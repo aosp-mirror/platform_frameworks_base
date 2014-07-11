@@ -260,10 +260,21 @@ status_t JMediaCodec::signalEndOfInputStream() {
     return mCodec->signalEndOfInputStream();
 }
 
-status_t JMediaCodec::getOutputFormat(JNIEnv *env, jobject *format) const {
+status_t JMediaCodec::getFormat(JNIEnv *env, bool input, jobject *format) const {
     sp<AMessage> msg;
     status_t err;
-    if ((err = mCodec->getOutputFormat(&msg)) != OK) {
+    err = input ? mCodec->getInputFormat(&msg) : mCodec->getOutputFormat(&msg);
+    if (err != OK) {
+        return err;
+    }
+
+    return ConvertMessageToMap(env, msg, format);
+}
+
+status_t JMediaCodec::getOutputFormat(JNIEnv *env, size_t index, jobject *format) const {
+    sp<AMessage> msg;
+    status_t err;
+    if ((err = mCodec->getOutputFormat(index, &msg)) != OK) {
         return err;
     }
 
@@ -294,6 +305,11 @@ status_t JMediaCodec::getBuffers(
             "(Ljava/nio/ByteOrder;)Ljava/nio/ByteBuffer;");
 
     CHECK(orderID != NULL);
+
+    jmethodID asReadOnlyBufferID = env->GetMethodID(
+            byteBufferClass.get(), "asReadOnlyBuffer", "()Ljava/nio/ByteBuffer;");
+
+    CHECK(asReadOnlyBufferID != NULL);
 
     ScopedLocalRef<jclass> byteOrderClass(
             env, env->FindClass("java/nio/ByteOrder"));
@@ -327,6 +343,12 @@ status_t JMediaCodec::getBuffers(
             env->NewDirectByteBuffer(
                 buffer->base(),
                 buffer->capacity());
+        if (!input && byteBuffer != NULL) {
+            jobject readOnlyBuffer = env->CallObjectMethod(
+                    byteBuffer, asReadOnlyBufferID);
+            env->DeleteLocalRef(byteBuffer);
+            byteBuffer = readOnlyBuffer;
+        }
         if (byteBuffer == NULL) {
             env->DeleteLocalRef(nativeByteOrderObj);
             return NO_MEMORY;
@@ -348,6 +370,130 @@ status_t JMediaCodec::getBuffers(
 
     return OK;
 }
+
+status_t JMediaCodec::getBuffer(
+        JNIEnv *env, bool input, size_t index, jobject *buf) const {
+    sp<ABuffer> buffer;
+
+    status_t err =
+        input
+            ? mCodec->getInputBuffer(index, &buffer)
+            : mCodec->getOutputBuffer(index, &buffer);
+
+    if (err != OK) {
+        return err;
+    }
+
+    ScopedLocalRef<jclass> byteBufferClass(
+            env, env->FindClass("java/nio/ByteBuffer"));
+
+    CHECK(byteBufferClass.get() != NULL);
+
+    jmethodID orderID = env->GetMethodID(
+            byteBufferClass.get(),
+            "order",
+            "(Ljava/nio/ByteOrder;)Ljava/nio/ByteBuffer;");
+
+    CHECK(orderID != NULL);
+
+    jmethodID asReadOnlyBufferID = env->GetMethodID(
+            byteBufferClass.get(), "asReadOnlyBuffer", "()Ljava/nio/ByteBuffer;");
+
+    CHECK(asReadOnlyBufferID != NULL);
+
+    jmethodID positionID = env->GetMethodID(
+            byteBufferClass.get(), "position", "(I)Ljava/nio/Buffer;");
+
+    CHECK(positionID != NULL);
+
+    jmethodID limitID = env->GetMethodID(
+            byteBufferClass.get(), "limit", "(I)Ljava/nio/Buffer;");
+
+    CHECK(limitID != NULL);
+
+    ScopedLocalRef<jclass> byteOrderClass(
+            env, env->FindClass("java/nio/ByteOrder"));
+
+    CHECK(byteOrderClass.get() != NULL);
+
+    jmethodID nativeOrderID = env->GetStaticMethodID(
+            byteOrderClass.get(), "nativeOrder", "()Ljava/nio/ByteOrder;");
+    CHECK(nativeOrderID != NULL);
+
+    jobject nativeByteOrderObj =
+        env->CallStaticObjectMethod(byteOrderClass.get(), nativeOrderID);
+    CHECK(nativeByteOrderObj != NULL);
+
+    // if this is an ABuffer that doesn't actually hold any accessible memory,
+    // use a null ByteBuffer
+    if (buffer->base() == NULL) {
+        *buf = NULL;
+        return OK;
+    }
+
+    jobject byteBuffer =
+        env->NewDirectByteBuffer(
+            buffer->base(),
+            buffer->capacity());
+    if (!input && byteBuffer != NULL) {
+        jobject readOnlyBuffer = env->CallObjectMethod(
+                byteBuffer, asReadOnlyBufferID);
+        env->DeleteLocalRef(byteBuffer);
+        byteBuffer = readOnlyBuffer;
+    }
+    if (byteBuffer == NULL) {
+        env->DeleteLocalRef(nativeByteOrderObj);
+        return NO_MEMORY;
+    }
+    jobject me = env->CallObjectMethod(
+            byteBuffer, orderID, nativeByteOrderObj);
+    env->DeleteLocalRef(me);
+    me = env->CallObjectMethod(
+            byteBuffer, positionID,
+            input ? 0 : buffer->offset());
+    env->DeleteLocalRef(me);
+    me = env->CallObjectMethod(
+            byteBuffer, limitID,
+            input ? buffer->capacity() : (buffer->offset() + buffer->size()));
+    env->DeleteLocalRef(me);
+    me = NULL;
+
+    env->DeleteLocalRef(nativeByteOrderObj);
+    nativeByteOrderObj = NULL;
+
+    *buf = byteBuffer;
+    return OK;
+}
+
+status_t JMediaCodec::getImage(
+        JNIEnv *env, bool input, size_t index, jobject *buf) const {
+    sp<ABuffer> buffer;
+
+    status_t err =
+        input
+            ? mCodec->getInputBuffer(index, &buffer)
+            : mCodec->getOutputBuffer(index, &buffer);
+
+    if (err != OK) {
+        return err;
+    }
+
+    // if this is an ABuffer that doesn't actually hold any accessible memory,
+    // use a null ByteBuffer
+    *buf = NULL;
+    if (buffer->base() == NULL) {
+        return OK;
+    }
+
+    // check if buffer is an image
+    AString imageData;
+    if (!buffer->meta()->findString("image-data", &imageData)) {
+        return OK;
+    }
+
+    return OK;
+}
+
 
 status_t JMediaCodec::getName(JNIEnv *env, jstring *nameStr) const {
     AString name;
@@ -959,9 +1105,9 @@ static void android_media_MediaCodec_signalEndOfInputStream(JNIEnv* env,
     throwExceptionAsNecessary(env, err);
 }
 
-static jobject android_media_MediaCodec_getOutputFormatNative(
-        JNIEnv *env, jobject thiz) {
-    ALOGV("android_media_MediaCodec_getOutputFormatNative");
+static jobject android_media_MediaCodec_getFormatNative(
+        JNIEnv *env, jobject thiz, jboolean input) {
+    ALOGV("android_media_MediaCodec_getFormatNative");
 
     sp<JMediaCodec> codec = getMediaCodec(env, thiz);
 
@@ -971,7 +1117,30 @@ static jobject android_media_MediaCodec_getOutputFormatNative(
     }
 
     jobject format;
-    status_t err = codec->getOutputFormat(env, &format);
+    status_t err = codec->getFormat(env, input, &format);
+
+    if (err == OK) {
+        return format;
+    }
+
+    throwExceptionAsNecessary(env, err);
+
+    return NULL;
+}
+
+static jobject android_media_MediaCodec_getOutputFormatForIndexNative(
+        JNIEnv *env, jobject thiz, jint index) {
+    ALOGV("android_media_MediaCodec_getOutputFormatForIndexNative");
+
+    sp<JMediaCodec> codec = getMediaCodec(env, thiz);
+
+    if (codec == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return NULL;
+    }
+
+    jobject format;
+    status_t err = codec->getOutputFormat(env, index, &format);
 
     if (err == OK) {
         return format;
@@ -998,6 +1167,58 @@ static jobjectArray android_media_MediaCodec_getBuffers(
 
     if (err == OK) {
         return buffers;
+    }
+
+    // if we're out of memory, an exception was already thrown
+    if (err != NO_MEMORY) {
+        throwExceptionAsNecessary(env, err);
+    }
+
+    return NULL;
+}
+
+static jobject android_media_MediaCodec_getBuffer(
+        JNIEnv *env, jobject thiz, jboolean input, jint index) {
+    ALOGV("android_media_MediaCodec_getBuffer");
+
+    sp<JMediaCodec> codec = getMediaCodec(env, thiz);
+
+    if (codec == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return NULL;
+    }
+
+    jobject buffer;
+    status_t err = codec->getBuffer(env, input, index, &buffer);
+
+    if (err == OK) {
+        return buffer;
+    }
+
+    // if we're out of memory, an exception was already thrown
+    if (err != NO_MEMORY) {
+        throwExceptionAsNecessary(env, err);
+    }
+
+    return NULL;
+}
+
+static jobject android_media_MediaCodec_getImage(
+        JNIEnv *env, jobject thiz, jboolean input, jint index) {
+    ALOGV("android_media_MediaCodec_getImage");
+
+    sp<JMediaCodec> codec = getMediaCodec(env, thiz);
+
+    if (codec == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return NULL;
+    }
+
+    jobject image;
+    status_t err = codec->getImage(env, input, index, &image);
+
+    if (err == OK) {
+        return image;
     }
 
     // if we're out of memory, an exception was already thrown
@@ -1168,7 +1389,7 @@ static void android_media_MediaCodec_native_finalize(
 }
 
 static JNINativeMethod gMethods[] = {
-    { "release", "()V", (void *)android_media_MediaCodec_release },
+    { "native_release", "()V", (void *)android_media_MediaCodec_release },
 
     { "native_setCallback",
       "(Landroid/media/MediaCodec$Callback;)V",
@@ -1182,20 +1403,20 @@ static JNINativeMethod gMethods[] = {
     { "createInputSurface", "()Landroid/view/Surface;",
       (void *)android_media_MediaCodec_createInputSurface },
 
-    { "start", "()V", (void *)android_media_MediaCodec_start },
+    { "native_start", "()V", (void *)android_media_MediaCodec_start },
     { "native_stop", "()V", (void *)android_media_MediaCodec_stop },
-    { "flush", "()V", (void *)android_media_MediaCodec_flush },
+    { "native_flush", "()V", (void *)android_media_MediaCodec_flush },
 
-    { "queueInputBuffer", "(IIIJI)V",
+    { "native_queueInputBuffer", "(IIIJI)V",
       (void *)android_media_MediaCodec_queueInputBuffer },
 
-    { "queueSecureInputBuffer", "(IILandroid/media/MediaCodec$CryptoInfo;JI)V",
+    { "native_queueSecureInputBuffer", "(IILandroid/media/MediaCodec$CryptoInfo;JI)V",
       (void *)android_media_MediaCodec_queueSecureInputBuffer },
 
-    { "dequeueInputBuffer", "(J)I",
+    { "native_dequeueInputBuffer", "(J)I",
       (void *)android_media_MediaCodec_dequeueInputBuffer },
 
-    { "dequeueOutputBuffer", "(Landroid/media/MediaCodec$BufferInfo;J)I",
+    { "native_dequeueOutputBuffer", "(Landroid/media/MediaCodec$BufferInfo;J)I",
       (void *)android_media_MediaCodec_dequeueOutputBuffer },
 
     { "releaseOutputBuffer", "(IZZJ)V",
@@ -1204,11 +1425,20 @@ static JNINativeMethod gMethods[] = {
     { "signalEndOfInputStream", "()V",
       (void *)android_media_MediaCodec_signalEndOfInputStream },
 
-    { "getOutputFormatNative", "()Ljava/util/Map;",
-      (void *)android_media_MediaCodec_getOutputFormatNative },
+    { "getFormatNative", "(Z)Ljava/util/Map;",
+      (void *)android_media_MediaCodec_getFormatNative },
+
+    { "getOutputFormatNative", "(I)Ljava/util/Map;",
+      (void *)android_media_MediaCodec_getOutputFormatForIndexNative },
 
     { "getBuffers", "(Z)[Ljava/nio/ByteBuffer;",
       (void *)android_media_MediaCodec_getBuffers },
+
+    { "getBuffer", "(ZI)Ljava/nio/ByteBuffer;",
+      (void *)android_media_MediaCodec_getBuffer },
+
+    { "getImage", "(ZI)Landroid/media/Image;",
+      (void *)android_media_MediaCodec_getImage },
 
     { "getName", "()Ljava/lang/String;",
       (void *)android_media_MediaCodec_getName },

@@ -16,6 +16,7 @@
 
 package android.media;
 
+import android.media.Image;
 import android.media.MediaCodecInfo;
 import android.media.MediaCodecList;
 import android.media.MediaCrypto;
@@ -40,11 +41,15 @@ import java.util.Map;
  * MediaCodec codec = MediaCodec.createDecoderByType(type);
  * codec.configure(format, ...);
  * codec.start();
+ *
+ * // if API level <= 20, get input and output buffer arrays here
  * ByteBuffer[] inputBuffers = codec.getInputBuffers();
  * ByteBuffer[] outputBuffers = codec.getOutputBuffers();
  * for (;;) {
  *   int inputBufferIndex = codec.dequeueInputBuffer(timeoutUs);
  *   if (inputBufferIndex &gt;= 0) {
+ *     // if API level >= 21, get input buffer here
+ *     ByteBuffer inputBuffer = codec.getInputBuffer(inputBufferIndex);
  *     // fill inputBuffers[inputBufferIndex] with valid data
  *     ...
  *     codec.queueInputBuffer(inputBufferIndex, ...);
@@ -52,13 +57,17 @@ import java.util.Map;
  *
  *   int outputBufferIndex = codec.dequeueOutputBuffer(timeoutUs);
  *   if (outputBufferIndex &gt;= 0) {
+ *     // if API level >= 21, get output buffer here
+ *     ByteBuffer outputBuffer = codec.getOutputBuffer(outputBufferIndex);
  *     // outputBuffer is ready to be processed or rendered.
  *     ...
  *     codec.releaseOutputBuffer(outputBufferIndex, ...);
  *   } else if (outputBufferIndex == MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED) {
+ *     // no needed to handle if API level >= 21 and using getOutputBuffer(int)
  *     outputBuffers = codec.getOutputBuffers();
  *   } else if (outputBufferIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
  *     // Subsequent data will conform to new format.
+ *     // can ignore if API level >= 21 and using getOutputFormat(outputBufferIndex)
  *     MediaFormat format = codec.getOutputFormat();
  *     ...
  *   }
@@ -70,9 +79,11 @@ import java.util.Map;
  *
  * Each codec maintains a number of input and output buffers that are
  * referred to by index in API calls.
+ * <p>
+ * For API levels 20 and below:
  * The contents of these buffers are represented by the ByteBuffer[] arrays
  * accessible through {@link #getInputBuffers} and {@link #getOutputBuffers}.
- *
+ * <p>
  * After a successful call to {@link #start} the client "owns" neither
  * input nor output buffers, subsequent calls to {@link #dequeueInputBuffer}
  * and {@link #dequeueOutputBuffer} then transfer ownership from the codec
@@ -101,19 +112,19 @@ import java.util.Map;
  * first few buffers submitted to the codec object after starting it must
  * be codec specific data marked as such using the flag {@link #BUFFER_FLAG_CODEC_CONFIG}
  * in a call to {@link #queueInputBuffer}.
- *
+ * <p>
  * Codec specific data included in the format passed to {@link #configure}
  * (in ByteBuffer entries with keys "csd-0", "csd-1", ...) is automatically
  * submitted to the codec, this data MUST NOT be submitted explicitly by the
  * client.
- *
+ * <p>
  * Once the client reaches the end of the input data it signals the end of
  * the input stream by specifying a flag of {@link #BUFFER_FLAG_END_OF_STREAM} in the call to
  * {@link #queueInputBuffer}. The codec will continue to return output buffers
  * until it eventually signals the end of the output stream by specifying
  * the same flag ({@link #BUFFER_FLAG_END_OF_STREAM}) on the BufferInfo returned in
  * {@link #dequeueOutputBuffer}.
- *
+ * <p>
  * In order to start decoding data that's not adjacent to previously submitted
  * data (i.e. after a seek) it is necessary to {@link #flush} the decoder.
  * Any input or output buffers the client may own at the point of the flush are
@@ -299,16 +310,23 @@ final public class MediaCodec {
             switch (msg.arg1) {
                 case CB_INPUT_AVAILABLE:
                 {
-                    mCallback.onInputBufferAvailable(mCodec, msg.arg2 /* index */);
+                    int index = msg.arg2;
+                    synchronized(mBufferLock) {
+                        validateInputByteBuffer(mCachedInputBuffers, index);
+                    }
+                    mCallback.onInputBufferAvailable(mCodec, index);
                     break;
                 }
 
                 case CB_OUTPUT_AVAILABLE:
                 {
+                    int index = msg.arg2;
+                    BufferInfo info = (MediaCodec.BufferInfo) msg.obj;
+                    synchronized(mBufferLock) {
+                        validateOutputByteBuffer(mCachedOutputBuffers, index, info);
+                    }
                     mCallback.onOutputBufferAvailable(
-                            mCodec,
-                            msg.arg2 /* index */,
-                            (MediaCodec.BufferInfo) msg.obj);
+                            mCodec, index, info);
                     break;
                 }
 
@@ -401,6 +419,7 @@ final public class MediaCodec {
         } else {
             mEventHandler = null;
         }
+        mBufferLock = new Object();
 
         native_setup(name, nameIsType, encoder);
     }
@@ -415,7 +434,12 @@ final public class MediaCodec {
      * component instance instead of relying on the garbage collector
      * to do this for you at some point in the future.
      */
-    public native final void release();
+    public final void release() {
+        freeAllTrackedBuffers(); // free buffers first
+        native_release();
+    }
+
+    private native final void native_release();
 
     /**
      * If this codec is to be used as an encoder, pass this flag.
@@ -489,7 +513,14 @@ final public class MediaCodec {
      * @throws MediaCodec.CodecException upon codec error. Note that some codec errors
      * for start may be attributed to future method calls.
      */
-    public native final void start();
+    public final void start() {
+        native_start();
+        synchronized(mBufferLock) {
+            cacheBuffers(true /* input */);
+            cacheBuffers(false /* input */);
+        }
+    }
+    private native final void native_start();
 
     /**
      * Finish the decode/encode session, note that the codec instance
@@ -500,6 +531,7 @@ final public class MediaCodec {
      */
     public final void stop() {
         native_stop();
+        freeAllTrackedBuffers();
 
         if (mEventHandler != null) {
             mEventHandler.removeMessages(EVENT_CALLBACK);
@@ -516,7 +548,19 @@ final public class MediaCodec {
      * @throws IllegalStateException if not in the Executing state.
      * @throws MediaCodec.CodecException upon codec error.
      */
-    public native final void flush();
+    public final void flush() {
+        synchronized(mBufferLock) {
+            invalidateByteBuffers(mCachedInputBuffers);
+            invalidateByteBuffers(mCachedOutputBuffers);
+            invalidateByteBuffers(mDequeuedInputBuffers);
+            invalidateByteBuffers(mDequeuedOutputBuffers);
+            freeImages(mDequeuedInputImages);
+            freeImages(mDequeuedOutputImages);
+        }
+        native_flush();
+    }
+
+    private native final void native_flush();
 
     /**
      * Thrown when an internal codec error occurs.
@@ -602,8 +646,11 @@ final public class MediaCodec {
 
     /**
      * After filling a range of the input buffer at the specified index
-     * submit it to the component.
-     *
+     * submit it to the component. Once an input buffer is queued to
+     * the codec, it MUST not be used until it is later retrieved by
+     * {#getInputBuffer} in response to a {#dequeueInputBuffer}
+     * response.
+     * <p>
      * Many decoders require the actual compressed data stream to be
      * preceded by "codec specific data", i.e. setup data used to initialize
      * the codec such as PPS/SPS in the case of AVC video or code tables
@@ -611,9 +658,16 @@ final public class MediaCodec {
      * The class {@link android.media.MediaExtractor} provides codec
      * specific data as part of
      * the returned track format in entries named "csd-0", "csd-1" ...
-     *
-     * These buffers should be submitted using the flag {@link #BUFFER_FLAG_CODEC_CONFIG}.
-     *
+     * <p>
+     * These buffers can be submitted directly after {@link #start} or
+     * {@link #flush} by specifying the flag {@link
+     * #BUFFER_FLAG_CODEC_CONFIG}.  However, if you configure the
+     * codec with a {@link MediaFormat} containing these keys, they
+     * will be automatically submitted by MediaCodec directly after
+     * start.  Therefore, the use of {@link
+     * #BUFFER_FLAG_CODEC_CONFIG} flag is discouraged and is
+     * recommended only for advanced users.
+     * <p>
      * To indicate that this is the final piece of input data (or rather that
      * no more input data follows unless the decoder is subsequently flushed)
      * specify the flag {@link #BUFFER_FLAG_END_OF_STREAM}.
@@ -634,7 +688,19 @@ final public class MediaCodec {
      * @throws CryptoException if a crypto object has been specified in
      *         {@link #configure}
      */
-    public native final void queueInputBuffer(
+    public final void queueInputBuffer(
+            int index,
+            int offset, int size, long presentationTimeUs, int flags)
+        throws CryptoException {
+        synchronized(mBufferLock) {
+            invalidateByteBuffer(mCachedInputBuffers, index);
+            updateDequeuedByteBuffer(mDequeuedInputBuffers, index, null);
+        }
+        native_queueInputBuffer(
+                index, offset, size, presentationTimeUs, flags);
+    }
+
+    private native final void native_queueInputBuffer(
             int index,
             int offset, int size, long presentationTimeUs, int flags)
         throws CryptoException;
@@ -740,7 +806,21 @@ final public class MediaCodec {
      *              An error code associated with the exception helps identify the
      *              reason for the failure.
      */
-    public native final void queueSecureInputBuffer(
+    public final void queueSecureInputBuffer(
+            int index,
+            int offset,
+            CryptoInfo info,
+            long presentationTimeUs,
+            int flags) throws CryptoException {
+        synchronized(mBufferLock) {
+            invalidateByteBuffer(mCachedInputBuffers, index);
+            updateDequeuedByteBuffer(mDequeuedInputBuffers, index, null);
+        }
+        native_queueSecureInputBuffer(
+                index, offset, info, presentationTimeUs, flags);
+    }
+
+    private native final void native_queueSecureInputBuffer(
             int index,
             int offset,
             CryptoInfo info,
@@ -757,7 +837,17 @@ final public class MediaCodec {
      * @throws IllegalStateException if not in the Executing state.
      * @throws MediaCodec.CodecException upon codec error.
      */
-    public native final int dequeueInputBuffer(long timeoutUs);
+    public final int dequeueInputBuffer(long timeoutUs) {
+        int res = native_dequeueInputBuffer(timeoutUs);
+        if (res >= 0) {
+            synchronized(mBufferLock) {
+                validateInputByteBuffer(mCachedInputBuffers, res);
+            }
+        }
+        return res;
+    }
+
+    private native final int native_dequeueInputBuffer(long timeoutUs);
 
     /**
      * If a non-negative timeout had been specified in the call
@@ -767,7 +857,10 @@ final public class MediaCodec {
 
     /**
      * The output format has changed, subsequent data will follow the new
-     * format. {@link #getOutputFormat} returns the new format.
+     * format. {@link #getOutputFormat()} returns the new format.  Note, that
+     * you can also use the new {@link #getOutputFormat(int)} method to
+     * get the format for a specific output buffer.  This frees you from
+     * having to track output format changes.
      */
     public static final int INFO_OUTPUT_FORMAT_CHANGED  = -2;
 
@@ -775,6 +868,11 @@ final public class MediaCodec {
      * The output buffers have changed, the client must refer to the new
      * set of output buffers returned by {@link #getOutputBuffers} from
      * this point on.
+     *
+     * @deprecated This return value can be ignored as {@link
+     * #getOutputBuffers} has been deprecated.  Client should
+     * request a current buffer using on of the get-buffer or
+     * get-image methods each time one has been dequeued.
      */
     public static final int INFO_OUTPUT_BUFFERS_CHANGED = -3;
 
@@ -787,13 +885,31 @@ final public class MediaCodec {
      * @throws IllegalStateException if not in the Executing state.
      * @throws MediaCodec.CodecException upon codec error.
      */
-    public native final int dequeueOutputBuffer(
+    public final int dequeueOutputBuffer(
+            BufferInfo info, long timeoutUs) {
+        int res = native_dequeueOutputBuffer(info, timeoutUs);
+        synchronized(mBufferLock) {
+            if (res == INFO_OUTPUT_BUFFERS_CHANGED) {
+                cacheBuffers(false /* input */);
+            } else if (res >= 0) {
+                validateOutputByteBuffer(mCachedOutputBuffers, res, info);
+            }
+        }
+        return res;
+    }
+
+    private native final int native_dequeueOutputBuffer(
             BufferInfo info, long timeoutUs);
 
     /**
      * If you are done with a buffer, use this call to return the buffer to
      * the codec. If you previously specified a surface when configuring this
      * video decoder you can optionally render the buffer.
+     *
+     * Once an output buffer is released to the codec, it MUST not
+     * be used until it is later retrieved by {#getOutputBuffer} in
+     * response to a {#dequeueOutputBuffer} response
+     *
      * @param index The index of a client-owned output buffer previously returned
      *              from a call to {@link #dequeueOutputBuffer}.
      * @param render If a valid surface was specified when configuring the codec,
@@ -802,6 +918,10 @@ final public class MediaCodec {
      * @throws MediaCodec.CodecException upon codec error.
      */
     public final void releaseOutputBuffer(int index, boolean render) {
+        synchronized(mBufferLock) {
+            invalidateByteBuffer(mCachedOutputBuffers, index);
+            updateDequeuedByteBuffer(mDequeuedOutputBuffers, index, null);
+        }
         releaseOutputBuffer(index, render, false /* updatePTS */, 0 /* dummy */);
     }
 
@@ -842,12 +962,22 @@ final public class MediaCodec {
      * </td></tr>
      * </table>
      *
+     * Once an output buffer is released to the codec, it MUST not
+     * be used until it is later retrieved by {#getOutputBuffer} in
+     * response to a {#dequeueOutputBuffer} response
+     *
      * @param index The index of a client-owned output buffer previously returned
      *              from a call to {@link #dequeueOutputBuffer}.
      * @param renderTimestampNs The timestamp to associate with this buffer when
      *              it is sent to the Surface.
+     * @throws IllegalStateException if not in the Executing state.
+     * @throws MediaCodec.CodecException upon codec error.
      */
     public final void releaseOutputBuffer(int index, long renderTimestampNs) {
+        synchronized(mBufferLock) {
+            invalidateByteBuffer(mCachedOutputBuffers, index);
+            updateDequeuedByteBuffer(mDequeuedOutputBuffers, index, null);
+        }
         releaseOutputBuffer(
                 index, true /* render */, true /* updatePTS */, renderTimestampNs);
     }
@@ -866,34 +996,341 @@ final public class MediaCodec {
 
     /**
      * Call this after dequeueOutputBuffer signals a format change by returning
-     * {@link #INFO_OUTPUT_FORMAT_CHANGED}
-     * @throws IllegalStateException if not in the Executing state.
+     * {@link #INFO_OUTPUT_FORMAT_CHANGED}.
+     * You can also call this after {@link #configure} returns
+     * successfully to get the output format initially configured
+     * for the codec.  Do this to determine what optional
+     * configuration parameters were supported by the codec.
+     *
+     * @throws IllegalStateException if not in the Executing or
+     *                               Configured state.
      * @throws MediaCodec.CodecException upon codec error.
      */
     public final MediaFormat getOutputFormat() {
-        return new MediaFormat(getOutputFormatNative());
+        return new MediaFormat(getFormatNative(false /* input */));
     }
 
-    private native final Map<String, Object> getOutputFormatNative();
+    /**
+     * Call this after {@link #configure} returns successfully to
+     * get the input format accepted by the codec. Do this to
+     * determine what optional configuration parameters were
+     * supported by the codec.
+     *
+     * @throws IllegalStateException if not in the Executing or
+     *                               Configured state.
+     * @throws MediaCodec.CodecException upon codec error.
+     */
+    public final MediaFormat getInputFormat() {
+        return new MediaFormat(getFormatNative(true /* input */));
+    }
 
     /**
-     * Call this after start() returns.
+     * Returns the output format for a specific output buffer.
+     *
+     * @param index The index of a client-owned input buffer previously
+     *              returned from a call to {@link #dequeueInputBuffer}.
+     *
+     * @return the format for the output buffer, or null if the index
+     * is not a dequeued output buffer.
+     */
+    public final MediaFormat getOutputFormat(int index) {
+        return new MediaFormat(getOutputFormatNative(index));
+    }
+
+    private native final Map<String, Object> getFormatNative(boolean input);
+
+    private native final Map<String, Object> getOutputFormatNative(int index);
+
+    private ByteBuffer[] mCachedInputBuffers;
+    private ByteBuffer[] mCachedOutputBuffers;
+    private ByteBuffer[] mDequeuedInputBuffers;
+    private ByteBuffer[] mDequeuedOutputBuffers;
+    private Image[] mDequeuedInputImages;
+    private Image[] mDequeuedOutputImages;
+    final private Object mBufferLock;
+
+    private final void invalidateByteBuffer(
+            ByteBuffer[] buffers, int index) {
+        if (index >= 0 && index < buffers.length) {
+            ByteBuffer buffer = buffers[index];
+            if (buffer != null) {
+                buffer.setAccessible(false);
+            }
+        }
+    }
+
+    private final void validateInputByteBuffer(
+            ByteBuffer[] buffers, int index) {
+        if (index >= 0 && index < buffers.length) {
+            ByteBuffer buffer = buffers[index];
+            if (buffer != null) {
+                buffer.setAccessible(true);
+                buffer.clear();
+            }
+        }
+    }
+
+    private final void validateOutputByteBuffer(
+            ByteBuffer[] buffers, int index, BufferInfo info) {
+        if (index >= 0 && index < buffers.length) {
+            ByteBuffer buffer = buffers[index];
+            if (buffer != null) {
+                buffer.setAccessible(true);
+                buffer.limit(info.offset + info.size).position(info.offset);
+            }
+        }
+    }
+
+    private final void invalidateByteBuffers(ByteBuffer[] buffers) {
+        if (buffers != null) {
+            for (ByteBuffer buffer: buffers) {
+                if (buffer != null) {
+                    buffer.setAccessible(false);
+                }
+            }
+        }
+    }
+
+    private final void freeByteBuffer(ByteBuffer buffer) {
+        if (buffer != null /* && buffer.isDirect() */) {
+            // all of our ByteBuffers are direct
+            java.nio.NioUtils.freeDirectBuffer(buffer);
+        }
+    }
+
+    private final void freeByteBuffers(ByteBuffer[] buffers) {
+        if (buffers != null) {
+            for (ByteBuffer buffer: buffers) {
+                freeByteBuffer(buffer);
+            }
+        }
+    }
+
+    private final void freeImage(Image image) {
+        if (image != null) {
+            image.close();
+        }
+    }
+
+    private final void freeImages(Image[] images) {
+        if (images != null) {
+            for (Image image: images) {
+                freeImage(image);
+            }
+        }
+    }
+
+    private final void freeAllTrackedBuffers() {
+        freeByteBuffers(mCachedInputBuffers);
+        freeByteBuffers(mCachedOutputBuffers);
+        freeImages(mDequeuedInputImages);
+        freeImages(mDequeuedOutputImages);
+        freeByteBuffers(mDequeuedInputBuffers);
+        freeByteBuffers(mDequeuedOutputBuffers);
+        mCachedInputBuffers = null;
+        mCachedOutputBuffers = null;
+        mDequeuedInputImages = null;
+        mDequeuedOutputImages = null;
+        mDequeuedInputBuffers = null;
+        mDequeuedOutputBuffers = null;
+    }
+
+    private final void cacheBuffers(boolean input) {
+        ByteBuffer[] buffers = getBuffers(input);
+        invalidateByteBuffers(buffers);
+        if (input) {
+            mCachedInputBuffers = buffers;
+            mDequeuedInputImages = new Image[buffers.length];
+            mDequeuedInputBuffers = new ByteBuffer[buffers.length];
+        } else {
+            mCachedOutputBuffers = buffers;
+            mDequeuedOutputImages = new Image[buffers.length];
+            mDequeuedOutputBuffers = new ByteBuffer[buffers.length];
+        }
+    }
+
+    /**
+     * Retrieve the set of input buffers.  Call this after start()
+     * returns. After calling this method, any ByteBuffers
+     * previously returned by an earlier call to this method MUST no
+     * longer be used.
+     *
+     * @deprecated Use the new {@link #getInputBuffer} method instead
+     * each time an input buffer is dequeued.
+     *
      * @throws IllegalStateException if not in the Executing state.
      * @throws MediaCodec.CodecException upon codec error.
      */
     public ByteBuffer[] getInputBuffers() {
-        return getBuffers(true /* input */);
+        if (mCachedInputBuffers == null) {
+            throw new IllegalStateException();
+        }
+        // FIXME: check codec status
+        return mCachedInputBuffers;
     }
 
     /**
-     * Call this after start() returns and whenever dequeueOutputBuffer
-     * signals an output buffer change by returning
-     * {@link #INFO_OUTPUT_BUFFERS_CHANGED}
-     * @throws IllegalStateException if not in the Executing state.
+     * Retrieve the set of output buffers.  Call this after start()
+     * returns and whenever dequeueOutputBuffer signals an output
+     * buffer change by returning {@link
+     * #INFO_OUTPUT_BUFFERS_CHANGED}. After calling this method, any
+     * ByteBuffers previously returned by an earlier call to this
+     * method MUST no longer be used.
+     *
+     * @deprecated Use the new {@link #getOutputBuffer} method instead
+     * each time an output buffer is dequeued.  This method is not
+     * supported if codec is configured in asynchronous mode.
+     *
+     * @throws IllegalStateException if not in the Executing state,
+     *         or codec is configured in asynchronous mode.
      * @throws MediaCodec.CodecException upon codec error.
      */
     public ByteBuffer[] getOutputBuffers() {
-        return getBuffers(false /* input */);
+        if (mCachedOutputBuffers == null) {
+            throw new IllegalStateException();
+        }
+        // FIXME: check codec status
+        return mCachedOutputBuffers;
+    }
+
+    private boolean updateDequeuedByteBuffer(
+            ByteBuffer[] buffers, int index, ByteBuffer newBuffer) {
+        if (index < 0 || index >= buffers.length) {
+            return false;
+        }
+        freeByteBuffer(buffers[index]);
+        buffers[index] = newBuffer;
+        return newBuffer != null;
+    }
+
+    private boolean updateDequeuedImage(
+            Image[] images, int index, Image newImage) {
+        if (index < 0 || index >= images.length) {
+            return false;
+        }
+        freeImage(images[index]);
+        images[index] = newImage;
+        return newImage != null;
+    }
+
+    /**
+     * Returns a cleared, writable ByteBuffer object for a dequeued
+     * input buffer index to contain the input data.
+     *
+     * After calling this method any ByteBuffer or Image object
+     * previously returned for the same input index MUST no longer
+     * be used.
+     *
+     * @param index The index of a client-owned input buffer previously
+     *              returned from a call to {@link #dequeueInputBuffer},
+     *              or received via an onInputBufferAvailable callback.
+     *
+     * @return the input buffer, or null if the index is not a dequeued
+     * input buffer, or if the codec is configured for surface input.
+     *
+     * @throws IllegalStateException if not in the Executing state.
+     * @throws MediaCodec.CodecException upon codec error.
+     */
+    public ByteBuffer getInputBuffer(int index) {
+        ByteBuffer newBuffer = getBuffer(true /* input */, index);
+        synchronized(mBufferLock) {
+            if (updateDequeuedByteBuffer(mDequeuedInputBuffers, index, newBuffer)) {
+                updateDequeuedImage(mDequeuedInputImages, index, null);
+                invalidateByteBuffer(mCachedInputBuffers, index);
+                return newBuffer;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns a writable Image object for a dequeued input buffer
+     * index to contain the raw input video frame.
+     *
+     * After calling this method any ByteBuffer or Image object
+     * previously returned for the same input index MUST no longer
+     * be used.
+     *
+     * @param index The index of a client-owned input buffer previously
+     *              returned from a call to {@link #dequeueInputBuffer},
+     *              or received via an onInputBufferAvailable callback.
+     *
+     * @return the input image, or null if the index is not a
+     * dequeued input buffer, or not a ByteBuffer that contains a
+     * raw image.
+     *
+     * @throws IllegalStateException if not in the Executing state.
+     * @throws MediaCodec.CodecException upon codec error.
+     */
+    public Image getInputImage(int index) {
+        Image newImage = getImage(true /* input */, index);
+        if (updateDequeuedImage(mDequeuedInputImages, index, newImage)) {
+            updateDequeuedByteBuffer(mDequeuedInputBuffers, index, null);
+            invalidateByteBuffer(mCachedInputBuffers, index);
+            return newImage;
+        }
+        return null;
+    }
+
+    /**
+     * Returns a read-only ByteBuffer for a dequeued output buffer
+     * index. The position and limit of the returned buffer are set
+     * to the valid output data.
+     *
+     * After calling this method, any ByteBuffer or Image object
+     * previously returned for the same output index MUST no longer
+     * be used.
+     *
+     * @param index The index of a client-owned output buffer previously
+     *              returned from a call to {@link #dequeueOutputBuffer},
+     *              or received via an onOutputBufferAvailable callback.
+     *
+     * @return the output buffer, or null if the index is not a dequeued
+     * output buffer, or the codec is configured with an output surface.
+     *
+     * @throws IllegalStateException if not in the Executing state.
+     * @throws MediaCodec.CodecException upon codec error.
+     */
+    public ByteBuffer getOutputBuffer(int index) {
+        ByteBuffer newBuffer = getBuffer(false /* input */, index);
+        synchronized(mBufferLock) {
+            if (updateDequeuedByteBuffer(mDequeuedOutputBuffers, index, newBuffer)) {
+                updateDequeuedImage(mDequeuedOutputImages, index, null);
+                invalidateByteBuffer(mCachedOutputBuffers, index);
+                return newBuffer;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns a read-only Image object for a dequeued output buffer
+     * index that contains the raw video frame.
+     *
+     * After calling this method, any ByteBuffer or Image object previously
+     * returned for the same output index MUST no longer be used.
+     *
+     * @param index The index of a client-owned output buffer previously
+     *              returned from a call to {@link #dequeueOutputBuffer},
+     *              or received via an onOutputBufferAvailable callback.
+     *
+     * @return the output image, or null if the index is not a
+     * dequeued output buffer, not a raw video frame, or if the codec
+     * was configured with an output surface.
+     *
+     * @throws IllegalStateException if not in the Executing state.
+     * @throws MediaCodec.CodecException upon codec error.
+     */
+    public Image getOutputImage(int index) {
+        Image newImage = getImage(false /* input */, index);
+        synchronized(mBufferLock) {
+            if (updateDequeuedImage(mDequeuedOutputImages, index, newImage)) {
+                updateDequeuedByteBuffer(mDequeuedOutputBuffers, index, null);
+                invalidateByteBuffer(mCachedOutputBuffers, index);
+                return newImage;
+            }
+        }
+        return null;
     }
 
     /**
@@ -1053,6 +1490,10 @@ final public class MediaCodec {
     }
 
     private native final ByteBuffer[] getBuffers(boolean input);
+
+    private native final ByteBuffer getBuffer(boolean input, int index);
+
+    private native final Image getImage(boolean input, int index);
 
     private static native final void native_init();
 
