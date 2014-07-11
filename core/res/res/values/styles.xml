@@ -1206,6 +1206,7 @@ please see styles_device_defaults.xml.
         <item name="navigationButtonStyle">@style/Widget.Toolbar.Button.Navigation</item>
         <item name="collapseIcon">?attr/homeAsUpIndicator</item>
         <item name="contentInsetStart">16dp</item>
+        <item name="touchscreenBlocksFocus">true</item>
     </style>
 
     <style name="Widget.Toolbar.Button.Navigation" parent="Widget">
