@@ -21,26 +21,59 @@ import android.test.suitebuilder.annotation.SmallTest;
 import android.view.inputmethod.InputMethodSubtype;
 import android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder;
 
+import java.util.Objects;
+
 public class InputMethodSubtypeTest extends InstrumentationTestCase {
-    @SmallTest
-    public void testLocale() throws Exception {
-        // Compare locale
-        assertEquals(createDummySubtype("en_US").getLocale(),
-                createDummySubtype("en_US").getLocale());
-        assertEquals(createDummySubtype("en_US").getLocale(),
-                cloneViaParcel(createDummySubtype("en_US")).getLocale());
-        assertEquals(createDummySubtype("en_US").getLocale(),
-                cloneViaParcel(cloneViaParcel(createDummySubtype("en_US"))).getLocale());
+
+    public void verifyLocale(final String localeString) {
+        // InputMethodSubtype#getLocale() returns exactly the same string that is passed to the
+        // constructor.
+        assertEquals(localeString, createDummySubtype(localeString).getLocale());
+
+        // InputMethodSubtype#getLocale() should be preserved via marshaling.
+        assertEquals(createDummySubtype(localeString).getLocale(),
+                cloneViaParcel(createDummySubtype(localeString)).getLocale());
+
+        // InputMethodSubtype#getLocale() should be preserved via marshaling.
+        assertEquals(createDummySubtype(localeString).getLocale(),
+                cloneViaParcel(cloneViaParcel(createDummySubtype(localeString))).getLocale());
+
+        // Make sure InputMethodSubtype#hashCode() returns the same hash code.
+        assertEquals(createDummySubtype(localeString).hashCode(),
+                createDummySubtype(localeString).hashCode());
+        assertEquals(createDummySubtype(localeString).hashCode(),
+                cloneViaParcel(createDummySubtype(localeString)).hashCode());
+        assertEquals(createDummySubtype(localeString).hashCode(),
+                cloneViaParcel(cloneViaParcel(createDummySubtype(localeString))).hashCode());
     }
 
     @SmallTest
-    public void testHashCode() throws Exception {
-        assertEquals(createDummySubtype("en_US").hashCode(),
-                createDummySubtype("en_US").hashCode());
-        assertEquals(createDummySubtype("en_US").hashCode(),
-                cloneViaParcel(createDummySubtype("en_US")).hashCode());
-        assertEquals(createDummySubtype("en_US").hashCode(),
-                cloneViaParcel(cloneViaParcel(createDummySubtype("en_US"))).hashCode());
+    public void testLocaleString() throws Exception {
+        // The locale string in InputMethodSubtype has accepted an arbitrary text actually,
+        // regardless of the validity of the text as a locale string.
+        verifyLocale("en_US");
+        verifyLocale("apparently invalid locale string");
+        verifyLocale("zz");
+        verifyLocale("iw");
+        verifyLocale("he");
+    }
+
+    @SmallTest
+    public void testDeprecatedLocaleString() throws Exception {
+        // Make sure "iw" is not automatically replaced with "he".
+        final InputMethodSubtype subtypeIw = createDummySubtype("iw");
+        final InputMethodSubtype subtypeHe = createDummySubtype("he");
+        assertEquals("iw", subtypeIw.getLocale());
+        assertEquals("he", subtypeHe.getLocale());
+        assertFalse(Objects.equals(subtypeIw, subtypeHe));
+        assertFalse(Objects.equals(subtypeIw.hashCode(), subtypeHe.hashCode()));
+
+        final InputMethodSubtype clonedSubtypeIw = cloneViaParcel(subtypeIw);
+        final InputMethodSubtype clonedSubtypeHe = cloneViaParcel(subtypeHe);
+        assertEquals(subtypeIw, clonedSubtypeIw);
+        assertEquals(subtypeHe, clonedSubtypeHe);
+        assertEquals("iw", clonedSubtypeIw.getLocale());
+        assertEquals("he", clonedSubtypeHe.getLocale());
     }
 
     private static final InputMethodSubtype cloneViaParcel(final InputMethodSubtype original) {
