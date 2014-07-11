@@ -263,7 +263,7 @@ public class VolumePanel extends Handler {
             synchronized (sConfirmSafeVolumeLock) {
                 sConfirmSafeVolumeDialog = null;
             }
-            mVolumePanel.forceTimeout();
+            mVolumePanel.forceTimeout(0);
             mVolumePanel.updateStates();
         }
     }
@@ -293,7 +293,7 @@ public class VolumePanel extends Handler {
                 public boolean onTouchEvent(MotionEvent event) {
                     if (isShowing() && event.getAction() == MotionEvent.ACTION_OUTSIDE &&
                             sConfirmSafeVolumeDialog == null) {
-                        forceTimeout();
+                        forceTimeout(0);
                         return true;
                     }
                     return false;
@@ -718,8 +718,8 @@ public class VolumePanel extends Handler {
         obtainMessage(MSG_DISPLAY_SAFE_VOLUME_WARNING, flags, 0).sendToTarget();
     }
 
-    public void postDismiss() {
-        forceTimeout();
+    public void postDismiss(long delay) {
+        forceTimeout(delay);
     }
 
     public void postLayoutDirection(int layoutDirection) {
@@ -1205,9 +1205,9 @@ public class VolumePanel extends Handler {
         sendEmptyMessage(MSG_USER_ACTIVITY);
     }
 
-    private void forceTimeout() {
+    private void forceTimeout(long delay) {
         removeMessages(MSG_TIMEOUT);
-        sendEmptyMessage(MSG_TIMEOUT);
+        sendEmptyMessageDelayed(MSG_TIMEOUT, delay);
     }
 
     public ZenModeController getZenController() {
