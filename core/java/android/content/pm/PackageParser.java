@@ -333,7 +333,7 @@ public class PackageParser {
     }
 
     public static final boolean isApkFile(File file) {
-        return file.isFile() && file.getName().endsWith(".apk");
+        return file.getName().endsWith(".apk");
     }
 
     /*

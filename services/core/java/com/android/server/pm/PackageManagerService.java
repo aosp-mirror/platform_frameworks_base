@@ -5061,7 +5061,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             // Just create the setting, don't add it yet. For already existing packages
             // the PkgSetting exists already and doesn't have to be created.
             pkgSetting = mSettings.getPackageLPw(pkg, origPackage, realName, suid, destCodeFile,
-                    destResourceFile, pkg.applicationInfo.legacyNativeLibraryDir,
+                    destResourceFile, pkg.applicationInfo.nativeLibraryRootDir,
                     pkg.applicationInfo.primaryCpuAbi,
                     pkg.applicationInfo.secondaryCpuAbi,
                     pkg.applicationInfo.flags, user, false);
@@ -5287,7 +5287,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                             + pkg.applicationInfo.uid + "/fs_"
                             + currentUid;
                         pkg.applicationInfo.nativeLibraryDir = pkg.applicationInfo.dataDir;
-                        pkg.applicationInfo.legacyNativeLibraryDir = pkg.applicationInfo.dataDir;
+                        pkg.applicationInfo.nativeLibraryRootDir = pkg.applicationInfo.dataDir;
                         String msg = "Package " + pkg.packageName
                                 + " has mismatched uid: "
                                 + currentUid + " on disk, "
@@ -5346,22 +5346,20 @@ public class PackageManagerService extends IPackageManager.Stub {
             NativeLibraryHelper.removeNativeBinariesFromDirLI(
                     new File(codePath, LIB_DIR_NAME), false /* delete dirs */);
             setBundledAppAbisAndRoots(pkg, pkgSetting);
+            setNativeLibraryPaths(pkg);
         } else {
             // TODO: We can probably be smarter about this stuff. For installed apps,
             // we can calculate this information at install time once and for all. For
             // system apps, we can probably assume that this information doesn't change
             // after the first boot scan. As things stand, we do lots of unnecessary work.
 
+            // Give ourselves some initial paths; we'll come back for another
+            // pass once we've determined ABI below.
+            setNativeLibraryPaths(pkg);
+
             final boolean isAsec = isForwardLocked(pkg) || isExternal(pkg);
-            final String nativeLibraryRootStr;
-            final boolean useIsaSpecificSubdirs;
-            if (pkg.applicationInfo.legacyNativeLibraryDir != null) {
-                nativeLibraryRootStr = pkg.applicationInfo.legacyNativeLibraryDir;
-                useIsaSpecificSubdirs = false;
-            } else {
-                nativeLibraryRootStr = new File(pkg.codePath, LIB_DIR_NAME).getAbsolutePath();
-                useIsaSpecificSubdirs = true;
-            }
+            final String nativeLibraryRootStr = pkg.applicationInfo.nativeLibraryRootDir;
+            final boolean useIsaSpecificSubdirs = pkg.applicationInfo.nativeLibraryRootRequiresIsa;
 
             NativeLibraryHelper.Handle handle = null;
             try {
@@ -5467,6 +5465,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                 IoUtils.closeQuietly(handle);
             }
 
+            // Now that we've calculated the ABIs and determined if it's an internal app,
+            // we will go ahead and populate the nativeLibraryPath.
+            setNativeLibraryPaths(pkg);
+
             if (DEBUG_INSTALL) Slog.i(TAG, "Linking native library dir for " + path);
             final int[] userIds = sUserManager.getUserIds();
             synchronized (mInstallLock) {
@@ -5475,14 +5477,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // this symlink for 64 bit libraries.
                 if (pkg.applicationInfo.primaryCpuAbi != null &&
                         !VMRuntime.is64BitAbi(pkg.applicationInfo.primaryCpuAbi)) {
-                    final String nativeLibPath;
-                    if (pkg.applicationInfo.legacyNativeLibraryDir != null) {
-                        nativeLibPath = pkg.applicationInfo.legacyNativeLibraryDir;
-                    } else {
-                        nativeLibPath = new File(nativeLibraryRootStr,
-                                VMRuntime.getInstructionSet(pkg.applicationInfo.primaryCpuAbi)).getAbsolutePath();
-                    }
-
+                    final String nativeLibPath = pkg.applicationInfo.nativeLibraryDir;
                     for (int userId : userIds) {
                         if (mInstaller.linkNativeLibraryDirectory(pkg.packageName, nativeLibPath, userId) < 0) {
                             Slog.w(TAG, "Failed linking native library dir (user=" + userId
@@ -5498,18 +5493,19 @@ public class PackageManagerService extends IPackageManager.Stub {
             pkgSetting.secondaryCpuAbiString = pkg.applicationInfo.secondaryCpuAbi;
         }
 
+        Slog.d(TAG, "Resolved nativeLibraryRoot for " + pkg.applicationInfo.packageName
+                + " to root=" + pkg.applicationInfo.nativeLibraryRootDir + ", isa="
+                + pkg.applicationInfo.nativeLibraryRootRequiresIsa);
+
+        // Push the derived path down into PackageSettings so we know what to
+        // clean up at uninstall time.
+        pkgSetting.legacyNativeLibraryPathString = pkg.applicationInfo.nativeLibraryRootDir;
+
         if (DEBUG_ABI_SELECTION) {
             Log.d(TAG, "Abis for package[" + pkg.packageName + "] are" +
                     " primary=" + pkg.applicationInfo.primaryCpuAbi +
                     " secondary=" + pkg.applicationInfo.secondaryCpuAbi);
         }
-
-        // Check if we have a legacy native library path, use it if we do.
-        pkg.applicationInfo.legacyNativeLibraryDir = pkgSetting.legacyNativeLibraryPathString;
-
-        // Now that we've calculated the ABIs and determined if it's an internal app,
-        // we will go ahead and populate the nativeLibraryPath.
-        populateDefaultNativeLibraryPath(pkg, pkg.applicationInfo);
 
         if ((scanMode&SCAN_BOOTING) == 0 && pkgSetting.sharedUser != null) {
             // We don't do this here during boot because we can do it all
@@ -6161,49 +6157,66 @@ public class PackageManagerService extends IPackageManager.Stub {
         return codeRoot.getPath();
     }
 
-    private void populateDefaultNativeLibraryPath(PackageParser.Package pkg,
-                                                  ApplicationInfo info) {
-        if (info.legacyNativeLibraryDir != null) {
-            // Not a cluster install.
-            if (DEBUG_ABI_SELECTION) {
-                Log.i(TAG, "Set nativeLibraryDir [non_cluster] for: " + pkg.packageName +
-                        " to " + info.legacyNativeLibraryDir);
-            }
-            info.nativeLibraryDir = info.legacyNativeLibraryDir;
-        } else if (info.primaryCpuAbi != null) {
-            final boolean is64Bit = VMRuntime.is64BitAbi(info.primaryCpuAbi);
-            if (info.apkRoot != null) {
-                // This is a bundled system app so choose the path based on the ABI.
-                // if it's a 64 bit abi, use lib64 otherwise use lib32. Note that this
-                // is just the default path.
-                final String apkName = deriveCodePathName(pkg.applicationInfo.getCodePath());
-                final String libDir = is64Bit ? LIB64_DIR_NAME : LIB_DIR_NAME;
-                info.nativeLibraryDir = (new File(info.apkRoot, new File(libDir, apkName).getAbsolutePath()))
+    /**
+     * Derive and set the location of native libraries for the given package,
+     * which varies depending on where and how the package was installed.
+     */
+    private void setNativeLibraryPaths(PackageParser.Package pkg) {
+        final ApplicationInfo info = pkg.applicationInfo;
+        final String codePath = pkg.codePath;
+        final File codeFile = new File(codePath);
+
+        final boolean bundledApp = isSystemApp(info) && !isUpdatedSystemApp(info);
+        final boolean asecApp = isForwardLocked(info) || isExternal(info);
+
+        info.nativeLibraryRootDir = null;
+        info.nativeLibraryRootRequiresIsa = false;
+        info.nativeLibraryDir = null;
+
+        if (bundledApp) {
+            // Monolithic bundled install
+            // TODO: support cluster bundled installs?
+
+            final boolean is64Bit = (info.primaryCpuAbi != null)
+                    && VMRuntime.is64BitAbi(info.primaryCpuAbi);
+
+            // This is a bundled system app so choose the path based on the ABI.
+            // if it's a 64 bit abi, use lib64 otherwise use lib32. Note that this
+            // is just the default path.
+            final String apkName = deriveCodePathName(codePath);
+            final String libDir = is64Bit ? LIB64_DIR_NAME : LIB_DIR_NAME;
+            info.nativeLibraryRootDir = Environment.buildPath(new File(info.apkRoot), libDir,
+                    apkName).getAbsolutePath();
+            info.nativeLibraryRootRequiresIsa = false;
+
+        } else if (isApkFile(codeFile)) {
+            // Monolithic install
+            if (asecApp) {
+                info.nativeLibraryRootDir = new File(codeFile.getParentFile(), LIB_DIR_NAME)
                         .getAbsolutePath();
-
-                if (DEBUG_ABI_SELECTION) {
-                    Log.i(TAG, "Set nativeLibraryDir [system] for: " + pkg.packageName +
-                            " to " + info.nativeLibraryDir);
-                }
+                info.nativeLibraryRootRequiresIsa = false;
             } else {
-                // Cluster install. legacyNativeLibraryDir == null && primaryCpuAbi = null
-                // implies this must be a cluster package.
-                final String codePath = pkg.codePath;
-                final File libPath = new File(new File(codePath, LIB_DIR_NAME),
-                        VMRuntime.getInstructionSet(info.primaryCpuAbi));
-                info.nativeLibraryDir = libPath.getAbsolutePath();
-
-                if (DEBUG_ABI_SELECTION) {
-                    Log.i(TAG, "Set nativeLibraryDir [cluster] for: " + pkg.packageName +
-                            " to " + info.nativeLibraryDir);
-                }
+                final String apkName = deriveCodePathName(codePath);
+                info.nativeLibraryRootDir = new File(mAppLib32InstallDir, apkName)
+                        .getAbsolutePath();
+                info.nativeLibraryRootRequiresIsa = false;
             }
         } else {
-            if (DEBUG_ABI_SELECTION) {
-                Log.i(TAG, "Setting nativeLibraryDir to null for: " + pkg.packageName);
-            }
+            // Cluster install
+            info.nativeLibraryRootDir = new File(codeFile, LIB_DIR_NAME).getAbsolutePath();
+            info.nativeLibraryRootRequiresIsa = true;
+        }
 
-            info.nativeLibraryDir = null;
+        if (info.nativeLibraryRootRequiresIsa) {
+            if (info.primaryCpuAbi != null) {
+                info.nativeLibraryDir = new File(info.nativeLibraryRootDir,
+                        VMRuntime.getInstructionSet(info.primaryCpuAbi)).getAbsolutePath();
+            } else {
+                Slog.w(TAG, "Package " + info.packageName
+                        + " missing ABI; unable to derive nativeLibraryDir");
+            }
+        } else {
+            info.nativeLibraryDir = info.nativeLibraryRootDir;
         }
     }
 
@@ -9124,13 +9137,13 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         /** Existing install */
-        FileInstallArgs(String codePath, String resourcePath, String legacyNativeLibraryRoot,
+        FileInstallArgs(String codePath, String resourcePath, String legacyNativeLibraryPath,
                 String[] instructionSets, boolean isMultiArch) {
             super(null, false, null, 0, null, null, null, instructionSets, null, isMultiArch);
             this.codeFile = (codePath != null) ? new File(codePath) : null;
             this.resourceFile = (resourcePath != null) ? new File(resourcePath) : null;
-            this.legacyNativeLibraryPath = (legacyNativeLibraryRoot != null) ?
-                    new File(legacyNativeLibraryRoot) : null;
+            this.legacyNativeLibraryPath = (legacyNativeLibraryPath != null) ?
+                    new File(legacyNativeLibraryPath) : null;
         }
 
         /** New install from existing */
@@ -9314,8 +9327,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                 pkg.applicationInfo.setResourcePath(pkg.codePath);
                 pkg.applicationInfo.setBaseResourcePath(pkg.baseCodePath);
                 pkg.applicationInfo.setSplitResourcePaths(pkg.splitCodePaths);
-                // Null out the legacy native dir so we stop using it.
-                pkg.applicationInfo.legacyNativeLibraryDir = null;
 
                 return true;
             }
@@ -9600,9 +9611,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             pkg.applicationInfo.setResourcePath(getResourcePath());
             pkg.applicationInfo.setBaseResourcePath(getResourcePath());
             pkg.applicationInfo.setSplitResourcePaths(null);
-            // ASEC installs are considered "legacy" because we don't support
-            // multiarch on them yet, and use the old style paths on them.
-            pkg.applicationInfo.legacyNativeLibraryDir = legacyNativeLibraryDir;
 
             return true;
         }
@@ -10074,7 +10082,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 res.removedInfo.args = createInstallArgsForExisting(0,
                         deletedPackage.applicationInfo.getCodePath(),
                         deletedPackage.applicationInfo.getResourcePath(),
-                        deletedPackage.applicationInfo.legacyNativeLibraryDir,
+                        deletedPackage.applicationInfo.nativeLibraryRootDir,
                         getAppDexInstructionSets(deletedPackage.applicationInfo),
                         isMultiArch(deletedPackage.applicationInfo));
             } else {
@@ -10384,6 +10392,9 @@ public class PackageManagerService extends IPackageManager.Stub {
         return (pkg.applicationInfo.flags & ApplicationInfo.FLAG_FORWARD_LOCK) != 0;
     }
 
+    private static boolean isForwardLocked(ApplicationInfo info) {
+        return (info.flags & ApplicationInfo.FLAG_FORWARD_LOCK) != 0;
+    }
 
     private boolean isForwardLocked(PackageSetting ps) {
         return (ps.pkgFlags & ApplicationInfo.FLAG_FORWARD_LOCK) != 0;
@@ -10403,6 +10414,10 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private static boolean isExternal(PackageSetting ps) {
         return (ps.pkgFlags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0;
+    }
+
+    private static boolean isExternal(ApplicationInfo info) {
+        return (info.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0;
     }
 
     private static boolean isSystemApp(PackageParser.Package pkg) {
@@ -10427,6 +10442,10 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private static boolean isUpdatedSystemApp(PackageParser.Package pkg) {
         return (pkg.applicationInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0;
+    }
+
+    private static boolean isUpdatedSystemApp(ApplicationInfo info) {
+        return (info.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0;
     }
 
     private int packageFlagsToInstallFlags(PackageSetting ps) {
@@ -12850,7 +12869,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 final boolean multiArch = isMultiArch(pkg.applicationInfo);
                 InstallArgs srcArgs = createInstallArgsForExisting(currFlags,
                         pkg.applicationInfo.getCodePath(), pkg.applicationInfo.getResourcePath(),
-                        pkg.applicationInfo.legacyNativeLibraryDir, instructionSets, multiArch);
+                        pkg.applicationInfo.nativeLibraryRootDir, instructionSets, multiArch);
                 MoveParams mp = new MoveParams(srcArgs, observer, newFlags, packageName,
                         instructionSets, pkg.applicationInfo.uid, user, multiArch);
                 msg.obj = mp;
@@ -12977,9 +12996,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                                         pkg.applicationInfo.setResourcePath(newResPath);
                                         pkg.applicationInfo.setBaseResourcePath(newResPath);
                                         pkg.applicationInfo.setSplitResourcePaths(null);
-                                        // Null out the legacy nativeLibraryDir so that we stop using it and
-                                        // always derive the codepath.
-                                        pkg.applicationInfo.legacyNativeLibraryDir = null;
 
                                         PackageSetting ps = (PackageSetting) pkg.mExtras;
                                         ps.codePath = new File(pkg.applicationInfo.getCodePath());

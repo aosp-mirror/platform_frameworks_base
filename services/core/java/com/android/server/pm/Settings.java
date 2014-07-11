@@ -82,6 +82,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.Map.Entry;
 
@@ -317,11 +318,11 @@ final class Settings {
 
     PackageSetting getPackageLPw(PackageParser.Package pkg, PackageSetting origPackage,
             String realName, SharedUserSetting sharedUser, File codePath, File resourcePath,
-            String nativeLibraryRoot, String primaryCpuAbi, String secondaryCpuAbi, int pkgFlags,
+            String legacyNativeLibraryPathString, String primaryCpuAbi, String secondaryCpuAbi, int pkgFlags,
             UserHandle user, boolean add) {
         final String name = pkg.packageName;
         PackageSetting p = getPackageLPw(name, origPackage, realName, sharedUser, codePath,
-                resourcePath, nativeLibraryRoot, primaryCpuAbi, secondaryCpuAbi,
+                resourcePath, legacyNativeLibraryPathString, primaryCpuAbi, secondaryCpuAbi,
                 pkg.mVersionCode, pkgFlags, user, add, true /* allowInstall */);
         return p;
     }
@@ -689,24 +690,24 @@ final class Settings {
         // pkg.mSetStopped = p.getStopped(userId);
         final String codePath = pkg.applicationInfo.getCodePath();
         final String resourcePath = pkg.applicationInfo.getResourcePath();
+        final String legacyNativeLibraryPath = pkg.applicationInfo.nativeLibraryRootDir;
         // Update code path if needed
-        if (!codePath.equalsIgnoreCase(p.codePathString)) {
+        if (!Objects.equals(codePath, p.codePathString)) {
             Slog.w(PackageManagerService.TAG, "Code path for pkg : " + p.pkg.packageName +
                     " changing from " + p.codePathString + " to " + codePath);
             p.codePath = new File(codePath);
             p.codePathString = codePath;
         }
         //Update resource path if needed
-        if (!resourcePath.equalsIgnoreCase(p.resourcePathString)) {
+        if (!Objects.equals(resourcePath, p.resourcePathString)) {
             Slog.w(PackageManagerService.TAG, "Resource path for pkg : " + p.pkg.packageName +
                     " changing from " + p.resourcePathString + " to " + resourcePath);
             p.resourcePath = new File(resourcePath);
             p.resourcePathString = resourcePath;
         }
         // Update the native library paths if needed
-        final String nativeLibraryRoot = pkg.applicationInfo.legacyNativeLibraryDir;
-        if (nativeLibraryRoot != null && !nativeLibraryRoot.equalsIgnoreCase(p.legacyNativeLibraryPathString)) {
-            p.legacyNativeLibraryPathString = nativeLibraryRoot;
+        if (!Objects.equals(legacyNativeLibraryPath, p.legacyNativeLibraryPathString)) {
+            p.legacyNativeLibraryPathString = legacyNativeLibraryPath;
         }
 
         // Update the required Cpu Abi
