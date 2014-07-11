@@ -3407,7 +3407,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
         public final int startActivity(Intent intent) {
             mService.enforceNotIsolatedCaller("ActivityContainer.startActivity");
             int userId = mService.handleIncomingUser(Binder.getCallingPid(),
-                    Binder.getCallingUid(), mCurrentUser, false, true, "ActivityContainer", null);
+                    Binder.getCallingUid(), mCurrentUser, false,
+                    ActivityManagerService.ALLOW_FULL_ONLY, "ActivityContainer", null);
             // TODO: Switch to user app stacks here.
             intent.addFlags(FORCE_NEW_TASK_FLAGS);
             String mimeType = intent.getType();
@@ -3433,7 +3434,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         private void checkEmbeddedAllowedInner(Intent intent, String resolvedType) {
             int userId = mService.handleIncomingUser(Binder.getCallingPid(),
-                    Binder.getCallingUid(), mCurrentUser, false, true, "ActivityContainer", null);
+                    Binder.getCallingUid(), mCurrentUser, false,
+                    ActivityManagerService.ALLOW_FULL_ONLY, "ActivityContainer", null);
             if (resolvedType == null) {
                 resolvedType = intent.getType();
                 if (resolvedType == null && intent.getData() != null
