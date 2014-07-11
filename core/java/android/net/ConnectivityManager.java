@@ -532,11 +532,6 @@ public class ConnectivityManager {
     /**
      * @hide
      */
-    public final static int INVALID_NET_ID = 0;
-
-    /**
-     * @hide
-     */
     public final static int REQUEST_ID_UNSET = 0;
 
     private final IConnectivityManager mService;
@@ -2508,12 +2503,15 @@ public class ConnectivityManager {
      * @return {@code true} on success, {@code false} if the {@link Network} is no longer valid.
      */
     public static boolean setProcessDefaultNetwork(Network network) {
-        if (network == null) {
-            return NetworkUtils.unbindProcessToNetwork();
-        } else {
-            return NetworkUtils.bindProcessToNetwork(network.netId);
-        }
+        return NetworkUtils.bindProcessToNetwork(network == null ? NETID_UNSET : network.netId);
     }
+
+    /**
+     * A NetID indicating no Network is selected.
+     * Keep in sync with bionic/libc/dns/include/resolv_netid.h
+     * @hide
+     */
+    public static final int NETID_UNSET = 0;
 
     /**
      * Returns the {@link Network} currently bound to this process via
@@ -2523,7 +2521,7 @@ public class ConnectivityManager {
      */
     public static Network getProcessDefaultNetwork() {
         int netId = NetworkUtils.getNetworkBoundToProcess();
-        if (netId == 0) return null;
+        if (netId == NETID_UNSET) return null;
         return new Network(netId);
     }
 
@@ -2538,10 +2536,7 @@ public class ConnectivityManager {
      * @deprecated This is strictly for legacy usage to support {@link #startUsingNetworkFeature}.
      */
     public static boolean setProcessDefaultNetworkForHostResolution(Network network) {
-        if (network == null) {
-            return NetworkUtils.unbindProcessToNetworkForHostResolution();
-        } else {
-            return NetworkUtils.bindProcessToNetworkForHostResolution(network.netId);
-        }
+        return NetworkUtils.bindProcessToNetworkForHostResolution(
+                network == null ? NETID_UNSET : network.netId);
     }
 }

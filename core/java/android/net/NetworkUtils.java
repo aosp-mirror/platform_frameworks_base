@@ -116,15 +116,9 @@ public class NetworkUtils {
      * {@link Network#getSocketFactory}) will be bound to this network.  Note that if this
      * {@code Network} ever disconnects all sockets created in this way will cease to work.  This
      * is by design so an application doesn't accidentally use sockets it thinks are still bound to
-     * a particular {@code Network}.
+     * a particular {@code Network}.  Passing NETID_UNSET clears the binding.
      */
     public native static boolean bindProcessToNetwork(int netId);
-
-    /**
-     * Clear any process specific {@code Network} binding.  This reverts a call to
-     * {@link #bindProcessToNetwork}.
-     */
-    public native static boolean unbindProcessToNetwork();
 
     /**
      * Return the netId last passed to {@link #bindProcessToNetwork}, or NETID_UNSET if
@@ -134,19 +128,12 @@ public class NetworkUtils {
 
     /**
      * Binds host resolutions performed by this process to the network designated by {@code netId}.
-     * {@link #bindProcessToNetwork} takes precedence over this setting.
+     * {@link #bindProcessToNetwork} takes precedence over this setting.  Passing NETID_UNSET clears
+     * the binding.
      *
      * @deprecated This is strictly for legacy usage to support startUsingNetworkFeature().
      */
     public native static boolean bindProcessToNetworkForHostResolution(int netId);
-
-    /**
-     * Clears any process specific {@link Network} binding for host resolution.  This does
-     * not clear bindings enacted via {@link #bindProcessToNetwork}.
-     *
-     * @deprecated This is strictly for legacy usage to support startUsingNetworkFeature().
-     */
-    public native static boolean unbindProcessToNetworkForHostResolution();
 
     /**
      * Explicitly binds {@code socketfd} to the network designated by {@code netId}.  This

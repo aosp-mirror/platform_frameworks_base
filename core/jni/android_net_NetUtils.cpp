@@ -258,11 +258,6 @@ static jboolean android_net_utils_bindProcessToNetwork(JNIEnv *env, jobject thiz
     return (jboolean) !setNetworkForProcess(netId);
 }
 
-static jboolean android_net_utils_unbindProcessToNetwork(JNIEnv *env, jobject thiz)
-{
-    return (jboolean) !setNetworkForProcess(NETID_UNSET);
-}
-
 static jint android_net_utils_getNetworkBoundToProcess(JNIEnv *env, jobject thiz)
 {
     return getNetworkForProcess();
@@ -272,11 +267,6 @@ static jboolean android_net_utils_bindProcessToNetworkForHostResolution(JNIEnv *
         jint netId)
 {
     return (jboolean) !setNetworkForResolv(netId);
-}
-
-static jboolean android_net_utils_unbindProcessToNetworkForHostResolution(JNIEnv *env, jobject thiz)
-{
-    return (jboolean) !setNetworkForResolv(NETID_UNSET);
 }
 
 static jboolean android_net_utils_bindSocketToNetwork(JNIEnv *env, jobject thiz, jint socket,
@@ -309,9 +299,7 @@ static JNINativeMethod gNetworkUtilMethods[] = {
     { "markSocket", "(II)V", (void*) android_net_utils_markSocket },
     { "bindProcessToNetwork", "(I)Z", (void*) android_net_utils_bindProcessToNetwork },
     { "getNetworkBoundToProcess", "()I", (void*) android_net_utils_getNetworkBoundToProcess },
-    { "unbindProcessToNetwork", "()Z", (void*) android_net_utils_unbindProcessToNetwork },
     { "bindProcessToNetworkForHostResolution", "(I)Z", (void*) android_net_utils_bindProcessToNetworkForHostResolution },
-    { "unbindProcessToNetworkForHostResolution", "()Z", (void*) android_net_utils_unbindProcessToNetworkForHostResolution },
     { "bindSocketToNetwork", "(II)Z", (void*) android_net_utils_bindSocketToNetwork },
     { "protectFromVpn", "(I)Z", (void*)android_net_utils_protectFromVpn },
 };

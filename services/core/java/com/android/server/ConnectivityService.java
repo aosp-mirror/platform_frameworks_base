@@ -179,8 +179,6 @@ import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSession;
 
-import static android.net.ConnectivityManager.INVALID_NET_ID;
-
 /**
  * @hide
  */
@@ -1841,8 +1839,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         final int uid = Binder.getCallingUid();
         final long token = Binder.clearCallingIdentity();
         try {
-            LinkProperties lp = null;
-            int netId = INVALID_NET_ID;
+            LinkProperties lp;
+            int netId;
             synchronized (nai) {
                 lp = nai.linkProperties;
                 netId = nai.network.netId;
@@ -2239,7 +2237,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         } catch (Exception e) {
             loge("Exception removing network: " + e);
         } finally {
-            mNetTrackers[prevNetType].setNetId(INVALID_NET_ID);
+//            mNetTrackers[prevNetType].setNetId(INVALID_NET_ID);
         }
     }
 
