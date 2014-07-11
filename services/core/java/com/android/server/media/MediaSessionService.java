@@ -30,14 +30,11 @@ import android.content.pm.PackageManager;
 import android.media.AudioManager;
 import android.media.IAudioService;
 import android.media.IRemoteVolumeController;
-import android.media.routeprovider.RouteRequest;
 import android.media.session.IActiveSessionsListener;
 import android.media.session.ISession;
 import android.media.session.ISessionCallback;
 import android.media.session.ISessionManager;
 import android.media.session.MediaSession;
-import android.media.session.RouteInfo;
-import android.media.session.RouteOptions;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -74,15 +71,12 @@ public class MediaSessionService extends SystemService implements Monitor {
     private static final int WAKELOCK_TIMEOUT = 5000;
 
     private final SessionManagerImpl mSessionManagerImpl;
-    // private final MediaRouteProviderWatcher mRouteProviderWatcher;
     private final MediaSessionStack mPriorityStack;
 
     private final ArrayList<MediaSessionRecord> mAllSessions = new ArrayList<MediaSessionRecord>();
     private final SparseArray<UserRecord> mUserRecords = new SparseArray<UserRecord>();
     private final ArrayList<SessionsListenerRecord> mSessionsListeners
             = new ArrayList<SessionsListenerRecord>();
-    // private final ArrayList<MediaRouteProviderProxy> mProviders
-    // = new ArrayList<MediaRouteProviderProxy>();
     private final Object mLock = new Object();
     private final MessageHandler mHandler = new MessageHandler();
     private final PowerManager.WakeLock mMediaEventWakeLock;
@@ -93,10 +87,6 @@ public class MediaSessionService extends SystemService implements Monitor {
 
     private MediaSessionRecord mPrioritySession;
     private int mCurrentUserId = -1;
-
-    // Used to keep track of the current request to show routes for a specific
-    // session so we drop late callbacks properly.
-    private int mShowRoutesRequestId = 0;
 
     // Used to notify system UI when remote volume was changed. TODO find a
     // better way to handle this.
@@ -124,69 +114,6 @@ public class MediaSessionService extends SystemService implements Monitor {
     private IAudioService getAudioService() {
         IBinder b = ServiceManager.getService(Context.AUDIO_SERVICE);
         return IAudioService.Stub.asInterface(b);
-    }
-
-    /**
-     * Should trigger showing the Media route picker dialog. Right now it just
-     * kicks off a query to all the providers to get routes.
-     *
-     * @param record The session to show the picker for.
-     */
-    public void showRoutePickerForSession(MediaSessionRecord record) {
-        // TODO for now just toggle the route to test (we will only have one
-        // match for now)
-        synchronized (mLock) {
-            if (!mAllSessions.contains(record)) {
-                Log.d(TAG, "Unknown session tried to show route picker. Ignoring.");
-                return;
-            }
-            RouteInfo current = record.getRoute();
-            UserRecord user = mUserRecords.get(record.getUserId());
-            if (current != null) {
-                // For now send null to mean the local route
-                MediaRouteProviderProxy proxy = user.getProviderLocked(current.getProvider());
-                if (proxy != null) {
-                    proxy.removeSession(record);
-                }
-                record.selectRoute(null);
-                return;
-            }
-            ArrayList<MediaRouteProviderProxy> providers = user.getProvidersLocked();
-            mShowRoutesRequestId++;
-            for (int i = providers.size() - 1; i >= 0; i--) {
-                MediaRouteProviderProxy provider = providers.get(i);
-                provider.getRoutes(record, mShowRoutesRequestId);
-            }
-        }
-    }
-
-    /**
-     * Connect a session to the given route.
-     *
-     * @param session The session to connect.
-     * @param route The route to connect to.
-     * @param options The options to use for the connection.
-     */
-    public void connectToRoute(MediaSessionRecord session, RouteInfo route,
-            RouteOptions options) {
-        synchronized (mLock) {
-            if (!mAllSessions.contains(session)) {
-                Log.d(TAG, "Unknown session attempting to connect to route. Ignoring");
-                return;
-            }
-            UserRecord user = mUserRecords.get(session.getUserId());
-            if (user == null) {
-                Log.wtf(TAG, "connectToRoute: User " + session.getUserId() + " does not exist.");
-                return;
-            }
-            MediaRouteProviderProxy proxy = user.getProviderLocked(route.getProvider());
-            if (proxy == null) {
-                Log.w(TAG, "Provider for route " + route.getName() + " does not exist.");
-                return;
-            }
-            RouteRequest request = new RouteRequest(session.getSessionInfo(), options, true);
-            proxy.connectToRoute(session, route, request);
-        }
     }
 
     public void updateSession(MediaSessionRecord record) {
@@ -552,77 +479,31 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
     }
 
-    private MediaRouteProviderProxy.RoutesListener mRoutesCallback
-            = new MediaRouteProviderProxy.RoutesListener() {
-        @Override
-        public void onRoutesUpdated(String sessionId, ArrayList<RouteInfo> routes,
-                int reqId) {
-            // TODO for now select the first route to test, eventually add the
-            // new routes to the dialog if it is still open
-            synchronized (mLock) {
-                int index = findIndexOfSessionForIdLocked(sessionId);
-                if (index != -1 && routes != null && routes.size() > 0) {
-                    MediaSessionRecord record = mAllSessions.get(index);
-                    RouteInfo route = routes.get(0);
-                    record.selectRoute(route);
-                    UserRecord user = mUserRecords.get(record.getUserId());
-                    MediaRouteProviderProxy provider = user.getProviderLocked(route.getProvider());
-                    provider.addSession(record);
-                }
-            }
-        }
-
-        @Override
-        public void onRouteConnected(String sessionId, RouteInfo route,
-                RouteRequest options, RouteConnectionRecord connection) {
-            synchronized (mLock) {
-                int index = findIndexOfSessionForIdLocked(sessionId);
-                if (index != -1) {
-                    MediaSessionRecord session = mAllSessions.get(index);
-                    session.setRouteConnected(route, options.getConnectionOptions(), connection);
-                }
-            }
-        }
-    };
-
     /**
      * Information about a particular user. The contents of this object is
      * guarded by mLock.
      */
     final class UserRecord {
         private final int mUserId;
-        private final MediaRouteProviderWatcher mRouteProviderWatcher;
-        private final ArrayList<MediaRouteProviderProxy> mProviders
-                = new ArrayList<MediaRouteProviderProxy>();
         private final ArrayList<MediaSessionRecord> mSessions = new ArrayList<MediaSessionRecord>();
 
         public UserRecord(Context context, int userId) {
             mUserId = userId;
-            mRouteProviderWatcher = new MediaRouteProviderWatcher(context,
-                    mProviderWatcherCallback, mHandler, userId);
         }
 
         public void startLocked() {
-            mRouteProviderWatcher.start();
+            // nothing for now
         }
 
         public void stopLocked() {
-            mRouteProviderWatcher.stop();
-            updateInterestLocked();
+            // nothing for now
         }
 
         public void destroyLocked() {
             for (int i = mSessions.size() - 1; i >= 0; i--) {
                 MediaSessionRecord session = mSessions.get(i);
                 MediaSessionService.this.destroySessionLocked(session);
-                if (session.isConnected()) {
-                    session.disconnect(MediaSession.DISCONNECT_REASON_USER_STOPPING);
-                }
             }
-        }
-
-        public ArrayList<MediaRouteProviderProxy> getProvidersLocked() {
-            return mProviders;
         }
 
         public ArrayList<MediaSessionRecord> getSessionsLocked() {
@@ -631,31 +512,16 @@ public class MediaSessionService extends SystemService implements Monitor {
 
         public void addSessionLocked(MediaSessionRecord session) {
             mSessions.add(session);
-            updateInterestLocked();
         }
 
         public void removeSessionLocked(MediaSessionRecord session) {
             mSessions.remove(session);
-            RouteInfo route = session.getRoute();
-            if (route != null) {
-                MediaRouteProviderProxy provider = getProviderLocked(route.getProvider());
-                if (provider != null) {
-                    provider.removeSession(session);
-                }
-            }
-            updateInterestLocked();
         }
 
         public void dumpLocked(PrintWriter pw, String prefix) {
             pw.println(prefix + "Record for user " + mUserId);
             String indent = prefix + "  ";
-            int size = mProviders.size();
-            pw.println(indent + size + " Providers:");
-            for (int i = 0; i < size; i++) {
-                mProviders.get(i).dump(pw, indent);
-            }
-            pw.println();
-            size = mSessions.size();
+            int size = mSessions.size();
             pw.println(indent + size + " Sessions:");
             for (int i = 0; i < size; i++) {
                 // Just print the session info, the full session dump will
@@ -663,48 +529,6 @@ public class MediaSessionService extends SystemService implements Monitor {
                 pw.println(indent + mSessions.get(i).getSessionInfo());
             }
         }
-
-        public void updateInterestLocked() {
-            // TODO go through the sessions and build up the set of interfaces
-            // we're interested in. Update the provider watcher.
-            // For now, just express interest in all providers for the current
-            // user
-            boolean interested = mUserId == mCurrentUserId;
-            for (int i = mProviders.size() - 1; i >= 0; i--) {
-                mProviders.get(i).setInterested(interested);
-            }
-        }
-
-        private MediaRouteProviderProxy getProviderLocked(String providerId) {
-            for (int i = mProviders.size() - 1; i >= 0; i--) {
-                MediaRouteProviderProxy provider = mProviders.get(i);
-                if (TextUtils.equals(providerId, provider.getId())) {
-                    return provider;
-                }
-            }
-            return null;
-        }
-
-        private MediaRouteProviderWatcher.Callback mProviderWatcherCallback
-                = new MediaRouteProviderWatcher.Callback() {
-            @Override
-            public void removeProvider(MediaRouteProviderProxy provider) {
-                synchronized (mLock) {
-                    mProviders.remove(provider);
-                    provider.setRoutesListener(null);
-                    provider.setInterested(false);
-                }
-            }
-
-            @Override
-            public void addProvider(MediaRouteProviderProxy provider) {
-                synchronized (mLock) {
-                    mProviders.add(provider);
-                    provider.setRoutesListener(mRoutesCallback);
-                    provider.setInterested(true);
-                }
-            }
-        };
     }
 
     final class SessionsListenerRecord implements IBinder.DeathRecipient {

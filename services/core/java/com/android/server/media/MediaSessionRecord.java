@@ -19,19 +19,13 @@ package com.android.server.media;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.media.routeprovider.RouteRequest;
 import android.media.session.ISessionController;
 import android.media.session.ISessionControllerCallback;
 import android.media.session.ISession;
 import android.media.session.ISessionCallback;
 import android.media.session.MediaController;
-import android.media.session.RouteCommand;
-import android.media.session.RouteInfo;
-import android.media.session.RouteOptions;
-import android.media.session.RouteEvent;
 import android.media.session.MediaSession;
 import android.media.session.MediaSessionInfo;
-import android.media.session.RouteInterface;
 import android.media.session.PlaybackState;
 import android.media.session.ParcelableVolumeInfo;
 import android.media.AudioManager;
@@ -94,13 +88,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     private final Object mLock = new Object();
     private final ArrayList<ISessionControllerCallback> mControllerCallbacks =
             new ArrayList<ISessionControllerCallback>();
-    private final ArrayList<RouteRequest> mRequests = new ArrayList<RouteRequest>();
 
-    private RouteInfo mRoute;
-    private RouteOptions mRequest;
-    private RouteConnectionRecord mConnection;
-    // TODO define a RouteState class with relevant info
-    private int mRouteState;
     private long mFlags;
     private ComponentName mMediaButtonReceiver;
 
@@ -160,24 +148,6 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     }
 
     /**
-     * Get the set of route requests this session is interested in.
-     *
-     * @return The list of RouteRequests
-     */
-    public List<RouteRequest> getRouteRequests() {
-        return mRequests;
-    }
-
-    /**
-     * Get the route this session is currently on.
-     *
-     * @return The route the session is on.
-     */
-    public RouteInfo getRoute() {
-        return mRoute;
-    }
-
-    /**
      * Get the info for this session.
      *
      * @return Info that identifies this session.
@@ -226,41 +196,6 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
      */
     public boolean isSystemPriority() {
         return (mFlags & MediaSession.FLAG_EXCLUSIVE_GLOBAL_PRIORITY) != 0;
-    }
-
-    /**
-     * Set the selected route. This does not connect to the route, just notifies
-     * the app that a new route has been selected.
-     *
-     * @param route The route that was selected.
-     */
-    public void selectRoute(RouteInfo route) {
-        synchronized (mLock) {
-            if (route != mRoute) {
-                disconnect(MediaSession.DISCONNECT_REASON_ROUTE_CHANGED);
-            }
-            mRoute = route;
-        }
-        mSessionCb.sendRouteChange(route);
-    }
-
-    /**
-     * Update the state of the route this session is using and notify the
-     * session.
-     *
-     * @param state The new state of the route.
-     */
-    public void setRouteState(int state) {
-        mSessionCb.sendRouteStateChange(state);
-    }
-
-    /**
-     * Send an event to this session from the route it is using.
-     *
-     * @param event The event to send.
-     */
-    public void sendRouteEvent(RouteEvent event) {
-        mSessionCb.sendRouteEvent(event);
     }
 
     /**
@@ -335,40 +270,6 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                         + mMaxVolume);
             }
         }
-    }
-
-    /**
-     * Set the connection to use for the selected route and notify the app it is
-     * now connected.
-     *
-     * @param route The route the connection is to.
-     * @param request The request that was used to connect.
-     * @param connection The connection to the route.
-     * @return True if this connection is still valid, false if it is stale.
-     */
-    public boolean setRouteConnected(RouteInfo route, RouteOptions request,
-            RouteConnectionRecord connection) {
-        synchronized (mLock) {
-            if (mDestroyed) {
-                Log.i(TAG, "setRouteConnected: session has been destroyed");
-                connection.disconnect();
-                return false;
-            }
-            if (mRoute == null || !TextUtils.equals(route.getId(), mRoute.getId())) {
-                Log.w(TAG, "setRouteConnected: connected route is stale");
-                connection.disconnect();
-                return false;
-            }
-            if (request != mRequest) {
-                Log.w(TAG, "setRouteConnected: connection request is stale");
-                connection.disconnect();
-                return false;
-            }
-            mConnection = connection;
-            mConnection.setListener(mConnectionListener);
-            mSessionCb.sendRouteConnected();
-        }
-        return true;
     }
 
     /**
@@ -460,30 +361,6 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         return mOptimisticVolume;
     }
 
-    /**
-     * @return True if this session is currently connected to a route.
-     */
-    public boolean isConnected() {
-        return mConnection != null;
-    }
-
-    public void disconnect(int reason) {
-        synchronized (mLock) {
-            if (!mDestroyed) {
-                disconnectLocked(reason);
-            }
-        }
-    }
-
-    private void disconnectLocked(int reason) {
-        if (mConnection != null) {
-            mConnection.setListener(null);
-            mConnection.disconnect();
-            mConnection = null;
-            pushDisconnected(reason);
-        }
-    }
-
     public boolean isTransportControlEnabled() {
         return hasFlag(MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS);
     }
@@ -502,11 +379,6 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
             if (mDestroyed) {
                 return;
             }
-            if (isConnected()) {
-                disconnectLocked(MediaSession.DISCONNECT_REASON_SESSION_DESTROYED);
-            }
-            mRoute = null;
-            mRequest = null;
             mDestroyed = true;
         }
     }
@@ -532,15 +404,6 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         pw.println(indent + "controllers: " + mControllerCallbacks.size());
         pw.println(indent + "state=" + (mPlaybackState == null ? null : mPlaybackState.toString()));
         pw.println(indent + "metadata:" + getShortMetadataString());
-        pw.println(indent + "route requests {");
-        int size = mRequests.size();
-        for (int i = 0; i < size; i++) {
-            pw.println(indent + "  " + mRequests.get(i).toString());
-        }
-        pw.println(indent + "}");
-        pw.println(indent + "route=" + (mRoute == null ? null : mRoute.toString()));
-        pw.println(indent + "connection=" + (mConnection == null ? null : mConnection.toString()));
-        pw.println(indent + "params=" + (mRequest == null ? null : mRequest.toString()));
     }
 
     private String getShortMetadataString() {
@@ -548,12 +411,6 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         String title = mMetadata == null ? null : mMetadata
                 .getString(MediaMetadata.METADATA_KEY_TITLE);
         return "size=" + fields + ", title=" + title;
-    }
-
-    private void pushDisconnected(int reason) {
-        synchronized (mLock) {
-            mSessionCb.sendRouteDisconnected(reason);
-        }
     }
 
     private void pushPlaybackStateUpdate() {
@@ -613,25 +470,6 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
     }
 
-    private void pushRouteUpdate() {
-        synchronized (mLock) {
-            if (mDestroyed) {
-                return;
-            }
-            for (int i = mControllerCallbacks.size() - 1; i >= 0; i--) {
-                ISessionControllerCallback cb = mControllerCallbacks.get(i);
-                try {
-                    cb.onRouteChanged(mRoute);
-                } catch (DeadObjectException e) {
-                    Log.w(TAG, "Removing dead callback in pushRouteUpdate.", e);
-                    mControllerCallbacks.remove(i);
-                } catch (RemoteException e) {
-                    Log.w(TAG, "unexpected exception in pushRouteUpdate.", e);
-                }
-            }
-        }
-    }
-
     private void pushEvent(String event, Bundle data) {
         synchronized (mLock) {
             if (mDestroyed) {
@@ -647,25 +485,6 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                 } catch (RemoteException e) {
                     Log.w(TAG, "unexpected exception in pushEvent.", e);
                 }
-            }
-        }
-    }
-
-    private void pushRouteCommand(RouteCommand command, ResultReceiver cb) {
-        synchronized (mLock) {
-            if (mDestroyed) {
-                return;
-            }
-            if (mRoute == null || !TextUtils.equals(command.getRouteInfo(), mRoute.getId())) {
-                if (cb != null) {
-                    cb.send(RouteInterface.RESULT_ROUTE_IS_STALE, null);
-                    return;
-                }
-            }
-            if (mConnection != null) {
-                mConnection.sendCommand(command, cb);
-            } else if (cb != null) {
-                cb.send(RouteInterface.RESULT_NOT_CONNECTED, null);
             }
         }
     }
@@ -707,21 +526,6 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
         return -1;
     }
-
-    private final RouteConnectionRecord.Listener mConnectionListener
-            = new RouteConnectionRecord.Listener() {
-        @Override
-        public void onEvent(RouteEvent event) {
-            RouteEvent eventForSession = new RouteEvent(null, event.getIface(),
-                    event.getEvent(), event.getExtras());
-            mSessionCb.sendRouteEvent(eventForSession);
-        }
-
-        @Override
-        public void disconnect() {
-            MediaSessionRecord.this.disconnect(MediaSession.DISCONNECT_REASON_PROVIDER_DISCONNECTED);
-        }
-    };
 
     private final Runnable mClearOptimisticVolumeRunnable = new Runnable() {
         @Override
@@ -797,46 +601,6 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
 
         @Override
-        public void sendRouteCommand(RouteCommand command, ResultReceiver cb) {
-            mHandler.post(MessageHandler.MSG_SEND_COMMAND,
-                    new Pair<RouteCommand, ResultReceiver>(command, cb));
-        }
-
-        @Override
-        public boolean setRoute(RouteInfo route) throws RemoteException {
-            // TODO decide if allowed to set route and if the route exists
-            return false;
-        }
-
-        @Override
-        public void connectToRoute(RouteInfo route, RouteOptions request)
-                throws RemoteException {
-            if (mRoute == null || !TextUtils.equals(route.getId(), mRoute.getId())) {
-                throw new RemoteException("RouteInfo does not match current route");
-            }
-            mService.connectToRoute(MediaSessionRecord.this, route, request);
-            mRequest = request;
-        }
-
-        @Override
-        public void disconnectFromRoute(RouteInfo route) {
-            if (route != null && mRoute != null
-                    && TextUtils.equals(route.getId(), mRoute.getId())) {
-                disconnect(MediaSession.DISCONNECT_REASON_SESSION_DISCONNECTED);
-            }
-        }
-
-        @Override
-        public void setRouteOptions(List<RouteOptions> options) throws RemoteException {
-            mRequests.clear();
-            for (int i = options.size() - 1; i >= 0; i--) {
-                RouteRequest request = new RouteRequest(mSessionInfo, options.get(i),
-                        false);
-                mRequests.add(request);
-            }
-        }
-
-        @Override
         public void setCurrentVolume(int volume) {
             mCurrentVolume = volume;
             mHandler.post(MessageHandler.MSG_UPDATE_VOLUME);
@@ -900,46 +664,6 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                 mCb.onCommand(command, extras, cb);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in sendCommand.", e);
-            }
-        }
-
-        public void sendRouteChange(RouteInfo route) {
-            try {
-                mCb.onRequestRouteChange(route);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Remote failure in sendRouteChange.", e);
-            }
-        }
-
-        public void sendRouteStateChange(int state) {
-            try {
-                mCb.onRouteStateChange(state);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Remote failure in sendRouteStateChange.", e);
-            }
-        }
-
-        public void sendRouteEvent(RouteEvent event) {
-            try {
-                mCb.onRouteEvent(event);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Remote failure in sendRouteEvent.", e);
-            }
-        }
-
-        public void sendRouteConnected() {
-            try {
-                mCb.onRouteConnected(mRoute, mRequest);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Remote failure in sendRouteStateChange.", e);
-            }
-        }
-
-        public void sendRouteDisconnected(int reason) {
-            try {
-                mCb.onRouteDisconnected(mRoute, reason);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Remote failure in sendRouteDisconnected");
             }
         }
 
@@ -1185,22 +909,14 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         public boolean isTransportControlEnabled() {
             return MediaSessionRecord.this.isTransportControlEnabled();
         }
-
-        @Override
-        public void showRoutePicker() {
-            mService.showRoutePickerForSession(MediaSessionRecord.this);
-        }
     }
 
     private class MessageHandler extends Handler {
         private static final int MSG_UPDATE_METADATA = 1;
         private static final int MSG_UPDATE_PLAYBACK_STATE = 2;
-        private static final int MSG_UPDATE_ROUTE = 3;
-        private static final int MSG_SEND_EVENT = 4;
-        private static final int MSG_UPDATE_ROUTE_FILTERS = 5;
-        private static final int MSG_SEND_COMMAND = 6;
-        private static final int MSG_UPDATE_SESSION_STATE = 7;
-        private static final int MSG_UPDATE_VOLUME = 8;
+        private static final int MSG_SEND_EVENT = 3;
+        private static final int MSG_UPDATE_SESSION_STATE = 4;
+        private static final int MSG_UPDATE_VOLUME = 5;
 
         public MessageHandler(Looper looper) {
             super(looper);
@@ -1214,16 +930,8 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                 case MSG_UPDATE_PLAYBACK_STATE:
                     pushPlaybackStateUpdate();
                     break;
-                case MSG_UPDATE_ROUTE:
-                    pushRouteUpdate();
-                    break;
                 case MSG_SEND_EVENT:
                     pushEvent((String) msg.obj, msg.getData());
-                    break;
-                case MSG_SEND_COMMAND:
-                    Pair<RouteCommand, ResultReceiver> cmd =
-                            (Pair<RouteCommand, ResultReceiver>) msg.obj;
-                    pushRouteCommand(cmd.first, cmd.second);
                     break;
                 case MSG_UPDATE_SESSION_STATE:
                     // TODO add session state

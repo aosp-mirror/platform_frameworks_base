@@ -18,9 +18,6 @@ package android.media.session;
 import android.content.ComponentName;
 import android.media.MediaMetadata;
 import android.media.session.ISessionController;
-import android.media.session.RouteOptions;
-import android.media.session.RouteCommand;
-import android.media.session.RouteInfo;
 import android.media.session.PlaybackState;
 import android.os.Bundle;
 import android.os.ResultReceiver;
@@ -36,14 +33,6 @@ interface ISession {
     void setActive(boolean active);
     void setMediaButtonReceiver(in ComponentName mbr);
     void destroy();
-
-    // These commands are for setting up and communicating with routes
-    // Returns true if the route was set for this session
-    boolean setRoute(in RouteInfo route);
-    void setRouteOptions(in List<RouteOptions> options);
-    void connectToRoute(in RouteInfo route, in RouteOptions options);
-    void disconnectFromRoute(in RouteInfo route);
-    void sendRouteCommand(in RouteCommand event, in ResultReceiver cb);
 
     // These commands are for the TransportPerformer
     void setMetadata(in MediaMetadata metadata);

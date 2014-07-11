@@ -36,7 +36,6 @@ interface ISessionController {
     void registerCallbackListener(in ISessionControllerCallback cb);
     void unregisterCallbackListener(in ISessionControllerCallback cb);
     boolean isTransportControlEnabled();
-    void showRoutePicker();
     MediaSessionInfo getSessionInfo();
     long getFlags();
     ParcelableVolumeInfo getVolumeAttributes();

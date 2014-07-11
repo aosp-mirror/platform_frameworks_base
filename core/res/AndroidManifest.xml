@@ -2149,7 +2149,7 @@
         android:description="@string/permdesc_bindTvInput"
         android:protectionLevel="signature|system" />
 
-    <!-- Must be required by a {@link android.media.routeprovider.RouteProviderService}
+    <!-- Must be required by a {@link android.media.routing.MediaRouteService}
          to ensure that only the system can interact with it.
          @hide -->
     <permission android:name="android.permission.BIND_ROUTE_PROVIDER"

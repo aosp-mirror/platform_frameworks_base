@@ -93,40 +93,6 @@ public final class MediaSession {
     public static final int FLAG_EXCLUSIVE_GLOBAL_PRIORITY = 1 << 16;
 
     /**
-     * Indicates the session was disconnected because the user that the session
-     * belonged to is stopping.
-     *
-     * @hide
-     */
-    public static final int DISCONNECT_REASON_USER_STOPPING = 1;
-
-    /**
-     * Indicates the session was disconnected because the provider disconnected
-     * the route.
-     * @hide
-     */
-    public static final int DISCONNECT_REASON_PROVIDER_DISCONNECTED = 2;
-
-    /**
-     * Indicates the session was disconnected because the route has changed.
-     * @hide
-     */
-    public static final int DISCONNECT_REASON_ROUTE_CHANGED = 3;
-
-    /**
-     * Indicates the session was disconnected because the session owner
-     * requested it disconnect.
-     * @hide
-     */
-    public static final int DISCONNECT_REASON_SESSION_DISCONNECTED = 4;
-
-    /**
-     * Indicates the session was disconnected because it was destroyed.
-     * @hide
-     */
-    public static final int DISCONNECT_REASON_SESSION_DESTROYED = 5;
-
-    /**
      * The session uses local playback.
      */
     public static final int PLAYBACK_TYPE_LOCAL = 1;
@@ -146,11 +112,7 @@ public final class MediaSession {
             = new ArrayList<CallbackMessageHandler>();
     private final ArrayList<TransportMessageHandler> mTransportCallbacks
             = new ArrayList<TransportMessageHandler>();
-    // TODO route interfaces
-    private final ArrayMap<String, RouteInterface.EventListener> mInterfaceListeners
-            = new ArrayMap<String, RouteInterface.EventListener>();
 
-    private Route mRoute;
     private VolumeProvider mVolumeProvider;
 
     private boolean mActive = false;
@@ -377,90 +339,6 @@ public final class MediaSession {
     }
 
     /**
-     * Connect to the current route using the specified request.
-     * <p>
-     * Connection updates will be sent to the callback's
-     * {@link Callback#onRouteConnected(Route)} and
-     * {@link Callback#onRouteDisconnected(Route, int)} methods. If the
-     * connection fails {@link Callback#onRouteDisconnected(Route, int)} will be
-     * called.
-     * <p>
-     * If you already have a connection to this route it will be disconnected
-     * before the new connection is established. TODO add an easy way to compare
-     * MediaRouteOptions.
-     *
-     * @param route The route the app is trying to connect to.
-     * @param request The connection request to use.
-     * @hide
-     */
-    public void connect(RouteInfo route, RouteOptions request) {
-        if (route == null) {
-            throw new IllegalArgumentException("Must specify the route");
-        }
-        if (request == null) {
-            throw new IllegalArgumentException("Must specify the connection request");
-        }
-        try {
-            mBinder.connectToRoute(route, request);
-        } catch (RemoteException e) {
-            Log.wtf(TAG, "Error starting connection to route", e);
-        }
-    }
-
-    /**
-     * Disconnect from the current route. After calling you will be switched
-     * back to the default route.
-     *
-     * @hide
-     */
-    public void disconnect() {
-        if (mRoute != null) {
-            try {
-                mBinder.disconnectFromRoute(mRoute.getRouteInfo());
-            } catch (RemoteException e) {
-                Log.wtf(TAG, "Error disconnecting from route");
-            }
-        }
-    }
-
-    /**
-     * Set the list of route options your app is interested in connecting to. It
-     * will be used for picking valid routes.
-     *
-     * @param options The set of route options your app may use to connect.
-     * @hide
-     */
-    public void setRouteOptions(List<RouteOptions> options) {
-        try {
-            mBinder.setRouteOptions(options);
-        } catch (RemoteException e) {
-            Log.wtf(TAG, "Error setting route options.", e);
-        }
-    }
-
-    /**
-     * @hide
-     * TODO allow multiple listeners for the same interface, allow removal
-     */
-    public void addInterfaceListener(String iface,
-            RouteInterface.EventListener listener) {
-        mInterfaceListeners.put(iface, listener);
-    }
-
-    /**
-     * @hide
-     */
-    public boolean sendRouteCommand(RouteCommand command, ResultReceiver cb) {
-        try {
-            mBinder.sendRouteCommand(command, cb);
-        } catch (RemoteException e) {
-            Log.wtf(TAG, "Error sending command to route.", e);
-            return false;
-        }
-        return true;
-    }
-
-    /**
      * Add a callback to receive transport controls on, such as play, rewind, or
      * fast forward.
      *
@@ -670,34 +548,6 @@ public final class MediaSession {
         }
     }
 
-    private void postRequestRouteChange(RouteInfo route) {
-        synchronized (mLock) {
-            for (int i = mCallbacks.size() - 1; i >= 0; i--) {
-                mCallbacks.get(i).post(CallbackMessageHandler.MSG_ROUTE_CHANGE, route);
-            }
-        }
-    }
-
-    private void postRouteConnected(RouteInfo route, RouteOptions options) {
-        synchronized (mLock) {
-            mRoute = new Route(route, options, this);
-            for (int i = mCallbacks.size() - 1; i >= 0; i--) {
-                mCallbacks.get(i).post(CallbackMessageHandler.MSG_ROUTE_CONNECTED, mRoute);
-            }
-        }
-    }
-
-    private void postRouteDisconnected(RouteInfo route, int reason) {
-        synchronized (mLock) {
-            if (mRoute != null && TextUtils.equals(mRoute.getRouteInfo().getId(), route.getId())) {
-                for (int i = mCallbacks.size() - 1; i >= 0; i--) {
-                    mCallbacks.get(i).post(CallbackMessageHandler.MSG_ROUTE_DISCONNECTED, mRoute,
-                            reason);
-                }
-            }
-        }
-    }
-
     /**
      * Return true if this is considered an active playback state.
      *
@@ -796,47 +646,6 @@ public final class MediaSession {
         public void onControlCommand(@NonNull String command, @Nullable Bundle extras,
                 @Nullable ResultReceiver cb) {
         }
-
-        /**
-         * Called when the user has selected a different route to connect to.
-         * The app is responsible for connecting to the new route and migrating
-         * ongoing playback if necessary.
-         *
-         * @param route
-         * @hide
-         */
-        public void onRequestRouteChange(RouteInfo route) {
-        }
-
-        /**
-         * Called when a route has successfully connected. Calls to the route
-         * are now valid.
-         *
-         * @param route The route that was connected
-         * @hide
-         */
-        public void onRouteConnected(Route route) {
-        }
-
-        /**
-         * Called when a route was disconnected. Further calls to the route will
-         * fail. If available a reason for being disconnected will be provided.
-         * <p>
-         * Valid reasons are:
-         * <ul>
-         * <li>{@link #DISCONNECT_REASON_USER_STOPPING}</li>
-         * <li>{@link #DISCONNECT_REASON_PROVIDER_DISCONNECTED}</li>
-         * <li>{@link #DISCONNECT_REASON_ROUTE_CHANGED}</li>
-         * <li>{@link #DISCONNECT_REASON_SESSION_DISCONNECTED}</li>
-         * <li>{@link #DISCONNECT_REASON_SESSION_DESTROYED}</li>
-         * </ul>
-         *
-         * @param route The route that disconnected
-         * @param reason The reason for the disconnect
-         * @hide
-         */
-        public void onRouteDisconnected(Route route, int reason) {
-        }
     }
 
     /**
@@ -902,17 +711,6 @@ public final class MediaSession {
          */
         public void onSetRating(@NonNull Rating rating) {
         }
-
-        /**
-         * Report that audio focus has changed on the app. This only happens if
-         * you have indicated you have started playing with
-         * {@link #setPlaybackState}.
-         *
-         * @param focusChange The type of focus change, TBD.
-         * @hide
-         */
-        public void onRouteFocusChange(int focusChange) {
-        }
     }
 
     /**
@@ -926,8 +724,7 @@ public final class MediaSession {
         }
 
         @Override
-        public void onCommand(String command, Bundle extras, ResultReceiver cb)
-                throws RemoteException {
+        public void onCommand(String command, Bundle extras, ResultReceiver cb) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
                 session.postCommand(command, extras, cb);
@@ -935,8 +732,8 @@ public final class MediaSession {
         }
 
         @Override
-        public void onMediaButton(Intent mediaButtonIntent, int sequenceNumber, ResultReceiver cb)
-                throws RemoteException {
+        public void onMediaButton(Intent mediaButtonIntent, int sequenceNumber,
+                ResultReceiver cb) {
             MediaSession session = mMediaSession.get();
             try {
                 if (session != null) {
@@ -950,31 +747,7 @@ public final class MediaSession {
         }
 
         @Override
-        public void onRequestRouteChange(RouteInfo route) throws RemoteException {
-            MediaSession session = mMediaSession.get();
-            if (session != null) {
-                session.postRequestRouteChange(route);
-            }
-        }
-
-        @Override
-        public void onRouteConnected(RouteInfo route, RouteOptions options) {
-            MediaSession session = mMediaSession.get();
-            if (session != null) {
-                session.postRouteConnected(route, options);
-            }
-        }
-
-        @Override
-        public void onRouteDisconnected(RouteInfo route, int reason) {
-            MediaSession session = mMediaSession.get();
-            if (session != null) {
-                session.postRouteDisconnected(route, reason);
-            }
-        }
-
-        @Override
-        public void onPlay() throws RemoteException {
+        public void onPlay() {
             MediaSession session = mMediaSession.get();
             if (session != null) {
                 session.dispatchPlay();
@@ -982,7 +755,7 @@ public final class MediaSession {
         }
 
         @Override
-        public void onPause() throws RemoteException {
+        public void onPause() {
             MediaSession session = mMediaSession.get();
             if (session != null) {
                 session.dispatchPause();
@@ -990,7 +763,7 @@ public final class MediaSession {
         }
 
         @Override
-        public void onStop() throws RemoteException {
+        public void onStop() {
             MediaSession session = mMediaSession.get();
             if (session != null) {
                 session.dispatchStop();
@@ -998,7 +771,7 @@ public final class MediaSession {
         }
 
         @Override
-        public void onNext() throws RemoteException {
+        public void onNext() {
             MediaSession session = mMediaSession.get();
             if (session != null) {
                 session.dispatchNext();
@@ -1006,7 +779,7 @@ public final class MediaSession {
         }
 
         @Override
-        public void onPrevious() throws RemoteException {
+        public void onPrevious() {
             MediaSession session = mMediaSession.get();
             if (session != null) {
                 session.dispatchPrevious();
@@ -1014,7 +787,7 @@ public final class MediaSession {
         }
 
         @Override
-        public void onFastForward() throws RemoteException {
+        public void onFastForward() {
             MediaSession session = mMediaSession.get();
             if (session != null) {
                 session.dispatchFastForward();
@@ -1022,7 +795,7 @@ public final class MediaSession {
         }
 
         @Override
-        public void onRewind() throws RemoteException {
+        public void onRewind() {
             MediaSession session = mMediaSession.get();
             if (session != null) {
                 session.dispatchRewind();
@@ -1030,7 +803,7 @@ public final class MediaSession {
         }
 
         @Override
-        public void onSeekTo(long pos) throws RemoteException {
+        public void onSeekTo(long pos) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
                 session.dispatchSeekTo(pos);
@@ -1038,7 +811,7 @@ public final class MediaSession {
         }
 
         @Override
-        public void onRate(Rating rating) throws RemoteException {
+        public void onRate(Rating rating) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
                 session.dispatchRate(rating);
@@ -1046,26 +819,7 @@ public final class MediaSession {
         }
 
         @Override
-        public void onRouteEvent(RouteEvent event) throws RemoteException {
-            MediaSession session = mMediaSession.get();
-            if (session != null) {
-                RouteInterface.EventListener iface
-                        = session.mInterfaceListeners.get(event.getIface());
-                Log.d(TAG, "Received route event on iface " + event.getIface() + ". Listener is "
-                        + iface);
-                if (iface != null) {
-                    iface.onEvent(event.getEvent(), event.getExtras());
-                }
-            }
-        }
-
-        @Override
-        public void onRouteStateChange(int state) throws RemoteException {
-            // TODO
-        }
-
-        @Override
-        public void onAdjustVolumeBy(int delta) throws RemoteException {
+        public void onAdjustVolumeBy(int delta) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
                 if (session.mVolumeProvider != null) {
@@ -1075,7 +829,7 @@ public final class MediaSession {
         }
 
         @Override
-        public void onSetVolumeTo(int value) throws RemoteException {
+        public void onSetVolumeTo(int value) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
                 if (session.mVolumeProvider != null) {
@@ -1089,9 +843,6 @@ public final class MediaSession {
     private class CallbackMessageHandler extends Handler {
         private static final int MSG_MEDIA_BUTTON = 1;
         private static final int MSG_COMMAND = 2;
-        private static final int MSG_ROUTE_CHANGE = 3;
-        private static final int MSG_ROUTE_CONNECTED = 4;
-        private static final int MSG_ROUTE_DISCONNECTED = 5;
 
         private MediaSession.Callback mCallback;
 
@@ -1113,15 +864,6 @@ public final class MediaSession {
                     case MSG_COMMAND:
                         Command cmd = (Command) msg.obj;
                         mCallback.onControlCommand(cmd.command, cmd.extras, cmd.stub);
-                        break;
-                    case MSG_ROUTE_CHANGE:
-                        mCallback.onRequestRouteChange((RouteInfo) msg.obj);
-                        break;
-                    case MSG_ROUTE_CONNECTED:
-                        mCallback.onRouteConnected((Route) msg.obj);
-                        break;
-                    case MSG_ROUTE_DISCONNECTED:
-                        mCallback.onRouteDisconnected((Route) msg.obj, msg.arg1);
                         break;
                 }
             }

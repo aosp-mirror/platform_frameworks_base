@@ -52,8 +52,7 @@ public final class MediaController {
     private static final int MSG_EVENT = 1;
     private static final int MSG_UPDATE_PLAYBACK_STATE = 2;
     private static final int MSG_UPDATE_METADATA = 3;
-    private static final int MSG_ROUTE = 4;
-    private static final int MSG_UPDATE_VOLUME = 5;
+    private static final int MSG_UPDATE_VOLUME = 4;
 
     private final ISessionController mSessionBinder;
 
@@ -308,20 +307,6 @@ public final class MediaController {
     }
 
     /**
-     * Request that the route picker be shown for this session. This should
-     * generally be called in response to a user action.
-     *
-     * @hide
-     */
-    public void showRoutePicker() {
-        try {
-            mSessionBinder.showRoutePicker();
-        } catch (RemoteException e) {
-            Log.d(TAG, "Dead object in showRoutePicker", e);
-        }
-    }
-
-    /**
      * Get the info for the session this controller is connected to.
      *
      * @return The session info for the connected session.
@@ -418,15 +403,6 @@ public final class MediaController {
          * @param extras Optional parameters for the event, may be null.
          */
         public void onSessionEvent(@NonNull String event, @Nullable Bundle extras) {
-        }
-
-        /**
-         * Override to handle route changes for this session.
-         *
-         * @param route The new route
-         * @hide
-         */
-        public void onRouteChanged(RouteInfo route) {
         }
 
         /**
@@ -670,14 +646,6 @@ public final class MediaController {
         }
 
         @Override
-        public void onRouteChanged(RouteInfo route) {
-            MediaController controller = mController.get();
-            if (controller != null) {
-                controller.postMessage(MSG_ROUTE, route, null);
-            }
-        }
-
-        @Override
         public void onPlaybackStateChanged(PlaybackState state) {
             MediaController controller = mController.get();
             if (controller != null) {
@@ -718,9 +686,6 @@ public final class MediaController {
             switch (msg.what) {
                 case MSG_EVENT:
                     mCallback.onSessionEvent((String) msg.obj, msg.getData());
-                    break;
-                case MSG_ROUTE:
-                    mCallback.onRouteChanged((RouteInfo) msg.obj);
                     break;
                 case MSG_UPDATE_PLAYBACK_STATE:
                     mCallback.onPlaybackStateChanged((PlaybackState) msg.obj);

@@ -16,9 +16,6 @@
 package android.media.session;
 
 import android.media.Rating;
-import android.media.session.RouteEvent;
-import android.media.session.RouteInfo;
-import android.media.session.RouteOptions;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.ResultReceiver;
@@ -29,11 +26,6 @@ import android.os.ResultReceiver;
 oneway interface ISessionCallback {
     void onCommand(String command, in Bundle extras, in ResultReceiver cb);
     void onMediaButton(in Intent mediaButtonIntent, int sequenceNumber, in ResultReceiver cb);
-    void onRequestRouteChange(in RouteInfo route);
-    void onRouteConnected(in RouteInfo route, in RouteOptions options);
-    void onRouteDisconnected(in RouteInfo route, int reason);
-    void onRouteStateChange(int state);
-    void onRouteEvent(in RouteEvent event);
 
     // These callbacks are for the TransportPerformer
     void onPlay();

@@ -16,7 +16,6 @@
 package android.media.session;
 
 import android.media.MediaMetadata;
-import android.media.session.RouteInfo;
 import android.media.session.ParcelableVolumeInfo;
 import android.media.session.PlaybackState;
 import android.os.Bundle;
@@ -26,7 +25,6 @@ import android.os.Bundle;
  */
 oneway interface ISessionControllerCallback {
     void onEvent(String event, in Bundle extras);
-    void onRouteChanged(in RouteInfo route);
 
     // These callbacks are for the TransportController
     void onPlaybackStateChanged(in PlaybackState state);
