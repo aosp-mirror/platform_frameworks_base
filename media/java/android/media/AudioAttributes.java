@@ -486,6 +486,7 @@ public final class AudioAttributes implements Parcelable {
                 + " tags=" + mTags);
     }
 
+    /** @hide */
     public String usageToString() {
         switch(mUsage) {
             case USAGE_UNKNOWN:
