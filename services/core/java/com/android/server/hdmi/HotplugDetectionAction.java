@@ -219,7 +219,7 @@ final class HotplugDetectionAction extends FeatureAction {
             return;
         }
 
-        // Should ave only one Device Select Action
+        // Should have only one Device Select Action
         DeviceSelectAction action = actions.get(0);
         if (action.getTargetAddress() == address) {
             removeAction(DeviceSelectAction.class);

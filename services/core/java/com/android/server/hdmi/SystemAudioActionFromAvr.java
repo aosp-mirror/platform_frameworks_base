@@ -23,7 +23,7 @@ import android.hardware.hdmi.IHdmiControlCallback;
 /**
  * Feature action that handles System Audio initiated by AVR devices.
  */
-// # Seq 33
+// Seq #33
 final class SystemAudioActionFromAvr extends SystemAudioAction {
     /**
      * Constructor

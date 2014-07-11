@@ -65,7 +65,7 @@ abstract class HdmiCecLocalDevice {
     // Note that access to this collection should happen in service thread.
     private final LinkedList<FeatureAction> mActions = new LinkedList<>();
 
-    private Handler mHandler = new Handler () {
+    private final Handler mHandler = new Handler () {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
@@ -482,6 +482,7 @@ abstract class HdmiCecLocalDevice {
     @ServiceThreadOnly
     void removeAction(final FeatureAction action) {
         assertRunOnServiceThread();
+        action.finish(false);
         mActions.remove(action);
         checkIfPendingActionsCleared();
     }
@@ -502,8 +503,8 @@ abstract class HdmiCecLocalDevice {
         while (iter.hasNext()) {
             FeatureAction action = iter.next();
             if (action != exception && action.getClass().equals(clazz)) {
-                action.clear();
-                mActions.remove(action);
+                action.finish(false);
+                iter.remove();
             }
         }
         checkIfPendingActionsCleared();
@@ -637,7 +638,7 @@ abstract class HdmiCecLocalDevice {
         Iterator<FeatureAction> iter = mActions.iterator();
         while (iter.hasNext()) {
             FeatureAction action = iter.next();
-            action.finish();
+            action.finish(false);
             iter.remove();
         }
     }
