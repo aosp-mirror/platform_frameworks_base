@@ -39,5 +39,12 @@ final class HdmiConfig {
     // Number of retries for polling each device in address allocation mechanism.
     static final int ADDRESS_ALLOCATION_RETRY = 3;
 
+    // CEC spec said that it should try retransmission at least once.
+    // The actual number of send request for a single command will be at most
+    // RETRANSMISSION_COUNT + 1. Note that it affects only to normal commands
+    // and polling message for logical address allocation and device discovery
+    // action. They will have their own retransmission count.
+    static final int RETRANSMISSION_COUNT = 1;
+
     private HdmiConfig() { /* cannot be instantiated */ }
 }

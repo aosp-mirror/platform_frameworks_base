@@ -533,16 +533,25 @@ final class HdmiCecController {
             @Override
             public void run() {
                 byte[] body = buildBody(cecMessage.getOpcode(), cecMessage.getParams());
-                final int error = nativeSendCecCommand(mNativePtr, cecMessage.getSource(),
-                        cecMessage.getDestination(), body);
-                if (error != Constants.SEND_RESULT_SUCCESS) {
+                int i = 0;
+                int errorCode = Constants.SEND_RESULT_SUCCESS;
+                do {
+                    errorCode = nativeSendCecCommand(mNativePtr, cecMessage.getSource(),
+                            cecMessage.getDestination(), body);
+                    if (errorCode == Constants.SEND_RESULT_SUCCESS) {
+                        break;
+                    }
+                } while (i++ < HdmiConfig.RETRANSMISSION_COUNT);
+
+                final int finalError = errorCode;
+                if (finalError != Constants.SEND_RESULT_SUCCESS) {
                     Slog.w(TAG, "Failed to send " + cecMessage);
                 }
                 if (callback != null) {
                     runOnServiceThread(new Runnable() {
                         @Override
                         public void run() {
-                            callback.onSendCompleted(error);
+                            callback.onSendCompleted(finalError);
                         }
                     });
                 }
