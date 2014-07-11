@@ -1020,14 +1020,13 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
+        @SuppressWarnings("resource")
         protected void dump(FileDescriptor fd, final PrintWriter writer, String[] args) {
             final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
-            if (mContext.checkCallingOrSelfPermission(
-                    android.Manifest.permission.DUMP)
+            if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
                     != PackageManager.PERMISSION_GRANTED) {
-                pw.println("Permission Denial: can't dump TvInputManager " +
-                        "from from pid=" + Binder.getCallingPid() + ", uid=" +
-                        Binder.getCallingUid());
+                pw.println("Permission Denial: can't dump TvInputManager from pid="
+                        + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid());
                 return;
             }
 
@@ -1043,7 +1042,6 @@ public final class TvInputManagerService extends SystemService {
                 for (int i = 0; i < mUserStates.size(); i++) {
                     int userId = mUserStates.keyAt(i);
                     UserState userState = getUserStateLocked(userId);
-
                     pw.println("UserState (" + userId + "):");
                     pw.increaseIndent();
 
