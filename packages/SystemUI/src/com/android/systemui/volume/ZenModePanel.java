@@ -133,13 +133,6 @@ public class ZenModePanel extends LinearLayout {
         });
 
         mZenSubheadExpanded = (TextView) findViewById(R.id.zen_subhead_expanded);
-        mZenSubheadExpanded.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setExpanded(false);
-                fireInteraction();
-            }
-        });
 
         mMoreSettings = findViewById(R.id.zen_more_settings);
         mMoreSettings.setOnClickListener(new View.OnClickListener() {
@@ -270,8 +263,9 @@ public class ZenModePanel extends LinearLayout {
         final boolean zenOff = zen == Global.ZEN_MODE_OFF;
         final boolean zenImportant = zen == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
         final boolean zenNone = zen == Global.ZEN_MODE_NO_INTERRUPTIONS;
+        final boolean foreverSelected = mExitConditionId == null;
 
-        mZenSubhead.setVisibility(!zenOff ? VISIBLE : GONE);
+        mZenSubhead.setVisibility(!zenOff && (mExpanded || !foreverSelected) ? VISIBLE : GONE);
         mZenSubheadExpanded.setVisibility(mExpanded ? VISIBLE : GONE);
         mZenSubheadCollapsed.setVisibility(!mExpanded ? VISIBLE : GONE);
         mMoreSettings.setVisibility(zenImportant && mExpanded ? VISIBLE : GONE);
