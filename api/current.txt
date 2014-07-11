@@ -26427,8 +26427,37 @@ package android.service.trust {
 
 package android.service.voice {
 
+  public class AlwaysOnHotwordDetector {
+    method public int getAvailability();
+    method public android.content.Intent getManageIntent(int);
+    method public int getRecognitionStatus();
+    method public int startRecognition();
+    method public int stopRecognition();
+    field public static final int KEYPHRASE_ENROLLED = 2; // 0x2
+    field public static final int KEYPHRASE_HARDWARE_UNAVAILABLE = -2; // 0xfffffffe
+    field public static final int KEYPHRASE_UNENROLLED = 1; // 0x1
+    field public static final int KEYPHRASE_UNSUPPORTED = -1; // 0xffffffff
+    field public static final int MANAGE_ACTION_ENROLL = 0; // 0x0
+    field public static final int MANAGE_ACTION_RE_ENROLL = 1; // 0x1
+    field public static final int MANAGE_ACTION_UN_ENROLL = 2; // 0x2
+    field public static final int RECOGNITION_ACTIVE = 2; // 0x2
+    field public static final int RECOGNITION_DISABLED_TEMPORARILY = -1; // 0xffffffff
+    field public static final int RECOGNITION_NOT_AVAILABLE = -3; // 0xfffffffd
+    field public static final int RECOGNITION_NOT_REQUESTED = -2; // 0xfffffffe
+    field public static final int RECOGNITION_REQUESTED = 1; // 0x1
+    field public static final int STATUS_ERROR = -2147483648; // 0x80000000
+    field public static final int STATUS_OK = 1; // 0x1
+  }
+
+  public static abstract interface AlwaysOnHotwordDetector.Callback {
+    method public abstract void onDetected();
+    method public abstract void onDetectionStarted();
+    method public abstract void onDetectionStopped();
+  }
+
   public class VoiceInteractionService extends android.app.Service {
     ctor public VoiceInteractionService();
+    method public final android.service.voice.AlwaysOnHotwordDetector getAlwaysOnHotwordDetector(java.lang.String, java.lang.String, android.service.voice.AlwaysOnHotwordDetector.Callback);
     method public android.os.IBinder onBind(android.content.Intent);
     method public void startSession(android.os.Bundle);
     field public static final java.lang.String SERVICE_INTERFACE = "android.service.voice.VoiceInteractionService";

@@ -1,0 +1,101 @@
+/**
+ * Copyright (C) 2014 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package android.hardware.soundtrigger;
+
+import android.os.Parcel;
+import android.os.Parcelable;
+
+/**
+ * A Voice Keyphrase.
+ *
+ * @hide
+ */
+public class Keyphrase implements Parcelable {
+    /** A unique identifier for this keyphrase */
+    public final int id;
+    /** A hint text to display corresponding to this keyphrase, e.g. "Hello There". */
+    public final String hintText;
+    /** The locale of interest when using this Keyphrase. */
+    public String locale;
+
+    public static final Parcelable.Creator<Keyphrase> CREATOR
+            = new Parcelable.Creator<Keyphrase>() {
+        public Keyphrase createFromParcel(Parcel in) {
+            return Keyphrase.fromParcel(in);
+        }
+
+        public Keyphrase[] newArray(int size) {
+            return new Keyphrase[size];
+        }
+    };
+
+    private static Keyphrase fromParcel(Parcel in) {
+        return new Keyphrase(in.readInt(), in.readString(), in.readString());
+    }
+
+    public Keyphrase(int id, String hintText, String locale) {
+        this.id = id;
+        this.hintText = hintText;
+        this.locale = locale;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(id);
+        dest.writeString(hintText);
+        dest.writeString(locale);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((hintText == null) ? 0 : hintText.hashCode());
+        result = prime * result + id;
+        result = prime * result + ((locale == null) ? 0 : locale.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Keyphrase other = (Keyphrase) obj;
+        if (hintText == null) {
+            if (other.hintText != null)
+                return false;
+        } else if (!hintText.equals(other.hintText))
+            return false;
+        if (id != other.id)
+            return false;
+        if (locale == null) {
+            if (other.locale != null)
+                return false;
+        } else if (!locale.equals(other.locale))
+            return false;
+        return true;
+    }
+}

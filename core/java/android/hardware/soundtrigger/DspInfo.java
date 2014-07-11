@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2014 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package android.service.voice;
+package android.hardware.soundtrigger;
 
 import java.util.UUID;
 
 /**
  * Properties of the DSP hardware on the device.
+ *
  * @hide
  */
 public class DspInfo {
