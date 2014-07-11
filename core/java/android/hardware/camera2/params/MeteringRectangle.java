@@ -100,6 +100,8 @@ public final class MeteringRectangle {
     /**
      * Create a new metering rectangle.
      *
+     * <p>The point {@code xy}'s data is copied; the reference is not retained.</p>
+     *
      * @param xy a non-{@code null} {@link Point} with both x,y >= 0
      * @param dimensions a non-{@code null} {@link android.util.Size Size} with width, height >= 0
      * @param meteringWeight weight >= 0
@@ -120,6 +122,8 @@ public final class MeteringRectangle {
 
     /**
      * Create a new metering rectangle.
+     *
+     * <p>The rectangle data is copied; the reference is not retained.</p>
      *
      * @param rect a non-{@code null} rectangle with all x,y,w,h dimensions >= 0
      * @param meteringWeight weight >= 0
@@ -185,7 +189,7 @@ public final class MeteringRectangle {
     /**
      * Convenience method to create the upper-left (X,Y) coordinate as a {@link Point}.
      *
-     * @return {@code (x,y)} point with both x,y >= 0
+     * @return a new {@code (x,y)} {@link Point} with both x,y >= 0
      */
     public Point getUpperLeftPoint() {
         return new Point(mX, mY);
@@ -196,7 +200,7 @@ public final class MeteringRectangle {
      *
      * <p>This strips away the X,Y,weight from the rectangle.</p>
      *
-     * @return a Size with non-negative width and height
+     * @return a new {@link Size} with non-negative width and height
      */
     public Size getSize() {
         return new Size(mWidth, mHeight);
@@ -207,7 +211,7 @@ public final class MeteringRectangle {
      *
      * <p>This strips away the weight from the rectangle.</p>
      *
-     * @return a {@link Rect} with non-negative x1, y1, x2, y2
+     * @return a new {@link Rect} with non-negative x1, y1, x2, y2
      */
     public Rect getRect() {
         return new Rect(mX, mY, mX + mWidth, mY + mHeight);
@@ -249,5 +253,17 @@ public final class MeteringRectangle {
     @Override
     public int hashCode() {
         return HashCodeHelpers.hashCode(mX, mY, mWidth, mHeight, mWeight);
+    }
+
+    /**
+     * Return the metering rectangle as a string representation
+     * {@code "(x:%d, y:%d, w:%d, h:%d, wt:%d)"} where each {@code %d} respectively represents
+     * the x, y, width, height, and weight points.
+     *
+     * @return string representation of the metering rectangle
+     */
+    @Override
+    public String toString() {
+        return String.format("(x:%d, y:%d, w:%d, h:%d, wt:%d)", mX, mY, mWidth, mHeight, mWeight);
     }
 }

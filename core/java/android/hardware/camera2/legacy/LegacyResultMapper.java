@@ -24,8 +24,15 @@ import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.impl.CameraMetadataNative;
+import android.hardware.camera2.legacy.ParameterUtils.WeightedRectangle;
+import android.hardware.camera2.legacy.ParameterUtils.ZoomData;
+import android.hardware.camera2.params.MeteringRectangle;
+import android.hardware.camera2.utils.ListUtils;
 import android.util.Log;
 import android.util.Size;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.android.internal.util.Preconditions.*;
 import static android.hardware.camera2.CaptureResult.*;
@@ -54,6 +61,11 @@ public class LegacyResultMapper {
 
         CameraMetadataNative result = new CameraMetadataNative();
 
+        Rect activeArraySize = characteristics.get(
+                CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE);
+        ZoomData zoomData = ParameterUtils.convertScalerCropRegion(activeArraySize,
+                request.get(CaptureRequest.SCALER_CROP_REGION), previewSize, params);
+
         /*
          * control
          */
@@ -66,7 +78,7 @@ public class LegacyResultMapper {
         /*
          * control.ae*
          */
-        mapAe(result, /*out*/params);
+        mapAe(result, activeArraySize, zoomData, /*out*/params);
 
         // control.awbLock
         result.set(CaptureResult.CONTROL_AWB_LOCK, params.getAutoWhiteBalanceLock());
@@ -92,7 +104,7 @@ public class LegacyResultMapper {
         /*
          * scaler
          */
-        mapScaler(result, characteristics, request, previewSize, params);
+        mapScaler(result, zoomData, /*out*/params);
 
         /*
          * sensor
@@ -104,7 +116,8 @@ public class LegacyResultMapper {
         return result;
     }
 
-    private static void mapAe(CameraMetadataNative m, /*out*/Parameters p) {
+    private static void mapAe(CameraMetadataNative m,
+            Rect activeArray, ZoomData zoomData, /*out*/Parameters p) {
         // control.aeAntiBandingMode
         {
             int antiBandingMode = LegacyMetadataMapper.convertAntiBandingModeOrDefault(
@@ -123,15 +136,52 @@ public class LegacyResultMapper {
         }
 
         // control.aeRegions
+        {
+            if (VERBOSE) {
+                String meteringAreas = p.get("metering-areas");
+                Log.v(TAG, "mapAe - parameter dump; metering-areas: " + meteringAreas);
+            }
 
-        /*
-         * TODO: Use the *resulting* crop region to calculate intersection with
-         * metering region
-         *
-         * Report the sensor-relative metering region in the result even
-         * if that's not actually the real thing (similar to how we do it
-         * for zooming)
-         */
+            MeteringRectangle[] meteringRectArray = getMeteringRectangles(activeArray,
+                    zoomData, p.getMeteringAreas(), "AE");
+
+            m.set(CONTROL_AE_REGIONS, meteringRectArray);
+        }
+
+        // control.afRegions
+        {
+            if (VERBOSE) {
+                String focusAreas = p.get("focus-areas");
+                Log.v(TAG, "mapAe - parameter dump; focus-areas: " + focusAreas);
+            }
+
+            MeteringRectangle[] meteringRectArray = getMeteringRectangles(activeArray,
+                    zoomData, p.getFocusAreas(), "AF");
+
+            m.set(CONTROL_AF_REGIONS, meteringRectArray);
+        }
+    }
+
+    private static MeteringRectangle[] getMeteringRectangles(Rect activeArray, ZoomData zoomData,
+            List<Camera.Area> meteringAreaList, String regionName) {
+        List<MeteringRectangle> meteringRectList = new ArrayList<>();
+        if (meteringAreaList != null) {
+            for (Camera.Area area : meteringAreaList) {
+                WeightedRectangle rect =
+                        ParameterUtils.convertCameraAreaToActiveArrayRectangle(
+                                activeArray, zoomData, area);
+
+                meteringRectList.add(rect.toMetering());
+            }
+        }
+
+        if (VERBOSE) {
+            Log.v(TAG,
+                    "Metering rectangles for " + regionName + ": "
+                     + ListUtils.listToString(meteringRectList));
+        }
+
+        return meteringRectList.toArray(new MeteringRectangle[0]);
     }
 
 
@@ -169,33 +219,13 @@ public class LegacyResultMapper {
 
     /** Map results for scaler.* */
     private static void mapScaler(CameraMetadataNative m,
-            CameraCharacteristics characteristics,
-            CaptureRequest request,
-            Size previewSize,
+            ZoomData zoomData,
             /*out*/Parameters p) {
         /*
          * scaler.cropRegion
          */
         {
-            Rect activeArraySize = characteristics.get(
-                    CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE);
-            Rect activeArraySizeOnly = new Rect(
-                    /*left*/0, /*top*/0,
-                    activeArraySize.width(), activeArraySize.height());
-
-            Rect userCropRegion = request.get(CaptureRequest.SCALER_CROP_REGION);
-
-            if (userCropRegion == null) {
-                userCropRegion = activeArraySizeOnly;
-            }
-
-            Rect reportedCropRegion = new Rect();
-            Rect previewCropRegion = new Rect();
-            ParameterUtils.getClosestAvailableZoomCrop(p, activeArraySizeOnly,
-                    previewSize, userCropRegion,
-                    /*out*/reportedCropRegion, /*out*/previewCropRegion);
-
-            m.set(SCALER_CROP_REGION, reportedCropRegion);
+            m.set(SCALER_CROP_REGION, zoomData.reportedCrop);
         }
     }
 }

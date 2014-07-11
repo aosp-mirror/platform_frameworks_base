@@ -85,7 +85,7 @@ public class LegacyMetadataMapper {
      * being set to true.
      */
     static final boolean LIE_ABOUT_AE_STATE = true;
-    static final boolean LIE_ABOUT_AE_MAX_REGIONS = true;
+    static final boolean LIE_ABOUT_AE_MAX_REGIONS = false;
     static final boolean LIE_ABOUT_AF = true;
     static final boolean LIE_ABOUT_AF_MAX_REGIONS = true;
     static final boolean LIE_ABOUT_AWB = true;
@@ -201,7 +201,7 @@ public class LegacyMetadataMapper {
         /*
          * info.supportedHardwareLevel
          */
-        m.set(INFO_SUPPORTED_HARDWARE_LEVEL, INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED);
+        m.set(INFO_SUPPORTED_HARDWARE_LEVEL, INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY);
 
         /*
          * scaler.availableStream*, scaler.available*Durations, sensor.info.maxFrameDuration

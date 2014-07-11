@@ -17,9 +17,15 @@
 package android.hardware.camera2.legacy;
 
 import android.graphics.Matrix;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.hardware.Camera;
+import android.hardware.Camera.Area;
+import android.hardware.camera2.legacy.ParameterUtils.MeteringData;
+import android.hardware.camera2.legacy.ParameterUtils.ZoomData;
+import android.hardware.camera2.params.Face;
+import android.hardware.camera2.params.MeteringRectangle;
 import android.hardware.camera2.utils.ListUtils;
 import android.hardware.camera2.utils.ParamsUtils;
 import android.hardware.camera2.utils.SizeAreaComparator;
@@ -38,6 +44,181 @@ import static com.android.internal.util.Preconditions.*;
  * Various utilities for dealing with camera API1 parameters.
  */
 public class ParameterUtils {
+    /** Upper/left minimal point of a normalized rectangle */
+    public static final int NORMALIZED_RECTANGLE_MIN = -1000;
+    /** Lower/right maximal point of a normalized rectangle */
+    public static final int NORMALIZED_RECTANGLE_MAX = 1000;
+    /** The default normalized rectangle spans the entire size of the preview viewport */
+    public static final Rect NORMALIZED_RECTANGLE_DEFAULT = new Rect(
+            NORMALIZED_RECTANGLE_MIN,
+            NORMALIZED_RECTANGLE_MIN,
+            NORMALIZED_RECTANGLE_MAX,
+            NORMALIZED_RECTANGLE_MAX);
+    /** The default normalized area uses the default normalized rectangle with a weight=1 */
+    public static final Camera.Area CAMERA_AREA_DEFAULT =
+            new Camera.Area(new Rect(NORMALIZED_RECTANGLE_DEFAULT),
+                            /*weight*/1);
+    /** Empty rectangle {@code 0x0+0,0} */
+    public static final Rect RECTANGLE_EMPTY =
+            new Rect(/*left*/0, /*top*/0, /*right*/0, /*bottom*/0);
+
+    /**
+     * Calculate effective/reported zoom data from a user-specified crop region.
+     */
+    public static class ZoomData {
+        /** Zoom index used by {@link Camera.Parameters#setZoom} */
+        public final int zoomIndex;
+        /** Effective crop-region given the zoom index, coordinates relative to active-array */
+        public final Rect previewCrop;
+        /** Reported crop-region given the zoom index, coordinates relative to active-array */
+        public final Rect reportedCrop;
+
+        public ZoomData(int zoomIndex, Rect previewCrop, Rect reportedCrop) {
+            this.zoomIndex = zoomIndex;
+            this.previewCrop = previewCrop;
+            this.reportedCrop = reportedCrop;
+        }
+    }
+
+    /**
+     * Calculate effective/reported metering data from a user-specified metering region.
+     */
+    public static class MeteringData {
+        /**
+         * The metering area scaled to the range of [-1000, 1000].
+         * <p>Values outside of this range are clipped to be within the range.</p>
+         */
+        public final Camera.Area meteringArea;
+        /**
+         * Effective preview metering region, coordinates relative to active-array.
+         *
+         * <p>Clipped to fit inside of the (effective) preview crop region.</p>
+         */
+        public final Rect previewMetering;
+        /**
+         * Reported metering region, coordinates relative to active-array.
+         *
+         * <p>Clipped to fit inside of the (reported) resulting crop region.</p>
+         */
+        public final Rect reportedMetering;
+
+        public MeteringData(Area meteringArea, Rect previewMetering, Rect reportedMetering) {
+            this.meteringArea = meteringArea;
+            this.previewMetering = previewMetering;
+            this.reportedMetering = reportedMetering;
+        }
+    }
+
+    /**
+     * A weighted rectangle is an arbitrary rectangle (the coordinate system is unknown) with an
+     * arbitrary weight.
+     *
+     * <p>The user of this class must know what the coordinate system ahead of time; it's
+     * then possible to convert to a more concrete type such as a metering rectangle or a face.
+     * </p>
+     *
+     * <p>When converting to a more concrete type, out-of-range values are clipped; this prevents
+     * possible illegal argument exceptions being thrown at runtime.</p>
+     */
+    public static class WeightedRectangle {
+        /** Arbitrary rectangle (the range is user-defined); never {@code null}. */
+        public final Rect rect;
+        /** Arbitrary weight (the range is user-defined). */
+        public final int weight;
+
+        /**
+         * Create a new weighted-rectangle from a non-{@code null} rectangle; the {@code weight}
+         * can be unbounded.
+         */
+        public WeightedRectangle(Rect rect, int weight) {
+            this.rect = checkNotNull(rect, "rect must not be null");
+            this.weight = weight;
+        }
+
+        /**
+         * Convert to a metering rectangle, clipping any of the values to stay within range.
+         *
+         * <p>If values are clipped, a warning is printed to logcat.</p>
+         *
+         * @return a new metering rectangle
+         */
+        public MeteringRectangle toMetering() {
+            int weight = clip(this.weight,
+                    MeteringRectangle.METERING_WEIGHT_MIN,
+                    MeteringRectangle.METERING_WEIGHT_MAX,
+                    rect,
+                    "weight");
+
+            int x = clipLower(rect.left, /*lo*/0, rect, "left");
+            int y = clipLower(rect.top, /*lo*/0, rect, "top");
+            int w = clipLower(rect.width(), /*lo*/0, rect, "width");
+            int h = clipLower(rect.height(), /*lo*/0, rect, "height");
+
+            return new MeteringRectangle(x, y, w, h, weight);
+        }
+
+        /**
+         * Convert to a face; the rect is considered to be the bounds, and the weight
+         * is considered to be the score.
+         *
+         * <p>If the score is out of range of {@value Face#SCORE_MIN}, {@value Face#SCORE_MAX},
+         * the score is clipped first and a warning is printed to logcat.</p>
+         *
+         * <p>All other parameters are passed-through as-is.</p>
+         *
+         * @return a new face with the optional features set
+         */
+        public Face toFace(
+                int id, Point leftEyePosition, Point rightEyePosition, Point mouthPosition) {
+            int score = clip(weight,
+                    Face.SCORE_MIN,
+                    Face.SCORE_MAX,
+                    rect,
+                    "score");
+
+            return new Face(rect, score, id, leftEyePosition, rightEyePosition, mouthPosition);
+        }
+
+        /**
+         * Convert to a face; the rect is considered to be the bounds, and the weight
+         * is considered to be the score.
+         *
+         * <p>If the score is out of range of {@value Face#SCORE_MIN}, {@value Face#SCORE_MAX},
+         * the score is clipped first and a warning is printed to logcat.</p>
+         *
+         * <p>All other parameters are passed-through as-is.</p>
+         *
+         * @return a new face without the optional features
+         */
+        public Face toFace() {
+            int score = clip(weight,
+                    Face.SCORE_MIN,
+                    Face.SCORE_MAX,
+                    rect,
+                    "score");
+
+            return new Face(rect, score);
+        }
+
+        private static int clipLower(int value, int lo, Rect rect, String name) {
+            return clip(value, lo, /*hi*/Integer.MAX_VALUE, rect, name);
+        }
+
+        private static int clip(int value, int lo, int hi, Rect rect, String name) {
+            if (value < lo) {
+                Log.w(TAG, "toMetering - Rectangle " + rect + " "
+                        + name + " too small, clip to " + lo);
+                value = lo;
+            } else if (value > hi) {
+                Log.w(TAG, "toMetering - Rectangle " + rect + " "
+                        + name + " too small, clip to " + hi);
+                value = hi;
+            }
+
+            return value;
+        }
+    }
+
     private static final String TAG = "ParameterUtils";
     private static final boolean VERBOSE = Log.isLoggable(TAG, Log.VERBOSE);
 
@@ -97,6 +278,35 @@ public class ParameterUtils {
 
             return sb.toString();
         }
+    }
+
+    /**
+     * Convert a camera area list into a human-readable string
+     * @param areaList a list of areas (null is ok)
+     */
+    public static String stringFromAreaList(List<Camera.Area> areaList) {
+        StringBuilder sb = new StringBuilder();
+
+        if (areaList == null) {
+            return null;
+        }
+
+        int i = 0;
+        for (Camera.Area area : areaList) {
+            if (area == null) {
+                sb.append("null");
+            } else {
+                sb.append(stringFromArea(area));
+            }
+
+            if (i != areaList.size() - 1) {
+                sb.append(", ");
+            }
+
+            i++;
+        }
+
+        return sb.toString();
     }
 
     /**
@@ -486,6 +696,217 @@ public class ParameterUtils {
 
         return new SizeF(zoomRatioWidth, zoomRatioHeight);
     }
+
+    /**
+     * Convert the user-specified crop region into zoom data; which can be used
+     * to set the parameters to a specific zoom index, or to report back to the user what the
+     * actual zoom was, or for other calculations requiring the current preview crop region.
+     *
+     * <p>None of the parameters are mutated.</p>
+     *
+     * @param activeArraySize active array size of the sensor (e.g. max jpeg size)
+     * @param cropRegion the user-specified crop region
+     * @param previewSize the current preview size (in pixels)
+     * @param params the current camera parameters (not mutated)
+     *
+     * @return the zoom index, and the effective/reported crop regions (relative to active array)
+     */
+    public static ZoomData convertScalerCropRegion(Rect activeArraySize, Rect
+            cropRegion, Size previewSize, Camera.Parameters params) {
+        Rect activeArraySizeOnly = new Rect(
+                /*left*/0, /*top*/0,
+                activeArraySize.width(), activeArraySize.height());
+
+        Rect userCropRegion = cropRegion;
+
+        if (userCropRegion == null) {
+            userCropRegion = activeArraySizeOnly;
+        }
+
+        if (VERBOSE) {
+            Log.v(TAG, "convertScalerCropRegion - user crop region was " + userCropRegion);
+        }
+
+        final Rect reportedCropRegion = new Rect();
+        final Rect previewCropRegion = new Rect();
+        final int zoomIdx = ParameterUtils.getClosestAvailableZoomCrop(params, activeArraySizeOnly,
+                previewSize, userCropRegion,
+                /*out*/reportedCropRegion, /*out*/previewCropRegion);
+
+        if (VERBOSE) {
+            Log.v(TAG, "convertScalerCropRegion - zoom calculated to: " +
+                    "zoomIndex = " + zoomIdx +
+                    ", reported crop region = " + reportedCropRegion +
+                    ", preview crop region = " + previewCropRegion);
+        }
+
+        return new ZoomData(zoomIdx, previewCropRegion, reportedCropRegion);
+    }
+
+    /**
+     * Calculate the actual/effective/reported normalized rectangle data from a metering
+     * rectangle.
+     *
+     * <p>If any of the rectangles are out-of-range of their intended bounding box,
+     * the {@link #RECTANGLE_EMPTY empty rectangle} is substituted instead
+     * (with a weight of {@code 0}).</p>
+     *
+     * <p>The metering rectangle is bound by the crop region (effective/reported respectively).
+     * The metering {@link Camera.Area area} is bound by {@code [-1000, 1000]}.</p>
+     *
+     * <p>No parameters are mutated; returns the new metering data.</p>
+     *
+     * @param activeArraySize active array size of the sensor (e.g. max jpeg size)
+     * @param meteringRect the user-specified metering rectangle
+     * @param zoomData the calculated zoom data corresponding to this request
+     *
+     * @return the metering area, the reported/effective metering rectangles
+     */
+    public static MeteringData convertMeteringRectangleToLegacy(
+            Rect activeArray, MeteringRectangle meteringRect, ZoomData zoomData) {
+        Rect previewCrop = zoomData.previewCrop;
+
+        float scaleW = (NORMALIZED_RECTANGLE_MAX - NORMALIZED_RECTANGLE_MIN) * 1.0f /
+                previewCrop.width();
+        float scaleH = (NORMALIZED_RECTANGLE_MAX - NORMALIZED_RECTANGLE_MIN) * 1.0f /
+                previewCrop.height();
+
+        Matrix transform = new Matrix();
+        // Move the preview crop so that top,left is at (0,0), otherwise after scaling
+        // the corner bounds will be outside of [-1000, 1000]
+        transform.setTranslate(-previewCrop.left, -previewCrop.top);
+        // Scale into [0, 2000] range about the center of the preview
+        transform.postScale(scaleW, scaleH);
+        // Move so that top left of a typical rect is at [-1000, -1000]
+        transform.postTranslate(/*dx*/NORMALIZED_RECTANGLE_MIN, /*dy*/NORMALIZED_RECTANGLE_MIN);
+
+        /*
+         * Calculate the preview metering region (effective), and the camera1 api
+         * normalized metering region.
+         */
+        Rect normalizedRegionUnbounded = ParamsUtils.mapRect(transform, meteringRect.getRect());
+
+        /*
+         * Try to intersect normalized area with [-1000, 1000] rectangle; otherwise
+         * it's completely out of range
+         */
+        Rect normalizedIntersected = new Rect(normalizedRegionUnbounded);
+
+        Camera.Area meteringArea;
+        if (!normalizedIntersected.intersect(NORMALIZED_RECTANGLE_DEFAULT)) {
+            Log.w(TAG,
+                    "convertMeteringRectangleToLegacy - metering rectangle too small, " +
+                    "no metering will be done");
+            normalizedIntersected.set(RECTANGLE_EMPTY);
+            meteringArea = new Camera.Area(RECTANGLE_EMPTY,
+                    MeteringRectangle.METERING_WEIGHT_DONT_CARE);
+        } else {
+            meteringArea = new Camera.Area(normalizedIntersected,
+                    meteringRect.getMeteringWeight());
+        }
+
+        /*
+         * Calculate effective preview metering region
+         */
+        Rect previewMetering = meteringRect.getRect();
+        if (!previewMetering.intersect(previewCrop)) {
+            previewMetering.set(RECTANGLE_EMPTY);
+        }
+
+        /*
+         * Calculate effective reported metering region
+         * - Transform the calculated metering area back into active array space
+         * - Clip it to be a subset of the reported crop region
+         */
+        Rect reportedMetering;
+        {
+            Camera.Area normalizedAreaUnbounded = new Camera.Area(
+                    normalizedRegionUnbounded, meteringRect.getMeteringWeight());
+            WeightedRectangle reportedMeteringRect = convertCameraAreaToActiveArrayRectangle(
+                    activeArray, zoomData, normalizedAreaUnbounded, /*usePreviewCrop*/false);
+            reportedMetering = reportedMeteringRect.rect;
+        }
+
+        if (VERBOSE) {
+            Log.v(TAG, String.format(
+                    "convertMeteringRectangleToLegacy - activeArray = %s, meteringRect = %s, " +
+                    "previewCrop = %s, meteringArea = %s, previewMetering = %s, " +
+                    "reportedMetering = %s, normalizedRegionUnbounded = %s",
+                    activeArray, meteringRect,
+                    previewCrop, stringFromArea(meteringArea), previewMetering,
+                    reportedMetering, normalizedRegionUnbounded));
+        }
+
+        return new MeteringData(meteringArea, previewMetering, reportedMetering);
+    }
+
+    /**
+     * Convert the normalized camera area from [-1000, 1000] coordinate space
+     * into the active array-based coordinate space.
+     *
+     * <p>Values out of range are clipped to be within the resulting (reported) crop
+     * region. It is possible to have values larger than the preview crop.</p>
+     *
+     * <p>Weights out of range of [0, 1000] are clipped to be within the range.</p>
+     *
+     * @param activeArraySize active array size of the sensor (e.g. max jpeg size)
+     * @param zoomData the calculated zoom data corresponding to this request
+     * @param area the normalized camera area
+     *
+     * @return the weighed rectangle in active array coordinate space, with the weight
+     */
+    public static WeightedRectangle convertCameraAreaToActiveArrayRectangle(
+            Rect activeArray, ZoomData zoomData, Camera.Area area) {
+        return convertCameraAreaToActiveArrayRectangle(activeArray, zoomData, area,
+                /*usePreviewCrop*/true);
+    }
+
+    private static WeightedRectangle convertCameraAreaToActiveArrayRectangle(
+            Rect activeArray, ZoomData zoomData, Camera.Area area, boolean usePreviewCrop) {
+        Rect previewCrop = zoomData.previewCrop;
+        Rect reportedCrop = zoomData.reportedCrop;
+
+        float scaleW = previewCrop.width() * 1.0f /
+                (NORMALIZED_RECTANGLE_MAX - NORMALIZED_RECTANGLE_MIN);
+        float scaleH = previewCrop.height() * 1.0f /
+                (NORMALIZED_RECTANGLE_MAX - NORMALIZED_RECTANGLE_MIN);
+
+        /*
+         * Calculate the reported metering region from the non-intersected normalized region
+         * by scaling and translating back into active array-relative coordinates.
+         */
+        Matrix transform = new Matrix();
+
+        // Move top left from (-1000, -1000) to (0, 0)
+        transform.setTranslate(/*dx*/NORMALIZED_RECTANGLE_MAX, /*dy*/NORMALIZED_RECTANGLE_MAX);
+
+        // Scale from [0, 2000] back into the preview rectangle
+        transform.postScale(scaleW, scaleH);
+
+        // Move the rect so that the [-1000,-1000] point ends up at the preview [left, top]
+        transform.postTranslate(previewCrop.left, previewCrop.top);
+
+        Rect cropToIntersectAgainst = usePreviewCrop ? previewCrop : reportedCrop;
+
+        // Now apply the transformation backwards to get the reported metering region
+        Rect reportedMetering = ParamsUtils.mapRect(transform, area.rect);
+        // Intersect it with the crop region, to avoid reporting out-of-bounds
+        // metering regions
+        if (!reportedMetering.intersect(cropToIntersectAgainst)) {
+            reportedMetering.set(RECTANGLE_EMPTY);
+        }
+
+        int weight = area.weight;
+        if (weight < MeteringRectangle.METERING_WEIGHT_MIN) {
+            Log.w(TAG,
+                    "convertCameraAreaToMeteringRectangle - rectangle "
+                            + stringFromArea(area) + " has too small weight, clip to 0");
+            weight = 0;
+        }
+
+        return new WeightedRectangle(reportedMetering, area.weight);
+    }
+
 
     private ParameterUtils() {
         throw new AssertionError();
