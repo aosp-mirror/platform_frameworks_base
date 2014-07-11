@@ -59,7 +59,7 @@ final class DevicePowerStatusAction extends FeatureAction {
     boolean start() {
         queryDevicePowerStatus();
         mState = STATE_WAITING_FOR_REPORT_POWER_STATUS;
-        addTimer(mState, FeatureAction.TIMEOUT_MS);
+        addTimer(mState, HdmiConfig.TIMEOUT_MS);
         return true;
     }
 

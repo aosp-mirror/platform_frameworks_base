@@ -35,7 +35,7 @@ abstract class SystemAudioAction extends FeatureAction {
     private static final int MAX_SEND_RETRY_COUNT = 2;
 
     private static final int ON_TIMEOUT_MS = 5000;
-    private static final int OFF_TIMEOUT_MS = TIMEOUT_MS;
+    private static final int OFF_TIMEOUT_MS = HdmiConfig.TIMEOUT_MS;
 
     // Logical address of AV Receiver.
     protected final int mAvrLogicalAddress;

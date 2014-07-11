@@ -46,7 +46,7 @@ final class SystemAudioStatusAction extends FeatureAction {
     @Override
     boolean start() {
         mState = STATE_WAIT_FOR_REPORT_AUDIO_STATUS;
-        addTimer(mState, TIMEOUT_MS);
+        addTimer(mState, HdmiConfig.TIMEOUT_MS);
         sendGiveAudioStatus();
         return true;
     }

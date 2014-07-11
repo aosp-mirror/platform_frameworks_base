@@ -38,7 +38,6 @@ final class HotplugDetectionAction extends FeatureAction {
 
     private static final int POLLING_INTERVAL_MS = 5000;
     private static final int TIMEOUT_COUNT = 3;
-    private static final int POLL_RETRY_COUNT = 2;
 
     // State in which waits for next polling
     private static final int STATE_WAIT_FOR_NEXT_POLLING = 1;
@@ -126,7 +125,7 @@ final class HotplugDetectionAction extends FeatureAction {
                 checkHotplug(ackedAddress, false);
             }
         }, Constants.POLL_ITERATION_IN_ORDER
-                | Constants.POLL_STRATEGY_REMOTES_DEVICES, POLL_RETRY_COUNT);
+                | Constants.POLL_STRATEGY_REMOTES_DEVICES, HdmiConfig.HOTPLUG_DETECTION_RETRY);
     }
 
     private void pollAudioSystem() {
@@ -138,7 +137,7 @@ final class HotplugDetectionAction extends FeatureAction {
                 checkHotplug(ackedAddress, true);
             }
         }, Constants.POLL_ITERATION_IN_ORDER
-                | Constants.POLL_STRATEGY_SYSTEM_AUDIO, POLL_RETRY_COUNT);
+                | Constants.POLL_STRATEGY_SYSTEM_AUDIO, HdmiConfig.HOTPLUG_DETECTION_RETRY);
     }
 
     private void checkHotplug(List<Integer> ackedAddress, boolean audioOnly) {

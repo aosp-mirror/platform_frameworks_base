@@ -51,8 +51,6 @@ final class DeviceDiscoveryAction extends FeatureAction {
     // State in which the action is waiting for gathering vendor id of non-local devices.
     private static final int STATE_WAITING_FOR_VENDOR_ID = 4;
 
-    private static final int DEVICE_POLLING_RETRY = 1;
-
     /**
      * Interface used to report result of device discovery.
      */
@@ -118,7 +116,7 @@ final class DeviceDiscoveryAction extends FeatureAction {
                 startPhysicalAddressStage();
             }
         }, Constants.POLL_ITERATION_REVERSE_ORDER
-            | Constants.POLL_STRATEGY_REMOTES_DEVICES, DEVICE_POLLING_RETRY);
+            | Constants.POLL_STRATEGY_REMOTES_DEVICES, HdmiConfig.DEVICE_POLLING_RETRY);
         return true;
     }
 
@@ -154,7 +152,7 @@ final class DeviceDiscoveryAction extends FeatureAction {
             return;
         }
         sendCommand(HdmiCecMessageBuilder.buildGivePhysicalAddress(getSourceAddress(), address));
-        addTimer(mState, TIMEOUT_MS);
+        addTimer(mState, HdmiConfig.TIMEOUT_MS);
     }
 
     private void startOsdNameStage() {
@@ -177,7 +175,7 @@ final class DeviceDiscoveryAction extends FeatureAction {
             return;
         }
         sendCommand(HdmiCecMessageBuilder.buildGiveOsdNameCommand(getSourceAddress(), address));
-        addTimer(mState, TIMEOUT_MS);
+        addTimer(mState, HdmiConfig.TIMEOUT_MS);
     }
 
     private void startVendorIdStage() {
@@ -202,7 +200,7 @@ final class DeviceDiscoveryAction extends FeatureAction {
         }
         sendCommand(
                 HdmiCecMessageBuilder.buildGiveDeviceVendorIdCommand(getSourceAddress(), address));
-        addTimer(mState, TIMEOUT_MS);
+        addTimer(mState, HdmiConfig.TIMEOUT_MS);
     }
 
     private boolean mayProcessMessageIfCached(int address, int opcode) {

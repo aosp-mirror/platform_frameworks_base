@@ -76,7 +76,7 @@ final class OneTouchPlayAction extends FeatureAction {
         broadcastActiveSource();
         queryDevicePowerStatus();
         mState = STATE_WAITING_FOR_REPORT_POWER_STATUS;
-        addTimer(mState, FeatureAction.TIMEOUT_MS);
+        addTimer(mState, HdmiConfig.TIMEOUT_MS);
         return true;
     }
 
@@ -116,7 +116,7 @@ final class OneTouchPlayAction extends FeatureAction {
         if (state == STATE_WAITING_FOR_REPORT_POWER_STATUS) {
             if (mPowerStatusCounter++ < LOOP_COUNTER_MAX) {
                 queryDevicePowerStatus();
-                addTimer(mState, FeatureAction.TIMEOUT_MS);
+                addTimer(mState, HdmiConfig.TIMEOUT_MS);
             } else {
                 // Couldn't wake up the TV for whatever reason. Report failure.
                 invokeCallback(HdmiControlManager.RESULT_TIMEOUT);
