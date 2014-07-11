@@ -412,16 +412,6 @@ public final class AudioAttributes implements Parcelable {
         }
     };
 
-    /** @hide */
-    @Override
-    public String toString () {
-        return new String("AudioAttributes:"
-                + " usage=" + mUsage
-                + " content=" + mContentType
-                + " flags=0x" + Integer.toHexString(mFlags)
-                + " tags=" + mTags);
-    }
-
     @Override
     public int describeContents() {
         return 0;
@@ -486,6 +476,52 @@ public final class AudioAttributes implements Parcelable {
         }
     };
 
+    /** @hide */
+    @Override
+    public String toString () {
+        return new String("AudioAttributes:"
+                + " usage=" + mUsage
+                + " content=" + mContentType
+                + " flags=0x" + Integer.toHexString(mFlags).toUpperCase()
+                + " tags=" + mTags);
+    }
+
+    public String usageToString() {
+        switch(mUsage) {
+            case USAGE_UNKNOWN:
+                return new String("USAGE_UNKNOWN");
+            case USAGE_MEDIA:
+                return new String("USAGE_MEDIA");
+            case USAGE_VOICE_COMMUNICATION:
+                return new String("USAGE_VOICE_COMMUNICATION");
+            case USAGE_VOICE_COMMUNICATION_SIGNALLING:
+                return new String("USAGE_VOICE_COMMUNICATION");
+            case USAGE_ALARM:
+                return new String("USAGE_ALARM");
+            case USAGE_NOTIFICATION:
+                return new String("USAGE_NOTIFICATION");
+            case USAGE_NOTIFICATION_TELEPHONY_RINGTONE:
+                return new String("USAGE_NOTIFICATION");
+            case USAGE_NOTIFICATION_COMMUNICATION_REQUEST:
+                return new String("USAGE_NOTIFICATION");
+            case USAGE_NOTIFICATION_COMMUNICATION_INSTANT:
+                return new String("USAGE_NOTIFICATION_COMMUNICATION_INSTANT");
+            case USAGE_NOTIFICATION_COMMUNICATION_DELAYED:
+                return new String("USAGE_NOTIFICATION_COMMUNICATION_DELAYED");
+            case USAGE_NOTIFICATION_EVENT:
+                return new String("USAGE_NOTIFICATION_EVENT");
+            case USAGE_ASSISTANCE_ACCESSIBILITY:
+                return new String("USAGE_ASSISTANCE_ACCESSIBILITY");
+            case USAGE_ASSISTANCE_NAVIGATION_GUIDANCE:
+                return new String("USAGE_ASSISTANCE_NAVIGATION_GUIDANCE");
+            case USAGE_ASSISTANCE_SONIFICATION:
+                return new String("USAGE_ASSISTANCE_SONIFICATION");
+            case USAGE_GAME:
+                return new String("USAGE_GAME");
+            default:
+                return new String("unknown usage " + mUsage);
+        }
+    }
 
     /** @hide */
     @IntDef({

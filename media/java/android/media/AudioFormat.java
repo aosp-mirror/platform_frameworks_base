@@ -227,19 +227,23 @@ public class AudioFormat {
     private int mChannelMask;
     private int mPropertySetMask;
 
-    int getEncoding() {
+    /** @hide */
+    public int getEncoding() {
         return mEncoding;
     }
 
-    int getSampleRate() {
+    /** @hide */
+    public int getSampleRate() {
         return mSampleRate;
     }
 
-    int getChannelMask() {
+    /** @hide */
+    public int getChannelMask() {
         return mChannelMask;
     }
 
-    int getPropertySetMask() {
+    /** @hide */
+    public int getPropertySetMask() {
         return mPropertySetMask;
     }
 
@@ -248,7 +252,7 @@ public class AudioFormat {
      * Builder class for {@link AudioFormat} objects.
      */
     public static class Builder {
-        private int mEncoding = ENCODING_DEFAULT;
+        private int mEncoding = ENCODING_PCM_16BIT;
         private int mSampleRate = 0;
         private int mChannelMask = CHANNEL_INVALID;
         private int mPropertySetMask = AUDIO_FORMAT_HAS_PROPERTY_NONE;

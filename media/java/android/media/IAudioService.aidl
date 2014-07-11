@@ -28,6 +28,7 @@ import android.media.IRemoteVolumeObserver;
 import android.media.IRingtonePlayer;
 import android.media.IVolumeController;
 import android.media.Rating;
+import android.media.audiopolicy.AudioPolicyConfig;
 import android.net.Uri;
 import android.view.KeyEvent;
 
@@ -199,4 +200,7 @@ interface IAudioService {
     void disableSafeMediaVolume();
 
     int setHdmiSystemAudioSupported(boolean on, int device, String name);
+
+           boolean registerAudioPolicy(in AudioPolicyConfig policyConfig, IBinder cb);
+    oneway void unregisterAudioPolicyAsync(in IBinder cb);
 }
