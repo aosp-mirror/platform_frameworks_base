@@ -20,6 +20,7 @@ import android.content.Intent;
 import android.hardware.hdmi.HdmiCecDeviceInfo;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.IHdmiControlCallback;
+import android.media.AudioManager;
 import android.media.AudioManager.OnAudioPortUpdateListener;
 import android.media.AudioPatch;
 import android.media.AudioPort;
@@ -654,8 +655,10 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         synchronized (mLock) {
             mSystemAudioMute = mute;
             mSystemAudioVolume = volume;
-            // TODO: pass volume to service (audio service) after scale it to local volume level.
-            mService.setAudioStatus(mute, volume);
+            int maxVolume = mService.getAudioManager().getStreamMaxVolume(
+                    AudioManager.STREAM_MUSIC);
+            mService.setAudioStatus(mute,
+                    VolumeControlAction.scaleToCustomVolume(volume, maxVolume));
         }
     }
 
