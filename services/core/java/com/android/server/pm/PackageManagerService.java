@@ -6343,8 +6343,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 subDir = nativeLibraryRoot;
             }
 
-            int copyRet = NativeLibraryHelper.copyNativeBinariesIfNeededLI(handle,
-                    subDir, Build.SUPPORTED_ABIS[abi]);
+            int copyRet = NativeLibraryHelper.copyNativeBinariesIfNeededLI(handle, subDir, abiList[abi]);
             if (copyRet != PackageManager.INSTALL_SUCCEEDED) {
                 return copyRet;
             }
