@@ -160,7 +160,9 @@ public class JobStore {
             }
             return false;
         }
-        maybeWriteStatusToDiskAsync();
+        if (jobStatus.isPersisted()) {
+            maybeWriteStatusToDiskAsync();
+        }
         return removed;
     }
 
@@ -429,7 +431,8 @@ public class JobStore {
             }
         }
 
-        private List<JobStatus> readJobMapImpl(FileInputStream fis) throws XmlPullParserException, IOException {
+        private List<JobStatus> readJobMapImpl(FileInputStream fis)
+                throws XmlPullParserException, IOException {
             XmlPullParser parser = Xml.newPullParser();
             parser.setInput(fis, null);
 
@@ -498,6 +501,7 @@ public class JobStore {
             // Read out job identifier attributes.
             try {
                 jobBuilder = buildBuilderFromXml(parser);
+                jobBuilder.setIsPersisted(true);
                 uid = Integer.valueOf(parser.getAttributeValue(null, "uid"));
             } catch (NumberFormatException e) {
                 Slog.e(TAG, "Error parsing job's required fields, skipping");

@@ -63,8 +63,9 @@ public class TaskStoreTest extends AndroidTestCase {
                 .setBackoffCriteria(initialBackoff, JobInfo.BackoffPolicy.EXPONENTIAL)
                 .setOverrideDeadline(runByMillis)
                 .setMinimumLatency(runFromMillis)
+                .setIsPersisted(true)
                 .build();
-        final JobStatus ts = new JobStatus(task, SOME_UID, true /* persisted */);
+        final JobStatus ts = new JobStatus(task, SOME_UID);
         mTaskStoreUnderTest.add(ts);
         Thread.sleep(IO_WAIT);
         // Manually load tasks from xml file.
@@ -89,15 +90,17 @@ public class TaskStoreTest extends AndroidTestCase {
                 .setRequiresDeviceIdle(true)
                 .setPeriodic(10000L)
                 .setRequiresCharging(true)
+                .setIsPersisted(true)
                 .build();
         final JobInfo task2 = new Builder(12, mComponent)
                 .setMinimumLatency(5000L)
                 .setBackoffCriteria(15000L, JobInfo.BackoffPolicy.LINEAR)
                 .setOverrideDeadline(30000L)
                 .setRequiredNetworkCapabilities(JobInfo.NetworkType.UNMETERED)
+                .setIsPersisted(true)
                 .build();
-        final JobStatus taskStatus1 = new JobStatus(task1, SOME_UID, true /* persisted */);
-        final JobStatus taskStatus2 = new JobStatus(task2, SOME_UID, true /* persisted */);
+        final JobStatus taskStatus1 = new JobStatus(task1, SOME_UID);
+        final JobStatus taskStatus2 = new JobStatus(task2, SOME_UID);
         mTaskStoreUnderTest.add(taskStatus1);
         mTaskStoreUnderTest.add(taskStatus2);
         Thread.sleep(IO_WAIT);
@@ -128,7 +131,8 @@ public class TaskStoreTest extends AndroidTestCase {
         JobInfo.Builder b = new Builder(8, mComponent)
                 .setRequiresDeviceIdle(true)
                 .setPeriodic(10000L)
-                .setRequiresCharging(true);
+                .setRequiresCharging(true)
+                .setIsPersisted(true);
 
         PersistableBundle extras = new PersistableBundle();
         extras.putDouble("hello", 3.2);
@@ -136,7 +140,7 @@ public class TaskStoreTest extends AndroidTestCase {
         extras.putInt("into", 3);
         b.setExtras(extras);
         final JobInfo task = b.build();
-        JobStatus taskStatus = new JobStatus(task, SOME_UID, true /* persisted */);
+        JobStatus taskStatus = new JobStatus(task, SOME_UID);
 
         mTaskStoreUnderTest.add(taskStatus);
         Thread.sleep(IO_WAIT);

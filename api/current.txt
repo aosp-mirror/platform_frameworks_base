@@ -5495,6 +5495,7 @@ package android.app.job {
     method public int getNetworkCapabilities();
     method public android.content.ComponentName getService();
     method public boolean isPeriodic();
+    method public boolean isPersisted();
     method public boolean isRequireCharging();
     method public boolean isRequireDeviceIdle();
     method public void writeToParcel(android.os.Parcel, int);
@@ -5511,6 +5512,7 @@ package android.app.job {
     method public android.app.job.JobInfo build();
     method public android.app.job.JobInfo.Builder setBackoffCriteria(long, int);
     method public android.app.job.JobInfo.Builder setExtras(android.os.PersistableBundle);
+    method public android.app.job.JobInfo.Builder setIsPersisted(boolean);
     method public android.app.job.JobInfo.Builder setMinimumLatency(long);
     method public android.app.job.JobInfo.Builder setOverrideDeadline(long);
     method public android.app.job.JobInfo.Builder setPeriodic(long);
