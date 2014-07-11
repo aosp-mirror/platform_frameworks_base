@@ -534,6 +534,13 @@ public class ConnectivityManager {
      */
     public final static int REQUEST_ID_UNSET = 0;
 
+    /**
+     * A NetID indicating no Network is selected.
+     * Keep in sync with bionic/libc/dns/include/resolv_netid.h
+     * @hide
+     */
+    public static final int NETID_UNSET = 0;
+
     private final IConnectivityManager mService;
 
     private final String mPackageName;
@@ -2505,13 +2512,6 @@ public class ConnectivityManager {
     public static boolean setProcessDefaultNetwork(Network network) {
         return NetworkUtils.bindProcessToNetwork(network == null ? NETID_UNSET : network.netId);
     }
-
-    /**
-     * A NetID indicating no Network is selected.
-     * Keep in sync with bionic/libc/dns/include/resolv_netid.h
-     * @hide
-     */
-    public static final int NETID_UNSET = 0;
 
     /**
      * Returns the {@link Network} currently bound to this process via
