@@ -14205,11 +14205,14 @@ package android.media {
 
   public abstract class Image implements java.lang.AutoCloseable {
     method public abstract void close();
+    method public android.graphics.Rect getCropRect();
     method public abstract int getFormat();
     method public abstract int getHeight();
     method public abstract android.media.Image.Plane[] getPlanes();
     method public abstract long getTimestamp();
     method public abstract int getWidth();
+    method public void setCropRect(android.graphics.Rect);
+    field protected android.graphics.Rect mCropRect;
   }
 
   public static abstract class Image.Plane {
