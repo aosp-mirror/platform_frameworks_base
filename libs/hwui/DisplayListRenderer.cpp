@@ -306,7 +306,7 @@ status_t DisplayListRenderer::drawOval(float left, float top, float right, float
 
 status_t DisplayListRenderer::drawArc(float left, float top, float right, float bottom,
         float startAngle, float sweepAngle, bool useCenter, const SkPaint* paint) {
-    if (fabs(sweepAngle) > 360.0f) {
+    if (fabs(sweepAngle) >= 360.0f) {
         return drawOval(left, top, right, bottom, paint);
     }
 
