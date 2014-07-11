@@ -537,10 +537,17 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     }
 
     @ServiceThreadOnly
+    // Seq #32
     void changeSystemAudioMode(boolean enabled, IHdmiControlCallback callback) {
         assertRunOnServiceThread();
+        if (!mService.isControlEnabled() || hasAction(DeviceDiscoveryAction.class)) {
+            setSystemAudioMode(false, true);
+            invokeCallback(callback, HdmiControlManager.RESULT_INCORRECT_MODE);
+            return;
+        }
         HdmiCecDeviceInfo avr = getAvrDeviceInfo();
         if (avr == null) {
+            setSystemAudioMode(false, true);
             invokeCallback(callback, HdmiControlManager.RESULT_TARGET_NOT_AVAILABLE);
             return;
         }
