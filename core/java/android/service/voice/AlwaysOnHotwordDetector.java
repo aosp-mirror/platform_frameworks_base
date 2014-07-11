@@ -66,18 +66,42 @@ public class AlwaysOnHotwordDetector {
     public static final int MANAGE_ACTION_UN_ENROLL = 2;
 
     /**
-     * Return codes for {@link #startRecognition()}, {@link #stopRecognition()}
+     * Return codes for {@link #startRecognition(int)}, {@link #stopRecognition()}
      */
     public static final int STATUS_ERROR = Integer.MIN_VALUE;
     public static final int STATUS_OK = 1;
 
     //---- Keyphrase recognition status ----//
-    // TODO: Figure out if they are exclusive or should be flags instead?
-    public static final int RECOGNITION_NOT_AVAILABLE = -3;
-    public static final int RECOGNITION_NOT_REQUESTED = -2;
-    public static final int RECOGNITION_DISABLED_TEMPORARILY = -1;
-    public static final int RECOGNITION_REQUESTED = 1;
-    public static final int RECOGNITION_ACTIVE = 2;
+    /** Indicates that recognition is not available. */
+    public static final int RECOGNITION_STATUS_NOT_AVAILABLE = 0x01;
+    /** Indicates that recognition has not been requested. */
+    public static final int RECOGNITION_STATUS_NOT_REQUESTED = 0x02;
+    /** Indicates that recognition has been requested. */
+    public static final int RECOGNITION_STATUS_REQUESTED = 0x04;
+    /** Indicates that recognition has been temporarily disabled. */
+    public static final int RECOGNITION_STATUS_DISABLED_TEMPORARILY = 0x08;
+    /** Indicates that recognition is currently active . */
+    public static final int RECOGNITION_STATUS_ACTIVE = 0x10;
+
+    //-- Flags for startRecogntion    ----//
+    /** Empty flag for {@link #startRecognition(int)}. */
+    public static final int RECOGNITION_FLAG_NONE = 0;
+    /**
+     * Recognition flag for {@link #startRecognition(int)} that indicates
+     * whether the trigger audio for hotword needs to be captured.
+     */
+    public static final int RECOGNITION_FLAG_CAPTURE_TRIGGER_AUDIO = 0x1;
+
+    //---- Recognition mode flags ----//
+    // Must be kept in sync with the related attribute defined as searchKeyphraseRecognitionFlags.
+
+    /** Simple recognition of the key phrase. Returned by {@link #getRecognitionStatus()} */
+    public static final int RECOGNITION_MODE_VOICE_TRIGGER
+            = SoundTrigger.RECOGNITION_MODE_VOICE_TRIGGER;
+    /** Trigger only if one user is identified. Returned by {@link #getRecognitionStatus()} */
+    public static final int RECOGNITION_MODE_USER_IDENTIFICATION
+            = SoundTrigger.RECOGNITION_MODE_USER_IDENTIFICATION;
+
     static final String TAG = "AlwaysOnHotwordDetector";
 
     private final String mText;
@@ -107,9 +131,11 @@ public class AlwaysOnHotwordDetector {
     public interface Callback {
         /**
          * Called when the keyphrase is spoken.
-         * TODO: Add more data to the callback.
+         *
+         * @param data Optional trigger audio data, if it was requested during
+         *        {@link AlwaysOnHotwordDetector#startRecognition(int)}.
          */
-        void onDetected();
+        void onDetected(byte[] data);
         /**
          * Called when the detection for the associated keyphrase starts.
          */
@@ -166,47 +192,63 @@ public class AlwaysOnHotwordDetector {
     }
 
     /**
-     * Gets the status of the recognition.
-     * @return One of {@link #RECOGNITION_NOT_AVAILABLE}, {@link #RECOGNITION_NOT_REQUESTED},
-     *         {@link #RECOGNITION_DISABLED_TEMPORARILY} or {@link #RECOGNITION_ACTIVE}.
-     * @throws UnsupportedOperationException if the recognition isn't supported.
+     * Gets the recognition modes supported by the associated keyphrase.
+     *
+     * @throws UnsupportedOperationException if the keyphrase itself isn't supported.
      *         Callers should check the availability by calling {@link #getAvailability()}
      *         before calling this method to avoid this exception.
      */
-    public int getRecognitionStatus() {
-        if (mAvailability != KEYPHRASE_ENROLLED) {
+    public int getSupportedRecognitionModes() {
+        if (mAvailability == KEYPHRASE_HARDWARE_UNAVAILABLE
+                || mAvailability == KEYPHRASE_UNSUPPORTED) {
             throw new UnsupportedOperationException(
-                    "Recognition for the given keyphrase is not supported");
+                    "Getting supported recognition modes for the keyphrase is not supported");
         }
 
+        return mKeyphraseMetadata.recognitionModeFlags;
+    }
+
+    /**
+     * Gets the status of the recognition.
+     * @return A flag comprised of {@link #RECOGNITION_STATUS_NOT_AVAILABLE},
+     *         {@link #RECOGNITION_STATUS_NOT_REQUESTED}, {@link #RECOGNITION_STATUS_REQUESTED},
+     *         {@link #RECOGNITION_STATUS_DISABLED_TEMPORARILY} and
+     *         {@link #RECOGNITION_STATUS_ACTIVE}.
+     */
+    public int getRecognitionStatus() {
         return mRecognitionState;
     }
 
     /**
      * Starts recognition for the associated keyphrase.
      *
+     * @param recognitionFlags The flags to control the recognition properties.
+     *        The allowed flags are {@link #RECOGNITION_FLAG_NONE} and
+     *        {@link #RECOGNITION_FLAG_CAPTURE_TRIGGER_AUDIO}.
      * @return One of {@link #STATUS_ERROR} or {@link #STATUS_OK}.
      * @throws UnsupportedOperationException if the recognition isn't supported.
      *         Callers should check the availability by calling {@link #getAvailability()}
      *         before calling this method to avoid this exception.
      */
-    public int startRecognition() {
-        if (mAvailability != KEYPHRASE_ENROLLED) {
+    public int startRecognition(int recognitionFlags) {
+        if (mAvailability != KEYPHRASE_ENROLLED
+                || (mRecognitionState&RECOGNITION_STATUS_NOT_AVAILABLE) != 0) {
             throw new UnsupportedOperationException(
                     "Recognition for the given keyphrase is not supported");
         }
 
-        mRecognitionState = RECOGNITION_REQUESTED;
-        mRecognitionState = RECOGNITION_REQUESTED;
+        mRecognitionState &= RECOGNITION_STATUS_REQUESTED;
         KeyphraseRecognitionExtra[] recognitionExtra = new KeyphraseRecognitionExtra[1];
         // TODO: Do we need to do something about the confidence level here?
-        // TODO: Read the recognition mode flag from the KeyphraseMetadata.
         // TODO: Take in captureTriggerAudio as a method param here.
         recognitionExtra[0] = new KeyphraseRecognitionExtra(mKeyphraseMetadata.id,
-                SoundTrigger.RECOGNITION_MODE_VOICE_TRIGGER, new ConfidenceLevel[0]);
+                mKeyphraseMetadata.recognitionModeFlags, new ConfidenceLevel[0]);
+        boolean captureTriggerAudio =
+                (recognitionFlags & RECOGNITION_FLAG_CAPTURE_TRIGGER_AUDIO) != 0;
         int code = mSoundTriggerHelper.startRecognition(mKeyphraseMetadata.id,
                 mEnrolledSoundModel.convertToSoundTriggerKeyphraseSoundModel(), mListener,
-                new RecognitionConfig(false, recognitionExtra, null /* additional data */));
+                new RecognitionConfig(
+                        captureTriggerAudio, recognitionExtra,null /* additional data */));
         if (code != SoundTriggerHelper.STATUS_OK) {
             Slog.w(TAG, "startRecognition() failed with error code " + code);
             return STATUS_ERROR;
@@ -229,7 +271,7 @@ public class AlwaysOnHotwordDetector {
                     "Recognition for the given keyphrase is not supported");
         }
 
-        mRecognitionState = RECOGNITION_NOT_REQUESTED;
+        mRecognitionState &= ~RECOGNITION_STATUS_NOT_REQUESTED;
         int code = mSoundTriggerHelper.stopRecognition(mKeyphraseMetadata.id, mListener);
 
         if (code != SoundTriggerHelper.STATUS_OK) {
@@ -269,16 +311,21 @@ public class AlwaysOnHotwordDetector {
     private int internalGetAvailability() {
         // No DSP available
         if (mSoundTriggerHelper.dspInfo == null) {
+            mRecognitionState = RECOGNITION_STATUS_NOT_AVAILABLE;
             return KEYPHRASE_HARDWARE_UNAVAILABLE;
         }
         // No enrollment application supports this keyphrase/locale
         if (mKeyphraseMetadata == null) {
+            mRecognitionState = RECOGNITION_STATUS_NOT_AVAILABLE;
             return KEYPHRASE_UNSUPPORTED;
         }
         // This keyphrase hasn't been enrolled.
         if (mEnrolledSoundModel == null) {
+            mRecognitionState = RECOGNITION_STATUS_NOT_AVAILABLE;
             return KEYPHRASE_UNENROLLED;
         }
+        // Mark recognition as available
+        mRecognitionState &= ~RECOGNITION_STATUS_NOT_AVAILABLE;
         return KEYPHRASE_ENROLLED;
     }
 
@@ -320,14 +367,15 @@ public class AlwaysOnHotwordDetector {
         }
 
         @Override
-        public void onKeyphraseSpoken() {
+        public void onKeyphraseSpoken(byte[] data) {
             Slog.i(TAG, "onKeyphraseSpoken");
-            mCallback.onDetected();
+            mCallback.onDetected(data);
         }
 
         @Override
         public void onListeningStateChanged(int state) {
             Slog.i(TAG, "onListeningStateChanged: state=" + state);
+            // TODO: Set/unset the RECOGNITION_STATUS_ACTIVE flag here.
             if (state == SoundTriggerHelper.STATE_STARTED) {
                 mCallback.onDetectionStarted();
             } else if (state == SoundTriggerHelper.STATE_STOPPED) {

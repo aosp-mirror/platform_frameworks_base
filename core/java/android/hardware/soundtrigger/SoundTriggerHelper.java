@@ -65,8 +65,12 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
      * The callback for sound trigger events.
      */
     public interface Listener {
-        /** Called when the given keyphrase is spoken. */
-        void onKeyphraseSpoken();
+        /**
+         * Called when the given keyphrase is spoken.
+         *
+         * @param data The captured audio, may be null.
+         */
+        void onKeyphraseSpoken(byte[] data);
 
         /**
          * Called when the listening state for the given keyphrase changes.
@@ -226,7 +230,8 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
 
         switch (event.status) {
             case SoundTrigger.RECOGNITION_STATUS_SUCCESS:
-                listener.onKeyphraseSpoken();
+                // TODO: Pass the captured audio back.
+                listener.onKeyphraseSpoken(null);
                 break;
             case SoundTrigger.RECOGNITION_STATUS_ABORT:
                 listener.onListeningStateChanged(STATE_STOPPED);
