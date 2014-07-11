@@ -38,7 +38,7 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
 
     @Override
     @ServiceThreadOnly
-    protected void onAddressAllocated(int logicalAddress) {
+    protected void onAddressAllocated(int logicalAddress, boolean fromBootup) {
         assertRunOnServiceThread();
         mService.sendCecCommand(HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
                 mAddress, mService.getPhysicalAddress(), mDeviceType));

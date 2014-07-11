@@ -115,7 +115,7 @@ abstract class HdmiCecLocalDevice {
     /**
      * Called once a logical address of the local device is allocated.
      */
-    protected abstract void onAddressAllocated(int logicalAddress);
+    protected abstract void onAddressAllocated(int logicalAddress, boolean fromBootup);
 
     /**
      * Dispatch incoming message.
@@ -394,10 +394,10 @@ abstract class HdmiCecLocalDevice {
     }
 
     @ServiceThreadOnly
-    final void handleAddressAllocated(int logicalAddress) {
+    final void handleAddressAllocated(int logicalAddress, boolean fromBootup) {
         assertRunOnServiceThread();
         mAddress = mPreferredAddress = logicalAddress;
-        onAddressAllocated(logicalAddress);
+        onAddressAllocated(logicalAddress, fromBootup);
     }
 
     @ServiceThreadOnly

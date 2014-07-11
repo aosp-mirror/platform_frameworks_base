@@ -94,14 +94,14 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
 
     @Override
     @ServiceThreadOnly
-    protected void onAddressAllocated(int logicalAddress) {
+    protected void onAddressAllocated(int logicalAddress, boolean fromBootup) {
         assertRunOnServiceThread();
         mService.sendCecCommand(HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
                 mAddress, mService.getPhysicalAddress(), mDeviceType));
         mService.sendCecCommand(HdmiCecMessageBuilder.buildDeviceVendorIdCommand(
                 mAddress, mService.getVendorId()));
         mSystemAudioMode = mService.readBooleanSetting(Global.HDMI_SYSTEM_AUDIO_ENABLED, false);
-        launchRoutingControl(true);
+        launchRoutingControl(fromBootup);
         launchDeviceDiscovery();
         registerAudioPortUpdateListener();
         // TODO: unregister audio port update listener if local device is released.

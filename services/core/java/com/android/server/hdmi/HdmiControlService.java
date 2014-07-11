@@ -211,16 +211,17 @@ public final class HdmiControlService extends SystemService {
         mPowerStatus = HdmiControlManager.POWER_STATUS_TRANSIENT_TO_ON;
         mProhibitMode = false;
         mHdmiControlEnabled = readBooleanSetting(Global.HDMI_CONTROL_ENABLED, true);
-        mCecController = HdmiCecController.create(this);
 
+        mCecController = HdmiCecController.create(this);
         if (mCecController != null) {
             // TODO: Remove this as soon as OEM's HAL implementation is corrected.
             mCecController.setOption(HdmiTvClient.OPTION_CEC_ENABLE,
                     HdmiTvClient.ENABLED);
 
-            mCecController.setOption(HdmiTvClient.OPTION_CEC_SERVICE_CONTROL,
-                    HdmiTvClient.ENABLED);
-            initializeLocalDevices(mLocalDevices);
+            // TODO: load value for mHdmiControlEnabled from preference.
+            if (mHdmiControlEnabled) {
+                initializeCec(true);
+            }
         } else {
             Slog.i(TAG, "Device does not support HDMI-CEC.");
         }
@@ -252,8 +253,14 @@ public final class HdmiControlService extends SystemService {
         Global.putInt(cr, key, value ? Constants.TRUE : Constants.FALSE);
     }
 
+    private void initializeCec(boolean fromBootup) {
+        mCecController.setOption(HdmiTvClient.OPTION_CEC_SERVICE_CONTROL,
+                HdmiTvClient.ENABLED);
+        initializeLocalDevices(mLocalDevices, fromBootup);
+    }
+
     @ServiceThreadOnly
-    private void initializeLocalDevices(final List<Integer> deviceTypes) {
+    private void initializeLocalDevices(final List<Integer> deviceTypes, final boolean fromBootup) {
         assertRunOnServiceThread();
         // A container for [Logical Address, Local device info].
         final SparseArray<HdmiCecLocalDevice> devices = new SparseArray<>();
@@ -282,7 +289,7 @@ public final class HdmiControlService extends SystemService {
                         if (mPowerStatus == HdmiControlManager.POWER_STATUS_TRANSIENT_TO_ON) {
                             mPowerStatus = HdmiControlManager.POWER_STATUS_ON;
                         }
-                        notifyAddressAllocated(devices);
+                        notifyAddressAllocated(devices, fromBootup);
                     }
                 }
             });
@@ -290,12 +297,13 @@ public final class HdmiControlService extends SystemService {
     }
 
     @ServiceThreadOnly
-    private void notifyAddressAllocated(SparseArray<HdmiCecLocalDevice> devices) {
+    private void notifyAddressAllocated(SparseArray<HdmiCecLocalDevice> devices,
+            boolean fromBootup) {
         assertRunOnServiceThread();
         for (int i = 0; i < devices.size(); ++i) {
             int address = devices.keyAt(i);
             HdmiCecLocalDevice device = devices.valueAt(i);
-            device.handleAddressAllocated(address);
+            device.handleAddressAllocated(address, fromBootup);
         }
     }
 
@@ -1223,8 +1231,9 @@ public final class HdmiControlService extends SystemService {
         assertRunOnServiceThread();
         mPowerStatus = HdmiControlManager.POWER_STATUS_TRANSIENT_TO_ON;
         if (mCecController != null) {
-            mCecController.setOption(HdmiTvClient.OPTION_CEC_SERVICE_CONTROL, HdmiTvClient.ENABLED);
-            initializeLocalDevices(mLocalDevices);
+            if (mHdmiControlEnabled) {
+                initializeCec(true);
+            }
         } else {
             Slog.i(TAG, "Device does not support HDMI-CEC.");
         }
@@ -1338,12 +1347,7 @@ public final class HdmiControlService extends SystemService {
         }
 
         if (enabled) {
-            // TODO: call initalizedLocalDevice with additional param once putting
-            // it to address allocation result.
-            HdmiCecLocalDeviceTv tv = tv();
-            if (tv != null) {
-                tv.launchRoutingControl(false);
-            }
+            initializeCec(false);
         } else {
             disableDevices(new PendingActionClearedCallback() {
                 @Override
