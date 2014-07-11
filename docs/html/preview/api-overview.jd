@@ -781,7 +781,7 @@ $ adb shell stop
 $ rm /tmp/device_owner.xml
 $ echo "&lt;?xml version='1.0' encoding='utf-8' standalone='yes' ?&gt;"
 &gt;&gt; /tmp/device_owner.xml
-$ echo "&device-owner package=\"&lt;your_device_owner_package&gt;\"
+$ echo "&lt;device-owner package=\"&lt;your_device_owner_package&gt;\"
 name=\"*&lt;your_organization_name&gt;\" /&gt;" &gt;&gt; /tmp/device_owner.xml
 $ adb push /tmp/device_owner.xml /data/system/device_owner.xml
 $ adb reboot
