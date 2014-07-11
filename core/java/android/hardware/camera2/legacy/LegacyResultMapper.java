@@ -80,7 +80,7 @@ public class LegacyResultMapper {
         /*
          * control.ae*
          */
-        mapAe(result, request, activeArraySize, zoomData, /*out*/params);
+        mapAe(result, characteristics, request, activeArraySize, zoomData, /*out*/params);
 
         // control.awbLock
         result.set(CaptureResult.CONTROL_AWB_LOCK, params.getAutoWhiteBalanceLock());
@@ -98,6 +98,13 @@ public class LegacyResultMapper {
         if (LegacyMetadataMapper.LIE_ABOUT_AWB) {
             result.set(CaptureResult.CONTROL_AWB_MODE,
                     request.get(CaptureRequest.CONTROL_AWB_MODE));
+        }
+
+        /*
+         * flash
+         */
+        {
+            // TODO
         }
 
         /*
@@ -122,6 +129,7 @@ public class LegacyResultMapper {
     }
 
     private static void mapAe(CameraMetadataNative m,
+            CameraCharacteristics characteristics,
             CaptureRequest request, Rect activeArray, ZoomData zoomData, /*out*/Parameters p) {
         // control.aeAntiBandingMode
         {
@@ -153,8 +161,8 @@ public class LegacyResultMapper {
             }
         }
 
-        // control.aeMode, flash.mode
-        mapAeAndFlashMode(m, p);
+        // control.aeMode, flash.mode, flash.state
+        mapAeAndFlashMode(m, characteristics, p);
 
         // control.aeState
         if (LegacyMetadataMapper.LIE_ABOUT_AE_STATE) {
@@ -219,33 +227,47 @@ public class LegacyResultMapper {
         return meteringRectList.toArray(new MeteringRectangle[0]);
     }
 
-
-    /** Map results for control.aeMode, flash.mode */
-    private static void mapAeAndFlashMode(CameraMetadataNative m, /*out*/Parameters p) {
+    /** Map results for control.aeMode, flash.mode, flash.state */
+    private static void mapAeAndFlashMode(CameraMetadataNative m,
+            CameraCharacteristics characteristics, Parameters p) {
         // Default: AE mode on but flash never fires
         int flashMode = FLASH_MODE_OFF;
+        // If there is no flash on this camera, the state is always unavailable
+        // , otherwise it's only known for TORCH/SINGLE modes
+        Integer flashState = characteristics.get(CameraCharacteristics.FLASH_INFO_AVAILABLE)
+                ? null : FLASH_STATE_UNAVAILABLE;
         int aeMode = CONTROL_AE_MODE_ON;
 
-        switch (p.getFlashMode()) {
-            case Parameters.FLASH_MODE_OFF:
-                break; // ok, using default
-            case Parameters.FLASH_MODE_AUTO:
-                aeMode = CONTROL_AE_MODE_ON_AUTO_FLASH;
-                break;
-            case Parameters.FLASH_MODE_ON:
-                // flashMode = SINGLE + aeMode = ON is indistinguishable from ON_ALWAYS_FLASH
-                aeMode = CONTROL_AE_MODE_ON_ALWAYS_FLASH;
-                break;
-            case Parameters.FLASH_MODE_RED_EYE:
-                aeMode = CONTROL_AE_MODE_ON_AUTO_FLASH_REDEYE;
-                break;
-            case Parameters.FLASH_MODE_TORCH:
-                flashMode = FLASH_MODE_TORCH;
-                break;
-            default:
-                Log.w(TAG, "mapAeAndFlashMode - Ignoring unknown flash mode " + p.getFlashMode());
+        String flashModeSetting = p.getFlashMode();
+
+        if (flashModeSetting != null) {
+            switch (flashModeSetting) {
+                case Parameters.FLASH_MODE_OFF:
+                    break; // ok, using default
+                case Parameters.FLASH_MODE_AUTO:
+                    aeMode = CONTROL_AE_MODE_ON_AUTO_FLASH;
+                    break;
+                case Parameters.FLASH_MODE_ON:
+                    // flashMode = SINGLE + aeMode = ON is indistinguishable from ON_ALWAYS_FLASH
+                    flashMode = FLASH_MODE_SINGLE;
+                    aeMode = CONTROL_AE_MODE_ON_ALWAYS_FLASH;
+                    flashState = FLASH_STATE_FIRED;
+                    break;
+                case Parameters.FLASH_MODE_RED_EYE:
+                    aeMode = CONTROL_AE_MODE_ON_AUTO_FLASH_REDEYE;
+                    break;
+                case Parameters.FLASH_MODE_TORCH:
+                    flashMode = FLASH_MODE_TORCH;
+                    flashState = FLASH_STATE_FIRED;
+                    break;
+                default:
+                    Log.w(TAG,
+                            "mapAeAndFlashMode - Ignoring unknown flash mode " + p.getFlashMode());
+            }
         }
 
+        // flash.state
+        m.set(FLASH_STATE, flashState);
         // flash.mode
         m.set(FLASH_MODE, flashMode);
         // control.aeMode

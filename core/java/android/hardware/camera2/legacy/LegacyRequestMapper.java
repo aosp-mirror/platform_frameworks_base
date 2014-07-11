@@ -258,34 +258,70 @@ public class LegacyRequestMapper {
 
         List<String> supportedFlashModes = p.getSupportedFlashModes();
 
+        String flashModeSetting = null;
+
+        // Flash is OFF by default, on cameras that support flash
+        if (ListUtils.listContains(supportedFlashModes, Parameters.FLASH_MODE_OFF)) {
+            flashModeSetting = Parameters.FLASH_MODE_OFF;
+        }
+
         /*
          * Map all of the control.aeMode* enums, but ignore AE_MODE_OFF since we never support it
          */
 
         // Ignore flash.mode controls unless aeMode == ON
         if (aeMode == CONTROL_AE_MODE_ON) {
-            // Flash is OFF by default
-            p.setFlashMode(Parameters.FLASH_MODE_OFF);
-
-            if (flashMode == FLASH_MODE_TORCH &&
-                    ListUtils.listContains(supportedFlashModes, Parameters.FLASH_MODE_TORCH)) {
-                p.setFlashMode(Parameters.FLASH_MODE_TORCH);
-            } else if (flashMode == FLASH_MODE_SINGLE &&
-                    ListUtils.listContains(supportedFlashModes, Parameters.FLASH_MODE_ON)) {
-                p.setFlashMode(Parameters.FLASH_MODE_ON);
+            if (flashMode == FLASH_MODE_TORCH) {
+                    if (ListUtils.listContains(supportedFlashModes, Parameters.FLASH_MODE_TORCH)) {
+                        flashModeSetting = Parameters.FLASH_MODE_TORCH;
+                    } else {
+                        Log.w(TAG, "mapAeAndFlashMode - Ignore flash.mode == TORCH;" +
+                                "camera does not support it");
+                    }
+            } else if (flashMode == FLASH_MODE_SINGLE) {
+                if (ListUtils.listContains(supportedFlashModes, Parameters.FLASH_MODE_ON)) {
+                    flashModeSetting = Parameters.FLASH_MODE_ON;
+                } else {
+                    Log.w(TAG, "mapAeAndFlashMode - Ignore flash.mode == SINGLE;" +
+                            "camera does not support it");
+                }
+            } else {
+                // Use the default FLASH_MODE_OFF
             }
-        } else if (aeMode == CONTROL_AE_MODE_ON_ALWAYS_FLASH &&
-                ListUtils.listContains(supportedFlashModes, Parameters.FLASH_MODE_ON)) {
-            p.setFlashMode(Parameters.FLASH_MODE_ON);
-        } else if (aeMode == CONTROL_AE_MODE_ON_AUTO_FLASH &&
-                ListUtils.listContains(supportedFlashModes, Parameters.FLASH_MODE_AUTO)) {
-            p.setFlashMode(Parameters.FLASH_MODE_AUTO);
-        } else if (aeMode == CONTROL_AE_MODE_ON_AUTO_FLASH_REDEYE &&
-                ListUtils.listContains(supportedFlashModes, Parameters.FLASH_MODE_RED_EYE)) {
-            p.setFlashMode(Parameters.FLASH_MODE_RED_EYE);
+        } else if (aeMode == CONTROL_AE_MODE_ON_ALWAYS_FLASH) {
+                if (ListUtils.listContains(supportedFlashModes, Parameters.FLASH_MODE_ON)) {
+                    flashModeSetting = Parameters.FLASH_MODE_ON;
+                } else {
+                    Log.w(TAG, "mapAeAndFlashMode - Ignore control.aeMode == ON_ALWAYS_FLASH;" +
+                            "camera does not support it");
+                }
+        } else if (aeMode == CONTROL_AE_MODE_ON_AUTO_FLASH) {
+            if (ListUtils.listContains(supportedFlashModes, Parameters.FLASH_MODE_AUTO)) {
+                flashModeSetting = Parameters.FLASH_MODE_AUTO;
+            } else {
+                Log.w(TAG, "mapAeAndFlashMode - Ignore control.aeMode == ON_AUTO_FLASH;" +
+                        "camera does not support it");
+            }
+        } else if (aeMode == CONTROL_AE_MODE_ON_AUTO_FLASH_REDEYE) {
+                if (ListUtils.listContains(supportedFlashModes, Parameters.FLASH_MODE_RED_EYE)) {
+                    flashModeSetting = Parameters.FLASH_MODE_RED_EYE;
+                } else {
+                    Log.w(TAG, "mapAeAndFlashMode - Ignore control.aeMode == ON_AUTO_FLASH_REDEYE;"
+                            + "camera does not support it");
+                }
         } else {
             // Default to aeMode == ON, flash = OFF
-            p.setFlashMode(Parameters.FLASH_MODE_OFF);
+        }
+
+        if (flashModeSetting != null) {
+            p.setFlashMode(flashModeSetting);
+        }
+
+        if (VERBOSE) {
+                Log.v(TAG,
+                        "mapAeAndFlashMode - set flash.mode (api1) to " + flashModeSetting
+                        + ", requested (api2) " + flashMode
+                        + ", supported (api1) " + ListUtils.listToString(supportedFlashModes));
         }
     }
 
