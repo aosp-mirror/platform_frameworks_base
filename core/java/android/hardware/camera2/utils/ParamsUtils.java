@@ -19,6 +19,7 @@ package android.hardware.camera2.utils;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.util.Rational;
 import android.util.Size;
 
 import static com.android.internal.util.Preconditions.*;
@@ -27,6 +28,9 @@ import static com.android.internal.util.Preconditions.*;
  * Various assortment of params utilities.
  */
 public class ParamsUtils {
+
+    /** Arbitrary denominator used to estimate floats as rationals */
+    private static final int RATIONAL_DENOMINATOR = 1000000; // 1million
 
     /**
      * Create a {@link Rect} from a {@code Size} by creating a new rectangle with
@@ -102,6 +106,55 @@ public class ParamsUtils {
 
         return new Size(rect.width(), rect.height());
     }
+
+    /**
+     * Create a {@link Rational} value by approximating the float value as a rational.
+     *
+     * <p>Floating points too large to be represented as an integer will be converted to
+     * to {@link Integer#MAX_VALUE}; floating points too small to be represented as an integer
+     * will be converted to {@link Integer#MIN_VALUE}.</p>
+     *
+     * @param value a floating point value
+     * @return the rational representation of the float
+     */
+    public static Rational createRational(float value) {
+        if (Float.isNaN(value)) {
+            return Rational.NaN;
+        } else if (value == Float.POSITIVE_INFINITY) {
+            return Rational.POSITIVE_INFINITY;
+        } else if (value == Float.NEGATIVE_INFINITY) {
+            return Rational.NEGATIVE_INFINITY;
+        } else if (value == 0.0f) {
+            return Rational.ZERO;
+        }
+
+        // normal finite value: approximate it
+
+        /*
+         * Start out trying to approximate with denominator = 1million,
+         * but if the numerator doesn't fit into an Int then keep making the denominator
+         * smaller until it does.
+         */
+        int den = RATIONAL_DENOMINATOR;
+        float numF;
+        do {
+            numF = value * den;
+
+            if ((numF > Integer.MIN_VALUE && numF < Integer.MAX_VALUE) || (den == 1)) {
+                break;
+            }
+
+            den /= 10;
+        } while (true);
+
+        /*
+         *  By float -> int narrowing conversion in JLS 5.1.3, this will automatically become
+         *  MIN_VALUE or MAX_VALUE if numF is too small/large to be represented by an integer
+         */
+        int num = (int) numF;
+
+        return new Rational(num, den);
+     }
 
     /**
      * Convert an integral rectangle ({@code source}) to a floating point rectangle

@@ -28,7 +28,9 @@ import android.hardware.camera2.legacy.ParameterUtils.WeightedRectangle;
 import android.hardware.camera2.legacy.ParameterUtils.ZoomData;
 import android.hardware.camera2.params.MeteringRectangle;
 import android.hardware.camera2.utils.ListUtils;
+import android.hardware.camera2.utils.ParamsUtils;
 import android.util.Log;
+import android.util.Rational;
 import android.util.Size;
 
 import java.util.ArrayList;
@@ -78,19 +80,22 @@ public class LegacyResultMapper {
         /*
          * control.ae*
          */
-        mapAe(result, activeArraySize, zoomData, /*out*/params);
+        mapAe(result, request, activeArraySize, zoomData, /*out*/params);
 
         // control.awbLock
         result.set(CaptureResult.CONTROL_AWB_LOCK, params.getAutoWhiteBalanceLock());
 
         // control.awbState
-        if (LegacyMetadataMapper.LIE_ABOUT_AWB) {
+        if (LegacyMetadataMapper.LIE_ABOUT_AWB_STATE) {
             // Lie to pass CTS temporarily.
             // TODO: CTS needs to be updated not to query this value
             // for LIMITED devices unless its guaranteed to be available.
             result.set(CaptureResult.CONTROL_AWB_STATE,
                     CameraMetadata.CONTROL_AWB_STATE_CONVERGED);
             // TODO: Read the awb mode from parameters instead
+        }
+
+        if (LegacyMetadataMapper.LIE_ABOUT_AWB) {
             result.set(CaptureResult.CONTROL_AWB_MODE,
                     request.get(CaptureRequest.CONTROL_AWB_MODE));
         }
@@ -117,12 +122,35 @@ public class LegacyResultMapper {
     }
 
     private static void mapAe(CameraMetadataNative m,
-            Rect activeArray, ZoomData zoomData, /*out*/Parameters p) {
+            CaptureRequest request, Rect activeArray, ZoomData zoomData, /*out*/Parameters p) {
         // control.aeAntiBandingMode
         {
             int antiBandingMode = LegacyMetadataMapper.convertAntiBandingModeOrDefault(
                     p.getAntibanding());
             m.set(CONTROL_AE_ANTIBANDING_MODE, antiBandingMode);
+        }
+
+        // control.aeExposureCompensation
+        {
+            m.set(CONTROL_AE_EXPOSURE_COMPENSATION, p.getExposureCompensation());
+        }
+
+        // control.aeLock
+        {
+            boolean lock = p.isAutoExposureLockSupported() ? p.getAutoExposureLock() : false;
+            m.set(CONTROL_AE_LOCK, lock);
+            if (VERBOSE) {
+                Log.v(TAG,
+                        "mapAe - android.control.aeLock = " + lock +
+                        ", supported = " + p.isAutoExposureLockSupported());
+            }
+
+            Boolean requestLock = request.get(CaptureRequest.CONTROL_AE_LOCK);
+            if (requestLock != null && requestLock != lock) {
+                Log.w(TAG,
+                        "mapAe - android.control.aeLock was requested to " + requestLock +
+                        " but resulted in " + lock);
+            }
         }
 
         // control.aeMode, flash.mode
@@ -159,6 +187,13 @@ public class LegacyResultMapper {
                     zoomData, p.getFocusAreas(), "AF");
 
             m.set(CONTROL_AF_REGIONS, meteringRectArray);
+        }
+
+        // control.awbLock
+        {
+            boolean lock = p.isAutoWhiteBalanceLockSupported() ?
+                    p.getAutoWhiteBalanceLock() : false;
+            m.set(CONTROL_AWB_LOCK, lock);
         }
     }
 

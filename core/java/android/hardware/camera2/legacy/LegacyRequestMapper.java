@@ -30,6 +30,7 @@ import android.util.Size;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import static com.android.internal.util.Preconditions.*;
 import static android.hardware.camera2.CaptureRequest.*;
@@ -153,13 +154,56 @@ public class LegacyRequestMapper {
          * control
          */
 
+        // control.aeExposureCompensation
+        {
+            Range<Integer> compensationRange =
+                    characteristics.get(CameraCharacteristics.CONTROL_AE_COMPENSATION_RANGE);
+            int compensation = getOrDefault(request,
+                    CONTROL_AE_EXPOSURE_COMPENSATION,
+                    /*defaultValue*/0);
+
+            if (!compensationRange.inRange(compensation)) {
+                Log.w(TAG,
+                        "convertRequestMetadata - control.aeExposureCompensation " +
+                        "is out of range, ignoring value");
+                compensation = 0;
+            }
+
+            params.setExposureCompensation(compensation);
+        }
+
+        // control.aeLock
+        {
+            Boolean aeLock = getIfSupported(request, CONTROL_AE_LOCK, /*defaultValue*/false,
+                    params.isAutoExposureLockSupported(),
+                    /*allowedValue*/false);
+
+            if (aeLock != null) {
+                params.setAutoExposureLock(aeLock);
+            }
+
+            if (VERBOSE) {
+                Log.v(TAG, "convertRequestToMetadata - control.aeLock set to " + aeLock);
+            }
+
+            // TODO: Don't add control.aeLock to availableRequestKeys if it's not supported
+        }
+
         // control.aeMode, flash.mode
         mapAeAndFlashMode(request, /*out*/params);
 
         // control.awbLock
-        Boolean awbLock = request.get(CONTROL_AWB_LOCK);
-        params.setAutoWhiteBalanceLock(awbLock == null ? false : awbLock);
+        {
+            Boolean awbLock = getIfSupported(request, CONTROL_AWB_LOCK, /*defaultValue*/false,
+                    params.isAutoWhiteBalanceLockSupported(),
+                    /*allowedValue*/false);
 
+            if (awbLock != null) {
+                params.setAutoWhiteBalanceLock(awbLock);
+            }
+
+         // TODO: Don't add control.awbLock to availableRequestKeys if it's not supported
+        }
     }
 
     private static List<Camera.Area> convertMeteringRegionsToLegacy(
@@ -275,6 +319,7 @@ public class LegacyRequestMapper {
         return legacyFps;
     }
 
+    /** Return the value set by the key, or the {@code defaultValue} if no value was set. */
     private static <T> T getOrDefault(CaptureRequest r, CaptureRequest.Key<T> key, T defaultValue) {
         checkNotNull(r, "r must not be null");
         checkNotNull(key, "key must not be null");
@@ -286,5 +331,30 @@ public class LegacyRequestMapper {
         } else {
             return value;
         }
+    }
+
+    /**
+     * Return {@code null} if the value is not supported, otherwise return the retrieved key's
+     * value from the request (or the default value if it wasn't set).
+     *
+     * <p>If the fetched value in the request is equivalent to {@code allowedValue},
+     * then omit the warning (e.g. turning off AF lock on a camera
+     * that always has the AF lock turned off is a silent no-op), but still return {@code null}.</p>
+     *
+     * <p>Logs a warning to logcat if the key is not supported by api1 camera device.</p.
+     */
+    private static <T> T getIfSupported(
+            CaptureRequest r, CaptureRequest.Key<T> key, T defaultValue, boolean isSupported,
+            T allowedValue) {
+        T val = getOrDefault(r, key, defaultValue);
+
+        if (!isSupported) {
+            if (!Objects.equals(val, allowedValue)) {
+                Log.w(TAG, key.getName() + " is not supported; ignoring requested value " + val);
+            }
+            return null;
+        }
+
+        return val;
     }
 }
