@@ -29503,6 +29503,7 @@ package android.text {
     ctor public SpannableStringBuilder(java.lang.CharSequence);
     ctor public SpannableStringBuilder(java.lang.CharSequence, int, int);
     method public android.text.SpannableStringBuilder append(java.lang.CharSequence);
+    method public android.text.SpannableStringBuilder append(java.lang.CharSequence, java.lang.Object, int);
     method public android.text.SpannableStringBuilder append(java.lang.CharSequence, int, int);
     method public android.text.SpannableStringBuilder append(char);
     method public char charAt(int);
