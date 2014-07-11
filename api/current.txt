@@ -244,7 +244,7 @@ package android {
     field public static final int action = 16842797; // 0x101002d
     field public static final int actionBarDivider = 16843675; // 0x101039b
     field public static final int actionBarItemBackground = 16843676; // 0x101039c
-    field public static final int actionBarPopupTheme = 16843918; // 0x101048e
+    field public static final int actionBarPopupTheme = 16843919; // 0x101048f
     field public static final int actionBarSize = 16843499; // 0x10102eb
     field public static final int actionBarSplitStyle = 16843656; // 0x1010388
     field public static final int actionBarStyle = 16843470; // 0x10102ce
@@ -853,7 +853,7 @@ package android {
     field public static final int mirrorForRtl = 16843726; // 0x10103ce
     field public static final int mode = 16843134; // 0x101017e
     field public static final int moreIcon = 16843061; // 0x1010135
-    field public static final int multiArch = 16843919; // 0x101048f
+    field public static final int multiArch = 16843920; // 0x1010490
     field public static final int multiprocess = 16842771; // 0x1010013
     field public static final int name = 16842755; // 0x1010003
     field public static final int navigationBarColor = 16843860; // 0x1010454
