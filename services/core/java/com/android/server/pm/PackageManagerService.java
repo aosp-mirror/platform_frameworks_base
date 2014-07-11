@@ -5694,15 +5694,14 @@ public class PackageManagerService extends IPackageManager.Stub {
                 ksms.removeAppKeySetData(pkg.packageName);
                 ksms.addSigningKeySetToPackage(pkg.packageName, pkg.mSigningKeys);
                 if (pkg.mKeySetMapping != null) {
-                    for (Map.Entry<String, Set<PublicKey>> entry :
+                    for (Map.Entry<String, ArraySet<PublicKey>> entry :
                             pkg.mKeySetMapping.entrySet()) {
                         if (entry.getValue() != null) {
                             ksms.addDefinedKeySetToPackage(pkg.packageName,
                                                           entry.getValue(), entry.getKey());
                         }
                     }
-                    if (pkg.mUpgradeKeySets != null
-                            && pkg.mKeySetMapping.keySet().containsAll(pkg.mUpgradeKeySets)) {
+                    if (pkg.mUpgradeKeySets != null) {
                         for (String upgradeAlias : pkg.mUpgradeKeySets) {
                             ksms.addUpgradeKeySetToPackage(pkg.packageName, upgradeAlias);
                         }

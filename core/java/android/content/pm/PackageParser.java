@@ -1312,8 +1312,8 @@ public class PackageParser {
                 }
                 XmlUtils.skipCurrentTag(parser);
 
-            } else if (tagName.equals("keys")) {
-                if (!parseKeys(pkg, res, parser, attrs, outError)) {
+            } else if (tagName.equals("key-sets")) {
+                if (!parseKeySets(pkg, res, parser, attrs, outError)) {
                     return null;
                 }
             } else if (tagName.equals("permission-group")) {
@@ -1328,17 +1328,6 @@ public class PackageParser {
                 if (parsePermissionTree(pkg, res, parser, attrs, outError) == null) {
                     return null;
                 }
-            } else if (tagName.equals("upgrade-keyset")) {
-                sa = res.obtainAttributes(attrs,
-                        com.android.internal.R.styleable.AndroidManifestUpgradeKeySet);
-                String name = sa.getNonResourceString(
-                        com.android.internal.R.styleable.AndroidManifestUpgradeKeySet_name);
-                sa.recycle();
-                if (pkg.mUpgradeKeySets == null) {
-                    pkg.mUpgradeKeySets = new ArraySet<String>();
-                }
-                pkg.mUpgradeKeySets.add(name);
-                XmlUtils.skipCurrentTag(parser);
             } else if (tagName.equals("uses-permission")) {
                 if (!parseUsesPermission(pkg, res, parser, attrs, outError)) {
                     return null;
@@ -1849,84 +1838,141 @@ public class PackageParser {
         return buildCompoundName(pkg, procSeq, "taskAffinity", outError);
     }
 
-    private boolean parseKeys(Package owner, Resources res,
+    private boolean parseKeySets(Package owner, Resources res,
             XmlPullParser parser, AttributeSet attrs, String[] outError)
             throws XmlPullParserException, IOException {
-        // we've encountered the 'keys' tag
+        // we've encountered the 'key-sets' tag
         // all the keys and keysets that we want must be defined here
         // so we're going to iterate over the parser and pull out the things we want
         int outerDepth = parser.getDepth();
-
+        int currentKeySetDepth = -1;
         int type;
-        PublicKey currentKey = null;
-        int currentKeyDepth = -1;
-        Map<PublicKey, Set<String>> definedKeySets = new HashMap<PublicKey, Set<String>>();
+        String currentKeySet = null;
+        ArrayMap<String, PublicKey> publicKeys = new ArrayMap<String, PublicKey>();
+        ArraySet<String> upgradeKeySets = new ArraySet<String>();
+        ArrayMap<String, ArraySet<String>> definedKeySets = new ArrayMap<String, ArraySet<String>>();
+        ArraySet<String> improperKeySets = new ArraySet<String>();
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
                 && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
             if (type == XmlPullParser.END_TAG) {
-                if (parser.getDepth() == currentKeyDepth) {
-                    currentKey = null;
-                    currentKeyDepth = -1;
+                if (parser.getDepth() == currentKeySetDepth) {
+                    currentKeySet = null;
+                    currentKeySetDepth = -1;
                 }
                 continue;
             }
-            String tagname = parser.getName();
-            if (tagname.equals("publicKey")) {
+            String tagName = parser.getName();
+            if (tagName.equals("key-set")) {
+                if (currentKeySet != null) {
+                    Slog.w(TAG, "Improperly nested 'key-set' tag at "
+                            + parser.getPositionDescription());
+                    return false;
+                }
                 final TypedArray sa = res.obtainAttributes(attrs,
-                        com.android.internal.R.styleable.PublicKey);
+                        com.android.internal.R.styleable.AndroidManifestKeySet);
+                final String keysetName = sa.getNonResourceString(
+                    com.android.internal.R.styleable.AndroidManifestKeySet_name);
+                definedKeySets.put(keysetName, new ArraySet<String>());
+                currentKeySet = keysetName;
+                currentKeySetDepth = parser.getDepth();
+                sa.recycle();
+            } else if (tagName.equals("public-key")) {
+                if (currentKeySet == null) {
+                    Slog.w(TAG, "Improperly nested 'public-key' tag at "
+                            + parser.getPositionDescription());
+                    return false;
+                }
+                final TypedArray sa = res.obtainAttributes(attrs,
+                        com.android.internal.R.styleable.AndroidManifestPublicKey);
+                final String publicKeyName = sa.getNonResourceString(
+                        com.android.internal.R.styleable.AndroidManifestPublicKey_name);
                 final String encodedKey = sa.getNonResourceString(
-                    com.android.internal.R.styleable.PublicKey_value);
-                currentKey = parsePublicKey(encodedKey);
-                if (currentKey == null) {
-                    Slog.w(TAG, "No valid key in 'publicKey' tag at "
-                            + parser.getPositionDescription());
+                            com.android.internal.R.styleable.AndroidManifestPublicKey_value);
+                if (encodedKey == null && publicKeys.get(publicKeyName) == null) {
+                    Slog.w(TAG, "'public-key' " + publicKeyName + " must define a public-key value"
+                            + " on first use at " + parser.getPositionDescription());
                     sa.recycle();
-                    continue;
+                    return false;
+                } else if (encodedKey != null) {
+                    PublicKey currentKey = parsePublicKey(encodedKey);
+                    if (currentKey == null) {
+                        Slog.w(TAG, "No recognized valid key in 'public-key' tag at "
+                                + parser.getPositionDescription() + " key-set " + currentKeySet
+                                + " will not be added to the package's defined key-sets.");
+                        sa.recycle();
+                        improperKeySets.add(currentKeySet);
+                        XmlUtils.skipCurrentTag(parser);
+                        continue;
+                    }
+                    if (publicKeys.get(publicKeyName) == null
+                            || publicKeys.get(publicKeyName).equals(currentKey)) {
+
+                        /* public-key first definition, or matches old definition */
+                        publicKeys.put(publicKeyName, currentKey);
+                    } else {
+                        Slog.w(TAG, "Value of 'public-key' " + publicKeyName
+                               + " conflicts with previously defined value at "
+                               + parser.getPositionDescription());
+                        sa.recycle();
+                        return false;
+                    }
                 }
-                currentKeyDepth = parser.getDepth();
-                definedKeySets.put(currentKey, new HashSet<String>());
+                definedKeySets.get(currentKeySet).add(publicKeyName);
                 sa.recycle();
-            } else if (tagname.equals("keyset")) {
-                if (currentKey == null) {
-                    Slog.i(TAG, "'keyset' not in 'publicKey' tag at "
-                            + parser.getPositionDescription());
-                    continue;
-                }
+                XmlUtils.skipCurrentTag(parser);
+            } else if (tagName.equals("upgrade-key-set")) {
                 final TypedArray sa = res.obtainAttributes(attrs,
-                        com.android.internal.R.styleable.KeySet);
-                final String name = sa.getNonResourceString(
-                    com.android.internal.R.styleable.KeySet_name);
-                definedKeySets.get(currentKey).add(name);
+                        com.android.internal.R.styleable.AndroidManifestUpgradeKeySet);
+                String name = sa.getNonResourceString(
+                        com.android.internal.R.styleable.AndroidManifestUpgradeKeySet_name);
+                upgradeKeySets.add(name);
                 sa.recycle();
+                XmlUtils.skipCurrentTag(parser);
             } else if (RIGID_PARSER) {
-                Slog.w(TAG, "Bad element under <keys>: " + parser.getName()
+                Slog.w(TAG, "Bad element under <key-sets>: " + parser.getName()
                         + " at " + mArchiveSourcePath + " "
                         + parser.getPositionDescription());
                 return false;
             } else {
-                Slog.w(TAG, "Unknown element under <keys>: " + parser.getName()
+                Slog.w(TAG, "Unknown element under <key-sets>: " + parser.getName()
                         + " at " + mArchiveSourcePath + " "
                         + parser.getPositionDescription());
                 XmlUtils.skipCurrentTag(parser);
                 continue;
             }
         }
-
-        owner.mKeySetMapping = new ArrayMap<String, Set<PublicKey>>();
-        for (Map.Entry<PublicKey, Set<String>> e : definedKeySets.entrySet()) {
-            PublicKey key = e.getKey();
-            Set<String> keySetNames = e.getValue();
-            for (String alias : keySetNames) {
-                if (owner.mKeySetMapping.containsKey(alias)) {
-                    owner.mKeySetMapping.get(alias).add(key);
-                } else {
-                    Set<PublicKey> keys = new ArraySet<PublicKey>();
-                    keys.add(key);
-                    owner.mKeySetMapping.put(alias, keys);
-                }
+        Set<String> publicKeyNames = publicKeys.keySet();
+        if (publicKeyNames.removeAll(definedKeySets.keySet())) {
+            Slog.w(TAG, "Package" + owner.packageName + " AndroidManifext.xml "
+                   + "'key-set' and 'public-key' names must be distinct.");
+            return false;
+        }
+        owner.mKeySetMapping = new ArrayMap<String, ArraySet<PublicKey>>();
+        for (ArrayMap.Entry<String, ArraySet<String>> e: definedKeySets.entrySet()) {
+            final String keySetName = e.getKey();
+            if (e.getValue().size() == 0) {
+                Slog.w(TAG, "Package" + owner.packageName + " AndroidManifext.xml "
+                        + "'key-set' " + keySetName + " has no valid associated 'public-key'."
+                        + " Not including in package's defined key-sets.");
+                continue;
+            } else if (improperKeySets.contains(keySetName)) {
+                Slog.w(TAG, "Package" + owner.packageName + " AndroidManifext.xml "
+                        + "'key-set' " + keySetName + " contained improper 'public-key'"
+                        + " tags. Not including in package's defined key-sets.");
+                continue;
+            }
+            owner.mKeySetMapping.put(keySetName, new ArraySet<PublicKey>());
+            for (String s : e.getValue()) {
+                owner.mKeySetMapping.get(keySetName).add(publicKeys.get(s));
             }
         }
-
+        if (owner.mKeySetMapping.keySet().containsAll(upgradeKeySets)) {
+            owner.mUpgradeKeySets = upgradeKeySets;
+        } else {
+            Slog.w(TAG, "Package" + owner.packageName + " AndroidManifext.xml "
+                   + "does not define all 'upgrade-key-set's .");
+            return false;
+        }
         return true;
     }
 
@@ -3925,11 +3971,11 @@ public class PackageParser {
         public boolean mTrustedOverlay;
 
         /**
-         * Data used to feed the KeySetManager
+         * Data used to feed the KeySetManagerService
          */
-        public Set<PublicKey> mSigningKeys;
-        public Set<String> mUpgradeKeySets;
-        public Map<String, Set<PublicKey>> mKeySetMapping;
+        public ArraySet<PublicKey> mSigningKeys;
+        public ArraySet<String> mUpgradeKeySets;
+        public ArrayMap<String, ArraySet<PublicKey>> mKeySetMapping;
 
         public Package(String packageName) {
             this.packageName = packageName;

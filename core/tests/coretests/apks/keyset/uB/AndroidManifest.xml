@@ -17,10 +17,11 @@
         package="com.android.frameworks.coretests.keysets">
     <application android:hasCode="false">
     </application>
-    <keys>
-      <publicKey android:value="MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAMTfQsY8UuXiXmvw/y7Tpr7HoyfAC0nE/8Qdk3ZtEr9asa5qqP0F6xzCI1PGVFV+WLVRwm6FdB9StENL5EKyQFcCAwEAAQ==">
-        <keyset android:name="B" />
-      </publicKey>
-    </keys>
-    <upgrade-keyset android:name="B"/>
+    <key-sets>
+        <key-set android:name="B" >
+          <public-key android:name="keyB"
+                      android:value="MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAMTfQsY8UuXiXmvw/y7Tpr7HoyfAC0nE/8Qdk3ZtEr9asa5qqP0F6xzCI1PGVFV+WLVRwm6FdB9StENL5EKyQFcCAwEAAQ==" />
+        </key-set>
+        <upgrade-key-set android:name="B"/>
+    </key-sets>
 </manifest>

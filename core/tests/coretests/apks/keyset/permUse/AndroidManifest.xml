@@ -18,14 +18,16 @@
     <application android:hasCode="false">
     </application>
     <uses-permission android:name="com.android.frameworks.coretests.keysets_permdef.keyset_perm" />
-    <keys>
-      <publicKey android:value="MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAJoN1Nsgqf0V4C/bbN8wo8O2X/S5D76+5Mb9mlIsHkUTUTbHCNk+LxHIUYLm89YbP9zImrV0bUHLUAZUyoMUCiMCAwEAAQ==">
-        <keyset android:name="A" />
-      </publicKey>
-      <publicKey android:value="MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAMTfQsY8UuXiXmvw/y7Tpr7HoyfAC0nE/8Qdk3ZtEr9asa5qqP0F6xzCI1PGVFV+WLVRwm6FdB9StENL5EKyQFcCAwEAAQ==">
-        <keyset android:name="B" />
-      </publicKey>
-    </keys>
-    <upgrade-keyset android:name="A"/>
-    <upgrade-keyset android:name="B"/>
+    <key-sets>
+        <key-set android:name="A">
+          <public-key android:name="keyA"
+                      android:value="MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAJoN1Nsgqf0V4C/bbN8wo8O2X/S5D76+5Mb9mlIsHkUTUTbHCNk+LxHIUYLm89YbP9zImrV0bUHLUAZUyoMUCiMCAwEAAQ=="/>
+        </key-set>
+        <key-set android:name="B">
+          <public-key android:name="keyB"
+                      android:value="MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAMTfQsY8UuXiXmvw/y7Tpr7HoyfAC0nE/8Qdk3ZtEr9asa5qqP0F6xzCI1PGVFV+WLVRwm6FdB9StENL5EKyQFcCAwEAAQ==" />
+        </key-set>
+        <upgrade-key-set android:name="A"/>
+        <upgrade-key-set android:name="B"/>
+    </key-sets>
 </manifest>

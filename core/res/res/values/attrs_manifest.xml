@@ -2025,10 +2025,11 @@
     <!-- Groups signing keys into a {@code KeySet} for easier reference in
             other APIs. However, currently no APIs use this. -->
     <attr name="keySet" />
-    <declare-styleable name="PublicKey">
+    <declare-styleable name="AndroidManifestPublicKey">
+        <attr name="name" />
         <attr name="value" />
     </declare-styleable>
-    <declare-styleable name="KeySet">
+    <declare-styleable name="AndroidManifestKeySet">
         <attr name="name" />
     </declare-styleable>
 
