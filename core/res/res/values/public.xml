@@ -2483,6 +2483,10 @@
 
   <public-padding type="interpolator" name="l_resource_pad" end="0x010c0010" />
 
+  <!-- @SystemApi -->
+  <!-- @hide -->
+  <public type="style" name="Theme.Leanback.FormWizard"/>
+
   <!-- An interpolator which accelerates fast but decelerates slowly. -->
   <public type="interpolator" name="fast_out_slow_in" />
   <!-- An interpolator which starts with a peak non-zero velocity and decelerates slowly. -->

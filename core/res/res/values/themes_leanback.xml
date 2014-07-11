@@ -62,4 +62,17 @@
         <item name="windowCloseOnTouchOutside">false</item>
         <item name="alertDialogStyle">@style/AlertDialog.Leanback</item>
     </style>
+
+    <!-- Setup and form wizard themes -->
+
+    <style name="Theme.Leanback.FormWizard" parent="Theme.Material.NoActionBar">
+        <item name="windowBackground">@drawable/background_leanback_setup</item>
+        <item name="colorBackgroundCacheHint">@null</item>
+        <item name="windowShowWallpaper">false</item>
+        <item name="textAppearanceSmall">@style/TextAppearance.Leanback.FormWizard.Small</item>
+        <item name="textAppearanceMedium">@style/TextAppearance.Leanback.FormWizard.Medium</item>
+        <item name="textAppearanceLarge">@style/TextAppearance.Leanback.FormWizard.Large</item>
+        <item name="textAppearanceListItem">@style/TextAppearance.Leanback.FormWizard.ListItem</item>
+        <item name="textAppearance">@style/TextAppearance.Leanback.FormWizard</item>
+    </style>
 </resources>
