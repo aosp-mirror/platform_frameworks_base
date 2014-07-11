@@ -66,7 +66,7 @@ final class ActiveSourceHandler {
         }
         HdmiCecDeviceInfo device = mService.getDeviceInfo(activeAddress);
         if (device == null) {
-            tv.addAndStartAction(new NewDeviceAction(tv, activeAddress, activePath));
+            tv.startNewDeviceAction(activeAddress, activePath);
         }
 
         int currentActive = tv.getActiveSource();
