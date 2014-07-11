@@ -610,7 +610,7 @@ abstract class HdmiCecLocalDevice {
      * Called when the system goes to standby mode.
      *
      * @param initiatedByCec true if this power sequence is initiated
-     *         by the reception the CEC messages like &lt;Standby&gt;
+     *        by the reception the CEC messages like &lt;Standby&gt;
      */
     protected void onStandby(boolean initiatedByCec) {}
 
@@ -619,11 +619,19 @@ abstract class HdmiCecLocalDevice {
      * actions are completed or timeout is issued.
      *
      * @param initiatedByCec true if this sequence is initiated
-     *         by the reception the CEC messages like &lt;Standby&gt;
-     * @param callback callback interface to get notified when all pending actions are cleared
+     *        by the reception the CEC messages like &lt;Standby&gt;
+     * @param origialCallback callback interface to get notified when all pending actions are
+     *        cleared
      */
-    protected void disableDevice(boolean initiatedByCec, PendingActionClearedCallback callback) {
-        mPendingActionClearedCallback = callback;
+    protected void disableDevice(boolean initiatedByCec,
+            final PendingActionClearedCallback origialCallback) {
+        mPendingActionClearedCallback = new PendingActionClearedCallback() {
+            @Override
+            public void onCleared(HdmiCecLocalDevice device) {
+                mHandler.removeMessages(MSG_DISABLE_DEVICE_TIMEOUT);
+                origialCallback.onCleared(device);
+            }
+        };
         mHandler.sendMessageDelayed(Message.obtain(mHandler, MSG_DISABLE_DEVICE_TIMEOUT),
                 DEVICE_CLEANUP_TIMEOUT);
     }
