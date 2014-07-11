@@ -142,6 +142,7 @@ public class FadedEdgeDrawHelper {
                 mFadeMatrix.setScale(1, fadeHeight * topFadeStrength);
                 mFadeMatrix.postTranslate(left, top);
                 mFade.setLocalMatrix(mFadeMatrix);
+                mFadePaint.setShader(mFade);
                 canvas.drawRect(left, top, right, top + length, mFadePaint);
 
                 if (mBlackPaint == null) {
@@ -157,6 +158,7 @@ public class FadedEdgeDrawHelper {
                 mFadeMatrix.postRotate(180);
                 mFadeMatrix.postTranslate(left, bottom);
                 mFade.setLocalMatrix(mFadeMatrix);
+                mFadePaint.setShader(mFade);
                 canvas.drawRect(left, bottom - length, right, bottom, mFadePaint);
             }
 
@@ -165,6 +167,7 @@ public class FadedEdgeDrawHelper {
                 mFadeMatrix.postRotate(-90);
                 mFadeMatrix.postTranslate(left, top);
                 mFade.setLocalMatrix(mFadeMatrix);
+                mFadePaint.setShader(mFade);
                 canvas.drawRect(left, top, left + length, bottom, mFadePaint);
             }
 
@@ -173,6 +176,7 @@ public class FadedEdgeDrawHelper {
                 mFadeMatrix.postRotate(90);
                 mFadeMatrix.postTranslate(right, top);
                 mFade.setLocalMatrix(mFadeMatrix);
+                mFadePaint.setShader(mFade);
                 canvas.drawRect(right - length, top, right, bottom, mFadePaint);
             }
         }

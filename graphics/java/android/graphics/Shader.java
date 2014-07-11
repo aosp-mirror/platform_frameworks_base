@@ -69,12 +69,17 @@ public class Shader {
 
     /**
      * Set the shader's local matrix. Passing null will reset the shader's
-     * matrix to identity
+     * matrix to identity.
+     *
+     * Starting with {@link android.os.Build.VERSION_CODES#L}, this does not
+     * modify any Paints which use this Shader. In order to modify the Paint,
+     * you need to call {@link Paint#setShader} again.
+     *
      * @param localM The shader's new local matrix, or null to specify identity
      */
     public void setLocalMatrix(Matrix localM) {
         mLocalMatrix = localM;
-        nativeSetLocalMatrix(native_instance,
+        native_instance = nativeSetLocalMatrix(native_instance,
                 localM == null ? 0 : localM.native_instance);
     }
 
@@ -109,6 +114,6 @@ public class Shader {
     }
 
     private static native void nativeDestructor(long native_shader);
-    private static native void nativeSetLocalMatrix(long native_shader,
+    private static native long nativeSetLocalMatrix(long native_shader,
             long matrix_instance);
 }

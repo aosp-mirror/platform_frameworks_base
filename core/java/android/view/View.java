@@ -14948,6 +14948,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             matrix.setScale(1, fadeHeight * topFadeStrength);
             matrix.postTranslate(left, top);
             fade.setLocalMatrix(matrix);
+            p.setShader(fade);
             canvas.drawRect(left, top, right, top + length, p);
         }
 
@@ -14956,6 +14957,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             matrix.postRotate(180);
             matrix.postTranslate(left, bottom);
             fade.setLocalMatrix(matrix);
+            p.setShader(fade);
             canvas.drawRect(left, bottom - length, right, bottom, p);
         }
 
@@ -14964,6 +14966,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             matrix.postRotate(-90);
             matrix.postTranslate(left, top);
             fade.setLocalMatrix(matrix);
+            p.setShader(fade);
             canvas.drawRect(left, top, left + length, bottom, p);
         }
 
@@ -14972,6 +14975,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             matrix.postRotate(90);
             matrix.postTranslate(right, top);
             fade.setLocalMatrix(matrix);
+            p.setShader(fade);
             canvas.drawRect(right - length, top, right, bottom, p);
         }
 

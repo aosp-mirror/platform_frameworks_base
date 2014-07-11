@@ -467,10 +467,12 @@ public class BitmapDrawable extends Drawable {
             if (needMirroring()) {
                 updateMirrorMatrix(bounds.right - bounds.left);
                 shader.setLocalMatrix(mMirrorMatrix);
+                mBitmapState.mPaint.setShader(shader);
             } else {
                 if (mMirrorMatrix != null) {
                     mMirrorMatrix = null;
                     shader.setLocalMatrix(Matrix.IDENTITY_MATRIX);
+                    mBitmapState.mPaint.setShader(shader);
                 }
             }
         }
@@ -547,10 +549,12 @@ public class BitmapDrawable extends Drawable {
                 // Mirror the bitmap
                 updateMirrorMatrix(mDstRect.right - mDstRect.left);
                 shader.setLocalMatrix(mMirrorMatrix);
+                paint.setShader(shader);
             } else {
                 if (mMirrorMatrix != null) {
                     mMirrorMatrix = null;
                     shader.setLocalMatrix(Matrix.IDENTITY_MATRIX);
+                    paint.setShader(shader);
                 }
             }
 
