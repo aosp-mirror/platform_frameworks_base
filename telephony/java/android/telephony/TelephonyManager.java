@@ -1695,6 +1695,15 @@ public class TelephonyManager {
      */
     /** {@hide} */
     public String getLine1Number(long subId) {
+        String number = null;
+        try {
+            number = getITelephony().getLine1NumberForDisplay(subId);
+        } catch (RemoteException ex) {
+        } catch (NullPointerException ex) {
+        }
+        if (number != null) {
+            return number;
+        }
         try {
             return getSubscriberInfo().getLine1NumberUsingSubId(subId);
         } catch (RemoteException ex) {
@@ -1702,6 +1711,47 @@ public class TelephonyManager {
         } catch (NullPointerException ex) {
             // This could happen before phone restarts due to crashing
             return null;
+        }
+    }
+
+    /**
+     * Set the phone number string and its alphatag for line 1 for display
+     * purpose only, for example, displayed in Phone Status. It won't change
+     * the actual MSISDN/MDN. This setting won't be persisted during power cycle
+     * and it should be set again after reboot.
+     * <p>
+     * Requires Permission:
+     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     *
+     * @param alphaTag alpha-tagging of the dailing nubmer
+     * @param number The dialing number
+     *
+     * @hide
+     */
+    public void setLine1NumberForDisplay(String alphaTag, String number) {
+        setLine1NumberForDisplay(getDefaultSubscription(), alphaTag, number);
+    }
+
+    /**
+     * Set the phone number string and its alphatag for line 1 for display
+     * purpose only, for example, displayed in Phone Status. It won't change
+     * the actual MSISDN/MDN. This setting won't be persisted during power cycle
+     * and it should be set again after reboot.
+     * <p>
+     * Requires Permission:
+     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     *
+     * @param subId the subscriber that the alphatag and dialing number belongs to.
+     * @param alphaTag alpha-tagging of the dailing nubmer
+     * @param number The dialing number
+     *
+     * @hide
+     */
+    public void setLine1NumberForDisplay(long subId, String alphaTag, String number) {
+        try {
+            getITelephony().setLine1NumberForDisplay(subId, alphaTag, number);
+        } catch (RemoteException ex) {
+        } catch (NullPointerException ex) {
         }
     }
 
@@ -1730,6 +1780,15 @@ public class TelephonyManager {
      */
     /** {@hide} */
     public String getLine1AlphaTag(long subId) {
+        String alphaTag = null;
+        try {
+            alphaTag = getITelephony().getLine1AlphaTagForDisplay(subId);
+        } catch (RemoteException ex) {
+        } catch (NullPointerException ex) {
+        }
+        if (alphaTag != null) {
+            return alphaTag;
+        }
         try {
             return getSubscriberInfo().getLine1AlphaTagUsingSubId(subId);
         } catch (RemoteException ex) {
