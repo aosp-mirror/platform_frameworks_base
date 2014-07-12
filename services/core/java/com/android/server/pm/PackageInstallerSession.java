@@ -92,7 +92,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
                 try {
                     installLocked();
-                } catch (InstallFailedException e) {
+                } catch (PackageManagerException e) {
                     Slog.e(TAG, "Install failed: " + e);
                     destroy();
                     try {
@@ -235,16 +235,16 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         mHandler.obtainMessage(MSG_INSTALL, observer).sendToTarget();
     }
 
-    private void installLocked() throws InstallFailedException {
+    private void installLocked() throws PackageManagerException {
         if (mInvalid) {
-            throw new InstallFailedException(INSTALL_FAILED_ALREADY_EXISTS, "Invalid session");
+            throw new PackageManagerException(INSTALL_FAILED_ALREADY_EXISTS, "Invalid session");
         }
 
         // Verify that all writers are hands-off
         if (mMutationsAllowed) {
             for (FileBridge bridge : mBridges) {
                 if (!bridge.isClosed()) {
-                    throw new InstallFailedException(INSTALL_FAILED_PACKAGE_CHANGED,
+                    throw new PackageManagerException(INSTALL_FAILED_PACKAGE_CHANGED,
                             "Files still open");
                 }
             }
@@ -298,13 +298,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      * <p>
      * Renames package files in stage to match split names defined inside.
      */
-    private void validateInstallLocked() throws InstallFailedException {
+    private void validateInstallLocked() throws PackageManagerException {
         mPackageName = null;
         mVersionCode = -1;
 
         final File[] files = sessionStageDir.listFiles();
         if (ArrayUtils.isEmpty(files)) {
-            throw new InstallFailedException(INSTALL_FAILED_INVALID_APK, "No packages staged");
+            throw new PackageManagerException(INSTALL_FAILED_INVALID_APK, "No packages staged");
         }
 
         final ArraySet<String> seenSplits = new ArraySet<>();
@@ -315,12 +315,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             try {
                 info = PackageParser.parseApkLite(file, PackageParser.PARSE_GET_SIGNATURES);
             } catch (PackageParserException e) {
-                throw new InstallFailedException(INSTALL_FAILED_INVALID_APK,
+                throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
                         "Failed to parse " + file + ": " + e);
             }
 
             if (!seenSplits.add(info.splitName)) {
-                throw new InstallFailedException(INSTALL_FAILED_INVALID_APK,
+                throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
                         "Split " + info.splitName + " was defined multiple times");
             }
 
@@ -344,7 +344,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 name = "split_" + info.splitName + ".apk";
             }
             if (!FileUtils.isValidExtFilename(name)) {
-                throw new InstallFailedException(INSTALL_FAILED_INVALID_APK,
+                throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
                         "Invalid filename: " + name);
             }
             if (!file.getName().equals(name)) {
@@ -359,7 +359,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         if (params.fullInstall) {
             // Full installs must include a base package
             if (!seenSplits.contains(null)) {
-                throw new InstallFailedException(INSTALL_FAILED_INVALID_APK,
+                throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
                         "Full install must include a base package");
             }
 
@@ -367,7 +367,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             // Partial installs must be consistent with existing install.
             final ApplicationInfo app = mPm.getApplicationInfo(mPackageName, 0, userId);
             if (app == null) {
-                throw new InstallFailedException(INSTALL_FAILED_INVALID_APK,
+                throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
                         "Missing existing base package for " + mPackageName);
             }
 
@@ -376,7 +376,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 info = PackageParser.parseApkLite(new File(app.getBaseCodePath()),
                         PackageParser.PARSE_GET_SIGNATURES);
             } catch (PackageParserException e) {
-                throw new InstallFailedException(INSTALL_FAILED_INVALID_APK,
+                throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
                         "Failed to parse existing base " + app.getBaseCodePath() + ": " + e);
             }
 
@@ -386,18 +386,18 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     private void assertPackageConsistent(String tag, String packageName, int versionCode,
-            Signature[] signatures) throws InstallFailedException {
+            Signature[] signatures) throws PackageManagerException {
         if (!mPackageName.equals(packageName)) {
-            throw new InstallFailedException(INSTALL_FAILED_INVALID_APK, tag + " package "
+            throw new PackageManagerException(INSTALL_FAILED_INVALID_APK, tag + " package "
                     + packageName + " inconsistent with " + mPackageName);
         }
         if (mVersionCode != versionCode) {
-            throw new InstallFailedException(INSTALL_FAILED_INVALID_APK, tag
+            throw new PackageManagerException(INSTALL_FAILED_INVALID_APK, tag
                     + " version code " + versionCode + " inconsistent with "
                     + mVersionCode);
         }
         if (!Signature.areExactMatch(mSignatures, signatures)) {
-            throw new InstallFailedException(INSTALL_FAILED_INVALID_APK,
+            throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
                     tag + " signatures are inconsistent");
         }
     }
@@ -406,14 +406,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      * Application is already installed; splice existing files that haven't been
      * overridden into our stage.
      */
-    private void spliceExistingFilesIntoStage() throws InstallFailedException {
+    private void spliceExistingFilesIntoStage() throws PackageManagerException {
         final ApplicationInfo app = mPm.getApplicationInfo(mPackageName, 0, userId);
         final File existingDir = new File(app.getBaseCodePath());
 
         try {
             linkTreeIgnoringExisting(existingDir, sessionStageDir);
         } catch (ErrnoException e) {
-            throw new InstallFailedException(INSTALL_FAILED_INTERNAL_ERROR,
+            throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
                     "Failed to splice into stage");
         }
     }
@@ -449,15 +449,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             sessionStageDir.delete();
         } finally {
             mCallback.onSessionInvalid(this);
-        }
-    }
-
-    private class InstallFailedException extends Exception {
-        private final int error;
-
-        public InstallFailedException(int error, String detailMessage) {
-            super(detailMessage);
-            this.error = error;
         }
     }
 }

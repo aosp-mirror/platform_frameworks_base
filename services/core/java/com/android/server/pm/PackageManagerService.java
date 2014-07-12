@@ -24,14 +24,30 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
 import static android.content.pm.PackageManager.INSTALL_EXTERNAL;
+import static android.content.pm.PackageManager.INSTALL_FAILED_ALREADY_EXISTS;
+import static android.content.pm.PackageManager.INSTALL_FAILED_CONFLICTING_PROVIDER;
+import static android.content.pm.PackageManager.INSTALL_FAILED_CPU_ABI_INCOMPATIBLE;
+import static android.content.pm.PackageManager.INSTALL_FAILED_DEXOPT;
+import static android.content.pm.PackageManager.INSTALL_FAILED_DUPLICATE_PACKAGE;
+import static android.content.pm.PackageManager.INSTALL_FAILED_DUPLICATE_PERMISSION;
+import static android.content.pm.PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
+import static android.content.pm.PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
+import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_APK;
+import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION;
+import static android.content.pm.PackageManager.INSTALL_FAILED_MISSING_SHARED_LIBRARY;
+import static android.content.pm.PackageManager.INSTALL_FAILED_PACKAGE_CHANGED;
+import static android.content.pm.PackageManager.INSTALL_FAILED_REPLACE_COULDNT_DELETE;
+import static android.content.pm.PackageManager.INSTALL_FAILED_SHARED_USER_INCOMPATIBLE;
+import static android.content.pm.PackageManager.INSTALL_FAILED_TEST_ONLY;
+import static android.content.pm.PackageManager.INSTALL_FAILED_UID_CHANGED;
+import static android.content.pm.PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_USER_RESTRICTED;
 import static android.content.pm.PackageManager.INSTALL_FORWARD_LOCK;
+import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
 import static android.content.pm.PackageParser.isApkFile;
 import static android.os.Process.PACKAGE_INFO_GID;
 import static android.os.Process.SYSTEM_UID;
 import static android.system.OsConstants.O_CREAT;
-import static android.system.OsConstants.EEXIST;
-import static android.system.OsConstants.O_EXCL;
 import static android.system.OsConstants.O_RDWR;
 import static android.system.OsConstants.S_IRGRP;
 import static android.system.OsConstants.S_IROTH;
@@ -85,7 +101,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageDeleteObserver;
-import android.content.pm.IPackageInstallObserver;
 import android.content.pm.IPackageInstallObserver2;
 import android.content.pm.IPackageInstaller;
 import android.content.pm.IPackageManager;
@@ -185,7 +200,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -380,9 +394,6 @@ public class PackageManagerService extends IPackageManager.Stub {
     // installed zip file (absolute codePath), and values are Package.
     final HashMap<String, PackageParser.Package> mAppDirs =
             new HashMap<String, PackageParser.Package>();
-
-    // Information for the parser to write more useful error messages.
-    int mLastScanError;
 
     // ----------------------------------------------------------------
 
@@ -1080,7 +1091,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                         if (args.observer != null) {
                             try {
                                 Bundle extras = extrasForInstallResult(res);
-                                args.observer.packageInstalled(res.name, extras, res.returnCode, null);
+                                args.observer.packageInstalled(res.name, extras, res.returnCode,
+                                        res.returnMsg);
                             } catch (RemoteException e) {
                                 Slog.i(TAG, "Observer no longer exists.");
                             }
@@ -4096,14 +4108,19 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // Ignore entries which are not apk's
                 continue;
             }
-            PackageParser.Package pkg = scanPackageLI(file,
-                    flags|PackageParser.PARSE_MUST_BE_APK, scanMode, currentTime, null, null);
-            // Don't mess around with apps in system partition.
-            if (pkg == null && (flags & PackageParser.PARSE_IS_SYSTEM) == 0 &&
-                    mLastScanError == PackageManager.INSTALL_FAILED_INVALID_APK) {
-                // Delete the apk
-                Slog.w(TAG, "Cleaning up failed install of " + file);
-                file.delete();
+            try {
+                scanPackageLI(file, flags | PackageParser.PARSE_MUST_BE_APK, scanMode, currentTime,
+                        null, null);
+            } catch (PackageManagerException e) {
+                Slog.w(TAG, "Failed to parse " + file + ": " + e.getMessage());
+
+                // Don't mess around with apps in system partition.
+                if ((flags & PackageParser.PARSE_IS_SYSTEM) == 0 &&
+                        e.error == PackageManager.INSTALL_FAILED_INVALID_APK) {
+                    // Delete the apk
+                    Slog.w(TAG, "Cleaning up failed install of " + file);
+                    file.delete();
+                }
             }
         }
     }
@@ -4133,8 +4150,9 @@ public class PackageManagerService extends IPackageManager.Stub {
         Slog.println(priority, TAG, msg);
     }
 
-    private boolean collectCertificatesLI(PackageParser pp, PackageSetting ps,
-            PackageParser.Package pkg, File srcFile, int parseFlags) {
+    private void collectCertificatesLI(PackageParser pp, PackageSetting ps,
+            PackageParser.Package pkg, File srcFile, int parseFlags)
+            throws PackageManagerException {
         if (ps != null
                 && ps.codePath.equals(srcFile)
                 && ps.timeStamp == srcFile.lastModified()
@@ -4150,10 +4168,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                 synchronized (mPackages) {
                     pkg.mSigningKeys = ksms.getPublicKeysFromKeySetLPr(mSigningKeySetId);
                 }
-                return true;
+                return;
             }
 
-            Slog.w(TAG, "PackageSetting for " + ps.name + " is missing signatures.  Collecting certs again to recover them.");
+            Slog.w(TAG, "PackageSetting for " + ps.name
+                    + " is missing signatures.  Collecting certs again to recover them.");
         } else {
             Log.i(TAG, srcFile.toString() + " changed; collecting certs");
         }
@@ -4162,20 +4181,17 @@ public class PackageManagerService extends IPackageManager.Stub {
             pp.collectCertificates(pkg, parseFlags);
             pp.collectManifestDigest(pkg);
         } catch (PackageParserException e) {
-            Slog.e(TAG, "Failed during collect: " + e);
-            mLastScanError = e.error;
-            return false;
+            throw new PackageManagerException(e.error, "Failed to collect certificates for "
+                    + pkg.packageName + ": " + e.getMessage());
         }
-        return true;
     }
 
     /*
      *  Scan a package and return the newly parsed package.
      *  Returns null in case of errors and the error code is stored in mLastScanError
      */
-    private PackageParser.Package scanPackageLI(File scanFile,
-            int parseFlags, int scanMode, long currentTime, UserHandle user, String abiOverride) {
-        mLastScanError = PackageManager.INSTALL_SUCCEEDED;
+    private PackageParser.Package scanPackageLI(File scanFile, int parseFlags, int scanMode,
+            long currentTime, UserHandle user, String abiOverride) throws PackageManagerException {
         if (DEBUG_INSTALL) Slog.d(TAG, "Parsing: " + scanFile);
         parseFlags |= mDefParseFlags;
         PackageParser pp = new PackageParser();
@@ -4191,9 +4207,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         try {
             pkg = pp.parsePackage(scanFile, parseFlags);
         } catch (PackageParserException e) {
-            Slog.e(TAG, "Failed during scan: " + e);
-            mLastScanError = e.error;
-            return null;
+            throw new PackageManagerException(e.error,
+                    "Failed to scan " + scanFile + ": " + e.getMessage());
         }
 
         PackageSetting ps = null;
@@ -4245,8 +4260,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         }
                     }
                     updatedPkg.pkg = pkg;
-                    mLastScanError = PackageManager.INSTALL_FAILED_DUPLICATE_PACKAGE;
-                    return null;
+                    throw new PackageManagerException(INSTALL_FAILED_DUPLICATE_PACKAGE, null);
                 } else {
                     // The current app on the system partition is better than
                     // what we have updated to on the data partition; switch
@@ -4289,11 +4303,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                 parseFlags |= PackageParser.PARSE_IS_PRIVILEGED;
             }
         }
+
         // Verify certificates against what was last scanned
-        if (!collectCertificatesLI(pp, ps, pkg, scanFile, parseFlags)) {
-            Slog.w(TAG, "Failed verifying certificates for package:" + pkg.packageName);
-            return null;
-        }
+        collectCertificatesLI(pp, ps, pkg, scanFile, parseFlags);
 
         /*
          * A new system app appeared, but we already had a non-system one of the
@@ -4405,7 +4417,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         return processName;
     }
 
-    private boolean verifySignaturesLP(PackageSetting pkgSetting, PackageParser.Package pkg) {
+    private void verifySignaturesLP(PackageSetting pkgSetting, PackageParser.Package pkg)
+            throws PackageManagerException {
         if (pkgSetting.signatures.mSignatures != null) {
             // Already existing package. Make sure signatures match
             boolean match = compareSignatures(pkgSetting.signatures.mSignatures, pkg.mSignatures)
@@ -4415,10 +4428,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                         == PackageManager.SIGNATURE_MATCH;
             }
             if (!match) {
-                Slog.e(TAG, "Package " + pkg.packageName
-                        + " signatures do not match the previously installed version; ignoring!");
-                mLastScanError = PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE;
-                return false;
+                throw new PackageManagerException(INSTALL_FAILED_UPDATE_INCOMPATIBLE, "Package "
+                        + pkg.packageName + " signatures do not match the "
+                        + "previously installed version; ignoring!");
             }
         }
 
@@ -4432,14 +4444,12 @@ public class PackageManagerService extends IPackageManager.Stub {
                         == PackageManager.SIGNATURE_MATCH;
             }
             if (!match) {
-                Slog.e(TAG, "Package " + pkg.packageName
+                throw new PackageManagerException(INSTALL_FAILED_SHARED_USER_INCOMPATIBLE,
+                        "Package " + pkg.packageName
                         + " has no signatures that match those in shared user "
                         + pkgSetting.sharedUser.name + "; ignoring!");
-                mLastScanError = PackageManager.INSTALL_FAILED_SHARED_USER_INCOMPATIBLE;
-                return false;
             }
         }
-        return true;
     }
 
     /**
@@ -4836,8 +4846,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    private boolean updateSharedLibrariesLPw(PackageParser.Package pkg,
-            PackageParser.Package changingLib) {
+    private void updateSharedLibrariesLPw(PackageParser.Package pkg,
+            PackageParser.Package changingLib) throws PackageManagerException {
         // We might be upgrading from a version of the platform that did not
         // provide per-package native library directories for system apps.
         // Fix that up here.
@@ -4854,11 +4864,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             for (int i=0; i<N; i++) {
                 final SharedLibraryEntry file = mSharedLibraries.get(pkg.usesLibraries.get(i));
                 if (file == null) {
-                    Slog.e(TAG, "Package " + pkg.packageName
-                            + " requires unavailable shared library "
+                    throw new PackageManagerException(INSTALL_FAILED_MISSING_SHARED_LIBRARY,
+                            "Package " + pkg.packageName + " requires unavailable shared library "
                             + pkg.usesLibraries.get(i) + "; failing!");
-                    mLastScanError = PackageManager.INSTALL_FAILED_MISSING_SHARED_LIBRARY;
-                    return false;
                 }
                 addSharedLibraryLPw(usesLibraryFiles, file, changingLib);
             }
@@ -4880,7 +4888,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                 pkg.usesLibraryFiles = null;
             }
         }
-        return true;
     }
 
     private static boolean hasString(List<String> list, List<String> which) {
@@ -4899,7 +4906,11 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private void updateAllSharedLibrariesLPw() {
         for (PackageParser.Package pkg : mPackages.values()) {
-            updateSharedLibrariesLPw(pkg, null);
+            try {
+                updateSharedLibrariesLPw(pkg, null);
+            } catch (PackageManagerException e) {
+                Slog.e(TAG, "updateAllSharedLibrariesLPw failed: " + e.getMessage());
+            }
         }
     }
 
@@ -4913,21 +4924,25 @@ public class PackageManagerService extends IPackageManager.Stub {
                     res = new ArrayList<PackageParser.Package>();
                 }
                 res.add(pkg);
-                updateSharedLibrariesLPw(pkg, changingPkg);
+                try {
+                    updateSharedLibrariesLPw(pkg, changingPkg);
+                } catch (PackageManagerException e) {
+                    Slog.e(TAG, "updateAllSharedLibrariesLPw failed: " + e.getMessage());
+                }
             }
         }
         return res;
     }
 
-    private PackageParser.Package scanPackageLI(PackageParser.Package pkg,
-            int parseFlags, int scanMode, long currentTime, UserHandle user, String abiOverride) {
+    private PackageParser.Package scanPackageLI(PackageParser.Package pkg, int parseFlags,
+            int scanMode, long currentTime, UserHandle user, String abiOverride)
+            throws PackageManagerException {
         final File scanFile = new File(pkg.codePath);
         if (pkg.applicationInfo.getCodePath() == null ||
                 pkg.applicationInfo.getResourcePath() == null) {
             // Bail out. The resource and code paths haven't been set.
-            Slog.w(TAG, " Code and resource paths haven't been set correctly");
-            mLastScanError = PackageManager.INSTALL_FAILED_INVALID_APK;
-            return null;
+            throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
+                    "Code and resource paths haven't been set correctly");
         }
 
         if ((parseFlags&PackageParser.PARSE_IS_SYSTEM) != 0) {
@@ -4950,8 +4965,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                     Slog.w(TAG, "Core android package being redefined.  Skipping.");
                     Slog.w(TAG, " file=" + scanFile);
                     Slog.w(TAG, "*************************************************");
-                    mLastScanError = PackageManager.INSTALL_FAILED_DUPLICATE_PACKAGE;
-                    return null;
+                    throw new PackageManagerException(INSTALL_FAILED_DUPLICATE_PACKAGE,
+                            "Core android package being redefined.  Skipping.");
                 }
 
                 // Set up information for our fall-back user intent resolution activity.
@@ -4987,10 +5002,9 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         if (mPackages.containsKey(pkg.packageName)
                 || mSharedLibraries.containsKey(pkg.packageName)) {
-            Slog.w(TAG, "Application package " + pkg.packageName
+            throw new PackageManagerException(INSTALL_FAILED_DUPLICATE_PACKAGE,
+                    "Application package " + pkg.packageName
                     + " already installed.  Skipping duplicate.");
-            mLastScanError = PackageManager.INSTALL_FAILED_DUPLICATE_PACKAGE;
-            return null;
         }
 
         // Initialize package source and resource directories
@@ -5012,10 +5026,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (pkg.mSharedUserId != null) {
                 suid = mSettings.getSharedUserLPw(pkg.mSharedUserId, 0, true);
                 if (suid == null) {
-                    Slog.w(TAG, "Creating application package " + pkg.packageName
+                    throw new PackageManagerException(INSTALL_FAILED_INSUFFICIENT_STORAGE,
+                            "Creating application package " + pkg.packageName
                             + " for shared user failed");
-                    mLastScanError = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
-                    return null;
                 }
                 if (DEBUG_PACKAGE_SCANNING) {
                     if ((parseFlags & PackageParser.PARSE_CHATTY) != 0)
@@ -5087,11 +5100,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                     pkg.applicationInfo.secondaryCpuAbi,
                     pkg.applicationInfo.flags, user, false);
             if (pkgSetting == null) {
-                Slog.w(TAG, "Creating application package " + pkg.packageName + " failed");
-                mLastScanError = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
-                return null;
+                throw new PackageManagerException(INSTALL_FAILED_INSUFFICIENT_STORAGE,
+                        "Creating application package " + pkg.packageName + " failed");
             }
-            
+
             if (pkgSetting.origPackage != null) {
                 // If we are first transitioning from an original package,
                 // fix up the new package's name now.  We need to do this after
@@ -5126,9 +5138,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // are the only ones that can fail an install due to this.  We
                 // will take care of the system apps by updating all of their
                 // library paths after the scan is done.
-                if (!updateSharedLibrariesLPw(pkg, null)) {
-                    return null;
-                }
+                updateSharedLibrariesLPw(pkg, null);
             }
 
             if (mFoundPolicyFile) {
@@ -5138,9 +5148,11 @@ public class PackageManagerService extends IPackageManager.Stub {
             pkg.applicationInfo.uid = pkgSetting.appId;
             pkg.mExtras = pkgSetting;
             if (!pkgSetting.keySetData.isUsingUpgradeKeySets() || pkgSetting.sharedUser != null) {
-                if (!verifySignaturesLP(pkgSetting, pkg)) {
-                    if ((parseFlags&PackageParser.PARSE_IS_SYSTEM_DIR) == 0) {
-                        return null;
+                try {
+                    verifySignaturesLP(pkgSetting, pkg);
+                } catch (PackageManagerException e) {
+                    if ((parseFlags & PackageParser.PARSE_IS_SYSTEM_DIR) == 0) {
+                        throw e;
                     }
                     // The signature has changed, but this package is in the system
                     // image...  let's recover!
@@ -5153,9 +5165,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                     if (pkgSetting.sharedUser != null) {
                         if (compareSignatures(pkgSetting.sharedUser.signatures.mSignatures,
                                               pkg.mSignatures) != PackageManager.SIGNATURE_MATCH) {
-                            Log.w(TAG, "Signature mismatch for shared user : " + pkgSetting.sharedUser);
-                            mLastScanError = PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
-                            return null;
+                            throw new PackageManagerException(
+                                    INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES,
+                                            "Signature mismatch for shared user : "
+                                            + pkgSetting.sharedUser);
                         }
                     }
                     // File a report about this.
@@ -5165,10 +5178,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
             } else {
                 if (!checkUpgradeKeySetLP(pkgSetting, pkg)) {
-                    Slog.e(TAG, "Package " + pkg.packageName
-                           + " upgrade keys do not match the previously installed version; ");
-                    mLastScanError = PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE;
-                    return null;
+                    throw new PackageManagerException(INSTALL_FAILED_UPDATE_INCOMPATIBLE, "Package "
+                            + pkg.packageName + " upgrade keys do not match the "
+                            + "previously installed version");
                 } else {
                     // signatures may have changed as result of upgrade
                     pkgSetting.signatures.mSignatures = pkg.mSignatures;
@@ -5188,13 +5200,14 @@ public class PackageManagerService extends IPackageManager.Stub {
                         for (int j = 0; j < names.length; j++) {
                             if (mProvidersByAuthority.containsKey(names[j])) {
                                 PackageParser.Provider other = mProvidersByAuthority.get(names[j]);
-                                Slog.w(TAG, "Can't install because provider name " + names[j] +
-                                        " (in package " + pkg.applicationInfo.packageName +
-                                        ") is already used by "
-                                        + ((other != null && other.getComponentName() != null)
-                                                ? other.getComponentName().getPackageName() : "?"));
-                                mLastScanError = PackageManager.INSTALL_FAILED_CONFLICTING_PROVIDER;
-                                return null;
+                                final String otherPackageName =
+                                        ((other != null && other.getComponentName() != null) ?
+                                                other.getComponentName().getPackageName() : "?");
+                                throw new PackageManagerException(
+                                        INSTALL_FAILED_CONFLICTING_PROVIDER,
+                                                "Can't install because provider name " + names[j]
+                                                + " (in package " + pkg.applicationInfo.packageName
+                                                + ") is already used by " + otherPackageName);
                             }
                         }
                     }
@@ -5290,8 +5303,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                                 msg = prefix + pkg.packageName
                                         + " could not have data directory re-created after delete.";
                                 reportSettingsProblem(Log.WARN, msg);
-                                mLastScanError = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
-                                return null;
+                                throw new PackageManagerException(
+                                        INSTALL_FAILED_INSUFFICIENT_STORAGE, msg);
                             }
                         }
                         if (!recovered) {
@@ -5300,8 +5313,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                     } else if (!recovered) {
                         // If we allow this install to proceed, we will be broken.
                         // Abort, abort!
-                        mLastScanError = PackageManager.INSTALL_FAILED_UID_CHANGED;
-                        return null;
+                        throw new PackageManagerException(INSTALL_FAILED_UID_CHANGED,
+                                "scanPackageLI");
                     }
                     if (!recovered) {
                         pkg.applicationInfo.dataDir = "/mismatched_uid/settings_"
@@ -5340,9 +5353,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                                            pkg.applicationInfo.seinfo);
                 if (ret < 0) {
                     // Error from installer
-                    Slog.w(TAG, "Unable to create data dirs [errorCode=" + ret + "]");
-                    mLastScanError = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
-                    return null;
+                    throw new PackageManagerException(INSTALL_FAILED_INSUFFICIENT_STORAGE,
+                            "Unable to create data dirs [errorCode=" + ret + "]");
                 }
 
                 if (dataPath.exists()) {
@@ -5416,9 +5428,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                     }
 
                     if (abi32 < 0 && abi32 != PackageManager.NO_NATIVE_LIBRARIES) {
-                        Slog.w(TAG, "Error unpackaging 32 bit native libs for multiarch app, errorCode=" + abi32);
-                        mLastScanError = PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
-                        return null;
+                        throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
+                                "Error unpackaging 32 bit native libs for multiarch app, errorCode="
+                                + abi32);
                     }
 
                     if (Build.SUPPORTED_64_BIT_ABIS.length > 0) {
@@ -5431,11 +5443,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                     }
 
                     if (abi64 < 0 && abi64 != PackageManager.NO_NATIVE_LIBRARIES) {
-                        Slog.w(TAG, "Error unpackaging 64 bit native libs for multiarch app, errorCode=" + abi32);
-                        mLastScanError = PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
-                        return null;
+                        throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
+                                "Error unpackaging 64 bit native libs for multiarch app, errorCode="
+                                + abi32);
                     }
-
 
                     if (abi64 >= 0) {
                         pkg.applicationInfo.primaryCpuAbi = Build.SUPPORTED_64_BIT_ABIS[abi64];
@@ -5471,9 +5482,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                     }
 
                     if (copyRet < 0 && copyRet != PackageManager.NO_NATIVE_LIBRARIES) {
-                        Slog.w(TAG, "Error unpackaging native libs for app, errorCode=" + copyRet);
-                        mLastScanError = PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
-                        return null;
+                        throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
+                                "Error unpackaging native libs for app, errorCode=" + copyRet);
                     }
 
                     if (copyRet >= 0) {
@@ -5501,10 +5511,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                     final String nativeLibPath = pkg.applicationInfo.nativeLibraryDir;
                     for (int userId : userIds) {
                         if (mInstaller.linkNativeLibraryDirectory(pkg.packageName, nativeLibPath, userId) < 0) {
-                            Slog.w(TAG, "Failed linking native library dir (user=" + userId
-                                    + ")");
-                            mLastScanError = PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
-                            return null;
+                            throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
+                                    "Failed linking native library dir (user=" + userId + ")");
                         }
                     }
                 }
@@ -5537,8 +5545,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             // code and package path correct.
             if (!adjustCpuAbisForSharedUserLPw(pkgSetting.sharedUser.packages,
                     pkg, forceDex, (scanMode & SCAN_DEFER_DEX) != 0)) {
-                mLastScanError = PackageManager.INSTALL_FAILED_CPU_ABI_INCOMPATIBLE;
-                return null;
+                throw new PackageManagerException(INSTALL_FAILED_CPU_ABI_INCOMPATIBLE,
+                        "scanPackageLI");
             }
         }
 
@@ -5549,8 +5557,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     removeDataDirsLI(pkg.packageName);
                 }
 
-                mLastScanError = PackageManager.INSTALL_FAILED_DEXOPT;
-                return null;
+                throw new PackageManagerException(INSTALL_FAILED_DEXOPT, "scanPackageLI");
             }
         }
 
@@ -5629,8 +5636,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                             removeDataDirsLI(pkg.packageName);
                         }
 
-                        mLastScanError = PackageManager.INSTALL_FAILED_DEXOPT;
-                        return null;
+                        throw new PackageManagerException(INSTALL_FAILED_DEXOPT,
+                                "scanPackageLI failed to dexopt clientLibPkgs");
                     }
                 }
             }
@@ -6012,8 +6019,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                     map.put(pkg.packageName, pkg);
                     PackageParser.Package orig = mPackages.get(pkg.mOverlayTarget);
                     if (orig != null && !createIdmapForPackagePairLI(orig, pkg)) {
-                        mLastScanError = PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE;
-                        return null;
+                        throw new PackageManagerException(INSTALL_FAILED_UPDATE_INCOMPATIBLE,
+                                "scanPackageLI failed to createIdmap");
                     }
                 }
             } else if (mOverlays.containsKey(pkg.packageName) &&
@@ -7692,9 +7699,14 @@ public class PackageManagerService extends IPackageManager.Stub {
                                 flags |= PackageParser.PARSE_IS_PRIVILEGED;
                             }
                         }
-                        p = scanPackageLI(fullPath, flags,
-                                SCAN_MONITOR | SCAN_NO_PATHS | SCAN_UPDATE_TIME,
-                                System.currentTimeMillis(), UserHandle.ALL, null);
+                        try {
+                            p = scanPackageLI(fullPath, flags,
+                                    SCAN_MONITOR | SCAN_NO_PATHS | SCAN_UPDATE_TIME,
+                                    System.currentTimeMillis(), UserHandle.ALL, null);
+                        } catch (PackageManagerException e) {
+                            Slog.w(TAG, "Failed to scan " + fullPath + ": " + e.getMessage());
+                            p = null;
+                        }
                         if (p != null) {
                             /*
                              * TODO this seems dangerous as the package may have
@@ -9843,7 +9855,14 @@ public class PackageManagerService extends IPackageManager.Stub {
         int[] newUsers;
         PackageParser.Package pkg;
         int returnCode;
+        String returnMsg;
         PackageRemovedInfo removedInfo;
+
+        public void setError(int code, String msg) {
+            returnCode = code;
+            returnMsg = msg;
+            Slog.w(TAG, msg);
+        }
 
         // In some error cases we want to convey more info back to the observer
         String origPackage;
@@ -9867,29 +9886,23 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // it has been renamed to an older name.  The package we
                 // are trying to install should be installed as an update to
                 // the existing one, but that has not been requested, so bail.
-                Slog.w(TAG, "Attempt to re-install " + pkgName
+                res.setError(INSTALL_FAILED_ALREADY_EXISTS, "Attempt to re-install " + pkgName
                         + " without first uninstalling package running as "
                         + mSettings.mRenamedPackages.get(pkgName));
-                res.returnCode = PackageManager.INSTALL_FAILED_ALREADY_EXISTS;
                 return;
             }
             if (mPackages.containsKey(pkgName) || mAppDirs.containsKey(pkg.codePath)) {
                 // Don't allow installation over an existing package with the same name.
-                Slog.w(TAG, "Attempt to re-install " + pkgName
+                res.setError(INSTALL_FAILED_ALREADY_EXISTS, "Attempt to re-install " + pkgName
                         + " without first uninstalling.");
-                res.returnCode = PackageManager.INSTALL_FAILED_ALREADY_EXISTS;
                 return;
             }
         }
-        mLastScanError = PackageManager.INSTALL_SUCCEEDED;
-        PackageParser.Package newPackage = scanPackageLI(pkg, parseFlags, scanMode,
-                System.currentTimeMillis(), user, abiOverride);
-        if (newPackage == null) {
-            Slog.w(TAG, "Package couldn't be installed in " + pkg.codePath);
-            if ((res.returnCode=mLastScanError) == PackageManager.INSTALL_SUCCEEDED) {
-                res.returnCode = PackageManager.INSTALL_FAILED_INVALID_APK;
-            }
-        } else {
+
+        try {
+            PackageParser.Package newPackage = scanPackageLI(pkg, parseFlags, scanMode,
+                    System.currentTimeMillis(), user, abiOverride);
+
             updateSettingsLI(newPackage, installerPackageName, null, null, res);
             // delete the partially installed application. the data directory will have to be
             // restored if it was already existing
@@ -9902,6 +9915,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                         dataDirExists ? PackageManager.DELETE_KEEP_DATA : 0,
                                 res.removedInfo, true);
             }
+
+        } catch (PackageManagerException e) {
+            res.setError(e.error,
+                    "Package couldn't be installed in " + pkg.codePath + ": " + e.getMessage());
         }
     }
 
@@ -9936,15 +9953,15 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // default to original signature matching
                 if (compareSignatures(oldPackage.mSignatures, pkg.mSignatures)
                     != PackageManager.SIGNATURE_MATCH) {
-                    Slog.w(TAG, "New package has a different signature: " + pkgName);
-                    res.returnCode = PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
+                    res.setError(INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES,
+                            "New package has a different signature: " + pkgName);
                     return;
                 }
             } else {
                 if(!checkUpgradeKeySetLP(ps, pkg)) {
-                    Slog.w(TAG, "New package not signed by keys specified by upgrade-keysets: "
-                           + pkgName);
-                    res.returnCode = PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
+                    res.setError(INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES,
+                            "New package not signed by keys specified by upgrade-keysets: "
+                            + pkgName);
                     return;
                 }
             }
@@ -9972,7 +9989,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             PackageParser.Package pkg, int parseFlags, int scanMode, UserHandle user,
             int[] allUsers, boolean[] perUserInstalled,
             String installerPackageName, PackageInstalledInfo res, String abiOverride) {
-        PackageParser.Package newPackage = null;
         String pkgName = deletedPackage.packageName;
         boolean deletedPkg = true;
         boolean updatedSettings = false;
@@ -9990,21 +10006,18 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (!deletePackageLI(pkgName, null, true, null, null, PackageManager.DELETE_KEEP_DATA,
                 res.removedInfo, true)) {
             // If the existing package wasn't successfully deleted
-            res.returnCode = PackageManager.INSTALL_FAILED_REPLACE_COULDNT_DELETE;
+            res.setError(INSTALL_FAILED_REPLACE_COULDNT_DELETE, "replaceNonSystemPackageLI");
             deletedPkg = false;
         } else {
             // Successfully deleted the old package. Now proceed with re-installation
-            mLastScanError = PackageManager.INSTALL_SUCCEEDED;
-            newPackage = scanPackageLI(pkg, parseFlags, scanMode | SCAN_UPDATE_TIME,
-                    System.currentTimeMillis(), user, abiOverride);
-            if (newPackage == null) {
-                Slog.w(TAG, "Package couldn't be installed in " + pkg.codePath);
-                if ((res.returnCode=mLastScanError) == PackageManager.INSTALL_SUCCEEDED) {
-                    res.returnCode = PackageManager.INSTALL_FAILED_INVALID_APK;
-                }
-            } else {
+            try {
+                final PackageParser.Package newPackage = scanPackageLI(pkg, parseFlags,
+                        scanMode | SCAN_UPDATE_TIME, System.currentTimeMillis(), user, abiOverride);
                 updateSettingsLI(newPackage, installerPackageName, allUsers, perUserInstalled, res);
                 updatedSettings = true;
+            } catch (PackageManagerException e) {
+                res.setError(e.error,
+                        "Package couldn't be installed in " + pkg.codePath + ": " + e.getMessage());
             }
         }
 
@@ -10032,9 +10045,12 @@ public class PackageManagerService extends IPackageManager.Stub {
                         (oldOnSd ? PackageParser.PARSE_ON_SDCARD : 0);
                 int oldScanMode = (oldOnSd ? 0 : SCAN_MONITOR) | SCAN_UPDATE_SIGNATURE
                         | SCAN_UPDATE_TIME;
-                if (scanPackageLI(restoreFile, oldParseFlags, oldScanMode,
-                        origUpdateTime, null, null) == null) {
-                    Slog.e(TAG, "Failed to restore package : " + pkgName + " after failed upgrade");
+                try {
+                    scanPackageLI(restoreFile, oldParseFlags, oldScanMode, origUpdateTime, null,
+                            null);
+                } catch (PackageManagerException e) {
+                    Slog.e(TAG, "Failed to restore package : " + pkgName + " after failed upgrade: "
+                            + e.getMessage());
                     return;
                 }
                 // Restore of old package succeeded. Update permissions.
@@ -10056,7 +10072,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             String installerPackageName, PackageInstalledInfo res, String abiOverride) {
         if (DEBUG_INSTALL) Slog.d(TAG, "replaceSystemPackageLI: new=" + pkg
                 + ", old=" + deletedPackage);
-        PackageParser.Package newPackage = null;
         boolean updatedSettings = false;
         parseFlags |= PackageManager.INSTALL_REPLACE_EXISTING |
                 PackageParser.PARSE_IS_SYSTEM;
@@ -10064,9 +10079,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             parseFlags |= PackageParser.PARSE_IS_PRIVILEGED;
         }
         String packageName = deletedPackage.packageName;
-        res.returnCode = PackageManager.INSTALL_FAILED_REPLACE_COULDNT_DELETE;
         if (packageName == null) {
-            Slog.w(TAG, "Attempt to delete null packageName.");
+            res.setError(INSTALL_FAILED_REPLACE_COULDNT_DELETE,
+                    "Attempt to delete null packageName.");
             return;
         }
         PackageParser.Package oldPkg;
@@ -10077,7 +10092,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             oldPkgSetting = mSettings.mPackages.get(packageName);
             if((oldPkg == null) || (oldPkg.applicationInfo == null) ||
                     (oldPkgSetting == null)) {
-                Slog.w(TAG, "Couldn't find package:"+packageName+" information");
+                res.setError(INSTALL_FAILED_REPLACE_COULDNT_DELETE,
+                        "Couldn't find package:" + packageName + " information");
                 return;
             }
         }
@@ -10106,25 +10122,22 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         
         // Successfully disabled the old package. Now proceed with re-installation
-        res.returnCode = mLastScanError = PackageManager.INSTALL_SUCCEEDED;
+        res.returnCode = PackageManager.INSTALL_SUCCEEDED;
         pkg.applicationInfo.flags |= ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
-        newPackage = scanPackageLI(pkg, parseFlags, scanMode, 0, user, abiOverride);
-        if (newPackage == null) {
-            Slog.w(TAG, "Package couldn't be installed in " + pkg.codePath);
-            if ((res.returnCode=mLastScanError) == PackageManager.INSTALL_SUCCEEDED) {
-                res.returnCode = PackageManager.INSTALL_FAILED_INVALID_APK;
-            }
-        } else {
+
+        PackageParser.Package newPackage = null;
+        try {
+            newPackage = scanPackageLI(pkg, parseFlags, scanMode, 0, user, abiOverride);
             if (newPackage.mExtras != null) {
-                final PackageSetting newPkgSetting = (PackageSetting)newPackage.mExtras;
+                final PackageSetting newPkgSetting = (PackageSetting) newPackage.mExtras;
                 newPkgSetting.firstInstallTime = oldPkgSetting.firstInstallTime;
                 newPkgSetting.lastUpdateTime = System.currentTimeMillis();
 
                 // is the update attempting to change shared user? that isn't going to work...
                 if (oldPkgSetting.sharedUser != newPkgSetting.sharedUser) {
-                    Slog.w(TAG, "Forbidding shared user change from " + oldPkgSetting.sharedUser
+                    res.setError(INSTALL_FAILED_SHARED_USER_INCOMPATIBLE,
+                            "Forbidding shared user change from " + oldPkgSetting.sharedUser
                             + " to " + newPkgSetting.sharedUser);
-                    res.returnCode = PackageManager.INSTALL_FAILED_SHARED_USER_INCOMPATIBLE;
                     updatedSettings = true;
                 }
             }
@@ -10133,6 +10146,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                 updateSettingsLI(newPackage, installerPackageName, allUsers, perUserInstalled, res);
                 updatedSettings = true;
             }
+
+        } catch (PackageManagerException e) {
+            res.setError(e.error,
+                    "Package couldn't be installed in " + pkg.codePath + ": " + e.getMessage());
         }
 
         if (res.returnCode != PackageManager.INSTALL_SUCCEEDED) {
@@ -10142,7 +10159,12 @@ public class PackageManagerService extends IPackageManager.Stub {
                 removeInstalledPackageLI(newPackage, true);
             }
             // Add back the old system package
-            scanPackageLI(oldPkg, parseFlags, SCAN_MONITOR | SCAN_UPDATE_SIGNATURE, 0, user, null);
+            try {
+                scanPackageLI(oldPkg, parseFlags, SCAN_MONITOR | SCAN_UPDATE_SIGNATURE, 0, user,
+                        null);
+            } catch (PackageManagerException e) {
+                Slog.e(TAG, "Failed to restore original package: " + e.getMessage());
+            }
             // Restore the old system information in Settings
             synchronized(mPackages) {
                 if (updatedSettings) {
@@ -10265,15 +10287,14 @@ public class PackageManagerService extends IPackageManager.Stub {
         try {
             pkg = pp.parsePackage(tmpPackageFile, parseFlags);
         } catch (PackageParserException e) {
-            Slog.e(TAG, "Failed during install: " + e);
-            res.returnCode = e.error;
+            res.setError(e.error, "Failed parse during installPackageLI: " + e.getMessage());
             return;
         }
 
         String pkgName = res.name = pkg.packageName;
         if ((pkg.applicationInfo.flags&ApplicationInfo.FLAG_TEST_ONLY) != 0) {
             if ((pFlags&PackageManager.INSTALL_ALLOW_TEST) == 0) {
-                res.returnCode = PackageManager.INSTALL_FAILED_TEST_ONLY;
+                res.setError(INSTALL_FAILED_TEST_ONLY, "installPackageLI");
                 return;
             }
         }
@@ -10282,8 +10303,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             pp.collectCertificates(pkg, parseFlags);
             pp.collectManifestDigest(pkg);
         } catch (PackageParserException e) {
-            Slog.e(TAG, "Failed during install: " + e);
-            res.returnCode = e.error;
+            res.setError(e.error, "Failed collect during installPackageLI: " + e.getMessage());
             return;
         }
 
@@ -10297,7 +10317,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             if (!args.manifestDigest.equals(pkg.manifestDigest)) {
-                res.returnCode = PackageManager.INSTALL_FAILED_PACKAGE_CHANGED;
+                res.setError(INSTALL_FAILED_PACKAGE_CHANGED, "Manifest digest changed");
                 return;
             }
         } else if (DEBUG_INSTALL) {
@@ -10325,10 +10345,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                         // install to proceed; we fail the install on all other permission
                         // redefinitions.
                         if (!bp.sourcePackage.equals("android")) {
-                            Slog.w(TAG, "Package " + pkg.packageName
-                                    + " attempting to redeclare permission " + perm.info.name
-                                    + " already owned by " + bp.sourcePackage);
-                            res.returnCode = PackageManager.INSTALL_FAILED_DUPLICATE_PERMISSION;
+                            res.setError(INSTALL_FAILED_DUPLICATE_PERMISSION, "Package "
+                                    + pkg.packageName + " attempting to redeclare permission "
+                                    + perm.info.name + " already owned by " + bp.sourcePackage);
                             res.origPermission = perm.info.name;
                             res.origPackage = bp.sourcePackage;
                             return;
@@ -10378,13 +10397,13 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         if (systemApp && onSd) {
             // Disable updates to system apps on sdcard
-            Slog.w(TAG, "Cannot install updates to system apps on sdcard");
-            res.returnCode = PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION;
+            res.setError(INSTALL_FAILED_INVALID_INSTALL_LOCATION,
+                    "Cannot install updates to system apps on sdcard");
             return;
         }
 
         if (!args.doRename(res.returnCode, pkg, oldCodePath)) {
-            res.returnCode = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
+            res.setError(INSTALL_FAILED_INSUFFICIENT_STORAGE, "Failed rename");
             return;
         }
 
@@ -10816,14 +10835,16 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (locationIsPrivileged(disabledPs.codePath)) {
             parseFlags |= PackageParser.PARSE_IS_PRIVILEGED;
         }
-        PackageParser.Package newPkg = scanPackageLI(disabledPs.codePath,
-                parseFlags, SCAN_MONITOR | SCAN_NO_PATHS, 0, null, null);
 
-        if (newPkg == null) {
-            Slog.w(TAG, "Failed to restore system package:" + newPs.name
-                    + " with error:" + mLastScanError);
+        final PackageParser.Package newPkg;
+        try {
+            newPkg = scanPackageLI(disabledPs.codePath, parseFlags, SCAN_MONITOR | SCAN_NO_PATHS, 0,
+                    null, null);
+        } catch (PackageManagerException e) {
+            Slog.w(TAG, "Failed to restore system package:" + newPs.name + ": " + e.getMessage());
             return false;
         }
+
         // writer
         synchronized (mPackages) {
             PackageSetting ps = mSettings.mPackages.get(newPkg.packageName);
@@ -12687,8 +12708,12 @@ public class PackageManagerService extends IPackageManager.Stub {
 
                 doGc = true;
                 synchronized (mInstallLock) {
-                    final PackageParser.Package pkg = scanPackageLI(new File(codePath), parseFlags,
-                            0, 0, null, null);
+                    PackageParser.Package pkg = null;
+                    try {
+                        pkg = scanPackageLI(new File(codePath), parseFlags, 0, 0, null, null);
+                    } catch (PackageManagerException e) {
+                        Slog.w(TAG, "Failed to scan " + codePath + ": " + e.getMessage());
+                    }
                     // Scan the package
                     if (pkg != null) {
                         /*
