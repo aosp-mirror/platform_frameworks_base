@@ -429,9 +429,4 @@ interface IPackageManager {
 
     boolean setBlockUninstallForUser(String packageName, boolean blockUninstall, int userId);
     boolean getBlockUninstallForUser(String packageName, int userId);
-
-    IBinder getKeySetByAlias(String packageName, String alias);
-    IBinder getSigningKeySet(String packageName);
-    boolean isPackageSignedByKeySet(String packageName, IBinder ks);
-    boolean isPackageSignedByKeySetExactly(String packageName, IBinder ks);
 }
