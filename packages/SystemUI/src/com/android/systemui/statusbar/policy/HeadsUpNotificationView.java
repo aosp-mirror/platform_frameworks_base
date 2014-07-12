@@ -26,6 +26,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.ViewOutlineProvider;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 
@@ -159,6 +160,21 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
 
     // ViewGroup methods
 
+    private static final ViewOutlineProvider CONTENT_HOLDER_OUTLINE_PROVIDER =
+            new ViewOutlineProvider() {
+        @Override
+        public boolean getOutline(View view, Outline outline) {
+            int outlineLeft = view.getPaddingLeft();
+            int outlineTop = view.getPaddingTop();
+
+            // Apply padding to shadow.
+            outline.setRect(outlineLeft, outlineTop,
+                    view.getWidth() - outlineLeft - view.getPaddingRight(),
+                    view.getHeight() - outlineTop - view.getPaddingBottom());
+            return true;
+        }
+    };
+
     @Override
     public void onAttachedToWindow() {
         float densityScale = getResources().getDisplayMetrics().density;
@@ -174,6 +190,7 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
         mExpandHelper = new ExpandHelper(getContext(), this, minHeight, maxHeight);
 
         mContentHolder = (ViewGroup) findViewById(R.id.content_holder);
+        mContentHolder.setOutlineProvider(CONTENT_HOLDER_OUTLINE_PROVIDER);
 
         if (mHeadsUp != null) {
             // whoops, we're on already!
@@ -230,20 +247,6 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
         mSwipeHelper.setDensityScale(densityScale);
         float pagingTouchSlop = ViewConfiguration.get(getContext()).getScaledPagingTouchSlop();
         mSwipeHelper.setPagingTouchSlop(pagingTouchSlop);
-    }
-
-    @Override
-    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        super.onLayout(changed, left, top, right, bottom);
-        Outline o = new Outline();
-
-        // Apply padding to shadow.
-        int outlineLeft = mContentHolder.getPaddingLeft();
-        int outlineTop = mContentHolder.getPaddingTop();
-        o.setRect(outlineLeft, outlineTop,
-                mContentHolder.getWidth() - outlineLeft - mContentHolder.getPaddingRight(),
-                mContentHolder.getHeight() - outlineTop - mContentHolder.getPaddingBottom());
-        mContentHolder.setOutline(o);
     }
 
     // ExpandHelper.Callback methods

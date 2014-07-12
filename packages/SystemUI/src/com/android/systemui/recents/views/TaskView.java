@@ -27,6 +27,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewOutlineProvider;
 import android.view.ViewPropertyAnimator;
 import android.view.animation.AccelerateInterpolator;
 import android.widget.FrameLayout;
@@ -66,7 +67,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
     boolean mClipViewInStack;
     Rect mTmpRect = new Rect();
     Paint mLayerPaint = new Paint();
-    Outline mOutline = new Outline();
 
     TaskThumbnailView mThumbnailView;
     TaskBarView mBarView;
@@ -115,6 +115,15 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         setClipToOutline(true);
         setDim(getDim());
         setFooterHeight(getFooterHeight());
+        setOutlineProvider(new ViewOutlineProvider() {
+            @Override
+            public boolean getOutline(View view, Outline outline) {
+                int height = getHeight() - mMaxFooterHeight + mFooterHeight;
+                outline.setRoundRect(0, 0, getWidth(), height,
+                        mConfig.taskViewRoundedCornerRadiusPx);
+                return true;
+            }
+        });
     }
 
     @Override
@@ -149,20 +158,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         mThumbnailView.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
                 MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY));
         setMeasuredDimension(width, height);
-        updateOutline();
-    }
-
-    /** Updates the outline to match whether the lock-to-app button is visible or not. */
-    void updateOutline() {
-        int height = getMeasuredHeight();
-        if (height == 0) return;
-
-        // Account for the current footer height
-        height = height - mMaxFooterHeight + mFooterHeight;
-
-        mOutline.setRoundRect(0, 0, getMeasuredWidth(), height,
-                mConfig.taskViewRoundedCornerRadiusPx);
-        setOutline(mOutline);
     }
 
     /** Set callback */
@@ -548,7 +543,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
     /** Sets the footer height. */
     public void setFooterHeight(int height) {
         mFooterHeight = height;
-        updateOutline();
+        invalidateOutline();
         invalidate(0, getMeasuredHeight() - mMaxFooterHeight, getMeasuredWidth(),
                 getMeasuredHeight());
     }

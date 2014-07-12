@@ -2374,30 +2374,27 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     static final int PFLAG3_MEASURE_NEEDED_BEFORE_LAYOUT = 0x8;
 
     /**
-     * Flag indicating that an overridden method correctly  called down to
+     * Flag indicating that an overridden method correctly called down to
      * the superclass implementation as required by the API spec.
      */
     static final int PFLAG3_CALLED_SUPER = 0x10;
 
-    @Deprecated
-    static final int PFLAG3_OUTLINE_DEFINED = 0x20;
-
     /**
      * Flag indicating that we're in the process of applying window insets.
      */
-    static final int PFLAG3_APPLYING_INSETS = 0x40;
+    static final int PFLAG3_APPLYING_INSETS = 0x20;
 
     /**
      * Flag indicating that we're in the process of fitting system windows using the old method.
      */
-    static final int PFLAG3_FITTING_SYSTEM_WINDOWS = 0x80;
+    static final int PFLAG3_FITTING_SYSTEM_WINDOWS = 0x40;
 
     /**
      * Flag indicating that nested scrolling is enabled for this view.
      * The view will optionally cooperate with views up its parent chain to allow for
      * integrated nested scrolling along the same axis.
      */
-    static final int PFLAG3_NESTED_SCROLLING_ENABLED = 0x200;
+    static final int PFLAG3_NESTED_SCROLLING_ENABLED = 0x80;
 
     /* End of masks for mPrivateFlags3 */
 
@@ -3273,8 +3270,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     private int[] mDrawableState = null;
 
-    @Deprecated
-    private Outline mOutline;
     ViewOutlineProvider mOutlineProvider = ViewOutlineProvider.BACKGROUND;
 
     /**
@@ -10751,23 +10746,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
     }
 
+    /** Deprecated, pending removal */
     @Deprecated
-    public void setOutline(@Nullable Outline outline) {
-        mPrivateFlags3 |= PFLAG3_OUTLINE_DEFINED;
-
-        if (outline == null || outline.isEmpty()) {
-            if (mOutline != null) {
-                mOutline.setEmpty();
-            }
-        } else {
-            // always copy the path since caller may reuse
-            if (mOutline == null) {
-                mOutline = new Outline();
-            }
-            mOutline.set(outline);
-        }
-        mRenderNode.setOutline(mOutline);
-    }
+    public void setOutline(@Nullable Outline outline) {}
 
     /**
      * Returns whether the Outline should be used to clip the contents of the View.
@@ -10836,12 +10817,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #setOutlineProvider(ViewOutlineProvider)
      */
     public void invalidateOutline() {
-        if ((mPrivateFlags3 & PFLAG3_OUTLINE_DEFINED) != 0) {
-            // TODO: remove this when removing old outline code
-            // setOutline() was called to manually set outline, ignore provider
-            return;
-        }
-
         // Unattached views ignore this signal, and outline is recomputed in onAttachedToWindow()
         if (mAttachInfo == null) return;
 
