@@ -17,7 +17,6 @@
 package com.android.internal.telephony;
 
 import android.app.PendingIntent;
-import android.net.Uri;
 import com.android.internal.telephony.SmsRawData;
 
 /** Interface for applications to access the ICC phone book.
@@ -467,6 +466,7 @@ interface ISms {
      */
     long getPreferredSmsSubscription();
 
+
     /**
      * Gets SMS format supported on IMS.  SMS over IMS format is
      * either 3GPP or 3GPP2.
@@ -491,76 +491,12 @@ interface ISms {
      */
     String getImsSmsFormatUsingSubId(long subId);
 
+
+
+
     /*
      * Get SMS prompt property,  enabled or not
      * @return true if enabled, false otherwise
      */
     boolean isSMSPromptEnabled();
-
-    /**
-     * Send a system stored text message.
-     *
-     * This is used for sending a previously sent, but failed-to-send, message or
-     * for sending a text message that has been stored as a draft.
-     *
-     * @param subId the SIM id.
-     * @param callingPkg the package name of the calling app
-     * @param messageUri the URI of the stored message
-     * @param scAddress is the service center address or null to use the current default SMSC
-     * @param sentIntent if not NULL this <code>PendingIntent</code> is
-     *  broadcast when the message is successfully sent, or failed.
-     *  The result code will be <code>Activity.RESULT_OK</code> for success,
-     *  or one of these errors:<br>
-     *  <code>RESULT_ERROR_GENERIC_FAILURE</code><br>
-     *  <code>RESULT_ERROR_RADIO_OFF</code><br>
-     *  <code>RESULT_ERROR_NULL_PDU</code><br>
-     *  For <code>RESULT_ERROR_GENERIC_FAILURE</code> the sentIntent may include
-     *  the extra "errorCode" containing a radio technology specific value,
-     *  generally only useful for troubleshooting.<br>
-     *  The per-application based SMS control checks sentIntent. If sentIntent
-     *  is NULL the caller will be checked against all unknown applications,
-     *  which cause smaller number of SMS to be sent in checking period.
-     * @param deliveryIntent if not NULL this <code>PendingIntent</code> is
-     *  broadcast when the message is delivered to the recipient.  The
-     *  raw pdu of the status report is in the extended data ("pdu").
-     */
-    void sendStoredText(long subId, String callingPkg, in Uri messageUri, String scAddress,
-            in PendingIntent sentIntent, in PendingIntent deliveryIntent);
-
-    /**
-     * Send a system stored multi-part text message.
-     *
-     * This is used for sending a previously sent, but failed-to-send, message or
-     * for sending a text message that has been stored as a draft.
-     * The provided <code>PendingIntent</code> lists should match the part number of the
-     * divided text of the stored message by using <code>divideMessage</code>
-     *
-     * @param subId the SIM id.
-     * @param callingPkg the package name of the calling app
-     * @param messageUri the URI of the stored message
-     * @param scAddress is the service center address or null to use
-     *   the current default SMSC
-     * @param sentIntents if not null, an <code>ArrayList</code> of
-     *   <code>PendingIntent</code>s (one for each message part) that is
-     *   broadcast when the corresponding message part has been sent.
-     *   The result code will be <code>Activity.RESULT_OK</code> for success,
-     *   or one of these errors:<br>
-     *   <code>RESULT_ERROR_GENERIC_FAILURE</code><br>
-     *   <code>RESULT_ERROR_RADIO_OFF</code><br>
-     *   <code>RESULT_ERROR_NULL_PDU</code><br>
-     *   For <code>RESULT_ERROR_GENERIC_FAILURE</code> each sentIntent may include
-     *   the extra "errorCode" containing a radio technology specific value,
-     *   generally only useful for troubleshooting.<br>
-     *   The per-application based SMS control checks sentIntent. If sentIntent
-     *   is NULL the caller will be checked against all unknown applications,
-     *   which cause smaller number of SMS to be sent in checking period.
-     * @param deliveryIntents if not null, an <code>ArrayList</code> of
-     *   <code>PendingIntent</code>s (one for each message part) that is
-     *   broadcast when the corresponding message part has been delivered
-     *   to the recipient.  The raw pdu of the status report is in the
-     *   extended data ("pdu").
-     */
-    void sendStoredMultipartText(long subId, String callingPkg, in Uri messageUri,
-                String scAddress, in List<PendingIntent> sentIntents,
-                in List<PendingIntent> deliveryIntents);
 }
