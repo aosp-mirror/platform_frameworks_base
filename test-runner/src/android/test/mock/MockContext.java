@@ -175,6 +175,11 @@ public class MockContext extends Context {
     }
 
     @Override
+    public File getNoBackupFilesDir() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public File getExternalFilesDir(String type) {
         throw new UnsupportedOperationException();
     }

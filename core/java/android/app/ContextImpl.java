@@ -247,6 +247,8 @@ class ContextImpl extends Context {
     @GuardedBy("mSync")
     private File mFilesDir;
     @GuardedBy("mSync")
+    private File mNoBackupFilesDir;
+    @GuardedBy("mSync")
     private File mCacheDir;
 
     @GuardedBy("mSync")
@@ -963,27 +965,42 @@ class ContextImpl extends Context {
         return f.delete();
     }
 
+    // Common-path handling of app data dir creation
+    private static File createFilesDirLocked(File file) {
+        if (!file.exists()) {
+            if (!file.mkdirs()) {
+                if (file.exists()) {
+                    // spurious failure; probably racing with another process for this app
+                    return file;
+                }
+                Log.w(TAG, "Unable to create files subdir " + file.getPath());
+                return null;
+            }
+            FileUtils.setPermissions(
+                    file.getPath(),
+                    FileUtils.S_IRWXU|FileUtils.S_IRWXG|FileUtils.S_IXOTH,
+                    -1, -1);
+        }
+        return file;
+    }
+
     @Override
     public File getFilesDir() {
         synchronized (mSync) {
             if (mFilesDir == null) {
                 mFilesDir = new File(getDataDirFile(), "files");
             }
-            if (!mFilesDir.exists()) {
-                if(!mFilesDir.mkdirs()) {
-                    if (mFilesDir.exists()) {
-                        // spurious failure; probably racing with another process for this app
-                        return mFilesDir;
-                    }
-                    Log.w(TAG, "Unable to create files directory " + mFilesDir.getPath());
-                    return null;
-                }
-                FileUtils.setPermissions(
-                        mFilesDir.getPath(),
-                        FileUtils.S_IRWXU|FileUtils.S_IRWXG|FileUtils.S_IXOTH,
-                        -1, -1);
+            return createFilesDirLocked(mFilesDir);
+        }
+    }
+
+    @Override
+    public File getNoBackupFilesDir() {
+        synchronized (mSync) {
+            if (mNoBackupFilesDir == null) {
+                mNoBackupFilesDir = new File(getDataDirFile(), "no_backup");
             }
-            return mFilesDir;
+            return createFilesDirLocked(mNoBackupFilesDir);
         }
     }
 
@@ -1035,22 +1052,8 @@ class ContextImpl extends Context {
             if (mCacheDir == null) {
                 mCacheDir = new File(getDataDirFile(), "cache");
             }
-            if (!mCacheDir.exists()) {
-                if(!mCacheDir.mkdirs()) {
-                    if (mCacheDir.exists()) {
-                        // spurious failure; probably racing with another process for this app
-                        return mCacheDir;
-                    }
-                    Log.w(TAG, "Unable to create cache directory " + mCacheDir.getAbsolutePath());
-                    return null;
-                }
-                FileUtils.setPermissions(
-                        mCacheDir.getPath(),
-                        FileUtils.S_IRWXU|FileUtils.S_IRWXG|FileUtils.S_IXOTH,
-                        -1, -1);
-            }
+            return createFilesDirLocked(mCacheDir);
         }
-        return mCacheDir;
     }
 
     @Override
