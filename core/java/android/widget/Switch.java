@@ -936,7 +936,7 @@ public class Switch extends CompoundButton {
                 final Rect bounds = thumbDrawable.getBounds();
                 cX = bounds.left + bounds.right;
             } else {
-                cX = getWidth() / 2;
+                cX = getWidth();
             }
 
             final int left = cX / 2 - switchText.getWidth() / 2;
