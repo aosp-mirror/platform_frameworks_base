@@ -89,20 +89,3 @@ LOCAL_CERTIFICATE := $(LOCAL_PATH)/../../certs/keyset_A
 LOCAL_ADDITIONAL_CERTIFICATES := $(LOCAL_PATH)/../../certs/keyset_B
 LOCAL_MANIFEST_FILE := uB/AndroidManifest.xml
 include $(FrameworkCoreTests_BUILD_PACKAGE)
-
-#apks signed by platform only
-include $(CLEAR_VARS)
-LOCAL_SRC_FILES := $(call all-subdir-java-files)
-LOCAL_PACKAGE_NAME := keyset_splat_api
-LOCAL_CERTIFICATE := platform
-LOCAL_MANIFEST_FILE := api_test/AndroidManifest.xml
-include $(FrameworkCoreTests_BUILD_PACKAGE)
-
-#apks signed by platform and keyset_A
-include $(CLEAR_VARS)
-LOCAL_SRC_FILES := $(call all-subdir-java-files)
-LOCAL_PACKAGE_NAME := keyset_splata_api
-LOCAL_CERTIFICATE := platform
-LOCAL_ADDITIONAL_CERTIFICATES := $(LOCAL_PATH)/../../certs/keyset_A
-LOCAL_MANIFEST_FILE := api_test/AndroidManifest.xml
-include $(FrameworkCoreTests_BUILD_PACKAGE)
