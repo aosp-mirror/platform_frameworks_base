@@ -32,7 +32,6 @@ import android.os.Binder;
 import android.os.FileUtils;
 import android.os.HandlerThread;
 import android.os.Process;
-import android.os.RemoteException;
 import android.os.SELinux;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -43,7 +42,6 @@ import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.util.ArrayUtils;
 import com.android.server.IoThread;
 import com.google.android.collect.Sets;
 
