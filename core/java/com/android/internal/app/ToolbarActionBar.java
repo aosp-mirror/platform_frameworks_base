@@ -65,6 +65,7 @@ public class ToolbarActionBar extends ActionBar {
         mToolbar = toolbar;
         mDecorToolbar = new ToolbarWidgetWrapper(toolbar);
         mWindowCallback = windowCallback;
+        mDecorToolbar.setWindowCallback(mWindowCallback);
         toolbar.setOnMenuItemClickListener(mMenuClicker);
         mDecorToolbar.setWindowTitle(title);
     }
