@@ -345,7 +345,7 @@ public class InputMethodUtils {
     /**
      * Returns the language component of a given locale string.
      */
-    private static String getLanguageFromLocaleString(String locale) {
+    public static String getLanguageFromLocaleString(String locale) {
         final int idx = locale.indexOf('_');
         if (idx < 0) {
             return locale;
