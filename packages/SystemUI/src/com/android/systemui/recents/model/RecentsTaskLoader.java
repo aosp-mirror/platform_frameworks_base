@@ -523,8 +523,8 @@ public class RecentsTaskLoader {
             ActivityInfo info = ssp.getActivityInfo(t.baseIntent.getComponent(), t.userId);
             if (info == null) continue;
 
-            stack.addTask(new Task(t.persistentId, true, t.baseIntent, 0, null, null, 0, 0,
-                    t.firstActiveTime, t.lastActiveTime, (i == (taskCount - 1))));
+            stack.addTask(new Task(t.persistentId, true, t.baseIntent, t.affiliatedTaskId, null,
+                    null, 0, 0, t.firstActiveTime, t.lastActiveTime, (i == (taskCount - 1))));
         }
         stack.createSimulatedAffiliatedGroupings();
         return stack;
