@@ -40,5 +40,5 @@ oneway interface IPackageInstallObserver2 {
      * </tr>
      * </table>
      */
-    void packageInstalled(String basePackageName, in Bundle extras, int returnCode);
+    void packageInstalled(String basePackageName, in Bundle extras, int returnCode, String msg);
 }

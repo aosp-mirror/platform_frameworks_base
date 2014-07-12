@@ -14,24 +14,6 @@
  * limitations under the License.
  */
 
-package android.app;
+package android.content.pm;
 
-import android.content.pm.IPackageDeleteObserver;
-
-/** {@hide} */
-public class PackageUninstallObserver {
-    private final IPackageDeleteObserver.Stub mBinder = new IPackageDeleteObserver.Stub() {
-        @Override
-        public void packageDeleted(String basePackageName, int returnCode) {
-            PackageUninstallObserver.this.onUninstallFinished(basePackageName, returnCode);
-        }
-    };
-
-    /** {@hide} */
-    public IPackageDeleteObserver getBinder() {
-        return mBinder;
-    }
-
-    public void onUninstallFinished(String basePackageName, int returnCode) {
-    }
-}
+parcelable InstallSessionParams;

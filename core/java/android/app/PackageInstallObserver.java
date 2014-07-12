@@ -23,13 +23,14 @@ import android.os.Bundle;
 public class PackageInstallObserver {
     private final IPackageInstallObserver2.Stub mBinder = new IPackageInstallObserver2.Stub() {
         @Override
-        public void packageInstalled(String basePackageName, Bundle extras, int returnCode) {
+        public void packageInstalled(String basePackageName, Bundle extras, int returnCode,
+                String msg) {
             PackageInstallObserver.this.packageInstalled(basePackageName, extras, returnCode);
         }
     };
 
     /** {@hide} */
-    public IPackageInstallObserver2.Stub getBinder() {
+    public IPackageInstallObserver2 getBinder() {
         return mBinder;
     }
 
@@ -49,5 +50,10 @@ public class PackageInstallObserver {
      * @hide
      */
     public void packageInstalled(String basePackageName, Bundle extras, int returnCode) {
+    }
+
+    public void packageInstalled(String basePackageName, Bundle extras, int returnCode,
+            String msg) {
+        packageInstalled(basePackageName, extras, returnCode);
     }
 }
