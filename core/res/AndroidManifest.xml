@@ -2602,16 +2602,6 @@
         android:description="@string/permdesc_modifyNetworkAccounting"
         android:protectionLevel="signature|system" />
 
-    <!-- @SystemApi Allows an application to mark traffic as from another user for per user routing.
-         Used by system wide services like media server that execute delegated network connections
-         for users.
-         @hide
-    -->
-    <permission android:name="android.permission.MARK_NETWORK_SOCKET"
-        android:label="@string/permlab_markNetworkSocket"
-        android:description="@string/permdesc_markNetworkSocket"
-        android:protectionLevel="signature|system" />
-
     <!-- C2DM permission.
          @hide Used internally.
      -->

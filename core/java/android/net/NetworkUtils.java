@@ -106,11 +106,6 @@ public class NetworkUtils {
     public native static String getDhcpError();
 
     /**
-     * Set the SO_MARK of {@code socketfd} to {@code mark}
-     */
-    public native static void markSocket(int socketfd, int mark);
-
-    /**
      * Binds the current process to the network designated by {@code netId}.  All sockets created
      * in the future (and not explicitly bound via a bound {@link SocketFactory} (see
      * {@link Network#getSocketFactory}) will be bound to this network.  Note that if this

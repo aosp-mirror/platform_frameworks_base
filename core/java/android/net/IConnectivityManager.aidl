@@ -42,9 +42,6 @@ import com.android.internal.net.VpnProfile;
 /** {@hide} */
 interface IConnectivityManager
 {
-    // Keep this in sync with framework/native/services/connectivitymanager/ConnectivityManager.h
-    void markSocketAsUser(in ParcelFileDescriptor socket, int uid);
-
     NetworkInfo getActiveNetworkInfo();
     NetworkInfo getActiveNetworkInfoForUid(int uid);
     NetworkInfo getNetworkInfo(int networkType);

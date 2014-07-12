@@ -2109,11 +2109,6 @@
     <string name="permdesc_modifyNetworkAccounting">Allows the app to modify how network usage is accounted against apps. Not for use by normal apps.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_markNetworkSocket">modify socket marks</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_markNetworkSocket">Allows the app to modify socket marks for routing</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_accessNotifications">access notifications</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_accessNotifications">Allows the app to retrieve, examine, and clear notifications, including those posted by other apps.</string>
