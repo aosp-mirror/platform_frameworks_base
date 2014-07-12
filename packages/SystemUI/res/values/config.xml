@@ -127,6 +127,10 @@
     <integer name="recents_animate_task_enter_from_home_duration">275</integer>
     <!-- The animation stagger to apply to each task animation when transitioning from home. -->
     <integer name="recents_animate_task_enter_from_home_delay">10</integer>
+    <!-- The short duration when animating in/out the lock to app button. -->
+    <integer name="recents_animate_lock_to_app_button_short_duration">150</integer>
+    <!-- The long duration when animating in/out the lock to app button. -->
+    <integer name="recents_animate_lock_to_app_button_long_duration">300</integer>
     <!-- The min animation duration for animating the nav bar scrim in. -->
     <integer name="recents_nav_bar_scrim_enter_duration">400</integer>
     <!-- The animation duration for animating the removal of a task view. -->

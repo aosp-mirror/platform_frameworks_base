@@ -150,7 +150,7 @@ public class TaskStack {
         /* Notifies when a task has been added to the stack */
         public void onStackTaskAdded(TaskStack stack, Task t);
         /* Notifies when a task has been removed from the stack */
-        public void onStackTaskRemoved(TaskStack stack, Task t);
+        public void onStackTaskRemoved(TaskStack stack, Task removedTask, Task newFrontMostTask);
         /** Notifies when the stack was filtered */
         public void onStackFiltered(TaskStack newStack, ArrayList<Task> curTasks, Task t);
         /** Notifies when the stack was un-filtered */
@@ -203,9 +203,15 @@ public class TaskStack {
             if (group.getTaskCount() == 0) {
                 removeGroup(group);
             }
+            // Update the lock-to-app state
+            Task newFrontMostTask = getFrontMostTask();
+            t.canLockToTask = false;
+            if (newFrontMostTask != null) {
+                newFrontMostTask.canLockToTask = true;
+            }
             if (mCb != null) {
                 // Notify that a task has been removed
-                mCb.onStackTaskRemoved(this, t);
+                mCb.onStackTaskRemoved(this, t, newFrontMostTask);
             }
         }
     }
@@ -226,7 +232,7 @@ public class TaskStack {
             }
             if (mCb != null) {
                 // Notify that a task has been removed
-                mCb.onStackTaskRemoved(this, t);
+                mCb.onStackTaskRemoved(this, t, null);
             }
         }
         mTaskList.set(tasks);
@@ -239,6 +245,7 @@ public class TaskStack {
 
     /** Gets the front task */
     public Task getFrontMostTask() {
+        if (mTaskList.size() == 0) return null;
         return mTaskList.getTasks().get(mTaskList.size() - 1);
     }
 

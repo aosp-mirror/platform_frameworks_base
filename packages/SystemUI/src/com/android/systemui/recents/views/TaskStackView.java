@@ -51,11 +51,12 @@ import java.util.Set;
 /* The visual representation of a task stack view */
 public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCallbacks,
         TaskView.TaskViewCallbacks, ViewPool.ViewPoolConsumer<TaskView, Task>,
-        View.OnClickListener, RecentsPackageMonitor.PackageCallbacks {
+        RecentsPackageMonitor.PackageCallbacks {
 
     /** The TaskView callbacks */
     interface TaskStackViewCallbacks {
-        public void onTaskViewClicked(TaskStackView stackView, TaskView tv, TaskStack stack, Task t);
+        public void onTaskViewClicked(TaskStackView stackView, TaskView tv, TaskStack stack, Task t,
+                                      boolean lockToTask);
         public void onTaskViewAppInfoClicked(Task t);
         public void onTaskViewDismissed(Task t);
         public void onAllTaskViewsDismissed();
@@ -734,7 +735,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         for (int i = 0; i < childCount; i++) {
             TaskView t = (TaskView) getChildAt(i);
             t.measure(MeasureSpec.makeMeasureSpec(mStackAlgorithm.mTaskRect.width(), MeasureSpec.EXACTLY),
-                    MeasureSpec.makeMeasureSpec(mStackAlgorithm.mTaskRect.height(), MeasureSpec.EXACTLY));
+                    MeasureSpec.makeMeasureSpec(mStackAlgorithm.mTaskRect.height() +
+                            mConfig.taskViewLockToAppButtonHeight, MeasureSpec.EXACTLY));
         }
 
         setMeasuredDimension(width, height);
@@ -766,7 +768,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             TaskView t = (TaskView) getChildAt(i);
             t.layout(mStackAlgorithm.mTaskRect.left, mStackAlgorithm.mStackRectSansPeek.top,
                     mStackAlgorithm.mTaskRect.right, mStackAlgorithm.mStackRectSansPeek.top +
-                    mStackAlgorithm.mTaskRect.height());
+                    mStackAlgorithm.mTaskRect.height() + mConfig.taskViewLockToAppButtonHeight);
         }
 
         if (mAwaitingFirstLayout) {
@@ -903,11 +905,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mUIDozeTrigger.poke();
     }
 
-    /** Disables handling touch on this task view. */
-    void setTouchOnTaskView(TaskView tv, boolean enabled) {
-        tv.setOnClickListener(enabled ? this : null);
-    }
-
     /**** TaskStackCallbacks Implementation ****/
 
     @Override
@@ -919,24 +916,32 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     @Override
-    public void onStackTaskRemoved(TaskStack stack, Task t) {
+    public void onStackTaskRemoved(TaskStack stack, Task removedTask, Task newFrontMostTask) {
         // Update the task offsets
         mStackAlgorithm.updateTaskOffsets(mStack.getTasks());
 
         // Remove the view associated with this task, we can't rely on updateTransforms
         // to work here because the task is no longer in the list
-        TaskView tv = getChildViewForTask(t);
+        TaskView tv = getChildViewForTask(removedTask);
         if (tv != null) {
             mViewPool.returnViewToPool(tv);
         }
 
         // Notify the callback that we've removed the task and it can clean up after it
-        mCb.onTaskViewDismissed(t);
+        mCb.onTaskViewDismissed(removedTask);
 
         // Update the min/max scroll and animate other task views into their new positions
         updateMinMaxScroll(true);
         int movement = (int) mStackAlgorithm.getTaskOverlapHeight();
         requestSynchronizeStackViewsWithModel(Utilities.calculateTranslationAnimationDuration(movement));
+
+        // Update the new front most task
+        if (newFrontMostTask != null) {
+            TaskView frontTv = getChildViewForTask(newFrontMostTask);
+            if (frontTv != null) {
+                frontTv.onTaskBound(newFrontMostTask);
+            }
+        }
 
         // If there are no remaining tasks, then either unfilter the current stack, or just close
         // the activity if there are no filtered stacks
@@ -1086,7 +1091,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             addView(tv, insertIndex);
 
             // Set the callbacks and listeners for this new view
-            setTouchOnTaskView(tv, true);
+            tv.setTouchEnabled(true);
             tv.setCallbacks(this);
         } else {
             attachViewToParent(tv, insertIndex, tv.getLayoutParams());
@@ -1129,18 +1134,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     @Override
-    public void onTaskViewDismissed(TaskView tv) {
-        Task task = tv.getTask();
-        // Remove the task from the view
-        mStack.removeTask(task);
-    }
-
-    /**** View.OnClickListener Implementation ****/
-
-    @Override
-    public void onClick(View v) {
-        TaskView tv = (TaskView) v;
-        Task task = tv.getTask();
+    public void onTaskViewClicked(TaskView tv, Task task, boolean lockToTask) {
         if (Console.Enabled) {
             Console.log(Constants.Log.UI.ClickEvents, "[TaskStack|Clicked|Thumbnail]",
                     task + " cb: " + mCb);
@@ -1150,8 +1144,15 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mUIDozeTrigger.stopDozing();
 
         if (mCb != null) {
-            mCb.onTaskViewClicked(this, tv, mStack, task);
+            mCb.onTaskViewClicked(this, tv, mStack, task, lockToTask);
         }
+    }
+
+    @Override
+    public void onTaskViewDismissed(TaskView tv) {
+        Task task = tv.getTask();
+        // Remove the task from the view
+        mStack.removeTask(task);
     }
 
     /**** RecentsPackageMonitor.PackageCallbacks Implementation ****/

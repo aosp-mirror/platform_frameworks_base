@@ -210,6 +210,9 @@
     <!-- The amount of highlight to make on each task view. -->
     <dimen name="recents_task_view_highlight">1dp</dimen>
 
+    <!-- The height of the lock-to-app button. -->
+    <dimen name="recents_task_view_lock_to_app_button_height">48dp</dimen>
+
     <!-- The height of a task view bar. -->
     <dimen name="recents_task_bar_height">56dp</dimen>
 

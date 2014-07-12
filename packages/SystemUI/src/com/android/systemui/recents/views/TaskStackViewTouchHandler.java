@@ -377,7 +377,9 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         // Enable HW layers on that task
         tv.enableHwLayers();
         // Disallow touch events from this task view
-        mSv.setTouchOnTaskView(tv, false);
+        tv.setTouchEnabled(false);
+        // Hide the footer
+        tv.animateFooterVisibility(false, mSv.mConfig.taskViewLockToAppShortAnimDuration, 0);
         // Disallow parents from intercepting touch events
         final ViewParent parent = mSv.getParent();
         if (parent != null) {
@@ -413,7 +415,9 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         // Re-enable clipping with the stack
         tv.setClipViewInStack(true);
         // Re-enable touch events from this task view
-        mSv.setTouchOnTaskView(tv, true);
+        tv.setTouchEnabled(true);
+        // Restore the footer
+        tv.animateFooterVisibility(true, mSv.mConfig.taskViewLockToAppShortAnimDuration, 0);
     }
 
     @Override

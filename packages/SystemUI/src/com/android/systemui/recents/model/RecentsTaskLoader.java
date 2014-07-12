@@ -429,7 +429,8 @@ public class RecentsTaskLoader {
 
             // Create a new task
             Task task = new Task(t.persistentId, (t.id > -1), t.baseIntent, 0, activityLabel,
-                    activityIcon, activityColor, t.userId, t.firstActiveTime, t.lastActiveTime);
+                    activityIcon, activityColor, t.userId, t.firstActiveTime, t.lastActiveTime,
+                    (i == (taskCount - 1)));
 
             // Preload the specified number of apps
             if (i >= (taskCount - preloadCount)) {
@@ -523,7 +524,7 @@ public class RecentsTaskLoader {
             if (info == null) continue;
 
             stack.addTask(new Task(t.persistentId, true, t.baseIntent, 0, null, null, 0, 0,
-                    t.firstActiveTime, t.lastActiveTime));
+                    t.firstActiveTime, t.lastActiveTime, (i == (taskCount - 1))));
         }
         stack.createSimulatedAffiliatedGroupings();
         return stack;

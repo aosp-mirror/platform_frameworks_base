@@ -95,9 +95,11 @@ public class TaskStackViewLayoutAlgorithm {
 
         if (numTasks <= 1) {
             // If there is only one task, then center the task in the stack rect (sans peek)
-            mMinScroll = mMaxScroll = -(stackHeight - taskHeight) / 2;
+            mMinScroll = mMaxScroll = -(stackHeight -
+                    (taskHeight + mConfig.taskViewLockToAppButtonHeight)) / 2;
         } else {
-            int maxScrollHeight = taskHeight + getStackScrollForTaskIndex(tasks.get(tasks.size() - 1));
+            int maxScrollHeight = getStackScrollForTaskIndex(tasks.get(tasks.size() - 1))
+                    + taskHeight + mConfig.taskViewLockToAppButtonHeight;
             mMinScroll = Math.min(stackHeight, maxScrollHeight) - stackHeight;
             mMaxScroll = maxScrollHeight - stackHeight;
         }
