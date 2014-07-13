@@ -48,9 +48,12 @@ import android.system.Os;
 import android.system.OsConstants;
 import android.system.StructStat;
 import android.util.ArraySet;
+import android.util.ExceptionUtils;
+import android.util.MathUtils;
 import android.util.Slog;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 
 import libcore.io.Libcore;
@@ -94,12 +97,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     installLocked();
                 } catch (PackageManagerException e) {
                     Slog.e(TAG, "Install failed: " + e);
-                    destroy();
+                    destroyInternal();
                     try {
                         mRemoteObserver.packageInstalled(mPackageName, null, e.error,
                                 e.getMessage());
                     } catch (RemoteException ignored) {
                     }
+                    mCallback.onSessionFinished(PackageInstallerSession.this, false);
                 }
 
                 return true;
@@ -109,7 +113,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     private final Object mLock = new Object();
 
-    private int mProgress;
+    private int mClientProgress;
+    private int mProgress = 0;
 
     private String mPackageName;
     private int mVersionCode;
@@ -170,13 +175,28 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     @Override
-    public void updateProgress(int progress) {
-        mProgress = progress;
-        mCallback.onProgressChanged(this);
+    public void setClientProgress(int progress) {
+        mClientProgress = progress;
+        mProgress = MathUtils.constrain((mClientProgress * 8 * 100) / (params.progressMax * 10), 0, 80);
+        mCallback.onSessionProgress(this, mProgress);
+    }
+
+    @Override
+    public void addClientProgress(int progress) {
+        setClientProgress(mClientProgress + progress);
     }
 
     @Override
     public ParcelFileDescriptor openWrite(String name, long offsetBytes, long lengthBytes) {
+        try {
+            return openWriteInternal(name, offsetBytes, lengthBytes);
+        } catch (IOException e) {
+            throw ExceptionUtils.wrap(e);
+        }
+    }
+
+    private ParcelFileDescriptor openWriteInternal(String name, long offsetBytes, long lengthBytes)
+            throws IOException {
         // TODO: relay over to DCS when installing to ASEC
 
         // Quick sanity check of state, and allocate a pipe for ourselves. We
@@ -223,9 +243,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             return new ParcelFileDescriptor(bridge.getClientSocket());
 
         } catch (ErrnoException e) {
-            throw new IllegalStateException("Failed to write", e);
-        } catch (IOException e) {
-            throw new IllegalStateException("Failed to write", e);
+            throw e.rethrowAsIOException();
         }
     }
 
@@ -274,6 +292,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             spliceExistingFilesIntoStage();
         }
 
+        // TODO: surface more granular state from dexopt
+        mCallback.onSessionProgress(this, 90);
+
         // TODO: for ASEC based applications, grow and stream in packages
 
         // We've reached point of no return; call into PMS to install the stage.
@@ -282,9 +303,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final IPackageInstallObserver2 localObserver = new IPackageInstallObserver2.Stub() {
             @Override
             public void packageInstalled(String basePackageName, Bundle extras, int returnCode,
-                    String msg) throws RemoteException {
-                destroy();
-                remoteObserver.packageInstalled(basePackageName, extras, returnCode, msg);
+                    String msg) {
+                destroyInternal();
+                try {
+                    remoteObserver.packageInstalled(basePackageName, extras, returnCode, msg);
+                } catch (RemoteException ignored) {
+                }
+                final boolean success = (returnCode == PackageManager.INSTALL_SUCCEEDED);
+                mCallback.onSessionFinished(PackageInstallerSession.this, success);
             }
         };
 
@@ -442,13 +468,40 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @Override
     public void destroy() {
         try {
-            synchronized (mLock) {
-                mInvalid = true;
-            }
-            FileUtils.deleteContents(sessionStageDir);
-            sessionStageDir.delete();
+            destroyInternal();
         } finally {
-            mCallback.onSessionInvalid(this);
+            mCallback.onSessionFinished(this, false);
         }
+    }
+
+    private void destroyInternal() {
+        synchronized (mLock) {
+            mInvalid = true;
+        }
+        FileUtils.deleteContents(sessionStageDir);
+        sessionStageDir.delete();
+    }
+
+    void dump(IndentingPrintWriter pw) {
+        pw.println("Session " + sessionId + ":");
+        pw.increaseIndent();
+
+        pw.printPair("userId", userId);
+        pw.printPair("installerPackageName", installerPackageName);
+        pw.printPair("installerUid", installerUid);
+        pw.printPair("createdMillis", createdMillis);
+        pw.printPair("sessionStageDir", sessionStageDir);
+        pw.println();
+
+        params.dump(pw);
+
+        pw.printPair("mClientProgress", mClientProgress);
+        pw.printPair("mProgress", mProgress);
+        pw.printPair("mMutationsAllowed", mMutationsAllowed);
+        pw.printPair("mPermissionsConfirmed", mPermissionsConfirmed);
+        pw.printPair("mBridges", mBridges.size());
+        pw.println();
+
+        pw.decreaseIndent();
     }
 }

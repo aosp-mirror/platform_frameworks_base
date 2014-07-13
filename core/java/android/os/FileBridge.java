@@ -31,7 +31,6 @@ import libcore.io.Streams;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.SyncFailedException;
 import java.nio.ByteOrder;
 import java.util.Arrays;
 
@@ -144,8 +143,7 @@ public class FileBridge extends Thread {
             }
         }
 
-        @Override
-        public void flush() throws IOException {
+        public void fsync() throws IOException {
             writeCommandAndBlock(CMD_FSYNC, "fsync()");
         }
 

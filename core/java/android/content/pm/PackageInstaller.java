@@ -23,8 +23,10 @@ import android.os.Bundle;
 import android.os.FileBridge;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
+import android.util.ExceptionUtils;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
 
@@ -64,9 +66,12 @@ public class PackageInstaller {
         observer.packageInstalled(packageName, null, returnCode);
     }
 
-    public int createSession(InstallSessionParams params) {
+    public int createSession(InstallSessionParams params) throws IOException {
         try {
             return mInstaller.createSession(mInstallerPackageName, params, mUserId);
+        } catch (RuntimeException e) {
+            ExceptionUtils.maybeUnwrapIOException(e);
+            throw e;
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
@@ -136,8 +141,7 @@ public class PackageInstaller {
         public abstract void onFinished(int sessionId, boolean success);
     }
 
-    public void registerObserver(SessionObserver observer) {
-        // TODO: consider restricting to current launcher app
+    public void registerSessionObserver(SessionObserver observer) {
         try {
             mInstaller.registerObserver(observer.getBinder(), mUserId);
         } catch (RemoteException e) {
@@ -145,7 +149,7 @@ public class PackageInstaller {
         }
     }
 
-    public void unregisterObserver(SessionObserver observer) {
+    public void unregisterSessionObserver(SessionObserver observer) {
         try {
             mInstaller.unregisterObserver(observer.getBinder(), mUserId);
         } catch (RemoteException e) {
@@ -173,9 +177,18 @@ public class PackageInstaller {
             mSession = session;
         }
 
-        public void updateProgress(int progress) {
+        public void setProgress(int progress) {
             try {
-                mSession.updateProgress(progress);
+                mSession.setClientProgress(progress);
+            } catch (RemoteException e) {
+                throw e.rethrowAsRuntimeException();
+            }
+        }
+
+        /** {@hide} */
+        public void addProgress(int progress) {
+            try {
+                mSession.addClientProgress(progress);
             } catch (RemoteException e) {
                 throw e.rethrowAsRuntimeException();
             }
@@ -187,19 +200,31 @@ public class PackageInstaller {
          * {@link OutputStream#flush()} to ensure bytes have been written to
          * disk.
          */
-        public OutputStream openWrite(String splitName, long offsetBytes, long lengthBytes) {
+        public OutputStream openWrite(String splitName, long offsetBytes, long lengthBytes)
+                throws IOException {
             try {
                 final ParcelFileDescriptor clientSocket = mSession.openWrite(splitName,
                         offsetBytes, lengthBytes);
                 return new FileBridge.FileBridgeOutputStream(clientSocket.getFileDescriptor());
+            } catch (RuntimeException e) {
+                ExceptionUtils.maybeUnwrapIOException(e);
+                throw e;
             } catch (RemoteException e) {
-                throw e.rethrowAsRuntimeException();
+                throw new IOException(e);
             }
         }
 
-        public void install(InstallResultCallback callback) {
+        public void fsync(OutputStream out) throws IOException {
+            if (out instanceof FileBridge.FileBridgeOutputStream) {
+                ((FileBridge.FileBridgeOutputStream) out).fsync();
+            } else {
+                throw new IllegalArgumentException("Unrecognized stream");
+            }
+        }
+
+        public void commit(CommitResultCallback callback) {
             try {
-                mSession.install(new InstallResultCallbackDelegate(callback).getBinder());
+                mSession.install(new CommitResultCallbackDelegate(callback).getBinder());
             } catch (RemoteException e) {
                 throw e.rethrowAsRuntimeException();
             }
@@ -246,16 +271,8 @@ public class PackageInstaller {
         }
     }
 
-    public static abstract class InstallResultCallback {
-        /**
-         * The session installed successfully.
-         */
+    public static abstract class CommitResultCallback {
         public abstract void onSuccess();
-
-        /**
-         * General unclassified failure. You may be interested in overriding
-         * more granular classifications.
-         */
         public abstract void onFailure(String msg);
 
         /**
@@ -300,10 +317,10 @@ public class PackageInstaller {
         }
     }
 
-    private static class InstallResultCallbackDelegate extends PackageInstallObserver {
-        private final InstallResultCallback target;
+    private static class CommitResultCallbackDelegate extends PackageInstallObserver {
+        private final CommitResultCallback target;
 
-        public InstallResultCallbackDelegate(InstallResultCallback target) {
+        public CommitResultCallbackDelegate(CommitResultCallback target) {
             this.target = target;
         }
 
