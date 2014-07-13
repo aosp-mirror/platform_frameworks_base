@@ -216,21 +216,27 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
             final DataUsageInfo info = mController.getDataUsageInfo();
             if (info == null) return v;
             final Resources res = mContext.getResources();
-            int titleId;
-            long bytes;
+            final int titleId;
+            final long bytes;
             int usageColor = R.color.system_accent_color;
-            String top = null, bottom = null;
-            if (info.limitLevel <= 0) { // no limit
+            final String top;
+            String bottom = null;
+            if (info.usageLevel < info.warningLevel || info.limitLevel <= 0) {
+                // under warning, or no limit
                 titleId = R.string.quick_settings_cellular_detail_data_usage;
                 bytes = info.usageLevel;
-            } else if (info.usageLevel <= info.limitLevel) { // under limit
+                top = res.getString(R.string.quick_settings_cellular_detail_data_warning,
+                        formatBytes(info.warningLevel));
+            } else if (info.usageLevel <= info.limitLevel) {
+                // over warning, under limit
                 titleId = R.string.quick_settings_cellular_detail_remaining_data;
                 bytes = info.limitLevel - info.usageLevel;
                 top = res.getString(R.string.quick_settings_cellular_detail_data_used,
                         formatBytes(info.usageLevel));
                 bottom = res.getString(R.string.quick_settings_cellular_detail_data_limit,
                         formatBytes(info.limitLevel));
-            } else { // over limit
+            } else {
+                // over limit
                 titleId = R.string.quick_settings_cellular_detail_over_limit;
                 bytes = info.usageLevel - info.limitLevel;
                 top = res.getString(R.string.quick_settings_cellular_detail_data_used,
@@ -246,7 +252,7 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
             usage.setText(formatBytes(bytes));
             usage.setTextColor(res.getColor(usageColor));
             final DataUsageGraph graph = (DataUsageGraph) v.findViewById(R.id.usage_graph);
-            graph.setLevels(info.maxLevel, info.limitLevel, info.warningLevel, info.usageLevel);
+            graph.setLevels(info.limitLevel, info.warningLevel, info.usageLevel);
             final TextView carrier = (TextView) v.findViewById(R.id.usage_carrier_text);
             carrier.setText(info.carrier);
             final TextView period = (TextView) v.findViewById(R.id.usage_period_text);
