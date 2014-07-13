@@ -88,8 +88,10 @@ void Picture::serialize(SkWStream* stream) const {
     } else if (NULL != mPicture.get()) {
         mPicture->serialize(stream);
     } else {
-        SkPicture empty;
-        empty.serialize(stream);
+        SkPictureRecorder recorder;
+        recorder.beginRecording(0, 0);
+        SkAutoTUnref<SkPicture> empty(recorder.endRecording());
+        empty->serialize(stream);
     }
 }
 
