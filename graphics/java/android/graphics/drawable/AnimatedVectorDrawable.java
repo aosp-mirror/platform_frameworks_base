@@ -16,6 +16,7 @@ package android.graphics.drawable;
 
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
+import android.animation.ValueAnimator;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
@@ -327,6 +328,22 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable {
         for (int i = 0; i < size; i++) {
             final Animator animator = animators.get(i);
             animator.pause();
+        }
+    }
+
+    /**
+     * Reverses ongoing animations or starts pending animations in reverse.
+     * <p>
+     * NOTE: Only works of all animations are ValueAnimators.
+     */
+    void reverse() {
+        final ArrayList<Animator> animators = mAnimatedVectorState.mAnimators;
+        final int size = animators.size();
+        for (int i = 0; i < size; i++) {
+            final Animator animator = animators.get(i);
+            if (animator instanceof ValueAnimator) {
+                ((ValueAnimator) animator).reverse();
+            }
         }
     }
 }
