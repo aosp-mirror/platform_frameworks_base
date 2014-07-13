@@ -86,7 +86,7 @@ public class KeyguardStatusView extends GridLayout {
     private void setEnableMarquee(boolean enabled) {
         if (DEBUG) Log.v(TAG, (enabled ? "Enable" : "Disable") + " transport text marquee");
         if (mAlarmStatusView != null) mAlarmStatusView.setSelected(enabled);
-        mOwnerInfo.setSelected(enabled);
+        if (mOwnerInfo != null) mOwnerInfo.setSelected(enabled);
     }
 
     @Override
@@ -131,6 +131,7 @@ public class KeyguardStatusView extends GridLayout {
     }
 
     private void updateOwnerInfo() {
+        if (mOwnerInfo == null) return;
         String ownerInfo = getOwnerInfo();
         if (!TextUtils.isEmpty(ownerInfo)) {
             mOwnerInfo.setVisibility(View.VISIBLE);

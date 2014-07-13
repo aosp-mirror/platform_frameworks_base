@@ -16,13 +16,30 @@
 
 package com.android.systemui.statusbar.policy;
 
+import java.util.Set;
+
 public interface CastController {
     void addCallback(Callback callback);
     void removeCallback(Callback callback);
     void setDiscovering(boolean request);
     void setCurrentUserId(int currentUserId);
+    Set<CastDevice> getCastDevices();
+    void startCasting(CastDevice device);
+    void stopCasting();
 
     public interface Callback {
-        void onStateChanged(boolean enabled, boolean connecting, String connectedRouteName);
+        void onCastDevicesChanged();
+    }
+
+    public static final class CastDevice {
+        public static final int STATE_DISCONNECTED = 0;
+        public static final int STATE_CONNECTING = 1;
+        public static final int STATE_CONNECTED = 2;
+
+        public String id;
+        public String name;
+        public String description;
+        public int state = STATE_DISCONNECTED;
+        public Object tag;
     }
 }

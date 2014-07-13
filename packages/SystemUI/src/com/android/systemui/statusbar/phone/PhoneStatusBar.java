@@ -2322,6 +2322,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         if (mBluetoothController != null) {
             mBluetoothController.dump(fd, pw, args);
         }
+        if (mCastController != null) {
+            mCastController.dump(fd, pw, args);
+        }
     }
 
     private String hunStateToString(Entry entry) {
