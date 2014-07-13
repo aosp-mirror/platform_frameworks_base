@@ -420,6 +420,9 @@ please see themes_device_defaults.xml.
 
         <!-- Accessibility focused drawable. -->
         <item name="accessibilityFocusedDrawable">@drawable/view_accessibility_focused</item>
+
+        <!-- Lighting and shadow style. -->
+        <item name="lightingStyle">@style/Lighting</item>
     </style>
 
     <!-- Variant of {@link #Theme} with no title bar -->
