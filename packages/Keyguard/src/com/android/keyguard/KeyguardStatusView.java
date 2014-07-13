@@ -16,9 +16,11 @@
 
 package com.android.keyguard;
 
+import android.app.AlarmClockInfo;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
+import android.provider.AlarmClock;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.util.AttributeSet;
@@ -121,13 +123,22 @@ public class KeyguardStatusView extends GridLayout {
 
     void refreshAlarmStatus() {
         // Update Alarm status
-        String nextAlarm = mLockPatternUtils.getNextAlarm();
-        if (!TextUtils.isEmpty(nextAlarm)) {
-            mAlarmStatusView.setText(nextAlarm);
+        AlarmClockInfo nextAlarm = mLockPatternUtils.getNextAlarm();
+        if (nextAlarm != null) {
+            mAlarmStatusView.setText(formatNextAlarm(nextAlarm));
             mAlarmStatusView.setVisibility(View.VISIBLE);
         } else {
             mAlarmStatusView.setVisibility(View.GONE);
         }
+    }
+
+    String formatNextAlarm(AlarmClockInfo info) {
+        if (info == null) {
+            return "";
+        }
+        String skeleton = DateFormat.is24HourFormat(mContext) ? "EHm" : "Ehma";
+        String pattern = DateFormat.getBestDateTimePattern(Locale.getDefault(), skeleton);
+        return DateFormat.format(pattern, info.getTriggerTime()).toString();
     }
 
     private void updateOwnerInfo() {
