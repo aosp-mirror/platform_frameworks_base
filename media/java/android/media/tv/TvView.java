@@ -18,7 +18,6 @@ package android.media.tv;
 
 import android.content.Context;
 import android.graphics.Rect;
-import android.media.MediaPlayer.TrackInfo;
 import android.media.tv.TvInputManager.Session;
 import android.media.tv.TvInputManager.Session.FinishedInputEventCallback;
 import android.media.tv.TvInputManager.SessionCallback;
@@ -216,11 +215,26 @@ public class TvView extends ViewGroup {
     }
 
     /**
+     * Enables or disables the caption in this TvView.
+     * <p>
+     * Note that this method does not take any effect unless the current TvView is tuned.
+     *
+     * @param enabled {@code true} to enable, {@code false} to disable.
+     */
+    public void setCaptionEnabled(boolean enabled) {
+        if (mSession != null) {
+            mSession.setCaptionEnabled(enabled);
+        }
+    }
+
+    /**
      * Select a track.
      * <p>
      * If it is called multiple times on the same type of track (ie. Video, Audio, Text), the track
-     * selected in previous will be unselected.
+     * selected in previous will be unselected. Note that this method does not take any effect
+     * unless the current TvView is tuned.
      * </p>
+     *
      * @param track the track to be selected.
      * @see #getTracks()
      */
@@ -232,6 +246,8 @@ public class TvView extends ViewGroup {
 
     /**
      * Unselect a track.
+     * <p>
+     * Note that this method does not take any effect unless the current TvView is tuned.
      *
      * @param track the track to be unselected.
      * @see #getTracks()
