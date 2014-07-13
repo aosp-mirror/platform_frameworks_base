@@ -1096,10 +1096,6 @@ public class PopupWindow {
         p.softInputMode = mSoftInputMode;
         p.setTitle("PopupWindow:" + Integer.toHexString(hashCode()));
 
-        // TODO: Use real shadow insets once that algorithm is finalized.
-        final int shadowInset = (int) Math.ceil(mElevation * 2);
-        p.shadowInsets.set(shadowInset, shadowInset, shadowInset, shadowInset);
-
         return p;
     }
 

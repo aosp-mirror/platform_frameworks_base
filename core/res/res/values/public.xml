@@ -2233,6 +2233,9 @@
   <public type="attr" name="buttonBarNegativeButtonStyle" />
   <public type="attr" name="popupElevation" />
   <public type="attr" name="actionBarPopupTheme" />
+  <public type="attr" name="multiArch" />
+  <public type="attr" name="touchscreenBlocksFocus" />
+  <public type="attr" name="windowElevation" />
 
   <public-padding type="dimen" name="l_resource_pad" end="0x01050010" />
 
@@ -2509,6 +2512,4 @@
   <!-- A transition that moves views in or out of the scene to or from the left edge when
        a view visibility changes. -->
   <public type="transition" name="slide_left"/>
-  <public type="attr" name="multiArch" />
-  <public type="attr" name="touchscreenBlocksFocus" />
 </resources>

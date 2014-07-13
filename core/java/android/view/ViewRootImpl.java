@@ -461,6 +461,11 @@ public final class ViewRootImpl implements ViewParent,
                     }
                 }
 
+                // Compute surface insets required to draw at specified Z value.
+                // TODO: Use real shadow insets for a constant max Z.
+                final int surfaceInset = (int) Math.ceil(view.getZ() * 2);
+                attrs.surfaceInsets.set(surfaceInset, surfaceInset, surfaceInset, surfaceInset);
+
                 CompatibilityInfo compatibilityInfo = mDisplayAdjustments.getCompatibilityInfo();
                 mTranslator = compatibilityInfo.getTranslator();
                 mDisplayAdjustments.setActivityToken(attrs.token);
@@ -1713,8 +1718,8 @@ public final class ViewRootImpl implements ViewParent,
                 if (hwInitialized ||
                         mWidth != mAttachInfo.mHardwareRenderer.getWidth() ||
                         mHeight != mAttachInfo.mHardwareRenderer.getHeight()) {
-                    final Rect shadowInsets = params != null ? params.shadowInsets : null;
-                    mAttachInfo.mHardwareRenderer.setup(mWidth, mHeight, shadowInsets);
+                    final Rect surfaceInsets = params != null ? params.surfaceInsets : null;
+                    mAttachInfo.mHardwareRenderer.setup(mWidth, mHeight, surfaceInsets);
                     if (!hwInitialized) {
                         mAttachInfo.mHardwareRenderer.invalidate(mSurface);
                         mFullRedrawNeeded = true;
@@ -2371,7 +2376,7 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         final WindowManager.LayoutParams params = mWindowAttributes;
-        final Rect surfaceInsets = params != null ? params.shadowInsets : null;
+        final Rect surfaceInsets = params != null ? params.surfaceInsets : null;
         boolean animating = mScroller != null && mScroller.computeScrollOffset();
         final int curScrollY;
         if (animating) {
@@ -3155,7 +3160,7 @@ public final class ViewRootImpl implements ViewParent,
                             mFullRedrawNeeded = true;
                             try {
                                 final WindowManager.LayoutParams lp = mWindowAttributes;
-                                final Rect surfaceInsets = lp != null ? lp.shadowInsets : null;
+                                final Rect surfaceInsets = lp != null ? lp.surfaceInsets : null;
                                 mAttachInfo.mHardwareRenderer.initializeIfNeeded(
                                         mWidth, mHeight, mSurface, surfaceInsets);
                             } catch (OutOfResourcesException e) {
