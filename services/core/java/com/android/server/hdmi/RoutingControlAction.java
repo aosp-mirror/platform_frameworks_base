@@ -114,9 +114,8 @@ final class RoutingControlAction extends FeatureAction {
                 tv().updateActivePortId(tv().pathToPortId(mCurrentRoutingPath));
             }
         }
-        invokeCallback(HdmiControlManager.RESULT_SUCCESS);
-        finish();
-     }
+        finishWithCallback(HdmiControlManager.RESULT_SUCCESS);
+    }
 
     private int getTvPowerStatus() {
         return tv().getPowerStatus();
@@ -130,6 +129,11 @@ final class RoutingControlAction extends FeatureAction {
     private void sendSetStreamPath() {
         sendCommand(HdmiCecMessageBuilder.buildSetStreamPath(getSourceAddress(),
                 mCurrentRoutingPath));
+    }
+
+    private void finishWithCallback(int result) {
+        invokeCallback(result);
+        finish();
     }
 
     @Override
@@ -152,6 +156,7 @@ final class RoutingControlAction extends FeatureAction {
                     });
                 } else {
                     tv().updateActivePortId(tv().pathToPortId(mCurrentRoutingPath));
+                    finishWithCallback(HdmiControlManager.RESULT_SUCCESS);
                 }
                 return;
             case STATE_WAIT_FOR_REPORT_POWER_STATUS:
@@ -159,8 +164,7 @@ final class RoutingControlAction extends FeatureAction {
                     tv().updateActivePortId(tv().pathToPortId(mCurrentRoutingPath));
                     sendSetStreamPath();
                 }
-                invokeCallback(HdmiControlManager.RESULT_SUCCESS);
-                finish();
+                finishWithCallback(HdmiControlManager.RESULT_SUCCESS);
                 return;
         }
     }
@@ -177,6 +181,7 @@ final class RoutingControlAction extends FeatureAction {
         } else {
             tv().updateActivePortId(tv().pathToPortId(mCurrentRoutingPath));
             sendSetStreamPath();
+            finishWithCallback(HdmiControlManager.RESULT_SUCCESS);
         }
     }
 
