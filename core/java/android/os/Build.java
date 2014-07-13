@@ -45,10 +45,20 @@ public class Build {
     /** The name of the underlying board, like "goldfish". */
     public static final String BOARD = getString("ro.product.board");
 
-    /** The name of the instruction set (CPU type + ABI convention) of native code. */
+    /**
+     * The name of the instruction set (CPU type + ABI convention) of native code.
+     *
+     * @deprecated Use {@link #SUPPORTED_ABIS} instead.
+     */
+    @Deprecated
     public static final String CPU_ABI = getString("ro.product.cpu.abi");
 
-    /** The name of the second instruction set (CPU type + ABI convention) of native code. */
+    /**
+     * The name of the second instruction set (CPU type + ABI convention) of native code.
+     *
+     * @deprecated Use {@link #SUPPORTED_ABIS} instead.
+     */
+    @Deprecated
     public static final String CPU_ABI2 = getString("ro.product.cpu.abi2");
 
     /** The manufacturer of the product/hardware. */
@@ -85,8 +95,6 @@ public class Build {
      * element in the list.
      *
      * See {@link #SUPPORTED_32_BIT_ABIS} and {@link #SUPPORTED_64_BIT_ABIS}.
-     *
-     * @hide
      */
     public static final String[] SUPPORTED_ABIS = SystemProperties.get("ro.product.cpu.abilist")
             .split(",");
@@ -96,8 +104,6 @@ public class Build {
      * is the first element in the list.
      *
      * See {@link #SUPPORTED_ABIS} and {@link #SUPPORTED_64_BIT_ABIS}.
-     *
-     * @hide
      */
     public static final String[] SUPPORTED_32_BIT_ABIS =
             SystemProperties.get("ro.product.cpu.abilist32").split(",");
@@ -107,8 +113,6 @@ public class Build {
      * is the first element in the list.
      *
      * See {@link #SUPPORTED_ABIS} and {@link #SUPPORTED_32_BIT_ABIS}.
-     *
-     * @hide
      */
     public static final String[] SUPPORTED_64_BIT_ABIS =
             SystemProperties.get("ro.product.cpu.abilist64").split(",");
