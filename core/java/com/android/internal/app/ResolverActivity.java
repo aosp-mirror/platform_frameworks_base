@@ -18,6 +18,8 @@ package com.android.internal.app;
 
 import android.app.Activity;
 import android.os.AsyncTask;
+import android.util.ArrayMap;
+import android.widget.AbsListView;
 import android.widget.GridView;
 import com.android.internal.R;
 import com.android.internal.content.PackageMonitor;
@@ -89,6 +91,46 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
         }
     };
 
+    private enum ActionTitle {
+        VIEW(Intent.ACTION_VIEW,
+                com.android.internal.R.string.whichViewApplication,
+                com.android.internal.R.string.whichViewApplicationNamed),
+        EDIT(Intent.ACTION_EDIT,
+                com.android.internal.R.string.whichEditApplication,
+                com.android.internal.R.string.whichEditApplicationNamed),
+        SEND(Intent.ACTION_SEND,
+                com.android.internal.R.string.whichSendApplication,
+                com.android.internal.R.string.whichSendApplicationNamed),
+        SENDTO(Intent.ACTION_SENDTO,
+                com.android.internal.R.string.whichSendApplication,
+                com.android.internal.R.string.whichSendApplicationNamed),
+        SEND_MULTIPLE(Intent.ACTION_SEND_MULTIPLE,
+                com.android.internal.R.string.whichSendApplication,
+                com.android.internal.R.string.whichSendApplicationNamed),
+        DEFAULT(null,
+                com.android.internal.R.string.whichApplication,
+                com.android.internal.R.string.whichApplicationNamed);
+
+        public final String action;
+        public final int titleRes;
+        public final int namedTitleRes;
+
+        ActionTitle(String action, int titleRes, int namedTitleRes) {
+            this.action = action;
+            this.titleRes = titleRes;
+            this.namedTitleRes = namedTitleRes;
+        }
+
+        public static ActionTitle forAction(String action) {
+            for (ActionTitle title : values()) {
+                if (action != null && action.equals(title.action)) {
+                    return title;
+                }
+            }
+            return DEFAULT;
+        }
+    }
+
     private Intent makeMyIntent() {
         Intent intent = new Intent(getIntent());
         intent.setComponent(null);
@@ -113,16 +155,27 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
                 && categories.contains(Intent.CATEGORY_HOME)) {
             titleResource = com.android.internal.R.string.whichHomeApplication;
         } else {
-            titleResource = com.android.internal.R.string.whichApplication;
+            titleResource = 0;
         }
 
-        onCreate(savedInstanceState, intent, getResources().getText(titleResource),
+        onCreate(savedInstanceState, intent,
+                titleResource != 0 ? getResources().getText(titleResource) : null, titleResource,
                 null, null, true);
     }
 
+    /**
+     * Compatibility version for other bundled services that use this ocerload without
+     * a default title resource
+     */
     protected void onCreate(Bundle savedInstanceState, Intent intent,
-            CharSequence title, Intent[] initialIntents, List<ResolveInfo> rList,
-            boolean alwaysUseOption) {
+            CharSequence title, Intent[] initialIntents,
+            List<ResolveInfo> rList, boolean alwaysUseOption) {
+        onCreate(savedInstanceState, intent, title, initialIntents, rList, alwaysUseOption);
+    }
+
+    protected void onCreate(Bundle savedInstanceState, Intent intent,
+            CharSequence title, int defaultTitleRes, Intent[] initialIntents,
+            List<ResolveInfo> rList, boolean alwaysUseOption) {
         setTheme(R.style.Theme_DeviceDefault_Resolver);
         super.onCreate(savedInstanceState);
         try {
@@ -132,7 +185,6 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
             mLaunchedFromUid = -1;
         }
         mPm = getPackageManager();
-        mAlwaysUseOption = alwaysUseOption;
         mMaxColumns = getResources().getInteger(R.integer.config_maxResolverActivityColumns);
 
         mPackageMonitor.register(this, getMainLooper(), false);
@@ -143,14 +195,24 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
         mIconSize = am.getLauncherLargeIconSize();
 
         mAdapter = new ResolveListAdapter(this, intent, initialIntents, rList,
-                mLaunchedFromUid);
+                mLaunchedFromUid, alwaysUseOption);
+
+        final int layoutId;
+        if (mAdapter.hasFilteredItem()) {
+            layoutId = R.layout.resolver_list_with_default;
+            alwaysUseOption = false;
+        } else {
+            layoutId = R.layout.resolver_list;
+        }
+        mAlwaysUseOption = alwaysUseOption;
+
         int count = mAdapter.getCount();
         if (mLaunchedFromUid < 0 || UserHandle.isIsolated(mLaunchedFromUid)) {
             // Gulp!
             finish();
             return;
         } else if (count > 1) {
-            setContentView(R.layout.resolver_list);
+            setContentView(layoutId);
             mGridView = (GridView) findViewById(R.id.resolver_list);
             mGridView.setAdapter(mAdapter);
             mGridView.setOnItemClickListener(this);
@@ -162,7 +224,7 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
 
             resizeGrid();
         } else if (count == 1) {
-            startActivity(mAdapter.intentForPosition(0));
+            startActivity(mAdapter.intentForPosition(0, false));
             mPackageMonitor.unregister();
             mRegistered = false;
             finish();
@@ -189,10 +251,19 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
 
         final TextView titleView = (TextView) findViewById(R.id.title);
         if (titleView != null) {
+            if (title == null) {
+                title = getTitleForAction(intent.getAction(), defaultTitleRes);
+            }
             titleView.setText(title);
         }
 
-        if (alwaysUseOption) {
+        final ImageView iconView = (ImageView) findViewById(R.id.icon);
+        final DisplayResolveInfo iconInfo = mAdapter.getFilteredItem();
+        if (iconView != null && iconInfo != null) {
+            new LoadIconIntoViewTask(iconView).execute(iconInfo);
+        }
+
+        if (alwaysUseOption || mAdapter.hasFilteredItem()) {
             final ViewGroup buttonLayout = (ViewGroup) findViewById(R.id.button_bar);
             if (buttonLayout != null) {
                 buttonLayout.setVisibility(View.VISIBLE);
@@ -201,12 +272,22 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
             } else {
                 mAlwaysUseOption = false;
             }
-            // Set the initial highlight if there was a preferred or last used choice
-            final int initialHighlight = mAdapter.getInitialHighlight();
-            if (initialHighlight >= 0) {
-                mGridView.setItemChecked(initialHighlight, true);
-                onItemClick(null, null, initialHighlight, 0); // Other entries are not used
-            }
+        }
+
+        if (mAdapter.hasFilteredItem()) {
+            setAlwaysButtonEnabled(true, mAdapter.getFilteredPosition(), false);
+            mOnceButton.setEnabled(true);
+        }
+    }
+
+    protected CharSequence getTitleForAction(String action, int defaultTitleRes) {
+        final ActionTitle title = ActionTitle.forAction(action);
+        final boolean named = mAdapter.hasFilteredItem();
+        if (title == ActionTitle.DEFAULT && defaultTitleRes != 0) {
+            return getString(defaultTitleRes);
+        } else {
+            return named ? getString(title.namedTitleRes, mAdapter.getFilteredItem().displayLabel) :
+                    getString(title.titleRes);
         }
     }
 
@@ -292,7 +373,7 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
             final int checkedPos = mGridView.getCheckedItemPosition();
             final boolean hasValidSelection = checkedPos != ListView.INVALID_POSITION;
             mLastSelected = checkedPos;
-            setAlwaysButtonEnabled(hasValidSelection, checkedPos);
+            setAlwaysButtonEnabled(hasValidSelection, checkedPos, true);
             mOnceButton.setEnabled(hasValidSelection);
             if (hasValidSelection) {
                 mGridView.setSelection(checkedPos);
@@ -305,21 +386,22 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
         final int checkedPos = mGridView.getCheckedItemPosition();
         final boolean hasValidSelection = checkedPos != ListView.INVALID_POSITION;
         if (mAlwaysUseOption && (!hasValidSelection || mLastSelected != checkedPos)) {
-            setAlwaysButtonEnabled(hasValidSelection, checkedPos);
+            setAlwaysButtonEnabled(hasValidSelection, checkedPos, true);
             mOnceButton.setEnabled(hasValidSelection);
             if (hasValidSelection) {
                 mGridView.smoothScrollToPosition(checkedPos);
             }
             mLastSelected = checkedPos;
         } else {
-            startSelected(position, false);
+            startSelected(position, false, true);
         }
     }
 
-    private void setAlwaysButtonEnabled(boolean hasValidSelection, int checkedPos) {
+    private void setAlwaysButtonEnabled(boolean hasValidSelection, int checkedPos,
+            boolean filtered) {
         boolean enabled = false;
         if (hasValidSelection) {
-            ResolveInfo ri = mAdapter.resolveInfoForPosition(checkedPos);
+            ResolveInfo ri = mAdapter.resolveInfoForPosition(checkedPos, filtered);
             if (ri.targetUserId == UserHandle.USER_CURRENT) {
                 enabled = true;
             }
@@ -329,22 +411,25 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
 
     public void onButtonClick(View v) {
         final int id = v.getId();
-        startSelected(mGridView.getCheckedItemPosition(), id == R.id.button_always);
+        startSelected(mAlwaysUseOption ?
+                mGridView.getCheckedItemPosition() : mAdapter.getFilteredPosition(),
+                id == R.id.button_always,
+                mAlwaysUseOption);
         dismiss();
     }
 
-    void startSelected(int which, boolean always) {
+    void startSelected(int which, boolean always, boolean filtered) {
         if (isFinishing()) {
             return;
         }
-        ResolveInfo ri = mAdapter.resolveInfoForPosition(which);
-        Intent intent = mAdapter.intentForPosition(which);
+        ResolveInfo ri = mAdapter.resolveInfoForPosition(which, filtered);
+        Intent intent = mAdapter.intentForPosition(which, filtered);
         onIntentSelected(ri, intent, always);
         finish();
     }
 
     protected void onIntentSelected(ResolveInfo ri, Intent intent, boolean alwaysCheck) {
-        if (mAlwaysUseOption && mAdapter.mOrigResolveList != null) {
+        if ((mAlwaysUseOption || mAdapter.hasFilteredItem()) && mAdapter.mOrigResolveList != null) {
             // Build a reasonable intent filter, based on what matched.
             IntentFilter filter = new IntentFilter();
 
@@ -485,16 +570,19 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
         List<DisplayResolveInfo> mList;
         List<ResolveInfo> mOrigResolveList;
 
-        private int mInitialHighlight = -1;
+        private int mLastChosenPosition = -1;
+        private boolean mFilterLastUsed;
 
         public ResolveListAdapter(Context context, Intent intent,
-                Intent[] initialIntents, List<ResolveInfo> rList, int launchedFromUid) {
+                Intent[] initialIntents, List<ResolveInfo> rList, int launchedFromUid,
+                boolean filterLastUsed) {
             mIntent = new Intent(intent);
             mInitialIntents = initialIntents;
             mBaseResolveList = rList;
             mLaunchedFromUid = launchedFromUid;
             mInflater = LayoutInflater.from(context);
             mList = new ArrayList<DisplayResolveInfo>();
+            mFilterLastUsed = filterLastUsed;
             rebuildList();
         }
 
@@ -511,8 +599,23 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
             }
         }
 
-        public int getInitialHighlight() {
-            return mInitialHighlight;
+        public DisplayResolveInfo getFilteredItem() {
+            if (mFilterLastUsed && mLastChosenPosition >= 0) {
+                // Not using getItem since it offsets to dodge this position for the list
+                return mList.get(mLastChosenPosition);
+            }
+            return null;
+        }
+
+        public int getFilteredPosition() {
+            if (mFilterLastUsed && mLastChosenPosition >= 0) {
+                return mLastChosenPosition;
+            }
+            return AbsListView.INVALID_POSITION;
+        }
+
+        public boolean hasFilteredItem() {
+            return mFilterLastUsed && mLastChosenPosition >= 0;
         }
 
         private void rebuildList() {
@@ -532,7 +635,7 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
             } else {
                 currentResolveList = mOrigResolveList = mPm.queryIntentActivities(
                         mIntent, PackageManager.MATCH_DEFAULT_ONLY
-                        | (mAlwaysUseOption ? PackageManager.GET_RESOLVED_FILTER : 0));
+                        | (mFilterLastUsed ? PackageManager.GET_RESOLVED_FILTER : 0));
                 // Filter out any activities that the launched uid does not
                 // have permission for.  We don't do this when we have an explicit
                 // list of resolved activities, because that only happens when
@@ -648,7 +751,7 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
                         && mLastChosen.activityInfo.packageName.equals(
                                 ro.activityInfo.packageName)
                         && mLastChosen.activityInfo.name.equals(ro.activityInfo.name)) {
-                    mInitialHighlight = mList.size();
+                    mLastChosenPosition = mList.size();
                 }
                 // No duplicate labels. Use label for entry at start
                 mList.add(new DisplayResolveInfo(ro, roLabel, null, null));
@@ -683,7 +786,7 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
                             && mLastChosen.activityInfo.packageName.equals(
                                     add.activityInfo.packageName)
                             && mLastChosen.activityInfo.name.equals(add.activityInfo.name)) {
-                        mInitialHighlight = mList.size();
+                        mLastChosenPosition = mList.size();
                     }
                     if (usePkg) {
                         // Use application name for all entries from start to end-1
@@ -698,12 +801,12 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
             }
         }
 
-        public ResolveInfo resolveInfoForPosition(int position) {
-            return mList.get(position).ri;
+        public ResolveInfo resolveInfoForPosition(int position, boolean filtered) {
+            return (filtered ? getItem(position) : mList.get(position)).ri;
         }
 
-        public Intent intentForPosition(int position) {
-            DisplayResolveInfo dri = mList.get(position);
+        public Intent intentForPosition(int position, boolean filtered) {
+            DisplayResolveInfo dri = filtered ? getItem(position) : mList.get(position);
             
             Intent intent = new Intent(dri.origIntent != null
                     ? dri.origIntent : mIntent);
@@ -716,10 +819,17 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
         }
 
         public int getCount() {
-            return mList.size();
+            int result = mList.size();
+            if (mFilterLastUsed && mLastChosenPosition >= 0) {
+                result--;
+            }
+            return result;
         }
 
-        public Object getItem(int position) {
+        public DisplayResolveInfo getItem(int position) {
+            if (mFilterLastUsed && mLastChosenPosition >= 0 && position >= mLastChosenPosition) {
+                position++;
+            }
             return mList.get(position);
         }
 
@@ -742,7 +852,7 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
             } else {
                 view = convertView;
             }
-            bindView(view, mList.get(position));
+            bindView(view, getItem(position));
             return view;
         }
 
@@ -778,7 +888,7 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
 
         @Override
         public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-            ResolveInfo ri = mAdapter.resolveInfoForPosition(position);
+            ResolveInfo ri = mAdapter.resolveInfoForPosition(position, true);
             showAppDetails(ri);
             return true;
         }
@@ -798,6 +908,28 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
         @Override
         protected void onPostExecute(DisplayResolveInfo info) {
             mAdapter.notifyDataSetChanged();
+        }
+    }
+
+    class LoadIconIntoViewTask extends AsyncTask<DisplayResolveInfo, Void, DisplayResolveInfo> {
+        final ImageView mTargetView;
+
+        public LoadIconIntoViewTask(ImageView target) {
+            mTargetView = target;
+        }
+
+        @Override
+        protected DisplayResolveInfo doInBackground(DisplayResolveInfo... params) {
+            final DisplayResolveInfo info = params[0];
+            if (info.displayIcon == null) {
+                info.displayIcon = loadIconForResolveInfo(info.ri);
+            }
+            return info;
+        }
+
+        @Override
+        protected void onPostExecute(DisplayResolveInfo info) {
+            mTargetView.setImageDrawable(info.displayIcon);
         }
     }
 }

@@ -1908,4 +1908,12 @@
   <java-symbol type="bool" name="skipHoldBeforeMerge" />
   <java-symbol type="bool" name="useImsAlwaysForEmergencyCall" />
   <java-symbol type="attr" name="touchscreenBlocksFocus" />
+  <java-symbol type="layout" name="resolver_list_with_default" />
+  <java-symbol type="string" name="whichApplicationNamed" />
+  <java-symbol type="string" name="whichViewApplication" />
+  <java-symbol type="string" name="whichViewApplicationNamed" />
+  <java-symbol type="string" name="whichEditApplication" />
+  <java-symbol type="string" name="whichEditApplicationNamed" />
+  <java-symbol type="string" name="whichSendApplication" />
+  <java-symbol type="string" name="whichSendApplicationNamed" />
 </resources>
