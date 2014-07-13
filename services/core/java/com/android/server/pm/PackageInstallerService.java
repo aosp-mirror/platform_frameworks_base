@@ -32,16 +32,20 @@ import android.os.Binder;
 import android.os.FileUtils;
 import android.os.HandlerThread;
 import android.os.Process;
+import android.os.RemoteCallbackList;
+import android.os.RemoteException;
 import android.os.SELinux;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.util.ArraySet;
+import android.util.ExceptionUtils;
 import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.IoThread;
 import com.google.android.collect.Sets;
 
@@ -70,6 +74,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     private int mNextSessionId;
     @GuardedBy("mSessions")
     private final SparseArray<PackageInstallerSession> mSessions = new SparseArray<>();
+
+    private RemoteCallbackList<IPackageInstallerObserver> mObservers = new RemoteCallbackList<>();
 
     private static final FilenameFilter sStageFilter = new FilenameFilter() {
         @Override
@@ -144,7 +150,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     public int createSession(String installerPackageName, InstallSessionParams params,
             int userId) {
         final int callingUid = Binder.getCallingUid();
-        mPm.enforceCrossUserPermission(callingUid, userId, false, TAG);
+        mPm.enforceCrossUserPermission(callingUid, userId, true, "createSession");
 
         if (mPm.isUserRestricted(UserHandle.getUserId(callingUid),
                 UserManager.DISALLOW_INSTALL_APPS)) {
@@ -161,19 +167,32 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
             params.installFlags |= INSTALL_REPLACE_EXISTING;
         }
 
+        // Sanity check that install could fit
+        if (params.deltaSize > 0) {
+            try {
+                mPm.freeStorage(params.deltaSize);
+            } catch (IOException e) {
+                throw ExceptionUtils.wrap(e);
+            }
+        }
+
+        final int sessionId;
+        final PackageInstallerSession session;
         synchronized (mSessions) {
+            sessionId = allocateSessionIdLocked();
+
             final long createdMillis = System.currentTimeMillis();
-            final int sessionId = allocateSessionIdLocked();
             final File sessionStageDir = prepareSessionStageDir(sessionId);
 
-            final PackageInstallerSession session = new PackageInstallerSession(mCallback, mPm,
-                    sessionId, userId, installerPackageName, callingUid, params, createdMillis,
-                    sessionStageDir, mInstallThread.getLooper());
+            session = new PackageInstallerSession(mCallback, mPm, sessionId, userId,
+                    installerPackageName, callingUid, params, createdMillis, sessionStageDir,
+                    mInstallThread.getLooper());
             mSessions.put(sessionId, session);
-
-            writeSessionsAsync();
-            return sessionId;
         }
+
+        notifySessionCreated(session.generateInfo());
+        writeSessionsAsync();
+        return sessionId;
     }
 
     @Override
@@ -221,7 +240,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
 
     @Override
     public List<InstallSessionInfo> getSessions(int userId) {
-        mPm.enforceCrossUserPermission(Binder.getCallingUid(), userId, false, TAG);
+        mPm.enforceCrossUserPermission(Binder.getCallingUid(), userId, true, "getSessions");
 
         final List<InstallSessionInfo> result = new ArrayList<>();
         synchronized (mSessions) {
@@ -238,32 +257,112 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     @Override
     public void uninstall(String packageName, int flags, IPackageDeleteObserver observer,
             int userId) {
+        mPm.enforceCrossUserPermission(Binder.getCallingUid(), userId, true, "uninstall");
         mPm.deletePackageAsUser(packageName, observer, userId, flags);
     }
 
     @Override
     public void uninstallSplit(String basePackageName, String overlayName, int flags,
             IPackageDeleteObserver observer, int userId) {
+        mPm.enforceCrossUserPermission(Binder.getCallingUid(), userId, true, "uninstallSplit");
+
         // TODO: flesh out once PM has split support
         throw new UnsupportedOperationException();
     }
 
     @Override
     public void registerObserver(IPackageInstallerObserver observer, int userId) {
-        throw new UnsupportedOperationException();
+        mPm.enforceCrossUserPermission(Binder.getCallingUid(), userId, true, "registerObserver");
+
+        // TODO: consider restricting to active launcher app only
+        mObservers.register(observer, new UserHandle(userId));
     }
 
     @Override
     public void unregisterObserver(IPackageInstallerObserver observer, int userId) {
-        throw new UnsupportedOperationException();
+        mPm.enforceCrossUserPermission(Binder.getCallingUid(), userId, true, "unregisterObserver");
+        mObservers.unregister(observer);
+    }
+
+    private int getSessionUserId(int sessionId) {
+        synchronized (mSessions) {
+            return UserHandle.getUserId(mSessions.get(sessionId).installerUid);
+        }
+    }
+
+    private void notifySessionCreated(InstallSessionInfo info) {
+        final int userId = getSessionUserId(info.sessionId);
+        final int n = mObservers.beginBroadcast();
+        for (int i = 0; i < n; i++) {
+            final IPackageInstallerObserver observer = mObservers.getBroadcastItem(i);
+            final UserHandle user = (UserHandle) mObservers.getBroadcastCookie(i);
+            if (userId == user.getIdentifier()) {
+                try {
+                    observer.onSessionCreated(info);
+                } catch (RemoteException ignored) {
+                }
+            }
+        }
+        mObservers.finishBroadcast();
+    }
+
+    private void notifySessionProgress(int sessionId, int progress) {
+        final int userId = getSessionUserId(sessionId);
+        final int n = mObservers.beginBroadcast();
+        for (int i = 0; i < n; i++) {
+            final IPackageInstallerObserver observer = mObservers.getBroadcastItem(i);
+            final UserHandle user = (UserHandle) mObservers.getBroadcastCookie(i);
+            if (userId == user.getIdentifier()) {
+                try {
+                    observer.onSessionProgress(sessionId, progress);
+                } catch (RemoteException ignored) {
+                }
+            }
+        }
+        mObservers.finishBroadcast();
+    }
+
+    private void notifySessionFinished(int sessionId, boolean success) {
+        final int userId = getSessionUserId(sessionId);
+        final int n = mObservers.beginBroadcast();
+        for (int i = 0; i < n; i++) {
+            final IPackageInstallerObserver observer = mObservers.getBroadcastItem(i);
+            final UserHandle user = (UserHandle) mObservers.getBroadcastCookie(i);
+            if (userId == user.getIdentifier()) {
+                try {
+                    observer.onSessionFinished(sessionId, success);
+                } catch (RemoteException ignored) {
+                }
+            }
+        }
+        mObservers.finishBroadcast();
+    }
+
+    void dump(IndentingPrintWriter pw) {
+        pw.println("Active install sessions:");
+        pw.increaseIndent();
+        synchronized (mSessions) {
+            final int N = mSessions.size();
+            for (int i = 0; i < N; i++) {
+                final PackageInstallerSession session = mSessions.valueAt(i);
+                session.dump(pw);
+                pw.println();
+            }
+        }
+        pw.println();
+        pw.decreaseIndent();
     }
 
     class Callback {
-        public void onProgressChanged(PackageInstallerSession session) {
-            // TODO: notify listeners
+        public void onSessionProgress(PackageInstallerSession session, int progress) {
+            notifySessionProgress(session.sessionId, progress);
         }
 
-        public void onSessionInvalid(PackageInstallerSession session) {
+        public void onSessionFinished(PackageInstallerSession session, boolean success) {
+            notifySessionFinished(session.sessionId, success);
+            synchronized (mSessions) {
+                mSessions.remove(session.sessionId);
+            }
             writeSessionsAsync();
         }
     }

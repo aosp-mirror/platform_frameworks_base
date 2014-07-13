@@ -31,7 +31,7 @@ import android.content.pm.InstallSessionParams;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
-import android.content.pm.PackageInstaller.InstallResultCallback;
+import android.content.pm.PackageInstaller.CommitResultCallback;
 import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
@@ -769,7 +769,7 @@ public final class Pm {
         }
     }
 
-    class LocalInstallResultCallback extends InstallResultCallback {
+    class LocalCommitResultCallback extends CommitResultCallback {
         boolean finished;
         boolean success;
         String msg;
@@ -1018,6 +1018,7 @@ public final class Pm {
         final InstallSessionParams params = new InstallSessionParams();
         params.installFlags = PackageManager.INSTALL_ALL_USERS;
         params.fullInstall = true;
+        params.progressMax = -1;
 
         String opt;
         while ((opt = nextOption()) != null) {
@@ -1042,6 +1043,7 @@ public final class Pm {
                 params.fullInstall = false;
             } else if (opt.equals("-S")) {
                 params.deltaSize = Long.parseLong(nextOptionData());
+                params.progressMax = (int) params.deltaSize;
             } else {
                 throw new IllegalArgumentException("Unknown option " + opt);
             }
@@ -1093,7 +1095,8 @@ public final class Pm {
             out = session.openWrite(splitName, 0, sizeBytes);
 
             final int n = Streams.copy(in, out);
-            out.flush();
+            session.fsync(out);
+            session.addProgress(n);
 
             System.out.println("Success: streamed " + n + " bytes");
         } finally {
@@ -1110,8 +1113,8 @@ public final class Pm {
         try {
             session = new PackageInstaller.Session(mInstaller.openSession(sessionId));
 
-            final LocalInstallResultCallback callback = new LocalInstallResultCallback();
-            session.install(callback);
+            final LocalCommitResultCallback callback = new LocalCommitResultCallback();
+            session.commit(callback);
 
             synchronized (callback) {
                 while (!callback.finished) {

@@ -21,6 +21,8 @@ import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.android.internal.util.IndentingPrintWriter;
+
 /** {@hide} */
 public class InstallSessionParams implements Parcelable {
 
@@ -36,6 +38,8 @@ public class InstallSessionParams implements Parcelable {
     public Signature[] signatures;
     /** {@hide} */
     public long deltaSize = -1;
+    /** {@hide} */
+    public int progressMax = 100;
     /** {@hide} */
     public String packageName;
     /** {@hide} */
@@ -59,6 +63,7 @@ public class InstallSessionParams implements Parcelable {
         installLocation = source.readInt();
         signatures = (Signature[]) source.readParcelableArray(null);
         deltaSize = source.readLong();
+        progressMax = source.readInt();
         packageName = source.readString();
         icon = source.readParcelable(null);
         title = source.readString();
@@ -87,6 +92,10 @@ public class InstallSessionParams implements Parcelable {
         this.deltaSize = deltaSize;
     }
 
+    public void setProgressMax(int progressMax) {
+        this.progressMax = progressMax;
+    }
+
     public void setPackageName(String packageName) {
         this.packageName = packageName;
     }
@@ -107,6 +116,23 @@ public class InstallSessionParams implements Parcelable {
         this.referrerUri = referrerUri;
     }
 
+    /** {@hide} */
+    public void dump(IndentingPrintWriter pw) {
+        pw.printPair("fullInstall", fullInstall);
+        pw.printHexPair("installFlags", installFlags);
+        pw.printPair("installLocation", installLocation);
+        pw.printPair("signatures", (signatures != null));
+        pw.printPair("deltaSize", deltaSize);
+        pw.printPair("progressMax", progressMax);
+        pw.printPair("packageName", packageName);
+        pw.printPair("icon", (icon != null));
+        pw.printPair("title", title);
+        pw.printPair("originatingUri", originatingUri);
+        pw.printPair("referrerUri", referrerUri);
+        pw.printPair("abiOverride", abiOverride);
+        pw.println();
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -119,6 +145,7 @@ public class InstallSessionParams implements Parcelable {
         dest.writeInt(installLocation);
         dest.writeParcelableArray(signatures, flags);
         dest.writeLong(deltaSize);
+        dest.writeInt(progressMax);
         dest.writeString(packageName);
         dest.writeParcelable(icon, flags);
         dest.writeString(title != null ? title.toString() : null);
