@@ -83,6 +83,10 @@ public class PrinterRegistry {
         getPrinterProvider().setTrackedPrinter(printerId);
     }
 
+    public boolean areHistoricalPrintersLoaded() {
+        return getPrinterProvider().areHistoricalPrintersLoaded();
+    }
+
     private FusedPrintersProvider getPrinterProvider() {
         Loader<?> loader = mActivity.getLoaderManager().getLoader(LOADER_ID_PRINTERS_LOADER);
         return (FusedPrintersProvider) loader;

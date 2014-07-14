@@ -271,6 +271,10 @@ public final class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
         onStopLoading();
     }
 
+    public boolean areHistoricalPrintersLoaded() {
+        return mPersistenceManager.mReadHistoryCompleted;
+    }
+
     public void setTrackedPrinter(PrinterId printerId) {
         if (isStarted() && mDiscoverySession != null
                 && mDiscoverySession.isPrinterDiscoveryStarted()) {

@@ -190,7 +190,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
     private MediaSizeComparator mMediaSizeComparator;
 
-    private PrinterInfo mOldCurrentPrinter;
+    private PrinterInfo mCurrentPrinter;
 
     private PageRange[] mSelectedPages;
 
@@ -576,7 +576,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             }
         }
 
-        PrinterId printerId = mOldCurrentPrinter.getId();
+        PrinterId printerId = mCurrentPrinter.getId();
         final int index = mDestinationSpinnerAdapter.getPrinterIndex(printerId);
         mDestinationSpinner.setSelection(index);
     }
@@ -810,7 +810,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     }
 
     private void requestCreatePdfFileOrFinish() {
-        if (getCurrentPrinter() == mDestinationSpinnerAdapter.getPdfPrinter()) {
+        if (mCurrentPrinter == mDestinationSpinnerAdapter.getPdfPrinter()) {
             startCreateDocumentActivity();
         } else {
             finish();
@@ -898,17 +898,12 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     }
 
     private void addCurrentPrinterToHistory() {
-        PrinterInfo currentPrinter = getCurrentPrinter();
-        if (currentPrinter != null) {
+        if (mCurrentPrinter != null) {
             PrinterId fakePdfPrinterId = mDestinationSpinnerAdapter.getPdfPrinter().getId();
-            if (!currentPrinter.getId().equals(fakePdfPrinterId)) {
-                mPrinterRegistry.addHistoricalPrinter(currentPrinter);
+            if (!mCurrentPrinter.getId().equals(fakePdfPrinterId)) {
+                mPrinterRegistry.addHistoricalPrinter(mCurrentPrinter);
             }
         }
-    }
-
-    private PrinterInfo getCurrentPrinter() {
-        return ((PrinterHolder) mDestinationSpinner.getSelectedItem()).printer;
     }
 
     private void cancelPrint() {
@@ -970,7 +965,6 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         mDestinationSpinner = (Spinner) findViewById(R.id.destination_spinner);
         mDestinationSpinner.setAdapter(mDestinationSpinnerAdapter);
         mDestinationSpinner.setOnItemSelectedListener(itemSelectedListener);
-        mDestinationSpinner.setSelection(0);
 
         // Media size.
         mMediaSizeSpinnerAdapter = new ArrayAdapter<>(
@@ -1036,16 +1030,14 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         @Override
         public void onClick(View view) {
             if (view == mPrintButton) {
-                PrinterInfo currentPrinter = getCurrentPrinter();
-                if (currentPrinter != null) {
+                if (mCurrentPrinter != null) {
                     confirmPrint();
                 } else {
                     cancelPrint();
                 }
             } else if (view == mMoreOptionsButton) {
-                PrinterInfo currentPrinter = getCurrentPrinter();
-                if (currentPrinter != null) {
-                    startAdvancedPrintOptionsActivity(currentPrinter);
+                if (mCurrentPrinter != null) {
+                    startAdvancedPrintOptionsActivity(mCurrentPrinter);
                 }
             }
         }
@@ -1090,8 +1082,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
         // If no current printer, or it has no capabilities, or it is not
         // available, we disable all print options except the destination.
-        PrinterInfo currentPrinter = getCurrentPrinter();
-        if (currentPrinter == null || !canPrint(currentPrinter)) {
+        if (mCurrentPrinter == null || !canPrint(mCurrentPrinter)) {
             mCopiesEditText.setEnabled(false);
             mMediaSizeSpinner.setEnabled(false);
             mColorModeSpinner.setEnabled(false);
@@ -1103,7 +1094,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             return;
         }
 
-        PrinterCapabilitiesInfo capabilities = currentPrinter.getCapabilities();
+        PrinterCapabilitiesInfo capabilities = mCurrentPrinter.getCapabilities();
         PrintAttributes defaultAttributes = capabilities.getDefaults();
 
         // Destination.
@@ -1291,7 +1282,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         }
 
         // Advanced print options
-        ComponentName serviceName = currentPrinter.getId().getServiceName();
+        ComponentName serviceName = mCurrentPrinter.getId().getServiceName();
         if (!TextUtils.isEmpty(PrintOptionUtils.getAdvancedOptionsActivityName(
                 this, serviceName))) {
             mAdvancedPrintOptionsContainer.setVisibility(View.VISIBLE);
@@ -1302,7 +1293,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         }
 
         // Print
-        if (mDestinationSpinnerAdapter.getPdfPrinter() != currentPrinter) {
+        if (mDestinationSpinnerAdapter.getPdfPrinter() != mCurrentPrinter) {
             mPrintButton.setImageResource(com.android.internal.R.drawable.ic_print);
         } else {
             mPrintButton.setImageResource(com.android.internal.R.drawable.ic_menu_save);
@@ -1317,7 +1308,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         }
 
         // Copies
-        if (mDestinationSpinnerAdapter.getPdfPrinter() != currentPrinter) {
+        if (mDestinationSpinnerAdapter.getPdfPrinter() != mCurrentPrinter) {
             mCopiesEditText.setEnabled(true);
         } else {
             mCopiesEditText.setEnabled(false);
@@ -1395,8 +1386,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     }
 
     public void onPrinterAvailable(PrinterInfo printer) {
-        PrinterInfo currentPrinter = getCurrentPrinter();
-        if (currentPrinter.equals(printer)) {
+        if (mCurrentPrinter.equals(printer)) {
             setState(STATE_CONFIGURING);
             if (canUpdateDocument()) {
                 updateDocument(true, false);
@@ -1407,7 +1397,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     }
 
     public void onPrinterUnavailable(PrinterInfo printer) {
-        if (getCurrentPrinter().getId().equals(printer.getId())) {
+        if (mCurrentPrinter.getId().equals(printer.getId())) {
             setState(STATE_PRINTER_UNAVAILABLE);
             if (mPrintedDocument.isUpdating()) {
                 mPrintedDocument.cancel();
@@ -1444,15 +1434,14 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             return false;
         }
 
-        PrinterInfo currentPrinter = getCurrentPrinter();
-        if (currentPrinter == null) {
+        if (mCurrentPrinter == null) {
             return false;
         }
-        PrinterCapabilitiesInfo capabilities = currentPrinter.getCapabilities();
+        PrinterCapabilitiesInfo capabilities = mCurrentPrinter.getCapabilities();
         if (capabilities == null) {
             return false;
         }
-        if (currentPrinter.getStatus() == PrinterInfo.STATUS_UNAVAILABLE) {
+        if (mCurrentPrinter.getStatus() == PrinterInfo.STATUS_UNAVAILABLE) {
             return false;
         }
 
@@ -1560,8 +1549,13 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
         private final PrinterHolder mFakePdfPrinterHolder;
 
+        private boolean mHistoricalPrintersLoaded;
+
         public DestinationAdapter() {
-            addPrinters(mPrinterHolders, mPrinterRegistry.getPrinters());
+            mHistoricalPrintersLoaded = mPrinterRegistry.areHistoricalPrintersLoaded();
+            if (mHistoricalPrintersLoaded) {
+                addPrinters(mPrinterHolders, mPrinterRegistry.getPrinters());
+            }
             mPrinterRegistry.setOnPrintersChangeListener(this);
             mFakePdfPrinterHolder = new PrinterHolder(createFakePdfPrinter());
         }
@@ -1602,7 +1596,10 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
         @Override
         public int getCount() {
-            return Math.min(mPrinterHolders.size() + 2, DEST_ADAPTER_MAX_ITEM_COUNT);
+            if (mHistoricalPrintersLoaded) {
+                return Math.min(mPrinterHolders.size() + 2, DEST_ADAPTER_MAX_ITEM_COUNT);
+            }
+            return 0;
         }
 
         @Override
@@ -1731,6 +1728,12 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             // not shown in the initial short list. Therefore, we have
             // to keep the printer order.
 
+            // Check if historical printers are loaded as this adapter is open
+            // for busyness only if they are. This member is updated here and
+            // when the adapter is created because the historical printers may
+            // be loaded before or after the adapter is created.
+            mHistoricalPrintersLoaded = mPrinterRegistry.areHistoricalPrintersLoaded();
+
             // No old printers - do not bother keeping their position.
             if (mPrinterHolders.isEmpty()) {
                 addPrinters(mPrinterHolders, printers);
@@ -1839,7 +1842,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     private final class PrintersObserver extends DataSetObserver {
         @Override
         public void onChanged() {
-            PrinterInfo oldPrinterState = mOldCurrentPrinter;
+            PrinterInfo oldPrinterState = mCurrentPrinter;
             if (oldPrinterState == null) {
                 return;
             }
@@ -1927,14 +1930,15 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                     return;
                 }
 
-                PrinterInfo currentPrinter = getCurrentPrinter();
+                PrinterHolder currentItem = (PrinterHolder) mDestinationSpinner.getSelectedItem();
+                PrinterInfo currentPrinter = (currentItem != null) ? currentItem.printer : null;
 
                 // Why on earth item selected is called if no selection changed.
-                if (mOldCurrentPrinter == currentPrinter) {
+                if (mCurrentPrinter == currentPrinter) {
                     return;
                 }
 
-                mOldCurrentPrinter = currentPrinter;
+                mCurrentPrinter = currentPrinter;
 
                 PrinterHolder printerHolder = mDestinationSpinnerAdapter.getPrinterHolder(
                         currentPrinter.getId());
