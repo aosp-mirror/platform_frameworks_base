@@ -200,7 +200,12 @@ public class ContextWrapper extends Context {
     public File getFilesDir() {
         return mBase.getFilesDir();
     }
-    
+
+    @Override
+    public File getNoBackupFilesDir() {
+        return mBase.getNoBackupFilesDir();
+    }
+
     @Override
     public File getExternalFilesDir(String type) {
         return mBase.getExternalFilesDir(type);
