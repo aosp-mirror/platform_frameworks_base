@@ -104,7 +104,7 @@ widgets:</p>
 
 <p>Android provides <a href="{@docRoot}guide/topics/resources/drawable-resource.html#StateList">
 Drawable State List Resources</a> to implement highlights for selected and focused controls. The
-following code example demonstates how to indicate selection of a button object:
+following code example demonstrates how to indicate selection of a button object:
 </p>
 
 <pre>
