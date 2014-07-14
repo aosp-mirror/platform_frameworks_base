@@ -658,5 +658,22 @@ interface ITelephony {
      * Similar to above, but check for pkg whose name is pkgname.
      */
     int checkCarrierPrivilegesForPackage(String pkgname);
+
+    /**
+     * Set whether Android should display a simplified Mobile Network Settings UI.
+     * The setting won't be persisted during power cycle.
+     *
+     * @param subId for which the simplified UI should be enabled or disabled.
+     * @param enable true means enabling the simplified UI.
+     */
+    void enableSimplifiedNetworkSettings(long subId, boolean enable);
+
+    /**
+     * Get whether a simplified Mobile Network Settings UI is enabled.
+     *
+     * @param subId for which the simplified UI should be enabled or disabled.
+     * @return true if the simplified UI is enabled.
+     */
+    boolean getSimplifiedNetworkSettingsEnabled(long subId);
 }
 

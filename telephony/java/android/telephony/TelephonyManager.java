@@ -3184,4 +3184,73 @@ public class TelephonyManager {
             Log.e(TAG, "Error calling ITelephony#setSystemDefault", e);
         }
     }
+
+    /**
+     * Set whether Android should display a simplified Mobile Network Settings UI.
+     * The setting won't be persisted during power cycle.
+     * <p>
+     * Requires Permission:
+     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     *
+     * @param enable true means enabling the simplified UI.
+     *
+     * @hide
+     */
+    public void enableSimplifiedNetworkSettings(boolean enable) {
+        enableSimplifiedNetworkSettings(getDefaultSubscription(), enable);
+    }
+
+    /**
+     * Set whether Android should display a simplified Mobile Network Settings UI.
+     * The setting won't be persisted during power cycle.
+     * <p>
+     * Requires Permission:
+     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     *
+     * @param subId for which the simplified UI should be enabled or disabled.
+     * @param enable true means enabling the simplified UI.
+     *
+     * @hide
+     */
+    public void enableSimplifiedNetworkSettings(long subId, boolean enable) {
+        try {
+            getITelephony().enableSimplifiedNetworkSettings(subId, enable);
+        } catch (RemoteException ex) {
+        } catch (NullPointerException ex) {
+        }
+    }
+
+    /**
+     * Get whether a simplified Mobile Network Settings UI is enabled.
+     * <p>
+     * Requires Permission:
+     *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     *
+     * @return true if the simplified UI is enabled.
+     *
+     * @hide
+     */
+    public boolean getSimplifiedNetworkSettingsEnabled() {
+        return getSimplifiedNetworkSettingsEnabled(getDefaultSubscription());
+    }
+
+    /**
+     * Get whether a simplified Mobile Network Settings UI is enabled.
+     * <p>
+     * Requires Permission:
+     *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     *
+     * @param subId for which the simplified UI should be enabled or disabled.
+     * @return true if the simplified UI is enabled.
+     *
+     * @hide
+     */
+    public boolean getSimplifiedNetworkSettingsEnabled(long subId) {
+        try {
+            return getITelephony().getSimplifiedNetworkSettingsEnabled(subId);
+        } catch (RemoteException ex) {
+        } catch (NullPointerException ex) {
+        }
+        return false;
+    }
 }
