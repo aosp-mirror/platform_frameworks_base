@@ -675,5 +675,36 @@ interface ITelephony {
      * @return true if the simplified UI is enabled.
      */
     boolean getSimplifiedNetworkSettingsEnabled(long subId);
+
+    /**
+     * Set the phone number string and its alphatag for line 1 for display
+     * purpose only, for example, displayed in Phone Status. It won't change
+     * the actual MSISDN/MDN. This setting won't be persisted during power cycle
+     * and it should be set again after reboot.
+     *
+     * @param subId the subscriber that the alphatag and dialing number belongs to.
+     * @param alphaTag alpha-tagging of the dailing nubmer
+     * @param number The dialing number
+     */
+    void setLine1NumberForDisplay(long subId, String alphaTag, String number);
+
+    /**
+     * Returns the displayed dialing number string if it was set previously via
+     * {@link #setLine1NumberForDisplay}. Otherwise returns null.
+     *
+     * @param subId whose dialing number for line 1 is returned.
+     * @return the displayed dialing number if set, or null if not set.
+     */
+    String getLine1NumberForDisplay(long subId);
+
+    /**
+     * Returns the displayed alphatag of the dialing number if it was set
+     * previously via {@link #setLine1NumberForDisplay}. Otherwise returns null.
+     *
+     * @param subId whose alphatag associated with line 1 is returned.
+     * @return the displayed alphatag of the dialing number if set, or null if
+     *         not set.
+     */
+    String getLine1AlphaTagForDisplay(long subId);
 }
 
