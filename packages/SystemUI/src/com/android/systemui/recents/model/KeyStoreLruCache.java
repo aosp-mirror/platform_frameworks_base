@@ -73,11 +73,6 @@ public class KeyStoreLruCache<V> {
         return mCache.get(key);
     }
 
-    /** Gets the previous task key that matches the specified key. */
-    final Task.TaskKey getKey(Task.TaskKey key) {
-        return mKeys.get(key);
-    }
-
     /** Puts an entry in the cache for a specific key. */
     final void put(Task.TaskKey key, V value) {
         mCache.put(key, value);

@@ -458,8 +458,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         filter.addAction(ACTION_TOGGLE_RECENTS_ACTIVITY);
         filter.addAction(ACTION_START_ENTER_ANIMATION);
         registerReceiver(mServiceBroadcastReceiver, filter);
-
-        mVisible = true;
     }
 
     @Override
@@ -485,6 +483,8 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                 }
             }, 1);
         }
+
+        mVisible = true;
     }
 
     @Override

@@ -302,7 +302,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             int[] visibleRange = mTmpVisibleRange;
             updateStackTransforms(mCurrentTaskTransforms, tasks, stackScroll, visibleRange, false);
             TaskViewTransform tmpTransform = new TaskViewTransform();
-            TaskStack.GroupTaskIndex gti = new TaskStack.GroupTaskIndex();
 
             // Return all the invisible children to the pool
             HashMap<Task, TaskView> taskChildViewMap = getTaskChildViewMap();
@@ -352,6 +351,47 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
             mStackViewsAnimationDuration = 0;
             mStackViewsDirty = false;
+        }
+    }
+
+    /** Updates the clip for each of the task views. */
+    void clipTaskViews() {
+        // Update the clip on each task child
+        if (Constants.DebugFlags.App.EnableTaskStackClipping) {
+            int childCount = getChildCount();
+            for (int i = 0; i < childCount - 1; i++) {
+                TaskView tv = (TaskView) getChildAt(i);
+                TaskView nextTv = null;
+                TaskView tmpTv = null;
+                int clipBottom = 0;
+                if (tv.shouldClipViewInStack()) {
+                    // Find the next view to clip against
+                    int nextIndex = i;
+                    while (nextIndex < getChildCount()) {
+                        tmpTv = (TaskView) getChildAt(++nextIndex);
+                        if (tmpTv != null && tmpTv.shouldClipViewInStack()) {
+                            nextTv = tmpTv;
+                            break;
+                        }
+                    }
+
+                    // Clip against the next view, this is just an approximation since we are
+                    // stacked and we can make assumptions about the visibility of the this
+                    // task relative to the ones in front of it.
+                    if (nextTv != null) {
+                        // XXX: Can hash the visible rects for this run
+                        tv.getHitRect(mTmpRect);
+                        nextTv.getHitRect(mTmpRect2);
+                        clipBottom = (mTmpRect.bottom - mTmpRect2.top);
+                    }
+                }
+                tv.setClipFromBottom(clipBottom);
+            }
+        }
+        if (getChildCount() > 0) {
+            // The front most task should never be clipped
+            TaskView tv = (TaskView) getChildAt(getChildCount() - 1);
+            tv.setClipFromBottom(0);
         }
     }
 
@@ -641,48 +681,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                     Console.AnsiPurple);
         }
         synchronizeStackViewsWithModel();
+        clipTaskViews();
         super.dispatchDraw(canvas);
-    }
-
-    @Override
-    protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
-        if (Constants.DebugFlags.App.EnableTaskStackClipping) {
-            TaskView tv = (TaskView) child;
-            TaskView nextTv = null;
-            TaskView tmpTv = null;
-            if (tv.shouldClipViewInStack()) {
-                int curIndex = indexOfChild(tv);
-
-                // Find the next view to clip against
-                while (nextTv == null && curIndex < getChildCount()) {
-                    tmpTv = (TaskView) getChildAt(++curIndex);
-                    if (tmpTv != null && tmpTv.shouldClipViewInStack()) {
-                        nextTv = tmpTv;
-                    }
-                }
-
-                // Clip against the next view (if we aren't animating its alpha)
-                if (nextTv != null) {
-                    Rect curRect = tv.getClippingRect(mTmpRect);
-                    Rect nextRect = nextTv.getClippingRect(mTmpRect2);
-                    // The hit rects are relative to the task view, which needs to be offset by
-                    // the system bar height
-                    curRect.offset(0, mConfig.systemInsets.top);
-                    nextRect.offset(0, mConfig.systemInsets.top);
-                    // Compute the clip region
-                    Region clipRegion = new Region();
-                    clipRegion.op(curRect, Region.Op.UNION);
-                    clipRegion.op(nextRect, Region.Op.DIFFERENCE);
-                    // Clip the canvas
-                    int saveCount = canvas.save(Canvas.CLIP_SAVE_FLAG);
-                    canvas.clipRegion(clipRegion);
-                    boolean invalidate = super.drawChild(canvas, child, drawingTime);
-                    canvas.restoreToCount(saveCount);
-                    return invalidate;
-                }
-            }
-        }
-        return super.drawChild(canvas, child, drawingTime);
     }
 
     /** Computes the stack and task rects */
@@ -1153,6 +1153,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         Task task = tv.getTask();
         // Remove the task from the view
         mStack.removeTask(task);
+    }
+
+    @Override
+    public void onTaskViewClipStateChanged(TaskView tv) {
+        invalidate(mStackAlgorithm.mStackRect);
     }
 
     /**** RecentsPackageMonitor.PackageCallbacks Implementation ****/
