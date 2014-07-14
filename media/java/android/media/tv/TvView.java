@@ -525,6 +525,29 @@ public class TvView extends ViewGroup {
         }
 
         /**
+         * This is called when the video is available, so the TV input starts the playback.
+         *
+         * @param inputId The ID of the TV input bound to this view.
+         */
+        public void onVideoAvailable(String inputId) {
+        }
+
+        /**
+         * This is called when the video is not available, so the TV input stops the playback.
+         *
+         * @param inputId The ID of the TV input bound to this view.
+         * @param reason The reason why the TV input stopped the playback:
+         * <ul>
+         * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_UNKNOWN}
+         * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_TUNE}
+         * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_WEAK_SIGNAL}
+         * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_BUFFERING}
+         * </ul>
+         */
+        public void onVideoUnavailable(String inputId, int reason) {
+        }
+
+        /**
          * This is invoked when a custom event from the bound TV input is sent to this view.
          *
          * @param eventType The type of the event.
@@ -622,6 +645,24 @@ public class TvView extends ViewGroup {
             updateVideoSize(tracks);
             if (mListener != null) {
                 mListener.onTrackInfoChanged(mInputId, tracks);
+            }
+        }
+
+        public void onVideoAvailable(Session session) {
+            if (DEBUG) {
+                Log.d(TAG, "onVideoAvailable()");
+            }
+            if (mListener != null) {
+                mListener.onVideoAvailable(mInputId);
+            }
+        }
+
+        public void onVideoUnavailable(Session session, int reason) {
+            if (DEBUG) {
+                Log.d(TAG, "onVideoUnavailable(" + reason + ")");
+            }
+            if (mListener != null) {
+                mListener.onVideoUnavailable(mInputId, reason);
             }
         }
 
