@@ -16166,6 +16166,10 @@ package android.media.tv {
   public final class TvInputManager {
     method public boolean getAvailability(java.lang.String);
     method public java.util.List<android.media.tv.TvInputInfo> getTvInputList();
+    field public static final int VIDEO_UNAVAILABLE_REASON_BUFFERING = 3; // 0x3
+    field public static final int VIDEO_UNAVAILABLE_REASON_TUNE = 1; // 0x1
+    field public static final int VIDEO_UNAVAILABLE_REASON_UNKNOWN = 0; // 0x0
+    field public static final int VIDEO_UNAVAILABLE_REASON_WEAK_SIGNAL = 2; // 0x2
   }
 
   public static abstract class TvInputManager.TvInputListener {
@@ -16185,6 +16189,8 @@ package android.media.tv {
     ctor public TvInputService.Session();
     method public void dispatchChannelRetuned(android.net.Uri);
     method public void dispatchTrackInfoChanged(java.util.List<android.media.tv.TvTrackInfo>);
+    method public void dispatchVideoAvailable();
+    method public void dispatchVideoUnavailable(int);
     method public android.view.View onCreateOverlayView();
     method public boolean onGenericMotionEvent(android.view.MotionEvent);
     method public boolean onKeyDown(int, android.view.KeyEvent);
@@ -16263,6 +16269,8 @@ package android.media.tv {
     method public void onError(java.lang.String, int);
     method public void onTrackInfoChanged(java.lang.String, java.util.List<android.media.tv.TvTrackInfo>);
     method public void onVideoSizeChanged(java.lang.String, int, int);
+    method public void onVideoAvailable(java.lang.String);
+    method public void onVideoUnavailable(java.lang.String, int);
   }
 
 }
