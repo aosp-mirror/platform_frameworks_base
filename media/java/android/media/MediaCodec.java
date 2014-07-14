@@ -332,8 +332,7 @@ final public class MediaCodec {
 
                 case CB_ERROR:
                 {
-                    mCallback.onError(mCodec,
-                            msg.arg2 /* error */, (Integer) msg.obj /* actionCode */);
+                    mCallback.onError(mCodec, (MediaCodec.CodecException) msg.obj);
                     break;
                 }
 
@@ -1454,10 +1453,9 @@ final public class MediaCodec {
          * Called when the MediaCodec encountered an error
          *
          * @param codec The MediaCodec object.
-         * @param error a device specific error code.
-         * @param actionCode a value for use in {@link MediaCodec.CodecException}.
+         * @param e The {@link MediaCodec.CodecException} object describing the error.
          */
-        public abstract void onError(MediaCodec codec, int error, int actionCode);
+        public abstract void onError(MediaCodec codec, CodecException e);
 
         /**
          * Called when the output format has changed

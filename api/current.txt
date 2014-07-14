@@ -14336,7 +14336,7 @@ package android.media {
 
   public static abstract class MediaCodec.Callback {
     ctor public MediaCodec.Callback();
-    method public abstract void onError(android.media.MediaCodec, int, int);
+    method public abstract void onError(android.media.MediaCodec, android.media.MediaCodec.CodecException);
     method public abstract void onInputBufferAvailable(android.media.MediaCodec, int);
     method public abstract void onOutputBufferAvailable(android.media.MediaCodec, int, android.media.MediaCodec.BufferInfo);
     method public abstract void onOutputFormatChanged(android.media.MediaCodec, android.media.MediaFormat);

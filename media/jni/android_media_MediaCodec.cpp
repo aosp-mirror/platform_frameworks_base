@@ -566,20 +566,27 @@ void JMediaCodec::handleCallback(const sp<AMessage> &msg) {
 
         case MediaCodec::CB_ERROR:
         {
-            CHECK(msg->findInt32("err", &arg2));
-
-            int32_t actionCode;
+            int32_t err, actionCode;
+            CHECK(msg->findInt32("err", &err));
             CHECK(msg->findInt32("actionCode", &actionCode));
 
             // use Integer object to pass the action code
             ScopedLocalRef<jclass> clazz(
-                    env, env->FindClass("java/lang/Integer"));
-            jmethodID ctor = env->GetMethodID(clazz.get(), "<init>", "(I)V");
-            obj = env->NewObject(clazz.get(), ctor, actionCode);
+                    env, env->FindClass("android/media/MediaCodec$CodecException"));
+            jmethodID ctor = env->GetMethodID(clazz.get(), "<init>", "(IILjava/lang/String;)V");
+
+            AString str;
+            const char *detail = "Unknown error";
+            if (msg->findString("detail", &str)) {
+                detail = str.c_str();
+            }
+            jstring msgObj = env->NewStringUTF(detail);
+
+            obj = env->NewObject(clazz.get(), ctor, err, actionCode, msgObj);
 
             if (obj == NULL) {
                 if (env->ExceptionCheck()) {
-                    ALOGE("Could not create Integer object for actionCode.");
+                    ALOGE("Could not create CodecException object.");
                     env->ExceptionClear();
                 }
                 jniThrowException(env, "java/lang/IllegalStateException", NULL);
