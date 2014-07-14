@@ -712,36 +712,6 @@ public final class PageContentRepository {
                     break;
                 }
 
-//                if (mRenderedPage == null) {
-//                    final int bitmapSizeInBytes = mRenderSpec.bitmapWidth
-//                            * mRenderSpec.bitmapHeight * BYTES_PER_PIXEL;
-//
-//                    while (mPageContentCache.getSizeInBytes() > 0
-//                            && mPageContentCache.getSizeInBytes() + bitmapSizeInBytes
-//                            > mPageContentCache.getMaxSizeInBytes()) {
-//                        RenderedPage renderedPage = mPageContentCache.removeLeastNeeded();
-//
-//                        // If not the right size - recycle and keep freeing space.
-//                        Bitmap bitmap = renderedPage.content.getBitmap();
-//                        if (!mRenderSpec.hasSameSize(bitmap.getWidth(), bitmap.getHeight())) {
-//                            if (DEBUG) {
-//                                Log.i(LOG_TAG, "Recycling bitmap for page: " + mPageIndex
-//                                        + " with different size.");
-//                            }
-//                            bitmap.recycle();
-//                            continue;
-//                        }
-//
-//                        mRenderedPage = renderedPage;
-//                        bitmap.eraseColor(Color.WHITE);
-//
-//                        if (DEBUG) {
-//                            Log.i(LOG_TAG, "Reused bitmap for page: " + mPageIndex + " cache size: "
-//                                    + mPageContentCache.getSizeInBytes() + " bytes");
-//                        }
-//                    }
-//                }
-
                 if (mRenderedPage == null) {
                     if (DEBUG) {
                         Log.i(LOG_TAG, "Created bitmap for page: " + mPageIndex + " cache size: "
