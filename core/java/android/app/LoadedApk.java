@@ -56,6 +56,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.Objects;
 
 final class IntentReceiverLeaked extends AndroidRuntimeException {
     public IntentReceiverLeaked(String msg) {
@@ -252,6 +253,22 @@ public final class LoadedApk {
             }
 
             if (mIncludeCode && !mPackageName.equals("android")) {
+                // Avoid the binder call when the package is the current application package.
+                // The activity manager will perform ensure that dexopt is performed before
+                // spinning up the process.
+                if (!Objects.equals(mPackageName, ActivityThread.currentPackageName())) {
+                    final String isa = VMRuntime.getRuntime().vmInstructionSet();
+                    try {
+                        // TODO: We can probably do away with the isa argument since
+                        // the AM and PM have enough information to figure this out
+                        // themselves. If we do need it, we should match it against the
+                        // list of devices ISAs before sending it down to installd.
+                        ActivityThread.getPackageManager().performDexOptIfNeeded(mPackageName, isa);
+                    } catch (RemoteException re) {
+                        // Ignored.
+                    }
+                }
+
                 final ArrayList<String> zipPaths = new ArrayList<>();
                 final ArrayList<String> libPaths = new ArrayList<>();
 
