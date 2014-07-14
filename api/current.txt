@@ -7213,6 +7213,7 @@ package android.content {
     field public static final java.lang.String TELEPHONY_SERVICE = "phone";
     field public static final java.lang.String TEXT_SERVICES_MANAGER_SERVICE = "textservices";
     field public static final java.lang.String TV_INPUT_SERVICE = "tv_input";
+    field public static final java.lang.String TV_PARENTAL_CONTROL_SERVICE = "tv_parental_control";
     field public static final java.lang.String UI_MODE_SERVICE = "uimode";
     field public static final java.lang.String USB_SERVICE = "usb";
     field public static final java.lang.String USER_SERVICE = "user";
@@ -16402,10 +16403,12 @@ package android.media.session {
 
 package android.media.tv {
 
-  public class TvContentRating {
+  public final class TvContentRating {
     ctor public TvContentRating(java.lang.String);
     ctor public TvContentRating(java.lang.String, java.lang.String[]);
     method public java.lang.String flattenToString();
+    method public java.lang.String getRating();
+    method public java.util.List<java.lang.String> getSubRatings();
     method public static android.media.tv.TvContentRating unflattenFromString(java.lang.String);
     field public static final java.lang.String RATING_KR_12 = "RATING_KR_12";
     field public static final java.lang.String RATING_KR_15 = "RATING_KR_15";
@@ -16600,6 +16603,7 @@ package android.media.tv {
   public abstract class TvInputService.Session implements android.view.KeyEvent.Callback {
     ctor public TvInputService.Session();
     method public void dispatchChannelRetuned(android.net.Uri);
+    method public void dispatchContentBlocked(android.media.tv.TvContentRating);
     method public void dispatchTrackInfoChanged(java.util.List<android.media.tv.TvTrackInfo>);
     method public void dispatchVideoAvailable();
     method public void dispatchVideoUnavailable(int);
@@ -16619,6 +16623,19 @@ package android.media.tv {
     method public abstract boolean onTune(android.net.Uri);
     method public boolean onUnselectTrack(android.media.tv.TvTrackInfo);
     method public void setOverlayViewEnabled(boolean);
+  }
+
+  public final class TvParentalControlManager {
+    method public void addParentalControlCallback(android.media.tv.TvParentalControlManager.ParentalControlCallback, android.os.Handler);
+    method public final boolean isEnabled();
+    method public final boolean isRatingBlocked(android.media.tv.TvContentRating);
+    method public void removeParentalControlCallback(android.media.tv.TvParentalControlManager.ParentalControlCallback);
+  }
+
+  public static abstract class TvParentalControlManager.ParentalControlCallback {
+    ctor public TvParentalControlManager.ParentalControlCallback();
+    method public void onBlockedRatingsChanged();
+    method public void onEnabledChanged(boolean);
   }
 
   public final class TvTrackInfo implements android.os.Parcelable {
@@ -16678,6 +16695,7 @@ package android.media.tv {
   public static abstract class TvView.TvInputListener {
     ctor public TvView.TvInputListener();
     method public void onChannelRetuned(java.lang.String, android.net.Uri);
+    method public void onContentBlocked(java.lang.String, android.media.tv.TvContentRating);
     method public void onError(java.lang.String, int);
     method public void onTrackInfoChanged(java.lang.String, java.util.List<android.media.tv.TvTrackInfo>);
     method public void onVideoAvailable(java.lang.String);

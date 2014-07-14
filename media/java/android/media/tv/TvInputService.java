@@ -18,7 +18,6 @@ package android.media.tv;
 
 import android.annotation.SuppressLint;
 import android.app.Service;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
@@ -267,6 +266,42 @@ public abstract class TvInputService extends Service {
         }
 
         /**
+         * Informs the application that the current program content is blocked by parent controls.
+         * <p>
+         * Each TV input service is required to query the system whether the user is allowed to
+         * watch the current program before showing it to the user if the parental control is turned
+         * on, which can be checked by calling {@link TvParentalControlManager#isEnabled}. Whether
+         * the TV input service should block the content or not is determined by invoking
+         * {@link TvParentalControlManager#isRatingBlocked} with the content rating for the current
+         * program. Then the TvParentalControlManager makes a judgment based on the user blocked
+         * ratings stored in the secure settings and returns the result. If the rating in question
+         * turns out to be blocked, the TV input service must immediately block the content and call
+         * this method with the content rating of the current program to prompt the PIN verification
+         * screen.
+         * </p><p>
+         * Each TV input service also needs to continuously listen to any changes made to the
+         * parental control settings by registering a
+         * {@link TvParentalControlManager.ParentalControlCallback} to the manager and immediately
+         * reevaluate the current program with the new parental control settings.
+         * </p>
+         *
+         * @param rating The content rating for the current TV program.
+         */
+        public void dispatchContentBlocked(final TvContentRating rating) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) Log.d(TAG, "dispatchContentBlocked");
+                        mSessionCallback.onContentBlocked(rating.flattenToString());
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in dispatchContentBlocked");
+                    }
+                }
+            });
+        }
+
+        /**
          * Informs the application that video is not available, so the TV input cannot continue
          * playing the TV stream.
          *
@@ -279,10 +314,8 @@ public abstract class TvInputService extends Service {
          * </ul>
          */
         public void dispatchVideoUnavailable(final int reason) {
-            if (reason != TvInputManager.VIDEO_UNAVAILABLE_REASON_UNKNOWN
-                    && reason != TvInputManager.VIDEO_UNAVAILABLE_REASON_TUNE
-                    && reason != TvInputManager.VIDEO_UNAVAILABLE_REASON_WEAK_SIGNAL
-                    && reason != TvInputManager.VIDEO_UNAVAILABLE_REASON_BUFFERING) {
+            if (reason < TvInputManager.VIDEO_UNAVAILABLE_REASON_START
+                    || reason > TvInputManager.VIDEO_UNAVAILABLE_REASON_END) {
                 throw new IllegalArgumentException("Unknown reason: " + reason);
             }
             mHandler.post(new Runnable() {

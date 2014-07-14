@@ -520,6 +520,23 @@ public final class TvInputManagerService extends SystemService {
             }
 
             @Override
+            public void onContentBlocked(String rating) {
+                synchronized (mLock) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "onContentBlocked()");
+                    }
+                    if (sessionState.mSession == null || sessionState.mClient == null) {
+                        return;
+                    }
+                    try {
+                        sessionState.mClient.onContentBlocked(rating, sessionState.mSeq);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "error in onContentBlocked");
+                    }
+                }
+            }
+
+            @Override
             public void onSessionEvent(String eventType, Bundle eventArgs) {
                 synchronized (mLock) {
                     if (DEBUG) {
