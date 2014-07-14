@@ -32,62 +32,20 @@ import java.util.Set;
 public abstract class Connection {
 
     /** @hide */
-    public interface Listener {
-        void onStateChanged(Connection c, int state);
-        void onFeaturesChanged(Connection c, int features);
-        void onHandleChanged(Connection c, Uri newHandle);
-        void onSignalChanged(Connection c, Bundle details);
-        void onDisconnected(Connection c, int cause, String message);
-        void onPostDialWait(Connection c, String remaining);
-        void onRequestingRingback(Connection c, boolean ringback);
-        void onDestroyed(Connection c);
-        void onCallCapabilitiesChanged(Connection c, int callCapabilities);
-        void onParentConnectionChanged(Connection c, Connection parent);
-        void onSetCallVideoProvider(Connection c, CallVideoProvider callVideoProvider);
-        void onSetAudioModeIsVoip(Connection c, boolean isVoip);
-        void onSetStatusHints(Connection c, StatusHints statusHints);
-    }
-
-    /** @hide */
-    public static class ListenerBase implements Listener {
-        @Override
+    public abstract static class Listener {
         public void onStateChanged(Connection c, int state) {}
-
-        /** {@inheritDoc} */
-        @Override
-        public void onFeaturesChanged(Connection c, int features) {}
-
-        @Override
-        public void onHandleChanged(Connection c, Uri newHandle) {}
-
-        @Override
+        public void onHandleChanged(Connection c, Uri newHandle, int presentation) {}
+        public void onCallerDisplayNameChanged(
+                Connection c, String callerDisplayName, int presentation) {}
         public void onSignalChanged(Connection c, Bundle details) {}
-
-        @Override
         public void onDisconnected(Connection c, int cause, String message) {}
-
-        @Override
-        public void onDestroyed(Connection c) {}
-
-        @Override
         public void onPostDialWait(Connection c, String remaining) {}
-
-        @Override
         public void onRequestingRingback(Connection c, boolean ringback) {}
-
-        @Override
+        public void onDestroyed(Connection c) {}
         public void onCallCapabilitiesChanged(Connection c, int callCapabilities) {}
-
-        @Override
         public void onParentConnectionChanged(Connection c, Connection parent) {}
-
-        @Override
         public void onSetCallVideoProvider(Connection c, CallVideoProvider callVideoProvider) {}
-
-        @Override
         public void onSetAudioModeIsVoip(Connection c, boolean isVoip) {}
-
-        @Override
         public void onSetStatusHints(Connection c, StatusHints statusHints) {}
     }
 
@@ -106,9 +64,11 @@ public abstract class Connection {
     private final List<Connection> mChildConnections = new ArrayList<>();
 
     private int mState = State.NEW;
-    private int mFeatures = CallFeatures.NONE;
     private CallAudioState mCallAudioState;
     private Uri mHandle;
+    private int mHandlePresentation;
+    private String mCallerDisplayName;
+    private int mCallerDisplayNamePresentation;
     private boolean mRequestingRingback = false;
     private int mCallCapabilities;
     private Connection mParentConnection;
@@ -122,18 +82,32 @@ public abstract class Connection {
     protected Connection() {}
 
     /**
-     * The handle (e.g., phone number) to which this Connection is currently communicating.
-     *
-     * IMPORTANT: If an incoming connection has a phone number (or other handle) that the user
-     * is not supposed to be able to see (e.g. it is PRESENTATION_RESTRICTED), then a compliant
-     * ConnectionService implementation MUST NOT reveal this phone number and MUST return
-     * {@code null} from this method.
-     *
-     * @return The handle (e.g., phone number) to which this Connection
-     *         is currently communicating.
+     * @return The handle (e.g., phone number) to which this Connection is currently communicating.
      */
     public final Uri getHandle() {
         return mHandle;
+    }
+
+    /**
+     * @return The {@link CallPropertyPresentation} which controls how the handle is shown.
+     */
+    public final int getHandlePresentation() {
+        return mHandlePresentation;
+    }
+
+    /**
+     * @return The caller display name (CNAP).
+     */
+    public final String getCallerDisplayName() {
+        return mCallerDisplayName;
+    }
+
+    /**
+     * @return The {@link CallPropertyPresentation} which controls how the caller display name is
+     *         shown.
+     */
+    public final int getCallerDisplayNamePresentation() {
+        return mCallerDisplayNamePresentation;
     }
 
     /**
@@ -141,14 +115,6 @@ public abstract class Connection {
      */
     public final int getState() {
         return mState;
-    }
-
-    /**
-     * @return The features of the call.  These are items for which the InCall UI may wish to
-     *         display a visual indicator.
-     */
-    public final int getFeatures() {
-        return mFeatures;
     }
 
     /**
@@ -287,31 +253,34 @@ public abstract class Connection {
     }
 
     /**
-     * Sets the value of the {@link #getHandle()} property and notifies listeners.
+     * Sets the value of the {@link #getHandle()} property.
      *
      * @param handle The new handle.
+     * @param presentation The {@link CallPropertyPresentation} which controls how the handle is
+     *         shown.
      */
-    public final void setHandle(Uri handle) {
+    public final void setHandle(Uri handle, int presentation) {
         Log.d(this, "setHandle %s", handle);
         mHandle = handle;
+        mHandlePresentation = presentation;
         for (Listener l : mListeners) {
-            l.onHandleChanged(this, handle);
+            l.onHandleChanged(this, handle, presentation);
         }
     }
 
     /**
-     * Set the features applicable to the connection.  These are items for which the InCall UI may
-     * wish to display a visual indicator.
-     * Features are defined in {@link android.telecomm.CallFeatures} and are passed in as a
-     * bit-mask.
+     * Sets the caller display name (CNAP).
      *
-     * @param features The features active.
+     * @param callerDisplayName The new display name.
+     * @param presentation The {@link CallPropertyPresentation} which controls how the name is
+     *         shown.
      */
-    public final void setFeatures(int features) {
-        Log.d(this, "setFeatures %d", features);
-        mFeatures = features;
+    public final void setCallerDisplayName(String callerDisplayName, int presentation) {
+        Log.d(this, "setCallerDisplayName %s", callerDisplayName);
+        mCallerDisplayName = callerDisplayName;
+        mCallerDisplayNamePresentation = presentation;
         for (Listener l : mListeners) {
-            l.onFeaturesChanged(this, mFeatures);
+            l.onCallerDisplayNameChanged(this, callerDisplayName, presentation);
         }
     }
 
@@ -428,8 +397,7 @@ public abstract class Connection {
     }
 
     /**
-     * Notifies this Connection and listeners of a change in the current signal levels
-     * for the underlying data transport.
+     * Sets the current signal levels for the underlying data transport.
      *
      * @param details A {@link android.os.Bundle} containing details of the current level.
      */
@@ -464,8 +432,7 @@ public abstract class Connection {
     }
 
     /**
-     * Notifies this Connection and listeners that the {@link #getCallAudioState()} property
-     * has a new value.
+     * Notifies this Connection that the {@link #getCallAudioState()} property has a new value.
      *
      * @param state The new call audio state.
      */
@@ -532,6 +499,12 @@ public abstract class Connection {
      * Notifies this Connection whether the user wishes to proceed with the post-dial DTMF codes.
      */
     protected void onPostDialContinue(boolean proceed) {}
+
+    /**
+     * Swap this call with a background call. This is used for calls that don't support hold,
+     * e.g. CDMA.
+     */
+    protected void onSwapWithBackgroundCall() {}
 
     /**
      * TODO(santoscordon): Needs documentation.

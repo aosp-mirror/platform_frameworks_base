@@ -58,6 +58,8 @@ oneway interface IConnectionService {
 
     void splitFromConference(String callId);
 
+    void swapWithBackgroundCall(String callId);
+
     void onPostDialContinue(String callId, boolean proceed);
 
     void onPhoneAccountClicked(String callId);

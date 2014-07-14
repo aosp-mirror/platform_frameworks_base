@@ -37,9 +37,11 @@ public final class RemoteConnection {
         void onRequestingRingback(RemoteConnection connection, boolean ringback);
         void onCallCapabilitiesChanged(RemoteConnection connection, int callCapabilities);
         void onPostDialWait(RemoteConnection connection, String remainingDigits);
-        void onFeaturesChanged(RemoteConnection connection, int features);
-        void onSetAudioModeIsVoip(RemoteConnection connection, boolean isVoip);
-        void onSetStatusHints(RemoteConnection connection, StatusHints statusHints);
+        void onAudioModeIsVoipChanged(RemoteConnection connection, boolean isVoip);
+        void onStatusHintsChanged(RemoteConnection connection, StatusHints statusHints);
+        void onHandleChanged(RemoteConnection connection, Uri handle, int presentation);
+        void onCallerDisplayNameChanged(
+                RemoteConnection connection, String callerDisplayName, int presentation);
         void onDestroyed(RemoteConnection connection);
     }
 
@@ -53,9 +55,12 @@ public final class RemoteConnection {
     private boolean mRequestingRingback;
     private boolean mConnected;
     private int mCallCapabilities;
-    private int mFeatures;
     private boolean mAudioModeIsVoip;
     private StatusHints mStatusHints;
+    private Uri mHandle;
+    private int mHandlePresentation;
+    private String mCallerDisplayName;
+    private int mCallerDisplayNamePresentation;
 
     /**
      * @hide
@@ -91,16 +96,28 @@ public final class RemoteConnection {
         return mCallCapabilities;
     }
 
-    public int getFeatures() {
-        return mFeatures;
-    }
-
     public boolean getAudioModeIsVoip() {
         return mAudioModeIsVoip;
     }
 
     public StatusHints getStatusHints() {
         return mStatusHints;
+    }
+
+    public Uri getHandle() {
+        return mHandle;
+    }
+
+    public int getHandlePresentation() {
+        return mHandlePresentation;
+    }
+
+    public String getCallerDisplayName() {
+        return mCallerDisplayName;
+    }
+
+    public int getCallerDisplayNamePresentation() {
+        return mCallerDisplayNamePresentation;
     }
 
     public void abort() {
@@ -179,6 +196,15 @@ public final class RemoteConnection {
         try {
             if (mConnected) {
                 mConnectionService.onPostDialContinue(mConnectionId, proceed);
+            }
+        } catch (RemoteException ignored) {
+        }
+    }
+
+    public void swapWithBackgroundCall() {
+        try {
+            if (mConnected) {
+                mConnectionService.swapWithBackgroundCall(mConnectionId);
             }
         } catch (RemoteException ignored) {
         }
@@ -271,21 +297,11 @@ public final class RemoteConnection {
         }
     }
 
-    /**
-     * @hide
-     */
-    void setFeatures(int features) {
-        mFeatures = features;
-        for (Listener l : mListeners) {
-            l.onFeaturesChanged(this, features);
-        }
-    }
-
     /** @hide */
     void setAudioModeIsVoip(boolean isVoip) {
         mAudioModeIsVoip = isVoip;
         for (Listener l : mListeners) {
-            l.onSetAudioModeIsVoip(this, isVoip);
+            l.onAudioModeIsVoipChanged(this, isVoip);
         }
     }
 
@@ -293,7 +309,25 @@ public final class RemoteConnection {
     void setStatusHints(StatusHints statusHints) {
         mStatusHints = statusHints;
         for (Listener l : mListeners) {
-            l.onSetStatusHints(this, statusHints);
+            l.onStatusHintsChanged(this, statusHints);
+        }
+    }
+
+    /** @hide */
+    void setHandle(Uri handle, int presentation) {
+        mHandle = handle;
+        mHandlePresentation = presentation;
+        for (Listener l : mListeners) {
+            l.onHandleChanged(this, handle, presentation);
+        }
+    }
+
+    /** @hide */
+    void setCallerDisplayName(String callerDisplayName, int presentation) {
+        mCallerDisplayName = callerDisplayName;
+        mCallerDisplayNamePresentation = presentation;
+        for (Listener l : mListeners) {
+            l.onCallerDisplayNameChanged(this, callerDisplayName, presentation);
         }
     }
 }

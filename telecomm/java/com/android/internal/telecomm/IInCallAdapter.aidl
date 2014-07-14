@@ -51,4 +51,6 @@ oneway interface IInCallAdapter {
     void conference(String callId);
 
     void splitFromConference(String callId);
+
+    void swapWithBackgroundCall(String callId);
 }

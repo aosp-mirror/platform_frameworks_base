@@ -16,8 +16,8 @@
 
 package android.telecomm;
 
-import android.os.Bundle;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -32,20 +32,32 @@ public final class ConnectionRequest implements Parcelable {
     //         numbers that would satisfy the client's needs, in order of preference
     private final String mCallId;
     private final Uri mHandle;
+    private final int mHandlePresentation;
     private final Bundle mExtras;
     private final PhoneAccount mAccount;
     private final int mVideoState;
 
-    public ConnectionRequest(String callId, Uri handle, Bundle extras, int videoState) {
-        this(null, callId, handle, extras, videoState);
-    }
-
-    public ConnectionRequest(PhoneAccount account, String callId, Uri handle, Bundle extras,
+    /**
+     * @param account The account which should be used to place the call.
+     * @param callId An identifier for this call.
+     * @param handle The handle (e.g., phone number) to which the {@link Connection} is to connect.
+     * @param handlePresentation The {@link CallPropertyPresentation} which controls how the handle
+     *         is shown.
+     * @param extras Application-specific extra data.
+     * @param videoState Determines the video state for the connection.
+     */
+    public ConnectionRequest(
+            PhoneAccount account,
+            String callId,
+            Uri handle,
+            int handlePresentation,
+            Bundle extras,
             int videoState) {
+        mAccount = account;
         mCallId = callId;
         mHandle = handle;
+        mHandlePresentation = handlePresentation;
         mExtras = extras;
-        mAccount = account;
         mVideoState = videoState;
     }
 
@@ -63,6 +75,11 @@ public final class ConnectionRequest implements Parcelable {
      * The handle (e.g., phone number) to which the {@link Connection} is to connect.
      */
     public Uri getHandle() { return mHandle; }
+
+    /**
+     * The {@link CallPropertyPresentation} which controls how the handle is shown.
+     */
+    public int getHandlePresentation() { return mHandlePresentation; }
 
     /**
      * Application-specific extra data. Used for passing back information from an incoming
@@ -96,11 +113,15 @@ public final class ConnectionRequest implements Parcelable {
             new Parcelable.Creator<ConnectionRequest> () {
                 @Override
                 public ConnectionRequest createFromParcel(Parcel source) {
+                    PhoneAccount account = (PhoneAccount) source.readParcelable(
+                            getClass().getClassLoader());
                     String callId = source.readString();
                     Uri handle = (Uri) source.readParcelable(getClass().getClassLoader());
+                    int presentation = source.readInt();
                     Bundle extras = (Bundle) source.readParcelable(getClass().getClassLoader());
                     int videoState = source.readInt();
-                    return new ConnectionRequest(callId, handle, extras, videoState);
+                    return new ConnectionRequest(
+                            account, callId, handle, presentation, extras, videoState);
                 }
 
                 @Override
@@ -119,8 +140,10 @@ public final class ConnectionRequest implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel destination, int flags) {
+        destination.writeParcelable(mAccount, 0);
         destination.writeString(mCallId);
         destination.writeParcelable(mHandle, 0);
+        destination.writeInt(mHandlePresentation);
         destination.writeParcelable(mExtras, 0);
         destination.writeInt(mVideoState);
     }

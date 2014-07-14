@@ -48,8 +48,12 @@ public final class CallCapabilities {
     /** Remote device supports video telephony. */
     public static final int SUPPORTS_VT_REMOTE = 0x00000200;
 
+    public static final int VoLTE = 0x00000400;
+
+    public static final int VoWIFI = 0x00000800;
+
     public static final int ALL = HOLD | SUPPORT_HOLD | MERGE_CALLS | SWAP_CALLS | ADD_CALL
-            | RESPOND_VIA_TEXT | MUTE | GENERIC_CONFERENCE;
+            | RESPOND_VIA_TEXT | MUTE | GENERIC_CONFERENCE | VoLTE | VoWIFI;
 
     public static String toString(int capabilities) {
         StringBuilder builder = new StringBuilder();
@@ -83,6 +87,12 @@ public final class CallCapabilities {
         }
         if ((capabilities & SUPPORTS_VT_REMOTE) != 0) {
             builder.append(" SUPPORTS_VT_REMOTE");
+        }
+        if ((capabilities & VoLTE) != 0) {
+            builder.append(" VoLTE");
+        }
+        if ((capabilities & VoWIFI) != 0) {
+            builder.append(" VoWIFI");
         }
         builder.append("]");
         return builder.toString();

@@ -226,4 +226,17 @@ public final class InCallAdapter {
         } catch (RemoteException ignored) {
         }
     }
+
+    /**
+     * Swap this call with a background call. This is used for calls that don't support hold,
+     * e.g. CDMA.
+     *
+     * @param callId The unique ID of the call.
+     */
+    public void swapWithBackgroundCall(String callId) {
+        try {
+            mAdapter.swapWithBackgroundCall(callId);
+        } catch (RemoteException ignored) {
+        }
+    }
 }

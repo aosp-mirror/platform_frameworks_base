@@ -16,6 +16,7 @@
 
 package com.android.internal.telecomm;
 
+import android.net.Uri;
 import android.telecomm.ConnectionRequest;
 import android.telecomm.StatusHints;
 
@@ -64,9 +65,11 @@ oneway interface IConnectionServiceAdapter {
 
     void setCallVideoProvider(String callId, ICallVideoProvider callVideoProvider);
 
-    void setFeatures(String callId, int features);
-
     void setAudioModeIsVoip(String callId, boolean isVoip);
 
     void setStatusHints(String callId, in StatusHints statusHints);
+
+    void setHandle(String callId, in Uri handle, int presentation);
+
+    void setCallerDisplayName(String callId, String callerDisplayName, int presentation);
 }

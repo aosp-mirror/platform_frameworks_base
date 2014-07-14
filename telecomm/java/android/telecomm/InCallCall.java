@@ -40,6 +40,9 @@ public final class InCallCall implements Parcelable {
     private final int mCapabilities;
     private final long mConnectTimeMillis;
     private final Uri mHandle;
+    private final int mHandlePresentation;
+    private final String mCallerDisplayName;
+    private final int mCallerDisplayNamePresentation;
     private final GatewayInfo mGatewayInfo;
     private final PhoneAccount mAccount;
     private final CallServiceDescriptor mCurrentCallServiceDescriptor;
@@ -47,7 +50,6 @@ public final class InCallCall implements Parcelable {
     private RemoteCallVideoProvider mRemoteCallVideoProvider;
     private final String mParentCallId;
     private final List<String> mChildCallIds;
-    private final int mFeatures;
     private final StatusHints mStatusHints;
 
     /** @hide */
@@ -60,13 +62,15 @@ public final class InCallCall implements Parcelable {
             int capabilities,
             long connectTimeMillis,
             Uri handle,
+            int handlePresentation,
+            String callerDisplayName,
+            int callerDisplayNamePresentation,
             GatewayInfo gatewayInfo,
             PhoneAccount account,
             CallServiceDescriptor descriptor,
             ICallVideoProvider callVideoProvider,
             String parentCallId,
             List<String> childCallIds,
-            int features,
             StatusHints statusHints) {
         mId = id;
         mState = state;
@@ -76,13 +80,15 @@ public final class InCallCall implements Parcelable {
         mCapabilities = capabilities;
         mConnectTimeMillis = connectTimeMillis;
         mHandle = handle;
+        mHandlePresentation = handlePresentation;
+        mCallerDisplayName = callerDisplayName;
+        mCallerDisplayNamePresentation = callerDisplayNamePresentation;
         mGatewayInfo = gatewayInfo;
         mAccount = account;
         mCurrentCallServiceDescriptor = descriptor;
         mCallVideoProvider = callVideoProvider;
         mParentCallId = parentCallId;
         mChildCallIds = childCallIds;
-        mFeatures = features;
         mStatusHints = statusHints;
     }
 
@@ -134,6 +140,21 @@ public final class InCallCall implements Parcelable {
         return mHandle;
     }
 
+    /** The {@link CallPropertyPresentation} which controls how the handle is shown. */
+    public int getHandlePresentation() {
+        return mHandlePresentation;
+    }
+
+    /** The endpoint to which the call is connected. */
+    public String getCallerDisplayName() {
+        return mCallerDisplayName;
+    }
+
+    /** The {@link CallPropertyPresentation} which controls how the caller display name is shown. */
+    public int getCallerDisplayNamePresentation() {
+        return mCallerDisplayNamePresentation;
+    }
+
     /** Gateway information for the call. */
     public GatewayInfo getGatewayInfo() {
         return mGatewayInfo;
@@ -183,15 +204,6 @@ public final class InCallCall implements Parcelable {
     }
 
     /**
-     * The features of this call (e.g. VoLTE, VoWIFI).
-     *
-     * @return Features.
-     */
-    public int getFeatures() {
-        return mFeatures;
-    }
-
-    /**
      * The status label and icon.
      *
      * @return Status hints.
@@ -215,6 +227,9 @@ public final class InCallCall implements Parcelable {
             int capabilities = source.readInt();
             long connectTimeMillis = source.readLong();
             Uri handle = source.readParcelable(classLoader);
+            int handlePresentation = source.readInt();
+            String callerDisplayName = source.readString();
+            int callerDisplayNamePresentation = source.readInt();
             GatewayInfo gatewayInfo = source.readParcelable(classLoader);
             PhoneAccount account = source.readParcelable(classLoader);
             CallServiceDescriptor descriptor = source.readParcelable(classLoader);
@@ -223,11 +238,11 @@ public final class InCallCall implements Parcelable {
             String parentCallId = source.readString();
             List<String> childCallIds = new ArrayList<>();
             source.readList(childCallIds, classLoader);
-            int features = source.readInt();
             StatusHints statusHints = source.readParcelable(classLoader);
             return new InCallCall(id, state, disconnectCauseCode, disconnectCauseMsg,
-                    cannedSmsResponses, capabilities, connectTimeMillis, handle, gatewayInfo,
-                    account, descriptor, callVideoProvider, parentCallId, childCallIds, features,
+                    cannedSmsResponses, capabilities, connectTimeMillis, handle, handlePresentation,
+                    callerDisplayName, callerDisplayNamePresentation, gatewayInfo,
+                    account, descriptor, callVideoProvider, parentCallId, childCallIds,
                     statusHints);
         }
 
@@ -254,6 +269,9 @@ public final class InCallCall implements Parcelable {
         destination.writeInt(mCapabilities);
         destination.writeLong(mConnectTimeMillis);
         destination.writeParcelable(mHandle, 0);
+        destination.writeInt(mHandlePresentation);
+        destination.writeString(mCallerDisplayName);
+        destination.writeInt(mCallerDisplayNamePresentation);
         destination.writeParcelable(mGatewayInfo, 0);
         destination.writeParcelable(mAccount, 0);
         destination.writeParcelable(mCurrentCallServiceDescriptor, 0);
@@ -261,7 +279,6 @@ public final class InCallCall implements Parcelable {
                 mCallVideoProvider != null ? mCallVideoProvider.asBinder() : null);
         destination.writeString(mParentCallId);
         destination.writeList(mChildCallIds);
-        destination.writeInt(mFeatures);
         destination.writeParcelable(mStatusHints, 0);
     }
 

@@ -16,17 +16,17 @@
 
 package android.telecomm;
 
-/** Defines how numbers are displayed in caller id. */
-public enum CallNumberPresentation {
-    /** Number is displayed normally. */
-    ALLOWED,
+/** Defines how numbers and names are displayed in caller id. */
+public class CallPropertyPresentation {
+    /** Property is displayed normally. */
+    public static final int ALLOWED = 0;
 
-    /** Number was blocked. */
-    RESTRICTED,
+    /** Property was blocked. */
+    public static final int RESTRICTED = 1;
 
     /** Presentation was not specified or is unknown. */
-    UNKNOWN,
+    public static final int UNKNOWN = 2;
 
-    /** Number should be displayed as a pay phone. */
-    PAYPHONE
+    /** Property should be displayed as a pay phone. */
+    public static final int PAYPHONE = 3;
 }

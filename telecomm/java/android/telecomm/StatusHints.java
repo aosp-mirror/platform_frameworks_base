@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.DisplayMetrics;
@@ -35,11 +36,13 @@ public final class StatusHints implements Parcelable {
     private final ComponentName mComponentName;
     private final String mLabel;
     private final int mIconId;
+    private final Bundle mExtras;
 
-    public StatusHints(ComponentName componentName, String label, int iconId) {
+    public StatusHints(ComponentName componentName, String label, int iconId, Bundle extras) {
         mComponentName = componentName;
         mLabel = label;
         mIconId = iconId;
+        mExtras = extras;
     }
 
     /**
@@ -70,6 +73,13 @@ public final class StatusHints implements Parcelable {
         return getIcon(context, mIconId);
     }
 
+    /**
+     * @return Extra data used to display status.
+     */
+    public Bundle getExtras() {
+        return mExtras;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -80,6 +90,7 @@ public final class StatusHints implements Parcelable {
         out.writeParcelable(mComponentName, flags);
         out.writeString(mLabel);
         out.writeInt(mIconId);
+        out.writeParcelable(mExtras, 0);
     }
 
     public static final Creator<StatusHints> CREATOR
@@ -97,6 +108,7 @@ public final class StatusHints implements Parcelable {
         mComponentName = in.readParcelable(getClass().getClassLoader());
         mLabel = in.readString();
         mIconId = in.readInt();
+        mExtras = (Bundle) in.readParcelable(getClass().getClassLoader());
     }
 
     private Drawable getIcon(Context context, int resId) {

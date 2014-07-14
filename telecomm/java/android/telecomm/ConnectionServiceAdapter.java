@@ -17,6 +17,7 @@
 package android.telecomm;
 
 import android.content.ComponentName;
+import android.net.Uri;
 import android.os.IBinder;
 import android.os.IBinder.DeathRecipient;
 import android.os.RemoteException;
@@ -342,20 +343,20 @@ final class ConnectionServiceAdapter implements DeathRecipient {
         }
     }
 
-    /**
-    * Set the features associated with the given call.
-    * Features are defined in {@link android.telecomm.CallFeatures} and are passed in as a
-    * bit-mask.
-    *
-    * @param callId The unique ID of the call to set features for.
-    * @param features The features.
-    */
-    void setFeatures(String callId, int features) {
-        Log.v(this, "setFeatures: %d", features);
+    void setHandle(String callId, Uri handle, int presentation) {
         for (IConnectionServiceAdapter adapter : mAdapters) {
             try {
-                adapter.setFeatures(callId, features);
-            } catch (RemoteException ignored) {
+                adapter.setHandle(callId, handle, presentation);
+            } catch (RemoteException e) {
+            }
+        }
+    }
+
+    void setCallerDisplayName(String callId, String callerDisplayName, int presentation) {
+        for (IConnectionServiceAdapter adapter : mAdapters) {
+            try {
+                adapter.setCallerDisplayName(callId, callerDisplayName, presentation);
+            } catch (RemoteException e) {
             }
         }
     }
