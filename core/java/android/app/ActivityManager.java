@@ -2456,7 +2456,10 @@ public class ActivityManager {
     }
 
     /**
-     * @hide
+     * Return whether currently in lock task mode.  When in this mode
+     * no new tasks can be created or switched to.
+     *
+     * @see Activity#startLockTask()
      */
     public boolean isInLockTaskMode() {
         try {
