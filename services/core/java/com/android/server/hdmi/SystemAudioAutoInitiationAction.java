@@ -21,6 +21,7 @@ import com.android.server.hdmi.HdmiControlService.SendMessageCallback;
 /**
  * Action to initiate system audio once AVR is detected on Device discovery action.
  */
+// Seq #27
 final class SystemAudioAutoInitiationAction extends FeatureAction {
     private final int mAvrAddress;
 

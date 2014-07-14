@@ -24,6 +24,7 @@ import android.hardware.hdmi.IHdmiControlCallback;
  * Feature action that handles System Audio initiated by TV devices.
  */
 final class SystemAudioActionFromTv extends SystemAudioAction {
+
     /**
      * Constructor
      *
@@ -41,9 +42,6 @@ final class SystemAudioActionFromTv extends SystemAudioAction {
 
     @Override
     boolean start() {
-        // TODO: Check HDMI-CEC is enabled.
-        // TODO: Move to the waiting state if currently a routing change is in progress.
-
         removeSystemAudioActionInProgress();
         sendSystemAudioModeRequest();
         return true;

@@ -23,14 +23,20 @@ import android.hardware.hdmi.IHdmiControlCallback;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import java.util.List;
+
 /**
  * Base feature action class for SystemAudioActionFromTv and SystemAudioActionFromAvr.
  */
 abstract class SystemAudioAction extends FeatureAction {
     private static final String TAG = "SystemAudioAction";
 
+    // Transient state to differentiate with STATE_NONE where the on-finished callback
+    // will not be called.
+    private static final int STATE_CHECK_ROUTING_IN_PRGRESS = 1;
+
     // State in which waits for <SetSystemAudioMode>.
-    private static final int STATE_WAIT_FOR_SET_SYSTEM_AUDIO_MODE = 1;
+    private static final int STATE_WAIT_FOR_SET_SYSTEM_AUDIO_MODE = 2;
 
     private static final int MAX_SEND_RETRY_COUNT = 2;
 
@@ -65,7 +71,25 @@ abstract class SystemAudioAction extends FeatureAction {
         mCallback = callback;
     }
 
+    // Seq #27
     protected void sendSystemAudioModeRequest() {
+        mState = STATE_CHECK_ROUTING_IN_PRGRESS;
+        List<RoutingControlAction> routingActions = getActions(RoutingControlAction.class);
+        if (!routingActions.isEmpty()) {
+            // Should have only one Routing Control Action
+            RoutingControlAction routingAction = routingActions.get(0);
+            routingAction.addOnFinishedCallback(this, new Runnable() {
+                @Override
+                public void run() {
+                    sendSystemAudioModeRequestInternal();
+                }
+            });
+            return;
+        }
+        sendSystemAudioModeRequestInternal();
+    }
+
+    private void sendSystemAudioModeRequestInternal() {
         int avrPhysicalAddress = tv().getAvrDeviceInfo().getPhysicalAddress();
         HdmiCecMessage command = HdmiCecMessageBuilder.buildSystemAudioModeRequest(
                 getSourceAddress(),

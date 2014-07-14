@@ -18,11 +18,13 @@ package com.android.server.hdmi;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.util.Pair;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.hdmi.HdmiControlService.DevicePollingCallback;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -58,6 +60,8 @@ abstract class FeatureAction {
 
     // Timer that manages timeout events.
     protected ActionTimer mActionTimer;
+
+    private ArrayList<Pair<FeatureAction, Runnable>> mOnFinishedCallbacks;
 
     FeatureAction(HdmiCecLocalDevice source) {
         mSource = source;
@@ -220,8 +224,22 @@ abstract class FeatureAction {
      * Finish up the action. Reset the state, and remove itself from the action queue.
      */
     protected void finish() {
+        finish(true);
+    }
+
+    void finish(boolean removeSelf) {
         clear();
-        removeAction(this);
+        if (removeSelf) {
+            removeAction(this);
+        }
+        if (mOnFinishedCallbacks != null) {
+            for (Pair<FeatureAction, Runnable> actionCallbackPair: mOnFinishedCallbacks) {
+                if (actionCallbackPair.first.mState != STATE_NONE) {
+                    actionCallbackPair.second.run();
+                }
+            }
+            mOnFinishedCallbacks = null;
+        }
     }
 
     protected final HdmiCecLocalDevice localDevice() {
@@ -244,10 +262,17 @@ abstract class FeatureAction {
         return mSource.getDeviceInfo().getPhysicalAddress();
     }
 
-    protected void sendUserControlPressedAndReleased(int targetAddress, int uiCommand) {
+    protected final void sendUserControlPressedAndReleased(int targetAddress, int uiCommand) {
         sendCommand(HdmiCecMessageBuilder.buildUserControlPressed(
                 getSourceAddress(), targetAddress, uiCommand));
         sendCommand(HdmiCecMessageBuilder.buildUserControlReleased(
                 getSourceAddress(), targetAddress));
+    }
+
+    protected final void addOnFinishedCallback(FeatureAction action, Runnable runnable) {
+        if (mOnFinishedCallbacks == null) {
+            mOnFinishedCallbacks = new ArrayList<>();
+        }
+        mOnFinishedCallbacks.add(Pair.create(action, runnable));
     }
 }
