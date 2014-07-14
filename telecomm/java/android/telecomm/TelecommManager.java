@@ -23,37 +23,133 @@ import android.util.Log;
 
 import com.android.internal.telecomm.ITelecommService;
 
+import java.util.List;
+
 /**
  * Provides access to Telecomm-related functionality.
  * TODO(santoscordon): Move this all into PhoneManager.
  * @hide
  */
 public class TelecommManager {
+
+    /**
+     * The extra used with an {@link android.content.Intent#ACTION_CALL} or
+     * {@link android.content.Intent#ACTION_DIAL} {@code Intent} to specify a {@link PhoneAccount}
+     * to use when making the call.
+     *
+     * <p class="note">
+     * Retrieve with
+     * {@link android.content.Intent#getParcelableExtra(String)}.
+     */
+    public static final String EXTRA_PHONE_ACCOUNT = "account";
+
     private static final String TAG = "TelecommManager";
     private static final String TELECOMM_SERVICE_NAME = "telecomm";
 
     private final Context mContext;
-    private final ITelecommService mService;
-
-    /**
-     * @hide
-     */
-    public TelecommManager(Context context, ITelecommService service) {
-        Context appContext = context.getApplicationContext();
-        if (appContext != null) {
-            mContext = appContext;
-        } else {
-            mContext = context;
-        }
-
-        mService = service;
-    }
 
     /**
      * @hide
      */
     public static TelecommManager from(Context context) {
         return (TelecommManager) context.getSystemService(Context.TELECOMM_SERVICE);
+    }
+
+    /**
+     * @hide
+     */
+    public TelecommManager(Context context) {
+        Context appContext = context.getApplicationContext();
+        if (appContext != null) {
+            mContext = appContext;
+        } else {
+            mContext = context;
+        }
+    }
+
+    /**
+     * Return a list of {@link PhoneAccount}s which can be used to make and receive phone calls.
+     *
+     * @see #EXTRA_PHONE_ACCOUNT
+     * @return A list of {@code PhoneAccount} objects.
+     */
+    public List<PhoneAccount> getEnabledPhoneAccounts() {
+        try {
+            if (isServiceConnected()) {
+                return getTelecommService().getEnabledPhoneAccounts();
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelecommService#getEnabledPhoneAccounts", e);
+        }
+        return null;
+    }
+
+    /**
+     * Return the metadata for a specified {@link PhoneAccount}. Metadata includes resources which
+     * can be used in a user interface.
+     *
+     * @param account The {@link PhoneAccount}.
+     *
+     * @return The metadata for the account.
+     */
+    public PhoneAccountMetadata getPhoneAccountMetadata(PhoneAccount account) {
+        try {
+            if (isServiceConnected()) {
+                return getTelecommService().getPhoneAccountMetadata(account);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelecommService#getPhoneAccountMetadata", e);
+        }
+        return null;
+    }
+
+    /**
+     * Register a {@link PhoneAccount} for use by the system.
+     *
+     * @param account The {@link PhoneAccount}.
+     * @param metadata The metadata for the account.
+     */
+    public void registerPhoneAccount(PhoneAccount account, PhoneAccountMetadata metadata) {
+        try {
+            if (isServiceConnected()) {
+                getTelecommService().registerPhoneAccount(account, metadata);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelecommService#registerPhoneAccount", e);
+        }
+    }
+
+    /**
+     * Remove a {@link PhoneAccount} registration from the system.
+     *
+     * @param account An Account.
+     */
+    public void unregisterPhoneAccount(PhoneAccount account) {
+        try {
+            if (isServiceConnected()) {
+                getTelecommService().unregisterPhoneAccount(account);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelecommService#unregisterPhoneAccount", e);
+        }
+    }
+
+    /**
+     * Remove all Accounts for a given package from the system.
+     *
+     * @param packageName A package name that may have registered Accounts.
+     *
+     * @hide
+     */
+    @SystemApi
+    public void clearAccounts(String packageName) {
+        try {
+            if (isServiceConnected()) {
+                getTelecommService().clearAccounts(packageName);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelecommService#clearAccounts", e);
+        }
     }
 
     /**
@@ -108,7 +204,7 @@ public class TelecommManager {
 
     /**
      * Ends an ongoing call. TODO(santoscordon): L-release - need to convert all invocations of
-     * ITelephony#endCall to use this method (clockwork & gearhead).
+     * ITelecommService#endCall to use this method (clockwork & gearhead).
      *
      * @hide
      */
@@ -127,7 +223,7 @@ public class TelecommManager {
     /**
      * If there is a ringing incoming call, this method accepts the call on behalf of the user.
      * TODO(santoscordon): L-release - need to convert all invocation of
-     * ITelephony#answerRingingCall to use this method (clockwork & gearhead).
+     * ITelecommService#answerRingingCall to use this method (clockwork & gearhead).
      *
      * @hide
      */

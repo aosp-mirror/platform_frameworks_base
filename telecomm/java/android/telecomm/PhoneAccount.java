@@ -17,52 +17,64 @@
 package android.telecomm;
 
 import android.content.ComponentName;
-import android.content.Context;
-import android.content.pm.PackageManager;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.telephony.Rlog;
-import android.util.DisplayMetrics;
-import android.util.Log;
 
-import java.util.MissingResourceException;
 import java.util.Objects;
 
 /**
  * Represents a distinct account, line of service or call placement method that
  * the system can use to place phone calls.
  */
-public final class PhoneAccount implements Parcelable {
+public class PhoneAccount implements Parcelable {
 
-    private static final int NO_DENSITY = -1;
 
-    private static final String LOG_TAG = "Account";
+    /**
+     * Flag indicating that this {@code PhoneAccount} can act as a call manager for traditional
+     * SIM-based telephony calls. The {@link ConnectionService} associated with this phone-account
+     * will be allowed to manage SIM-based phone calls including using its own proprietary
+     * phone-call implementation (like VoIP calling) to make calls instead of the telephony stack.
+     * When a user opts to place a call using the SIM-based telephony stack, the connection-service
+     * associated with this phone-account will be attempted first if the user has explicitly
+     * selected it to be used as the default call-manager.
+     * <p>
+     * See {@link #getCapabilities}
+     */
+    public static final int CAPABILITY_SIM_CALL_MANAGER = 0x1;
 
-    private final ComponentName mComponentName;
-    private final String mId;
-    private final Uri mHandle;
-    private final String mLabel;
-    private final String mShortDescription;
-    private final boolean mIsEnabled;
-    private final boolean mIsSystemDefault;
+    /**
+     * Flag indicating that this {@code PhoneAccount} can make phone calls in place of traditional
+     * SIM-based telephony calls. This account will be treated as a distinct method for placing
+     * calls alongside the traditional SIM-based telephony stack. This flag is distinct from
+     * {@link #CAPABILITY_SIM_CALL_MANAGER} in that it is not allowed to manage calls from or use
+     * the built-in telephony stack to place its calls.
+     * <p>
+     * See {@link #getCapabilities}
+     */
+    public static final int CAPABILITY_CALL_PROVIDER = 0x2;
+
+    /**
+     * Flag indicating that this {@code PhoneAccount} represents a built-in PSTN SIM subscription.
+     * <p>
+     * Only the android framework can set this capability on a phone-account.
+     */
+    public static final int CAPABILITY_SIM_SUBSCRIPTION = 0x4;
+
+    private ComponentName mComponentName;
+    private String mId;
+    private Uri mHandle;
+    private int mCapabilities;
 
     public PhoneAccount(
             ComponentName componentName,
             String id,
             Uri handle,
-            String label,
-            String shortDescription,
-            boolean isEnabled,
-            boolean isSystemDefault) {
+            int capabilities) {
         mComponentName = componentName;
         mId = id;
         mHandle = handle;
-        mLabel = label;
-        mShortDescription = shortDescription;
-        mIsSystemDefault = isSystemDefault;
-        mIsEnabled = isEnabled;
+        mCapabilities = capabilities;
     }
 
     /**
@@ -87,8 +99,8 @@ public final class PhoneAccount implements Parcelable {
 
     /**
      * The handle (e.g., a phone number) associated with this {@code PhoneAccount}. This represents
-     * the destination from which outgoing calls using this {@code PhoneAccount} will appear to come
-     * from, if applicable, and the destination to which incoming calls using this
+     * the destination from which outgoing calls using this {@code PhoneAccount} will appear to
+     * come, if applicable, and the destination to which incoming calls using this
      * {@code PhoneAccount} may be addressed.
      *
      * @return A handle expressed as a {@code Uri}, for example, a phone number.
@@ -98,76 +110,23 @@ public final class PhoneAccount implements Parcelable {
     }
 
     /**
-     * A short string label describing this {@code PhoneAccount}.
+     * The capabilities of this {@code PhoneAccount}.
      *
-     * @param context The invoking {@code Context}, used for retrieving resources.
-     *
-     * TODO(ihab): If don't need context, remove param
-     *
-     * @return A label for this {@code PhoneAccount}.
+     * @return A bit field of flags describing this {@code PhoneAccount}'s capabilities.
      */
-    public String getLabel(Context context) {
-        return mLabel;
+    public int getCapabilities() {
+        return mCapabilities;
     }
 
-    /**
-     * A short paragraph describing this {@code PhoneAccount}.
-     *
-     * @param context The invoking {@code Context}, used for retrieving resources.
-     *
-     * TODO(ihab): If don't need context, remove param
-     *
-     * @return A description for this {@code PhoneAccount}.
-     */
-    public String getShortDescription(Context context) {
-        return mShortDescription;
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(mComponentName) + Objects.hashCode(mId) +
+                Objects.hashCode(mHandle) + mCapabilities;
     }
 
-    // TODO(ihab): Representation of the icons
     //
-    // Refactor to pass a Bitmap (scale it at runtime), but if they don't pass one, fall
-    // back to the android:icon attr in the manifest (<service /> first, <application /> second)
-
-    /**
-     * An icon to represent this {@code PhoneAccount} in a user interface.
-     *
-     * @param context The invoking {@code Context}, used for retrieving resources.
-     *
-     * @return An icon for this {@code PhoneAccount}.
-     */
-    public Drawable getIcon(Context context) {
-        return null;  // TODO(ihab): See above
-    }
-
-    /**
-     * An icon to represent this {@code PhoneAccount} in a user interface.
-     *
-     * @param context The invoking {@code Context}, used for retrieving resources.
-     * @param density A display density from {@link DisplayMetrics}.
-     *
-     * @return An icon for this {@code PhoneAccount}.
-     */
-    public Drawable getIcon(Context context, int density) {
-        return null;  // TODO(ihab): See above
-    }
-
-    /**
-     * Whether this {@code PhoneAccount} is enabled for use.
-     *
-     * @return {@code true} if this {@code PhoneAccount} is enabled.
-     */
-    public boolean isEnabled() {
-        return mIsEnabled;
-    }
-
-    /**
-     * Whether this {@code PhoneAccount} is the system default.
-     *
-     * @return {@code true} if this {@code PhoneAccount} is the system default.
-     */
-    public boolean isSystemDefault() {
-        return mIsSystemDefault;
-    }
+    // Parcelable implementation.
+    //
 
     @Override
     public int describeContents() {
@@ -179,18 +138,16 @@ public final class PhoneAccount implements Parcelable {
         out.writeParcelable(mComponentName, flags);
         out.writeString(mId);
         out.writeString(mHandle != null ? mHandle.toString() : "");
-        out.writeString(mLabel);
-        out.writeString(mShortDescription);
-        out.writeInt(mIsEnabled ? 1 : 0);
-        out.writeInt(mIsSystemDefault ? 1 : 0);
+        out.writeInt(mCapabilities);
     }
 
-    public static final Creator<PhoneAccount> CREATOR
-            = new Creator<PhoneAccount>() {
+    public static final Creator<PhoneAccount> CREATOR = new Creator<PhoneAccount>() {
+        @Override
         public PhoneAccount createFromParcel(Parcel in) {
             return new PhoneAccount(in);
         }
 
+        @Override
         public PhoneAccount[] newArray(int size) {
             return new PhoneAccount[size];
         }
@@ -201,22 +158,6 @@ public final class PhoneAccount implements Parcelable {
         mId = in.readString();
         String uriString = in.readString();
         mHandle = uriString.length() > 0 ? Uri.parse(uriString) : null;
-        mLabel = in.readString();
-        mShortDescription = in.readString();
-        mIsEnabled = in.readInt() == 1;
-        mIsSystemDefault = in.readInt() == 1;
-    }
-
-    @Override
-    public boolean equals(Object other) {
-        return
-                other instanceof PhoneAccount &&
-                Objects.equals(mComponentName, ((PhoneAccount) other).mComponentName) &&
-                Objects.equals(mId, ((PhoneAccount) other).mId);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(mComponentName) + Objects.hashCode(mId);
+        mCapabilities = in.readInt();
     }
 }
