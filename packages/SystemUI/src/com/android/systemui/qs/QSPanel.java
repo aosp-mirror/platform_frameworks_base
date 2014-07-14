@@ -34,6 +34,7 @@ import com.android.systemui.R;
 import com.android.systemui.qs.QSTile.DetailAdapter;
 import com.android.systemui.settings.BrightnessController;
 import com.android.systemui.settings.ToggleSlider;
+import com.android.systemui.statusbar.phone.QSTileHost;
 
 import java.util.ArrayList;
 
@@ -61,9 +62,10 @@ public class QSPanel extends ViewGroup {
     private boolean mExpanded;
     private boolean mListening;
 
-    private TileRecord mDetailRecord;
+    private Record mDetailRecord;
     private Callback mCallback;
     private BrightnessController mBrightnessController;
+    private QSTileHost mHost;
 
     public QSPanel(Context context) {
         this(context, null);
@@ -89,11 +91,23 @@ public class QSPanel extends ViewGroup {
         mBrightnessController = new BrightnessController(getContext(),
                 (ImageView) findViewById(R.id.brightness_icon),
                 (ToggleSlider) findViewById(R.id.brightness_slider));
+
+        mDetailDoneButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showDetail(false, mDetailRecord);
+            }
+        });
     }
 
     public void setCallback(Callback callback) {
         mCallback = callback;
     }
+
+    public void setHost(QSTileHost host) {
+        mHost = host;
+    }
+
 
     public void updateResources() {
         final Resources res = mContext.getResources();
@@ -143,7 +157,13 @@ public class QSPanel extends ViewGroup {
         }
     }
 
-    private void showDetail(boolean show, TileRecord r) {
+    public void showDetailAdapter(boolean show, DetailAdapter adapter) {
+        Record r = new Record();
+        r.detailAdapter = adapter;
+        showDetail(show, r);
+    }
+
+    private void showDetail(boolean show, Record r) {
         mHandler.obtainMessage(H.SHOW_DETAIL, show ? 1 : 0, 0, r).sendToTarget();
     }
 
@@ -203,40 +223,52 @@ public class QSPanel extends ViewGroup {
         addView(r.tileView);
     }
 
-    private void handleShowDetail(TileRecord r, boolean show) {
-        if (r == null) return;
-        AnimatorListener listener = null;
+    private void handleShowDetail(Record r, boolean show) {
+        if (r instanceof TileRecord) {
+            handleShowDetailTile((TileRecord) r, show);
+        } else {
+            handleShowDetailImpl(r, show, getWidth() /* x */, 0/* y */);
+        }
+    }
+
+    private void handleShowDetailTile(TileRecord r, boolean show) {
+        if ((mDetailRecord != null) == show) return;
+
         if (show) {
-            if (mDetailRecord != null) return;  // already showing something in detail
             r.detailAdapter = r.tile.getDetailAdapter();
             if (r.detailAdapter == null) return;
-            mDetailRecord = r;
-            r.detailView = r.detailAdapter.createDetailView(mContext, r.detailView, mDetailContent);
+        }
+        int x = r.tileView.getLeft() + r.tileView.getWidth() / 2;
+        int y = r.tileView.getTop() + r.tileView.getHeight() / 2;
+        handleShowDetailImpl(r, show, x, y);
+    }
+
+    private void handleShowDetailImpl(Record r, boolean show, int x, int y) {
+        if ((mDetailRecord != null) == show) return;  // already in right state
+        DetailAdapter detailAdapter = null;
+        AnimatorListener listener = null;
+        if (show) {
+            detailAdapter = r.detailAdapter;
+            r.detailView = detailAdapter.createDetailView(mContext, r.detailView, mDetailContent);
             if (r.detailView == null) throw new IllegalStateException("Must return detail view");
-            mDetailDoneButton.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    showDetail(false, mDetailRecord);
-                }
-            });
-            final Intent settingsIntent = r.detailAdapter.getSettingsIntent();
+
+            final Intent settingsIntent = detailAdapter.getSettingsIntent();
             mDetailSettingsButton.setVisibility(settingsIntent != null ? VISIBLE : GONE);
             mDetailSettingsButton.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    mDetailRecord.tile.mHost.startSettingsActivity(settingsIntent);
+                    mHost.startSettingsActivity(settingsIntent);
                 }
             });
+
             mDetailContent.removeAllViews();
             mDetail.bringToFront();
             mDetailContent.addView(r.detailView);
+            mDetailRecord = r;
         } else {
-            if (mDetailRecord == null) return;
             listener = mTeardownDetailWhenDone;
         }
-        fireShowingDetail(show ? r.detailAdapter : null);
-        int x = r.tileView.getLeft() + r.tileView.getWidth() / 2;
-        int y = r.tileView.getTop() + r.tileView.getHeight() / 2;
+        fireShowingDetail(show ? detailAdapter : null);
         mClipper.animateCircularClip(x, y, show, listener);
     }
 
@@ -339,18 +371,21 @@ public class QSPanel extends ViewGroup {
         @Override
         public void handleMessage(Message msg) {
             if (msg.what == SHOW_DETAIL) {
-                handleShowDetail((TileRecord)msg.obj, msg.arg1 != 0);
+                handleShowDetail((Record)msg.obj, msg.arg1 != 0);
             } else if (msg.what == SET_TILE_VISIBILITY) {
                 handleSetTileVisibility((View)msg.obj, msg.arg1 != 0);
             }
         }
     }
 
-    private static final class TileRecord {
-        QSTile<?> tile;
-        QSTileView tileView;
+    private static class Record {
         View detailView;
         DetailAdapter detailAdapter;
+    }
+
+    private static final class TileRecord extends Record {
+        QSTile<?> tile;
+        QSTileView tileView;
         int row;
         int col;
     }

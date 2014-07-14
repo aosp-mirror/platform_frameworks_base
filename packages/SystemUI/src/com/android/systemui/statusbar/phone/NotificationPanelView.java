@@ -150,7 +150,6 @@ public class NotificationPanelView extends PanelView implements
         super.onFinishInflate();
         mHeader = (StatusBarHeaderView) findViewById(R.id.header);
         mHeader.setOnClickListener(this);
-        mHeader.setOverlayParent(this);
         mKeyguardStatusView = findViewById(R.id.keyguard_status_view);
         mQsContainer = findViewById(R.id.quick_settings_container);
         mQsPanel = (QSPanel) findViewById(R.id.quick_settings_panel);

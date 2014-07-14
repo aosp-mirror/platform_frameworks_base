@@ -90,6 +90,7 @@ public class UserSwitcherHostView extends FrameLayout
         mListView = (ListView) findViewById(android.R.id.list);
         mListView.setAdapter(mAdapter);
         mListView.setOnItemClickListener(this);
+        refreshUsers();
     }
 
     @Override

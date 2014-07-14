@@ -475,10 +475,6 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         });
     }
 
-    public void setOverlayParent(ViewGroup parent) {
-        mMultiUserSwitch.setOverlayParent(parent);
-    }
-
     @Override
     public void onClick(View v) {
         if (v == mSettingsButton) {
@@ -501,6 +497,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         if (mQSPanel != null) {
             mQSPanel.setCallback(mQsPanelCallback);
         }
+        mMultiUserSwitch.setQsPanel(qsp);
     }
 
     @Override

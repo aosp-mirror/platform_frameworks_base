@@ -699,6 +699,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     mBluetoothController, mLocationController, mRotationLockController,
                     mNetworkController, mZenModeController, null /*tethering*/,
                     mCastController, mVolumeComponent, mFlashlightController);
+            mQSPanel.setHost(qsh);
             for (QSTile<?> tile : qsh.getTiles()) {
                 mQSPanel.addTile(tile);
             }
