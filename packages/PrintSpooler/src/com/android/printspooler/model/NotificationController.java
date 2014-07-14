@@ -56,8 +56,6 @@ final class NotificationController {
     private static final String INTENT_ACTION_RESTART_PRINTJOB = "INTENT_ACTION_RESTART_PRINTJOB";
 
     private static final String EXTRA_PRINT_JOB_ID = "EXTRA_PRINT_JOB_ID";
-    private static final String EXTRA_PRINTJOB_LABEL = "EXTRA_PRINTJOB_LABEL";
-    private static final String EXTRA_PRINTER_NAME = "EXTRA_PRINTER_NAME";
 
     private final Context mContext;
     private final NotificationManager mNotificationManager;
@@ -69,7 +67,7 @@ final class NotificationController {
     }
 
     public void onUpdateNotifications(List<PrintJobInfo> printJobs) {
-        List<PrintJobInfo> notifyPrintJobs = new ArrayList<PrintJobInfo>();
+        List<PrintJobInfo> notifyPrintJobs = new ArrayList<>();
 
         final int printJobCount = printJobs.size();
         for (int i = 0; i < printJobCount; i++) {
@@ -252,8 +250,6 @@ final class NotificationController {
         Intent intent = new Intent(mContext, NotificationBroadcastReceiver.class);
         intent.setAction(INTENT_ACTION_CANCEL_PRINTJOB + "_" + printJob.getId().flattenToString());
         intent.putExtra(EXTRA_PRINT_JOB_ID, printJob.getId());
-        intent.putExtra(EXTRA_PRINTJOB_LABEL, printJob.getLabel());
-        intent.putExtra(EXTRA_PRINTER_NAME, printJob.getPrinterName());
         return PendingIntent.getBroadcast(mContext, 0, intent, PendingIntent.FLAG_ONE_SHOT);
     }
 
@@ -302,17 +298,14 @@ final class NotificationController {
             String action = intent.getAction();
             if (action != null && action.startsWith(INTENT_ACTION_CANCEL_PRINTJOB)) {
                 PrintJobId printJobId = intent.getExtras().getParcelable(EXTRA_PRINT_JOB_ID);
-                String printJobLabel = intent.getExtras().getString(EXTRA_PRINTJOB_LABEL);
-                String printerName = intent.getExtras().getString(EXTRA_PRINTER_NAME);
-                handleCancelPrintJob(context, printJobId, printJobLabel, printerName);
+                handleCancelPrintJob(context, printJobId);
             } else if (action != null && action.startsWith(INTENT_ACTION_RESTART_PRINTJOB)) {
                 PrintJobId printJobId = intent.getExtras().getParcelable(EXTRA_PRINT_JOB_ID);
                 handleRestartPrintJob(context, printJobId);
             }
         }
 
-        private void handleCancelPrintJob(final Context context, final PrintJobId printJobId,
-                final String printJobLabel, final String printerName) {
+        private void handleCancelPrintJob(final Context context, final PrintJobId printJobId) {
             if (DEBUG) {
                 Log.i(LOG_TAG, "handleCancelPrintJob() printJobId:" + printJobId);
             }
