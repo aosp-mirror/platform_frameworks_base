@@ -31,6 +31,7 @@ import android.content.pm.IPackageInstallObserver;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.IPackageStatsObserver;
 import android.content.pm.InstrumentationInfo;
+import android.content.pm.KeySet;
 import android.content.pm.ManifestDigest;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
@@ -613,6 +614,26 @@ public class MockPackageManager extends PackageManager {
 
     @Override
     public boolean isSafeMode() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public KeySet getKeySetByAlias(String packageName, String alias) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public KeySet getSigningKeySet(String packageName) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean isSignedBy(String packageName, KeySet ks) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean isSignedByExactly(String packageName, KeySet ks) {
         throw new UnsupportedOperationException();
     }
 
