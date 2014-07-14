@@ -25581,6 +25581,7 @@ package android.provider {
     field public static final java.lang.String NUMBER = "number";
     field public static final java.lang.String SOURCE_DATA = "source_data";
     field public static final java.lang.String SOURCE_PACKAGE = "source_package";
+    field public static final java.lang.String TRANSCRIPTION = "transcription";
   }
 
 }
