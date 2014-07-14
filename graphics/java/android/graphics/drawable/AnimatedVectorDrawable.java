@@ -210,6 +210,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable {
                     if (drawableRes != 0) {
                         mAnimatedVectorState.mVectorDrawable = (VectorDrawable) res.getDrawable(
                                 drawableRes, theme).mutate();
+                        mAnimatedVectorState.mVectorDrawable.setAllowCaching(false);
                     }
                     a.recycle();
                 } else if (TARGET.equals(tagName)) {
@@ -259,6 +260,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable {
                 mChangingConfigurations = copy.mChangingConfigurations;
                 // TODO: Make sure the constant state are handled correctly.
                 mVectorDrawable = new VectorDrawable();
+                mVectorDrawable.setAllowCaching(false);
                 mAnimators = new ArrayList<Animator>();
             }
         }
