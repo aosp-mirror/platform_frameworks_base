@@ -157,6 +157,10 @@ static void android_media_MediaRecorder_setCamera(JNIEnv* env, jobject thiz, job
         return;
     }
     sp<Camera> c = get_native_camera(env, camera, NULL);
+    if (c == NULL) {
+        // get_native_camera will throw an exception in this case
+        return;
+    }
     sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
     process_media_recorder_call(env, mr->setCamera(c->remote(), c->getRecordingProxy()),
             "java/lang/RuntimeException", "setCamera failed.");
