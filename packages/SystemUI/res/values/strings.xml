@@ -691,4 +691,7 @@
 
     <!-- Battery level for expanded quick settings [CHAR LIMIT=2] -->
     <string name="battery_level_template"><xliff:g id="level" example="45">%d</xliff:g>%%</string>
+
+    <!-- Text shown in place of notification contents when the notification is hidden on a secure lockscreen -->
+    <string name="notification_hidden_text">Contents hidden</string>
 </resources>
