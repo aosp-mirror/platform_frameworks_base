@@ -70,6 +70,7 @@ import com.android.internal.os.IParcelFileDescriptorFactory;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FastXmlSerializer;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.server.EventLogTags;
 import com.android.server.IntentResolver;
@@ -12016,30 +12017,19 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     static class DumpState {
         public static final int DUMP_LIBS = 1 << 0;
-
         public static final int DUMP_FEATURES = 1 << 1;
-
         public static final int DUMP_RESOLVERS = 1 << 2;
-
         public static final int DUMP_PERMISSIONS = 1 << 3;
-
         public static final int DUMP_PACKAGES = 1 << 4;
-
         public static final int DUMP_SHARED_USERS = 1 << 5;
-
         public static final int DUMP_MESSAGES = 1 << 6;
-
         public static final int DUMP_PROVIDERS = 1 << 7;
-
         public static final int DUMP_VERIFIERS = 1 << 8;
-
         public static final int DUMP_PREFERRED = 1 << 9;
-
         public static final int DUMP_PREFERRED_XML = 1 << 10;
-
         public static final int DUMP_KEYSETS = 1 << 11;
-
         public static final int DUMP_VERSION = 1 << 12;
+        public static final int DUMP_INSTALLS = 1 << 13;
 
         public static final int OPTION_SHOW_FILTERS = 1 << 0;
 
@@ -12143,6 +12133,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 pw.println("    version: print database version info");
                 pw.println("    write: write current settings now");
                 pw.println("    <package.name>: info about given package");
+                pw.println("    installs: details about install sessions");
                 return;
             } else if ("--checkin".equals(opt)) {
                 checkin = true;
@@ -12199,6 +12190,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                     pw.println("Settings written.");
                     return;
                 }
+            } else if ("installs".equals(cmd)) {
+                dumpState.setDump(DumpState.DUMP_INSTALLS);
             }
         }
 
@@ -12414,9 +12407,13 @@ public class PackageManagerService extends IPackageManager.Stub {
                 mSettings.dumpSharedUsersLPr(pw, packageName, dumpState);
             }
 
+            if (!checkin && dumpState.isDumping(DumpState.DUMP_INSTALLS)) {
+                if (dumpState.onTitlePrinted()) pw.println();
+                mInstallerService.dump(new IndentingPrintWriter(pw, "  ", 120));
+            }
+
             if (!checkin && dumpState.isDumping(DumpState.DUMP_MESSAGES) && packageName == null) {
-                if (dumpState.onTitlePrinted())
-                    pw.println();
+                if (dumpState.onTitlePrinted()) pw.println();
                 mSettings.dumpReadMessagesLPr(pw, dumpState);
 
                 pw.println();

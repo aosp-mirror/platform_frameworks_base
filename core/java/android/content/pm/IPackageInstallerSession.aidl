@@ -21,7 +21,8 @@ import android.os.ParcelFileDescriptor;
 
 /** {@hide} */
 interface IPackageInstallerSession {
-    void updateProgress(int progress);
+    void setClientProgress(int progress);
+    void addClientProgress(int progress);
 
     ParcelFileDescriptor openWrite(String name, long offsetBytes, long lengthBytes);
 
