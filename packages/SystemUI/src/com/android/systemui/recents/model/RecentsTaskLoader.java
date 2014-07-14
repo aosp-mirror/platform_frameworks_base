@@ -428,9 +428,9 @@ public class RecentsTaskLoader {
             boolean isForemostTask = (i == (taskCount - 1));
 
             // Create a new task
-            Task task = new Task(t.persistentId, (t.id > -1), t.baseIntent, 0, activityLabel,
-                    activityIcon, activityColor, t.userId, t.firstActiveTime, t.lastActiveTime,
-                    (i == (taskCount - 1)));
+            Task task = new Task(t.persistentId, (t.id > -1), t.baseIntent, t.affiliatedTaskId,
+                    activityLabel, activityIcon, activityColor, t.userId, t.firstActiveTime,
+                    t.lastActiveTime, (i == (taskCount - 1)));
 
             // Preload the specified number of apps
             if (i >= (taskCount - preloadCount)) {

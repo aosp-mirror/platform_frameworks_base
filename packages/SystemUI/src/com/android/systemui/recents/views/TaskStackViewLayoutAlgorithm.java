@@ -135,7 +135,7 @@ public class TaskStackViewLayoutAlgorithm {
         // Set the y translation
         if (boundedT < 0f) {
             transformOut.translationY = (int) ((Math.max(-numPeekCards, boundedT) /
-                    numPeekCards) * peekHeight - scaleYOffset);
+                    numPeekCards) * peekHeight - scaleYOffset - scaleBarYOffset);
         } else {
             transformOut.translationY = (int) (boundedT * overlapHeight - scaleYOffset - scaleBarYOffset);
         }
