@@ -13,16 +13,10 @@
  * limitations under the License.
  */
 
-package android.media.routeprovider;
+package android.media.routing;
 
-import android.media.session.RouteCommand;
-import android.os.ResultReceiver;
+/** @hide */
+interface IMediaRouterStateCallback {
 
-/**
- * Interface for a specific connected route.
- * @hide
- */
-oneway interface IRouteConnection {
-    void onCommand(in RouteCommand command, in ResultReceiver cb);
-    void disconnect();
 }
+

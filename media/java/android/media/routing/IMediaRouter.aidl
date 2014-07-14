@@ -13,20 +13,10 @@
  * limitations under the License.
  */
 
-package android.media.routeprovider;
+package android.media.routing;
 
-import android.media.routeprovider.IRouteConnection;
-import android.media.session.RouteEvent;
-import android.os.Bundle;
-import android.os.ResultReceiver;
+/** @hide */
+interface IMediaRouter {
 
-/**
- * System's provider callback interface.
- * @hide
- */
-oneway interface IRouteProviderCallback {
-    void onRoutesChanged();
-    void onConnectionStateChanged(in IRouteConnection connection, int state);
-    void onConnectionTerminated(in IRouteConnection connection);
-    void onRouteEvent(in RouteEvent event);
 }
+

@@ -10,8 +10,7 @@ LOCAL_PACKAGE_NAME := OneMedia
 LOCAL_CERTIFICATE := platform
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
-        android-support-v7-appcompat \
-        android-support-v7-mediarouter
+    android-support-media-protocols
 
 LOCAL_PROGUARD_ENABLED := disabled
 

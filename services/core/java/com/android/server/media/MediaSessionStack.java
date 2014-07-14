@@ -25,7 +25,7 @@ import java.util.ArrayList;
 
 /**
  * Keeps track of media sessions and their priority for notifications, media
- * button routing, etc.
+ * button dispatch, etc.
  */
 public class MediaSessionStack {
     /**
@@ -277,8 +277,8 @@ public class MediaSessionStack {
                 lastActiveIndex++;
                 lastPublishedIndex++;
             } else if (session.isPlaybackActive(true)) {
-                // TODO replace getRoute() == null with real local route check
-                if(session.getRoute() == null) {
+                // TODO this with real local route check
+                if (true) {
                     // Active local sessions get top priority
                     result.add(lastLocalIndex, session);
                     lastLocalIndex++;

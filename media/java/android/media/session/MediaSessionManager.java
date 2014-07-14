@@ -35,9 +35,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * MediaSessionManager allows the creation and control of MediaSessions in the
- * system. A MediaSession enables publishing information about ongoing media and
- * interacting with MediaControllers and MediaRoutes.
+ * Provides support for interacting with {@link MediaSession media sessions}
+ * that applications have published to express their ongoing media playback state.
  * <p>
  * Use <code>Context.getSystemService(Context.MEDIA_SESSION_SERVICE)</code> to
  * get an instance of this class.
@@ -256,8 +255,8 @@ public final class MediaSessionManager {
     }
 
     /**
-     * Dispatch an adjust volume request to the system. It will be routed to the
-     * most relevant stream/session.
+     * Dispatch an adjust volume request to the system. It will be sent to the
+     * most relevant audio stream or media session.
      *
      * @param suggestedStream The stream to fall back to if there isn't a
      *            relevant stream
@@ -292,8 +291,7 @@ public final class MediaSessionManager {
 
         private final IActiveSessionsListener.Stub mStub = new IActiveSessionsListener.Stub() {
             @Override
-            public void onActiveSessionsChanged(List<MediaSession.Token> tokens)
-                    throws RemoteException {
+            public void onActiveSessionsChanged(List<MediaSession.Token> tokens) {
                 ArrayList<MediaController> controllers = new ArrayList<MediaController>();
                 int size = tokens.size();
                 for (int i = 0; i < size; i++) {

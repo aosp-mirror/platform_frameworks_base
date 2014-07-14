@@ -16,7 +16,6 @@
 package com.android.onemedia.playback;
 
 import android.os.Bundle;
-import android.support.v7.media.MediaItemMetadata;
 
 import java.util.HashMap;
 import java.util.Map;
