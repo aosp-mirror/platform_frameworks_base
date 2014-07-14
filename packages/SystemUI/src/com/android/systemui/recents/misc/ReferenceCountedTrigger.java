@@ -72,7 +72,12 @@ public class ReferenceCountedTrigger {
 
     /** Adds a runnable to the last-decrement runnables list. */
     public void addLastDecrementRunnable(Runnable r) {
+        // To ensure that the last decrement always calls, we increment and decrement after setting
+        // the last decrement runnable
+        boolean ensureLastDecrement = (mCount == 0);
+        if (ensureLastDecrement) increment();
         mLastDecRunnables.add(r);
+        if (ensureLastDecrement) decrement();
     }
 
     /** Decrements the ref count */

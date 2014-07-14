@@ -320,7 +320,7 @@ public class TaskStack {
     /**
      * Temporary: This method will simulate affiliation groups by
      */
-    public void createSimulatedAffiliatedGroupings() {
+    public void createAffiliatedGroupings() {
         if (Constants.DebugFlags.App.EnableSimulatedTaskGroups) {
             HashMap<Task.TaskKey, Task> taskMap = new HashMap<Task.TaskKey, Task>();
             // Sort all tasks by increasing firstActiveTime of the task
