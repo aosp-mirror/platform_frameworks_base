@@ -1020,7 +1020,7 @@ public final class RemoteController
                 l.onClientPlaybackStateUpdate(playstate);
             } else {
                 l.onClientPlaybackStateUpdate(playstate, state.getLastPositionUpdateTime(),
-                        state.getPosition(), state.getPlaybackRate());
+                        state.getPosition(), state.getPlaybackSpeed());
             }
             if (state != null) {
                 l.onClientTransportControlUpdate(PlaybackState.getRccControlFlagsFromActions(state

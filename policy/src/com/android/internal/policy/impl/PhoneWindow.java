@@ -49,6 +49,9 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
+import android.media.session.MediaController;
+import android.media.session.MediaSession;
+import android.media.session.MediaSessionLegacyHelper;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -224,6 +227,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private boolean mClosingActionMenu;
 
     private int mVolumeControlStreamType = AudioManager.USE_DEFAULT_STREAM_TYPE;
+    private MediaController mMediaController;
 
     private AudioManager mAudioManager;
     private KeyguardManager mKeyguardManager;
@@ -1688,14 +1692,41 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
         switch (keyCode) {
             case KeyEvent.KEYCODE_VOLUME_UP:
-            case KeyEvent.KEYCODE_VOLUME_DOWN:
+            case KeyEvent.KEYCODE_VOLUME_DOWN: {
+                int direction = keyCode == KeyEvent.KEYCODE_VOLUME_UP ? AudioManager.ADJUST_RAISE
+                        : AudioManager.ADJUST_LOWER;
+                // If we have a session send it the volume command, otherwise
+                // use the suggested stream.
+                if (mMediaController != null) {
+                    mMediaController.adjustVolumeBy(direction, AudioManager.FLAG_SHOW_UI);
+                } else {
+                    MediaSessionLegacyHelper.getHelper(getContext()).sendAdjustVolumeBy(
+                            mVolumeControlStreamType, direction, AudioManager.FLAG_SHOW_UI);
+                }
+                return true;
+            }
             case KeyEvent.KEYCODE_VOLUME_MUTE: {
-                // Similar code is in PhoneFallbackEventHandler in case the window
-                // doesn't have one of these.  In this case, we execute it here and
-                // eat the event instead, because we have mVolumeControlStreamType
-                // and they don't.
                 getAudioManager().handleKeyDown(event, mVolumeControlStreamType);
                 return true;
+            }
+            // These are all the recognized media key codes in
+            // KeyEvent.isMediaKey()
+            case KeyEvent.KEYCODE_MEDIA_PLAY:
+            case KeyEvent.KEYCODE_MEDIA_PAUSE:
+            case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
+            case KeyEvent.KEYCODE_MUTE:
+            case KeyEvent.KEYCODE_HEADSETHOOK:
+            case KeyEvent.KEYCODE_MEDIA_STOP:
+            case KeyEvent.KEYCODE_MEDIA_NEXT:
+            case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
+            case KeyEvent.KEYCODE_MEDIA_REWIND:
+            case KeyEvent.KEYCODE_MEDIA_RECORD:
+            case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD: {
+                if (mMediaController != null) {
+                    if (mMediaController.dispatchMediaButtonEvent(event)) {
+                        return true;
+                    }
+                }
             }
 
             case KeyEvent.KEYCODE_MENU: {
@@ -1750,7 +1781,19 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
         switch (keyCode) {
             case KeyEvent.KEYCODE_VOLUME_UP:
-            case KeyEvent.KEYCODE_VOLUME_DOWN:
+            case KeyEvent.KEYCODE_VOLUME_DOWN: {
+                // If we have a session send it the volume command, otherwise
+                // use the suggested stream.
+                if (mMediaController != null) {
+                    mMediaController.adjustVolumeBy(0, AudioManager.FLAG_PLAY_SOUND
+                            | AudioManager.FLAG_VIBRATE);
+                } else {
+                    MediaSessionLegacyHelper.getHelper(getContext()).sendAdjustVolumeBy(
+                            mVolumeControlStreamType, 0,
+                            AudioManager.FLAG_PLAY_SOUND | AudioManager.FLAG_VIBRATE);
+                }
+                return true;
+            }
             case KeyEvent.KEYCODE_VOLUME_MUTE: {
                 // Similar code is in PhoneFallbackEventHandler in case the window
                 // doesn't have one of these.  In this case, we execute it here and
@@ -1758,6 +1801,25 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 // and they don't.
                 getAudioManager().handleKeyUp(event, mVolumeControlStreamType);
                 return true;
+            }
+            // These are all the recognized media key codes in
+            // KeyEvent.isMediaKey()
+            case KeyEvent.KEYCODE_MEDIA_PLAY:
+            case KeyEvent.KEYCODE_MEDIA_PAUSE:
+            case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
+            case KeyEvent.KEYCODE_MUTE:
+            case KeyEvent.KEYCODE_HEADSETHOOK:
+            case KeyEvent.KEYCODE_MEDIA_STOP:
+            case KeyEvent.KEYCODE_MEDIA_NEXT:
+            case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
+            case KeyEvent.KEYCODE_MEDIA_REWIND:
+            case KeyEvent.KEYCODE_MEDIA_RECORD:
+            case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD: {
+                if (mMediaController != null) {
+                    if (mMediaController.dispatchMediaButtonEvent(event)) {
+                        return true;
+                    }
+                }
             }
 
             case KeyEvent.KEYCODE_MENU: {
@@ -3771,6 +3833,16 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     @Override
     public int getVolumeControlStream() {
         return mVolumeControlStreamType;
+    }
+
+    @Override
+    public void setMediaController(MediaController controller) {
+        mMediaController = controller;
+    }
+
+    @Override
+    public MediaController getMediaController() {
+        return mMediaController;
     }
 
     private boolean isTranslucent() {
