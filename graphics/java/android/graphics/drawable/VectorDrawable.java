@@ -18,6 +18,7 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
@@ -142,6 +143,10 @@ public class VectorDrawable extends Drawable {
 
     private boolean mMutated;
 
+    // AnimatedVectorDrawable needs to turn off the cache all the time, otherwise,
+    // caching the bitmap by default is allowed.
+    private boolean mAllowCaching = true;
+
     public VectorDrawable() {
         mVectorState = new VectorDrawableState();
     }
@@ -183,7 +188,23 @@ public class VectorDrawable extends Drawable {
         final int saveCount = canvas.save();
         final Rect bounds = getBounds();
         canvas.translate(bounds.left, bounds.top);
-        mVectorState.mVPathRenderer.draw(canvas, bounds.width(), bounds.height());
+
+        if (!mAllowCaching) {
+            mVectorState.mVPathRenderer.draw(canvas, bounds.width(), bounds.height());
+        } else {
+            Bitmap bitmap = mVectorState.mCachedBitmap;
+            if (bitmap == null || !mVectorState.canReuseCache(bounds.width(),
+                    bounds.height())) {
+                bitmap = Bitmap.createBitmap(bounds.width(), bounds.height(),
+                        Bitmap.Config.ARGB_8888);
+                Canvas tmpCanvas = new Canvas(bitmap);
+                mVectorState.mVPathRenderer.draw(tmpCanvas, bounds.width(), bounds.height());
+                mVectorState.mCachedBitmap = bitmap;
+
+                mVectorState.updateCacheStates();
+            }
+            canvas.drawBitmap(bitmap, null, bounds, null);
+        }
         canvas.restoreToCount(saveCount);
     }
 
@@ -444,12 +465,22 @@ public class VectorDrawable extends Drawable {
         return super.getChangingConfigurations() | mVectorState.mChangingConfigurations;
     }
 
+    void setAllowCaching(boolean allowCaching) {
+        mAllowCaching = allowCaching;
+    }
+
     private static class VectorDrawableState extends ConstantState {
         int[] mThemeAttrs;
         int mChangingConfigurations;
         VPathRenderer mVPathRenderer;
         ColorStateList mTint;
         Mode mTintMode;
+
+        Bitmap mCachedBitmap;
+        int[] mCachedThemeAttrs;
+        ColorStateList mCachedTint;
+        Mode mCachedTintMode;
+        int mCachedRootAlpha;
 
         // Deep copy for mutate() or implicitly mutate.
         public VectorDrawableState(VectorDrawableState copy) {
@@ -460,6 +491,27 @@ public class VectorDrawable extends Drawable {
                 mTint = copy.mTint;
                 mTintMode = copy.mTintMode;
             }
+        }
+
+        public boolean canReuseCache(int width, int height) {
+            if (mCachedThemeAttrs == mThemeAttrs
+                    && mCachedTint == mTint
+                    && mCachedTintMode == mTintMode
+                    && width == mCachedBitmap.getWidth()
+                    && height == mCachedBitmap.getHeight()
+                    && mCachedRootAlpha == mVPathRenderer.getRootAlpha())  {
+                return true;
+            }
+            return false;
+        }
+
+        public void updateCacheStates() {
+            // Use shallow copy here and shallow comparison in canReuseCache(),
+            // likely hit cache miss more, but practically not much difference.
+            mCachedThemeAttrs = mThemeAttrs;
+            mCachedTint = mTint;
+            mCachedTintMode = mTintMode;
+            mCachedRootAlpha = mVPathRenderer.getRootAlpha();
         }
 
         public VectorDrawableState() {
