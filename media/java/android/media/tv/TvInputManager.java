@@ -47,6 +47,24 @@ import java.util.Map;
 public final class TvInputManager {
     private static final String TAG = "TvInputManager";
 
+    /**
+     * A generic reason. Video is not available due to an unspecified error.
+     */
+    public static final int VIDEO_UNAVAILABLE_REASON_UNKNOWN = 0;
+    /**
+     * Video is not available because the TV input is tuning to another channel.
+     */
+    public static final int VIDEO_UNAVAILABLE_REASON_TUNE = 1;
+    /**
+     * Video is not available due to the weak TV signal.
+     */
+    public static final int VIDEO_UNAVAILABLE_REASON_WEAK_SIGNAL = 2;
+    /**
+     * Video is not available because the TV input stopped the playback temporarily to buffer more
+     * data.
+     */
+    public static final int VIDEO_UNAVAILABLE_REASON_BUFFERING = 3;
+
     private final ITvInputManager mService;
 
     // A mapping from an input to the list of its TvInputListenerRecords.
@@ -108,6 +126,29 @@ public final class TvInputManager {
         }
 
         /**
+         * This is called when the video is available, so the TV input starts the playback.
+         *
+         * @param session A {@link TvInputManager.Session} associated with this callback
+         */
+        public void onVideoAvailable(Session session) {
+        }
+
+        /**
+         * This is called when the video is not available, so the TV input stops the playback.
+         *
+         * @param session A {@link TvInputManager.Session} associated with this callback
+         * @param reason The reason why the TV input stopped the playback:
+         * <ul>
+         * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_UNKNOWN}
+         * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_TUNE}
+         * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_WEAK_SIGNAL}
+         * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_BUFFERING}
+         * </ul>
+         */
+        public void onVideoUnavailable(Session session, int reason) {
+        }
+
+        /**
          * This is called when a custom event has been sent from this session.
          *
          * @param session A {@link TvInputManager.Session} associated with this callback
@@ -164,6 +205,24 @@ public final class TvInputManager {
                 public void run() {
                     mSession.setTracks(tracks);
                     mSessionCallback.onTrackInfoChanged(mSession, tracks);
+                }
+            });
+        }
+
+        public void postVideoAvailable() {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onVideoAvailable(mSession);
+                }
+            });
+        }
+
+        public void postVideoUnavailable(final int reason) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onVideoUnavailable(mSession, reason);
                 }
             });
         }
@@ -276,6 +335,30 @@ public final class TvInputManager {
                         return;
                     }
                     record.postTrackInfoChanged(tracks);
+                }
+            }
+
+            @Override
+            public void onVideoAvailable(int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postVideoAvailable();
+                }
+            }
+
+            @Override
+            public void onVideoUnavailable(int reason, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postVideoUnavailable(reason);
                 }
             }
 
