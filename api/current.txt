@@ -14287,10 +14287,16 @@ package android.media {
     method public final int dequeueOutputBuffer(android.media.MediaCodec.BufferInfo, long);
     method public final void flush();
     method public android.media.MediaCodecInfo getCodecInfo();
-    method public java.nio.ByteBuffer[] getInputBuffers();
+    method public java.nio.ByteBuffer getInputBuffer(int);
+    method public deprecated java.nio.ByteBuffer[] getInputBuffers();
+    method public final android.media.MediaFormat getInputFormat();
+    method public android.media.Image getInputImage(int);
     method public final java.lang.String getName();
-    method public java.nio.ByteBuffer[] getOutputBuffers();
+    method public java.nio.ByteBuffer getOutputBuffer(int);
+    method public deprecated java.nio.ByteBuffer[] getOutputBuffers();
     method public final android.media.MediaFormat getOutputFormat();
+    method public final android.media.MediaFormat getOutputFormat(int);
+    method public android.media.Image getOutputImage(int);
     method public final void queueInputBuffer(int, int, int, long, int) throws android.media.MediaCodec.CryptoException;
     method public final void queueSecureInputBuffer(int, int, android.media.MediaCodec.CryptoInfo, long, int) throws android.media.MediaCodec.CryptoException;
     method public final void release();
@@ -14309,7 +14315,7 @@ package android.media {
     field public static final int CONFIGURE_FLAG_ENCODE = 1; // 0x1
     field public static final int CRYPTO_MODE_AES_CTR = 1; // 0x1
     field public static final int CRYPTO_MODE_UNENCRYPTED = 0; // 0x0
-    field public static final int INFO_OUTPUT_BUFFERS_CHANGED = -3; // 0xfffffffd
+    field public static final deprecated int INFO_OUTPUT_BUFFERS_CHANGED = -3; // 0xfffffffd
     field public static final int INFO_OUTPUT_FORMAT_CHANGED = -2; // 0xfffffffe
     field public static final int INFO_TRY_AGAIN_LATER = -1; // 0xffffffff
     field public static final java.lang.String PARAMETER_KEY_REQUEST_SYNC_FRAME = "request-sync";

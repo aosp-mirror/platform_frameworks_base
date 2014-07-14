@@ -86,10 +86,18 @@ struct JMediaCodec : public AHandler {
 
     status_t signalEndOfInputStream();
 
-    status_t getOutputFormat(JNIEnv *env, jobject *format) const;
+    status_t getFormat(JNIEnv *env, bool input, jobject *format) const;
+
+    status_t getOutputFormat(JNIEnv *env, size_t index, jobject *format) const;
 
     status_t getBuffers(
             JNIEnv *env, bool input, jobjectArray *bufArray) const;
+
+    status_t getBuffer(
+            JNIEnv *env, bool input, size_t index, jobject *buf) const;
+
+    status_t getImage(
+            JNIEnv *env, bool input, size_t index, jobject *image) const;
 
     status_t getName(JNIEnv *env, jstring *name) const;
 
