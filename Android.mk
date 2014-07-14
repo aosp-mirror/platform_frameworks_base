@@ -340,8 +340,6 @@ LOCAL_SRC_FILES += \
 	media/java/android/media/tv/ITvInputServiceCallback.aidl \
 	media/java/android/media/tv/ITvInputSession.aidl \
 	media/java/android/media/tv/ITvInputSessionCallback.aidl \
-	telecomm/java/com/android/internal/telecomm/ICallServiceLookupResponse.aidl \
-	telecomm/java/com/android/internal/telecomm/ICallServiceProvider.aidl \
 	telecomm/java/com/android/internal/telecomm/ICallVideoProvider.aidl \
 	telecomm/java/com/android/internal/telecomm/ICallVideoClient.aidl \
 	telecomm/java/com/android/internal/telecomm/IConnectionService.aidl \
@@ -362,10 +360,6 @@ LOCAL_SRC_FILES += \
 	telephony/java/com/android/internal/telephony/IPhoneStateListener.aidl \
 	telephony/java/com/android/internal/telephony/IPhoneSubInfo.aidl \
 	telephony/java/com/android/internal/telephony/ITelephony.aidl \
-	telephony/java/com/android/internal/telephony/IThirdPartyCallListener.aidl \
-	telephony/java/com/android/internal/telephony/IThirdPartyCallProvider.aidl \
-	telephony/java/com/android/internal/telephony/IThirdPartyCallSendDtmfCallback.aidl \
-	telephony/java/com/android/internal/telephony/IThirdPartyCallService.aidl \
 	telephony/java/com/android/internal/telephony/ITelephonyRegistry.aidl \
 	telephony/java/com/android/internal/telephony/ISms.aidl \
 	telephony/java/com/android/internal/telephony/IWapPushManager.aidl \
