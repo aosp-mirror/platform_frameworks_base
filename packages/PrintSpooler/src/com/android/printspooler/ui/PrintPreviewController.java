@@ -311,7 +311,7 @@ class PrintPreviewController implements MutexFileProvider.OnReleaseRequestCallba
         }
     }
 
-    private final class PreloadController implements RecyclerView.OnScrollListener {
+    private final class PreloadController extends RecyclerView.OnScrollListener {
         private final RecyclerView mRecyclerView;
 
         private int mOldScrollState;
@@ -322,7 +322,7 @@ class PrintPreviewController implements MutexFileProvider.OnReleaseRequestCallba
         }
 
         @Override
-        public void onScrollStateChanged(int state) {
+        public void onScrollStateChanged(RecyclerView recyclerView, int state) {
             switch (mOldScrollState) {
                 case RecyclerView.SCROLL_STATE_SETTLING: {
                     if (state == RecyclerView.SCROLL_STATE_IDLE
@@ -339,11 +339,6 @@ class PrintPreviewController implements MutexFileProvider.OnReleaseRequestCallba
                 } break;
             }
             mOldScrollState = state;
-        }
-
-        @Override
-        public void onScrolled(int dx, int dy) {
-            /* do nothing */
         }
 
         public void startPreloadContent() {
