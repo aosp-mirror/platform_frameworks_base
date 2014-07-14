@@ -439,8 +439,11 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
     if (!is_system_server) {
         int rc = createProcessGroup(uid, getpid());
         if (rc != 0) {
-            ALOGE("createProcessGroup(%d, %d) failed: %s", uid, pid, strerror(-rc));
-            RuntimeAbort(env);
+            if (rc == -EROFS) {
+                ALOGW("createProcessGroup failed, kernel missing CONFIG_CGROUP_CPUACCT?");
+            } else {
+                ALOGE("createProcessGroup(%d, %d) failed: %s", uid, pid, strerror(-rc));
+            }
         }
     }
 
