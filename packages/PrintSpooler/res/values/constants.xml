@@ -40,4 +40,6 @@
 
     <dimen name="preview_controls_elevation">8dip</dimen>
 
+    <integer name="print_option_column_count">2</integer>
+
 </resources>
