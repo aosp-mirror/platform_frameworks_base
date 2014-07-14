@@ -16,6 +16,7 @@
 
 package android.telecomm;
 
+import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
@@ -31,19 +32,14 @@ public final class TelecommConstants {
      * to find and bind to the appropriate {@link android.telecomm.ConnectionService} which
      * Telecomm will ultimately use to control and get information about the call.</p>
      *
-     * <p>Input: get*Extra field {@link #EXTRA_CALL_SERVICE_DESCRIPTOR} contains the component name
-     * of the {@link android.telecomm.ConnectionService} that Telecomm should bind to. Telecomm
-     * will then ask the call service for more information about the call prior to showing any UI.
+     * <p>Input: get*Extra field {@link #EXTRA_PHONE_ACCOUNT} contains the component name of the
+     * {@link android.telecomm.ConnectionService} that Telecomm should bind to. Telecomm will then
+     * ask the connection service for more information about the call prior to showing any UI.
      *
      * TODO(santoscordon): Needs permissions.
      * TODO(santoscordon): Consider moving this into a simple method call on a system service.
      */
     public static final String ACTION_INCOMING_CALL = "android.intent.action.INCOMING_CALL";
-
-    /**
-     * The service action used to bind to {@link CallServiceProvider} implementations.
-     */
-    public static final String ACTION_CALL_SERVICE_PROVIDER = CallServiceProvider.class.getName();
 
     /**
      * The service action used to bind to {@link ConnectionService} implementations.
@@ -69,11 +65,15 @@ public final class TelecommConstants {
             "android.intent.extra.START_CALL_WITH_VIDEO_STATE";
 
     /**
-     * Extra for {@link #ACTION_INCOMING_CALL} containing the {@link CallServiceDescriptor} that
-     * describes the call service to use for the incoming call.
+     * The extra used with an {@link android.content.Intent#ACTION_CALL},
+     * {@link #ACTION_INCOMING_CALL}, {@link android.content.Intent#ACTION_DIAL} {@code Intent} to
+     * specify a {@link PhoneAccount} to use when making the call.
+     *
+     * <p class="note">
+     * Retrieve with
+     * {@link android.content.Intent#getParcelableExtra(String)}.
      */
-    public static final String EXTRA_CALL_SERVICE_DESCRIPTOR =
-            "android.intent.extra.CALL_SERVICE_DESCRIPTOR";
+    public static final String EXTRA_PHONE_ACCOUNT = "android.intent.extra.PHONE_ACCOUNT";
 
     /**
      * Optional extra for {@link #ACTION_INCOMING_CALL} containing a {@link Bundle} which contains

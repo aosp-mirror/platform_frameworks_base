@@ -31,18 +31,6 @@ import java.util.List;
  * @hide
  */
 public class TelecommManager {
-
-    /**
-     * The extra used with an {@link android.content.Intent#ACTION_CALL} or
-     * {@link android.content.Intent#ACTION_DIAL} {@code Intent} to specify a {@link PhoneAccount}
-     * to use when making the call.
-     *
-     * <p class="note">
-     * Retrieve with
-     * {@link android.content.Intent#getParcelableExtra(String)}.
-     */
-    public static final String EXTRA_PHONE_ACCOUNT = "account";
-
     private static final String TAG = "TelecommManager";
     private static final String TELECOMM_SERVICE_NAME = "telecomm";
 
