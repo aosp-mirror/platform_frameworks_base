@@ -19,6 +19,8 @@ package android.media;
 import java.nio.ByteBuffer;
 import java.lang.AutoCloseable;
 
+import android.graphics.Rect;
+
 /**
  * <p>A single complete image buffer to use with a media source such as a
  * {@link MediaCodec} or a
@@ -120,6 +122,34 @@ public abstract class Image implements AutoCloseable {
      * </p>
      */
     public abstract long getTimestamp();
+
+    protected Rect mCropRect;
+
+    /**
+     * Get the crop rectangle associated with this frame.
+     * <p>
+     * The crop rectangle specifies the region of valid pixels in the image,
+     * using coordinates in the largest-resolution plane.
+     */
+    public Rect getCropRect() {
+        if (mCropRect == null) {
+            return new Rect(0, 0, getWidth(), getHeight());
+        } else {
+            return new Rect(mCropRect); // return a copy
+        }
+    }
+
+    /**
+     * Set the crop rectangle associated with this frame.
+     * <p>
+     * The crop rectangle specifies the region of valid pixels in the image,
+     * using coordinates in the largest-resolution plane.
+     */
+    public void setCropRect(Rect cropRect) {
+        cropRect = new Rect(cropRect);  // make a copy
+        cropRect.intersect(0, 0, getWidth(), getHeight());
+        mCropRect = cropRect;
+    }
 
     /**
      * Get the array of pixel planes for this Image. The number of planes is
