@@ -162,7 +162,7 @@ public class LegacyRequestMapper {
                     CONTROL_AE_EXPOSURE_COMPENSATION,
                     /*defaultValue*/0);
 
-            if (!compensationRange.inRange(compensation)) {
+            if (!compensationRange.contains(compensation)) {
                 Log.w(TAG,
                         "convertRequestMetadata - control.aeExposureCompensation " +
                         "is out of range, ignoring value");
