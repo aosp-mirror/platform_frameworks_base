@@ -2815,7 +2815,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             // Migrate the old signatures to the new scheme.
             existingSigs.assignSignatures(scannedPkg.mSignatures);
             // The new KeySets will be re-added later in the scanning process.
-            mSettings.mKeySetManagerService.removeAppKeySetData(scannedPkg.packageName);
+            synchronized (mPackages) {
+                mSettings.mKeySetManagerService.removeAppKeySetDataLPw(scannedPkg.packageName);
+            }
             return PackageManager.SIGNATURE_MATCH;
         }
         return PackageManager.SIGNATURE_NO_MATCH;
@@ -4145,7 +4147,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // if the package appears to be unchanged.
                 pkg.mSignatures = ps.signatures.mSignatures;
                 KeySetManagerService ksms = mSettings.mKeySetManagerService;
-                pkg.mSigningKeys = ksms.getPublicKeysFromKeySet(mSigningKeySetId);
+                synchronized (mPackages) {
+                    pkg.mSigningKeys = ksms.getPublicKeysFromKeySetLPr(mSigningKeySetId);
+                }
                 return true;
             }
 
@@ -5704,19 +5708,19 @@ public class PackageManagerService extends IPackageManager.Stub {
             KeySetManagerService ksms = mSettings.mKeySetManagerService;
             try {
                 // Old KeySetData no longer valid.
-                ksms.removeAppKeySetData(pkg.packageName);
-                ksms.addSigningKeySetToPackage(pkg.packageName, pkg.mSigningKeys);
+                ksms.removeAppKeySetDataLPw(pkg.packageName);
+                ksms.addSigningKeySetToPackageLPw(pkg.packageName, pkg.mSigningKeys);
                 if (pkg.mKeySetMapping != null) {
                     for (Map.Entry<String, ArraySet<PublicKey>> entry :
                             pkg.mKeySetMapping.entrySet()) {
                         if (entry.getValue() != null) {
-                            ksms.addDefinedKeySetToPackage(pkg.packageName,
+                            ksms.addDefinedKeySetToPackageLPw(pkg.packageName,
                                                           entry.getValue(), entry.getKey());
                         }
                     }
                     if (pkg.mUpgradeKeySets != null) {
                         for (String upgradeAlias : pkg.mUpgradeKeySets) {
-                            ksms.addUpgradeKeySetToPackage(pkg.packageName, upgradeAlias);
+                            ksms.addUpgradeKeySetToPackageLPw(pkg.packageName, upgradeAlias);
                         }
                     }
                 }
@@ -9906,14 +9910,9 @@ public class PackageManagerService extends IPackageManager.Stub {
         // required keys.
         long[] upgradeKeySets = oldPS.keySetData.getUpgradeKeySets();
         KeySetManagerService ksms = mSettings.mKeySetManagerService;
-        Set<Long> newSigningKeyIds = new ArraySet<Long>();
-        for (PublicKey pk : newPkg.mSigningKeys) {
-            newSigningKeyIds.add(ksms.getIdForPublicKey(pk));
-        }
-        //remove PUBLIC_KEY_NOT_FOUND, although not necessary
-        newSigningKeyIds.remove(ksms.PUBLIC_KEY_NOT_FOUND);
         for (int i = 0; i < upgradeKeySets.length; i++) {
-            if (newSigningKeyIds.containsAll(ksms.mKeySetMapping.get(upgradeKeySets[i]))) {
+            Set<PublicKey> upgradeSet = ksms.getPublicKeysFromKeySetLPr(upgradeKeySets[i]);
+            if (newPkg.mSigningKeys.containsAll(upgradeSet)) {
                 return true;
             }
         }
@@ -10707,7 +10706,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (deletedPs != null) {
                 if ((flags&PackageManager.DELETE_KEEP_DATA) == 0) {
                     if (outInfo != null) {
-                        mSettings.mKeySetManagerService.removeAppKeySetData(packageName);
+                        mSettings.mKeySetManagerService.removeAppKeySetDataLPw(packageName);
                         outInfo.removedAppId = mSettings.removePackageLPw(packageName);
                     }
                     if (deletedPs != null) {
@@ -12383,7 +12382,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             if (!checkin && dumpState.isDumping(DumpState.DUMP_KEYSETS)) {
-                mSettings.mKeySetManagerService.dump(pw, packageName, dumpState);
+                mSettings.mKeySetManagerService.dumpLPr(pw, packageName, dumpState);
             }
 
             if (dumpState.isDumping(DumpState.DUMP_PACKAGES)) {
