@@ -16,8 +16,6 @@
 
 package android.telecomm;
 
-import android.app.Service;
-import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -31,11 +29,10 @@ import com.android.internal.telecomm.IInCallService;
  * This service is implemented by any app that wishes to provide the user-interface for managing
  * phone calls. Telecomm binds to this service while there exists a live (active or incoming)
  * call, and uses it to notify the in-call app of any live and and recently disconnected calls.
- * TODO(santoscordon): Needs more/better description of lifecycle once the interface is better
- * defined.
+ *
  * TODO(santoscordon): What happens if two or more apps on a given device implement this interface?
  */
-public abstract class InCallService extends Service {
+public abstract class InCallService {
     private static final int MSG_SET_IN_CALL_ADAPTER = 1;
     private static final int MSG_ADD_CALL = 2;
     private static final int MSG_UPDATE_CALL = 3;
@@ -50,21 +47,21 @@ public abstract class InCallService extends Service {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_SET_IN_CALL_ADAPTER:
-                    mAdapter = new InCallAdapter((IInCallAdapter) msg.obj);
-                    onAdapterAttached(mAdapter);
+                    mPhone = new Phone(new InCallAdapter((IInCallAdapter) msg.obj));
+                    onPhoneCreated(mPhone);
                     break;
                 case MSG_ADD_CALL:
-                    addCall((InCallCall) msg.obj);
+                    mPhone.internalAddCall((InCallCall) msg.obj);
                     break;
                 case MSG_UPDATE_CALL:
-                    updateCall((InCallCall) msg.obj);
+                    mPhone.internalUpdateCall((InCallCall) msg.obj);
                     break;
-                case MSG_SET_POST_DIAL: {
+                                case MSG_SET_POST_DIAL: {
                     SomeArgs args = (SomeArgs) msg.obj;
                     try {
                         String callId = (String) args.arg1;
                         String remaining = (String) args.arg2;
-                        setPostDial(callId, remaining);
+                        mPhone.internalSetPostDial(callId, remaining);
                     } finally {
                         args.recycle();
                     }
@@ -75,17 +72,17 @@ public abstract class InCallService extends Service {
                     try {
                         String callId = (String) args.arg1;
                         String remaining = (String) args.arg2;
-                        setPostDialWait(callId, remaining);
+                        mPhone.internalSetPostDialWait(callId, remaining);
                     } finally {
                         args.recycle();
                     }
                     break;
                 }
                 case MSG_ON_AUDIO_STATE_CHANGED:
-                    onAudioStateChanged((CallAudioState) msg.obj);
+                    mPhone.internalAudioStateChanged((CallAudioState) msg.obj);
                     break;
                 case MSG_BRING_TO_FOREGROUND:
-                    bringToForeground(msg.arg1 == 1);
+                    mPhone.internalBringToForeground(msg.arg1 == 1);
                     break;
                 default:
                     break;
@@ -142,85 +139,41 @@ public abstract class InCallService extends Service {
         }
     }
 
-    private final InCallServiceBinder mBinder;
+    private Phone mPhone;
 
-    private InCallAdapter mAdapter;
+    protected InCallService() {}
 
-    protected InCallService() {
-        mBinder = new InCallServiceBinder();
-    }
-
-    @Override
-    public final IBinder onBind(Intent intent) {
-        return mBinder;
+    public final IBinder getBinder() {
+        return new InCallServiceBinder();
     }
 
     /**
-     * @return The attached {@link InCallAdapter} if attached, or null otherwise.
+     * Obtain the {@code Phone} associated with this {@code InCallService}.
+     *
+     * @return The {@code Phone} object associated with this {@code InCallService}, or {@code null}
+     * if the {@code InCallService} is not in a state where it has an associated {@code Phone}.
      */
-    protected final InCallAdapter getAdapter() {
-        return mAdapter;
+    public Phone getPhone() {
+        return mPhone;
     }
 
     /**
-     * Lifecycle callback which is called when this {@link InCallService} has been attached
-     * to a {@link InCallAdapter}, indicating {@link #getAdapter()} is now safe to use.
+     * Invoked when the {@code Phone} has been created. This is a signal to the in-call experience
+     * to start displaying in-call information to the user. Each instance of {@code InCallService}
+     * will have only one {@code Phone}, and this method will be called exactly once in the
+     * lifetime of the {@code InCallService}.
      *
-     * @param adapter The adapter now attached to this in-call service.
+     * @param phone The {@code Phone} object associated with this {@code InCallService}.
      */
-    protected void onAdapterAttached(InCallAdapter adapter) {
-    }
+    public void onPhoneCreated(Phone phone) { }
 
     /**
-     * Indicates to the in-call app that a new call has been created and an appropriate
-     * user-interface should be built and shown to notify the user.
+     * Invoked when a {@code Phone} has been destroyed. This is a signal to the in-call experience
+     * to stop displaying in-call information to the user. This method will be called exactly once
+     * in the lifetime of the {@code InCallService}, and it will always be called after a previous
+     * call to {@link #onPhoneCreated(Phone)}.
      *
-     * @param call Information about the new call.
+     * @param phone The {@code Phone} object associated with this {@code InCallService}.
      */
-     protected abstract void addCall(InCallCall call);
-
-    /**
-     * Call when information about a call has changed.
-     *
-     * @param call Information about the new call.
-     */
-     protected abstract void updateCall(InCallCall call);
-
-    /**
-     * Indicates to the in-call app that the specified call is active but in a "post-dial" state
-     * where Telecomm is now sending some dual-tone multi-frequency signaling (DTMF) tones appended
-     * to the dialed number. Normal transitions are to {@link #setPostDialWait(String,String)} when
-     * the post-dial string requires user confirmation to proceed, and {@link CallState#ACTIVE} when
-     * the post-dial tones are completed.
-     *
-     * @param callId The identifier of the call changing state.
-     * @param remaining The remaining postdial string to be dialed.
-     */
-    protected abstract void setPostDial(String callId, String remaining);
-
-    /**
-     * Indicates to the in-call app that the specified call was in the
-     * {@link #setPostDial(String,String)} state but is now waiting for user confirmation before the
-     * remaining digits can be sent. Normal transitions are to {@link #setPostDial(String,String)}
-     * when the user asks Telecomm to proceed with the post-dial sequence and the in-call app
-     * informs Telecomm of this by invoking {@link InCallAdapter#postDialContinue(String,boolean)}.
-     *
-     * @param callId The identifier of the call changing state.
-     * @param remaining The remaining postdial string to be dialed.
-     */
-    protected abstract void setPostDialWait(String callId, String remaining);
-
-    /**
-     * Called when the audio state changes.
-     *
-     * @param audioState The new {@link CallAudioState}.
-     */
-    protected abstract void onAudioStateChanged(CallAudioState audioState);
-
-    /**
-     * Brings the in-call screen to the foreground.
-     *
-     * @param showDialpad If true, put up the dialpad when the screen is shown.
-     */
-    protected abstract void bringToForeground(boolean showDialpad);
+    public void onPhoneDestroyed(Phone phone) { }
 }

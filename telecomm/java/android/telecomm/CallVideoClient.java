@@ -241,6 +241,7 @@ public abstract class CallVideoClient {
      *
      * @param callCameraCapabilities The changed camera capabilities.
      */
-    public abstract void onHandleCameraCapabilitiesChange(CallCameraCapabilities callCameraCapabilities);
+    public abstract void onHandleCameraCapabilitiesChange(
+            CallCameraCapabilities callCameraCapabilities);
 }
 
