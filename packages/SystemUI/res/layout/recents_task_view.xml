@@ -62,6 +62,27 @@
             android:visibility="invisible"
             android:src="@drawable/recents_dismiss_light" />
     </com.android.systemui.recents.views.TaskBarView>
+    <FrameLayout
+        android:id="@+id/lock_to_app"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/recents_task_view_lock_to_app_button_height"
+        android:layout_gravity="center_horizontal|bottom"
+        android:background="@drawable/recents_lock_to_task_button_bg"
+        android:visibility="invisible">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_horizontal"
+            android:gravity="center"
+            android:drawableLeft="@drawable/ic_lock_to_app_24dp"
+            android:drawablePadding="8dp"
+            android:textSize="16sp"
+            android:textColor="@color/recents_task_view_lock_to_app_button_color"
+            android:text="@string/recents_lock_to_app_button_label"
+            android:fontFamily="sans-serif-medium"
+            android:singleLine="true"
+            android:textAllCaps="true" />
+    </FrameLayout>
 </com.android.systemui.recents.views.TaskView>
 
 

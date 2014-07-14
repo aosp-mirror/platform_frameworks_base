@@ -68,6 +68,7 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
     // Recents service binding
     Handler mHandler;
     boolean mBootCompleted = false;
+    boolean mStartAnimationTriggered = false;
 
     // Task launching
     RecentsConfiguration mConfig;
@@ -252,6 +253,7 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
      * Creates the activity options for a unknown state->recents transition.
      */
     ActivityOptions getUnknownTransitionActivityOptions() {
+        mStartAnimationTriggered = false;
         return ActivityOptions.makeCustomAnimation(mContext,
                 R.anim.recents_from_unknown_enter,
                 R.anim.recents_from_unknown_exit, mHandler, this);
@@ -261,6 +263,7 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
      * Creates the activity options for a home->recents transition.
      */
     ActivityOptions getHomeTransitionActivityOptions() {
+        mStartAnimationTriggered = false;
         return ActivityOptions.makeCustomAnimation(mContext,
                 R.anim.recents_from_launcher_enter,
                 R.anim.recents_from_launcher_exit, mHandler, this);
@@ -279,6 +282,7 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
             // Take the full screenshot
             sLastScreenshot = mSystemServicesProxy.takeAppScreenshot();
             if (sLastScreenshot != null) {
+                mStartAnimationTriggered = false;
                 return ActivityOptions.makeCustomAnimation(mContext,
                         R.anim.recents_from_app_enter,
                         R.anim.recents_from_app_exit, mHandler, this);
@@ -302,6 +306,7 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
                 c.setBitmap(null);
                 // Recycle the old thumbnail
                 firstThumbnail.recycle();
+                mStartAnimationTriggered = false;
                 return ActivityOptions.makeThumbnailScaleDownAnimation(mStatusBarView,
                         thumbnail, toTaskRect.left, toTaskRect.top, this);
             }
@@ -449,9 +454,12 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
     @Override
     public void onAnimationStarted() {
         // Notify recents to start the enter animation
-        Intent intent = new Intent(RecentsActivity.ACTION_START_ENTER_ANIMATION);
-        intent.setPackage(mContext.getPackageName());
-        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-        mContext.sendBroadcast(intent);
+        if (!mStartAnimationTriggered) {
+            Intent intent = new Intent(RecentsActivity.ACTION_START_ENTER_ANIMATION);
+            intent.setPackage(mContext.getPackageName());
+            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+            mContext.sendBroadcast(intent);
+            mStartAnimationTriggered = true;
+        }
     }
 }

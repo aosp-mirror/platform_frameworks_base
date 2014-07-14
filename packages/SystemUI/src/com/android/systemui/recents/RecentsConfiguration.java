@@ -92,6 +92,11 @@ public class RecentsConfiguration {
     public int taskBarExitAnimDuration;
     public int taskBarDismissDozeDelaySeconds;
 
+    /** Lock to app */
+    public int taskViewLockToAppButtonHeight;
+    public int taskViewLockToAppShortAnimDuration;
+    public int taskViewLockToAppLongAnimDuration;
+
     /** Nav bar scrim */
     public int navBarScrimEnterDuration;
 
@@ -225,6 +230,14 @@ public class RecentsConfiguration {
                 res.getInteger(R.integer.recents_animate_task_bar_exit_duration);
         taskBarDismissDozeDelaySeconds =
                 res.getInteger(R.integer.recents_task_bar_dismiss_delay_seconds);
+
+        // Lock to app
+        taskViewLockToAppButtonHeight =
+                res.getDimensionPixelSize(R.dimen.recents_task_view_lock_to_app_button_height);
+        taskViewLockToAppShortAnimDuration =
+                res.getInteger(R.integer.recents_animate_lock_to_app_button_short_duration);
+        taskViewLockToAppLongAnimDuration =
+                res.getInteger(R.integer.recents_animate_lock_to_app_button_long_duration);
 
         // Nav bar scrim
         navBarScrimEnterDuration =

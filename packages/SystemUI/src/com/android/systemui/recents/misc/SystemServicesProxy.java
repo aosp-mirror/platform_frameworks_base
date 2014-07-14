@@ -17,8 +17,10 @@
 package com.android.systemui.recents.misc;
 
 import android.app.ActivityManager;
+import android.app.ActivityManagerNative;
 import android.app.ActivityOptions;
 import android.app.AppGlobals;
+import android.app.IActivityManager;
 import android.app.SearchManager;
 import android.appwidget.AppWidgetHost;
 import android.appwidget.AppWidgetManager;
@@ -66,6 +68,7 @@ public class SystemServicesProxy {
     final static String TAG = "SystemServicesProxy";
 
     ActivityManager mAm;
+    IActivityManager mIam;
     AppWidgetManager mAwm;
     PackageManager mPm;
     IPackageManager mIpm;
@@ -83,6 +86,7 @@ public class SystemServicesProxy {
     /** Private constructor */
     public SystemServicesProxy(Context context) {
         mAm = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        mIam = ActivityManagerNative.getDefault();
         mAwm = AppWidgetManager.getInstance(context);
         mPm = context.getPackageManager();
         mUm = (UserManager) context.getSystemService(Context.USER_SERVICE);
@@ -404,6 +408,17 @@ public class SystemServicesProxy {
 
         mWm.getDefaultDisplay().getRectSize(windowRect);
         return windowRect;
+    }
+
+    /**
+     * Locks the current task.
+     */
+    public void lockCurrentTask() {
+        if (mIam == null) return;
+
+        try {
+            mIam.startLockTaskModeOnCurrent();
+        } catch (RemoteException e) {}
     }
 
     /**

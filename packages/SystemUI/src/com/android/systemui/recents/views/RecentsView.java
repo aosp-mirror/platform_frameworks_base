@@ -34,9 +34,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowInsets;
 import android.widget.FrameLayout;
-import com.android.systemui.recents.misc.Console;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
+import com.android.systemui.recents.misc.Console;
+import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.model.RecentsPackageMonitor;
 import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.SpaceNode;
@@ -144,7 +145,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                             Console.log(Constants.Log.UI.Focus, "[RecentsView|launchFocusedTask]",
                                     "Found focused Task");
                         }
-                        onTaskViewClicked(stackView, tv, stack, task);
+                        onTaskViewClicked(stackView, tv, stack, task, false);
                         return true;
                     }
                 }
@@ -180,7 +181,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                             tv = stv;
                         }
                     }
-                    onTaskViewClicked(stackView, tv, stack, task);
+                    onTaskViewClicked(stackView, tv, stack, task, false);
                     return true;
                 }
             }
@@ -431,7 +432,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
     @Override
     public void onTaskViewClicked(final TaskStackView stackView, final TaskView tv,
-                                  final TaskStack stack, final Task task) {
+                                  final TaskStack stack, final Task task, final boolean lockToTask) {
         // Notify any callbacks of the launching of a new task
         if (mCb != null) {
             mCb.onTaskViewClicked();
@@ -456,6 +457,8 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         }
 
         // Compute the thumbnail to scale up from
+        final SystemServicesProxy ssp =
+                RecentsTaskLoader.getInstance().getSystemServicesProxy();
         ActivityOptions opts = null;
         int thumbnailWidth = transform.rect.width();
         int thumbnailHeight = transform.rect.height();
@@ -469,8 +472,26 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                     new Rect(0, 0, task.thumbnail.getWidth(), task.thumbnail.getHeight()),
                     new Rect(0, 0, thumbnailWidth, thumbnailHeight), null);
             c.setBitmap(null);
+            ActivityOptions.OnAnimationStartedListener animStartedListener = null;
+            if (lockToTask) {
+                animStartedListener = new ActivityOptions.OnAnimationStartedListener() {
+                    boolean mTriggered = false;
+                    @Override
+                    public void onAnimationStarted() {
+                        if (!mTriggered) {
+                            postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    ssp.lockCurrentTask();
+                                }
+                            }, 350);
+                            mTriggered = true;
+                        }
+                    }
+                };
+            }
             opts = ActivityOptions.makeThumbnailScaleUpAnimation(sourceView,
-                    b, offsetX, offsetY);
+                    b, offsetX, offsetY, animStartedListener);
         }
 
         final ActivityOptions launchOpts = opts;
@@ -496,8 +517,12 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                         UserHandle taskUser = new UserHandle(task.userId);
                         if (launchOpts != null) {
                             getContext().startActivityAsUser(i, launchOpts.toBundle(), taskUser);
+
                         } else {
                             getContext().startActivityAsUser(i, taskUser);
+                            if (lockToTask) {
+                                ssp.lockCurrentTask();
+                            }
                         }
                     } catch (ActivityNotFoundException anfe) {
                         Console.logError(getContext(), "Could not start Activity");

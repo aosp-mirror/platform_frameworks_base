@@ -35,6 +35,7 @@ import com.android.systemui.recents.misc.Console;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.model.Task;
+import com.android.systemui.recents.model.TaskStack;
 
 
 /* A task view */
@@ -44,10 +45,15 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
     interface TaskViewCallbacks {
         public void onTaskViewAppIconClicked(TaskView tv);
         public void onTaskViewAppInfoClicked(TaskView tv);
+        public void onTaskViewClicked(TaskView tv, Task t, boolean lockToTask);
         public void onTaskViewDismissed(TaskView tv);
     }
 
     RecentsConfiguration mConfig;
+
+    int mFooterHeight;
+    int mMaxFooterHeight;
+    ObjectAnimator mFooterAnimator;
 
     int mDim;
     int mMaxDim;
@@ -60,9 +66,11 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
     boolean mClipViewInStack;
     Rect mTmpRect = new Rect();
     Paint mLayerPaint = new Paint();
+    Outline mOutline = new Outline();
 
     TaskThumbnailView mThumbnailView;
     TaskBarView mBarView;
+    View mLockToAppButtonView;
     TaskViewCallbacks mCb;
 
     // Optimizations
@@ -102,9 +110,11 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
     public TaskView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         mConfig = RecentsConfiguration.getInstance();
+        mMaxFooterHeight = mConfig.taskViewLockToAppButtonHeight;
         setWillNotDraw(false);
         setClipToOutline(true);
         setDim(getDim());
+        setFooterHeight(getFooterHeight());
     }
 
     @Override
@@ -117,6 +127,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         // Bind the views
         mBarView = (TaskBarView) findViewById(R.id.task_view_bar);
         mThumbnailView = (TaskThumbnailView) findViewById(R.id.task_view_thumbnail);
+        mLockToAppButtonView = findViewById(R.id.lock_to_app);
 
         if (mTaskDataLoaded) {
             onTaskDataLoaded();
@@ -125,13 +136,33 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        int width = MeasureSpec.getSize(widthMeasureSpec);
+        int height = MeasureSpec.getSize(heightMeasureSpec);
 
-        // Update the outline
-        Outline o = new Outline();
-        o.setRoundRect(0, 0, getMeasuredWidth(), getMeasuredHeight(),
+        // Measure the bar view, thumbnail, and lock-to-app buttons
+        mBarView.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
+                MeasureSpec.makeMeasureSpec(mConfig.taskBarHeight, MeasureSpec.EXACTLY));
+        mLockToAppButtonView.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
+                MeasureSpec.makeMeasureSpec(mConfig.taskViewLockToAppButtonHeight,
+                        MeasureSpec.EXACTLY));
+        // Measure the thumbnail height to be the same as the width
+        mThumbnailView.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
+                MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY));
+        setMeasuredDimension(width, height);
+        updateOutline();
+    }
+
+    /** Updates the outline to match whether the lock-to-app button is visible or not. */
+    void updateOutline() {
+        int height = getMeasuredHeight();
+        if (height == 0) return;
+
+        // Account for the current footer height
+        height = height - mMaxFooterHeight + mFooterHeight;
+
+        mOutline.setRoundRect(0, 0, getMeasuredWidth(), height,
                 mConfig.taskViewRoundedCornerRadiusPx);
-        setOutline(o);
+        setOutline(mOutline);
     }
 
     /** Set callback */
@@ -289,6 +320,8 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
                         // Animate the task bar of the first task view
                         mBarView.startEnterRecentsAnimation(0, mEnableThumbnailClip);
                         setVisibility(View.VISIBLE);
+                        // Animate the footer into view
+                        animateFooterVisibility(true, mConfig.taskBarEnterAnimDuration, 0);
                         // Decrement the post animation trigger
                         ctx.postAnimationTrigger.decrement();
                     }
@@ -335,6 +368,10 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
                 });
                 anim.start();
                 ctx.postAnimationTrigger.increment();
+
+                // Animate the footer into view
+                animateFooterVisibility(true, mConfig.taskBarEnterAnimDuration,
+                        mConfig.taskBarEnterAnimDelay);
             } else {
                 mEnableThumbnailClip.run();
             }
@@ -366,9 +403,16 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
                     })
                     .start();
             ctx.postAnimationTrigger.increment();
+
+            // Animate the footer into view
+            animateFooterVisibility(true, mConfig.taskViewEnterFromHomeDuration,
+                    mConfig.taskBarEnterAnimDelay);
         } else {
             // Otherwise, just enable the thumbnail clip
             mEnableThumbnailClip.run();
+
+            // Animate the footer into view
+            animateFooterVisibility(true, 0, 0);
         }
     }
 
@@ -457,12 +501,14 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
     void enableHwLayers() {
         mThumbnailView.setLayerType(View.LAYER_TYPE_HARDWARE, mLayerPaint);
         mBarView.enableHwLayers();
+        mLockToAppButtonView.setLayerType(View.LAYER_TYPE_HARDWARE, mLayerPaint);
     }
 
     /** Disable the hw layers on this task view */
     void disableHwLayers() {
         mThumbnailView.setLayerType(View.LAYER_TYPE_NONE, mLayerPaint);
         mBarView.disableHwLayers();
+        mLockToAppButtonView.setLayerType(View.LAYER_TYPE_NONE, mLayerPaint);
     }
 
     /** Sets the stubbed state of this task view. */
@@ -495,6 +541,57 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
             if (getParent() instanceof View) {
                 getHitRect(mTmpRect);
                 ((View) getParent()).invalidate(mTmpRect);
+            }
+        }
+    }
+
+    /** Sets the footer height. */
+    public void setFooterHeight(int height) {
+        mFooterHeight = height;
+        updateOutline();
+        invalidate(0, getMeasuredHeight() - mMaxFooterHeight, getMeasuredWidth(),
+                getMeasuredHeight());
+    }
+
+    /** Gets the footer height. */
+    public int getFooterHeight() {
+        return mFooterHeight;
+    }
+
+    /** Animates the footer into and out of view. */
+    public void animateFooterVisibility(boolean visible, int duration, int delay) {
+        if (!mTask.canLockToTask) return;
+        if (mMaxFooterHeight <= 0) return;
+
+        if (mFooterAnimator != null) {
+            mFooterAnimator.removeAllListeners();
+            mFooterAnimator.cancel();
+        }
+        int height = visible ? mMaxFooterHeight : 0;
+        if (visible && mLockToAppButtonView.getVisibility() != View.VISIBLE) {
+            if (duration > 0) {
+                setFooterHeight(0);
+            } else {
+                setFooterHeight(mMaxFooterHeight);
+            }
+            mLockToAppButtonView.setVisibility(View.VISIBLE);
+        }
+        if (duration > 0) {
+            mFooterAnimator = ObjectAnimator.ofInt(this, "footerHeight", height);
+            mFooterAnimator.setDuration(duration);
+            mFooterAnimator.setInterpolator(mConfig.fastOutSlowInInterpolator);
+            if (!visible) {
+                mFooterAnimator.addListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        mLockToAppButtonView.setVisibility(View.INVISIBLE);
+                    }
+                });
+            }
+            mFooterAnimator.start();
+        } else {
+            if (!visible) {
+                mLockToAppButtonView.setVisibility(View.INVISIBLE);
             }
         }
     }
@@ -584,6 +681,11 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
     public void onTaskBound(Task t) {
         mTask = t;
         mTask.setCallbacks(this);
+        if (getMeasuredWidth() == 0) {
+            animateFooterVisibility(t.canLockToTask, 0, 0);
+        } else {
+            animateFooterVisibility(t.canLockToTask, mConfig.taskViewLockToAppLongAnimDuration, 0);
+        }
     }
 
     @Override
@@ -597,6 +699,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
                 mBarView.mApplicationIcon.setOnClickListener(this);
             }
             mBarView.mDismissButton.setOnClickListener(this);
+            mLockToAppButtonView.setOnClickListener(this);
             if (Constants.DebugFlags.App.EnableDevAppInfoOnLongPress) {
                 if (mConfig.developerOptionsEnabled) {
                     mBarView.mApplicationIcon.setOnLongClickListener(this);
@@ -618,11 +721,17 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
                 mBarView.mApplicationIcon.setOnClickListener(null);
             }
             mBarView.mDismissButton.setOnClickListener(null);
+            mLockToAppButtonView.setOnClickListener(null);
             if (Constants.DebugFlags.App.EnableDevAppInfoOnLongPress) {
                 mBarView.mApplicationIcon.setOnLongClickListener(null);
             }
         }
         mTaskDataLoaded = false;
+    }
+
+    /** Enables/disables handling touch on this task view. */
+    void setTouchEnabled(boolean enabled) {
+        setOnClickListener(enabled ? this : null);
     }
 
     @Override
@@ -642,6 +751,10 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
                             mCb.onTaskViewDismissed(tv);
                         }
                     });
+                    // Hide the footer
+                    tv.animateFooterVisibility(false, mConfig.taskViewRemoveAnimDuration, 0);
+                } else if (v == tv || v == mLockToAppButtonView) {
+                    mCb.onTaskViewClicked(tv, tv.getTask(), (v == mLockToAppButtonView));
                 }
             }
         }, 125);
