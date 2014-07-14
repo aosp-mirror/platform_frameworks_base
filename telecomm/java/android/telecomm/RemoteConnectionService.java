@@ -44,40 +44,34 @@ final class RemoteConnectionService implements DeathRecipient {
 
     private String mConnectionId;
     private ConnectionRequest mPendingRequest;
-    private ConnectionService.OutgoingCallResponse<RemoteConnection> mPendingOutgoingCallResponse;
+    private ConnectionService.CreateConnectionResponse<RemoteConnection> mPendingResponse;
     // Remote connection services only support a single connection.
     private RemoteConnection mConnection;
 
     private final IConnectionServiceAdapter mAdapter = new IConnectionServiceAdapter.Stub() {
-
         @Override
-        public void notifyIncomingCall(ConnectionRequest request) {
-            Log.w(this, "notifyIncomingCall not implemented in Remote connection");
-        }
-
-        @Override
-        public void handleSuccessfulOutgoingCall(ConnectionRequest request) {
+        public void handleCreateConnectionSuccessful(ConnectionRequest request) {
             if (isPendingConnection(request.getCallId())) {
                 mConnection = new RemoteConnection(mConnectionService, request.getCallId());
-                mPendingOutgoingCallResponse.onSuccess(request, mConnection);
+                mPendingResponse.onSuccess(request, mConnection);
                 clearPendingInformation();
             }
         }
 
         @Override
-        public void handleFailedOutgoingCall(
+        public void handleCreateConnectionFailed(
                 ConnectionRequest request, int errorCode, String errorMessage) {
             if (isPendingConnection(request.getCallId())) {
-                mPendingOutgoingCallResponse.onFailure(request, errorCode, errorMessage);
+                mPendingResponse.onFailure(request, errorCode, errorMessage);
                 mConnectionId = null;
                 clearPendingInformation();
             }
         }
 
         @Override
-        public void cancelOutgoingCall(ConnectionRequest request) {
+        public void handleCreateConnectionCancelled(ConnectionRequest request) {
             if (isPendingConnection(request.getCallId())) {
-                mPendingOutgoingCallResponse.onCancel(request);
+                mPendingResponse.onCancel(request);
                 mConnectionId = null;
                 clearPendingInformation();
             }
@@ -226,12 +220,10 @@ final class RemoteConnectionService implements DeathRecipient {
         release();
     }
 
-    /**
-     * Places an outgoing call.
-     */
-    final void createOutgoingConnection(
+    final void createRemoteConnection(
             ConnectionRequest request,
-            ConnectionService.OutgoingCallResponse<RemoteConnection> response) {
+            ConnectionService.CreateConnectionResponse<RemoteConnection> response,
+            boolean isIncoming) {
 
         if (mConnectionId == null) {
             String id = UUID.randomUUID().toString();
@@ -243,9 +235,9 @@ final class RemoteConnectionService implements DeathRecipient {
                     request.getExtras(),
                     request.getVideoState());
             try {
-                mConnectionService.call(newRequest);
+                mConnectionService.createConnection(newRequest, isIncoming);
                 mConnectionId = id;
-                mPendingOutgoingCallResponse = response;
+                mPendingResponse = response;
                 mPendingRequest = request;
             } catch (RemoteException e) {
                 response.onFailure(request, DisconnectCause.ERROR_UNSPECIFIED, e.toString());
@@ -254,9 +246,6 @@ final class RemoteConnectionService implements DeathRecipient {
             response.onFailure(request, DisconnectCause.ERROR_UNSPECIFIED, null);
         }
     }
-
-    // TODO(santoscordon): Handle incoming connections
-    // public final void handleIncomingConnection() {}
 
     final List<PhoneAccount> lookupAccounts(Uri handle) {
         // TODO(santoscordon): Update this so that is actually calls into the RemoteConnection
@@ -279,7 +268,7 @@ final class RemoteConnectionService implements DeathRecipient {
     }
 
     private boolean isPendingConnection(String id) {
-        return TextUtils.equals(mConnectionId, id) && mPendingOutgoingCallResponse != null;
+        return TextUtils.equals(mConnectionId, id) && mPendingResponse != null;
     }
 
     private boolean isCurrentConnection(String id) {
@@ -288,7 +277,7 @@ final class RemoteConnectionService implements DeathRecipient {
 
     private void clearPendingInformation() {
         mPendingRequest = null;
-        mPendingOutgoingCallResponse = null;
+        mPendingResponse = null;
     }
 
     private void destroyConnection() {

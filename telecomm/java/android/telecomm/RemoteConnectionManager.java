@@ -54,9 +54,10 @@ public class RemoteConnectionManager {
         return accounts;
     }
 
-    public void createOutgoingConnection(
+    public void createRemoteConnection(
             ConnectionRequest request,
-            final ConnectionService.OutgoingCallResponse response) {
+            ConnectionService.CreateConnectionResponse response,
+            boolean isIncoming) {
         PhoneAccount account = request.getAccount();
         if (account == null) {
             throw new IllegalArgumentException("account must be specified.");
@@ -67,7 +68,7 @@ public class RemoteConnectionManager {
             throw new UnsupportedOperationException("account not supported: " + componentName);
         } else {
             RemoteConnectionService remoteService = mRemoteConnectionServices.get(componentName);
-            remoteService.createOutgoingConnection(request, response);
+            remoteService.createRemoteConnection(request, response, isIncoming);
         }
     }
 }
