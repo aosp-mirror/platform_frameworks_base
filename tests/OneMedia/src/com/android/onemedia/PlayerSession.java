@@ -17,14 +17,17 @@ package com.android.onemedia;
 
 import android.content.Context;
 import android.content.Intent;
-import android.media.session.Route;
-import android.media.session.RouteInfo;
-import android.media.session.RouteOptions;
-import android.media.session.RoutePlaybackControls;
+import android.media.routing.MediaRouteSelector;
+import android.media.routing.MediaRouter;
+import android.media.routing.MediaRouter.ConnectionRequest;
+import android.media.routing.MediaRouter.DestinationInfo;
+import android.media.routing.MediaRouter.RouteInfo;
 import android.media.session.MediaSession;
 import android.media.session.MediaSessionManager;
 import android.media.session.PlaybackState;
 import android.os.Bundle;
+import android.support.media.protocols.MediaPlayerProtocol;
+import android.support.media.protocols.MediaPlayerProtocol.MediaStatus;
 import android.util.Log;
 import android.view.KeyEvent;
 
@@ -34,11 +37,13 @@ import com.android.onemedia.playback.Renderer;
 import com.android.onemedia.playback.RequestUtils;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class PlayerSession {
     private static final String TAG = "PlayerSession";
 
     protected MediaSession mSession;
+    protected MediaRouter mRouter;
     protected Context mContext;
     protected Renderer mRenderer;
     protected MediaSession.Callback mCallback;
@@ -46,10 +51,6 @@ public class PlayerSession {
 
     protected PlaybackState mPlaybackState;
     protected Listener mListener;
-    protected ArrayList<RouteOptions> mRouteOptions;
-    protected Route mRoute;
-    protected RoutePlaybackControls mRouteControls;
-    protected RouteListener mRouteListener;
 
     private String mContent;
 
@@ -63,38 +64,50 @@ public class PlayerSession {
                 | PlaybackState.ACTION_PLAY);
 
         mRenderer.registerListener(mRenderListener);
-
-        // TODO need an easier way to build route options
-        mRouteOptions = new ArrayList<RouteOptions>();
-        RouteOptions.Builder bob = new RouteOptions.Builder();
-        bob.addInterface(RoutePlaybackControls.NAME);
-        mRouteOptions.add(bob.build());
-        mRouteListener = new RouteListener();
     }
 
     public void createSession() {
-        if (mSession != null) {
-            mSession.release();
-        }
+        releaseSession();
+
         MediaSessionManager man = (MediaSessionManager) mContext
                 .getSystemService(Context.MEDIA_SESSION_SERVICE);
         Log.d(TAG, "Creating session for package " + mContext.getBasePackageName());
+
+        mRouter = new MediaRouter(mContext);
+        mRouter.addSelector(new MediaRouteSelector.Builder()
+                .addRequiredProtocol(MediaPlayerProtocol.class)
+                .build());
+        mRouter.addSelector(new MediaRouteSelector.Builder()
+                .setRequiredFeatures(MediaRouter.ROUTE_FEATURE_LIVE_AUDIO)
+                .setOptionalFeatures(MediaRouter.ROUTE_FEATURE_LIVE_VIDEO)
+                .build());
+        mRouter.setRoutingCallback(new RoutingCallback(), null);
+
         mSession = man.createSession("OneMedia");
         mSession.addCallback(mCallback);
         mSession.addTransportControlsCallback(new TransportCallback());
         mSession.setPlaybackState(mPlaybackState);
         mSession.setFlags(MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS);
-        mSession.setRouteOptions(mRouteOptions);
+        mSession.setMediaRouter(mRouter);
         mSession.setActive(true);
     }
 
     public void onDestroy() {
-        if (mSession != null) {
-            mSession.release();
-        }
+        releaseSession();
         if (mRenderer != null) {
             mRenderer.unregisterListener(mRenderListener);
             mRenderer.onDestroy();
+        }
+    }
+
+    private void releaseSession() {
+        if (mSession != null) {
+            mSession.release();
+            mSession = null;
+        }
+        if (mRouter != null) {
+            mRouter.release();
+            mRouter = null;
         }
     }
 
@@ -218,40 +231,6 @@ public class PlayerSession {
                 }
             }
         }
-
-        @Override
-        public void onRequestRouteChange(RouteInfo route) {
-            if (mRenderer != null) {
-                mRenderer.onStop();
-            }
-            if (route == null) {
-                // Use local route
-                mRoute = null;
-                mRenderer = new LocalRenderer(mContext, null);
-                mRenderer.registerListener(mRenderListener);
-                updateState(PlaybackState.STATE_NONE);
-            } else {
-                // Use remote route
-                mSession.connect(route, mRouteOptions.get(0));
-                mRenderer = null;
-                updateState(PlaybackState.STATE_CONNECTING);
-            }
-        }
-
-        @Override
-        public void onRouteConnected(Route route) {
-            mRoute = route;
-            mRouteControls = RoutePlaybackControls.from(route);
-            mRouteControls.addListener(mRouteListener);
-            Log.d(TAG, "Connected to route, registering listener");
-            mRenderer = new OneMRPRenderer(mRouteControls);
-            updateState(PlaybackState.STATE_NONE);
-        }
-
-        @Override
-        public void onRouteDisconnected(Route route, int reason) {
-
-        }
     }
 
     private class TransportCallback extends MediaSession.TransportControlsCallback {
@@ -266,12 +245,62 @@ public class PlayerSession {
         }
     }
 
-    private class RouteListener extends RoutePlaybackControls.Listener {
+    private class RoutingCallback extends MediaRouter.RoutingCallback {
         @Override
-        public void onPlaybackStateChange(int state) {
-            Log.d(TAG, "Updating state to " + state);
-            updateState(state);
+        public void onConnectionStateChanged(int state) {
+            if (state == MediaRouter.CONNECTION_STATE_CONNECTING) {
+                if (mRenderer != null) {
+                    mRenderer.onStop();
+                }
+                mRenderer = null;
+                updateState(PlaybackState.STATE_CONNECTING);
+                return;
+            }
+
+            MediaRouter.ConnectionInfo connection = mRouter.getConnection();
+            if (connection != null) {
+                MediaPlayerProtocol protocol =
+                        connection.getProtocolObject(MediaPlayerProtocol.class);
+                if (protocol != null) {
+                    Log.d(TAG, "Connected to route using media player protocol");
+
+                    protocol.setCallback(new PlayerCallback(), null);
+                    mRenderer = new OneMRPRenderer(protocol);
+                    updateState(PlaybackState.STATE_NONE);
+                    return;
+                }
+            }
+
+            // Use local route
+            mRenderer = new LocalRenderer(mContext, null);
+            mRenderer.registerListener(mRenderListener);
+            updateState(PlaybackState.STATE_NONE);
         }
     }
 
+    private class PlayerCallback extends MediaPlayerProtocol.Callback {
+        @Override
+        public void onStatusUpdated(MediaStatus status, Bundle extras) {
+            if (status != null) {
+                Log.d(TAG, "Received status update: " + status.toBundle());
+                switch (status.getPlayerState()) {
+                    case MediaStatus.PLAYER_STATE_BUFFERING:
+                        updateState(PlaybackState.STATE_BUFFERING);
+                        break;
+                    case MediaStatus.PLAYER_STATE_IDLE:
+                        updateState(PlaybackState.STATE_STOPPED);
+                        break;
+                    case MediaStatus.PLAYER_STATE_PAUSED:
+                        updateState(PlaybackState.STATE_PAUSED);
+                        break;
+                    case MediaStatus.PLAYER_STATE_PLAYING:
+                        updateState(PlaybackState.STATE_PLAYING);
+                        break;
+                    case MediaStatus.PLAYER_STATE_UNKNOWN:
+                        updateState(PlaybackState.STATE_NONE);
+                        break;
+                }
+            } 
+        }
+    }
 }

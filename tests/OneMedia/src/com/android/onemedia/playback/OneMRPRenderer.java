@@ -1,39 +1,42 @@
 package com.android.onemedia.playback;
 
-import android.media.session.RoutePlaybackControls;
 import android.os.Bundle;
+import android.support.media.protocols.MediaPlayerProtocol;
+import android.support.media.protocols.MediaPlayerProtocol.MediaInfo;
 
 /**
  * Renderer for communicating with the OneMRP route
  */
 public class OneMRPRenderer extends Renderer {
-    private final RoutePlaybackControls mControls;
+    private final MediaPlayerProtocol mProtocol;
 
-    public OneMRPRenderer(RoutePlaybackControls controls) {
+    public OneMRPRenderer(MediaPlayerProtocol protocol) {
         super(null, null);
-        mControls = controls;
+        mProtocol = protocol;
     }
 
     @Override
     public void setContent(Bundle request) {
-        mControls.playNow(request.getString(RequestUtils.EXTRA_KEY_SOURCE));
+        MediaInfo mediaInfo = new MediaInfo(request.getString(RequestUtils.EXTRA_KEY_SOURCE),
+                MediaInfo.STREAM_TYPE_BUFFERED, "audio/mp3");
+        mProtocol.load(mediaInfo, true, 0, null);
     }
 
     @Override
     public boolean onStop() {
-        mControls.pause();
+        mProtocol.stop(null);
         return true;
     }
 
     @Override
     public boolean onPlay() {
-        mControls.resume();
+        mProtocol.play(null);
         return true;
     }
 
     @Override
     public boolean onPause() {
-        mControls.pause();
+        mProtocol.pause(null);
         return true;
     }
 
