@@ -3922,6 +3922,11 @@ public class BackupManagerService extends IBackupManager.Stub {
                                 break;
                         }
 
+                        // Is it a *file* we need to drop?
+                        if (!isRestorableFile(info)) {
+                            okay = false;
+                        }
+
                         // If the policy is satisfied, go ahead and set up to pipe the
                         // data to the agent.
                         if (DEBUG && okay && mAgent != null) {
@@ -4082,9 +4087,9 @@ public class BackupManagerService extends IBackupManager.Stub {
                             }
                         }
 
-                        // Problems setting up the agent communication, or an already-
-                        // ignored package: skip to the next tar stream entry by
-                        // reading and discarding this file.
+                        // Problems setting up the agent communication, an explicitly
+                        // dropped file, or an already-ignored package: skip to the
+                        // next stream entry by reading and discarding this file.
                         if (!okay) {
                             if (DEBUG) Slog.d(TAG, "[discarding file content]");
                             long bytesToConsume = (info.size + 511) & ~511;
@@ -4689,6 +4694,31 @@ public class BackupManagerService extends IBackupManager.Stub {
                 }
             }
             return info;
+        }
+
+        private boolean isRestorableFile(FileMetadata info) {
+            if (FullBackup.CACHE_TREE_TOKEN.equals(info.domain)) {
+                if (MORE_DEBUG) {
+                    Slog.i(TAG, "Dropping cache file path " + info.path);
+                }
+                return false;
+            }
+
+            if (FullBackup.ROOT_TREE_TOKEN.equals(info.domain)) {
+                // It's possible this is "no-backup" dir contents in an archive stream
+                // produced on a device running a version of the OS that predates that
+                // API.  Respect the no-backup intention and don't let the data get to
+                // the app.
+                if (info.path.startsWith("no_backup/")) {
+                    if (MORE_DEBUG) {
+                        Slog.i(TAG, "Dropping no_backup file path " + info.path);
+                    }
+                    return false;
+                }
+            }
+
+            // Otherwise we think this file is good to go
+            return true;
         }
 
         private void HEXLOG(byte[] block) {

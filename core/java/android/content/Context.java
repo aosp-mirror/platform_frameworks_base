@@ -647,6 +647,26 @@ public abstract class Context {
     public abstract File getFilesDir();
 
     /**
+     * Returns the absolute path to the directory on the filesystem similar to
+     * {@link #getFilesDir()}.  The difference is that files placed under this
+     * directory will be excluded from automatic backup to remote storage.  See
+     * {@link android.app.backup.BackupAgent BackupAgent} for a full discussion
+     * of the automatic backup mechanism in Android.
+     *
+     * <p>No permissions are required to read or write to the returned path, since this
+     * path is internal storage.
+     *
+     * @return The path of the directory holding application files that will not be
+     *         automatically backed up to remote storage.
+     *
+     * @see #openFileOutput
+     * @see #getFileStreamPath
+     * @see #getDir
+     * @see android.app.backup.BackupAgent
+     */
+    public abstract File getNoBackupFilesDir();
+
+    /**
      * Returns the absolute path to the directory on the primary external filesystem
      * (that is somewhere on {@link android.os.Environment#getExternalStorageDirectory()
      * Environment.getExternalStorageDirectory()}) where the application can
