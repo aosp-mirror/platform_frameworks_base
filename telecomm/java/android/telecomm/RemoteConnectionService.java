@@ -266,10 +266,7 @@ final class RemoteConnectionService implements DeathRecipient {
                 mComponentName,
                 null /* id */,
                 null /* handle */,
-                "" /* label */,
-                "" /* shortDescription */,
-                true /* isEnabled */,
-                false /* isSystemDefault */));
+                0 /* capabilities */));
         return accounts;
     }
 
