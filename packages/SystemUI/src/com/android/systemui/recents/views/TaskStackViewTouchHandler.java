@@ -22,7 +22,6 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewParent;
-import com.android.systemui.recents.misc.Console;
 import com.android.systemui.recents.Constants;
 
 /* Handles touch events for a TaskStackView. */
@@ -100,12 +99,6 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
 
     /** Touch preprocessing for handling below */
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        if (Console.Enabled) {
-            Console.log(Constants.Log.UI.TouchEvents,
-                    "[TaskStackViewTouchHandler|interceptTouchEvent]",
-                    Console.motionEventActionToString(ev.getAction()), Console.AnsiBlue);
-        }
-
         // Return early if we have no children
         boolean hasChildren = (mSv.getChildCount() > 0);
         if (!hasChildren) {
@@ -186,12 +179,6 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
 
     /** Handles touch events once we have intercepted them */
     public boolean onTouchEvent(MotionEvent ev) {
-        if (Console.Enabled) {
-            Console.log(Constants.Log.UI.TouchEvents,
-                    "[TaskStackViewTouchHandler|touchEvent]",
-                    Console.motionEventActionToString(ev.getAction()), Console.AnsiBlue);
-        }
-
         // Short circuit if we have no children
         boolean hasChildren = (mSv.getChildCount() > 0);
         if (!hasChildren) {
@@ -290,16 +277,6 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                     int overscrollRange = (int) (Math.min(1f,
                             Math.abs((float) velocity / mMaximumVelocity)) *
                             Constants.Values.TaskStackView.TaskStackOverscrollRange);
-
-                    if (Console.Enabled) {
-                        Console.log(Constants.Log.UI.TouchEvents,
-                                "[TaskStackViewTouchHandler|fling]",
-                                "scroll: " + mSv.getStackScroll() + " velocity: " + velocity +
-                                        " maxVelocity: " + mMaximumVelocity +
-                                        " overscrollRange: " + overscrollRange,
-                                Console.AnsiGreen);
-                    }
-
                     // Fling scroll
                     mSv.mScroller.fling(0, mSv.getStackScroll(),
                             0, -velocity,
