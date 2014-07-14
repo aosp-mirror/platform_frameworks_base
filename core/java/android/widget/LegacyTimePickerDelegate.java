@@ -224,7 +224,8 @@ class LegacyTimePickerDelegate extends TimePicker.AbstractTimePickerDelegate {
         }
 
         mDoneButton = delegator.findViewById(R.id.done_button);
-        if (mDoneButton != null) {
+        mShowDoneButton = (mDoneButton != null);
+        if (mShowDoneButton) {
             mDoneButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -261,7 +262,6 @@ class LegacyTimePickerDelegate extends TimePicker.AbstractTimePickerDelegate {
             mDelegator.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
         }
 
-        mShowDoneButton = false;
         updateDoneButton();
     }
 

@@ -942,11 +942,7 @@ please see themes_device_defaults.xml.
 
     <!-- Holo theme for the TimePicker dialog windows, which is used by the
          {@link android.app.TimePickerDialog} class. -->
-    <style name="Theme.Holo.Dialog.TimePicker">
-        <item name="windowBackground">@color/transparent</item>
-        <item name="windowTitleStyle">@style/DialogWindowTitle.Holo</item>
-        <item name="windowContentOverlay">@null</item>
-    </style>
+    <style name="Theme.Holo.Dialog.TimePicker" parent="Theme.Holo.Dialog.Alert" />
 
     <!-- Theme for a window that will be displayed either full-screen on
          smaller screens (small, normal) or as a dialog on larger screens
@@ -1061,11 +1057,7 @@ please see themes_device_defaults.xml.
 
     <!-- Holo Light theme for the TimePicker dialog windows, which is used by the
          {@link android.app.TimePickerDialog} class. -->
-    <style name="Theme.Holo.Light.Dialog.TimePicker">
-        <item name="windowBackground">@color/transparent</item>
-        <item name="windowTitleStyle">@style/DialogWindowTitle.Holo.Light</item>
-        <item name="windowContentOverlay">@null</item>
-    </style>
+    <style name="Theme.Holo.Light.Dialog.TimePicker" parent="Theme.Holo.Light.Dialog.Alert" />
 
     <!-- Theme for a presentation window on a secondary display. -->
     <style name="Theme.Holo.Light.Dialog.Presentation" parent="Theme.Holo.Light.NoActionBar.Fullscreen" />

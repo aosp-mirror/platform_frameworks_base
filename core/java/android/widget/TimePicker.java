@@ -17,6 +17,7 @@
 package android.widget;
 
 import android.annotation.Widget;
+import android.app.UiModeManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
@@ -29,7 +30,7 @@ import com.android.internal.R;
 
 import java.util.Locale;
 
-import static android.os.Build.VERSION_CODES.KITKAT;
+import static android.os.Build.VERSION_CODES.L;
 
 /**
  * A view for selecting the time of day, in either 24 hour or AM/PM mode. The
@@ -91,15 +92,24 @@ public class TimePicker extends FrameLayout {
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.TimePicker,
                 mDefStyleAttr, mDefStyleRes);
 
-        // Create the correct UI delegate. Default is the legacy one.
-        final boolean isLegacyMode = shouldForceLegacyMode() ?
-                true : a.getBoolean(R.styleable.TimePicker_legacyMode, true);
+        // Create the correct UI delegate. Legacy mode is used when API Levels is below L
+        // release or when it is a TV UI
+        final boolean isLegacyMode =  a.getBoolean(
+                R.styleable.TimePicker_legacyMode, isLegacyMode());
+
+        a.recycle();
+
         setLegacyMode(isLegacyMode);
     }
 
-    private boolean shouldForceLegacyMode() {
+    private boolean isLegacyMode() {
+        UiModeManager uiModeManager =
+                (UiModeManager) mContext.getSystemService(Context.UI_MODE_SERVICE);
+        if (uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION) {
+            return true;
+        }
         final int targetSdkVersion = getContext().getApplicationInfo().targetSdkVersion;
-        return targetSdkVersion < KITKAT;
+        return targetSdkVersion < L;
     }
 
     private TimePickerDelegate createLegacyUIDelegate(Context context, AttributeSet attrs,
@@ -113,10 +123,7 @@ public class TimePicker extends FrameLayout {
                 defStyleRes);
     }
 
-    /**
-     * @hide
-     */
-    public void setLegacyMode(boolean isLegacyMode) {
+    private void setLegacyMode(boolean isLegacyMode) {
         removeAllViewsInLayout();
         mDelegate = isLegacyMode ?
                 createLegacyUIDelegate(mContext, mAttrs, mDefStyleAttr, mDefStyleRes) :

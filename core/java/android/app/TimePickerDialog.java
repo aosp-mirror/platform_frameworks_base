@@ -16,11 +16,9 @@
 
 package android.app;
 
-import android.app.UiModeManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -30,6 +28,7 @@ import android.widget.TimePicker.OnTimeChangedListener;
 
 import com.android.internal.R;
 
+import static android.os.Build.VERSION_CODES.L;
 
 /**
  * A dialog that prompts the user for the time of day using a {@link TimePicker}.
@@ -108,18 +107,19 @@ public class TimePickerDialog extends AlertDialog
 
         Context themeContext = getContext();
 
+        final int targetSdkVersion = getContext().getApplicationInfo().targetSdkVersion;
+        if (targetSdkVersion < L) {
+            setIcon(0);
+            setTitle(R.string.time_picker_dialog_title);
+            setButton(BUTTON_POSITIVE, themeContext.getText(R.string.date_time_done), this);
+        }
+
         LayoutInflater inflater =
                 (LayoutInflater) themeContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View view = inflater.inflate(R.layout.time_picker_dialog, null);
         setView(view);
         mTimePicker = (TimePicker) view.findViewById(R.id.timePicker);
 
-        // Initialize state
-        UiModeManager uiModeManager =
-                (UiModeManager) mContext.getSystemService(Context.UI_MODE_SERVICE);
-        if (uiModeManager.getCurrentModeType() != Configuration.UI_MODE_TYPE_TELEVISION) {
-            mTimePicker.setLegacyMode(false /* will show new UI */);
-        }
         mTimePicker.setShowDoneButton(true);
         mTimePicker.setDismissCallback(new TimePicker.TimePickerDismissCallback() {
             @Override
