@@ -43,8 +43,9 @@ public class ChooserActivity extends ResolverActivity {
             }
         }
         CharSequence title = intent.getCharSequenceExtra(Intent.EXTRA_TITLE);
+        int defaultTitleRes = 0;
         if (title == null) {
-            title = getResources().getText(com.android.internal.R.string.chooseActivity);
+            defaultTitleRes = com.android.internal.R.string.chooseActivity;
         }
         Parcelable[] pa = intent.getParcelableArrayExtra(Intent.EXTRA_INITIAL_INTENTS);
         Intent[] initialIntents = null;
@@ -68,6 +69,7 @@ public class ChooserActivity extends ResolverActivity {
                 initialIntents[i] = in;
             }
         }
-        super.onCreate(savedInstanceState, target, title, initialIntents, null, false);
+        super.onCreate(savedInstanceState, target, title, defaultTitleRes, initialIntents,
+                null, false);
     }
 }
