@@ -147,6 +147,7 @@ public final class PrintContentView extends ViewGroup implements View.OnClickLis
         mExpandCollapseIcon = findViewById(R.id.expand_collapse_icon);
 
         mExpandCollapseHandle.setOnClickListener(this);
+        mSummaryContent.setOnClickListener(this);
 
         // Make sure we start in a closed options state.
         onDragProgress(1.0f);
@@ -154,7 +155,7 @@ public final class PrintContentView extends ViewGroup implements View.OnClickLis
 
     @Override
     public void onClick(View view) {
-        if (view == mExpandCollapseHandle) {
+        if (view == mExpandCollapseHandle || view == mSummaryContent) {
             if (isOptionsClosed() && mOptionsStateController.canOpenOptions()) {
                 openOptions();
             } else if (isOptionsOpened() && mOptionsStateController.canCloseOptions()) {
