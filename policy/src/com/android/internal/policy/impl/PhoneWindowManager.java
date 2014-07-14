@@ -1070,7 +1070,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         initializeHdmiState();
 
         // Match current screen state.
-        if (mPowerManager.isScreenOn()) {
+        if (mPowerManager.isInteractive()) {
             wakingUp(null);
         } else {
             goingToSleep(WindowManagerPolicy.OFF_BECAUSE_OF_USER);
@@ -4077,7 +4077,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                                 telephonyService.silenceRinger();
                             } else if ((mIncallPowerBehavior
                                     & Settings.Secure.INCALL_POWER_BUTTON_BEHAVIOR_HANGUP) != 0
-                                    && telephonyService.isOffhook() && isScreenOn) {
+                                    && telephonyService.isOffhook() && interactive) {
                                 // Otherwise, if "Power button ends call" is enabled,
                                 // the Power button will hang up any current active call.
                                 hungUp = telephonyService.endCall();
