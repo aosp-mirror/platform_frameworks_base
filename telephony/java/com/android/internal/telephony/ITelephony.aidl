@@ -650,7 +650,7 @@ interface ITelephony {
      *
      * TODO: Add a link to documentation.
      *
-     * @return carrier privelege status defined in TelephonyManager.
+     * @return carrier privilege status defined in TelephonyManager.
      */
     int hasCarrierPrivileges();
 
