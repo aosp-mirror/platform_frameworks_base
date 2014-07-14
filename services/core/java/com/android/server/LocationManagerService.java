@@ -20,6 +20,7 @@ import com.android.internal.content.PackageMonitor;
 import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
 import com.android.internal.os.BackgroundThread;
+import com.android.server.location.ActivityRecognitionProxy;
 import com.android.server.location.FlpHardwareProvider;
 import com.android.server.location.FusedProxy;
 import com.android.server.location.GeocoderProxy;
@@ -53,6 +54,7 @@ import android.content.pm.Signature;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.database.ContentObserver;
+import android.hardware.location.ActivityRecognitionHardware;
 import android.location.Address;
 import android.location.Criteria;
 import android.location.GeocoderParams;
@@ -475,7 +477,7 @@ public class LocationManagerService extends ILocationManager.Stub {
             Slog.e(TAG,  "no geocoder provider found");
         }
 
-        // bind to fused provider if supported
+        // bind to fused hardware provider if supported
         if (FlpHardwareProvider.isSupported()) {
           FlpHardwareProvider flpHardwareProvider =
               FlpHardwareProvider.getInstance(mContext);
@@ -503,6 +505,23 @@ public class LocationManagerService extends ILocationManager.Stub {
           }
         } else {
           Slog.e(TAG, "FLP HAL not supported.");
+        }
+
+        // bind to the hardware activity recognition if supported
+        if (ActivityRecognitionHardware.isSupported()) {
+            ActivityRecognitionProxy proxy = ActivityRecognitionProxy.createAndBind(
+                    mContext,
+                    mLocationHandler,
+                    ActivityRecognitionHardware.getInstance(mContext),
+                    com.android.internal.R.bool.config_enableActivityRecognitionHardwareOverlay,
+                    com.android.internal.R.string.config_activityRecognitionHardwarePackageName,
+                    com.android.internal.R.array.config_locationProviderPackageNames);
+
+            if (proxy == null) {
+                Slog.e(TAG, "Unable to bind ActivityRecognitionProxy.");
+            }
+        } else {
+            Slog.e(TAG, "Hardware Activity-Recognition not supported.");
         }
 
         String[] testProviderStrings = resources.getStringArray(

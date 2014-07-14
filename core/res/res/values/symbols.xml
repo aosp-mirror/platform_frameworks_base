@@ -1478,6 +1478,7 @@
   <java-symbol type="bool" name="config_useAttentionLight" />
   <java-symbol type="bool" name="config_animateScreenLights" />
   <java-symbol type="bool" name="config_automatic_brightness_available" />
+  <java-symbol type="bool" name="config_enableActivityRecognitionHardwareOverlay" />
   <java-symbol type="bool" name="config_enableFusedLocationOverlay" />
   <java-symbol type="bool" name="config_enableHardwareFlpOverlay" />
   <java-symbol type="bool" name="config_enableGeocoderOverlay" />
@@ -1570,6 +1571,7 @@
   <java-symbol type="string" name="car_mode_disable_notification_title" />
   <java-symbol type="string" name="chooser_wallpaper" />
   <java-symbol type="string" name="config_datause_iface" />
+  <java-symbol type="string" name="config_activityRecognitionHardwarePackageName" />
   <java-symbol type="string" name="config_fusedLocationProviderPackageName" />
   <java-symbol type="string" name="config_hardwareFlpPackageName" />
   <java-symbol type="string" name="config_geocoderProviderPackageName" />
