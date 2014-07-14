@@ -41,7 +41,7 @@ public class StatusBarIcon implements Parcelable {
 
     @Override
     public String toString() {
-        return "StatusBarIcon(pkg=" + this.iconPackage + "user=" + user.getIdentifier()
+        return "StatusBarIcon(pkg=" + this.iconPackage + " user=" + user.getIdentifier()
                 + " id=0x" + Integer.toHexString(this.iconId)
                 + " level=" + this.iconLevel + " visible=" + visible
                 + " num=" + this.number + " )";
