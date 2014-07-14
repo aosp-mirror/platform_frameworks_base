@@ -31,6 +31,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -80,6 +81,8 @@ public class SystemServicesProxy {
     ComponentName mAssistComponent;
 
     Bitmap mDummyIcon;
+    int mDummyThumbnailWidth;
+    int mDummyThumbnailHeight;
     Paint mBgProtectionPaint;
     Canvas mBgProtectionCanvas;
 
@@ -95,6 +98,13 @@ public class SystemServicesProxy {
         mWm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         mDisplay = mWm.getDefaultDisplay();
         mRecentsPackage = context.getPackageName();
+
+        // Get the dummy thumbnail width/heights
+        Resources res = context.getResources();
+        int wId = com.android.internal.R.dimen.thumbnail_width;
+        int hId = com.android.internal.R.dimen.thumbnail_height;
+        mDummyThumbnailWidth = res.getDimensionPixelSize(wId);
+        mDummyThumbnailHeight = res.getDimensionPixelSize(hId);
 
         // Create the protection paints
         mBgProtectionPaint = new Paint();
@@ -213,7 +223,8 @@ public class SystemServicesProxy {
 
         // If we are mocking, then just return a dummy thumbnail
         if (Constants.DebugFlags.App.EnableSystemServicesProxy) {
-            Bitmap thumbnail = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
+            Bitmap thumbnail = Bitmap.createBitmap(mDummyThumbnailWidth, mDummyThumbnailHeight,
+                    Bitmap.Config.ARGB_8888);
             thumbnail.eraseColor(0xff333333);
             return thumbnail;
         }
@@ -239,6 +250,8 @@ public class SystemServicesProxy {
      */
     public static Bitmap getThumbnail(ActivityManager activityManager, int taskId) {
         ActivityManager.TaskThumbnail taskThumbnail = activityManager.getTaskThumbnail(taskId);
+        if (taskThumbnail == null) return null;
+
         Bitmap thumbnail = taskThumbnail.mainThumbnail;
         ParcelFileDescriptor descriptor = taskThumbnail.thumbnailFileDescriptor;
         if (thumbnail == null && descriptor != null) {

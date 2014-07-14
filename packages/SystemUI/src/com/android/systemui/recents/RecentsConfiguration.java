@@ -35,6 +35,7 @@ import com.android.systemui.recents.misc.Console;
  * NOTE: We should not hold any references to a Context from a static instance */
 public class RecentsConfiguration {
     static RecentsConfiguration sInstance;
+    static int sPrevConfigurationHashCode;
 
     DisplayMetrics mDisplayMetrics;
 
@@ -138,7 +139,11 @@ public class RecentsConfiguration {
         if (sInstance == null) {
             sInstance = new RecentsConfiguration(context);
         }
-        sInstance.update(context);
+        int configHashCode = context.getResources().getConfiguration().hashCode();
+        if (sPrevConfigurationHashCode != configHashCode) {
+            sInstance.update(context);
+            sPrevConfigurationHashCode = configHashCode;
+        }
         return sInstance;
     }
 
@@ -179,10 +184,8 @@ public class RecentsConfiguration {
         transposeRecentsLayoutWithOrientation =
                 res.getBoolean(R.bool.recents_transpose_layout_with_orientation);
 
-        // Search bar
+        // Search Bar
         searchBarSpaceHeightPx = res.getDimensionPixelSize(R.dimen.recents_search_bar_space_height);
-
-        // Update the search widget id
         searchBarAppWidgetId = settings.getInt(Constants.Values.App.Key_SearchAppWidgetId, -1);
 
         // Task stack
@@ -242,12 +245,6 @@ public class RecentsConfiguration {
         // Nav bar scrim
         navBarScrimEnterDuration =
                 res.getInteger(R.integer.recents_nav_bar_scrim_enter_duration);
-
-        if (Console.Enabled) {
-            Console.log(Constants.Log.UI.MeasureAndLayout,
-                    "[RecentsConfiguration|orientation]", isLandscape ? "Landscape" : "Portrait",
-                    Console.AnsiGreen);
-        }
     }
 
     /** Updates the system insets */

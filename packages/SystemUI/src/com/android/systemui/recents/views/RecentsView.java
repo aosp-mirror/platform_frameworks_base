@@ -141,19 +141,11 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                     TaskView tv = (TaskView) stackView.getChildAt(j);
                     Task task = tv.getTask();
                     if (tv.isFocusedTask()) {
-                        if (Console.Enabled) {
-                            Console.log(Constants.Log.UI.Focus, "[RecentsView|launchFocusedTask]",
-                                    "Found focused Task");
-                        }
                         onTaskViewClicked(stackView, tv, stack, task, false);
                         return true;
                     }
                 }
             }
-        }
-        if (Console.Enabled) {
-            Console.log(Constants.Log.UI.Focus, "[RecentsView|launchFocusedTask]",
-                    "No Tasks focused");
         }
         return false;
     }
@@ -228,12 +220,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             if (searchBar != null) {
                 mSearchBar = searchBar;
                 addView(mSearchBar);
-
-                if (Console.Enabled) {
-                    Console.log(Constants.Log.App.SystemUIHandshake, "[RecentsView|setSearchBar]",
-                            "" + (mSearchBar.getVisibility() == View.VISIBLE),
-                            Console.AnsiBlue);
-                }
             }
         }
     }
@@ -259,13 +245,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         int widthMode = MeasureSpec.getMode(widthMeasureSpec);
         int height = MeasureSpec.getSize(heightMeasureSpec);
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
-
-        if (Console.Enabled) {
-            Console.log(Constants.Log.UI.MeasureAndLayout, "[RecentsView|measure]",
-                    "width: " + width + " height: " + height, Console.AnsiGreen);
-            Console.logTraceTime(Constants.Log.App.TimeRecentsStartup,
-                    Constants.Log.App.TimeRecentsStartupKey, "RecentsView.onMeasure");
-        }
 
         // Get the search bar bounds and measure the search bar layout
         if (mSearchBar != null) {
@@ -303,13 +282,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
      */
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        if (Console.Enabled) {
-            Console.log(Constants.Log.UI.MeasureAndLayout, "[RecentsView|layout]",
-                    new Rect(left, top, right, bottom) + " changed: " + changed, Console.AnsiGreen);
-            Console.logTraceTime(Constants.Log.App.TimeRecentsStartup,
-                    Constants.Log.App.TimeRecentsStartupKey, "RecentsView.onLayout");
-        }
-
         // Get the search bar bounds so that we lay it out
         if (mSearchBar != null) {
             Rect searchBarSpaceBounds = new Rect();
@@ -351,11 +323,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
     @Override
     public WindowInsets onApplyWindowInsets(WindowInsets insets) {
-        if (Console.Enabled) {
-            Console.log(Constants.Log.UI.MeasureAndLayout,
-                    "[RecentsView|fitSystemWindows]", "insets: " + insets, Console.AnsiGreen);
-        }
-
         // Update the configuration with the latest system insets and trigger a relayout
         mConfig.updateSystemInsets(insets.getSystemWindowInsets());
         requestLayout();
@@ -482,11 +449,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         final Runnable launchRunnable = new Runnable() {
             @Override
             public void run() {
-                if (Console.Enabled) {
-                    Console.logTraceTime(Constants.Log.App.TimeRecentsLaunchTask,
-                            Constants.Log.App.TimeRecentsLaunchKey, "preStartActivity");
-                }
-
                 if (task.isActive) {
                     // Bring an active task to the foreground
                     RecentsTaskLoader.getInstance().getSystemServicesProxy()
@@ -515,18 +477,8 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                     // And clean up the old task
                     onTaskViewDismissed(task);
                 }
-
-                if (Console.Enabled) {
-                    Console.logTraceTime(Constants.Log.App.TimeRecentsLaunchTask,
-                            Constants.Log.App.TimeRecentsLaunchKey, "startActivity");
-                }
             }
         };
-
-        if (Console.Enabled) {
-            Console.logTraceTime(Constants.Log.App.TimeRecentsLaunchTask,
-                    Constants.Log.App.TimeRecentsLaunchKey, "onTaskLaunched");
-        }
 
         // Launch the app right away if there is no task view, otherwise, animate the icon out first
         if (tv == null) {

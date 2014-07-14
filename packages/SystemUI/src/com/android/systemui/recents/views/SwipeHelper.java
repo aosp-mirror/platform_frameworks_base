@@ -28,8 +28,6 @@ import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.animation.LinearInterpolator;
-import com.android.systemui.recents.misc.Console;
-import com.android.systemui.recents.Constants;
 
 /**
  * This class facilitates swipe to dismiss. It defines an interface to be implemented by the
@@ -178,11 +176,6 @@ public class SwipeHelper {
     }
 
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        if (Console.Enabled) {
-            Console.log(Constants.Log.UI.TouchEvents,
-                    "[SwipeHelper|interceptTouchEvent]",
-                    Console.motionEventActionToString(ev.getAction()), Console.AnsiBlue);
-        }
         final int action = ev.getAction();
 
         switch (action) {
@@ -294,12 +287,6 @@ public class SwipeHelper {
     }
 
     public boolean onTouchEvent(MotionEvent ev) {
-        if (Console.Enabled) {
-            Console.log(Constants.Log.UI.TouchEvents,
-                    "[SwipeHelper|touchEvent]",
-                    Console.motionEventActionToString(ev.getAction()), Console.AnsiBlue);
-        }
-
         if (!mDragging) {
             if (!onInterceptTouchEvent(ev)) {
                 return mCanCurrViewBeDimissed;

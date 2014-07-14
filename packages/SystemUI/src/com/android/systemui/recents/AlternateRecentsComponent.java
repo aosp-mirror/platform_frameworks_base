@@ -64,11 +64,9 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
 
     Context mContext;
     SystemServicesProxy mSystemServicesProxy;
-
-    // Recents service binding
     Handler mHandler;
-    boolean mBootCompleted = false;
-    boolean mStartAnimationTriggered = false;
+    boolean mBootCompleted;
+    boolean mStartAnimationTriggered;
 
     // Task launching
     RecentsConfiguration mConfig;
@@ -95,9 +93,7 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
     }
 
     public void onStart() {
-        if (Console.Enabled) {
-            Console.log(Constants.Log.App.RecentsComponent, "[RecentsComponent|start]");
-        }
+        // Do nothing
     }
 
     public void onBootCompleted() {
@@ -106,9 +102,6 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
 
     /** Shows the recents */
     public void onShowRecents(boolean triggeredFromAltTab, View statusBarView) {
-        if (Console.Enabled) {
-            Console.log(Constants.Log.App.RecentsComponent, "[RecentsComponent|showRecents]");
-        }
         mStatusBarView = statusBarView;
         mTriggeredFromAltTab = triggeredFromAltTab;
 
@@ -121,10 +114,6 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
 
     /** Hides the recents */
     public void onHideRecents(boolean triggeredFromAltTab) {
-        if (Console.Enabled) {
-            Console.log(Constants.Log.App.RecentsComponent, "[RecentsComponent|hideRecents]");
-        }
-
         if (mBootCompleted) {
             if (isRecentsTopMost(getTopMostTask(), null)) {
                 // Notify recents to hide itself
@@ -139,13 +128,6 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
 
     /** Toggles the alternate recents activity */
     public void onToggleRecents(View statusBarView) {
-        if (Console.Enabled) {
-            Console.logStartTracingTime(Constants.Log.App.TimeRecentsStartup,
-                    Constants.Log.App.TimeRecentsStartupKey);
-            Console.logStartTracingTime(Constants.Log.App.TimeRecentsLaunchTask,
-                    Constants.Log.App.TimeRecentsLaunchKey);
-            Console.log(Constants.Log.App.RecentsComponent, "[RecentsComponent|toggleRecents]", "");
-        }
         mStatusBarView = statusBarView;
         mTriggeredFromAltTab = false;
 
@@ -223,14 +205,6 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
             intent.setPackage(mContext.getPackageName());
             intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
             mContext.sendBroadcast(intent);
-
-            // Time this path
-            if (Console.Enabled) {
-                Console.logTraceTime(Constants.Log.App.TimeRecentsStartup,
-                        Constants.Log.App.TimeRecentsStartupKey, "receivedToggleRecents");
-                Console.logTraceTime(Constants.Log.App.TimeRecentsLaunchTask,
-                        Constants.Log.App.TimeRecentsLaunchKey, "receivedToggleRecents");
-            }
             mLastToggleTime = System.currentTimeMillis();
             return;
         } else {
@@ -395,11 +369,6 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
                 startAlternateRecentsActivity(topTask, opts, null);
             }
         }
-
-        if (Console.Enabled) {
-            Console.logTraceTime(Constants.Log.App.TimeRecentsStartup,
-                    Constants.Log.App.TimeRecentsStartupKey, "startRecentsActivity");
-        }
         mLastToggleTime = System.currentTimeMillis();
     }
 
@@ -417,10 +386,9 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
         intent.putExtra(EXTRA_TRIGGERED_FROM_ALT_TAB, mTriggeredFromAltTab);
         intent.putExtra(EXTRA_TRIGGERED_FROM_TASK_ID, (topTask != null) ? topTask.id : -1);
         if (opts != null) {
-            mContext.startActivityAsUser(intent, opts.toBundle(), new UserHandle(
-                    UserHandle.USER_CURRENT));
+            mContext.startActivityAsUser(intent, opts.toBundle(), UserHandle.CURRENT);
         } else {
-            mContext.startActivityAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
+            mContext.startActivityAsUser(intent, UserHandle.CURRENT);
         }
     }
 

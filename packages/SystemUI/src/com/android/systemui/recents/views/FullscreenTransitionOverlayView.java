@@ -22,8 +22,6 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
@@ -34,9 +32,7 @@ import android.view.animation.AccelerateInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import com.android.systemui.R;
-import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
-import com.android.systemui.recents.misc.Console;
 
 
 /**
@@ -152,11 +148,6 @@ public class FullscreenTransitionOverlayView extends FrameLayout {
     public void prepareAnimateOnEnterRecents(Bitmap screenshot) {
         if (!mConfig.launchedFromAppWithScreenshot) return;
 
-        if (Console.Enabled) {
-            Console.logStartTracingTime(Constants.Log.App.TimeRecentsScreenshotTransition,
-                    Constants.Log.App.TimeRecentsScreenshotTransitionKey);
-        }
-
         setClipTop(0);
         setClipBottom(getMeasuredHeight());
         setDim(0);
@@ -180,11 +171,6 @@ public class FullscreenTransitionOverlayView extends FrameLayout {
     /** Animates this view as it enters recents */
     public void animateOnEnterRecents(ViewAnimation.TaskViewEnterContext ctx,
                                       final Runnable postAnimRunnable) {
-        if (Console.Enabled) {
-            Console.logTraceTime(Constants.Log.App.TimeRecentsScreenshotTransition,
-                    Constants.Log.App.TimeRecentsScreenshotTransitionKey, "Starting");
-        }
-
         // Cancel the current animation
         if (mEnterAnimation != null) {
             mEnterAnimation.removeAllListeners();
@@ -226,11 +212,6 @@ public class FullscreenTransitionOverlayView extends FrameLayout {
                         mCb.onEnterAnimationComplete();
                         // Run the given post-anim runnable
                         postAnimRunnable.run();
-
-                        if (Console.Enabled) {
-                            Console.logTraceTime(Constants.Log.App.TimeRecentsScreenshotTransition,
-                                    Constants.Log.App.TimeRecentsScreenshotTransitionKey, "Completed");
-                        }
                     }
                 });
             }

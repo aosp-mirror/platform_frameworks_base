@@ -52,43 +52,6 @@ public class Constants {
         }
     }
 
-    public static class Log {
-        public static class App {
-            public static final String TimeRecentsStartupKey = "startup";
-            public static final String TimeRecentsLaunchKey = "launchTask";
-            public static final String TimeRecentsScreenshotTransitionKey = "screenshot";
-            public static final boolean TimeRecentsStartup = false;
-            public static final boolean TimeRecentsLaunchTask = false;
-            public static final boolean TimeRecentsScreenshotTransition = false;
-
-
-            public static final boolean RecentsComponent = false;
-            public static final boolean TaskDataLoader = false;
-            public static final boolean SystemUIHandshake = false;
-            public static final boolean TimeSystemCalls = false;
-            public static final boolean Memory = false;
-            public static final boolean Search = false;
-        }
-
-        public static class UI {
-            public static final boolean Draw = false;
-            public static final boolean ClickEvents = false;
-            public static final boolean TouchEvents = false;
-            public static final boolean MeasureAndLayout = false;
-            public static final boolean HwLayers = false;
-            public static final boolean Focus = false;
-        }
-
-        public static class TaskStack {
-            public static final boolean SynchronizeViewsWithModel = false;
-        }
-
-        public static class ViewPool {
-            public static final boolean PoolCallbacks = false;
-        }
-    }
-
-    /** XXX: We are going to move almost all of these into a resource once they are nailed down. */
     public static class Values {
         public static class App {
             public static int AppWidgetHostId = 1024;
