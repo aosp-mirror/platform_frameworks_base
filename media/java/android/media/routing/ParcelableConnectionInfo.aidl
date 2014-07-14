@@ -13,6 +13,6 @@
 ** limitations under the License.
 */
 
-package android.media.routeprovider;
+package android.media.routing;
 
-parcelable RouteRequest;
+parcelable ParcelableConnectionInfo;

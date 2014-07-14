@@ -157,10 +157,11 @@ public final class PlaybackState implements Parcelable {
 
     /**
      * State indicating the class doing playback is currently connecting to a
-     * route. Depending on the implementation you may return to the previous
-     * state when the connection finishes or enter {@link #STATE_NONE}. If
-     * the connection failed {@link #STATE_ERROR} should be used.
-     * @hide
+     * new destination.  Depending on the implementation you may return to the previous
+     * state when the connection finishes or enter {@link #STATE_NONE}.
+     * If the connection failed {@link #STATE_ERROR} should be used.
+     *
+     * @see #setState
      */
     public final static int STATE_CONNECTING = 8;
 

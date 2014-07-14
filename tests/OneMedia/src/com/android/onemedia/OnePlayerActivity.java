@@ -28,8 +28,6 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.android.onemedia.playback.Renderer;
-
 public class OnePlayerActivity extends Activity {
     private static final String TAG = "OnePlayerActivity";
 

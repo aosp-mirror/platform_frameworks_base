@@ -15,19 +15,20 @@
  */
 package com.android.onemedia.provider;
 
-import android.media.routeprovider.RouteConnection;
-import android.media.routeprovider.RouteInterfaceHandler;
-import android.media.routeprovider.RoutePlaybackControlsHandler;
-import android.media.routeprovider.RouteProviderService;
-import android.media.routeprovider.RouteRequest;
-import android.media.session.RouteInfo;
-import android.media.session.RoutePlaybackControls;
-import android.media.session.RouteInterface;
+import android.media.routing.MediaRouteSelector;
+import android.media.routing.MediaRouteService;
+import android.media.routing.MediaRouter.ConnectionInfo;
+import android.media.routing.MediaRouter.ConnectionRequest;
+import android.media.routing.MediaRouter.DestinationInfo;
+import android.media.routing.MediaRouter.DiscoveryRequest;
+import android.media.routing.MediaRouter.RouteInfo;
 import android.media.session.PlaybackState;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
-import android.os.ResultReceiver;
+import android.os.Process;
+import android.support.media.protocols.MediaPlayerProtocol;
+import android.support.media.protocols.MediaPlayerProtocol.MediaInfo;
+import android.support.media.protocols.MediaPlayerProtocol.MediaStatus;
 import android.util.Log;
 
 import com.android.onemedia.playback.LocalRenderer;
@@ -35,29 +36,28 @@ import com.android.onemedia.playback.Renderer;
 import com.android.onemedia.playback.RequestUtils;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 
 /**
  * Test of MediaRouteProvider. Show a dummy provider with a simple interface for
  * playing music.
  */
-public class OneMediaRouteProvider extends RouteProviderService {
+public class OneMediaRouteProvider extends MediaRouteService {
     private static final String TAG = "OneMRP";
     private static final boolean DEBUG = true;
+
+    private static final String TEST_DESTINATION_ID = "testDestination";
+    private static final String TEST_ROUTE_ID = "testRoute";
 
     private Renderer mRenderer;
     private RenderListener mRenderListener;
     private PlaybackState mPlaybackState;
-    private RouteConnection mConnection;
-    private RoutePlaybackControlsHandler mControls;
-    private String mRouteId;
     private Handler mHandler;
+
+    private OneStub mStub;
 
     @Override
     public void onCreate() {
         mHandler = new Handler();
-        mRouteId = UUID.randomUUID().toString();
         mRenderer = new LocalRenderer(this, null);
         mRenderListener = new RenderListener();
         mPlaybackState = new PlaybackState();
@@ -65,81 +65,106 @@ public class OneMediaRouteProvider extends RouteProviderService {
                 | PlaybackState.ACTION_PLAY);
 
         mRenderer.registerListener(mRenderListener);
-
-        if (DEBUG) {
-            Log.d(TAG, "onCreate, routeId is " + mRouteId);
-        }
     }
 
     @Override
-    public List<RouteInfo> getMatchingRoutes(List<RouteRequest> requests) {
-        RouteInfo.Builder bob = new RouteInfo.Builder();
-        bob.setName("OneMedia").setId(mRouteId);
-        // TODO add a helper library for generating route info with the correct
-        // options
-        Log.d(TAG, "Requests:");
-        for (RouteRequest request : requests) {
-            List<String> ifaces = request.getConnectionOptions().getInterfaceNames();
-            Log.d(TAG, "  request ifaces:" + ifaces.toString());
-            if (ifaces != null && ifaces.size() == 1
-                    && RoutePlaybackControls.NAME.equals(ifaces.get(0))) {
-                bob.addRouteOptions(request.getConnectionOptions());
-            }
+    public ClientSession onCreateClientSession(ClientInfo client) {
+        if (client.getUid() != Process.myUid()) {
+            // for testing purposes, only allow connections from this application
+            // since this provider is not fully featured
+            return null;
         }
-        ArrayList<RouteInfo> result = new ArrayList<RouteInfo>();
-        if (bob.getOptionsSize() > 0) {
-            RouteInfo info = bob.build();
-            result.add(info);
-        }
-        if (DEBUG) {
-            Log.d(TAG, "getRoutes returning " + result.toString());
-        }
-        return result;
+        return new OneSession(client);
     }
 
-    @Override
-    public RouteConnection connect(RouteInfo route, RouteRequest request) {
-        if (mConnection != null) {
-            disconnect(mConnection);
-        }
-        RouteConnection connection = new RouteConnection(this, route);
-        mControls = RoutePlaybackControlsHandler.addTo(connection);
-        mControls.addListener(new PlayHandler(mRouteId), mHandler);
-        if (DEBUG) {
-            Log.d(TAG, "Connected to route");
-        }
-        return connection;
-    }
+    private final class OneSession extends ClientSession {
+        private final ClientInfo mClient;
 
-    private class PlayHandler extends RoutePlaybackControlsHandler.Listener {
-        private final String mRouteId;
-
-        public PlayHandler(String routeId) {
-            mRouteId = routeId;
+        public OneSession(ClientInfo client) {
+            mClient = client;
         }
 
         @Override
-        public void playNow(String content, ResultReceiver cb) {
+        public boolean onStartDiscovery(DiscoveryRequest req, DiscoveryCallback callback) {
+            for (MediaRouteSelector selector : req.getSelectors()) {
+                if (isMatch(selector)) {
+                    DestinationInfo destination = new DestinationInfo.Builder(
+                            TEST_DESTINATION_ID, getServiceMetadata(), "OneMedia")
+                            .setDescription("Test route from OneMedia app.")
+                            .build();
+                    ArrayList<RouteInfo> routes = new ArrayList<RouteInfo>();
+                    routes.add(new RouteInfo.Builder(
+                            TEST_ROUTE_ID, destination, selector).build());
+                    callback.onDestinationFound(destination, routes);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public void onStopDiscovery() {
+        }
+
+        @Override
+        public boolean onConnect(ConnectionRequest req, ConnectionCallback callback) {
+            if (req.getRoute().getId().equals(TEST_ROUTE_ID)) {
+                mStub = new OneStub();
+                ConnectionInfo connection = new ConnectionInfo.Builder(req.getRoute())
+                        .setProtocolStub(MediaPlayerProtocol.class, mStub)
+                        .build();
+                callback.onConnected(connection);
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public void onDisconnect() {
+            mStub = null;
+        }
+
+        private boolean isMatch(MediaRouteSelector selector) {
+            if (!selector.containsProtocol(MediaPlayerProtocol.class)) {
+                return false;
+            }
+            for (String protocol : selector.getRequiredProtocols()) {
+                if (!protocol.equals(MediaPlayerProtocol.class.getName())) {
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
+
+    private final class OneStub extends MediaPlayerProtocol.Stub {
+        MediaInfo mMediaInfo;
+
+        public OneStub() {
+            super(mHandler);
+        }
+
+        @Override
+        public void onLoad(MediaInfo mediaInfo, boolean autoplay, long playPosition,
+                Bundle extras) {
             if (DEBUG) {
-                Log.d(TAG, "Attempting to play " + content);
+                Log.d(TAG, "Attempting to play " + mediaInfo.getContentId());
             }
             // look up the route and send a play command to it
+            mMediaInfo = mediaInfo;
             Bundle bundle = new Bundle();
-            bundle.putString(RequestUtils.EXTRA_KEY_SOURCE, content);
+            bundle.putString(RequestUtils.EXTRA_KEY_SOURCE, mediaInfo.getContentId());
             mRenderer.setContent(bundle);
-            RouteInterfaceHandler.sendResult(cb, RouteInterface.RESULT_SUCCESS, null);
         }
 
         @Override
-        public boolean resume() {
+        public void onPlay(Bundle extras) {
             mRenderer.onPlay();
-            return true;
         }
 
         @Override
-        public boolean pause() {
+        public void onPause(Bundle extras) {
             mRenderer.onPause();
-            return true;
         }
     }
 
@@ -148,9 +173,7 @@ public class OneMediaRouteProvider extends RouteProviderService {
         @Override
         public void onError(int type, int extra, Bundle extras, Throwable error) {
             Log.d(TAG, "Sending onError with type " + type + " and extra " + extra);
-            if (mControls != null) {
-                mControls.sendPlaybackChangeEvent(PlaybackState.STATE_ERROR);
-            }
+            sendStatusUpdate(PlaybackState.STATE_ERROR);
         }
 
         @Override
@@ -186,7 +209,7 @@ public class OneMediaRouteProvider extends RouteProviderService {
                     break;
             }
 
-            mControls.sendPlaybackChangeEvent(mPlaybackState.getState());
+            sendStatusUpdate(mPlaybackState.getState());
         }
 
         @Override
@@ -202,6 +225,37 @@ public class OneMediaRouteProvider extends RouteProviderService {
 
         @Override
         public void onNextStarted() {
+        }
+
+        private void sendStatusUpdate(int state) {
+            if (mStub != null) {
+                MediaStatus status = new MediaStatus(1, mStub.mMediaInfo);
+                switch (state) {
+                    case PlaybackState.STATE_BUFFERING:
+                    case PlaybackState.STATE_FAST_FORWARDING:
+                    case PlaybackState.STATE_REWINDING:
+                    case PlaybackState.STATE_SKIPPING_TO_NEXT:
+                    case PlaybackState.STATE_SKIPPING_TO_PREVIOUS:
+                        status.setPlayerState(MediaStatus.PLAYER_STATE_BUFFERING);
+                        break;
+                    case PlaybackState.STATE_CONNECTING:
+                    case PlaybackState.STATE_STOPPED:
+                        status.setPlayerState(MediaStatus.PLAYER_STATE_IDLE);
+                        break;
+                    case PlaybackState.STATE_PAUSED:
+                        status.setPlayerState(MediaStatus.PLAYER_STATE_PAUSED);
+                        break;
+                    case PlaybackState.STATE_PLAYING:
+                        status.setPlayerState(MediaStatus.PLAYER_STATE_PLAYING);
+                        break;
+                    case PlaybackState.STATE_NONE:
+                    case PlaybackState.STATE_ERROR:
+                    default:
+                        status.setPlayerState(MediaStatus.PLAYER_STATE_UNKNOWN);
+                        break;
+                }
+                mStub.sendStatusUpdatedEvent(status, null);
+            }
         }
     }
 }
