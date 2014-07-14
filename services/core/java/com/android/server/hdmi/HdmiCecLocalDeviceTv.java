@@ -399,8 +399,26 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         if (!isInDeviceList(path, address)) {
             handleNewDeviceAtTheTailOfActivePath(path);
         }
-        addAndStartAction(new NewDeviceAction(this, address, path));
+        startNewDeviceAction(address, path);
         return true;
+    }
+
+    void startNewDeviceAction(int address, int path) {
+        for (NewDeviceAction action : getActions(NewDeviceAction.class)) {
+            // If there is new device action which has the same logical address and path
+            // ignore new request.
+            // NewDeviceAction is created whenever it receives <Report Physical Address>.
+            // And there is a chance starting NewDeviceAction for the same source.
+            // Usually, new device sends <Report Physical Address> when it's plugged
+            // in. However, TV can detect a new device from HotPlugDetectionAction,
+            // which sends <Give Physical Address> to the source for newly detected
+            // device.
+            if (action.isActionOf(address, path)) {
+                return;
+            }
+        }
+
+        addAndStartAction(new NewDeviceAction(this, address, path));
     }
 
     private void handleNewDeviceAtTheTailOfActivePath(int path) {

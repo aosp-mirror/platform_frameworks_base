@@ -56,7 +56,6 @@ final class NewDeviceAction extends FeatureAction {
      * @param source {@link HdmiCecLocalDevice} instance
      * @param deviceLogicalAddress logical address of the device in interest
      * @param devicePhysicalAddress physical address of the device in interest
-     * @param requireRoutingChange whether to initiate routing change or not
      */
     NewDeviceAction(HdmiCecLocalDevice source, int deviceLogicalAddress,
             int devicePhysicalAddress) {
@@ -68,18 +67,6 @@ final class NewDeviceAction extends FeatureAction {
 
     @Override
     public boolean start() {
-        if (HdmiUtils.getTypeFromAddress(getSourceAddress())
-                == HdmiCecDeviceInfo.DEVICE_AUDIO_SYSTEM) {
-            if (tv().getAvrDeviceInfo() == null) {
-                // TODO: Start system audio initiation action
-            }
-
-            if (shouldTryArcInitiation()) {
-                addAndStartAction(new RequestArcInitiationAction(localDevice(),
-                                mDeviceLogicalAddress));
-            }
-        }
-
         mState = STATE_WAITING_FOR_SET_OSD_NAME;
         if (mayProcessCommandIfCached(mDeviceLogicalAddress, Constants.MESSAGE_SET_OSD_NAME)) {
             return true;
@@ -89,10 +76,6 @@ final class NewDeviceAction extends FeatureAction {
                 mDeviceLogicalAddress));
         addTimer(mState, HdmiConfig.TIMEOUT_MS);
         return true;
-    }
-
-    private boolean shouldTryArcInitiation() {
-         return tv().isConnectedToArcPort(mDevicePhysicalAddress) && tv().isArcFeatureEnabled();
     }
 
     @Override
@@ -172,6 +155,23 @@ final class NewDeviceAction extends FeatureAction {
                 mDeviceLogicalAddress, mDevicePhysicalAddress,
                 HdmiUtils.getTypeFromAddress(mDeviceLogicalAddress),
                 mVendorId, mDisplayName));
+
+        if (HdmiUtils.getTypeFromAddress(mDeviceLogicalAddress)
+                == HdmiCecDeviceInfo.DEVICE_AUDIO_SYSTEM) {
+            if (tv().getSystemAudioMode()) {
+                addAndStartAction(new SystemAudioAutoInitiationAction(localDevice(),
+                        mDeviceLogicalAddress));
+            }
+
+            if (shouldTryArcInitiation()) {
+                addAndStartAction(new RequestArcInitiationAction(localDevice(),
+                        mDeviceLogicalAddress));
+            }
+        }
+    }
+
+    private boolean shouldTryArcInitiation() {
+        return tv().isConnectedToArcPort(mDevicePhysicalAddress) && tv().isArcFeatureEnabled();
     }
 
     @Override
@@ -187,5 +187,9 @@ final class NewDeviceAction extends FeatureAction {
             addDeviceInfo();
             finish();
         }
+    }
+
+    boolean isActionOf(int address, int path) {
+        return (mDeviceLogicalAddress == address) && (mDevicePhysicalAddress == path);
     }
 }
