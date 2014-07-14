@@ -657,6 +657,6 @@ interface ITelephony {
     /**
      * Similar to above, but check for pkg whose name is pkgname.
      */
-    int hasCarrierPrivileges(String pkgname);
+    int checkCarrierPrivilegesForPackage(String pkgname);
 }
 
