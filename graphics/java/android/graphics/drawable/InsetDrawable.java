@@ -232,6 +232,12 @@ public class InsetDrawable extends Drawable implements Drawable.Callback {
         mInsetState.mDrawable.setHotspotBounds(left, top, right, bottom);
     }
 
+    /** @hide */
+    @Override
+    public void getHotspotBounds(Rect outRect) {
+        mInsetState.mDrawable.getHotspotBounds(outRect);
+    }
+
     @Override
     public boolean setVisible(boolean visible, boolean restart) {
         mInsetState.mDrawable.setVisible(visible, restart);

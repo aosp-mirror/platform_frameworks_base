@@ -52,6 +52,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
      */
     private static final boolean DEFAULT_DITHER = true;
     private DrawableContainerState mDrawableContainerState;
+    private Rect mHotspotBounds;
     private Drawable mCurrDrawable;
     private int mAlpha = 0xFF;
 
@@ -273,8 +274,24 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
 
     @Override
     public void setHotspotBounds(int left, int top, int right, int bottom) {
+        if (mHotspotBounds == null) {
+            mHotspotBounds = new Rect(left, top, bottom, right);
+        } else {
+            mHotspotBounds.set(left, top, bottom, right);
+        }
+
         if (mCurrDrawable != null) {
             mCurrDrawable.setHotspotBounds(left, top, right, bottom);
+        }
+    }
+
+    /** @hide */
+    @Override
+    public void getHotspotBounds(Rect outRect) {
+        if (mHotspotBounds != null) {
+            outRect.set(mHotspotBounds);
+        } else {
+            super.getHotspotBounds(outRect);
         }
     }
 
@@ -430,6 +447,12 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
                 d.setBounds(getBounds());
                 d.setLayoutDirection(getLayoutDirection());
                 d.setAutoMirrored(mDrawableContainerState.mAutoMirrored);
+
+                final Rect hotspotBounds = mHotspotBounds;
+                if (hotspotBounds != null) {
+                    d.setHotspotBounds(hotspotBounds.left, hotspotBounds.top,
+                            hotspotBounds.right, hotspotBounds.bottom);
+                }
             }
         } else {
             mCurrDrawable = null;

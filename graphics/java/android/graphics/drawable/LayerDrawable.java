@@ -80,6 +80,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     private int[] mPaddingB;
 
     private final Rect mTmpRect = new Rect();
+    private Rect mHotspotBounds;
     private boolean mMutated;
 
     /**
@@ -629,6 +630,22 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         final int N = mLayerState.mNum;
         for (int i = 0; i < N; i++) {
             array[i].mDrawable.setHotspotBounds(left, top, right, bottom);
+        }
+
+        if (mHotspotBounds == null) {
+            mHotspotBounds = new Rect(left, top, right, bottom);
+        } else {
+            mHotspotBounds.set(left, top, right, bottom);
+        }
+    }
+
+    /** @hide */
+    @Override
+    public void getHotspotBounds(Rect outRect) {
+        if (mHotspotBounds != null) {
+            outRect.set(mHotspotBounds);
+        } else {
+            super.getHotspotBounds(outRect);
         }
     }
 
