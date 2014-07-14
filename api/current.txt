@@ -28419,6 +28419,7 @@ package android.telephony {
     method public int hasCarrierPrivileges();
     method public boolean hasIccCard();
     method public boolean isNetworkRoaming();
+    method public boolean isSmsCapable();
     method public void listen(android.telephony.PhoneStateListener, int);
     field public static final java.lang.String ACTION_PHONE_STATE_CHANGED = "android.intent.action.PHONE_STATE";
     field public static final java.lang.String ACTION_RESPOND_VIA_MESSAGE = "android.intent.action.RESPOND_VIA_MESSAGE";

@@ -2275,8 +2275,6 @@ public class TelephonyManager {
      * <p>
      * Note: Voicemail waiting sms, cell broadcasting sms, and MMS are
      *       disabled when device doesn't support sms.
-     *
-     * @hide pending API review
      */
     public boolean isSmsCapable() {
         if (mContext == null) return true;
