@@ -20,6 +20,8 @@ import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.NetworkStatsHistory.FIELD_RX_BYTES;
 import static android.net.NetworkStatsHistory.FIELD_TX_BYTES;
 import static android.telephony.TelephonyManager.SIM_STATE_READY;
+import static android.text.format.DateUtils.FORMAT_ABBREV_MONTH;
+import static android.text.format.DateUtils.FORMAT_SHOW_DATE;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -33,19 +35,23 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.telephony.TelephonyManager;
 import android.text.format.DateUtils;
+import android.text.format.Time;
 import android.util.Log;
 
 import com.android.systemui.statusbar.policy.NetworkController.DataUsageInfo;
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 public class MobileDataController {
     private static final String TAG = "MobileDataController";
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    private static final SimpleDateFormat MMM_D = new SimpleDateFormat("MMM d");
+    private static final long DEFAULT_WARNING_LEVEL = 2L * 1024 * 1024 * 1024;
     private static final int FIELDS = FIELD_RX_BYTES | FIELD_TX_BYTES;
+    private static final StringBuilder PERIOD_BUILDER = new StringBuilder(50);
+    private static final java.util.Formatter PERIOD_FORMATTER = new java.util.Formatter(
+            PERIOD_BUILDER, Locale.getDefault());
 
     private final Context mContext;
     private final TelephonyManager mTelephonyManager;
@@ -87,6 +93,13 @@ public class MobileDataController {
         return null;
     }
 
+    private static Time addMonth(Time t, int months) {
+        final Time rt = new Time(t);
+        rt.set(t.monthDay, t.month + months, t.year);
+        rt.normalize(false);
+        return rt;
+    }
+
     public DataUsageInfo getDataUsageInfo() {
         final String subscriberId = getActiveSubscriberId(mContext);
         if (subscriberId == null) {
@@ -101,9 +114,28 @@ public class MobileDataController {
         try {
             final NetworkStatsHistory history = mSession.getHistoryForNetwork(template, FIELDS);
             final long now = System.currentTimeMillis();
-            // period = last 4 wks for now
-            final long start = now - DateUtils.WEEK_IN_MILLIS * 4;
-            final long end = now;
+            final long start, end;
+            if (policy != null && policy.cycleDay > 0) {
+                // period = determined from cycleDay
+                if (DEBUG) Log.d(TAG, "Cycle day=" + policy.cycleDay + " tz="
+                        + policy.cycleTimezone);
+                final Time nowTime = new Time(policy.cycleTimezone);
+                nowTime.setToNow();
+                final Time policyTime = new Time(nowTime);
+                policyTime.set(policy.cycleDay, policyTime.month, policyTime.year);
+                policyTime.normalize(false);
+                if (nowTime.after(policyTime)) {
+                    start = policyTime.toMillis(false);
+                    end = addMonth(policyTime, 1).toMillis(false);
+                } else {
+                    start = addMonth(policyTime, -1).toMillis(false);
+                    end = policyTime.toMillis(false);
+                }
+            } else {
+                // period = last 4 wks
+                end = now;
+                start = now - DateUtils.WEEK_IN_MILLIS * 4;
+            }
             final long callStart = System.currentTimeMillis();
             final NetworkStatsHistory.Entry entry = history.getValues(start, end, now, null);
             final long callEnd = System.currentTimeMillis();
@@ -115,12 +147,13 @@ public class MobileDataController {
             }
             final long totalBytes = entry.rxBytes + entry.txBytes;
             final DataUsageInfo usage = new DataUsageInfo();
-            usage.maxLevel = (long) (totalBytes / .4);
             usage.usageLevel = totalBytes;
-            usage.period = MMM_D.format(new Date(start)) + " - " + MMM_D.format(new Date(end));
+            usage.period = formatDateRange(start, end);
             if (policy != null) {
                 usage.limitLevel = policy.limitBytes > 0 ? policy.limitBytes : 0;
                 usage.warningLevel = policy.warningBytes > 0 ? policy.warningBytes : 0;
+            } else {
+                usage.warningLevel = DEFAULT_WARNING_LEVEL;
             }
             return usage;
         } catch (RemoteException e) {
@@ -176,6 +209,15 @@ public class MobileDataController {
         final TelephonyManager tele = TelephonyManager.from(context);
         final String actualSubscriberId = tele.getSubscriberId();
         return actualSubscriberId;
+    }
+
+    private String formatDateRange(long start, long end) {
+        final int flags = FORMAT_SHOW_DATE | FORMAT_ABBREV_MONTH;
+        synchronized (PERIOD_BUILDER) {
+            PERIOD_BUILDER.setLength(0);
+            return DateUtils.formatDateRange(mContext, PERIOD_FORMATTER, start, end, flags, null)
+                    .toString();
+        }
     }
 
     public interface Callback {
