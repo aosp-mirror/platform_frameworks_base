@@ -230,7 +230,7 @@ public abstract class PrintService extends Service {
      *
      * @see #EXTRA_PRINT_JOB_INFO
      */
-    public static final String EXTRA_PRINTER_INFO = "android.intent.extra.print.PRINTER_INFO";
+    public static final String EXTRA_PRINTER_INFO = "android.intent.extra.print.EXTRA_PRINTER_INFO";
 
     private Handler mHandler;
 
