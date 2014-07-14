@@ -48,22 +48,6 @@ public enum CallState {
     RINGING,
 
     /**
-     * Indicates that the call is active but in a "post-dial" state where Telecomm is now sending
-     * some dual-tone multi-frequency signaling (DTMF) tones appended to the dialed number. Normal
-     * transitions are to {@link #POST_DIAL_WAIT} when the post-dial string requires user
-     * confirmation to proceed, {@link #ACTIVE} when the post-dial tones are completed, or
-     * {@link #DISCONNECTED}.
-     */
-    POST_DIAL,
-
-    /**
-     * Indicates that the call was in the {@link #POST_DIAL} state but is now waiting for user
-     * confirmation before the remaining digits can be sent. Normal transitions are to
-     * {@link #POST_DIAL} when the user asks Telecomm to proceed with the post-dial sequence.
-     */
-    POST_DIAL_WAIT,
-
-    /**
      * Indicates that a call is currently connected to another party and a communication channel is
      * open between them. The normal transition to this state is by the user answering a
      * {@link #DIALING} call or a {@link #RINGING} call being answered by the other party.
