@@ -653,5 +653,10 @@ interface ITelephony {
      * @return carrier privelege status defined in TelephonyManager.
      */
     int hasCarrierPrivileges();
+
+    /**
+     * Similar to above, but check for pkg whose name is pkgname.
+     */
+    int hasCarrierPrivileges(String pkgname);
 }
 
