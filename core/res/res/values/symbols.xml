@@ -610,10 +610,14 @@
   <java-symbol type="string" name="lock_to_app_description" />
   <java-symbol type="string" name="lock_to_app_negative" />
   <java-symbol type="string" name="lock_to_app_positive" />
-  <java-symbol type="drawable" name="ic_recent" />
-  <java-symbol type="layout" name="lock_to_app_enter" />
-  <java-symbol type="layout" name="lock_to_app_exit" />
-  <java-symbol type="drawable" name="lock_task_notify_bg" />
+  <java-symbol type="layout" name="lock_to_app_checkbox" />
+  <java-symbol type="id" name="lock_to_app_checkbox" />
+  <java-symbol type="string" name="lock_to_app_start" />
+  <java-symbol type="string" name="lock_to_app_exit" />
+  <java-symbol type="string" name="lock_to_app_use_screen_lock" />
+  <java-symbol type="string" name="lock_to_app_unlock_pin" />
+  <java-symbol type="string" name="lock_to_app_unlock_pattern" />
+  <java-symbol type="string" name="lock_to_app_unlock_password" />
   <java-symbol type="string" name="lockscreen_access_pattern_cell_added" />
   <java-symbol type="string" name="lockscreen_access_pattern_cleared" />
   <java-symbol type="string" name="lockscreen_access_pattern_detected" />
