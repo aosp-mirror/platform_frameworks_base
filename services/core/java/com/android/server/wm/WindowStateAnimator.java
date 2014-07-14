@@ -717,10 +717,10 @@ class WindowStateAnimator {
             float top = w.mFrame.top + w.mYOffset;
 
             // Adjust for surface insets.
-            width += attrs.shadowInsets.left + attrs.shadowInsets.right;
-            height += attrs.shadowInsets.top + attrs.shadowInsets.bottom;
-            left -= attrs.shadowInsets.left;
-            top -= attrs.shadowInsets.top;
+            width += attrs.surfaceInsets.left + attrs.surfaceInsets.right;
+            height += attrs.surfaceInsets.top + attrs.surfaceInsets.bottom;
+            left -= attrs.surfaceInsets.left;
+            top -= attrs.surfaceInsets.top;
 
             if (DEBUG_VISIBILITY) {
                 Slog.v(TAG, "Creating surface in session "
@@ -1140,19 +1140,12 @@ class WindowStateAnimator {
 
     void applyDecorRect(final Rect decorRect) {
         final WindowState w = mWin;
-        int width = w.mFrame.width();
-        int height = w.mFrame.height();
+        final int width = w.mFrame.width();
+        final int height = w.mFrame.height();
 
         // Compute the offset of the window in relation to the decor rect.
-        int left = w.mXOffset + w.mFrame.left;
-        int top = w.mYOffset + w.mFrame.top;
-
-        // Adjust for surface insets.
-        final WindowManager.LayoutParams attrs = w.mAttrs;
-        width += attrs.shadowInsets.left + attrs.shadowInsets.right;
-        height += attrs.shadowInsets.top + attrs.shadowInsets.bottom;
-        left -= attrs.shadowInsets.left;
-        top -= attrs.shadowInsets.top;
+        final int left = w.mXOffset + w.mFrame.left;
+        final int top = w.mYOffset + w.mFrame.top;
 
         // Initialize the decor rect to the entire frame.
         w.mSystemDecorRect.set(0, 0, width, height);
@@ -1182,7 +1175,6 @@ class WindowStateAnimator {
         if (displayContent == null) {
             return;
         }
-        DisplayInfo displayInfo = displayContent.getDisplayInfo();
 
         // Need to recompute a new system decor rect each time.
         if ((w.mAttrs.flags & LayoutParams.FLAG_SCALED) != 0) {
@@ -1192,6 +1184,7 @@ class WindowStateAnimator {
         } else if (!w.isDefaultDisplay()) {
             // On a different display there is no system decor.  Crop the window
             // by the screen boundaries.
+            final DisplayInfo displayInfo = displayContent.getDisplayInfo();
             w.mSystemDecorRect.set(0, 0, w.mCompatFrame.width(), w.mCompatFrame.height());
             w.mSystemDecorRect.intersect(-w.mCompatFrame.left, -w.mCompatFrame.top,
                     displayInfo.logicalWidth - w.mCompatFrame.left,
@@ -1202,43 +1195,51 @@ class WindowStateAnimator {
             // windows need to be cropped by the screen, so they don't cover
             // the universe background.
             if (mAnimator.mUniverseBackground == null) {
-                w.mSystemDecorRect.set(0, 0, w.mCompatFrame.width(),
-                        w.mCompatFrame.height());
+                w.mSystemDecorRect.set(0, 0, w.mCompatFrame.width(), w.mCompatFrame.height());
             } else {
                 applyDecorRect(mService.mScreenRect);
             }
         } else if (w.mAttrs.type == WindowManager.LayoutParams.TYPE_UNIVERSE_BACKGROUND
                 || w.mDecorFrame.isEmpty()) {
             // The universe background isn't cropped, nor windows without policy decor.
-            w.mSystemDecorRect.set(0, 0, w.mCompatFrame.width(),
-                    w.mCompatFrame.height());
+            w.mSystemDecorRect.set(0, 0, w.mCompatFrame.width(), w.mCompatFrame.height());
         } else {
             // Crop to the system decor specified by policy.
             applyDecorRect(w.mDecorFrame);
         }
 
-        // By default, the clip rect is the system decor rect
-        Rect clipRect = w.mSystemDecorRect;
-        if (mHasClipRect) {
+        // By default, the clip rect is the system decor.
+        final Rect clipRect = mTmpClipRect;
+        clipRect.set(w.mSystemDecorRect);
 
-            // If we have an animated clip rect, intersect it with the system decor rect
-            // NOTE: We are adding a temporary workaround due to the status bar not always reporting
-            // the correct system decor rect.  In such cases, we take into account the specified
-            // content insets as well.
-            int offsetTop = Math.max(w.mSystemDecorRect.top, w.mContentInsets.top);
-            mTmpClipRect.set(w.mSystemDecorRect);
-            // Don't apply the workaround to apps explicitly requesting fullscreen layout.
+        // Expand the clip rect for surface insets.
+        final WindowManager.LayoutParams attrs = w.mAttrs;
+        clipRect.left -= attrs.surfaceInsets.left;
+        clipRect.top -= attrs.surfaceInsets.top;
+        clipRect.right += attrs.surfaceInsets.right;
+        clipRect.bottom += attrs.surfaceInsets.bottom;
+
+        // If we have an animated clip rect, intersect it with the clip rect.
+        if (mHasClipRect) {
+            // NOTE: We are adding a temporary workaround due to the status bar
+            // not always reporting the correct system decor rect. In such
+            // cases, we take into account the specified content insets as well.
             if ((w.mSystemUiVisibility & SYSTEM_UI_FLAGS_LAYOUT_STABLE_FULLSCREEN)
                     == SYSTEM_UI_FLAGS_LAYOUT_STABLE_FULLSCREEN) {
-                mTmpClipRect.intersect(mClipRect);
+                // Don't apply the workaround to apps explicitly requesting
+                // fullscreen layout.
+                clipRect.intersect(mClipRect);
             } else {
-                mTmpClipRect.offset(0, -offsetTop);
-                mTmpClipRect.intersect(mClipRect);
-                mTmpClipRect.offset(0, offsetTop);
+                final int offsetTop = Math.max(clipRect.top, w.mContentInsets.top);
+                clipRect.offset(0, -offsetTop);
+                clipRect.intersect(mClipRect);
+                clipRect.offset(0, offsetTop);
             }
-            clipRect = mTmpClipRect;
-
         }
+
+        // The clip rect was generated assuming (0,0) as the window origin,
+        // so we need to translate to match the actual surface coordinates.
+        clipRect.offset(attrs.surfaceInsets.left, attrs.surfaceInsets.top);
 
         if (!clipRect.equals(mLastClipRect)) {
             mLastClipRect.set(clipRect);
@@ -1285,10 +1286,10 @@ class WindowStateAnimator {
 
         // Adjust for surface insets.
         final LayoutParams attrs = w.getAttrs();
-        width += attrs.shadowInsets.left + attrs.shadowInsets.right;
-        height += attrs.shadowInsets.top + attrs.shadowInsets.bottom;
-        left -= attrs.shadowInsets.left;
-        top -= attrs.shadowInsets.top;
+        width += attrs.surfaceInsets.left + attrs.surfaceInsets.right;
+        height += attrs.surfaceInsets.top + attrs.surfaceInsets.bottom;
+        left -= attrs.surfaceInsets.left;
+        top -= attrs.surfaceInsets.top;
 
         final boolean surfaceMoved = mSurfaceX != left || mSurfaceY != top;
         if (surfaceMoved) {

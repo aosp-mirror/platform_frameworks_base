@@ -1298,7 +1298,7 @@ public interface WindowManager extends ViewManager {
          *
          * @hide
          */
-        public Rect shadowInsets = new Rect();
+        public Rect surfaceInsets = new Rect();
     
         /**
          * The desired bitmap format.  May be one of the constants in
@@ -1580,10 +1580,10 @@ public interface WindowManager extends ViewManager {
             out.writeInt(hasSystemUiListeners ? 1 : 0);
             out.writeInt(inputFeatures);
             out.writeLong(userActivityTimeout);
-            out.writeInt(shadowInsets.left);
-            out.writeInt(shadowInsets.top);
-            out.writeInt(shadowInsets.right);
-            out.writeInt(shadowInsets.bottom);
+            out.writeInt(surfaceInsets.left);
+            out.writeInt(surfaceInsets.top);
+            out.writeInt(surfaceInsets.right);
+            out.writeInt(surfaceInsets.bottom);
         }
         
         public static final Parcelable.Creator<LayoutParams> CREATOR
@@ -1626,7 +1626,10 @@ public interface WindowManager extends ViewManager {
             hasSystemUiListeners = in.readInt() != 0;
             inputFeatures = in.readInt();
             userActivityTimeout = in.readLong();
-            shadowInsets.set(in.readInt(), in.readInt(), in.readInt(), in.readInt());
+            surfaceInsets.left = in.readInt();
+            surfaceInsets.top = in.readInt();
+            surfaceInsets.right = in.readInt();
+            surfaceInsets.bottom = in.readInt();
         }
     
         @SuppressWarnings({"PointlessBitwiseExpression"})
@@ -1658,7 +1661,7 @@ public interface WindowManager extends ViewManager {
         /** {@hide} */
         public static final int TRANSLUCENT_FLAGS_CHANGED = 1<<19;
         /** {@hide} */
-        public static final int SHADOW_INSETS_CHANGED = 1<<20;
+        public static final int SURFACE_INSETS_CHANGED = 1<<20;
         /** {@hide} */
         public static final int EVERYTHING_CHANGED = 0xffffffff;
 
@@ -1794,9 +1797,9 @@ public interface WindowManager extends ViewManager {
                 changes |= USER_ACTIVITY_TIMEOUT_CHANGED;
             }
 
-            if (!shadowInsets.equals(o.shadowInsets)) {
-                shadowInsets.set(o.shadowInsets);
-                changes |= SHADOW_INSETS_CHANGED;
+            if (!surfaceInsets.equals(o.surfaceInsets)) {
+                surfaceInsets.set(o.surfaceInsets);
+                changes |= SURFACE_INSETS_CHANGED;
             }
 
             return changes;
@@ -1898,8 +1901,8 @@ public interface WindowManager extends ViewManager {
             if (userActivityTimeout >= 0) {
                 sb.append(" userActivityTimeout=").append(userActivityTimeout);
             }
-            if (!shadowInsets.equals(Insets.NONE)) {
-                sb.append(" shadowInsets=").append(shadowInsets);
+            if (!surfaceInsets.equals(Insets.NONE)) {
+                sb.append(" surfaceInsets=").append(surfaceInsets);
             }
             sb.append('}');
             return sb.toString();

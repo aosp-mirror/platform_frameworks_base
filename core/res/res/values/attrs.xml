@@ -1826,6 +1826,9 @@
              Activity Transition. Corresponds to
              {@link android.view.Window#setTransitionBackgroundFadeDuration(long)}. -->
         <attr name="windowTransitionBackgroundFadeDuration" />
+
+        <!-- Elevation to use for the window. -->
+        <attr name="windowElevation" format="dimension" />
     </declare-styleable>
 
     <!-- The set of attributes that describe a AlertDialog's theme. -->

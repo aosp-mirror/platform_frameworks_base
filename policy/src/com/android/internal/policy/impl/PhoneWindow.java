@@ -208,6 +208,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     private Drawable mBackgroundDrawable;
 
+    private float mElevation;
+
     private int mFrameResource = 0;
 
     private int mTextColor = 0;
@@ -3251,6 +3253,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                             + Integer.toHexString(mFrameResource));
                 }
             }
+            mElevation = a.getDimension(com.android.internal.R.styleable.Window_windowElevation, 0);
             mTextColor = a.getColor(com.android.internal.R.styleable.Window_textColor, 0xFF000000);
         }
 
@@ -3340,27 +3343,30 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         // Remaining setup -- of background and title -- that only applies
         // to top-level windows.
         if (getContainer() == null) {
-            Drawable drawable = mBackgroundDrawable;
+            final Drawable background;
             if (mBackgroundResource != 0) {
-                drawable = getContext().getDrawable(mBackgroundResource);
+                background = getContext().getDrawable(mBackgroundResource);
+            } else {
+                background = mBackgroundDrawable;
             }
-            mDecor.setWindowBackground(drawable);
-            drawable = null;
+            mDecor.setWindowBackground(background);
+
+            final Drawable frame;
             if (mFrameResource != 0) {
-                drawable = getContext().getDrawable(mFrameResource);
+                frame = getContext().getDrawable(mFrameResource);
+            } else {
+                frame = null;
             }
-            mDecor.setWindowFrame(drawable);
+            mDecor.setWindowFrame(frame);
 
-            // System.out.println("Text=" + Integer.toHexString(mTextColor) +
-            // " Sel=" + Integer.toHexString(mTextSelectedColor) +
-            // " Title=" + Integer.toHexString(mTitleColor));
-
-            if (mTitleColor == 0) {
-                mTitleColor = mTextColor;
-            }
+            mDecor.setElevation(mElevation);
 
             if (mTitle != null) {
                 setTitle(mTitle);
+            }
+
+            if (mTitleColor == 0) {
+                mTitleColor = mTextColor;
             }
             setTitleColor(mTitleColor);
         }
