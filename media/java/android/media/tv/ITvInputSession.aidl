@@ -33,6 +33,7 @@ oneway interface ITvInputSession {
     // is to introduce some new concepts that will solve a number of problems in audio policy today.
     void setVolume(float volume);
     void tune(in Uri channelUri);
+    void setCaptionEnabled(boolean enabled);
     void selectTrack(in TvTrackInfo track);
     void unselectTrack(in TvTrackInfo track);
 

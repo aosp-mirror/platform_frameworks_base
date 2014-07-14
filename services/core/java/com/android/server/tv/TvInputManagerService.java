@@ -861,6 +861,26 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
+        public void setCaptionEnabled(IBinder sessionToken, boolean enabled, int userId) {
+            final int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
+                    userId, "setCaptionEnabled");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        getSessionLocked(sessionToken, callingUid, resolvedUserId)
+                                .setCaptionEnabled(enabled);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "error in setCaptionEnabled", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
         public void selectTrack(IBinder sessionToken, TvTrackInfo track, int userId) {
             final int callingUid = Binder.getCallingUid();
             final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,

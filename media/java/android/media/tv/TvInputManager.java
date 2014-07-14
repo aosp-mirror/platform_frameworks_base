@@ -35,7 +35,6 @@ import android.view.Surface;
 import android.view.View;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -569,6 +568,23 @@ public final class TvInputManager {
             mTracks = null;
             try {
                 mService.tune(mToken, channelUri, mUserId);
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        /**
+         * Enables or disables the caption for this session.
+         *
+         * @param enabled {@code true} to enable, {@code false} to disable.
+         */
+        public void setCaptionEnabled(boolean enabled) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.setCaptionEnabled(mToken, enabled, mUserId);
             } catch (RemoteException e) {
                 throw new RuntimeException(e);
             }

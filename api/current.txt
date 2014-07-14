@@ -16171,6 +16171,7 @@ package android.media.tv {
     method public boolean onKeyUp(int, android.view.KeyEvent);
     method public abstract void onRelease();
     method public boolean onSelectTrack(android.media.tv.TvTrackInfo);
+    method public abstract void onSetCaptionEnabled(boolean);
     method public abstract void onSetStreamVolume(float);
     method public abstract boolean onSetSurface(android.view.Surface);
     method public boolean onTouchEvent(android.view.MotionEvent);
@@ -16220,6 +16221,7 @@ package android.media.tv {
     method public boolean onUnhandledInputEvent(android.view.InputEvent);
     method public void reset();
     method public void selectTrack(android.media.tv.TvTrackInfo);
+    method public void setCaptionEnabled(boolean);
     method public void setOnUnhandledInputEventListener(android.media.tv.TvView.OnUnhandledInputEventListener);
     method public void setStreamVolume(float);
     method public void setTvInputListener(android.media.tv.TvView.TvInputListener);
