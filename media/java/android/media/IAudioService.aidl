@@ -195,6 +195,8 @@ interface IAudioService {
 
     void setVolumeController(in IVolumeController controller);
 
+    void notifyVolumeControllerVisible(in IVolumeController controller, boolean visible);
+
     boolean isStreamAffectedByRingerMode(int streamType);
 
     void disableSafeMediaVolume();

@@ -99,6 +99,13 @@ public class VolumeUI extends SystemUI {
                     kvm.userActivity();
                 }
             }
+
+            @Override
+            public void onVisible(boolean visible) {
+                if (mAudioManager != null && mVolumeController != null) {
+                    mAudioManager.notifyVolumeControllerVisible(mVolumeController, visible);
+                }
+            }
         });
         mDialogPanel = mPanel;
     }

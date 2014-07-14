@@ -61,6 +61,7 @@ import android.os.PowerManager;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.Vibrator;
@@ -810,6 +811,9 @@ public class AudioService extends IAudioService.Stub {
 
         // Restore the default media button receiver from the system settings
         mMediaFocusControl.restoreMediaButtonReceiver();
+
+        // Load settings for the volume controller
+        mVolumeController.loadSettings(cr);
     }
 
     private int rescaleIndex(int index, int srcStream, int dstStream) {
@@ -851,12 +855,21 @@ public class AudioService extends IAudioService.Stub {
         } else {
             streamType = getActiveStreamType(suggestedStreamType);
         }
+        final int resolvedStream = mStreamVolumeAlias[streamType];
 
         // Play sounds on STREAM_RING and STREAM_REMOTE_MUSIC only.
         if ((streamType != STREAM_REMOTE_MUSIC) &&
                 (flags & AudioManager.FLAG_PLAY_SOUND) != 0 &&
-                (mStreamVolumeAlias[streamType] != AudioSystem.STREAM_RING)) {
+                resolvedStream != AudioSystem.STREAM_RING) {
             flags &= ~AudioManager.FLAG_PLAY_SOUND;
+        }
+
+        // For notifications/ring, show the ui before making any adjustments
+        if (mVolumeController.suppressAdjustment(resolvedStream, flags)) {
+            direction = 0;
+            flags &= ~AudioManager.FLAG_PLAY_SOUND;
+            flags &= ~AudioManager.FLAG_VIBRATE;
+            if (DEBUG_VOL) Log.d(TAG, "Volume controller suppressed adjustment");
         }
 
         if (streamType == STREAM_REMOTE_MUSIC) {
@@ -4955,15 +4968,65 @@ public class AudioService extends IAudioService.Stub {
             }
         }
         mVolumeController.setController(controller);
+        if (DEBUG_VOL) Log.d(TAG, "Volume controller: " + mVolumeController);
+    }
+
+    @Override
+    public void notifyVolumeControllerVisible(final IVolumeController controller, boolean visible) {
+        enforceSelfOrSystemUI("notify about volume controller visibility");
+
+        // return early if the controller is not current
+        if (!mVolumeController.isSameBinder(controller)) {
+            return;
+        }
+
+        mVolumeController.setVisible(visible);
+        if (DEBUG_VOL) Log.d(TAG, "Volume controller visible: " + visible);
     }
 
     public static class VolumeController {
         private static final String TAG = "VolumeController";
 
         private IVolumeController mController;
+        private boolean mVisible;
+        private long mNextLongPress;
+        private int mLongPressTimeout;
 
         public void setController(IVolumeController controller) {
             mController = controller;
+            mVisible = false;
+        }
+
+        public void loadSettings(ContentResolver cr) {
+            mLongPressTimeout = Settings.Secure.getIntForUser(cr,
+                    Settings.Secure.LONG_PRESS_TIMEOUT, 500, UserHandle.USER_CURRENT);
+        }
+
+        public boolean suppressAdjustment(int resolvedStream, int flags) {
+            boolean suppress = false;
+            if (resolvedStream == AudioSystem.STREAM_RING && mController != null) {
+                final long now = SystemClock.uptimeMillis();
+                if ((flags & AudioManager.FLAG_SHOW_UI) != 0 && !mVisible) {
+                    // ui will become visible
+                    if (mNextLongPress < now) {
+                        mNextLongPress = now + mLongPressTimeout;
+                    }
+                    suppress = true;
+                } else if (mNextLongPress > 0) {  // in a long-press
+                    if (now > mNextLongPress) {
+                        // long press triggered, no more suppression
+                        mNextLongPress = 0;
+                    } else {
+                        // keep suppressing until the long press triggers
+                        suppress = true;
+                    }
+                }
+            }
+            return suppress;
+        }
+
+        public void setVisible(boolean visible) {
+            mVisible = visible;
         }
 
         public boolean isSameBinder(IVolumeController controller) {
@@ -4980,7 +5043,7 @@ public class AudioService extends IAudioService.Stub {
 
         @Override
         public String toString() {
-            return "VolumeController(" + asBinder() + ")";
+            return "VolumeController(" + asBinder() + ",mVisible=" + mVisible + ")";
         }
 
         public void postDisplaySafeVolumeWarning(int flags) {
