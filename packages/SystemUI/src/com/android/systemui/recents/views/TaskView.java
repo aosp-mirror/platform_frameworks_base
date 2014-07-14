@@ -46,8 +46,9 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
     interface TaskViewCallbacks {
         public void onTaskViewAppIconClicked(TaskView tv);
         public void onTaskViewAppInfoClicked(TaskView tv);
-        public void onTaskViewClicked(TaskView tv, Task t, boolean lockToTask);
+        public void onTaskViewClicked(TaskView tv, Task task, boolean lockToTask);
         public void onTaskViewDismissed(TaskView tv);
+        public void onTaskViewClipStateChanged(TaskView tv);
     }
 
     RecentsConfiguration mConfig;
@@ -65,7 +66,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
     boolean mIsFocused;
     boolean mIsStub;
     boolean mClipViewInStack;
-    Rect mTmpRect = new Rect();
+    int mClipFromBottom;
     Paint mLayerPaint = new Paint();
 
     TaskThumbnailView mThumbnailView;
@@ -118,7 +119,9 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         setOutlineProvider(new ViewOutlineProvider() {
             @Override
             public boolean getOutline(View view, Outline outline) {
-                int height = getHeight() - mMaxFooterHeight + mFooterHeight;
+                // The current height is measured with the footer, so account for the footer height
+                // and the current clip (in the stack)
+                int height = getMeasuredHeight() - mClipFromBottom - mMaxFooterHeight + mFooterHeight;
                 outline.setRoundRect(0, 0, getWidth(), height,
                         mConfig.taskViewRoundedCornerRadiusPx);
                 return true;
@@ -483,15 +486,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         mBarView.setNoUserInteractionState();
     }
 
-    /** Returns the rect we want to clip (it may not be the full rect) */
-    Rect getClippingRect(Rect outRect) {
-        getHitRect(outRect);
-        // XXX: We should get the hit rect of the thumbnail view and intersect, but this is faster
-        outRect.right = outRect.left + mThumbnailView.getRight();
-        outRect.bottom = outRect.top + mThumbnailView.getBottom();
-        return outRect;
-    }
-
     /** Enable the hw layers on this task view */
     void enableHwLayers() {
         mThumbnailView.setLayerType(View.LAYER_TYPE_HARDWARE, mLayerPaint);
@@ -506,7 +500,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         mLockToAppButtonView.setLayerType(View.LAYER_TYPE_NONE, mLayerPaint);
     }
 
-    /** Sets the stubbed state of this task view. */
+    /** Sets the stubbed state of this task view.
     void setStubState(boolean isStub) {
         if (!mIsStub && isStub) {
             // This is now a stub task view, so clip to the bar height, hide the thumbnail
@@ -519,7 +513,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
             mThumbnailView.setVisibility(View.VISIBLE);
         }
         mIsStub = isStub;
-    }
+    } */
 
     /**
      * Returns whether this view should be clipped, or any views below should clip against this
@@ -533,19 +527,26 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
     void setClipViewInStack(boolean clip) {
         if (clip != mClipViewInStack) {
             mClipViewInStack = clip;
-            if (getParent() instanceof View) {
-                getHitRect(mTmpRect);
-                ((View) getParent()).invalidate(mTmpRect);
-            }
+            mCb.onTaskViewClipStateChanged(this);
+        }
+    }
+
+    void setClipFromBottom(int clipFromBottom) {
+        clipFromBottom = Math.max(0, Math.min(getMeasuredHeight(), clipFromBottom));
+        if (mClipFromBottom != clipFromBottom) {
+            mClipFromBottom = clipFromBottom;
+            invalidateOutline();
         }
     }
 
     /** Sets the footer height. */
-    public void setFooterHeight(int height) {
-        mFooterHeight = height;
-        invalidateOutline();
-        invalidate(0, getMeasuredHeight() - mMaxFooterHeight, getMeasuredWidth(),
-                getMeasuredHeight());
+    public void setFooterHeight(int footerHeight) {
+        if (footerHeight != mFooterHeight) {
+            mFooterHeight = footerHeight;
+            invalidateOutline();
+            invalidate(0, getMeasuredHeight() - mMaxFooterHeight, getMeasuredWidth(),
+                    getMeasuredHeight());
+        }
     }
 
     /** Gets the footer height. */
@@ -677,6 +678,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         mTask = t;
         mTask.setCallbacks(this);
         if (getMeasuredWidth() == 0) {
+            // If we haven't yet measured, we should just set the footer height with any animation
             animateFooterVisibility(t.canLockToTask, 0, 0);
         } else {
             animateFooterVisibility(t.canLockToTask, mConfig.taskViewLockToAppLongAnimDuration, 0);

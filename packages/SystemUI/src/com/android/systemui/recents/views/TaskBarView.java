@@ -162,11 +162,10 @@ class TaskBarView extends FrameLayout {
         }
         // Try and apply the system ui tint
         setBackgroundColor(t.colorPrimary);
-        mActivityDescription.setTextColor(Utilities.getIdealColorForBackgroundColorGreyscale(
-                t.colorPrimaryGreyscale, mConfig.taskBarViewLightTextColor,
-                mConfig.taskBarViewDarkTextColor));
-        mDismissButton.setImageDrawable(Utilities.getIdealResourceForBackgroundColorGreyscale(
-                t.colorPrimaryGreyscale, mLightDismissDrawable, mDarkDismissDrawable));
+        mActivityDescription.setTextColor(t.useLightOnPrimaryColor ?
+                mConfig.taskBarViewLightTextColor : mConfig.taskBarViewDarkTextColor);
+        mDismissButton.setImageDrawable(t.useLightOnPrimaryColor ?
+                mLightDismissDrawable : mDarkDismissDrawable);
     }
 
     /** Unbinds the bar view from the task */

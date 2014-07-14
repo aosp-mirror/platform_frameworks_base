@@ -18,6 +18,7 @@ package com.android.systemui.recents.model;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import com.android.systemui.recents.misc.Utilities;
 
@@ -84,7 +85,7 @@ public class Task {
     public Drawable activityIcon;
     public String activityLabel;
     public int colorPrimary;
-    public int colorPrimaryGreyscale;
+    public boolean useLightOnPrimaryColor;
     public Bitmap thumbnail;
     public boolean isActive;
     public boolean canLockToTask;
@@ -104,7 +105,8 @@ public class Task {
         this.activityLabel = activityTitle;
         this.activityIcon = activityIcon;
         this.colorPrimary = colorPrimary;
-        this.colorPrimaryGreyscale = Utilities.colorToGreyscale(colorPrimary);
+        this.useLightOnPrimaryColor = Utilities.computeContrastBetweenColors(colorPrimary,
+                Color.WHITE) > 3f;
         this.isActive = isActive;
         this.canLockToTask = canLockToTask;
         this.userId = userId;

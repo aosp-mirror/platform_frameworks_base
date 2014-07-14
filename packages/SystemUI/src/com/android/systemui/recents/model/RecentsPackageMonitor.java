@@ -45,7 +45,7 @@ public class RecentsPackageMonitor extends PackageMonitor {
         mSystemServicesProxy = new SystemServicesProxy(context);
         mCb = cb;
         try {
-            register(context, Looper.getMainLooper(), false);
+            register(context, Looper.getMainLooper(), true);
         } catch (IllegalStateException e) {
             e.printStackTrace();
         }

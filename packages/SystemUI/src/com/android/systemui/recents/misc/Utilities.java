@@ -16,16 +16,10 @@
 
 package com.android.systemui.recents.misc;
 
-import android.app.ActivityManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
-import android.os.ParcelFileDescriptor;
 import com.android.systemui.recents.RecentsConfiguration;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -73,22 +67,25 @@ public class Utilities {
         }
     }
 
-    /** Calculates the luminance-preserved greyscale of a given color. */
-    public static int colorToGreyscale(int color) {
-        return Math.round(0.2126f * Color.red(color) + 0.7152f * Color.green(color) +
-                0.0722f * Color.blue(color));
-    }
+    /** Calculates the constrast between two colors, using the algorithm provided by the WCAG v2. */
+    public static float computeContrastBetweenColors(int bg, int fg) {
+        float bgR = Color.red(bg) / 255f;
+        float bgG = Color.green(bg) / 255f;
+        float bgB = Color.blue(bg) / 255f;
+        bgR = (bgR < 0.03928f) ? bgR / 12.92f : (float) Math.pow((bgR + 0.055f) / 1.055f, 2.4f);
+        bgG = (bgG < 0.03928f) ? bgG / 12.92f : (float) Math.pow((bgG + 0.055f) / 1.055f, 2.4f);
+        bgB = (bgB < 0.03928f) ? bgB / 12.92f : (float) Math.pow((bgB + 0.055f) / 1.055f, 2.4f);
+        float bgL = 0.2126f * bgR + 0.7152f * bgG + 0.0722f * bgB;
+        
+        float fgR = Color.red(fg) / 255f;
+        float fgG = Color.green(fg) / 255f;
+        float fgB = Color.blue(fg) / 255f;
+        fgR = (fgR < 0.03928f) ? fgR / 12.92f : (float) Math.pow((fgR + 0.055f) / 1.055f, 2.4f);
+        fgG = (fgG < 0.03928f) ? fgG / 12.92f : (float) Math.pow((fgG + 0.055f) / 1.055f, 2.4f);
+        fgB = (fgB < 0.03928f) ? fgB / 12.92f : (float) Math.pow((fgB + 0.055f) / 1.055f, 2.4f);
+        float fgL = 0.2126f * fgR + 0.7152f * fgG + 0.0722f * fgB;
 
-    /** Returns the ideal color to draw on top of a specified background color. */
-    public static int getIdealColorForBackgroundColorGreyscale(int greyscale, int lightRes,
-                                                               int darkRes) {
-        return (greyscale < 128) ? lightRes : darkRes;
-    }
-    /** Returns the ideal drawable to draw on top of a specified background color. */
-    public static Drawable getIdealResourceForBackgroundColorGreyscale(int greyscale,
-                                                                       Drawable lightRes,
-                                                                       Drawable darkRes) {
-        return (greyscale < 128) ? lightRes : darkRes;
+        return Math.abs((fgL + 0.05f) / (bgL + 0.05f));
     }
 
     /** Sets some private shadow properties. */
