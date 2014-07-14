@@ -824,15 +824,9 @@ please see styles_device_defaults.xml.
         <item name="textColorLink">?textColorLinkInverse</item>
     </style>
 
-    <style name="TextAppearance.Theme.Dialog" parent="TextAppearance.Theme">
-    </style>
+    <style name="TextAppearance.Theme.Dialog" parent="TextAppearance.Theme" />
 
-    <style name="TextAppearance.Theme.Dialog.AppError">
-        <item name="textColor">#ffffc0c0</item>
-    </style>
-
-    <style name="TextAppearance.Widget">
-    </style>
+    <style name="TextAppearance.Widget" />
 
     <style name="TextAppearance.Widget.Button" parent="TextAppearance.Small.Inverse">
         <item name="textColor">@color/primary_text_light_nodisable</item>

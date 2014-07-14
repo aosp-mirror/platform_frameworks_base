@@ -1011,7 +1011,8 @@ please see themes_device_defaults.xml.
     <style name="Theme.Material.Dialog">
         <item name="windowFrame">@null</item>
         <item name="windowTitleStyle">@style/DialogWindowTitle.Material</item>
-        <item name="windowBackground">@drawable/dialog_background_shadow_material</item>
+        <item name="windowBackground">@drawable/dialog_background_material</item>
+        <item name="windowElevation">@dimen/floating_window_z</item>
         <item name="windowIsFloating">true</item>
         <item name="windowContentOverlay">@null</item>
         <item name="windowAnimationStyle">@style/Animation.Material.Dialog</item>
@@ -1077,6 +1078,7 @@ please see themes_device_defaults.xml.
          its pixels. -->
     <style name="Theme.Material.Dialog.NoFrame">
         <item name="windowBackground">@color/transparent</item>
+        <item name="windowElevation">0dp</item>
         <item name="windowAnimationStyle">@null</item>
         <item name="backgroundDimEnabled">false</item>
         <item name="windowIsTranslucent">true</item>
@@ -1085,7 +1087,6 @@ please see themes_device_defaults.xml.
     </style>
 
     <style name="Theme.Material.Dialog.BaseAlert">
-        <item name="windowBackground">@color/transparent</item>
         <item name="windowTitleStyle">@style/DialogWindowTitle.Material</item>
         <item name="windowMinWidthMajor">@dimen/dialog_min_width_major</item>
         <item name="windowMinWidthMinor">@dimen/dialog_min_width_minor</item>
@@ -1100,6 +1101,7 @@ please see themes_device_defaults.xml.
 
     <style name="Theme.Material.Dialog.BaseTimePicker">
         <item name="windowBackground">@color/transparent</item>
+        <item name="windowElevation">0dp</item>
         <item name="windowTitleStyle">@style/DialogWindowTitle.Material</item>
         <item name="windowContentOverlay">@null</item>
     </style>
@@ -1131,7 +1133,8 @@ please see themes_device_defaults.xml.
     <style name="Theme.Material.Light.Dialog">
         <item name="windowFrame">@null</item>
         <item name="windowTitleStyle">@style/DialogWindowTitle.Material.Light</item>
-        <item name="windowBackground">@drawable/dialog_background_shadow_material</item>
+        <item name="windowBackground">@drawable/dialog_background_material</item>
+        <item name="windowElevation">@dimen/floating_window_z</item>
         <item name="windowIsFloating">true</item>
         <item name="windowContentOverlay">@null</item>
         <item name="windowAnimationStyle">@style/Animation.Material.Dialog</item>
@@ -1203,7 +1206,6 @@ please see themes_device_defaults.xml.
     <style name="Theme.Material.Light.DialogWhenLarge.NoActionBar" parent="@style/Theme.Material.Light.NoActionBar" />
 
     <style name="Theme.Material.Light.Dialog.BaseAlert">
-        <item name="windowBackground">@color/transparent</item>
         <item name="windowTitleStyle">@style/DialogWindowTitle.Material.Light</item>
         <item name="windowMinWidthMajor">@dimen/dialog_min_width_major</item>
         <item name="windowMinWidthMinor">@dimen/dialog_min_width_minor</item>
@@ -1218,6 +1220,7 @@ please see themes_device_defaults.xml.
 
     <style name="Theme.Material.Light.Dialog.BaseTimePicker">
         <item name="windowBackground">@color/transparent</item>
+        <item name="windowElevation">0dp</item>
         <item name="windowTitleStyle">@style/DialogWindowTitle.Material.Light</item>
     </style>
 

@@ -1368,6 +1368,7 @@ package android {
     field public static final int windowContentTransitions = 16843794; // 0x1010412
     field public static final int windowDisablePreview = 16843298; // 0x1010222
     field public static final int windowDrawsSystemBarBackgrounds = 16843858; // 0x1010452
+    field public static final int windowElevation = 16843922; // 0x1010492
     field public static final int windowEnableSplitTouch = 16843543; // 0x1010317
     field public static final int windowEnterAnimation = 16842932; // 0x10100b4
     field public static final int windowEnterTransition = 16843833; // 0x1010439
