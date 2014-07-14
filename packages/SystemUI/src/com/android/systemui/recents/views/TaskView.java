@@ -175,11 +175,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
 
     /** Synchronizes this view's properties with the task's transform */
     void updateViewPropertiesToTaskTransform(TaskViewTransform toTransform, int duration) {
-        if (Console.Enabled) {
-            Console.log(Constants.Log.UI.Draw, "[TaskView|updateViewPropertiesToTaskTransform]",
-                    "duration: " + duration, Console.AnsiPurple);
-        }
-
         // Update the bar view
         mBarView.updateViewPropertiesToTaskTransform(toTransform, duration);
 

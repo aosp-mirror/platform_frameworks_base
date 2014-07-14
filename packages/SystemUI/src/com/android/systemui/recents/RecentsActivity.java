@@ -52,16 +52,23 @@ import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
-/* Activity */
+/**
+ * The main Recents activity that is started from AlternateRecentsComponent.
+ */
 public class RecentsActivity extends Activity implements RecentsView.RecentsViewCallbacks,
         RecentsAppWidgetHost.RecentsAppWidgetHostCallbacks,
         FullscreenTransitionOverlayView.FullScreenTransitionViewCallbacks {
 
+    // Actions and Extras sent from AlternateRecentsComponent
     final static String EXTRA_TRIGGERED_FROM_ALT_TAB = "extra_triggered_from_alt_tab";
     final static String ACTION_START_ENTER_ANIMATION = "action_start_enter_animation";
     final static String ACTION_TOGGLE_RECENTS_ACTIVITY = "action_toggle_recents_activity";
     final static String ACTION_HIDE_RECENTS_ACTIVITY = "action_hide_recents_activity";
 
+    RecentsConfiguration mConfig;
+    boolean mVisible;
+
+    // Top level views
     RecentsView mRecentsView;
     SystemBarScrimViews mScrimViews;
     ViewStub mEmptyViewStub;
@@ -69,29 +76,29 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     ViewStub mFullscreenOverlayStub;
     FullscreenTransitionOverlayView mFullScreenOverlayView;
 
-    RecentsConfiguration mConfig;
-
+    // Search AppWidget
     RecentsAppWidgetHost mAppWidgetHost;
     AppWidgetProviderInfo mSearchAppWidgetInfo;
     AppWidgetHostView mSearchAppWidgetHostView;
 
-    boolean mVisible;
 
     // Runnables to finish the Recents activity
-    FinishRecentsRunnable mFinishRunnable = new FinishRecentsRunnable(true);
+    FinishRecentsRunnable mFinishRunnable = new FinishRecentsRunnable();
     FinishRecentsRunnable mFinishLaunchHomeRunnable;
 
     /**
-     * A Runnable to finish Recents either with/without a transition, and either by calling finish()
-     * or just launching the specified intent.
+     * A common Runnable to finish Recents either by calling finish() (with a custom animation) or
+     * launching Home with some ActivityOptions.  Generally we always launch home when we exit
+     * Recents rather than just finishing the activity since we don't know what is behind Recents in
+     * the task stack.  The only case where we finish() directly is when we are cancelling the full
+     * screen transition from the app.
      */
     class FinishRecentsRunnable implements Runnable {
-        boolean mUseCustomFinishTransition;
         Intent mLaunchIntent;
         ActivityOptions mLaunchOpts;
 
-        public FinishRecentsRunnable(boolean withTransition) {
-            mUseCustomFinishTransition = withTransition;
+        public FinishRecentsRunnable() {
+            // Do nothing
         }
 
         /**
@@ -111,77 +118,66 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
             // Finish Recents
             if (mLaunchIntent != null) {
                 if (mLaunchOpts != null) {
-                    startActivityAsUser(mLaunchIntent, new UserHandle(UserHandle.USER_CURRENT));
+                    startActivityAsUser(mLaunchIntent, UserHandle.CURRENT);
                 } else {
-                    startActivityAsUser(mLaunchIntent, mLaunchOpts.toBundle(),
-                            new UserHandle(UserHandle.USER_CURRENT));
+                    startActivityAsUser(mLaunchIntent, mLaunchOpts.toBundle(), UserHandle.CURRENT);
                 }
             } else {
                 finish();
-                if (mUseCustomFinishTransition) {
-                    overridePendingTransition(R.anim.recents_to_launcher_enter,
-                            R.anim.recents_to_launcher_exit);
-                }
+                overridePendingTransition(R.anim.recents_to_launcher_enter,
+                        R.anim.recents_to_launcher_exit);
             }
         }
     }
 
-    // Broadcast receiver to handle messages from AlternateRecentsComponent
+    /**
+     * Broadcast receiver to handle messages from AlternateRecentsComponent.
+     */
     final BroadcastReceiver mServiceBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if (Console.Enabled) {
-                Console.log(Constants.Log.App.SystemUIHandshake,
-                        "[RecentsActivity|serviceBroadcast]", action, Console.AnsiRed);
-            }
             if (action.equals(ACTION_HIDE_RECENTS_ACTIVITY)) {
                 if (intent.getBooleanExtra(EXTRA_TRIGGERED_FROM_ALT_TAB, false)) {
-                    // Dismiss recents, launching the focused task
-                    dismissRecentsIfVisible();
+                    // If we are hiding from releasing Alt-Tab, dismiss Recents to the focused app
+                    dismissRecentsToFocusedTaskOrHome(false);
                 } else {
-                    // If we are mid-animation into Recents, then reverse it and finish
-                    if (mFullScreenOverlayView == null ||
-                            !mFullScreenOverlayView.cancelAnimateOnEnterRecents(mFinishRunnable)) {
-                        // Otherwise, either finish Recents, or launch Home directly
-                        ReferenceCountedTrigger exitTrigger = new ReferenceCountedTrigger(context,
-                                null, mFinishLaunchHomeRunnable, null);
-                        mRecentsView.startExitToHomeAnimation(
-                                new ViewAnimation.TaskViewExitContext(exitTrigger));
-                    }
+                    // Otherwise, dismiss Recents to Home
+                    dismissRecentsToHome(true);
                 }
             } else if (action.equals(ACTION_TOGGLE_RECENTS_ACTIVITY)) {
-                // Try and unfilter and filtered stacks
-                if (!mRecentsView.unfilterFilteredStacks()) {
-                    // If there are no filtered stacks, dismiss recents and launch the first task
-                    dismissRecentsIfVisible();
-                }
+                // If we are toggling Recents, then first unfilter any filtered stacks first
+                dismissRecentsToFocusedTaskOrHome(true);
             } else if (action.equals(ACTION_START_ENTER_ANIMATION)) {
                 // Try and start the enter animation (or restart it on configuration changed)
                 ReferenceCountedTrigger t = new ReferenceCountedTrigger(context, null, null, null);
                 mRecentsView.startEnterRecentsAnimation(new ViewAnimation.TaskViewEnterContext(
                         mFullScreenOverlayView, t));
-                // Call our callback
                 onEnterAnimationTriggered();
             }
         }
     };
 
-    // Broadcast receiver to handle messages from the system
+    /**
+     * Broadcast receiver to handle messages from the system
+     */
     final BroadcastReceiver mSystemBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if (action.equals(Intent.ACTION_SCREEN_OFF) && mVisible) {
-                mFinishLaunchHomeRunnable.run();
+            if (action.equals(Intent.ACTION_SCREEN_OFF)) {
+                // When the screen turns off, dismiss Recents to Home
+                dismissRecentsToHome(false);
             } else if (action.equals(SearchManager.INTENT_GLOBAL_SEARCH_ACTIVITY_CHANGED)) {
-                // Refresh the search widget
+                // When the search activity changes, update the Search widget
                 refreshSearchWidget();
             }
         }
     };
 
-    // Debug trigger
+    /**
+     * A custom debug trigger to listen for a debug key chord.
+     */
     final DebugTrigger mDebugTrigger = new DebugTrigger(new Runnable() {
         @Override
         public void run() {
@@ -211,15 +207,17 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         mConfig.launchedToTaskId = launchIntent.getIntExtra(
                 AlternateRecentsComponent.EXTRA_TRIGGERED_FROM_TASK_ID, -1);
 
-        // Add the default no-recents layout
-        if (mEmptyView == null) {
-            mEmptyView = mEmptyViewStub.inflate();
-        }
+        // Update the top level view's visibilities
         if (mConfig.launchedWithNoRecentTasks) {
+            if (mEmptyView == null) {
+                mEmptyView = mEmptyViewStub.inflate();
+            }
             mEmptyView.setVisibility(View.VISIBLE);
             mRecentsView.setSearchBarVisibility(View.GONE);
         } else {
-            mEmptyView.setVisibility(View.GONE);
+            if (mEmptyView != null) {
+                mEmptyView.setVisibility(View.GONE);
+            }
             if (mRecentsView.hasSearchBar()) {
                 mRecentsView.setSearchBarVisibility(View.VISIBLE);
             } else {
@@ -227,7 +225,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
             }
         }
 
-        // Show the scrim if we animate into Recents without window transitions
+        // Animate the SystemUI scrims into view
         mScrimViews.prepareEnterRecentsAnimation();
     }
 
@@ -250,12 +248,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                     ssp.unbindSearchAppWidget(mAppWidgetHost, appWidgetId);
                     appWidgetId = -1;
                 }
-                if (Console.Enabled) {
-                    Console.log(Constants.Log.App.SystemUIHandshake,
-                            "[RecentsActivity|onCreate|settings|appWidgetId]",
-                            "Id: " + appWidgetId,
-                            Console.AnsiBlue);
-                }
             }
 
             // If there is no id, then bind a new search app widget
@@ -263,13 +255,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                 Pair<Integer, AppWidgetProviderInfo> widgetInfo =
                         ssp.bindSearchAppWidget(mAppWidgetHost);
                 if (widgetInfo != null) {
-                    if (Console.Enabled) {
-                        Console.log(Constants.Log.App.SystemUIHandshake,
-                                "[RecentsActivity|onCreate|searchWidget]",
-                                "Id: " + widgetInfo.first + " Info: " + widgetInfo.second,
-                                Console.AnsiBlue);
-                    }
-
                     // Save the app widget id into the settings
                     mConfig.updateSearchBarAppWidgetId(this, widgetInfo.first);
                     mSearchAppWidgetInfo = widgetInfo.second;
@@ -283,12 +268,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         if (Constants.DebugFlags.App.EnableSearchLayout) {
             int appWidgetId = mConfig.searchBarAppWidgetId;
             if (appWidgetId >= 0) {
-                if (Console.Enabled) {
-                    Console.log(Constants.Log.App.SystemUIHandshake,
-                            "[RecentsActivity|onCreate|addSearchAppWidgetView]",
-                            "Id: " + appWidgetId,
-                            Console.AnsiBlue);
-                }
                 mSearchAppWidgetHostView = mAppWidgetHost.createView(this, appWidgetId,
                         mSearchAppWidgetInfo);
                 Bundle opts = new Bundle();
@@ -305,28 +284,50 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     }
 
     /** Dismisses recents if we are already visible and the intent is to toggle the recents view */
-    boolean dismissRecentsIfVisible() {
+    boolean dismissRecentsToFocusedTaskOrHome(boolean checkFilteredStackState) {
         if (mVisible) {
-            // If we are mid-animation into Recents, then reverse it and finish
-            if (mFullScreenOverlayView == null ||
-                    !mFullScreenOverlayView.cancelAnimateOnEnterRecents(mFinishRunnable)) {
-                // If we have a focused task, then launch that task
-                if (!mRecentsView.launchFocusedTask()) {
-                    if (mConfig.launchedFromHome) {
-                        // Just start the animation out of recents
-                        ReferenceCountedTrigger exitTrigger = new ReferenceCountedTrigger(this,
-                                null, mFinishLaunchHomeRunnable, null);
-                        mRecentsView.startExitToHomeAnimation(
-                                new ViewAnimation.TaskViewExitContext(exitTrigger));
-                    } else {
-                        // Otherwise, try and launch the first task
-                        if (!mRecentsView.launchFirstTask()) {
-                            // If there are no tasks, then just finish recents
-                            mFinishLaunchHomeRunnable.run();
-                        }
-                    }
-                }
+            // If we are mid-animation into Recents, reverse the animation now
+            if (mFullScreenOverlayView != null &&
+                mFullScreenOverlayView.cancelAnimateOnEnterRecents(mFinishRunnable)) return true;
+            // If we currently have filtered stacks, then unfilter those first
+            if (checkFilteredStackState &&
+                mRecentsView.unfilterFilteredStacks()) return true;
+            // If we have a focused Task, launch that Task now
+            if (mRecentsView.launchFocusedTask()) return true;
+            // If we launched from Home, then return to Home
+            if (mConfig.launchedFromHome) {
+                dismissRecentsToHomeRaw(true);
+                return true;
             }
+            // Otherwise, try and return to the first Task in the stack
+            if (mRecentsView.launchFirstTask()) return true;
+            // If none of the other cases apply, then just go Home
+            dismissRecentsToHomeRaw(true);
+            return true;
+        }
+        return false;
+    }
+
+    /** Dismisses Recents directly to Home. */
+    void dismissRecentsToHomeRaw(boolean animated) {
+        if (animated) {
+            ReferenceCountedTrigger exitTrigger = new ReferenceCountedTrigger(this,
+                    null, mFinishLaunchHomeRunnable, null);
+            mRecentsView.startExitToHomeAnimation(
+                    new ViewAnimation.TaskViewExitContext(exitTrigger));
+        } else {
+            mFinishLaunchHomeRunnable.run();
+        }
+    }
+
+    /** Dismisses Recents directly to Home if we currently aren't transitioning. */
+    boolean dismissRecentsToHome(boolean animated) {
+        if (mVisible) {
+            // If we are mid-animation into Recents, reverse the animation now
+            if (mFullScreenOverlayView != null &&
+                mFullScreenOverlayView.cancelAnimateOnEnterRecents(mFinishRunnable)) return true;
+            // Return to Home
+            dismissRecentsToHomeRaw(animated);
             return true;
         }
         return false;
@@ -336,13 +337,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (Console.Enabled) {
-            Console.logDivider(Constants.Log.App.SystemUIHandshake);
-            Console.log(Constants.Log.App.SystemUIHandshake, "[RecentsActivity|onCreate]",
-                    getIntent().getAction() + " visible: " + mVisible, Console.AnsiRed);
-            Console.logTraceTime(Constants.Log.App.TimeRecentsStartup,
-                    Constants.Log.App.TimeRecentsStartupKey, "onCreate");
-        }
 
         // Initialize the loader and the configuration
         RecentsTaskLoader.initialize(this);
@@ -410,11 +404,13 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     }
 
     void onConfigurationChange() {
+        // Update RecentsConfiguration
+        mConfig = RecentsConfiguration.reinitialize(this);
+
         // Try and start the enter animation (or restart it on configuration changed)
         ReferenceCountedTrigger t = new ReferenceCountedTrigger(this, null, null, null);
         mRecentsView.startEnterRecentsAnimation(new ViewAnimation.TaskViewEnterContext(
                 mFullScreenOverlayView, t));
-        // Call our callback
         onEnterAnimationTriggered();
     }
 
@@ -422,18 +418,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent);
-
-        if (Console.Enabled) {
-            Console.logDivider(Constants.Log.App.SystemUIHandshake);
-            Console.log(Constants.Log.App.SystemUIHandshake, "[RecentsActivity|onNewIntent]",
-                    intent.getAction() + " visible: " + mVisible, Console.AnsiRed);
-            Console.logTraceTime(Constants.Log.App.TimeRecentsStartup,
-                    Constants.Log.App.TimeRecentsStartupKey, "onNewIntent");
-        }
-
-        // Initialize the loader and the configuration
-        RecentsTaskLoader.initialize(this);
-        mConfig = RecentsConfiguration.reinitialize(this);
 
         // Update the recent tasks
         updateRecentsTasks(intent);
@@ -446,10 +430,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
     @Override
     protected void onStart() {
-        if (Console.Enabled) {
-            Console.log(Constants.Log.App.SystemUIHandshake, "[RecentsActivity|onStart]", "",
-                    Console.AnsiRed);
-        }
         super.onStart();
 
         // Register the broadcast receiver to handle messages from our service
@@ -462,10 +442,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
     @Override
     protected void onResume() {
-        if (Console.Enabled) {
-            Console.log(Constants.Log.App.SystemUIHandshake, "[RecentsActivity|onResume]", "",
-                    Console.AnsiRed);
-        }
         super.onResume();
 
         // Start listening for widget package changes if there is one bound, post it since we don't
@@ -484,64 +460,28 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
             }, 1);
         }
 
+        // Mark Recents as visible
         mVisible = true;
     }
 
     @Override
-    public void onAttachedToWindow() {
-        if (Console.Enabled) {
-            Console.log(Constants.Log.App.SystemUIHandshake,
-                    "[RecentsActivity|onAttachedToWindow]", "",
-                    Console.AnsiRed);
-        }
-        super.onAttachedToWindow();
-    }
-
-    @Override
-    public void onDetachedFromWindow() {
-        if (Console.Enabled) {
-            Console.log(Constants.Log.App.SystemUIHandshake,
-                    "[RecentsActivity|onDetachedFromWindow]", "",
-                    Console.AnsiRed);
-        }
-        super.onDetachedFromWindow();
-    }
-
-    @Override
-    protected void onPause() {
-        if (Console.Enabled) {
-            Console.log(Constants.Log.App.SystemUIHandshake, "[RecentsActivity|onPause]", "",
-                    Console.AnsiRed);
-        }
-        super.onPause();
-    }
-
-    @Override
     protected void onStop() {
-        if (Console.Enabled) {
-            Console.log(Constants.Log.App.SystemUIHandshake, "[RecentsActivity|onStop]", "",
-                    Console.AnsiRed);
-        }
         super.onStop();
 
         // Unregister the RecentsService receiver
         unregisterReceiver(mServiceBroadcastReceiver);
 
         // Stop listening for widget package changes if there was one bound
-        if (mConfig.searchBarAppWidgetId >= 0) {
+        if (mAppWidgetHost.isListening()) {
             mAppWidgetHost.stopListening();
         }
     }
 
     @Override
     protected void onDestroy() {
-        if (Console.Enabled) {
-            Console.log(Constants.Log.App.SystemUIHandshake, "[RecentsActivity|onDestroy]", "",
-                    Console.AnsiRed);
-        }
         super.onDestroy();
 
-        // Unregister the screen off receiver
+        // Unregister the system broadcast receivers
         unregisterReceiver(mSystemBroadcastReceiver);
         RecentsTaskLoader.getInstance().unregisterReceivers();
     }
@@ -583,26 +523,8 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         // Test mode where back does not do anything
         if (mConfig.debugModeEnabled) return;
 
-        // If we are mid-animation into Recents, then reverse it and finish
-        if (mFullScreenOverlayView == null ||
-                !mFullScreenOverlayView.cancelAnimateOnEnterRecents(mFinishRunnable)) {
-            // If we are currently filtering in any stacks, unfilter them first
-            if (!mRecentsView.unfilterFilteredStacks()) {
-                if (mConfig.launchedFromHome) {
-                    // Just start the animation out of recents
-                    ReferenceCountedTrigger exitTrigger = new ReferenceCountedTrigger(this,
-                            null, mFinishLaunchHomeRunnable, null);
-                    mRecentsView.startExitToHomeAnimation(
-                            new ViewAnimation.TaskViewExitContext(exitTrigger));
-                } else {
-                    // Otherwise, try and launch the first task
-                    if (!mRecentsView.launchFirstTask()) {
-                        // If there are no tasks, then just finish recents
-                        mFinishLaunchHomeRunnable.run();
-                    }
-                }
-            }
-        }
+        // Dismiss Recents to the focused Task or Home
+        dismissRecentsToFocusedTaskOrHome(true);
     }
 
     /** Called when debug mode is triggered */
@@ -623,7 +545,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
     /** Called when the enter recents animation is triggered. */
     public void onEnterAnimationTriggered() {
-        // Animate the scrims in
+        // Animate the SystemUI scrim views
         mScrimViews.startEnterRecentsAnimation();
     }
 
@@ -644,7 +566,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
     @Override
     public void onExitToHomeAnimationTriggered() {
-        // Animate the scrims out
+        // Animate the SystemUI scrim views out
         mScrimViews.startExitRecentsAnimation();
     }
 
@@ -664,7 +586,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
     @Override
     public void refreshSearchWidget() {
-        // Load the Search widget again
         bindSearchBarAppWidget();
         addSearchBarAppWidgetView();
     }

@@ -33,6 +33,7 @@ public class RecentsAppWidgetHost extends AppWidgetHost {
     Context mContext;
     RecentsAppWidgetHostCallbacks mCb;
     RecentsConfiguration mConfig;
+    boolean mIsListening;
 
     public RecentsAppWidgetHost(Context context, int hostId) {
         super(context, hostId);
@@ -42,6 +43,7 @@ public class RecentsAppWidgetHost extends AppWidgetHost {
 
     public void startListening(RecentsAppWidgetHostCallbacks cb) {
         mCb = cb;
+        mIsListening = true;
         super.startListening();
     }
 
@@ -51,6 +53,11 @@ public class RecentsAppWidgetHost extends AppWidgetHost {
         // Ensure that we release any references to the callbacks
         mCb = null;
         mContext = null;
+        mIsListening = false;
+    }
+
+    public boolean isListening() {
+        return mIsListening;
     }
 
     @Override
