@@ -67,14 +67,14 @@ public class AnimatedStateListDrawable extends StateListDrawable {
 
     private AnimatedStateListState mState;
 
-    /** The currently running animation, if any. */
-    private ObjectAnimator mAnim;
+    /** The currently running transition, if any. */
+    private Transition mTransition;
 
-    /** Index to be set after the animation ends. */
-    private int mAnimToIndex = -1;
+    /** Index to be set after the transition ends. */
+    private int mTransitionToIndex = -1;
 
-    /** Index away from which we are animating. */
-    private int mAnimFromIndex = -1;
+    /** Index away from which we are transitioning. */
+    private int mTransitionFromIndex = -1;
 
     private boolean mMutated;
 
@@ -84,20 +84,13 @@ public class AnimatedStateListDrawable extends StateListDrawable {
 
     @Override
     public boolean setVisible(boolean visible, boolean restart) {
-        // If we're relying on an Animatable transition, the super method
-        // will handle visibility changes.
         final boolean changed = super.setVisible(visible, restart);
 
-        if (mAnim != null) {
+        if (mTransition != null && (changed || restart)) {
             if (visible) {
-                if (restart) {
-                    mAnim.cancel();
-                    mAnim.start();
-                } else if (changed && mAnim.isPaused()) {
-                    mAnim.resume();
-                }
-            } else if (mAnim.isRunning()) {
-                mAnim.pause();
+                mTransition.start();
+            } else {
+                mTransition.stop();
             }
         }
 
@@ -164,30 +157,31 @@ public class AnimatedStateListDrawable extends StateListDrawable {
     }
 
     private boolean selectTransition(int toIndex) {
-        if (toIndex == mAnimToIndex) {
+        if (toIndex == mTransitionToIndex) {
             // Already animating to that keyframe.
             return true;
         }
 
-        if (mAnim != null) {
-            if (toIndex == mAnimToIndex) {
+        final Transition currentTransition = mTransition;
+        if (currentTransition != null) {
+            if (toIndex == mTransitionToIndex) {
                 return true;
-            } else if (toIndex == mAnimFromIndex) {
+            } else if (toIndex == mTransitionFromIndex) {
                 // Reverse the current animation.
-                mAnim.reverse();
-                mAnimFromIndex = mAnimToIndex;
-                mAnimToIndex = toIndex;
+                currentTransition.reverse();
+                mTransitionFromIndex = mTransitionToIndex;
+                mTransitionToIndex = toIndex;
                 return true;
             }
 
             // Changing animation, end the current animation.
-            mAnim.cancel();
-            mAnim = null;
+            currentTransition.stop();
+            mTransition = null;
         }
 
         // Reset state.
-        mAnimFromIndex = -1;
-        mAnimToIndex = -1;
+        mTransitionFromIndex = -1;
+        mTransitionToIndex = -1;
 
         final AnimatedStateListState state = mState;
         final int fromIndex = getCurrentIndex();
@@ -205,49 +199,144 @@ public class AnimatedStateListDrawable extends StateListDrawable {
             return false;
         }
 
+        final Transition transition;
         final Drawable d = getCurrent();
         if (d instanceof AnimationDrawable) {
-            // We can support reverse() here.
-            final boolean reversed = mState.isTransitionReversed(fromId, toId);
-            mAnim = getAnimationDrawableAnimator((AnimationDrawable) d, reversed);
-            mAnim.start();
+            final boolean reversed = state.isTransitionReversed(fromId, toId);
+            transition = new AnimationDrawableTransition((AnimationDrawable) d, reversed);
+        } else if (d instanceof AnimatedVectorDrawable) {
+            final boolean reversed = state.isTransitionReversed(fromId, toId);
+            transition = new AnimatedVectorDrawableTransition((AnimatedVectorDrawable) d, reversed);
         } else if (d instanceof Animatable) {
-            // Let the transition animate itself.
-            ((Animatable) d).start();
+            transition = new AnimatableTransition((Animatable) d);
         } else {
             // We don't know how to animate this transition.
             return false;
         }
 
-        mAnimFromIndex = fromIndex;
-        mAnimToIndex = toIndex;
+        transition.start();
+
+        mTransition = transition;
+        mTransitionFromIndex = fromIndex;
+        mTransitionToIndex = toIndex;
         return true;
     }
 
-    private ObjectAnimator getAnimationDrawableAnimator(@NonNull AnimationDrawable ad,
-            boolean reversed) {
-        final int frameCount = ad.getNumberOfFrames();
-        final int fromFrame = reversed ? frameCount - 1 : 0;
-        final int toFrame = reversed ? 0 : frameCount - 1;
-        final FrameInterpolator interp = new FrameInterpolator(ad, reversed);
-        final ObjectAnimator anim = ObjectAnimator.ofInt(ad, "currentIndex", fromFrame, toFrame);
-        anim.setAutoCancel(true);
-        anim.setDuration(interp.getTotalDuration());
-        anim.addListener(mAnimListener);
-        anim.setInterpolator(interp);
+    private static abstract class Transition {
+        public abstract void start();
+        public abstract void stop();
 
-        return anim;
+        public void reverse() {
+            // Not supported by default.
+        }
+
+        public boolean canReverse() {
+            return false;
+        }
     }
+
+    private static class AnimatableTransition  extends Transition {
+        private final Animatable mA;
+
+        public AnimatableTransition(Animatable a) {
+            mA = a;
+        }
+
+        @Override
+        public void start() {
+            mA.start();
+        }
+
+        @Override
+        public void stop() {
+            mA.stop();
+        }
+    }
+
+
+    private static class AnimationDrawableTransition  extends Transition {
+        private final ObjectAnimator mAnim;
+
+        public AnimationDrawableTransition(AnimationDrawable ad, boolean reversed) {
+            final int frameCount = ad.getNumberOfFrames();
+            final int fromFrame = reversed ? frameCount - 1 : 0;
+            final int toFrame = reversed ? 0 : frameCount - 1;
+            final FrameInterpolator interp = new FrameInterpolator(ad, reversed);
+            final ObjectAnimator anim = ObjectAnimator.ofInt(ad, "currentIndex", fromFrame, toFrame);
+            anim.setAutoCancel(true);
+            anim.setDuration(interp.getTotalDuration());
+            anim.setInterpolator(interp);
+
+            mAnim = anim;
+        }
+
+        @Override
+        public boolean canReverse() {
+            return true;
+        }
+
+        @Override
+        public void start() {
+            mAnim.start();
+        }
+
+        @Override
+        public void reverse() {
+            mAnim.reverse();
+        }
+
+        @Override
+        public void stop() {
+            mAnim.cancel();
+        }
+    }
+
+    private static class AnimatedVectorDrawableTransition  extends Transition {
+        private final AnimatedVectorDrawable mAvd;
+        private final boolean mReversed;
+
+        public AnimatedVectorDrawableTransition(AnimatedVectorDrawable avd, boolean reversed) {
+            mAvd = avd;
+            mReversed = reversed;
+        }
+
+        @Override
+        public boolean canReverse() {
+            return true;
+        }
+
+        @Override
+        public void start() {
+            if (mReversed) {
+                mAvd.reverse();
+            } else {
+                mAvd.start();
+            }
+        }
+
+        @Override
+        public void reverse() {
+            mAvd.reverse();
+        }
+
+        @Override
+        public void stop() {
+            mAvd.stop();
+        }
+    }
+
 
     @Override
     public void jumpToCurrentState() {
-        // If we're relying on an Animatable transition, the super method
-        // will handle jumping it to the current state.
         super.jumpToCurrentState();
 
-        if (mAnim != null) {
-            mAnim.end();
-            mAnim = null;
+        if (mTransition != null) {
+            mTransition.stop();
+            mTransition = null;
+
+            selectDrawable(mTransitionToIndex);
+            mTransitionToIndex = -1;
+            mTransitionFromIndex = -1;
         }
     }
 
@@ -407,11 +496,11 @@ public class AnimatedStateListDrawable extends StateListDrawable {
     private final AnimatorListenerAdapter mAnimListener = new AnimatorListenerAdapter() {
         @Override
         public void onAnimationEnd(Animator anim) {
-            selectDrawable(mAnimToIndex);
+            selectDrawable(mTransitionToIndex);
 
-            mAnimToIndex = -1;
-            mAnimFromIndex = -1;
-            mAnim = null;
+            mTransitionToIndex = -1;
+            mTransitionFromIndex = -1;
+            mTransition = null;
         }
     };
 
