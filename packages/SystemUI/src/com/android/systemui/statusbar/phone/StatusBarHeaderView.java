@@ -63,6 +63,8 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     private View mSignalCluster;
     private View mSettingsButton;
     private View mQsDetailHeader;
+    private TextView mQsDetailHeaderTitle;
+    private Switch mQsDetailHeaderSwitch;
     private View mEmergencyCallsOnly;
     private TextView mBatteryLevel;
 
@@ -120,6 +122,8 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         mSettingsButton.setOnClickListener(this);
         mQsDetailHeader = findViewById(R.id.qs_detail_header);
         mQsDetailHeader.setAlpha(0);
+        mQsDetailHeaderTitle = (TextView) mQsDetailHeader.findViewById(android.R.id.title);
+        mQsDetailHeaderSwitch = (Switch) mQsDetailHeader.findViewById(android.R.id.toggle);
         mEmergencyCallsOnly = findViewById(R.id.header_emergency_calls_only);
         mBatteryLevel = (TextView) findViewById(R.id.battery_level);
         loadDimens();
@@ -550,10 +554,22 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
             });
         }
 
+        @Override
+        public void onScanStateChanged(final boolean state) {
+            post(new Runnable() {
+                @Override
+                public void run() {
+                    handleScanStateChanged(state);
+                }
+            });
+        }
+
         private void handleToggleStateChanged(boolean state) {
-            final Switch headerSwitch = (Switch)
-                    mQsDetailHeader.findViewById(android.R.id.toggle);
-            headerSwitch.setChecked(state);
+            mQsDetailHeaderSwitch.setChecked(state);
+        }
+
+        private void handleScanStateChanged(boolean state) {
+            // TODO - waiting on framework asset
         }
 
         private void handleShowingDetail(final QSTile.DetailAdapter detail) {
@@ -561,18 +577,14 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
             transition(mDateTime, !showingDetail);
             transition(mQsDetailHeader, showingDetail);
             if (showingDetail) {
-                final TextView headerTitle = (TextView)
-                        mQsDetailHeader.findViewById(android.R.id.title);
-                headerTitle.setText(detail.getTitle());
-                final Switch headerSwitch = (Switch)
-                        mQsDetailHeader.findViewById(android.R.id.toggle);
+                mQsDetailHeaderTitle.setText(detail.getTitle());
                 final Boolean toggleState = detail.getToggleState();
                 if (toggleState == null) {
-                    headerSwitch.setVisibility(INVISIBLE);
+                    mQsDetailHeaderSwitch.setVisibility(INVISIBLE);
                     mQsDetailHeader.setClickable(false);
                 } else {
-                    headerSwitch.setVisibility(VISIBLE);
-                    headerSwitch.setChecked(toggleState);
+                    mQsDetailHeaderSwitch.setVisibility(VISIBLE);
+                    mQsDetailHeaderSwitch.setChecked(toggleState);
                     mQsDetailHeader.setClickable(true);
                     mQsDetailHeader.setOnClickListener(new OnClickListener() {
                         @Override

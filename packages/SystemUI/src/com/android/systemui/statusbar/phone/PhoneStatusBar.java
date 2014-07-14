@@ -2316,7 +2316,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mGestureRec.dump(fd, pw, args);
         }
 
-        mNetworkController.dump(fd, pw, args);
+        if (mNetworkController != null) {
+            mNetworkController.dump(fd, pw, args);
+        }
+        if (mBluetoothController != null) {
+            mBluetoothController.dump(fd, pw, args);
+        }
     }
 
     private String hunStateToString(Entry entry) {

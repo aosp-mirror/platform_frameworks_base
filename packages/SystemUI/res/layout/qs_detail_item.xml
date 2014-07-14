@@ -17,9 +17,9 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="@dimen/qs_detail_item_height"
-    android:gravity="center_vertical"
     android:background="@drawable/btn_borderless_rect"
     android:clickable="true"
+    android:gravity="center_vertical"
     android:orientation="horizontal" >
 
     <ImageView
@@ -29,9 +29,10 @@
         android:layout_marginEnd="12dp" />
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
+        android:layout_weight="1"
         android:orientation="vertical" >
 
         <TextView
@@ -47,5 +48,14 @@
             android:layout_marginTop="2dp"
             android:textAppearance="@style/TextAppearance.QS.DetailItemSecondary" />
     </LinearLayout>
+
+    <ImageView
+        android:id="@android:id/icon2"
+        style="@style/QSBorderlessButton"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:clickable="true"
+        android:scaleType="center"
+        android:src="@drawable/ic_qs_cancel" />
 
 </LinearLayout>
