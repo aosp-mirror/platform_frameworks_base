@@ -7061,6 +7061,7 @@ package android.content {
     method public abstract java.io.File getFileStreamPath(java.lang.String);
     method public abstract java.io.File getFilesDir();
     method public abstract android.os.Looper getMainLooper();
+    method public abstract java.io.File getNoBackupFilesDir();
     method public abstract java.io.File getObbDir();
     method public abstract java.io.File[] getObbDirs();
     method public abstract java.lang.String getPackageCodePath();
@@ -7230,6 +7231,7 @@ package android.content {
     method public java.io.File getFileStreamPath(java.lang.String);
     method public java.io.File getFilesDir();
     method public android.os.Looper getMainLooper();
+    method public java.io.File getNoBackupFilesDir();
     method public java.io.File getObbDir();
     method public java.io.File[] getObbDirs();
     method public java.lang.String getPackageCodePath();
@@ -29309,6 +29311,7 @@ package android.test.mock {
     method public java.io.File getFileStreamPath(java.lang.String);
     method public java.io.File getFilesDir();
     method public android.os.Looper getMainLooper();
+    method public java.io.File getNoBackupFilesDir();
     method public java.io.File getObbDir();
     method public java.io.File[] getObbDirs();
     method public java.lang.String getPackageCodePath();
