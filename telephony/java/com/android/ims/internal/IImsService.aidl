@@ -23,6 +23,7 @@ import com.android.ims.internal.IImsRegistrationListener;
 import com.android.ims.internal.IImsCallSession;
 import com.android.ims.internal.IImsCallSessionListener;
 import com.android.ims.internal.IImsUt;
+import com.android.ims.internal.IImsConfig;
 
 /**
  * {@hide}
@@ -45,4 +46,9 @@ interface IImsService {
      * Ut interface for the supplementary service configuration.
      */
     IImsUt getUtInterface(int serviceId);
+
+    /**
+     * Config interface to get/set IMS service/capability parameters.
+     */
+    IImsConfig getConfigInterface();
 }
