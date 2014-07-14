@@ -282,7 +282,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         ArrayList<View> sharedElementSnapshots = createSnapshots(sharedElementState,
                 mSharedElementNames);
         setTransitionAlpha(mSharedElements, 1);
-        ArrayMap<ImageView, Pair<ImageView.ScaleType, Matrix>> originalImageViewState =
+        ArrayList<SharedElementOriginalState> originalImageViewState =
                 setSharedElementState(sharedElementState, sharedElementSnapshots);
         requestLayoutForSharedElements();
 
@@ -294,7 +294,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
             startEnterTransition(transition);
         }
 
-        setOriginalImageViewState(originalImageViewState);
+        setOriginalSharedElementState(mSharedElements, originalImageViewState);
 
         if (mResultReceiver != null) {
             // We can't trust that the view will disappear on the same frame that the shared
