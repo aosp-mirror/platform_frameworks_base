@@ -56,7 +56,7 @@ import static android.system.OsConstants.*;
 
 public class LocalTransport extends BackupTransport {
     private static final String TAG = "LocalTransport";
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     private static final String TRANSPORT_DIR_NAME
             = "com.android.internal.backup.LocalTransport";
