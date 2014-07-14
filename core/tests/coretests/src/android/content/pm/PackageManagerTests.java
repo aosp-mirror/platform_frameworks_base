@@ -26,6 +26,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.KeySet;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -33,6 +34,7 @@ import android.content.pm.PackageParser.PackageParserException;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.FileUtils;
@@ -3326,6 +3328,174 @@ public class PackageManagerTests extends AndroidTestCase {
         cleanUpInstall(permPkgName);
         cleanUpInstall(pkgName);
     }
+
+    /**
+     * The following tests are related to testing KeySets-based API
+     */
+
+    /*
+     * testGetSigningKeySetNull - ensure getSigningKeySet() returns null on null
+     * input and when calling a package other than that which made the call.
+     */
+    public void testGetSigningKeySet() throws Exception {
+        PackageManager pm = getPm();
+        String mPkgName = mContext.getPackageName();
+        String otherPkgName = "com.android.frameworks.coretests.keysets_api";
+        KeySet ks;
+        try {
+            ks = pm.getSigningKeySet(null);
+            assertTrue(false); // should have thrown
+        } catch (NullPointerException e) {
+        }
+        try {
+            ks = pm.getSigningKeySet("keysets.test.bogus.package");
+            assertTrue(false); // should have thrown
+        } catch (IllegalArgumentException e) {
+        }
+        installFromRawResource("keysetApi.apk", R.raw.keyset_splat_api,
+                0, false, false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
+        try {
+            ks = pm.getSigningKeySet(otherPkgName);
+            assertTrue(false); // should have thrown
+        } catch (SecurityException e) {
+        }
+        cleanUpInstall(otherPkgName);
+        ks = pm.getSigningKeySet(mContext.getPackageName());
+        assertNotNull(ks);
+    }
+
+    /*
+     * testGetKeySetByAlias - same as getSigningKeySet, but for keysets defined
+     * by this package.
+     */
+    public void testGetKeySetByAlias() throws Exception {
+        PackageManager pm = getPm();
+        String mPkgName = mContext.getPackageName();
+        String otherPkgName = "com.android.frameworks.coretests.keysets_api";
+        KeySet ks;
+        try {
+            ks = pm.getKeySetByAlias(null, null);
+            assertTrue(false); // should have thrown
+        } catch (NullPointerException e) {
+        }
+        try {
+            ks = pm.getKeySetByAlias(null, "keysetBogus");
+            assertTrue(false); // should have thrown
+        } catch (NullPointerException e) {
+        }
+        try {
+            ks = pm.getKeySetByAlias("keysets.test.bogus.package", null);
+            assertTrue(false); // should have thrown
+        } catch (NullPointerException e) {
+        }
+        try {
+            ks = pm.getKeySetByAlias("keysets.test.bogus.package", "A");
+            assertTrue(false); // should have thrown
+        } catch(IllegalArgumentException e) {
+        }
+        try {
+            ks = pm.getKeySetByAlias(mPkgName, "keysetBogus");
+            assertTrue(false); // should have thrown
+        } catch(IllegalArgumentException e) {
+        }
+        installFromRawResource("keysetApi.apk", R.raw.keyset_splat_api,
+                0, false, false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
+        try {
+            ks = pm.getKeySetByAlias(otherPkgName, "A");
+            assertTrue(false); // should have thrown
+        } catch (SecurityException e) {
+        }
+        cleanUpInstall(otherPkgName);
+        ks = pm.getKeySetByAlias(mPkgName, "A");
+        assertNotNull(ks);
+    }
+
+    public void testIsSignedBy() throws Exception {
+        PackageManager pm = getPm();
+        String mPkgName = mContext.getPackageName();
+        String otherPkgName = "com.android.frameworks.coretests.keysets_api";
+        KeySet mSigningKS = pm.getSigningKeySet(mPkgName);
+        KeySet mDefinedKS = pm.getKeySetByAlias(mPkgName, "A");
+
+        try {
+            assertFalse(pm.isSignedBy(null, null));
+            assertTrue(false); // should have thrown
+        } catch (NullPointerException e) {
+        }
+        try {
+            assertFalse(pm.isSignedBy(null, mSigningKS));
+            assertTrue(false); // should have thrown
+        } catch (NullPointerException e) {
+        }
+        try {
+            assertFalse(pm.isSignedBy(mPkgName, null));
+            assertTrue(false); // should have thrown
+        } catch (NullPointerException e) {
+        }
+        try {
+            assertFalse(pm.isSignedBy("keysets.test.bogus.package", mDefinedKS));
+        } catch(IllegalArgumentException e) {
+        }
+        assertFalse(pm.isSignedBy(mPkgName, mDefinedKS));
+        assertFalse(pm.isSignedBy(mPkgName, new KeySet(new Binder())));
+        assertTrue(pm.isSignedBy(mPkgName, mSigningKS));
+
+        installFromRawResource("keysetApi.apk", R.raw.keyset_splat_api,
+                0, false, false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
+        assertFalse(pm.isSignedBy(otherPkgName, mDefinedKS));
+        assertTrue(pm.isSignedBy(otherPkgName, mSigningKS));
+        cleanUpInstall(otherPkgName);
+
+        installFromRawResource("keysetApi.apk", R.raw.keyset_splata_api,
+                0, false, false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
+        assertTrue(pm.isSignedBy(otherPkgName, mDefinedKS));
+        assertTrue(pm.isSignedBy(otherPkgName, mSigningKS));
+        cleanUpInstall(otherPkgName);
+    }
+
+    public void testIsSignedByExactly() throws Exception {
+        PackageManager pm = getPm();
+        String mPkgName = mContext.getPackageName();
+        String otherPkgName = "com.android.frameworks.coretests.keysets_api";
+        KeySet mSigningKS = pm.getSigningKeySet(mPkgName);
+        KeySet mDefinedKS = pm.getKeySetByAlias(mPkgName, "A");
+        try {
+            assertFalse(pm.isSignedBy(null, null));
+            assertTrue(false); // should have thrown
+        } catch (NullPointerException e) {
+        }
+        try {
+            assertFalse(pm.isSignedBy(null, mSigningKS));
+            assertTrue(false); // should have thrown
+        } catch (NullPointerException e) {
+        }
+        try {
+            assertFalse(pm.isSignedBy(mPkgName, null));
+            assertTrue(false); // should have thrown
+        } catch (NullPointerException e) {
+        }
+        try {
+            assertFalse(pm.isSignedByExactly("keysets.test.bogus.package", mDefinedKS));
+        } catch(IllegalArgumentException e) {
+        }
+        assertFalse(pm.isSignedByExactly(mPkgName, mDefinedKS));
+        assertFalse(pm.isSignedByExactly(mPkgName, new KeySet(new Binder())));
+        assertTrue(pm.isSignedByExactly(mPkgName, mSigningKS));
+
+        installFromRawResource("keysetApi.apk", R.raw.keyset_splat_api,
+                0, false, false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
+        assertFalse(pm.isSignedByExactly(otherPkgName, mDefinedKS));
+        assertTrue(pm.isSignedByExactly(otherPkgName, mSigningKS));
+        cleanUpInstall(otherPkgName);
+
+        installFromRawResource("keysetApi.apk", R.raw.keyset_splata_api,
+                0, false, false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
+        assertFalse(pm.isSignedByExactly(otherPkgName, mDefinedKS));
+        assertFalse(pm.isSignedByExactly(otherPkgName, mSigningKS));
+        cleanUpInstall(otherPkgName);
+    }
+
+
 
     /**
      * The following tests are related to testing the checkSignatures api.
