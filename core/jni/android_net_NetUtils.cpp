@@ -246,13 +246,6 @@ static jstring android_net_utils_getDhcpError(JNIEnv* env, jobject clazz)
     return env->NewStringUTF(::dhcp_get_errmsg());
 }
 
-static void android_net_utils_markSocket(JNIEnv *env, jobject thiz, jint socket, jint mark)
-{
-    if (setsockopt(socket, SOL_SOCKET, SO_MARK, &mark, sizeof(mark)) < 0) {
-        jniThrowException(env, "java/lang/IllegalStateException", "Error marking socket");
-    }
-}
-
 static jboolean android_net_utils_bindProcessToNetwork(JNIEnv *env, jobject thiz, jint netId)
 {
     return (jboolean) !setNetworkForProcess(netId);
@@ -296,7 +289,6 @@ static JNINativeMethod gNetworkUtilMethods[] = {
     { "stopDhcp", "(Ljava/lang/String;)Z",  (void *)android_net_utils_stopDhcp },
     { "releaseDhcpLease", "(Ljava/lang/String;)Z",  (void *)android_net_utils_releaseDhcpLease },
     { "getDhcpError", "()Ljava/lang/String;", (void*) android_net_utils_getDhcpError },
-    { "markSocket", "(II)V", (void*) android_net_utils_markSocket },
     { "bindProcessToNetwork", "(I)Z", (void*) android_net_utils_bindProcessToNetwork },
     { "getNetworkBoundToProcess", "()I", (void*) android_net_utils_getNetworkBoundToProcess },
     { "bindProcessToNetworkForHostResolution", "(I)Z", (void*) android_net_utils_bindProcessToNetworkForHostResolution },

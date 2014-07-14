@@ -336,11 +336,6 @@ interface INetworkManagementService
     void removeVpnUidRanges(int netId, in UidRange[] ranges);
 
     /**
-     * Get the SO_MARK associated with routing packets for user {@code uid}
-     */
-    int getMarkForUid(int uid);
-
-    /**
      * Exempts {@code host} from the routing set up by {@link setMarkedForwardingRoute}
      * All connects to {@code host} will use the global routing table
      */
