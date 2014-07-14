@@ -18,39 +18,50 @@ package com.android.systemui.statusbar;
 
 import android.content.Context;
 import android.graphics.Outline;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.AttributeSet;
+import android.view.View;
+import android.view.ViewOutlineProvider;
 
 /**
  * Like {@link ExpandableView}, but setting an outline for the height and clipping.
  */
 public abstract class ExpandableOutlineView extends ExpandableView {
 
-    private final Outline mOutline = new Outline();
+    private final Rect mOutlineRect = new Rect();
     private boolean mCustomOutline;
     private float mDensity;
 
     public ExpandableOutlineView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mDensity = getResources().getDisplayMetrics().density;
+        setOutlineProvider(new ViewOutlineProvider() {
+            @Override
+            public boolean getOutline(View view, Outline outline) {
+                if (!mCustomOutline) {
+                    outline.setRect(0,
+                            mClipTopAmount,
+                            getWidth(),
+                            Math.max(mActualHeight, mClipTopAmount));
+                } else {
+                    outline.setRect(mOutlineRect);
+                }
+                return true;
+            }
+        });
     }
 
     @Override
     public void setActualHeight(int actualHeight, boolean notifyListeners) {
         super.setActualHeight(actualHeight, notifyListeners);
-        updateOutline();
+        invalidateOutline();
     }
 
     @Override
     public void setClipTopAmount(int clipTopAmount) {
         super.setClipTopAmount(clipTopAmount);
-        updateOutline();
-    }
-
-    @Override
-    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        super.onLayout(changed, left, top, right, bottom);
-        updateOutline();
+        invalidateOutline();
     }
 
     protected void setOutlineRect(RectF rect) {
@@ -58,32 +69,20 @@ public abstract class ExpandableOutlineView extends ExpandableView {
             setOutlineRect(rect.left, rect.top, rect.right, rect.bottom);
         } else {
             mCustomOutline = false;
-            updateOutline();
+            invalidateOutline();
         }
     }
 
     protected void setOutlineRect(float left, float top, float right, float bottom) {
         mCustomOutline = true;
 
-        int rectLeft = (int) left;
-        int rectTop = (int) top;
-        int rectRight = (int) right;
-        int rectBottom = (int) bottom;
+        mOutlineRect.set((int) left, (int) top, (int) right, (int) bottom);
 
         // Outlines need to be at least 1 dp
-        rectBottom = (int) Math.max(top + mDensity, rectBottom);
-        rectRight = (int) Math.max(left + mDensity, rectRight);
-        mOutline.setRect(rectLeft, rectTop, rectRight, rectBottom);
-        setOutline(mOutline);
+        mOutlineRect.bottom = (int) Math.max(top + mDensity, mOutlineRect.bottom);
+        mOutlineRect.right = (int) Math.max(left + mDensity, mOutlineRect.right);
+
+        invalidateOutline();
     }
 
-    private void updateOutline() {
-        if (!mCustomOutline) {
-            mOutline.setRect(0,
-                    mClipTopAmount,
-                    getWidth(),
-                    Math.max(mActualHeight, mClipTopAmount));
-            setOutline(mOutline);
-        }
-    }
 }

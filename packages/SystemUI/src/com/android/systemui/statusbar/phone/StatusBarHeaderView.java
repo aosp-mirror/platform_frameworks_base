@@ -24,6 +24,7 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewOutlineProvider;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -96,7 +97,6 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     private QSPanel mQSPanel;
 
     private final Rect mClipBounds = new Rect();
-    private final Outline mOutline = new Outline();
 
     public StatusBarHeaderView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -140,6 +140,13 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
                 mAmPm.setPivotX(rtl ? mAmPm.getWidth() : 0);
                 mAmPm.setPivotY(mAmPm.getBaseline());
                 updateAmPmTranslation();
+            }
+        });
+        setOutlineProvider(new ViewOutlineProvider() {
+            @Override
+            public boolean getOutline(View view, Outline outline) {
+                outline.setRect(mClipBounds);
+                return true;
             }
         });
     }
@@ -423,8 +430,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     private void setClipping(float height) {
         mClipBounds.set(getPaddingLeft(), 0, getWidth() - getPaddingRight(), (int) height);
         setClipBounds(mClipBounds);
-        mOutline.setRect(mClipBounds);
-        setOutline(mOutline);
+        invalidateOutline();
     }
 
     public void attachSystemIcons(LinearLayout systemIcons) {
