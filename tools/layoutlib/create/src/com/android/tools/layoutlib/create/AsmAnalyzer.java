@@ -724,9 +724,8 @@ public class AsmAnalyzer {
                 considerDesc(desc);
 
 
-                // Check if method is a specialized version of java.lang.System.arrayCopy()
-                if (owner.equals("java/lang/System") && name.equals("arraycopy")
-                        && !desc.equals("(Ljava/lang/Object;ILjava/lang/Object;II)V")) {
+                // Check if method needs to replaced by a call to a different method.
+                if (ReplaceMethodCallsAdapter.isReplacementNeeded(owner, name, desc)) {
                     mReplaceMethodCallClasses.add(mOwnerClass);
                 }
             }
