@@ -18,12 +18,14 @@ package com.android.onemedia;
 
 import android.media.MediaMetadata;
 import android.media.session.MediaController;
+import android.media.session.MediaSession;
 import android.media.session.MediaSessionManager;
 import android.media.session.PlaybackState;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -43,7 +45,7 @@ public class PlayerController {
     protected MediaController.TransportControls mTransportControls;
 
     private final Intent mServiceIntent;
-    private Context mContext;
+    private Activity mContext;
     private Listener mListener;
     private SessionCallback mControllerCb;
     private MediaSessionManager mManager;
@@ -51,7 +53,7 @@ public class PlayerController {
 
     private boolean mResumed;
 
-    public PlayerController(Context context, Intent serviceIntent) {
+    public PlayerController(Activity context, Intent serviceIntent) {
         mContext = context;
         if (serviceIntent == null) {
             mServiceIntent = new Intent(mContext, PlayerService.class);
@@ -140,6 +142,7 @@ public class PlayerController {
             mBinder = null;
             mController = null;
             mTransportControls = null;
+            mContext.setMediaController(null);
             Log.d(TAG, "Disconnected from PlayerService");
 
             if (mListener != null) {
@@ -151,12 +154,15 @@ public class PlayerController {
         public void onServiceConnected(ComponentName name, IBinder service) {
             mBinder = IPlayerService.Stub.asInterface(service);
             Log.d(TAG, "service is " + service + " binder is " + mBinder);
+            MediaSession.Token token;
             try {
-                mController = MediaController.fromToken(mBinder.getSessionToken());
+                token = mBinder.getSessionToken();
             } catch (RemoteException e) {
                 Log.e(TAG, "Error getting session", e);
                 return;
             }
+            mController = MediaController.fromToken(token);
+            mContext.setMediaController(mController);
             mController.addCallback(mControllerCb, mHandler);
             mTransportControls = mController.getTransportControls();
             Log.d(TAG, "Ready to use PlayerService");
