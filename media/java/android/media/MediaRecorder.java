@@ -25,8 +25,8 @@ import android.util.Log;
 import android.view.Surface;
 
 import java.io.FileDescriptor;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.lang.ref.WeakReference;
 
 /**
@@ -713,11 +713,11 @@ public class MediaRecorder
     public void prepare() throws IllegalStateException, IOException
     {
         if (mPath != null) {
-            FileOutputStream fos = new FileOutputStream(mPath);
+            RandomAccessFile file = new RandomAccessFile(mPath, "rws");
             try {
-                _setOutputFile(fos.getFD(), 0, 0);
+                _setOutputFile(file.getFD(), 0, 0);
             } finally {
-                fos.close();
+                file.close();
             }
         } else if (mFd != null) {
             _setOutputFile(mFd, 0, 0);
