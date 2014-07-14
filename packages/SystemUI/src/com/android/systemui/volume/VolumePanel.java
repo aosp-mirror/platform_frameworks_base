@@ -85,6 +85,7 @@ public class VolumePanel extends Handler {
     private static final int FREE_DELAY = 10000;
     private static final int TIMEOUT_DELAY = 3000;
     private static final int TIMEOUT_DELAY_SHORT = 1500;
+    private static final int TIMEOUT_DELAY_COLLAPSED = 4500;
     private static final int TIMEOUT_DELAY_EXPANDED = 10000;
 
     private static final int MSG_VOLUME_CHANGED = 0;
@@ -591,11 +592,18 @@ public class VolumePanel extends Handler {
 
     private void updateTimeoutDelay() {
         mTimeoutDelay = mActiveStreamType == AudioManager.STREAM_MUSIC ? TIMEOUT_DELAY_SHORT
-                : mZenPanelExpanded ? TIMEOUT_DELAY_EXPANDED : TIMEOUT_DELAY;
+                : mZenPanelExpanded ? TIMEOUT_DELAY_EXPANDED
+                : isZenPanelVisible() ? TIMEOUT_DELAY_COLLAPSED
+                : TIMEOUT_DELAY;
+    }
+
+    private boolean isZenPanelVisible() {
+        return mZenPanel != null && mZenPanel.getVisibility() == View.VISIBLE;
     }
 
     private void setZenPanelVisible(boolean visible) {
         if (LOGD) Log.d(mTag, "setZenPanelVisible " + visible + " mZenPanel=" + mZenPanel);
+        final boolean changing = visible != isZenPanelVisible();
         if (visible) {
             if (mZenPanel == null) {
                 mZenPanel = (ZenModePanel) mZenPanelStub.inflate();
@@ -628,6 +636,10 @@ public class VolumePanel extends Handler {
             if (mZenPanel != null) {
                 mZenPanel.setVisibility(View.GONE);
             }
+        }
+        if (changing) {
+            updateTimeoutDelay();
+            resetTimeout();
         }
     }
 
@@ -1198,7 +1210,8 @@ public class VolumePanel extends Handler {
     }
 
     private void resetTimeout() {
-        if (LOGD) Log.d(mTag, "resetTimeout at " + System.currentTimeMillis());
+        if (LOGD) Log.d(mTag, "resetTimeout at " + System.currentTimeMillis()
+                + " delay=" + mTimeoutDelay);
         removeMessages(MSG_TIMEOUT);
         sendEmptyMessageDelayed(MSG_TIMEOUT, mTimeoutDelay);
         removeMessages(MSG_USER_ACTIVITY);
