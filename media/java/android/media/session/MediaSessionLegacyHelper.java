@@ -202,7 +202,7 @@ public class MediaSessionLegacyHelper {
                 if (up) {
                     flags = AudioManager.FLAG_PLAY_SOUND | AudioManager.FLAG_VIBRATE;
                 } else {
-                    flags = AudioManager.FLAG_SHOW_UI;
+                    flags = AudioManager.FLAG_SHOW_UI | AudioManager.FLAG_VIBRATE;
                 }
             }
 

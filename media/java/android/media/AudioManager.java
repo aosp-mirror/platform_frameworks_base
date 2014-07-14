@@ -2912,6 +2912,20 @@ public class AudioManager {
     }
 
     /**
+     * Notify audio manager about volume controller visibility changes.
+     * Currently limited to SystemUI.
+     *
+     * @hide
+     */
+    public void notifyVolumeControllerVisible(IVolumeController controller, boolean visible) {
+        try {
+            getService().notifyVolumeControllerVisible(controller, visible);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Error notifying about volume controller visibility", e);
+        }
+    }
+
+    /**
      * Only useful for volume controllers.
      * @hide
      */
