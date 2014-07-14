@@ -27900,35 +27900,6 @@ package android.telecomm {
     field public static final int UNKNOWN = 2; // 0x2
   }
 
-  public final class CallServiceDescriptor implements android.os.Parcelable {
-    method public int describeContents();
-    method public java.lang.String getConnectionServiceId();
-    method public int getNetworkType();
-    method public android.content.ComponentName getServiceComponent();
-    method public static android.telecomm.CallServiceDescriptor.Builder newBuilder(android.content.Context);
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
-    field public static final int FLAG_MOBILE = 4; // 0x4
-    field public static final int FLAG_PSTN = 2; // 0x2
-    field public static final int FLAG_WIFI = 1; // 0x1
-  }
-
-  public static class CallServiceDescriptor.Builder {
-    method public android.telecomm.CallServiceDescriptor build();
-    method public android.telecomm.CallServiceDescriptor.Builder setConnectionService(java.lang.Class<? extends android.telecomm.ConnectionService>);
-    method public android.telecomm.CallServiceDescriptor.Builder setNetworkType(int);
-  }
-
-  public final class CallServiceLookupResponse {
-    method public void setCallServiceDescriptors(java.util.List<android.telecomm.CallServiceDescriptor>);
-  }
-
-  public abstract class CallServiceProvider extends android.app.Service {
-    ctor protected CallServiceProvider();
-    method public abstract void lookupCallServices(android.telecomm.CallServiceLookupResponse);
-    method public android.os.IBinder onBind(android.content.Intent);
-  }
-
   public final class CallState extends java.lang.Enum {
     method public static android.telecomm.CallState valueOf(java.lang.String);
     method public static final android.telecomm.CallState[] values();
@@ -28100,7 +28071,6 @@ package android.telecomm {
     method public java.util.List<java.lang.String> getCannedSmsResponses();
     method public int getCapabilities();
     method public long getConnectTimeMillis();
-    method public android.telecomm.CallServiceDescriptor getCurrentCallServiceDescriptor();
     method public int getDisconnectCauseCode();
     method public java.lang.String getDisconnectCauseMsg();
     method public android.telecomm.GatewayInfo getGatewayInfo();
@@ -28230,7 +28200,6 @@ package android.telecomm {
 
   public final class TelecommConstants {
     ctor public TelecommConstants();
-    field public static final java.lang.String ACTION_CALL_SERVICE_PROVIDER;
     field public static final java.lang.String ACTION_CONNECTION_SERVICE;
     field public static final java.lang.String ACTION_CONNECTION_SERVICE_CONFIGURE = "android.intent.action.CONNECTION_SERVICE_CONFIGURE";
     field public static final java.lang.String ACTION_INCOMING_CALL = "android.intent.action.INCOMING_CALL";
@@ -28238,9 +28207,9 @@ package android.telecomm {
     field public static final char DTMF_CHARACTER_WAIT = 59; // 0x003b ';'
     field public static final java.lang.String EXTRA_CALL_DISCONNECT_CAUSE = "android.telecomm.extra.CALL_DISCONNECT_CAUSE";
     field public static final java.lang.String EXTRA_CALL_DISCONNECT_MESSAGE = "android.telecomm.extra.CALL_DISCONNECT_MESSAGE";
-    field public static final java.lang.String EXTRA_CALL_SERVICE_DESCRIPTOR = "android.intent.extra.CALL_SERVICE_DESCRIPTOR";
     field public static final java.lang.String EXTRA_CONNECTION_SERVICE = "android.telecomm.extra.CONNECTION_SERVICE";
     field public static final java.lang.String EXTRA_INCOMING_CALL_EXTRAS = "android.intent.extra.INCOMING_CALL_EXTRAS";
+    field public static final java.lang.String EXTRA_PHONE_ACCOUNT = "android.intent.extra.PHONE_ACCOUNT";
     field public static final java.lang.String EXTRA_START_CALL_WITH_SPEAKERPHONE = "android.intent.extra.START_CALL_WITH_SPEAKERPHONE";
     field public static final java.lang.String EXTRA_START_CALL_WITH_VIDEO_STATE = "android.intent.extra.START_CALL_WITH_VIDEO_STATE";
   }
