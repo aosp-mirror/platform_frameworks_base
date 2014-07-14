@@ -177,7 +177,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @Override
     public void setClientProgress(int progress) {
         mClientProgress = progress;
-        mProgress = MathUtils.constrain((mClientProgress * 8 * 100) / (params.progressMax * 10), 0, 80);
+        mProgress = MathUtils.constrain(
+                (int) (((float) mClientProgress) / ((float) params.progressMax)) * 80, 0, 80);
         mCallback.onSessionProgress(this, mProgress);
     }
 
