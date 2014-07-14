@@ -16,8 +16,11 @@
 
 package android.view;
 
+import com.android.internal.R;
+
 import android.content.Context;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -78,6 +81,13 @@ public class ThreadedRenderer extends HardwareRenderer {
     // applied as translation when updating the root render node.
     private int mInsetTop, mInsetLeft;
 
+    // Light and shadow properties specified by the theme.
+    private final float mLightY;
+    private final float mLightZ;
+    private final float mLightRadius;
+    private final float mAmbientShadowAlpha;
+    private final float mSpotShadowAlpha;
+
     private long mNativeProxy;
     private boolean mInitialized = false;
     private RenderNode mRootNode;
@@ -85,6 +95,15 @@ public class ThreadedRenderer extends HardwareRenderer {
     private boolean mProfilingEnabled;
 
     ThreadedRenderer(Context context, boolean translucent) {
+        final TypedArray a = context.obtainStyledAttributes(
+                null, R.styleable.Lighting, R.attr.lightingStyle, 0);
+        mLightY = a.getDimension(R.styleable.Lighting_lightY, 0);
+        mLightZ = a.getDimension(R.styleable.Lighting_lightZ, 0);
+        mLightRadius = a.getDimension(R.styleable.Lighting_lightRadius, 0);
+        mAmbientShadowAlpha = a.getFloat(R.styleable.Lighting_ambientShadowAlpha, 0);
+        mSpotShadowAlpha = a.getFloat(R.styleable.Lighting_spotShadowAlpha, 0);
+        a.recycle();
+
         long rootNodePtr = nCreateRootRenderNode();
         mRootNode = RenderNode.adopt(rootNodePtr);
         mRootNode.setClipToBounds(false);
@@ -164,8 +183,8 @@ public class ThreadedRenderer extends HardwareRenderer {
     }
 
     @Override
-    void setup(int width, int height, Rect surfaceInsets, float lightX, float lightY, float lightZ,
-            float lightRadius) {
+    void setup(int width, int height, Rect surfaceInsets) {
+        final float lightX = width / 2.0f;
         mWidth = width;
         mHeight = height;
         if (surfaceInsets != null) {
@@ -180,7 +199,7 @@ public class ThreadedRenderer extends HardwareRenderer {
             mSurfaceHeight = height;
         }
         mRootNode.setLeftTopRightBottom(-mInsetLeft, -mInsetTop, mSurfaceWidth, mSurfaceHeight);
-        nSetup(mNativeProxy, mSurfaceWidth, mSurfaceHeight, lightX, lightY, lightZ, lightRadius);
+        nSetup(mNativeProxy, mSurfaceWidth, mSurfaceHeight, lightX, mLightY, mLightZ, mLightRadius);
     }
 
     @Override

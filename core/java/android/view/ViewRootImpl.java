@@ -1714,8 +1714,7 @@ public final class ViewRootImpl implements ViewParent,
                         mWidth != mAttachInfo.mHardwareRenderer.getWidth() ||
                         mHeight != mAttachInfo.mHardwareRenderer.getHeight()) {
                     final Rect shadowInsets = params != null ? params.shadowInsets : null;
-                    mAttachInfo.mHardwareRenderer.setup(mWidth, mHeight, shadowInsets,
-                            mAttachInfo.mRootView.getResources().getDisplayMetrics());
+                    mAttachInfo.mHardwareRenderer.setup(mWidth, mHeight, shadowInsets);
                     if (!hwInitialized) {
                         mAttachInfo.mHardwareRenderer.invalidate(mSurface);
                         mFullRedrawNeeded = true;
@@ -2459,8 +2458,7 @@ public final class ViewRootImpl implements ViewParent,
 
                     try {
                         attachInfo.mHardwareRenderer.initializeIfNeeded(
-                                mWidth, mHeight, mSurface, surfaceInsets,
-                                attachInfo.mRootView.getResources().getDisplayMetrics());
+                                mWidth, mHeight, mSurface, surfaceInsets);
                     } catch (OutOfResourcesException e) {
                         handleOutOfResourcesException(e);
                         return;
@@ -3159,8 +3157,7 @@ public final class ViewRootImpl implements ViewParent,
                                 final WindowManager.LayoutParams lp = mWindowAttributes;
                                 final Rect surfaceInsets = lp != null ? lp.shadowInsets : null;
                                 mAttachInfo.mHardwareRenderer.initializeIfNeeded(
-                                        mWidth, mHeight, mSurface, surfaceInsets,
-                                        mAttachInfo.mRootView.getResources().getDisplayMetrics());
+                                        mWidth, mHeight, mSurface, surfaceInsets);
                             } catch (OutOfResourcesException e) {
                                 Log.e(TAG, "OutOfResourcesException locking surface", e);
                                 try {

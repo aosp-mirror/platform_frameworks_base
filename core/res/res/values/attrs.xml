@@ -985,6 +985,14 @@
 
         <!-- The color applied to framework buttons in their normal state. -->
         <attr name="colorButtonNormal" format="color" />
+
+        <!-- ================== -->
+        <!-- Hardware rendering -->
+        <!-- ================== -->
+        <eat-comment />
+
+        <!-- Reference to the Lighting style. -->
+        <attr name="lightingStyle" format="reference" />
     </declare-styleable>
 
     <!-- **************************************************************** -->
@@ -7140,5 +7148,14 @@
         <attr name="layout_alwaysShow" format="boolean" />
         <attr name="layout_ignoreOffset" format="boolean" />
         <attr name="layout_gravity" />
+    </declare-styleable>
+
+    <!-- @hide -->
+    <declare-styleable name="Lighting">
+        <attr name="lightY" format="dimension" />
+        <attr name="lightZ" format="dimension" />
+        <attr name="lightRadius" format="dimension" />
+        <attr name="ambientShadowAlpha" format="float" />
+        <attr name="spotShadowAlpha" format="float" />
     </declare-styleable>
 </resources>

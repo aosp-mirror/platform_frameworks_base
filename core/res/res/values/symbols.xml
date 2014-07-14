@@ -1904,7 +1904,6 @@
   <java-symbol type="attr" name="seekBarPreferenceStyle" />
   <java-symbol type="style" name="Theme.DeviceDefault.Resolver" />
   <java-symbol type="attr" name="preferenceFragmentStyle" />
-
   <java-symbol type="bool" name="skipHoldBeforeMerge" />
   <java-symbol type="bool" name="useImsAlwaysForEmergencyCall" />
   <java-symbol type="attr" name="touchscreenBlocksFocus" />
@@ -1916,4 +1915,10 @@
   <java-symbol type="string" name="whichEditApplicationNamed" />
   <java-symbol type="string" name="whichSendApplication" />
   <java-symbol type="string" name="whichSendApplicationNamed" />
+  <java-symbol type="attr" name="lightingStyle" />
+  <java-symbol type="attr" name="lightY" />
+  <java-symbol type="attr" name="lightZ" />
+  <java-symbol type="attr" name="lightRadius" />
+  <java-symbol type="attr" name="ambientShadowAlpha" />
+  <java-symbol type="attr" name="spotShadowAlpha" />
 </resources>
