@@ -42,4 +42,7 @@
 
     <integer name="print_option_column_count">2</integer>
 
+    <fraction name="page_selected_alpha">100%</fraction>
+    <fraction name="page_unselected_alpha">50%</fraction>
+
 </resources>

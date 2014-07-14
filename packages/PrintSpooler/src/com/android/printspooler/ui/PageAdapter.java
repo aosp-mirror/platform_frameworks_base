@@ -90,7 +90,10 @@ public final class PageAdapter extends Adapter {
     private int mSelectedPageCount;
 
     private float mSelectedPageElevation;
+    private float mSelectedPageAlpha;
+
     private float mUnselectedPageElevation;
+    private float mUnselectedPageAlpha;
 
     private int mPreviewPageMargin;
     private int mPreviewListPadding;
@@ -127,8 +130,13 @@ public final class PageAdapter extends Adapter {
 
         mSelectedPageElevation = mContext.getResources().getDimension(
                 R.dimen.selected_page_elevation);
+        mSelectedPageAlpha = mContext.getResources().getFraction(
+                R.fraction.page_selected_alpha, 1, 1);
+
         mUnselectedPageElevation = mContext.getResources().getDimension(
                 R.dimen.unselected_page_elevation);
+        mUnselectedPageAlpha = mContext.getResources().getFraction(
+                R.fraction.page_unselected_alpha, 1, 1);
 
         mPreviewPageMargin = mContext.getResources().getDimensionPixelSize(
                 R.dimen.preview_page_margin);
@@ -339,9 +347,11 @@ public final class PageAdapter extends Adapter {
         if (mConfirmedPagesInDocument.indexOfKey(pageInDocument) >= 0) {
             checkbox.setChecked(true);
             page.setTranslationZ(mSelectedPageElevation);
+            page.setAlpha(mSelectedPageAlpha);
         } else {
             checkbox.setChecked(false);
             page.setTranslationZ(mUnselectedPageElevation);
+            page.setAlpha(mUnselectedPageAlpha);
         }
 
         TextView pageNumberView = (TextView) page.findViewById(R.id.page_number);
@@ -760,11 +770,13 @@ public final class PageAdapter extends Adapter {
             if (mConfirmedPagesInDocument.indexOfKey(pageInDocument) < 0) {
                 mConfirmedPagesInDocument.put(pageInDocument, null);
                 pageSelector.setChecked(true);
-                page.animate().translationZ(mSelectedPageElevation);
+                page.animate().translationZ(mSelectedPageElevation)
+                        .alpha(mSelectedPageAlpha);
             } else {
                 mConfirmedPagesInDocument.remove(pageInDocument);
                 pageSelector.setChecked(false);
-                page.animate().translationZ(mUnselectedPageElevation);
+                page.animate().translationZ(mUnselectedPageElevation)
+                        .alpha(mUnselectedPageAlpha);
             }
         }
     }
