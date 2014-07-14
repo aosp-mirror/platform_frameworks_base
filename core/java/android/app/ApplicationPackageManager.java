@@ -33,6 +33,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.IPackageStatsObserver;
 import android.content.pm.InstrumentationInfo;
+import android.content.pm.KeySet;
 import android.content.pm.ManifestDigest;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
@@ -52,6 +53,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -59,6 +61,7 @@ import android.os.UserManager;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.view.Display;
+import com.android.internal.util.Preconditions;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -1445,6 +1448,62 @@ final class ApplicationPackageManager extends PackageManager {
             // Should never happen!
         }
         return false;
+    }
+
+    @Override
+    public KeySet getKeySetByAlias(String packageName, String alias) {
+        Preconditions.checkNotNull(packageName);
+        Preconditions.checkNotNull(alias);
+        IBinder keySetToken;
+        try {
+            keySetToken = mPM.getKeySetByAlias(packageName, alias);
+        } catch (RemoteException e) {
+            return null;
+        }
+        if (keySetToken == null) {
+            return null;
+        }
+        return new KeySet(keySetToken);
+    }
+
+    @Override
+    public KeySet getSigningKeySet(String packageName) {
+        Preconditions.checkNotNull(packageName);
+        IBinder keySetToken;
+        try {
+            keySetToken = mPM.getSigningKeySet(packageName);
+        } catch (RemoteException e) {
+            return null;
+        }
+        if (keySetToken == null) {
+            return null;
+        }
+        return new KeySet(keySetToken);
+    }
+
+
+    @Override
+    public boolean isSignedBy(String packageName, KeySet ks) {
+        Preconditions.checkNotNull(packageName);
+        Preconditions.checkNotNull(ks);
+        IBinder keySetToken = ks.getToken();
+        try {
+            return mPM.isPackageSignedByKeySet(packageName, keySetToken);
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    @Override
+    public boolean isSignedByExactly(String packageName, KeySet ks) {
+        Preconditions.checkNotNull(packageName);
+        Preconditions.checkNotNull(ks);
+        IBinder keySetToken = ks.getToken();
+        try {
+            return mPM.isPackageSignedByKeySetExactly(packageName, keySetToken);
+        } catch (RemoteException e) {
+            return false;
+        }
     }
 
     /**
