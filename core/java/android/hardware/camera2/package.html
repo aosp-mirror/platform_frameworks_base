@@ -58,16 +58,16 @@ from a variety of classes, including {@link android.view.SurfaceView},
 <p>Generally, camera preview images are sent to {@link
 android.view.SurfaceView} or {@link android.view.TextureView} (via its
 {@link android.graphics.SurfaceTexture}). Capture of JPEG images or
-RAW buffers for {@link android.hardware.camera2.DngCreator} can be done
-with {@link android.media.ImageReader} with the
-{android.graphics.ImageFormat#JPEG} and
-{android.graphics.ImageFormat#RAW_SENSOR} formats.  Application-driven
+RAW buffers for {@link android.hardware.camera2.DngCreator} can be
+done with {@link android.media.ImageReader} with the {@link
+android.graphics.ImageFormat#JPEG} and {@link
+android.graphics.ImageFormat#RAW_SENSOR} formats.  Application-driven
 processing of camera data in RenderScript, OpenGL ES, or directly in
 managed or native code is best done through {@link
 android.renderscript.Allocation} with a YUV {@link
 android.renderscript.Type}, {@link android.graphics.SurfaceTexture},
-and {@link android.media.ImageReader} with a
-{android.graphics.ImageFormat#YUV_420_888} format, respectively.</p>
+and {@link android.media.ImageReader} with a {@link
+android.graphics.ImageFormat#YUV_420_888} format, respectively.</p>
 
 <p>The application then needs to construct a {@link
 android.hardware.camera2.CaptureRequest}, which defines all the

@@ -27,14 +27,18 @@ import android.view.Surface;
 /**
  * Captures frames from an image stream as an OpenGL ES texture.
  *
- * <p>The image stream may come from either camera preview or video decode.  A SurfaceTexture
- * may be used in place of a SurfaceHolder when specifying the output destination of a
- * {@link android.hardware.Camera} or {@link android.media.MediaPlayer}
- * object.  Doing so will cause all the frames from the image stream to be sent to the
- * SurfaceTexture object rather than to the device's display.  When {@link #updateTexImage} is
- * called, the contents of the texture object specified when the SurfaceTexture was created are
- * updated to contain the most recent image from the image stream.  This may cause some frames of
- * the stream to be skipped.
+ * <p>The image stream may come from either camera preview or video decode. A
+ * {@link android.view.Surface} created from a SurfaceTexture can be used as an output
+ * destination for the {@link android.hardware.camera2}, {@link android.media.MediaCodec},
+ * {@link android.media.MediaPlayer}, and {@link android.renderscript.Allocation} APIs.
+ * When {@link #updateTexImage} is called, the contents of the texture object specified
+ * when the SurfaceTexture was created are updated to contain the most recent image from the image
+ * stream.  This may cause some frames of the stream to be skipped.
+ *
+ * <p>A SurfaceTexture may also be used in place of a SurfaceHolder when specifying the output
+ * destination of the older {@link android.hardware.Camera} API. Doing so will cause all the
+ * frames from the image stream to be sent to the SurfaceTexture object rather than to the device's
+ * display.
  *
  * <p>When sampling from the texture one should first transform the texture coordinates using the
  * matrix queried via {@link #getTransformMatrix(float[])}.  The transform matrix may change each

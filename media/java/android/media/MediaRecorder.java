@@ -114,23 +114,26 @@ public class MediaRecorder
     }
 
     /**
-     * Sets a Camera to use for recording. Use this function to switch
-     * quickly between preview and capture mode without a teardown of
-     * the camera object. {@link android.hardware.Camera#unlock()} should be
-     * called before this. Must call before prepare().
+     * Sets a {@link android.hardware.Camera} to use for recording.
+     *
+     * <p>Use this function to switch quickly between preview and capture mode without a teardown of
+     * the camera object. {@link android.hardware.Camera#unlock()} should be called before
+     * this. Must call before {@link #prepare}.</p>
      *
      * @param c the Camera to use for recording
+     * @deprecated Use {@link #getSurface} and the {@link android.hardware.camera2} API instead.
      */
+    @Deprecated
     public native void setCamera(Camera c);
 
     /**
      * Gets the surface to record from when using SURFACE video source.
-     * <p>
-     * Should only be called after prepare(). Frames rendered before start()
-     * will be discarded.
-     * </p>
-     * @throws IllegalStateException if it is called before prepare(), after
-     * stop() or is called when VideoSource is not set to SURFACE.
+     *
+     * <p> May only be called after {@link #prepare}. Frames rendered to the Surface before
+     * {@link #start} will be discarded.</p>
+     *
+     * @throws IllegalStateException if it is called before {@link #prepare}, after
+     * {@link #stop}, or is called when VideoSource is not set to SURFACE.
      * @see android.media.MediaRecorder.VideoSource
      */
     public native Surface getSurface();
@@ -239,7 +242,7 @@ public class MediaRecorder
         public static final int DEFAULT = 0;
         /** Camera video source
          * <p>
-         * Using android.hardware.Camera as video source.
+         * Using the {@link android.hardware.Camera} API as video source.
          * </p>
          */
         public static final int CAMERA = 1;
@@ -248,7 +251,7 @@ public class MediaRecorder
          * Using a Surface as video source.
          * </p><p>
          * This flag must be used when recording from an
-         * android.hardware.camera2.CameraDevice source.
+         * {@link android.hardware.camera2} API source.
          * </p><p>
          * When using this video source type, use {@link MediaRecorder#getSurface()}
          * to retrieve the surface created by MediaRecorder.

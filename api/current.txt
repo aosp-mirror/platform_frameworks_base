@@ -11857,7 +11857,7 @@ package android.graphics.pdf {
 
 package android.hardware {
 
-  public class Camera {
+  public deprecated class Camera {
     method public final void addCallbackBuffer(byte[]);
     method public final void autoFocus(android.hardware.Camera.AutoFocusCallback);
     method public final void cancelAutoFocus();
@@ -11896,21 +11896,21 @@ package android.hardware {
     field public static final int CAMERA_ERROR_UNKNOWN = 1; // 0x1
   }
 
-  public static class Camera.Area {
+  public static deprecated class Camera.Area {
     ctor public Camera.Area(android.graphics.Rect, int);
     field public android.graphics.Rect rect;
     field public int weight;
   }
 
-  public static abstract interface Camera.AutoFocusCallback {
+  public static abstract deprecated interface Camera.AutoFocusCallback {
     method public abstract void onAutoFocus(boolean, android.hardware.Camera);
   }
 
-  public static abstract interface Camera.AutoFocusMoveCallback {
+  public static abstract deprecated interface Camera.AutoFocusMoveCallback {
     method public abstract void onAutoFocusMoving(boolean, android.hardware.Camera);
   }
 
-  public static class Camera.CameraInfo {
+  public static deprecated class Camera.CameraInfo {
     ctor public Camera.CameraInfo();
     field public static final int CAMERA_FACING_BACK = 0; // 0x0
     field public static final int CAMERA_FACING_FRONT = 1; // 0x1
@@ -11919,11 +11919,11 @@ package android.hardware {
     field public int orientation;
   }
 
-  public static abstract interface Camera.ErrorCallback {
+  public static abstract deprecated interface Camera.ErrorCallback {
     method public abstract void onError(int, android.hardware.Camera);
   }
 
-  public static class Camera.Face {
+  public static deprecated class Camera.Face {
     ctor public Camera.Face();
     field public int id;
     field public android.graphics.Point leftEye;
@@ -11933,15 +11933,15 @@ package android.hardware {
     field public int score;
   }
 
-  public static abstract interface Camera.FaceDetectionListener {
+  public static abstract deprecated interface Camera.FaceDetectionListener {
     method public abstract void onFaceDetection(android.hardware.Camera.Face[], android.hardware.Camera);
   }
 
-  public static abstract interface Camera.OnZoomChangeListener {
+  public static abstract deprecated interface Camera.OnZoomChangeListener {
     method public abstract void onZoomChange(int, boolean, android.hardware.Camera);
   }
 
-  public class Camera.Parameters {
+  public deprecated class Camera.Parameters {
     method public java.lang.String flatten();
     method public java.lang.String get(java.lang.String);
     method public java.lang.String getAntibanding();
@@ -12091,19 +12091,19 @@ package android.hardware {
     field public static final java.lang.String WHITE_BALANCE_WARM_FLUORESCENT = "warm-fluorescent";
   }
 
-  public static abstract interface Camera.PictureCallback {
+  public static abstract deprecated interface Camera.PictureCallback {
     method public abstract void onPictureTaken(byte[], android.hardware.Camera);
   }
 
-  public static abstract interface Camera.PreviewCallback {
+  public static abstract deprecated interface Camera.PreviewCallback {
     method public abstract void onPreviewFrame(byte[], android.hardware.Camera);
   }
 
-  public static abstract interface Camera.ShutterCallback {
+  public static abstract deprecated interface Camera.ShutterCallback {
     method public abstract void onShutter();
   }
 
-  public class Camera.Size {
+  public deprecated class Camera.Size {
     ctor public Camera.Size(int, int);
     field public int height;
     field public int width;
@@ -14970,7 +14970,7 @@ package android.media {
     method public void setAudioEncodingBitRate(int);
     method public void setAudioSamplingRate(int);
     method public void setAudioSource(int) throws java.lang.IllegalStateException;
-    method public void setCamera(android.hardware.Camera);
+    method public deprecated void setCamera(android.hardware.Camera);
     method public void setCaptureRate(double);
     method public void setLocation(float, float);
     method public void setMaxDuration(int) throws java.lang.IllegalArgumentException;
