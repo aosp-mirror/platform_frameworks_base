@@ -16,36 +16,19 @@
 
 package android.content.pm;
 
-import android.os.IBinder;
+import android.os.Binder;
 
-/**
- * Represents a {@code KeySet} that has been declared in the AndroidManifest.xml
- * file for the application.  A {@code KeySet} can be used explicitly to
- * represent a trust relationship with other applications on the device.
- */
+/** @hide */
 public class KeySet {
 
-    private IBinder token;
+    private Binder token;
 
     /** @hide */
-    public KeySet(IBinder token) {
-        if (token == null) {
-            throw new NullPointerException("null value for KeySet IBinder token");
-        }
+    public KeySet(Binder token) {
         this.token = token;
     }
 
-    /** @hide */
-    public IBinder getToken() {
+    Binder getToken() {
         return token;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o instanceof KeySet) {
-            KeySet ks = (KeySet) o;
-            return token == ks.token;
-        }
-        return false;
     }
 }
