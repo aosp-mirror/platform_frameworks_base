@@ -302,6 +302,19 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".settings.BrightnessDialog"
+            android:label="@string/quick_settings_brightness_dialog_title"
+            android:theme="@android:style/Theme.DeviceDefault.Light.Dialog"
+            android:finishOnCloseSystemDialogs="true"
+            android:launchMode="singleInstance"
+            android:excludeFromRecents="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.SHOW_BRIGHTNESS_DIALOG" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
 
         <!-- I dream of notifications -->
         <service

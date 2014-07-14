@@ -2327,8 +2327,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 Settings.System.putIntForUser(mContext.getContentResolver(),
                         Settings.System.SCREEN_BRIGHTNESS, brightness,
                         UserHandle.USER_CURRENT_OR_SELF);
-                Intent intent = new Intent(Intent.ACTION_SHOW_BRIGHTNESS_DIALOG);
-                mContext.sendBroadcastAsUser(intent, UserHandle.CURRENT_OR_SELF);
+                mContext.startActivityAsUser(new Intent(Intent.ACTION_SHOW_BRIGHTNESS_DIALOG),
+                        UserHandle.CURRENT_OR_SELF);
             }
             return -1;
         } else if (keyCode == KeyEvent.KEYCODE_META_LEFT) {

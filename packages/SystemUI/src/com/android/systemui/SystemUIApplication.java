@@ -46,8 +46,7 @@ public class SystemUIApplication extends Application {
             com.android.systemui.statusbar.SystemBars.class,
             com.android.systemui.usb.StorageNotification.class,
             com.android.systemui.power.PowerUI.class,
-            com.android.systemui.media.RingtonePlayer.class,
-            com.android.systemui.settings.SettingsUI.class,
+            com.android.systemui.media.RingtonePlayer.class
     };
 
     /**
