@@ -536,8 +536,67 @@ public final class Rational extends Number implements Comparable<Rational> {
         } else { // finite value
             if (gcd(mNumerator, mDenominator) > 1) {
                 throw new InvalidObjectException(
-                    "Rational must be deserialized from a reduced form for finite values");
+                        "Rational must be deserialized from a reduced form for finite values");
             }
+        }
+    }
+
+    private static NumberFormatException invalidRational(String s) {
+        throw new NumberFormatException("Invalid Rational: \"" + s + "\"");
+    }
+
+    /**
+     * Parses the specified string as a rational value.
+     * <p>The ASCII characters {@code \}{@code u003a} (':') and
+     * {@code \}{@code u002f} ('/') are recognized as separators between
+     * the numerator and denumerator.</p>
+     * <p>
+     * For any {@code Rational r}: {@code Rational.parseRational(r.toString()).equals(r)}.
+     * However, the method also handles rational numbers expressed in the
+     * following forms:</p>
+     * <p>
+     * "<i>num</i>{@code /}<i>den</i>" or
+     * "<i>num</i>{@code :}<i>den</i>" {@code => new Rational(num, den);},
+     * where <i>num</i> and <i>den</i> are string integers potentially
+     * containing a sign, such as "-10", "+7" or "5".</p>
+     *
+     * <pre>{@code
+     * Rational.parseRational("3:+6").equals(new Rational(1, 2)) == true
+     * Rational.parseRational("-3/-6").equals(new Rational(1, 2)) == true
+     * Rational.parseRational("4.56") => throws NumberFormatException
+     * }</pre>
+     *
+     * @param string the string representation of a rational value.
+     * @return the rational value represented by {@code string}.
+     *
+     * @throws NumberFormatException if {@code string} cannot be parsed
+     * as a rational value.
+     * @throws NullPointerException if {@code string} was {@code null}
+     */
+    public static Rational parseRational(String string)
+            throws NumberFormatException {
+        checkNotNull(string, "string must not be null");
+
+        if (string.equals("NaN")) {
+            return NaN;
+        } else if (string.equals("Infinity")) {
+            return POSITIVE_INFINITY;
+        } else if (string.equals("-Infinity")) {
+            return NEGATIVE_INFINITY;
+        }
+
+        int sep_ix = string.indexOf(':');
+        if (sep_ix < 0) {
+            sep_ix = string.indexOf('/');
+        }
+        if (sep_ix < 0) {
+            throw invalidRational(string);
+        }
+        try {
+            return new Rational(Integer.parseInt(string.substring(0, sep_ix)),
+                    Integer.parseInt(string.substring(sep_ix + 1)));
+        } catch (NumberFormatException e) {
+            throw invalidRational(string);
         }
     }
 }

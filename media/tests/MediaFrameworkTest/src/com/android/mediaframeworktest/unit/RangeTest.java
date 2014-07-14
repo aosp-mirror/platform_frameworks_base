@@ -137,12 +137,12 @@ public class RangeTest extends junit.framework.TestCase {
     }
 
     private static <T extends Comparable<? super T>> void assertInRange(Range<T> object, T needle) {
-        assertAction("in-range", object, needle, true, object.inRange(needle));
+        assertAction("in-range", object, needle, true, object.contains(needle));
     }
 
     private static <T extends Comparable<? super T>> void assertOutOfRange(Range<T> object,
             T needle) {
-        assertAction("out-of-range", object, needle, false, object.inRange(needle));
+        assertAction("out-of-range", object, needle, false, object.contains(needle));
     }
 
     private static <T extends Comparable<? super T>> void assertUpper(Range<T> object, T expected) {
