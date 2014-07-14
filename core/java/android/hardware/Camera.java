@@ -133,7 +133,11 @@ import java.util.List;
  * <p>For more information about using cameras, read the
  * <a href="{@docRoot}guide/topics/media/camera.html">Camera</a> developer guide.</p>
  * </div>
+ *
+ * @deprecated We recommend using the new {@link android.hardware.camera2} API for new
+ *             applications.
  */
+@Deprecated
 public class Camera {
     private static final String TAG = "Camera";
 
@@ -247,7 +251,11 @@ public class Camera {
 
     /**
      * Information about a camera
+     *
+     * @deprecated We recommend using the new {@link android.hardware.camera2} API for new
+     *             applications.
      */
+    @Deprecated
     public static class CameraInfo {
         /**
          * The facing of the camera is opposite to that of the screen.
@@ -675,7 +683,11 @@ public class Camera {
      * @see #setOneShotPreviewCallback(Camera.PreviewCallback)
      * @see #setPreviewCallbackWithBuffer(Camera.PreviewCallback)
      * @see #startPreview()
+     *
+     * @deprecated We recommend using the new {@link android.hardware.camera2} API for new
+     *             applications.
      */
+    @Deprecated
     public interface PreviewCallback
     {
         /**
@@ -1175,7 +1187,10 @@ public class Camera {
      * manifest element.</p>
      *
      * @see #autoFocus(AutoFocusCallback)
+     * @deprecated We recommend using the new {@link android.hardware.camera2} API for new
+     *             applications.
      */
+    @Deprecated
     public interface AutoFocusCallback
     {
         /**
@@ -1286,7 +1301,11 @@ public class Camera {
      * Parameters#FOCUS_MODE_CONTINUOUS_VIDEO} and {@link
      * Parameters#FOCUS_MODE_CONTINUOUS_PICTURE}. Applications can show
      * autofocus animation based on this.</p>
+     *
+     * @deprecated We recommend using the new {@link android.hardware.camera2} API for new
+     *             applications.
      */
+    @Deprecated
     public interface AutoFocusMoveCallback
     {
         /**
@@ -1314,7 +1333,11 @@ public class Camera {
      * Callback interface used to signal the moment of actual image capture.
      *
      * @see #takePicture(ShutterCallback, PictureCallback, PictureCallback, PictureCallback)
+     *
+     * @deprecated We recommend using the new {@link android.hardware.camera2} API for new
+     *             applications.
      */
+    @Deprecated
     public interface ShutterCallback
     {
         /**
@@ -1331,7 +1354,11 @@ public class Camera {
      * Callback interface used to supply image data from a photo capture.
      *
      * @see #takePicture(ShutterCallback, PictureCallback, PictureCallback, PictureCallback)
+     *
+     * @deprecated We recommend using the new {@link android.hardware.camera2} API for new
+     *             applications.
      */
+    @Deprecated
     public interface PictureCallback {
         /**
          * Called when image data is available after a picture is taken.
@@ -1538,7 +1565,11 @@ public class Camera {
      *
      * @see #setZoomChangeListener(OnZoomChangeListener)
      * @see #startSmoothZoom(int)
+     *
+     * @deprecated We recommend using the new {@link android.hardware.camera2} API for new
+     *             applications.
      */
+    @Deprecated
     public interface OnZoomChangeListener
     {
         /**
@@ -1568,7 +1599,10 @@ public class Camera {
     /**
      * Callback interface for face detected in the preview frame.
      *
+     * @deprecated We recommend using the new {@link android.hardware.camera2} API for new
+     *             applications.
      */
+    @Deprecated
     public interface FaceDetectionListener
     {
         /**
@@ -1652,7 +1686,10 @@ public class Camera {
      * list of face objects for use in focusing and metering.</p>
      *
      * @see FaceDetectionListener
+     * @deprecated We recommend using the new {@link android.hardware.camera2} API for new
+     *             applications.
      */
+    @Deprecated
     public static class Face {
         /**
          * Create an empty face.
@@ -1766,7 +1803,11 @@ public class Camera {
      * Callback interface for camera error notification.
      *
      * @see #setErrorCallback(ErrorCallback)
+     *
+     * @deprecated We recommend using the new {@link android.hardware.camera2} API for new
+     *             applications.
      */
+    @Deprecated
     public interface ErrorCallback
     {
         /**
@@ -1864,7 +1905,10 @@ public class Camera {
 
     /**
      * Image size (width and height dimensions).
+     * @deprecated We recommend using the new {@link android.hardware.camera2} API for new
+     *             applications.
      */
+    @Deprecated
     public class Size {
         /**
          * Sets the dimensions for pictures.
@@ -1931,7 +1975,11 @@ public class Camera {
      * @see Parameters#setMeteringAreas(List)
      * @see Parameters#getMeteringAreas()
      * @see Parameters#getMaxNumMeteringAreas()
+     *
+     * @deprecated We recommend using the new {@link android.hardware.camera2} API for new
+     *             applications.
      */
+    @Deprecated
     public static class Area {
         /**
          * Create an area with specified rectangle and weight.
@@ -2005,7 +2053,11 @@ public class Camera {
      * calling {@link Camera.Parameters#setColorEffect(String)}. If the
      * camera does not support color effects,
      * {@link Camera.Parameters#getSupportedColorEffects()} will return null.
+     *
+     * @deprecated We recommend using the new {@link android.hardware.camera2} API for new
+     *             applications.
      */
+    @Deprecated
     public class Parameters {
         // Parameter keys to communicate with the camera driver.
         private static final String KEY_PREVIEW_SIZE = "preview-size";
@@ -2960,7 +3012,6 @@ public class Camera {
             case ImageFormat.YV12:      return PIXEL_FORMAT_YUV420P;
             case ImageFormat.RGB_565:   return PIXEL_FORMAT_RGB565;
             case ImageFormat.JPEG:      return PIXEL_FORMAT_JPEG;
-            case ImageFormat.BAYER_RGGB: return PIXEL_FORMAT_BAYER_RGGB;
             default:                    return null;
             }
         }

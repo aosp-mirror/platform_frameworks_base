@@ -54,9 +54,12 @@ public class ImageFormat {
      * cr_offset = y_size
      * cb_offset = y_size + c_size</pre>
      *
-     * <p>This format is guaranteed to be supported for camera preview images since
-     * API level 12; for earlier API versions, check
-     * {@link android.hardware.Camera.Parameters#getSupportedPreviewFormats()}.
+     * <p>For the {@link android.hardware.camera2} API, the {@link #YUV_420_888} format is
+     * recommended for YUV output instead.</p>
+     *
+     * <p>For the older camera API, this format is guaranteed to be supported for
+     * {@link android.hardware.Camera} preview images since API level 12; for earlier API versions,
+     * check {@link android.hardware.Camera.Parameters#getSupportedPreviewFormats()}.
      *
      * <p>Note that for camera preview callback use (see
      * {@link android.hardware.Camera#setPreviewCallback}), the
@@ -133,29 +136,47 @@ public class ImageFormat {
     public static final int Y16 = 0x20363159;
 
     /**
-     * YCbCr format, used for video. Whether this format is supported by the
-     * camera hardware can be determined by
-     * {@link android.hardware.Camera.Parameters#getSupportedPreviewFormats()}.
+     * YCbCr format, used for video.
+     *
+     * <p>For the {@link android.hardware.camera2} API, the {@link #YUV_420_888} format is
+     * recommended for YUV output instead.</p>
+     *
+     * <p>Whether this format is supported by the old camera API can be determined by
+     * {@link android.hardware.Camera.Parameters#getSupportedPreviewFormats()}.</p>
+     *
      */
     public static final int NV16 = 0x10;
 
     /**
-     * YCrCb format used for images, which uses the NV21 encoding format. This
-     * is the default format for camera preview images, when not otherwise set
-     * with {@link android.hardware.Camera.Parameters#setPreviewFormat(int)}.
+     * YCrCb format used for images, which uses the NV21 encoding format.
+     *
+     * <p>This is the default format
+     * for {@link android.hardware.Camera} preview images, when not otherwise set with
+     * {@link android.hardware.Camera.Parameters#setPreviewFormat(int)}.</p>
+     *
+     * <p>For the {@link android.hardware.camera2} API, the {@link #YUV_420_888} format is
+     * recommended for YUV output instead.</p>
      */
     public static final int NV21 = 0x11;
 
     /**
      * YCbCr format used for images, which uses YUYV (YUY2) encoding format.
-     * This is an alternative format for camera preview images. Whether this
-     * format is supported by the camera hardware can be determined by
-     * {@link android.hardware.Camera.Parameters#getSupportedPreviewFormats()}.
+     *
+     * <p>For the {@link android.hardware.camera2} API, the {@link #YUV_420_888} format is
+     * recommended for YUV output instead.</p>
+     *
+     * <p>This is an alternative format for {@link android.hardware.Camera} preview images. Whether
+     * this format is supported by the camera hardware can be determined by
+     * {@link android.hardware.Camera.Parameters#getSupportedPreviewFormats()}.</p>
      */
     public static final int YUY2 = 0x14;
 
     /**
-     * Encoded formats. These are not necessarily supported by the hardware.
+     * Compressed JPEG format.
+     *
+     * <p>This format is always supported as an output format for the
+     * {@link android.hardware.camera2} API, and as a picture format for the older
+     * {@link android.hardware.Camera} API</p>
      */
     public static final int JPEG = 0x100;
 
@@ -332,16 +353,6 @@ public class ImageFormat {
     public static final int RAW10 = 0x25;
 
     /**
-     * Raw bayer format used for images, which is 10 bit precision samples
-     * stored in 16 bit words. The filter pattern is RGGB. Whether this format
-     * is supported by the camera hardware can be determined by
-     * {@link android.hardware.Camera.Parameters#getSupportedPreviewFormats()}.
-     *
-     * @hide
-     */
-    public static final int BAYER_RGGB = 0x200;
-
-    /**
      * Use this function to retrieve the number of bits per pixel of an
      * ImageFormat.
      *
@@ -368,8 +379,6 @@ public class ImageFormat {
             case YUV_420_888:
                 return 12;
             case RAW_SENSOR:
-                return 16;
-            case BAYER_RGGB:
                 return 16;
             case RAW10:
                 return 10;
