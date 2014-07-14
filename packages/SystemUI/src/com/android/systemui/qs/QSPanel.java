@@ -108,6 +108,9 @@ public class QSPanel extends ViewGroup {
             mColumns = columns;
             postInvalidate();
         }
+        if (mListening) {
+            refreshAllTiles();
+        }
     }
 
     public void setExpanded(boolean expanded) {
@@ -123,14 +126,20 @@ public class QSPanel extends ViewGroup {
         mListening = listening;
         for (TileRecord r : mRecords) {
             r.tile.setListening(mListening);
-            if (mListening) {
-                r.tile.refreshState();
-            }
+        }
+        if (mListening) {
+            refreshAllTiles();
         }
         if (listening) {
             mBrightnessController.registerCallbacks();
         } else {
             mBrightnessController.unregisterCallbacks();
+        }
+    }
+
+    private void refreshAllTiles() {
+        for (TileRecord r : mRecords) {
+            r.tile.refreshState();
         }
     }
 
