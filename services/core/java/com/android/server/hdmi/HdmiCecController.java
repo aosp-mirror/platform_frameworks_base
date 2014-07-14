@@ -265,8 +265,6 @@ final class HdmiCecController {
     @ServiceThreadOnly
     void clearLogicalAddress() {
         assertRunOnServiceThread();
-        // TODO: consider to backup logical address so that new logical address
-        // allocation can use it as preferred address.
         for (int i = 0; i < mLocalDevices.size(); ++i) {
             mLocalDevices.valueAt(i).clearAddress();
         }

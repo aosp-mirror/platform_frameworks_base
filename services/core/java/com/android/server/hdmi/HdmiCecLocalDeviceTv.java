@@ -26,6 +26,7 @@ import android.media.AudioPatch;
 import android.media.AudioPort;
 import android.media.AudioSystem;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings.Global;
 import android.util.Slog;
@@ -106,6 +107,22 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         launchDeviceDiscovery();
         registerAudioPortUpdateListener();
         // TODO: unregister audio port update listener if local device is released.
+    }
+
+    @Override
+    @ServiceThreadOnly
+    protected int getPreferredAddress() {
+        assertRunOnServiceThread();
+        return SystemProperties.getInt(Constants.PROPERTY_PREFERRED_ADDRESS_TV,
+                Constants.ADDR_UNREGISTERED);
+    }
+
+    @Override
+    @ServiceThreadOnly
+    protected void setPreferredAddress(int addr) {
+        assertRunOnServiceThread();
+        SystemProperties.set(Constants.PROPERTY_PREFERRED_ADDRESS_TV,
+                String.valueOf(addr));
     }
 
     private void registerAudioPortUpdateListener() {

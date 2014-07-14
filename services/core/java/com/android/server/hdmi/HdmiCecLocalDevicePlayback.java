@@ -20,6 +20,7 @@ import android.hardware.hdmi.HdmiCecDeviceInfo;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.util.Slog;
 
 import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
@@ -42,6 +43,22 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
         assertRunOnServiceThread();
         mService.sendCecCommand(HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
                 mAddress, mService.getPhysicalAddress(), mDeviceType));
+    }
+
+    @Override
+    @ServiceThreadOnly
+    protected int getPreferredAddress() {
+        assertRunOnServiceThread();
+        return SystemProperties.getInt(Constants.PROPERTY_PREFERRED_ADDRESS_PLAYBACK,
+                Constants.ADDR_UNREGISTERED);
+    }
+
+    @Override
+    @ServiceThreadOnly
+    protected void setPreferredAddress(int addr) {
+        assertRunOnServiceThread();
+        SystemProperties.set(Constants.PROPERTY_PREFERRED_ADDRESS_PLAYBACK,
+                String.valueOf(addr));
     }
 
     @ServiceThreadOnly
