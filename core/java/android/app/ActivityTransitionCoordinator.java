@@ -403,20 +403,18 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         view.layout(left, top, right, bottom);
     }
 
-    protected ArrayMap<ImageView, Pair<ImageView.ScaleType, Matrix>> setSharedElementState(
+    protected ArrayList<SharedElementOriginalState> setSharedElementState(
             Bundle sharedElementState, final ArrayList<View> snapshots) {
-        ArrayMap<ImageView, Pair<ImageView.ScaleType, Matrix>> originalImageState =
-                new ArrayMap<ImageView, Pair<ImageView.ScaleType, Matrix>>();
+        ArrayList<SharedElementOriginalState> originalImageState =
+                new ArrayList<SharedElementOriginalState>();
         if (sharedElementState != null) {
             int[] tempLoc = new int[2];
             for (int i = 0; i < mSharedElementNames.size(); i++) {
                 View sharedElement = mSharedElements.get(i);
                 String name = mSharedElementNames.get(i);
-                Pair<ImageView.ScaleType, Matrix> originalState = getOldImageState(sharedElement,
+                SharedElementOriginalState originalState = getOldSharedElementState(sharedElement,
                         name, sharedElementState);
-                if (originalState != null) {
-                    originalImageState.put((ImageView) sharedElement, originalState);
-                }
+                originalImageState.add(originalState);
                 View parent = (View) sharedElement.getParent();
                 parent.getLocationOnScreen(tempLoc);
                 setSharedElementState(sharedElement, name, sharedElementState, tempLoc);
@@ -438,29 +436,34 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         return originalImageState;
     }
 
-    private static Pair<ImageView.ScaleType, Matrix> getOldImageState(View view, String name,
+    private static SharedElementOriginalState getOldSharedElementState(View view, String name,
             Bundle transitionArgs) {
+
+        SharedElementOriginalState state = new SharedElementOriginalState();
+        state.mLeft = view.getLeft();
+        state.mTop = view.getTop();
+        state.mRight = view.getRight();
+        state.mBottom = view.getBottom();
+        state.mMeasuredWidth = view.getMeasuredWidth();
+        state.mMeasuredHeight = view.getMeasuredHeight();
         if (!(view instanceof ImageView)) {
-            return null;
+            return state;
         }
         Bundle bundle = transitionArgs.getBundle(name);
         if (bundle == null) {
-            return null;
+            return state;
         }
         int scaleTypeInt = bundle.getInt(KEY_SCALE_TYPE, -1);
         if (scaleTypeInt < 0) {
-            return null;
+            return state;
         }
 
         ImageView imageView = (ImageView) view;
-        ImageView.ScaleType originalScaleType = imageView.getScaleType();
-
-        Matrix originalMatrix = null;
-        if (originalScaleType == ImageView.ScaleType.MATRIX) {
-            originalMatrix = new Matrix(imageView.getImageMatrix());
+        state.mScaleType = imageView.getScaleType();
+        if (state.mScaleType == ImageView.ScaleType.MATRIX) {
+            state.mMatrix = new Matrix(imageView.getImageMatrix());
         }
-
-        return Pair.create(originalScaleType, originalMatrix);
+        return state;
     }
 
     protected ArrayList<View> createSnapshots(Bundle state, Collection<String> names) {
@@ -489,13 +492,26 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         return snapshots;
     }
 
-    protected static void setOriginalImageViewState(
-            ArrayMap<ImageView, Pair<ImageView.ScaleType, Matrix>> originalState) {
+    protected static void setOriginalSharedElementState(ArrayList<View> sharedElements,
+            ArrayList<SharedElementOriginalState> originalState) {
         for (int i = 0; i < originalState.size(); i++) {
-            ImageView imageView = originalState.keyAt(i);
-            Pair<ImageView.ScaleType, Matrix> state = originalState.valueAt(i);
-            imageView.setScaleType(state.first);
-            imageView.setImageMatrix(state.second);
+            View view = sharedElements.get(i);
+            SharedElementOriginalState state = originalState.get(i);
+            if (view instanceof ImageView && state.mScaleType != null) {
+                ImageView imageView = (ImageView) view;
+                imageView.setScaleType(state.mScaleType);
+                if (state.mScaleType == ImageView.ScaleType.MATRIX) {
+                  imageView.setImageMatrix(state.mMatrix);
+                }
+            }
+            // origignal widthspec might be AT_MOST,  but it should work for most
+            // cases.
+            int widthSpec = View.MeasureSpec.makeMeasureSpec(state.mMeasuredWidth,
+                    View.MeasureSpec.EXACTLY);
+            int heightSpec = View.MeasureSpec.makeMeasureSpec(state.mMeasuredHeight,
+                    View.MeasureSpec.EXACTLY);
+            view.measure(widthSpec, heightSpec);
+            view.layout(state.mLeft, state.mTop, state.mRight, state.mBottom);
         }
     }
 
@@ -620,6 +636,17 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         public Rect onGetEpicenter(Transition transition) {
             return mEpicenter;
         }
+    }
+
+    static class SharedElementOriginalState {
+        int mLeft;
+        int mTop;
+        int mRight;
+        int mBottom;
+        int mMeasuredWidth;
+        int mMeasuredHeight;
+        ImageView.ScaleType mScaleType;
+        Matrix mMatrix;
     }
 
 }
