@@ -25,7 +25,7 @@ public class PackageInstallObserver {
         @Override
         public void packageInstalled(String basePackageName, Bundle extras, int returnCode,
                 String msg) {
-            PackageInstallObserver.this.packageInstalled(basePackageName, extras, returnCode);
+            PackageInstallObserver.this.packageInstalled(basePackageName, extras, returnCode, msg);
         }
     };
 

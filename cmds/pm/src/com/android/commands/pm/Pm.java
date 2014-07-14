@@ -50,6 +50,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.content.PackageHelper;
@@ -923,29 +924,9 @@ public final class Pm {
                     return;
                 }
             } else if (opt.equals("--abi")) {
-                abi = nextOptionData();
-                if (abi == null) {
-                    System.err.println("Error: must supply argument for --abi");
-                    return;
-                }
+                abi = checkAbiArgument(nextOptionData());
             } else {
                 System.err.println("Error: Unknown option: " + opt);
-                return;
-            }
-        }
-
-        if (abi != null) {
-            final String[] supportedAbis = Build.SUPPORTED_ABIS;
-            boolean matched = false;
-            for (String supportedAbi : supportedAbis) {
-                if (supportedAbi.equals(abi)) {
-                    matched = true;
-                    break;
-                }
-            }
-
-            if (!matched) {
-                System.err.println("Error: abi " + abi + " not supported on this device.");
                 return;
             }
         }
@@ -1044,6 +1025,8 @@ public final class Pm {
             } else if (opt.equals("-S")) {
                 params.deltaSize = Long.parseLong(nextOptionData());
                 params.progressMax = (int) params.deltaSize;
+            } else if (opt.equals("--abi")) {
+                params.abiOverride = checkAbiArgument(nextOptionData());
             } else {
                 throw new IllegalArgumentException("Unknown option " + opt);
             }
@@ -1682,6 +1665,21 @@ public final class Pm {
             System.err.println(PM_NOT_RUNNING_ERR);
             return null;
         }
+    }
+
+    private static String checkAbiArgument(String abi) {
+        if (TextUtils.isEmpty(abi)) {
+            throw new IllegalArgumentException("Missing ABI argument");
+        }
+
+        final String[] supportedAbis = Build.SUPPORTED_ABIS;
+        for (String supportedAbi : supportedAbis) {
+            if (supportedAbi.equals(abi)) {
+                return abi;
+            }
+        }
+
+        throw new IllegalArgumentException("ABI " + abi + " not supported on this device");
     }
 
     private String nextOption() {

@@ -9331,14 +9331,18 @@ public class PackageManagerService extends IPackageManager.Stub {
                 return false;
             } else {
                 final File beforeCodeFile = codeFile;
-                final File afterCodeFile = new File(mAppInstallDir,
-                        getNextCodePath(oldCodePath, pkg.packageName, null));
+                final File afterCodeFile = getNextCodePath(pkg.packageName);
 
                 Slog.d(TAG, "Renaming " + beforeCodeFile + " to " + afterCodeFile);
-                if (!beforeCodeFile.renameTo(afterCodeFile)) {
+                try {
+                    Os.rename(beforeCodeFile.getAbsolutePath(), afterCodeFile.getAbsolutePath());
+                } catch (ErrnoException e) {
+                    Slog.d(TAG, "Failed to rename", e);
                     return false;
                 }
+
                 if (!SELinux.restoreconRecursive(afterCodeFile)) {
+                    Slog.d(TAG, "Failed to restorecon");
                     return false;
                 }
 
@@ -9809,6 +9813,16 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         idxStr = INSTALL_PACKAGE_SUFFIX + Integer.toString(idx);
         return prefix + idxStr;
+    }
+
+    private File getNextCodePath(String packageName) {
+        int suffix = 1;
+        File result;
+        do {
+            result = new File(mAppInstallDir, packageName + "-" + suffix);
+            suffix++;
+        } while (result.exists());
+        return result;
     }
 
     // Utility method used to ignore ADD/REMOVE events
