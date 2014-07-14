@@ -24,12 +24,15 @@ import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.IPackageDeleteObserver;
 import android.content.pm.IPackageInstaller;
+import android.content.pm.IPackageInstallerObserver;
 import android.content.pm.IPackageInstallerSession;
-import android.content.pm.PackageInstallerParams;
+import android.content.pm.InstallSessionInfo;
+import android.content.pm.InstallSessionParams;
 import android.os.Binder;
 import android.os.FileUtils;
 import android.os.HandlerThread;
 import android.os.Process;
+import android.os.RemoteException;
 import android.os.SELinux;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -47,6 +50,8 @@ import com.google.android.collect.Sets;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PackageInstallerService extends IPackageInstaller.Stub {
     private static final String TAG = "PackageInstaller";
@@ -138,7 +143,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     }
 
     @Override
-    public int createSession(String installerPackageName, PackageInstallerParams params,
+    public int createSession(String installerPackageName, InstallSessionParams params,
             int userId) {
         final int callingUid = Binder.getCallingUid();
         mPm.enforceCrossUserPermission(callingUid, userId, false, TAG);
@@ -217,35 +222,41 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     }
 
     @Override
-    public int[] getSessions(String installerPackageName, int userId) {
-        final int callingUid = Binder.getCallingUid();
-        mPm.enforceCrossUserPermission(callingUid, userId, false, TAG);
-        mAppOps.checkPackage(callingUid, installerPackageName);
+    public List<InstallSessionInfo> getSessions(int userId) {
+        mPm.enforceCrossUserPermission(Binder.getCallingUid(), userId, false, TAG);
 
-        int[] matching = new int[0];
+        final List<InstallSessionInfo> result = new ArrayList<>();
         synchronized (mSessions) {
             for (int i = 0; i < mSessions.size(); i++) {
-                final int key = mSessions.keyAt(i);
                 final PackageInstallerSession session = mSessions.valueAt(i);
-                if (session.userId == userId
-                        && session.installerPackageName.equals(installerPackageName)) {
-                    matching = ArrayUtils.appendInt(matching, key);
+                if (session.userId == userId) {
+                    result.add(session.generateInfo());
                 }
             }
         }
-        return matching;
+        return result;
     }
 
     @Override
-    public void uninstall(String basePackageName, int flags, IPackageDeleteObserver observer,
+    public void uninstall(String packageName, int flags, IPackageDeleteObserver observer,
             int userId) {
-        mPm.deletePackageAsUser(basePackageName, observer, userId, flags);
+        mPm.deletePackageAsUser(packageName, observer, userId, flags);
     }
 
     @Override
     public void uninstallSplit(String basePackageName, String overlayName, int flags,
             IPackageDeleteObserver observer, int userId) {
         // TODO: flesh out once PM has split support
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void registerObserver(IPackageInstallerObserver observer, int userId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void unregisterObserver(IPackageInstallerObserver observer, int userId) {
         throw new UnsupportedOperationException();
     }
 

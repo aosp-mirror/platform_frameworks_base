@@ -27,10 +27,11 @@ import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageDeleteObserver;
 import android.content.pm.IPackageInstaller;
 import android.content.pm.IPackageManager;
+import android.content.pm.InstallSessionParams;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
-import android.content.pm.PackageInstallerParams;
+import android.content.pm.PackageInstaller.InstallResultCallback;
 import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
@@ -768,6 +769,31 @@ public final class Pm {
         }
     }
 
+    class LocalInstallResultCallback extends InstallResultCallback {
+        boolean finished;
+        boolean success;
+        String msg;
+
+        private void setResult(boolean success, String msg) {
+            synchronized (this) {
+                this.finished = true;
+                this.success = success;
+                this.msg = msg;
+                notifyAll();
+            }
+        }
+
+        @Override
+        public void onSuccess() {
+            setResult(true, null);
+        }
+
+        @Override
+        public void onFailure(String msg) {
+            setResult(false, msg);
+        }
+    }
+
     /**
      * Converts a failure code into a string by using reflection to find a matching constant
      * in PackageManager.
@@ -989,7 +1015,7 @@ public final class Pm {
     private void runInstallCreate() throws RemoteException {
         String installerPackageName = null;
 
-        final PackageInstallerParams params = new PackageInstallerParams();
+        final InstallSessionParams params = new InstallSessionParams();
         params.installFlags = PackageManager.INSTALL_ALL_USERS;
         params.fullInstall = true;
 
@@ -1084,21 +1110,21 @@ public final class Pm {
         try {
             session = new PackageInstaller.Session(mInstaller.openSession(sessionId));
 
-            final LocalPackageInstallObserver observer = new LocalPackageInstallObserver();
-            session.install(observer);
+            final LocalInstallResultCallback callback = new LocalInstallResultCallback();
+            session.install(callback);
 
-            synchronized (observer) {
-                while (!observer.finished) {
+            synchronized (callback) {
+                while (!callback.finished) {
                     try {
-                        observer.wait();
+                        callback.wait();
                     } catch (InterruptedException e) {
                     }
                 }
-                if (observer.result != PackageManager.INSTALL_SUCCEEDED) {
-                    throw new IllegalStateException(
-                            "Failure [" + installFailureToString(observer) + "]");
+                if (!callback.success) {
+                    throw new IllegalStateException("Failure [" + callback.msg + "]");
                 }
             }
+
             System.out.println("Success");
         } finally {
             IoUtils.closeQuietly(session);

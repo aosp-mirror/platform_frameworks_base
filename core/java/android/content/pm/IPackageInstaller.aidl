@@ -17,17 +17,22 @@
 package android.content.pm;
 
 import android.content.pm.IPackageDeleteObserver;
+import android.content.pm.IPackageInstallerObserver;
 import android.content.pm.IPackageInstallerSession;
-import android.content.pm.PackageInstallerParams;
+import android.content.pm.InstallSessionInfo;
+import android.content.pm.InstallSessionParams;
 import android.os.ParcelFileDescriptor;
 
 /** {@hide} */
 interface IPackageInstaller {
-    int createSession(String installerPackageName, in PackageInstallerParams params, int userId);
+    int createSession(String installerPackageName, in InstallSessionParams params, int userId);
     IPackageInstallerSession openSession(int sessionId);
 
-    int[] getSessions(String installerPackageName, int userId);
+    List<InstallSessionInfo> getSessions(int userId);
 
-    void uninstall(String basePackageName, int flags, in IPackageDeleteObserver observer, int userId);
-    void uninstallSplit(String basePackageName, String splitName, int flags, in IPackageDeleteObserver observer, int userId);
+    void registerObserver(IPackageInstallerObserver observer, int userId);
+    void unregisterObserver(IPackageInstallerObserver observer, int userId);
+
+    void uninstall(String packageName, int flags, in IPackageDeleteObserver observer, int userId);
+    void uninstallSplit(String packageName, String splitName, int flags, in IPackageDeleteObserver observer, int userId);
 }

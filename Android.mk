@@ -130,6 +130,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/content/pm/IPackageInstallObserver.aidl \
 	core/java/android/content/pm/IPackageInstallObserver2.aidl \
 	core/java/android/content/pm/IPackageInstaller.aidl \
+	core/java/android/content/pm/IPackageInstallerObserver.aidl \
 	core/java/android/content/pm/IPackageInstallerSession.aidl \
 	core/java/android/content/pm/IPackageManager.aidl \
 	core/java/android/content/pm/IPackageMoveObserver.aidl \
