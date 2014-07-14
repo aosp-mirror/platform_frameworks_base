@@ -16268,8 +16268,8 @@ package android.media.tv {
     method public void onChannelRetuned(java.lang.String, android.net.Uri);
     method public void onError(java.lang.String, int);
     method public void onTrackInfoChanged(java.lang.String, java.util.List<android.media.tv.TvTrackInfo>);
-    method public void onVideoSizeChanged(java.lang.String, int, int);
     method public void onVideoAvailable(java.lang.String);
+    method public void onVideoSizeChanged(java.lang.String, int, int);
     method public void onVideoUnavailable(java.lang.String, int);
   }
 
@@ -25340,6 +25340,7 @@ package android.provider {
     field public static final java.lang.String NUMBER = "number";
     field public static final java.lang.String SOURCE_DATA = "source_data";
     field public static final java.lang.String SOURCE_PACKAGE = "source_package";
+    field public static final java.lang.String TRANSCRIPTION = "transcription";
   }
 
 }
