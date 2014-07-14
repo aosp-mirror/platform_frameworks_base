@@ -656,14 +656,13 @@ public class UsbDeviceManager {
                     }
                     break;
                 case MSG_USER_SWITCHED: {
-                    mCurrentUser = msg.arg1;
-
                     UserManager userManager =
                             (UserManager) mContext.getSystemService(Context.USER_SERVICE);
                     if (userManager.hasUserRestriction(UserManager.DISALLOW_USB_FILE_TRANSFER)) {
                         Slog.v(TAG, "Switched to user with DISALLOW_USB_FILE_TRANSFER restriction;"
                                 + " disabling USB.");
                         setUsbConfig("none");
+                        mCurrentUser = msg.arg1;
                         break;
                     }
 
@@ -675,6 +674,7 @@ public class UsbDeviceManager {
                         setUsbConfig("none");
                         setUsbConfig(mCurrentFunctions);
                     }
+                    mCurrentUser = msg.arg1;
                     break;
                 }
             }
