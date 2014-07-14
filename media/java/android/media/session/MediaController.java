@@ -22,6 +22,7 @@ import android.media.AudioManager;
 import android.media.MediaMetadata;
 import android.media.Rating;
 import android.media.VolumeProvider;
+import android.media.routing.MediaRouter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -52,8 +53,7 @@ public final class MediaController {
     private static final int MSG_EVENT = 1;
     private static final int MSG_UPDATE_PLAYBACK_STATE = 2;
     private static final int MSG_UPDATE_METADATA = 3;
-    private static final int MSG_ROUTE = 4;
-    private static final int MSG_UPDATE_VOLUME = 5;
+    private static final int MSG_UPDATE_VOLUME = 4;
 
     private final ISessionController mSessionBinder;
 
@@ -64,11 +64,11 @@ public final class MediaController {
     private boolean mCbRegistered = false;
     private MediaSessionInfo mInfo;
 
-    private TransportControls mTransportController;
+    private final TransportControls mTransportControls;
 
     private MediaController(ISessionController sessionBinder) {
         mSessionBinder = sessionBinder;
-        mTransportController = new TransportControls();
+        mTransportControls = new TransportControls();
     }
 
     /**
@@ -91,12 +91,24 @@ public final class MediaController {
     }
 
     /**
-     * Get a {@link TransportControls} instance for this session.
+     * Get a {@link TransportControls} instance to send transport actions to
+     * the associated session.
      *
-     * @return A controls instance
+     * @return A transport controls instance.
      */
     public @NonNull TransportControls getTransportControls() {
-        return mTransportController;
+        return mTransportControls;
+    }
+
+    /**
+     * Creates a media router delegate through which the destination of the media
+     * router may be observed and controlled.
+     *
+     * @return The media router delegate, or null if the media session does
+     * not support media routing.
+     */
+    public @Nullable MediaRouter.Delegate createMediaRouterDelegate() {
+        return new MediaRouter.Delegate();
     }
 
     /**
@@ -308,20 +320,6 @@ public final class MediaController {
     }
 
     /**
-     * Request that the route picker be shown for this session. This should
-     * generally be called in response to a user action.
-     *
-     * @hide
-     */
-    public void showRoutePicker() {
-        try {
-            mSessionBinder.showRoutePicker();
-        } catch (RemoteException e) {
-            Log.d(TAG, "Dead object in showRoutePicker", e);
-        }
-    }
-
-    /**
      * Get the info for the session this controller is connected to.
      *
      * @return The session info for the connected session.
@@ -418,15 +416,6 @@ public final class MediaController {
          * @param extras Optional parameters for the event, may be null.
          */
         public void onSessionEvent(@NonNull String event, @Nullable Bundle extras) {
-        }
-
-        /**
-         * Override to handle route changes for this session.
-         *
-         * @param route The new route
-         * @hide
-         */
-        public void onRouteChanged(RouteInfo route) {
         }
 
         /**
@@ -670,14 +659,6 @@ public final class MediaController {
         }
 
         @Override
-        public void onRouteChanged(RouteInfo route) {
-            MediaController controller = mController.get();
-            if (controller != null) {
-                controller.postMessage(MSG_ROUTE, route, null);
-            }
-        }
-
-        @Override
         public void onPlaybackStateChanged(PlaybackState state) {
             MediaController controller = mController.get();
             if (controller != null) {
@@ -718,9 +699,6 @@ public final class MediaController {
             switch (msg.what) {
                 case MSG_EVENT:
                     mCallback.onSessionEvent((String) msg.obj, msg.getData());
-                    break;
-                case MSG_ROUTE:
-                    mCallback.onRouteChanged((RouteInfo) msg.obj);
                     break;
                 case MSG_UPDATE_PLAYBACK_STATE:
                     mCallback.onPlaybackStateChanged((PlaybackState) msg.obj);

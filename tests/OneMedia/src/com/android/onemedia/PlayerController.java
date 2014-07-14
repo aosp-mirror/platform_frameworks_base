@@ -18,7 +18,6 @@ package com.android.onemedia;
 
 import android.media.MediaMetadata;
 import android.media.session.MediaController;
-import android.media.session.RouteInfo;
 import android.media.session.MediaSessionManager;
 import android.media.session.PlaybackState;
 import android.os.Bundle;
@@ -121,7 +120,7 @@ public class PlayerController {
     }
 
     public void showRoutePicker() {
-        mController.showRoutePicker();
+        // TODO
     }
 
     private void unbindFromService() {
@@ -172,11 +171,6 @@ public class PlayerController {
     };
 
     private class SessionCallback extends MediaController.Callback {
-        @Override
-        public void onRouteChanged(RouteInfo route) {
-            // TODO
-        }
-
         @Override
         public void onPlaybackStateChanged(PlaybackState state) {
             if (state == null) {

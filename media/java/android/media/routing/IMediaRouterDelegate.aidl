@@ -13,21 +13,10 @@
  * limitations under the License.
  */
 
-package android.media.session;
+package android.media.routing;
 
-import android.media.MediaMetadata;
-import android.media.session.ParcelableVolumeInfo;
-import android.media.session.PlaybackState;
-import android.os.Bundle;
+/** @hide */
+interface IMediaRouterDelegate {
 
-/**
- * @hide
- */
-oneway interface ISessionControllerCallback {
-    void onEvent(String event, in Bundle extras);
-
-    // These callbacks are for the TransportController
-    void onPlaybackStateChanged(in PlaybackState state);
-    void onMetadataChanged(in MediaMetadata metadata);
-    void onVolumeInfoChanged(in ParcelableVolumeInfo info);
 }
+

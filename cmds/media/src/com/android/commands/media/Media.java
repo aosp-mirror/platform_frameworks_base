@@ -25,7 +25,6 @@ import android.media.session.ISessionManager;
 import android.media.session.MediaController;
 import android.media.session.MediaSessionInfo;
 import android.media.session.PlaybackState;
-import android.media.session.RouteInfo;
 import android.os.Bundle;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -178,11 +177,6 @@ public class Media extends BaseCommand {
         @Override
         public void onSessionEvent(String event, Bundle extras) {
             System.out.println("onSessionEvent event=" + event + ", extras=" + extras);
-        }
-
-        @Override
-        public void onRouteChanged(RouteInfo route) {
-            System.out.println("onRouteChanged " + route);
         }
 
         @Override
