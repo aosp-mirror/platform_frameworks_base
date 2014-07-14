@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <!--
 Copyright (C) 2014 The Android Open Source Project
 
@@ -14,22 +13,22 @@ Copyright (C) 2014 The Android Open Source Project
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<animation-list
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:oneshot="true">
-    <item android:drawable="@drawable/ic_qs_rotation_15" android:duration="16" />
-    <item android:drawable="@drawable/ic_qs_rotation_14" android:duration="16" />
-    <item android:drawable="@drawable/ic_qs_rotation_13" android:duration="16" />
-    <item android:drawable="@drawable/ic_qs_rotation_12" android:duration="16" />
-    <item android:drawable="@drawable/ic_qs_rotation_11" android:duration="16" />
-    <item android:drawable="@drawable/ic_qs_rotation_10" android:duration="16" />
-    <item android:drawable="@drawable/ic_qs_rotation_09" android:duration="16" />
-    <item android:drawable="@drawable/ic_qs_rotation_08" android:duration="16" />
-    <item android:drawable="@drawable/ic_qs_rotation_07" android:duration="16" />
-    <item android:drawable="@drawable/ic_qs_rotation_06" android:duration="16" />
-    <item android:drawable="@drawable/ic_qs_rotation_05" android:duration="16" />
-    <item android:drawable="@drawable/ic_qs_rotation_04" android:duration="16" />
-    <item android:drawable="@drawable/ic_qs_rotation_03" android:duration="16" />
-    <item android:drawable="@drawable/ic_qs_rotation_02" android:duration="16" />
-    <item android:drawable="@drawable/ic_qs_rotation_01" android:duration="16" />
-</animation-list>
+<vector xmlns:android="http://schemas.android.com/apk/res/android" >
+    <size
+        android:width="64dp"
+        android:height="64dp"/>
+
+    <viewport
+        android:viewportWidth="24.0"
+        android:viewportHeight="24.0"/>
+
+    <path
+        android:fill="#FFFFFFFF"
+        android:pathData="M10.25,1.75c-0.6,-0.6 -1.5,-0.6 -2.1,0.0l-6.4,6.4c-0.6,0.6 -0.6,1.5 0.0,2.1l12.0,12.0c0.6,0.6 1.5,0.6 2.1,0.0l6.4,-6.4c0.6,-0.6 0.6,-1.5 0.0,-2.1L10.25,1.75zM14.85,21.25l-12.0,-12.0l6.4,-6.4l12.0,12.0L14.85,21.25z"/>
+    <path
+        android:fill="#FFFFFFFF"
+        android:pathData="M16.55,2.5c3.3,1.5 5.6,4.7 6.0,8.5l1.5,0.0c-0.6,-6.2 -5.7,-11.0 -12.0,-11.0c-0.2,0.0 -0.4,0.0 -0.7,0.0l3.8,3.8L16.55,2.5z"/>
+    <path
+        android:fill="#FFFFFFFF"
+        android:pathData="M7.55,21.5c-3.3,-1.5 -5.6,-4.7 -6.0,-8.5l-1.4,0.0c0.5,6.2 5.6,11.0 11.9,11.0c0.2,0.0 0.4,0.0 0.7,0.0l-3.8,-3.8L7.55,21.5z"/>
+</vector>
