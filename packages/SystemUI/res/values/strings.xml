@@ -516,6 +516,10 @@
     <string name="quick_settings_time_label">Time</string>
     <!-- QuickSettings: User [CHAR LIMIT=NONE] -->
     <string name="quick_settings_user_label">Me</string>
+    <!-- QuickSettings: Title of the user detail panel [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_user_title">User</string>
+    <!-- QuickSettings: Label on the item for adding a new user [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_user_new_user">New user</string>
     <!-- QuickSettings: Wifi [CHAR LIMIT=NONE] -->
     <string name="quick_settings_wifi_label">Wi-Fi</string>
     <!-- QuickSettings: Wifi (Not connected) [CHAR LIMIT=NONE] -->
