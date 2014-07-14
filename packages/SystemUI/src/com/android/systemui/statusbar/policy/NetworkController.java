@@ -61,7 +61,6 @@ public interface NetworkController {
     public static class DataUsageInfo {
         public String carrier;
         public String period;
-        public long maxLevel;
         public long limitLevel;
         public long warningLevel;
         public long usageLevel;
