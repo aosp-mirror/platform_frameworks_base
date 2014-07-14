@@ -389,6 +389,7 @@ public final class PageAdapter extends Adapter {
             mSelectedPages = selectedPages;
             mSelectedPageCount = PageRangeUtils.getNormalizedPageCount(
                     mSelectedPages, mDocumentPageCount);
+            updatePreviewAreaAndPageSize();
             notifyDataSetChanged();
         }
         return mSelectedPages;
