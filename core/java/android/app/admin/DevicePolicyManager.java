@@ -19,6 +19,7 @@ package android.app.admin;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.app.Activity;
+import android.content.AbstractRestrictionsProvider;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -2661,19 +2662,19 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Designates a specific broadcast receiver component as the provider for
+     * Designates a specific service component as the provider for
      * making permission requests of a local or remote administrator of the user.
      * <p/>
      * Only a profile owner can designate the restrictions provider.
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
-     * @param receiver The component name of a BroadcastReceiver that handles the
-     * {@link RestrictionsManager#ACTION_REQUEST_PERMISSION} intent. If this param is null,
+     * @param provider The component name of the service that implements
+     * {@link AbstractRestrictionsProvider}. If this param is null,
      * it removes the restrictions provider previously assigned.
      */
-    public void setRestrictionsProvider(ComponentName admin, ComponentName receiver) {
+    public void setRestrictionsProvider(ComponentName admin, ComponentName provider) {
         if (mService != null) {
             try {
-                mService.setRestrictionsProvider(admin, receiver);
+                mService.setRestrictionsProvider(admin, provider);
             } catch (RemoteException re) {
                 Log.w(TAG, "Failed to set permission provider on device policy service");
             }
