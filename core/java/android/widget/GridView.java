@@ -1029,11 +1029,6 @@ public class GridView extends AbsListView {
     }
 
     @Override
-    AbsPositionScroller createPositionScroller() {
-        return new GridViewPositionScroller();
-    }
-
-    @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         // Sets up mListPadding
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
@@ -2391,34 +2386,5 @@ public class GridView extends AbsListView {
         final CollectionItemInfo itemInfo = CollectionItemInfo.obtain(
                 column, 1, row, 1, isHeading, isSelected);
         info.setCollectionItemInfo(itemInfo);
-    }
-
-    /**
-     * Sub-position scroller that understands the layout of a GridView.
-     */
-    class GridViewPositionScroller extends AbsSubPositionScroller {
-        @Override
-        public int getRowForPosition(int position) {
-            return position / mNumColumns;
-        }
-
-        @Override
-        public int getFirstPositionForRow(int row) {
-            return row * mNumColumns;
-        }
-
-        @Override
-        public int getHeightForRow(int row) {
-            final int firstRowPosition = row * mNumColumns;
-            final int lastRowPosition = Math.min(getCount(), firstRowPosition + mNumColumns);
-            int maxHeight = 0;
-            for (int i = firstRowPosition; i < lastRowPosition; i++) {
-                final int height = getHeightForPosition(i);
-                if (height > maxHeight) {
-                    maxHeight = height;
-                }
-            }
-            return maxHeight;
-        }
     }
 }
