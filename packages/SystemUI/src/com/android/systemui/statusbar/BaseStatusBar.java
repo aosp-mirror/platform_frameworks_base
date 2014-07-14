@@ -1097,6 +1097,8 @@ public abstract class BaseStatusBar extends SystemUI implements
             entry.autoRedacted = true;
         }
 
+        row.setClearable(sbn.isClearable());
+
         row.setDrawingCacheEnabled(true);
 
         if (MULTIUSER_DEBUG) {

@@ -53,6 +53,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     private NotificationContentView mPrivateLayout;
     private int mMaxExpandHeight;
     private View mVetoButton;
+    private boolean mClearable;
 
     public ExpandableNotificationRow(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -166,6 +167,23 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     }
 
     /**
+     * @return Can the underlying notification be cleared?
+     */
+    public boolean isClearable() {
+        return mClearable;
+    }
+
+    /**
+     * Set whether the notification can be cleared.
+     *
+     * @param clearable
+     */
+    public void setClearable(boolean clearable) {
+        mClearable = clearable;
+        updateVetoButton();
+    }
+
+    /**
      * Apply an expansion state to the layout.
      */
     public void applyExpansionToLayout() {
@@ -223,6 +241,13 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         // TODO: animation?
         mPublicLayout.setVisibility(show ? View.VISIBLE : View.GONE);
         mPrivateLayout.setVisibility(show ? View.GONE : View.VISIBLE);
+
+        updateVetoButton();
+    }
+
+    private void updateVetoButton() {
+        // public versions cannot be dismissed
+        mVetoButton.setVisibility(isClearable() && !mShowingPublic ? View.VISIBLE : View.GONE);
     }
 
     public int getMaxExpandHeight() {
