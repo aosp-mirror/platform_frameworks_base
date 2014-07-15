@@ -1811,10 +1811,18 @@ public final class ActivityManagerService extends ActivityManagerNative
                 break;
             }
             case SYSTEM_USER_START_MSG: {
+                mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_USER_RUNNING_START,
+                        Integer.toString(msg.arg1), msg.arg1);
                 mSystemServiceManager.startUser(msg.arg1);
                 break;
             }
             case SYSTEM_USER_CURRENT_MSG: {
+                mBatteryStatsService.noteEvent(
+                        BatteryStats.HistoryItem.EVENT_USER_FOREGROUND_FINISH,
+                        Integer.toString(msg.arg2), msg.arg2);
+                mBatteryStatsService.noteEvent(
+                        BatteryStats.HistoryItem.EVENT_USER_FOREGROUND_START,
+                        Integer.toString(msg.arg1), msg.arg1);
                 mSystemServiceManager.switchUser(msg.arg1);
                 break;
             }
@@ -10168,7 +10176,11 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         if (goingCallback != null) goingCallback.run();
-        
+
+        mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_USER_RUNNING_START,
+                Integer.toString(mCurrentUserId), mCurrentUserId);
+        mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_USER_FOREGROUND_START,
+                Integer.toString(mCurrentUserId), mCurrentUserId);
         mSystemServiceManager.startUser(mCurrentUserId);
 
         synchronized (this) {
@@ -12441,12 +12453,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                 pw.print(" lastCachedPss="); pw.println(r.lastCachedPss);
                 pw.print(prefix);
                 pw.print("    ");
-                pw.print("keeping="); pw.print(r.keeping);
-                pw.print(" cached="); pw.print(r.cached);
+                pw.print("cached="); pw.print(r.cached);
                 pw.print(" empty="); pw.print(r.empty);
                 pw.print(" hasAboveClient="); pw.println(r.hasAboveClient);
 
-                if (!r.keeping) {
+                if (r.setProcState >= ActivityManager.PROCESS_STATE_SERVICE) {
                     if (r.lastWakeTime != 0) {
                         long wtime;
                         BatteryStatsImpl stats = service.mBatteryStatsService.getActiveStatistics();
@@ -15200,7 +15211,6 @@ public final class ActivityManagerService extends ActivityManagerNative
             app.adjSeq = mAdjSeq;
             app.curRawAdj = app.maxAdj;
             app.foregroundActivities = false;
-            app.keeping = true;
             app.curSchedGroup = Process.THREAD_GROUP_DEFAULT;
             app.curProcState = ActivityManager.PROCESS_STATE_PERSISTENT;
             // System processes can do UI, and when they do we want to have
@@ -15224,7 +15234,6 @@ public final class ActivityManagerService extends ActivityManagerNative
             return (app.curAdj=app.maxAdj);
         }
 
-        app.keeping = false;
         app.systemNoUi = false;
 
         // Determine the importance of the process, starting with most
@@ -15469,9 +15478,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                         app.adjType = "cch-started-services";
                     }
                 }
-                // Don't kill this process because it is doing work; it
-                // has said it is doing work.
-                app.keeping = true;
             }
             for (int conni = s.connections.size()-1;
                     conni >= 0 && (adj > ProcessList.FOREGROUND_APP_ADJ
@@ -15560,9 +15566,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                                 }
                                 if (!client.cached) {
                                     app.cached = false;
-                                }
-                                if (client.keeping) {
-                                    app.keeping = true;
                                 }
                                 adjType = "service";
                             }
@@ -15675,7 +15678,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                         app.adjType = "provider";
                     }
                     app.cached &= client.cached;
-                    app.keeping |= client.keeping;
                     app.adjTypeCode = ActivityManager.RunningAppProcessInfo
                             .REASON_PROVIDER_IN_USE;
                     app.adjSource = client;
@@ -15719,7 +15721,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                     adj = ProcessList.FOREGROUND_APP_ADJ;
                     schedGroup = Process.THREAD_GROUP_DEFAULT;
                     app.cached = false;
-                    app.keeping = true;
                     app.adjType = "provider";
                     app.adjTarget = cpr.name;
                 }
@@ -15801,9 +15802,6 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (app.maxAdj <= ProcessList.PERCEPTIBLE_APP_ADJ) {
                 schedGroup = Process.THREAD_GROUP_DEFAULT;
             }
-        }
-        if (adj < ProcessList.CACHED_APP_MIN_ADJ) {
-            app.keeping = true;
         }
 
         // Do final modification to adj.  Everything we do between here and applying
@@ -16026,7 +16024,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         while (i > 0) {
             i--;
             ProcessRecord app = mLruProcesses.get(i);
-            if (!app.keeping) {
+            if (app.setProcState >= ActivityManager.PROCESS_STATE_HOME) {
                 long wtime;
                 synchronized (stats) {
                     wtime = stats.getProcessWakeTime(app.info.uid,
@@ -16071,7 +16069,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                             + " during " + realtimeSince);
                     app.baseProcessTracker.reportExcessiveWake(app.pkgList);
                 } else if (doCpuKills && uptimeSince > 0
-                        && ((cputimeUsed*100)/uptimeSince) >= 50) {
+                        && ((cputimeUsed*100)/uptimeSince) >= 25) {
                     synchronized (stats) {
                         stats.reportExcessiveCpuLocked(app.info.uid, app.processName,
                                 uptimeSince, cputimeUsed);
@@ -16087,23 +16085,11 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    private final boolean applyOomAdjLocked(ProcessRecord app, boolean wasKeeping,
+    private final boolean applyOomAdjLocked(ProcessRecord app,
             ProcessRecord TOP_APP, boolean doingAll, long now) {
         boolean success = true;
 
         if (app.curRawAdj != app.setRawAdj) {
-            if (wasKeeping && !app.keeping) {
-                // This app is no longer something we want to keep.  Note
-                // its current wake lock time to later know to kill it if
-                // it is not behaving well.
-                BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
-                synchronized (stats) {
-                    app.lastWakeTime = stats.getProcessWakeTime(app.info.uid,
-                            app.pid, SystemClock.elapsedRealtime());
-                }
-                app.lastCpuTime = app.curCpuTime;
-            }
-
             app.setRawAdj = app.curRawAdj;
         }
 
@@ -16192,6 +16178,21 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(TAG,
                     "Proc state change of " + app.processName
                     + " to " + app.curProcState);
+            boolean setImportant = app.setProcState < ActivityManager.PROCESS_STATE_SERVICE;
+            boolean curImportant = app.curProcState < ActivityManager.PROCESS_STATE_SERVICE;
+            if (setImportant && !curImportant) {
+                // This app is no longer something we consider important enough to allow to
+                // use arbitrary amounts of battery power.  Note
+                // its current wake lock time to later know to kill it if
+                // it is not behaving well.
+                BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
+                synchronized (stats) {
+                    app.lastWakeTime = stats.getProcessWakeTime(app.info.uid,
+                            app.pid, SystemClock.elapsedRealtime());
+                }
+                app.lastCpuTime = app.curCpuTime;
+
+            }
             app.setProcState = app.curProcState;
             if (app.setProcState >= ActivityManager.PROCESS_STATE_HOME) {
                 app.notCachedSinceIdle = false;
@@ -16268,11 +16269,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             return false;
         }
 
-        final boolean wasKeeping = app.keeping;
-
         computeOomAdjLocked(app, cachedAdj, TOP_APP, doingAll, now);
 
-        return applyOomAdjLocked(app, wasKeeping, TOP_APP, doingAll, now);
+        return applyOomAdjLocked(app, TOP_APP, doingAll, now);
     }
 
     final void updateProcessForegroundLocked(ProcessRecord proc, boolean isForeground,
@@ -16428,7 +16427,6 @@ public final class ActivityManagerService extends ActivityManagerNative
             ProcessRecord app = mLruProcesses.get(i);
             if (!app.killedByAm && app.thread != null) {
                 app.procStateChanged = false;
-                final boolean wasKeeping = app.keeping;
                 computeOomAdjLocked(app, ProcessList.UNKNOWN_ADJ, TOP_APP, true, now);
 
                 // If we haven't yet assigned the final cached adj
@@ -16483,7 +16481,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                 }
 
-                applyOomAdjLocked(app, wasKeeping, TOP_APP, true, now);
+                applyOomAdjLocked(app, TOP_APP, true, now);
 
                 // Count the number of process types.
                 switch (app.curProcState) {
@@ -17127,7 +17125,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
 
                 if (foreground) {
-                    mHandler.sendMessage(mHandler.obtainMessage(SYSTEM_USER_CURRENT_MSG, userId));
+                    mHandler.sendMessage(mHandler.obtainMessage(SYSTEM_USER_CURRENT_MSG, userId,
+                            oldUserId));
                     mHandler.removeMessages(REPORT_USER_SWITCH_MSG);
                     mHandler.removeMessages(USER_SWITCH_TIMEOUT_MSG);
                     mHandler.sendMessage(mHandler.obtainMessage(REPORT_USER_SWITCH_MSG,
@@ -17502,6 +17501,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                             }
                             uss.mState = UserStartedState.STATE_SHUTDOWN;
                         }
+                        mBatteryStatsService.noteEvent(
+                                BatteryStats.HistoryItem.EVENT_USER_RUNNING_FINISH,
+                                Integer.toString(userId), userId);
                         mSystemServiceManager.stopUser(userId);
                         broadcastIntentLocked(null, null, shutdownIntent,
                                 null, shutdownReceiver, 0, null, null, null, AppOpsManager.OP_NONE,

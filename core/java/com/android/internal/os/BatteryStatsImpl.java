@@ -91,7 +91,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 109 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 112 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -2109,6 +2109,11 @@ public final class BatteryStatsImpl extends BatteryStats {
             return;
         }
 
+        if (dataSize == 0) {
+            // The history is currently empty; we need it to start with a time stamp.
+            cur.currentTime = System.currentTimeMillis();
+            addHistoryBufferLocked(elapsedRealtimeMs, uptimeMs, HistoryItem.CMD_RESET, cur);
+        }
         addHistoryBufferLocked(elapsedRealtimeMs, uptimeMs, HistoryItem.CMD_UPDATE, cur);
     }
 
@@ -2360,6 +2365,50 @@ public final class BatteryStatsImpl extends BatteryStats {
         addHistoryEventLocked(elapsedRealtime, uptime, HistoryItem.EVENT_PROC_FINISH, name, uid);
         getUidStatsLocked(uid).updateProcessStateLocked(name, Uid.PROCESS_STATE_NONE,
                 elapsedRealtime);
+    }
+
+    public void noteSyncStartLocked(String name, int uid) {
+        uid = mapUid(uid);
+        final long elapsedRealtime = SystemClock.elapsedRealtime();
+        final long uptime = SystemClock.uptimeMillis();
+        getUidStatsLocked(uid).noteStartSyncLocked(name, elapsedRealtime);
+        if (!mActiveEvents.updateState(HistoryItem.EVENT_SYNC_START, name, uid, 0)) {
+            return;
+        }
+        addHistoryEventLocked(elapsedRealtime, uptime, HistoryItem.EVENT_SYNC_START, name, uid);
+    }
+
+    public void noteSyncFinishLocked(String name, int uid) {
+        uid = mapUid(uid);
+        final long elapsedRealtime = SystemClock.elapsedRealtime();
+        final long uptime = SystemClock.uptimeMillis();
+        getUidStatsLocked(uid).noteStopSyncLocked(name, elapsedRealtime);
+        if (!mActiveEvents.updateState(HistoryItem.EVENT_SYNC_FINISH, name, uid, 0)) {
+            return;
+        }
+        addHistoryEventLocked(elapsedRealtime, uptime, HistoryItem.EVENT_SYNC_FINISH, name, uid);
+    }
+
+    public void noteJobStartLocked(String name, int uid) {
+        uid = mapUid(uid);
+        final long elapsedRealtime = SystemClock.elapsedRealtime();
+        final long uptime = SystemClock.uptimeMillis();
+        getUidStatsLocked(uid).noteStartJobLocked(name, elapsedRealtime);
+        if (!mActiveEvents.updateState(HistoryItem.EVENT_JOB_START, name, uid, 0)) {
+            return;
+        }
+        addHistoryEventLocked(elapsedRealtime, uptime, HistoryItem.EVENT_JOB_START, name, uid);
+    }
+
+    public void noteJobFinishLocked(String name, int uid) {
+        uid = mapUid(uid);
+        final long elapsedRealtime = SystemClock.elapsedRealtime();
+        final long uptime = SystemClock.uptimeMillis();
+        getUidStatsLocked(uid).noteStopJobLocked(name, elapsedRealtime);
+        if (!mActiveEvents.updateState(HistoryItem.EVENT_JOB_FINISH, name, uid, 0)) {
+            return;
+        }
+        addHistoryEventLocked(elapsedRealtime, uptime, HistoryItem.EVENT_JOB_FINISH, name, uid);
     }
 
     private void requestWakelockCpuUpdate() {
@@ -3833,6 +3882,16 @@ public final class BatteryStatsImpl extends BatteryStats {
         final ArrayMap<String, Wakelock> mWakelockStats = new ArrayMap<String, Wakelock>();
 
         /**
+         * The statistics we have collected for this uid's syncs.
+         */
+        final ArrayMap<String, StopwatchTimer> mSyncStats = new ArrayMap<String, StopwatchTimer>();
+
+        /**
+         * The statistics we have collected for this uid's jobs.
+         */
+        final ArrayMap<String, StopwatchTimer> mJobStats = new ArrayMap<String, StopwatchTimer>();
+
+        /**
          * The statistics we have collected for this uid's sensor activations.
          */
         final SparseArray<Sensor> mSensorStats = new SparseArray<Sensor>();
@@ -3869,6 +3928,16 @@ public final class BatteryStatsImpl extends BatteryStats {
         @Override
         public Map<String, ? extends BatteryStats.Uid.Wakelock> getWakelockStats() {
             return mWakelockStats;
+        }
+
+        @Override
+        public Map<String, ? extends BatteryStats.Timer> getSyncStats() {
+            return mSyncStats;
+        }
+
+        @Override
+        public Map<String, ? extends BatteryStats.Timer> getJobStats() {
+            return mJobStats;
         }
 
         @Override
@@ -4396,6 +4465,24 @@ public final class BatteryStatsImpl extends BatteryStats {
                     active = true;
                 }
             }
+            for (int is=mSyncStats.size()-1; is>=0; is--) {
+                StopwatchTimer timer = mSyncStats.valueAt(is);
+                if (timer.reset(false)) {
+                    mSyncStats.removeAt(is);
+                    timer.detach();
+                } else {
+                    active = true;
+                }
+            }
+            for (int ij=mJobStats.size()-1; ij>=0; ij--) {
+                StopwatchTimer timer = mJobStats.valueAt(ij);
+                if (timer.reset(false)) {
+                    mJobStats.removeAt(ij);
+                    timer.detach();
+                } else {
+                    active = true;
+                }
+            }
             for (int ise=mSensorStats.size()-1; ise>=0; ise--) {
                 Sensor s = mSensorStats.valueAt(ise);
                 if (s.reset()) {
@@ -4495,6 +4582,22 @@ public final class BatteryStatsImpl extends BatteryStats {
                 out.writeString(mWakelockStats.keyAt(iw));
                 Uid.Wakelock wakelock = mWakelockStats.valueAt(iw);
                 wakelock.writeToParcelLocked(out, elapsedRealtimeUs);
+            }
+
+            int NS = mSyncStats.size();
+            out.writeInt(NS);
+            for (int is=0; is<NS; is++) {
+                out.writeString(mSyncStats.keyAt(is));
+                StopwatchTimer timer = mSyncStats.valueAt(is);
+                Timer.writeTimerToParcel(out, timer, elapsedRealtimeUs);
+            }
+
+            int NJ = mJobStats.size();
+            out.writeInt(NJ);
+            for (int ij=0; ij<NJ; ij++) {
+                out.writeString(mJobStats.keyAt(ij));
+                StopwatchTimer timer = mJobStats.valueAt(ij);
+                Timer.writeTimerToParcel(out, timer, elapsedRealtimeUs);
             }
 
             int NSE = mSensorStats.size();
@@ -4616,6 +4719,25 @@ public final class BatteryStatsImpl extends BatteryStats {
                 // the previous run of the system was an older version
                 // that didn't impose a limit.
                 mWakelockStats.put(wakelockName, wakelock);
+            }
+
+            int numSyncs = in.readInt();
+            mSyncStats.clear();
+            for (int j = 0; j < numSyncs; j++) {
+                String syncName = in.readString();
+                if (in.readInt() != 0) {
+                    mSyncStats.put(syncName,
+                            new StopwatchTimer(Uid.this, SYNC, null, timeBase, in));
+                }
+            }
+
+            int numJobs = in.readInt();
+            mJobStats.clear();
+            for (int j = 0; j < numJobs; j++) {
+                String jobName = in.readString();
+                if (in.readInt() != 0) {
+                    mJobStats.put(jobName, new StopwatchTimer(Uid.this, JOB, null, timeBase, in));
+                }
             }
 
             int numSensors = in.readInt();
@@ -5670,6 +5792,38 @@ public final class BatteryStatsImpl extends BatteryStats {
             return ss;
         }
 
+        public StopwatchTimer getSyncTimerLocked(String name) {
+            StopwatchTimer t = mSyncStats.get(name);
+            if (t == null) {
+                final int N = mSyncStats.size();
+                if (N > MAX_WAKELOCKS_PER_UID) {
+                    name = BATCHED_WAKELOCK_NAME;
+                    t = mSyncStats.get(name);
+                }
+                if (t == null) {
+                    t = new StopwatchTimer(Uid.this, SYNC, null, mOnBatteryTimeBase);
+                    mSyncStats.put(name, t);
+                }
+            }
+            return t;
+        }
+
+        public StopwatchTimer getJobTimerLocked(String name) {
+            StopwatchTimer t = mJobStats.get(name);
+            if (t == null) {
+                final int N = mJobStats.size();
+                if (N > MAX_WAKELOCKS_PER_UID) {
+                    name = BATCHED_WAKELOCK_NAME;
+                    t = mJobStats.get(name);
+                }
+                if (t == null) {
+                    t = new StopwatchTimer(Uid.this, JOB, null, mOnBatteryTimeBase);
+                    mJobStats.put(name, t);
+                }
+            }
+            return t;
+        }
+
         public StopwatchTimer getWakeTimerLocked(String name, int type) {
             Wakelock wl = mWakelockStats.get(name);
             if (wl == null) {
@@ -5735,6 +5889,34 @@ public final class BatteryStatsImpl extends BatteryStats {
             t = new StopwatchTimer(Uid.this, BatteryStats.SENSOR, timers, mOnBatteryTimeBase);
             se.mTimer = t;
             return t;
+        }
+
+        public void noteStartSyncLocked(String name, long elapsedRealtimeMs) {
+            StopwatchTimer t = getSyncTimerLocked(name);
+            if (t != null) {
+                t.startRunningLocked(elapsedRealtimeMs);
+            }
+        }
+
+        public void noteStopSyncLocked(String name, long elapsedRealtimeMs) {
+            StopwatchTimer t = getSyncTimerLocked(name);
+            if (t != null) {
+                t.stopRunningLocked(elapsedRealtimeMs);
+            }
+        }
+
+        public void noteStartJobLocked(String name, long elapsedRealtimeMs) {
+            StopwatchTimer t = getJobTimerLocked(name);
+            if (t != null) {
+                t.startRunningLocked(elapsedRealtimeMs);
+            }
+        }
+
+        public void noteStopJobLocked(String name, long elapsedRealtimeMs) {
+            StopwatchTimer t = getJobTimerLocked(name);
+            if (t != null) {
+                t.stopRunningLocked(elapsedRealtimeMs);
+            }
         }
 
         public void noteStartWakeLocked(int pid, String name, int type, long elapsedRealtimeMs) {
@@ -7170,7 +7352,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         // the last run until samples in this run.
         if (mHistoryBaseTime > 0) {
             long oldnow = SystemClock.elapsedRealtime();
-            mHistoryBaseTime = (mHistoryBaseTime - oldnow) + 60*1000;
+            mHistoryBaseTime = mHistoryBaseTime - oldnow + 1;
             if (DEBUG_HISTORY) {
                 StringBuilder sb = new StringBuilder(128);
                 sb.append("****************** ADJUSTED mHistoryBaseTime: ");
@@ -7433,6 +7615,26 @@ public final class BatteryStatsImpl extends BatteryStats {
                 }
             }
 
+            int NS = in.readInt();
+            if (NS > 100) {
+                Slog.w(TAG, "File corrupt: too many syncs " + NS);
+                return;
+            }
+            for (int is = 0; is < NS; is++) {
+                String name = in.readString();
+                u.getSyncTimerLocked(name).readSummaryFromParcelLocked(in);
+            }
+
+            int NJ = in.readInt();
+            if (NJ > 100) {
+                Slog.w(TAG, "File corrupt: too many job timers " + NJ);
+                return;
+            }
+            for (int ij = 0; ij < NJ; ij++) {
+                String name = in.readString();
+                u.getJobTimerLocked(name).readSummaryFromParcelLocked(in);
+            }
+
             int NP = in.readInt();
             if (NP > 1000) {
                 Slog.w(TAG, "File corrupt: too many sensors " + NP);
@@ -7484,7 +7686,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                 String pkgName = in.readString();
                 Uid.Pkg p = u.getPackageStatsLocked(pkgName);
                 p.mWakeups = p.mLoadedWakeups = in.readInt();
-                final int NS = in.readInt();
+                NS = in.readInt();
                 if (NS > 1000) {
                     Slog.w(TAG, "File corrupt: too many services " + NS);
                     return;
@@ -7717,6 +7919,20 @@ public final class BatteryStatsImpl extends BatteryStats {
                 }
             }
 
+            int NS = u.mSyncStats.size();
+            out.writeInt(NS);
+            for (int is=0; is<NS; is++) {
+                out.writeString(u.mSyncStats.keyAt(is));
+                u.mSyncStats.valueAt(is).writeSummaryFromParcelLocked(out, NOWREAL_SYS);
+            }
+
+            int NJ = u.mJobStats.size();
+            out.writeInt(NJ);
+            for (int ij=0; ij<NJ; ij++) {
+                out.writeString(u.mJobStats.keyAt(ij));
+                u.mJobStats.valueAt(ij).writeSummaryFromParcelLocked(out, NOWREAL_SYS);
+            }
+
             int NSE = u.mSensorStats.size();
             out.writeInt(NSE);
             for (int ise=0; ise<NSE; ise++) {
@@ -7760,7 +7976,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                     out.writeString(ent.getKey());
                     Uid.Pkg ps = ent.getValue();
                     out.writeInt(ps.mWakeups);
-                    final int NS = ps.mServiceStats.size();
+                    NS = ps.mServiceStats.size();
                     out.writeInt(NS);
                     if (NS > 0) {
                         for (Map.Entry<String, BatteryStatsImpl.Uid.Pkg.Serv> sent
@@ -7786,7 +8002,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     void readFromParcelLocked(Parcel in) {
         int magic = in.readInt();
         if (magic != MAGIC) {
-            throw new ParcelFormatException("Bad magic number");
+            throw new ParcelFormatException("Bad magic number: #" + Integer.toHexString(magic));
         }
 
         readHistory(in, false);
