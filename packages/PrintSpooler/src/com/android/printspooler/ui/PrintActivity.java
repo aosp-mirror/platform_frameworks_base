@@ -157,7 +157,6 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
     private EditText mCopiesEditText;
 
-    private TextView mPageRangeOptionsTitle;
     private TextView mPageRangeTitle;
     private EditText mPageRangeEditText;
 
@@ -195,6 +194,8 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     private PageRange[] mSelectedPages;
 
     private String mCallingPackageName;
+
+    private int mCurrentPageCount;
 
     private int mState;
 
@@ -996,19 +997,10 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         // Range options
         ArrayAdapter<SpinnerItem<Integer>> rangeOptionsSpinnerAdapter =
                 new ArrayAdapter<>(this, R.layout.spinner_dropdown_item, R.id.title);
-        final int[] rangeOptionsValues = getResources().getIntArray(
-                R.array.page_options_values);
-        String[] rangeOptionsLabels = getResources().getStringArray(
-                R.array.page_options_labels);
-        final int rangeOptionsCount = rangeOptionsLabels.length;
-        for (int i = 0; i < rangeOptionsCount; i++) {
-            rangeOptionsSpinnerAdapter.add(new SpinnerItem<>(
-                    rangeOptionsValues[i], rangeOptionsLabels[i]));
-        }
-        mPageRangeOptionsTitle = (TextView) findViewById(R.id.range_options_title);
         mRangeOptionsSpinner = (Spinner) findViewById(R.id.range_options_spinner);
         mRangeOptionsSpinner.setAdapter(rangeOptionsSpinnerAdapter);
         mRangeOptionsSpinner.setOnItemSelectedListener(itemSelectedListener);
+        updatePageRangeOptions(PrintDocumentInfo.PAGE_COUNT_UNKNOWN);
 
         // Page range
         mPageRangeTitle = (TextView) findViewById(R.id.page_range_title);
@@ -1265,20 +1257,21 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                     mPageRangeTitle.setVisibility(View.INVISIBLE);
                 }
             }
-            String title = (pageCount != PrintDocumentInfo.PAGE_COUNT_UNKNOWN)
-                    ? getString(R.string.label_pages, String.valueOf(pageCount))
-                    : getString(R.string.page_count_unknown);
-            mPageRangeOptionsTitle.setText(title);
         } else {
             if (mRangeOptionsSpinner.getSelectedItemPosition() != 0) {
                 mRangeOptionsSpinner.setSelection(0);
                 mPageRangeEditText.setText("");
             }
             mRangeOptionsSpinner.setEnabled(false);
-            mPageRangeOptionsTitle.setText(getString(R.string.page_count_unknown));
             mPageRangeEditText.setEnabled(false);
             mPageRangeEditText.setVisibility(View.INVISIBLE);
             mPageRangeTitle.setVisibility(View.INVISIBLE);
+        }
+
+        final int newPageCount = getAdjustedPageCount(info);
+        if (newPageCount != mCurrentPageCount) {
+            mCurrentPageCount = newPageCount;
+            updatePageRangeOptions(newPageCount);
         }
 
         // Advanced print options
@@ -1317,6 +1310,27 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                 && TextUtils.isEmpty(mCopiesEditText.getText())) {
             mCopiesEditText.setText(String.valueOf(MIN_COPIES));
             mCopiesEditText.requestFocus();
+        }
+    }
+
+    private void updatePageRangeOptions(int pageCount) {
+        ArrayAdapter<SpinnerItem<Integer>> rangeOptionsSpinnerAdapter =
+                (ArrayAdapter) mRangeOptionsSpinner.getAdapter();
+        rangeOptionsSpinnerAdapter.clear();
+
+        final int[] rangeOptionsValues = getResources().getIntArray(
+                R.array.page_options_values);
+
+        String pageCountLabel = (pageCount > 0) ? String.valueOf(pageCount) : "";
+        String[] rangeOptionsLabels = new String[] {
+            getString(R.string.template_all_pages, pageCountLabel),
+            getString(R.string.template_page_range, pageCountLabel)
+        };
+
+        final int rangeOptionsCount = rangeOptionsLabels.length;
+        for (int i = 0; i < rangeOptionsCount; i++) {
+            rangeOptionsSpinnerAdapter.add(new SpinnerItem<>(
+                    rangeOptionsValues[i], rangeOptionsLabels[i]));
         }
     }
 

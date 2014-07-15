@@ -159,14 +159,13 @@
                  <!-- Range options -->
 
                  <TextView
-                     android:id="@+id/range_options_title"
                      android:layout_width="wrap_content"
                      android:layout_height="wrap_content"
                      android:layout_marginTop="8dip"
                      android:layout_marginStart="12dip"
                      android:textAppearance="?android:attr/textAppearanceSmall"
                      android:labelFor="@+id/range_options_spinner"
-                     android:text="@string/page_count_unknown">
+                     android:text="@string/label_pages">
                  </TextView>
 
                  <Spinner
