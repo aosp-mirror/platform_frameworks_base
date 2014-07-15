@@ -16,6 +16,7 @@
 
 package android.graphics.drawable;
 
+import android.annotation.NonNull;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
@@ -26,6 +27,7 @@ import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Insets;
 import android.graphics.NinePatch;
+import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
@@ -281,14 +283,35 @@ public class NinePatchDrawable extends Drawable {
         return false;
     }
 
+    @Override
+    public boolean getOutline(@NonNull Outline outline) {
+        final Rect bounds = getBounds();
+        if (bounds.isEmpty()) return false;
+
+        if (mNinePatchState != null) {
+            NinePatch.InsetStruct insets = mNinePatchState.getBitmap().getNinePatchInsets();
+            if (insets != null) {
+                final Rect outlineInsets = insets.outlineRect;
+                outline.setRoundRect(bounds.left + outlineInsets.left,
+                        bounds.top + outlineInsets.top,
+                        bounds.right - outlineInsets.right,
+                        bounds.bottom - outlineInsets.bottom,
+                        insets.outlineRadius);
+                outline.setFilled(insets.outlineFilled);
+                return true;
+            }
+        }
+        return super.getOutline(outline);
+    }
+
     /**
      * @hide
      */
     @Override
     public Insets getOpticalInsets() {
         if (needsMirroring()) {
-            return Insets.of(mOpticalInsets.right, mOpticalInsets.top, mOpticalInsets.right,
-                    mOpticalInsets.bottom);
+            return Insets.of(mOpticalInsets.right, mOpticalInsets.top,
+                    mOpticalInsets.left, mOpticalInsets.bottom);
         } else {
             return mOpticalInsets;
         }
@@ -574,7 +597,7 @@ public class NinePatchDrawable extends Drawable {
         }
 
         NinePatchState(NinePatch ninePatch, Rect padding) {
-            this(ninePatch, padding, new Rect(), DEFAULT_DITHER, false);
+            this(ninePatch, padding, null, DEFAULT_DITHER, false);
         }
 
         NinePatchState(NinePatch ninePatch, Rect padding, Rect opticalInsets) {

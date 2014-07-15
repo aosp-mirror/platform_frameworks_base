@@ -414,7 +414,7 @@ static void assert_premultiplied(const SkBitmap& bitmap, bool isPremultiplied) {
 }
 
 jobject GraphicsJNI::createBitmap(JNIEnv* env, SkBitmap* bitmap, jbyteArray buffer,
-        int bitmapCreateFlags, jbyteArray ninepatch, jintArray layoutbounds, int density)
+        int bitmapCreateFlags, jbyteArray ninePatchChunk, jobject ninePatchInsets, int density)
 {
     SkASSERT(bitmap);
     SkASSERT(bitmap->pixelRef());
@@ -428,15 +428,9 @@ jobject GraphicsJNI::createBitmap(JNIEnv* env, SkBitmap* bitmap, jbyteArray buff
     jobject obj = env->NewObject(gBitmap_class, gBitmap_constructorMethodID,
             reinterpret_cast<jlong>(bitmap), buffer,
             bitmap->width(), bitmap->height(), density, isMutable, isPremultiplied,
-            ninepatch, layoutbounds);
+            ninePatchChunk, ninePatchInsets);
     hasException(env); // For the side effect of logging.
     return obj;
-}
-
-jobject GraphicsJNI::createBitmap(JNIEnv* env, SkBitmap* bitmap, int bitmapCreateFlags,
-        jbyteArray ninepatch, int density)
-{
-    return createBitmap(env, bitmap, NULL, bitmapCreateFlags, ninepatch, NULL, density);
 }
 
 void GraphicsJNI::reinitBitmap(JNIEnv* env, jobject javaBitmap, SkBitmap* bitmap,
@@ -719,7 +713,7 @@ int register_android_graphics_Graphics(JNIEnv* env)
 
     gBitmap_class = make_globalref(env, "android/graphics/Bitmap");
     gBitmap_nativeInstanceID = getFieldIDCheck(env, gBitmap_class, "mNativeBitmap", "J");
-    gBitmap_constructorMethodID = env->GetMethodID(gBitmap_class, "<init>", "(J[BIIIZZ[B[I)V");
+    gBitmap_constructorMethodID = env->GetMethodID(gBitmap_class, "<init>", "(J[BIIIZZ[BLandroid/graphics/NinePatch$InsetStruct;)V");
     gBitmap_reinitMethodID = env->GetMethodID(gBitmap_class, "reinit", "(IIZ)V");
     gBitmap_getAllocationByteCountMethodID = env->GetMethodID(gBitmap_class, "getAllocationByteCount", "()I");
     gBitmapRegionDecoder_class = make_globalref(env, "android/graphics/BitmapRegionDecoder");
