@@ -36,6 +36,8 @@
 #include <media/stagefright/MetaData.h>
 #include <media/stagefright/NuMediaExtractor.h>
 
+#include <nativehelper/ScopedLocalRef.h>
+
 #include "android_util_Binder.h"
 
 namespace android {
@@ -206,12 +208,12 @@ status_t JMediaExtractor::readSampleData(
     size_t dstSize;
     jbyteArray byteArray = NULL;
 
-    if (dst == NULL) {
-        jclass byteBufClass = env->FindClass("java/nio/ByteBuffer");
-        CHECK(byteBufClass != NULL);
+    ScopedLocalRef<jclass> byteBufClass(env, env->FindClass("java/nio/ByteBuffer"));
+    CHECK(byteBufClass.get() != NULL);
 
+    if (dst == NULL) {
         jmethodID arrayID =
-            env->GetMethodID(byteBufClass, "array", "()[B");
+            env->GetMethodID(byteBufClass.get(), "array", "()[B");
         CHECK(arrayID != NULL);
 
         byteArray =
@@ -250,6 +252,24 @@ status_t JMediaExtractor::readSampleData(
     }
 
     *sampleSize = buffer->size();
+
+    jmethodID positionID = env->GetMethodID(
+            byteBufClass.get(), "position", "(I)Ljava/nio/Buffer;");
+
+    CHECK(positionID != NULL);
+
+    jmethodID limitID = env->GetMethodID(
+            byteBufClass.get(), "limit", "(I)Ljava/nio/Buffer;");
+
+    CHECK(limitID != NULL);
+
+    jobject me = env->CallObjectMethod(
+            byteBuf, limitID, offset + *sampleSize);
+    env->DeleteLocalRef(me);
+    me = env->CallObjectMethod(
+            byteBuf, positionID, offset);
+    env->DeleteLocalRef(me);
+    me = NULL;
 
     return OK;
 }

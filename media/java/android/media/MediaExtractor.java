@@ -297,8 +297,12 @@ final public class MediaExtractor {
 
     /**
      * Retrieve the current encoded sample and store it in the byte buffer
-     * starting at the given offset. Returns the sample size (or -1 if
-     * no more samples are available).
+     * starting at the given offset.
+     * <p>
+     * <b>Note:</b>As of API 21, on success the position and limit of
+     * {@code byteBuf} is updated to point to the data just read.
+     * @param byteBuf the destination byte buffer
+     * @return the sample size (or -1 if no more samples are available).
      */
     public native int readSampleData(ByteBuffer byteBuf, int offset);
 
@@ -316,7 +320,10 @@ final public class MediaExtractor {
 
     // Keep these in sync with their equivalents in NuMediaExtractor.h
     /**
-     * The sample is a sync sample
+     * The sample is a sync sample (or in {@link MediaCodec}'s terminology
+     * it is a key frame.)
+     *
+     * @see MediaCodec#BUFFER_FLAG_KEY_FRAME
      */
     public static final int SAMPLE_FLAG_SYNC      = 1;
 
