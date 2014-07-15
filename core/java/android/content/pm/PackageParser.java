@@ -380,6 +380,7 @@ public class PackageParser {
         }
         PackageInfo pi = new PackageInfo();
         pi.packageName = p.packageName;
+        pi.splitNames = p.splitNames;
         pi.versionCode = p.mVersionCode;
         pi.versionName = p.mVersionName;
         pi.sharedUserId = p.mSharedUserId;

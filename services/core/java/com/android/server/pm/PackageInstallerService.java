@@ -60,6 +60,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
 
     // TODO: destroy sessions with old timestamps
     // TODO: remove outstanding sessions when installer package goes away
+    // TODO: notify listeners in other users when package has been installed there
 
     private final Context mContext;
     private final PackageManagerService mPm;
@@ -165,6 +166,10 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
             params.installFlags &= ~INSTALL_FROM_ADB;
             params.installFlags &= ~INSTALL_ALL_USERS;
             params.installFlags |= INSTALL_REPLACE_EXISTING;
+        }
+
+        if (params.mode == InstallSessionParams.MODE_INVALID) {
+            throw new IllegalArgumentException("Params must have valid mode set");
         }
 
         // Sanity check that install could fit
