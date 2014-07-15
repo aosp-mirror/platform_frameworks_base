@@ -49,7 +49,7 @@
             android:ellipsize="end"
             android:textIsSelectable="false"
             android:gravity="top|start"
-            android:textColor="?android:attr/textColorSecondary"
+            android:textColor="?android:attr/textColorPrimary"
             android:duplicateParentState="true">
         </TextView>
 
@@ -62,7 +62,7 @@
             android:ellipsize="end"
             android:textIsSelectable="false"
             android:visibility="gone"
-            android:textColor="?android:attr/textColorSecondary"
+            android:textColor="?android:attr/textColorPrimary"
             android:duplicateParentState="true">
         </TextView>
 
