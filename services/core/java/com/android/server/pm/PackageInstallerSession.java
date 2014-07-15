@@ -166,7 +166,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         info.installerPackageName = installerPackageName;
         info.progress = mProgress;
 
-        info.fullInstall = params.fullInstall;
+        info.mode = params.mode;
         info.packageName = params.packageName;
         info.icon = params.icon;
         info.title = params.title;
@@ -288,7 +288,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         // Inherit any packages and native libraries from existing install that
         // haven't been overridden.
-        if (!params.fullInstall) {
+        if (params.mode == InstallSessionParams.MODE_INHERIT_EXISTING) {
             spliceExistingFilesIntoStage();
         }
 
@@ -382,7 +382,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         // currently relying on PMS to do this.
         // TODO: teach about compatible upgrade keysets.
 
-        if (params.fullInstall) {
+        if (params.mode == InstallSessionParams.MODE_FULL_INSTALL) {
             // Full installs must include a base package
             if (!seenSplits.contains(null)) {
                 throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,

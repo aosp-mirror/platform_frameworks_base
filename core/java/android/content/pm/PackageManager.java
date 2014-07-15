@@ -3629,8 +3629,11 @@ public abstract class PackageManager {
      */
     public abstract VerifierDeviceIdentity getVerifierDeviceIdentity();
 
-    /** {@hide} */
-    public abstract PackageInstaller getPackageInstaller();
+    /**
+     * Return interface that offers the ability to install, upgrade, and remove
+     * applications on the device.
+     */
+    public abstract PackageInstaller getInstaller();
 
     /**
      * Returns the data directory for a particular user and package, given the uid of the package.
@@ -3676,4 +3679,7 @@ public abstract class PackageManager {
      * @hide
      */
     public abstract Drawable loadItemIcon(PackageItemInfo itemInfo, ApplicationInfo appInfo);
+
+    /** {@hide} */
+    public abstract boolean isPackageAvailable(String packageName);
 }

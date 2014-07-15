@@ -16,6 +16,7 @@
 
 package android.content.pm;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Parcel;
@@ -23,13 +24,22 @@ import android.os.Parcelable;
 
 import com.android.internal.util.IndentingPrintWriter;
 
-/** {@hide} */
+/**
+ * Parameters for creating a new {@link PackageInstaller.Session}.
+ */
 public class InstallSessionParams implements Parcelable {
 
     // TODO: extend to support remaining VerificationParams
 
     /** {@hide} */
-    public boolean fullInstall;
+    public static final int MODE_INVALID = 0;
+    /** {@hide} */
+    public static final int MODE_FULL_INSTALL = 1;
+    /** {@hide} */
+    public static final int MODE_INHERIT_EXISTING = 2;
+
+    /** {@hide} */
+    public int mode = MODE_INVALID;
     /** {@hide} */
     public int installFlags;
     /** {@hide} */
@@ -58,7 +68,7 @@ public class InstallSessionParams implements Parcelable {
 
     /** {@hide} */
     public InstallSessionParams(Parcel source) {
-        fullInstall = source.readInt() != 0;
+        mode = source.readInt();
         installFlags = source.readInt();
         installLocation = source.readInt();
         signatures = (Signature[]) source.readParcelableArray(null);
@@ -72,53 +82,108 @@ public class InstallSessionParams implements Parcelable {
         abiOverride = source.readString();
     }
 
-    public void setFullInstall(boolean fullInstall) {
-        this.fullInstall = fullInstall;
+    /**
+     * Set session mode indicating that it should fully replace any existing
+     * APKs for this application.
+     */
+    public void setModeFullInstall() {
+        this.mode = MODE_FULL_INSTALL;
     }
 
-    public void setInstallFlags(int installFlags) {
-        this.installFlags = installFlags;
+    /**
+     * Set session mode indicating that it should inherit any existing APKs for
+     * this application, unless they are explicitly overridden (by split name)
+     * in the session.
+     */
+    public void setModeInheritExisting() {
+        this.mode = MODE_INHERIT_EXISTING;
     }
 
+    /**
+     * Provide value of {@link PackageInfo#installLocation}, which may be used
+     * to determine where the app will be staged. Defaults to
+     * {@link PackageInfo#INSTALL_LOCATION_INTERNAL_ONLY}.
+     */
     public void setInstallLocation(int installLocation) {
         this.installLocation = installLocation;
     }
 
+    /**
+     * Optionally provide the required value of {@link PackageInfo#signatures}.
+     * This can be used to assert that all staged APKs have been signed with
+     * this set of specific certificates. Regardless of this value, all APKs in
+     * the application must have the same signing certificates.
+     */
     public void setSignatures(Signature[] signatures) {
         this.signatures = signatures;
     }
 
+    /**
+     * Indicate the expected growth in disk usage resulting from this session.
+     * This may be used to ensure enough disk space exists before proceeding, or
+     * to estimate container size for installations living on external storage.
+     * <p>
+     * This value should only reflect APK sizes.
+     */
     public void setDeltaSize(long deltaSize) {
         this.deltaSize = deltaSize;
     }
 
+    /**
+     * Set the maximum progress for this session, used for normalization
+     * purposes.
+     *
+     * @see PackageInstaller.Session#setProgress(int)
+     */
     public void setProgressMax(int progressMax) {
         this.progressMax = progressMax;
     }
 
+    /**
+     * Optionally set the package name this session will be working with. It's
+     * strongly recommended that you provide this value when known.
+     */
     public void setPackageName(String packageName) {
         this.packageName = packageName;
     }
 
+    /**
+     * Optionally set an icon representing the app being installed.
+     */
     public void setIcon(Bitmap icon) {
         this.icon = icon;
     }
 
+    /**
+     * Optionally set a title representing the app being installed.
+     */
     public void setTitle(CharSequence title) {
         this.title = title;
     }
 
+    /**
+     * Optionally set the URI where this package was downloaded from. Used for
+     * verification purposes.
+     *
+     * @see Intent#EXTRA_ORIGINATING_URI
+     */
     public void setOriginatingUri(Uri originatingUri) {
         this.originatingUri = originatingUri;
     }
 
+    /**
+     * Optionally set the URI that referred you to install this package. Used
+     * for verification purposes.
+     *
+     * @see Intent#EXTRA_REFERRER
+     */
     public void setReferrerUri(Uri referrerUri) {
         this.referrerUri = referrerUri;
     }
 
     /** {@hide} */
     public void dump(IndentingPrintWriter pw) {
-        pw.printPair("fullInstall", fullInstall);
+        pw.printPair("mode", mode);
         pw.printHexPair("installFlags", installFlags);
         pw.printPair("installLocation", installLocation);
         pw.printPair("signatures", (signatures != null));
@@ -140,7 +205,7 @@ public class InstallSessionParams implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(fullInstall ? 1 : 0);
+        dest.writeInt(mode);
         dest.writeInt(installFlags);
         dest.writeInt(installLocation);
         dest.writeParcelableArray(signatures, flags);
