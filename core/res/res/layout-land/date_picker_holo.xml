@@ -15,23 +15,32 @@
      limitations under the License.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="@dimen/datepicker_component_width"
-              android:layout_height="match_parent"
+              android:layout_width="match_parent"
+              android:layout_height="@dimen/datepicker_view_animator_height"
               android:gravity="center"
-              android:orientation="vertical" >
+              android:orientation="horizontal" >
 
     <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:background="?android:attr/datePickerHeaderSelectorBackgroundColor"
             android:orientation="vertical" >
 
-        <include layout="@layout/date_picker_header_view" />
+        <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="0dip"
+                android:layout_weight="1"
+                android:orientation="vertical" >
 
-        <include layout="@layout/date_picker_selected_date" />
+            <include layout="@layout/date_picker_header_view" />
+
+            <include layout="@layout/date_picker_selected_date" />
+        </LinearLayout>
+
+        <include layout="@layout/date_picker_done_button" />
     </LinearLayout>
 
     <include layout="@layout/date_picker_view_animator" />
-
-    <include layout="@layout/date_picker_done_button" />
 
 </LinearLayout>

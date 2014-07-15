@@ -207,7 +207,23 @@ easier.
         <!-- DatePicker style -->
         <item name="datePickerStyle">@style/Widget.DeviceDefault.DatePicker</item>
 
+        <!-- The DatePicker Header day of week label text appearance -->
+        <item name="datePickerHeaderDayOfWeekLabelTextAppearance">@style/TextAppearance.DeviceDefault.DatePicker.DayOfWeekLabel</item>
+
+        <!-- The DatePicker Header selector month label text appearance -->
+        <item name="datePickerHeaderSelectorMonthLabelTextAppearance">@style/TextAppearance.DeviceDefault.DatePicker.Selector.MonthLabel</item>
+
+        <!-- The DatePicker Header selector day of month label text appearance -->
+        <item name="datePickerHeaderSelectorDayOfMonthLabelTextAppearance">@style/TextAppearance.DeviceDefault.DatePicker.Selector.DayOfMonthLabel</item>
+
+        <!-- The DatePicker Header selector year label text appearance -->
+        <item name="datePickerHeaderSelectorYearLabelTextAppearance">@style/TextAppearance.DeviceDefault.DatePicker.Selector.YearLabel</item>
+
+        <!-- DatePicker dialog theme -->
+        <item name="datePickerDialogTheme">@android:style/Theme.DeviceDefault.Dialog.DatePicker</item>
+
         <item name="mediaRouteButtonStyle">@style/Widget.DeviceDefault.MediaRouteButton</item>
+
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault} with no action bar -->
@@ -466,7 +482,23 @@ easier.
         <!-- DatePicker style -->
         <item name="datePickerStyle">@style/Widget.DeviceDefault.Light.DatePicker</item>
 
+        <!-- The DatePicker Header day of week label text appearance -->
+        <item name="datePickerHeaderDayOfWeekLabelTextAppearance">@style/TextAppearance.DeviceDefault.Light.DatePicker.DayOfWeekLabel</item>
+
+        <!-- The DatePicker Header selector month label text appearance -->
+        <item name="datePickerHeaderSelectorMonthLabelTextAppearance">@style/TextAppearance.DeviceDefault.Light.DatePicker.Selector.MonthLabel</item>
+
+        <!-- The DatePicker Header selector day of month label text appearance -->
+        <item name="datePickerHeaderSelectorDayOfMonthLabelTextAppearance">@style/TextAppearance.DeviceDefault.Light.DatePicker.Selector.DayOfMonthLabel</item>
+
+        <!-- The DatePicker Header selector year label text appearance -->
+        <item name="datePickerHeaderSelectorYearLabelTextAppearance">@style/TextAppearance.DeviceDefault.Light.DatePicker.Selector.YearLabel</item>
+
+        <!-- DatePicker dialog theme -->
+        <item name="datePickerDialogTheme">@android:style/Theme.DeviceDefault.Light.Dialog.DatePicker</item>
+
         <item name="mediaRouteButtonStyle">@style/Widget.DeviceDefault.Light.MediaRouteButton</item>
+
     </style>
 
     <!-- Variant of the DeviceDefault (light) theme that has a solid (opaque) action bar with an

@@ -359,6 +359,7 @@ package android {
     field public static final int buttonTint = 16843889; // 0x1010471
     field public static final int buttonTintMode = 16843890; // 0x1010472
     field public static final int cacheColorHint = 16843009; // 0x1010101
+    field public static final int calendarTextColor = 16843931; // 0x101049b
     field public static final int calendarViewShown = 16843596; // 0x101034c
     field public static final int calendarViewStyle = 16843613; // 0x101035d
     field public static final int canRequestEnhancedWebAccessibility = 16843736; // 0x10103d8
@@ -447,6 +448,14 @@ package android {
     field public static final int dashWidth = 16843174; // 0x10101a6
     field public static final int data = 16842798; // 0x101002e
     field public static final int datePickerStyle = 16843612; // 0x101035c
+    field public static final int dateSelectorBackgroundColor = 16843925; // 0x1010495
+    field public static final int dateSelectorDayOfMonthTextAppearance = 16843927; // 0x1010497
+    field public static final int dateSelectorDayOfWeekBackgroundColor = 16843923; // 0x1010493
+    field public static final int dateSelectorDayOfWeekTextAppearance = 16843924; // 0x1010494
+    field public static final int dateSelectorMonthTextAppearance = 16843926; // 0x1010496
+    field public static final int dateSelectorYearListItemTextAppearance = 16843929; // 0x1010499
+    field public static final int dateSelectorYearListSelectedCircleColor = 16843930; // 0x101049a
+    field public static final int dateSelectorYearTextAppearance = 16843928; // 0x1010498
     field public static final int dateTextAppearance = 16843593; // 0x1010349
     field public static final int debuggable = 16842767; // 0x101000f
     field public static final int defaultValue = 16843245; // 0x10101ed
@@ -37154,8 +37163,16 @@ package android.widget {
     ctor public DatePicker(android.content.Context, android.util.AttributeSet);
     ctor public DatePicker(android.content.Context, android.util.AttributeSet, int);
     ctor public DatePicker(android.content.Context, android.util.AttributeSet, int, int);
+    method public android.content.res.ColorStateList getCalendarTextColor();
     method public android.widget.CalendarView getCalendarView();
     method public boolean getCalendarViewShown();
+    method public int getDateSelectorBackgroundColor();
+    method public int getDateSelectorDayOfMonthTextAppearance();
+    method public int getDateSelectorDayOfWeekBackgroundColor();
+    method public int getDateSelectorDayOfWeekTextAppearance();
+    method public int getDateSelectorMonthTextAppearance();
+    method public int getDateSelectorYearListItemTextAppearance();
+    method public int getDateSelectorYearTextAppearance();
     method public int getDayOfMonth();
     method public long getMaxDate();
     method public long getMinDate();
@@ -37163,7 +37180,15 @@ package android.widget {
     method public boolean getSpinnersShown();
     method public int getYear();
     method public void init(int, int, int, android.widget.DatePicker.OnDateChangedListener);
+    method public void setCalendarTextColor(android.content.res.ColorStateList);
     method public void setCalendarViewShown(boolean);
+    method public void setDateSelectorBackgroundColor(int);
+    method public void setDateSelectorDayOfMonthTextAppearance(int);
+    method public void setDateSelectorDayOfWeekBackgroundColor(int);
+    method public void setDateSelectorDayOfWeekTextAppearance(int);
+    method public void setDateSelectorMonthTextAppearance(int);
+    method public void setDateSelectorYearListItemTextAppearance(int);
+    method public void setDateSelectorYearTextAppearance(int);
     method public void setMaxDate(long);
     method public void setMinDate(long);
     method public void setSpinnersShown(boolean);

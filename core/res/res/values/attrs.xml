@@ -691,6 +691,33 @@
         <!-- The DatePicker style. -->
         <attr name="datePickerStyle" format="reference" />
 
+        <!-- The DatePicker Header day of week label background color . -->
+        <attr name="datePickerHeaderDayOfWeekLabelBackgroundColor" format="reference" />
+
+        <!-- The DatePicker Header day of week label text appearance -->
+        <attr name="datePickerHeaderDayOfWeekLabelTextAppearance" format="reference" />
+
+        <!-- The DatePicker Header selector background color . -->
+        <attr name="datePickerHeaderSelectorBackgroundColor" format="reference" />
+
+        <!-- The DatePicker Header selector month label text appearance -->
+        <attr name="datePickerHeaderSelectorMonthLabelTextAppearance" format="reference" />
+
+        <!-- The DatePicker Header selector day of month label text appearance -->
+        <attr name="datePickerHeaderSelectorDayOfMonthLabelTextAppearance" format="reference" />
+
+        <!-- The DatePicker Header selector year label text appearance -->
+        <attr name="datePickerHeaderSelectorYearLabelTextAppearance" format="reference" />
+
+        <!-- The DatePicker Header list year label text appearance -->
+        <attr name="datePickerHeaderListYearLabelTextAppearance" format="reference" />
+
+        <!-- DatePicker list year label circle background color -->
+        <attr name="datePickerHeaderListYearLabelCircleBackgroundColor" format="reference" />
+
+        <!-- The DatePicker dialog theme. -->
+        <attr name="datePickerDialogTheme" format="reference" />
+
         <!-- Default ActivityChooserView style. -->
         <attr name="activityChooserViewStyle" format="reference" />
 
@@ -4183,6 +4210,28 @@
         <attr name="maxDate" format="string" />
         <!-- @hide The layout of the date picker. -->
         <attr name="internalLayout" format="reference"  />
+        <!-- @hide The layout of the legacy DatePicker. -->
+        <attr name="legacyLayout" />
+        <!-- @hide Enables or disable the use of the legacy layout for the DatePicker. -->
+        <attr name="legacyMode" />
+        <!-- The background color for the date selector 's day of week of the non legacy DatePicker. -->
+        <attr name="dateSelectorDayOfWeekBackgroundColor" format="color|reference" />
+        <!-- The text color for the date selector's day of week of the non legacy DatePicker. -->
+        <attr name="dateSelectorDayOfWeekTextAppearance" format="reference" />
+        <!-- The background color for the date selector of the non legacy DatePicker. -->
+        <attr name="dateSelectorBackgroundColor" format="color|reference" />
+        <!-- The month's text appearance in the date selector of the non legacy DatePicker. -->
+        <attr name="dateSelectorMonthTextAppearance" format="reference" />
+        <!-- The day of month's text appearance in the date selector of the non legacy DatePicker. -->
+        <attr name="dateSelectorDayOfMonthTextAppearance" format="reference" />
+        <!-- The year's text appearance in the date selector of the non legacy DatePicker. -->
+        <attr name="dateSelectorYearTextAppearance" format="reference" />
+        <!-- The list year's text appearance in the list of the non legacy DatePicker. -->
+        <attr name="dateSelectorYearListItemTextAppearance" format="reference" />
+        <!-- The list year's selected circle color in the list of the non legacy DatePicker. -->
+        <attr name="dateSelectorYearListSelectedCircleColor" format="color|reference" />
+        <!-- The text color list of the calendar of the non legacy DatePicker. -->
+        <attr name="calendarTextColor" format="color|reference" />
     </declare-styleable>
 
     <declare-styleable name="TwoLineListItem">
