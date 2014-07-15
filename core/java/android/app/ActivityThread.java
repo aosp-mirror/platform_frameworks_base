@@ -2610,15 +2610,7 @@ public final class ActivityThread {
             return;
         }
 
-        if (mBackupAgents.get(packageName) != null) {
-            Slog.d(TAG, "BackupAgent " + "  for " + packageName
-                    + " already exists");
-            return;
-        }
-
-        BackupAgent agent = null;
         String classname = data.appInfo.backupAgentName;
-
         // full backup operation but no app-supplied agent?  use the default implementation
         if (classname == null && (data.backupMode == IApplicationThread.BACKUP_MODE_FULL
                 || data.backupMode == IApplicationThread.BACKUP_MODE_RESTORE_FULL)) {
@@ -2627,29 +2619,38 @@ public final class ActivityThread {
 
         try {
             IBinder binder = null;
-            try {
-                if (DEBUG_BACKUP) Slog.v(TAG, "Initializing agent class " + classname);
-
-                java.lang.ClassLoader cl = packageInfo.getClassLoader();
-                agent = (BackupAgent) cl.loadClass(classname).newInstance();
-
-                // set up the agent's context
-                ContextImpl context = ContextImpl.createAppContext(this, packageInfo);
-                context.setOuterContext(agent);
-                agent.attach(context);
-
-                agent.onCreate();
-                binder = agent.onBind();
-                mBackupAgents.put(packageName, agent);
-            } catch (Exception e) {
-                // If this is during restore, fail silently; otherwise go
-                // ahead and let the user see the crash.
-                Slog.e(TAG, "Agent threw during creation: " + e);
-                if (data.backupMode != IApplicationThread.BACKUP_MODE_RESTORE
-                        && data.backupMode != IApplicationThread.BACKUP_MODE_RESTORE_FULL) {
-                    throw e;
+            BackupAgent agent = mBackupAgents.get(packageName);
+            if (agent != null) {
+                // reusing the existing instance
+                if (DEBUG_BACKUP) {
+                    Slog.v(TAG, "Reusing existing agent instance");
                 }
-                // falling through with 'binder' still null
+                binder = agent.onBind();
+            } else {
+                try {
+                    if (DEBUG_BACKUP) Slog.v(TAG, "Initializing agent class " + classname);
+
+                    java.lang.ClassLoader cl = packageInfo.getClassLoader();
+                    agent = (BackupAgent) cl.loadClass(classname).newInstance();
+
+                    // set up the agent's context
+                    ContextImpl context = ContextImpl.createAppContext(this, packageInfo);
+                    context.setOuterContext(agent);
+                    agent.attach(context);
+
+                    agent.onCreate();
+                    binder = agent.onBind();
+                    mBackupAgents.put(packageName, agent);
+                } catch (Exception e) {
+                    // If this is during restore, fail silently; otherwise go
+                    // ahead and let the user see the crash.
+                    Slog.e(TAG, "Agent threw during creation: " + e);
+                    if (data.backupMode != IApplicationThread.BACKUP_MODE_RESTORE
+                            && data.backupMode != IApplicationThread.BACKUP_MODE_RESTORE_FULL) {
+                        throw e;
+                    }
+                    // falling through with 'binder' still null
+                }
             }
 
             // tell the OS that we're live now
