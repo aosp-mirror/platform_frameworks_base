@@ -289,6 +289,7 @@
   <java-symbol type="bool" name="config_enableMultiUserUI"/>
   <java-symbol type="bool" name="config_disableUsbPermissionDialogs"/>
   <java-symbol type="bool" name="config_windowIsRound" />
+  <java-symbol type="bool" name="config_hasRecents" />
 
   <java-symbol type="integer" name="config_bluetooth_max_advertisers" />
   <java-symbol type="integer" name="config_bluetooth_max_scan_filters" />
