@@ -1081,6 +1081,7 @@ final class ActivityStack {
         if (next == mLastScreenshotActivity) {
             invalidateLastScreenshot();
         }
+        mReturningActivityOptions = null;
     }
 
     private void setVisibile(ActivityRecord r, boolean visible) {
@@ -1217,13 +1218,10 @@ final class ActivityStack {
                         if (DEBUG_VISBILITY) Slog.v(TAG, "Skipping: already visible at " + r);
                         r.stopFreezingScreenLocked(false);
                         try {
-                            if (mReturningActivityOptions != null) {
-                                if (activityNdx > 0) {
-                                    ActivityRecord under = activities.get(activityNdx - 1);
-                                    under.app.thread.scheduleOnNewActivityOptions(under.appToken,
-                                            mReturningActivityOptions);
-                                }
-                                mReturningActivityOptions = null;
+                            if (mReturningActivityOptions != null && r == top && activityNdx > 0) {
+                                ActivityRecord under = activities.get(activityNdx - 1);
+                                under.app.thread.scheduleOnNewActivityOptions(under.appToken,
+                                        mReturningActivityOptions);
                             }
                         } catch(RemoteException e) {
                         }
