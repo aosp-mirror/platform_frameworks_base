@@ -18,9 +18,10 @@ package android.media.tv;
 
 import android.content.ComponentName;
 import android.graphics.Rect;
+import android.media.tv.ITvInputClient;
 import android.media.tv.ITvInputHardware;
 import android.media.tv.ITvInputHardwareCallback;
-import android.media.tv.ITvInputClient;
+import android.media.tv.ITvInputManagerCallback;
 import android.media.tv.TvInputHardwareInfo;
 import android.media.tv.TvInputInfo;
 import android.media.tv.TvTrackInfo;
@@ -34,10 +35,8 @@ import android.view.Surface;
 interface ITvInputManager {
     List<TvInputInfo> getTvInputList(int userId);
 
-    boolean getAvailability(in ITvInputClient client, in String inputId, int userId);
-
-    void registerCallback(in ITvInputClient client, in String inputId, int userId);
-    void unregisterCallback(in ITvInputClient client, in String inputId, int userId);
+    void registerCallback(in ITvInputManagerCallback callback, int userId);
+    void unregisterCallback(in ITvInputManagerCallback callback, int userId);
 
     void createSession(in ITvInputClient client, in String inputId, int seq, int userId);
     void releaseSession(in IBinder sessionToken, int userId);
@@ -56,7 +55,12 @@ interface ITvInputManager {
 
     // For TV input hardware binding
     List<TvInputHardwareInfo> getHardwareList();
+    /*
+     * All TvInputServices which want to use hardware must call this method on
+     * BOOT_COMPLETE.
+     */
+    void registerTvInputInfo(in TvInputInfo info, int deviceId);
     ITvInputHardware acquireTvInputHardware(int deviceId, in ITvInputHardwareCallback callback,
-            int userId);
+            in TvInputInfo info, int userId);
     void releaseTvInputHardware(int deviceId, in ITvInputHardware hardware, int userId);
 }

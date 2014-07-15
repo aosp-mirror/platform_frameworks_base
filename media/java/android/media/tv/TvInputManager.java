@@ -24,6 +24,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pools.Pool;
 import android.util.Pools.SimplePool;
@@ -37,6 +38,7 @@ import android.view.View;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -65,11 +67,43 @@ public final class TvInputManager {
      */
     public static final int VIDEO_UNAVAILABLE_REASON_BUFFERING = 3;
 
+    /**
+     * The TV input is connected.
+     * <p>
+     * State for {@link #getInputState} and {@link
+     * TvInputManager.TvInputListener#onInputStateChanged}.
+     * </p>
+     */
+    public static final int INPUT_STATE_CONNECTED = 0;
+    /**
+     * The TV input is connected but in standby mode. It would take a while until it becomes
+     * fully ready.
+     * <p>
+     * State for {@link #getInputState} and {@link
+     * TvInputManager.TvInputListener#onInputStateChanged}.
+     * </p>
+     */
+    public static final int INPUT_STATE_CONNECTED_STANDBY = 1;
+    /**
+     * The TV input is disconnected.
+     * <p>
+     * State for {@link #getInputState} and {@link
+     * TvInputManager.TvInputListener#onInputStateChanged}.
+     * </p>
+     */
+    public static final int INPUT_STATE_DISCONNECTED = 2;
+
     private final ITvInputManager mService;
 
-    // A mapping from an input to the list of its TvInputListenerRecords.
-    private final Map<String, List<TvInputListenerRecord>> mTvInputListenerRecordsMap =
-            new HashMap<String, List<TvInputListenerRecord>>();
+    private final Object mLock = new Object();
+
+    // @GuardedBy(mLock)
+    private final List<TvInputListenerRecord> mTvInputListenerRecordsList =
+            new LinkedList<TvInputListenerRecord>();
+
+    // A mapping from TV input ID to the state of corresponding input.
+    // @GuardedBy(mLock)
+    private final Map<String, Integer> mStateMap = new ArrayMap<String, Integer>();
 
     // A mapping from the sequence number of a session to its SessionCallbackRecord.
     private final SparseArray<SessionCallbackRecord> mSessionCallbackRecordMap =
@@ -80,6 +114,8 @@ public final class TvInputManager {
     private int mNextSeq;
 
     private final ITvInputClient mClient;
+
+    private final ITvInputManagerCallback mCallback;
 
     private final int mUserId;
 
@@ -242,13 +278,17 @@ public final class TvInputManager {
      */
     public abstract static class TvInputListener {
         /**
-         * This is called when the availability status of a given TV input is changed.
+         * This is called when the state of a given TV input is changed.
          *
          * @param inputId the id of the TV input.
-         * @param isAvailable {@code true} if the given TV input is available to show TV programs.
-         *            {@code false} otherwise.
+         * @param state state of the TV input. The value is one of the following:
+         * <ul>
+         * <li>{@link TvInputManager#INPUT_STATE_CONNECTED}
+         * <li>{@link TvInputManager#INPUT_STATE_CONNECTED_STANDBY}
+         * <li>{@link TvInputManager#INPUT_STATE_DISCONNECTED}
+         * </ul>
          */
-        public void onAvailabilityChanged(String inputId, boolean isAvailable) {
+        public void onInputStateChanged(String inputId, int state) {
         }
     }
 
@@ -265,11 +305,11 @@ public final class TvInputManager {
             return mListener;
         }
 
-        public void postAvailabilityChanged(final String inputId, final boolean isAvailable) {
+        public void postStateChanged(final String inputId, final int state) {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    mListener.onAvailabilityChanged(inputId, isAvailable);
+                    mListener.onInputStateChanged(inputId, state);
                 }
             });
         }
@@ -373,22 +413,23 @@ public final class TvInputManager {
                     record.postSessionEvent(eventType, eventArgs);
                 }
             }
-
+        };
+        mCallback = new ITvInputManagerCallback.Stub() {
             @Override
-            public void onAvailabilityChanged(String inputId, boolean isAvailable) {
-                synchronized (mTvInputListenerRecordsMap) {
-                    List<TvInputListenerRecord> records = mTvInputListenerRecordsMap.get(inputId);
-                    if (records == null) {
-                        // Silently ignore - no listener is registered yet.
-                        return;
-                    }
-                    int recordsCount = records.size();
-                    for (int i = 0; i < recordsCount; i++) {
-                        records.get(i).postAvailabilityChanged(inputId, isAvailable);
+            public void onInputStateChanged(String inputId, int state) {
+                synchronized (mLock) {
+                    mStateMap.put(inputId, state);
+                    for (TvInputListenerRecord record : mTvInputListenerRecordsList) {
+                        record.postStateChanged(inputId, state);
                     }
                 }
             }
         };
+        try {
+            mService.registerCallback(mCallback, mUserId);
+        } catch (RemoteException e) {
+            Log.e(TAG, "mService.registerCallback failed: " + e);
+        }
     }
 
     /**
@@ -405,98 +446,66 @@ public final class TvInputManager {
     }
 
     /**
-     * Returns the availability of a given TV input.
+     * Returns the state of a given TV input. It retuns one of the following:
+     * <ul>
+     * <li>{@link #INPUT_STATE_CONNECTED}
+     * <li>{@link #INPUT_STATE_CONNECTED_STANDBY}
+     * <li>{@link #INPUT_STATE_DISCONNECTED}
+     * </ul>
      *
      * @param inputId the id of the TV input.
-     * @throws IllegalArgumentException if the argument is {@code null}.
-     * @throws IllegalStateException If there is no {@link TvInputListener} registered on the given
-     *             TV input.
+     * @throws IllegalArgumentException if the argument is {@code null} or if there is no
+     *        {@link TvInputInfo} corresponding to {@code inputId}.
      */
-    public boolean getAvailability(String inputId) {
+    public int getInputState(String inputId) {
         if (inputId == null) {
             throw new IllegalArgumentException("id cannot be null");
         }
-        synchronized (mTvInputListenerRecordsMap) {
-            List<TvInputListenerRecord> records = mTvInputListenerRecordsMap.get(inputId);
-            if (records == null || records.size() == 0) {
-                throw new IllegalStateException("At least one listener should be registered.");
+        synchronized (mLock) {
+            Integer state = mStateMap.get(inputId);
+            if (state == null) {
+                throw new IllegalArgumentException("Unrecognized input ID: " + inputId);
             }
-        }
-        try {
-            return mService.getAvailability(mClient, inputId, mUserId);
-        } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            return state.intValue();
         }
     }
 
     /**
-     * Registers a {@link TvInputListener} for a given TV input.
+     * Registers a {@link TvInputListener}.
      *
-     * @param inputId the id of the TV input.
-     * @param listener a listener used to monitor status of the given TV input.
+     * @param listener a listener used to monitor status of the TV inputs.
      * @param handler a {@link Handler} that the status change will be delivered to.
      * @throws IllegalArgumentException if any of the arguments is {@code null}.
-     * @hide
      */
-    public void registerListener(String inputId, TvInputListener listener, Handler handler) {
-        if (inputId == null) {
-            throw new IllegalArgumentException("id cannot be null");
-        }
+    public void registerListener(TvInputListener listener, Handler handler) {
         if (listener == null) {
             throw new IllegalArgumentException("listener cannot be null");
         }
         if (handler == null) {
             throw new IllegalArgumentException("handler cannot be null");
         }
-        synchronized (mTvInputListenerRecordsMap) {
-            List<TvInputListenerRecord> records = mTvInputListenerRecordsMap.get(inputId);
-            if (records == null) {
-                records = new ArrayList<TvInputListenerRecord>();
-                mTvInputListenerRecordsMap.put(inputId, records);
-                try {
-                    mService.registerCallback(mClient, inputId, mUserId);
-                } catch (RemoteException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-            records.add(new TvInputListenerRecord(listener, handler));
+        synchronized (mLock) {
+            mTvInputListenerRecordsList.add(new TvInputListenerRecord(listener, handler));
         }
     }
 
     /**
-     * Unregisters the existing {@link TvInputListener} for a given TV input.
+     * Unregisters the existing {@link TvInputListener}.
      *
-     * @param inputId the id of the TV input.
-     * @param listener the existing listener to remove for the given TV input.
+     * @param listener the existing listener to remove.
      * @throws IllegalArgumentException if any of the arguments is {@code null}.
-     * @hide
      */
-    public void unregisterListener(String inputId, final TvInputListener listener) {
-        if (inputId == null) {
-            throw new IllegalArgumentException("id cannot be null");
-        }
+    public void unregisterListener(final TvInputListener listener) {
         if (listener == null) {
             throw new IllegalArgumentException("listener cannot be null");
         }
-        synchronized (mTvInputListenerRecordsMap) {
-            List<TvInputListenerRecord> records = mTvInputListenerRecordsMap.get(inputId);
-            if (records == null) {
-                Log.e(TAG, "No listener found for " + inputId);
-                return;
-            }
-            for (Iterator<TvInputListenerRecord> it = records.iterator(); it.hasNext();) {
+        synchronized (mLock) {
+            for (Iterator<TvInputListenerRecord> it = mTvInputListenerRecordsList.iterator();
+                    it.hasNext(); ) {
                 TvInputListenerRecord record = it.next();
                 if (record.getListener() == listener) {
                     it.remove();
-                }
-            }
-            if (records.isEmpty()) {
-                try {
-                    mService.unregisterCallback(mClient, inputId, mUserId);
-                } catch (RemoteException e) {
-                    throw new RuntimeException(e);
-                } finally {
-                    mTvInputListenerRecordsMap.remove(inputId);
+                    break;
                 }
             }
         }

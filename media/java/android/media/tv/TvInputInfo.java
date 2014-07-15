@@ -80,7 +80,7 @@ public final class TvInputInfo implements Parcelable {
     // Attributes from XML meta data.
     private String mSetupActivity;
     private String mSettingsActivity;
-    private int mType;
+    private int mType = TYPE_VIRTUAL;
 
     /**
      * Create a new instance of the TvInputInfo class,
@@ -128,10 +128,13 @@ public final class TvInputInfo implements Parcelable {
                 Log.d(TAG, "Settings activity loaded. [" + input.mSettingsActivity + "] for "
                         + si.name);
             }
-            input.mType = sa.getInt(
-                    com.android.internal.R.styleable.TvInputService_tvInputType, TYPE_VIRTUAL);
-            if (DEBUG) {
-                Log.d(TAG, "Type loaded. [" + input.mType + "] for " + si.name);
+            if (pm.checkPermission(android.Manifest.permission.TV_INPUT_HARDWARE, si.packageName)
+                    == PackageManager.PERMISSION_GRANTED) {
+                input.mType = sa.getInt(
+                        com.android.internal.R.styleable.TvInputService_tvInputType, TYPE_VIRTUAL);
+                if (DEBUG) {
+                    Log.d(TAG, "Type loaded. [" + input.mType + "] for " + si.name);
+                }
             }
             sa.recycle();
 
