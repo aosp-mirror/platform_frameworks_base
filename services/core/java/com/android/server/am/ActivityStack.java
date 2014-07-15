@@ -1842,8 +1842,11 @@ final class ActivityStack {
             ActivityStack lastStack = mStackSupervisor.getLastStack();
             final boolean fromHome = lastStack.isHomeStack();
             if (!isHomeStack() && (fromHome || topTask() != task)) {
-                task.setTaskToReturnTo(fromHome ?
-                        lastStack.topTask().taskType : APPLICATION_ACTIVITY_TYPE);
+                task.setTaskToReturnTo(fromHome
+                        ? lastStack.topTask() == null
+                                ? HOME_ACTIVITY_TYPE
+                                : lastStack.topTask().taskType
+                        : APPLICATION_ACTIVITY_TYPE);
             }
         } else {
             task.setTaskToReturnTo(APPLICATION_ACTIVITY_TYPE);
