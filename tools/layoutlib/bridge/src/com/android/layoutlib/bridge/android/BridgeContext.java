@@ -1083,6 +1083,12 @@ public final class BridgeContext extends Context {
     }
 
     @Override
+    public File getNoBackupFilesDir() {
+        // pass
+        return null;
+    }
+
+    @Override
     public File getExternalFilesDir(String type) {
         // pass
         return null;
