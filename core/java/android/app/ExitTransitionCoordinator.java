@@ -329,7 +329,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
     private Bundle captureExitSharedElementsState() {
         Bundle bundle = new Bundle();
         Rect bounds = new Rect();
-        for (int i = 0; i < mSharedElementNames.size(); i++) {
+        for (int i = 0; i < mSharedElements.size(); i++) {
             String name = mSharedElementNames.get(i);
             Bundle sharedElementState = mExitSharedElementBundle.getBundle(name);
             if (sharedElementState != null) {
