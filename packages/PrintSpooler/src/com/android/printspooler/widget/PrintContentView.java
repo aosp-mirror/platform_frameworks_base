@@ -22,6 +22,7 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import com.android.printspooler.R;
 
 /**
@@ -301,6 +302,7 @@ public final class PrintContentView extends ViewGroup implements View.OnClickLis
             mSummaryContent.setLayerType(View.LAYER_TYPE_HARDWARE, null);
             mDraggableContent.setLayerType(View.LAYER_TYPE_HARDWARE, null);
             mMoreOptionsContainer.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+            ensureImeClosedAndInputFocusCleared();
         }
         if ((mDragProgress > 0 && progress == 0)
                 || (mDragProgress < 1.0f && progress == 1.0f)) {
@@ -348,6 +350,18 @@ public final class PrintContentView extends ViewGroup implements View.OnClickLis
                 mMoreOptionsContainer.setVisibility(View.VISIBLE);
             }
             mDraggableContent.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void ensureImeClosedAndInputFocusCleared() {
+        View focus = findFocus();
+        if (focus != null) {
+            InputMethodManager imm = (InputMethodManager) mContext.getSystemService(
+                    Context.INPUT_METHOD_SERVICE);
+            if (imm.isActive(focus)) {
+                imm.hideSoftInputFromWindow(getWindowToken(), 0);
+            }
+            focus.clearFocus();
         }
     }
 
