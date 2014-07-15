@@ -148,8 +148,8 @@ public class NetworkMonitor extends StateMachine {
     /**
      * Request ConnectivityService display provisioning notification.
      * arg1    = Whether to make the notification visible.
-     * obj     = Intent to be launched when notification selected by user.
-     * replyTo = NetworkAgentInfo.messenger so ConnectivityService can identify sender.
+     * arg2    = NetID.
+     * obj     = Intent to be launched when notification selected by user, null if !arg1.
      */
     public static final int EVENT_PROVISIONING_NOTIFICATION = BASE + 12;
 
@@ -447,9 +447,9 @@ public class NetworkMonitor extends StateMachine {
             // Initiate notification to sign-in.
             Intent intent = new Intent(ACTION_SIGN_IN_REQUESTED);
             intent.putExtra(Intent.EXTRA_TEXT, String.valueOf(mNetworkAgentInfo.network.netId));
-            Message message = obtainMessage(EVENT_PROVISIONING_NOTIFICATION, 1, 0,
+            Message message = obtainMessage(EVENT_PROVISIONING_NOTIFICATION, 1,
+                    mNetworkAgentInfo.network.netId,
                     PendingIntent.getBroadcast(mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT));
-            message.replyTo = mNetworkAgentInfo.messenger;
             mConnectivityServiceHandler.sendMessage(message);
         }
 
@@ -470,8 +470,8 @@ public class NetworkMonitor extends StateMachine {
 
         @Override
         public void exit() {
-            Message message = obtainMessage(EVENT_PROVISIONING_NOTIFICATION, 0, 0, null);
-            message.replyTo = mNetworkAgentInfo.messenger;
+            Message message = obtainMessage(EVENT_PROVISIONING_NOTIFICATION, 0,
+                    mNetworkAgentInfo.network.netId, null);
             mConnectivityServiceHandler.sendMessage(message);
             mContext.unregisterReceiver(mUserRespondedBroadcastReceiver);
             mUserRespondedBroadcastReceiver = null;
