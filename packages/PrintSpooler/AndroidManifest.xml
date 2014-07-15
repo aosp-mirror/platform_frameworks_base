@@ -69,7 +69,7 @@
         <activity
             android:name=".ui.SelectPrinterActivity"
             android:label="@string/all_printers_label"
-            android:theme="@style/SelectPrinterActivityTheme"
+            android:theme="@android:style/Theme.Material.Settings"
             android:exported="false">
         </activity>
 
