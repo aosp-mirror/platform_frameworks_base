@@ -824,9 +824,30 @@ public class MediaPlayer implements SubtitleController.Listener
      * @return a MediaPlayer object, or null if creation failed
      */
     public static MediaPlayer create(Context context, Uri uri, SurfaceHolder holder) {
+        int s = AudioSystem.newAudioSessionId();
+        return create(context, uri, holder, null, s > 0 ? s : 0);
+    }
+
+    /**
+     * Same factory method as {@link #create(Context, Uri, SurfaceHolder)} but that lets you specify
+     * the audio attributes and session ID to be used by the new MediaPlayer instance.
+     * @param context the Context to use
+     * @param uri the Uri from which to get the datasource
+     * @param holder the SurfaceHolder to use for displaying the video, may be null.
+     * @param audioAttributes the {@link AudioAttributes} to be used by the media player.
+     * @param audioSessionId the audio session ID to be used by the media player,
+     *     see {@link AudioManager#allocateAudioSessionId()} to obtain a new session.
+     * @return a MediaPlayer object, or null if creation failed
+     */
+    public static MediaPlayer create(Context context, Uri uri, SurfaceHolder holder,
+            AudioAttributes audioAttributes, int audioSessionId) {
 
         try {
             MediaPlayer mp = new MediaPlayer();
+            final AudioAttributes aa = audioAttributes != null ? audioAttributes :
+                new AudioAttributes.Builder().build();
+            mp.setAudioAttributes(aa);
+            mp.setAudioSessionId(audioSessionId);
             mp.setDataSource(context, uri);
             if (holder != null) {
                 mp.setDisplay(holder);
@@ -866,11 +887,34 @@ public class MediaPlayer implements SubtitleController.Listener
      * @return a MediaPlayer object, or null if creation failed
      */
     public static MediaPlayer create(Context context, int resid) {
+        int s = AudioSystem.newAudioSessionId();
+        return create(context, resid, null, s > 0 ? s : 0);
+    }
+
+    /**
+     * Same factory method as {@link #create(Context, int)} but that lets you specify the audio
+     * attributes and session ID to be used by the new MediaPlayer instance.
+     * @param context the Context to use
+     * @param resid the raw resource id (<var>R.raw.&lt;something></var>) for
+     *              the resource to use as the datasource
+     * @param audioAttributes the {@link AudioAttributes} to be used by the media player.
+     * @param audioSessionId the audio session ID to be used by the media player,
+     *     see {@link AudioManager#allocateAudioSessionId()} to obtain a new session.
+     * @return a MediaPlayer object, or null if creation failed
+     */
+    public static MediaPlayer create(Context context, int resid,
+            AudioAttributes audioAttributes, int audioSessionId) {
         try {
             AssetFileDescriptor afd = context.getResources().openRawResourceFd(resid);
             if (afd == null) return null;
 
             MediaPlayer mp = new MediaPlayer();
+
+            final AudioAttributes aa = audioAttributes != null ? audioAttributes :
+                new AudioAttributes.Builder().build();
+            mp.setAudioAttributes(aa);
+            mp.setAudioSessionId(audioSessionId);
+
             mp.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
             afd.close();
             mp.prepare();
