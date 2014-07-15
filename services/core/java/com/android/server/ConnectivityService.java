@@ -3199,13 +3199,17 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     break;
                 }
                 case NetworkMonitor.EVENT_PROVISIONING_NOTIFICATION: {
-                    NetworkAgentInfo nai = mNetworkAgentInfos.get(msg.replyTo);
-                    if (nai == null) {
-                        loge("EVENT_PROVISIONING_NOTIFICATION from unknown NetworkMonitor");
-                        break;
+                    if (msg.arg1 == 0) {
+                        setProvNotificationVisibleIntent(false, msg.arg2, 0, null, null);
+                    } else {
+                        NetworkAgentInfo nai = mNetworkForNetId.get(msg.arg2);
+                        if (nai == null) {
+                            loge("EVENT_PROVISIONING_NOTIFICATION from unknown NetworkMonitor");
+                            break;
+                        }
+                        setProvNotificationVisibleIntent(true, msg.arg2, nai.networkInfo.getType(),
+                                nai.networkInfo.getExtraInfo(), (PendingIntent)msg.obj);
                     }
-                    setProvNotificationVisibleIntent(msg.arg1 != 0, nai.networkInfo.getType(),
-                            nai.networkInfo.getExtraInfo(), (PendingIntent)msg.obj);
                     break;
                 }
                 case NetworkStateTracker.EVENT_STATE_CHANGED: {
@@ -4958,10 +4962,19 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     break;
             }
         }
-        setProvNotificationVisibleIntent(visible, networkType, extraInfo, pendingIntent);
+        // Concatenate the range of types onto the range of NetIDs.
+        int id = MAX_NET_ID + 1 + (networkType - ConnectivityManager.TYPE_NONE);
+        setProvNotificationVisibleIntent(visible, id, networkType, extraInfo, pendingIntent);
     }
 
-    private void setProvNotificationVisibleIntent(boolean visible, int networkType,
+    /**
+     * Show or hide network provisioning notificaitons.
+     *
+     * @param id an identifier that uniquely identifies this notification.  This must match
+     *         between show and hide calls.  We use the NetID value but for legacy callers
+     *         we concatenate the range of types with the range of NetIDs.
+     */
+    private void setProvNotificationVisibleIntent(boolean visible, int id, int networkType,
             String extraInfo, PendingIntent intent) {
         if (DBG) {
             log("setProvNotificationVisibleIntent: E visible=" + visible + " networkType=" +
@@ -5008,14 +5021,14 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             notification.contentIntent = intent;
 
             try {
-                notificationManager.notify(NOTIFICATION_ID, networkType, notification);
+                notificationManager.notify(NOTIFICATION_ID, id, notification);
             } catch (NullPointerException npe) {
                 loge("setNotificaitionVisible: visible notificationManager npe=" + npe);
                 npe.printStackTrace();
             }
         } else {
             try {
-                notificationManager.cancel(NOTIFICATION_ID, networkType);
+                notificationManager.cancel(NOTIFICATION_ID, id);
             } catch (NullPointerException npe) {
                 loge("setNotificaitionVisible: cancel notificationManager npe=" + npe);
                 npe.printStackTrace();
