@@ -30,4 +30,30 @@
         <item name="hideWheelUntilFocused">true</item>
     </style>
 
+    <!-- Setup and form wizard themes -->
+    <style name="TextAppearance.Leanback.FormWizard" parent="@style/TextAppearance.Material">
+        <item name="textSize">18sp</item>
+        <item name="fontFamily">sans-serif-light</item>
+    </style>
+
+    <style name="TextAppearance.Leanback.FormWizard.Small" parent="@style/TextAppearance.Material.Small">
+        <item name="textSize">18sp</item>
+        <item name="fontFamily">sans-serif-light</item>
+    </style>
+
+    <style name="TextAppearance.Leanback.FormWizard.Medium" parent="@style/TextAppearance.Material.Medium">
+        <item name="textSize">36sp</item>
+        <item name="fontFamily">sans-serif-thin</item>
+    </style>
+
+    <style name="TextAppearance.Leanback.FormWizard.Large" parent="@style/TextAppearance.Material.Large">
+        <item name="textSize">56sp</item>
+        <item name="fontFamily">sans-serif-thin</item>
+    </style>
+
+    <style name="TextAppearance.Leanback.FormWizard.ListItem" parent="@style/TextAppearance.Material.Subhead">
+        <item name="textSize">18sp</item>
+        <item name="fontFamily">sans-serif-condensed</item>
+    </style>
+
 </resources>
