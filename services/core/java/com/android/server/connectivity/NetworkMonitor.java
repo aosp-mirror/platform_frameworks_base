@@ -648,6 +648,7 @@ public class NetworkMonitor extends StateMachine {
                         new InputStreamReader(socket.getInputStream()));
                 OutputStreamWriter writer = new OutputStreamWriter(socket.getOutputStream());
                 writer.write("GET " + url.getFile() + " HTTP/1.1\r\nHost: " + url.getHost() +
+                        "\r\nUser-Agent: " + System.getProperty("http.agent") +
                         "\r\nConnection: close\r\n\r\n");
                 writer.flush();
                 String response = reader.readLine();
