@@ -15,6 +15,90 @@
 
 DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
   {
+    "title":"Quizlet Developer Story",
+    "titleFriendly":"",
+    "summary":"Quizlet is an extremely popular online learning tool for students. See how they optimized for the classroom with Android and the power of Google Play for Education.",
+    "url":"https://www.youtube.com/watch?v=Idu7VcTTXfk",
+    "group":"",
+    "keywords": [],
+    "tags": [
+      "#gpfe",
+      "#googleplay"
+    ],
+    "image":"http://i1.ytimg.com/vi/Idu7VcTTXfk/maxresdefault.jpg",
+    "type":"video"
+  },
+  {
+    "title":"Whats New in Google Play",
+    "titleFriendly":"",
+    "summary":"Learn about the vision and philosophy behind Google Play for Education",
+    "url":"https://www.youtube.com/watch?v=IKhU180eJMo",
+    "group":"",
+    "keywords": [],
+    "tags": [
+      "#gpfe",
+      "#googleplay"
+    ],
+    "image":"http://i1.ytimg.com/vi/IKhU180eJMo/maxresdefault.jpg",
+    "type":"video"
+  },
+  {
+    "title":"ClassDojo Developer Story",
+    "titleFriendly":"",
+    "summary":"ClassDojo is a classroom tool that helps teachers improve behavior in their classrooms quickly and easily. See how they optimized for the classroom with Android and the power of Google Play for Education.",
+    "url":"https://www.youtube.com/watch?v=iokH4SAIfRw",
+    "group":"",
+    "keywords": [],
+    "tags": [
+      "#gpfe",
+      "#googleplay"
+    ],
+    "image":"http://i1.ytimg.com/vi/iokH4SAIfRw/maxresdefault.jpg",
+    "type":"video"
+  },
+  {
+    "title":"5 Tips for Succeeding",
+    "titleFriendly":"",
+    "summary":"See inspirational ways of using technology in the classroom.",
+    "url":"https://www.youtube.com/watch?v=Eh2adsAyTKc",
+    "group":"",
+    "keywords": [],
+    "tags": [
+      "#gpfe",
+      "#googleplay"
+    ],
+    "image":"http://i1.ytimg.com/vi/Eh2adsAyTKc/maxresdefault.jpg",
+    "type":"video"
+  },
+  {
+    "title":"Optimizing Apps for Education",
+    "titleFriendly":"",
+    "summary":"Learn how to optimize your app for teachers and students.",
+    "url":"https://www.youtube.com/watch?v=_AZ6UcPz-_g",
+    "group":"",
+    "keywords": [],
+    "tags": [
+      "#gpfe",
+      "#googleplay"
+    ],
+    "image":"http://i1.ytimg.com/vi/_AZ6UcPz-_g/maxresdefault.jpg",
+    "type":"video"
+  },
+  {
+    "title":"Ideas and Tools for Building Innovative Education Apps",
+    "titleFriendly":"",
+    "summary":"Are you hungry to build an awesome app for education but don't quite know where to start? Come hear about apps that teachers want, and the APIs you're going to need to build them! In particular, we'll talk about app ideas that combine APIs for Google Drive, Google Login, Android Single Task Mode and more to build transformative Educational apps that will delight educators and kids in and out of the classroom.",
+    "url":"https://www.youtube.com/watch?v=iulXz8QTD1g",
+    "group":"",
+    "keywords": [],
+    "tags": [
+      "#gpfe",
+      "#googleplay"
+    ],
+    "image":"http://i1.ytimg.com/vi/iulXz8QTD1g/maxresdefault.jpg",
+    "type":"video"
+  },
+  {
     "title":"Developer Registration",
     "titleFriendly":"",
     "summary":"Additional information about the registration process.",
@@ -699,10 +783,10 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "url": "http://youtu.be/vzvpcEffvaE",
     "timestamp": 1383243492000,
     "image": "http://i1.ytimg.com/vi/vzvpcEffvaE/maxresdefault.jpg",
-    "title": "Introducing Google Play for Education",
-    "summary": "Google Play for Education is a destination where schools can find great, teacher-approved, educational content&mdash;from videos and books, to educational apps&mdash;all in one place. Teachers can filter content by subject matter, grade and other criteria. Bulk purchase and instant distribution let educators bring your apps directly to classrooms and schools.",
+    "title": "Introducing Tablets with Google Play for Education",
+    "summary": "Schools in Hillsborough, New Jersey were among the first to try out Nexus 7 tablets with Google Play for Education. See the difference it made for students, teachers, and administrators.",
     "keywords": [],
-    "type": "youtube",
+    "type": "video",
     "titleFriendly": ""
   },
   {
