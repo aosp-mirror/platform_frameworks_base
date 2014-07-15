@@ -28221,6 +28221,7 @@ package android.telecomm {
     method public java.lang.String getId();
     method public android.telecomm.CallState getState();
     method public android.telecomm.StatusHints getStatusHints();
+    method public int getVideoState();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
   }
