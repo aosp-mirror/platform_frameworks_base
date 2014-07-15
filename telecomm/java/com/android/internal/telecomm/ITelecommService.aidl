@@ -101,4 +101,14 @@ interface ITelecommService {
      * @see PhoneManager#handlePinMmi
      */
     boolean handlePinMmi(String dialString);
+
+    /**
+     * @see TelecomManager#isTtySupported
+     */
+    boolean isTtySupported();
+
+    /**
+     * @see TelecomManager#getCurrentTtyMode
+     */
+    int getCurrentTtyMode();
 }

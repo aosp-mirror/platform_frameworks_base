@@ -44,9 +44,9 @@ public abstract class Connection {
         public void onDestroyed(Connection c) {}
         public void onCallCapabilitiesChanged(Connection c, int callCapabilities) {}
         public void onParentConnectionChanged(Connection c, Connection parent) {}
-        public void onSetCallVideoProvider(Connection c, CallVideoProvider callVideoProvider) {}
-        public void onSetAudioModeIsVoip(Connection c, boolean isVoip) {}
-        public void onSetStatusHints(Connection c, StatusHints statusHints) {}
+        public void onCallVideoProviderChanged(Connection c, CallVideoProvider callVideoProvider) {}
+        public void onAudioModeIsVoipChanged(Connection c, boolean isVoip) {}
+        public void onStatusHintsChanged(Connection c, StatusHints statusHints) {}
     }
 
     public final class State {
@@ -321,7 +321,7 @@ public abstract class Connection {
     public final void setCallVideoProvider(CallVideoProvider callVideoProvider) {
         mCallVideoProvider = callVideoProvider;
         for (Listener l : mListeners) {
-            l.onSetCallVideoProvider(this, callVideoProvider);
+            l.onCallVideoProviderChanged(this, callVideoProvider);
         }
     }
 
@@ -415,7 +415,7 @@ public abstract class Connection {
     public final void setAudioModeIsVoip(boolean isVoip) {
         mAudioModeIsVoip = isVoip;
         for (Listener l : mListeners) {
-            l.onSetAudioModeIsVoip(this, isVoip);
+            l.onAudioModeIsVoipChanged(this, isVoip);
         }
     }
 
@@ -427,7 +427,7 @@ public abstract class Connection {
     public final void setStatusHints(StatusHints statusHints) {
         mStatusHints = statusHints;
         for (Listener l : mListeners) {
-            l.onSetStatusHints(this, statusHints);
+            l.onStatusHintsChanged(this, statusHints);
         }
     }
 
@@ -515,7 +515,6 @@ public abstract class Connection {
      * Called when the phone account UI was clicked.
      */
     protected void onPhoneAccountClicked() {}
-
 
     private void addChild(Connection connection) {
         Log.d(this, "adding child %s", connection);

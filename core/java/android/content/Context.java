@@ -2539,7 +2539,6 @@ public abstract class Context {
      *
      * @see #getSystemService
      * @see android.telecomm.TelecommManager
-     * @hide
      */
     public static final String TELECOMM_SERVICE = "telecomm";
 

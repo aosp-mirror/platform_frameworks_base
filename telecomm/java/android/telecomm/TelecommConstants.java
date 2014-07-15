@@ -121,4 +121,83 @@ public final class TelecommConstants {
      * wait for user confirmation before proceeding.
      */
     public static final char DTMF_CHARACTER_WAIT = ';';
+
+    /**
+     * TTY (teletypewriter) mode is off.
+     *
+     * @hide
+     */
+    public static final int TTY_MODE_OFF = 0;
+
+    /**
+     * TTY (teletypewriter) mode is on. The speaker is off and the microphone is muted. The user
+     * will communicate with the remote party by sending and receiving text messages.
+     *
+     * @hide
+     */
+    public static final int TTY_MODE_FULL = 1;
+
+    /**
+     * TTY (teletypewriter) mode is in hearing carryover mode (HCO). The microphone is muted but the
+     * speaker is on. The user will communicate with the remote party by sending text messages and
+     * hearing an audible reply.
+     *
+     * @hide
+     */
+    public static final int TTY_MODE_HCO = 2;
+
+    /**
+     * TTY (teletypewriter) mode is in voice carryover mode (VCO). The speaker is off but the
+     * microphone is still on. User will communicate with the remote party by speaking and receiving
+     * text message replies.
+     *
+     * @hide
+     */
+    public static final int TTY_MODE_VCO = 3;
+
+    /**
+     * Broadcast intent action indicating that the current TTY mode has changed. An intent extra
+     * provides this state as an int.
+     * @see #EXTRA_CURRENT_TTY_MODE
+     *
+     * @hide
+     */
+    public static final String ACTION_CURRENT_TTY_MODE_CHANGED =
+            "android.telecomm.intent.action.CURRENT_TTY_MODE_CHANGED";
+
+    /**
+     * The lookup key for an int that indicates the current TTY mode.
+     * Valid modes are:
+     * - {@link #TTY_MODE_OFF}
+     * - {@link #TTY_MODE_FULL}
+     * - {@link #TTY_MODE_HCO}
+     * - {@link #TTY_MODE_VCO}
+     *
+     * @hide
+     */
+    public static final String EXTRA_CURRENT_TTY_MODE =
+            "android.telecomm.intent.extra.CURRENT_TTY_MODE";
+
+    /**
+     * Broadcast intent action indicating that the TTY preferred operating mode
+     * has changed. An intent extra provides the new mode as an int.
+     * @see #EXTRA_TTY_PREFERRED_MODE
+     *
+     * @hide
+     */
+    public static final String ACTION_TTY_PREFERRED_MODE_CHANGED =
+            "android.telecomm.intent.action.TTY_PREFERRED_MODE_CHANGED";
+
+    /**
+     * The lookup key for an int that indicates preferred TTY mode.
+     * Valid modes are:
+     * - {@link #TTY_MODE_OFF}
+     * - {@link #TTY_MODE_FULL}
+     * - {@link #TTY_MODE_HCO}
+     * - {@link #TTY_MODE_VCO}
+     *
+     * @hide
+     */
+    public static final String EXTRA_TTY_PREFERRED_MODE =
+            "android.telecomm.intent.extra.TTY_PREFERRED";
 }
