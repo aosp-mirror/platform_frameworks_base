@@ -32,11 +32,9 @@ import com.android.internal.telecomm.IConnectionServiceAdapter;
 oneway interface IConnectionService {
     void addConnectionServiceAdapter(in IConnectionServiceAdapter adapter);
 
-    void call(in ConnectionRequest request);
+    void createConnection(in ConnectionRequest request, boolean isIncoming);
 
     void abort(String callId);
-
-    void createIncomingCall(in ConnectionRequest request);
 
     void answer(String callId);
 

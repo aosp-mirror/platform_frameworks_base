@@ -73,65 +73,28 @@ final class ConnectionServiceAdapter implements DeathRecipient {
         }
     }
 
-    /**
-     * Provides Telecomm with the details of an incoming call. An invocation of this method must
-     * follow {@link ConnectionService#setIncomingCallId} and use the call ID specified therein.
-     * Upon the invocation of this method, Telecomm will bring up the incoming-call interface where
-     * the user can elect to answer or reject a call.
-     *
-     * @param request The connection request.
-     */
-    void notifyIncomingCall(ConnectionRequest request) {
+    void handleCreateConnectionSuccessful(ConnectionRequest request) {
         for (IConnectionServiceAdapter adapter : mAdapters) {
             try {
-                adapter.notifyIncomingCall(request);
+                adapter.handleCreateConnectionSuccessful(request);
             } catch (RemoteException e) {
             }
         }
     }
 
-    /**
-     * Tells Telecomm that an attempt to place the specified outgoing call succeeded.
-     *
-     * @param request The originating request for a connection.
-     */
-    void handleSuccessfulOutgoingCall(ConnectionRequest request) {
+    void handleCreateConnectionFailed(ConnectionRequest request, int errorCode, String errorMsg) {
         for (IConnectionServiceAdapter adapter : mAdapters) {
             try {
-                adapter.handleSuccessfulOutgoingCall(request);
+                adapter.handleCreateConnectionFailed(request, errorCode, errorMsg);
             } catch (RemoteException e) {
             }
         }
     }
 
-    /**
-     * Tells Telecomm that an attempt to place the specified outgoing call failed.
-     *
-     * @param request The originating request for a connection.
-     * @param errorCode The error code associated with the failed call attempt.
-     * @param errorMsg The error message associated with the failed call attempt.
-     */
-    void handleFailedOutgoingCall(
-            ConnectionRequest request,
-            int errorCode,
-            String errorMsg) {
+    void handleCreateConnectionCancelled(ConnectionRequest request) {
         for (IConnectionServiceAdapter adapter : mAdapters) {
             try {
-                adapter.handleFailedOutgoingCall(request, errorCode, errorMsg);
-            } catch (RemoteException e) {
-            }
-        }
-    }
-
-    /**
-     * Tells Telecomm to cancel the call.
-     *
-     * @param request The originating request for a connection.
-     */
-    void cancelOutgoingCall(ConnectionRequest request) {
-        for (IConnectionServiceAdapter adapter : mAdapters) {
-            try {
-                adapter.cancelOutgoingCall(request);
+                adapter.handleCreateConnectionCancelled(request);
             } catch (RemoteException e) {
             }
         }
