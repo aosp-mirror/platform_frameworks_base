@@ -1069,31 +1069,27 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         synchronized (mRecords) {
             final int recordCount = mRecords.size();
             pw.println("last known state:");
-            for (int i = 0; i < TelephonyManager.getDefault().getPhoneCount(); i++) {
-                pw.println("  Phone Id=" + i);
-                pw.println("  mCallState=" + mCallState[i]);
-                pw.println("  mCallIncomingNumber=" + mCallIncomingNumber[i]);
-                pw.println("  mServiceState=" + mServiceState[i]);
-                pw.println("  mSignalStrength=" + mSignalStrength[i]);
-                pw.println("  mMessageWaiting=" + mMessageWaiting[i]);
-                pw.println("  mCallForwarding=" + mCallForwarding[i]);
-                pw.println("  mDataActivity=" + mDataActivity[i]);
-                pw.println("  mDataConnectionState=" + mDataConnectionState[i]);
-                pw.println("  mDataConnectionPossible=" + mDataConnectionPossible[i]);
-                pw.println("  mDataConnectionReason=" + mDataConnectionReason[i]);
-                pw.println("  mDataConnectionApn=" + mDataConnectionApn[i]);
-                pw.println("  mDataConnectionLinkProperties=" + mDataConnectionLinkProperties[i]);
-                pw.println("  mDataConnectionLinkCapabilities=" +
-                        mDataConnectionLinkCapabilities[i]);
-                pw.println("  mCellLocation=" + mCellLocation[i]);
-                pw.println("  mCellInfo=" + mCellInfo.get(i));
-            }
+            pw.println("  mCallState=" + mCallState);
+            pw.println("  mCallIncomingNumber=" + mCallIncomingNumber);
+            pw.println("  mServiceState=" + mServiceState);
+            pw.println("  mSignalStrength=" + mSignalStrength);
+            pw.println("  mMessageWaiting=" + mMessageWaiting);
+            pw.println("  mCallForwarding=" + mCallForwarding);
+            pw.println("  mDataActivity=" + mDataActivity);
+            pw.println("  mDataConnectionState=" + mDataConnectionState);
+            pw.println("  mDataConnectionPossible=" + mDataConnectionPossible);
+            pw.println("  mDataConnectionReason=" + mDataConnectionReason);
+            pw.println("  mDataConnectionApn=" + mDataConnectionApn);
+            pw.println("  mDataConnectionLinkProperties=" + mDataConnectionLinkProperties);
+            pw.println("  mDataConnectionNetworkCapabilities=" +
+                    mDataConnectionNetworkCapabilities);
             pw.println("  mDefaultSubId=" + mDefaultSubId);
+            pw.println("  mCellLocation=" + mCellLocation);
+            pw.println("  mCellInfo=" + mCellInfo);
             pw.println("  mDcRtInfo=" + mDcRtInfo);
             pw.println("registrations: count=" + recordCount);
             for (Record r : mRecords) {
                 pw.println("  " + r.pkgForDebug + " 0x" + Integer.toHexString(r.events));
-                pw.println("is Legacy = " + r.isLegacyApp + " subId = " + r.subId);
             }
         }
     }
