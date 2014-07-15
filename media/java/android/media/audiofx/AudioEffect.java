@@ -1282,7 +1282,7 @@ public class AudioEffect {
     /**
      * @hide
      */
-    public int byteArrayToInt(byte[] valueBuf) {
+    public static int byteArrayToInt(byte[] valueBuf) {
         return byteArrayToInt(valueBuf, 0);
 
     }
@@ -1290,7 +1290,7 @@ public class AudioEffect {
     /**
      * @hide
      */
-    public int byteArrayToInt(byte[] valueBuf, int offset) {
+    public static int byteArrayToInt(byte[] valueBuf, int offset) {
         ByteBuffer converter = ByteBuffer.wrap(valueBuf);
         converter.order(ByteOrder.nativeOrder());
         return converter.getInt(offset);
@@ -1300,7 +1300,7 @@ public class AudioEffect {
     /**
      * @hide
      */
-    public byte[] intToByteArray(int value) {
+    public static byte[] intToByteArray(int value) {
         ByteBuffer converter = ByteBuffer.allocate(4);
         converter.order(ByteOrder.nativeOrder());
         converter.putInt(value);
@@ -1310,14 +1310,14 @@ public class AudioEffect {
     /**
      * @hide
      */
-    public short byteArrayToShort(byte[] valueBuf) {
+    public static short byteArrayToShort(byte[] valueBuf) {
         return byteArrayToShort(valueBuf, 0);
     }
 
     /**
      * @hide
      */
-    public short byteArrayToShort(byte[] valueBuf, int offset) {
+    public static short byteArrayToShort(byte[] valueBuf, int offset) {
         ByteBuffer converter = ByteBuffer.wrap(valueBuf);
         converter.order(ByteOrder.nativeOrder());
         return converter.getShort(offset);
@@ -1327,7 +1327,7 @@ public class AudioEffect {
     /**
      * @hide
      */
-    public byte[] shortToByteArray(short value) {
+    public static byte[] shortToByteArray(short value) {
         ByteBuffer converter = ByteBuffer.allocate(2);
         converter.order(ByteOrder.nativeOrder());
         short sValue = (short) value;
@@ -1338,7 +1338,7 @@ public class AudioEffect {
     /**
      * @hide
      */
-    public byte[] concatArrays(byte[]... arrays) {
+    public static byte[] concatArrays(byte[]... arrays) {
         int len = 0;
         for (byte[] a : arrays) {
             len += a.length;
