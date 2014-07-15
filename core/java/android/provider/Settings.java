@@ -824,6 +824,15 @@ public final class Settings {
     public static final String ACTION_BATTERY_SAVER_SETTINGS
             = "android.settings.BATTERY_SAVER_SETTINGS";
 
+    /**
+     * Activity Action: Show Home selection settings. If there are multiple activities
+     * that can satisfy the {@link Intent#CATEGORY_HOME} intent, this screen allows you
+     * to pick your preferred activity.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_HOME_SETTINGS
+            = "android.settings.HOME_SETTINGS";
+
     // End of Intent actions for Settings
 
     /**
