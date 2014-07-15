@@ -264,6 +264,11 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
         return validatePeople(record);
     }
 
+    @Override
+    public void setConfig(RankingConfig config) {
+        // ignore: config has no relevant information yet.
+    }
+
     private static class LookupResult {
         private static final long CONTACT_REFRESH_MILLIS = 60 * 60 * 1000;  // 1hr
         public static final int INVALID_ID = -1;

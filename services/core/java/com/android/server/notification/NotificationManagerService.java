@@ -103,11 +103,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-import java.util.concurrent.TimeUnit;
 
 /** {@hide} */
 public class NotificationManagerService extends SystemService {
@@ -120,7 +118,8 @@ public class NotificationManagerService extends SystemService {
     static final int MESSAGE_TIMEOUT = 2;
     static final int MESSAGE_SAVE_POLICY_FILE = 3;
     static final int MESSAGE_RECONSIDER_RANKING = 4;
-    static final int MESSAGE_SEND_RANKING_UPDATE = 5;
+    static final int MESSAGE_RANKING_CONFIG_CHANGE = 5;
+    static final int MESSAGE_SEND_RANKING_UPDATE = 6;
 
     static final int LONG_DELAY = 3500; // 3.5 seconds
     static final int SHORT_DELAY = 2000; // 2 seconds
@@ -152,7 +151,6 @@ public class NotificationManagerService extends SystemService {
     private WorkerHandler mHandler;
     private final HandlerThread mRankingThread = new HandlerThread("ranker",
             Process.THREAD_PRIORITY_BACKGROUND);
-    private Handler mRankingHandler = null;
 
     private Light mNotificationLight;
     Light mAttentionLight;
@@ -178,7 +176,6 @@ public class NotificationManagerService extends SystemService {
     // used as a mutex for access to all active notifications & listeners
     final ArrayList<NotificationRecord> mNotificationList =
             new ArrayList<NotificationRecord>();
-    final NotificationComparator mRankingComparator = new NotificationComparator();
     final ArrayMap<String, NotificationRecord> mNotificationsByKey =
             new ArrayMap<String, NotificationRecord>();
     final ArrayList<ToastRecord> mToastQueue = new ArrayList<ToastRecord>();
@@ -203,7 +200,7 @@ public class NotificationManagerService extends SystemService {
     private static final String TAG_PACKAGE = "package";
     private static final String ATTR_NAME = "name";
 
-    final ArrayList<NotificationSignalExtractor> mSignalExtractors = new ArrayList<NotificationSignalExtractor>();
+    private RankingHelper mRankingHelper;
 
     private final UserProfiles mUserProfiles = new UserProfiles();
     private NotificationListeners mListeners;
@@ -360,6 +357,7 @@ public class NotificationManagerService extends SystemService {
                         }
                     }
                     mZenModeHelper.readXml(parser);
+                    mRankingHelper.readXml(parser);
                 }
             } catch (FileNotFoundException e) {
                 // No data yet
@@ -398,6 +396,7 @@ public class NotificationManagerService extends SystemService {
                 out.startTag(null, TAG_BODY);
                 out.attribute(null, ATTR_VERSION, Integer.toString(DB_VERSION));
                 mZenModeHelper.writeXml(out);
+                mRankingHelper.writeXml(out);
                 out.endTag(null, TAG_BODY);
                 out.endDocument();
                 mPolicyFile.finishWrite(stream);
@@ -752,13 +751,23 @@ public class NotificationManagerService extends SystemService {
 
     @Override
     public void onStart() {
+        Resources resources = getContext().getResources();
+
         mAm = ActivityManagerNative.getDefault();
         mAppOps = (AppOpsManager) getContext().getSystemService(Context.APP_OPS_SERVICE);
         mVibrator = (Vibrator) getContext().getSystemService(Context.VIBRATOR_SERVICE);
 
         mHandler = new WorkerHandler();
         mRankingThread.start();
-        mRankingHandler = new RankingWorkerHandler(mRankingThread.getLooper());
+        String[] extractorNames;
+        try {
+            extractorNames = resources.getStringArray(R.array.config_notificationSignalExtractors);
+        } catch (Resources.NotFoundException e) {
+            extractorNames = new String[0];
+        }
+        mRankingHelper = new RankingHelper(getContext(),
+                new RankingWorkerHandler(mRankingThread.getLooper()),
+                extractorNames);
         mZenModeHelper = new ZenModeHelper(getContext(), mHandler);
         mZenModeHelper.addCallback(new ZenModeHelper.Callback() {
             @Override
@@ -782,7 +791,6 @@ public class NotificationManagerService extends SystemService {
         mNotificationLight = lights.getLight(LightsManager.LIGHT_ID_NOTIFICATIONS);
         mAttentionLight = lights.getLight(LightsManager.LIGHT_ID_ATTENTION);
 
-        Resources resources = getContext().getResources();
         mDefaultNotificationColor = resources.getColor(
                 R.color.config_defaultNotificationColor);
         mDefaultNotificationLedOn = resources.getInteger(
@@ -836,25 +844,6 @@ public class NotificationManagerService extends SystemService {
         getContext().registerReceiver(mIntentReceiver, sdFilter);
 
         mSettingsObserver = new SettingsObserver(mHandler);
-
-        // spin up NotificationSignalExtractors
-        String[] extractorNames = resources.getStringArray(
-                R.array.config_notificationSignalExtractors);
-        for (String extractorName : extractorNames) {
-            try {
-                Class<?> extractorClass = getContext().getClassLoader().loadClass(extractorName);
-                NotificationSignalExtractor extractor =
-                        (NotificationSignalExtractor) extractorClass.newInstance();
-                extractor.initialize(getContext());
-                mSignalExtractors.add(extractor);
-            } catch (ClassNotFoundException e) {
-                Slog.w(TAG, "Couldn't find extractor " + extractorName + ".", e);
-            } catch (InstantiationException e) {
-                Slog.w(TAG, "Couldn't instantiate extractor " + extractorName + ".", e);
-            } catch (IllegalAccessException e) {
-                Slog.w(TAG, "Problem accessing extractor " + extractorName + ".", e);
-            }
-        }
 
         mArchive = new Archive(resources.getInteger(
                 R.integer.config_notificationServiceArchiveSize));
@@ -1060,6 +1049,19 @@ public class NotificationManagerService extends SystemService {
             checkCallerIsSystem();
             return (mAppOps.checkOpNoThrow(AppOpsManager.OP_POST_NOTIFICATION, uid, pkg)
                     == AppOpsManager.MODE_ALLOWED);
+        }
+
+        @Override
+        public void setPackagePriority(String pkg, int uid, int priority) {
+            checkCallerIsSystem();
+            mRankingHelper.setPackagePriority(pkg, uid, priority);
+            savePolicyFile();
+        }
+
+        @Override
+        public int getPackagePriority(String pkg, int uid) {
+            checkCallerIsSystem();
+            return mRankingHelper.getPackagePriority(pkg, uid);
         }
 
         /**
@@ -1402,6 +1404,9 @@ public class NotificationManagerService extends SystemService {
                 mZenModeHelper.dump(pw, "    ");
             }
 
+            pw.println("\n  Ranking Config:");
+            mRankingHelper.dump(pw, "    ", filter);
+
             pw.println("\n  Notification listeners:");
             mListeners.dump(pw, filter);
 
@@ -1509,16 +1514,7 @@ public class NotificationManagerService extends SystemService {
                     // Retain ranking information from previous record
                     r.copyRankingInformation(old);
                 }
-                if (!mSignalExtractors.isEmpty()) {
-                    for (NotificationSignalExtractor extractor : mSignalExtractors) {
-                        try {
-                            RankingReconsideration recon = extractor.process(r);
-                            scheduleRankingReconsideration(recon);
-                        } catch (Throwable t) {
-                            Slog.w(TAG, "NotificationSignalExtractor failed.", t);
-                        }
-                    }
-                }
+                mRankingHelper.extractSignals(r);
 
                 // 3. Apply local rules
 
@@ -1563,7 +1559,7 @@ public class NotificationManagerService extends SystemService {
 
                     applyZenModeLocked(r);
 
-                    Collections.sort(mNotificationList, mRankingComparator);
+                    mRankingHelper.sort(mNotificationList);
 
                     if (notification.icon != 0) {
                         mListeners.notifyPostedLocked(n);
@@ -1838,14 +1834,6 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
-    private void scheduleRankingReconsideration(RankingReconsideration recon) {
-        if (recon != null) {
-            Message m = Message.obtain(mRankingHandler, MESSAGE_RECONSIDER_RANKING, recon);
-            long delay = recon.getDelay(TimeUnit.MILLISECONDS);
-            mRankingHandler.sendMessageDelayed(m, delay);
-        }
-    }
-
     private void handleRankingReconsideration(Message message) {
         if (!(message.obj instanceof RankingReconsideration)) return;
         RankingReconsideration recon = (RankingReconsideration) message.obj;
@@ -1860,7 +1848,7 @@ public class NotificationManagerService extends SystemService {
             boolean interceptBefore = record.isIntercepted();
             recon.applyChangesLocked(record);
             applyZenModeLocked(record);
-            Collections.sort(mNotificationList, mRankingComparator);
+            mRankingHelper.sort(mNotificationList);
             int indexAfter = findNotificationRecordIndexLocked(record);
             boolean interceptAfter = record.isIntercepted();
             changed = indexBefore != indexAfter || interceptBefore != interceptAfter;
@@ -1873,6 +1861,25 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
+    private void handleRankingConfigChange() {
+        synchronized (mNotificationList) {
+            final int N = mNotificationList.size();
+            ArrayList<String> orderBefore = new ArrayList<String>(N);
+            for (int i = 0; i < N; i++) {
+                final NotificationRecord r = mNotificationList.get(i);
+                orderBefore.add(r.getKey());
+                mRankingHelper.extractSignals(r);
+            }
+            mRankingHelper.sort(mNotificationList);
+            for (int i = 0; i < N; i++) {
+                if (!orderBefore.get(i).equals(mNotificationList.get(i).getKey())) {
+                    scheduleSendRankingUpdate();
+                    return;
+                }
+            }
+        }
+    }
+
     // let zen mode evaluate this record
     private void applyZenModeLocked(NotificationRecord record) {
         record.setIntercepted(mZenModeHelper.shouldIntercept(record));
@@ -1880,7 +1887,7 @@ public class NotificationManagerService extends SystemService {
 
     // lock on mNotificationList
     private int findNotificationRecordIndexLocked(NotificationRecord target) {
-        return Collections.binarySearch(mNotificationList, target, mRankingComparator);
+        return mRankingHelper.indexOf(mNotificationList, target);
     }
 
     private void scheduleSendRankingUpdate() {
@@ -1927,6 +1934,9 @@ public class NotificationManagerService extends SystemService {
             switch (msg.what) {
                 case MESSAGE_RECONSIDER_RANKING:
                     handleRankingReconsideration(msg);
+                    break;
+                case MESSAGE_RANKING_CONFIG_CHANGE:
+                    handleRankingConfigChange();
                     break;
             }
         }
