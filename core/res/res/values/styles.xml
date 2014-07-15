@@ -1360,8 +1360,8 @@ please see styles_device_defaults.xml.
         <item name="lightY">-200dp</item>
         <item name="lightZ">800dp</item>
         <item name="lightRadius">800dp</item>
-        <item name="ambientShadowAlpha">0.125</item>
-        <item name="spotShadowAlpha">0.25</item>
+        <item name="ambientShadowAlpha">0.0471</item>
+        <item name="spotShadowAlpha">0.1765</item>
     </style>
 
 </resources>
