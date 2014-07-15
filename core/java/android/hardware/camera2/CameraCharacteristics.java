@@ -494,7 +494,9 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * to do high speed recording, it can select the maximum size reported by this metadata to
      * configure output streams. Once the size is selected, application can filter this metadata
      * by selected size and get the supported fps ranges, and use these fps ranges to setup the
-     * recording requests.</p>
+     * recording requests. Note that for the use case of multiple output streams, application
+     * must select one unique size from this metadata to use. Otherwise a request error might
+     * occur.</p>
      * <p>For normal video recording use case, where some application will NOT set
      * {@link CaptureRequest#CONTROL_SCENE_MODE android.control.sceneMode} to HIGH_SPEED_VIDEO in capture requests, the fps ranges
      * reported in this metadata must not be used to setup capture requests, or it will cause
@@ -504,8 +506,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CaptureRequest#CONTROL_SCENE_MODE
      * @hide
      */
-    public static final Key<int[]> CONTROL_AVAILABLE_HIGH_SPEED_VIDEO_CONFIGURATIONS =
-            new Key<int[]>("android.control.availableHighSpeedVideoConfigurations", int[].class);
+    public static final Key<android.hardware.camera2.params.HighSpeedVideoConfiguration[]> CONTROL_AVAILABLE_HIGH_SPEED_VIDEO_CONFIGURATIONS =
+            new Key<android.hardware.camera2.params.HighSpeedVideoConfiguration[]>("android.control.availableHighSpeedVideoConfigurations", android.hardware.camera2.params.HighSpeedVideoConfiguration[].class);
 
     /**
      * <p>The set of edge enhancement modes supported by this camera device.</p>

@@ -12946,6 +12946,10 @@ package android.hardware.camera2.params {
   }
 
   public final class StreamConfigurationMap {
+    method public android.util.Range<java.lang.Integer>[] getHighSpeedVideoFpsRanges();
+    method public android.util.Range<java.lang.Integer>[] getHighSpeedVideoFpsRangesFor(android.util.Size);
+    method public android.util.Size[] getHighSpeedVideoSizes();
+    method public android.util.Size[] getHighSpeedVideoSizesFor(android.util.Range<java.lang.Integer>);
     method public final int[] getOutputFormats();
     method public long getOutputMinFrameDuration(int, android.util.Size);
     method public long getOutputMinFrameDuration(java.lang.Class<T>, android.util.Size);
