@@ -1157,6 +1157,9 @@ final public class MediaCodec {
      * @deprecated Use the new {@link #getInputBuffer} method instead
      * each time an input buffer is dequeued.
      *
+     * <b>Note:</b>As of API 21, dequeued input buffers are
+     * automatically {@link java.nio.Buffer#clear cleared}.
+     *
      * @throws IllegalStateException if not in the Executing state.
      * @throws MediaCodec.CodecException upon codec error.
      */
@@ -1179,6 +1182,10 @@ final public class MediaCodec {
      * @deprecated Use the new {@link #getOutputBuffer} method instead
      * each time an output buffer is dequeued.  This method is not
      * supported if codec is configured in asynchronous mode.
+     *
+     * <b>Note:</b>As of API 21, the position and limit of output
+     * buffers that are dequeued will be set to the valid data
+     * range.
      *
      * @throws IllegalStateException if not in the Executing state,
      *         or codec is configured in asynchronous mode.
@@ -1213,8 +1220,8 @@ final public class MediaCodec {
     }
 
     /**
-     * Returns a cleared, writable ByteBuffer object for a dequeued
-     * input buffer index to contain the input data.
+     * Returns a {@link java.nio.Buffer#clear cleared}, writable ByteBuffer
+     * object for a dequeued input buffer index to contain the input data.
      *
      * After calling this method any ByteBuffer or Image object
      * previously returned for the same input index MUST no longer

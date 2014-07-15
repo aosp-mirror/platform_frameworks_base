@@ -449,12 +449,12 @@ status_t JMediaCodec::getBuffer(
             byteBuffer, orderID, nativeByteOrderObj);
     env->DeleteLocalRef(me);
     me = env->CallObjectMethod(
-            byteBuffer, positionID,
-            input ? 0 : buffer->offset());
-    env->DeleteLocalRef(me);
-    me = env->CallObjectMethod(
             byteBuffer, limitID,
             input ? buffer->capacity() : (buffer->offset() + buffer->size()));
+    env->DeleteLocalRef(me);
+    me = env->CallObjectMethod(
+            byteBuffer, positionID,
+            input ? 0 : buffer->offset());
     env->DeleteLocalRef(me);
     me = NULL;
 
