@@ -409,11 +409,6 @@ public final class BluetoothLeScanner {
         }
 
         @Override
-        public void onAdvertiseStateChange(int advertiseState, int status) {
-            // no op
-        }
-
-        @Override
         public void onMultiAdvertiseCallback(int status) {
             // no op
         }

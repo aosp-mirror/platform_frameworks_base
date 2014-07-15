@@ -219,22 +219,6 @@ public final class BluetoothAdapter {
             "android.bluetooth.adapter.action.SCAN_MODE_CHANGED";
 
     /**
-     * Broadcast Action: Indicate BLE Advertising is started.
-     * @hide
-     */
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_BLUETOOTH_ADVERTISING_STARTED =
-            "android.bluetooth.adapter.action.ADVERTISING_STARTED";
-
-    /**
-     * Broadcast Action: Indicated BLE Advertising is stopped.
-     * @hide
-     */
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_BLUETOOTH_ADVERTISING_STOPPED =
-            "android.bluetooth.adapter.action.ADVERTISING_STOPPED";
-
-    /**
      * Used as an int extra field in {@link #ACTION_SCAN_MODE_CHANGED}
      * intents to request the current scan mode. Possible values are:
      * {@link #SCAN_MODE_NONE},
@@ -403,8 +387,6 @@ public final class BluetoothAdapter {
     private IBluetooth mService;
 
     private final Map<LeScanCallback, GattCallbackWrapper> mLeScanClients;
-    private BluetoothAdvScanData mBluetoothAdvScanData = null;
-    private GattCallbackWrapper mAdvertisingGattCallback;
     private final Handler mHandler;  // Handler to post the advertise callback to run on main thread.
     private final Object mLock = new Object();
 
@@ -481,29 +463,6 @@ public final class BluetoothAdapter {
     }
 
     /**
-     * Returns a {@link BluetoothAdvScanData} object representing advertising data.
-     * Data will be reset when bluetooth service is turned off.
-     * @hide
-     */
-    public BluetoothAdvScanData getAdvScanData() {
-      try {
-          IBluetoothGatt iGatt = mManagerService.getBluetoothGatt();
-          if (iGatt == null) {
-              // BLE is not supported
-              Log.e(TAG, "failed to start, iGatt null");
-              return null;
-          }
-          if (mBluetoothAdvScanData == null) {
-              mBluetoothAdvScanData = new BluetoothAdvScanData(iGatt, BluetoothAdvScanData.AD);
-          }
-          return mBluetoothAdvScanData;
-      } catch (RemoteException e) {
-          Log.e(TAG, "failed to get advScanData, error: " + e);
-          return null;
-      }
-    }
-
-    /**
      * Returns a {@link BluetoothLeAdvertiser} object for Bluetooth LE Advertising operations.
      */
     public BluetoothLeAdvertiser getBluetoothLeAdvertiser() {
@@ -517,106 +476,6 @@ public final class BluetoothAdapter {
     public BluetoothLeScanner getBluetoothLeScanner() {
         // TODO: Return null if BLE scan is not supported by hardware.
         return new BluetoothLeScanner(mManagerService);
-    }
-
-    /**
-     * Interface for BLE advertising callback.
-     *
-     * @hide
-     */
-    public interface AdvertiseCallback {
-        /**
-         * Callback when advertise starts.
-         * @param status - {@link #ADVERTISE_CALLBACK_SUCCESS} for success, others for failure.
-         */
-        void onAdvertiseStart(int status);
-        /**
-         * Callback when advertise stops.
-         * @param status - {@link #ADVERTISE_CALLBACK_SUCCESS} for success, others for failure.
-         */
-        void onAdvertiseStop(int status);
-    }
-
-    /**
-     * Start BLE advertising using current {@link BluetoothAdvScanData}.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_PRIVILEGED}
-     *
-     * @param callback - {@link AdvertiseCallback}
-     * @return true if BLE advertising succeeds, false otherwise.
-     * @hide
-     */
-    public boolean startAdvertising(final AdvertiseCallback callback) {
-        if (getState() != STATE_ON) return false;
-        try {
-            IBluetoothGatt iGatt = mManagerService.getBluetoothGatt();
-            if (iGatt == null) {
-                // BLE is not supported.
-                return false;
-            }
-            // Restart/reset advertising packets if advertising is in progress.
-            if (isAdvertising()) {
-                // Invalid advertising callback.
-                if (mAdvertisingGattCallback == null || mAdvertisingGattCallback.mLeHandle == -1) {
-                    Log.e(TAG, "failed to restart advertising, invalid callback");
-                    return false;
-                }
-                iGatt.startAdvertising(mAdvertisingGattCallback.mLeHandle);
-                // Run the callback from main thread.
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        // callback with status success.
-                        callback.onAdvertiseStart(ADVERTISE_CALLBACK_SUCCESS);
-                    }
-                });
-                return true;
-            }
-            UUID uuid = UUID.randomUUID();
-            GattCallbackWrapper wrapper =
-                new GattCallbackWrapper(this, null, null, callback);
-            iGatt.registerClient(new ParcelUuid(uuid), wrapper);
-            if (!wrapper.advertiseStarted()) {
-                return false;
-            }
-            synchronized (mLock) {
-                mAdvertisingGattCallback = wrapper;
-            }
-            return true;
-        } catch (RemoteException e) {
-            Log.e(TAG, "", e);
-            return false;
-        }
-    }
-
-    /**
-     * Stop BLE advertising. The callback has to be the same one used for start advertising.
-     *
-     * @param callback - {@link AdvertiseCallback}
-     * @return true if BLE advertising stops, false otherwise.
-     * @hide
-     */
-    public boolean stopAdvertising(AdvertiseCallback callback) {
-        try {
-            IBluetoothGatt iGatt = mManagerService.getBluetoothGatt();
-            if (iGatt == null) {
-                // BLE is not supported
-                return false;
-            }
-            if (mAdvertisingGattCallback == null) {
-                // no callback.
-                return false;
-            }
-            // Make sure same callback is used for start and stop advertising.
-            if (callback != mAdvertisingGattCallback.mAdvertiseCallback) {
-                Log.e(TAG, "must use the same callback for star/stop advertising");
-                return false;
-            }
-            mAdvertisingGattCallback.stopAdvertising();
-            return true;
-        } catch (RemoteException e) {
-            Log.e(TAG, "", e);
-            return false;
-        }
     }
 
     /**
@@ -1076,23 +935,6 @@ public final class BluetoothAdapter {
     }
 
     /**
-     * Returns whether BLE is currently advertising.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_PRIVILEGED}.
-     *
-     * @hide
-     */
-    public boolean isAdvertising() {
-        if (getState() != STATE_ON) return false;
-        try {
-            IBluetoothGatt iGatt = mManagerService.getBluetoothGatt();
-            return iGatt.isAdvertising();
-        } catch (RemoteException e) {
-            Log.e(TAG, "", e);
-        }
-        return false;
-    }
-
-    /**
      * Return the set of {@link BluetoothDevice} objects that are bonded
      * (paired) to the local adapter.
      * <p>If Bluetooth state is not {@link #STATE_ON}, this API
@@ -1537,8 +1379,6 @@ public final class BluetoothAdapter {
                 if (VDBG) Log.d(TAG, "onBluetoothServiceDown: " + mService);
                 synchronized (mManagerCallback) {
                     mService = null;
-                    // Reset bluetooth adv scan data when Gatt service is down.
-                    mBluetoothAdvScanData = null;
                     for (IBluetoothManagerCallback cb : mProxyServiceStateCallbacks ){
                         try {
                             if (cb != null) {
@@ -1822,7 +1662,6 @@ public final class BluetoothAdapter {
         private static final int LE_CALLBACK_REG_TIMEOUT = 2000;
         private static final int LE_CALLBACK_REG_WAIT_COUNT = 5;
 
-        private final AdvertiseCallback mAdvertiseCallback;
         private final LeScanCallback mLeScanCb;
 
         // mLeHandle 0: not registered
@@ -1838,25 +1677,10 @@ public final class BluetoothAdapter {
             mLeScanCb = leScanCb;
             mScanFilter = uuid;
             mLeHandle = 0;
-            mAdvertiseCallback = null;
-        }
-
-        public GattCallbackWrapper(BluetoothAdapter bluetoothAdapter, LeScanCallback leScanCb,
-            UUID[] uuid, AdvertiseCallback callback) {
-          mBluetoothAdapter = new WeakReference<BluetoothAdapter>(bluetoothAdapter);
-          mLeScanCb = leScanCb;
-          mScanFilter = uuid;
-          mLeHandle = 0;
-          mAdvertiseCallback = callback;
         }
 
         public boolean scanStarted() {
             return waitForRegisteration(LE_CALLBACK_REG_WAIT_COUNT);
-        }
-
-        public boolean advertiseStarted() {
-            // Wait for registeration callback.
-            return waitForRegisteration(1);
         }
 
         private boolean waitForRegisteration(int maxWaitCount) {
@@ -1876,27 +1700,6 @@ public final class BluetoothAdapter {
                 started = (mLeHandle > 0);
             }
             return started;
-        }
-
-        public void stopAdvertising() {
-            synchronized (this) {
-                if (mLeHandle <= 0) {
-                    Log.e(TAG, "Error state, mLeHandle: " + mLeHandle);
-                    return;
-                }
-                BluetoothAdapter adapter = mBluetoothAdapter.get();
-                if (adapter != null) {
-                    try {
-                        IBluetoothGatt iGatt = adapter.getBluetoothManager().getBluetoothGatt();
-                        iGatt.stopAdvertising();
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Failed to stop advertising" + e);
-                    }
-                } else {
-                    Log.e(TAG, "stopAdvertising, BluetoothAdapter is null");
-                }
-                notifyAll();
-            }
         }
 
         public void stopLeScan() {
@@ -1940,18 +1743,14 @@ public final class BluetoothAdapter {
                         BluetoothAdapter adapter = mBluetoothAdapter.get();
                         if (adapter != null) {
                             iGatt = adapter.getBluetoothManager().getBluetoothGatt();
-                            if (mAdvertiseCallback != null) {
-                                iGatt.startAdvertising(mLeHandle);
+                            if (mScanFilter == null) {
+                                iGatt.startScan(mLeHandle, false);
                             } else {
-                              if (mScanFilter == null) {
-                                  iGatt.startScan(mLeHandle, false);
-                              } else {
-                                  ParcelUuid[] uuids = new ParcelUuid[mScanFilter.length];
-                                  for(int i = 0; i != uuids.length; ++i) {
-                                      uuids[i] = new ParcelUuid(mScanFilter[i]);
-                                  }
-                                  iGatt.startScanWithUuids(mLeHandle, false, uuids);
-                              }
+                                ParcelUuid[] uuids = new ParcelUuid[mScanFilter.length];
+                                for(int i = 0; i != uuids.length; ++i) {
+                                    uuids[i] = new ParcelUuid(mScanFilter[i]);
+                                }
+                                iGatt.startScanWithUuids(mLeHandle, false, uuids);
                             }
                         } else {
                             Log.e(TAG, "onClientRegistered, BluetoothAdapter null");
@@ -2080,44 +1879,6 @@ public final class BluetoothAdapter {
         }
 
         public void onAdvertiseStateChange(int advertiseState, int status) {
-            Log.d(TAG, "on advertise call back, state: " + advertiseState + " status: " + status);
-            if (advertiseState == STATE_ADVERTISE_STARTED) {
-                if (status == ADVERTISE_CALLBACK_SUCCESS) {
-                    mAdvertiseCallback.onAdvertiseStart(status);
-                } else {
-                    // If status is unsuccessful and advertise state is started, it means stop
-                    // advertising fails.
-                    mAdvertiseCallback.onAdvertiseStop(status);
-                }
-            } else {
-                synchronized (this) {
-                    if (status == ADVERTISE_CALLBACK_SUCCESS) {
-                        BluetoothAdapter adapter = mBluetoothAdapter.get();
-                        if (adapter != null) {
-                            try {
-                                IBluetoothGatt iGatt =
-                                        adapter.getBluetoothManager().getBluetoothGatt();
-                                Log.d(TAG, "unregistering client " + mLeHandle);
-                                iGatt.unregisterClient(mLeHandle);
-                                // Reset advertise app handle.
-                                mLeHandle = -1;
-                                adapter.mAdvertisingGattCallback = null;
-                            } catch (RemoteException e) {
-                                Log.e(TAG, "Failed to unregister client" + e);
-                            }
-                        } else {
-                            Log.e(TAG, "cannot unregister client, BluetoothAdapter is null");
-                        }
-                    }
-                }
-                if (status == ADVERTISE_CALLBACK_SUCCESS) {
-                    mAdvertiseCallback.onAdvertiseStop(status);
-                } else{
-                    // If status is unsuccesful and advertise state is stopped, it means start
-                    // advertising fails.
-                    mAdvertiseCallback.onAdvertiseStart(status);
-                }
-            }
         }
 
         @Override

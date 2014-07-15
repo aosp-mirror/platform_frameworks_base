@@ -332,11 +332,6 @@ public final class BluetoothLeAdvertiser {
         }
 
         @Override
-        public void onAdvertiseStateChange(int advertiseState, int status) {
-            // no op
-        }
-
-        @Override
         public void onMultiAdvertiseCallback(int status) {
             // TODO: This logic needs to be re-visited to account
             //       for whether the scan has actually been started
