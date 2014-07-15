@@ -16,16 +16,9 @@
   ~ limitations under the License
   -->
 
-<!-- FrameLayout -->
-<com.android.systemui.settings.UserSwitcherHostView
+<com.android.systemui.qs.tiles.UserDetail
         xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-
-        <ListView android:id="@android:id/list"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                tools:listitem="@layout/user_switcher_item"/>
-
-</com.android.systemui.settings.UserSwitcherHostView>
+    <include layout="@layout/user_switcher_host" />
+</com.android.systemui.qs.tiles.UserDetail>
