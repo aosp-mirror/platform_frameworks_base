@@ -128,6 +128,7 @@ interface IContentService {
     void setIsSyncable(in Account account, String providerName, int syncable);
 
     void setMasterSyncAutomatically(boolean flag);
+    void setMasterSyncAutomaticallyAsUser(boolean flag, int userId);
 
     boolean getMasterSyncAutomatically();
     boolean getMasterSyncAutomaticallyAsUser(int userId);
