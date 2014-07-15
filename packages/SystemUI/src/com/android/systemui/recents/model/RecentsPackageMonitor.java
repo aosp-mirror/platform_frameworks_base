@@ -25,7 +25,6 @@ import com.android.systemui.recents.misc.SystemServicesProxy;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * The package monitor listens for changes from PackageManager to update the contents of the Recents
@@ -33,7 +32,7 @@ import java.util.Set;
  */
 public class RecentsPackageMonitor extends PackageMonitor {
     public interface PackageCallbacks {
-        public void onComponentRemoved(Set<ComponentName> cns);
+        public void onComponentRemoved(HashSet<ComponentName> cns);
     }
 
     PackageCallbacks mCb;

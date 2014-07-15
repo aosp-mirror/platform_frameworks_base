@@ -204,8 +204,8 @@ public class TaskStack {
                 removeGroup(group);
             }
             // Update the lock-to-app state
-            Task newFrontMostTask = getFrontMostTask();
             t.canLockToTask = false;
+            Task newFrontMostTask = getFrontMostTask();
             if (newFrontMostTask != null) {
                 newFrontMostTask.canLockToTask = true;
             }

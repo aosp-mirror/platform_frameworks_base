@@ -28,7 +28,7 @@
         android:layout_height="@dimen/recents_task_bar_height"
         android:layout_gravity="top|center_horizontal"
         android:background="@color/recents_task_bar_default_background_color">
-        <ImageView
+        <com.android.systemui.recents.views.FixedSizeImageView
             android:id="@+id/application_icon"
             android:layout_width="@dimen/recents_task_view_application_icon_size"
             android:layout_height="@dimen/recents_task_view_application_icon_size"
@@ -51,7 +51,7 @@
             android:maxLines="2"
             android:ellipsize="marquee"
             android:fadingEdge="horizontal" />
-        <ImageView
+        <com.android.systemui.recents.views.FixedSizeImageView
             android:id="@+id/dismiss_task"
             android:layout_width="48dp"
             android:layout_height="48dp"

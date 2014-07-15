@@ -495,7 +495,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         mLockToAppButtonView.setLayerType(View.LAYER_TYPE_NONE, mLayerPaint);
     }
 
-    /** Sets the stubbed state of this task view.
+    /** Sets the stubbed state of this task view. */
     void setStubState(boolean isStub) {
         if (!mIsStub && isStub) {
             // This is now a stub task view, so clip to the bar height, hide the thumbnail
@@ -508,7 +508,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
             mThumbnailView.setVisibility(View.VISIBLE);
         }
         mIsStub = isStub;
-    } */
+    }
 
     /**
      * Returns whether this view should be clipped, or any views below should clip against this
@@ -549,9 +549,19 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         return mFooterHeight;
     }
 
+    /** Gets the max footer height. */
+    public int getMaxFooterHeight() {
+        return mMaxFooterHeight;
+    }
+
     /** Animates the footer into and out of view. */
     public void animateFooterVisibility(boolean visible, int duration, int delay) {
-        if (!mTask.canLockToTask) return;
+        if (!mTask.canLockToTask) {
+            if (mLockToAppButtonView.getVisibility() == View.VISIBLE) {
+                mLockToAppButtonView.setVisibility(View.INVISIBLE);
+            }
+            return;
+        }
         if (mMaxFooterHeight <= 0) return;
 
         if (mFooterAnimator != null) {
