@@ -45,7 +45,7 @@ import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
 
 import java.util.ArrayList;
-import java.util.Set;
+import java.util.HashSet;
 
 /**
  * This view is the the top level layout that contains TaskStacks (which are laid out according
@@ -551,7 +551,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     /**** RecentsPackageMonitor.PackageCallbacks Implementation ****/
 
     @Override
-    public void onComponentRemoved(Set<ComponentName> cns) {
+    public void onComponentRemoved(HashSet<ComponentName> cns) {
         // Propagate this event down to each task stack view
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {

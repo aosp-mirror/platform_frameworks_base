@@ -146,7 +146,8 @@ public class TaskStackViewLayoutAlgorithm {
         transformOut.translationZ = (int) Math.max(minZ, minZ + ((boundedT + numPeekCards) * incZ));
 
         // Set the alphas
-        transformOut.dismissAlpha = Math.max(-1f, Math.min(0f, t + 1)) + 1f;
+        // transformOut.dismissAlpha = Math.max(-1f, Math.min(0f, t + 1)) + 1f;
+        transformOut.dismissAlpha = 1f;
 
         // Update the rect and visibility
         transformOut.rect.set(mTaskRect);
