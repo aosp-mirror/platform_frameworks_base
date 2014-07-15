@@ -21,9 +21,6 @@ import android.hardware.hdmi.HdmiCecDeviceInfo;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.media.AudioManager;
-import android.media.AudioManager.OnAudioPortUpdateListener;
-import android.media.AudioPatch;
-import android.media.AudioPort;
 import android.media.AudioSystem;
 import android.os.RemoteException;
 import android.os.SystemProperties;
@@ -56,9 +53,10 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     // Whether ARC feature is enabled or not.
     private boolean mArcFeatureEnabled = false;
 
-    // Whether SystemAudioMode is "On" or not.
+    // Whether System audio mode is activated or not.
+    // This becomes true only when all system audio sequences are finished.
     @GuardedBy("mLock")
-    private boolean mSystemAudioMode;
+    private boolean mSystemAudioActivated = false;
 
     // The previous port id (input) before switching to the new one. This is remembered in order to
     // be able to switch to it upon receiving <Inactive Source> from currently active source.
@@ -108,11 +106,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                 mAddress, mService.getPhysicalAddress(), mDeviceType));
         mService.sendCecCommand(HdmiCecMessageBuilder.buildDeviceVendorIdCommand(
                 mAddress, mService.getVendorId()));
-        mSystemAudioMode = mService.readBooleanSetting(Global.HDMI_SYSTEM_AUDIO_ENABLED, false);
         launchRoutingControl(fromBootup);
         launchDeviceDiscovery();
-        registerAudioPortUpdateListener();
-        // TODO: unregister audio port update listener if local device is released.
     }
 
     @Override
@@ -128,30 +123,6 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     protected void setPreferredAddress(int addr) {
         assertRunOnServiceThread();
         SystemProperties.set(Constants.PROPERTY_PREFERRED_ADDRESS_TV, String.valueOf(addr));
-    }
-
-    private void registerAudioPortUpdateListener() {
-        mService.getAudioManager().registerAudioPortUpdateListener(
-                new OnAudioPortUpdateListener() {
-                    @Override
-                    public void OnAudioPatchListUpdate(AudioPatch[] patchList) {}
-
-                    @Override
-                    public void OnAudioPortListUpdate(AudioPort[] portList) {
-                        if (!mSystemAudioMode) {
-                            return;
-                        }
-                        int devices = mService.getAudioManager().getDevicesForStream(
-                                AudioSystem.STREAM_MUSIC);
-                        if ((devices & ~AudioSystem.DEVICE_ALL_HDMI_SYSTEM_AUDIO_AND_SPEAKER)
-                                != 0) {
-                            // TODO: release system audio here.
-                        }
-                    }
-
-                    @Override
-                    public void OnServiceDied() {}
-                });
     }
 
     /**
@@ -565,7 +536,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                         // If there is AVR, initiate System Audio Auto initiation action,
                         // which turns on and off system audio according to last system
                         // audio setting.
-                        if (mSystemAudioMode && getAvrDeviceInfo() != null) {
+                        if (mSystemAudioActivated && getAvrDeviceInfo() != null) {
                             addAndStartAction(new SystemAudioAutoInitiationAction(
                                     HdmiCecLocalDeviceTv.this,
                                     getAvrDeviceInfo().getLogicalAddress()));
@@ -608,21 +579,34 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
 
     // # Seq 25
     void setSystemAudioMode(boolean on, boolean updateSetting) {
+        if (updateSetting) {
+            mService.writeBooleanSetting(Global.HDMI_SYSTEM_AUDIO_ENABLED, on);
+        }
+        updateAudioManagerForSystemAudio(on);
         synchronized (mLock) {
-            if (on != mSystemAudioMode) {
-                mSystemAudioMode = on;
-                if (updateSetting) {
-                    mService.writeBooleanSetting(Global.HDMI_SYSTEM_AUDIO_ENABLED, on);
-                }
+            if (mSystemAudioActivated != on) {
+                mSystemAudioActivated = on;
                 mService.announceSystemAudioModeChange(on);
             }
         }
     }
 
-    boolean getSystemAudioMode() {
-        synchronized (mLock) {
-            return mSystemAudioMode;
+    private void updateAudioManagerForSystemAudio(boolean on) {
+        // TODO: remove output device, once update AudioManager api.
+        mService.getAudioManager().setHdmiSystemAudioSupported(on);
+    }
+
+    boolean isSystemAudioActivated() {
+        if (getAvrDeviceInfo() == null) {
+            return false;
         }
+        synchronized (mLock) {
+            return mSystemAudioActivated;
+        }
+    }
+
+    boolean getSystemAudioModeSetting() {
+        return mService.readBooleanSetting(Global.HDMI_SYSTEM_AUDIO_ENABLED, false);
     }
 
     /**
@@ -722,7 +706,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     void changeVolume(int curVolume, int delta, int maxVolume) {
         assertRunOnServiceThread();
-        if (delta == 0 || !isSystemAudioOn()) {
+        if (delta == 0 || !isSystemAudioActivated()) {
             return;
         }
 
@@ -750,7 +734,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     void changeMute(boolean mute) {
         assertRunOnServiceThread();
-        if (!isSystemAudioOn()) {
+        if (!isSystemAudioActivated()) {
             return;
         }
 
@@ -761,12 +745,10 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     }
 
     private boolean isSystemAudioOn() {
-        if (getAvrDeviceInfo() == null) {
-            return false;
-        }
+
 
         synchronized (mLock) {
-            return mSystemAudioMode;
+            return mSystemAudioActivated;
         }
     }
 
