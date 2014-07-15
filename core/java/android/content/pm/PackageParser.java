@@ -1129,11 +1129,8 @@ public class PackageParser {
             } else if (attr.equals("versionCode")) {
                 versionCode = attrs.getAttributeIntValue(i, 0);
                 numFound++;
-            } else if (attr.equals("multiArch")) {
-                multiArch = attrs.getAttributeBooleanValue(i, false);
-                numFound++;
             }
-            if (numFound >= 3) {
+            if (numFound >= 2) {
                 break;
             }
         }
@@ -1153,6 +1150,16 @@ public class PackageParser {
                 final VerifierInfo verifier = parseVerifier(res, parser, attrs, flags);
                 if (verifier != null) {
                     verifiers.add(verifier);
+                }
+            }
+
+            if (parser.getDepth() == searchDepth && "application".equals(parser.getName())) {
+                for (int i = 0; i < attrs.getAttributeCount(); ++i) {
+                    final String attr = attrs.getAttributeName(i);
+                    if ("multiArch".equals(attr)) {
+                        multiArch = attrs.getAttributeBooleanValue(i, false);
+                        break;
+                    }
                 }
             }
         }

@@ -73,6 +73,7 @@ public class PackageInfoLite implements Parcelable {
         dest.writeInt(versionCode);
         dest.writeInt(recommendedInstallLocation);
         dest.writeInt(installLocation);
+        dest.writeInt(multiArch ? 1 : 0);
 
         if (verifiers == null || verifiers.length == 0) {
             dest.writeInt(0);
@@ -98,6 +99,7 @@ public class PackageInfoLite implements Parcelable {
         versionCode = source.readInt();
         recommendedInstallLocation = source.readInt();
         installLocation = source.readInt();
+        multiArch = (source.readInt() != 0);
 
         final int verifiersLength = source.readInt();
         if (verifiersLength == 0) {
