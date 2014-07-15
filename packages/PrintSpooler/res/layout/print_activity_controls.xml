@@ -22,7 +22,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:elevation="@dimen/preview_controls_elevation"
-    android:background="?android:attr/colorForegroundInverse">
+    android:background="?android:attr/colorPrimary">
 
         <LinearLayout
          android:id="@+id/draggable_content"
@@ -61,6 +61,8 @@
                      android:layout_width="fill_parent"
                      android:layout_height="wrap_content"
                      style="?android:attr/editTextStyle"
+                     android:singleLine="true"
+                     android:ellipsize="end"
                      android:inputType="numberDecimal">
                  </view>
 
@@ -88,8 +90,7 @@
                  <Spinner
                      android:id="@+id/paper_size_spinner"
                      android:layout_width="fill_parent"
-                     android:layout_height="wrap_content"
-                     style="@style/PrintOptionSpinnerStyle">
+                     android:layout_height="wrap_content">
                  </Spinner>
 
              </LinearLayout>
@@ -116,8 +117,7 @@
                  <Spinner
                      android:id="@+id/color_spinner"
                      android:layout_width="fill_parent"
-                     android:layout_height="wrap_content"
-                     style="@style/PrintOptionSpinnerStyle">
+                     android:layout_height="wrap_content">
                  </Spinner>
 
              </LinearLayout>
@@ -144,8 +144,7 @@
                  <Spinner
                      android:id="@+id/orientation_spinner"
                      android:layout_width="fill_parent"
-                     android:layout_height="wrap_content"
-                     style="@style/PrintOptionSpinnerStyle">
+                     android:layout_height="wrap_content">
                  </Spinner>
 
              </LinearLayout>
@@ -173,8 +172,7 @@
                  <Spinner
                      android:id="@+id/range_options_spinner"
                      android:layout_width="fill_parent"
-                     android:layout_height="wrap_content"
-                     style="@style/PrintOptionSpinnerStyle">
+                     android:layout_height="wrap_content">
                  </Spinner>
 
              </LinearLayout>
@@ -207,7 +205,8 @@
                      android:layout_width="fill_parent"
                      android:layout_height="wrap_content"
                      android:layout_gravity="bottom|fill_horizontal"
-                     style="@style/PrintOptionEditTextStyle"
+                     android:singleLine="true"
+                     android:ellipsize="end"
                      android:visibility="visible"
                      android:inputType="textNoSuggestions">
                  </view>
