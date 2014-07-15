@@ -46,6 +46,12 @@ public class HapticFeedbackConstants {
     public static final int CLOCK_TICK = 4;
 
     /**
+     * The user has pressed either a day or month or year date of a Calendar.
+     * @hide
+     */
+    public static final int CALENDAR_DATE = 5;
+
+    /**
      * This is a private constant.  Feel free to renumber as desired.
      * @hide
      */

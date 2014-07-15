@@ -2239,6 +2239,16 @@
   <public type="attr" name="launchTaskBehindBackgroundAnimation" />
   <public type="attr" name="launchTaskBehindSourceAnimation" />
 
+  <public type="attr" name="dateSelectorDayOfWeekBackgroundColor" />
+  <public type="attr" name="dateSelectorDayOfWeekTextAppearance" />
+  <public type="attr" name="dateSelectorBackgroundColor" />
+  <public type="attr" name="dateSelectorMonthTextAppearance" />
+  <public type="attr" name="dateSelectorDayOfMonthTextAppearance" />
+  <public type="attr" name="dateSelectorYearTextAppearance" />
+  <public type="attr" name="dateSelectorYearListItemTextAppearance" />
+  <public type="attr" name="dateSelectorYearListSelectedCircleColor" />
+  <public type="attr" name="calendarTextColor" />
+
   <public-padding type="dimen" name="l_resource_pad" end="0x01050010" />
 
   <public-padding type="id" name="l_resource_pad" end="0x01020040" />

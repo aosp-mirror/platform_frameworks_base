@@ -250,6 +250,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // Vibrator pattern for a short vibration when tapping on an hour/minute tick of a Clock.
     long[] mClockTickVibePattern;
 
+    // Vibrator pattern for a short vibration when tapping on a day/month/year date of a Calendar.
+    long[] mCalendarDateVibePattern;
+
     // Vibrator pattern for haptic feedback during boot when safe mode is disabled.
     long[] mSafeModeDisabledVibePattern;
 
@@ -1071,6 +1074,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 com.android.internal.R.array.config_keyboardTapVibePattern);
         mClockTickVibePattern = getLongIntArray(mContext.getResources(),
                 com.android.internal.R.array.config_clockTickVibePattern);
+        mCalendarDateVibePattern = getLongIntArray(mContext.getResources(),
+                com.android.internal.R.array.config_calendarDateVibePattern);
         mSafeModeDisabledVibePattern = getLongIntArray(mContext.getResources(),
                 com.android.internal.R.array.config_safeModeDisabledVibePattern);
         mSafeModeEnabledVibePattern = getLongIntArray(mContext.getResources(),
@@ -5405,6 +5410,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 break;
             case HapticFeedbackConstants.CLOCK_TICK:
                 pattern = mClockTickVibePattern;
+                break;
+            case HapticFeedbackConstants.CALENDAR_DATE:
+                pattern = mCalendarDateVibePattern;
                 break;
             case HapticFeedbackConstants.SAFE_MODE_DISABLED:
                 pattern = mSafeModeDisabledVibePattern;

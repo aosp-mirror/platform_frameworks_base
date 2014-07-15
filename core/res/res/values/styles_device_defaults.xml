@@ -280,4 +280,29 @@ easier.
     <style name="DeviceDefault.Light.ButtonBar" parent="Widget.Material.Light.ButtonBar"/>
     <style name="DeviceDefault.Light.ButtonBar.AlertDialog" parent="Widget.Material.Light.ButtonBar.AlertDialog"/>
     <style name="DeviceDefault.Light.SegmentedButton" parent="Widget.Material.Light.SegmentedButton"/>
+
+    <style name="TextAppearance.DeviceDefault.Light.TimePicker.TimeLabel" parent="TextAppearance.Material.TimePicker.TimeLabel"/>
+    <style name="TextAppearance.DeviceDefault.Light.TimePicker.AmPmLabel" parent="TextAppearance.Material.TimePicker.AmPmLabel"/>
+
+    <style name="Theme.DeviceDefault.Dialog.TimePicker" parent="Theme.Material.Dialog.TimePicker"/>
+    <style name="Theme.DeviceDefault.Light.Dialog.TimePicker" parent="Theme.Material.Light.Dialog.TimePicker"/>
+
+    <style name="TextAppearance.DeviceDefault.DatePicker.DayOfWeekLabel" parent="TextAppearance.Material.DatePicker.DayOfWeekLabel"/>
+    <style name="TextAppearance.DeviceDefault.Light.DatePicker.DayOfWeekLabel" parent="TextAppearance.Material.Light.DatePicker.DayOfWeekLabel"/>
+
+    <style name="TextAppearance.DeviceDefault.DatePicker.Selector" parent="TextAppearance.Material.DatePicker.Selector"/>
+    <style name="TextAppearance.DeviceDefault.Light.DatePicker.Selector" parent="TextAppearance.Material.Light.DatePicker.Selector"/>
+
+    <style name="TextAppearance.DeviceDefault.DatePicker.Selector.MonthLabel" parent="TextAppearance.Material.DatePicker.Selector.MonthLabel"/>
+    <style name="TextAppearance.DeviceDefault.Light.DatePicker.Selector.MonthLabel" parent="TextAppearance.Material.Light.DatePicker.Selector.MonthLabel"/>
+
+    <style name="TextAppearance.DeviceDefault.DatePicker.Selector.DayOfMonthLabel" parent="TextAppearance.Material.DatePicker.Selector.DayOfMonthLabel"/>
+    <style name="TextAppearance.DeviceDefault.Light.DatePicker.Selector.DayOfMonthLabel" parent="TextAppearance.Material.Light.DatePicker.Selector.DayOfMonthLabel"/>
+
+    <style name="TextAppearance.DeviceDefault.DatePicker.Selector.YearLabel" parent="TextAppearance.Material.DatePicker.Selector.YearLabel"/>
+    <style name="TextAppearance.DeviceDefault.Light.DatePicker.Selector.YearLabel" parent="TextAppearance.Material.Light.DatePicker.Selector.YearLabel"/>
+
+    <style name="Theme.DeviceDefault.Dialog.DatePicker" parent="Theme.Material.Dialog.DatePicker"/>
+    <style name="Theme.DeviceDefault.Light.Dialog.DatePicker" parent="Theme.Material.Light.Dialog.DatePicker"/>
+
 </resources>
