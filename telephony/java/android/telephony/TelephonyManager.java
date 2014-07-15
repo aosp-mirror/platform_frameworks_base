@@ -1711,11 +1711,10 @@ public class TelephonyManager {
      * <p>
      * Requires Permission:
      *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
      *
      * @param alphaTag alpha-tagging of the dailing nubmer
      * @param number The dialing number
-     *
-     * @hide
      */
     public void setLine1NumberForDisplay(String alphaTag, String number) {
         setLine1NumberForDisplay(getDefaultSubscription(), alphaTag, number);
@@ -1729,12 +1728,11 @@ public class TelephonyManager {
      * <p>
      * Requires Permission:
      *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
      *
      * @param subId the subscriber that the alphatag and dialing number belongs to.
      * @param alphaTag alpha-tagging of the dailing nubmer
      * @param number The dialing number
-     *
-     * @hide
      */
     public void setLine1NumberForDisplay(long subId, String alphaTag, String number) {
         try {
@@ -2347,11 +2345,10 @@ public class TelephonyManager {
      *
      * <p>Requires Permission:
      *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
      *
      * @param AID Application id. See ETSI 102.221 and 101.220.
      * @return The logical channel id which is negative on error.
-     *
-     * @hide
      */
     public int iccOpenLogicalChannel(String AID) {
         try {
@@ -2369,12 +2366,11 @@ public class TelephonyManager {
      *
      * <p>Requires Permission:
      *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
      *
      * @param channel is the channel id to be closed as retruned by a successful
      *            iccOpenLogicalChannel.
      * @return true if the channel was closed successfully.
-     *
-     * @hide
      */
     public boolean iccCloseLogicalChannel(int channel) {
         try {
@@ -2392,6 +2388,7 @@ public class TelephonyManager {
      *
      * <p>Requires Permission:
      *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
      *
      * @param channel is the channel id to be closed as returned by a successful
      *            iccOpenLogicalChannel.
@@ -2404,8 +2401,6 @@ public class TelephonyManager {
      * @param data Data to be sent with the APDU.
      * @return The APDU response from the ICC card with the status appended at
      *            the end. If an error occurs, an empty string is returned.
-     *
-     * @hide
      */
     public String iccTransmitApduLogicalChannel(int channel, int cla,
             int instruction, int p1, int p2, int p3, String data) {
@@ -2423,6 +2418,7 @@ public class TelephonyManager {
      *
      * <p>Requires Permission:
      *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
      *
      * @param content String containing SAT/USAT response in hexadecimal
      *                format starting with command tag. See TS 102 223 for
@@ -2430,8 +2426,6 @@ public class TelephonyManager {
      * @return The APDU response from the ICC card, with the last 4 bytes
      *         being the status word. If the command fails, returns an empty
      *         string.
-     *
-     * @hide
      */
     public String sendEnvelopeWithStatus(String content) {
         try {
@@ -2443,11 +2437,16 @@ public class TelephonyManager {
     }
 
     /**
-     * Read one of the NV items defined in {@link com.android.internal.telephony.RadioNVItems}.
+     * Read one of the NV items defined in com.android.internal.telephony.RadioNVItems.
      * Used for device configuration by some CDMA operators.
+     * <p>
+     * Requires Permission:
+     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
      *
      * @param itemID the ID of the item to read.
      * @return the NV item as a String, or null on any failure.
+     *
      * @hide
      */
     public String nvReadItem(int itemID) {
@@ -2461,14 +2460,18 @@ public class TelephonyManager {
         return "";
     }
 
-
     /**
-     * Write one of the NV items defined in {@link com.android.internal.telephony.RadioNVItems}.
+     * Write one of the NV items defined in com.android.internal.telephony.RadioNVItems.
      * Used for device configuration by some CDMA operators.
+     * <p>
+     * Requires Permission:
+     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
      *
      * @param itemID the ID of the item to read.
      * @param itemValue the value to write, as a String.
      * @return true on success; false on any failure.
+     *
      * @hide
      */
     public boolean nvWriteItem(int itemID, String itemValue) {
@@ -2485,9 +2488,14 @@ public class TelephonyManager {
     /**
      * Update the CDMA Preferred Roaming List (PRL) in the radio NV storage.
      * Used for device configuration by some CDMA operators.
+     * <p>
+     * Requires Permission:
+     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
      *
      * @param preferredRoamingList byte array containing the new PRL.
      * @return true on success; false on any failure.
+     *
      * @hide
      */
     public boolean nvWriteCdmaPrl(byte[] preferredRoamingList) {
@@ -2505,9 +2513,14 @@ public class TelephonyManager {
      * Perform the specified type of NV config reset. The radio will be taken offline
      * and the device must be rebooted after the operation. Used for device
      * configuration by some CDMA operators.
+     * <p>
+     * Requires Permission:
+     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
      *
      * @param resetType reset type: 1: reload NV reset, 2: erase NV reset, 3: factory NV reset
      * @return true on success; false on any failure.
+     *
      * @hide
      */
     public boolean nvResetConfig(int resetType) {
@@ -2804,10 +2817,12 @@ public class TelephonyManager {
     /**
      * Get the calculated preferred network type.
      * Used for debugging incorrect network type.
+     * <p>
+     * Requires Permission:
+     *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      *
      * @return the preferred network type, defined in RILConstants.java or -1 if
      *         none available.
-     * @hide
      */
     public int getCalculatedPreferredNetworkType() {
         try {
@@ -2823,9 +2838,12 @@ public class TelephonyManager {
     /**
      * Get the preferred network type.
      * Used for device configuration by some CDMA operators.
+     * <p>
+     * Requires Permission:
+     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
      *
      * @return the preferred network type, defined in RILConstants.java.
-     * @hide
      */
     public int getPreferredNetworkType() {
         try {
@@ -2841,10 +2859,13 @@ public class TelephonyManager {
     /**
      * Set the preferred network type.
      * Used for device configuration by some CDMA operators.
+     * <p>
+     * Requires Permission:
+     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
      *
      * @param networkType the preferred network type, defined in RILConstants.java.
      * @return true on success; false on any failure.
-     * @hide
      */
     public boolean setPreferredNetworkType(int networkType) {
         try {
@@ -2860,10 +2881,13 @@ public class TelephonyManager {
     /**
      * Set the CDMA subscription source.
      * Used for device supporting both NV and RUIM for CDMA.
+     * <p>
+     * Requires Permission:
+     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
      *
      * @param subscriptionType the subscription type, 0 for RUIM, 1 for NV.
      * @return true on success; false on any failure.
-     * @hide
      */
     public boolean setCdmaSubscription(int subscriptionType) {
         try {
@@ -3201,10 +3225,9 @@ public class TelephonyManager {
      * <p>
      * Requires Permission:
      *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
      *
      * @param enable true means enabling the simplified UI.
-     *
-     * @hide
      */
     public void enableSimplifiedNetworkSettings(boolean enable) {
         enableSimplifiedNetworkSettings(getDefaultSubscription(), enable);
@@ -3216,11 +3239,10 @@ public class TelephonyManager {
      * <p>
      * Requires Permission:
      *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
      *
      * @param subId for which the simplified UI should be enabled or disabled.
      * @param enable true means enabling the simplified UI.
-     *
-     * @hide
      */
     public void enableSimplifiedNetworkSettings(long subId, boolean enable) {
         try {
@@ -3237,8 +3259,6 @@ public class TelephonyManager {
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      *
      * @return true if the simplified UI is enabled.
-     *
-     * @hide
      */
     public boolean getSimplifiedNetworkSettingsEnabled() {
         return getSimplifiedNetworkSettingsEnabled(getDefaultSubscription());
@@ -3252,8 +3272,6 @@ public class TelephonyManager {
      *
      * @param subId for which the simplified UI should be enabled or disabled.
      * @return true if the simplified UI is enabled.
-     *
-     * @hide
      */
     public boolean getSimplifiedNetworkSettingsEnabled(long subId) {
         try {

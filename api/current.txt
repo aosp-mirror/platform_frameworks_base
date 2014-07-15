@@ -28826,7 +28826,10 @@ package android.telephony {
   }
 
   public class TelephonyManager {
+    method public void enableSimplifiedNetworkSettings(boolean);
+    method public void enableSimplifiedNetworkSettings(long, boolean);
     method public java.util.List<android.telephony.CellInfo> getAllCellInfo();
+    method public int getCalculatedPreferredNetworkType();
     method public int getCallState();
     method public android.telephony.CellLocation getCellLocation();
     method public int getDataActivity();
@@ -28843,19 +28846,30 @@ package android.telephony {
     method public java.lang.String getNetworkOperatorName();
     method public int getNetworkType();
     method public int getPhoneType();
+    method public int getPreferredNetworkType();
     method public java.lang.String getSimCountryIso();
     method public java.lang.String getSimOperator();
     method public java.lang.String getSimOperatorName();
     method public java.lang.String getSimSerialNumber();
     method public int getSimState();
+    method public boolean getSimplifiedNetworkSettingsEnabled();
+    method public boolean getSimplifiedNetworkSettingsEnabled(long);
     method public java.lang.String getSubscriberId();
     method public java.lang.String getVoiceMailAlphaTag();
     method public java.lang.String getVoiceMailNumber();
     method public int hasCarrierPrivileges();
     method public boolean hasIccCard();
+    method public boolean iccCloseLogicalChannel(int);
+    method public int iccOpenLogicalChannel(java.lang.String);
+    method public java.lang.String iccTransmitApduLogicalChannel(int, int, int, int, int, int, java.lang.String);
     method public boolean isNetworkRoaming();
     method public boolean isSmsCapable();
     method public void listen(android.telephony.PhoneStateListener, int);
+    method public java.lang.String sendEnvelopeWithStatus(java.lang.String);
+    method public boolean setCdmaSubscription(int);
+    method public void setLine1NumberForDisplay(java.lang.String, java.lang.String);
+    method public void setLine1NumberForDisplay(long, java.lang.String, java.lang.String);
+    method public boolean setPreferredNetworkType(int);
     field public static final java.lang.String ACTION_PHONE_STATE_CHANGED = "android.intent.action.PHONE_STATE";
     field public static final java.lang.String ACTION_RESPOND_VIA_MESSAGE = "android.intent.action.RESPOND_VIA_MESSAGE";
     field public static final int CALL_STATE_IDLE = 0; // 0x0
