@@ -50,6 +50,7 @@ public final class InCallCall implements Parcelable {
     private final String mParentCallId;
     private final List<String> mChildCallIds;
     private final StatusHints mStatusHints;
+    private final int mVideoState;
 
     /** @hide */
     public InCallCall(
@@ -69,7 +70,8 @@ public final class InCallCall implements Parcelable {
             ICallVideoProvider callVideoProvider,
             String parentCallId,
             List<String> childCallIds,
-            StatusHints statusHints) {
+            StatusHints statusHints,
+            int videoState) {
         mId = id;
         mState = state;
         mDisconnectCauseCode = disconnectCauseCode;
@@ -87,6 +89,7 @@ public final class InCallCall implements Parcelable {
         mParentCallId = parentCallId;
         mChildCallIds = childCallIds;
         mStatusHints = statusHints;
+        mVideoState = videoState;
     }
 
     /** The unique ID of the call. */
@@ -204,6 +207,14 @@ public final class InCallCall implements Parcelable {
         return mStatusHints;
     }
 
+    /**
+     * The video state.
+     * @return The video state of the call.
+     */
+    public int getVideoState() {
+        return mVideoState;
+    }
+
     /** Responsible for creating InCallCall objects for deserialized Parcels. */
     public static final Parcelable.Creator<InCallCall> CREATOR =
             new Parcelable.Creator<InCallCall> () {
@@ -230,10 +241,12 @@ public final class InCallCall implements Parcelable {
             List<String> childCallIds = new ArrayList<>();
             source.readList(childCallIds, classLoader);
             StatusHints statusHints = source.readParcelable(classLoader);
+            int videoState = source.readInt();
             return new InCallCall(id, state, disconnectCauseCode, disconnectCauseMsg,
                     cannedSmsResponses, capabilities, connectTimeMillis, handle, handlePresentation,
                     callerDisplayName, callerDisplayNamePresentation, gatewayInfo,
-                    account, callVideoProvider, parentCallId, childCallIds, statusHints);
+                    account, callVideoProvider, parentCallId, childCallIds, statusHints,
+                    videoState);
         }
 
         @Override
@@ -269,6 +282,7 @@ public final class InCallCall implements Parcelable {
         destination.writeString(mParentCallId);
         destination.writeList(mChildCallIds);
         destination.writeParcelable(mStatusHints, 0);
+        destination.writeInt(mVideoState);
     }
 
     @Override

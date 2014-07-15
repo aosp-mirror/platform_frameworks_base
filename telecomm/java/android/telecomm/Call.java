@@ -73,6 +73,7 @@ public final class Call {
         private final String mDisconnectCauseMsg;
         private final long mConnectTimeMillis;
         private final GatewayInfo mGatewayInfo;
+        private final int mVideoState;
 
         /**
          * @return The handle (e.g., phone number) to which the {@code Call} is currently
@@ -167,7 +168,8 @@ public final class Call {
                         Objects.equals(mDisconnectCauseCode, d.mDisconnectCauseCode) &&
                         Objects.equals(mDisconnectCauseMsg, d.mDisconnectCauseMsg) &&
                         Objects.equals(mConnectTimeMillis, d.mConnectTimeMillis) &&
-                        Objects.equals(mGatewayInfo, d.mGatewayInfo);
+                        Objects.equals(mGatewayInfo, d.mGatewayInfo) &&
+                        Objects.equals(mVideoState, d.mVideoState);
             }
             return false;
         }
@@ -184,7 +186,8 @@ public final class Call {
                     Objects.hashCode(mDisconnectCauseCode) +
                     Objects.hashCode(mDisconnectCauseMsg) +
                     Objects.hashCode(mConnectTimeMillis) +
-                    Objects.hashCode(mGatewayInfo);
+                    Objects.hashCode(mGatewayInfo) +
+                    Objects.hashCode(mVideoState);
         }
 
         /** {@hide} */
@@ -198,7 +201,8 @@ public final class Call {
                 int disconnectCauseCode,
                 String disconnectCauseMsg,
                 long connectTimeMillis,
-                GatewayInfo gatewayInfo) {
+                GatewayInfo gatewayInfo,
+                int videoState) {
             mHandle = handle;
             mHandlePresentation = handlePresentation;
             mCallerDisplayName = callerDisplayName;
@@ -209,6 +213,7 @@ public final class Call {
             mDisconnectCauseMsg = disconnectCauseMsg;
             mConnectTimeMillis = connectTimeMillis;
             mGatewayInfo = gatewayInfo;
+            mVideoState = videoState;
         }
     }
 
@@ -545,7 +550,8 @@ public final class Call {
                 inCallCall.getDisconnectCauseCode(),
                 inCallCall.getDisconnectCauseMsg(),
                 inCallCall.getConnectTimeMillis(),
-                inCallCall.getGatewayInfo());
+                inCallCall.getGatewayInfo(),
+                inCallCall.getVideoState());
         boolean detailsChanged = !Objects.equals(mDetails, details);
         if (detailsChanged) {
             mDetails = details;
