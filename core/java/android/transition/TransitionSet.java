@@ -160,7 +160,7 @@ public class TransitionSet extends Transition {
     @Override
     public TransitionSet setDuration(long duration) {
         super.setDuration(duration);
-        if (mDuration >= 0) {
+        if (mDuration >= 0 && mTransitions != null) {
             int numTransitions = mTransitions.size();
             for (int i = 0; i < numTransitions; ++i) {
                 mTransitions.get(i).setDuration(duration);
