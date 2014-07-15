@@ -1423,7 +1423,7 @@ public class Intent implements Parcelable, Cloneable {
      * You can use {@link KeyguardManager#isKeyguardSecure()} to determine if the user will be
      * prompted.
      */
-    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION))
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_CONFIRM_DEVICE_CREDENTIAL = "android.intent.action.CONFIRM_DEVICE_CREDENTIAL";
 
 
