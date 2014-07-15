@@ -76,10 +76,12 @@ public:
         bitmap's SkAlphaType must already be in sync with bitmapCreateFlags.
     */
     static jobject createBitmap(JNIEnv* env, SkBitmap* bitmap, jbyteArray buffer,
-            int bitmapCreateFlags, jbyteArray ninepatch, jintArray layoutbounds, int density = -1);
+            int bitmapCreateFlags, jbyteArray ninePatch, jobject ninePatchInsets, int density = -1);
 
     static jobject createBitmap(JNIEnv* env, SkBitmap* bitmap, int bitmapCreateFlags,
-            jbyteArray ninepatch, int density = -1);
+            jbyteArray ninePatch, int density = -1) {
+        return createBitmap(env, bitmap, NULL, bitmapCreateFlags, ninePatch, NULL, density);
+    }
 
     /** Reinitialize a bitmap. bitmap must already have its SkAlphaType set in
         sync with isPremultiplied
