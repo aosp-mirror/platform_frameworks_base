@@ -44,7 +44,6 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.provider.Settings.Global;
-import android.provider.Settings.SettingNotFoundException;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;

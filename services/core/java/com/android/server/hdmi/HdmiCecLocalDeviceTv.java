@@ -89,9 +89,15 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     // If true, TV going to standby mode puts other devices also to standby.
     private boolean mAutoDeviceOff;
 
+    // If true, TV wakes itself up when receiving <Text/Image View On>.
+    private boolean mAutoWakeup;
+
     HdmiCecLocalDeviceTv(HdmiControlService service) {
         super(service, HdmiCecDeviceInfo.DEVICE_TV);
         mPrevPortId = Constants.INVALID_PORT_ID;
+        mAutoDeviceOff = mService.readBooleanSetting(Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED,
+                true);
+        mAutoWakeup = mService.readBooleanSetting(Global.HDMI_CONTROL_AUTO_WAKEUP_ENABLED, true);
     }
 
     @Override
@@ -121,8 +127,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     protected void setPreferredAddress(int addr) {
         assertRunOnServiceThread();
-        SystemProperties.set(Constants.PROPERTY_PREFERRED_ADDRESS_TV,
-                String.valueOf(addr));
+        SystemProperties.set(Constants.PROPERTY_PREFERRED_ADDRESS_TV, String.valueOf(addr));
     }
 
     private void registerAudioPortUpdateListener() {
@@ -491,7 +496,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     protected boolean handleTextViewOn(HdmiCecMessage message) {
         assertRunOnServiceThread();
-        if (mService.isPowerStandbyOrTransient()) {
+        if (mService.isPowerStandbyOrTransient() && mAutoWakeup) {
             mService.wakeUp();
         }
         // TODO: Connect to Hardware input manager to invoke TV App with the appropriate channel
@@ -1115,6 +1120,14 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     void setAutoDeviceOff(boolean enabled) {
         assertRunOnServiceThread();
         mAutoDeviceOff = enabled;
+        mService.writeBooleanSetting(Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED, enabled);
+    }
+
+    @ServiceThreadOnly
+    void setAutoWakeup(boolean enabled) {
+        assertRunOnServiceThread();
+        mAutoWakeup = enabled;
+        mService.writeBooleanSetting(Global.HDMI_CONTROL_AUTO_WAKEUP_ENABLED, enabled);
     }
 
     @Override
@@ -1176,7 +1189,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         if (!mService.isControlEnabled()) {
             return;
         }
-        if (!initiatedByCec) {
+        if (!initiatedByCec && mAutoDeviceOff) {
             mService.sendCecCommand(HdmiCecMessageBuilder.buildStandby(
                     mAddress, Constants.ADDR_BROADCAST));
         }
