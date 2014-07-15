@@ -17,7 +17,6 @@
 package android.content;
 
 import android.os.Bundle;
-import android.content.IPermissionResponseCallback;
 
 /**
  * Interface used by the RestrictionsManager
@@ -28,6 +27,4 @@ interface IRestrictionsManager {
     boolean hasRestrictionsProvider();
     void requestPermission(in String packageName, in String requestTemplate, in Bundle requestData);
     void notifyPermissionResponse(in String packageName, in Bundle response);
-    void getPermissionResponse(in String packageName, in String requestId,
-            in IPermissionResponseCallback callback);
 }
