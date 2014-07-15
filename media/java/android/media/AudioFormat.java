@@ -78,9 +78,9 @@ public class AudioFormat {
     public static final int CHANNEL_OUT_FRONT_LEFT_OF_CENTER = 0x100;
     public static final int CHANNEL_OUT_FRONT_RIGHT_OF_CENTER = 0x200;
     public static final int CHANNEL_OUT_BACK_CENTER = 0x400;
-    /** @hide */
+    /** @hide  CANDIDATE FOR PUBLIC API */
     public static final int CHANNEL_OUT_SIDE_LEFT =         0x800;
-    /** @hide */
+    /** @hide  CANDIDATE FOR PUBLIC API */
     public static final int CHANNEL_OUT_SIDE_RIGHT =       0x1000;
     /** @hide */
     public static final int CHANNEL_OUT_TOP_CENTER =       0x2000;
@@ -127,6 +127,35 @@ public class AudioFormat {
             CHANNEL_OUT_BACK_LEFT | CHANNEL_OUT_BACK_RIGHT |
             CHANNEL_OUT_LOW_FREQUENCY);
     // CHANNEL_OUT_ALL is not yet defined; if added then it should match AUDIO_CHANNEL_OUT_ALL
+
+    /**
+     * @hide
+     * Return the number of channels from an output channel mask
+     * @param mask a combination of the CHANNEL_OUT_* definitions, but not CHANNEL_OUT_DEFAULT
+     * @return number of channels for the mask
+     */
+    public static int channelCountFromOutChannelMask(int mask) {
+        return Integer.bitCount(mask);
+    }
+    /**
+     * @hide
+     * Return a channel mask ready to be used by native code
+     * @param mask a combination of the CHANNEL_OUT_* definitions, but not CHANNEL_OUT_DEFAULT
+     * @return a native channel mask
+     */
+    public static int convertChannelOutMaskToNativeMask(int javaMask) {
+        return (javaMask >> 2);
+    }
+
+    /**
+     * @hide
+     * Return a java output channel mask
+     * @param mask a native channel mask
+     * @return a combination of the CHANNEL_OUT_* definitions
+     */
+    public static int convertNativeChannelMaskToOutMask(int nativeMask) {
+        return (nativeMask << 2);
+    }
 
     public static final int CHANNEL_IN_DEFAULT = 1;
     // These directly match native
