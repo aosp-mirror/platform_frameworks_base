@@ -142,7 +142,7 @@ public abstract class BatteryStats implements Parcelable {
     /**
      * Bump the version on this if the checkin format changes.
      */
-    private static final int BATTERY_STATS_CHECKIN_VERSION = 8;
+    private static final int BATTERY_STATS_CHECKIN_VERSION = 9;
     
     private static final long BYTES_PER_KB = 1024;
     private static final long BYTES_PER_MB = 1048576; // 1024^2
@@ -1857,9 +1857,9 @@ public abstract class BatteryStats implements Parcelable {
                 screenOnTime / 1000, phoneOnTime / 1000, wifiOnTime / 1000,
                 wifiRunningTime / 1000, bluetoothOnTime / 1000,
                 mobileRxTotalBytes, mobileTxTotalBytes, wifiRxTotalBytes, wifiTxTotalBytes,
-                fullWakeLockTimeTotal, partialWakeLockTimeTotal,
-                0 /*legacy input event count*/, getMobileRadioActiveTime(rawRealtime, which),
-                getMobileRadioActiveAdjustedTime(which), interactiveTime / 1000,
+                fullWakeLockTimeTotal / 1000, partialWakeLockTimeTotal / 1000,
+                0 /*legacy input event count*/, getMobileRadioActiveTime(rawRealtime, which) / 1000,
+                getMobileRadioActiveAdjustedTime(which) / 1000, interactiveTime / 1000,
                 lowPowerModeEnabledTime / 1000);
         
         // Dump screen brightness stats
