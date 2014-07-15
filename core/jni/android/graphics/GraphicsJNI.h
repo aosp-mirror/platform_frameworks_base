@@ -12,9 +12,9 @@
 
 class SkBitmapRegionDecoder;
 class SkCanvas;
-class SkPaint;
 
 namespace android {
+class Paint;
 class TypefaceImpl;
 }
 
@@ -48,7 +48,7 @@ public:
     static void point_to_jpointf(const SkPoint& point, JNIEnv*, jobject jpointf);
 
     static SkCanvas* getNativeCanvas(JNIEnv*, jobject canvas);
-    static SkPaint*  getNativePaint(JNIEnv*, jobject paint);
+    static android::Paint*  getNativePaint(JNIEnv*, jobject paint);
     static android::TypefaceImpl* getNativeTypeface(JNIEnv*, jobject paint);
     static SkBitmap* getNativeBitmap(JNIEnv*, jobject bitmap);
     static SkRegion* getNativeRegion(JNIEnv*, jobject region);

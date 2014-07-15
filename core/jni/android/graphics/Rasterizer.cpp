@@ -22,6 +22,7 @@
 
 #include "jni.h"
 #include "GraphicsJNI.h"
+#include "Paint.h"
 #include "SkLayerRasterizer.h"
 #include <android_runtime/AndroidRuntime.h>
 
@@ -79,7 +80,7 @@ public:
 
     static void addLayer(JNIEnv* env, jobject, jlong layerHandle, jlong paintHandle, jfloat dx, jfloat dy) {
         NativeLayerRasterizer* nr = reinterpret_cast<NativeLayerRasterizer *>(layerHandle);
-        const SkPaint* paint = reinterpret_cast<SkPaint *>(paintHandle);
+        const Paint* paint = reinterpret_cast<Paint *>(paintHandle);
         SkASSERT(nr);
         SkASSERT(paint);
         nr->fBuilder.addLayer(*paint, dx, dy);
