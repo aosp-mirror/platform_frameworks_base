@@ -2351,7 +2351,8 @@ status_t OpenGLRenderer::drawVertexBuffer(float translateX, float translateY,
         return DrawGlInfo::kStatusDone;
     }
 
-    const Rect& bounds = vertexBuffer.getBounds();
+    Rect bounds(vertexBuffer.getBounds());
+    bounds.translate(translateX, translateY);
     dirtyLayer(bounds.left, bounds.top, bounds.right, bounds.bottom, *currentTransform());
 
     int color = paint->getColor();
