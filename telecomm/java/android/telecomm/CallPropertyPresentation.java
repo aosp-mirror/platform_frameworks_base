@@ -19,14 +19,14 @@ package android.telecomm;
 /** Defines how numbers and names are displayed in caller id. */
 public class CallPropertyPresentation {
     /** Property is displayed normally. */
-    public static final int ALLOWED = 0;
+    public static final int ALLOWED = 1;
 
     /** Property was blocked. */
-    public static final int RESTRICTED = 1;
+    public static final int RESTRICTED = 2;
 
     /** Presentation was not specified or is unknown. */
-    public static final int UNKNOWN = 2;
+    public static final int UNKNOWN = 3;
 
     /** Property should be displayed as a pay phone. */
-    public static final int PAYPHONE = 3;
+    public static final int PAYPHONE = 4;
 }
