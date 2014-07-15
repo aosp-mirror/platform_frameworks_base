@@ -16,11 +16,18 @@
 
 <resources>
 
-    <style name="PrintActivity" parent="@android:style/Theme.DeviceDefault.NoActionBar">
+    <style name="PrintActivity" parent="@android:style/Theme.Material">
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+
         <item name="android:backgroundDimEnabled">false</item>
+
+        <item name="android:colorPrimary">@*android:color/material_blue_grey_900</item>
+        <item name="android:colorPrimaryDark">@*android:color/material_blue_grey_950</item>
+        <item name="android:colorAccent">@*android:color/material_dark_teal_A400</item>
     </style>
 
     <style name="SelectPrinterActivityTheme" parent="@android:style/Theme.DeviceDefault.Light">
