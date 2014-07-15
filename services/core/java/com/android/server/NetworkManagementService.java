@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import static android.Manifest.permission.ACCESS_NETWORK_STATE;
 import static android.Manifest.permission.CONNECTIVITY_INTERNAL;
 import static android.Manifest.permission.DUMP;
 import static android.Manifest.permission.SHUTDOWN;
@@ -63,6 +64,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.provider.Settings;
 import android.telephony.DataConnectionRealTimeInfo;
 import android.telephony.PhoneStateListener;
 import android.telephony.SubscriptionManager;
@@ -70,6 +72,7 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
+import java.util.List;
 
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.net.NetworkStatsFactory;
@@ -138,6 +141,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         public static final int TetheringStatsResult      = 221;
         public static final int DnsProxyQueryResult       = 222;
         public static final int ClatdStatusResult         = 223;
+        public static final int V6RtrAdvResult            = 227;
 
         public static final int InterfaceChange           = 600;
         public static final int BandwidthControl          = 601;
@@ -811,6 +815,36 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                     mConnector.executeForList("interface", "list"), InterfaceListResult);
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
+        }
+    }
+
+    @Override
+    public void addUpstreamV6Interface(String iface) throws RemoteException {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.ACCESS_NETWORK_STATE, "NetworkManagementService");
+
+        Slog.d(TAG, "addUpstreamInterface("+ iface + ")");
+        try {
+            final Command cmd = new Command("tether", "interface", "add_upstream");
+            cmd.appendArg(iface);
+            mConnector.execute(cmd);
+        } catch (NativeDaemonConnectorException e) {
+            throw new RemoteException("Cannot add upstream interface");
+        }
+    }
+
+    @Override
+    public void removeUpstreamV6Interface(String iface) throws RemoteException {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.ACCESS_NETWORK_STATE, "NetworkManagementService");
+
+        Slog.d(TAG, "removeUpstreamInterface(" + iface + ")");
+        try {
+            final Command cmd = new Command("tether", "interface", "remove_upstream");
+            cmd.appendArg(iface);
+            mConnector.execute(cmd);
+        } catch (NativeDaemonConnectorException e) {
+            throw new RemoteException("Cannot remove upstream interface");
         }
     }
 
