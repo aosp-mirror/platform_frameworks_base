@@ -1212,8 +1212,7 @@ public class SyncManager {
             } else {
                 try {
                     mEventName = mSyncOperation.wakeLockName();
-                    mBatteryStats.noteEvent(BatteryStats.HistoryItem.EVENT_SYNC_START,
-                            mEventName, mSyncAdapterUid);
+                    mBatteryStats.noteSyncStart(mEventName, mSyncAdapterUid);
                 } catch (RemoteException e) {
                 }
             }
@@ -1232,8 +1231,7 @@ public class SyncManager {
                 mBound = false;
                 mContext.unbindService(this);
                 try {
-                    mBatteryStats.noteEvent(BatteryStats.HistoryItem.EVENT_SYNC_FINISH,
-                            mEventName, mSyncAdapterUid);
+                    mBatteryStats.noteSyncFinish(mEventName, mSyncAdapterUid);
                 } catch (RemoteException e) {
                 }
             }

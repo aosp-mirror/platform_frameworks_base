@@ -186,6 +186,34 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
     }
 
+    public void noteSyncStart(String name, int uid) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteSyncStartLocked(name, uid);
+        }
+    }
+
+    public void noteSyncFinish(String name, int uid) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteSyncFinishLocked(name, uid);
+        }
+    }
+
+    public void noteJobStart(String name, int uid) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteJobStartLocked(name, uid);
+        }
+    }
+
+    public void noteJobFinish(String name, int uid) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteJobFinishLocked(name, uid);
+        }
+    }
+
     public void noteStartWakelock(int uid, int pid, String name, String historyName, int type,
             boolean unimportantForLogging) {
         enforceCallingPermission();
