@@ -1513,6 +1513,7 @@
      See {@link com.android.server.notification.NotificationSignalExtractor} -->
     <string-array name="config_notificationSignalExtractors">
         <item>com.android.server.notification.ValidateNotificationPeople</item>
+        <item>com.android.server.notification.PackagePriorityExtractor</item>
         <item>com.android.server.notification.NotificationIntrusivenessExtractor</item>
     </string-array>
 

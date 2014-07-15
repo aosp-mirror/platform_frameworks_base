@@ -44,6 +44,9 @@ interface INotificationManager
     void setNotificationsEnabledForPackage(String pkg, int uid, boolean enabled);
     boolean areNotificationsEnabledForPackage(String pkg, int uid);
 
+    void setPackagePriority(String pkg, int uid, int priority);
+    int getPackagePriority(String pkg, int uid);
+
     // TODO: Remove this when callers have been migrated to the equivalent
     // INotificationListener method.
     StatusBarNotification[] getActiveNotifications(String callingPkg);
