@@ -5428,11 +5428,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                         }
                     }
 
-                    if (abi32 < 0 && abi32 != PackageManager.NO_NATIVE_LIBRARIES) {
-                        throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
-                                "Error unpackaging 32 bit native libs for multiarch app, errorCode="
-                                + abi32);
-                    }
+                    maybeThrowExceptionForMultiArchCopy(
+                            "Error unpackaging 32 bit native libs for multiarch app.", abi32);
 
                     if (Build.SUPPORTED_64_BIT_ABIS.length > 0) {
                         if (isAsec) {
@@ -5443,11 +5440,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                         }
                     }
 
-                    if (abi64 < 0 && abi64 != PackageManager.NO_NATIVE_LIBRARIES) {
-                        throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
-                                "Error unpackaging 64 bit native libs for multiarch app, errorCode="
-                                + abi32);
-                    }
+                    maybeThrowExceptionForMultiArchCopy(
+                            "Error unpackaging 64 bit native libs for multiarch app.", abi64);
 
                     if (abi64 >= 0) {
                         pkg.applicationInfo.primaryCpuAbi = Build.SUPPORTED_64_BIT_ABIS[abi64];
@@ -6240,9 +6234,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (info.primaryCpuAbi != null) {
                 info.nativeLibraryDir = new File(info.nativeLibraryRootDir,
                         VMRuntime.getInstructionSet(info.primaryCpuAbi)).getAbsolutePath();
-            } else {
-                Slog.w(TAG, "Package " + info.packageName
-                        + " missing ABI; unable to derive nativeLibraryDir");
             }
         } else {
             info.nativeLibraryDir = info.nativeLibraryRootDir;
@@ -9264,29 +9255,13 @@ public class PackageManagerService extends IPackageManager.Stub {
                     if (Build.SUPPORTED_32_BIT_ABIS.length > 0) {
                         copyRet = copyNativeLibrariesForInternalApp(handle, libraryRoot,
                                 Build.SUPPORTED_32_BIT_ABIS, true /* use isa specific subdirs */);
-                        if (copyRet < 0 && copyRet != PackageManager.NO_NATIVE_LIBRARIES) {
-                            Slog.w(TAG, "Failure copying 32 bit native libraries [errorCode=" + copyRet + "]");
-                            return copyRet;
-                        }
-                    }
-
-                    if (DEBUG_ABI_SELECTION && copyRet >= 0) {
-                        Log.d(TAG, "Installed 32 bit libraries under: " + codeFile + " abi=" +
-                                Build.SUPPORTED_32_BIT_ABIS[copyRet]);
+                        maybeThrowExceptionForMultiArchCopy("Failure copying 32 bit native libraries", copyRet);
                     }
 
                     if (Build.SUPPORTED_64_BIT_ABIS.length > 0) {
                         copyRet = copyNativeLibrariesForInternalApp(handle, libraryRoot,
                                 Build.SUPPORTED_64_BIT_ABIS, true /* use isa specific subdirs */);
-                        if (copyRet < 0 && copyRet != PackageManager.NO_NATIVE_LIBRARIES) {
-                            Slog.w(TAG, "Failure copying 64 bit native libraries [errorCode=" + copyRet + "]");
-                            return copyRet;
-                        }
-                    }
-
-                    if (DEBUG_ABI_SELECTION && copyRet >= 0) {
-                        Log.d(TAG, "Installed 64 bit libraries under: " + codeFile + " abi=" +
-                                Build.SUPPORTED_64_BIT_ABIS[copyRet]);
+                        maybeThrowExceptionForMultiArchCopy("Failure copying 64 bit native libraries", copyRet);
                     }
                 } else {
                     String[] abiList = (abiOverride != null) ?
@@ -9303,14 +9278,13 @@ public class PackageManagerService extends IPackageManager.Stub {
                         Slog.w(TAG, "Failure copying native libraries [errorCode=" + copyRet + "]");
                         return copyRet;
                     }
-
-                    if (DEBUG_ABI_SELECTION && copyRet >= 0) {
-                        Log.d(TAG, "Installed libraries under: " + codeFile + " abi=" + abiList[copyRet]);
-                    }
                 }
             } catch (IOException e) {
                 Slog.e(TAG, "Copying native libraries failed", e);
                 ret = PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
+            } catch (PackageManagerException pme) {
+                Slog.e(TAG, "Copying native libraries failed", pme);
+                ret = pme.error;
             } finally {
                 IoUtils.closeQuietly(handle);
             }
@@ -9457,6 +9431,16 @@ public class PackageManagerService extends IPackageManager.Stub {
     private boolean isAsecExternal(String cid) {
         final String asecPath = PackageHelper.getSdFilesystem(cid);
         return !asecPath.startsWith(mAsecInternalPath);
+    }
+
+    private static void maybeThrowExceptionForMultiArchCopy(String message, int copyRet) throws
+            PackageManagerException {
+        if (copyRet < 0) {
+            if (copyRet != PackageManager.NO_NATIVE_LIBRARIES &&
+                    copyRet != PackageManager.INSTALL_FAILED_NO_MATCHING_ABIS) {
+                throw new PackageManagerException(copyRet, message);
+            }
+        }
     }
 
     /**
