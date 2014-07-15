@@ -38,4 +38,10 @@ public interface NotificationSignalExtractor {
      */
     public RankingReconsideration process(NotificationRecord notification);
 
+    /**
+     * Called whenever the {@link RankingConfig} changes.
+     *
+     * @param config information about which signals are important.
+     */
+    void setConfig(RankingConfig config);
 }

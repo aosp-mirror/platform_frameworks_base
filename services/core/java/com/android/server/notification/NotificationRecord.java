@@ -58,6 +58,7 @@ public final class NotificationRecord {
 
     // Is this record an update of an old record?
     public boolean isUpdate;
+    private int mPackagePriority;
 
     NotificationRecord(StatusBarNotification sbn, int score)
     {
@@ -70,6 +71,7 @@ public final class NotificationRecord {
     public void copyRankingInformation(NotificationRecord previous) {
         mContactAffinity = previous.mContactAffinity;
         mRecentlyIntrusive = previous.mRecentlyIntrusive;
+        mPackagePriority = previous.mPackagePriority;
         mIntercept = previous.mIntercept;
         mRankingTimeMs = calculateRankingTimeMs(previous.getRankingTimeMs());
     }
@@ -141,6 +143,7 @@ public final class NotificationRecord {
         pw.println(prefix + "  stats=" + stats.toString());
         pw.println(prefix + "  mContactAffinity=" + mContactAffinity);
         pw.println(prefix + "  mRecentlyIntrusive=" + mRecentlyIntrusive);
+        pw.println(prefix + "  mPackagePriority=" + mPackagePriority);
         pw.println(prefix + "  mIntercept=" + mIntercept);
         pw.println(prefix + "  mRankingTimeMs=" + mRankingTimeMs);
     }
@@ -193,6 +196,14 @@ public final class NotificationRecord {
         return mRecentlyIntrusive;
     }
 
+    public void setPackagePriority(int packagePriority) {
+      mPackagePriority = packagePriority;
+    }
+
+    public int getPackagePriority() {
+        return mPackagePriority;
+    }
+
     public boolean setIntercepted(boolean intercept) {
         mIntercept = intercept;
         return mIntercept;
@@ -230,5 +241,4 @@ public final class NotificationRecord {
         }
         return sbn.getPostTime();
     }
-
 }
