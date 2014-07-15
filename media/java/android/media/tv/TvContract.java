@@ -16,7 +16,6 @@
 
 package android.media.tv;
 
-import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.net.Uri;
@@ -120,26 +119,23 @@ public final class TvContract {
     /**
      * Builds a URI that points to all browsable channels from a given TV input.
      *
-     * @param name {@link ComponentName} of the {@link android.media.tv.TvInputService} that
-     *            implements the given TV input.
+     * @param inputId The ID of the TV input to build a channels URI for.
      */
-    public static final Uri buildChannelsUriForInput(ComponentName name) {
-        return buildChannelsUriForInput(name, true);
+    public static final Uri buildChannelsUriForInput(String inputId) {
+        return buildChannelsUriForInput(inputId, true);
     }
 
     /**
      * Builds a URI that points to all or browsable-only channels from a given TV input.
      *
-     * @param name {@link ComponentName} of the {@link android.media.tv.TvInputService} that
-     *            implements the given TV input.
+     * @param inputId The ID of the TV input to build a channels URI for.
      * @param browsableOnly If set to {@code true} the URI points to only browsable channels. If set
      *            to {@code false} the URI points to all channels regardless of whether they are
      *            browsable or not.
      */
-    public static final Uri buildChannelsUriForInput(ComponentName name, boolean browsableOnly) {
+    public static final Uri buildChannelsUriForInput(String inputId, boolean browsableOnly) {
         return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(AUTHORITY)
-                .appendPath(PATH_INPUT).appendPath(name.getPackageName())
-                .appendPath(name.getClassName()).appendPath(PATH_CHANNEL)
+                .appendPath(PATH_INPUT).appendPath(inputId).appendPath(PATH_CHANNEL)
                 .appendQueryParameter(PARAM_BROWSABLE_ONLY, String.valueOf(browsableOnly)).build();
     }
 
@@ -147,26 +143,26 @@ public final class TvContract {
      * Builds a URI that points to all or browsable-only channels which have programs with the given
      * genre from the given TV input.
      *
-     * @param name {@link ComponentName} of the {@link android.media.tv.TvInputService} that
-     *            implements the given TV input. If null, builds a URI for all the TV inputs.
+     * @param inputId The ID of the TV input to build a channels URI for. If null, builds a URI for
+     *            all the TV inputs.
      * @param genre {@link Programs.Genres} to search.
      * @param browsableOnly If set to {@code true} the URI points to only browsable channels. If set
      *            to {@code false} the URI points to all channels regardless of whether they are
      *            browsable or not.
      * @hide
      */
-    public static final Uri buildChannelsUriForCanonicalGenre(ComponentName name, String genre,
+    public static final Uri buildChannelsUriForCanonicalGenre(String inputId, String genre,
             boolean browsableOnly) {
         if (!Programs.Genres.isCanonical(genre)) {
             throw new IllegalArgumentException("Not a canonical genre: '" + genre + "'");
         }
 
         Uri uri;
-        if (name == null) {
+        if (inputId == null) {
             uri = new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(AUTHORITY)
                     .appendPath(PATH_CHANNEL).build();
         } else {
-            uri = buildChannelsUriForInput(name, browsableOnly);
+            uri = buildChannelsUriForInput(inputId, browsableOnly);
         }
         return uri.buildUpon().appendQueryParameter(PARAM_CANONICAL_GENRE, genre).build();
     }
@@ -249,39 +245,22 @@ public final class TvContract {
     }
 
     /**
-     * Extracts the {@link Channels#COLUMN_PACKAGE_NAME} from a given URI.
+     * Extracts the {@link Channels#COLUMN_INPUT_ID} from a given URI.
      *
-     * @param channelsUri A URI constructed by {@link #buildChannelsUriForInput(ComponentName)} or
-     *            {@link #buildChannelsUriForInput(ComponentName, boolean)}.
+     * @param channelsUri A URI constructed by {@link #buildChannelsUriForInput(String)},
+     *            {@link #buildChannelsUriForInput(String, boolean)}, or
+     *            {@link #buildChannelsUriForCanonicalGenre(String, String, boolean)}.
      * @hide
      */
-    public static final String getPackageName(Uri channelsUri) {
+    public static final String getInputId(Uri channelsUri) {
         final List<String> paths = channelsUri.getPathSegments();
-        if (paths.size() < 4) {
+        if (paths.size() < 3) {
             throw new IllegalArgumentException("Not channels: " + channelsUri);
         }
-        if (!PATH_INPUT.equals(paths.get(0)) || !PATH_CHANNEL.equals(paths.get(3))) {
+        if (!PATH_INPUT.equals(paths.get(0)) || !PATH_CHANNEL.equals(paths.get(2))) {
             throw new IllegalArgumentException("Not channels: " + channelsUri);
         }
         return paths.get(1);
-    }
-
-    /**
-     * Extracts the {@link Channels#COLUMN_SERVICE_NAME} from a given URI.
-     *
-     * @param channelsUri A URI constructed by {@link #buildChannelsUriForInput(ComponentName)} or
-     *            {@link #buildChannelsUriForInput(ComponentName, boolean)}.
-     * @hide
-     */
-    public static final String getServiceName(Uri channelsUri) {
-        final List<String> paths = channelsUri.getPathSegments();
-        if (paths.size() < 4) {
-            throw new IllegalArgumentException("Not channels: " + channelsUri);
-        }
-        if (!PATH_INPUT.equals(paths.get(0)) || !PATH_CHANNEL.equals(paths.get(3))) {
-            throw new IllegalArgumentException("Not channels: " + channelsUri);
-        }
-        return paths.get(2);
     }
 
     /**
@@ -495,15 +474,14 @@ public final class TvContract {
         }
 
         /**
-         * The name of the {@link TvInputService} subclass that provides this TV channel. This
-         * should be a fully qualified class name (such as, "com.example.project.TvInputService").
+         * The ID of the TV input that provides this TV channel.
          * <p>
          * This is a required field.
          * </p><p>
          * Type: TEXT
          * </p>
          */
-        public static final String COLUMN_SERVICE_NAME = "service_name";
+        public static final String COLUMN_INPUT_ID = "input_id";
 
         /**
          * The predefined type of this TV channel.
