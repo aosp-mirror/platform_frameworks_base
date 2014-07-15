@@ -16427,8 +16427,13 @@ package android.media.tv {
   }
 
   public final class TvInputManager {
-    method public boolean getAvailability(java.lang.String);
+    method public int getInputState(java.lang.String);
     method public java.util.List<android.media.tv.TvInputInfo> getTvInputList();
+    method public void registerListener(android.media.tv.TvInputManager.TvInputListener, android.os.Handler);
+    method public void unregisterListener(android.media.tv.TvInputManager.TvInputListener);
+    field public static final int INPUT_STATE_CONNECTED = 0; // 0x0
+    field public static final int INPUT_STATE_CONNECTED_STANDBY = 1; // 0x1
+    field public static final int INPUT_STATE_DISCONNECTED = 2; // 0x2
     field public static final int VIDEO_UNAVAILABLE_REASON_BUFFERING = 3; // 0x3
     field public static final int VIDEO_UNAVAILABLE_REASON_TUNE = 1; // 0x1
     field public static final int VIDEO_UNAVAILABLE_REASON_UNKNOWN = 0; // 0x0
@@ -16437,7 +16442,7 @@ package android.media.tv {
 
   public static abstract class TvInputManager.TvInputListener {
     ctor public TvInputManager.TvInputListener();
-    method public void onAvailabilityChanged(java.lang.String, boolean);
+    method public void onInputStateChanged(java.lang.String, int);
   }
 
   public abstract class TvInputService extends android.app.Service {
