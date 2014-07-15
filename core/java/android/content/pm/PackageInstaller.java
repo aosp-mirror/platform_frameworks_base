@@ -30,7 +30,31 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
 
-/** {@hide} */
+/**
+ * Offers the ability to install, upgrade, and remove applications on the
+ * device. This includes support for apps packaged either as a single
+ * "monolithic" APK, or apps packaged as multiple "split" APKs.
+ * <p>
+ * An app is delivered for installation through a
+ * {@link PackageInstaller.Session}, which any app can create. Once the session
+ * is created, the installer can stream one or more APKs into place until it
+ * decides to either commit or destroy the session. Committing may require user
+ * intervention to complete the installation.
+ * <p>
+ * Sessions can install brand new apps, upgrade existing apps, or add new splits
+ * onto an existing app.
+ * <p>
+ * Apps packaged into multiple split APKs always consist of a single "base" APK
+ * (with a {@code null} split name) and zero or more "split" APKs (with unique
+ * split names). Any subset of these APKs can be installed together, as long as
+ * the following constraints are met:
+ * <ul>
+ * <li>All APKs must have the exact same package name, version code, and signing
+ * certificates.
+ * <li>All installations must contain a single base APK.
+ * <li>All APKs must have unique split names.
+ * </ul>
+ */
 public class PackageInstaller {
     private final PackageManager mPm;
     private final IPackageInstaller mInstaller;
@@ -46,16 +70,18 @@ public class PackageInstaller {
         mUserId = userId;
     }
 
+    /**
+     * Quickly test if the given package is already available on the device.
+     * This is typically used in multi-user scenarios where another user on the
+     * device has already installed the package.
+     *
+     * @hide
+     */
     public boolean isPackageAvailable(String packageName) {
-        try {
-            final ApplicationInfo info = mPm.getApplicationInfo(packageName,
-                    PackageManager.GET_UNINSTALLED_PACKAGES);
-            return ((info.flags & ApplicationInfo.FLAG_INSTALLED) != 0);
-        } catch (NameNotFoundException e) {
-            return false;
-        }
+        return mPm.isPackageAvailable(packageName);
     }
 
+    /** {@hide} */
     public void installAvailablePackage(String packageName, PackageInstallObserver observer) {
         int returnCode;
         try {
@@ -66,6 +92,18 @@ public class PackageInstaller {
         observer.packageInstalled(packageName, null, returnCode);
     }
 
+    /**
+     * Create a new session using the given parameters, returning a unique ID
+     * that represents the session. Once created, the session can be opened
+     * multiple times across multiple device boots.
+     * <p>
+     * The system may automatically destroy sessions that have not been
+     * finalized (either committed or abandoned) within a reasonable period of
+     * time, typically on the order of a day.
+     *
+     * @throws IOException if parameters were unsatisfiable, such as lack of
+     *             disk space or unavailable media.
+     */
     public int createSession(InstallSessionParams params) throws IOException {
         try {
             return mInstaller.createSession(mInstallerPackageName, params, mUserId);
@@ -77,6 +115,9 @@ public class PackageInstaller {
         }
     }
 
+    /**
+     * Open an existing session to actively perform work.
+     */
     public Session openSession(int sessionId) {
         try {
             return new Session(mInstaller.openSession(sessionId));
@@ -85,7 +126,10 @@ public class PackageInstaller {
         }
     }
 
-    public List<InstallSessionInfo> getSessions() {
+    /**
+     * Return list of all active install sessions on the device.
+     */
+    public List<InstallSessionInfo> getActiveSessions() {
         // TODO: filter based on caller
         // TODO: let launcher app see all active sessions
         try {
@@ -95,6 +139,11 @@ public class PackageInstaller {
         }
     }
 
+    /**
+     * Uninstall the given package, removing it completely from the device. This
+     * method is only available to the current "installer of record" for the
+     * package.
+     */
     public void uninstall(String packageName, UninstallResultCallback callback) {
         try {
             mInstaller.uninstall(packageName, 0,
@@ -104,6 +153,11 @@ public class PackageInstaller {
         }
     }
 
+    /**
+     * Uninstall only a specific split from the given package.
+     *
+     * @hide
+     */
     public void uninstall(String packageName, String splitName, UninstallResultCallback callback) {
         try {
             mInstaller.uninstallSplit(packageName, splitName, 0,
@@ -113,6 +167,9 @@ public class PackageInstaller {
         }
     }
 
+    /**
+     * Events for observing session lifecycle.
+     */
     public static abstract class SessionObserver {
         private final IPackageInstallerObserver.Stub mBinder = new IPackageInstallerObserver.Stub() {
             @Override
@@ -127,7 +184,7 @@ public class PackageInstaller {
 
             @Override
             public void onSessionFinished(int sessionId, boolean success) {
-                SessionObserver.this.onFinished(sessionId, success);
+                SessionObserver.this.onFinalized(sessionId, success);
             }
         };
 
@@ -136,11 +193,30 @@ public class PackageInstaller {
             return mBinder;
         }
 
+        /**
+         * New session has been created.
+         */
         public abstract void onCreated(InstallSessionInfo info);
+
+        /**
+         * Progress for given session has been updated.
+         * <p>
+         * Note that this progress may not directly correspond to the value
+         * reported by {@link PackageInstaller.Session#setProgress(int)}, as the
+         * system may carve out a portion of the overall progress to represent
+         * its own internal installation work.
+         */
         public abstract void onProgress(int sessionId, int progress);
-        public abstract void onFinished(int sessionId, boolean success);
+
+        /**
+         * Session has been finalized, either with success or failure.
+         */
+        public abstract void onFinalized(int sessionId, boolean success);
     }
 
+    /**
+     * Register to watch for session lifecycle events.
+     */
     public void registerSessionObserver(SessionObserver observer) {
         try {
             mInstaller.registerObserver(observer.getBinder(), mUserId);
@@ -149,6 +225,9 @@ public class PackageInstaller {
         }
     }
 
+    /**
+     * Unregister an existing observer.
+     */
     public void unregisterSessionObserver(SessionObserver observer) {
         try {
             mInstaller.unregisterObserver(observer.getBinder(), mUserId);
@@ -177,6 +256,10 @@ public class PackageInstaller {
             mSession = session;
         }
 
+        /**
+         * Set current progress. Valid values are anywhere between 0 and
+         * {@link InstallSessionParams#setProgressMax(int)}.
+         */
         public void setProgress(int progress) {
             try {
                 mSession.setClientProgress(progress);
@@ -197,7 +280,7 @@ public class PackageInstaller {
         /**
          * Open an APK file for writing, starting at the given offset. You can
          * then stream data into the file, periodically calling
-         * {@link OutputStream#flush()} to ensure bytes have been written to
+         * {@link #fsync(OutputStream)} to ensure bytes have been written to
          * disk.
          */
         public OutputStream openWrite(String splitName, long offsetBytes, long lengthBytes)
@@ -214,6 +297,11 @@ public class PackageInstaller {
             }
         }
 
+        /**
+         * Ensure that any outstanding data for given stream has been committed
+         * to disk. This is only valid for streams returned from
+         * {@link #openWrite(String, long, long)}.
+         */
         public void fsync(OutputStream out) throws IOException {
             if (out instanceof FileBridge.FileBridgeOutputStream) {
                 ((FileBridge.FileBridgeOutputStream) out).fsync();
@@ -222,6 +310,15 @@ public class PackageInstaller {
             }
         }
 
+        /**
+         * Attempt to commit everything staged in this session. This may require
+         * user intervention, and so it may not happen immediately. The final
+         * result of the commit will be reported through the given callback.
+         * <p>
+         * Once this method is called, no additional mutations may be performed
+         * on the session. If the device reboots before the session has been
+         * finalized, you may commit the session again.
+         */
         public void commit(CommitResultCallback callback) {
             try {
                 mSession.install(new CommitResultCallbackDelegate(callback).getBinder());
@@ -230,11 +327,18 @@ public class PackageInstaller {
             }
         }
 
+        /**
+         * Release this session object. You can open the session again if it
+         * hasn't been finalized.
+         */
         @Override
         public void close() {
             // No resources to release at the moment
         }
 
+        /**
+         * Completely destroy this session, rendering it invalid.
+         */
         public void destroy() {
             try {
                 mSession.destroy();
@@ -244,11 +348,15 @@ public class PackageInstaller {
         }
     }
 
+    /**
+     * Final result of an uninstall request.
+     */
     public static abstract class UninstallResultCallback {
         public abstract void onSuccess();
         public abstract void onFailure(String msg);
     }
 
+    /** {@hide} */
     private static class UninstallResultCallbackDelegate extends PackageUninstallObserver {
         private final UninstallResultCallback target;
 
@@ -271,8 +379,18 @@ public class PackageInstaller {
         }
     }
 
+    /**
+     * Final result of a session commit request.
+     */
     public static abstract class CommitResultCallback {
         public abstract void onSuccess();
+
+        /**
+         * Generic failure occurred. You can override methods (such as
+         * {@link #onFailureInvalid(String)}) to handle more specific categories
+         * of failure. By default, those specific categories all flow into this
+         * generic failure.
+         */
         public abstract void onFailure(String msg);
 
         /**
@@ -286,12 +404,16 @@ public class PackageInstaller {
         }
 
         /**
-         * This install session conflicts (or is inconsistent with) with
-         * another package already installed on the device. For example, an
-         * existing permission, incompatible certificates, etc. The user may
-         * be able to uninstall another app to fix the issue.
+         * This install session conflicts (or is inconsistent with) with another
+         * package already installed on the device. For example, an existing
+         * permission, incompatible certificates, etc. The user may be able to
+         * uninstall another app to fix the issue.
+         *
+         * @param otherPackageName if one specific package was identified as the
+         *            cause of the conflict, it's named here. If unknown, or
+         *            multiple packages, this may be {@code null}.
          */
-        public void onFailureConflict(String msg, String packageName) {
+        public void onFailureConflict(String msg, String otherPackageName) {
             onFailure(msg);
         }
 
@@ -317,6 +439,7 @@ public class PackageInstaller {
         }
     }
 
+    /** {@hide} */
     private static class CommitResultCallbackDelegate extends PackageInstallObserver {
         private final CommitResultCallback target;
 

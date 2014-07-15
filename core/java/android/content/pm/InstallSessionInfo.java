@@ -20,15 +20,25 @@ import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-/** {@hide} */
+/**
+ * Details for an active install session.
+ */
 public class InstallSessionInfo implements Parcelable {
+
+    /** {@hide} */
     public int sessionId;
+    /** {@hide} */
     public String installerPackageName;
+    /** {@hide} */
     public int progress;
 
-    public boolean fullInstall;
+    /** {@hide} */
+    public int mode;
+    /** {@hide} */
     public String packageName;
+    /** {@hide} */
     public Bitmap icon;
+    /** {@hide} */
     public CharSequence title;
 
     /** {@hide} */
@@ -41,10 +51,60 @@ public class InstallSessionInfo implements Parcelable {
         installerPackageName = source.readString();
         progress = source.readInt();
 
-        fullInstall = source.readInt() != 0;
+        mode = source.readInt();
         packageName = source.readString();
         icon = source.readParcelable(null);
         title = source.readString();
+    }
+
+    /**
+     * Return the ID for this session.
+     */
+    public int getSessionId() {
+        return sessionId;
+    }
+
+    /**
+     * Return the package name of the app that owns this session.
+     */
+    public String getInstallerPackageName() {
+        return installerPackageName;
+    }
+
+    /**
+     * Return current overall progress of this session, between 0 and 100.
+     * <p>
+     * Note that this progress may not directly correspond to the value reported
+     * by {@link PackageInstaller.Session#setProgress(int)}, as the system may
+     * carve out a portion of the overall progress to represent its own internal
+     * installation work.
+     */
+    public int getProgress() {
+        return progress;
+    }
+
+    /**
+     * Return the package name this session is working with. May be {@code null}
+     * if unknown.
+     */
+    public String getPackageName() {
+        return packageName;
+    }
+
+    /**
+     * Return an icon representing the app being installed. May be {@code null}
+     * if unavailable.
+     */
+    public Bitmap getIcon() {
+        return icon;
+    }
+
+    /**
+     * Return a title representing the app being installed. May be {@code null}
+     * if unavailable.
+     */
+    public CharSequence getTitle() {
+        return title;
     }
 
     @Override
@@ -58,7 +118,7 @@ public class InstallSessionInfo implements Parcelable {
         dest.writeString(installerPackageName);
         dest.writeInt(progress);
 
-        dest.writeInt(fullInstall ? 1 : 0);
+        dest.writeInt(mode);
         dest.writeString(packageName);
         dest.writeParcelable(icon, flags);
         dest.writeString(title != null ? title.toString() : null);
