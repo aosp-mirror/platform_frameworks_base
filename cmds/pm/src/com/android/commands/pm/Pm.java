@@ -998,7 +998,7 @@ public final class Pm {
 
         final InstallSessionParams params = new InstallSessionParams();
         params.installFlags = PackageManager.INSTALL_ALL_USERS;
-        params.fullInstall = true;
+        params.mode = InstallSessionParams.MODE_FULL_INSTALL;
         params.progressMax = -1;
 
         String opt;
@@ -1021,7 +1021,7 @@ public final class Pm {
             } else if (opt.equals("-d")) {
                 params.installFlags |= PackageManager.INSTALL_ALLOW_DOWNGRADE;
             } else if (opt.equals("-p")) {
-                params.fullInstall = false;
+                params.mode = InstallSessionParams.MODE_INHERIT_EXISTING;
             } else if (opt.equals("-S")) {
                 params.deltaSize = Long.parseLong(nextOptionData());
                 params.progressMax = (int) params.deltaSize;

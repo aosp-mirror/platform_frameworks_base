@@ -31,6 +31,11 @@ public class PackageInfo implements Parcelable {
     public String packageName;
 
     /**
+     * The names of any installed split APKs for this package.
+     */
+    public String[] splitNames;
+
+    /**
      * The version number of this package, as specified by the &lt;manifest&gt;
      * tag's {@link android.R.styleable#AndroidManifest_versionCode versionCode}
      * attribute.
@@ -190,24 +195,25 @@ public class PackageInfo implements Parcelable {
      * @hide
      */
     public static final int INSTALL_LOCATION_UNSPECIFIED = -1;
+
     /**
-     * Constant corresponding to <code>auto</code> in
-     * the {@link android.R.attr#installLocation} attribute.
-     * @hide
+     * Constant corresponding to <code>auto</code> in the
+     * {@link android.R.attr#installLocation} attribute.
      */
     public static final int INSTALL_LOCATION_AUTO = 0;
+
     /**
-     * Constant corresponding to <code>internalOnly</code> in
-     * the {@link android.R.attr#installLocation} attribute.
-     * @hide
+     * Constant corresponding to <code>internalOnly</code> in the
+     * {@link android.R.attr#installLocation} attribute.
      */
     public static final int INSTALL_LOCATION_INTERNAL_ONLY = 1;
+
     /**
-     * Constant corresponding to <code>preferExternal</code> in
-     * the {@link android.R.attr#installLocation} attribute.
-     * @hide
+     * Constant corresponding to <code>preferExternal</code> in the
+     * {@link android.R.attr#installLocation} attribute.
      */
     public static final int INSTALL_LOCATION_PREFER_EXTERNAL = 2;
+
     /**
      * Flag for {@link #requiredForProfile}
      * The application will always be installed for a restricted profile.
@@ -222,12 +228,10 @@ public class PackageInfo implements Parcelable {
     public static final int MANAGED_PROFILE = 2;
 
     /**
-     * The install location requested by the activity.  From the
+     * The install location requested by the package. From the
      * {@link android.R.attr#installLocation} attribute, one of
-     * {@link #INSTALL_LOCATION_AUTO},
-     * {@link #INSTALL_LOCATION_INTERNAL_ONLY},
+     * {@link #INSTALL_LOCATION_AUTO}, {@link #INSTALL_LOCATION_INTERNAL_ONLY},
      * {@link #INSTALL_LOCATION_PREFER_EXTERNAL}
-     * @hide
      */
     public int installLocation = INSTALL_LOCATION_INTERNAL_ONLY;
 
@@ -269,6 +273,7 @@ public class PackageInfo implements Parcelable {
 
     public void writeToParcel(Parcel dest, int parcelableFlags) {
         dest.writeString(packageName);
+        dest.writeStringArray(splitNames);
         dest.writeInt(versionCode);
         dest.writeString(versionName);
         dest.writeString(sharedUserId);
@@ -314,6 +319,7 @@ public class PackageInfo implements Parcelable {
 
     private PackageInfo(Parcel source) {
         packageName = source.readString();
+        splitNames = source.readStringArray();
         versionCode = source.readInt();
         versionName = source.readString();
         sharedUserId = source.readString();
