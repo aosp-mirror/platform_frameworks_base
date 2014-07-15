@@ -26,6 +26,7 @@ import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.LongSparseLongArray;
 import android.util.SparseIntArray;
 import android.util.StateSet;
@@ -62,6 +63,8 @@ import java.io.IOException;
  * @attr ref android.R.styleable#DrawableStates_state_pressed
  */
 public class AnimatedStateListDrawable extends StateListDrawable {
+    private static final String LOGTAG = AnimatedStateListDrawable.class.getSimpleName();
+
     private static final String ELEMENT_TRANSITION = "transition";
     private static final String ELEMENT_ITEM = "item";
 
@@ -302,13 +305,13 @@ public class AnimatedStateListDrawable extends StateListDrawable {
 
         @Override
         public boolean canReverse() {
-            return true;
+            return mAvd.canReverse();
         }
 
         @Override
         public void start() {
             if (mReversed) {
-                mAvd.reverse();
+                reverse();
             } else {
                 mAvd.start();
             }
@@ -316,7 +319,11 @@ public class AnimatedStateListDrawable extends StateListDrawable {
 
         @Override
         public void reverse() {
-            mAvd.reverse();
+            if (canReverse()) {
+                mAvd.reverse();
+            } else {
+                Log.w(LOGTAG, "Reverse() is called on a drawable can't reverse");
+            }
         }
 
         @Override
