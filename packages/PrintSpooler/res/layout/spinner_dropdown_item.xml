@@ -17,8 +17,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:paddingStart="8dip"
-    android:paddingEnd="8dip"
     android:minHeight="?android:attr/listPreferredItemHeightSmall"
     android:orientation="vertical"
     android:gravity="start|center_vertical">
@@ -27,12 +25,13 @@
         android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        style="?android:attr/spinnerDropDownItemStyle"
         android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="?android:attr/textColorPrimary"
         android:singleLine="true"
         android:ellipsize="end"
         android:textIsSelectable="false"
         android:gravity="top|left"
-        android:textColor="?android:attr/textColorPrimary"
         android:duplicateParentState="true">
     </TextView>
 
@@ -40,12 +39,13 @@
         android:id="@+id/subtitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        style="?android:attr/spinnerDropDownItemStyle"
         android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textColor="?android:attr/textColorPrimary"
         android:singleLine="true"
         android:ellipsize="end"
         android:textIsSelectable="false"
         android:visibility="gone"
-        android:textColor="?android:attr/textColorPrimary"
         android:duplicateParentState="true">
     </TextView>
 
