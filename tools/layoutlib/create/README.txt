@@ -39,7 +39,8 @@ The ASM library is used to do the bytecode modification using its visitor patter
 
 The layoutlib_create is *NOT* generic. There is no configuration file. Instead all the configuration
 is done in the main() method and the CreateInfo structure is expected to change with the Android
-platform as new classes are added, changed or removed.
+platform as new classes are added, changed or removed. Some configuration that may be platform
+dependent is also present elsewhere in code.
 
 The resulting JAR is used by layoutlib_bridge (a.k.a. "the bridge"), also part of the platform, that
 provides all the necessary missing implementation for rendering graphics in Eclipse.
@@ -95,7 +96,7 @@ The generator is constructed from a CreateInfo struct that acts as a config file
 - specific classes to refactor.
 
 Each of these are specific strategies we use to be able to modify the Android code to fit within the
-Eclipse renderer. These strategies are explained beow.
+Eclipse renderer. These strategies are explained below.
 
 The core method of the generator is transform(): it takes an input ASM ClassReader and modifies it
 to produce a byte array suitable for the final JAR file.
@@ -130,9 +131,11 @@ the StackMapTable correctly and Java 7 VM enforces that classes with version gre
 valid StackMapTable. As a side benefit of this, we can continue to support Java 6 because Java 7 on
 Mac has horrible font rendering support.
 
-ReplaceMethodCallsAdapter replaces calls to certain methods. Currently, it only rewrites calls to
-specialized versions of java.lang.System.arraycopy(), which are not part of the Desktop VM to call
-the more general method java.lang.System.arraycopy(Ljava/lang/Object;ILjava/lang/Object;II)V.
+ReplaceMethodCallsAdapter replaces calls to certain methods. This is different from the
+DelegateMethodAdapter since it doesn't preserve the original copy of the method and more importantly
+changes the calls to a method in each class instead of changing the implementation of the method.
+This is useful for methods in the Java namespace where we cannot add delegates. The configuration
+for this is not done through the CreateInfo class, but done in the ReplaceMethodAdapter.
 
 The ClassAdapters are chained together to achieve the desired output. (Look at section 2.2.7
 Transformation chains in the asm user guide, link in the References.) The order of execution of
