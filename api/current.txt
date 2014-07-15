@@ -6571,11 +6571,10 @@ package android.bluetooth.le {
 
 package android.content {
 
-  public abstract class AbstractRestrictionsProvider extends android.app.Service {
+  public abstract class AbstractRestrictionsProvider extends android.content.BroadcastReceiver {
     ctor public AbstractRestrictionsProvider();
-    method public abstract android.os.Bundle getPermissionResponse(java.lang.String, java.lang.String);
-    method public final android.os.IBinder onBind(android.content.Intent);
-    method public abstract void requestPermission(java.lang.String, java.lang.String, android.os.Bundle);
+    method public void onReceive(android.content.Context, android.content.Intent);
+    method public abstract void requestPermission(android.content.Context, java.lang.String, java.lang.String, android.os.Bundle);
   }
 
   public abstract class AbstractThreadedSyncAdapter {
@@ -7957,24 +7956,25 @@ package android.content {
   public class RestrictionsManager {
     method public android.os.Bundle getApplicationRestrictions();
     method public java.util.List<android.content.RestrictionEntry> getManifestRestrictions(java.lang.String);
-    method public void getPermissionResponse(java.lang.String, android.content.RestrictionsManager.PermissionResponseCallback);
     method public boolean hasRestrictionsProvider();
     method public void notifyPermissionResponse(java.lang.String, android.os.Bundle);
     method public void requestPermission(java.lang.String, android.os.Bundle);
     field public static final java.lang.String ACTION_PERMISSION_RESPONSE_RECEIVED = "android.intent.action.PERMISSION_RESPONSE_RECEIVED";
-    field public static final java.lang.String EXTRA_PACKAGE_NAME = "package_name";
-    field public static final java.lang.String EXTRA_RESPONSE_BUNDLE = "response";
+    field public static final java.lang.String ACTION_REQUEST_PERMISSION = "android.content.action.REQUEST_PERMISSION";
+    field public static final java.lang.String EXTRA_PACKAGE_NAME = "android.content.extra.PACKAGE_NAME";
+    field public static final java.lang.String EXTRA_REQUEST_BUNDLE = "android.content.extra.REQUEST_BUNDLE";
+    field public static final java.lang.String EXTRA_REQUEST_TYPE = "android.content.extra.REQUEST_TYPE";
+    field public static final java.lang.String EXTRA_RESPONSE_BUNDLE = "android.content.extra.RESPONSE_BUNDLE";
     field public static final java.lang.String REQUEST_KEY_APPROVE_LABEL = "android.request.approve_label";
     field public static final java.lang.String REQUEST_KEY_DATA = "android.request.data";
     field public static final java.lang.String REQUEST_KEY_DENY_LABEL = "android.request.deny_label";
-    field public static final java.lang.String REQUEST_KEY_DEVICE_NAME = "android.request.device";
     field public static final java.lang.String REQUEST_KEY_ICON = "android.request.icon";
     field public static final java.lang.String REQUEST_KEY_ID = "android.request.id";
     field public static final java.lang.String REQUEST_KEY_MESSAGE = "android.request.mesg";
-    field public static final java.lang.String REQUEST_KEY_REQUESTOR_NAME = "android.request.requestor";
+    field public static final java.lang.String REQUEST_KEY_NEW_REQUEST = "android.request.new_request";
     field public static final java.lang.String REQUEST_KEY_TITLE = "android.request.title";
+    field public static final java.lang.String REQUEST_TYPE_APPROVAL = "android.request.type.approval";
     field public static final java.lang.String REQUEST_TYPE_LOCAL_APPROVAL = "android.request.type.local_approval";
-    field public static final java.lang.String REQUEST_TYPE_QUESTION = "android.request.type.question";
     field public static final java.lang.String RESPONSE_KEY_ERROR_CODE = "android.response.errorcode";
     field public static final java.lang.String RESPONSE_KEY_ERROR_MESSAGE = "android.response.errormsg";
     field public static final java.lang.String RESPONSE_KEY_RESPONSE_TIMESTAMP = "android.response.timestamp";
@@ -7987,11 +7987,6 @@ package android.content {
     field public static final int RESULT_ERROR_NETWORK = 2; // 0x2
     field public static final int RESULT_NO_RESPONSE = 3; // 0x3
     field public static final int RESULT_UNKNOWN_REQUEST = 4; // 0x4
-  }
-
-  public static abstract class RestrictionsManager.PermissionResponseCallback {
-    ctor public RestrictionsManager.PermissionResponseCallback();
-    method public abstract void onResponse(android.os.Bundle);
   }
 
   public class SearchRecentSuggestionsProvider extends android.content.ContentProvider {
