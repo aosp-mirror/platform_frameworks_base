@@ -1578,6 +1578,9 @@
     <!-- Package name for default network scorer app; overridden by product overlays. -->
     <string name="config_defaultNetworkScorerPackageName"></string>
 
+    <!-- default device has recents property -->
+    <bool name="config_hasRecents">true</bool>
+
     <!-- Defines the default set of global actions. Actions may still be disabled or hidden based
          on the current state of the device.
          Each item must be one of the following strings:
