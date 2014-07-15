@@ -136,14 +136,17 @@ import java.util.Map;
  * cycle is necessary.
  *
  * <p> During its life, a codec conceptually exists in one of the following states:
- * Initialized, Configured, Executing, Uninitialized, (omitting transitory states
+ * Initialized, Configured, Executing, Error, Uninitialized, (omitting transitory states
  * between them). When created by one of the factory methods,
  * the codec is in the Initialized state; {@link #configure} brings it to the
  * Configured state; {@link #start} brings it to the Executing state.
  * In the Executing state, decoding or encoding occurs through the buffer queue
  * manipulation described above. The method {@link #stop}
  * returns the codec to the Initialized state, whereupon it may be configured again,
- * and {@link #release} brings the codec to the terminal Uninitialized state.
+ * and {@link #release} brings the codec to the terminal Uninitialized state.  When
+ * a codec error occurs, the codec moves to the Error state.  Use {@link #reset} to
+ * bring the codec back to the Initialized state, or {@link #release} to move it
+ * to the Uninitialized state.
  *
  * <p> The factory methods
  * {@link #createByCodecName},
@@ -170,7 +173,8 @@ import java.util.Map;
  * then resources are temporarily unavailable and the method may be retried at a later time.
  * If both {@link MediaCodec.CodecException#isRecoverable}
  * and {@link MediaCodec.CodecException#isTransient} return false,
- * then the {@link MediaCodec.CodecException} is fatal and the codec must be released.
+ * then the {@link MediaCodec.CodecException} is fatal and the codec must be
+ * {@link #reset reset} or {@link #release released}.
  * Both {@link MediaCodec.CodecException#isRecoverable} and
  * {@link MediaCodec.CodecException#isTransient} do not return true at the same time.
  */
@@ -429,6 +433,23 @@ final public class MediaCodec {
     }
 
     /**
+     * Returns the codec to its initial (Initialized) state.
+     *
+     * Call this if an {@link MediaCodec.CodecException#isRecoverable unrecoverable}
+     * error has occured to reset the codec to its initial state after creation.
+     *
+     * @throws CodecException if an unrecoverable error has occured and the codec
+     * could not be reset.
+     * @throws IllegalStateException if in the Uninitialized state.
+     */
+    public final void reset() {
+        freeAllTrackedBuffers(); // free buffers first
+        native_reset();
+    }
+
+    private native final void native_reset();
+
+    /**
      * Make sure you call this when you're done to free up any opened
      * component instance instead of relying on the garbage collector
      * to do this for you at some point in the future.
@@ -646,9 +667,10 @@ final public class MediaCodec {
     /**
      * After filling a range of the input buffer at the specified index
      * submit it to the component. Once an input buffer is queued to
-     * the codec, it MUST not be used until it is later retrieved by
-     * {#getInputBuffer} in response to a {#dequeueInputBuffer}
-     * response.
+     * the codec, it MUST NOT be used until it is later retrieved by
+     * {@link #getInputBuffer} in response to a {@link #dequeueInputBuffer}
+     * return value or a {@link Callback#onInputBufferAvailable}
+     * callback.
      * <p>
      * Many decoders require the actual compressed data stream to be
      * preceded by "codec specific data", i.e. setup data used to initialize
@@ -905,9 +927,10 @@ final public class MediaCodec {
      * the codec. If you previously specified a surface when configuring this
      * video decoder you can optionally render the buffer.
      *
-     * Once an output buffer is released to the codec, it MUST not
-     * be used until it is later retrieved by {#getOutputBuffer} in
-     * response to a {#dequeueOutputBuffer} response
+     * Once an output buffer is released to the codec, it MUST NOT
+     * be used until it is later retrieved by {@link #getOutputBuffer} in response
+     * to a {@link #dequeueOutputBuffer} return value or a
+     * {@link Callback#onOutputBufferAvailable} callback.
      *
      * @param index The index of a client-owned output buffer previously returned
      *              from a call to {@link #dequeueOutputBuffer}.
@@ -961,9 +984,10 @@ final public class MediaCodec {
      * </td></tr>
      * </table>
      *
-     * Once an output buffer is released to the codec, it MUST not
-     * be used until it is later retrieved by {#getOutputBuffer} in
-     * response to a {#dequeueOutputBuffer} response
+     * Once an output buffer is released to the codec, it MUST NOT
+     * be used until it is later retrieved by {@link #getOutputBuffer} in response
+     * to a {@link #dequeueOutputBuffer} return value or a
+     * {@link Callback#onOutputBufferAvailable} callback.
      *
      * @param index The index of a client-owned output buffer previously returned
      *              from a call to {@link #dequeueOutputBuffer}.
