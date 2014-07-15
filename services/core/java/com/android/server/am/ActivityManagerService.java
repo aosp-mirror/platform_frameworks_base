@@ -5655,6 +5655,11 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
+    public final void notifyLaunchTaskBehindComplete(IBinder token) {
+        mStackSupervisor.scheduleLaunchTaskBehindComplete(token);
+    }
+
+    @Override
     public String getCallingPackage(IBinder token) {
         synchronized (this) {
             ActivityRecord r = getCallingRecordLocked(token);

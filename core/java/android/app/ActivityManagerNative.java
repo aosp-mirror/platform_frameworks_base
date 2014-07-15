@@ -30,7 +30,6 @@ import android.content.pm.IPackageDataObserver;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
-import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Binder;
@@ -2196,10 +2195,18 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
-        case MEDIA_RESOURCES_RELEASED: {
+        case MEDIA_RESOURCES_RELEASED_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder token = data.readStrongBinder();
             mediaResourcesReleased(token);
+            reply.writeNoException();
+            return true;
+        }
+
+        case NOTIFY_LAUNCH_TASK_BEHIND_COMPLETE_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            IBinder token = data.readStrongBinder();
+            notifyLaunchTaskBehindComplete(token);
             reply.writeNoException();
             return true;
         }
@@ -5069,7 +5076,20 @@ class ActivityManagerProxy implements IActivityManager
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeStrongBinder(token);
-        mRemote.transact(MEDIA_RESOURCES_RELEASED, data, reply, IBinder.FLAG_ONEWAY);
+        mRemote.transact(MEDIA_RESOURCES_RELEASED_TRANSACTION, data, reply, IBinder.FLAG_ONEWAY);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+    }
+
+    @Override
+    public void notifyLaunchTaskBehindComplete(IBinder token) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeStrongBinder(token);
+        mRemote.transact(NOTIFY_LAUNCH_TASK_BEHIND_COMPLETE_TRANSACTION, data, reply,
+                IBinder.FLAG_ONEWAY);
         reply.readException();
         data.recycle();
         reply.recycle();
