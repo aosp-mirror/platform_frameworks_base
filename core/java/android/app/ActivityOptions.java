@@ -126,6 +126,8 @@ public class ActivityOptions {
     public static final int ANIM_SCENE_TRANSITION = 5;
     /** @hide */
     public static final int ANIM_DEFAULT = 6;
+    /** @hide */
+    public static final int ANIM_LAUNCH_TASK_BEHIND = 7;
 
     private String mPackageName;
     private int mAnimationType = ANIM_NONE;
@@ -432,6 +434,27 @@ public class ActivityOptions {
         return opts;
     }
 
+    /**
+     * If set along with Intent.FLAG_ACTIVITY_NEW_DOCUMENT then the task being launched will not be
+     * presented to the user but will instead be only available through the recents task list.
+     * In addition, the new task wil be affiliated with the launching activity's task.
+     * Affiliated tasks are grouped together in the recents task list.
+     *
+     * <p>This behavior is not supported for activities with {@link
+     * android.R.styleable#AndroidManifestActivity_launchMode launchMode} values of
+     * <code>singleInstance</code> or <code>singleTask</code>.
+     */
+    public static ActivityOptions makeLaunchTaskBehindAnimation() {
+        final ActivityOptions opts = new ActivityOptions();
+        opts.mAnimationType = ANIM_LAUNCH_TASK_BEHIND;
+        return opts;
+    }
+
+    /** @hide */
+    public boolean getLaunchTaskBehind() {
+        return mAnimationType == ANIM_LAUNCH_TASK_BEHIND;
+    }
+
     private ActivityOptions() {
     }
 
@@ -647,16 +670,15 @@ public class ActivityOptions {
         if (mPackageName != null) {
             b.putString(KEY_PACKAGE_NAME, mPackageName);
         }
+        b.putInt(KEY_ANIM_TYPE, mAnimationType);
         switch (mAnimationType) {
             case ANIM_CUSTOM:
-                b.putInt(KEY_ANIM_TYPE, mAnimationType);
                 b.putInt(KEY_ANIM_ENTER_RES_ID, mCustomEnterResId);
                 b.putInt(KEY_ANIM_EXIT_RES_ID, mCustomExitResId);
                 b.putBinder(KEY_ANIM_START_LISTENER, mAnimationStartedListener
                         != null ? mAnimationStartedListener.asBinder() : null);
                 break;
             case ANIM_SCALE_UP:
-                b.putInt(KEY_ANIM_TYPE, mAnimationType);
                 b.putInt(KEY_ANIM_START_X, mStartX);
                 b.putInt(KEY_ANIM_START_Y, mStartY);
                 b.putInt(KEY_ANIM_START_WIDTH, mStartWidth);
@@ -664,7 +686,6 @@ public class ActivityOptions {
                 break;
             case ANIM_THUMBNAIL_SCALE_UP:
             case ANIM_THUMBNAIL_SCALE_DOWN:
-                b.putInt(KEY_ANIM_TYPE, mAnimationType);
                 b.putParcelable(KEY_ANIM_THUMBNAIL, mThumbnail);
                 b.putInt(KEY_ANIM_START_X, mStartX);
                 b.putInt(KEY_ANIM_START_Y, mStartY);
@@ -672,7 +693,6 @@ public class ActivityOptions {
                         != null ? mAnimationStartedListener.asBinder() : null);
                 break;
             case ANIM_SCENE_TRANSITION:
-                b.putInt(KEY_ANIM_TYPE, mAnimationType);
                 if (mTransitionReceiver != null) {
                     b.putParcelable(KEY_TRANSITION_COMPLETE_LISTENER, mTransitionReceiver);
                 }
@@ -683,6 +703,7 @@ public class ActivityOptions {
                 b.putInt(KEY_EXIT_COORDINATOR_INDEX, mExitCoordinatorIndex);
                 break;
         }
+
         return b;
     }
 

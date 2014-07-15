@@ -1135,19 +1135,15 @@ final class ActivityStack {
         return true;
     }
 
-    final void ensureActivitiesVisibleLocked(ActivityRecord starting, int configChanges) {
-        ActivityRecord r = topRunningActivityLocked(null);
-        if (r != null) {
-            ensureActivitiesVisibleLocked(r, starting, null, configChanges);
-        }
-    }
-
     /**
      * Make sure that all activities that need to be visible (that is, they
      * currently can be seen by the user) actually are.
      */
-    final void ensureActivitiesVisibleLocked(ActivityRecord top, ActivityRecord starting,
-            String onlyThisProcess, int configChanges) {
+    final void ensureActivitiesVisibleLocked(ActivityRecord starting, int configChanges) {
+        ActivityRecord top = topRunningActivityLocked(null);
+        if (top == null) {
+            return;
+        }
         if (DEBUG_VISBILITY) Slog.v(
                 TAG, "ensureActivitiesVisible behind " + top
                 + " configChanges=0x" + Integer.toHexString(configChanges));
@@ -1179,37 +1175,34 @@ final class ActivityStack {
                     continue;
                 }
                 aboveTop = false;
-                if (!behindFullscreen) {
+                // mLaunchingBehind: Activities launching behind are at the back of the task stack
+                // but must be drawn initially for the animation as though they were visible.
+                if (!behindFullscreen || r.mLaunchTaskBehind) {
                     if (DEBUG_VISBILITY) Slog.v(
                             TAG, "Make visible? " + r + " finishing=" + r.finishing
                             + " state=" + r.state);
 
-                    final boolean doThisProcess = onlyThisProcess == null
-                            || onlyThisProcess.equals(r.processName);
-
                     // First: if this is not the current activity being started, make
                     // sure it matches the current configuration.
-                    if (r != starting && doThisProcess) {
+                    if (r != starting) {
                         ensureActivityConfigurationLocked(r, 0);
                     }
 
                     if (r.app == null || r.app.thread == null) {
-                        if (onlyThisProcess == null || onlyThisProcess.equals(r.processName)) {
-                            // This activity needs to be visible, but isn't even
-                            // running...  get it started, but don't resume it
-                            // at this point.
-                            if (DEBUG_VISBILITY) Slog.v(TAG, "Start and freeze screen for " + r);
-                            if (r != starting) {
-                                r.startFreezingScreenLocked(r.app, configChanges);
-                            }
-                            if (!r.visible) {
-                                if (DEBUG_VISBILITY) Slog.v(
-                                        TAG, "Starting and making visible: " + r);
-                                setVisibile(r, true);
-                            }
-                            if (r != starting) {
-                                mStackSupervisor.startSpecificActivityLocked(r, false, false);
-                            }
+                        // This activity needs to be visible, but isn't even
+                        // running...  get it started, but don't resume it
+                        // at this point.
+                        if (DEBUG_VISBILITY) Slog.v(TAG, "Start and freeze screen for " + r);
+                        if (r != starting) {
+                            r.startFreezingScreenLocked(r.app, configChanges);
+                        }
+                        if (!r.visible || r.mLaunchTaskBehind) {
+                            if (DEBUG_VISBILITY) Slog.v(
+                                    TAG, "Starting and making visible: " + r);
+                            setVisibile(r, true);
+                        }
+                        if (r != starting) {
+                            mStackSupervisor.startSpecificActivityLocked(r, false, false);
                         }
 
                     } else if (r.visible) {
@@ -1225,7 +1218,7 @@ final class ActivityStack {
                             }
                         } catch(RemoteException e) {
                         }
-                    } else if (onlyThisProcess == null) {
+                    } else {
                         // This activity is not currently visible, but is running.
                         // Tell it to become visible.
                         r.visible = true;
@@ -1648,7 +1641,9 @@ final class ActivityStack {
                 } else {
                     mWindowManager.prepareAppTransition(prev.task == next.task
                             ? AppTransition.TRANSIT_ACTIVITY_OPEN
-                            : AppTransition.TRANSIT_TASK_OPEN, false);
+                            : next.mLaunchTaskBehind
+                                    ? AppTransition.TRANSIT_TASK_OPEN_BEHIND
+                                    : AppTransition.TRANSIT_TASK_OPEN, false);
                 }
             }
             if (false) {
@@ -1852,17 +1847,17 @@ final class ActivityStack {
 
         mTaskHistory.remove(task);
         // Now put task at top.
-        int stackNdx = mTaskHistory.size();
+        int taskNdx = mTaskHistory.size();
         if (!isCurrentProfileLocked(task.userId)) {
             // Put non-current user tasks below current user tasks.
-            while (--stackNdx >= 0) {
-                if (!isCurrentProfileLocked(mTaskHistory.get(stackNdx).userId)) {
+            while (--taskNdx >= 0) {
+                if (!isCurrentProfileLocked(mTaskHistory.get(taskNdx).userId)) {
                     break;
                 }
             }
-            ++stackNdx;
+            ++taskNdx;
         }
-        mTaskHistory.add(stackNdx, task);
+        mTaskHistory.add(taskNdx, task);
         updateTaskMovement(task, true);
     }
 
@@ -1870,7 +1865,8 @@ final class ActivityStack {
             boolean doResume, boolean keepCurTransition, Bundle options) {
         TaskRecord rTask = r.task;
         final int taskId = rTask.taskId;
-        if (taskForIdLocked(taskId) == null || newTask) {
+        // mLaunchTaskBehind tasks get placed at the back of the task stack.
+        if (!r.mLaunchTaskBehind && (taskForIdLocked(taskId) == null || newTask)) {
             // Last activity in task had been removed or ActivityManagerService is reusing task.
             // Insert or replace.
             // Might not even be in.
@@ -1895,7 +1891,8 @@ final class ActivityStack {
                         mWindowManager.addAppToken(task.mActivities.indexOf(r), r.appToken,
                                 r.task.taskId, mStackId, r.info.screenOrientation, r.fullscreen,
                                 (r.info.flags & ActivityInfo.FLAG_SHOW_ON_LOCK_SCREEN) != 0,
-                                r.userId, r.info.configChanges, task.voiceSession != null);
+                                r.userId, r.info.configChanges, task.voiceSession != null,
+                                r.mLaunchTaskBehind);
                         if (VALIDATE_TOKENS) {
                             validateAppTokensLocked();
                         }
@@ -1949,14 +1946,16 @@ final class ActivityStack {
                 mNoAnimActivities.add(r);
             } else {
                 mWindowManager.prepareAppTransition(newTask
-                        ? AppTransition.TRANSIT_TASK_OPEN
+                        ? r.mLaunchTaskBehind
+                                ? AppTransition.TRANSIT_TASK_OPEN_BEHIND
+                                : AppTransition.TRANSIT_TASK_OPEN
                         : AppTransition.TRANSIT_ACTIVITY_OPEN, keepCurTransition);
                 mNoAnimActivities.remove(r);
             }
             mWindowManager.addAppToken(task.mActivities.indexOf(r),
                     r.appToken, r.task.taskId, mStackId, r.info.screenOrientation, r.fullscreen,
                     (r.info.flags & ActivityInfo.FLAG_SHOW_ON_LOCK_SCREEN) != 0, r.userId,
-                    r.info.configChanges, task.voiceSession != null);
+                    r.info.configChanges, task.voiceSession != null, r.mLaunchTaskBehind);
             boolean doShow = true;
             if (newTask) {
                 // Even though this activity is starting fresh, we still need
@@ -1972,7 +1971,12 @@ final class ActivityStack {
                     == ActivityOptions.ANIM_SCENE_TRANSITION) {
                 doShow = false;
             }
-            if (SHOW_APP_STARTING_PREVIEW && doShow) {
+            if (r.mLaunchTaskBehind) {
+                // Don't do a starting window for mLaunchTaskBehind. More importantly make sure we
+                // tell WindowManager that r is visible even though it is at the back of the stack.
+                mWindowManager.setAppVisibility(r.appToken, true);
+                ensureActivitiesVisibleLocked(null, 0);
+            } else if (SHOW_APP_STARTING_PREVIEW && doShow) {
                 // Figure out if we are transitioning from another activity that is
                 // "has the same starting icon" as the next one.  This allows the
                 // window manager to keep the previous window it had previously
@@ -2003,7 +2007,7 @@ final class ActivityStack {
             mWindowManager.addAppToken(task.mActivities.indexOf(r), r.appToken,
                     r.task.taskId, mStackId, r.info.screenOrientation, r.fullscreen,
                     (r.info.flags & ActivityInfo.FLAG_SHOW_ON_LOCK_SCREEN) != 0, r.userId,
-                    r.info.configChanges, task.voiceSession != null);
+                    r.info.configChanges, task.voiceSession != null, r.mLaunchTaskBehind);
             ActivityOptions.abort(options);
             options = null;
         }

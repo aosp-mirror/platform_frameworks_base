@@ -3830,17 +3830,6 @@ public class Intent implements Parcelable, Cloneable {
      * {@link android.R.styleable#AndroidManifestActivity_autoRemoveFromRecents}.
      */
     public static final int FLAG_ACTIVITY_AUTO_REMOVE_FROM_RECENTS = 0x00002000;
-    /**
-     * If set along with FLAG_ACTIVITY_NEW_DOCUMENT then the task being launched will not be
-     * presented to the user but will instead be only available through the recents task list.
-     * In addition, the new task wil be affiliated with the launching activity's task.
-     * Affiliated tasks are grouped together in the recents task list.
-     *
-     * <p>This behavior is not supported for activities with {@link
-     * android.R.styleable#AndroidManifestActivity_launchMode launchMode} values of
-     * <code>singleInstance</code> or <code>singleTask</code>.
-     */
-    public static final int FLAG_ACTIVITY_LAUNCH_BEHIND = 0x00001000;
 
     /**
      * If set, when sending a broadcast only registered receivers will be

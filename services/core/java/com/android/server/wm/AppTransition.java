@@ -46,6 +46,8 @@ import static com.android.internal.R.styleable.WindowAnimation_activityCloseEnte
 import static com.android.internal.R.styleable.WindowAnimation_activityCloseExitAnimation;
 import static com.android.internal.R.styleable.WindowAnimation_taskOpenEnterAnimation;
 import static com.android.internal.R.styleable.WindowAnimation_taskOpenExitAnimation;
+import static com.android.internal.R.styleable.WindowAnimation_launchTaskBehindBackgroundAnimation;
+import static com.android.internal.R.styleable.WindowAnimation_launchTaskBehindSourceAnimation;
 import static com.android.internal.R.styleable.WindowAnimation_taskCloseEnterAnimation;
 import static com.android.internal.R.styleable.WindowAnimation_taskCloseExitAnimation;
 import static com.android.internal.R.styleable.WindowAnimation_taskToFrontEnterAnimation;
@@ -72,44 +74,42 @@ public class AppTransition implements Dump {
             WindowManagerService.DEBUG_APP_TRANSITIONS;
     private static final boolean DEBUG_ANIM = WindowManagerService.DEBUG_ANIM;
 
-    /** Bit mask that is set for all enter transition. */
-    public static final int TRANSIT_ENTER_MASK = 0x1000;
-
-    /** Bit mask that is set for all exit transitions. */
-    public static final int TRANSIT_EXIT_MASK = 0x2000;
 
     /** Not set up for a transition. */
     public static final int TRANSIT_UNSET = -1;
     /** No animation for transition. */
     public static final int TRANSIT_NONE = 0;
     /** A window in a new activity is being opened on top of an existing one in the same task. */
-    public static final int TRANSIT_ACTIVITY_OPEN = 6 | TRANSIT_ENTER_MASK;
+    public static final int TRANSIT_ACTIVITY_OPEN = 6;
     /** The window in the top-most activity is being closed to reveal the
      * previous activity in the same task. */
-    public static final int TRANSIT_ACTIVITY_CLOSE = 7 | TRANSIT_EXIT_MASK;
+    public static final int TRANSIT_ACTIVITY_CLOSE = 7;
     /** A window in a new task is being opened on top of an existing one
      * in another activity's task. */
-    public static final int TRANSIT_TASK_OPEN = 8 | TRANSIT_ENTER_MASK;
+    public static final int TRANSIT_TASK_OPEN = 8;
     /** A window in the top-most activity is being closed to reveal the
      * previous activity in a different task. */
-    public static final int TRANSIT_TASK_CLOSE = 9 | TRANSIT_EXIT_MASK;
+    public static final int TRANSIT_TASK_CLOSE = 9;
     /** A window in an existing task is being displayed on top of an existing one
      * in another activity's task. */
-    public static final int TRANSIT_TASK_TO_FRONT = 10 | TRANSIT_ENTER_MASK;
+    public static final int TRANSIT_TASK_TO_FRONT = 10;
     /** A window in an existing task is being put below all other tasks. */
-    public static final int TRANSIT_TASK_TO_BACK = 11 | TRANSIT_EXIT_MASK;
+    public static final int TRANSIT_TASK_TO_BACK = 11;
     /** A window in a new activity that doesn't have a wallpaper is being opened on top of one that
      * does, effectively closing the wallpaper. */
-    public static final int TRANSIT_WALLPAPER_CLOSE = 12 | TRANSIT_EXIT_MASK;
+    public static final int TRANSIT_WALLPAPER_CLOSE = 12;
     /** A window in a new activity that does have a wallpaper is being opened on one that didn't,
      * effectively opening the wallpaper. */
-    public static final int TRANSIT_WALLPAPER_OPEN = 13 | TRANSIT_ENTER_MASK;
+    public static final int TRANSIT_WALLPAPER_OPEN = 13;
     /** A window in a new activity is being opened on top of an existing one, and both are on top
      * of the wallpaper. */
-    public static final int TRANSIT_WALLPAPER_INTRA_OPEN = 14 | TRANSIT_ENTER_MASK;
+    public static final int TRANSIT_WALLPAPER_INTRA_OPEN = 14;
     /** The window in the top-most activity is being closed to reveal the previous activity, and
      * both are on top of the wallpaper. */
-    public static final int TRANSIT_WALLPAPER_INTRA_CLOSE = 15 | TRANSIT_EXIT_MASK;
+    public static final int TRANSIT_WALLPAPER_INTRA_CLOSE = 15;
+    /** A window in a new task is being opened behind an existing one in another activity's task.
+     * The new window will show briefly and then be gone. */
+    public static final int TRANSIT_TASK_OPEN_BEHIND = 16;
 
     /** Fraction of animation at which the recents thumbnail becomes completely transparent */
     private static final float RECENTS_THUMBNAIL_FADEOUT_FRACTION = 0.25f;
@@ -811,6 +811,10 @@ public class AppTransition implements Dump {
                             ? WindowAnimation_wallpaperIntraCloseEnterAnimation
                             : WindowAnimation_wallpaperIntraCloseExitAnimation;
                     break;
+                case TRANSIT_TASK_OPEN_BEHIND:
+                    animAttr = enter
+                            ? WindowAnimation_launchTaskBehindSourceAnimation
+                            : WindowAnimation_launchTaskBehindBackgroundAnimation;
             }
             a = animAttr != 0 ? loadAnimationAttr(lp, animAttr) : null;
             if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG,
@@ -896,9 +900,6 @@ public class AppTransition implements Dump {
             case TRANSIT_NONE: {
                 return "TRANSIT_NONE";
             }
-            case TRANSIT_EXIT_MASK: {
-                return "TRANSIT_EXIT_MASK";
-            }
             case TRANSIT_ACTIVITY_OPEN: {
                 return "TRANSIT_ACTIVITY_OPEN";
             }
@@ -928,6 +929,9 @@ public class AppTransition implements Dump {
             }
             case TRANSIT_WALLPAPER_INTRA_CLOSE: {
                 return "TRANSIT_WALLPAPER_INTRA_CLOSE";
+            }
+            case TRANSIT_TASK_OPEN_BEHIND: {
+                return "TRANSIT_TASK_OPEN_BEHIND";
             }
             default: {
                 return "<UNKNOWN>";

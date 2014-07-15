@@ -167,6 +167,8 @@ final class ActivityRecord {
     ActivityContainer mInitialActivityContainer;
 
     TaskDescription taskDescription; // the recents information for this activity
+    boolean mLaunchTaskBehind; // this activity is actively being launched with
+        // ActivityOptions.setLaunchTaskBehind, will be cleared once launch is completed.
 
     void dump(PrintWriter pw, String prefix) {
         final long now = SystemClock.uptimeMillis();
@@ -400,6 +402,7 @@ final class ActivityRecord {
         mInitialActivityContainer = container;
         if (options != null) {
             pendingOptions = new ActivityOptions(options);
+            mLaunchTaskBehind = pendingOptions.getLaunchTaskBehind();
         }
 
         // This starts out true, since the initial state of an activity
