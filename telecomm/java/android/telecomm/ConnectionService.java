@@ -47,22 +47,21 @@ public abstract class ConnectionService extends Service {
     private static final Connection NULL_CONNECTION = new Connection() {};
 
     private static final int MSG_ADD_CALL_SERVICE_ADAPTER = 1;
-    private static final int MSG_CALL = 2;
+    private static final int MSG_CREATE_CONNECTION = 2;
     private static final int MSG_ABORT = 3;
-    private static final int MSG_CREATE_INCOMING_CALL = 4;
-    private static final int MSG_ANSWER = 5;
-    private static final int MSG_REJECT = 6;
-    private static final int MSG_DISCONNECT = 7;
-    private static final int MSG_HOLD = 8;
-    private static final int MSG_UNHOLD = 9;
-    private static final int MSG_ON_AUDIO_STATE_CHANGED = 10;
-    private static final int MSG_PLAY_DTMF_TONE = 11;
-    private static final int MSG_STOP_DTMF_TONE = 12;
-    private static final int MSG_CONFERENCE = 13;
-    private static final int MSG_SPLIT_FROM_CONFERENCE = 14;
-    private static final int MSG_SWAP_WITH_BACKGROUND_CALL = 15;
-    private static final int MSG_ON_POST_DIAL_CONTINUE = 16;
-    private static final int MSG_ON_PHONE_ACCOUNT_CLICKED = 17;
+    private static final int MSG_ANSWER = 4;
+    private static final int MSG_REJECT = 5;
+    private static final int MSG_DISCONNECT = 6;
+    private static final int MSG_HOLD = 7;
+    private static final int MSG_UNHOLD = 8;
+    private static final int MSG_ON_AUDIO_STATE_CHANGED = 9;
+    private static final int MSG_PLAY_DTMF_TONE = 10;
+    private static final int MSG_STOP_DTMF_TONE = 11;
+    private static final int MSG_CONFERENCE = 12;
+    private static final int MSG_SPLIT_FROM_CONFERENCE = 13;
+    private static final int MSG_SWAP_WITH_BACKGROUND_CALL = 14;
+    private static final int MSG_ON_POST_DIAL_CONTINUE = 15;
+    private static final int MSG_ON_PHONE_ACCOUNT_CLICKED = 16;
 
     private final Map<String, Connection> mConnectionById = new HashMap<>();
     private final Map<Connection, String> mIdByConnection = new HashMap<>();
@@ -74,11 +73,11 @@ public abstract class ConnectionService extends Service {
     private final ConnectionServiceAdapter mAdapter = new ConnectionServiceAdapter();
 
     /**
-     * A callback for providing the resuilt of creating a connection.
+     * A callback for providing the result of creating a connection.
      */
-    public interface OutgoingCallResponse<CONNECTION> {
+    public interface CreateConnectionResponse<CONNECTION> {
         /**
-         * Tells Telecomm that an attempt to place the specified outgoing call succeeded.
+         * Tells Telecomm that an attempt to create the connection succeeded.
          *
          * @param request The original request.
          * @param connection The connection.
@@ -86,7 +85,8 @@ public abstract class ConnectionService extends Service {
         void onSuccess(ConnectionRequest request, CONNECTION connection);
 
         /**
-         * Tells Telecomm that an attempt to place the specified outgoing call failed.
+         * Tells Telecomm that an attempt to create the connection failed. Telecomm will try a
+         * different service until a service cancels the process or completes it successfully.
          *
          * @param request The original request.
          * @param code An integer code indicating the reason for failure.
@@ -95,7 +95,8 @@ public abstract class ConnectionService extends Service {
         void onFailure(ConnectionRequest request, int code, String msg);
 
         /**
-         * Tells Telecomm to cancel the call.
+         * Tells Telecomm to cancel creating the connection. Telecomm will stop trying to create
+         * the connection an no more services will be tried.
          *
          * @param request The original request.
          */
@@ -109,18 +110,14 @@ public abstract class ConnectionService extends Service {
         }
 
         @Override
-        public void call(ConnectionRequest request) {
-            mHandler.obtainMessage(MSG_CALL, request).sendToTarget();
+        public void createConnection(ConnectionRequest request, boolean isIncoming) {
+            mHandler.obtainMessage(
+                    MSG_CREATE_CONNECTION, isIncoming ? 1 : 0, 0, request).sendToTarget();
         }
 
         @Override
         public void abort(String callId) {
             mHandler.obtainMessage(MSG_ABORT, callId).sendToTarget();
-        }
-
-        @Override
-        public void createIncomingCall(ConnectionRequest request) {
-            mHandler.obtainMessage(MSG_CREATE_INCOMING_CALL, request).sendToTarget();
         }
 
         @Override
@@ -206,14 +203,11 @@ public abstract class ConnectionService extends Service {
                     mAdapter.addAdapter((IConnectionServiceAdapter) msg.obj);
                     onAdapterAttached();
                     break;
-                case MSG_CALL:
-                    call((ConnectionRequest) msg.obj);
+                case MSG_CREATE_CONNECTION:
+                    createConnection((ConnectionRequest) msg.obj, msg.arg1 == 1);
                     break;
                 case MSG_ABORT:
                     abort((String) msg.obj);
-                    break;
-                case MSG_CREATE_INCOMING_CALL:
-                    createIncomingCall((ConnectionRequest) msg.obj);
                     break;
                 case MSG_ANSWER:
                     answer((String) msg.obj);
@@ -394,61 +388,44 @@ public abstract class ConnectionService extends Service {
         return mBinder;
     }
 
-    private void call(final ConnectionRequest originalRequest) {
+    /**
+     * This can be used by telecomm to either create a new outgoing call or attach to an existing
+     * incoming call. In either case, telecomm will cycle through a set of services and call
+     * createConnection util a connection service cancels the process or completes it successfully.
+     */
+    private void createConnection(ConnectionRequest originalRequest, boolean isIncoming) {
         Log.d(this, "call %s", originalRequest);
-        onCreateConnections(
-                originalRequest,
-                new OutgoingCallResponse<Connection>() {
-                    @Override
-                    public void onSuccess(ConnectionRequest request, Connection connection) {
-                        Log.d(this, "adapter handleSuccessfulOutgoingCall %s", request.getCallId());
-                        mAdapter.handleSuccessfulOutgoingCall(request);
-                        addConnection(request.getCallId(), connection);
-                    }
+        CreateConnectionResponse response = new CreateConnectionResponse<Connection>() {
+            @Override
+            public void onSuccess(ConnectionRequest request, Connection connection) {
+                Log.d(this, "adapter handleCreateConnectionSuccessful %s",
+                        request.getCallId());
+                mAdapter.handleCreateConnectionSuccessful(request);
+                addConnection(request.getCallId(), connection);
+            }
 
-                    @Override
-                    public void onFailure(ConnectionRequest request, int code, String msg) {
-                        mAdapter.handleFailedOutgoingCall(request, code, msg);
-                    }
+            @Override
+            public void onFailure(ConnectionRequest request, int code, String msg) {
+                // Tell telecomm to try a different service.
+                mAdapter.handleCreateConnectionFailed(request, code, msg);
+            }
 
-                    @Override
-                    public void onCancel(ConnectionRequest request) {
-                        mAdapter.cancelOutgoingCall(request);
-                    }
-                }
-        );
+            @Override
+            public void onCancel(ConnectionRequest request) {
+                // Tell telecomm not to attempt any more services.
+                mAdapter.handleCreateConnectionCancelled(request);
+            }
+        };
+        if (isIncoming) {
+            onCreateIncomingConnection(originalRequest, response);
+        } else {
+            onCreateOutgoingConnection(originalRequest, response);
+        }
     }
 
     private void abort(String callId) {
         Log.d(this, "abort %s", callId);
         findConnectionForAction(callId, "abort").onAbort();
-    }
-
-    private void createIncomingCall(ConnectionRequest originalRequest) {
-        Log.d(this, "createIncomingCall %s", originalRequest);
-        onCreateIncomingConnection(
-                originalRequest,
-                new Response<ConnectionRequest, Connection>() {
-                    @Override
-                    public void onResult(ConnectionRequest request, Connection... result) {
-                        if (result != null && result.length != 1) {
-                            for (Connection c : result) {
-                                c.onAbort();
-                            }
-                        } else {
-                            addConnection(request.getCallId(), result[0]);
-                            Log.d(this, "adapter notifyIncomingCall %s", request);
-                            mAdapter.notifyIncomingCall(request);
-                        }
-                    }
-
-                    @Override
-                    public void onError(ConnectionRequest request, int code, String msg) {
-                        Log.d(this, "adapter failed createIncomingCall %s %d %s",
-                                request, code, msg);
-                    }
-                }
-        );
     }
 
     private void answer(String callId) {
@@ -570,7 +547,7 @@ public abstract class ConnectionService extends Service {
                                     IConnectionService.Stub.asInterface(services.get(i)));
                         }
                         mAreAccountsInitialized = true;
-                        Log.d(this, "remote call services found: " + services);
+                        Log.d(this, "remote connection services found: " + services);
                         maybeRespondToAccountLookup();
                     }
                 });
@@ -606,10 +583,16 @@ public abstract class ConnectionService extends Service {
         }
     }
 
+    public final void createRemoteIncomingConnection(
+            ConnectionRequest request,
+            CreateConnectionResponse<RemoteConnection> response) {
+        mRemoteConnectionManager.createRemoteConnection(request, response, true);
+    }
+
     public final void createRemoteOutgoingConnection(
             ConnectionRequest request,
-            OutgoingCallResponse<RemoteConnection> response) {
-        mRemoteConnectionManager.createOutgoingConnection(request, response);
+            CreateConnectionResponse<RemoteConnection> response) {
+        mRemoteConnectionManager.createRemoteConnection(request, response, false);
     }
 
     /**
@@ -620,14 +603,25 @@ public abstract class ConnectionService extends Service {
     }
 
     /**
-     * Create a Connection given a request.
+     * Create a Connection given an incoming request. This is used to attach to existing incoming
+     * calls.
      *
-     * @param request Data encapsulating details of the desired Connection.
+     * @param request Details about the incoming call.
      * @param callback A callback for providing the result.
      */
-    protected void onCreateConnections(
+    protected void onCreateIncomingConnection(
             ConnectionRequest request,
-            OutgoingCallResponse<Connection> callback) {}
+            CreateConnectionResponse<Connection> callback) {}
+
+    /**
+     * Create a Connection given an outgoing request. This is used to initiate new outgoing calls.
+     *
+     * @param request Details about the outgoing call.
+     * @param callback A callback for providing the result.
+     */
+    protected void onCreateOutgoingConnection(
+            ConnectionRequest request,
+            CreateConnectionResponse<Connection> callback) {}
 
     /**
      * Returns a new or existing conference connection when the the user elects to convert the
@@ -643,21 +637,6 @@ public abstract class ConnectionService extends Service {
             String token,
             Connection connection,
             Response<String, Connection> callback) {}
-
-    /**
-     * Create a Connection to match an incoming connection notification.
-     *
-     * IMPORTANT: If the incoming connection has a phone number (or other handle) that the user
-     * is not supposed to be able to see (e.g. it is PRESENTATION_RESTRICTED), then a compliant
-     * ConnectionService implementation MUST NOT reveal this phone number as part of the Intent
-     * it sends to notify Telecomm of an incoming connection.
-     *
-     * @param request Data encapsulating details of the desired Connection.
-     * @param callback A callback for providing the result.
-     */
-    protected void onCreateIncomingConnection(
-            ConnectionRequest request,
-            Response<ConnectionRequest, Connection> callback) {}
 
     /**
      * Notifies that a connection has been added to this connection service and sent to Telecomm.

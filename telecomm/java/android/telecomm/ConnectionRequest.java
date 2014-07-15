@@ -30,11 +30,11 @@ public final class ConnectionRequest implements Parcelable {
     // TODO: Token to limit recursive invocations
     // TODO: Consider upgrading "mHandle" to ordered list of handles, indicating a set of phone
     //         numbers that would satisfy the client's needs, in order of preference
+    private final PhoneAccount mAccount;
     private final String mCallId;
     private final Uri mHandle;
     private final int mHandlePresentation;
     private final Bundle mExtras;
-    private final PhoneAccount mAccount;
     private final int mVideoState;
 
     /**
@@ -59,6 +59,15 @@ public final class ConnectionRequest implements Parcelable {
         mHandlePresentation = handlePresentation;
         mExtras = extras;
         mVideoState = videoState;
+    }
+
+    private ConnectionRequest(Parcel in) {
+        mAccount = in.readParcelable(getClass().getClassLoader());
+        mCallId = in.readString();
+        mHandle = in.readParcelable(getClass().getClassLoader());
+        mHandlePresentation = in.readInt();
+        mExtras = in.readParcelable(getClass().getClassLoader());
+        mVideoState = in.readInt();
     }
 
     /**
@@ -109,26 +118,17 @@ public final class ConnectionRequest implements Parcelable {
                 mExtras == null ? "" : mExtras);
     }
 
-    public static final Parcelable.Creator<ConnectionRequest> CREATOR =
-            new Parcelable.Creator<ConnectionRequest> () {
-                @Override
-                public ConnectionRequest createFromParcel(Parcel source) {
-                    PhoneAccount account = (PhoneAccount) source.readParcelable(
-                            getClass().getClassLoader());
-                    String callId = source.readString();
-                    Uri handle = (Uri) source.readParcelable(getClass().getClassLoader());
-                    int presentation = source.readInt();
-                    Bundle extras = (Bundle) source.readParcelable(getClass().getClassLoader());
-                    int videoState = source.readInt();
-                    return new ConnectionRequest(
-                            account, callId, handle, presentation, extras, videoState);
-                }
+    public static final Creator<ConnectionRequest> CREATOR = new Creator<ConnectionRequest> () {
+        @Override
+        public ConnectionRequest createFromParcel(Parcel source) {
+            return new ConnectionRequest(source);
+        }
 
-                @Override
-                public ConnectionRequest[] newArray(int size) {
-                    return new ConnectionRequest[size];
-                }
-            };
+        @Override
+        public ConnectionRequest[] newArray(int size) {
+            return new ConnectionRequest[size];
+        }
+    };
 
     /**
      * {@inheritDoc}

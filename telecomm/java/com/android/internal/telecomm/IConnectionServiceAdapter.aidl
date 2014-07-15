@@ -31,13 +31,12 @@ import com.android.internal.telecomm.RemoteServiceCallback;
  * {@hide}
  */
 oneway interface IConnectionServiceAdapter {
-    void notifyIncomingCall(in ConnectionRequest request);
+    void handleCreateConnectionSuccessful(in ConnectionRequest request);
 
-    void handleSuccessfulOutgoingCall(in ConnectionRequest request);
+    void handleCreateConnectionFailed(
+            in ConnectionRequest request, int errorCode, String errorMessage);
 
-    void handleFailedOutgoingCall(in ConnectionRequest request, int errorCode, String errorMessage);
-
-    void cancelOutgoingCall(in ConnectionRequest request);
+    void handleCreateConnectionCancelled(in ConnectionRequest request);
 
     void setActive(String callId);
 
