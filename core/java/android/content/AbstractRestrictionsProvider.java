@@ -16,78 +16,65 @@
 
 package android.content;
 
-import android.app.Service;
 import android.app.admin.DevicePolicyManager;
 import android.os.Bundle;
 import android.os.IBinder;
 
 /**
- * Abstract implementation of a Restrictions Provider Service. To implement a Restrictions Provider,
- * extend from this class and implement the abstract methods. Export this service in the
- * manifest. A profile owner device admin can then register this component as a Restrictions
- * Provider using {@link DevicePolicyManager#setRestrictionsProvider(ComponentName, ComponentName)}.
+ * Abstract implementation of a Restrictions Provider BroadcastReceiver. To implement a
+ * Restrictions Provider, extend from this class and implement the abstract methods.
+ * Export this receiver in the manifest. A profile owner device admin can then register this
+ * component as a Restrictions Provider using
+ * {@link DevicePolicyManager#setRestrictionsProvider(ComponentName, ComponentName)}.
  * <p>
  * The function of a Restrictions Provider is to transport permission requests from apps on this
  * device to an administrator (most likely on a remote device or computer) and deliver back
  * responses. The response should be sent back to the app via
  * {@link RestrictionsManager#notifyPermissionResponse(String, Bundle)}.
- * <p>
- * Apps can also query previously received responses using
- * {@link #getPermissionResponse(String, String)}. The period for which previously received
- * responses are available is left to the implementation of the Restrictions Provider.
+ *
+ * @see RestrictionsManager
  */
-public abstract class AbstractRestrictionsProvider extends Service {
+public abstract class AbstractRestrictionsProvider extends BroadcastReceiver {
 
     private static final String TAG = "AbstractRestrictionsProvider";
-
-    @Override
-    public final IBinder onBind(Intent intent) {
-        return new RestrictionsProviderWrapper().asBinder();
-    }
-
-    /**
-     * Checks to see if there is a response for a prior request and returns the response bundle if
-     * it exists. If there is no response yet or if the request is not known, the returned bundle
-     * should contain the response code in {@link RestrictionsManager#RESPONSE_KEY_RESULT}.
-     *
-     * @param packageName the application that is requesting a permission response.
-     * @param requestId the id of the request for which the response is needed.
-     * @return a bundle containing at a minimum the result of the request. It could contain other
-     * optional information such as error codes and cookies.
-     *
-     * @see RestrictionsManager#RESPONSE_KEY_RESULT
-     */
-    public abstract Bundle getPermissionResponse(String packageName, String requestId);
 
     /**
      * An asynchronous permission request made by an application for an operation that requires
      * authorization by a local or remote administrator other than the user. The Restrictions
-     * Provider must transfer the request to the administrator and deliver back a response, when
+     * Provider should transfer the request to the administrator and deliver back a response, when
      * available. The calling application is aware that the response could take an indefinite
      * amount of time.
+     * <p>
+     * If the request bundle contains the key {@link RestrictionsManager#REQUEST_KEY_NEW_REQUEST},
+     * then a new request must be sent. Otherwise the provider can look up any previous response
+     * to the same requestId and return the cached response.
      *
      * @param packageName the application requesting permission.
      * @param requestType the type of request, which determines the content and presentation of
      * the request data.
      * @param request the request data bundle containing at a minimum a request id.
      *
-     * @see RestrictionsManager#REQUEST_TYPE_QUESTION
+     * @see RestrictionsManager#REQUEST_TYPE_APPROVAL
      * @see RestrictionsManager#REQUEST_TYPE_LOCAL_APPROVAL
      * @see RestrictionsManager#REQUEST_KEY_ID
      */
-    public abstract void requestPermission(String packageName, String requestType, Bundle request);
+    public abstract void requestPermission(Context context,
+            String packageName, String requestType, Bundle request);
 
-    private class RestrictionsProviderWrapper extends IRestrictionsProvider.Stub {
+    /**
+     * Intercept standard Restrictions Provider broadcasts.  Implementations
+     * should not override this method; it is better to implement the
+     * convenience callbacks for each action.
+     */
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        String action = intent.getAction();
 
-        @Override
-        public Bundle getPermissionResponse(String packageName, String requestId) {
-            return AbstractRestrictionsProvider.this
-                    .getPermissionResponse(packageName, requestId);
-        }
-
-        @Override
-        public void requestPermission(String packageName, String templateId, Bundle request) {
-            AbstractRestrictionsProvider.this.requestPermission(packageName, templateId, request);
+        if (RestrictionsManager.ACTION_REQUEST_PERMISSION.equals(action)) {
+            String packageName = intent.getStringExtra(RestrictionsManager.EXTRA_PACKAGE_NAME);
+            String requestType = intent.getStringExtra(RestrictionsManager.EXTRA_REQUEST_TYPE);
+            Bundle request = intent.getBundleExtra(RestrictionsManager.EXTRA_REQUEST_BUNDLE);
+            requestPermission(context, packageName, requestType, request);
         }
     }
 }
