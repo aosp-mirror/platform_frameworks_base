@@ -39,14 +39,12 @@ jfieldID gOptions_heightFieldID;
 jfieldID gOptions_mimeFieldID;
 jfieldID gOptions_mCancelID;
 jfieldID gOptions_bitmapFieldID;
-jfieldID gBitmap_nativeBitmapFieldID;
-jfieldID gBitmap_layoutBoundsFieldID;
 
-#if 0
-    #define TRACE_BITMAP(code)  code
-#else
-    #define TRACE_BITMAP(code)
-#endif
+jfieldID gBitmap_nativeBitmapFieldID;
+jfieldID gBitmap_ninePatchInsetsFieldID;
+
+jclass gInsetStruct_class;
+jmethodID gInsetStruct_constructorMethodID;
 
 using namespace android;
 
@@ -195,8 +193,7 @@ private:
     const unsigned int mSize;
 };
 
-static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding,
-        jobject options) {
+static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding, jobject options) {
 
     int sampleSize = 1;
 
@@ -331,12 +328,12 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
     }
 
     jbyteArray ninePatchChunk = NULL;
-    if (peeker.fPatch != NULL) {
+    if (peeker.mPatch != NULL) {
         if (willScale) {
-            scaleNinePatchChunk(peeker.fPatch, scale);
+            scaleNinePatchChunk(peeker.mPatch, scale);
         }
 
-        size_t ninePatchArraySize = peeker.fPatch->serializedSize();
+        size_t ninePatchArraySize = peeker.mPatch->serializedSize();
         ninePatchChunk = env->NewByteArray(ninePatchArraySize);
         if (ninePatchChunk == NULL) {
             return nullObjectReturn("ninePatchChunk == null");
@@ -347,28 +344,18 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
             return nullObjectReturn("primitive array == null");
         }
 
-        memcpy(array, peeker.fPatch, peeker.fPatchSize);
+        memcpy(array, peeker.mPatch, peeker.mPatchSize);
         env->ReleasePrimitiveArrayCritical(ninePatchChunk, array, 0);
     }
 
-    jintArray layoutBounds = NULL;
-    if (peeker.fLayoutBounds != NULL) {
-        layoutBounds = env->NewIntArray(4);
-        if (layoutBounds == NULL) {
-            return nullObjectReturn("layoutBounds == null");
-        }
-
-        jint scaledBounds[4];
-        if (willScale) {
-            for (int i=0; i<4; i++) {
-                scaledBounds[i] = (jint)((((jint*)peeker.fLayoutBounds)[i]*scale) + .5f);
-            }
-        } else {
-            memcpy(scaledBounds, (jint*)peeker.fLayoutBounds, sizeof(scaledBounds));
-        }
-        env->SetIntArrayRegion(layoutBounds, 0, 4, scaledBounds);
+    jobject ninePatchInsets = NULL;
+    if (peeker.mHasInsets) {
+        ninePatchInsets = env->NewObject(gInsetStruct_class, gInsetStruct_constructorMethodID,
+                peeker.mOpticalInsets[0], peeker.mOpticalInsets[1], peeker.mOpticalInsets[2], peeker.mOpticalInsets[3],
+                peeker.mOutlineInsets[0], peeker.mOutlineInsets[1], peeker.mOutlineInsets[2], peeker.mOutlineInsets[3],
+                peeker.mOutlineRadius, peeker.mOutlineFilled, scale);
         if (javaBitmap != NULL) {
-            env->SetObjectField(javaBitmap, gBitmap_layoutBoundsFieldID, layoutBounds);
+            env->SetObjectField(javaBitmap, gBitmap_ninePatchInsetsFieldID, ninePatchInsets);
         }
     }
 
@@ -409,10 +396,10 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
     }
 
     if (padding) {
-        if (peeker.fPatch != NULL) {
+        if (peeker.mPatch != NULL) {
             GraphicsJNI::set_jrect(env, padding,
-                    peeker.fPatch->paddingLeft, peeker.fPatch->paddingTop,
-                    peeker.fPatch->paddingRight, peeker.fPatch->paddingBottom);
+                    peeker.mPatch->paddingLeft, peeker.mPatch->paddingTop,
+                    peeker.mPatch->paddingRight, peeker.mPatch->paddingBottom);
         } else {
             GraphicsJNI::set_jrect(env, padding, -1, -1, -1, -1);
         }
@@ -446,7 +433,7 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
 
     // now create the java bitmap
     return GraphicsJNI::createBitmap(env, outputBitmap, javaAllocator.getStorageObj(),
-            bitmapCreateFlags, ninePatchChunk, layoutBounds, -1);
+            bitmapCreateFlags, ninePatchChunk, ninePatchInsets, -1);
 }
 
 // Need to buffer enough input to be able to rewind as much as might be read by a decoder
@@ -576,7 +563,7 @@ int register_android_graphics_BitmapFactory(JNIEnv* env) {
     jclass options_class = env->FindClass("android/graphics/BitmapFactory$Options");
     SkASSERT(options_class);
     gOptions_bitmapFieldID = getFieldIDCheck(env, options_class, "inBitmap",
-        "Landroid/graphics/Bitmap;");
+            "Landroid/graphics/Bitmap;");
     gOptions_justBoundsFieldID = getFieldIDCheck(env, options_class, "inJustDecodeBounds", "Z");
     gOptions_sampleSizeFieldID = getFieldIDCheck(env, options_class, "inSampleSize", "I");
     gOptions_configFieldID = getFieldIDCheck(env, options_class, "inPreferredConfig",
@@ -598,7 +585,12 @@ int register_android_graphics_BitmapFactory(JNIEnv* env) {
     jclass bitmap_class = env->FindClass("android/graphics/Bitmap");
     SkASSERT(bitmap_class);
     gBitmap_nativeBitmapFieldID = getFieldIDCheck(env, bitmap_class, "mNativeBitmap", "J");
-    gBitmap_layoutBoundsFieldID = getFieldIDCheck(env, bitmap_class, "mOpticalInsets", "[I");
+    gBitmap_ninePatchInsetsFieldID = getFieldIDCheck(env, bitmap_class, "mNinePatchInsets",
+            "Landroid/graphics/NinePatch$InsetStruct;");
+
+    gInsetStruct_class = (jclass) env->NewGlobalRef(env->FindClass("android/graphics/NinePatch$InsetStruct"));
+    gInsetStruct_constructorMethodID = env->GetMethodID(gInsetStruct_class, "<init>", "(IIIIIIIIFZF)V");
+
     int ret = AndroidRuntime::registerNativeMethods(env,
                                     "android/graphics/BitmapFactory$Options",
                                     gOptionsMethods,
