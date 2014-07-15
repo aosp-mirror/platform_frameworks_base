@@ -4636,7 +4636,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             return DEX_OPT_SKIPPED;
         }
 
-        final Collection<String> paths = pkg.getAllCodePaths();
+        final List<String> paths = pkg.getAllCodePathsExcludingResourceOnly();
         boolean performedDexOpt = false;
         // There are three basic cases here:
         // 1.) we need to dexopt, either because we are forced or it is needed
@@ -4648,7 +4648,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                     final boolean isDexOptNeeded = DexFile.isDexOptNeededInternal(path,
                             pkg.packageName, instructionSet, defer);
                     if (forceDex || (!defer && isDexOptNeeded)) {
-                        Log.i(TAG, "Running dexopt on: " + pkg.applicationInfo.packageName + " isa=" + instructionSet);
+                        Log.i(TAG, "Running dexopt on: " + path + " pkg="
+                                + pkg.applicationInfo.packageName + " isa=" + instructionSet);
                         final int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
                         final int ret = mInstaller.dexopt(path, sharedGid, !isForwardLocked(pkg),
                                 pkg.packageName, instructionSet);

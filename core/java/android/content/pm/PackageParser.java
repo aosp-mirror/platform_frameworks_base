@@ -82,9 +82,22 @@ import java.util.jar.StrictJarFile;
 import java.util.zip.ZipEntry;
 
 /**
- * Package archive parsing
+ * Parser for package files (APKs) on disk. This supports apps packaged either
+ * as a single "monolithic" APK, or apps packaged as a "cluster" of multiple
+ * APKs in a single directory.
+ * <p>
+ * Apps packaged as multiple APKs always consist of a single "base" APK (with a
+ * {@code null} split name) and zero or more "split" APKs (with unique split
+ * names). Any subset of those split APKs are a valid install, as long as the
+ * following constraints are met:
+ * <ul>
+ * <li>All APKs must have the exact same package name, version code, and signing
+ * certificates.
+ * <li>All APKs must have unique split names.
+ * <li>All installations must contain a single base APK.
+ * </ul>
  *
- * {@hide}
+ * @hide
  */
 public class PackageParser {
     private static final boolean DEBUG_JAR = false;
@@ -92,6 +105,7 @@ public class PackageParser {
     private static final boolean DEBUG_BACKUP = false;
 
     // TODO: switch outError users to PackageParserException
+    // TODO: refactor "codePath" to "apkPath"
 
     /** File name in an APK for the Android manifest. */
     private static final String ANDROID_MANIFEST_FILENAME = "AndroidManifest.xml";
@@ -247,6 +261,7 @@ public class PackageParser {
         /** Paths of any split APKs, ordered by parsed splitName */
         public final String[] splitCodePaths;
 
+        public final boolean coreApp;
         public final boolean multiArch;
 
         private PackageLite(String codePath, ApkLite baseApk, String[] splitNames,
@@ -259,6 +274,7 @@ public class PackageParser {
             this.codePath = codePath;
             this.baseCodePath = baseApk.codePath;
             this.splitCodePaths = splitCodePaths;
+            this.coreApp = baseApk.coreApp;
             this.multiArch = baseApk.multiArch;
         }
 
@@ -283,11 +299,12 @@ public class PackageParser {
         public final int installLocation;
         public final VerifierInfo[] verifiers;
         public final Signature[] signatures;
+        public final boolean coreApp;
         public final boolean multiArch;
 
         public ApkLite(String codePath, String packageName, String splitName, int versionCode,
                 int installLocation, List<VerifierInfo> verifiers, Signature[] signatures,
-                boolean multiArch) {
+                boolean coreApp, boolean multiArch) {
             this.codePath = codePath;
             this.packageName = packageName;
             this.splitName = splitName;
@@ -295,6 +312,7 @@ public class PackageParser {
             this.installLocation = installLocation;
             this.verifiers = verifiers.toArray(new VerifierInfo[verifiers.size()]);
             this.signatures = signatures;
+            this.coreApp = coreApp;
             this.multiArch = multiArch;
         }
     }
@@ -322,6 +340,11 @@ public class PackageParser {
         mSeparateProcesses = procs;
     }
 
+    /**
+     * Flag indicating this parser should only consider apps with
+     * {@code coreApp} manifest attribute to be valid apps. This is useful when
+     * creating a minimalist boot environment.
+     */
     public void setOnlyCoreApps(boolean onlyCoreApps) {
         mOnlyCoreApps = onlyCoreApps;
     }
@@ -401,7 +424,7 @@ public class PackageParser {
             pi.gids = gids;
         }
         if ((flags&PackageManager.GET_CONFIGURATIONS) != 0) {
-            int N = p.configPreferences.size();
+            int N = p.configPreferences != null ? p.configPreferences.size() : 0;
             if (N > 0) {
                 pi.configPreferences = new ConfigurationInfo[N];
                 p.configPreferences.toArray(pi.configPreferences);
@@ -591,6 +614,17 @@ public class PackageParser {
         }
     }
 
+    /**
+     * Parse only lightweight details about the package at the given location.
+     * Automatically detects if the package is a monolithic style (single APK
+     * file) or cluster style (directory of APKs).
+     * <p>
+     * This performs sanity checking on cluster style packages, such as
+     * requiring identical package name and version codes, a single base APK,
+     * and unique split names.
+     *
+     * @see PackageParser#parsePackage(File, int)
+     */
     public static PackageLite parsePackageLite(File packageFile, int flags)
             throws PackageParserException {
         if (packageFile.isDirectory()) {
@@ -677,6 +711,20 @@ public class PackageParser {
         return new PackageLite(codePath, baseApk, splitNames, splitCodePaths);
     }
 
+    /**
+     * Parse the package at the given location. Automatically detects if the
+     * package is a monolithic style (single APK file) or cluster style
+     * (directory of APKs).
+     * <p>
+     * This performs sanity checking on cluster style packages, such as
+     * requiring identical package name and version codes, a single base APK,
+     * and unique split names.
+     * <p>
+     * Note that this <em>does not</em> perform signature verification; that
+     * must be done separately in {@link #collectCertificates(Package, int)}.
+     *
+     * @see #parsePackageLite(File, int)
+     */
     public Package parsePackage(File packageFile, int flags) throws PackageParserException {
         if (packageFile.isDirectory()) {
             return parseClusterPackage(packageFile, flags);
@@ -697,6 +745,11 @@ public class PackageParser {
     private Package parseClusterPackage(File packageDir, int flags) throws PackageParserException {
         final PackageLite lite = parseClusterPackageLite(packageDir, 0);
 
+        if (mOnlyCoreApps && !lite.coreApp) {
+            throw new PackageParserException(INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,
+                    "Not a coreApp: " + packageDir);
+        }
+
         final File baseApk = new File(lite.baseCodePath);
         final Package pkg = parseBaseApk(baseApk, flags);
         if (pkg == null) {
@@ -705,12 +758,13 @@ public class PackageParser {
         }
 
         if (!ArrayUtils.isEmpty(lite.splitNames)) {
+            final int num = lite.splitNames.length;
             pkg.splitNames = lite.splitNames;
             pkg.splitCodePaths = lite.splitCodePaths;
+            pkg.splitFlags = new int[num];
 
-            for (String splitCodePath : lite.splitCodePaths) {
-                final File splitApk = new File(splitCodePath);
-                parseSplitApk(pkg, splitApk, flags);
+            for (int i = 0; i < num; i++) {
+                parseSplitApk(pkg, i, flags);
             }
         }
 
@@ -730,115 +784,191 @@ public class PackageParser {
      */
     @Deprecated
     public Package parseMonolithicPackage(File apkFile, int flags) throws PackageParserException {
-        final Package pkg = parseBaseApk(apkFile, flags);
-        if (pkg == null) {
-            throw new PackageParserException(mParseError, "Failed to parse " + apkFile);
+        if (mOnlyCoreApps) {
+            final PackageLite lite = parseMonolithicPackageLite(apkFile, flags);
+            if (!lite.coreApp) {
+                throw new PackageParserException(INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,
+                        "Not a coreApp: " + apkFile);
+            }
         }
 
+        final Package pkg = parseBaseApk(apkFile, flags);
         pkg.codePath = apkFile.getAbsolutePath();
         return pkg;
     }
 
-    private Package parseBaseApk(File apkFile, int flags) {
-        final boolean trustedOverlay = (flags & PARSE_TRUSTED_OVERLAY) != 0;
+    private Package parseBaseApk(File apkFile, int flags) throws PackageParserException {
+        final String apkPath = apkFile.getAbsolutePath();
 
         mParseError = PackageManager.INSTALL_SUCCEEDED;
-
-        final String apkPath = apkFile.getAbsolutePath();
         mArchiveSourcePath = apkFile.getAbsolutePath();
-        if (!apkFile.isFile()) {
-            Slog.w(TAG, "Skipping dir: " + apkPath);
-            mParseError = PackageManager.INSTALL_PARSE_FAILED_NOT_APK;
-            return null;
-        }
-        if (!isApkFile(apkFile) && (flags & PARSE_MUST_BE_APK) != 0) {
-            if ((flags&PARSE_IS_SYSTEM) == 0) {
-                // We expect to have non-.apk files in the system dir,
-                // so don't warn about them.
-                Slog.w(TAG, "Skipping non-package file: " + apkPath);
-            }
-            mParseError = PackageManager.INSTALL_PARSE_FAILED_NOT_APK;
-            return null;
+
+        if ((flags & PARSE_MUST_BE_APK) != 0 && !isApkFile(apkFile)) {
+            throw new PackageParserException(INSTALL_PARSE_FAILED_NOT_APK,
+                    "Invalid package file: " + apkPath);
         }
 
-        if (DEBUG_JAR)
-            Slog.d(TAG, "Scanning package: " + apkPath);
+        if (DEBUG_JAR) Slog.d(TAG, "Scanning base APK: " + apkPath);
 
-        XmlResourceParser parser = null;
-        AssetManager assmgr = null;
+        AssetManager assets = null;
         Resources res = null;
-        boolean assetError = true;
+        XmlResourceParser parser = null;
         try {
-            assmgr = new AssetManager();
-            int cookie = assmgr.addAssetPath(apkPath);
-            if (cookie != 0) {
-                res = new Resources(assmgr, mMetrics, null);
-                assmgr.setConfiguration(0, 0, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                        Build.VERSION.RESOURCES_SDK_INT);
-                parser = assmgr.openXmlResourceParser(cookie, ANDROID_MANIFEST_FILENAME);
-                assetError = false;
-            } else {
-                Slog.w(TAG, "Failed adding asset path:" + apkPath);
+            assets = new AssetManager();
+            int cookie = assets.addAssetPath(apkPath);
+            if (cookie == 0) {
+                throw new PackageParserException(INSTALL_PARSE_FAILED_BAD_MANIFEST,
+                        "Failed adding asset path: " + apkPath);
             }
-        } catch (Exception e) {
-            Slog.w(TAG, "Unable to read AndroidManifest.xml of " + apkPath, e);
-        }
-        if (assetError) {
-            if (assmgr != null) assmgr.close();
-            mParseError = PackageManager.INSTALL_PARSE_FAILED_BAD_MANIFEST;
-            return null;
-        }
-        String[] errorText = new String[1];
-        Package pkg = null;
-        Exception errorException = null;
-        try {
-            // XXXX todo: need to figure out correct configuration.
-            pkg = parseBaseApk(res, parser, flags, trustedOverlay, errorText);
-        } catch (Exception e) {
-            errorException = e;
-            mParseError = PackageManager.INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION;
-        }
 
-        if (pkg == null) {
-            // If we are only parsing core apps, then a null with INSTALL_SUCCEEDED
-            // just means to skip this app so don't make a fuss about it.
-            if (!mOnlyCoreApps || mParseError != PackageManager.INSTALL_SUCCEEDED) {
-                if (errorException != null) {
-                    Slog.w(TAG, apkPath, errorException);
-                } else {
-                    Slog.w(TAG, apkPath + " (at "
-                            + parser.getPositionDescription()
-                            + "): " + errorText[0]);
-                }
-                if (mParseError == PackageManager.INSTALL_SUCCEEDED) {
-                    mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
-                }
+            res = new Resources(assets, mMetrics, null);
+            assets.setConfiguration(0, 0, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    Build.VERSION.RESOURCES_SDK_INT);
+            parser = assets.openXmlResourceParser(cookie, ANDROID_MANIFEST_FILENAME);
+
+            final String[] outError = new String[1];
+            final Package pkg = parseBaseApk(res, parser, flags, outError);
+            if (pkg == null) {
+                throw new PackageParserException(mParseError,
+                        apkPath + " (at " + parser.getPositionDescription() + "): " + outError[0]);
             }
-            parser.close();
-            assmgr.close();
-            return null;
+
+            pkg.baseCodePath = apkPath;
+            pkg.mSignatures = null;
+
+            // TODO: Remove this when the WebView can load resources dynamically. b/11505352
+            pkg.usesOptionalLibraries = ArrayUtils.add(pkg.usesOptionalLibraries,
+                    "com.android.webview");
+
+            return pkg;
+
+        } catch (PackageParserException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new PackageParserException(INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION,
+                    "Unable to read AndroidManifest.xml of " + apkPath);
+        } finally {
+            IoUtils.closeQuietly(parser);
+            IoUtils.closeQuietly(assets);
         }
-
-        parser.close();
-        assmgr.close();
-
-        pkg.baseCodePath = apkPath;
-        pkg.mSignatures = null;
-
-        // TODO: Remove this when the WebView can load resources dynamically. b/11505352
-        if (pkg.usesOptionalLibraries == null) {
-            pkg.usesOptionalLibraries = new ArrayList<String>();
-        }
-        pkg.usesOptionalLibraries.add("com.android.webview");
-
-        return pkg;
     }
 
-    private void parseSplitApk(Package pkg, File apkFile, int flags) throws PackageParserException {
-        final String splitCodePath = apkFile.getAbsolutePath();
-        mArchiveSourcePath = apkFile.getAbsolutePath();
+    private void parseSplitApk(Package pkg, int splitIndex, int flags)
+            throws PackageParserException {
+        final String apkPath = pkg.splitCodePaths[splitIndex];
+        final File apkFile = new File(apkPath);
 
-        // TODO: expand split APK parsing
+        mParseError = PackageManager.INSTALL_SUCCEEDED;
+        mArchiveSourcePath = apkPath;
+
+        if ((flags & PARSE_MUST_BE_APK) != 0 && !isApkFile(apkFile)) {
+            throw new PackageParserException(INSTALL_PARSE_FAILED_NOT_APK,
+                    "Invalid package file: " + apkPath);
+        }
+
+        if (DEBUG_JAR) Slog.d(TAG, "Scanning split APK: " + apkPath);
+
+        AssetManager assets = null;
+        Resources res = null;
+        XmlResourceParser parser = null;
+        try {
+            assets = new AssetManager();
+            int cookie = assets.addAssetPath(apkPath);
+            if (cookie == 0) {
+                throw new PackageParserException(INSTALL_PARSE_FAILED_BAD_MANIFEST,
+                        "Failed adding asset path: " + apkPath);
+            }
+
+            res = new Resources(assets, mMetrics, null);
+            assets.setConfiguration(0, 0, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    Build.VERSION.RESOURCES_SDK_INT);
+            parser = assets.openXmlResourceParser(cookie, ANDROID_MANIFEST_FILENAME);
+
+            final String[] outError = new String[1];
+            pkg = parseSplitApk(pkg, res, parser, flags, splitIndex, outError);
+            if (pkg == null) {
+                throw new PackageParserException(mParseError,
+                        apkPath + " (at " + parser.getPositionDescription() + "): " + outError[0]);
+            }
+
+        } catch (PackageParserException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new PackageParserException(INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION,
+                    "Unable to read AndroidManifest.xml of " + apkPath);
+        } finally {
+            IoUtils.closeQuietly(parser);
+            IoUtils.closeQuietly(assets);
+        }
+    }
+
+    /**
+     * Parse the manifest of a <em>split APK</em>.
+     * <p>
+     * Note that split APKs have many more restrictions on what they're capable
+     * of doing, so many valid features of a base APK have been carefully
+     * omitted here.
+     */
+    private Package parseSplitApk(Package pkg, Resources res, XmlResourceParser parser, int flags,
+            int splitIndex, String[] outError) throws XmlPullParserException, IOException {
+        AttributeSet attrs = parser;
+
+        mParseInstrumentationArgs = null;
+        mParseActivityArgs = null;
+        mParseServiceArgs = null;
+        mParseProviderArgs = null;
+
+        int type;
+
+        boolean foundApp = false;
+
+        int outerDepth = parser.getDepth();
+        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
+            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
+                continue;
+            }
+
+            String tagName = parser.getName();
+            if (tagName.equals("application")) {
+                if (foundApp) {
+                    if (RIGID_PARSER) {
+                        outError[0] = "<manifest> has more than one <application>";
+                        mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+                        return null;
+                    } else {
+                        Slog.w(TAG, "<manifest> has more than one <application>");
+                        XmlUtils.skipCurrentTag(parser);
+                        continue;
+                    }
+                }
+
+                foundApp = true;
+                if (!parseSplitApplication(pkg, res, parser, attrs, flags, splitIndex, outError)) {
+                    return null;
+                }
+
+            } else if (RIGID_PARSER) {
+                outError[0] = "Bad element under <manifest>: "
+                    + parser.getName();
+                mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+                return null;
+
+            } else {
+                Slog.w(TAG, "Unknown element under <manifest>: " + parser.getName()
+                        + " at " + mArchiveSourcePath + " "
+                        + parser.getPositionDescription());
+                XmlUtils.skipCurrentTag(parser);
+                continue;
+            }
+        }
+
+        if (!foundApp) {
+            outError[0] = "<manifest> does not contain an <application>";
+            mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_EMPTY;
+        }
+
+        return pkg;
     }
 
     /**
@@ -1001,14 +1131,14 @@ public class PackageParser {
             throws PackageParserException {
         final String apkPath = apkFile.getAbsolutePath();
 
-        AssetManager assmgr = null;
+        AssetManager assets = null;
         XmlResourceParser parser = null;
         try {
-            assmgr = new AssetManager();
-            assmgr.setConfiguration(0, 0, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            assets = new AssetManager();
+            assets.setConfiguration(0, 0, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     Build.VERSION.RESOURCES_SDK_INT);
 
-            int cookie = assmgr.addAssetPath(apkPath);
+            int cookie = assets.addAssetPath(apkPath);
             if (cookie == 0) {
                 throw new PackageParserException(INSTALL_PARSE_FAILED_NOT_APK,
                         "Failed to parse " + apkPath);
@@ -1017,8 +1147,8 @@ public class PackageParser {
             final DisplayMetrics metrics = new DisplayMetrics();
             metrics.setToDefaults();
 
-            final Resources res = new Resources(assmgr, metrics, null);
-            parser = assmgr.openXmlResourceParser(cookie, ANDROID_MANIFEST_FILENAME);
+            final Resources res = new Resources(assets, metrics, null);
+            parser = assets.openXmlResourceParser(cookie, ANDROID_MANIFEST_FILENAME);
 
             // Only collect certificates on the manifest; does not validate
             // signatures across remainder of package.
@@ -1036,8 +1166,8 @@ public class PackageParser {
             throw new PackageParserException(INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION,
                     "Failed to parse " + apkPath, e);
         } finally {
-            if (parser != null) parser.close();
-            if (assmgr != null) assmgr.close();
+            IoUtils.closeQuietly(parser);
+            IoUtils.closeQuietly(assets);
         }
     }
 
@@ -1118,8 +1248,10 @@ public class PackageParser {
 
         int installLocation = PARSE_DEFAULT_INSTALL_LOCATION;
         int versionCode = 0;
-        int numFound = 0;
+        boolean coreApp = false;
         boolean multiArch = false;
+
+        int numFound = 0;
         for (int i = 0; i < attrs.getAttributeCount(); i++) {
             String attr = attrs.getAttributeName(i);
             if (attr.equals("installLocation")) {
@@ -1129,8 +1261,11 @@ public class PackageParser {
             } else if (attr.equals("versionCode")) {
                 versionCode = attrs.getAttributeIntValue(i, 0);
                 numFound++;
+            } else if (attr.equals("coreApp")) {
+                coreApp = attrs.getAttributeBooleanValue(i, false);
+                numFound++;
             }
-            if (numFound >= 2) {
+            if (numFound >= 3) {
                 break;
             }
         }
@@ -1165,7 +1300,7 @@ public class PackageParser {
         }
 
         return new ApkLite(codePath, packageSplit.first, packageSplit.second, versionCode,
-                installLocation, verifiers, signatures, multiArch);
+                installLocation, verifiers, signatures, coreApp, multiArch);
     }
 
     /**
@@ -1180,8 +1315,16 @@ public class PackageParser {
         return new Signature(sig);
     }
 
+    /**
+     * Parse the manifest of a <em>base APK</em>.
+     * <p>
+     * When adding new features, carefully consider if they should also be
+     * supported by split APKs.
+     */
     private Package parseBaseApk(Resources res, XmlResourceParser parser, int flags,
-            boolean trustedOverlay, String[] outError) throws XmlPullParserException, IOException {
+            String[] outError) throws XmlPullParserException, IOException {
+        final boolean trustedOverlay = (flags & PARSE_TRUSTED_OVERLAY) != 0;
+
         AttributeSet attrs = parser;
 
         mParseInstrumentationArgs = null;
@@ -1201,14 +1344,6 @@ public class PackageParser {
         }
 
         int type;
-
-        if (mOnlyCoreApps) {
-            boolean core = attrs.getAttributeBooleanValue(null, "coreApp", false);
-            if (!core) {
-                mParseError = PackageManager.INSTALL_SUCCEEDED;
-                return null;
-            }
-        }
 
         if (!TextUtils.isEmpty(splitName)) {
             outError[0] = "Expected base APK, but found split " + splitName;
@@ -1290,7 +1425,7 @@ public class PackageParser {
                 }
 
                 foundApp = true;
-                if (!parseApplication(pkg, res, parser, attrs, flags, outError)) {
+                if (!parseBaseApplication(pkg, res, parser, attrs, flags, outError)) {
                     return null;
                 }
             } else if (tagName.equals("overlay")) {
@@ -1362,7 +1497,7 @@ public class PackageParser {
                     cPref.reqInputFeatures |= ConfigurationInfo.INPUT_FEATURE_FIVE_WAY_NAV;
                 }
                 sa.recycle();
-                pkg.configPreferences.add(cPref);
+                pkg.configPreferences = ArrayUtils.add(pkg.configPreferences, cPref);
 
                 XmlUtils.skipCurrentTag(parser);
 
@@ -1385,15 +1520,12 @@ public class PackageParser {
                     fi.flags |= FeatureInfo.FLAG_REQUIRED;
                 }
                 sa.recycle();
-                if (pkg.reqFeatures == null) {
-                    pkg.reqFeatures = new ArrayList<FeatureInfo>();
-                }
-                pkg.reqFeatures.add(fi);
-                
+                pkg.reqFeatures = ArrayUtils.add(pkg.reqFeatures, fi);
+
                 if (fi.name == null) {
                     ConfigurationInfo cPref = new ConfigurationInfo();
                     cPref.reqGlEsVersion = fi.reqGlEsVersion;
-                    pkg.configPreferences.add(cPref);
+                    pkg.configPreferences = ArrayUtils.add(pkg.configPreferences, cPref);
                 }
 
                 XmlUtils.skipCurrentTag(parser);
@@ -2204,7 +2336,14 @@ public class PackageParser {
         return a;
     }
 
-    private boolean parseApplication(Package owner, Resources res,
+    /**
+     * Parse the {@code application} XML tree at the current parse location in a
+     * <em>base APK</em> manifest.
+     * <p>
+     * When adding new features, carefully consider if they should also be
+     * supported by split APKs.
+     */
+    private boolean parseBaseApplication(Package owner, Resources res,
             XmlPullParser parser, AttributeSet attrs, int flags, String[] outError)
         throws XmlPullParserException, IOException {
         final ApplicationInfo ai = owner.applicationInfo;
@@ -2324,7 +2463,7 @@ public class PackageParser {
             ai.flags |= ApplicationInfo.FLAG_VM_SAFE_MODE;
         }
 
-        boolean hardwareAccelerated = sa.getBoolean(
+        owner.baseHardwareAccelerated = sa.getBoolean(
                 com.android.internal.R.styleable.AndroidManifestApplication_hardwareAccelerated,
                 owner.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.ICE_CREAM_SANDWICH);
 
@@ -2449,7 +2588,7 @@ public class PackageParser {
             String tagName = parser.getName();
             if (tagName.equals("activity")) {
                 Activity a = parseActivity(owner, res, parser, attrs, flags, outError, false,
-                        hardwareAccelerated);
+                        owner.baseHardwareAccelerated);
                 if (a == null) {
                     mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                     return false;
@@ -2515,11 +2654,9 @@ public class PackageParser {
                 sa.recycle();
 
                 if (lname != null) {
-                    if (owner.libraryNames == null) {
-                        owner.libraryNames = new ArrayList<String>();
-                    }
-                    if (!owner.libraryNames.contains(lname)) {
-                        owner.libraryNames.add(lname.intern());
+                    lname = lname.intern();
+                    if (!ArrayUtils.contains(owner.libraryNames, lname)) {
+                        owner.libraryNames = ArrayUtils.add(owner.libraryNames, lname);
                     }
                 }
 
@@ -2540,19 +2677,150 @@ public class PackageParser {
                 sa.recycle();
 
                 if (lname != null) {
+                    lname = lname.intern();
                     if (req) {
-                        if (owner.usesLibraries == null) {
-                            owner.usesLibraries = new ArrayList<String>();
-                        }
-                        if (!owner.usesLibraries.contains(lname)) {
-                            owner.usesLibraries.add(lname.intern());
-                        }
+                        owner.usesLibraries = ArrayUtils.add(owner.usesLibraries, lname);
                     } else {
-                        if (owner.usesOptionalLibraries == null) {
-                            owner.usesOptionalLibraries = new ArrayList<String>();
-                        }
-                        if (!owner.usesOptionalLibraries.contains(lname)) {
-                            owner.usesOptionalLibraries.add(lname.intern());
+                        owner.usesOptionalLibraries = ArrayUtils.add(
+                                owner.usesOptionalLibraries, lname);
+                    }
+                }
+
+                XmlUtils.skipCurrentTag(parser);
+
+            } else if (tagName.equals("uses-package")) {
+                // Dependencies for app installers; we don't currently try to
+                // enforce this.
+                XmlUtils.skipCurrentTag(parser);
+
+            } else {
+                if (!RIGID_PARSER) {
+                    Slog.w(TAG, "Unknown element under <application>: " + tagName
+                            + " at " + mArchiveSourcePath + " "
+                            + parser.getPositionDescription());
+                    XmlUtils.skipCurrentTag(parser);
+                    continue;
+                } else {
+                    outError[0] = "Bad element under <application>: " + tagName;
+                    mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Parse the {@code application} XML tree at the current parse location in a
+     * <em>split APK</em> manifest.
+     * <p>
+     * Note that split APKs have many more restrictions on what they're capable
+     * of doing, so many valid features of a base APK have been carefully
+     * omitted here.
+     */
+    private boolean parseSplitApplication(Package owner, Resources res, XmlPullParser parser,
+            AttributeSet attrs, int flags, int splitIndex, String[] outError)
+            throws XmlPullParserException, IOException {
+        TypedArray sa = res.obtainAttributes(attrs,
+                com.android.internal.R.styleable.AndroidManifestApplication);
+
+        if (sa.getBoolean(
+                com.android.internal.R.styleable.AndroidManifestApplication_hasCode, true)) {
+            owner.splitFlags[splitIndex] |= ApplicationInfo.FLAG_HAS_CODE;
+        }
+
+        final int innerDepth = parser.getDepth();
+        int type;
+        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                && (type != XmlPullParser.END_TAG || parser.getDepth() > innerDepth)) {
+            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
+                continue;
+            }
+
+            String tagName = parser.getName();
+            if (tagName.equals("activity")) {
+                Activity a = parseActivity(owner, res, parser, attrs, flags, outError, false,
+                        owner.baseHardwareAccelerated);
+                if (a == null) {
+                    mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+                    return false;
+                }
+
+                owner.activities.add(a);
+
+            } else if (tagName.equals("receiver")) {
+                Activity a = parseActivity(owner, res, parser, attrs, flags, outError, true, false);
+                if (a == null) {
+                    mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+                    return false;
+                }
+
+                owner.receivers.add(a);
+
+            } else if (tagName.equals("service")) {
+                Service s = parseService(owner, res, parser, attrs, flags, outError);
+                if (s == null) {
+                    mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+                    return false;
+                }
+
+                owner.services.add(s);
+
+            } else if (tagName.equals("provider")) {
+                Provider p = parseProvider(owner, res, parser, attrs, flags, outError);
+                if (p == null) {
+                    mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+                    return false;
+                }
+
+                owner.providers.add(p);
+
+            } else if (tagName.equals("activity-alias")) {
+                Activity a = parseActivityAlias(owner, res, parser, attrs, flags, outError);
+                if (a == null) {
+                    mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+                    return false;
+                }
+
+                owner.activities.add(a);
+
+            } else if (parser.getName().equals("meta-data")) {
+                // note: application meta-data is stored off to the side, so it can
+                // remain null in the primary copy (we like to avoid extra copies because
+                // it can be large)
+                if ((owner.mAppMetaData = parseMetaData(res, parser, attrs, owner.mAppMetaData,
+                        outError)) == null) {
+                    mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+                    return false;
+                }
+
+            } else if (tagName.equals("uses-library")) {
+                sa = res.obtainAttributes(attrs,
+                        com.android.internal.R.styleable.AndroidManifestUsesLibrary);
+
+                // Note: don't allow this value to be a reference to a resource
+                // that may change.
+                String lname = sa.getNonResourceString(
+                        com.android.internal.R.styleable.AndroidManifestUsesLibrary_name);
+                boolean req = sa.getBoolean(
+                        com.android.internal.R.styleable.AndroidManifestUsesLibrary_required,
+                        true);
+
+                sa.recycle();
+
+                if (lname != null) {
+                    lname = lname.intern();
+                    if (req) {
+                        // Upgrade to treat as stronger constraint
+                        owner.usesLibraries = ArrayUtils.add(owner.usesLibraries, lname);
+                        owner.usesOptionalLibraries = ArrayUtils.remove(
+                                owner.usesOptionalLibraries, lname);
+                    } else {
+                        // Ignore if someone already defined as required
+                        if (!ArrayUtils.contains(owner.usesLibraries, lname)) {
+                            owner.usesOptionalLibraries = ArrayUtils.add(
+                                    owner.usesOptionalLibraries, lname);
                         }
                     }
                 }
@@ -3873,6 +4141,11 @@ public class PackageParser {
         /** Paths of any split APKs, ordered by parsed splitName */
         public String[] splitCodePaths;
 
+        /** Flags of any split APKs; ordered by parsed splitName */
+        public int[] splitFlags;
+
+        public boolean baseHardwareAccelerated;
+
         // For now we only support one application per package.
         public final ApplicationInfo applicationInfo = new ApplicationInfo();
 
@@ -3941,15 +4214,10 @@ public class PackageParser {
         // Whether an operation is currently pending on this package
         public boolean mOperationPending;
 
-        /*
-         *  Applications hardware preferences
-         */
-        public final ArrayList<ConfigurationInfo> configPreferences =
-                new ArrayList<ConfigurationInfo>();
+        // Applications hardware preferences
+        public ArrayList<ConfigurationInfo> configPreferences = null;
 
-        /*
-         *  Applications requested features
-         */
+        // Applications requested features
         public ArrayList<FeatureInfo> reqFeatures = null;
 
         public int installLocation;
@@ -3994,6 +4262,25 @@ public class PackageParser {
             paths.add(baseCodePath);
             if (!ArrayUtils.isEmpty(splitCodePaths)) {
                 Collections.addAll(paths, splitCodePaths);
+            }
+            return paths;
+        }
+
+        /**
+         * Filtered set of {@link #getAllCodePaths()} that excludes
+         * resource-only APKs.
+         */
+        public List<String> getAllCodePathsExcludingResourceOnly() {
+            ArrayList<String> paths = new ArrayList<>();
+            if ((applicationInfo.flags & ApplicationInfo.FLAG_HAS_CODE) != 0) {
+                paths.add(baseCodePath);
+            }
+            if (!ArrayUtils.isEmpty(splitCodePaths)) {
+                for (int i = 0; i < splitCodePaths.length; i++) {
+                    if ((splitFlags[i] & ApplicationInfo.FLAG_HAS_CODE) != 0) {
+                        paths.add(splitCodePaths[i]);
+                    }
+                }
             }
             return paths;
         }

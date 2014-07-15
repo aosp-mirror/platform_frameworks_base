@@ -42,17 +42,17 @@ import java.util.List;
  * intervention to complete the installation.
  * <p>
  * Sessions can install brand new apps, upgrade existing apps, or add new splits
- * onto an existing app.
+ * into an existing app.
  * <p>
- * Apps packaged into multiple split APKs always consist of a single "base" APK
+ * Apps packaged as multiple split APKs always consist of a single "base" APK
  * (with a {@code null} split name) and zero or more "split" APKs (with unique
  * split names). Any subset of these APKs can be installed together, as long as
  * the following constraints are met:
  * <ul>
  * <li>All APKs must have the exact same package name, version code, and signing
  * certificates.
- * <li>All installations must contain a single base APK.
  * <li>All APKs must have unique split names.
+ * <li>All installations must contain a single base APK.
  * </ul>
  */
 public class PackageInstaller {
