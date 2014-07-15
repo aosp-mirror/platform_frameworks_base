@@ -14,24 +14,23 @@
  * limitations under the License.
  */
 
-package android.content.res;
+package com.android.layoutlib.bridge.android;
 
 import java.util.Locale;
 
-import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 import com.ibm.icu.util.ULocale;
 
 /**
- * Delegate used to provide new implementation of a select few methods of {@link Resources}
+ * This class provides an alternate implementation for {@code java.util.Locale#toLanguageTag}
+ * which is only available after Java 6.
  *
- * Through the layoutlib_create tool, the original  methods of Resources have been replaced
- * by calls to methods of the same name in this delegate class.
- *
+ * The create tool re-writes references to the above mentioned method to this one. Hence it's
+ * imperative that this class is not deleted unless the create tool is modified.
  */
-public class Resources_Delegate {
+@SuppressWarnings("UnusedDeclaration")
+public class AndroidLocale {
 
-    @LayoutlibDelegate
-    /*package*/ static String localeToLanguageTag(Resources res, Locale locale)  {
+    public static String toLanguageTag(Locale locale)  {
         return ULocale.forLocale(locale).toLanguageTag();
     }
 }
