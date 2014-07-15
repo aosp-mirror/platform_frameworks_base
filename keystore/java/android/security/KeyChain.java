@@ -397,7 +397,8 @@ public final class KeyChain {
         return KeyStore.getInstance().isHardwareBacked(algorithm);
     }
 
-    private static X509Certificate toCertificate(byte[] bytes) {
+    /** @hide */
+    public static X509Certificate toCertificate(byte[] bytes) {
         if (bytes == null) {
             throw new IllegalArgumentException("bytes == null");
         }
