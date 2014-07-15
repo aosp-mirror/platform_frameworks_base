@@ -57,6 +57,10 @@ public:
         return mShouldClip;
     }
 
+    float radius() const {
+        return mRadius;
+    }
+
     const SkPath* getPath() const {
         if (!mShouldClip) return NULL;
 
