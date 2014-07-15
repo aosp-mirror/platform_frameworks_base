@@ -19,9 +19,9 @@
 #include <android_runtime/AndroidRuntime.h>
 #include <vector>
 
+#include "Canvas.h"
 #include "CreateJavaOutputStreamAdaptor.h"
 
-#include "SkCanvas.h"
 #include "SkDocument.h"
 #include "SkPicture.h"
 #include "SkPictureRecorder.h"
@@ -132,8 +132,9 @@ static jlong nativeStartPage(JNIEnv* env, jobject thiz, jlong documentPtr,
         jint pageWidth, jint pageHeight,
         jint contentLeft, jint contentTop, jint contentRight, jint contentBottom) {
     PdfDocument* document = reinterpret_cast<PdfDocument*>(documentPtr);
-    return reinterpret_cast<jlong>(document->startPage(pageWidth, pageHeight,
-            contentLeft, contentTop, contentRight, contentBottom));
+    SkCanvas* canvas = document->startPage(pageWidth, pageHeight,
+            contentLeft, contentTop, contentRight, contentBottom);
+    return reinterpret_cast<jlong>(Canvas::create_canvas(canvas));
 }
 
 static void nativeFinishPage(JNIEnv* env, jobject thiz, jlong documentPtr) {
