@@ -1420,7 +1420,7 @@ public class Intent implements Parcelable, Cloneable {
      * challenge.<p/>
      * This intent is handled by the system at a high priority and applications cannot intercept
      * it.<p/>
-     * You can use {@link KeyguardManager#isKeyguardSecure()} to determine if the user will be
+     * You can use {@link android.app.KeyguardManager#isKeyguardSecure()} to determine if the user will be
      * prompted.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
