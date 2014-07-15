@@ -631,6 +631,9 @@ public class PropertyValuesHolder implements Cloneable {
     public void setObjectValues(Object... values) {
         mValueType = values[0].getClass();
         mKeyframeSet = KeyframeSet.ofObject(values);
+        if (mEvaluator != null) {
+            mKeyframeSet.setEvaluator(mEvaluator);
+        }
     }
 
     /**
