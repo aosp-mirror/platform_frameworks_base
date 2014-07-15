@@ -21,7 +21,6 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
-import android.graphics.RectF;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -106,7 +105,6 @@ public class EdgeEffect {
     private float mPullDistance;
     
     private final Rect mBounds = new Rect();
-    private final RectF mArcRect = new RectF();
     private final Paint mPaint = new Paint();
     private float mRadius;
     private float mBaseGlowHeight;
@@ -318,11 +316,9 @@ public class EdgeEffect {
 
         final int count = canvas.save();
 
-        final float y = mBounds.height();
-        final float centerY = y - mRadius;
         final float centerX = mBounds.centerX();
+        final float centerY = mBounds.height() - mRadius;
 
-        mArcRect.set(centerX - mRadius, centerY - mRadius, centerX + mRadius, centerY + mRadius);
         canvas.scale(1.f, Math.min(mGlowScaleY, 1.f), centerX, 0);
 
         final float displacement = Math.max(0, Math.min(mDisplacement, 1.f)) - 0.5f;
@@ -330,7 +326,7 @@ public class EdgeEffect {
 
         canvas.clipRect(mBounds);
         canvas.translate(translateX, 0);
-        canvas.drawArc(mArcRect, 45, 90, false, mPaint);
+        canvas.drawCircle(centerX, centerY, mRadius, mPaint);
         canvas.restoreToCount(count);
 
         boolean oneLastFrame = false;
