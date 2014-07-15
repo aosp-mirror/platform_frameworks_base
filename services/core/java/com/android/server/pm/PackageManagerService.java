@@ -1713,7 +1713,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // NOTE: We ignore potential failures here during a system scan (like
                 // the rest of the commands above) because there's precious little we
                 // can do about it. A settings error is reported, though.
-                adjustCpuAbisForSharedUserLPw(setting.packages, null,
+                adjustCpuAbisForSharedUserLPw(setting.packages, null /* scanned package */,
                         false /* force dexopt */, false /* defer dexopt */);
             }
 
@@ -5538,11 +5538,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             // We also do this *before* we perform dexopt on this package, so that
             // we can avoid redundant dexopts, and also to make sure we've got the
             // code and package path correct.
-            if (!adjustCpuAbisForSharedUserLPw(pkgSetting.sharedUser.packages,
-                    pkg, forceDex, (scanMode & SCAN_DEFER_DEX) != 0)) {
-                throw new PackageManagerException(INSTALL_FAILED_CPU_ABI_INCOMPATIBLE,
-                        "scanPackageLI");
-            }
+            adjustCpuAbisForSharedUserLPw(pkgSetting.sharedUser.packages,
+                    pkg, forceDex, (scanMode & SCAN_DEFER_DEX) != 0);
         }
 
         if ((scanMode&SCAN_NO_DEX) == 0) {
@@ -6041,7 +6038,7 @@ public class PackageManagerService extends IPackageManager.Stub {
      * NOTE: We currently only match for the primary CPU abi string. Matching the secondary
      * adds unnecessary complexity.
      */
-    private boolean adjustCpuAbisForSharedUserLPw(Set<PackageSetting> packagesForUser,
+    private void adjustCpuAbisForSharedUserLPw(Set<PackageSetting> packagesForUser,
             PackageParser.Package scannedPackage, boolean forceDexOpt, boolean deferDexOpt) {
         String requiredInstructionSet = null;
         if (scannedPackage != null && scannedPackage.applicationInfo.primaryCpuAbi != null) {
@@ -6055,27 +6052,23 @@ public class PackageManagerService extends IPackageManager.Stub {
             // when scannedPackage is an update of an existing package. Without this check,
             // we will never be able to change the ABI of any package belonging to a shared
             // user, even if it's compatible with other packages.
-            if (scannedPackage == null || ! scannedPackage.packageName.equals(ps.name)) {
+            if (scannedPackage == null || !scannedPackage.packageName.equals(ps.name)) {
                 if (ps.primaryCpuAbiString == null) {
                     continue;
                 }
 
                 final String instructionSet = VMRuntime.getInstructionSet(ps.primaryCpuAbiString);
-                if (requiredInstructionSet != null) {
-                    if (!instructionSet.equals(requiredInstructionSet)) {
-                        // We have a mismatch between instruction sets (say arm vs arm64).
-                        // bail out.
-                        String errorMessage = "Instruction set mismatch, "
-                                + ((requirer == null) ? "[caller]" : requirer)
-                                + " requires " + requiredInstructionSet + " whereas " + ps
-                                + " requires " + instructionSet;
-                        Slog.e(TAG, errorMessage);
+                if (requiredInstructionSet != null && !instructionSet.equals(requiredInstructionSet)) {
+                    // We have a mismatch between instruction sets (say arm vs arm64) warn about
+                    // this but there's not much we can do.
+                    String errorMessage = "Instruction set mismatch, "
+                            + ((requirer == null) ? "[caller]" : requirer)
+                            + " requires " + requiredInstructionSet + " whereas " + ps
+                            + " requires " + instructionSet;
+                    Slog.w(TAG, errorMessage);
+                }
 
-                        reportSettingsProblem(Log.WARN, errorMessage);
-                        // Give up, don't bother making any other changes to the package settings.
-                        return false;
-                    }
-                } else {
+                if (requiredInstructionSet == null) {
                     requiredInstructionSet = instructionSet;
                     requirer = ps;
                 }
@@ -6112,7 +6105,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         if (performDexOptLI(ps.pkg, forceDexOpt, deferDexOpt, true) == DEX_OPT_FAILED) {
                             ps.primaryCpuAbiString = null;
                             ps.pkg.applicationInfo.primaryCpuAbi = null;
-                            return false;
+                            return;
                         } else {
                             mInstaller.rmdex(ps.codePathString, getPreferredInstructionSet());
                         }
@@ -6120,8 +6113,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
             }
         }
-
-        return true;
     }
 
     private void setUpCustomResolverActivity(PackageParser.Package pkg) {
