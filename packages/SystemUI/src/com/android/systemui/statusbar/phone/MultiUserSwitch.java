@@ -18,29 +18,22 @@ package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Canvas;
-import android.graphics.Path;
-import android.graphics.drawable.Drawable;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.ContactsContract;
 import android.util.AttributeSet;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.ImageButton;
 
-import com.android.systemui.R;
-import com.android.systemui.settings.UserSwitcherHostView;
-import com.android.systemui.statusbar.policy.UserInfoController;
+import com.android.systemui.qs.QSPanel;
+import com.android.systemui.qs.tiles.UserDetail;
 
 /**
  * Container for image of the multi user switcher (tappable).
  */
 public class MultiUserSwitch extends FrameLayout implements View.OnClickListener {
 
-    private ViewGroup mOverlayParent;
+    private QSPanel mQsPanel;
 
     public MultiUserSwitch(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -52,25 +45,15 @@ public class MultiUserSwitch extends FrameLayout implements View.OnClickListener
         setOnClickListener(this);
     }
 
-    public void setOverlayParent(ViewGroup parent) {
-        mOverlayParent = parent;
+    public void setQsPanel(QSPanel qsPanel) {
+        mQsPanel = qsPanel;
     }
 
     @Override
     public void onClick(View v) {
         final UserManager um = UserManager.get(getContext());
         if (um.isUserSwitcherEnabled()) {
-            final UserSwitcherHostView switcher =
-                    (UserSwitcherHostView) LayoutInflater.from(getContext()).inflate(
-                            R.layout.user_switcher_host, mOverlayParent, false);
-            switcher.setFinishRunnable(new Runnable() {
-                @Override
-                public void run() {
-                    mOverlayParent.removeView(switcher);
-                }
-            });
-            switcher.refreshUsers();
-            mOverlayParent.addView(switcher);
+            mQsPanel.showDetailAdapter(true, UserDetail.USER_DETAIL_ADAPTER);
         } else {
             Intent intent = ContactsContract.QuickContact.composeQuickContactsIntent(
                     getContext(), v, ContactsContract.Profile.CONTENT_URI,
