@@ -32,7 +32,7 @@ APIs</a></li>
   </div>
 </div>
 
-<p>The Android framework APIs provides a set 2D drawing APIs that allow you to render your own
+<p>The Android framework APIs provides a set of 2D-drawing APIs that allow you to render your own
 custom graphics onto a canvas or to modify existing Views to customize their look and feel.
 When drawing 2D graphics, you'll typically do so in one of two ways:</p>
 
