@@ -456,9 +456,11 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                 } else {
                     // Launch the activity anew with the desired animation
                     Intent i = new Intent(task.key.baseIntent);
-                    i.setFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY
-                            | Intent.FLAG_ACTIVITY_TASK_ON_HOME
-                            | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    i.addFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY
+                            | Intent.FLAG_ACTIVITY_TASK_ON_HOME);
+                    if ((i.getFlags() & Intent.FLAG_ACTIVITY_NEW_DOCUMENT) == 0) {
+                        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    }
                     try {
                         UserHandle taskUser = new UserHandle(task.userId);
                         if (launchOpts != null) {
