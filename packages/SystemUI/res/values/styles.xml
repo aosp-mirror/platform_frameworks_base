@@ -270,4 +270,10 @@
         <item name="android:windowEnterAnimation">@*android:anim/dock_top_enter</item>
         <item name="android:windowExitAnimation">@*android:anim/dock_top_exit</item>
     </style>
+
+    <style name="TextAppearance.StatusBar.Material.EventContent.Parenthetical"
+           parent="@*android:style/TextAppearance.StatusBar.Material.EventContent">
+        <item name="android:textStyle">italic</item>
+        <item name="android:textColor">#60000000</item>
+    </style>
 </resources>

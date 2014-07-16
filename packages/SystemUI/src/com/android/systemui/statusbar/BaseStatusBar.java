@@ -62,8 +62,10 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.view.ViewStub;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
+import android.widget.DateTimeView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
@@ -1075,12 +1077,24 @@ public abstract class BaseStatusBar extends SystemUI implements
                 }
             }
 
+            final View privateTime = contentViewLocal.findViewById(com.android.internal.R.id.time);
+            if (privateTime != null && privateTime.getVisibility() == View.VISIBLE) {
+                final View timeStub = publicViewLocal.findViewById(com.android.internal.R.id.time);
+                timeStub.setVisibility(View.VISIBLE);
+                final DateTimeView dateTimeView = (DateTimeView)
+                        publicViewLocal.findViewById(com.android.internal.R.id.time);
+                dateTimeView.setTime(entry.notification.getNotification().when);
+            }
+
             final TextView text = (TextView) publicViewLocal.findViewById(
-                    com.android.internal.R.id.text);
-            text.setText("Unlock your device to see this notification.");
+                com.android.internal.R.id.text);
+            if (text != null) {
+                text.setText(R.string.notification_hidden_text);
+                text.setTextAppearance(mContext,
+                        R.style.TextAppearance_StatusBar_Material_EventContent_Parenthetical);
+            }
 
             entry.autoRedacted = true;
-            // TODO: fill out "time" as well
         }
 
         row.setDrawingCacheEnabled(true);
