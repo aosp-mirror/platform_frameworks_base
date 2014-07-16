@@ -185,7 +185,9 @@ public class PackageInfo implements Parcelable {
     public ConfigurationInfo[] configPreferences;
 
     /**
-     * The features that this application has said it requires.
+     * Features that this application has requested.
+     *
+     * @see FeatureInfo#FLAG_REQUIRED
      */
     public FeatureInfo[] reqFeatures;
 

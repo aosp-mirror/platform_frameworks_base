@@ -8913,7 +8913,7 @@ package android.content.res {
     ctor public AssetFileDescriptor.AutoCloseOutputStream(android.content.res.AssetFileDescriptor) throws java.io.IOException;
   }
 
-  public final class AssetManager {
+  public final class AssetManager implements java.lang.AutoCloseable {
     method public void close();
     method public final java.lang.String[] getLocales();
     method public final java.lang.String[] list(java.lang.String) throws java.io.IOException;
