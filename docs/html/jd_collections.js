@@ -7,12 +7,26 @@ var RESOURCE_COLLECTIONS = {
       "sdk/installing/studio.html" 
     ]
   },
-  "index/devices": {
+  "distribute/edu/videos/stories": {
     "title": "",
     "resources": [
-      "wear/index.html",
-      "tv/index.html",
-      "auto/index.html"
+      "https://www.youtube.com/watch?v=Idu7VcTTXfk",
+      "https://www.youtube.com/watch?v=iokH4SAIfRw"
+    ]
+  },
+  "distribute/edu/videos/bestpractices": {
+    "title": "",
+    "resources": [
+      "https://www.youtube.com/watch?v=iulXz8QTD1g",
+      "https://www.youtube.com/watch?v=IKhU180eJMo",
+      "https://www.youtube.com/watch?v=_AZ6UcPz-_g",
+      "https://www.youtube.com/watch?v=Eh2adsAyTKc"
+    ]
+  },
+  "distribute/edu/videos/experience": {
+    "title": "",
+    "resources": [
+      "http://youtu.be/vzvpcEffvaE"
     ]
   },
   "launch/static": {
@@ -45,7 +59,7 @@ var RESOURCE_COLLECTIONS = {
     "resources": [
       "distribute/googleplay/edu/about.html",
       "distribute/googleplay/edu/start.html",
-      "https://developers.google.com/edu/faq"
+      "distribute/googleplay/edu/videos.html"
     ]
   },
   "distribute/essentials": {
