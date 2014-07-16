@@ -14956,7 +14956,9 @@ package android.media {
     method public void attachAuxEffect(int);
     method public static android.media.MediaPlayer create(android.content.Context, android.net.Uri);
     method public static android.media.MediaPlayer create(android.content.Context, android.net.Uri, android.view.SurfaceHolder);
+    method public static android.media.MediaPlayer create(android.content.Context, android.net.Uri, android.view.SurfaceHolder, android.media.AudioAttributes, int);
     method public static android.media.MediaPlayer create(android.content.Context, int);
+    method public static android.media.MediaPlayer create(android.content.Context, int, android.media.AudioAttributes, int);
     method public void deselectTrack(int) throws java.lang.IllegalStateException;
     method public int getAudioSessionId();
     method public int getCurrentPosition();
