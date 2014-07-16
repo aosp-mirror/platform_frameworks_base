@@ -141,6 +141,9 @@ interface IDevicePolicyManager {
     boolean removeUser(in ComponentName who, in UserHandle userHandle);
     boolean switchUser(in ComponentName who, in UserHandle userHandle);
 
+    void enableSystemApp(in ComponentName admin, in String packageName);
+    int enableSystemAppWithIntent(in ComponentName admin, in Intent intent);
+
     void setAccountManagementDisabled(in ComponentName who, in String accountType, in boolean disabled);
     String[] getAccountTypesWithManagementDisabled();
 
