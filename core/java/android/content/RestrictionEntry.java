@@ -79,6 +79,13 @@ public class RestrictionEntry implements Parcelable {
      */
     public static final int TYPE_INTEGER = 5;
 
+    /**
+     * A type of restriction. Use this for storing a string value.
+     * @see #setSelectedString
+     * @see #getSelectedString
+     */
+    public static final int TYPE_STRING = 6;
+
     /** The type of restriction. */
     private int mType;
 
@@ -105,6 +112,17 @@ public class RestrictionEntry implements Parcelable {
 
     /* List of selected choices in the multi-select case. */
     private String[] mCurrentValues;
+
+    /**
+     * Constructor for specifying the type and key, with no initial value;
+     *
+     * @param type the restriction type.
+     * @param key the unique key for this restriction
+     */
+    public RestrictionEntry(int type, String key) {
+        mType = type;
+        mKey = key;
+    }
 
     /**
      * Constructor for {@link #TYPE_CHOICE} type.

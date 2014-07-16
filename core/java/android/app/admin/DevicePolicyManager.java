@@ -2243,7 +2243,7 @@ public class DevicePolicyManager {
      * application running in the managed profile.
      *
      * <p>The provided {@link Bundle} consists of key-value pairs, where the types of values may be
-     * {@link Boolean}, {@link String}, or {@link String}[]. The recommended format for key strings
+     * boolean, int, String, or String[]. The recommended format for keys
      * is "com.example.packagename/example-setting" to avoid naming conflicts with library
      * components such as {@link android.webkit.WebView}.
      *

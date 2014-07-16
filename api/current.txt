@@ -359,7 +359,7 @@ package android {
     field public static final int buttonTint = 16843889; // 0x1010471
     field public static final int buttonTintMode = 16843890; // 0x1010472
     field public static final int cacheColorHint = 16843009; // 0x1010101
-    field public static final int calendarTextColor = 16843933; // 0x101049d
+    field public static final int calendarTextColor = 16843934; // 0x101049e
     field public static final int calendarViewShown = 16843596; // 0x101034c
     field public static final int calendarViewStyle = 16843613; // 0x101035d
     field public static final int canRequestEnhancedWebAccessibility = 16843736; // 0x10103d8
@@ -448,14 +448,14 @@ package android {
     field public static final int dashWidth = 16843174; // 0x10101a6
     field public static final int data = 16842798; // 0x101002e
     field public static final int datePickerStyle = 16843612; // 0x101035c
-    field public static final int dateSelectorBackgroundColor = 16843927; // 0x1010497
-    field public static final int dateSelectorDayOfMonthTextAppearance = 16843929; // 0x1010499
-    field public static final int dateSelectorDayOfWeekBackgroundColor = 16843925; // 0x1010495
-    field public static final int dateSelectorDayOfWeekTextAppearance = 16843926; // 0x1010496
-    field public static final int dateSelectorMonthTextAppearance = 16843928; // 0x1010498
-    field public static final int dateSelectorYearListItemTextAppearance = 16843931; // 0x101049b
-    field public static final int dateSelectorYearListSelectedCircleColor = 16843932; // 0x101049c
-    field public static final int dateSelectorYearTextAppearance = 16843930; // 0x101049a
+    field public static final int dateSelectorBackgroundColor = 16843928; // 0x1010498
+    field public static final int dateSelectorDayOfMonthTextAppearance = 16843930; // 0x101049a
+    field public static final int dateSelectorDayOfWeekBackgroundColor = 16843926; // 0x1010496
+    field public static final int dateSelectorDayOfWeekTextAppearance = 16843927; // 0x1010497
+    field public static final int dateSelectorMonthTextAppearance = 16843929; // 0x1010499
+    field public static final int dateSelectorYearListItemTextAppearance = 16843932; // 0x101049c
+    field public static final int dateSelectorYearListSelectedCircleColor = 16843933; // 0x101049d
+    field public static final int dateSelectorYearTextAppearance = 16843931; // 0x101049b
     field public static final int dateTextAppearance = 16843593; // 0x1010349
     field public static final int debuggable = 16842767; // 0x101000f
     field public static final int defaultValue = 16843245; // 0x10101ed
@@ -1007,6 +1007,7 @@ package android {
     field public static final int restoreAnyVersion = 16843450; // 0x10102ba
     field public static final deprecated int restoreNeedsApplication = 16843421; // 0x101029d
     field public static final int restrictedAccountType = 16843733; // 0x10103d5
+    field public static final int restrictionType = 16843925; // 0x1010495
     field public static final int reversible = 16843853; // 0x101044d
     field public static final int right = 16843183; // 0x10101af
     field public static final int ringtonePreferenceStyle = 16842899; // 0x1010093
@@ -7934,6 +7935,7 @@ package android.content {
   }
 
   public class RestrictionEntry implements android.os.Parcelable {
+    ctor public RestrictionEntry(int, java.lang.String);
     ctor public RestrictionEntry(java.lang.String, java.lang.String);
     ctor public RestrictionEntry(java.lang.String, boolean);
     ctor public RestrictionEntry(java.lang.String, java.lang.String[]);
@@ -7968,6 +7970,7 @@ package android.content {
     field public static final int TYPE_INTEGER = 5; // 0x5
     field public static final int TYPE_MULTI_SELECT = 4; // 0x4
     field public static final int TYPE_NULL = 0; // 0x0
+    field public static final int TYPE_STRING = 6; // 0x6
   }
 
   public class RestrictionsManager {
@@ -7982,6 +7985,7 @@ package android.content {
     field public static final java.lang.String EXTRA_REQUEST_BUNDLE = "android.content.extra.REQUEST_BUNDLE";
     field public static final java.lang.String EXTRA_REQUEST_TYPE = "android.content.extra.REQUEST_TYPE";
     field public static final java.lang.String EXTRA_RESPONSE_BUNDLE = "android.content.extra.RESPONSE_BUNDLE";
+    field public static final java.lang.String META_DATA_APP_RESTRICTIONS = "android.content.APP_RESTRICTIONS";
     field public static final java.lang.String REQUEST_KEY_APPROVE_LABEL = "android.request.approve_label";
     field public static final java.lang.String REQUEST_KEY_DATA = "android.request.data";
     field public static final java.lang.String REQUEST_KEY_DENY_LABEL = "android.request.deny_label";
@@ -7993,7 +7997,7 @@ package android.content {
     field public static final java.lang.String REQUEST_TYPE_APPROVAL = "android.request.type.approval";
     field public static final java.lang.String REQUEST_TYPE_LOCAL_APPROVAL = "android.request.type.local_approval";
     field public static final java.lang.String RESPONSE_KEY_ERROR_CODE = "android.response.errorcode";
-    field public static final java.lang.String RESPONSE_KEY_ERROR_MESSAGE = "android.response.errormsg";
+    field public static final java.lang.String RESPONSE_KEY_MESSAGE = "android.response.msg";
     field public static final java.lang.String RESPONSE_KEY_RESPONSE_TIMESTAMP = "android.response.timestamp";
     field public static final java.lang.String RESPONSE_KEY_RESULT = "android.response.result";
     field public static final int RESULT_APPROVED = 1; // 0x1
