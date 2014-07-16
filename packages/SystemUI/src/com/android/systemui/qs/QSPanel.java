@@ -108,6 +108,9 @@ public class QSPanel extends ViewGroup {
         mHost = host;
     }
 
+    public QSTileHost getHost() {
+        return mHost;
+    }
 
     public void updateResources() {
         final Resources res = mContext.getResources();

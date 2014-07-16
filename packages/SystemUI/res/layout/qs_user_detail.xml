@@ -16,9 +16,14 @@
   ~ limitations under the License
   -->
 
-<com.android.systemui.qs.tiles.UserDetail
+<!-- GridView -->
+<com.android.systemui.qs.tiles.UserDetailView
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-    <include layout="@layout/user_switcher_host" />
-</com.android.systemui.qs.tiles.UserDetail>
+        android:layout_height="match_parent"
+        android:verticalSpacing="4dp"
+        android:horizontalSpacing="4dp"
+        android:numColumns="3"
+        android:listSelector="@drawable/ripple_drawable">
+
+</com.android.systemui.qs.tiles.UserDetailView>

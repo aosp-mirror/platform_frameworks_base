@@ -127,6 +127,7 @@ import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.LocationControllerImpl;
 import com.android.systemui.statusbar.policy.NetworkControllerImpl;
 import com.android.systemui.statusbar.policy.RotationLockControllerImpl;
+import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout.OnChildLocationsChangedListener;
@@ -194,6 +195,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     VolumeComponent mVolumeComponent;
     KeyguardUserSwitcher mKeyguardUserSwitcher;
     FlashlightController mFlashlightController;
+    UserSwitcherController mUserSwitcherController;
 
     int mNaturalBarHeight = -1;
     int mIconSize = -1;
@@ -691,6 +693,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
 
         mFlashlightController = new FlashlightController(mContext);
+        mUserSwitcherController = new UserSwitcherController(mContext);
 
         // Set up the quick settings tile panel
         mQSPanel = (QSPanel) mStatusBarWindow.findViewById(R.id.quick_settings_panel);
@@ -698,7 +701,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             final QSTileHost qsh = new QSTileHost(mContext, this,
                     mBluetoothController, mLocationController, mRotationLockController,
                     mNetworkController, mZenModeController, null /*tethering*/,
-                    mCastController, mVolumeComponent, mFlashlightController);
+                    mCastController, mVolumeComponent, mFlashlightController,
+                    mUserSwitcherController);
             mQSPanel.setHost(qsh);
             for (QSTile<?> tile : qsh.getTiles()) {
                 mQSPanel.addTile(tile);
@@ -2325,6 +2329,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
         if (mCastController != null) {
             mCastController.dump(fd, pw, args);
+        }
+        if (mUserSwitcherController != null) {
+            mUserSwitcherController.dump(fd, pw, args);
         }
     }
 
