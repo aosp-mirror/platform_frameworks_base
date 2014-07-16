@@ -3133,16 +3133,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             IActivityManager activityManager = ActivityManagerNative.getDefault();
             if (activityManager.isInLockTaskMode()) {
                 activityManager.stopLockTaskModeOnCurrent();
-            } else {
-                try {
-                    boolean lockToAppEnabled = Settings.System.getInt(mContext.getContentResolver(),
-                            Settings.System.LOCK_TO_APP_ENABLED) != 0;
-                    if (lockToAppEnabled) {
-                        activityManager.startLockTaskModeOnCurrent();
-                    }
-                } catch (SettingNotFoundException e) {
-                    // No setting, not enabled.
-                }
             }
         } catch (RemoteException e) {
             Log.d(TAG, "Unable to toggle Lock-to-app", e);

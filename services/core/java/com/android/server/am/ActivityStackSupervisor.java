@@ -3289,6 +3289,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                                     Settings.System.LOCK_TO_APP_EXIT_LOCKED) != 0;
                             if (shouldLockKeyguard) {
                                 mWindowManager.lockNow(null);
+                                mWindowManager.dismissKeyguard();
                             }
                         } catch (SettingNotFoundException e) {
                             // No setting, don't lock.
