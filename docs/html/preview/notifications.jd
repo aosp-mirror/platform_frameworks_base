@@ -183,7 +183,7 @@ their watch.</p>
 <img src="{@docRoot}preview/images/notifications/ReplyAction.png" width="156px" height="156px"
   alt="" />
 
-  
+
 </div>
 
 
@@ -315,7 +315,7 @@ when they expand the notification shade.</p>
 priority</strong></h4>
 
 <p>Default, High, and Max priority are interruptive priority levels and risk interrupting the user
-from what they are doing. This should not not be taken lightly, so these levels should be  reserved
+from what they are doing. This should not be taken lightly, so these levels should be  reserved
 for notifications that:</p>
 
 <ul>
@@ -498,7 +498,7 @@ notifications of a particular kind are pending.</p>
 
 <h3 style="clear:both" id="make_notifications_optional">Make notifications optional</h3>
 
-<p>Users should always be in control of notifications. Allow the user to diszable your app's
+<p>Users should always be in control of notifications. Allow the user to disable your app's
 notifications or change their alert properties, such as alert sound and whether to use vibration,
 by adding a notification settings item to your application settings.</p>
 

@@ -6,7 +6,7 @@ page.title=Material Theme
 <div id="qv">
 <h2>In this document</h2>
 <ol>
-  <li><a href="#colorpalette">Customize the Colot Palette</a></li>
+  <li><a href="#colorpalette">Customize the Color Palette</a></li>
   <li><a href="#statusbar">Customize the Status Bar</a></li>
   <li><a href="#inheritance">Theme Individual Views</a></li>
 </ol>
