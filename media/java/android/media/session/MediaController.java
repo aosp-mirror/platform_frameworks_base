@@ -234,19 +234,21 @@ public final class MediaController {
     }
 
     /**
-     * Adjust the volume of the stream or output this session is playing on.
-     * Negative values will lower the volume. The command will be ignored if it
-     * does not support {@link VolumeProvider#VOLUME_CONTROL_RELATIVE} or
+     * Adjust the volume of the stream or output this session is playing on. The
+     * direction must be one of {@link AudioManager#ADJUST_LOWER},
+     * {@link AudioManager#ADJUST_RAISE}, or {@link AudioManager#ADJUST_SAME}.
+     * The command will be ignored if the session does not support
+     * {@link VolumeProvider#VOLUME_CONTROL_RELATIVE} or
      * {@link VolumeProvider#VOLUME_CONTROL_ABSOLUTE}. The flags in
      * {@link AudioManager} may be used to affect the handling.
      *
      * @see #getVolumeInfo()
-     * @param delta The number of steps to adjust the volume by.
+     * @param direction The direction to adjust the volume in.
      * @param flags Any flags to pass with the command.
      */
-    public void adjustVolumeBy(int delta, int flags) {
+    public void adjustVolume(int direction, int flags) {
         try {
-            mSessionBinder.adjustVolumeBy(delta, flags);
+            mSessionBinder.adjustVolume(direction, flags);
         } catch (RemoteException e) {
             Log.wtf(TAG, "Error calling adjustVolumeBy.", e);
         }

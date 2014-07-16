@@ -869,11 +869,11 @@ public final class MediaSession {
         }
 
         @Override
-        public void onAdjustVolumeBy(int delta) {
+        public void onAdjustVolume(int direction) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
                 if (session.mVolumeProvider != null) {
-                    session.mVolumeProvider.onAdjustVolumeBy(delta);
+                    session.mVolumeProvider.onAdjustVolume(direction);
                 }
             }
         }

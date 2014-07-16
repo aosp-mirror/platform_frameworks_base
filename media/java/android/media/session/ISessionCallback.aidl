@@ -39,6 +39,6 @@ oneway interface ISessionCallback {
     void onRate(in Rating rating);
 
     // These callbacks are for volume handling
-    void onAdjustVolumeBy(int delta);
+    void onAdjustVolume(int direction);
     void onSetVolumeTo(int value);
 }

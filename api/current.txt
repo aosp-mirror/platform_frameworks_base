@@ -15619,7 +15619,7 @@ package android.media {
     method public final int getMaxVolume();
     method public final int getVolumeControl();
     method public final void notifyVolumeChanged();
-    method public void onAdjustVolumeBy(int);
+    method public void onAdjustVolume(int);
     method public abstract int onGetCurrentVolume();
     method public void onSetVolumeTo(int);
     field public static final int VOLUME_CONTROL_ABSOLUTE = 2; // 0x2
@@ -16224,7 +16224,7 @@ package android.media.session {
     ctor public MediaController(android.media.session.MediaSession.Token);
     method public void addCallback(android.media.session.MediaController.Callback);
     method public void addCallback(android.media.session.MediaController.Callback, android.os.Handler);
-    method public void adjustVolumeBy(int, int);
+    method public void adjustVolume(int, int);
     method public android.media.routing.MediaRouter.Delegate createMediaRouterDelegate();
     method public boolean dispatchMediaButtonEvent(android.view.KeyEvent);
     method public android.media.MediaMetadata getMetadata();

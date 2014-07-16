@@ -209,13 +209,13 @@ public class MediaSessionLegacyHelper {
                 }
             }
 
-            mSessionManager.dispatchAdjustVolumeBy(AudioManager.USE_DEFAULT_STREAM_TYPE,
+            mSessionManager.dispatchAdjustVolume(AudioManager.USE_DEFAULT_STREAM_TYPE,
                     direction, flags);
         }
     }
 
     public void sendAdjustVolumeBy(int suggestedStream, int delta, int flags) {
-        mSessionManager.dispatchAdjustVolumeBy(suggestedStream, delta, flags);
+        mSessionManager.dispatchAdjustVolume(suggestedStream, delta, flags);
         if (DEBUG) {
             Log.d(TAG, "dispatched volume adjustment");
         }
