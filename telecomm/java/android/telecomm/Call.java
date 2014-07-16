@@ -153,6 +153,13 @@ public final class Call {
             return mGatewayInfo;
         }
 
+        /**
+         * @return Returns the video state of the {@code Call}.
+         */
+        public int getVideoState() {
+            return mVideoState;
+        }
+
         @Override
         public boolean equals(Object o) {
             if (o instanceof Details) {

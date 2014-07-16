@@ -27998,6 +27998,7 @@ package android.telecomm {
     method public android.telecomm.GatewayInfo getGatewayInfo();
     method public android.net.Uri getHandle();
     method public int getHandlePresentation();
+    method public int getVideoState();
   }
 
   public static abstract class Call.Listener {
