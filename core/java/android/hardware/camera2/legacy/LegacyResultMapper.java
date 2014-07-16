@@ -28,15 +28,12 @@ import android.hardware.camera2.legacy.ParameterUtils.WeightedRectangle;
 import android.hardware.camera2.legacy.ParameterUtils.ZoomData;
 import android.hardware.camera2.params.MeteringRectangle;
 import android.hardware.camera2.utils.ListUtils;
-import android.hardware.camera2.utils.ParamsUtils;
 import android.util.Log;
-import android.util.Rational;
 import android.util.Size;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.android.internal.util.Preconditions.*;
 import static android.hardware.camera2.CaptureResult.*;
 
 /**
@@ -45,6 +42,36 @@ import static android.hardware.camera2.CaptureResult.*;
 public class LegacyResultMapper {
     private static final String TAG = "LegacyResultMapper";
     private static final boolean VERBOSE = Log.isLoggable(TAG, Log.VERBOSE);
+
+    private LegacyRequest mCachedRequest = null;
+    private CameraMetadataNative mCachedResult = null;
+
+    /**
+     * Generate capture result metadata from the legacy camera request.
+     *
+     * <p>This method caches and reuses the result from the previous call to this method if
+     * the {@code parameters} of the subsequent {@link LegacyRequest} passed to this method
+     * have not changed.</p>
+     *
+     * @param legacyRequest a non-{@code null} legacy request containing the latest parameters
+     * @param timestamp the timestamp to use for this result in nanoseconds.
+     *
+     * @return {@link CameraMetadataNative} object containing result metadata.
+     */
+    public CameraMetadataNative cachedConvertResultMetadata(
+            LegacyRequest legacyRequest, long timestamp) {
+        if (mCachedRequest != null && legacyRequest.parameters.same(mCachedRequest.parameters)) {
+            CameraMetadataNative newResult = new CameraMetadataNative(mCachedResult);
+
+            // sensor.timestamp
+            newResult.set(CaptureResult.SENSOR_TIMESTAMP, timestamp);
+            return newResult;
+        }
+
+        mCachedRequest = legacyRequest;
+        mCachedResult = convertResultMetadata(mCachedRequest, timestamp);
+        return mCachedResult;
+    }
 
     /**
      * Generate capture result metadata from the legacy camera request.

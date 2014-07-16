@@ -46,6 +46,7 @@ import static com.android.internal.util.Preconditions.*;
  */
 public abstract class TypeReference<T> {
     private final Type mType;
+    private final int mHash;
 
     /**
      * Create a new type reference for {@code T}.
@@ -73,6 +74,7 @@ public abstract class TypeReference<T> {
             throw new IllegalArgumentException(
                     "Including a type variable in a type reference is not allowed");
         }
+        mHash = mType.hashCode();
     }
 
     /**
@@ -84,11 +86,11 @@ public abstract class TypeReference<T> {
 
     private TypeReference(Type type) {
         mType = type;
-
         if (containsTypeVariable(mType)) {
             throw new IllegalArgumentException(
                     "Including a type variable in a type reference is not allowed");
         }
+        mHash = mType.hashCode();
     }
 
     private static class SpecializedTypeReference<T> extends TypeReference<T> {
@@ -249,7 +251,7 @@ public abstract class TypeReference<T> {
      */
     @Override
     public int hashCode() {
-        return mType.hashCode();
+        return mHash;
     }
 
     /**
