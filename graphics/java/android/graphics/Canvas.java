@@ -237,6 +237,9 @@ public class Canvas {
      */
     public void setViewport(int width, int height) {}
 
+    /** @hide */
+    public void setHighContrastText(boolean highContrastText) {}
+
     /**
      * @hide
      */
