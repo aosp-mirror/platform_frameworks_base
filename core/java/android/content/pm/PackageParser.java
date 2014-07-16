@@ -846,7 +846,7 @@ public class PackageParser {
             throw e;
         } catch (Exception e) {
             throw new PackageParserException(INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION,
-                    "Unable to read AndroidManifest.xml of " + apkPath);
+                    "Failed to read manifest from " + apkPath, e);
         } finally {
             IoUtils.closeQuietly(parser);
             IoUtils.closeQuietly(assets);
@@ -895,7 +895,7 @@ public class PackageParser {
             throw e;
         } catch (Exception e) {
             throw new PackageParserException(INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION,
-                    "Unable to read AndroidManifest.xml of " + apkPath);
+                    "Failed to read manifest from " + apkPath, e);
         } finally {
             IoUtils.closeQuietly(parser);
             IoUtils.closeQuietly(assets);
@@ -910,8 +910,12 @@ public class PackageParser {
      * omitted here.
      */
     private Package parseSplitApk(Package pkg, Resources res, XmlResourceParser parser, int flags,
-            int splitIndex, String[] outError) throws XmlPullParserException, IOException {
+            int splitIndex, String[] outError) throws XmlPullParserException, IOException,
+            PackageParserException {
         AttributeSet attrs = parser;
+
+        // We parsed manifest tag earlier; just skip past it
+        parsePackageSplitNames(parser, attrs, flags);
 
         mParseInstrumentationArgs = null;
         mParseActivityArgs = null;

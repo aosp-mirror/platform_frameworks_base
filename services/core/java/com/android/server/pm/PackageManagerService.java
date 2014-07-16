@@ -165,6 +165,7 @@ import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
+import android.util.ExceptionUtils;
 import android.util.Log;
 import android.util.LogPrinter;
 import android.util.PrintStreamPrinter;
@@ -9855,6 +9856,18 @@ public class PackageManagerService extends IPackageManager.Stub {
             Slog.w(TAG, msg);
         }
 
+        public void setError(String msg, PackageParserException e) {
+            returnCode = e.error;
+            returnMsg = ExceptionUtils.getCompleteMessage(msg, e);
+            Slog.w(TAG, msg, e);
+        }
+
+        public void setError(String msg, PackageManagerException e) {
+            returnCode = e.error;
+            returnMsg = ExceptionUtils.getCompleteMessage(msg, e);
+            Slog.w(TAG, msg, e);
+        }
+
         // In some error cases we want to convey more info back to the observer
         String origPackage;
         String origPermission;
@@ -9908,8 +9921,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
         } catch (PackageManagerException e) {
-            res.setError(e.error,
-                    "Package couldn't be installed in " + pkg.codePath + ": " + e.getMessage());
+            res.setError("Package couldn't be installed in " + pkg.codePath, e);
         }
     }
 
@@ -10007,8 +10019,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 updateSettingsLI(newPackage, installerPackageName, allUsers, perUserInstalled, res);
                 updatedSettings = true;
             } catch (PackageManagerException e) {
-                res.setError(e.error,
-                        "Package couldn't be installed in " + pkg.codePath + ": " + e.getMessage());
+                res.setError("Package couldn't be installed in " + pkg.codePath, e);
             }
         }
 
@@ -10139,8 +10150,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
         } catch (PackageManagerException e) {
-            res.setError(e.error,
-                    "Package couldn't be installed in " + pkg.codePath + ": " + e.getMessage());
+            res.setError("Package couldn't be installed in " + pkg.codePath, e);
         }
 
         if (res.returnCode != PackageManager.INSTALL_SUCCEEDED) {
@@ -10278,7 +10288,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         try {
             pkg = pp.parsePackage(tmpPackageFile, parseFlags);
         } catch (PackageParserException e) {
-            res.setError(e.error, "Failed parse during installPackageLI: " + e.getMessage());
+            res.setError("Failed parse during installPackageLI", e);
             return;
         }
 
@@ -10294,7 +10304,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             pp.collectCertificates(pkg, parseFlags);
             pp.collectManifestDigest(pkg);
         } catch (PackageParserException e) {
-            res.setError(e.error, "Failed collect during installPackageLI: " + e.getMessage());
+            res.setError("Failed collect during installPackageLI", e);
             return;
         }
 
