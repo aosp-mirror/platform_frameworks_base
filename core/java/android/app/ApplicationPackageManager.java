@@ -62,6 +62,7 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.view.Display;
 import com.android.internal.util.Preconditions;
+import dalvik.system.VMRuntime;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -251,6 +252,10 @@ final class ApplicationPackageManager extends PackageManager {
         try {
             ApplicationInfo ai = mPM.getApplicationInfo(packageName, flags, mContext.getUserId());
             if (ai != null) {
+                // This is a temporary hack. Callers must use
+                // createPackageContext(packageName).getApplicationInfo() to
+                // get the right paths.
+                maybeAdjustApplicationInfo(ai);
                 return ai;
             }
         } catch (RemoteException e) {
@@ -259,6 +264,24 @@ final class ApplicationPackageManager extends PackageManager {
 
         throw new NameNotFoundException(packageName);
     }
+
+    private static void maybeAdjustApplicationInfo(ApplicationInfo info) {
+        // If we're dealing with a multi-arch application that has both
+        // 32 and 64 bit shared libraries, we might need to choose the secondary
+        // depending on what the current runtime's instruction set is.
+        if (info.primaryCpuAbi != null && info.secondaryCpuAbi != null) {
+            final String runtimeIsa = VMRuntime.getRuntime().vmInstructionSet();
+            final String secondaryIsa = VMRuntime.getInstructionSet(info.secondaryCpuAbi);
+
+            // If the runtimeIsa is the same as the primary isa, then we do nothing.
+            // Everything will be set up correctly because info.nativeLibraryDir will
+            // correspond to the right ISA.
+            if (runtimeIsa.equals(secondaryIsa)) {
+                info.nativeLibraryDir = info.secondaryNativeLibraryDir;
+            }
+        }
+    }
+
 
     @Override
     public ActivityInfo getActivityInfo(ComponentName className, int flags)
