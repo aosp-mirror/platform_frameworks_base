@@ -20,8 +20,18 @@ import android.content.Intent;
 import android.hardware.soundtrigger.Keyphrase;
 import android.hardware.soundtrigger.KeyphraseEnrollmentInfo;
 import android.hardware.soundtrigger.KeyphraseMetadata;
+import android.hardware.soundtrigger.KeyphraseSoundModel;
+import android.hardware.soundtrigger.SoundTrigger;
+import android.hardware.soundtrigger.SoundTrigger.ConfidenceLevel;
+import android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra;
 import android.hardware.soundtrigger.SoundTriggerHelper;
+import android.hardware.soundtrigger.SoundTrigger.RecognitionConfig;
+import android.os.RemoteException;
 import android.util.Slog;
+
+import com.android.internal.app.IVoiceInteractionManagerService;
+
+import java.util.List;
 
 /**
  * A class that lets a VoiceInteractionService implementation interact with
@@ -72,11 +82,22 @@ public class AlwaysOnHotwordDetector {
 
     private final String mText;
     private final String mLocale;
-    private final Keyphrase mKeyphrase;
+    /**
+     * The metadata of the Keyphrase, derived from the enrollment application.
+     * This may be null if this keyphrase isn't supported by the enrollment application.
+     */
+    private final KeyphraseMetadata mKeyphraseMetadata;
+    /**
+     * The sound model for the keyphrase, derived from the model management service
+     * (IVoiceInteractionManagerService). May be null if the keyphrase isn't enrolled yet.
+     */
+    private final KeyphraseSoundModel mEnrolledSoundModel;
     private final KeyphraseEnrollmentInfo mKeyphraseEnrollmentInfo;
     private final SoundTriggerHelper mSoundTriggerHelper;
     private final SoundTriggerHelper.Listener mListener;
     private final int mAvailability;
+    private final IVoiceInteractionService mVoiceInteractionService;
+    private final IVoiceInteractionManagerService mModelManagementService;
 
     private int mRecognitionState;
 
@@ -103,25 +124,30 @@ public class AlwaysOnHotwordDetector {
      * @param text The keyphrase text to get the detector for.
      * @param locale The java locale for the detector.
      * @param callback A non-null Callback for receiving the recognition events.
+     * @param voiceInteractionService The current voice interaction service.
+     * @param modelManagementService A service that allows management of sound models.
      *
      * @hide
      */
     public AlwaysOnHotwordDetector(String text, String locale, Callback callback,
             KeyphraseEnrollmentInfo keyphraseEnrollmentInfo,
-            SoundTriggerHelper soundTriggerHelper) {
+            SoundTriggerHelper soundTriggerHelper,
+            IVoiceInteractionService voiceInteractionService,
+            IVoiceInteractionManagerService modelManagementService) {
         mText = text;
         mLocale = locale;
         mKeyphraseEnrollmentInfo = keyphraseEnrollmentInfo;
-        KeyphraseMetadata keyphraseMetadata =
-                mKeyphraseEnrollmentInfo.getKeyphraseMetadata(text, locale);
-        if (keyphraseMetadata != null) {
-            mKeyphrase = new Keyphrase(keyphraseMetadata.id, text, locale);
-        } else {
-            mKeyphrase = null;
-        }
+        mKeyphraseMetadata = mKeyphraseEnrollmentInfo.getKeyphraseMetadata(text, locale);
         mListener = new SoundTriggerListener(callback);
         mSoundTriggerHelper = soundTriggerHelper;
-        mAvailability = getAvailabilityInternal();
+        mVoiceInteractionService = voiceInteractionService;
+        mModelManagementService = modelManagementService;
+        if (mKeyphraseMetadata != null) {
+            mEnrolledSoundModel = internalGetKeyphraseSoundModel(mKeyphraseMetadata.id);
+        } else {
+            mEnrolledSoundModel = null;
+        }
+        mAvailability = internalGetAvailability();
     }
 
     /**
@@ -171,7 +197,16 @@ public class AlwaysOnHotwordDetector {
         }
 
         mRecognitionState = RECOGNITION_REQUESTED;
-        int code = mSoundTriggerHelper.startRecognition(mKeyphrase.id, mListener);
+        mRecognitionState = RECOGNITION_REQUESTED;
+        KeyphraseRecognitionExtra[] recognitionExtra = new KeyphraseRecognitionExtra[1];
+        // TODO: Do we need to do something about the confidence level here?
+        // TODO: Read the recognition mode flag from the KeyphraseMetadata.
+        // TODO: Take in captureTriggerAudio as a method param here.
+        recognitionExtra[0] = new KeyphraseRecognitionExtra(mKeyphraseMetadata.id,
+                SoundTrigger.RECOGNITION_MODE_VOICE_TRIGGER, new ConfidenceLevel[0]);
+        int code = mSoundTriggerHelper.startRecognition(mKeyphraseMetadata.id,
+                mEnrolledSoundModel.convertToSoundTriggerKeyphraseSoundModel(), mListener,
+                new RecognitionConfig(false, recognitionExtra, null /* additional data */));
         if (code != SoundTriggerHelper.STATUS_OK) {
             Slog.w(TAG, "startRecognition() failed with error code " + code);
             return STATUS_ERROR;
@@ -195,7 +230,8 @@ public class AlwaysOnHotwordDetector {
         }
 
         mRecognitionState = RECOGNITION_NOT_REQUESTED;
-        int code = mSoundTriggerHelper.stopRecognition(mKeyphrase.id, mListener);
+        int code = mSoundTriggerHelper.stopRecognition(mKeyphraseMetadata.id, mListener);
+
         if (code != SoundTriggerHelper.STATUS_OK) {
             Slog.w(TAG, "stopRecognition() failed with error code " + code);
             return STATUS_ERROR;
@@ -230,17 +266,49 @@ public class AlwaysOnHotwordDetector {
         return mKeyphraseEnrollmentInfo.getManageKeyphraseIntent(action, mText, mLocale);
     }
 
-    private int getAvailabilityInternal() {
+    private int internalGetAvailability() {
+        // No DSP available
         if (mSoundTriggerHelper.dspInfo == null) {
             return KEYPHRASE_HARDWARE_UNAVAILABLE;
         }
-        if (mKeyphrase == null || !mSoundTriggerHelper.isKeyphraseSupported(mKeyphrase)) {
+        // No enrollment application supports this keyphrase/locale
+        if (mKeyphraseMetadata == null) {
             return KEYPHRASE_UNSUPPORTED;
         }
-        if (!mSoundTriggerHelper.isKeyphraseEnrolled(mKeyphrase)) {
+        // This keyphrase hasn't been enrolled.
+        if (mEnrolledSoundModel == null) {
             return KEYPHRASE_UNENROLLED;
         }
         return KEYPHRASE_ENROLLED;
+    }
+
+    /**
+     * @return The corresponding {@link KeyphraseSoundModel} or null if none is found.
+     */
+    private KeyphraseSoundModel internalGetKeyphraseSoundModel(int keyphraseId) {
+        List<KeyphraseSoundModel> soundModels;
+        try {
+            soundModels = mModelManagementService
+                    .listRegisteredKeyphraseSoundModels(mVoiceInteractionService);
+            if (soundModels == null || soundModels.isEmpty()) {
+                Slog.i(TAG, "No available sound models for keyphrase ID: " + keyphraseId);
+                return null;
+            }
+            for (KeyphraseSoundModel soundModel : soundModels) {
+                if (soundModel.keyphrases == null) {
+                    continue;
+                }
+                for (Keyphrase keyphrase : soundModel.keyphrases) {
+                    // TODO: Check the user handle here to only load a model for the current user.
+                    if (keyphrase.id == keyphraseId) {
+                        return soundModel;
+                    }
+                }
+            }
+        } catch (RemoteException e) {
+            Slog.w(TAG, "RemoteException in listRegisteredKeyphraseSoundModels!");
+        }
+        return null;
     }
 
     /** @hide */
