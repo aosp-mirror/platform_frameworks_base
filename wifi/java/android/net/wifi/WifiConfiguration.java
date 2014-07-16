@@ -16,6 +16,7 @@
 
 package android.net.wifi;
 
+import android.annotation.SystemApi;
 import android.net.IpConfiguration;
 import android.net.IpConfiguration.ProxySettings;
 import android.net.IpConfiguration.IpAssignment;
@@ -342,6 +343,7 @@ public class WifiConfiguration implements Parcelable {
      * @hide
      * Uid of app creating the configuration
      */
+    @SystemApi
     public int creatorUid;
 
     /**
