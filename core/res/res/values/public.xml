@@ -2238,6 +2238,8 @@
   <public type="attr" name="windowElevation" />
   <public type="attr" name="launchTaskBehindBackgroundAnimation" />
   <public type="attr" name="launchTaskBehindSourceAnimation" />
+  <!-- Attribute specified in a restriction entry to denote the type of restriction. -->
+  <public type="attr" name="restrictionType" />
 
   <public type="attr" name="dateSelectorDayOfWeekBackgroundColor" />
   <public type="attr" name="dateSelectorDayOfWeekTextAppearance" />

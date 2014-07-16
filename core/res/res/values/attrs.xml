@@ -7218,4 +7218,21 @@
         <attr name="ambientShadowAlpha" format="float" />
         <attr name="spotShadowAlpha" format="float" />
     </declare-styleable>
+
+    <declare-styleable name="RestrictionEntry">
+        <attr name="key" />
+        <attr name="restrictionType">
+            <enum name="hidden" value="0" />
+            <enum name="bool" value="1" />
+            <enum name="choice" value="2" />
+            <enum name="multi-select" value="4" />
+            <enum name="integer" value="5" />
+            <enum name="string" value="6" />
+        </attr>
+        <attr name="title" />
+        <attr name="description" />
+        <attr name="defaultValue" />
+        <attr name="entries" />
+        <attr name="entryValues" />
+    </declare-styleable>
 </resources>
