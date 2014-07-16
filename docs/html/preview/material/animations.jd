@@ -130,7 +130,7 @@ translates and scales the image smoothly between these activities.</li>
 <ul>
 <li><em>explode</em> - Moves views in or out from the center of the scene.</li>
 <li><em>slide</em> - Moves views in or out from one of the edges of the scene.</li>
-<li><em>fade</em> - Mades views in or out of the scene.</li>
+<li><em>fade</em> - Moves views in or out of the scene.</li>
 </ul>
 
 <p>Any transition that extends the <code>android.transition.Visibility</code> class is supported
@@ -236,7 +236,7 @@ starts.</p>
 
 <h3>Shared elements transitions</h3>
 
-<p>To make a screne transition animation between two activities that have a shared element:</p>
+<p>To make a screen transition animation between two activities that have a shared element:</p>
 
 <ol>
 <li>Enable window content transitions in your style.</li>
