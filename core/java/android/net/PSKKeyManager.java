@@ -81,19 +81,16 @@ import javax.net.ssl.SSLEngine;
  * TLS-PSK in {@code SSLSocket}, {@code SSLServerSocket} and {@code SSLEngine} instances obtained
  * from it.
  * <pre> {@code
- *  PSKKeyManager myPskKeyManager = ...;
+ * PSKKeyManager myPskKeyManager = ...;
  *
  * SSLContext sslContext = SSLContext.getInstance("TLS");
  * sslContext.init(
  *         new KeyManager[] &#123;myPskKeyManager&#125;,
- *         new TrustManager[0], // No TrustManagers needed in TLS-PSK
+ *         new TrustManager[0], // No TrustManagers needed for TLS-PSK
  *         null // Use the default source of entropy
  *         );
  *
  * SSLSocket sslSocket = (SSLSocket) sslContext.getSocketFactory().createSocket(...);
- * // Enable a TLS-PSK cipher suite (no TLS-PSK cipher suites are enabled by default)
- * sslSocket.setEnabledCipherSuites(new String[] &#123;"TLS_PSK_WITH_AES_128_CBC_SHA"&#125;);
- * sslSocket.startHandshake();
  * }</pre>
  */
 public interface PSKKeyManager extends com.android.org.conscrypt.PSKKeyManager {
