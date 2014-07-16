@@ -207,15 +207,17 @@ public class RequestThreadManager {
                 @Override
                 public void onFrameAvailable(SurfaceTexture surfaceTexture) {
                     RequestHolder holder = mInFlightPreview;
+
+                    if (DEBUG) {
+                        mPrevCounter.countAndLog();
+                    }
+
                     if (holder == null) {
                         mGLThreadManager.queueNewFrame(null);
                         Log.w(TAG, "Dropping preview frame.");
                         return;
                     }
 
-                    if (DEBUG) {
-                        mPrevCounter.countAndLog();
-                    }
                     mInFlightPreview = null;
 
                     if (holder.hasPreviewTargets()) {
@@ -277,7 +279,6 @@ public class RequestThreadManager {
 
         startPreview();
     }
-
 
     private void configureOutputs(Collection<Surface> outputs) throws IOException {
         stopPreview();
@@ -395,6 +396,7 @@ public class RequestThreadManager {
             mPreviewTexture.setOnFrameAvailableListener(mPreviewCallback);
         }
 
+        mCamera.setParameters(mParams);
         // TODO: configure the JPEG surface with some arbitrary size
         // using LegacyCameraDevice.nativeConfigureSurface
     }
@@ -530,6 +532,7 @@ public class RequestThreadManager {
 
     private final Handler.Callback mRequestHandlerCb = new Handler.Callback() {
         private boolean mCleanup = false;
+        private LegacyResultMapper mMapper = new LegacyResultMapper();
 
         @Override
         public boolean handleMessage(Message msg) {
@@ -539,6 +542,10 @@ public class RequestThreadManager {
 
             if (DEBUG) {
                 Log.d(TAG, "Request thread handling message:" + msg.what);
+            }
+            long startTime = 0;
+            if (DEBUG) {
+                startTime = SystemClock.elapsedRealtimeNanos();
             }
             switch (msg.what) {
                 case MSG_CONFIGURE_OUTPUTS:
@@ -553,6 +560,10 @@ public class RequestThreadManager {
                         throw new IOError(e);
                     }
                     config.condition.open();
+                    if (DEBUG) {
+                        long totalTime = SystemClock.elapsedRealtimeNanos() - startTime;
+                        Log.d(TAG, "Configure took " + totalTime + " ns");
+                    }
                     break;
                 case MSG_SUBMIT_CAPTURE_REQUEST:
                     Handler handler = RequestThreadManager.this.mRequestThread.getHandler();
@@ -573,6 +584,8 @@ public class RequestThreadManager {
                             nextBurst.first.produceRequestHolders(nextBurst.second);
                     for (RequestHolder holder : requests) {
                         CaptureRequest request = holder.getRequest();
+
+                        boolean paramsChanged = false;
                         if (mLastRequest == null || mLastRequest.captureRequest != request) {
 
                             // The intermediate buffer is sometimes null, but we always need
@@ -587,9 +600,13 @@ public class RequestThreadManager {
                             // Parameters are mutated as a side-effect
                             LegacyMetadataMapper.convertRequestMetadata(/*inout*/legacyRequest);
 
-                            mParams = legacyRequest.parameters;
-                            mCamera.setParameters(mParams);
+                            if (!mParams.same(legacyRequest.parameters)) {
+                                mParams = legacyRequest.parameters;
+                                mCamera.setParameters(mParams);
+                                paramsChanged = true;
+                            }
                         }
+
                         mDeviceState.setCaptureStart(holder);
                         long timestamp = 0;
                         try {
@@ -616,16 +633,29 @@ public class RequestThreadManager {
                             // TODO: err handling
                             throw new IOError(e);
                         }
+
                         if (timestamp == 0) {
                             timestamp = SystemClock.elapsedRealtimeNanos();
                         }
-                        // Update parameters to the latest that we think the camera is using
-                        mLastRequest.setParameters(mCamera.getParameters());
-                        CameraMetadataNative result =
-                                LegacyResultMapper.convertResultMetadata(mLastRequest, timestamp);
+
+                        if (paramsChanged) {
+                            if (DEBUG) {
+                                Log.d(TAG, "Params changed -- getting new Parameters from HAL.");
+                            }
+                            mParams = mCamera.getParameters();
+
+                            // Update parameters to the latest that we think the camera is using
+                            mLastRequest.setParameters(mParams);
+                        }
+
+
+                        CameraMetadataNative result = mMapper.cachedConvertResultMetadata(
+                                mLastRequest, timestamp);
                         mDeviceState.setCaptureResult(holder, result);
                     }
                     if (DEBUG) {
+                        long totalTime = SystemClock.elapsedRealtimeNanos() - startTime;
+                        Log.d(TAG, "Capture request took " + totalTime + " ns");
                         mRequestCounter.countAndLog();
                     }
                     break;

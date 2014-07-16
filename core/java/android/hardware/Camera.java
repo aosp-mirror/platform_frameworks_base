@@ -2423,6 +2423,19 @@ public class Camera {
             return Camera.this;
         }
 
+
+        /**
+         * Value equality check.
+         *
+         * @hide
+         */
+        public boolean same(Parameters other) {
+            if (this == other) {
+                return true;
+            }
+            return other != null && Parameters.this.mMap.equals(other.mMap);
+        }
+
         /**
          * Writes the current Parameters to the log.
          * @hide

@@ -56,7 +56,6 @@ import android.location.LocationManager;
 import android.os.Parcelable;
 import android.os.Parcel;
 import android.util.Log;
-import android.util.Pair;
 import android.util.Size;
 
 import com.android.internal.util.Preconditions;
@@ -79,7 +78,7 @@ public class CameraMetadataNative implements Parcelable {
         private final Class<T> mType;
         private final TypeReference<T> mTypeReference;
         private final String mName;
-
+        private final int mHash;
         /**
          * Visible for testing only.
          *
@@ -95,6 +94,7 @@ public class CameraMetadataNative implements Parcelable {
             mName = name;
             mType = type;
             mTypeReference = TypeReference.createSpecializedTypeReference(type);
+            mHash = mName.hashCode() ^ mTypeReference.hashCode();
         }
 
         /**
@@ -113,6 +113,7 @@ public class CameraMetadataNative implements Parcelable {
             mName = name;
             mType = (Class<T>)typeReference.getRawType();
             mTypeReference = typeReference;
+            mHash = mName.hashCode() ^ mTypeReference.hashCode();
         }
 
         /**
@@ -137,7 +138,7 @@ public class CameraMetadataNative implements Parcelable {
          */
         @Override
         public final int hashCode() {
-            return mName.hashCode() ^ mTypeReference.hashCode();
+            return mHash;
         }
 
         /**
@@ -154,6 +155,10 @@ public class CameraMetadataNative implements Parcelable {
         public final boolean equals(Object o) {
             if (this == o) {
                 return true;
+            }
+
+            if (o == null || this.hashCode() != o.hashCode()) {
+                return false;
             }
 
             Key<?> lhs;
@@ -337,11 +342,11 @@ public class CameraMetadataNative implements Parcelable {
     public <T> T get(Key<T> key) {
         Preconditions.checkNotNull(key, "key must not be null");
 
-        Pair<T, Boolean> override = getOverride(key);
-        if (override.second) {
-            return override.first;
+        // Check if key has been overridden to use a wrapper class on the java side.
+        GetCommand g = sGetCommandMap.get(key);
+        if (g != null) {
+            return (T) g.getValue(this, key);
         }
-
         return getBase(key);
     }
 
@@ -371,7 +376,9 @@ public class CameraMetadataNative implements Parcelable {
      * type to the key.
      */
     public <T> void set(Key<T> key, T value) {
-        if (setOverride(key, value)) {
+        SetCommand s = sSetCommandMap.get(key);
+        if (s != null) {
+            s.setValue(this, value);
             return;
         }
 
@@ -449,44 +456,119 @@ public class CameraMetadataNative implements Parcelable {
         ByteBuffer buffer = ByteBuffer.wrap(values).order(ByteOrder.nativeOrder());
         return marshaler.unmarshal(buffer);
     }
-    // Need overwrite some metadata that has different definitions between native
-    // and managed sides.
-    @SuppressWarnings("unchecked")
-    private <T> Pair<T, Boolean> getOverride(Key<T> key) {
-        T value = null;
-        boolean override = true;
 
-        if (key.equals(CameraCharacteristics.SCALER_AVAILABLE_FORMATS)) {
-            value = (T) getAvailableFormats();
-        } else if (key.equals(CaptureResult.STATISTICS_FACES)) {
-            value = (T) getFaces();
-        } else if (key.equals(CaptureResult.STATISTICS_FACE_RECTANGLES)) {
-            value = (T) getFaceRectangles();
-        } else if (key.equals(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)) {
-            value = (T) getStreamConfigurationMap();
-        } else if (key.equals(CameraCharacteristics.CONTROL_MAX_REGIONS_AE)) {
-            value = (T) getMaxRegions(key);
-        } else if (key.equals(CameraCharacteristics.CONTROL_MAX_REGIONS_AWB)) {
-            value = (T) getMaxRegions(key);
-        } else if (key.equals(CameraCharacteristics.CONTROL_MAX_REGIONS_AF)) {
-            value = (T) getMaxRegions(key);
-        } else if (key.equals(CameraCharacteristics.REQUEST_MAX_NUM_OUTPUT_RAW)) {
-            value = (T) getMaxNumOutputs(key);
-        } else if (key.equals(CameraCharacteristics.REQUEST_MAX_NUM_OUTPUT_PROC)) {
-            value = (T) getMaxNumOutputs(key);
-        } else if (key.equals(CameraCharacteristics.REQUEST_MAX_NUM_OUTPUT_PROC_STALLING)) {
-            value = (T) getMaxNumOutputs(key);
-        } else if (key.equals(CaptureRequest.TONEMAP_CURVE)) {
-            value = (T) getTonemapCurve();
-        } else if (key.equals(CaptureResult.JPEG_GPS_LOCATION)) {
-            value = (T) getGpsLocation();
-        } else if (key.equals(CaptureResult.STATISTICS_LENS_SHADING_CORRECTION_MAP)) {
-            value = (T) getLensShadingMap();
-        } else {
-            override = false;
-        }
-
-        return Pair.create(value, override);
+    // Use Command pattern here to avoid lots of expensive if/equals checks in get for overridden
+    // metadata.
+    private static final HashMap<Key<?>, GetCommand> sGetCommandMap =
+            new HashMap<Key<?>, GetCommand>();
+    static {
+        sGetCommandMap.put(
+                CameraCharacteristics.SCALER_AVAILABLE_FORMATS.getNativeKey(), new GetCommand() {
+                    @Override
+                    @SuppressWarnings("unchecked")
+                    public <T> T getValue(CameraMetadataNative metadata, Key<T> key) {
+                        return (T) metadata.getAvailableFormats();
+                    }
+                });
+        sGetCommandMap.put(
+                CaptureResult.STATISTICS_FACES.getNativeKey(), new GetCommand() {
+                    @Override
+                    @SuppressWarnings("unchecked")
+                    public <T> T getValue(CameraMetadataNative metadata, Key<T> key) {
+                        return (T) metadata.getFaceRectangles();
+                    }
+                });
+        sGetCommandMap.put(
+                CaptureResult.STATISTICS_FACE_RECTANGLES.getNativeKey(), new GetCommand() {
+                    @Override
+                    @SuppressWarnings("unchecked")
+                    public <T> T getValue(CameraMetadataNative metadata, Key<T> key) {
+                        return (T) metadata.getFaces();
+                    }
+                });
+        sGetCommandMap.put(
+                CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP.getNativeKey(),
+                        new GetCommand() {
+                    @Override
+                    @SuppressWarnings("unchecked")
+                    public <T> T getValue(CameraMetadataNative metadata, Key<T> key) {
+                        return (T) metadata.getStreamConfigurationMap();
+                    }
+                });
+        sGetCommandMap.put(
+                CameraCharacteristics.CONTROL_MAX_REGIONS_AE.getNativeKey(), new GetCommand() {
+                    @Override
+                    @SuppressWarnings("unchecked")
+                    public <T> T getValue(CameraMetadataNative metadata, Key<T> key) {
+                        return (T) metadata.getMaxRegions(key);
+                    }
+                });
+        sGetCommandMap.put(
+                CameraCharacteristics.CONTROL_MAX_REGIONS_AWB.getNativeKey(), new GetCommand() {
+                    @Override
+                    @SuppressWarnings("unchecked")
+                    public <T> T getValue(CameraMetadataNative metadata, Key<T> key) {
+                        return (T) metadata.getMaxRegions(key);
+                    }
+                });
+        sGetCommandMap.put(
+                CameraCharacteristics.CONTROL_MAX_REGIONS_AF.getNativeKey(), new GetCommand() {
+                    @Override
+                    @SuppressWarnings("unchecked")
+                    public <T> T getValue(CameraMetadataNative metadata, Key<T> key) {
+                        return (T) metadata.getMaxRegions(key);
+                    }
+                });
+        sGetCommandMap.put(
+                CameraCharacteristics.REQUEST_MAX_NUM_OUTPUT_RAW.getNativeKey(), new GetCommand() {
+                    @Override
+                    @SuppressWarnings("unchecked")
+                    public <T> T getValue(CameraMetadataNative metadata, Key<T> key) {
+                        return (T) metadata.getMaxNumOutputs(key);
+                    }
+                });
+        sGetCommandMap.put(
+                CameraCharacteristics.REQUEST_MAX_NUM_OUTPUT_PROC.getNativeKey(), new GetCommand() {
+                    @Override
+                    @SuppressWarnings("unchecked")
+                    public <T> T getValue(CameraMetadataNative metadata, Key<T> key) {
+                        return (T) metadata.getMaxNumOutputs(key);
+                    }
+                });
+        sGetCommandMap.put(
+                CameraCharacteristics.REQUEST_MAX_NUM_OUTPUT_PROC_STALLING.getNativeKey(),
+                        new GetCommand() {
+                    @Override
+                    @SuppressWarnings("unchecked")
+                    public <T> T getValue(CameraMetadataNative metadata, Key<T> key) {
+                        return (T) metadata.getMaxNumOutputs(key);
+                    }
+                });
+        sGetCommandMap.put(
+                CaptureRequest.TONEMAP_CURVE.getNativeKey(), new GetCommand() {
+                    @Override
+                    @SuppressWarnings("unchecked")
+                    public <T> T getValue(CameraMetadataNative metadata, Key<T> key) {
+                        return (T) metadata.getTonemapCurve();
+                    }
+                });
+        sGetCommandMap.put(
+                CaptureResult.JPEG_GPS_LOCATION.getNativeKey(), new GetCommand() {
+                    @Override
+                    @SuppressWarnings("unchecked")
+                    public <T> T getValue(CameraMetadataNative metadata, Key<T> key) {
+                        return (T) metadata.getGpsLocation();
+                    }
+                });
+        sGetCommandMap.put(
+                CaptureResult.STATISTICS_LENS_SHADING_CORRECTION_MAP.getNativeKey(),
+                        new GetCommand() {
+                    @Override
+                    @SuppressWarnings("unchecked")
+                    public <T> T getValue(CameraMetadataNative metadata, Key<T> key) {
+                        return (T) metadata.getLensShadingMap();
+                    }
+                });
     }
 
     private int[] getAvailableFormats() {
@@ -759,19 +841,37 @@ public class CameraMetadataNative implements Parcelable {
         writeValues(tag, values);
     }
 
-    // Set the camera metadata override.
-    private <T> boolean setOverride(Key<T> key, T value) {
-        if (key.equals(CameraCharacteristics.SCALER_AVAILABLE_FORMATS)) {
-            return setAvailableFormats((int[]) value);
-        } else if (key.equals(CaptureResult.STATISTICS_FACE_RECTANGLES)) {
-            return setFaceRectangles((Rect[]) value);
-        } else if (key.equals(CaptureRequest.TONEMAP_CURVE)) {
-            return setTonemapCurve((TonemapCurve) value);
-        } else if (key.equals(CaptureResult.JPEG_GPS_LOCATION)) {
-            return setGpsLocation((Location) value);
-        }
-        // For other keys, set() falls back to setBase().
-        return false;
+    // Use Command pattern here to avoid lots of expensive if/equals checks in get for overridden
+    // metadata.
+    private static final HashMap<Key<?>, SetCommand> sSetCommandMap =
+            new HashMap<Key<?>, SetCommand>();
+    static {
+        sSetCommandMap.put(CameraCharacteristics.SCALER_AVAILABLE_FORMATS.getNativeKey(),
+                new SetCommand() {
+            @Override
+            public <T> void setValue(CameraMetadataNative metadata, T value) {
+                metadata.setAvailableFormats((int[]) value);
+            }
+        });
+        sSetCommandMap.put(CaptureResult.STATISTICS_FACE_RECTANGLES.getNativeKey(),
+                new SetCommand() {
+            @Override
+            public <T> void setValue(CameraMetadataNative metadata, T value) {
+                metadata.setFaceRectangles((Rect[]) value);
+            }
+        });
+        sSetCommandMap.put(CaptureRequest.TONEMAP_CURVE.getNativeKey(), new SetCommand() {
+            @Override
+            public <T> void setValue(CameraMetadataNative metadata, T value) {
+                metadata.setTonemapCurve((TonemapCurve) value);
+            }
+        });
+        sSetCommandMap.put(CaptureResult.JPEG_GPS_LOCATION.getNativeKey(), new SetCommand() {
+            @Override
+            public <T> void setValue(CameraMetadataNative metadata, T value) {
+                metadata.setGpsLocation((Location) value);
+            }
+        });
     }
 
     private boolean setAvailableFormats(int[] value) {
