@@ -334,22 +334,22 @@ public final class PageAdapter extends Adapter {
         content.init(provider, mMediaSize, mMinMargins);
 
 
-        View selector = page.findViewById(R.id.page_selector);
-        selector.setTag(myHolder);
+        View pageSelector = page.findViewById(R.id.page_selector);
+        pageSelector.setTag(myHolder);
         if (pageCount > 1) {
-            selector.setOnClickListener(mPageClickListener);
-            selector.setVisibility(View.VISIBLE);
+            pageSelector.setOnClickListener(mPageClickListener);
+            pageSelector.setVisibility(View.VISIBLE);
         } else {
-            selector.setOnClickListener(null);
-            selector.setVisibility(View.GONE);
+            pageSelector.setOnClickListener(null);
+            pageSelector.setVisibility(View.GONE);
         }
 
         if (mConfirmedPagesInDocument.indexOfKey(pageInDocument) >= 0) {
-            selector.setSelected(true);
+            pageSelector.setSelected(true);
             page.setTranslationZ(mSelectedPageElevation);
             page.setAlpha(mSelectedPageAlpha);
         } else {
-            selector.setSelected(false);
+            pageSelector.setSelected(false);
             page.setTranslationZ(mUnselectedPageElevation);
             page.setAlpha(mUnselectedPageAlpha);
         }
