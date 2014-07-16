@@ -78,5 +78,5 @@ these limitations:</p>
 <li>Path-based animations</li>
 </ul>
 
-<p>To preserve compatibility with earlier verisons of Android, check the system version at
+<p>To preserve compatibility with earlier versions of Android, check the system version at
 runtime before you invoke these APIs.</p>
