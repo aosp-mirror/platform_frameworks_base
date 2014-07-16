@@ -16376,6 +16376,29 @@ package android.media.session {
 
 package android.media.tv {
 
+  public class TvContentRating {
+    ctor public TvContentRating(java.lang.String);
+    ctor public TvContentRating(java.lang.String, java.lang.String[]);
+    method public java.lang.String flattenToString();
+    method public static android.media.tv.TvContentRating unflattenFromString(java.lang.String);
+    field public static final java.lang.String RATING_KR_12 = "RATING_KR_12";
+    field public static final java.lang.String RATING_KR_15 = "RATING_KR_15";
+    field public static final java.lang.String RATING_KR_19 = "RATING_KR_19";
+    field public static final java.lang.String RATING_KR_7 = "RATING_KR_7";
+    field public static final java.lang.String RATING_KR_ALL = "RATING_KR_ALL";
+    field public static final java.lang.String RATING_US_TV_14 = "RATING_US_TV_14";
+    field public static final java.lang.String RATING_US_TV_G = "RATING_US_TV_G";
+    field public static final java.lang.String RATING_US_TV_MA = "RATING_US_TV_MA";
+    field public static final java.lang.String RATING_US_TV_PG = "RATING_US_TV_PG";
+    field public static final java.lang.String RATING_US_TV_Y = "RATING_US_TV_Y";
+    field public static final java.lang.String RATING_US_TV_Y7 = "RATING_US_TV_Y7";
+    field public static final java.lang.String SUBRATING_US_D = "SUBRATING_US_D";
+    field public static final java.lang.String SUBRATING_US_FV = "SUBRATING_US_FV";
+    field public static final java.lang.String SUBRATING_US_L = "SUBRATING_US_L";
+    field public static final java.lang.String SUBRATING_US_S = "SUBRATING_US_S";
+    field public static final java.lang.String SUBRATING_US_V = "SUBRATING_US_V";
+  }
+
   public final class TvContract {
     method public static final android.net.Uri buildChannelLogoUri(long);
     method public static final android.net.Uri buildChannelLogoUri(android.net.Uri);
@@ -16470,6 +16493,7 @@ package android.media.tv {
     field public static final java.lang.String COLUMN_BROADCAST_GENRE = "broadcast_genre";
     field public static final java.lang.String COLUMN_CANONICAL_GENRE = "canonical_genre";
     field public static final java.lang.String COLUMN_CHANNEL_ID = "channel_id";
+    field public static final java.lang.String COLUMN_CONTENT_RATING = "content_rating";
     field public static final java.lang.String COLUMN_END_TIME_UTC_MILLIS = "end_time_utc_millis";
     field public static final java.lang.String COLUMN_INTERNAL_PROVIDER_DATA = "internal_provider_data";
     field public static final java.lang.String COLUMN_LONG_DESCRIPTION = "long_description";
