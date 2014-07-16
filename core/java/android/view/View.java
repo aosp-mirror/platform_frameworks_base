@@ -4852,8 +4852,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     private void manageFocusHotspot(boolean focused, View v) {
         final Rect r = new Rect();
-        if (!focused && v != null && mAttachInfo != null) {
-            v.getBoundsOnScreen(r);
+        if (v != null && mAttachInfo != null) {
+            v.getHotspotBounds(r);
             final int[] location = mAttachInfo.mTmpLocation;
             getLocationOnScreen(location);
             r.offset(-location[0], -location[1]);
@@ -4864,6 +4864,22 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         final float x = r.exactCenterX();
         final float y = r.exactCenterY();
         drawableHotspotChanged(x, y);
+    }
+
+    /**
+     * Populates <code>outRect</code> with the hotspot bounds. By default,
+     * the hotspot bounds are identical to the screen bounds.
+     *
+     * @param outRect rect to populate with hotspot bounds
+     * @hide Only for internal use by views and widgets.
+     */
+    public void getHotspotBounds(Rect outRect) {
+        final Drawable background = getBackground();
+        if (background != null) {
+            background.getHotspotBounds(outRect);
+        } else {
+            getBoundsOnScreen(outRect);
+        }
     }
 
     /**
