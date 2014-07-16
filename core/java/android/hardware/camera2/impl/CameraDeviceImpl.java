@@ -81,6 +81,7 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
 
     private final String mCameraId;
     private final CameraCharacteristics mCharacteristics;
+    private final int mTotalPartialCount;
 
     /**
      * A list tracking request and its expected last frame.
@@ -210,7 +211,7 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
 
     public CameraDeviceImpl(String cameraId, StateListener listener, Handler handler,
                         CameraCharacteristics characteristics) {
-        if (cameraId == null || listener == null || handler == null) {
+        if (cameraId == null || listener == null || handler == null || characteristics == null) {
             throw new IllegalArgumentException("Null argument given");
         }
         mCameraId = cameraId;
@@ -226,6 +227,15 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
         }
         TAG = tag;
         DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+
+        Integer partialCount =
+                mCharacteristics.get(CameraCharacteristics.REQUEST_PARTIAL_RESULT_COUNT);
+        if (partialCount == null) {
+            // 1 means partial result is not supported.
+            mTotalPartialCount = 1;
+        } else {
+            mTotalPartialCount = partialCount;
+        }
     }
 
     public CameraDeviceCallbacks getCallbacks() {
@@ -1042,11 +1052,11 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
                 final CaptureListenerHolder holder =
                         CameraDeviceImpl.this.mCaptureListenerMap.get(requestId);
 
-                Boolean quirkPartial = result.get(CaptureResult.QUIRKS_PARTIAL_RESULT);
-                boolean quirkIsPartialResult = (quirkPartial != null && quirkPartial);
+                boolean isPartialResult =
+                        (resultExtras.getPartialResultCount() < mTotalPartialCount);
 
                 // Update tracker (increment counter) when it's not a partial result.
-                if (!quirkIsPartialResult) {
+                if (!isPartialResult) {
                     mFrameNumberTracker.updateTracker(resultExtras.getFrameNumber(),
                             /*error*/false);
                 }
@@ -1076,7 +1086,7 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
                 Runnable resultDispatch = null;
 
                 // Either send a partial result or the final capture completed result
-                if (quirkIsPartialResult) {
+                if (isPartialResult) {
                     final CaptureResult resultAsCapture =
                             new CaptureResult(result, request, requestId);
 
@@ -1113,7 +1123,7 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
                 holder.getHandler().post(resultDispatch);
 
                 // Fire onCaptureSequenceCompleted
-                if (!quirkIsPartialResult) {
+                if (!isPartialResult) {
                     checkAndFireSequenceComplete();
                 }
 
