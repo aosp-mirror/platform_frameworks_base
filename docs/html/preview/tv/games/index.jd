@@ -146,7 +146,7 @@ Multiplayer</a> and <a href="">Turn-based Multiplayer</a> documentation on the A
 site.</p>
 
 <h2 id="web">Web</h2>
-<p>We discourage including web browsing in games for Android TV. The television set is not well-suited for browsing,, either in terms of display or control scheme.</p>
+<p>We discourage including web browsing in games for Android TV. The television set is not well-suited for browsing, either in terms of display or control scheme.</p>
 <p class="note"><strong>Note:</strong> You can use the {@link android.webkit.WebView} class for logins to services like Google+ and
 Facebook. </p>
 

@@ -73,7 +73,7 @@ area for touch feedback.</p>
 &lt;/shape>
 </pre>
 
-<p>Then this view and drawable cast the appropiate shadow.</p>
+<p>Then this view and drawable cast the appropriate shadow.</p>
 
 <p>You can also create outlines in your code using the methods in the <code>Outline</code> class,
 and you can assign them to views with the <code>View.setOutline</code> method.</p>
