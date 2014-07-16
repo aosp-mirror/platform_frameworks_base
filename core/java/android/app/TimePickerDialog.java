@@ -64,6 +64,8 @@ public class TimePickerDialog extends AlertDialog
     int mInitialMinute;
     boolean mIs24HourView;
 
+    private boolean mIsCanceled;
+
     /**
      * @param context Parent.
      * @param callBack How parent is notified.
@@ -124,10 +126,13 @@ public class TimePickerDialog extends AlertDialog
         mTimePicker.setDismissCallback(new TimePicker.TimePickerDismissCallback() {
             @Override
             public void dismiss(TimePicker view, boolean isCancel, int hourOfDay, int minute) {
+                mIsCanceled = isCancel;
                 if (!isCancel) {
                     mTimeSetCallback.onTimeSet(view, hourOfDay, minute);
+                    TimePickerDialog.this.dismiss();
+                } else {
+                    TimePickerDialog.this.cancel();
                 }
-                TimePickerDialog.this.dismiss();
             }
         });
         mTimePicker.setIs24HourView(mIs24HourView);
@@ -150,7 +155,7 @@ public class TimePickerDialog extends AlertDialog
     }
 
     private void tryNotifyTimeSet() {
-        if (mTimeSetCallback != null) {
+        if (mTimeSetCallback != null && !mIsCanceled) {
             mTimePicker.clearFocus();
             mTimeSetCallback.onTimeSet(mTimePicker, mTimePicker.getCurrentHour(),
                     mTimePicker.getCurrentMinute());
