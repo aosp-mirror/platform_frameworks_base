@@ -384,10 +384,16 @@ interface IPackageManager {
 
     /**
      * Ask the package manager to perform dex-opt (if needed) on the given
-     * package, if it already hasn't done mode.  Only does this if running
-     * in the special development "no pre-dexopt" mode.
+     * package and for the given instruction set if it already hasn't done
+     * so.
+     *
+     * If the supplied instructionSet is null, the package manager will use
+     * the packages default instruction set.
+     *
+     * In most cases, apps are dexopted in advance and this function will
+     * be a no-op.
      */
-    boolean performDexOpt(String packageName);
+    boolean performDexOptIfNeeded(String packageName, String instructionSet);
 
     /**
      * Update status of external media on the package manager to scan and
