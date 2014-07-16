@@ -1700,7 +1700,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 // If we have a session send it the volume command, otherwise
                 // use the suggested stream.
                 if (mMediaController != null) {
-                    mMediaController.adjustVolumeBy(direction, AudioManager.FLAG_SHOW_UI);
+                    mMediaController.adjustVolume(direction, AudioManager.FLAG_SHOW_UI);
                 } else {
                     MediaSessionLegacyHelper.getHelper(getContext()).sendAdjustVolumeBy(
                             mVolumeControlStreamType, direction, AudioManager.FLAG_SHOW_UI);
@@ -1787,7 +1787,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 // If we have a session send it the volume command, otherwise
                 // use the suggested stream.
                 if (mMediaController != null) {
-                    mMediaController.adjustVolumeBy(0, AudioManager.FLAG_PLAY_SOUND
+                    mMediaController.adjustVolume(0, AudioManager.FLAG_PLAY_SOUND
                             | AudioManager.FLAG_VIBRATE);
                 } else {
                     MediaSessionLegacyHelper.getHelper(getContext()).sendAdjustVolumeBy(

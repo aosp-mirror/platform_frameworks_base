@@ -2249,12 +2249,12 @@ public class MediaRouter {
             }
 
             @Override
-            public void onAdjustVolumeBy(final int delta) {
+            public void onAdjustVolume(final int direction) {
                 sStatic.mHandler.post(new Runnable() {
                     @Override
                     public void run() {
                         if (mVcb != null) {
-                            mVcb.vcb.onVolumeUpdateRequest(mVcb.route, delta);
+                            mVcb.vcb.onVolumeUpdateRequest(mVcb.route, direction);
                         }
                     }
                 });
