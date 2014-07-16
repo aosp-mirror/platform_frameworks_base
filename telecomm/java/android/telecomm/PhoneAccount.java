@@ -124,28 +124,6 @@ public class PhoneAccount implements Parcelable {
                 Objects.hashCode(mHandle) + mCapabilities;
     }
 
-    @Override
-    public String toString() {
-        return new StringBuilder().append(mComponentName)
-                    .append(", ")
-                    .append(mId)
-                    .append(", ")
-                    .append(Log.pii(mHandle))
-                    .append(", ")
-                    .append(String.valueOf(mCapabilities))
-                    .toString();
-    }
-
-    /**
-     * TODO: Change this to just be equals() and use Set<> in Telecomm code instead of Lists.
-     * @hide
-     */
-    public boolean equalsComponentAndId(PhoneAccount other) {
-        return other != null &&
-                Objects.equals(other.getComponentName(), getComponentName()) &&
-                Objects.equals(other.getId(), getId());
-    }
-
     //
     // Parcelable implementation.
     //
