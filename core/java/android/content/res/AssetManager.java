@@ -33,7 +33,7 @@ import java.util.HashMap;
  * files that have been bundled with the application as a simple stream of
  * bytes.
  */
-public final class AssetManager {
+public final class AssetManager implements AutoCloseable {
     /* modes used when opening an asset */
 
     /**

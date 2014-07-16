@@ -16,10 +16,14 @@
 
 package com.android.internal.util;
 
+import android.util.ArraySet;
+
 import dalvik.system.VMRuntime;
+
 import libcore.util.EmptyArray;
 
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 
 /**
  * ArrayUtils contains some methods that you can call to find out
@@ -331,5 +335,53 @@ public class ArrayUtils
 
     public static long[] cloneOrNull(long[] array) {
         return (array != null) ? array.clone() : null;
+    }
+
+    public static <T> ArraySet<T> add(ArraySet<T> cur, T val) {
+        if (cur == null) {
+            cur = new ArraySet<>();
+        }
+        cur.add(val);
+        return cur;
+    }
+
+    public static <T> ArraySet<T> remove(ArraySet<T> cur, T val) {
+        if (cur == null) {
+            return null;
+        }
+        cur.remove(val);
+        if (cur.isEmpty()) {
+            return null;
+        } else {
+            return cur;
+        }
+    }
+
+    public static <T> boolean contains(ArraySet<T> cur, T val) {
+        return (cur != null) ? cur.contains(val) : false;
+    }
+
+    public static <T> ArrayList<T> add(ArrayList<T> cur, T val) {
+        if (cur == null) {
+            cur = new ArrayList<>();
+        }
+        cur.add(val);
+        return cur;
+    }
+
+    public static <T> ArrayList<T> remove(ArrayList<T> cur, T val) {
+        if (cur == null) {
+            return null;
+        }
+        cur.remove(val);
+        if (cur.isEmpty()) {
+            return null;
+        } else {
+            return cur;
+        }
+    }
+
+    public static <T> boolean contains(ArrayList<T> cur, T val) {
+        return (cur != null) ? cur.contains(val) : false;
     }
 }
