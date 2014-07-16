@@ -393,10 +393,16 @@ public class AudioService extends IAudioService.Stub {
     // Indicates the mode used for SCO audio connection. The mode is virtual call if the request
     // originated from an app targeting an API version before JB MR2 and raw audio after that.
     private int mScoAudioMode;
+    // SCO audio mode is undefined
+    private static final int SCO_MODE_UNDEFINED = -1;
     // SCO audio mode is virtual voice call (BluetoothHeadset.startScoUsingVirtualVoiceCall())
     private static final int SCO_MODE_VIRTUAL_CALL = 0;
     // SCO audio mode is raw audio (BluetoothHeadset.connectAudio())
     private static final int SCO_MODE_RAW = 1;
+    // SCO audio mode is Voice Recognition (BluetoothHeadset.startVoiceRecognition())
+    private static final int SCO_MODE_VR = 2;
+
+    private static final int SCO_MODE_MAX = 2;
 
     // Current connection state indicated by bluetooth headset
     private int mScoConnectionState;
@@ -2117,7 +2123,7 @@ public class AudioService extends IAudioService.Stub {
     public void startBluetoothSco(IBinder cb, int targetSdkVersion) {
         int scoAudioMode =
                 (targetSdkVersion < Build.VERSION_CODES.JELLY_BEAN_MR2) ?
-                        SCO_MODE_VIRTUAL_CALL : SCO_MODE_RAW;
+                        SCO_MODE_VIRTUAL_CALL : SCO_MODE_UNDEFINED;
         startBluetoothScoInt(cb, scoAudioMode);
     }
 
@@ -2272,14 +2278,28 @@ public class AudioService extends IAudioService.Stub {
                                  mScoAudioState == SCO_STATE_DEACTIVATE_REQ)) {
                             if (mScoAudioState == SCO_STATE_INACTIVE) {
                                 mScoAudioMode = scoAudioMode;
+                                if (scoAudioMode == SCO_MODE_UNDEFINED) {
+                                    mScoAudioMode = new Integer(Settings.Global.getInt(
+                                                            mContentResolver,
+                                                            "bluetooth_sco_channel_"+
+                                                            mBluetoothHeadsetDevice.getAddress(),
+                                                            SCO_MODE_VIRTUAL_CALL));
+                                    if (mScoAudioMode > SCO_MODE_MAX || mScoAudioMode < 0) {
+                                        mScoAudioMode = SCO_MODE_VIRTUAL_CALL;
+                                    }
+                                }
                                 if (mBluetoothHeadset != null && mBluetoothHeadsetDevice != null) {
-                                    boolean status;
+                                    boolean status = false;
                                     if (mScoAudioMode == SCO_MODE_RAW) {
                                         status = mBluetoothHeadset.connectAudio();
-                                    } else {
+                                    } else if (mScoAudioMode == SCO_MODE_VIRTUAL_CALL) {
                                         status = mBluetoothHeadset.startScoUsingVirtualVoiceCall(
                                                                             mBluetoothHeadsetDevice);
+                                    } else if (mScoAudioMode == SCO_MODE_VR) {
+                                        status = mBluetoothHeadset.startVoiceRecognition(
+                                                                           mBluetoothHeadsetDevice);
                                     }
+
                                     if (status) {
                                         mScoAudioState = SCO_STATE_ACTIVE_INTERNAL;
                                     } else {
@@ -2302,13 +2322,17 @@ public class AudioService extends IAudioService.Stub {
                                mScoAudioState == SCO_STATE_ACTIVATE_REQ)) {
                     if (mScoAudioState == SCO_STATE_ACTIVE_INTERNAL) {
                         if (mBluetoothHeadset != null && mBluetoothHeadsetDevice != null) {
-                            boolean status;
+                            boolean status = false;
                             if (mScoAudioMode == SCO_MODE_RAW) {
                                 status = mBluetoothHeadset.disconnectAudio();
-                            } else {
+                            } else if (mScoAudioMode == SCO_MODE_VIRTUAL_CALL) {
                                 status = mBluetoothHeadset.stopScoUsingVirtualVoiceCall(
                                                                         mBluetoothHeadsetDevice);
+                            } else if (mScoAudioMode == SCO_MODE_VR) {
+                                        status = mBluetoothHeadset.stopVoiceRecognition(
+                                                                      mBluetoothHeadsetDevice);
                             }
+
                             if (!status) {
                                 mScoAudioState = SCO_STATE_INACTIVE;
                                 broadcastScoConnectionState(
@@ -2502,17 +2526,23 @@ public class AudioService extends IAudioService.Stub {
                                 mScoAudioState = SCO_STATE_ACTIVE_INTERNAL;
                                 if (mScoAudioMode == SCO_MODE_RAW) {
                                     status = mBluetoothHeadset.connectAudio();
-                                } else {
+                                } else if (mScoAudioMode == SCO_MODE_VIRTUAL_CALL) {
                                     status = mBluetoothHeadset.startScoUsingVirtualVoiceCall(
                                                                         mBluetoothHeadsetDevice);
+                                } else if (mScoAudioMode == SCO_MODE_VR) {
+                                    status = mBluetoothHeadset.startVoiceRecognition(
+                                                                      mBluetoothHeadsetDevice);
                                 }
                                 break;
                             case SCO_STATE_DEACTIVATE_REQ:
                                 if (mScoAudioMode == SCO_MODE_RAW) {
                                     status = mBluetoothHeadset.disconnectAudio();
-                                } else {
+                                } else if (mScoAudioMode == SCO_MODE_VIRTUAL_CALL) {
                                     status = mBluetoothHeadset.stopScoUsingVirtualVoiceCall(
                                                                         mBluetoothHeadsetDevice);
+                                } else if (mScoAudioMode == SCO_MODE_VR) {
+                                    status = mBluetoothHeadset.stopVoiceRecognition(
+                                                                      mBluetoothHeadsetDevice);
                                 }
                                 break;
                             case SCO_STATE_DEACTIVATE_EXT_REQ:
