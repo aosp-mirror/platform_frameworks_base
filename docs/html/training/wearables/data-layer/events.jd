@@ -43,7 +43,8 @@ pendingResult.setResultCallback(new ResultCallback&lt;DataItemResult&gt;() {
     &#64;Override
     public void onResult(final DataItemResult result) {
         if(result.getStatus().isSuccess()) {
-        Log.d(TAG, "Data item set: " + result.getDataItem().getUri());
+            Log.d(TAG, "Data item set: " + result.getDataItem().getUri());
+        }
     }
 });
 </pre>
@@ -293,7 +294,7 @@ public class MainActivity extends Activity implements
     &#64;Override
     protected void onStop() {
         if (null != mGoogleApiClient && mGoogleApiClient.isConnected()) {
-            Wearable.NodeApi.removeListener(mGoogleApiClient, this);
+            Wearable.DataApi.removeListener(mGoogleApiClient, this);
             mGoogleApiClient.disconnect();
         }
         super.onStop();
