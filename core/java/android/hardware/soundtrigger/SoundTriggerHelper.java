@@ -17,6 +17,7 @@
 package android.hardware.soundtrigger;
 
 import android.hardware.soundtrigger.SoundTrigger.ModuleProperties;
+import android.hardware.soundtrigger.SoundTrigger.RecognitionConfig;
 import android.hardware.soundtrigger.SoundTrigger.RecognitionEvent;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -56,7 +57,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
     private final ModuleProperties mModuleProperties;
     private final SoundTriggerModule mModule;
 
-    private final SparseArray<Listener> mListeners;
+    private final SparseArray<Listener> mActiveListeners;
 
     private int mCurrentSoundModelHandle = INVALID_SOUND_MODEL_HANDLE;
 
@@ -77,7 +78,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
     public SoundTriggerHelper() {
         ArrayList <ModuleProperties> modules = new ArrayList<>();
         int status = SoundTrigger.listModules(modules);
-        mListeners = new SparseArray<>(1);
+        mActiveListeners = new SparseArray<>(1);
         if (status != SoundTrigger.STATUS_OK || modules.size() == 0) {
             // TODO: Figure out how to handle errors in listing the modules here.
             dspInfo = null;
@@ -94,27 +95,9 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
     }
 
     /**
-     * @return True, if the given {@link Keyphrase} is supported on DSP.
-     */
-    public boolean isKeyphraseSupported(Keyphrase keyphrase) {
-        // TODO: We also need to look into a SoundTrigger API that let's us
-        // query this. For now just return true.
-        return true;
-    }
-
-    /**
-     * @return True, if the given {@link Keyphrase} has been enrolled.
-     */
-    public boolean isKeyphraseEnrolled(Keyphrase keyphrase) {
-        // TODO: Query VoiceInteractionManagerService
-        // to list registered sound models.
-        return false;
-    }
-
-    /**
      * @return True, if a recognition for the given {@link Keyphrase} is active.
      */
-    public boolean isKeyphraseActive(Keyphrase keyphrase) {
+    public synchronized boolean isKeyphraseActive(Keyphrase keyphrase) {
         // TODO: Check if the recognition for the keyphrase is currently active.
         return false;
     }
@@ -124,55 +107,98 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
      *
      * @param keyphraseId The identifier of the keyphrase for which
      *        the recognition is to be started.
+     * @param soundModel The sound model to use for recognition.
      * @param listener The listener for the recognition events related to the given keyphrase.
      * @return One of {@link #STATUS_ERROR} or {@link #STATUS_OK}.
      */
-    public int startRecognition(int keyphraseId, Listener listener) {
+    public synchronized int startRecognition(int keyphraseId,
+            SoundTrigger.KeyphraseSoundModel soundModel,
+            Listener listener, RecognitionConfig recognitionConfig) {
         if (dspInfo == null || mModule == null) {
             Slog.w(TAG, "Attempting startRecognition without the capability");
             return STATUS_ERROR;
         }
 
-        if (mListeners.get(keyphraseId) != listener) {
+        Listener oldListener = mActiveListeners.get(keyphraseId);
+        if (oldListener != null && oldListener != listener) {
             if (mCurrentSoundModelHandle != INVALID_SOUND_MODEL_HANDLE) {
                 Slog.w(TAG, "Canceling previous recognition");
                 // TODO: Inspect the return codes here.
                 mModule.unloadSoundModel(mCurrentSoundModelHandle);
             }
-            mListeners.get(keyphraseId).onListeningStateChanged(STATE_STOPPED);
+            mActiveListeners.get(keyphraseId).onListeningStateChanged(STATE_STOPPED);
+            mActiveListeners.remove(keyphraseId);
         }
 
+        int[] handle = new int[] { INVALID_SOUND_MODEL_HANDLE };
+        int status = mModule.loadSoundModel(soundModel, handle);
+        if (status != SoundTrigger.STATUS_OK) {
+            Slog.w(TAG, "loadSoundModel call failed with " + status);
+            return STATUS_ERROR;
+        }
+        if (handle[0] == INVALID_SOUND_MODEL_HANDLE) {
+            Slog.w(TAG, "loadSoundModel call returned invalid sound model handle");
+            return STATUS_ERROR;
+        }
+
+        // Start the recognition.
+        status = mModule.startRecognition(handle[0], recognitionConfig);
+        if (status != SoundTrigger.STATUS_OK) {
+            Slog.w(TAG, "startRecognition failed with " + status);
+            return STATUS_ERROR;
+        }
+
+        // Everything went well!
+        mCurrentSoundModelHandle = handle[0];
         // Register the new listener. This replaces the old one.
         // There can only be a maximum of one active listener for a keyphrase
         // at any given time.
-        mListeners.put(keyphraseId, listener);
-        // TODO: Get the sound model for the given keyphrase here.
-        // mModule.loadSoundModel(model, soundModelHandle);
-        // mModule.startRecognition(soundModelHandle, data);
-        // mCurrentSoundModelHandle = soundModelHandle;
-        return STATUS_ERROR;
+        mActiveListeners.put(keyphraseId, listener);
+        return STATUS_OK;
     }
 
     /**
      * Stops recognition for the given {@link Keyphrase} if a recognition is currently active.
      *
+     * @param keyphraseId The identifier of the keyphrase for which
+     *        the recognition is to be stopped.
+     * @param listener The listener for the recognition events related to the given keyphrase.
+     *
      * @return One of {@link #STATUS_ERROR} or {@link #STATUS_OK}.
      */
-    public int stopRecognition(int id, Listener listener) {
+    public synchronized int stopRecognition(int keyphraseId, Listener listener) {
         if (dspInfo == null || mModule == null) {
             Slog.w(TAG, "Attempting stopRecognition without the capability");
             return STATUS_ERROR;
         }
 
-        if (mListeners.get(id) != listener) {
+        Listener currentListener = mActiveListeners.get(keyphraseId);
+        if (currentListener == null) {
+            // startRecognition hasn't been called or it failed.
+            Slog.w(TAG, "Attempting stopRecognition without a successful startRecognition");
+            return STATUS_ERROR;
+        } else if (currentListener != listener) {
+            // TODO: Figure out if this should match the listener that was passed in during
+            // startRecognition, or should we allow a different listener to stop the recognition,
+            // in which case we don't need to pass in a listener here.
             Slog.w(TAG, "Attempting stopRecognition for another recognition");
             return STATUS_ERROR;
         } else {
             // Stop recognition if it's the current one, ignore otherwise.
             // TODO: Inspect the return codes here.
-            mModule.stopRecognition(mCurrentSoundModelHandle);
-            mModule.unloadSoundModel(mCurrentSoundModelHandle);
+            int status = mModule.stopRecognition(mCurrentSoundModelHandle);
+            if (status != SoundTrigger.STATUS_OK) {
+                Slog.w(TAG, "stopRecognition call failed with " + status);
+                return STATUS_ERROR;
+            }
+            status = mModule.unloadSoundModel(mCurrentSoundModelHandle);
+            if (status != SoundTrigger.STATUS_OK) {
+                Slog.w(TAG, "unloadSoundModel call failed with " + status);
+                return STATUS_ERROR;
+            }
+
             mCurrentSoundModelHandle = INVALID_SOUND_MODEL_HANDLE;
+            mActiveListeners.remove(keyphraseId);
             return STATUS_OK;
         }
     }
@@ -184,28 +210,26 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         // TODO: Get the keyphrase out of the event and fire events on it.
         // For now, as a nasty workaround, we fire all events to the listener for
         // keyphrase with TEMP_KEYPHRASE_ID.
+        Listener listener = null;
+        synchronized(this) {
+            // TODO: The keyphrase should come from the recognition event
+            // as it may be for a different keyphrase than the current one.
+            listener = mActiveListeners.get(TEMP_KEYPHRASE_ID);
+        }
+        if (listener == null) {
+            Slog.w(TAG, "received onRecognition event without any listener for it");
+            return;
+        }
 
         switch (event.status) {
             case SoundTrigger.RECOGNITION_STATUS_SUCCESS:
-                // TODO: The keyphrase should come from the recognition event
-                // as it may be for a different keyphrase than the current one.
-                if (mListeners.get(TEMP_KEYPHRASE_ID) != null) {
-                    mListeners.get(TEMP_KEYPHRASE_ID).onKeyphraseSpoken();
-                }
+                listener.onKeyphraseSpoken();
                 break;
             case SoundTrigger.RECOGNITION_STATUS_ABORT:
-                // TODO: The keyphrase should come from the recognition event
-                // as it may be for a different keyphrase than the current one.
-                if (mListeners.get(TEMP_KEYPHRASE_ID) != null) {
-                    mListeners.get(TEMP_KEYPHRASE_ID).onListeningStateChanged(STATE_STOPPED);
-                }
+                listener.onListeningStateChanged(STATE_STOPPED);
                 break;
             case SoundTrigger.RECOGNITION_STATUS_FAILURE:
-                // TODO: The keyphrase should come from the recognition event
-                // as it may be for a different keyphrase than the current one.
-                if (mListeners.get(TEMP_KEYPHRASE_ID) != null) {
-                    mListeners.get(TEMP_KEYPHRASE_ID).onListeningStateChanged(STATE_STOPPED);
-                }
+                listener.onListeningStateChanged(STATE_STOPPED);
                 break;
         }
     }

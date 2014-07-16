@@ -104,10 +104,8 @@ public class VoiceInteractionService extends Service {
      */
     public final AlwaysOnHotwordDetector getAlwaysOnHotwordDetector(
             String keyphrase, String locale, AlwaysOnHotwordDetector.Callback callback) {
-        // TODO: Cache instances and return the same one instead of creating a new interactor
-        // for the same keyphrase/locale combination.
         return new AlwaysOnHotwordDetector(keyphrase, locale, callback,
-                mKeyphraseEnrollmentInfo, mSoundTriggerHelper);
+                mKeyphraseEnrollmentInfo, mSoundTriggerHelper, mInterface, mSystemService);
     }
 
     /**
