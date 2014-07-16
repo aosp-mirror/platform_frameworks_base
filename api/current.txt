@@ -36171,14 +36171,28 @@ package android.webkit {
     method public abstract void onReceivedIcon(java.lang.String, android.graphics.Bitmap);
   }
 
+  public abstract interface WebResourceRequest {
+    method public abstract java.lang.String getMethod();
+    method public abstract java.util.Map<java.lang.String, java.lang.String> getRequestHeaders();
+    method public abstract android.net.Uri getUrl();
+    method public abstract boolean hasUserGestureInsecure();
+    method public abstract boolean isForMainFrame();
+  }
+
   public class WebResourceResponse {
     ctor public WebResourceResponse(java.lang.String, java.lang.String, java.io.InputStream);
+    ctor public WebResourceResponse(java.lang.String, java.lang.String, int, java.lang.String, java.util.Map<java.lang.String, java.lang.String>, java.io.InputStream);
     method public java.io.InputStream getData();
     method public java.lang.String getEncoding();
     method public java.lang.String getMimeType();
+    method public java.lang.String getReasonPhrase();
+    method public java.util.Map<java.lang.String, java.lang.String> getResponseHeaders();
+    method public int getStatusCode();
     method public void setData(java.io.InputStream);
     method public void setEncoding(java.lang.String);
     method public void setMimeType(java.lang.String);
+    method public void setResponseHeaders(java.util.Map<java.lang.String, java.lang.String>);
+    method public void setStatusCodeAndReasonPhrase(int, java.lang.String);
   }
 
   public abstract class WebSettings {
@@ -36502,7 +36516,8 @@ package android.webkit {
     method public deprecated void onTooManyRedirects(android.webkit.WebView, android.os.Message, android.os.Message);
     method public void onUnhandledInputEvent(android.webkit.WebView, android.view.InputEvent);
     method public deprecated void onUnhandledKeyEvent(android.webkit.WebView, android.view.KeyEvent);
-    method public android.webkit.WebResourceResponse shouldInterceptRequest(android.webkit.WebView, java.lang.String);
+    method public deprecated android.webkit.WebResourceResponse shouldInterceptRequest(android.webkit.WebView, java.lang.String);
+    method public android.webkit.WebResourceResponse shouldInterceptRequest(android.webkit.WebView, android.webkit.WebResourceRequest);
     method public boolean shouldOverrideKeyEvent(android.webkit.WebView, android.view.KeyEvent);
     method public boolean shouldOverrideUrlLoading(android.webkit.WebView, java.lang.String);
     field public static final int ERROR_AUTHENTICATION = -4; // 0xfffffffc

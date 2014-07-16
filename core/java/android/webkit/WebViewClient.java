@@ -96,10 +96,33 @@ public class WebViewClient {
      * @return A {@link android.webkit.WebResourceResponse} containing the
      *         response information or null if the WebView should load the
      *         resource itself.
+     * @deprecated Use {@link #shouldInterceptRequest(WebView, WebResourceRequest)
+     *             shouldInterceptRequest(WebView, WebResourceRequest)} instead.
      */
+    @Deprecated
     public WebResourceResponse shouldInterceptRequest(WebView view,
             String url) {
         return null;
+    }
+
+    /**
+     * Notify the host application of a resource request and allow the
+     * application to return the data.  If the return value is null, the WebView
+     * will continue to load the resource as usual.  Otherwise, the return
+     * response and data will be used.  NOTE: This method is called on a thread
+     * other than the UI thread so clients should exercise caution
+     * when accessing private data or the view system.
+     *
+     * @param view The {@link android.webkit.WebView} that is requesting the
+     *             resource.
+     * @param request Object containing the details of the request.
+     * @return A {@link android.webkit.WebResourceResponse} containing the
+     *         response information or null if the WebView should load the
+     *         resource itself.
+     */
+    public WebResourceResponse shouldInterceptRequest(WebView view,
+            WebResourceRequest request) {
+        return shouldInterceptRequest(view, request.getUrl().toString());
     }
 
     /**
