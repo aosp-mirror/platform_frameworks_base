@@ -5485,6 +5485,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 
                     if (copyRet >= 0) {
                         pkg.applicationInfo.primaryCpuAbi = abiList[copyRet];
+                    } else if (copyRet == PackageManager.NO_NATIVE_LIBRARIES && abiOverride != null) {
+                        pkg.applicationInfo.primaryCpuAbi = abiOverride;
                     }
                 }
             } catch (IOException ioe) {
