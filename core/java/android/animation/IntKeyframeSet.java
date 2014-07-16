@@ -57,6 +57,11 @@ class IntKeyframeSet extends KeyframeSet {
         return newSet;
     }
 
+    @Override
+    void invalidateCache() {
+        firstTime = true;
+    }
+
     public int getIntValue(float fraction) {
         if (mNumKeyframes == 2) {
             if (firstTime) {

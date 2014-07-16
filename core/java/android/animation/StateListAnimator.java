@@ -57,6 +57,7 @@ public class StateListAnimator {
     private AnimatorListenerAdapter mAnimatorListener = new AnimatorListenerAdapter() {
         @Override
         public void onAnimationEnd(Animator animation) {
+            animation.setTarget(null);
             if (mRunningAnimator == animation) {
                 mRunningAnimator = null;
             }
@@ -151,7 +152,7 @@ public class StateListAnimator {
 
     private void start(Tuple match) {
         match.mAnimator.setTarget(getTarget());
-        mRunningAnimator = match.mAnimator.clone();
+        mRunningAnimator = match.mAnimator;
         mRunningAnimator.start();
     }
 
