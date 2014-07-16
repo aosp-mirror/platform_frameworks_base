@@ -248,7 +248,7 @@ public class WindowAnimator {
         for (int i = windows.size() - 1; i >= 0; i--) {
             WindowState win = windows.get(i);
             WindowStateAnimator winAnimator = win.mWinAnimator;
-            final int flags = winAnimator.mAttrFlags;
+            final int flags = win.mAttrs.flags;
 
             if (winAnimator.mSurfaceControl != null) {
                 final boolean wasAnimating = winAnimator.mWasAnimating;
@@ -309,8 +309,7 @@ public class WindowAnimator {
                             + " hidden=" + win.mRootToken.hidden
                             + " anim=" + win.mWinAnimator.mAnimation);
                 } else if (mPolicy.canBeForceHidden(win, win.mAttrs)) {
-                    final boolean hideWhenLocked =
-                            (winAnimator.mAttrFlags & FLAG_SHOW_WHEN_LOCKED) == 0;
+                    final boolean hideWhenLocked = (flags & FLAG_SHOW_WHEN_LOCKED) == 0;
                     final boolean changed;
                     if (((mForceHiding == KEYGUARD_ANIMATING_IN)
                                 && (!winAnimator.isAnimating() || hideWhenLocked))
@@ -416,7 +415,7 @@ public class WindowAnimator {
                 continue;
             }
 
-            final int flags = winAnimator.mAttrFlags;
+            final int flags = win.mAttrs.flags;
 
             // If this window is animating, make a note that we have
             // an animating window and take care of a request to run

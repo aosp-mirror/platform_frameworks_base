@@ -172,7 +172,6 @@ class WindowStateAnimator {
     /** Was this window last hidden? */
     boolean mLastHidden;
 
-    int mAttrFlags;
     int mAttrType;
 
     public WindowStateAnimator(final WindowState win) {
@@ -197,7 +196,6 @@ class WindowStateAnimator {
                 ? null : win.mAttachedWindow.mWinAnimator;
         mAppAnimator = win.mAppToken == null ? null : win.mAppToken.mAppAnimator;
         mSession = win.mSession;
-        mAttrFlags = win.mAttrs.flags;
         mAttrType = win.mAttrs.type;
         mIsWallpaper = win.mIsWallpaper;
     }
