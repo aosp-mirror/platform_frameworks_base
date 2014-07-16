@@ -471,6 +471,12 @@ public class RippleDrawable extends LayerDrawable {
         onHotspotBoundsChanged();
     }
 
+    /** @hide */
+    @Override
+    public void getHotspotBounds(Rect outRect) {
+        outRect.set(mHotspotBounds);
+    }
+
     /**
      * Notifies all the animating ripples that the hotspot bounds have changed.
      */

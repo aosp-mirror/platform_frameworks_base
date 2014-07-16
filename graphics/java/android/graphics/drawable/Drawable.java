@@ -516,6 +516,11 @@ public abstract class Drawable {
      */
     public void setHotspotBounds(int left, int top, int right, int bottom) {}
 
+    /** @hide For internal use only. Individual results may vary. */
+    public void getHotspotBounds(Rect outRect) {
+        outRect.set(getBounds());
+    }
+
     /**
      * Whether this drawable requests projection.
      *
