@@ -1657,4 +1657,8 @@
     <!-- Default text encoding for WebSettings. @hide @SystemApi -->
     <string name="config_webSettingsDefaultTextEncoding">UTF-8</string>
 
+    <!--From SmsMessage-->
+    <!--Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
+        string that's stored in 8-bit unpacked format) characters.-->
+    <bool translatable="false" name="config_sms_decode_gsm_8bit_data">false</bool>
 </resources>
