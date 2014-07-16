@@ -88,8 +88,8 @@ to hold a {@link android.widget.TextView} and a {@link android.widget.Button}:</
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?>
 &lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="fill_parent" 
-              android:layout_height="fill_parent" 
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
               android:orientation="vertical" >
     &lt;TextView android:id="@+id/text"
               android:layout_width="wrap_content"
@@ -215,14 +215,14 @@ set the width or height: </p>
 <ul>
   <li><var>wrap_content</var> tells your view to size itself to the dimensions
 required by its content</li>
-  <li><var>fill_parent</var> (renamed <var>match_parent</var> in API Level 8)
+  <li><var>match_parent</var> (named <var>fill_parent</var> before API Level 8)
 tells your view to become as big as its parent view group will allow.</li>
 </ul>
 
 <p>In general, specifying a layout width and height using absolute units such as
 pixels is not recommended. Instead, using relative measurements such as
 density-independent pixel units (<var>dp</var>), <var>wrap_content</var>, or
-<var>fill_parent</var>, is a better approach, because it helps ensure that
+<var>match_parent</var>, is a better approach, because it helps ensure that
 your application will display properly across a variety of device screen sizes.
 The accepted measurement types are defined in the
 <a href="{@docRoot}guide/topics/resources/available-resources.html#dimension">
