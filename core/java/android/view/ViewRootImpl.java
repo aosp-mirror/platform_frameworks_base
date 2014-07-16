@@ -463,8 +463,13 @@ public final class ViewRootImpl implements ViewParent,
 
                 // Compute surface insets required to draw at specified Z value.
                 // TODO: Use real shadow insets for a constant max Z.
-                final int surfaceInset = (int) Math.ceil(view.getZ() * 2);
-                attrs.surfaceInsets.set(surfaceInset, surfaceInset, surfaceInset, surfaceInset);
+                if (view.isHardwareAccelerated()) {
+                    final int surfaceInset = (int) Math.ceil(view.getZ() * 2);
+                    attrs.surfaceInsets.set(surfaceInset, surfaceInset, surfaceInset, surfaceInset);
+                } else {
+                    // Software accelerated windows can't use insets.
+                    attrs.surfaceInsets.setEmpty();
+                }
 
                 CompatibilityInfo compatibilityInfo = mDisplayAdjustments.getCompatibilityInfo();
                 mTranslator = compatibilityInfo.getTranslator();
@@ -2375,8 +2380,6 @@ public final class ViewRootImpl implements ViewParent,
             attachInfo.mTreeObserver.dispatchOnScrollChanged();
         }
 
-        final WindowManager.LayoutParams params = mWindowAttributes;
-        final Rect surfaceInsets = params != null ? params.surfaceInsets : null;
         boolean animating = mScroller != null && mScroller.computeScrollOffset();
         final int curScrollY;
         if (animating) {
@@ -2434,8 +2437,18 @@ public final class ViewRootImpl implements ViewParent,
 
         attachInfo.mTreeObserver.dispatchOnDraw();
 
-        final int xOffset = surfaceInsets != null ? -surfaceInsets.left : 0;
-        final int yOffset = curScrollY + (surfaceInsets != null ? -surfaceInsets.top : 0);
+        int xOffset = 0;
+        int yOffset = curScrollY;
+        final WindowManager.LayoutParams params = mWindowAttributes;
+        final Rect surfaceInsets = params != null ? params.surfaceInsets : null;
+        if (surfaceInsets != null) {
+            xOffset -= surfaceInsets.left;
+            yOffset -= surfaceInsets.top;
+
+            // Offset dirty rect for surface insets.
+            dirty.offset(surfaceInsets.left, surfaceInsets.right);
+        }
+
         if (!dirty.isEmpty() || mIsAnimating) {
             if (attachInfo.mHardwareRenderer != null && attachInfo.mHardwareRenderer.isEnabled()) {
                 // Draw with hardware renderer.
@@ -2496,19 +2509,19 @@ public final class ViewRootImpl implements ViewParent,
             boolean scalingRequired, Rect dirty) {
 
         // Draw with software renderer.
-        Canvas canvas;
+        final Canvas canvas;
         try {
-            int left = dirty.left;
-            int top = dirty.top;
-            int right = dirty.right;
-            int bottom = dirty.bottom;
+            final int left = dirty.left;
+            final int top = dirty.top;
+            final int right = dirty.right;
+            final int bottom = dirty.bottom;
 
             canvas = mSurface.lockCanvas(dirty);
 
             // The dirty rectangle can be modified by Surface.lockCanvas()
             //noinspection ConstantConditions
-            if (left != dirty.left || top != dirty.top || right != dirty.right ||
-                    bottom != dirty.bottom) {
+            if (left != dirty.left || top != dirty.top || right != dirty.right
+                    || bottom != dirty.bottom) {
                 attachInfo.mIgnoreDirtyState = true;
             }
 
