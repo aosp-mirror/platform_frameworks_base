@@ -25393,9 +25393,11 @@ package android.provider {
   }
 
   public static abstract interface Telephony.BaseMmsColumns implements android.provider.BaseColumns {
+    field public static final java.lang.String ARCHIVED = "archived";
     field public static final java.lang.String CONTENT_CLASS = "ct_cls";
     field public static final java.lang.String CONTENT_LOCATION = "ct_l";
     field public static final java.lang.String CONTENT_TYPE = "ct_t";
+    field public static final java.lang.String CREATOR = "creator";
     field public static final java.lang.String DATE = "date";
     field public static final java.lang.String DATE_SENT = "date_sent";
     field public static final java.lang.String DELIVERY_REPORT = "d_rpt";
@@ -25618,7 +25620,9 @@ package android.provider {
 
   public static abstract interface Telephony.TextBasedSmsColumns {
     field public static final java.lang.String ADDRESS = "address";
+    field public static final java.lang.String ARCHIVED = "archived";
     field public static final java.lang.String BODY = "body";
+    field public static final java.lang.String CREATOR = "creator";
     field public static final java.lang.String DATE = "date";
     field public static final java.lang.String DATE_SENT = "date_sent";
     field public static final java.lang.String ERROR_CODE = "error_code";
@@ -28642,6 +28646,44 @@ package android.telephony {
     field public static final int VOICEMAIL_NUMBER_MISSING = 40; // 0x28
   }
 
+  public class MessagingConfigurationManager {
+    method public boolean getCarrierConfigBoolean(java.lang.String, boolean);
+    method public int getCarrierConfigInt(java.lang.String, int);
+    method public java.lang.String getCarrierConfigString(java.lang.String, java.lang.String);
+    method public static android.telephony.MessagingConfigurationManager getDefault();
+    method public void setCarrierConfigBoolean(java.lang.String, boolean);
+    method public void setCarrierConfigInt(java.lang.String, int);
+    method public void setCarrierConfigString(java.lang.String, java.lang.String);
+    field public static final java.lang.String CONF_ALIAS_ENABLED = "aliasEnabled";
+    field public static final java.lang.String CONF_ALIAS_MAX_CHARS = "aliasMaxChars";
+    field public static final java.lang.String CONF_ALIAS_MIN_CHARS = "aliasMinChars";
+    field public static final java.lang.String CONF_ALLOW_ATTACH_AUDIO = "allowAttachAudio";
+    field public static final java.lang.String CONF_APPEND_TRANSACTION_ID = "enabledTransID";
+    field public static final java.lang.String CONF_EMAIL_GATEWAY_NUMBER = "emailGatewayNumber";
+    field public static final java.lang.String CONF_HTTP_PARAMS = "httpParams";
+    field public static final java.lang.String CONF_HTTP_SOCKET_TIMEOUT = "httpSocketTimeout";
+    field public static final java.lang.String CONF_MAX_IMAGE_HEIGHT = "maxImageHeight";
+    field public static final java.lang.String CONF_MAX_IMAGE_WIDTH = "maxImageWidth";
+    field public static final java.lang.String CONF_MAX_MESSAGE_SIZE = "maxMessageSize";
+    field public static final java.lang.String CONF_MESSAGE_TEXT_MAX_SIZE = "maxMessageTextSize";
+    field public static final java.lang.String CONF_MMS_DELIVERY_REPORT_ENABLED = "enableMMSDeliveryReports";
+    field public static final java.lang.String CONF_MMS_ENABLED = "enabledMMS";
+    field public static final java.lang.String CONF_MMS_READ_REPORT_ENABLED = "enableMMSReadReports";
+    field public static final java.lang.String CONF_MULTIPART_SMS_ENABLED = "enableMultipartSMS";
+    field public static final java.lang.String CONF_NAI_SUFFIX = "naiSuffix";
+    field public static final java.lang.String CONF_NOTIFY_WAP_MMSC_ENABLED = "enabledNotifyWapMMSC";
+    field public static final java.lang.String CONF_RECIPIENT_LIMIT = "recipientLimit";
+    field public static final java.lang.String CONF_SEND_MULTIPART_SMS_AS_SEPARATE_MESSAGES = "sendMultipartSmsAsSeparateMessages";
+    field public static final java.lang.String CONF_SMS_DELIVERY_REPORT_ENABLED = "enableSMSDeliveryReports";
+    field public static final java.lang.String CONF_SMS_TO_MMS_TEXT_LENGTH_THRESHOLD = "smsToMmsTextLengthThreshold";
+    field public static final java.lang.String CONF_SMS_TO_MMS_TEXT_THRESHOLD = "smsToMmsTextThreshold";
+    field public static final java.lang.String CONF_SUBJECT_MAX_LENGTH = "maxSubjectLength";
+    field public static final java.lang.String CONF_SUPPORT_MMS_CONTENT_DISPOSITION = "supportMmsContentDisposition";
+    field public static final java.lang.String CONF_UA_PROF_TAG_NAME = "uaProfTagName";
+    field public static final java.lang.String CONF_UA_PROF_URL = "uaProfUrl";
+    field public static final java.lang.String CONF_USER_AGENT = "userAgent";
+  }
+
   public class NeighboringCellInfo implements android.os.Parcelable {
     ctor public deprecated NeighboringCellInfo();
     ctor public deprecated NeighboringCellInfo(int, int);
@@ -28784,19 +28826,43 @@ package android.telephony {
   }
 
   public final class SmsManager {
+    method public android.net.Uri addMultimediaMessageDraft(byte[]);
+    method public android.net.Uri addTextMessageDraft(java.lang.String, java.lang.String);
+    method public boolean deleteStoredConversation(long);
+    method public boolean deleteStoredMessage(android.net.Uri);
     method public java.util.ArrayList<java.lang.String> divideMessage(java.lang.String);
+    method public void downloadMultimediaMessage(java.lang.String, android.app.PendingIntent);
+    method public boolean getAutoPersisting();
     method public static android.telephony.SmsManager getDefault();
+    method public android.net.Uri importMultimediaMessage(byte[], java.lang.String, long, boolean, boolean);
+    method public android.net.Uri importTextMessage(java.lang.String, int, java.lang.String, long, boolean, boolean);
     method public void injectSmsPdu(byte[], java.lang.String, android.app.PendingIntent);
     method public void sendDataMessage(java.lang.String, java.lang.String, short, byte[], android.app.PendingIntent, android.app.PendingIntent);
+    method public void sendMultimediaMessage(byte[], java.lang.String, android.app.PendingIntent);
     method public void sendMultipartTextMessage(java.lang.String, java.lang.String, java.util.ArrayList<java.lang.String>, java.util.ArrayList<android.app.PendingIntent>, java.util.ArrayList<android.app.PendingIntent>);
+    method public void sendStoredMultimediaMessage(android.net.Uri, android.app.PendingIntent);
+    method public void sendStoredMultipartTextMessage(android.net.Uri, java.lang.String, java.util.ArrayList<android.app.PendingIntent>, java.util.ArrayList<android.app.PendingIntent>);
+    method public void sendStoredTextMessage(android.net.Uri, java.lang.String, android.app.PendingIntent, android.app.PendingIntent);
     method public void sendTextMessage(java.lang.String, java.lang.String, java.lang.String, android.app.PendingIntent, android.app.PendingIntent);
+    method public void setAutoPersisting(boolean);
     method public void updateMmsDownloadStatus(int, byte[]);
     method public void updateMmsSendStatus(int, boolean);
     method public void updateSmsSendStatus(int, boolean);
+    method public boolean updateStoredMessageStatus(android.net.Uri, android.content.ContentValues);
+    field public static final java.lang.String MESSAGE_STATUS_ARCHIVED = "archived";
+    field public static final java.lang.String MESSAGE_STATUS_READ = "read";
+    field public static final java.lang.String MESSAGE_STATUS_SEEN = "seen";
+    field public static final int MMS_ERROR_HTTP_FAILURE = 4; // 0x4
+    field public static final int MMS_ERROR_INVALID_APN = 2; // 0x2
+    field public static final int MMS_ERROR_UNABLE_CONNECT_MMS = 3; // 0x3
+    field public static final int MMS_ERROR_UNSPECIFIED = 1; // 0x1
+    field public static final java.lang.String MMS_EXTRA_DATA = "data";
     field public static final int RESULT_ERROR_GENERIC_FAILURE = 1; // 0x1
     field public static final int RESULT_ERROR_NO_SERVICE = 4; // 0x4
     field public static final int RESULT_ERROR_NULL_PDU = 3; // 0x3
     field public static final int RESULT_ERROR_RADIO_OFF = 2; // 0x2
+    field public static final int SMS_TYPE_INCOMING = 0; // 0x0
+    field public static final int SMS_TYPE_OUTGOING = 1; // 0x1
     field public static final int STATUS_ON_ICC_FREE = 0; // 0x0
     field public static final int STATUS_ON_ICC_READ = 1; // 0x1
     field public static final int STATUS_ON_ICC_SENT = 5; // 0x5
