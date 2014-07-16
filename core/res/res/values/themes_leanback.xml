@@ -63,8 +63,7 @@
         <item name="alertDialogStyle">@style/AlertDialog.Leanback</item>
     </style>
 
-    <!-- Setup and form wizard themes -->
-
+    <!-- Setup and form wizard themes @hide @SystemApi-->
     <style name="Theme.Leanback.FormWizard" parent="Theme.Material.NoActionBar">
         <item name="windowBackground">@drawable/background_leanback_setup</item>
         <item name="colorBackgroundCacheHint">@null</item>
