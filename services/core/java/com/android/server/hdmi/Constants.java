@@ -206,5 +206,10 @@ final class Constants {
     static final String PROPERTY_PREFERRED_ADDRESS_PLAYBACK = "hdmi_cec.prefaddr.playback";
     static final String PROPERTY_PREFERRED_ADDRESS_TV = "hdmi_cec.prefaddr.tv";
 
+    static final int RECORDING_TYPE_DIGITAL_RF = 1;
+    static final int RECORDING_TYPE_ANALOGUE_RF = 2;
+    static final int RECORDING_TYPE_EXTERNAL_PHYSICAL_ADDRESS = 3;
+    static final int RECORDING_TYPE_OWN_SOURCE = 4;
+
     private Constants() { /* cannot be instantiated */ }
 }
