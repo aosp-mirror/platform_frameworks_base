@@ -215,4 +215,29 @@ interface IMms {
      */
     void sendStoredMessage(long subId, String callingPkg, in Uri messageUri,
             in PendingIntent sentIntent);
+
+    /**
+     * Turns on/off the flag to automatically write sent/received SMS/MMS messages into system
+     *
+     * When this flag is on, all SMS/MMS sent/received are stored by system automatically
+     * When this flag is off, only SMS/MMS sent by non-default SMS apps are stored by system
+     * automatically
+     *
+     * This flag can only be changed by default SMS apps
+     *
+     * @param callingPkg the name of the calling app package
+     * @param enabled Whether to enable message auto persisting
+     */
+    void setAutoPersisting(String callingPkg, boolean enabled);
+
+    /**
+     * Get the value of the flag to automatically write sent/received SMS/MMS messages into system
+     *
+     * When this flag is on, all SMS/MMS sent/received are stored by system automatically
+     * When this flag is off, only SMS/MMS sent by non-default SMS apps are stored by system
+     * automatically
+     *
+     * @return the current value of the auto persist flag
+     */
+    boolean getAutoPersisting();
 }
