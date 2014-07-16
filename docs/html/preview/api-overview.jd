@@ -571,7 +571,7 @@ You must add the {@code android.permission.BLUETOOTH_ADMIN} permission in your
 manifest in order for your app to use the new advertising and scanning features.</a>
 
 <p>To begin Bluetooth LE advertising so that other devices can discover
-your app, call {@code android.bluetooth.le.BluetoothAdvertiser.startAdvisertising()}
+your app, call {@code android.bluetooth.le.BluetoothAdvertiser.startAdvertising()}
 and pass in an implementation of the
 {@code android.bluetooth.le.AdvertiseCallback} class. The callback object
 receives a report of the success or failure of the advertising operation.</p>
