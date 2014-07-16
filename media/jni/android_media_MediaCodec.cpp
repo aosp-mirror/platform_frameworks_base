@@ -197,6 +197,10 @@ status_t JMediaCodec::flush() {
     return mCodec->flush();
 }
 
+status_t JMediaCodec::reset() {
+    return mCodec->reset();
+}
+
 status_t JMediaCodec::queueInputBuffer(
         size_t index,
         size_t offset, size_t size, int64_t timeUs, uint32_t flags,
@@ -854,6 +858,26 @@ static void android_media_MediaCodec_stop(JNIEnv *env, jobject thiz) {
     throwExceptionAsNecessary(env, err);
 }
 
+static void android_media_MediaCodec_reset(JNIEnv *env, jobject thiz) {
+    ALOGV("android_media_MediaCodec_reset");
+
+    sp<JMediaCodec> codec = getMediaCodec(env, thiz);
+
+    if (codec == NULL) {
+        // should never be here
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return;
+    }
+
+    status_t err = codec->reset();
+    if (err != OK) {
+        // treat all errors as fatal for now, though resource not available
+        // errors could be treated as transient.
+        err = 0x80000000;
+    }
+    throwExceptionAsNecessary(env, err);
+}
+
 static void android_media_MediaCodec_flush(JNIEnv *env, jobject thiz) {
     ALOGV("android_media_MediaCodec_flush");
 
@@ -1397,6 +1421,8 @@ static void android_media_MediaCodec_native_finalize(
 
 static JNINativeMethod gMethods[] = {
     { "native_release", "()V", (void *)android_media_MediaCodec_release },
+
+    { "native_reset", "()V", (void *)android_media_MediaCodec_reset },
 
     { "native_setCallback",
       "(Landroid/media/MediaCodec$Callback;)V",
