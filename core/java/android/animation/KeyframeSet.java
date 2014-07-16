@@ -48,6 +48,13 @@ class KeyframeSet {
         mInterpolator = mLastKeyframe.getInterpolator();
     }
 
+    /**
+     * If subclass has variables that it calculates based on the Keyframes, it should reset them
+     * when this method is called because Keyframe contents might have changed.
+     */
+    void invalidateCache() {
+    }
+
     public static KeyframeSet ofInt(int... values) {
         int numKeyframes = values.length;
         IntKeyframe keyframes[] = new IntKeyframe[Math.max(numKeyframes,2)];
