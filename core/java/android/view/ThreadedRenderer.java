@@ -93,6 +93,7 @@ public class ThreadedRenderer extends HardwareRenderer {
     private RenderNode mRootNode;
     private Choreographer mChoreographer;
     private boolean mProfilingEnabled;
+    private boolean mRootNodeNeedsUpdate;
 
     ThreadedRenderer(Context context, boolean translucent) {
         final TypedArray a = context.obtainStyledAttributes(
@@ -247,28 +248,39 @@ public class ThreadedRenderer extends HardwareRenderer {
         return changed;
     }
 
-    private void updateRootDisplayList(View view, HardwareDrawCallbacks callbacks) {
+    private void updateViewTreeDisplayList(View view) {
         view.mPrivateFlags |= View.PFLAG_DRAWN;
-
         view.mRecreateDisplayList = (view.mPrivateFlags & View.PFLAG_INVALIDATED)
                 == View.PFLAG_INVALIDATED;
         view.mPrivateFlags &= ~View.PFLAG_INVALIDATED;
-
-        Trace.traceBegin(Trace.TRACE_TAG_VIEW, "getDisplayList");
-        HardwareCanvas canvas = mRootNode.start(mSurfaceWidth, mSurfaceHeight);
-        try {
-            canvas.save();
-            canvas.translate(mInsetLeft, mInsetTop);
-            callbacks.onHardwarePreDraw(canvas);
-            canvas.drawRenderNode(view.getDisplayList());
-            callbacks.onHardwarePostDraw(canvas);
-            canvas.restore();
-        } finally {
-            mRootNode.end(canvas);
-            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
-        }
-
+        view.getDisplayList();
         view.mRecreateDisplayList = false;
+    }
+
+    private void updateRootDisplayList(View view, HardwareDrawCallbacks callbacks) {
+        Trace.traceBegin(Trace.TRACE_TAG_VIEW, "getDisplayList");
+        updateViewTreeDisplayList(view);
+
+        if (mRootNodeNeedsUpdate || !mRootNode.isValid()) {
+            HardwareCanvas canvas = mRootNode.start(mSurfaceWidth, mSurfaceHeight);
+            try {
+                canvas.save();
+                canvas.translate(mInsetLeft, mInsetTop);
+                callbacks.onHardwarePreDraw(canvas);
+                canvas.drawRenderNode(view.getDisplayList());
+                callbacks.onHardwarePostDraw(canvas);
+                canvas.restore();
+                mRootNodeNeedsUpdate = false;
+            } finally {
+                mRootNode.end(canvas);
+            }
+        }
+        Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+    }
+
+    @Override
+    void invalidateRoot() {
+        mRootNodeNeedsUpdate = true;
     }
 
     @Override

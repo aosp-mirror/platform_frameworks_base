@@ -138,13 +138,6 @@ public:
         }
     }
 
-protected:
-    virtual void damageSelf(TreeInfo& info) {
-        // Intentionally a no-op. As RootRenderNode gets a new DisplayListData
-        // every frame this would result in every draw push being a full inval,
-        // which is wrong. Only RootRenderNode has this issue.
-    }
-
 private:
     sp<Looper> mLooper;
     std::vector<OnFinishedEvent> mOnFinishedEvents;

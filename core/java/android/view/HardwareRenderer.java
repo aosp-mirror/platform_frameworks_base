@@ -327,6 +327,12 @@ public abstract class HardwareRenderer {
     }
 
     /**
+     *  Indicates that the content drawn by HardwareDrawCallbacks needs to
+     *  be updated, which will be done by the next call to draw()
+     */
+    abstract void invalidateRoot();
+
+    /**
      * Draws the specified view.
      *
      * @param view The view to draw.
