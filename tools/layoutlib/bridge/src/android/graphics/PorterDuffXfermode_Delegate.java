@@ -16,17 +16,14 @@
 
 package android.graphics;
 
-import com.android.ide.common.rendering.api.LayoutLog;
-import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.impl.DelegateManager;
+import com.android.layoutlib.bridge.impl.PorterDuffUtility;
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 import android.graphics.PorterDuff.Mode;
 
-import java.awt.AlphaComposite;
 import java.awt.Composite;
 
-import static com.android.layoutlib.bridge.impl.PorterDuffUtility.getAlphaCompositeRule;
 import static com.android.layoutlib.bridge.impl.PorterDuffUtility.getPorterDuffMode;
 
 /**
@@ -58,7 +55,7 @@ public class PorterDuffXfermode_Delegate extends Xfermode_Delegate {
 
     @Override
     public Composite getComposite(int alpha) {
-        return getComposite(mMode, alpha);
+        return PorterDuffUtility.getComposite(mMode, alpha);
     }
 
     @Override
@@ -72,9 +69,6 @@ public class PorterDuffXfermode_Delegate extends Xfermode_Delegate {
         return null;
     }
 
-    public static Composite getComposite(int mode, int alpha) {
-        return getComposite(getPorterDuffMode(mode), alpha);
-    }
 
     // ---- native methods ----
 
@@ -90,17 +84,4 @@ public class PorterDuffXfermode_Delegate extends Xfermode_Delegate {
         mMode = getPorterDuffMode(mode);
     }
 
-    private static Composite getComposite(Mode mode, int alpha255) {
-        float alpha1 = alpha255 != 0xFF ? alpha255 / 255.f : 1.f;
-        int rule = getAlphaCompositeRule(mode);
-        if (rule >= 0) {
-            return AlphaComposite.getInstance(rule, alpha1);
-        }
-
-        Bridge.getLog().fidelityWarning(LayoutLog.TAG_BROKEN,
-                String.format("Unsupported PorterDuff Mode: %1$s", mode.name()),
-                null, null /*data*/);
-
-        return AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha1);
-    }
 }

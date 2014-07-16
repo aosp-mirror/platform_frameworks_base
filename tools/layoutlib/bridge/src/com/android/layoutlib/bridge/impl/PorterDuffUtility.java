@@ -19,11 +19,14 @@ package com.android.layoutlib.bridge.impl;
 import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.layoutlib.bridge.Bridge;
 
+import android.graphics.BlendComposite;
+import android.graphics.BlendComposite.BlendingMode;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.PorterDuffColorFilter_Delegate;
 import android.graphics.PorterDuffXfermode_Delegate;
 
 import java.awt.AlphaComposite;
+import java.awt.Composite;
 
 /**
  * Provides various utility methods for {@link PorterDuffColorFilter_Delegate} and {@link
@@ -51,46 +54,54 @@ public final class PorterDuffUtility {
     }
 
     /**
-     * A utility method to convert the porterDuffMode to an int to be used as a rule for {@link
-     * AlphaComposite}. If {@code AlphaComposite} doesn't support the mode, -1 is returned.
+     * A utility method to get the {@link Composite} that represents the filter for the given
+     * PorterDuff mode and the alpha. Defaults to {@link Mode#SRC_OVER} for invalid modes.
      */
-    public static int getAlphaCompositeRule(Mode porterDuffMode) {
-        switch (porterDuffMode) {
+    public static Composite getComposite(Mode mode, int alpha255) {
+        float alpha1 = alpha255 != 0xFF ? alpha255 / 255.f : 1.f;
+        switch (mode) {
             case CLEAR:
-                return AlphaComposite.CLEAR;
-            case DARKEN:
-                break;
-            case DST:
-                return AlphaComposite.DST;
-            case DST_ATOP:
-                return AlphaComposite.DST_ATOP;
-            case DST_IN:
-                return AlphaComposite.DST_IN;
-            case DST_OUT:
-                return AlphaComposite.DST_OUT;
-            case DST_OVER:
-                return AlphaComposite.DST_OVER;
-            case LIGHTEN:
-                break;
-            case MULTIPLY:
-                break;
-            case SCREEN:
-                break;
+                return AlphaComposite.getInstance(AlphaComposite.CLEAR, alpha1);
             case SRC:
-                return AlphaComposite.SRC;
-            case SRC_ATOP:
-                return AlphaComposite.SRC_ATOP;
-            case SRC_IN:
-                return AlphaComposite.SRC_IN;
-            case SRC_OUT:
-                return AlphaComposite.SRC_OUT;
+                return AlphaComposite.getInstance(AlphaComposite.SRC, alpha1);
+            case DST:
+                return AlphaComposite.getInstance(AlphaComposite.DST, alpha1);
             case SRC_OVER:
-                return AlphaComposite.SRC_OVER;
+                return AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha1);
+            case DST_OVER:
+                return AlphaComposite.getInstance(AlphaComposite.DST_OVER, alpha1);
+            case SRC_IN:
+                return AlphaComposite.getInstance(AlphaComposite.SRC_IN, alpha1);
+            case DST_IN:
+                return AlphaComposite.getInstance(AlphaComposite.DST_IN, alpha1);
+            case SRC_OUT:
+                return AlphaComposite.getInstance(AlphaComposite.SRC_OUT, alpha1);
+            case DST_OUT:
+                return AlphaComposite.getInstance(AlphaComposite.DST_OUT, alpha1);
+            case SRC_ATOP:
+                return AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, alpha1);
+            case DST_ATOP:
+                return AlphaComposite.getInstance(AlphaComposite.DST_ATOP, alpha1);
             case XOR:
-                return AlphaComposite.XOR;
-        }
-        // This is an unsupported mode.
-        return -1;
+                return AlphaComposite.getInstance(AlphaComposite.XOR, alpha1);
+            case DARKEN:
+                return BlendComposite.getInstance(BlendingMode.DARKEN, alpha1);
+            case LIGHTEN:
+                return BlendComposite.getInstance(BlendingMode.LIGHTEN, alpha1);
+            case MULTIPLY:
+                return BlendComposite.getInstance(BlendingMode.MULTIPLY, alpha1);
+            case SCREEN:
+                return BlendComposite.getInstance(BlendingMode.SCREEN, alpha1);
+            case ADD:
+                return BlendComposite.getInstance(BlendingMode.ADD, alpha1);
+            case OVERLAY:
+                return BlendComposite.getInstance(BlendingMode.OVERLAY, alpha1);
+            default:
+                Bridge.getLog().fidelityWarning(LayoutLog.TAG_BROKEN,
+                        String.format("Unsupported PorterDuff Mode: %1$s", mode.name()),
+                        null, null /*data*/);
 
+                return AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha1);
+        }
     }
 }
