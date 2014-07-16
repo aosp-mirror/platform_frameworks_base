@@ -31,6 +31,9 @@ import android.service.notification.ZenModeConfig;
 import android.text.format.DateUtils;
 import android.util.Slog;
 
+import com.android.server.notification.NotificationManagerService.DumpFilter;
+
+import java.io.PrintWriter;
 import java.util.Date;
 
 /** Built-in zen condition provider for simple time-based conditions */
@@ -49,9 +52,16 @@ public class CountdownConditionProvider extends ConditionProviderService {
     private final Receiver mReceiver = new Receiver();
 
     private boolean mConnected;
+    private long mTime;
 
     public CountdownConditionProvider() {
         if (DEBUG) Slog.d(TAG, "new CountdownConditionProvider()");
+    }
+
+    public void dump(PrintWriter pw, DumpFilter filter) {
+        pw.println("    CountdownConditionProvider:");
+        pw.print("      mConnected="); pw.println(mConnected);
+        pw.print("      mTime="); pw.println(mTime);
     }
 
     @Override
@@ -79,7 +89,7 @@ public class CountdownConditionProvider extends ConditionProviderService {
     @Override
     public void onSubscribe(Uri conditionId) {
         if (DEBUG) Slog.d(TAG, "onSubscribe " + conditionId);
-        final long time = ZenModeConfig.tryParseCountdownConditionId(conditionId);
+        mTime = ZenModeConfig.tryParseCountdownConditionId(conditionId);
         final AlarmManager alarms = (AlarmManager)
                 mContext.getSystemService(Context.ALARM_SERVICE);
         final Intent intent = new Intent(ACTION).putExtra(EXTRA_CONDITION_ID, conditionId)
@@ -87,14 +97,21 @@ public class CountdownConditionProvider extends ConditionProviderService {
         final PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, REQUEST_CODE,
                 intent, PendingIntent.FLAG_UPDATE_CURRENT);
         alarms.cancel(pendingIntent);
-        if (time > 0) {
+        if (mTime > 0) {
             final long now = System.currentTimeMillis();
             final CharSequence span =
-                    DateUtils.getRelativeTimeSpanString(time, now, DateUtils.MINUTE_IN_MILLIS);
+                    DateUtils.getRelativeTimeSpanString(mTime, now, DateUtils.MINUTE_IN_MILLIS);
+            if (mTime <= now) {
+                // in the past, already false
+                notifyCondition(newCondition(mTime, Condition.STATE_FALSE));
+            } else {
+                // in the future, set an alarm
+                alarms.setExact(AlarmManager.RTC_WAKEUP, mTime, pendingIntent);
+            }
             if (DEBUG) Slog.d(TAG, String.format(
-                    "Scheduling %s for %s, %s in the future (%s), now=%s",
-                    ACTION, ts(time), time - now, span, ts(now)));
-            alarms.setExact(AlarmManager.RTC_WAKEUP, time, pendingIntent);
+                    "%s %s for %s, %s in the future (%s), now=%s",
+                    (mTime <= now ? "Not scheduling" : "Scheduling"),
+                    ACTION, ts(mTime), mTime - now, span, ts(now)));
         }
     }
 

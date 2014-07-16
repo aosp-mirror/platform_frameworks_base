@@ -53,6 +53,7 @@ public class ConditionProviders extends ManagedServices {
     private final CountdownConditionProvider mCountdown = new CountdownConditionProvider();
 
     private Uri mExitConditionId;
+    private ComponentName mExitConditionComponent;
 
     public ConditionProviders(Context context, Handler handler,
             UserProfiles userProfiles, ZenModeHelper zenModeHelper) {
@@ -95,6 +96,7 @@ public class ConditionProviders extends ManagedServices {
                 }
             }
         }
+        mCountdown.dump(pw, filter);
     }
 
     @Override
@@ -120,20 +122,20 @@ public class ConditionProviders extends ManagedServices {
             // we tried
         }
         synchronized (mMutex) {
+            if (info.component.equals(mExitConditionComponent)) {
+                // ensure record exists, we'll wire it up and subscribe below
+                final ConditionRecord manualRecord =
+                        getRecordLocked(mExitConditionId, mExitConditionComponent);
+                manualRecord.isManual = true;
+            }
             final int N = mRecords.size();
             for(int i = 0; i < N; i++) {
                 final ConditionRecord r = mRecords.get(i);
                 if (!r.component.equals(info.component)) continue;
                 r.info = info;
-                // if automatic, auto-subscribe
-                if (r.isAutomatic) {
-                    try {
-                        final Uri id = r.id;
-                        if (DEBUG) Slog.d(TAG, "Auto-subscribing to configured condition " + id);
-                        provider.onSubscribe(id);
-                    } catch (RemoteException e) {
-                        // we tried
-                    }
+                // if automatic or manual, auto-subscribe
+                if (r.isAutomatic || r.isManual) {
+                    subscribeLocked(r);
                 }
             }
         }
@@ -274,6 +276,7 @@ public class ConditionProviders extends ManagedServices {
     public void setZenModeCondition(Uri conditionId) {
         if (DEBUG) Slog.d(TAG, "setZenModeCondition " + conditionId);
         synchronized(mMutex) {
+            ComponentName conditionComponent = null;
             if (ZenModeConfig.isValidCountdownConditionId(conditionId)) {
                 // constructed by the client, make sure the record exists...
                 final ConditionRecord r = getRecordLocked(conditionId,
@@ -296,9 +299,13 @@ public class ConditionProviders extends ManagedServices {
                     subscribeLocked(r);
                     r.isManual = true;
                 }
+                if (idEqual) {
+                    conditionComponent = r.component;
+                }
             }
             if (!Objects.equals(mExitConditionId, conditionId)) {
                 mExitConditionId = conditionId;
+                mExitConditionComponent = conditionComponent;
                 saveZenConfigLocked();
             }
         }
@@ -404,6 +411,13 @@ public class ConditionProviders extends ManagedServices {
         for (ManagedServiceInfo info : mServices) {
             final IConditionProvider provider = provider(info);
             if (provider == null) continue;
+            // clear all stored conditions from this provider that we no longer care about
+            for (int i = mRecords.size() - 1; i >= 0; i--) {
+                final ConditionRecord r = mRecords.get(i);
+                if (r.info != info) continue;
+                if (r.isManual || r.isAutomatic) continue;
+                mRecords.remove(i);
+            }
             try {
                 provider.onRequestConditions(flags);
             } catch (RemoteException e) {
@@ -420,6 +434,7 @@ public class ConditionProviders extends ManagedServices {
         }
         synchronized (mMutex) {
             mExitConditionId = config.exitConditionId;
+            mExitConditionComponent = config.exitConditionComponent;
             if (config.conditionComponents == null || config.conditionIds == null
                     || config.conditionComponents.length != config.conditionIds.length) {
                 if (DEBUG) Slog.d(TAG, "loadZenConfig: no conditions");
@@ -467,6 +482,7 @@ public class ConditionProviders extends ManagedServices {
             }
         }
         config.exitConditionId = mExitConditionId;
+        config.exitConditionComponent = mExitConditionComponent;
         if (DEBUG) Slog.d(TAG, "Setting zen config to: " + config);
         mZenModeHelper.setConfig(config);
     }
