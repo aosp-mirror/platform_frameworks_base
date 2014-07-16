@@ -129,7 +129,7 @@ you can begin developing features with the
 <ol>
   <li>Copy the library project at <code>&lt;android-sdk&gt;/extras/google/google_play_services/libproject/google-play-services_lib/</code> to the location where you maintain your Android app projects.</li>
 
-  <li>In your app project, reference Google Play services library project. See
+  <li>In your app project, reference the Google Play services library project. See
     <a href="{@docRoot}tools/projects/projects-cmdline.html#ReferencingLibraryProject">Referencing
     a Library Project on the Command Line</a> for more information on how to do this.
     <p class="note"><strong>Note:</strong>
