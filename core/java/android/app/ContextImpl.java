@@ -18,10 +18,12 @@ package android.app;
 
 import android.app.usage.IUsageStatsManager;
 import android.app.usage.UsageStatsManager;
+import android.appwidget.AppWidgetManager;
 import android.os.Build;
 
 import android.service.persistentdata.IPersistentDataBlockService;
 import android.service.persistentdata.PersistentDataBlockManager;
+import com.android.internal.appwidget.IAppWidgetService;
 import com.android.internal.policy.PolicyManager;
 import com.android.internal.util.Preconditions;
 
@@ -148,7 +150,6 @@ import android.app.trust.TrustManager;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IAppOpsService;
-import com.android.internal.appwidget.IAppWidgetService.Stub;
 import com.android.internal.os.IDropBoxManagerService;
 import com.android.internal.telecomm.ITelecommService;
 
@@ -771,6 +772,12 @@ class ContextImpl extends Context {
                     return new MediaProjectionManager(ctx);
                 }
         });
+
+        registerService(APPWIDGET_SERVICE, new ServiceFetcher() {
+            public Object createService(ContextImpl ctx) {
+                IBinder b = ServiceManager.getService(APPWIDGET_SERVICE);
+                return new AppWidgetManager(ctx, IAppWidgetService.Stub.asInterface(b));
+            }});
     }
 
     static ContextImpl getImpl(Context context) {
@@ -2097,6 +2104,25 @@ class ContextImpl extends Context {
             Slog.w(TAG, "Calling a method in the system process without a qualified user: "
                     + Debug.getCallers(5));
         }
+    }
+
+    @Override
+    public Context createApplicationContext(ApplicationInfo application, int flags)
+            throws NameNotFoundException {
+        LoadedApk pi = mMainThread.getPackageInfo(application, mResources.getCompatibilityInfo(),
+                flags | CONTEXT_REGISTER_PACKAGE);
+        if (pi != null) {
+            final boolean restricted = (flags & CONTEXT_RESTRICTED) == CONTEXT_RESTRICTED;
+            ContextImpl c = new ContextImpl(this, mMainThread, pi, mActivityToken,
+                    new UserHandle(UserHandle.getUserId(application.uid)), restricted,
+                    mDisplay, mOverrideConfiguration);
+            if (c.mResources != null) {
+                return c;
+            }
+        }
+
+        throw new PackageManager.NameNotFoundException(
+                "Application package " + application.packageName + " not found");
     }
 
     @Override

@@ -20,6 +20,7 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.app.Activity;
+import android.app.admin.IDevicePolicyManager;
 import android.content.AbstractRestrictionsProvider;
 import android.content.ComponentName;
 import android.content.Context;
@@ -40,7 +41,6 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.security.Credentials;
-import android.service.trust.TrustAgentService;
 import android.util.Log;
 
 import com.android.org.conscrypt.TrustedCertificateStore;
@@ -57,6 +57,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -3125,5 +3126,86 @@ public class DevicePolicyManager {
             }
         }
         return false;
+    }
+
+    /**
+     * Called by the profile owner to enable widget providers from a given package
+     * to be available in the parent profile. As a result the user will be able to
+     * add widgets from the white-listed package running under the profile to a widget
+     * host which runs under the device owner, for example the home screen. Note that
+     * a package may have zero or more provider components, where each component
+     * provides a different widget type.
+     * <p>
+     * <strong>Note:</strong> By default no widget provider package is white-listed.
+     * </p>
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param packageName The package from which widget providers are white-listed.
+     * @return Whether the package was added.
+     *
+     * @see #removeCrossProfileWidgetProvider(android.content.ComponentName, String)
+     * @see #getCrossProfileWidgetProviders(android.content.ComponentName)
+     */
+    public boolean addCrossProfileWidgetProvider(ComponentName admin, String packageName) {
+        if (mService != null) {
+            try {
+                return mService.addCrossProfileWidgetProvider(admin, packageName);
+            } catch (RemoteException re) {
+                Log.w(TAG, "Error calling addCrossProfileWidgetProvider", re);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Called by the profile owner to disable widget providers from a given package
+     * to be available in the parent profile. For this method to take effect the
+     * package should have been added via {@link #addCrossProfileWidgetProvider(
+     * android.content.ComponentName, String)}.
+     * <p>
+     * <strong>Note:</strong> By default no widget provider package is white-listed.
+     * </p>
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param packageName The package from which widget providers are no longer
+     *     white-listed.
+     * @return Whether the package was removed.
+     *
+     * @see #addCrossProfileWidgetProvider(android.content.ComponentName, String)
+     * @see #getCrossProfileWidgetProviders(android.content.ComponentName)
+     */
+    public boolean removeCrossProfileWidgetProvider(ComponentName admin, String packageName) {
+        if (mService != null) {
+            try {
+                return mService.removeCrossProfileWidgetProvider(admin, packageName);
+            } catch (RemoteException re) {
+                Log.w(TAG, "Error calling removeCrossProfileWidgetProvider", re);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Called by the profile owner to query providers from which packages are
+     * available in the parent profile.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @return The white-listed package list.
+     *
+     * @see #addCrossProfileWidgetProvider(android.content.ComponentName, String)
+     * @see #removeCrossProfileWidgetProvider(android.content.ComponentName, String)
+     */
+    public List<String> getCrossProfileWidgetProviders(ComponentName admin) {
+        if (mService != null) {
+            try {
+                List<String> providers = mService.getCrossProfileWidgetProviders(admin);
+                if (providers != null) {
+                    return providers;
+                }
+            } catch (RemoteException re) {
+                Log.w(TAG, "Error calling getCrossProfileWidgetProviders", re);
+            }
+        }
+        return Collections.emptyList();
     }
 }

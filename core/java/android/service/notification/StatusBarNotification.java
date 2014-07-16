@@ -63,7 +63,6 @@ public class StatusBarNotification implements Parcelable {
         this.score = score;
         this.notification = notification;
         this.user = user;
-        this.notification.setUser(user);
         this.postTime = postTime;
         this.key = key();
         this.groupKey = groupKey();
@@ -83,7 +82,6 @@ public class StatusBarNotification implements Parcelable {
         this.score = in.readInt();
         this.notification = new Notification(in);
         this.user = UserHandle.readFromParcel(in);
-        this.notification.setUser(this.user);
         this.postTime = in.readLong();
         this.key = key();
         this.groupKey = groupKey();

@@ -29,6 +29,7 @@ import android.app.PendingIntent;
 import android.app.admin.DeviceAdminInfo;
 import android.app.admin.DeviceAdminReceiver;
 import android.app.admin.DevicePolicyManager;
+import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.IDevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -71,7 +72,6 @@ import android.security.IKeyChainAliasCallback;
 import android.security.IKeyChainService;
 import android.security.KeyChain;
 import android.security.KeyChain.KeyChainConnection;
-import android.service.trust.TrustAgentService;
 import android.util.Log;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
@@ -81,13 +81,13 @@ import android.util.Xml;
 import android.view.IWindowManager;
 
 import com.android.internal.R;
-import com.android.internal.app.IAppOpsService;
 import com.android.internal.os.storage.ExternalStorageFormatter;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.JournaledFile;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.org.conscrypt.TrustedCertificateStore;
+import com.android.server.LocalServices;
 import com.android.server.SystemService;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -118,7 +118,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -294,6 +293,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         private static final String ATTR_VALUE = "value";
         private static final String TAG_PASSWORD_QUALITY = "password-quality";
         private static final String TAG_POLICIES = "policies";
+        private static final String TAG_CROSS_PROFILE_WIDGET_PROVIDERS =
+                "cross-profile-widget-providers";
+        private static final String TAG_PROVIDER = "provider";
 
         final DeviceAdminInfo info;
 
@@ -350,6 +352,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         String globalProxySpec = null;
         String globalProxyExclusionList = null;
         HashMap<String, List<String>> trustAgentFeatures = new HashMap<String, List<String>>();
+
+        List<String> crossProfileWidgetProviders;
 
         ActiveAdmin(DeviceAdminInfo _info) {
             info = _info;
@@ -495,6 +499,17 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
                 out.endTag(null, TAG_MANAGE_TRUST_AGENT_FEATURES);
             }
+            if (crossProfileWidgetProviders != null && !crossProfileWidgetProviders.isEmpty()) {
+                out.startTag(null, TAG_CROSS_PROFILE_WIDGET_PROVIDERS);
+                final int providerCount = crossProfileWidgetProviders.size();
+                for (int i = 0; i < providerCount; i++) {
+                    String provider = crossProfileWidgetProviders.get(i);
+                    out.startTag(null, TAG_PROVIDER);
+                    out.attribute(null, ATTR_VALUE, provider);
+                    out.endTag(null, TAG_PROVIDER);
+                }
+                out.endTag(null, TAG_CROSS_PROFILE_WIDGET_PROVIDERS);
+            }
         }
 
         void readFromXml(XmlPullParser parser)
@@ -576,6 +591,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     accountTypesWithManagementDisabled = readDisableAccountInfo(parser, tag);
                 } else if (TAG_MANAGE_TRUST_AGENT_FEATURES.equals(tag)) {
                     trustAgentFeatures = getAllTrustAgentFeatures(parser, tag);
+                } else if (TAG_CROSS_PROFILE_WIDGET_PROVIDERS.equals(tag)) {
+                    crossProfileWidgetProviders = getCrossProfileWidgetProviders(parser, tag);
                 } else {
                     Slog.w(LOG_TAG, "Unknown admin tag: " + tag);
                 }
@@ -645,6 +662,30 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return result;
         }
 
+        private List<String> getCrossProfileWidgetProviders(XmlPullParser parser, String tag)
+                throws XmlPullParserException, IOException  {
+            int outerDepthDAM = parser.getDepth();
+            int typeDAM;
+            ArrayList<String> result = null;
+            while ((typeDAM=parser.next()) != END_DOCUMENT
+                    && (typeDAM != END_TAG || parser.getDepth() > outerDepthDAM)) {
+                if (typeDAM == END_TAG || typeDAM == TEXT) {
+                    continue;
+                }
+                String tagDAM = parser.getName();
+                if (TAG_PROVIDER.equals(tagDAM)) {
+                    final String provider = parser.getAttributeValue(null, ATTR_VALUE);
+                    if (result == null) {
+                        result = new ArrayList<>();
+                    }
+                    result.add(provider);
+                } else {
+                    Slog.w(LOG_TAG, "Unknown tag under " + tag +  ": " + tagDAM);
+                }
+            }
+            return result;
+        }
+
         void dump(String prefix, PrintWriter pw) {
             pw.print(prefix); pw.print("uid="); pw.println(getUid());
             pw.print(prefix); pw.println("policies:");
@@ -700,6 +741,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     pw.println(disableScreenCapture);
             pw.print(prefix); pw.print("disabledKeyguardFeatures=");
                     pw.println(disabledKeyguardFeatures);
+            pw.print(prefix); pw.print("crossProfileWidgetProviders=");
+                    pw.println(crossProfileWidgetProviders);
         }
     }
 
@@ -757,6 +800,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         filter.addAction(Intent.ACTION_PACKAGE_ADDED);
         filter.addDataScheme("package");
         context.registerReceiverAsUser(mReceiver, UserHandle.ALL, filter, null, mHandler);
+
+        LocalServices.addService(DevicePolicyManagerInternal.class, new LocalService());
     }
 
     /**
@@ -1851,6 +1896,49 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
             }
             return timeout;
+        }
+    }
+
+    @Override
+    public boolean addCrossProfileWidgetProvider(ComponentName admin, String packageName) {
+        ActiveAdmin activeAdmin = getActiveAdminForCallerLocked(admin,
+                DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+        if (activeAdmin.crossProfileWidgetProviders == null) {
+            activeAdmin.crossProfileWidgetProviders = new ArrayList<>();
+        }
+        if (activeAdmin.crossProfileWidgetProviders.add(packageName)) {
+            saveSettingsLocked(UserHandle.getCallingUserId());
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean removeCrossProfileWidgetProvider(ComponentName admin, String packageName) {
+        ActiveAdmin activeAdmin = getActiveAdminForCallerLocked(admin,
+                DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+        if (activeAdmin.crossProfileWidgetProviders == null) {
+            return false;
+        }
+        if (activeAdmin.crossProfileWidgetProviders.remove(packageName)) {
+            saveSettingsLocked(UserHandle.getCallingUserId());
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public List<String> getCrossProfileWidgetProviders(ComponentName admin) {
+        ActiveAdmin activeAdmin = getActiveAdminForCallerLocked(admin,
+                DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+        if (activeAdmin.crossProfileWidgetProviders == null
+                || activeAdmin.crossProfileWidgetProviders.isEmpty()) {
+            return null;
+        }
+        if (Binder.getCallingUid() == Process.myUid()) {
+            return new ArrayList<>(activeAdmin.crossProfileWidgetProviders);
+        } else {
+            return activeAdmin.crossProfileWidgetProviders;
         }
     }
 
@@ -4616,6 +4704,26 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (mUserSetupComplete.equals(uri)) {
                 updateUserSetupComplete();
             }
+        }
+    }
+
+    private final class LocalService extends DevicePolicyManagerInternal {
+        @Override
+        public List<String> getCrossProfileWidgetProviders(int profileId) {
+            ComponentName ownerComponent = mDeviceOwner.getProfileOwnerComponent(profileId);
+            if (ownerComponent == null) {
+                return Collections.emptyList();
+            }
+
+            DevicePolicyData policy = getUserData(profileId);
+            ActiveAdmin admin = policy.mAdminMap.get(ownerComponent);
+
+            if (admin.crossProfileWidgetProviders == null
+                    || admin.crossProfileWidgetProviders.isEmpty()) {
+                return Collections.emptyList();
+            }
+
+            return admin.crossProfileWidgetProviders;
         }
     }
 }

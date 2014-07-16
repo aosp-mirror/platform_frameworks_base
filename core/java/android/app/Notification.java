@@ -1707,28 +1707,6 @@ public class Notification implements Parcelable
         }
     }
 
-    /** {@hide} */
-    public void setUser(UserHandle user) {
-        if (user.getIdentifier() == UserHandle.USER_ALL) {
-            user = UserHandle.OWNER;
-        }
-        if (tickerView != null) {
-            tickerView.setUser(user);
-        }
-        if (contentView != null) {
-            contentView.setUser(user);
-        }
-        if (bigContentView != null) {
-            bigContentView.setUser(user);
-        }
-        if (headsUpContentView != null) {
-            headsUpContentView.setUser(user);
-        }
-        if (publicVersion != null) {
-            publicVersion.setUser(user);
-        }
-    }
-
     /**
      * @hide
      */
