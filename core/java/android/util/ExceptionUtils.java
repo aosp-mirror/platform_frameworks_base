@@ -39,4 +39,20 @@ public class ExceptionUtils {
             throw new IOException(e.getMessage().substring(PREFIX_IO.length()));
         }
     }
+
+    public static String getCompleteMessage(String msg, Throwable t) {
+        final StringBuilder builder = new StringBuilder();
+        if (msg != null) {
+            builder.append(msg).append(": ");
+        }
+        builder.append(t.getMessage());
+        while ((t = t.getCause()) != null) {
+            builder.append(": ").append(t.getMessage());
+        }
+        return builder.toString();
+    }
+
+    public static String getCompleteMessage(Throwable t) {
+        return getCompleteMessage(null, t);
+    }
 }
