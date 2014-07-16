@@ -171,10 +171,10 @@ see <a href="{@docRoot}preview/material/compatibility.html">Compatibility</a>.</
 <p>Here's how to specify properties of <code>CardView</code>:</p>
 
 <ul>
-  <li>To set the corner radius in your layouts, use the <code>android:cardCornerRadius</code>
+  <li>To set the corner radius in your layouts, use the <code>card_view:cardCornerRadius</code>
   attribute.</li>
   <li>To set the corner radius in your code, use the <code>CardView.setRadius</code> method.</li>
-  <li>To set the background color of a card, use the <code>android:cardBackgroundColor</code>
+  <li>To set the background color of a card, use the <code>card_view:cardBackgroundColor</code>
 attribute.</li>
 </ul>
 
