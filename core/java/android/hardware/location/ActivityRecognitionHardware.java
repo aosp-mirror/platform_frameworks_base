@@ -134,8 +134,8 @@ public class ActivityRecognitionHardware extends IActivityRecognitionHardware.St
      * Called by the Activity-Recognition HAL.
      */
     private void onActivityChanged(Event[] events) {
-        int size = mSinks.beginBroadcast();
-        if (size == 0 || events == null || events.length == 0) {
+        if (events == null || events.length == 0) {
+            Log.d(TAG, "No events to broadcast for onActivityChanged.");
             return;
         }
 
@@ -151,6 +151,7 @@ public class ActivityRecognitionHardware extends IActivityRecognitionHardware.St
         ActivityChangedEvent activityChangedEvent =
                 new ActivityChangedEvent(activityRecognitionEventArray);
 
+        int size = mSinks.beginBroadcast();
         for (int i = 0; i < size; ++i) {
             IActivityRecognitionHardwareSink sink = mSinks.getBroadcastItem(i);
             try {
@@ -181,8 +182,8 @@ public class ActivityRecognitionHardware extends IActivityRecognitionHardware.St
             return INVALID_ACTIVITY_TYPE;
         }
 
-        int supporteActivitiesLength = mSupportedActivities.length;
-        for (int i = 0; i < supporteActivitiesLength; ++i) {
+        int supportedActivitiesLength = mSupportedActivities.length;
+        for (int i = 0; i < supportedActivitiesLength; ++i) {
             if (activity.equals(mSupportedActivities[i])) {
                 return i;
             }
@@ -198,7 +199,7 @@ public class ActivityRecognitionHardware extends IActivityRecognitionHardware.St
         mContext.enforceCallingPermission(HARDWARE_PERMISSION, message);
     }
 
-    private static String[] fetchSupportedActivities() {
+    private String[] fetchSupportedActivities() {
         String[] supportedActivities = nativeGetSupportedActivities();
         if (supportedActivities != null) {
             return supportedActivities;
@@ -211,14 +212,15 @@ public class ActivityRecognitionHardware extends IActivityRecognitionHardware.St
     static { nativeClassInit(); }
 
     private static native void nativeClassInit();
-    private static native void nativeInitialize();
-    private static native void nativeRelease();
     private static native boolean nativeIsSupported();
-    private static native String[] nativeGetSupportedActivities();
-    private static native int nativeEnableActivityEvent(
+
+    private native void nativeInitialize();
+    private native void nativeRelease();
+    private native String[] nativeGetSupportedActivities();
+    private native int nativeEnableActivityEvent(
             int activityType,
             int eventType,
             long reportLatenceNs);
-    private static native int nativeDisableActivityEvent(int activityType, int eventType);
-    private static native int nativeFlush();
+    private native int nativeDisableActivityEvent(int activityType, int eventType);
+    private native int nativeFlush();
 }
