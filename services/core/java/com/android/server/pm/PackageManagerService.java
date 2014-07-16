@@ -26,7 +26,6 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
 import static android.content.pm.PackageManager.INSTALL_EXTERNAL;
 import static android.content.pm.PackageManager.INSTALL_FAILED_ALREADY_EXISTS;
 import static android.content.pm.PackageManager.INSTALL_FAILED_CONFLICTING_PROVIDER;
-import static android.content.pm.PackageManager.INSTALL_FAILED_CPU_ABI_INCOMPATIBLE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_DEXOPT;
 import static android.content.pm.PackageManager.INSTALL_FAILED_DUPLICATE_PACKAGE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_DUPLICATE_PERMISSION;
@@ -4542,24 +4541,29 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
                 PackageParser.Package p = pkg;
                 synchronized (mInstallLock) {
-                    if (p.mDexOptNeeded) {
-                        performDexOptLI(p, false /* force dex */, false /* defer */,
-                                true /* include dependencies */);
-                    }
+                    performDexOptLI(p, null /* instruction sets */, false /* force dex */, false /* defer */,
+                            true /* include dependencies */);
                 }
             }
         }
     }
 
     @Override
-    public boolean performDexOpt(String packageName) {
-        enforceSystemOrRoot("Only the system can request dexopt be performed");
-        return performDexOpt(packageName, true);
+    public boolean performDexOptIfNeeded(String packageName, String instructionSet) {
+        return performDexOpt(packageName, instructionSet, true);
     }
 
-    public boolean performDexOpt(String packageName, boolean updateUsage) {
+    private static String getPrimaryInstructionSet(ApplicationInfo info) {
+        if (info.primaryCpuAbi == null) {
+            return getPreferredInstructionSet();
+        }
 
+        return VMRuntime.getInstructionSet(info.primaryCpuAbi);
+    }
+
+    public boolean performDexOpt(String packageName, String instructionSet, boolean updateUsage) {
         PackageParser.Package p;
+        final String targetInstructionSet;
         synchronized (mPackages) {
             p = mPackages.get(packageName);
             if (p == null) {
@@ -4569,13 +4573,17 @@ public class PackageManagerService extends IPackageManager.Stub {
                 p.mLastPackageUsageTimeInMills = System.currentTimeMillis();
             }
             mPackageUsage.write(false);
-            if (!p.mDexOptNeeded) {
+
+            targetInstructionSet = instructionSet != null ? instructionSet :
+                    getPrimaryInstructionSet(p.applicationInfo);
+            if (p.mDexOptPerformed.contains(targetInstructionSet)) {
                 return false;
             }
         }
 
         synchronized (mInstallLock) {
-            return performDexOptLI(p, false /* force dex */, false /* defer */,
+            final String[] instructionSets = new String[] { targetInstructionSet };
+            return performDexOptLI(p, instructionSets, false /* force dex */, false /* defer */,
                     true /* include dependencies */) == DEX_OPT_PERFORMED;
         }
     }
@@ -4585,9 +4593,9 @@ public class PackageManagerService extends IPackageManager.Stub {
         synchronized (mPackages) {
             for (PackageParser.Package p : mPackages.values()) {
                 if (DEBUG_DEXOPT) {
-                    Log.i(TAG, p.packageName + " mDexOptNeeded=" + p.mDexOptNeeded);
+                    Log.i(TAG, p.packageName + " mDexOptPerformed=" + p.mDexOptPerformed.toArray());
                 }
-                if (!p.mDexOptNeeded) {
+                if (!p.mDexOptPerformed.isEmpty()) {
                     continue;
                 }
                 if (pkgs == null) {
@@ -4655,6 +4663,10 @@ public class PackageManagerService extends IPackageManager.Stub {
         // 3.) we are skipping an unneeded dexopt
         for (String path : paths) {
             for (String instructionSet : instructionSets) {
+                if (!forceDex && pkg.mDexOptPerformed.contains(instructionSet)) {
+                    continue;
+                }
+
                 try {
                     final boolean isDexOptNeeded = DexFile.isDexOptNeededInternal(path,
                             pkg.packageName, instructionSet, defer);
@@ -4669,10 +4681,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                             // Don't bother running dexopt again if we failed, it will probably
                             // just result in an error again. Also, don't bother dexopting for other
                             // paths & ISAs.
-                            pkg.mDexOptNeeded = false;
                             return DEX_OPT_FAILED;
                         } else {
                             performedDexOpt = true;
+                            pkg.mDexOptPerformed.add(instructionSet);
                         }
                     }
 
@@ -4706,7 +4718,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         // deferred dex-opt. We've either dex-opted one more paths or instruction sets or
         // we've skipped all of them because they are up to date. In both cases this
         // package doesn't need dexopt any longer.
-        pkg.mDexOptNeeded = false;
         return performedDexOpt ? DEX_OPT_PERFORMED : DEX_OPT_SKIPPED;
     }
 
@@ -4762,8 +4773,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         return allInstructionSets;
     }
 
-    private int performDexOptLI(PackageParser.Package pkg, boolean forceDex, boolean defer,
-            boolean inclDependencies) {
+    private int performDexOptLI(PackageParser.Package pkg, String[] instructionSets,
+                                boolean forceDex, boolean defer, boolean inclDependencies) {
         HashSet<String> done;
         if (inclDependencies && (pkg.usesLibraries != null || pkg.usesOptionalLibraries != null)) {
             done = new HashSet<String>();
@@ -4771,7 +4782,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         } else {
             done = null;
         }
-        return performDexOptLI(pkg, null /* target instruction sets */,  forceDex, defer, done);
+        return performDexOptLI(pkg, instructionSets,  forceDex, defer, done);
     }
 
     private boolean verifyPackageUpdateLPr(PackageSetting oldPkg, PackageParser.Package newPkg) {
@@ -5569,7 +5580,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         if ((scanMode&SCAN_NO_DEX) == 0) {
-            if (performDexOptLI(pkg, forceDex, (scanMode&SCAN_DEFER_DEX) != 0, false)
+            if (performDexOptLI(pkg, null /* instruction sets */, forceDex, (scanMode&SCAN_DEFER_DEX) != 0, false)
                     == DEX_OPT_FAILED) {
                 if ((scanMode & SCAN_DELETE_DATA_ON_FAILURES) != 0) {
                     removeDataDirsLI(pkg.packageName);
@@ -5648,7 +5659,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             if ((scanMode&SCAN_NO_DEX) == 0) {
                 for (int i=0; i<clientLibPkgs.size(); i++) {
                     PackageParser.Package clientPkg = clientLibPkgs.get(i);
-                    if (performDexOptLI(clientPkg, forceDex, (scanMode&SCAN_DEFER_DEX) != 0, false)
+                    if (performDexOptLI(clientPkg, null /* instruction sets */,
+                            forceDex, (scanMode&SCAN_DEFER_DEX) != 0, false)
                             == DEX_OPT_FAILED) {
                         if ((scanMode & SCAN_DELETE_DATA_ON_FAILURES) != 0) {
                             removeDataDirsLI(pkg.packageName);
@@ -6128,7 +6140,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                         ps.pkg.applicationInfo.primaryCpuAbi = adjustedAbi;
                         Slog.i(TAG, "Adjusting ABI for : " + ps.name + " to " + adjustedAbi);
 
-                        if (performDexOptLI(ps.pkg, forceDexOpt, deferDexOpt, true) == DEX_OPT_FAILED) {
+                        if (performDexOptLI(ps.pkg, null /* instruction sets */, forceDexOpt,
+                                deferDexOpt, true) == DEX_OPT_FAILED) {
                             ps.primaryCpuAbiString = null;
                             ps.pkg.applicationInfo.primaryCpuAbi = null;
                             return;
@@ -10235,7 +10248,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                  * remove the target to make sure there isn't a stale
                  * file from a previous version of the package.
                  */
-                    newPackage.mDexOptNeeded = true;
+                    newPackage.mDexOptPerformed.clear();
                     mInstaller.rmdex(oldCodePath, instructionSet);
                     mInstaller.rmdex(newPackage.baseCodePath, instructionSet);
                 }
