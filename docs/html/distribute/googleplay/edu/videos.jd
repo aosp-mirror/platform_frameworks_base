@@ -1,0 +1,30 @@
+page.title=Video Resources
+page.image=http://i1.ytimg.com/vi/vzvpcEffvaE/maxresdefault.jpg
+meta.tags="education"
+page.tags="education"
+page.metaDescription=Watch video resources from Google and successful educational developers.
+
+@jd:body
+
+<p>
+With Google Play for Education, bringing your app to the classroom has never been easier. However,
+you may want to familiarize yourself with some best practices before diving in.
+To help you visualize what a great education app might look like, what Google Play for Education is all
+about, and how to achieve success with the platform, here is a selection of recent videos from
+Google and successful educational developers.
+</p>
+
+<h2>Developer Stories</h2>
+<div style="margin-top:20px" class="resource-widget resource-flow-layout wrap col-13
+   no-section" data-query="collection:distribute/edu/videos/stories" data-resourcestyle="card"
+   data-maxresults="6" data-cardsizes="18x12x2"></div>
+
+<h2>Best Practices</h2>
+<div style="margin-top:20px" class="resource-widget resource-flow-layout wrap col-13
+   no-section" data-query="collection:distribute/edu/videos/bestpractices" data-resourcestyle="card"
+   data-maxresults="6" data-cardsizes="18x6, 6x6, 6x6, 6x6"></div>
+
+<h2>Teacher/Classroom Experience</h2>
+<div style="margin-top:20px" class="resource-widget resource-flow-layout wrap col-13
+   no-section" data-query="collection:distribute/edu/videos/experience" data-resourcestyle="card"
+   data-maxresults="6" data-cardsizes="18x12x2"></div>
