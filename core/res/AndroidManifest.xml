@@ -834,9 +834,10 @@
         android:label="@string/permlab_changeWimaxState" />
 
     <!-- Allows applications to act as network scorers. @hide @SystemApi-->
+    <!-- TODO: Change protection level to normal when unhiding this API. -->
     <permission android:name="android.permission.SCORE_NETWORKS"
         android:permissionGroup="android.permission-group.NETWORK"
-        android:protectionLevel="normal"
+        android:protectionLevel="signature|system"
         android:description="@string/permdesc_scoreNetworks"
         android:label="@string/permlab_scoreNetworks" />
 
