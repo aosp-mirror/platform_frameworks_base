@@ -867,6 +867,22 @@ public abstract class Context {
     public abstract File getCacheDir();
 
     /**
+     * Returns the absolute path to the application specific cache directory on
+     * the filesystem designed for storing cached code. The system will delete
+     * any files stored in this location both when your specific application is
+     * upgraded, and when the entire platform is upgraded.
+     * <p>
+     * This location is optimal for storing compiled or optimized code generated
+     * by your application at runtime.
+     * <p>
+     * Apps require no extra permissions to read or write to the returned path,
+     * since this path lives in their private storage.
+     *
+     * @return The path of the directory holding application code cache files.
+     */
+    public abstract File getCodeCacheDir();
+
+    /**
      * Returns the absolute path to the directory on the primary external filesystem
      * (that is somewhere on {@link android.os.Environment#getExternalStorageDirectory()
      * Environment.getExternalStorageDirectory()} where the application can
