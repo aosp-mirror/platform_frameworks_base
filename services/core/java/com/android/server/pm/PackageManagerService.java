@@ -10026,9 +10026,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
         }
 
-        // Nuke any cached code
-        deleteCodeCacheDirsLI(pkgName);
-
         boolean sysPkg = (isSystemApp(oldPackage));
         if (sysPkg) {
             replaceSystemPackageLI(oldPackage, pkg, parseFlags, scanMode,
@@ -10066,6 +10063,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             deletedPkg = false;
         } else {
             // Successfully deleted the old package. Now proceed with re-installation
+            deleteCodeCacheDirsLI(pkgName);
             try {
                 final PackageParser.Package newPackage = scanPackageLI(pkg, parseFlags,
                         scanMode | SCAN_UPDATE_TIME, System.currentTimeMillis(), user, abiOverride);
@@ -10177,6 +10175,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         // Successfully disabled the old package. Now proceed with re-installation
+        deleteCodeCacheDirsLI(packageName);
+
         res.returnCode = PackageManager.INSTALL_SUCCEEDED;
         pkg.applicationInfo.flags |= ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
 

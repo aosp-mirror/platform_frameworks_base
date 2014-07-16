@@ -76,6 +76,10 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     @GuardedBy("mSessions")
     private final SparseArray<PackageInstallerSession> mSessions = new SparseArray<>();
 
+    /** Historical sessions kept around for debugging purposes */
+    @GuardedBy("mSessions")
+    private final SparseArray<PackageInstallerSession> mHistoricalSessions = new SparseArray<>();
+
     private RemoteCallbackList<IPackageInstallerObserver> mObservers = new RemoteCallbackList<>();
 
     private static final FilenameFilter sStageFilter = new FilenameFilter() {
@@ -344,18 +348,29 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     }
 
     void dump(IndentingPrintWriter pw) {
-        pw.println("Active install sessions:");
-        pw.increaseIndent();
         synchronized (mSessions) {
-            final int N = mSessions.size();
+            pw.println("Active install sessions:");
+            pw.increaseIndent();
+            int N = mSessions.size();
             for (int i = 0; i < N; i++) {
                 final PackageInstallerSession session = mSessions.valueAt(i);
                 session.dump(pw);
                 pw.println();
             }
+            pw.println();
+            pw.decreaseIndent();
+
+            pw.println("Historical install sessions:");
+            pw.increaseIndent();
+            N = mHistoricalSessions.size();
+            for (int i = 0; i < N; i++) {
+                final PackageInstallerSession session = mHistoricalSessions.valueAt(i);
+                session.dump(pw);
+                pw.println();
+            }
+            pw.println();
+            pw.decreaseIndent();
         }
-        pw.println();
-        pw.decreaseIndent();
     }
 
     class Callback {
@@ -367,6 +382,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
             notifySessionFinished(session.sessionId, success);
             synchronized (mSessions) {
                 mSessions.remove(session.sessionId);
+                mHistoricalSessions.put(session.sessionId, session);
             }
             writeSessionsAsync();
         }
