@@ -331,6 +331,10 @@ public class BackupTransport {
      * its datastore, if appropriate, and close the socket that had been provided in
      * {@link #performFullBackup(PackageInfo, ParcelFileDescriptor)}.
      *
+     * <p class="note">If the transport returns TRANSPORT_OK from this method, then the
+     * OS will always provide a matching call to {@link #finishBackup()} even if sending
+     * data via {@link #sendBackupData(int)} failed at some point.
+     *
      * @param targetPackage The package whose data is to follow.
      * @param socket The socket file descriptor through which the data will be provided.
      *    If the transport returns {@link #TRANSPORT_PACKAGE_REJECTED} here, it must still
