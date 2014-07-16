@@ -68,9 +68,9 @@ public final class TvInputInfo implements Parcelable {
     public static final int TYPE_PASSTHROUGH = 3;
 
     /**
-     * The name of the TV input service to provide to the setup activity and settings activity.
+     * The ID of the TV input to provide to the setup activity and settings activity.
      */
-    public static final String EXTRA_SERVICE_NAME = "serviceName";
+    public static final String EXTRA_INPUT_ID = "inputId";
 
     private static final String XML_START_TAG_NAME = "tv-input";
 
@@ -190,7 +190,7 @@ public final class TvInputInfo implements Parcelable {
         if (!TextUtils.isEmpty(mSetupActivity)) {
             Intent intent = new Intent(Intent.ACTION_MAIN);
             intent.setClassName(mService.serviceInfo.packageName, mSetupActivity);
-            intent.putExtra(EXTRA_SERVICE_NAME, mService.serviceInfo.name);
+            intent.putExtra(EXTRA_INPUT_ID, getId());
             return intent;
         }
         return null;
@@ -203,7 +203,7 @@ public final class TvInputInfo implements Parcelable {
         if (!TextUtils.isEmpty(mSettingsActivity)) {
             Intent intent = new Intent(Intent.ACTION_MAIN);
             intent.setClassName(mService.serviceInfo.packageName, mSettingsActivity);
-            intent.putExtra(EXTRA_SERVICE_NAME, mService.serviceInfo.name);
+            intent.putExtra(EXTRA_INPUT_ID, getId());
             return intent;
         }
         return null;
