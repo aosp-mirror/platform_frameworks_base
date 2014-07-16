@@ -980,6 +980,26 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
+        public void unblockContent(IBinder sessionToken, String unblockedRating, int userId) {
+            final int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
+                    userId, "unblockContent");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        getSessionLocked(sessionToken, callingUid, resolvedUserId)
+                                .unblockContent(unblockedRating);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "error in unblockContent", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
         public void setCaptionEnabled(IBinder sessionToken, boolean enabled, int userId) {
             final int callingUid = Binder.getCallingUid();
             final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
