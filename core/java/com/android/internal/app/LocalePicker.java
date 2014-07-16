@@ -16,6 +16,7 @@
 
 package com.android.internal.app;
 
+import android.content.res.TypedArray;
 import com.android.internal.R;
 
 import android.app.ActivityManagerNative;
@@ -227,6 +228,12 @@ public class LocalePicker extends ListFragment {
     @Override
     public void onActivityCreated(final Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
+        final int[] attrs = { android.R.attr.colorBackground };
+        final TypedArray a = getActivity().getTheme().obtainStyledAttributes(attrs);
+        getListView().setBackgroundColor(a.getColor(0, android.R.color.transparent));
+        a.recycle();
+
         final ArrayAdapter<LocaleInfo> adapter = constructAdapter(getActivity(),
                 isInDeveloperMode());
         setListAdapter(adapter);
