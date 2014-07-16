@@ -17,6 +17,8 @@
 package android.hardware.camera2;
 
 import android.hardware.camera2.impl.CameraMetadataNative;
+import android.hardware.camera2.impl.PublicKey;
+import android.hardware.camera2.impl.SyntheticKey;
 import android.hardware.camera2.utils.TypeReference;
 import android.util.Log;
 import android.util.Rational;
@@ -365,6 +367,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see #COLOR_CORRECTION_MODE_FAST
      * @see #COLOR_CORRECTION_MODE_HIGH_QUALITY
      */
+    @PublicKey
     public static final Key<Integer> COLOR_CORRECTION_MODE =
             new Key<Integer>("android.colorCorrection.mode", int.class);
 
@@ -383,6 +386,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      *
      * @see CaptureRequest#COLOR_CORRECTION_MODE
      */
+    @PublicKey
     public static final Key<android.hardware.camera2.params.ColorSpaceTransform> COLOR_CORRECTION_TRANSFORM =
             new Key<android.hardware.camera2.params.ColorSpaceTransform>("android.colorCorrection.transform", android.hardware.camera2.params.ColorSpaceTransform.class);
 
@@ -399,6 +403,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      *
      * @see CaptureRequest#COLOR_CORRECTION_MODE
      */
+    @PublicKey
     public static final Key<android.hardware.camera2.params.RggbChannelVector> COLOR_CORRECTION_GAINS =
             new Key<android.hardware.camera2.params.RggbChannelVector>("android.colorCorrection.gains", android.hardware.camera2.params.RggbChannelVector.class);
 
@@ -422,6 +427,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see #COLOR_CORRECTION_ABERRATION_CORRECTION_MODE_FAST
      * @see #COLOR_CORRECTION_ABERRATION_CORRECTION_MODE_HIGH_QUALITY
      */
+    @PublicKey
     public static final Key<Integer> COLOR_CORRECTION_ABERRATION_CORRECTION_MODE =
             new Key<Integer>("android.colorCorrection.aberrationCorrectionMode", int.class);
 
@@ -465,6 +471,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see #CONTROL_AE_ANTIBANDING_MODE_60HZ
      * @see #CONTROL_AE_ANTIBANDING_MODE_AUTO
      */
+    @PublicKey
     public static final Key<Integer> CONTROL_AE_ANTIBANDING_MODE =
             new Key<Integer>("android.control.aeAntibandingMode", int.class);
 
@@ -493,6 +500,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see CaptureRequest#CONTROL_AE_MODE
      * @see CaptureResult#CONTROL_AE_STATE
      */
+    @PublicKey
     public static final Key<Integer> CONTROL_AE_EXPOSURE_COMPENSATION =
             new Key<Integer>("android.control.aeExposureCompensation", int.class);
 
@@ -519,6 +527,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see CaptureRequest#SENSOR_EXPOSURE_TIME
      * @see CaptureRequest#SENSOR_SENSITIVITY
      */
+    @PublicKey
     public static final Key<Boolean> CONTROL_AE_LOCK =
             new Key<Boolean>("android.control.aeLock", boolean.class);
 
@@ -556,6 +565,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see #CONTROL_AE_MODE_ON_ALWAYS_FLASH
      * @see #CONTROL_AE_MODE_ON_AUTO_FLASH_REDEYE
      */
+    @PublicKey
     public static final Key<Integer> CONTROL_AE_MODE =
             new Key<Integer>("android.control.aeMode", int.class);
 
@@ -581,6 +591,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see CaptureRequest#SCALER_CROP_REGION
      * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
      */
+    @PublicKey
     public static final Key<android.hardware.camera2.params.MeteringRectangle[]> CONTROL_AE_REGIONS =
             new Key<android.hardware.camera2.params.MeteringRectangle[]>("android.control.aeRegions", android.hardware.camera2.params.MeteringRectangle[].class);
 
@@ -592,6 +603,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      *
      * @see CaptureRequest#SENSOR_EXPOSURE_TIME
      */
+    @PublicKey
     public static final Key<android.util.Range<Integer>> CONTROL_AE_TARGET_FPS_RANGE =
             new Key<android.util.Range<Integer>>("android.control.aeTargetFpsRange", new TypeReference<android.util.Range<Integer>>() {{ }});
 
@@ -619,6 +631,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see #CONTROL_AE_PRECAPTURE_TRIGGER_IDLE
      * @see #CONTROL_AE_PRECAPTURE_TRIGGER_START
      */
+    @PublicKey
     public static final Key<Integer> CONTROL_AE_PRECAPTURE_TRIGGER =
             new Key<Integer>("android.control.aePrecaptureTrigger", int.class);
 
@@ -817,6 +830,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see #CONTROL_AE_STATE_FLASH_REQUIRED
      * @see #CONTROL_AE_STATE_PRECAPTURE
      */
+    @PublicKey
     public static final Key<Integer> CONTROL_AE_STATE =
             new Key<Integer>("android.control.aeState", int.class);
 
@@ -839,6 +853,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see #CONTROL_AF_MODE_CONTINUOUS_PICTURE
      * @see #CONTROL_AF_MODE_EDOF
      */
+    @PublicKey
     public static final Key<Integer> CONTROL_AF_MODE =
             new Key<Integer>("android.control.afMode", int.class);
 
@@ -864,6 +879,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see CaptureRequest#SCALER_CROP_REGION
      * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
      */
+    @PublicKey
     public static final Key<android.hardware.camera2.params.MeteringRectangle[]> CONTROL_AF_REGIONS =
             new Key<android.hardware.camera2.params.MeteringRectangle[]>("android.control.afRegions", android.hardware.camera2.params.MeteringRectangle[].class);
 
@@ -886,6 +902,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see #CONTROL_AF_TRIGGER_START
      * @see #CONTROL_AF_TRIGGER_CANCEL
      */
+    @PublicKey
     public static final Key<Integer> CONTROL_AF_TRIGGER =
             new Key<Integer>("android.control.afTrigger", int.class);
 
@@ -1283,6 +1300,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see #CONTROL_AF_STATE_NOT_FOCUSED_LOCKED
      * @see #CONTROL_AF_STATE_PASSIVE_UNFOCUSED
      */
+    @PublicKey
     public static final Key<Integer> CONTROL_AF_STATE =
             new Key<Integer>("android.control.afState", int.class);
 
@@ -1295,6 +1313,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      *
      * @see CaptureRequest#CONTROL_AWB_MODE
      */
+    @PublicKey
     public static final Key<Boolean> CONTROL_AWB_LOCK =
             new Key<Boolean>("android.control.awbLock", boolean.class);
 
@@ -1333,6 +1352,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see #CONTROL_AWB_MODE_TWILIGHT
      * @see #CONTROL_AWB_MODE_SHADE
      */
+    @PublicKey
     public static final Key<Integer> CONTROL_AWB_MODE =
             new Key<Integer>("android.control.awbMode", int.class);
 
@@ -1358,6 +1378,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see CaptureRequest#SCALER_CROP_REGION
      * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
      */
+    @PublicKey
     public static final Key<android.hardware.camera2.params.MeteringRectangle[]> CONTROL_AWB_REGIONS =
             new Key<android.hardware.camera2.params.MeteringRectangle[]>("android.control.awbRegions", android.hardware.camera2.params.MeteringRectangle[].class);
 
@@ -1382,6 +1403,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see #CONTROL_CAPTURE_INTENT_ZERO_SHUTTER_LAG
      * @see #CONTROL_CAPTURE_INTENT_MANUAL
      */
+    @PublicKey
     public static final Key<Integer> CONTROL_CAPTURE_INTENT =
             new Key<Integer>("android.control.captureIntent", int.class);
 
@@ -1512,6 +1534,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see #CONTROL_AWB_STATE_CONVERGED
      * @see #CONTROL_AWB_STATE_LOCKED
      */
+    @PublicKey
     public static final Key<Integer> CONTROL_AWB_STATE =
             new Key<Integer>("android.control.awbState", int.class);
 
@@ -1537,6 +1560,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see #CONTROL_EFFECT_MODE_BLACKBOARD
      * @see #CONTROL_EFFECT_MODE_AQUA
      */
+    @PublicKey
     public static final Key<Integer> CONTROL_EFFECT_MODE =
             new Key<Integer>("android.control.effectMode", int.class);
 
@@ -1565,6 +1589,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see #CONTROL_MODE_USE_SCENE_MODE
      * @see #CONTROL_MODE_OFF_KEEP_STATE
      */
+    @PublicKey
     public static final Key<Integer> CONTROL_MODE =
             new Key<Integer>("android.control.mode", int.class);
 
@@ -1606,6 +1631,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see #CONTROL_SCENE_MODE_BARCODE
      * @see #CONTROL_SCENE_MODE_HIGH_SPEED_VIDEO
      */
+    @PublicKey
     public static final Key<Integer> CONTROL_SCENE_MODE =
             new Key<Integer>("android.control.sceneMode", int.class);
 
@@ -1630,6 +1656,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see #CONTROL_VIDEO_STABILIZATION_MODE_OFF
      * @see #CONTROL_VIDEO_STABILIZATION_MODE_ON
      */
+    @PublicKey
     public static final Key<Integer> CONTROL_VIDEO_STABILIZATION_MODE =
             new Key<Integer>("android.control.videoStabilizationMode", int.class);
 
@@ -1650,6 +1677,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see #EDGE_MODE_FAST
      * @see #EDGE_MODE_HIGH_QUALITY
      */
+    @PublicKey
     public static final Key<Integer> EDGE_MODE =
             new Key<Integer>("android.edge.mode", int.class);
 
@@ -1677,6 +1705,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see #FLASH_MODE_SINGLE
      * @see #FLASH_MODE_TORCH
      */
+    @PublicKey
     public static final Key<Integer> FLASH_MODE =
             new Key<Integer>("android.flash.mode", int.class);
 
@@ -1694,6 +1723,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see #FLASH_STATE_FIRED
      * @see #FLASH_STATE_PARTIAL
      */
+    @PublicKey
     public static final Key<Integer> FLASH_STATE =
             new Key<Integer>("android.flash.state", int.class);
 
@@ -1710,12 +1740,15 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see #HOT_PIXEL_MODE_FAST
      * @see #HOT_PIXEL_MODE_HIGH_QUALITY
      */
+    @PublicKey
     public static final Key<Integer> HOT_PIXEL_MODE =
             new Key<Integer>("android.hotPixel.mode", int.class);
 
     /**
      * <p>A location object to use when generating image GPS metadata.</p>
      */
+    @PublicKey
+    @SyntheticKey
     public static final Key<android.location.Location> JPEG_GPS_LOCATION =
             new Key<android.location.Location>("android.jpeg.gpsLocation", android.location.Location.class);
 
@@ -1747,6 +1780,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p>Orientation of JPEG image to
      * write</p>
      */
+    @PublicKey
     public static final Key<Integer> JPEG_ORIENTATION =
             new Key<Integer>("android.jpeg.orientation", int.class);
 
@@ -1755,6 +1789,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * image.</p>
      * <p>85-95 is typical usage range.</p>
      */
+    @PublicKey
     public static final Key<Byte> JPEG_QUALITY =
             new Key<Byte>("android.jpeg.quality", byte.class);
 
@@ -1762,6 +1797,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p>Compression quality of JPEG
      * thumbnail.</p>
      */
+    @PublicKey
     public static final Key<Byte> JPEG_THUMBNAIL_QUALITY =
             new Key<Byte>("android.jpeg.thumbnailQuality", byte.class);
 
@@ -1778,6 +1814,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * generate the thumbnail image. The thumbnail image will always have a smaller Field
      * Of View (FOV) than the primary image when aspect ratios differ.</p>
      */
+    @PublicKey
     public static final Key<android.util.Size> JPEG_THUMBNAIL_SIZE =
             new Key<android.util.Size>("android.jpeg.thumbnailSize", android.util.Size.class);
 
@@ -1807,6 +1844,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see CaptureRequest#SENSOR_FRAME_DURATION
      * @see CaptureRequest#SENSOR_SENSITIVITY
      */
+    @PublicKey
     public static final Key<Float> LENS_APERTURE =
             new Key<Float>("android.lens.aperture", float.class);
 
@@ -1830,6 +1868,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see CameraCharacteristics#LENS_INFO_AVAILABLE_FILTER_DENSITIES
      * @see CaptureResult#LENS_STATE
      */
+    @PublicKey
     public static final Key<Float> LENS_FILTER_DENSITY =
             new Key<Float>("android.lens.filterDensity", float.class);
 
@@ -1849,6 +1888,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see CaptureRequest#LENS_FOCUS_DISTANCE
      * @see CaptureResult#LENS_STATE
      */
+    @PublicKey
     public static final Key<Float> LENS_FOCAL_LENGTH =
             new Key<Float>("android.lens.focalLength", float.class);
 
@@ -1857,6 +1897,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * measured from frontmost surface of the lens.</p>
      * <p>Should be zero for fixed-focus cameras</p>
      */
+    @PublicKey
     public static final Key<Float> LENS_FOCUS_DISTANCE =
             new Key<Float>("android.lens.focusDistance", float.class);
 
@@ -1866,6 +1907,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p>If variable focus not supported, can still report
      * fixed depth of field range</p>
      */
+    @PublicKey
     public static final Key<android.util.Pair<Float,Float>> LENS_FOCUS_RANGE =
             new Key<android.util.Pair<Float,Float>>("android.lens.focusRange", new TypeReference<android.util.Pair<Float,Float>>() {{ }});
 
@@ -1895,6 +1937,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see #LENS_OPTICAL_STABILIZATION_MODE_OFF
      * @see #LENS_OPTICAL_STABILIZATION_MODE_ON
      */
+    @PublicKey
     public static final Key<Integer> LENS_OPTICAL_STABILIZATION_MODE =
             new Key<Integer>("android.lens.opticalStabilizationMode", int.class);
 
@@ -1931,6 +1974,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see #LENS_STATE_STATIONARY
      * @see #LENS_STATE_MOVING
      */
+    @PublicKey
     public static final Key<Integer> LENS_STATE =
             new Key<Integer>("android.lens.state", int.class);
 
@@ -1951,6 +1995,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see #NOISE_REDUCTION_MODE_FAST
      * @see #NOISE_REDUCTION_MODE_HIGH_QUALITY
      */
+    @PublicKey
     public static final Key<Integer> NOISE_REDUCTION_MODE =
             new Key<Integer>("android.noiseReduction.mode", int.class);
 
@@ -1982,6 +2027,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * frameCount value).</p>
      * <p>Reset on release()</p>
      */
+    @PublicKey
     public static final Key<Integer> REQUEST_FRAME_COUNT =
             new Key<Integer>("android.request.frameCount", int.class);
 
@@ -2005,6 +2051,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      *
      * @see CameraCharacteristics#REQUEST_PIPELINE_MAX_DEPTH
      */
+    @PublicKey
     public static final Key<Byte> REQUEST_PIPELINE_DEPTH =
             new Key<Byte>("android.request.pipelineDepth", byte.class);
 
@@ -2043,6 +2090,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see CameraCharacteristics#SCALER_AVAILABLE_MAX_DIGITAL_ZOOM
      * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
      */
+    @PublicKey
     public static final Key<android.graphics.Rect> SCALER_CROP_REGION =
             new Key<android.graphics.Rect>("android.scaler.cropRegion", android.graphics.Rect.class);
 
@@ -2052,6 +2100,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p>If the sensor can't expose this exact duration, it should shorten the
      * duration exposed to the nearest possible value (rather than expose longer).</p>
      */
+    @PublicKey
     public static final Key<Long> SENSOR_EXPOSURE_TIME =
             new Key<Long>("android.sensor.exposureTime", long.class);
 
@@ -2130,6 +2179,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      *
      * @see CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP
      */
+    @PublicKey
     public static final Key<Long> SENSOR_FRAME_DURATION =
             new Key<Long>("android.sensor.frameDuration", long.class);
 
@@ -2149,6 +2199,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see CameraCharacteristics#SENSOR_INFO_SENSITIVITY_RANGE
      * @see CameraCharacteristics#SENSOR_MAX_ANALOG_SENSITIVITY
      */
+    @PublicKey
     public static final Key<Integer> SENSOR_SENSITIVITY =
             new Key<Integer>("android.sensor.sensitivity", int.class);
 
@@ -2171,6 +2222,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      *
      * @see CameraCharacteristics#SENSOR_INFO_TIMESTAMP_CALIBRATION
      */
+    @PublicKey
     public static final Key<Long> SENSOR_TIMESTAMP =
             new Key<Long>("android.sensor.timestamp", long.class);
 
@@ -2185,6 +2237,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p>The order of the values is R, G, B; where R is in the lowest index.</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      */
+    @PublicKey
     public static final Key<Rational[]> SENSOR_NEUTRAL_COLOR_POINT =
             new Key<Rational[]>("android.sensor.neutralColorPoint", Rational[].class);
 
@@ -2222,6 +2275,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * </ul>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      */
+    @PublicKey
     public static final Key<Float> SENSOR_GREEN_SPLIT =
             new Key<Float>("android.sensor.greenSplit", float.class);
 
@@ -2238,6 +2292,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      *
      * @see CaptureRequest#SENSOR_TEST_PATTERN_MODE
      */
+    @PublicKey
     public static final Key<int[]> SENSOR_TEST_PATTERN_DATA =
             new Key<int[]>("android.sensor.testPatternData", int[].class);
 
@@ -2258,6 +2313,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see #SENSOR_TEST_PATTERN_MODE_PN9
      * @see #SENSOR_TEST_PATTERN_MODE_CUSTOM1
      */
+    @PublicKey
     public static final Key<Integer> SENSOR_TEST_PATTERN_MODE =
             new Key<Integer>("android.sensor.testPatternMode", int.class);
 
@@ -2272,6 +2328,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      *
      * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
      */
+    @PublicKey
     public static final Key<Long> SENSOR_ROLLING_SHUTTER_SKEW =
             new Key<Long>("android.sensor.rollingShutterSkew", long.class);
 
@@ -2310,6 +2367,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see #SHADING_MODE_FAST
      * @see #SHADING_MODE_HIGH_QUALITY
      */
+    @PublicKey
     public static final Key<Integer> SHADING_MODE =
             new Key<Integer>("android.shading.mode", int.class);
 
@@ -2326,6 +2384,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see #STATISTICS_FACE_DETECT_MODE_SIMPLE
      * @see #STATISTICS_FACE_DETECT_MODE_FULL
      */
+    @PublicKey
     public static final Key<Integer> STATISTICS_FACE_DETECT_MODE =
             new Key<Integer>("android.statistics.faceDetectMode", int.class);
 
@@ -2388,6 +2447,8 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      *
      * @see CaptureRequest#STATISTICS_FACE_DETECT_MODE
      */
+    @PublicKey
+    @SyntheticKey
     public static final Key<android.hardware.camera2.params.Face[]> STATISTICS_FACES =
             new Key<android.hardware.camera2.params.Face[]>("android.statistics.faces", android.hardware.camera2.params.Face[].class);
 
@@ -2434,6 +2495,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      *
      * @see CaptureRequest#COLOR_CORRECTION_MODE
      */
+    @PublicKey
     public static final Key<android.hardware.camera2.params.LensShadingMap> STATISTICS_LENS_SHADING_CORRECTION_MAP =
             new Key<android.hardware.camera2.params.LensShadingMap>("android.statistics.lensShadingCorrectionMap", android.hardware.camera2.params.LensShadingMap.class);
 
@@ -2554,6 +2616,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see #STATISTICS_SCENE_FLICKER_50HZ
      * @see #STATISTICS_SCENE_FLICKER_60HZ
      */
+    @PublicKey
     public static final Key<Integer> STATISTICS_SCENE_FLICKER =
             new Key<Integer>("android.statistics.sceneFlicker", int.class);
 
@@ -2566,6 +2629,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see CaptureResult#STATISTICS_HOT_PIXEL_MAP
      * @see CameraCharacteristics#STATISTICS_INFO_AVAILABLE_HOT_PIXEL_MAP_MODES
      */
+    @PublicKey
     public static final Key<Boolean> STATISTICS_HOT_PIXEL_MAP_MODE =
             new Key<Boolean>("android.statistics.hotPixelMapMode", boolean.class);
 
@@ -2581,6 +2645,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
      * @see CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE
      */
+    @PublicKey
     public static final Key<android.graphics.Point[]> STATISTICS_HOT_PIXEL_MAP =
             new Key<android.graphics.Point[]>("android.statistics.hotPixelMap", android.graphics.Point[].class);
 
@@ -2593,6 +2658,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see #STATISTICS_LENS_SHADING_MAP_MODE_OFF
      * @see #STATISTICS_LENS_SHADING_MAP_MODE_ON
      */
+    @PublicKey
     public static final Key<Integer> STATISTICS_LENS_SHADING_MAP_MODE =
             new Key<Integer>("android.statistics.lensShadingMapMode", int.class);
 
@@ -2722,6 +2788,8 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see CameraCharacteristics#TONEMAP_MAX_CURVE_POINTS
      * @see CaptureRequest#TONEMAP_MODE
      */
+    @PublicKey
+    @SyntheticKey
     public static final Key<android.hardware.camera2.params.TonemapCurve> TONEMAP_CURVE =
             new Key<android.hardware.camera2.params.TonemapCurve>("android.tonemap.curve", android.hardware.camera2.params.TonemapCurve.class);
 
@@ -2755,6 +2823,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see #TONEMAP_MODE_FAST
      * @see #TONEMAP_MODE_HIGH_QUALITY
      */
+    @PublicKey
     public static final Key<Integer> TONEMAP_MODE =
             new Key<Integer>("android.tonemap.mode", int.class);
 
@@ -2784,6 +2853,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      *
      * @see CaptureRequest#BLACK_LEVEL_LOCK
      */
+    @PublicKey
     public static final Key<Boolean> BLACK_LEVEL_LOCK =
             new Key<Boolean>("android.blackLevel.lock", boolean.class);
 
@@ -2851,4 +2921,5 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
     /*~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~
      * End generated code
      *~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~O@*/
+
 }
