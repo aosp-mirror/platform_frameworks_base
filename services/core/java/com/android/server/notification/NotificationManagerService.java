@@ -1340,75 +1340,84 @@ public class NotificationManagerService extends SystemService {
     void dumpImpl(PrintWriter pw, DumpFilter filter) {
         pw.print("Current Notification Manager state");
         if (filter != null) {
-            pw.print(" (filtered to '"); pw.print(filter.pkgFilter); pw.print("')");
+            pw.print(" (filtered to "); pw.print(filter); pw.print(")");
         }
         pw.println(':');
         int N;
+        final boolean zenOnly = filter != null && filter.zen;
 
-        synchronized (mToastQueue) {
-            N = mToastQueue.size();
-            if (N > 0) {
-                pw.println("  Toast Queue:");
-                for (int i=0; i<N; i++) {
-                    mToastQueue.get(i).dump(pw, "    ", filter);
+        if (!zenOnly) {
+            synchronized (mToastQueue) {
+                N = mToastQueue.size();
+                if (N > 0) {
+                    pw.println("  Toast Queue:");
+                    for (int i=0; i<N; i++) {
+                        mToastQueue.get(i).dump(pw, "    ", filter);
+                    }
+                    pw.println("  ");
                 }
-                pw.println("  ");
             }
         }
 
         synchronized (mNotificationList) {
-            N = mNotificationList.size();
-            if (N > 0) {
-                pw.println("  Notification List:");
-                for (int i=0; i<N; i++) {
-                    final NotificationRecord nr = mNotificationList.get(i);
-                    if (filter != null && !filter.matches(nr.sbn)) continue;
-                    nr.dump(pw, "    ", getContext());
-                }
-                pw.println("  ");
-            }
-
-            if (filter == null) {
-                N = mLights.size();
+            if (!zenOnly) {
+                N = mNotificationList.size();
                 if (N > 0) {
-                    pw.println("  Lights List:");
+                    pw.println("  Notification List:");
                     for (int i=0; i<N; i++) {
-                        pw.println("    " + mLights.get(i));
+                        final NotificationRecord nr = mNotificationList.get(i);
+                        if (filter != null && !filter.matches(nr.sbn)) continue;
+                        nr.dump(pw, "    ", getContext());
                     }
                     pw.println("  ");
                 }
 
-                pw.println("  mSoundNotification=" + mSoundNotification);
-                pw.println("  mVibrateNotification=" + mVibrateNotification);
-                pw.println("  mDisableNotificationAlerts=" + mDisableNotificationAlerts);
-                pw.println("  mSystemReady=" + mSystemReady);
-            }
-            pw.println("  mArchive=" + mArchive.toString());
-            Iterator<StatusBarNotification> iter = mArchive.descendingIterator();
-            int i=0;
-            while (iter.hasNext()) {
-                final StatusBarNotification sbn = iter.next();
-                if (filter != null && !filter.matches(sbn)) continue;
-                pw.println("    " + sbn);
-                if (++i >= 5) {
-                    if (iter.hasNext()) pw.println("    ...");
-                    break;
+                if (filter == null) {
+                    N = mLights.size();
+                    if (N > 0) {
+                        pw.println("  Lights List:");
+                        for (int i=0; i<N; i++) {
+                            pw.println("    " + mLights.get(i));
+                        }
+                        pw.println("  ");
+                    }
+
+                    pw.println("  mSoundNotification=" + mSoundNotification);
+                    pw.println("  mVibrateNotification=" + mVibrateNotification);
+                    pw.println("  mDisableNotificationAlerts=" + mDisableNotificationAlerts);
+                    pw.println("  mSystemReady=" + mSystemReady);
+                }
+                pw.println("  mArchive=" + mArchive.toString());
+                Iterator<StatusBarNotification> iter = mArchive.descendingIterator();
+                int i=0;
+                while (iter.hasNext()) {
+                    final StatusBarNotification sbn = iter.next();
+                    if (filter != null && !filter.matches(sbn)) continue;
+                    pw.println("    " + sbn);
+                    if (++i >= 5) {
+                        if (iter.hasNext()) pw.println("    ...");
+                        break;
+                    }
                 }
             }
 
-            pw.println("\n  Usage Stats:");
-            mUsageStats.dump(pw, "    ", filter);
+            if (!zenOnly) {
+                pw.println("\n  Usage Stats:");
+                mUsageStats.dump(pw, "    ", filter);
+            }
 
-            if (filter == null) {
+            if (filter == null || zenOnly) {
                 pw.println("\n  Zen Mode:");
                 mZenModeHelper.dump(pw, "    ");
             }
 
-            pw.println("\n  Ranking Config:");
-            mRankingHelper.dump(pw, "    ", filter);
+            if (!zenOnly) {
+                pw.println("\n  Ranking Config:");
+                mRankingHelper.dump(pw, "    ", filter);
 
-            pw.println("\n  Notification listeners:");
-            mListeners.dump(pw, filter);
+                pw.println("\n  Notification listeners:");
+                mListeners.dump(pw, filter);
+            }
 
             pw.println("\n  Condition providers:");
             mConditionProviders.dump(pw, filter);
@@ -2471,27 +2480,39 @@ public class NotificationManagerService extends SystemService {
 
     public static final class DumpFilter {
         public String pkgFilter;
+        public boolean zen;
 
         public static DumpFilter parseFromArguments(String[] args) {
-            if (args == null || args.length != 2 || !"p".equals(args[0])
-                    || args[1] == null || args[1].trim().isEmpty()) {
-                return null;
+            if (args != null && args.length == 2 && "p".equals(args[0])
+                    && args[1] != null && !args[1].trim().isEmpty()) {
+                final DumpFilter filter = new DumpFilter();
+                filter.pkgFilter = args[1].trim().toLowerCase();
+                return filter;
             }
-            final DumpFilter filter = new DumpFilter();
-            filter.pkgFilter = args[1].trim().toLowerCase();
-            return filter;
+            if (args != null && args.length == 1 && "zen".equals(args[0])) {
+                final DumpFilter filter = new DumpFilter();
+                filter.zen = true;
+                return filter;
+            }
+            return null;
         }
 
         public boolean matches(StatusBarNotification sbn) {
-            return sbn != null && (matches(sbn.getPackageName()) || matches(sbn.getOpPkg()));
+            return zen ? true : sbn != null
+                    && (matches(sbn.getPackageName()) || matches(sbn.getOpPkg()));
         }
 
         public boolean matches(ComponentName component) {
-            return component != null && matches(component.getPackageName());
+            return zen ? true : component != null && matches(component.getPackageName());
         }
 
         public boolean matches(String pkg) {
-            return pkg != null && pkg.toLowerCase().contains(pkgFilter);
+            return zen ? true : pkg != null && pkg.toLowerCase().contains(pkgFilter);
+        }
+
+        @Override
+        public String toString() {
+            return zen ? "zen" : ('\'' + pkgFilter + '\'');
         }
     }
 }
