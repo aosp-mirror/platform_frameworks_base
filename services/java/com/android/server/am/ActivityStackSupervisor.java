@@ -1709,7 +1709,7 @@ public final class ActivityStackSupervisor {
             TaskRecord sourceTask = sourceRecord.task;
             targetStack = sourceTask.stack;
             moveHomeStack(targetStack.isHomeStack());
-            mWindowManager.moveTaskToTop(sourceTask.taskId);
+            mWindowManager.moveTaskToTop(targetStack.topTask().taskId);
             if (!addingToTask &&
                     (launchFlags&Intent.FLAG_ACTIVITY_CLEAR_TOP) != 0) {
                 // In this case, we are adding the activity to an existing
