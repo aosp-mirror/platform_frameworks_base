@@ -572,6 +572,13 @@ public class MockContext extends Context {
 
     /** {@hide} */
     @Override
+    public Context createApplicationContext(ApplicationInfo application, int flags)
+            throws PackageManager.NameNotFoundException {
+        return null;
+    }
+
+    /** {@hide} */
+    @Override
     public Context createPackageContextAsUser(String packageName, int flags, UserHandle user)
             throws PackageManager.NameNotFoundException {
         throw new UnsupportedOperationException();
@@ -595,7 +602,7 @@ public class MockContext extends Context {
 
     @Override
     public boolean isRestricted() {
-        throw new UnsupportedOperationException();        
+        throw new UnsupportedOperationException();
     }
 
     /** @hide */

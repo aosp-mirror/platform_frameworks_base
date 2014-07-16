@@ -5380,6 +5380,7 @@ package android.app.admin {
 
   public class DevicePolicyManager {
     method public void addCrossProfileIntentFilter(android.content.ComponentName, android.content.IntentFilter, int);
+    method public boolean addCrossProfileWidgetProvider(android.content.ComponentName, java.lang.String);
     method public void addPersistentPreferredActivity(android.content.ComponentName, android.content.IntentFilter, android.content.ComponentName);
     method public void addUserRestriction(android.content.ComponentName, java.lang.String);
     method public void clearCrossProfileIntentFilters(android.content.ComponentName);
@@ -5396,6 +5397,7 @@ package android.app.admin {
     method public boolean getBlockUninstall(android.content.ComponentName, java.lang.String);
     method public boolean getCameraDisabled(android.content.ComponentName);
     method public boolean getCrossProfileCallerIdDisabled(android.content.ComponentName);
+    method public java.util.List<java.lang.String> getCrossProfileWidgetProviders(android.content.ComponentName);
     method public int getCurrentFailedPasswordAttempts();
     method public int getKeyguardDisabledFeatures(android.content.ComponentName);
     method public int getMaximumFailedPasswordsForWipe(android.content.ComponentName);
@@ -5429,6 +5431,7 @@ package android.app.admin {
     method public boolean isProfileOwnerApp(java.lang.String);
     method public void lockNow();
     method public void removeActiveAdmin(android.content.ComponentName);
+    method public boolean removeCrossProfileWidgetProvider(android.content.ComponentName, java.lang.String);
     method public boolean removeUser(android.content.ComponentName, android.os.UserHandle);
     method public boolean resetPassword(java.lang.String, int);
     method public void setAccountManagementDisabled(android.content.ComponentName, java.lang.String, boolean);
@@ -5734,6 +5737,7 @@ package android.appwidget {
     method protected android.appwidget.AppWidgetHostView onCreateView(android.content.Context, int, android.appwidget.AppWidgetProviderInfo);
     method protected void onProviderChanged(int, android.appwidget.AppWidgetProviderInfo);
     method protected void onProvidersChanged();
+    method public final void startAppWidgetConfigureActivityForResult(android.app.Activity, android.content.Intent, int);
     method public void startListening();
     method public void stopListening();
   }
@@ -5756,10 +5760,12 @@ package android.appwidget {
   public class AppWidgetManager {
     method public boolean bindAppWidgetIdIfAllowed(int, android.content.ComponentName);
     method public boolean bindAppWidgetIdIfAllowed(int, android.content.ComponentName, android.os.Bundle);
+    method public boolean bindAppWidgetIdIfAllowed(int, android.os.UserHandle, android.content.ComponentName, android.os.Bundle);
     method public int[] getAppWidgetIds(android.content.ComponentName);
     method public android.appwidget.AppWidgetProviderInfo getAppWidgetInfo(int);
     method public android.os.Bundle getAppWidgetOptions(int);
     method public java.util.List<android.appwidget.AppWidgetProviderInfo> getInstalledProviders();
+    method public java.util.List<android.appwidget.AppWidgetProviderInfo> getInstalledProvidersForProfiles(android.os.UserHandle[]);
     method public static android.appwidget.AppWidgetManager getInstance(android.content.Context);
     method public void notifyAppWidgetViewDataChanged(int[], int);
     method public void notifyAppWidgetViewDataChanged(int, int);
@@ -5784,6 +5790,7 @@ package android.appwidget {
     field public static final java.lang.String EXTRA_APPWIDGET_OLD_IDS = "appWidgetOldIds";
     field public static final java.lang.String EXTRA_APPWIDGET_OPTIONS = "appWidgetOptions";
     field public static final java.lang.String EXTRA_APPWIDGET_PROVIDER = "appWidgetProvider";
+    field public static final java.lang.String EXTRA_APPWIDGET_PROVIDER_PROFILE = "appWidgetProviderProfile";
     field public static final java.lang.String EXTRA_CUSTOM_EXTRAS = "customExtras";
     field public static final java.lang.String EXTRA_CUSTOM_INFO = "customInfo";
     field public static final java.lang.String EXTRA_HOST_ID = "hostId";
@@ -5812,6 +5819,10 @@ package android.appwidget {
     ctor public AppWidgetProviderInfo(android.os.Parcel);
     method public android.appwidget.AppWidgetProviderInfo clone();
     method public int describeContents();
+    method public final android.os.UserHandle getProfile();
+    method public final android.graphics.drawable.Drawable loadIcon(android.content.Context, int);
+    method public final java.lang.String loadLabel(android.content.pm.PackageManager);
+    method public final android.graphics.drawable.Drawable loadPreviewImage(android.content.Context, int);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final int RESIZE_BOTH = 3; // 0x3
@@ -5823,15 +5834,15 @@ package android.appwidget {
     field public static final int WIDGET_CATEGORY_RECENTS = 4; // 0x4
     field public int autoAdvanceViewId;
     field public android.content.ComponentName configure;
-    field public int icon;
+    field public deprecated int icon;
     field public int initialKeyguardLayout;
     field public int initialLayout;
-    field public java.lang.String label;
+    field public deprecated java.lang.String label;
     field public int minHeight;
     field public int minResizeHeight;
     field public int minResizeWidth;
     field public int minWidth;
-    field public int previewImage;
+    field public deprecated int previewImage;
     field public android.content.ComponentName provider;
     field public int resizeMode;
     field public int updatePeriodMillis;
@@ -7277,6 +7288,7 @@ package android.content {
     field public static final java.lang.String ACCOUNT_SERVICE = "account";
     field public static final java.lang.String ACTIVITY_SERVICE = "activity";
     field public static final java.lang.String ALARM_SERVICE = "alarm";
+    field public static final java.lang.String APPWIDGET_SERVICE = "appwidget";
     field public static final java.lang.String APP_OPS_SERVICE = "appops";
     field public static final java.lang.String AUDIO_SERVICE = "audio";
     field public static final java.lang.String BATTERY_SERVICE = "batterymanager";

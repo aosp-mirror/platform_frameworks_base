@@ -16,9 +16,17 @@
 
 package android.appwidget;
 
+import android.content.Context;
+import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
+import android.content.res.Resources;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.content.ComponentName;
+import android.os.UserHandle;
+import android.os.UserManager;
 
 /**
  * Describes the meta data for an installed AppWidget provider.  The fields in this class
@@ -145,21 +153,23 @@ public class AppWidgetProviderInfo implements Parcelable {
     public ComponentName configure;
 
     /**
-     * The label to display to the user in the AppWidget picker.  If not supplied in the
-     * xml, the application label will be used.
+     * The label to display to the user in the AppWidget picker.
      *
-     * <p>This field corresponds to the <code>android:label</code> attribute in
-     * the <code>&lt;receiver&gt;</code> element in the AndroidManifest.xml file.
+     * @deprecated Use {@link #loadLabel(android.content.pm.PackageManager)}.
      */
+    @Deprecated
     public String label;
 
     /**
-     * The icon to display for this AppWidget in the AppWidget picker.  If not supplied in the
+     * The icon to display for this AppWidget in the AppWidget picker. If not supplied in the
      * xml, the application icon will be used.
      *
      * <p>This field corresponds to the <code>android:icon</code> attribute in
      * the <code>&lt;receiver&gt;</code> element in the AndroidManifest.xml file.
+     *
+     * @deprecated Use {@link #loadIcon(android.content.Context, int)}.
      */
+    @Deprecated
     public int icon;
 
     /**
@@ -176,7 +186,10 @@ public class AppWidgetProviderInfo implements Parcelable {
      *
      * <p>This field corresponds to the <code>android:previewImage</code> attribute in
      * the <code>&lt;receiver&gt;</code> element in the AndroidManifest.xml file.
+     *
+     * @deprecated User {@link #loadPreviewImage(android.content.Context, int)}.
      */
+    @Deprecated
     public int previewImage;
 
     /**
@@ -200,12 +213,17 @@ public class AppWidgetProviderInfo implements Parcelable {
      */
     public int widgetCategory;
 
+    /** @hide */
+    public ActivityInfo providerInfo;
+
     public AppWidgetProviderInfo() {
+
     }
 
     /**
      * Unflatten the AppWidgetProviderInfo from a parcel.
      */
+    @SuppressWarnings("deprecation")
     public AppWidgetProviderInfo(Parcel in) {
         if (0 != in.readInt()) {
             this.provider = new ComponentName(in);
@@ -226,8 +244,86 @@ public class AppWidgetProviderInfo implements Parcelable {
         this.autoAdvanceViewId = in.readInt();
         this.resizeMode = in.readInt();
         this.widgetCategory = in.readInt();
+        this.providerInfo = in.readParcelable(null);
     }
 
+    /**
+     * Loads the localized label to display to the user in the AppWidget picker.
+     *
+     * @param packageManager Package manager instance for loading resources.
+     * @return The label for the current locale.
+     */
+    public final String loadLabel(PackageManager packageManager) {
+        CharSequence label = providerInfo.loadLabel(packageManager);
+        if (label != null) {
+            return label.toString().trim();
+        }
+        return null;
+    }
+
+    /**
+     * Loads the icon to display for this AppWidget in the AppWidget picker. If not
+     * supplied in the xml, the application icon will be used. A client can optionally
+     * provide a desired density such as {@link android.util.DisplayMetrics#DENSITY_LOW}
+     * {@link android.util.DisplayMetrics#DENSITY_MEDIUM}, etc. If no density is
+     * provided, the density of the current display will be used.
+     * <p>
+     * The loaded icon corresponds to the <code>android:icon</code> attribute in
+     * the <code>&lt;receiver&gt;</code> element in the AndroidManifest.xml file.
+     * </p>
+     * <p>
+     * <strong>Note:</strong> If you care about widgets from different profiles, you
+     * should use this method to load the icon as the system will apply the correct
+     * badging when applicable, so the user knows which profile a widget comes from.
+     * </p>
+     *
+     * @param context Context for accessing resources.
+     * @param density The optional desired density as per
+     *         {@link android.util.DisplayMetrics#densityDpi}.
+     * @return The potentially badged provider icon.
+     */
+    public final Drawable loadIcon(Context context, int density) {
+        return loadDrawable(context, density, providerInfo.getIconResource());
+    }
+
+    /**
+     * Loads a preview of what the AppWidget will look like after it's configured.
+     * If not supplied, the AppWidget's icon will be used. A client can optionally
+     * provide a desired deinsity such as {@link android.util.DisplayMetrics#DENSITY_LOW}
+     * {@link android.util.DisplayMetrics#DENSITY_MEDIUM}, etc. If no density is
+     * provided, the density of the current display will be used.
+     * <p>
+     * The loaded image corresponds to the <code>android:previewImage</code> attribute
+     * in the <code>&lt;receiver&gt;</code> element in the AndroidManifest.xml file.
+     * </p>
+     * <p>
+     * <strong>Note:</strong> If you care about widgets from different profiles, you
+     * should use this method to load the preview image as the system will apply the
+     * correct badging when applicable, so the user knows which profile a previewed
+     * widget comes from.
+     * </p>
+     *
+     * @param context Context for accessing resources.
+     * @param density The optional desired density as per
+     *         {@link android.util.DisplayMetrics#densityDpi}.
+     * @return The potentially badged widget preview image.
+     */
+    @SuppressWarnings("deprecation")
+    public final Drawable loadPreviewImage(Context context, int density) {
+        return loadDrawable(context, density, previewImage);
+    }
+
+    /**
+     * Gets the user profile in which the provider resides.
+     *
+     * @return The hosting user profile.
+     */
+    public final UserHandle getProfile() {
+        return new UserHandle(UserHandle.getUserId(providerInfo.applicationInfo.uid));
+    }
+
+    @Override
+    @SuppressWarnings("deprecation")
     public void writeToParcel(android.os.Parcel out, int flags) {
         if (this.provider != null) {
             out.writeInt(1);
@@ -254,9 +350,11 @@ public class AppWidgetProviderInfo implements Parcelable {
         out.writeInt(this.autoAdvanceViewId);
         out.writeInt(this.resizeMode);
         out.writeInt(this.widgetCategory);
+        out.writeParcelable(this.providerInfo, flags);
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public AppWidgetProviderInfo clone() {
         AppWidgetProviderInfo that = new AppWidgetProviderInfo();
         that.provider = this.provider == null ? null : this.provider.clone();
@@ -273,12 +371,40 @@ public class AppWidgetProviderInfo implements Parcelable {
         that.previewImage = this.previewImage;
         that.autoAdvanceViewId = this.autoAdvanceViewId;
         that.resizeMode = this.resizeMode;
-        that.widgetCategory  = this.widgetCategory;
+        that.widgetCategory = this.widgetCategory;
+        that.providerInfo = this.providerInfo;
         return that;
     }
 
     public int describeContents() {
         return 0;
+    }
+
+    private Drawable loadDrawable(Context context, int density, int resourceId) {
+        try {
+            Resources resources = context.getPackageManager().getResourcesForApplication(
+                    providerInfo.applicationInfo);
+
+            final Drawable drawable;
+            if (resourceId > 0) {
+                if (density <= 0) {
+                    density = context.getResources().getDisplayMetrics().densityDpi;
+                }
+                drawable = resources.getDrawableForDensity(resourceId, density);
+            } else {
+                drawable = providerInfo.loadIcon(context.getPackageManager());
+            }
+
+            if (drawable instanceof BitmapDrawable) {
+                UserManager userManager = (UserManager) context.getSystemService(
+                        Context.USER_SERVICE);
+                return userManager.getBadgedDrawableForUser(drawable, getProfile());
+            }
+        } catch (PackageManager.NameNotFoundException | Resources.NotFoundException e) {
+            /* ignore */
+        }
+
+        return null;
     }
 
     /**
@@ -299,6 +425,6 @@ public class AppWidgetProviderInfo implements Parcelable {
     };
 
     public String toString() {
-        return "AppWidgetProviderInfo(provider=" + this.provider + ")";
+        return "AppWidgetProviderInfo(" + getProfile() + '/' + provider + ')';
     }
 }

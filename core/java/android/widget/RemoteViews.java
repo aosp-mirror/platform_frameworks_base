@@ -17,6 +17,7 @@
 package android.widget;
 
 import android.app.ActivityOptions;
+import android.app.ActivityThread;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetHostView;
 import android.content.Context;
@@ -73,11 +74,11 @@ public class RemoteViews implements Parcelable, Filter {
     static final String EXTRA_REMOTEADAPTER_APPWIDGET_ID = "remoteAdapterAppWidgetId";
 
     /**
-     * User that these views should be applied as. Requires
-     * {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL} when
-     * crossing user boundaries.
+     * Application that hosts the remote views.
+     *
+     * @hide
      */
-    private UserHandle mUser = android.os.Process.myUserHandle();
+    private ApplicationInfo mApplication;
 
     /**
      * The package name of the package containing the layout
@@ -275,9 +276,9 @@ public class RemoteViews implements Parcelable, Filter {
     /**
      * Merges the passed RemoteViews actions with this RemoteViews actions according to
      * action-specific merge rules.
-     * 
+     *
      * @param newRv
-     * 
+     *
      * @hide
      */
     public void mergeRemoteViews(RemoteViews newRv) {
@@ -1608,16 +1609,16 @@ public class RemoteViews implements Parcelable, Filter {
             int bpp = 4;
             if (c != null) {
                 switch (c) {
-                case ALPHA_8:
-                    bpp = 1;
-                    break;
-                case RGB_565:
-                case ARGB_4444:
-                    bpp = 2;
-                    break;
-                case ARGB_8888:
-                    bpp = 4;
-                    break;
+                    case ALPHA_8:
+                        bpp = 1;
+                        break;
+                    case RGB_565:
+                    case ARGB_4444:
+                        bpp = 2;
+                        break;
+                    case ARGB_8888:
+                        bpp = 4;
+                        break;
                 }
             }
             increment(b.getWidth() * b.getHeight() * bpp);
@@ -1637,15 +1638,11 @@ public class RemoteViews implements Parcelable, Filter {
         mPackage = packageName;
         mLayoutId = layoutId;
         mBitmapCache = new BitmapCache();
+        mApplication = ActivityThread.currentApplication().getApplicationInfo();
 
         // setup the memory usage statistics
         mMemoryUsageCounter = new MemoryUsageCounter();
         recalculateMemoryUsage();
-    }
-
-    /** {@hide} */
-    public void setUser(UserHandle user) {
-        mUser = user;
     }
 
     private boolean hasLandscapeAndPortraitLayouts() {
@@ -1713,53 +1710,53 @@ public class RemoteViews implements Parcelable, Filter {
                 for (int i=0; i<count; i++) {
                     int tag = parcel.readInt();
                     switch (tag) {
-                    case SetOnClickPendingIntent.TAG:
-                        mActions.add(new SetOnClickPendingIntent(parcel));
-                        break;
-                    case SetDrawableParameters.TAG:
-                        mActions.add(new SetDrawableParameters(parcel));
-                        break;
-                    case ReflectionAction.TAG:
-                        mActions.add(new ReflectionAction(parcel));
-                        break;
-                    case ViewGroupAction.TAG:
-                        mActions.add(new ViewGroupAction(parcel, mBitmapCache));
-                        break;
-                    case ReflectionActionWithoutParams.TAG:
-                        mActions.add(new ReflectionActionWithoutParams(parcel));
-                        break;
-                    case SetEmptyView.TAG:
-                        mActions.add(new SetEmptyView(parcel));
-                        break;
-                    case SetPendingIntentTemplate.TAG:
-                        mActions.add(new SetPendingIntentTemplate(parcel));
-                        break;
-                    case SetOnClickFillInIntent.TAG:
-                        mActions.add(new SetOnClickFillInIntent(parcel));
-                        break;
-                    case SetRemoteViewsAdapterIntent.TAG:
-                        mActions.add(new SetRemoteViewsAdapterIntent(parcel));
-                        break;
-                    case TextViewDrawableAction.TAG:
-                        mActions.add(new TextViewDrawableAction(parcel));
-                        break;
-                    case TextViewSizeAction.TAG:
-                        mActions.add(new TextViewSizeAction(parcel));
-                        break;
-                    case ViewPaddingAction.TAG:
-                        mActions.add(new ViewPaddingAction(parcel));
-                        break;
-                    case BitmapReflectionAction.TAG:
-                        mActions.add(new BitmapReflectionAction(parcel));
-                        break;
-                    case SetRemoteViewsAdapterList.TAG:
-                        mActions.add(new SetRemoteViewsAdapterList(parcel));
-                        break;
-                    case TextViewDrawableColorFilterAction.TAG:
-                        mActions.add(new TextViewDrawableColorFilterAction(parcel));
-                        break;
-                    default:
-                        throw new ActionException("Tag " + tag + " not found");
+                        case SetOnClickPendingIntent.TAG:
+                            mActions.add(new SetOnClickPendingIntent(parcel));
+                            break;
+                        case SetDrawableParameters.TAG:
+                            mActions.add(new SetDrawableParameters(parcel));
+                            break;
+                        case ReflectionAction.TAG:
+                            mActions.add(new ReflectionAction(parcel));
+                            break;
+                        case ViewGroupAction.TAG:
+                            mActions.add(new ViewGroupAction(parcel, mBitmapCache));
+                            break;
+                        case ReflectionActionWithoutParams.TAG:
+                            mActions.add(new ReflectionActionWithoutParams(parcel));
+                            break;
+                        case SetEmptyView.TAG:
+                            mActions.add(new SetEmptyView(parcel));
+                            break;
+                        case SetPendingIntentTemplate.TAG:
+                            mActions.add(new SetPendingIntentTemplate(parcel));
+                            break;
+                        case SetOnClickFillInIntent.TAG:
+                            mActions.add(new SetOnClickFillInIntent(parcel));
+                            break;
+                        case SetRemoteViewsAdapterIntent.TAG:
+                            mActions.add(new SetRemoteViewsAdapterIntent(parcel));
+                            break;
+                        case TextViewDrawableAction.TAG:
+                            mActions.add(new TextViewDrawableAction(parcel));
+                            break;
+                        case TextViewSizeAction.TAG:
+                            mActions.add(new TextViewSizeAction(parcel));
+                            break;
+                        case ViewPaddingAction.TAG:
+                            mActions.add(new ViewPaddingAction(parcel));
+                            break;
+                        case BitmapReflectionAction.TAG:
+                            mActions.add(new BitmapReflectionAction(parcel));
+                            break;
+                        case SetRemoteViewsAdapterList.TAG:
+                            mActions.add(new SetRemoteViewsAdapterList(parcel));
+                            break;
+                        case TextViewDrawableColorFilterAction.TAG:
+                            mActions.add(new TextViewDrawableColorFilterAction(parcel));
+                            break;
+                        default:
+                            throw new ActionException("Tag " + tag + " not found");
                     }
                 }
             }
@@ -1770,6 +1767,8 @@ public class RemoteViews implements Parcelable, Filter {
             mPackage = mPortrait.getPackage();
             mLayoutId = mPortrait.getLayoutId();
         }
+
+        mApplication = parcel.readParcelable(null);
 
         // setup the memory usage statistics
         mMemoryUsageCounter = new MemoryUsageCounter();
@@ -2557,22 +2556,32 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     private Context prepareContext(Context context) {
-        Context c;
-        String packageName = mPackage;
-
-        if (packageName != null) {
-            try {
-                c = context.createPackageContextAsUser(
-                        packageName, Context.CONTEXT_RESTRICTED, mUser);
-            } catch (NameNotFoundException e) {
-                Log.e(LOG_TAG, "Package name " + packageName + " not found");
-                c = context;
+        if (mApplication != null) {
+            if (context.getUserId() == UserHandle.getUserId(mApplication.uid)
+                    && context.getPackageName().equals(mApplication.packageName)) {
+                return context;
             }
-        } else {
-            c = context;
+            try {
+                return context.createApplicationContext(mApplication,
+                        Context.CONTEXT_RESTRICTED);
+            } catch (NameNotFoundException e) {
+                Log.e(LOG_TAG, "Package name " + mPackage + " not found");
+            }
         }
 
-        return c;
+        if (mPackage != null) {
+            if (context.getPackageName().equals(mPackage)) {
+                return context;
+            }
+            try {
+                return context.createPackageContext(
+                        mPackage, Context.CONTEXT_RESTRICTED);
+            } catch (NameNotFoundException e) {
+                Log.e(LOG_TAG, "Package name " + mPackage + " not found");
+            }
+        }
+
+        return context;
     }
 
     /**
@@ -2629,6 +2638,8 @@ public class RemoteViews implements Parcelable, Filter {
             mLandscape.writeToParcel(dest, flags);
             mPortrait.writeToParcel(dest, flags);
         }
+
+        dest.writeParcelable(mApplication, 0);
     }
 
     /**
