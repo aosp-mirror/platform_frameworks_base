@@ -16221,12 +16221,12 @@ package android.media.routing {
 package android.media.session {
 
   public final class MediaController {
+    ctor public MediaController(android.media.session.MediaSession.Token);
     method public void addCallback(android.media.session.MediaController.Callback);
     method public void addCallback(android.media.session.MediaController.Callback, android.os.Handler);
     method public void adjustVolumeBy(int, int);
     method public android.media.routing.MediaRouter.Delegate createMediaRouterDelegate();
     method public boolean dispatchMediaButtonEvent(android.view.KeyEvent);
-    method public static android.media.session.MediaController fromToken(android.media.session.MediaSession.Token);
     method public android.media.MediaMetadata getMetadata();
     method public android.media.session.PlaybackState getPlaybackState();
     method public int getRatingType();
@@ -16266,6 +16266,7 @@ package android.media.session {
   }
 
   public final class MediaSession {
+    ctor public MediaSession(android.content.Context, java.lang.String);
     method public void addCallback(android.media.session.MediaSession.Callback);
     method public void addCallback(android.media.session.MediaSession.Callback, android.os.Handler);
     method public void addTransportControlsCallback(android.media.session.MediaSession.TransportControlsCallback);
@@ -16317,7 +16318,6 @@ package android.media.session {
 
   public final class MediaSessionManager {
     method public void addActiveSessionsListener(android.media.session.MediaSessionManager.SessionListener, android.content.ComponentName);
-    method public android.media.session.MediaSession createSession(java.lang.String);
     method public java.util.List<android.media.session.MediaController> getActiveSessions(android.content.ComponentName);
   }
 

@@ -66,28 +66,27 @@ public final class MediaController {
 
     private final TransportControls mTransportControls;
 
-    private MediaController(ISessionController sessionBinder) {
+    /**
+     * Call for creating a MediaController directly from a binder. Should only
+     * be used by framework code.
+     *
+     * @hide
+     */
+    public MediaController(ISessionController sessionBinder) {
+        if (sessionBinder == null) {
+            throw new IllegalArgumentException("Session token cannot be null");
+        }
         mSessionBinder = sessionBinder;
         mTransportControls = new TransportControls();
     }
 
     /**
-     * @hide
-     */
-    public static MediaController fromBinder(ISessionController sessionBinder) {
-        return new MediaController(sessionBinder);
-    }
-
-    /**
-     * Get a new media controller from a session token which may have
-     * been obtained from another process.  If successful the controller returned
-     * will be connected to the session that generated the token.
+     * Create a new MediaController from a session's token.
      *
-     * @param token The session token to control.
-     * @return A controller for the session or null if inaccessible.
+     * @param token The token for the session.
      */
-    public static MediaController fromToken(@NonNull MediaSession.Token token) {
-        return fromBinder(token.getBinder());
+    public MediaController(@NonNull MediaSession.Token token) {
+        this(token.getBinder());
     }
 
     /**

@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaMetadata;
@@ -37,9 +38,12 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
+import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
+
+import com.android.internal.telephony.DctConstants.Activity;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -59,8 +63,9 @@ import java.util.List;
  * create a {@link MediaController} to interact with the session.
  * <p>
  * To receive commands, media keys, and other events a {@link Callback} must be
- * set with {@link #addCallback(Callback)}. To receive transport control
- * commands a {@link TransportControlsCallback} must be set with
+ * set with {@link #addCallback(Callback)} and {@link #setActive(boolean)
+ * setActive(true)} must be called. To receive transport control commands a
+ * {@link TransportControlsCallback} must be set with
  * {@link #addTransportControlsCallback}.
  * <p>
  * When an app is finished performing playback it must call {@link #release()}
@@ -119,18 +124,45 @@ public final class MediaSession {
     private boolean mActive = false;
 
     /**
+     * Creates a new session. The session will automatically be registered with
+     * the system but will not be published until {@link #setActive(boolean)
+     * setActive(true)} is called. You must call {@link #release()} when
+     * finished with the session.
+     *
+     * @param context The context to use to create the session.
+     * @param tag A short name for debugging purposes.
+     */
+    public MediaSession(@NonNull Context context, @NonNull String tag) {
+        this(context, tag, UserHandle.myUserId());
+    }
+
+    /**
+     * Creates a new session as the specified user. To create a session as a
+     * user other than your own you must hold the
+     * {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL}
+     * permission.
+     *
+     * @param context The context to use to create the session.
+     * @param tag A short name for debugging purposes.
+     * @param userId The user id to create the session as.
      * @hide
      */
-    public MediaSession(ISession binder, CallbackStub cbStub) {
-        mBinder = binder;
-        mCbStub = cbStub;
-        ISessionController controllerBinder = null;
-        try {
-            controllerBinder = mBinder.getController();
-        } catch (RemoteException e) {
-            throw new RuntimeException("Dead object in MediaSessionController constructor: ", e);
+    public MediaSession(@NonNull Context context, @NonNull String tag, int userId) {
+        if (context == null) {
+            throw new IllegalArgumentException("context cannot be null.");
         }
-        mSessionToken = new Token(controllerBinder);
+        if (TextUtils.isEmpty(tag)) {
+            throw new IllegalArgumentException("tag cannot be null or empty");
+        }
+        mCbStub = new CallbackStub();
+        MediaSessionManager manager = (MediaSessionManager) context
+                .getSystemService(Context.MEDIA_SESSION_SERVICE);
+        try {
+            mBinder = manager.createSession(mCbStub, tag, userId);
+            mSessionToken = new Token(mBinder.getController());
+        } catch (RemoteException e) {
+            throw new RuntimeException("Remote error creating session.", e);
+        }
     }
 
     /**
