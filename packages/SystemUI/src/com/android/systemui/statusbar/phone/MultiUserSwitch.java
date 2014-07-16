@@ -26,7 +26,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 
 import com.android.systemui.qs.QSPanel;
-import com.android.systemui.qs.tiles.UserDetail;
+import com.android.systemui.qs.tiles.UserDetailView;
 
 /**
  * Container for image of the multi user switcher (tappable).
@@ -53,7 +53,8 @@ public class MultiUserSwitch extends FrameLayout implements View.OnClickListener
     public void onClick(View v) {
         final UserManager um = UserManager.get(getContext());
         if (um.isUserSwitcherEnabled()) {
-            mQsPanel.showDetailAdapter(true, UserDetail.USER_DETAIL_ADAPTER);
+            mQsPanel.showDetailAdapter(true,
+                    mQsPanel.getHost().getUserSwitcherController().userDetailAdapter);
         } else {
             Intent intent = ContactsContract.QuickContact.composeQuickContactsIntent(
                     getContext(), v, ContactsContract.Profile.CONTENT_URI,

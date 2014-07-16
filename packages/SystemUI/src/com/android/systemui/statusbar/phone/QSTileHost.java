@@ -40,6 +40,7 @@ import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.RotationLockController;
 import com.android.systemui.statusbar.policy.TetheringController;
+import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.volume.VolumeComponent;
 
@@ -63,12 +64,14 @@ public class QSTileHost implements QSTile.Host {
     private final VolumeComponent mVolume;
     private final ArrayList<QSTile<?>> mTiles = new ArrayList<QSTile<?>>();
     private final FlashlightController mFlashlight;
+    private final UserSwitcherController mUserSwitcherController;
 
     public QSTileHost(Context context, PhoneStatusBar statusBar,
             BluetoothController bluetooth, LocationController location,
             RotationLockController rotation, NetworkController network,
             ZenModeController zen, TetheringController tethering,
-            CastController cast, VolumeComponent volume, FlashlightController flashlight) {
+            CastController cast, VolumeComponent volume, FlashlightController flashlight,
+            UserSwitcherController userSwitcher) {
         mContext = context;
         mStatusBar = statusBar;
         mBluetooth = bluetooth;
@@ -80,6 +83,7 @@ public class QSTileHost implements QSTile.Host {
         mCast = cast;
         mVolume = volume;
         mFlashlight = flashlight;
+        mUserSwitcherController = userSwitcher;
 
         final HandlerThread ht = new HandlerThread(QSTileHost.class.getSimpleName());
         ht.start();
@@ -180,5 +184,9 @@ public class QSTileHost implements QSTile.Host {
     @Override
     public FlashlightController getFlashlightController() {
         return mFlashlight;
+    }
+
+    public UserSwitcherController getUserSwitcherController() {
+        return mUserSwitcherController;
     }
 }
