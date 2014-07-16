@@ -173,9 +173,6 @@ public:
     // UI thread only!
     ANDROID_API void addAnimator(const sp<BaseRenderNodeAnimator>& animator);
 
-protected:
-    virtual void damageSelf(TreeInfo& info);
-
 private:
     typedef key_value_pair_t<float, DrawRenderNodeOp*> ZDrawRenderNodeOpPair;
 
@@ -250,6 +247,7 @@ private:
     void prepareLayer(TreeInfo& info);
     void pushLayerUpdate(TreeInfo& info);
     void deleteDisplayListData();
+    void damageSelf(TreeInfo& info);
 
     void incParentRefCount() { mParentCount++; }
     void decParentRefCount();

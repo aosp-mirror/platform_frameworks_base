@@ -2440,8 +2440,11 @@ public final class ViewRootImpl implements ViewParent,
             if (attachInfo.mHardwareRenderer != null && attachInfo.mHardwareRenderer.isEnabled()) {
                 // Draw with hardware renderer.
                 mIsAnimating = false;
-                mHardwareYOffset = yOffset;
-                mHardwareXOffset = xOffset;
+                if (mHardwareYOffset != yOffset || mHardwareXOffset != xOffset) {
+                    mHardwareYOffset = yOffset;
+                    mHardwareXOffset = xOffset;
+                    mAttachInfo.mHardwareRenderer.invalidateRoot();
+                }
                 mResizeAlpha = resizeAlpha;
 
                 dirty.setEmpty();
@@ -2827,6 +2830,10 @@ public final class ViewRootImpl implements ViewParent,
         // Set the new focus host and node.
         mAccessibilityFocusedHost = view;
         mAccessibilityFocusedVirtualView = node;
+
+        if (mAttachInfo.mHardwareRenderer != null) {
+            mAttachInfo.mHardwareRenderer.invalidateRoot();
+        }
     }
 
     @Override
