@@ -23,8 +23,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.hardware.soundtrigger.SoundTrigger;
-import android.hardware.soundtrigger.SoundTrigger.Keyphrase;
-import android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel;
+import android.hardware.soundtrigger.Keyphrase;
+import android.hardware.soundtrigger.KeyphraseSoundModel;
 import android.util.Slog;
 
 import java.util.ArrayList;
@@ -32,6 +32,8 @@ import java.util.List;
 import java.util.UUID;
 
 /**
+ * Helper to manage the database of the sound models that have been registered on the device.
+ *
  * @hide
  */
 public class DatabaseHelper extends SQLiteOpenHelper {
@@ -86,14 +88,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        // TODO(sansid): For now, drop older tables and recreate new ones.
+        // TODO: For now, drop older tables and recreate new ones.
         db.execSQL("DROP TABLE IF EXISTS " + KeyphraseContract.TABLE);
         db.execSQL("DROP TABLE IF EXISTS " + SoundModelContract.TABLE);
         onCreate(db);
     }
 
     /**
-     * TODO(sansid): Change to addOrUpdate to handle changes here.
+     * TODO: Change to addOrUpdate to handle changes here.
      */
     public void addKeyphraseSoundModel(KeyphraseSoundModel soundModel) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -115,13 +117,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     /**
      * TODO(sansid): Change to addOrUpdate to handle changes here.
      */
-    private void addKeyphrase(UUID modelId, SoundTrigger.Keyphrase keyphrase) {
+    private void addKeyphrase(UUID modelId, Keyphrase keyphrase) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(KeyphraseContract.KEY_ID, keyphrase.id);
-        values.put(KeyphraseContract.KEY_RECOGNITION_MODES, keyphrase.recognitionModes);
+        values.put(KeyphraseContract.KEY_RECOGNITION_MODES, keyphrase.recognitionModeFlags);
         values.put(KeyphraseContract.KEY_SOUND_MODEL_ID, keyphrase.id);
-        values.put(KeyphraseContract.KEY_HINT_TEXT, keyphrase.text);
+        values.put(KeyphraseContract.KEY_HINT_TEXT, keyphrase.hintText);
         values.put(KeyphraseContract.KEY_LOCALE, keyphrase.locale);
         if (db.insert(KeyphraseContract.TABLE, null, values) == -1) {
             Slog.w(TAG, "Failed to persist keyphrase to database");
@@ -171,7 +173,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 String locale = c.getString(c.getColumnIndex(KeyphraseContract.KEY_LOCALE));
                 String hintText = c.getString(c.getColumnIndex(KeyphraseContract.KEY_HINT_TEXT));
 
-                keyphrases.add(new Keyphrase(id, modes, locale, hintText, users));
+                keyphrases.add(new Keyphrase(id, hintText, locale, modes, users));
             } while (c.moveToNext());
         }
         Keyphrase[] keyphraseArr = new Keyphrase[keyphrases.size()];

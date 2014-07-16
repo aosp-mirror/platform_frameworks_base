@@ -65,4 +65,15 @@ public class KeyphraseSoundModel implements Parcelable {
         }
         dest.writeParcelableArray(keyphrases, 0);
     }
+
+    public SoundTrigger.KeyphraseSoundModel convertToSoundTriggerKeyphraseSoundModel() {
+        SoundTrigger.Keyphrase[] stKeyphrases = null;
+        if (keyphrases != null) {
+            stKeyphrases = new SoundTrigger.Keyphrase[keyphrases.length];
+            for (int i = 0; i < keyphrases.length; i++) {
+                stKeyphrases[i] = keyphrases[i].convertToSoundTriggerKeyphrase();
+            }
+        }
+        return new SoundTrigger.KeyphraseSoundModel(uuid, data, stKeyphrases);
+    }
 }
