@@ -248,8 +248,6 @@ public class Virtualizer extends AudioEffect {
     }
 
     /**
-     * @hide
-     * CANDIDATE FOR PUBLIC API
      * Checks if the combination of a channel mask and device type is supported by this virtualizer.
      * Some virtualizer implementations may only support binaural processing (i.e. only support
      * headphone output), some may support transaural processing (i.e. for speaker output) for the
@@ -276,8 +274,6 @@ public class Virtualizer extends AudioEffect {
     }
 
     /**
-     * @hide
-     * CANDIDATE FOR PUBLIC API
      * Queries the virtual speaker angles (azimuth and elevation) for a combination of a channel
      * mask and device type.
      * If the virtualization configuration (mask and device) is supported (see
@@ -318,8 +314,6 @@ public class Virtualizer extends AudioEffect {
     }
 
     /**
-     * @hide
-     * CANDIDATE FOR PUBLIC API
      * Forces the virtualizer effect to use the processing mode used for the given device type.
      * The effect must be enabled for the forced mode to be applied.
      * @param deviceType one of the device types defined in {@link AudioDevice}.
