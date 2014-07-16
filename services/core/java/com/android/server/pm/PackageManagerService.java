@@ -6205,13 +6205,18 @@ public class PackageManagerService extends IPackageManager.Stub {
         final ApplicationInfo info = pkg.applicationInfo;
         final String codePath = pkg.codePath;
         final File codeFile = new File(codePath);
+        // If "/system/lib64/apkname" exists, assume that is the per-package
+        // native library directory to use; otherwise use "/system/lib/apkname".
+        final String apkRoot = calculateApkRoot(info.sourceDir);
 
         final boolean bundledApp = isSystemApp(info) && !isUpdatedSystemApp(info);
         final boolean asecApp = isForwardLocked(info) || isExternal(info);
 
+
         info.nativeLibraryRootDir = null;
         info.nativeLibraryRootRequiresIsa = false;
         info.nativeLibraryDir = null;
+        info.secondaryNativeLibraryDir = null;
 
         if (bundledApp) {
             // Monolithic bundled install
@@ -6225,35 +6230,43 @@ public class PackageManagerService extends IPackageManager.Stub {
             // is just the default path.
             final String apkName = deriveCodePathName(codePath);
             final String libDir = is64Bit ? LIB64_DIR_NAME : LIB_DIR_NAME;
-            info.nativeLibraryRootDir = Environment.buildPath(new File(info.apkRoot), libDir,
+            info.nativeLibraryRootDir = Environment.buildPath(new File(apkRoot), libDir,
                     apkName).getAbsolutePath();
             info.nativeLibraryRootRequiresIsa = false;
 
+            info.nativeLibraryDir = info.nativeLibraryRootDir;
+            if (info.secondaryCpuAbi != null) {
+                final String secondaryLibDir = is64Bit ? LIB_DIR_NAME : LIB64_DIR_NAME;
+                info.secondaryNativeLibraryDir = Environment.buildPath(new File(apkRoot),
+                        secondaryLibDir, apkName).getAbsolutePath();
+            }
         } else if (isApkFile(codeFile)) {
             // Monolithic install
             if (asecApp) {
                 info.nativeLibraryRootDir = new File(codeFile.getParentFile(), LIB_DIR_NAME)
                         .getAbsolutePath();
-                info.nativeLibraryRootRequiresIsa = false;
             } else {
                 final String apkName = deriveCodePathName(codePath);
                 info.nativeLibraryRootDir = new File(mAppLib32InstallDir, apkName)
                         .getAbsolutePath();
-                info.nativeLibraryRootRequiresIsa = false;
             }
+
+            info.nativeLibraryRootRequiresIsa = false;
+            info.nativeLibraryDir = info.nativeLibraryRootDir;
         } else {
             // Cluster install
             info.nativeLibraryRootDir = new File(codeFile, LIB_DIR_NAME).getAbsolutePath();
             info.nativeLibraryRootRequiresIsa = true;
-        }
 
-        if (info.nativeLibraryRootRequiresIsa) {
             if (info.primaryCpuAbi != null) {
                 info.nativeLibraryDir = new File(info.nativeLibraryRootDir,
                         VMRuntime.getInstructionSet(info.primaryCpuAbi)).getAbsolutePath();
             }
-        } else {
-            info.nativeLibraryDir = info.nativeLibraryRootDir;
+
+            if (info.secondaryCpuAbi != null) {
+                info.secondaryNativeLibraryDir = new File(info.nativeLibraryRootDir,
+                        VMRuntime.getInstructionSet(info.secondaryCpuAbi)).getAbsolutePath();
+            }
         }
     }
 
@@ -6271,7 +6284,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         // If "/system/lib64/apkname" exists, assume that is the per-package
         // native library directory to use; otherwise use "/system/lib/apkname".
         final String apkRoot = calculateApkRoot(pkg.applicationInfo.sourceDir);
-        pkg.applicationInfo.apkRoot = apkRoot;
         setBundledAppAbi(pkg, apkRoot, apkName);
         // pkgSetting might be null during rescan following uninstall of updates
         // to a bundled app, so accommodate that possibility.  The settings in
