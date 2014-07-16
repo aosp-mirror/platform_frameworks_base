@@ -44,6 +44,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.view.DisplayAdjustments;
 import android.view.Display;
+import dalvik.system.VMRuntime;
 
 import java.io.File;
 import java.io.IOException;
@@ -121,6 +122,8 @@ public final class LoadedApk {
             CompatibilityInfo compatInfo, ClassLoader baseLoader,
             boolean securityViolation, boolean includeCode) {
         final int myUid = Process.myUid();
+        aInfo = adjustNativeLibraryPaths(aInfo);
+
         mActivityThread = activityThread;
         mApplicationInfo = aInfo;
         mPackageName = aInfo.packageName;
@@ -141,6 +144,27 @@ public final class LoadedApk {
         mSecurityViolation = securityViolation;
         mIncludeCode = includeCode;
         mDisplayAdjustments.setCompatibilityInfo(compatInfo);
+    }
+
+    private static ApplicationInfo adjustNativeLibraryPaths(ApplicationInfo info) {
+        // If we're dealing with a multi-arch application that has both
+        // 32 and 64 bit shared libraries, we might need to choose the secondary
+        // depending on what the current runtime's instruction set is.
+        if (info.primaryCpuAbi != null && info.secondaryCpuAbi != null) {
+            final String runtimeIsa = VMRuntime.getRuntime().vmInstructionSet();
+            final String secondaryIsa = VMRuntime.getInstructionSet(info.secondaryCpuAbi);
+
+            // If the runtimeIsa is the same as the primary isa, then we do nothing.
+            // Everything will be set up correctly because info.nativeLibraryDir will
+            // correspond to the right ISA.
+            if (runtimeIsa.equals(secondaryIsa)) {
+                final ApplicationInfo modified = new ApplicationInfo(info);
+                modified.nativeLibraryDir = modified.secondaryNativeLibraryDir;
+                return modified;
+            }
+        }
+
+        return info;
     }
 
     /**
