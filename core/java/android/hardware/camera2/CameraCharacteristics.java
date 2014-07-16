@@ -131,6 +131,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     }
 
     private final CameraMetadataNative mProperties;
+    private List<CameraCharacteristics.Key<?>> mKeys;
     private List<CaptureRequest.Key<?>> mAvailableRequestKeys;
     private List<CaptureResult.Key<?>> mAvailableResultKeys;
 
@@ -194,8 +195,20 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      */
     @Override
     public List<Key<?>> getKeys() {
-        // Force the javadoc for this function to show up on the CameraCharacteristics page
-        return super.getKeys();
+        // List of keys is immutable; cache the results after we calculate them
+        if (mKeys != null) {
+            return mKeys;
+        }
+
+        int[] filterTags = get(REQUEST_AVAILABLE_CHARACTERISTICS_KEYS);
+        if (filterTags == null) {
+            throw new AssertionError("android.request.availableCharacteristicsKeys must be non-null"
+                    + " in the characteristics");
+        }
+
+        mKeys = Collections.unmodifiableList(
+                getKeysStatic(getClass(), getKeyClass(), this, filterTags));
+        return mKeys;
     }
 
     /**
@@ -218,8 +231,13 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
             Object crKey = CaptureRequest.Key.class;
             Class<CaptureRequest.Key<?>> crKeyTyped = (Class<CaptureRequest.Key<?>>)crKey;
 
-            mAvailableRequestKeys = Collections.unmodifiableList(
-                    getAvailableKeyList(CaptureRequest.class, crKeyTyped));
+            int[] filterTags = get(REQUEST_AVAILABLE_REQUEST_KEYS);
+            if (filterTags == null) {
+                throw new AssertionError("android.request.availableRequestKeys must be non-null "
+                        + "in the characteristics");
+            }
+            mAvailableRequestKeys =
+                    getAvailableKeyList(CaptureRequest.class, crKeyTyped, filterTags);
         }
         return mAvailableRequestKeys;
     }
@@ -244,8 +262,12 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
             Object crKey = CaptureResult.Key.class;
             Class<CaptureResult.Key<?>> crKeyTyped = (Class<CaptureResult.Key<?>>)crKey;
 
-            mAvailableResultKeys = Collections.unmodifiableList(
-                    getAvailableKeyList(CaptureResult.class, crKeyTyped));
+            int[] filterTags = get(REQUEST_AVAILABLE_RESULT_KEYS);
+            if (filterTags == null) {
+                throw new AssertionError("android.request.availableResultKeys must be non-null "
+                        + "in the characteristics");
+            }
+            mAvailableResultKeys = getAvailableKeyList(CaptureResult.class, crKeyTyped, filterTags);
         }
         return mAvailableResultKeys;
     }
@@ -266,7 +288,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @throws IllegalArgumentException if metadataClass is not a subclass of CameraMetadata
      */
     private <TKey> List<TKey>
-    getAvailableKeyList(Class<?> metadataClass, Class<TKey> keyClass) {
+    getAvailableKeyList(Class<?> metadataClass, Class<TKey> keyClass, int[] filterTags) {
 
         if (metadataClass.equals(CameraMetadata.class)) {
             throw new AssertionError(
@@ -277,7 +299,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
         }
 
         List<TKey> staticKeyList = CameraCharacteristics.<TKey>getKeysStatic(
-                metadataClass, keyClass, /*instance*/null);
+                metadataClass, keyClass, /*instance*/null, filterTags);
         return Collections.unmodifiableList(staticKeyList);
     }
 
