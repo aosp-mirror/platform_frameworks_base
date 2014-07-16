@@ -491,6 +491,23 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public String nativeLibraryDir;
 
     /**
+     * Full path where unpacked native libraries for {@link #secondaryCpuAbi}
+     * are stored, if present.
+     *
+     * The main reason this exists is for bundled multi-arch apps, where
+     * it's not trivial to calculate the location of libs for the secondary abi
+     * given the location of the primary.
+     *
+     * TODO: Change the layout of bundled installs so that we can use
+     * nativeLibraryRootDir & nativeLibraryRootRequiresIsa there as well.
+     * (e.g {@code [ "/system/app-lib/Foo/arm", "/system/app-lib/Foo/arm64" ]}
+     * instead of {@code [ "/system/lib/Foo", "/system/lib64/Foo" ]}.
+     *
+     * @hide
+     */
+    public String secondaryNativeLibraryDir;
+
+    /**
      * The root path where unpacked native libraries are stored.
      * <p>
      * When {@link #nativeLibraryRootRequiresIsa} is set, the libraries are
@@ -528,23 +545,6 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * {@hide}
      */
     public String secondaryCpuAbi;
-
-    /**
-     * The derived APK "root" for the given package. Will be non-null for bundled and
-     * updated system apps. This will be a top level path under which apks and libraries
-     * are installed, for eg. {@code /system}, {@code /oem} or {@code /vendor}. This is
-     * used to calculate the location of native code for a given package, for e.g
-     * {@code /vendor/lib} or {@code /vendor/lib64}.
-     *
-     * For app updates or fresh app installs, this will be {@code null} and we will use
-     * {@code legacyNativeLibraryDir}
-     *
-     * NOTE: This can be removed if we have a unified layout for bundled and installed
-     * apps.
-     *
-     * {@hide}
-     */
-    public String apkRoot;
 
     /**
      * The kernel user-ID that has been assigned to this application;
@@ -688,11 +688,11 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         splitSourceDirs = orig.splitSourceDirs;
         splitPublicSourceDirs = orig.splitPublicSourceDirs;
         nativeLibraryDir = orig.nativeLibraryDir;
+        secondaryNativeLibraryDir = orig.secondaryNativeLibraryDir;
         nativeLibraryRootDir = orig.nativeLibraryRootDir;
         nativeLibraryRootRequiresIsa = orig.nativeLibraryRootRequiresIsa;
         primaryCpuAbi = orig.primaryCpuAbi;
         secondaryCpuAbi = orig.secondaryCpuAbi;
-        apkRoot = orig.apkRoot;
         resourceDirs = orig.resourceDirs;
         seinfo = orig.seinfo;
         sharedLibraryFiles = orig.sharedLibraryFiles;
@@ -736,11 +736,11 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeStringArray(splitSourceDirs);
         dest.writeStringArray(splitPublicSourceDirs);
         dest.writeString(nativeLibraryDir);
+        dest.writeString(secondaryNativeLibraryDir);
         dest.writeString(nativeLibraryRootDir);
         dest.writeInt(nativeLibraryRootRequiresIsa ? 1 : 0);
         dest.writeString(primaryCpuAbi);
         dest.writeString(secondaryCpuAbi);
-        dest.writeString(apkRoot);
         dest.writeStringArray(resourceDirs);
         dest.writeString(seinfo);
         dest.writeStringArray(sharedLibraryFiles);
@@ -783,11 +783,11 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         splitSourceDirs = source.readStringArray();
         splitPublicSourceDirs = source.readStringArray();
         nativeLibraryDir = source.readString();
+        secondaryNativeLibraryDir = source.readString();
         nativeLibraryRootDir = source.readString();
         nativeLibraryRootRequiresIsa = source.readInt() != 0;
         primaryCpuAbi = source.readString();
         secondaryCpuAbi = source.readString();
-        apkRoot = source.readString();
         resourceDirs = source.readStringArray();
         seinfo = source.readString();
         sharedLibraryFiles = source.readStringArray();
