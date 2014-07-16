@@ -75,7 +75,7 @@ public class BackgroundDexOptService extends JobService {
                         schedule(BackgroundDexOptService.this);
                         return;
                     }
-                    pm.performDexOpt(pkg, false);
+                    pm.performDexOpt(pkg, null /* instruction set */, false);
                 }
                 // ran to completion, so we abandon our timeslice and do not reschedule
                 jobFinished(jobParams, false);

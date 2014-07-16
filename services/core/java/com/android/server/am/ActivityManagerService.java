@@ -2809,7 +2809,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     void ensurePackageDexOpt(String packageName) {
         IPackageManager pm = AppGlobals.getPackageManager();
         try {
-            if (pm.performDexOpt(packageName)) {
+            if (pm.performDexOptIfNeeded(packageName, null /* instruction set */)) {
                 mDidDexOpt = true;
             }
         } catch (RemoteException e) {
