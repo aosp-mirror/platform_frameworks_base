@@ -248,8 +248,6 @@ public interface WebViewProvider {
 
     public View findHierarchyView(String className, int hashCode);
 
-    public void preauthorizePermission(Uri origin, long resources);
-
     //-------------------------------------------------------------------------
     // Provider internal methods
     //-------------------------------------------------------------------------
