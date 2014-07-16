@@ -44,14 +44,15 @@
             android:textColor="?android:attr/textColorPrimary">
         </TextView>
 
-        <CheckBox
+        <ImageView
             android:id="@+id/page_selector"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginRight="8dip"
             android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true">
-        </CheckBox>
+            android:layout_centerVertical="true"
+            android:background="@drawable/page_selector_background">
+        </ImageView>
 
     </RelativeLayout>
 

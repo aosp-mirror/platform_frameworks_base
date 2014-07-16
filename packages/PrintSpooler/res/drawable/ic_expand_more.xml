@@ -20,7 +20,7 @@
     <item
         android:state_checked="true">
         <bitmap
-            android:src="@drawable/ic_expand_more_24dp"
+            android:src="@drawable/ic_expand_more"
             android:tint="?android:attr/colorControlActivated">
         </bitmap>
     </item>
@@ -28,14 +28,14 @@
     <item
         android:state_pressed="true">
         <bitmap
-            android:src="@drawable/ic_expand_more_24dp"
+            android:src="@drawable/ic_expand_more"
             android:tint="?android:attr/colorControlActivated">
         </bitmap>
     </item>
 
     <item>
         <bitmap
-            android:src="@drawable/ic_expand_more_24dp"
+            android:src="@drawable/ic_expand_more"
             android:tint="?android:attr/colorControlNormal">
         </bitmap>
     </item>
