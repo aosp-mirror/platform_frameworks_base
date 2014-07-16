@@ -19,7 +19,7 @@
         android:drawable="@drawable/vector_drawable12" />
     <item android:id="@+id/off"
         android:drawable="@drawable/vector_drawable12" />
-    <transition android:fromId="@+id/off" android:toId="@+id/on">
+    <transition android:fromId="@+id/off" android:toId="@+id/on" android:reversible="true">
         <animated-vector android:drawable="@drawable/vector_drawable12">
             <target
                 android:name="pie1"

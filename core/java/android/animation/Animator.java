@@ -356,6 +356,22 @@ public abstract class Animator implements Cloneable {
     public void setTarget(Object target) {
     }
 
+    // Hide reverse() and canReverse() for now since reverse() only work for simple
+    // cases, like we don't support sequential, neither startDelay.
+    // TODO: make reverse() works for all the Animators.
+    /**
+     * @hide
+     */
+    public boolean canReverse() {
+        return false;
+    }
+
+    /**
+     * @hide
+     */
+    public void reverse() {
+    }
+
     /**
      * <p>An animation listener receives notifications from an animation.
      * Notifications indicate animation related events, such as the end or the

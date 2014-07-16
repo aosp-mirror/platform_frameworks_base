@@ -1038,6 +1038,7 @@ public class ValueAnimator extends Animator {
      * play backwards. This behavior is only set for the current animation; future playing
      * of the animation will use the default behavior of playing forward.
      */
+    @Override
     public void reverse() {
         mPlayingBackwards = !mPlayingBackwards;
         if (mPlayingState == RUNNING) {
@@ -1050,6 +1051,14 @@ public class ValueAnimator extends Animator {
         } else {
             start(true);
         }
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public boolean canReverse() {
+        return true;
     }
 
     /**
