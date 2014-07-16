@@ -17,11 +17,24 @@
 package android.content;
 
 import android.app.admin.DevicePolicyManager;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.res.TypedArray;
+import android.content.res.XmlResourceParser;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Xml;
 
-import java.util.Collections;
+import com.android.internal.R;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -49,19 +62,52 @@ import java.util.List;
  * <p>
  * The syntax of the XML format is as follows:
  * <pre>
- * &lt;restrictions&gt;
+ * &lt;?xml version="1.0" encoding="utf-8"?&gt;
+ * &lt;restrictions xmlns:android="http://schemas.android.com/apk/res/android" &gt;
  *     &lt;restriction
- *         android:key="&lt;key&gt;"
- *         android:restrictionType="boolean|string|integer|multi-select|null"
- *         ... /&gt;
+ *         android:key="string"
+ *         android:title="string resource"
+ *         android:restrictionType=["bool" | "string" | "integer"
+ *                                         | "choice" | "multi-select" | "hidden"]
+ *         android:description="string resource"
+ *         android:entries="string-array resource"
+ *         android:entryValues="string-array resource"
+ *         android:defaultValue="reference"
+ *         /&gt;
  *     &lt;restriction ... /&gt;
+ *     ...
  * &lt;/restrictions&gt;
  * </pre>
  * <p>
  * The attributes for each restriction depend on the restriction type.
+ * <p>
+ * <ul>
+ * <li><code>key</code>, <code>title</code> and <code>restrictionType</code> are mandatory.</li>
+ * <li><code>entries</code> and <code>entryValues</code> are required if <code>restrictionType
+ * </code> is <code>choice</code> or <code>multi-select</code>.</li>
+ * <li><code>defaultValue</code> is optional and its type depends on the
+ * <code>restrictionType</code></li>
+ * <li><code>hidden</code> type must have a <code>defaultValue</code> and will
+ * not be shown to the administrator. It can be used to pass along data that cannot be modified,
+ * such as a version code.</li>
+ * <li><code>description</code> is meant to describe the restriction in more detail to the
+ * administrator controlling the values, if the title is not sufficient.</li>
+ * </ul>
+ * <p>
+ * In your manifest's <code>application</code> section, add the meta-data tag to point to
+ * the restrictions XML file as shown below:
+ * <pre>
+ * &lt;application ... &gt;
+ *     &lt;meta-data android:name="android.content.APP_RESTRICTIONS"
+ *                   android:resource="@xml/app_restrictions" /&gt;
+ *     ...
+ * &lt;/application&gt;
+ * </pre>
  *
  * @see RestrictionEntry
  * @see AbstractRestrictionsProvider
+ * @see DevicePolicyManager#setRestrictionsProvider(ComponentName, ComponentName)
+ * @see DevicePolicyManager#setApplicationRestrictions(ComponentName, String, Bundle)
  */
 public class RestrictionsManager {
 
@@ -231,8 +277,9 @@ public class RestrictionsManager {
     public static final String REQUEST_KEY_NEW_REQUEST = "android.request.new_request";
 
     /**
-     * Key for the response in the response bundle sent to the application, for a permission
-     * request.
+     * Key for the response result in the response bundle sent to the application, for a permission
+     * request. It indicates the status of the request. In some cases an additional message might
+     * be available in {@link #RESPONSE_KEY_MESSAGE}, to be displayed to the user.
      * <p>
      * Type: int
      * <p>
@@ -267,7 +314,7 @@ public class RestrictionsManager {
      * Response result value indicating an error condition. Additional error code might be available
      * in the response bundle, for the key {@link #RESPONSE_KEY_ERROR_CODE}. There might also be
      * an associated error message in the response bundle, for the key
-     * {@link #RESPONSE_KEY_ERROR_MESSAGE}.
+     * {@link #RESPONSE_KEY_MESSAGE}.
      */
     public static final int RESULT_ERROR = 5;
 
@@ -303,11 +350,11 @@ public class RestrictionsManager {
     public static final String RESPONSE_KEY_ERROR_CODE = "android.response.errorcode";
 
     /**
-     * Key for the optional error message in the response bundle sent to the application.
+     * Key for the optional message in the response bundle sent to the application.
      * <p>
      * Type: String
      */
-    public static final String RESPONSE_KEY_ERROR_MESSAGE = "android.response.errormsg";
+    public static final String RESPONSE_KEY_MESSAGE = "android.response.msg";
 
     /**
      * Key for the optional timestamp of when the administrator responded to the permission
@@ -316,6 +363,15 @@ public class RestrictionsManager {
      * Type: long
      */
     public static final String RESPONSE_KEY_RESPONSE_TIMESTAMP = "android.response.timestamp";
+
+    /**
+     * Name of the meta-data entry in the manifest that points to the XML file containing the
+     * application's available restrictions.
+     * @see #getManifestRestrictions(String)
+     */
+    public static final String META_DATA_APP_RESTRICTIONS = "android.content.APP_RESTRICTIONS";
+
+    private static final String TAG_RESTRICTION = "restriction";
 
     private final Context mContext;
     private final IRestrictionsManager mService;
@@ -436,7 +492,118 @@ public class RestrictionsManager {
      * in the manifest, or null if none was specified.
      */
     public List<RestrictionEntry> getManifestRestrictions(String packageName) {
-        // TODO:
-        return null;
+        ApplicationInfo appInfo = null;
+        try {
+            appInfo = mContext.getPackageManager().getApplicationInfo(packageName,
+                    PackageManager.GET_META_DATA);
+        } catch (NameNotFoundException pnfe) {
+            throw new IllegalArgumentException("No such package " + packageName);
+        }
+        if (appInfo == null || !appInfo.metaData.containsKey(META_DATA_APP_RESTRICTIONS)) {
+            return null;
+        }
+
+        XmlResourceParser xml =
+                appInfo.loadXmlMetaData(mContext.getPackageManager(), META_DATA_APP_RESTRICTIONS);
+        List<RestrictionEntry> restrictions = loadManifestRestrictions(packageName, xml);
+
+        return restrictions;
+    }
+
+    private List<RestrictionEntry> loadManifestRestrictions(String packageName,
+            XmlResourceParser xml) {
+        Context appContext;
+        try {
+            appContext = mContext.createPackageContext(packageName, 0 /* flags */);
+        } catch (NameNotFoundException nnfe) {
+            return null;
+        }
+        ArrayList<RestrictionEntry> restrictions = new ArrayList<RestrictionEntry>();
+        RestrictionEntry restriction;
+
+        try {
+            int tagType = xml.next();
+            while (tagType != XmlPullParser.END_DOCUMENT) {
+                if (tagType == XmlPullParser.START_TAG) {
+                    if (xml.getName().equals(TAG_RESTRICTION)) {
+                        AttributeSet attrSet = Xml.asAttributeSet(xml);
+                        if (attrSet != null) {
+                            TypedArray a = appContext.obtainStyledAttributes(attrSet,
+                                    com.android.internal.R.styleable.RestrictionEntry);
+                            restriction = loadRestriction(appContext, a);
+                            if (restriction != null) {
+                                restrictions.add(restriction);
+                            }
+                        }
+                    }
+                }
+                tagType = xml.next();
+            }
+        } catch (XmlPullParserException e) {
+            Log.w(TAG, "Reading restriction metadata for " + packageName, e);
+            return null;
+        } catch (IOException e) {
+            Log.w(TAG, "Reading restriction metadata for " + packageName, e);
+            return null;
+        }
+
+        return restrictions;
+    }
+
+    private RestrictionEntry loadRestriction(Context appContext, TypedArray a) {
+        String key = a.getString(R.styleable.RestrictionEntry_key);
+        int restrictionType = a.getInt(
+                R.styleable.RestrictionEntry_restrictionType, -1);
+        String title = a.getString(R.styleable.RestrictionEntry_title);
+        String description = a.getString(R.styleable.RestrictionEntry_description);
+        int entries = a.getResourceId(R.styleable.RestrictionEntry_entries, 0);
+        int entryValues = a.getResourceId(R.styleable.RestrictionEntry_entryValues, 0);
+
+        if (restrictionType == -1) {
+            Log.w(TAG, "restrictionType cannot be omitted");
+            return null;
+        }
+
+        if (key == null) {
+            Log.w(TAG, "key cannot be omitted");
+            return null;
+        }
+
+        RestrictionEntry restriction = new RestrictionEntry(restrictionType, key);
+        restriction.setTitle(title);
+        restriction.setDescription(description);
+        if (entries != 0) {
+            restriction.setChoiceEntries(appContext, entries);
+        }
+        if (entryValues != 0) {
+            restriction.setChoiceValues(appContext, entryValues);
+        }
+        // Extract the default value based on the type
+        switch (restrictionType) {
+            case RestrictionEntry.TYPE_NULL: // hidden
+            case RestrictionEntry.TYPE_STRING:
+            case RestrictionEntry.TYPE_CHOICE:
+                restriction.setSelectedString(
+                        a.getString(R.styleable.RestrictionEntry_defaultValue));
+                break;
+            case RestrictionEntry.TYPE_INTEGER:
+                restriction.setIntValue(
+                        a.getInt(R.styleable.RestrictionEntry_defaultValue, 0));
+                break;
+            case RestrictionEntry.TYPE_MULTI_SELECT:
+                int resId = a.getResourceId(R.styleable.RestrictionEntry_defaultValue, 0);
+                if (resId != 0) {
+                    restriction.setAllSelectedStrings(
+                            appContext.getResources().getStringArray(resId));
+                }
+                break;
+            case RestrictionEntry.TYPE_BOOLEAN:
+                restriction.setSelectedState(
+                        a.getBoolean(R.styleable.RestrictionEntry_defaultValue, false));
+                break;
+            default:
+                Log.w(TAG, "Unknown restriction type " + restrictionType);
+        }
+        return restriction;
     }
 }
