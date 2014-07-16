@@ -32,7 +32,6 @@ import android.service.notification.Condition;
 import android.service.notification.ZenModeConfig;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.animation.AnimationUtils;
@@ -54,8 +53,11 @@ public class ZenModePanel extends LinearLayout {
     private static final String TAG = "ZenModePanel";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
+    private static final int SECONDS_MS = 1000;
+    private static final int MINUTES_MS = 60 * SECONDS_MS;
+
     private static final int[] MINUTE_BUCKETS = DEBUG
-            ? new int[] { 1, 2, 5, 15, 30, 45, 60, 120, 180, 240, 480 }
+            ? new int[] { 0, 1, 2, 5, 15, 30, 45, 60, 120, 180, 240, 480 }
             : new int[] { 15, 30, 45, 60, 120, 180, 240, 480 };
     private static final int MIN_BUCKET_MINUTES = MINUTE_BUCKETS[0];
     private static final int MAX_BUCKET_MINUTES = MINUTE_BUCKETS[MINUTE_BUCKETS.length - 1];
@@ -64,9 +66,7 @@ public class ZenModePanel extends LinearLayout {
     private static final int TIME_CONDITION_INDEX = 1;
     private static final int FIRST_CONDITION_INDEX = 2;
     private static final float SILENT_HINT_PULSE_SCALE = 1.1f;
-
-    private static final int SECONDS_MS = 1000;
-    private static final int MINUTES_MS = 60 * SECONDS_MS;
+    private static final int ZERO_VALUE_MS = 20 * SECONDS_MS;
 
     public static final Intent ZEN_SETTINGS = new Intent(Settings.ACTION_ZEN_MODE_SETTINGS);
 
@@ -152,6 +152,7 @@ public class ZenModePanel extends LinearLayout {
         if (DEBUG) Log.d(mTag, "onAttachedToWindow");
         mAttachedZen = getSelectedZen(-1);
         refreshExitConditionText();
+        updateWidgets();
     }
 
     @Override
@@ -292,7 +293,8 @@ public class ZenModePanel extends LinearLayout {
 
     private Condition newTimeCondition(int minutesFromNow) {
         final long now = System.currentTimeMillis();
-        return timeCondition(now + minutesFromNow * MINUTES_MS, minutesFromNow);
+        final long millis = minutesFromNow == 0 ? ZERO_VALUE_MS : minutesFromNow * MINUTES_MS;
+        return timeCondition(now + millis, minutesFromNow);
     }
 
     private Condition timeCondition(long time, int minutes) {
@@ -369,6 +371,9 @@ public class ZenModePanel extends LinearLayout {
         }
         tag.conditionId = condition != null ? condition.id : null;
         tag.rb.setEnabled(enabled);
+        if (Objects.equals(tag.conditionId, mExitConditionId)) {
+            tag.rb.setChecked(true);
+        }
         tag.rb.setOnCheckedChangeListener(new OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {

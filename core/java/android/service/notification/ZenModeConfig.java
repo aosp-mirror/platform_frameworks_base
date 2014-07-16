@@ -76,6 +76,7 @@ public class ZenModeConfig implements Parcelable {
 
     private static final String EXIT_CONDITION_TAG = "exitCondition";
     private static final String EXIT_CONDITION_ATT_ID = "id";
+    private static final String EXIT_CONDITION_ATT_COMPONENT = "component";
 
     public boolean allowCalls;
     public boolean allowMessages;
@@ -89,6 +90,7 @@ public class ZenModeConfig implements Parcelable {
     public ComponentName[] conditionComponents;
     public Uri[] conditionIds;
     public Uri exitConditionId;
+    public ComponentName exitConditionComponent;
 
     public ZenModeConfig() { }
 
@@ -114,6 +116,7 @@ public class ZenModeConfig implements Parcelable {
         }
         allowFrom = source.readInt();
         exitConditionId = source.readParcelable(null);
+        exitConditionComponent = source.readParcelable(null);
     }
 
     @Override
@@ -144,6 +147,7 @@ public class ZenModeConfig implements Parcelable {
         }
         dest.writeInt(allowFrom);
         dest.writeParcelable(exitConditionId, 0);
+        dest.writeParcelable(exitConditionComponent, 0);
     }
 
     @Override
@@ -160,6 +164,7 @@ public class ZenModeConfig implements Parcelable {
             .append(",conditionIds=")
             .append(conditionIds == null ? null : TextUtils.join(",", conditionIds))
             .append(",exitConditionId=").append(exitConditionId)
+            .append(",exitConditionComponent=").append(exitConditionComponent)
             .append(']').toString();
     }
 
@@ -191,7 +196,8 @@ public class ZenModeConfig implements Parcelable {
                 && other.sleepEndMinute == sleepEndMinute
                 && Objects.deepEquals(other.conditionComponents, conditionComponents)
                 && Objects.deepEquals(other.conditionIds, conditionIds)
-                && Objects.equals(other.exitConditionId, exitConditionId);
+                && Objects.equals(other.exitConditionId, exitConditionId)
+                && Objects.equals(other.exitConditionComponent, exitConditionComponent);
     }
 
     @Override
@@ -199,7 +205,7 @@ public class ZenModeConfig implements Parcelable {
         return Objects.hash(allowCalls, allowMessages, allowFrom, sleepMode,
                 sleepStartHour, sleepStartMinute, sleepEndHour, sleepEndMinute,
                 Arrays.hashCode(conditionComponents), Arrays.hashCode(conditionIds),
-                exitConditionId);
+                exitConditionId, exitConditionComponent);
     }
 
     public boolean isValid() {
@@ -289,6 +295,8 @@ public class ZenModeConfig implements Parcelable {
                     }
                 } else if (EXIT_CONDITION_TAG.equals(tag)) {
                     rt.exitConditionId = safeUri(parser, EXIT_CONDITION_ATT_ID);
+                    rt.exitConditionComponent =
+                            safeComponentName(parser, EXIT_CONDITION_ATT_COMPONENT);
                 }
             }
         }
@@ -325,9 +333,11 @@ public class ZenModeConfig implements Parcelable {
                 out.endTag(null, CONDITION_TAG);
             }
         }
-        if (exitConditionId != null) {
+        if (exitConditionId != null && exitConditionComponent != null) {
             out.startTag(null, EXIT_CONDITION_TAG);
             out.attribute(null, EXIT_CONDITION_ATT_ID, exitConditionId.toString());
+            out.attribute(null, EXIT_CONDITION_ATT_COMPONENT,
+                    exitConditionComponent.flattenToString());
             out.endTag(null, EXIT_CONDITION_TAG);
         }
         out.endTag(null, ZEN_TAG);
