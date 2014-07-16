@@ -931,6 +931,13 @@ status_t generateAndroidManifestForSplit(Bundle* bundle, const sp<AaptAssets>& a
 
     // Build an empty <application> tag (required).
     sp<XMLNode> app = XMLNode::newElement(filename, String16(), String16("application"));
+
+    // Add the 'hasCode' attribute which is never true for resource splits.
+    if (!addTagAttribute(app, RESOURCES_ANDROID_NAMESPACE, "hasCode",
+            "false", true, true)) {
+        return UNKNOWN_ERROR;
+    }
+
     manifest->addChild(app);
     root->addChild(manifest);
 
