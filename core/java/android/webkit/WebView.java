@@ -2471,4 +2471,16 @@ public class WebView extends AbsoluteLayout
         mProvider.getViewDelegate().preDispatchDraw(canvas);
         super.dispatchDraw(canvas);
     }
+
+    @Override
+    public void onStartTemporaryDetach() {
+        super.onStartTemporaryDetach();
+        mProvider.getViewDelegate().onStartTemporaryDetach();
+    }
+
+    @Override
+    public void onFinishTemporaryDetach() {
+        super.onFinishTemporaryDetach();
+        mProvider.getViewDelegate().onFinishTemporaryDetach();
+    }
 }

@@ -360,6 +360,10 @@ public interface WebViewProvider {
         public void setLayerType(int layerType, Paint paint);
 
         public void preDispatchDraw(Canvas canvas);
+
+        public void onStartTemporaryDetach();
+
+        public void onFinishTemporaryDetach();
     }
 
     interface ScrollDelegate {
