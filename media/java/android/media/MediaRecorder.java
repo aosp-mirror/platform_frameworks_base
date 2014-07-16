@@ -160,10 +160,15 @@ public class MediaRecorder
      * {@link MediaRecorder#setAudioSource(int)}.
      */
     public final class AudioSource {
+
+        private AudioSource() {}
+
+        /** @hide */
+        public final static int AUDIO_SOURCE_INVALID = -1;
+
       /* Do not change these values without updating their counterparts
        * in system/core/include/system/audio.h!
        */
-        private AudioSource() {}
 
         /** Default audio source **/
         public static final int DEFAULT = 0;
