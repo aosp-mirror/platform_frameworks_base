@@ -11290,12 +11290,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                        + packageName + " u" + userId);
             return false;
         }
-        retCode = mInstaller.deleteCodeCacheFiles(packageName, userId);
-        if (retCode < 0) {
-            Slog.w(TAG, "Couldn't remove code cache files for package: "
-                       + packageName + " u" + userId);
-            return false;
-        }
         return true;
     }
 
