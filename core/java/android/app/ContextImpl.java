@@ -250,6 +250,8 @@ class ContextImpl extends Context {
     private File mNoBackupFilesDir;
     @GuardedBy("mSync")
     private File mCacheDir;
+    @GuardedBy("mSync")
+    private File mCodeCacheDir;
 
     @GuardedBy("mSync")
     private File[] mExternalObbDirs;
@@ -1051,6 +1053,16 @@ class ContextImpl extends Context {
                 mCacheDir = new File(getDataDirFile(), "cache");
             }
             return createFilesDirLocked(mCacheDir);
+        }
+    }
+
+    @Override
+    public File getCodeCacheDir() {
+        synchronized (mSync) {
+            if (mCodeCacheDir == null) {
+                mCodeCacheDir = new File(getDataDirFile(), "code_cache");
+            }
+            return createFilesDirLocked(mCodeCacheDir);
         }
     }
 
