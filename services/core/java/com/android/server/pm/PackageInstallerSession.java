@@ -65,6 +65,7 @@ import java.util.ArrayList;
 
 public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final String TAG = "PackageInstaller";
+    private static final boolean LOGD = true;
 
     // TODO: enforce INSTALL_ALLOW_TEST
     // TODO: enforce INSTALL_ALLOW_DOWNGRADE
@@ -435,35 +436,25 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      */
     private void spliceExistingFilesIntoStage() throws PackageManagerException {
         final ApplicationInfo app = mPm.getApplicationInfo(mPackageName, 0, userId);
-        final File existingDir = new File(app.getBaseCodePath());
 
-        try {
-            linkTreeIgnoringExisting(existingDir, sessionStageDir);
-        } catch (ErrnoException e) {
-            throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
-                    "Failed to splice into stage");
-        }
-    }
+        int n = 0;
+        final File[] oldFiles = new File(app.getCodePath()).listFiles();
+        if (!ArrayUtils.isEmpty(oldFiles)) {
+            for (File oldFile : oldFiles) {
+                if (!PackageParser.isApkFile(oldFile)) continue;
 
-    /**
-     * Recursively hard link all files from source directory tree to target.
-     * When a file already exists in the target tree, it leaves that file
-     * intact.
-     */
-    private void linkTreeIgnoringExisting(File sourceDir, File targetDir) throws ErrnoException {
-        final File[] sourceContents = sourceDir.listFiles();
-        if (ArrayUtils.isEmpty(sourceContents)) return;
-
-        for (File sourceFile : sourceContents) {
-            final File targetFile = new File(targetDir, sourceFile.getName());
-
-            if (sourceFile.isDirectory()) {
-                targetFile.mkdir();
-                linkTreeIgnoringExisting(sourceFile, targetFile);
-            } else {
-                Libcore.os.link(sourceFile.getAbsolutePath(), targetFile.getAbsolutePath());
+                final File newFile = new File(sessionStageDir, oldFile.getName());
+                try {
+                    Os.link(oldFile.getAbsolutePath(), newFile.getAbsolutePath());
+                    n++;
+                } catch (ErrnoException e) {
+                    throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
+                            "Failed to splice into stage", e);
+                }
             }
         }
+
+        if (LOGD) Slog.d(TAG, "Spliced " + n + " existing APKs into stage");
     }
 
     @Override
