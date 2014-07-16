@@ -1752,6 +1752,16 @@ public class PackageManagerService extends IPackageManager.Stub {
                 mSettings.readDefaultPreferredAppsLPw(this, 0);
             }
 
+            // If this is first boot after an OTA, and a normal boot, then
+            // we need to clear code cache directories.
+            if (!Build.FINGERPRINT.equals(mSettings.mFingerprint) && !onlyCore) {
+                Slog.i(TAG, "Build fingerprint changed; clearing code caches");
+                for (String pkgName : mSettings.mPackages.keySet()) {
+                    deleteCodeCacheDirsLI(pkgName);
+                }
+                mSettings.mFingerprint = Build.FINGERPRINT;
+            }
+
             // All the changes are done during package scanning.
             mSettings.updateInternalDatabaseVersion();
 
@@ -4825,6 +4835,18 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
         }
 
+        return res;
+    }
+
+    private int deleteCodeCacheDirsLI(String packageName) {
+        int[] users = sUserManager.getUserIds();
+        int res = 0;
+        for (int user : users) {
+            int resInner = mInstaller.deleteCodeCacheFiles(packageName, user);
+            if (resInner < 0) {
+                res = resInner;
+            }
+        }
         return res;
     }
 
@@ -9976,6 +9998,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                 perUserInstalled[i] = ps != null ? ps.getInstalled(allUsers[i]) : false;
             }
         }
+
+        // Nuke any cached code
+        deleteCodeCacheDirsLI(pkgName);
+
         boolean sysPkg = (isSystemApp(oldPackage));
         if (sysPkg) {
             replaceSystemPackageLI(oldPackage, pkg, parseFlags, scanMode,
@@ -10122,7 +10148,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 res.removedInfo.args = null;
             }
         }
-        
+
         // Successfully disabled the old package. Now proceed with re-installation
         res.returnCode = PackageManager.INSTALL_SUCCEEDED;
         pkg.applicationInfo.flags |= ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
@@ -11261,6 +11287,12 @@ public class PackageManagerService extends IPackageManager.Stub {
         int retCode = mInstaller.deleteCacheFiles(packageName, userId);
         if (retCode < 0) {
             Slog.w(TAG, "Couldn't remove cache files for package: "
+                       + packageName + " u" + userId);
+            return false;
+        }
+        retCode = mInstaller.deleteCodeCacheFiles(packageName, userId);
+        if (retCode < 0) {
+            Slog.w(TAG, "Couldn't remove code cache files for package: "
                        + packageName + " u" + userId);
             return false;
         }

@@ -7062,6 +7062,7 @@ package android.content {
     method public abstract android.content.res.AssetManager getAssets();
     method public abstract java.io.File getCacheDir();
     method public abstract java.lang.ClassLoader getClassLoader();
+    method public abstract java.io.File getCodeCacheDir();
     method public abstract android.content.ContentResolver getContentResolver();
     method public abstract java.io.File getDatabasePath(java.lang.String);
     method public abstract java.io.File getDir(java.lang.String, int);
@@ -7233,6 +7234,7 @@ package android.content {
     method public android.content.Context getBaseContext();
     method public java.io.File getCacheDir();
     method public java.lang.ClassLoader getClassLoader();
+    method public java.io.File getCodeCacheDir();
     method public android.content.ContentResolver getContentResolver();
     method public java.io.File getDatabasePath(java.lang.String);
     method public java.io.File getDir(java.lang.String, int);
@@ -29374,6 +29376,7 @@ package android.test.mock {
     method public android.content.res.AssetManager getAssets();
     method public java.io.File getCacheDir();
     method public java.lang.ClassLoader getClassLoader();
+    method public java.io.File getCodeCacheDir();
     method public android.content.ContentResolver getContentResolver();
     method public java.io.File getDatabasePath(java.lang.String);
     method public java.io.File getDir(java.lang.String, int);
