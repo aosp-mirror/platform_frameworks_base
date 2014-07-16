@@ -121,8 +121,11 @@ public abstract class ConnectionService extends Service {
         }
 
         @Override
-        public void answer(String callId) {
-            mHandler.obtainMessage(MSG_ANSWER, callId).sendToTarget();
+        public void answer(String callId, int videoState) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = callId;
+            args.arg2 = videoState;
+            mHandler.obtainMessage(MSG_ANSWER, args).sendToTarget();
         }
 
         @Override
@@ -209,9 +212,17 @@ public abstract class ConnectionService extends Service {
                 case MSG_ABORT:
                     abort((String) msg.obj);
                     break;
-                case MSG_ANSWER:
-                    answer((String) msg.obj);
+                case MSG_ANSWER: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    try {
+                        String callId = (String) args.arg1;
+                        int videoState = (int) args.arg2;
+                        answer(callId, videoState);
+                    } finally {
+                        args.recycle();
+                    }
                     break;
+                }
                 case MSG_REJECT:
                     reject((String) msg.obj);
                     break;
@@ -428,9 +439,9 @@ public abstract class ConnectionService extends Service {
         findConnectionForAction(callId, "abort").onAbort();
     }
 
-    private void answer(String callId) {
+    private void answer(String callId, int videoState) {
         Log.d(this, "answer %s", callId);
-        findConnectionForAction(callId, "answer").onAnswer();
+        findConnectionForAction(callId, "answer").onAnswer(videoState);
     }
 
     private void reject(String callId) {

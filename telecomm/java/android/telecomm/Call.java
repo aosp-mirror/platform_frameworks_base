@@ -342,9 +342,10 @@ public final class Call {
 
     /**
      * Instructs this {@link #STATE_RINGING} {@code Call} to answer.
+     * @param videoState The video state in which to answer the call.
      */
-    public void answer() {
-        mInCallAdapter.answerCall(mTelecommCallId);
+    public void answer(int videoState) {
+        mInCallAdapter.answerCall(mTelecommCallId, videoState);
     }
 
     /**
