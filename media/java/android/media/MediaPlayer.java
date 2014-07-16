@@ -378,6 +378,13 @@ import java.lang.ref.WeakReference;
  *     <td>Successful invoke of this method in a valid state does not change
  *         the state. Calling this method in an invalid state transfers the
  *         object to the <em>Error</em> state. </p></td></tr>
+ * <tr><td>setAudioAttributes </p></td>
+ *     <td>{Idle, Initialized, Stopped, Prepared, Started, Paused,
+ *          PlaybackCompleted}</p></td>
+ *     <td>{Error}</p></td>
+ *     <td>Successful invoke of this method does not change the state. In order for the
+ *         target audio attributes type to become effective, this method must be called before
+ *         prepare() or prepareAsync().</p></td></tr>
  * <tr><td>setAudioSessionId </p></td>
  *     <td>{Idle} </p></td>
  *     <td>{Initialized, Prepared, Started, Paused, Stopped, PlaybackCompleted,
@@ -787,6 +794,10 @@ public class MediaPlayer implements SubtitleController.Listener
      * <p>When done with the MediaPlayer, you should call  {@link #release()},
      * to free the resources. If not released, too many MediaPlayer instances will
      * result in an exception.</p>
+     * <p>Note that since {@link #prepare()} is called automatically in this method,
+     * you cannot change the audio stream type (see {@link #setAudioStreamType(int)}), audio
+     * session ID (see {@link #setAudioSessionId(int)}) or audio attributes
+     * (see {@link #setAudioAttributes(AudioAttributes)} of the new MediaPlayer.</p>
      *
      * @param context the Context to use
      * @param uri the Uri from which to get the datasource
@@ -802,6 +813,10 @@ public class MediaPlayer implements SubtitleController.Listener
      * <p>When done with the MediaPlayer, you should call  {@link #release()},
      * to free the resources. If not released, too many MediaPlayer instances will
      * result in an exception.</p>
+     * <p>Note that since {@link #prepare()} is called automatically in this method,
+     * you cannot change the audio stream type (see {@link #setAudioStreamType(int)}), audio
+     * session ID (see {@link #setAudioSessionId(int)}) or audio attributes
+     * (see {@link #setAudioAttributes(AudioAttributes)} of the new MediaPlayer.</p>
      *
      * @param context the Context to use
      * @param uri the Uri from which to get the datasource
@@ -840,6 +855,10 @@ public class MediaPlayer implements SubtitleController.Listener
      * <p>When done with the MediaPlayer, you should call  {@link #release()},
      * to free the resources. If not released, too many MediaPlayer instances will
      * result in an exception.</p>
+     * <p>Note that since {@link #prepare()} is called automatically in this method,
+     * you cannot change the audio stream type (see {@link #setAudioStreamType(int)}), audio
+     * session ID (see {@link #setAudioSessionId(int)}) or audio attributes
+     * (see {@link #setAudioAttributes(AudioAttributes)} of the new MediaPlayer.</p>
      *
      * @param context the Context to use
      * @param resid the raw resource id (<var>R.raw.&lt;something></var>) for
@@ -1454,16 +1473,15 @@ public class MediaPlayer implements SubtitleController.Listener
     private native boolean setParameter(int key, Parcel value);
 
     /**
-     * @hide
-     * CANDIDATE FOR PUBLIC API
-     * Must call this method before prepare() or
-     * prepareAsync() in order for the audio attributes to become effective
-     * thereafter.
+     * Sets the audio attributes for this MediaPlayer.
+     * See {@link AudioAttributes} for how to build and configure an instance of this class.
+     * You must call this method before {@link #prepare()} or {@link #prepareAsync()} in order
+     * for the audio attributes to become effective thereafter.
      * @param attributes a non-null set of audio attributes
      */
     public void setAudioAttributes(AudioAttributes attributes) throws IllegalArgumentException {
         if (attributes == null) {
-            final String msg = "Cannot set audio attributes to null";
+            final String msg = "Cannot set AudioAttributes to null";
             throw new IllegalArgumentException(msg);
         }
         Parcel pattributes = Parcel.obtain();

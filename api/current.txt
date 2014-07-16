@@ -14970,6 +14970,7 @@ package android.media {
     method public void reset();
     method public void seekTo(int) throws java.lang.IllegalStateException;
     method public void selectTrack(int) throws java.lang.IllegalStateException;
+    method public void setAudioAttributes(android.media.AudioAttributes) throws java.lang.IllegalArgumentException;
     method public void setAudioSessionId(int) throws java.lang.IllegalArgumentException, java.lang.IllegalStateException;
     method public void setAudioStreamType(int);
     method public void setAuxEffectSendLevel(float);
