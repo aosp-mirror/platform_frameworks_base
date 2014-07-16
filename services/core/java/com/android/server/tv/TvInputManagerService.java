@@ -816,6 +816,27 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
+        public void dispatchSurfaceChanged(IBinder sessionToken, int format, int width,
+                int height, int userId) {
+            final int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
+                    userId, "dispatchSurfaceChanged");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        getSessionLocked(sessionToken, callingUid, resolvedUserId)
+                                .dispatchSurfaceChanged(format, width, height);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "error in dispatchSurfaceChanged", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
         public void setVolume(IBinder sessionToken, float volume, int userId) {
             final int callingUid = Binder.getCallingUid();
             final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,

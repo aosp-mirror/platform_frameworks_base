@@ -313,6 +313,18 @@ public abstract class TvInputService extends Service {
         public abstract boolean onSetSurface(Surface surface);
 
         /**
+         * Called after any structural changes (format or size) have been made to the
+         * {@link Surface} passed by {@link #onSetSurface}. This method is always called
+         * at least once, after {@link #onSetSurface} with non-null {@link Surface} is called.
+         *
+         * @param format The new PixelFormat of the {@link Surface}.
+         * @param width The new width of the {@link Surface}.
+         * @param height The new height of the {@link Surface}.
+         */
+        public void onSurfaceChanged(int format, int width, int height) {
+        }
+
+        /**
          * Sets the relative stream volume of the current TV input session to handle the change of
          * audio focus by setting.
          *
@@ -523,6 +535,17 @@ public abstract class TvInputService extends Service {
             }
             mSurface = surface;
             // TODO: Handle failure.
+        }
+
+        /**
+         * Calls {@link #onSurfaceChanged}.
+         */
+        void dispatchSurfaceChanged(int format, int width, int height) {
+            if (DEBUG) {
+                Log.d(TAG, "dispatchSurfaceChanged(format=" + format + ", width=" + width
+                        + ", height=" + height + ")");
+            }
+            onSurfaceChanged(format, width, height);
         }
 
         /**

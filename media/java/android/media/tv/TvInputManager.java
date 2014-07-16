@@ -623,6 +623,27 @@ public final class TvInputManager {
         }
 
         /**
+         * Notifies of any structural changes (format or size) of the {@link Surface}
+         * passed by {@link #setSurface}.
+         *
+         * @param format The new PixelFormat of the {@link Surface}.
+         * @param width The new width of the {@link Surface}.
+         * @param height The new height of the {@link Surface}.
+         * @hide
+         */
+        public void dispatchSurfaceChanged(int format, int width, int height) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.dispatchSurfaceChanged(mToken, format, width, height, mUserId);
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        /**
          * Sets the relative stream volume of this session to handle a change of audio focus.
          *
          * @param volume A volume value between 0.0f to 1.0f.

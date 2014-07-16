@@ -75,17 +75,21 @@ public class TvView extends ViewGroup {
     private float mStreamVolume;
     private int mVideoWidth = VIDEO_SIZE_VALUE_UNKNOWN;
     private int mVideoHeight = VIDEO_SIZE_VALUE_UNKNOWN;
+    private boolean mSurfaceChanged;
+    private int mSurfaceFormat;
+    private int mSurfaceWidth;
+    private int mSurfaceHeight;
 
     private final SurfaceHolder.Callback mSurfaceHolderCallback = new SurfaceHolder.Callback() {
         @Override
         public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
             Log.d(TAG, "surfaceChanged(holder=" + holder + ", format=" + format + ", width=" + width
                     + ", height=" + height + ")");
-            if (holder.getSurface() == mSurface) {
-                return;
-            }
-            mSurface = holder.getSurface();
-            setSessionSurface(mSurface);
+            mSurfaceFormat = format;
+            mSurfaceWidth = width;
+            mSurfaceHeight = height;
+            mSurfaceChanged = true;
+            dispatchSurfaceChanged(mSurfaceFormat, mSurfaceWidth, mSurfaceHeight);
         }
 
         @Override
@@ -97,6 +101,7 @@ public class TvView extends ViewGroup {
         @Override
         public void surfaceDestroyed(SurfaceHolder holder) {
             mSurface = null;
+            mSurfaceChanged = false;
             setSessionSurface(null);
         }
     };
@@ -423,6 +428,13 @@ public class TvView extends ViewGroup {
         mSession.setSurface(surface);
     }
 
+    private void dispatchSurfaceChanged(int format, int width, int height) {
+        if (mSession == null) {
+            return;
+        }
+        mSession.dispatchSurfaceChanged(format, width, height);
+    }
+
     private void createSessionOverlayView() {
         if (mSession == null || !isAttachedToWindow()
                 || mOverlayViewCreated) {
@@ -600,6 +612,9 @@ public class TvView extends ViewGroup {
                 // setSessionSurface will be called in surfaceCreated.
                 if (mSurface != null) {
                     setSessionSurface(mSurface);
+                    if (mSurfaceChanged) {
+                        dispatchSurfaceChanged(mSurfaceFormat, mSurfaceWidth, mSurfaceHeight);
+                    }
                 }
                 createSessionOverlayView();
                 mSession.tune(mChannelUri);
@@ -615,9 +630,10 @@ public class TvView extends ViewGroup {
 
         @Override
         public void onSessionReleased(Session session) {
-            if (this == mSessionCallback) {
-                mSessionCallback = null;
+            if (this != mSessionCallback) {
+                return;
             }
+            mSessionCallback = null;
             mSession = null;
             if (mListener != null) {
                 mListener.onError(mInputId, ERROR_TV_INPUT_DISCONNECTED);
@@ -626,6 +642,9 @@ public class TvView extends ViewGroup {
 
         @Override
         public void onChannelRetuned(Session session, Uri channelUri) {
+            if (this != mSessionCallback) {
+                return;
+            }
             if (DEBUG) {
                 Log.d(TAG, "onChannelChangedByTvInput(" + channelUri + ")");
             }
@@ -648,7 +667,11 @@ public class TvView extends ViewGroup {
             }
         }
 
+        @Override
         public void onVideoAvailable(Session session) {
+            if (this != mSessionCallback) {
+                return;
+            }
             if (DEBUG) {
                 Log.d(TAG, "onVideoAvailable()");
             }
@@ -657,7 +680,11 @@ public class TvView extends ViewGroup {
             }
         }
 
+        @Override
         public void onVideoUnavailable(Session session, int reason) {
+            if (this != mSessionCallback) {
+                return;
+            }
             if (DEBUG) {
                 Log.d(TAG, "onVideoUnavailable(" + reason + ")");
             }

@@ -42,6 +42,8 @@ interface ITvInputManager {
     void releaseSession(in IBinder sessionToken, int userId);
 
     void setSurface(in IBinder sessionToken, in Surface surface, int userId);
+    void dispatchSurfaceChanged(in IBinder sessionToken, int format, int width, int height,
+            int userId);
     void setVolume(in IBinder sessionToken, float volume, int userId);
     void tune(in IBinder sessionToken, in Uri channelUri, int userId);
     void setCaptionEnabled(in IBinder sessionToken, boolean enabled, int userId);
