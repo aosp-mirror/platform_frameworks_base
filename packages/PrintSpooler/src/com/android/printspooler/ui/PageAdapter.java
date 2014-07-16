@@ -334,22 +334,22 @@ public final class PageAdapter extends Adapter {
         content.init(provider, mMediaSize, mMinMargins);
 
 
-        CheckBox checkbox = (CheckBox) page.findViewById(R.id.page_selector);
-        checkbox.setTag(myHolder);
+        View selector = page.findViewById(R.id.page_selector);
+        selector.setTag(myHolder);
         if (pageCount > 1) {
-            checkbox.setOnClickListener(mPageClickListener);
-            checkbox.setVisibility(View.VISIBLE);
+            selector.setOnClickListener(mPageClickListener);
+            selector.setVisibility(View.VISIBLE);
         } else {
-            checkbox.setOnClickListener(null);
-            checkbox.setVisibility(View.GONE);
+            selector.setOnClickListener(null);
+            selector.setVisibility(View.GONE);
         }
 
         if (mConfirmedPagesInDocument.indexOfKey(pageInDocument) >= 0) {
-            checkbox.setChecked(true);
+            selector.setSelected(true);
             page.setTranslationZ(mSelectedPageElevation);
             page.setAlpha(mSelectedPageAlpha);
         } else {
-            checkbox.setChecked(false);
+            selector.setSelected(false);
             page.setTranslationZ(mUnselectedPageElevation);
             page.setAlpha(mUnselectedPageAlpha);
         }
@@ -767,15 +767,15 @@ public final class PageAdapter extends Adapter {
             MyViewHolder holder = (MyViewHolder) page.getTag();
             final int pageInAdapter = holder.mPageInAdapter;
             final int pageInDocument = computePageIndexInDocument(pageInAdapter);
-            CheckBox pageSelector = (CheckBox) page.findViewById(R.id.page_selector);
+            View pageSelector = page.findViewById(R.id.page_selector);
             if (mConfirmedPagesInDocument.indexOfKey(pageInDocument) < 0) {
                 mConfirmedPagesInDocument.put(pageInDocument, null);
-                pageSelector.setChecked(true);
+                pageSelector.setSelected(true);
                 page.animate().translationZ(mSelectedPageElevation)
                         .alpha(mSelectedPageAlpha);
             } else {
                 mConfirmedPagesInDocument.remove(pageInDocument);
-                pageSelector.setChecked(false);
+                pageSelector.setSelected(false);
                 page.animate().translationZ(mUnselectedPageElevation)
                         .alpha(mUnselectedPageAlpha);
             }

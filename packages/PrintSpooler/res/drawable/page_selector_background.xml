@@ -15,28 +15,21 @@
 -->
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:autoMirrored="true">
+    android:enterFadeDuration="@android:integer/config_shortAnimTime"
+    android:exitFadeDuration="@android:integer/config_shortAnimTime">
 
     <item
-        android:state_checked="true">
+        android:state_selected="true">
         <bitmap
-            android:src="@drawable/ic_expand_less"
-            android:tint="?android:attr/colorControlActivated">
-        </bitmap>
-    </item>
-
-    <item
-        android:state_pressed="true">
-        <bitmap
-            android:src="@drawable/ic_expand_less"
-            android:tint="?android:attr/colorControlActivated">
+            android:src="@drawable/ic_check_circle"
+            android:tint="@color/promoted_action_background_color">
         </bitmap>
     </item>
 
     <item>
         <bitmap
-            android:src="@drawable/ic_expand_less"
-            android:tint="?android:attr/colorControlNormal">
+            android:src="@drawable/ic_remove_circle"
+            android:tint="@color/promoted_action_background_color">
         </bitmap>
     </item>
 
