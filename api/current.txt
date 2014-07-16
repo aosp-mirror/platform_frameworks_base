@@ -14427,6 +14427,7 @@ package android.media {
     method public final void release();
     method public final void releaseOutputBuffer(int, boolean);
     method public final void releaseOutputBuffer(int, long);
+    method public final void reset();
     method public void setCallback(android.media.MediaCodec.Callback);
     method public final void setParameters(android.os.Bundle);
     method public final void setVideoScalingMode(int);

@@ -56,6 +56,7 @@ struct JMediaCodec : public AHandler {
 
     status_t start();
     status_t stop();
+    status_t reset();
 
     status_t flush();
 
