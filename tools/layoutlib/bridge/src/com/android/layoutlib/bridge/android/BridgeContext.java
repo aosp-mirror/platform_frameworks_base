@@ -1045,6 +1045,12 @@ public final class BridgeContext extends Context {
     }
 
     @Override
+    public File getCodeCacheDir() {
+        // pass
+        return null;
+    }
+
+    @Override
     public File getExternalCacheDir() {
         // pass
         return null;

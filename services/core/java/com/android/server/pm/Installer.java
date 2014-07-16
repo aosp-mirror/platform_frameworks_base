@@ -309,6 +309,15 @@ public final class Installer extends SystemService {
         return execute(builder.toString());
     }
 
+    public int deleteCodeCacheFiles(String name, int userId) {
+        StringBuilder builder = new StringBuilder("rmcodecache");
+        builder.append(' ');
+        builder.append(name);
+        builder.append(' ');
+        builder.append(userId);
+        return execute(builder.toString());
+    }
+
     public int createUserData(String name, int uid, int userId, String seinfo) {
         StringBuilder builder = new StringBuilder("mkuserdata");
         builder.append(' ');

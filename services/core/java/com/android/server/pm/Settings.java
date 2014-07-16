@@ -30,6 +30,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.PatternMatcher;
@@ -183,6 +184,12 @@ final class Settings {
      */
     int mInternalDatabaseVersion;
     int mExternalDatabaseVersion;
+
+    /**
+     * Last known value of {@link Build#FINGERPRINT}. Used to determine when an
+     * system update has occurred, meaning we need to clear code caches.
+     */
+    String mFingerprint;
 
     Boolean mReadExternalStorageEnforced;
 
@@ -1664,6 +1671,7 @@ final class Settings {
             serializer.startTag(null, "last-platform-version");
             serializer.attribute(null, "internal", Integer.toString(mInternalSdkPlatform));
             serializer.attribute(null, "external", Integer.toString(mExternalSdkPlatform));
+            serializer.attribute(null, "fingerprint", mFingerprint);
             serializer.endTag(null, "last-platform-version");
 
             serializer.startTag(null, "database-version");
@@ -2089,6 +2097,7 @@ final class Settings {
                     PackageManagerService.reportSettingsProblem(Log.INFO,
                             "No settings file; creating initial state");
                     mInternalSdkPlatform = mExternalSdkPlatform = sdkVersion;
+                    mFingerprint = Build.FINGERPRINT;
                     return false;
                 }
                 str = new FileInputStream(mSettingsFilename);
@@ -2181,6 +2190,7 @@ final class Settings {
                         }
                     } catch (NumberFormatException e) {
                     }
+                    mFingerprint = parser.getAttributeValue(null, "fingerprint");
                 } else if (tagName.equals("database-version")) {
                     mInternalDatabaseVersion = mExternalDatabaseVersion = 0;
                     try {

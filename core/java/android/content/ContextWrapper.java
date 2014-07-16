@@ -232,6 +232,11 @@ public class ContextWrapper extends Context {
     }
 
     @Override
+    public File getCodeCacheDir() {
+        return mBase.getCodeCacheDir();
+    }
+
+    @Override
     public File getExternalCacheDir() {
         return mBase.getExternalCacheDir();
     }
