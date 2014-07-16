@@ -22,7 +22,8 @@
 
     <application
         android:hardwareAccelerated="true"
-        android:label="vector" >
+        android:label="vector"
+        android:supportsRtl="true" >
         <activity
             android:name="VectorDrawablePerformance"
             android:label="Vector Performance" >
