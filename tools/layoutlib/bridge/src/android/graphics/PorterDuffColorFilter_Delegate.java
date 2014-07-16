@@ -21,11 +21,10 @@ import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 import android.graphics.PorterDuff.Mode;
 
-import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
-import static com.android.layoutlib.bridge.impl.PorterDuffUtility.getAlphaCompositeRule;
+import static com.android.layoutlib.bridge.impl.PorterDuffUtility.getComposite;
 import static com.android.layoutlib.bridge.impl.PorterDuffUtility.getPorterDuffMode;
 
 /**
@@ -57,7 +56,7 @@ public class PorterDuffColorFilter_Delegate extends ColorFilter_Delegate {
 
     @Override
     public boolean isSupported() {
-        return getAlphaCompositeRule(mMode) != -1;
+        return true;
     }
 
     @Override
@@ -68,7 +67,7 @@ public class PorterDuffColorFilter_Delegate extends ColorFilter_Delegate {
     @Override
     public void applyFilter(Graphics2D g, int width, int height) {
         BufferedImage image = createFilterImage(width, height);
-        g.setComposite(getComposite());
+        g.setComposite(getComposite(mMode, 0xFF));
         g.drawImage(image, 0, 0, null);
     }
 
@@ -101,49 +100,36 @@ public class PorterDuffColorFilter_Delegate extends ColorFilter_Delegate {
         return image;
     }
 
-    private AlphaComposite getComposite() {
-        return AlphaComposite.getInstance(getAlphaCompositeRule(mMode));
-    }
-
     // For filtering the colors, the src image should contain the "color" only for pixel values
     // which are not transparent in the target image. But, we are using a simple rectangular image
-    // completely filled with color. Hence some AlphaComposite rules do not apply as intended.
-    // However, in such cases, they can usually be mapped to some other mode, which produces an
+    // completely filled with color. Hence some Composite rules do not apply as intended. However,
+    // in such cases, they can usually be mapped to some other mode, which produces an
     // equivalent result.
     private Mode getCompatibleMode(Mode mode) {
         Mode m = mode;
+        // Modes that are directly supported:
+        // CLEAR, DST, SRC_IN, DST_IN, DST_OUT, SRC_ATOP, DARKEN, LIGHTEN, MULTIPLY, SCREEN,
+        // ADD, OVERLAY
         switch (mode) {
-            // Modes that are directly supported.
-            case CLEAR:
-            case DST:
-            case SRC_IN:
-            case DST_IN:
-            case DST_OUT:
-            case SRC_ATOP:
-                break;
-            // Modes that can be mapped to one of the supported modes.
-            case SRC:
-                m = Mode.SRC_IN;
-                break;
-            case SRC_OVER:
-                m = Mode.SRC_ATOP;
-                break;
-            case DST_OVER:
-                m = Mode.DST;
-                break;
-            case SRC_OUT:
-                m = Mode.CLEAR;
-                break;
-            case DST_ATOP:
-                m = Mode.DST_IN;
-                break;
-            case XOR:
-                m = Mode.DST_OUT;
-                break;
-            // This mode is not supported, but used by Action Bar Overflow Popup Menus. We map this
-            // to the closest supported mode, to prevent showing excessive warnings to the user.
-            case MULTIPLY:
-                m = Mode.SRC_IN;
+        // Modes that can be mapped to one of the supported modes.
+        case SRC:
+            m = Mode.SRC_IN;
+            break;
+        case SRC_OVER:
+            m = Mode.SRC_ATOP;
+            break;
+        case DST_OVER:
+            m = Mode.DST;
+            break;
+        case SRC_OUT:
+            m = Mode.CLEAR;
+            break;
+        case DST_ATOP:
+            m = Mode.DST_IN;
+            break;
+        case XOR:
+            m = Mode.DST_OUT;
+            break;
         }
         return m;
     }
