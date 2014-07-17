@@ -364,19 +364,19 @@ public abstract class ConnectionService extends Service {
         }
 
         @Override
-        public void onSetCallVideoProvider(Connection c, CallVideoProvider callVideoProvider) {
+        public void onCallVideoProviderChanged(Connection c, CallVideoProvider callVideoProvider) {
             String id = mIdByConnection.get(c);
             mAdapter.setCallVideoProvider(id, callVideoProvider);
         }
 
         @Override
-        public void onSetAudioModeIsVoip(Connection c, boolean isVoip) {
+        public void onAudioModeIsVoipChanged(Connection c, boolean isVoip) {
             String id = mIdByConnection.get(c);
             mAdapter.setAudioModeIsVoip(id, isVoip);
         }
 
         @Override
-        public void onSetStatusHints(Connection c, StatusHints statusHints) {
+        public void onStatusHintsChanged(Connection c, StatusHints statusHints) {
             String id = mIdByConnection.get(c);
             mAdapter.setStatusHints(id, statusHints);
         }
