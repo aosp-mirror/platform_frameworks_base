@@ -31,6 +31,7 @@ import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -40,6 +41,18 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 /** A bitmap load queue */
 class TaskResourceLoadQueue {
     ConcurrentLinkedQueue<Task> mQueue = new ConcurrentLinkedQueue<Task>();
+
+    /** Adds a new task to the load queue */
+    void addTasks(Collection<Task> tasks) {
+        for (Task t : tasks) {
+            if (!mQueue.contains(t)) {
+                mQueue.add(t);
+            }
+        }
+        synchronized(this) {
+            notifyAll();
+        }
+    }
 
     /** Adds a new task to the load queue */
     void addTask(Task t) {
@@ -153,30 +166,30 @@ class TaskResourceLoader implements Runnable {
                 // Load the next item from the queue
                 final Task t = mLoadQueue.nextTask();
                 if (t != null) {
-                    Drawable cachedIcon = mApplicationIconCache.getCheckLastActiveTime(t.key);
-                    Bitmap cachedThumbnail = mThumbnailCache.getCheckLastActiveTime(t.key);
+                    Drawable cachedIcon = mApplicationIconCache.get(t.key);
+                    Bitmap cachedThumbnail = mThumbnailCache.get(t.key);
                     // Load the application icon if it is stale or we haven't cached one yet
                     if (cachedIcon == null) {
-                        Drawable icon = null;
                         ActivityInfo info = ssp.getActivityInfo(t.key.baseIntent.getComponent(),
                                 t.userId);
                         if (info != null) {
-                            icon = ssp.getActivityIcon(info, t.userId);
+                            cachedIcon = ssp.getActivityIcon(info, t.userId);
                         }
-                        // If we can't load the icon, then set the default application icon into the
-                        // cache.  This will remain until the task's last active time is updated.
-                        cachedIcon = icon != null ? icon : mDefaultApplicationIcon;
+                        if (cachedIcon == null) {
+                            cachedIcon = mDefaultApplicationIcon;
+                        }
+                        // At this point, even if we can't load the icon, we will set the default
+                        // icon.
                         mApplicationIconCache.put(t.key, cachedIcon);
                     }
                     // Load the thumbnail if it is stale or we haven't cached one yet
                     if (cachedThumbnail == null) {
-                        Bitmap thumbnail = ssp.getTaskThumbnail(t.key.id);
-                        if (thumbnail != null) {
-                            thumbnail.setHasAlpha(false);
+                        cachedThumbnail = ssp.getTaskThumbnail(t.key.id);
+                        if (cachedThumbnail != null) {
+                            cachedThumbnail.setHasAlpha(false);
+                        } else {
+                            cachedThumbnail = mDefaultThumbnail;
                         }
-                        // Even if we can't load the icon, we set the default thumbnail into the
-                        // cache.  This will remain until the task's last active time is updated.
-                        cachedThumbnail = thumbnail != null ? thumbnail : mDefaultThumbnail;
                         mThumbnailCache.put(t.key, cachedThumbnail);
                     }
                     if (!mCancelled) {
@@ -281,11 +294,11 @@ public class RecentsTaskLoader {
         return mSystemServicesProxy;
     }
 
+    /** Gets the list of recent tasks, ordered from back to front. */
     private static List<ActivityManager.RecentTaskInfo> getRecentTasks(SystemServicesProxy ssp) {
         List<ActivityManager.RecentTaskInfo> tasks =
                 ssp.getRecentTasks(50, UserHandle.CURRENT.getIdentifier());
         Collections.reverse(tasks);
-
         return tasks;
     }
 
@@ -302,7 +315,7 @@ public class RecentsTaskLoader {
         SystemServicesProxy ssp = mSystemServicesProxy;
         List<ActivityManager.RecentTaskInfo> tasks = getRecentTasks(ssp);
 
-        // Add each task to the task stack
+        // From back to front, add each task to the task stack
         int taskCount = tasks.size();
         for (int i = 0; i < taskCount; i++) {
             ActivityManager.RecentTaskInfo t = tasks.get(i);
@@ -311,7 +324,7 @@ public class RecentsTaskLoader {
 
             ActivityManager.TaskDescription av = t.taskDescription;
             String activityLabel = null;
-            Drawable activityIcon = null;
+            Drawable activityIcon = mDefaultApplicationIcon;
             int activityColor = config.taskBarViewDefaultBackgroundColor;
             if (av != null) {
                 activityLabel = (av.getLabel() != null ? av.getLabel() : ssp.getActivityLabel(info));
@@ -323,7 +336,6 @@ public class RecentsTaskLoader {
             } else {
                 activityLabel = ssp.getActivityLabel(info);
             }
-            boolean isForemostTask = (i == (taskCount - 1));
 
             // Create a new task
             Task task = new Task(t.persistentId, (t.id > -1), t.baseIntent, t.affiliatedTaskId,
@@ -333,43 +345,34 @@ public class RecentsTaskLoader {
             // Preload the specified number of apps
             if (i >= (taskCount - preloadCount)) {
                 // Load the icon from the cache if possible
-                task.applicationIcon = mApplicationIconCache.getCheckLastActiveTime(task.key);
+                task.applicationIcon = mApplicationIconCache.getAndInvalidateIfModified(task.key);
                 if (task.applicationIcon == null) {
-                    if (isForemostTask) {
-                        // We force loading the application icon for the foremost task
-                        task.applicationIcon = ssp.getActivityIcon(info, task.userId);
-                        if (task.applicationIcon == null) {
-                            task.applicationIcon = mDefaultApplicationIcon;
-                        }
-                        // Even if we can't load the icon we set the default application icon into
-                        // the cache.  This will remain until the task's last active time is updated.
+                    // Load the icon from the system
+                    task.applicationIcon = ssp.getActivityIcon(info, task.userId);
+                    if (task.applicationIcon != null) {
                         mApplicationIconCache.put(task.key, task.applicationIcon);
-                    } else {
-                        // Either the task has changed since the last active time, or it was not
-                        // previously cached, so try and load the task anew.
-                        tasksToLoad.add(task);
                     }
                 }
+                if (task.applicationIcon == null) {
+                    // Either the task has changed since the last active time, or it was not
+                    // previously cached, so try and load the task anew.
+                    tasksToLoad.add(task);
+                }
 
-                // Load the thumbnail (if possible and not the foremost task, from the cache)
-                task.thumbnail = mThumbnailCache.getCheckLastActiveTime(task.key);
+                // Load the thumbnail from the cache if possible
+                task.thumbnail = mThumbnailCache.getAndInvalidateIfModified(task.key);
                 if (task.thumbnail == null) {
-                    if (isForemostTask) {
-                        // We force loading the thumbnail icon for the foremost task
-                        task.thumbnail = ssp.getTaskThumbnail(task.key.id);
-                        if (task.thumbnail != null) {
-                            task.thumbnail.setHasAlpha(false);
-                        } else {
-                            task.thumbnail = mDefaultThumbnail;
-                        }
-                        // Even if we can't load the thumbnail we set the default thumbnail into
-                        // the cache.  This will remain until the task's last active time is updated.
+                    // Load the thumbnail from the system
+                    task.thumbnail = ssp.getTaskThumbnail(task.key.id);
+                    if (task.thumbnail != null) {
+                        task.thumbnail.setHasAlpha(false);
                         mThumbnailCache.put(task.key, task.thumbnail);
-                    } else {
-                        // Either the task has changed since the last active time, or it was not
-                        // previously cached, so try and load the task anew.
-                        tasksToLoad.add(task);
                     }
+                }
+                if (task.thumbnail == null) {
+                    // Either the task has changed since the last active time, or it was not
+                    // previously cached, so try and load the task anew.
+                    tasksToLoad.add(task);
                 }
             }
 
@@ -380,13 +383,9 @@ public class RecentsTaskLoader {
         // Simulate the groupings that we describe
         stack.createAffiliatedGroupings();
 
-        // Start the task loader
+        // Start the task loader and add all the tasks we need to load
         mLoader.start(context);
-
-        // Add all the tasks that we are reloading
-        for (Task t : tasksToLoad) {
-            mLoadQueue.addTask(t);
-        }
+        mLoadQueue.addTasks(tasksToLoad);
 
         // Update the package monitor with the list of packages to listen for
         mPackageMonitor.setTasks(tasks);
@@ -414,18 +413,14 @@ public class RecentsTaskLoader {
 
     /** Acquires the task resource data directly from the pool. */
     public void loadTaskData(Task t) {
-        Drawable applicationIcon = mApplicationIconCache.get(t.key);
-        Bitmap thumbnail = mThumbnailCache.get(t.key);
+        Drawable applicationIcon = mApplicationIconCache.getAndInvalidateIfModified(t.key);
+        Bitmap thumbnail = mThumbnailCache.getAndInvalidateIfModified(t.key);
 
-        boolean requiresLoad = false;
-        if (applicationIcon == null) {
-            applicationIcon = mDefaultApplicationIcon;
-            requiresLoad = true;
-        }
-        if (thumbnail == null) {
-            thumbnail = mLoadingThumbnail;
-            requiresLoad = true;
-        }
+        // Grab the thumbnail/icon from the cache, if either don't exist, then trigger a reload and
+        // use the default assets in their place until they load
+        boolean requiresLoad = (applicationIcon == null) || (thumbnail == null);
+        applicationIcon = applicationIcon != null ? applicationIcon : mDefaultApplicationIcon;
+        thumbnail = thumbnail != null ? thumbnail : mDefaultThumbnail;
         if (requiresLoad) {
             mLoadQueue.addTask(t);
         }
