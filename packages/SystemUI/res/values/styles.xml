@@ -154,7 +154,7 @@
 
     <style name="TextAppearance.QS">
         <item name="android:textStyle">normal</item>
-        <item name="android:textColor">#ffffff</item>
+        <item name="android:textColor">@color/qs_text</item>
         <item name="android:fontFamily">sans-serif</item>
     </style>
 
