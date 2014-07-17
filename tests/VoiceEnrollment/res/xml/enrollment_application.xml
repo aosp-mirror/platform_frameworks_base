@@ -20,4 +20,5 @@
 <voice-enrollment-application xmlns:android="http://schemas.android.com/apk/res/android"
     android:searchKeyphraseId="101"
     android:searchKeyphrase="Hello There"
-    android:searchKeyphraseSupportedLocales="en-US,en-GB,fr-FR,de-DE" />
+    android:searchKeyphraseSupportedLocales="en-US,en-GB,fr-FR,de-DE"
+    android:searchKeyphraseRecognitionFlags="voiceTrigger" />

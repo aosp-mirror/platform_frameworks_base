@@ -27,34 +27,36 @@ public class KeyphraseMetadata {
     public final int id;
     public final String keyphrase;
     public final ArraySet<String> supportedLocales;
+    public final int recognitionModeFlags;
 
-    public KeyphraseMetadata(int id, String keyphrase, String[] supportedLocales) {
+    public KeyphraseMetadata(int id, String keyphrase, String[] supportedLocales,
+            int recognitionModeFlags) {
         this.id = id;
         this.keyphrase = keyphrase;
         this.supportedLocales = new ArraySet<String>(supportedLocales.length);
         for (String locale : supportedLocales) {
             this.supportedLocales.add(locale);
         }
+        this.recognitionModeFlags = recognitionModeFlags;
     }
 
     @Override
     public String toString() {
-        return "id=" + id + ", keyphrase=" + keyphrase + ", supported-locales=" + supportedLocales;
+        return "id=" + id + ", keyphrase=" + keyphrase + ", supported-locales=" + supportedLocales
+                + ", recognition-modes=" + recognitionModeFlags;
     }
 
     /**
      * @return Indicates if we support the given phrase.
      */
     public boolean supportsPhrase(String phrase) {
-        // TODO(sansid): Come up with a scheme for custom keyphrases that should always match.
-        return keyphrase.equalsIgnoreCase(phrase);
+        return keyphrase.isEmpty() || keyphrase.equalsIgnoreCase(phrase);
     }
 
     /**
      * @return Indicates if we support the given locale.
      */
     public boolean supportsLocale(String locale) {
-        // TODO(sansid): Come up with a scheme for keyphrases that are available in all locales.
-        return supportedLocales.contains(locale);
+        return supportedLocales.isEmpty() || supportedLocales.contains(locale);
     }
 }
