@@ -89,7 +89,7 @@ public class UserDetailView extends GridView {
                 name = item.info.name;
             }
             if (item.picture == null) {
-                v.bind(name, mContext.getDrawable(R.drawable.ic_account_circle));
+                v.bind(name, mContext.getDrawable(R.drawable.ic_account_circle_qs));
             } else {
                 v.bind(name, item.picture);
             }
