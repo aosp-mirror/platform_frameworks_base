@@ -411,7 +411,7 @@ public final class SystemServer {
             SystemConfig.getInstance();
 
             Slog.i(TAG, "WebView Update Service");
-            ServiceManager.addService("webviewupdate", new WebViewUpdateService());
+            ServiceManager.addService("webviewupdate", new WebViewUpdateService(context));
 
             Slog.i(TAG, "WebViewFactory preparation");
             WebViewFactory.prepareWebViewInSystemServer();
