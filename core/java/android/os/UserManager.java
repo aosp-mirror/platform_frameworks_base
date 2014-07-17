@@ -138,7 +138,8 @@ public class UserManager {
     public static final String DISALLOW_CONFIG_CREDENTIALS = "no_config_credentials";
 
     /**
-     * Key for user restrictions. Specifies if a user is disallowed from removing users.
+     * Key for user restrictions. Specifies if a user is disallowed from removing itself and other
+     * users.
      * The default value is <code>false</code>.
      * <p/>
      * Type: Boolean
