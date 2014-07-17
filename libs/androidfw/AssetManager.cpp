@@ -231,6 +231,10 @@ bool AssetManager::addAssetPath(const String8& path, int32_t* cookie)
     }
 #endif
 
+    if (mResources != NULL) {
+        appendPathToResTable(ap);
+    }
+
     return true;
 }
 
@@ -596,6 +600,96 @@ FileType AssetManager::getFileType(const char* fileName)
         return kFileTypeRegular;
 }
 
+bool AssetManager::appendPathToResTable(const asset_path& ap) const {
+    Asset* ass = NULL;
+    ResTable* sharedRes = NULL;
+    bool shared = true;
+    bool onlyEmptyResources = true;
+    MY_TRACE_BEGIN(ap.path.string());
+    Asset* idmap = openIdmapLocked(ap);
+    size_t nextEntryIdx = mResources->getTableCount();
+    ALOGV("Looking for resource asset in '%s'\n", ap.path.string());
+    if (ap.type != kFileTypeDirectory) {
+        if (nextEntryIdx == 0) {
+            // The first item is typically the framework resources,
+            // which we want to avoid parsing every time.
+            sharedRes = const_cast<AssetManager*>(this)->
+                mZipSet.getZipResourceTable(ap.path);
+            if (sharedRes != NULL) {
+                // skip ahead the number of system overlay packages preloaded
+                nextEntryIdx = sharedRes->getTableCount();
+            }
+        }
+        if (sharedRes == NULL) {
+            ass = const_cast<AssetManager*>(this)->
+                mZipSet.getZipResourceTableAsset(ap.path);
+            if (ass == NULL) {
+                ALOGV("loading resource table %s\n", ap.path.string());
+                ass = const_cast<AssetManager*>(this)->
+                    openNonAssetInPathLocked("resources.arsc",
+                                             Asset::ACCESS_BUFFER,
+                                             ap);
+                if (ass != NULL && ass != kExcludedAsset) {
+                    ass = const_cast<AssetManager*>(this)->
+                        mZipSet.setZipResourceTableAsset(ap.path, ass);
+                }
+            }
+            
+            if (nextEntryIdx == 0 && ass != NULL) {
+                // If this is the first resource table in the asset
+                // manager, then we are going to cache it so that we
+                // can quickly copy it out for others.
+                ALOGV("Creating shared resources for %s", ap.path.string());
+                sharedRes = new ResTable();
+                sharedRes->add(ass, idmap, nextEntryIdx + 1, false);
+#ifdef HAVE_ANDROID_OS
+                const char* data = getenv("ANDROID_DATA");
+                LOG_ALWAYS_FATAL_IF(data == NULL, "ANDROID_DATA not set");
+                String8 overlaysListPath(data);
+                overlaysListPath.appendPath(kResourceCache);
+                overlaysListPath.appendPath("overlays.list");
+                addSystemOverlays(overlaysListPath.string(), ap.path, sharedRes, nextEntryIdx);
+#endif
+                sharedRes = const_cast<AssetManager*>(this)->
+                    mZipSet.setZipResourceTable(ap.path, sharedRes);
+            }
+        }
+    } else {
+        ALOGV("loading resource table %s\n", ap.path.string());
+        ass = const_cast<AssetManager*>(this)->
+            openNonAssetInPathLocked("resources.arsc",
+                                     Asset::ACCESS_BUFFER,
+                                     ap);
+        shared = false;
+    }
+
+    if ((ass != NULL || sharedRes != NULL) && ass != kExcludedAsset) {
+        ALOGV("Installing resource asset %p in to table %p\n", ass, mResources);
+        if (sharedRes != NULL) {
+            ALOGV("Copying existing resources for %s", ap.path.string());
+            mResources->add(sharedRes);
+        } else {
+            ALOGV("Parsing resources for %s", ap.path.string());
+            mResources->add(ass, idmap, nextEntryIdx + 1, !shared);
+        }
+        onlyEmptyResources = false;
+
+        if (!shared) {
+            delete ass;
+        }
+    } else {
+        ALOGV("Installing empty resources in to table %p\n", mResources);
+        mResources->addEmpty(nextEntryIdx + 1);
+    }
+
+    if (idmap != NULL) {
+        delete idmap;
+    }
+    MY_TRACE_END();
+
+    return onlyEmptyResources;
+}
+
 const ResTable* AssetManager::getResTable(bool required) const
 {
     ResTable* rt = mResources;
@@ -625,90 +719,8 @@ const ResTable* AssetManager::getResTable(bool required) const
     bool onlyEmptyResources = true;
     const size_t N = mAssetPaths.size();
     for (size_t i=0; i<N; i++) {
-        Asset* ass = NULL;
-        ResTable* sharedRes = NULL;
-        bool shared = true;
-        const asset_path& ap = mAssetPaths.itemAt(i);
-        MY_TRACE_BEGIN(ap.path.string());
-        Asset* idmap = openIdmapLocked(ap);
-        ALOGV("Looking for resource asset in '%s'\n", ap.path.string());
-        if (ap.type != kFileTypeDirectory) {
-            if (i == 0) {
-                // The first item is typically the framework resources,
-                // which we want to avoid parsing every time.
-                sharedRes = const_cast<AssetManager*>(this)->
-                    mZipSet.getZipResourceTable(ap.path);
-                if (sharedRes != NULL) {
-                    // skip ahead the number of system overlay packages preloaded
-                    i += sharedRes->getTableCount() - 1;
-                }
-            }
-            if (sharedRes == NULL) {
-                ass = const_cast<AssetManager*>(this)->
-                    mZipSet.getZipResourceTableAsset(ap.path);
-                if (ass == NULL) {
-                    ALOGV("loading resource table %s\n", ap.path.string());
-                    ass = const_cast<AssetManager*>(this)->
-                        openNonAssetInPathLocked("resources.arsc",
-                                                 Asset::ACCESS_BUFFER,
-                                                 ap);
-                    if (ass != NULL && ass != kExcludedAsset) {
-                        ass = const_cast<AssetManager*>(this)->
-                            mZipSet.setZipResourceTableAsset(ap.path, ass);
-                    }
-                }
-                
-                if (i == 0 && ass != NULL) {
-                    // If this is the first resource table in the asset
-                    // manager, then we are going to cache it so that we
-                    // can quickly copy it out for others.
-                    ALOGV("Creating shared resources for %s", ap.path.string());
-                    sharedRes = new ResTable();
-                    sharedRes->add(ass, idmap, i + 1, false);
-#ifdef HAVE_ANDROID_OS
-                    const char* data = getenv("ANDROID_DATA");
-                    LOG_ALWAYS_FATAL_IF(data == NULL, "ANDROID_DATA not set");
-                    String8 overlaysListPath(data);
-                    overlaysListPath.appendPath(kResourceCache);
-                    overlaysListPath.appendPath("overlays.list");
-                    addSystemOverlays(overlaysListPath.string(), ap.path, sharedRes, i);
-#endif
-                    sharedRes = const_cast<AssetManager*>(this)->
-                        mZipSet.setZipResourceTable(ap.path, sharedRes);
-                }
-            }
-        } else {
-            ALOGV("loading resource table %s\n", ap.path.string());
-            ass = const_cast<AssetManager*>(this)->
-                openNonAssetInPathLocked("resources.arsc",
-                                         Asset::ACCESS_BUFFER,
-                                         ap);
-            shared = false;
-        }
-
-        if ((ass != NULL || sharedRes != NULL) && ass != kExcludedAsset) {
-            ALOGV("Installing resource asset %p in to table %p\n", ass, mResources);
-            if (sharedRes != NULL) {
-                ALOGV("Copying existing resources for %s", ap.path.string());
-                mResources->add(sharedRes);
-            } else {
-                ALOGV("Parsing resources for %s", ap.path.string());
-                mResources->add(ass, idmap, i + 1, !shared);
-            }
-            onlyEmptyResources = false;
-
-            if (!shared) {
-                delete ass;
-            }
-        } else {
-            ALOGV("Installing empty resources in to table %p\n", mResources);
-            mResources->addEmpty(i + 1);
-        }
-
-        if (idmap != NULL) {
-            delete idmap;
-        }
-        MY_TRACE_END();
+        bool empty = appendPathToResTable(mAssetPaths.itemAt(i));
+        onlyEmptyResources = onlyEmptyResources && empty;
     }
 
     if (required && onlyEmptyResources) {
