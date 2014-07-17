@@ -25,16 +25,21 @@
     <string name="label_paper_size_summary" msgid="5668204981332138168">"ទំហំ​ក្រដាស៖"</string>
     <string name="label_color" msgid="1108690305218188969">"ពណ៌"</string>
     <string name="label_orientation" msgid="2853142581990496477">"ទិស"</string>
-    <string name="label_pages" msgid="6300874667546617333">"ទំព័រ (<xliff:g id="PAGE_COUNT">%1$s</xliff:g>)"</string>
+    <!-- no translation found for label_pages (7768589729282182230) -->
+    <skip />
+    <!-- no translation found for template_all_pages (3322235982020148762) -->
+    <skip />
+    <!-- no translation found for template_page_range (428638530038286328) -->
+    <skip />
     <string name="pages_range_example" msgid="8558694453556945172">"ឧ. 1—5,8,11—13"</string>
     <string name="print_preview" msgid="8010217796057763343">"មើល​មុន​បោះពុម្ព"</string>
     <string name="install_for_print_preview" msgid="6366303997385509332">"ដំឡើង​កម្មវិធី​មើល PDF សម្រាប់​ការ​មើល​ជា​មុន"</string>
     <string name="printing_app_crashed" msgid="854477616686566398">"កម្មវិធី​បោះពុម្ព​គាំង"</string>
-    <string name="page_count_unknown" msgid="6058852665954511124">"ទំព័រ"</string>
     <string name="generating_print_job" msgid="3119608742651698916">"​បង្កើត​ការ​ងារ​បោះពុម្ព"</string>
     <string name="save_as_pdf" msgid="5718454119847596853">"រក្សា​ទុក​ជា PDF"</string>
     <string name="all_printers" msgid="5018829726861876202">"ម៉ាស៊ីន​បោះពុម្ព​ទាំងអស់ ..."</string>
     <string name="print_dialog" msgid="32628687461331979">"ប្រអប់​បោះពុម្ព"</string>
+    <string name="current_page_template" msgid="1386638343571771292">"<xliff:g id="CURRENT_PAGE">%1$d</xliff:g> /<xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
     <string name="search" msgid="5421724265322228497">"ស្វែងរក"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"ម៉ាស៊ីន​បោះពុម្ព​ទាំងអស់"</string>
     <string name="add_print_service_label" msgid="5356702546188981940">"បន្ថែម​សេវាកម្ម"</string>
@@ -71,13 +76,9 @@
     <item msgid="4061931020926489228">"បញ្ឈរ"</item>
     <item msgid="3199660090246166812">"ផ្ដេក"</item>
   </string-array>
-  <string-array name="page_options_labels">
-    <item msgid="7421377442011699994">"ទាំង​អស់"</item>
-    <item msgid="6812869625222503603">"ជួរ"</item>
-  </string-array>
     <string name="print_write_error_message" msgid="5787642615179572543">"មិន​អាច​សរសេរ​ទៅ​កាន់​ឯកសារ"</string>
-    <string name="print_error_default_message" msgid="8568506918983980567">"មិន​អាច​បង្កើត​ការ​ងារ​បោះពុម្ព"</string>
+    <string name="print_error_default_message" msgid="8602678405502922346">"សូម​ទោស វា​មិន​ដំណើរ​ការ​ទេ។ ព្យាយាម​ម្ដងទៀត។"</string>
     <string name="print_error_retry" msgid="1426421728784259538">"ព្យាយាម​ម្ដងទៀត"</string>
-    <string name="print_error_printer_unavailable" msgid="6653128543854282851">"ម៉ាស៊ីន​បោះពុម្ព​​មិន​អាច​ប្រើ​បាន"</string>
-    <string name="print_operation_canceling" msgid="5274571823242489160">"កំពុង​បោះបង់..."</string>
+    <string name="print_error_printer_unavailable" msgid="8985614415253203381">"ឥឡូវ​នេះ ម៉ាស៊ីន​បោះពុម្ព​នេះ​មិន​អាច​ប្រើ​បាន។"</string>
+    <string name="print_preparing_preview" msgid="3939930735671364712">"កំពុង​រៀបចំ​មើល​ជា​មុន…"</string>
 </resources>

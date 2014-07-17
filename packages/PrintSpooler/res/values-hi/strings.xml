@@ -25,16 +25,21 @@
     <string name="label_paper_size_summary" msgid="5668204981332138168">"काग़ज़ का आकार:"</string>
     <string name="label_color" msgid="1108690305218188969">"रंग"</string>
     <string name="label_orientation" msgid="2853142581990496477">"अभिविन्‍यास"</string>
-    <string name="label_pages" msgid="6300874667546617333">"पृष्‍ठ (<xliff:g id="PAGE_COUNT">%1$s</xliff:g>)"</string>
+    <!-- no translation found for label_pages (7768589729282182230) -->
+    <skip />
+    <!-- no translation found for template_all_pages (3322235982020148762) -->
+    <skip />
+    <!-- no translation found for template_page_range (428638530038286328) -->
+    <skip />
     <string name="pages_range_example" msgid="8558694453556945172">"उदा. 1—5,8,11—13"</string>
     <string name="print_preview" msgid="8010217796057763343">"प्रिंट पूर्वावलोकन"</string>
     <string name="install_for_print_preview" msgid="6366303997385509332">"पूर्वावलोकन के लिए PDF व्यूअर इंस्टॉल करें"</string>
     <string name="printing_app_crashed" msgid="854477616686566398">"प्रिंटिंग ऐप्लिकेशन क्रैश हो गया"</string>
-    <string name="page_count_unknown" msgid="6058852665954511124">"पृष्ठ"</string>
     <string name="generating_print_job" msgid="3119608742651698916">"प्रिंट कार्य जनरेट हो रहा है"</string>
     <string name="save_as_pdf" msgid="5718454119847596853">"PDF के रूप में सहेजें"</string>
     <string name="all_printers" msgid="5018829726861876202">"सभी प्रिंटर..."</string>
     <string name="print_dialog" msgid="32628687461331979">"प्रिंट संवाद"</string>
+    <string name="current_page_template" msgid="1386638343571771292">"<xliff:g id="CURRENT_PAGE">%1$d</xliff:g> /<xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
     <string name="search" msgid="5421724265322228497">"खोजें"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"सभी प्रिंटर"</string>
     <string name="add_print_service_label" msgid="5356702546188981940">"सेवा जोड़ें"</string>
@@ -71,13 +76,9 @@
     <item msgid="4061931020926489228">"पोर्ट्रेट"</item>
     <item msgid="3199660090246166812">"लैंडस्केप"</item>
   </string-array>
-  <string-array name="page_options_labels">
-    <item msgid="7421377442011699994">"सभी"</item>
-    <item msgid="6812869625222503603">"सीमा"</item>
-  </string-array>
     <string name="print_write_error_message" msgid="5787642615179572543">"फ़ाइल पर नहीं लिखा जा सका"</string>
-    <string name="print_error_default_message" msgid="8568506918983980567">"प्रिंट कार्य जनरेट नहीं किया जा सका"</string>
+    <string name="print_error_default_message" msgid="8602678405502922346">"क्षमा करें, उससे बात नहीं बनी. पुन: प्रयास करें."</string>
     <string name="print_error_retry" msgid="1426421728784259538">"पुनः प्रयास करें"</string>
-    <string name="print_error_printer_unavailable" msgid="6653128543854282851">"प्रिंटर अनुपलब्ध है"</string>
-    <string name="print_operation_canceling" msgid="5274571823242489160">"रद्द किया जा रहा है..."</string>
+    <string name="print_error_printer_unavailable" msgid="8985614415253203381">"यह प्रिंटर इस समय उपलब्ध नहीं है."</string>
+    <string name="print_preparing_preview" msgid="3939930735671364712">"पूर्वावलोकन तैयार हो रहा है..."</string>
 </resources>

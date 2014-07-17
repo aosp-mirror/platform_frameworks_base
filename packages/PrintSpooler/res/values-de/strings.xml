@@ -25,16 +25,21 @@
     <string name="label_paper_size_summary" msgid="5668204981332138168">"Papierformat:"</string>
     <string name="label_color" msgid="1108690305218188969">"Farbe"</string>
     <string name="label_orientation" msgid="2853142581990496477">"Ausrichtung"</string>
-    <string name="label_pages" msgid="6300874667546617333">"Seiten (<xliff:g id="PAGE_COUNT">%1$s</xliff:g>)"</string>
+    <!-- no translation found for label_pages (7768589729282182230) -->
+    <skip />
+    <!-- no translation found for template_all_pages (3322235982020148762) -->
+    <skip />
+    <!-- no translation found for template_page_range (428638530038286328) -->
+    <skip />
     <string name="pages_range_example" msgid="8558694453556945172">"z. B. 1–5, 8, 11–13"</string>
     <string name="print_preview" msgid="8010217796057763343">"Vorschau drucken"</string>
     <string name="install_for_print_preview" msgid="6366303997385509332">"PDF-Viewer für Vorschau installieren"</string>
     <string name="printing_app_crashed" msgid="854477616686566398">"Druck-App abgestürzt"</string>
-    <string name="page_count_unknown" msgid="6058852665954511124">"Seiten"</string>
     <string name="generating_print_job" msgid="3119608742651698916">"Druckauftrag wird generiert..."</string>
     <string name="save_as_pdf" msgid="5718454119847596853">"Als PDF speichern"</string>
     <string name="all_printers" msgid="5018829726861876202">"Alle Drucker…"</string>
     <string name="print_dialog" msgid="32628687461331979">"Druckdialogfeld"</string>
+    <string name="current_page_template" msgid="1386638343571771292">"<xliff:g id="CURRENT_PAGE">%1$d</xliff:g>/<xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
     <string name="search" msgid="5421724265322228497">"Suchen"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"Alle Drucker"</string>
     <string name="add_print_service_label" msgid="5356702546188981940">"Dienst hinzufügen"</string>
@@ -71,13 +76,9 @@
     <item msgid="4061931020926489228">"Hochformat"</item>
     <item msgid="3199660090246166812">"Querformat"</item>
   </string-array>
-  <string-array name="page_options_labels">
-    <item msgid="7421377442011699994">"Alle"</item>
-    <item msgid="6812869625222503603">"Bereich"</item>
-  </string-array>
     <string name="print_write_error_message" msgid="5787642615179572543">"Fehler beim Schreiben in Datei"</string>
-    <string name="print_error_default_message" msgid="8568506918983980567">"Druckauftrag konnte nicht generiert werden."</string>
+    <string name="print_error_default_message" msgid="8602678405502922346">"Fehler. Bitte versuchen Sie es erneut."</string>
     <string name="print_error_retry" msgid="1426421728784259538">"Erneut versuchen"</string>
-    <string name="print_error_printer_unavailable" msgid="6653128543854282851">"Drucker nicht verfügbar"</string>
-    <string name="print_operation_canceling" msgid="5274571823242489160">"Vorgang wird abgebrochen..."</string>
+    <string name="print_error_printer_unavailable" msgid="8985614415253203381">"Dieser Drucker ist momentan nicht verfügbar."</string>
+    <string name="print_preparing_preview" msgid="3939930735671364712">"Vorschau wird vorbereitet…"</string>
 </resources>

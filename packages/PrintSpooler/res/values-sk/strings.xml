@@ -25,16 +25,21 @@
     <string name="label_paper_size_summary" msgid="5668204981332138168">"Veľkosť papiera:"</string>
     <string name="label_color" msgid="1108690305218188969">"Farba"</string>
     <string name="label_orientation" msgid="2853142581990496477">"Orientácia"</string>
-    <string name="label_pages" msgid="6300874667546617333">"STRÁNKY (<xliff:g id="PAGE_COUNT">%1$s</xliff:g>)"</string>
+    <!-- no translation found for label_pages (7768589729282182230) -->
+    <skip />
+    <!-- no translation found for template_all_pages (3322235982020148762) -->
+    <skip />
+    <!-- no translation found for template_page_range (428638530038286328) -->
+    <skip />
     <string name="pages_range_example" msgid="8558694453556945172">"napr. 1–5, 8, 11–13"</string>
     <string name="print_preview" msgid="8010217796057763343">"Ukážka pred tlačou"</string>
     <string name="install_for_print_preview" msgid="6366303997385509332">"Inštalovať zobrazovač PDF na zobrazenie ukážky"</string>
     <string name="printing_app_crashed" msgid="854477616686566398">"Aplikácia pre tlač zlyhala"</string>
-    <string name="page_count_unknown" msgid="6058852665954511124">"Strany"</string>
     <string name="generating_print_job" msgid="3119608742651698916">"Generuje sa tlačová úloha"</string>
     <string name="save_as_pdf" msgid="5718454119847596853">"Uložiť ako PDF"</string>
     <string name="all_printers" msgid="5018829726861876202">"Všetky tlačiarne..."</string>
     <string name="print_dialog" msgid="32628687461331979">"Dialógové okno tlače"</string>
+    <string name="current_page_template" msgid="1386638343571771292">"<xliff:g id="CURRENT_PAGE">%1$d</xliff:g> /<xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
     <string name="search" msgid="5421724265322228497">"VYHĽADÁVANIE"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"Všetky tlačiarne"</string>
     <string name="add_print_service_label" msgid="5356702546188981940">"Pridať službu"</string>
@@ -71,13 +76,9 @@
     <item msgid="4061931020926489228">"Na výšku"</item>
     <item msgid="3199660090246166812">"Na šírku"</item>
   </string-array>
-  <string-array name="page_options_labels">
-    <item msgid="7421377442011699994">"Všetky"</item>
-    <item msgid="6812869625222503603">"Rozsah"</item>
-  </string-array>
     <string name="print_write_error_message" msgid="5787642615179572543">"Do súboru nie je možné zapisovať"</string>
-    <string name="print_error_default_message" msgid="8568506918983980567">"Tlačovú úlohu nie je možné vytvoriť"</string>
+    <string name="print_error_default_message" msgid="8602678405502922346">"Je nám to ľúto, nefungovalo to. Skúste to znova."</string>
     <string name="print_error_retry" msgid="1426421728784259538">"Opakovať"</string>
-    <string name="print_error_printer_unavailable" msgid="6653128543854282851">"Tlačiareň nie je k dispozícii"</string>
-    <string name="print_operation_canceling" msgid="5274571823242489160">"Ruší sa..."</string>
+    <string name="print_error_printer_unavailable" msgid="8985614415253203381">"Táto tlačiareň nie je momentálne k dispozícii."</string>
+    <string name="print_preparing_preview" msgid="3939930735671364712">"Pripravuje sa ukážka..."</string>
 </resources>

@@ -25,16 +25,21 @@
     <string name="label_paper_size_summary" msgid="5668204981332138168">"Tamaño de papel:"</string>
     <string name="label_color" msgid="1108690305218188969">"Color"</string>
     <string name="label_orientation" msgid="2853142581990496477">"Orientación"</string>
-    <string name="label_pages" msgid="6300874667546617333">"Páginas (<xliff:g id="PAGE_COUNT">%1$s</xliff:g>)"</string>
+    <!-- no translation found for label_pages (7768589729282182230) -->
+    <skip />
+    <!-- no translation found for template_all_pages (3322235982020148762) -->
+    <skip />
+    <!-- no translation found for template_page_range (428638530038286328) -->
+    <skip />
     <string name="pages_range_example" msgid="8558694453556945172">"Ej.: 1-5, 8, 11-13"</string>
     <string name="print_preview" msgid="8010217796057763343">"Vista previa de impresión"</string>
     <string name="install_for_print_preview" msgid="6366303997385509332">"Instalar visualizador de PDF para vista previa"</string>
     <string name="printing_app_crashed" msgid="854477616686566398">"La aplicación de impresión falló"</string>
-    <string name="page_count_unknown" msgid="6058852665954511124">"Páginas"</string>
     <string name="generating_print_job" msgid="3119608742651698916">"Generando trabajo de impresión"</string>
     <string name="save_as_pdf" msgid="5718454119847596853">"Guardar como PDF"</string>
     <string name="all_printers" msgid="5018829726861876202">"Todas las impresoras…"</string>
     <string name="print_dialog" msgid="32628687461331979">"Cuadro de diálogo de impresión"</string>
+    <string name="current_page_template" msgid="1386638343571771292">"<xliff:g id="CURRENT_PAGE">%1$d</xliff:g> /<xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
     <string name="search" msgid="5421724265322228497">"Buscar"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"Todas las impresoras"</string>
     <string name="add_print_service_label" msgid="5356702546188981940">"Agregar servicio"</string>
@@ -71,13 +76,9 @@
     <item msgid="4061931020926489228">"Vertical"</item>
     <item msgid="3199660090246166812">"Horizontal"</item>
   </string-array>
-  <string-array name="page_options_labels">
-    <item msgid="7421377442011699994">"Todas"</item>
-    <item msgid="6812869625222503603">"Intervalo"</item>
-  </string-array>
     <string name="print_write_error_message" msgid="5787642615179572543">"No se pudo escribir en el archivo."</string>
-    <string name="print_error_default_message" msgid="8568506918983980567">"Error al generar el trabajo de impresión"</string>
+    <string name="print_error_default_message" msgid="8602678405502922346">"No funcionó. Vuelve a intentarlo."</string>
     <string name="print_error_retry" msgid="1426421728784259538">"Reintentar"</string>
-    <string name="print_error_printer_unavailable" msgid="6653128543854282851">"Impresora no disponible"</string>
-    <string name="print_operation_canceling" msgid="5274571823242489160">"Cancelando…"</string>
+    <string name="print_error_printer_unavailable" msgid="8985614415253203381">"Esta impresora no está disponible en este momento."</string>
+    <string name="print_preparing_preview" msgid="3939930735671364712">"Preparando vista previa…"</string>
 </resources>
