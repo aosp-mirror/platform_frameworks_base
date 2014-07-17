@@ -18,6 +18,7 @@ package android.net;
 
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SystemApi;
 import android.content.Context;
 import android.content.Intent;
 import android.net.NetworkScorerAppManager.NetworkScorerAppData;
@@ -52,6 +53,7 @@ import android.os.ServiceManager;
  *
  * @hide
  */
+@SystemApi
 public class NetworkScoreManager {
     /**
      * Activity action: ask the user to change the active network scorer. This will show a dialog

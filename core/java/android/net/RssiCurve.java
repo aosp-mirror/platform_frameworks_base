@@ -16,6 +16,7 @@
 
 package android.net;
 
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -49,6 +50,7 @@ import java.util.Objects;
  * @see ScoredNetwork
  * @hide
  */
+@SystemApi
 public class RssiCurve implements Parcelable {
 
     /** The starting dBm of the curve. */
