@@ -35,7 +35,7 @@ public class BridgeAssetManager extends AssetManager {
             // Note that AssetManager() creates a system AssetManager and we override it
             // with our BridgeAssetManager.
             AssetManager.sSystem = new BridgeAssetManager();
-            AssetManager.sSystem.makeStringBlocks(false);
+            AssetManager.sSystem.makeStringBlocks(null);
         }
         return AssetManager.sSystem;
     }
