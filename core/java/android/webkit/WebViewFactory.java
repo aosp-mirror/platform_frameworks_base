@@ -63,6 +63,11 @@ public final class WebViewFactory {
     private static final Object sProviderLock = new Object();
     private static boolean sAddressSpaceReserved = false;
 
+    public static String getWebViewPackageName() {
+        // TODO: Make this dynamic based on resource configuration.
+        return "com.android.webview";
+    }
+
     static WebViewFactoryProvider getProvider() {
         synchronized (sProviderLock) {
             // For now the main purpose of this function (and the factory abstraction) is to keep
