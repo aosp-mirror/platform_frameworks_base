@@ -1282,7 +1282,7 @@ public class NotificationManagerService extends SystemService {
             enforceSystemOrSystemUI("INotificationManager.setZenModeCondition");
             final long identity = Binder.clearCallingIdentity();
             try {
-                mConditionProviders.setZenModeCondition(conditionId);
+                mConditionProviders.setZenModeCondition(conditionId, "binderCall");
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -1409,6 +1409,9 @@ public class NotificationManagerService extends SystemService {
             if (filter == null || zenOnly) {
                 pw.println("\n  Zen Mode:");
                 mZenModeHelper.dump(pw, "    ");
+
+                pw.println("\n  Zen Log:");
+                ZenLog.dump(pw, "    ");
             }
 
             if (!zenOnly) {

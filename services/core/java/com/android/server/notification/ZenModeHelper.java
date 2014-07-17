@@ -139,18 +139,32 @@ public class ZenModeHelper {
                 return false;
             }
             if (isAlarm(record)) {
-                return mZenMode == Global.ZEN_MODE_NO_INTERRUPTIONS;
+                if (mZenMode == Global.ZEN_MODE_NO_INTERRUPTIONS) {
+                    ZenLog.traceIntercepted(record, "alarm");
+                    return true;
+                }
+                return false;
             }
             // audience has veto power over all following rules
             if (!audienceMatches(record)) {
+                ZenLog.traceIntercepted(record, "!audienceMatches");
                 return true;
             }
             if (isCall(record)) {
-                return !mConfig.allowCalls;
+                if (!mConfig.allowCalls) {
+                    ZenLog.traceIntercepted(record, "!allowCalls");
+                    return true;
+                }
+                return false;
             }
             if (isMessage(record)) {
-                return !mConfig.allowMessages;
+                if (!mConfig.allowMessages) {
+                    ZenLog.traceIntercepted(record, "!allowMessages");
+                    return true;
+                }
+                return false;
             }
+            ZenLog.traceIntercepted(record, "!allowed");
             return true;
         }
         return false;
@@ -171,6 +185,7 @@ public class ZenModeHelper {
             Slog.d(TAG, String.format("updateZenMode: %s -> %s",
                     Global.zenModeToString(mZenMode),
                     Global.zenModeToString(mode)));
+            ZenLog.traceUpdateZenMode(mZenMode, mode);
         }
         mZenMode = mode;
         final boolean zen = mZenMode != Global.ZEN_MODE_OFF;
@@ -202,19 +217,24 @@ public class ZenModeHelper {
         // force ringer mode into compliance
         if (mAudioManager != null) {
             int ringerMode = mAudioManager.getRingerMode();
+            int forcedRingerMode = -1;
             if (mZenMode == Global.ZEN_MODE_NO_INTERRUPTIONS) {
                 if (ringerMode != AudioManager.RINGER_MODE_SILENT) {
                     mPreviousRingerMode = ringerMode;
                     Slog.d(TAG, "Silencing ringer");
-                    mAudioManager.setRingerMode(AudioManager.RINGER_MODE_SILENT);
+                    forcedRingerMode = AudioManager.RINGER_MODE_SILENT;
                 }
             } else {
                 if (ringerMode == AudioManager.RINGER_MODE_SILENT) {
                     Slog.d(TAG, "Unsilencing ringer");
-                    mAudioManager.setRingerMode(mPreviousRingerMode != -1 ? mPreviousRingerMode
-                            : AudioManager.RINGER_MODE_NORMAL);
+                    forcedRingerMode = mPreviousRingerMode != -1 ? mPreviousRingerMode
+                            : AudioManager.RINGER_MODE_NORMAL;
                     mPreviousRingerMode = -1;
                 }
+            }
+            if (forcedRingerMode != -1) {
+                mAudioManager.setRingerMode(forcedRingerMode);
+                ZenLog.traceSetRingerMode(forcedRingerMode);
             }
         }
         dispatchOnZenModeChanged();
@@ -222,10 +242,16 @@ public class ZenModeHelper {
 
     public boolean allowDisable(int what, IBinder token, String pkg) {
         // TODO(cwren): delete this API before the next release. Bug:15344099
+        boolean allowDisable = true;
+        String reason = null;
         if (isDefaultPhoneApp(pkg)) {
-            return mZenMode == Global.ZEN_MODE_OFF || mConfig.allowCalls;
+            allowDisable = mZenMode == Global.ZEN_MODE_OFF || mConfig.allowCalls;
+            reason = mZenMode == Global.ZEN_MODE_OFF ? "zenOff" : "allowCalls";
         }
-        return true;
+        if (!SYSTEM_PACKAGES.contains(pkg)) {
+            ZenLog.traceAllowDisable(pkg, allowDisable, reason);
+        }
+        return allowDisable;
     }
 
     public void dump(PrintWriter pw, String prefix) {
@@ -255,8 +281,8 @@ public class ZenModeHelper {
     public boolean setConfig(ZenModeConfig config) {
         if (config == null || !config.isValid()) return false;
         if (config.equals(mConfig)) return true;
+        ZenLog.traceConfig(mConfig, config);
         mConfig = config;
-        Slog.d(TAG, "mConfig=" + mConfig);
         dispatchOnConfigChanged();
         final String val = Integer.toString(mConfig.hashCode());
         Global.putString(mContext.getContentResolver(), Global.ZEN_MODE_CONFIG_ETAG, val);
@@ -398,20 +424,18 @@ public class ZenModeHelper {
                     intent.getAction(), ts(schTime), ts(now), now - schTime));
 
             final int[] days = ZenModeConfig.tryParseDays(mConfig.sleepMode);
+            boolean enter = false;
+            final int day = getDayOfWeek(schTime);
             if (days != null) {
-                final int day = getDayOfWeek(schTime);
                 for (int i = 0; i < days.length; i++) {
                     if (days[i] == day) {
-                        Slog.d(TAG, "Enter downtime, day=" + day + " days=" + Arrays.asList(days));
+                        enter = true;
                         ZenModeHelper.this.setZenMode(zenModeValue);
                         break;
-                    } else {
-                        Slog.d(TAG, "Skip downtime, day=" + day + " days=" + Arrays.asList(days));
                     }
                 }
-            } else {
-                Slog.d(TAG, "Skip downtime, no days configured");
             }
+            ZenLog.traceDowntime(enter, day, days);
             updateAlarms();
         }
 
