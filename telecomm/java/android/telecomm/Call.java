@@ -62,6 +62,11 @@ public final class Call {
      */
     public static final int STATE_DISCONNECTED = 7;
 
+    /**
+     * The state of an outgoing {@code Call}, but waiting for user input before proceeding.
+     */
+    public static final int STATE_PRE_DIAL_WAIT = 8;
+
     public static class Details {
         private final Uri mHandle;
         private final int mHandlePresentation;
@@ -430,6 +435,15 @@ public final class Call {
     }
 
     /**
+     * Notifies this {@code Call} the a {@code PhoneAccount} has been selected and to proceed
+     * with placing an outgoing call.
+     */
+    public void phoneAccountSelected(PhoneAccount account) {
+        mInCallAdapter.phoneAccountSelected(mTelecommCallId, account);
+
+    }
+
+    /**
      * Instructs this {@code Call} to enter a conference.
      */
     public void conference() {
@@ -703,6 +717,8 @@ public final class Call {
         switch (inCallCallState) {
             case NEW:
                 return STATE_NEW;
+            case PRE_DIAL_WAIT:
+                return STATE_PRE_DIAL_WAIT;
             case DIALING:
                 return STATE_DIALING;
             case RINGING:

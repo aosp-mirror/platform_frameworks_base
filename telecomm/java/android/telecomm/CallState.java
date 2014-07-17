@@ -32,6 +32,14 @@ public enum CallState {
     NEW,
 
     /**
+     * Indicates that the call is about to go into the outgoing and dialing state but is waiting for
+     * user input before it proceeds. For example, where no default {@link PhoneAccount} is set,
+     * this is the state where the InCallUI is waiting for the user to select a {@link PhoneAccount}
+     * to call from.
+     */
+    PRE_DIAL_WAIT,
+
+    /**
      * Indicates that a call is outgoing and in the dialing state. A call transitions to this state
      * once an outgoing call has begun (e.g., user presses the dial button in Dialer). Calls in this
      * state usually transition to {@link #ACTIVE} if the call was answered or {@link #DISCONNECTED}

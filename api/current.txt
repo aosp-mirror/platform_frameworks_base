@@ -28035,6 +28035,7 @@ package android.telecomm {
     method public int getState();
     method public void hold();
     method public void phoneAccountClicked();
+    method public void phoneAccountSelected(android.telecomm.PhoneAccount);
     method public void playDtmfTone(char);
     method public void postDialContinue(boolean);
     method public void reject(boolean, java.lang.String);
@@ -28048,6 +28049,7 @@ package android.telecomm {
     field public static final int STATE_DISCONNECTED = 7; // 0x7
     field public static final int STATE_HOLDING = 3; // 0x3
     field public static final int STATE_NEW = 0; // 0x0
+    field public static final int STATE_PRE_DIAL_WAIT = 8; // 0x8
     field public static final int STATE_RINGING = 2; // 0x2
   }
 
@@ -28135,6 +28137,7 @@ package android.telecomm {
     enum_constant public static final android.telecomm.CallState DISCONNECTED;
     enum_constant public static final android.telecomm.CallState NEW;
     enum_constant public static final android.telecomm.CallState ON_HOLD;
+    enum_constant public static final android.telecomm.CallState PRE_DIAL_WAIT;
     enum_constant public static final android.telecomm.CallState RINGING;
   }
 
@@ -28279,6 +28282,7 @@ package android.telecomm {
     method public void holdCall(java.lang.String);
     method public void mute(boolean);
     method public void phoneAccountClicked(java.lang.String);
+    method public void phoneAccountSelected(java.lang.String, android.telecomm.PhoneAccount);
     method public void playDtmfTone(java.lang.String, char);
     method public void postDialContinue(java.lang.String, boolean);
     method public void rejectCall(java.lang.String, boolean, java.lang.String);

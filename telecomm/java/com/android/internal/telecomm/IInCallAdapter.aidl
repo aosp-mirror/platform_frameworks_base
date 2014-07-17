@@ -17,6 +17,7 @@
 package com.android.internal.telecomm;
 
 import android.telecomm.CallAudioState;
+import android.telecomm.PhoneAccount;
 
 /**
  * Internal remote callback interface for in-call services.
@@ -47,6 +48,8 @@ oneway interface IInCallAdapter {
     void postDialContinue(String callId, boolean proceed);
 
     void phoneAccountClicked(String callId);
+
+    void phoneAccountSelected(String callId, in PhoneAccount account);
 
     void conference(String callId);
 
