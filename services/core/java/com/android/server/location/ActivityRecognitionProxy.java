@@ -31,7 +31,8 @@ import android.util.Log;
  * @hide
  */
 public class ActivityRecognitionProxy {
-    private final String TAG = "ActivityRecognitionProxy";
+    private static final String TAG = "ActivityRecognitionProxy";
+
     private final ServiceWatcher mServiceWatcher;
     private final ActivityRecognitionHardware mActivityRecognitionHardware;
 
@@ -85,6 +86,7 @@ public class ActivityRecognitionProxy {
 
         // try to bind the provider
         if (!activityRecognitionProxy.mServiceWatcher.start()) {
+            Log.e(TAG, "ServiceWatcher could not start.");
             return null;
         }
 
