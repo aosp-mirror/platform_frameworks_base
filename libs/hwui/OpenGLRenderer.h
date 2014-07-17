@@ -587,14 +587,14 @@ private:
      * This method needs to be invoked every time getTargetFbo() is
      * bound again.
      */
-    void startTiling(const sp<Snapshot>& snapshot, bool opaque = false);
+    void startTiling(const sp<Snapshot>& snapshot, bool opaque = false, bool expand = false);
 
     /**
      * Tells the GPU what part of the screen is about to be redrawn.
      * This method needs to be invoked every time getTargetFbo() is
      * bound again.
      */
-    void startTiling(const Rect& clip, int windowHeight, bool opaque = false);
+    void startTiling(const Rect& clip, int windowHeight, bool opaque = false, bool expand = false);
 
     /**
      * Tells the GPU that we are done drawing the frame or that we
