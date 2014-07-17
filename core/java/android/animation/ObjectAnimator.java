@@ -883,10 +883,7 @@ public final class ObjectAnimator extends ValueAnimator {
         final Object oldTarget = getTarget();
         if (oldTarget != target) {
             mTarget = target == null ? null : new WeakReference<Object>(target);
-            if (oldTarget != null && target != null && oldTarget.getClass() == target.getClass()) {
-                return;
-            }
-            // New target type should cause re-initialization prior to starting
+            // New target should cause re-initialization prior to starting
             mInitialized = false;
         }
     }
