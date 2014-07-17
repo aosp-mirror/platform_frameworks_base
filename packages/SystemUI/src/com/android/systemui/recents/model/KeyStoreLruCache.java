@@ -28,20 +28,20 @@ import java.util.HashMap;
 public class KeyStoreLruCache<V> {
     // We keep a set of keys that are associated with the LRU cache, so that we can find out
     // information about the Task that was previously in the cache.
-    HashMap<Task.TaskKey, Task.TaskKey> mKeys = new HashMap<Task.TaskKey, Task.TaskKey>();
+    HashMap<Integer, Task.TaskKey> mTaskKeys = new HashMap<Integer, Task.TaskKey>();
     // The cache implementation
-    LruCache<Task.TaskKey, V> mCache;
+    LruCache<Integer, V> mCache;
 
     public KeyStoreLruCache(int cacheSize) {
-        mCache = new LruCache<Task.TaskKey, V>(cacheSize) {
+        mCache = new LruCache<Integer, V>(cacheSize) {
             @Override
-            protected int sizeOf(Task.TaskKey t, V v) {
+            protected int sizeOf(Integer taskId, V v) {
                 return computeSize(v);
             }
 
             @Override
-            protected void entryRemoved(boolean evicted, Task.TaskKey key, V oldV, V newV) {
-                mKeys.remove(key);
+            protected void entryRemoved(boolean evicted, Integer taskId, V oldV, V newV) {
+                mTaskKeys.remove(taskId);
             }
         };
     }
@@ -53,46 +53,41 @@ public class KeyStoreLruCache<V> {
 
     /** Gets a specific entry in the cache. */
     final V get(Task.TaskKey key) {
-        return mCache.get(key);
+        return mCache.get(key.id);
     }
 
     /**
-     * Returns the value only if the last active time of the key currently in the lru cache is
-     * greater than or equal to the last active time of the key specified.
+     * Returns the value only if the Task has not updated since the last time it was in the cache.
      */
-    final V getCheckLastActiveTime(Task.TaskKey key) {
-        Task.TaskKey lruKey = mKeys.get(key);
-        if (lruKey != null && (lruKey.lastActiveTime < key.lastActiveTime)) {
-            // The task has changed (been made active since the last time it was put into the
+    final V getAndInvalidateIfModified(Task.TaskKey key) {
+        Task.TaskKey lastKey = mTaskKeys.get(key.id);
+        if (lastKey != null && (lastKey.lastActiveTime < key.lastActiveTime)) {
+            // The task has updated (been made active since the last time it was put into the
             // LRU cache) so invalidate that item in the cache
-            remove(lruKey);
+            remove(key);
             return null;
         }
         // Either the task does not exist in the cache, or the last active time is the same as
-        // the key specified
-        return mCache.get(key);
+        // the key specified, so return what is in the cache
+        return mCache.get(key.id);
     }
 
     /** Puts an entry in the cache for a specific key. */
     final void put(Task.TaskKey key, V value) {
-        mCache.put(key, value);
-        if (mKeys.containsKey(key)) {
-            mKeys.get(key).updateLastActiveTime(key.lastActiveTime);
-        } else {
-            mKeys.put(key, key);
-        }
+        mCache.put(key.id, value);
+        mTaskKeys.put(key.id, key);
     }
 
     /** Removes a cache entry for a specific key. */
     final void remove(Task.TaskKey key) {
-        mCache.remove(key);
-        mKeys.remove(key);
+        mCache.remove(key.id);
+        mTaskKeys.remove(key.id);
     }
 
     /** Removes all the entries in the cache. */
     final void evictAll() {
         mCache.evictAll();
-        mKeys.clear();
+        mTaskKeys.clear();
     }
 
     /** Returns the size of the cache. */
