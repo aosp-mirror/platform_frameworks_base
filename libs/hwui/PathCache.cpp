@@ -19,6 +19,7 @@
 
 #include <SkBitmap.h>
 #include <SkCanvas.h>
+#include <SkColor.h>
 #include <SkPaint.h>
 #include <SkPath.h>
 #include <SkRect.h>
@@ -111,7 +112,7 @@ static void initBitmap(SkBitmap& bitmap, uint32_t width, uint32_t height) {
 static void initPaint(SkPaint& paint) {
     // Make sure the paint is opaque, color, alpha, filter, etc.
     // will be applied later when compositing the alpha8 texture
-    paint.setColor(0xff000000);
+    paint.setColor(SK_ColorBLACK);
     paint.setAlpha(255);
     paint.setColorFilter(NULL);
     paint.setMaskFilter(NULL);
