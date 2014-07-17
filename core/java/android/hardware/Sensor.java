@@ -781,6 +781,25 @@ public final class Sensor {
      */
     public static final String STRING_TYPE_GLANCE_GESTURE = "android.sensor.glance_gesture";
 
+     /**
+     * A constant describing a pick up sensor.
+     *
+     * A sensor of this type triggers when the device is picked up regardless of wherever it was
+     * before (desk, pocket, bag). The only allowed return value is 1.0. This sensor deactivates
+     * itself immediately after it triggers.
+     *
+     * @hide Expected to be used internally for always on display.
+     */
+    public static final int TYPE_PICK_UP_GESTURE = 44;
+
+    /**
+     * A constant string describing a pick up sensor.
+     *
+     * @hide This sensor is expected to be used internally for always on display.
+     * @see #TYPE_PICK_UP_GESTURE
+     */
+    public static final String STRING_TYPE_PICK_UP_GESTURE = "android.sensor.pick_up_gesture";
+
     /**
      * A constant describing all sensor types.
      */
@@ -880,6 +899,7 @@ public final class Sensor {
             1, // SENSOR_TYPE_WAKE_UP_TILT_DETECTOR
             1, // SENSOR_TYPE_WAKE_GESTURE
             1, // SENSOR_TYPE_GLANCE_GESTURE
+            1, // SENSOR_TYPE_PICK_UP_GESTURE
     };
 
     /**
