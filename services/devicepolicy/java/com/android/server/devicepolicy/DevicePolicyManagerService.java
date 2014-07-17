@@ -55,7 +55,9 @@ import android.content.pm.UserInfo;
 import android.media.AudioManager;
 import android.media.IAudioService;
 import android.net.ConnectivityManager;
+import android.net.Uri;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.database.ContentObserver;
 import android.net.ProxyInfo;
 import android.os.Binder;
 import android.os.Bundle;
@@ -136,6 +138,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private static final boolean DBG = false;
 
     private static final String ATTR_PERMISSION_PROVIDER = "permission-provider";
+    private static final String ATTR_SETUP_COMPLETE = "setup-complete";
 
     final Context mContext;
     final UserManager mUserManager;
@@ -174,6 +177,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
         }
     }
+
     public static class DevicePolicyData {
         int mActivePasswordQuality = DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
         int mActivePasswordLength = 0;
@@ -188,6 +192,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         int mUserHandle;
         int mPasswordOwner = -1;
         long mLastMaximumTimeToLock = -1;
+        boolean mUserSetupComplete = false;
 
         final HashMap<ComponentName, ActiveAdmin> mAdminMap
                 = new HashMap<ComponentName, ActiveAdmin>();
@@ -973,6 +978,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 out.attribute(null, ATTR_PERMISSION_PROVIDER,
                         policy.mRestrictionsProvider.flattenToString());
             }
+            if (policy.mUserSetupComplete) {
+                out.attribute(null, ATTR_SETUP_COMPLETE,
+                        Boolean.toString(true));
+            }
 
             final int N = policy.mAdminList.size();
             for (int i=0; i<N; i++) {
@@ -1073,6 +1082,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             String permissionProvider = parser.getAttributeValue(null, ATTR_PERMISSION_PROVIDER);
             if (permissionProvider != null) {
                 policy.mRestrictionsProvider = ComponentName.unflattenFromString(permissionProvider);
+            }
+            String userSetupComplete = parser.getAttributeValue(null, ATTR_SETUP_COMPLETE);
+            if (userSetupComplete != null && Boolean.toString(true).equals(userSetupComplete)) {
+                policy.mUserSetupComplete = true;
             }
 
             type = parser.next();
@@ -1266,6 +1279,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
             }
         }
+        // Register an observer for watching for user setup complete.
+        new SetupContentObserver(mHandler).register(mContext.getContentResolver());
+        // Initialize the user setup state, to handle the upgrade case.
+        updateUserSetupComplete();
     }
 
     private void cleanUpOldUsers() {
@@ -4100,6 +4117,52 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             AudioManager audioManager =
                     (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
             return audioManager.isMasterMute();
+        }
+    }
+
+    /**
+     * We need to update the internal state of whether a user has completed setup once. After
+     * that, we ignore any changes that reset the Settings.Secure.USER_SETUP_COMPLETE changes
+     * as we don't trust any apps that might try to reset it.
+     * <p>
+     * Unfortunately, we don't know which user's setup state was changed, so we write all of
+     * them.
+     */
+    void updateUserSetupComplete() {
+        List<UserInfo> users = mUserManager.getUsers(true);
+        ContentResolver resolver = mContext.getContentResolver();
+        final int N = users.size();
+        for (int i = 0; i < N; i++) {
+            int userHandle = users.get(i).id;
+            if (Settings.Secure.getIntForUser(resolver, Settings.Secure.USER_SETUP_COMPLETE, 0,
+                    userHandle) != 0) {
+                DevicePolicyData policy = getUserData(userHandle);
+                policy.mUserSetupComplete = true;
+                synchronized (this) {
+                    saveSettingsLocked(userHandle);
+                }
+            }
+        }
+    }
+
+    private class SetupContentObserver extends ContentObserver {
+
+        private final Uri mUserSetupComplete = Settings.Secure.getUriFor(
+                Settings.Secure.USER_SETUP_COMPLETE);
+
+        public SetupContentObserver(Handler handler) {
+            super(handler);
+        }
+
+        void register(ContentResolver resolver) {
+            resolver.registerContentObserver(mUserSetupComplete, false, this, UserHandle.USER_ALL);
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            if (mUserSetupComplete.equals(uri)) {
+                updateUserSetupComplete();
+            }
         }
     }
 }
