@@ -108,7 +108,7 @@ final class HotplugDetectionAction extends FeatureAction {
         if (mTimeoutCount == 0) {
             pollAllDevices();
         } else {
-            if (tv().getSystemAudioMode()) {
+            if (tv().isSystemAudioActivated()) {
                 pollAudioSystem();
             }
         }

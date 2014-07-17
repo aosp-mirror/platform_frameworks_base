@@ -827,7 +827,7 @@ public final class HdmiControlService extends SystemService {
             if (tv == null) {
                 return false;
             }
-            return tv.getSystemAudioMode();
+            return tv.isSystemAudioActivated();
         }
 
         @Override
