@@ -416,17 +416,17 @@
     <string name="accessibility_quick_settings_less_time">Less time</string>
 
     <!-- Title of dialog shown when 2G-3G data usage has exceeded limit and has been disabled. [CHAR LIMIT=48] -->
-    <string name="data_usage_disabled_dialog_3g_title">2G-3G data disabled</string>
+    <string name="data_usage_disabled_dialog_3g_title">2G-3G data is off</string>
     <!-- Title of dialog shown when 4G data usage has exceeded limit and has been disabled. [CHAR LIMIT=48] -->
-    <string name="data_usage_disabled_dialog_4g_title">4G data disabled</string>
+    <string name="data_usage_disabled_dialog_4g_title">4G data is off</string>
     <!-- Title of dialog shown when mobile data usage has exceeded limit and has been disabled. [CHAR LIMIT=48] -->
-    <string name="data_usage_disabled_dialog_mobile_title">Mobile data disabled</string>
+    <string name="data_usage_disabled_dialog_mobile_title">Cellular data is off</string>
     <!-- Title of dialog shown when data usage has exceeded limit and has been disabled. [CHAR LIMIT=48] -->
-    <string name="data_usage_disabled_dialog_title">Data disabled</string>
+    <string name="data_usage_disabled_dialog_title">Data is off</string>
     <!-- Body of dialog shown when data usage has exceeded limit and has been disabled. [CHAR LIMIT=NONE] -->
-    <string name="data_usage_disabled_dialog">You\'ve reached the specified data usage limit.\n\nIf you re-enable data, you may be charged by the operator.</string>
+    <string name="data_usage_disabled_dialog">Your device turned off data because it reached the limit you set.\n\nTurning it back on may lead to charges from your carrier.</string>
     <!-- Dialog button indicating that data connection should be re-enabled. [CHAR LIMIT=28] -->
-    <string name="data_usage_disabled_dialog_enable">Re-enable data</string>
+    <string name="data_usage_disabled_dialog_enable">Turn on data</string>
 
     <!-- Text to display underneath the graphical signal strength meter when
          no connection is available. [CHAR LIMIT=20] -->

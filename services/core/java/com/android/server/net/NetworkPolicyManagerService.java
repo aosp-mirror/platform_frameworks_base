@@ -815,6 +815,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 final CharSequence body = res.getText(R.string.data_usage_limit_body);
 
                 final CharSequence title;
+                int icon = R.drawable.stat_notify_disabled_data;
                 switch (policy.template.getMatchRule()) {
                     case MATCH_MOBILE_3G_LOWER:
                         title = res.getText(R.string.data_usage_3g_limit_title);
@@ -827,6 +828,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         break;
                     case MATCH_WIFI:
                         title = res.getText(R.string.data_usage_wifi_limit_title);
+                        icon = R.drawable.stat_notify_error;
                         break;
                     default:
                         title = null;
@@ -834,7 +836,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 }
 
                 builder.setOngoing(true);
-                builder.setSmallIcon(R.drawable.stat_notify_disabled);
+                builder.setSmallIcon(icon);
                 builder.setTicker(title);
                 builder.setContentTitle(title);
                 builder.setContentText(body);
