@@ -299,6 +299,9 @@ package android {
     field public static final int alphabeticShortcut = 16843235; // 0x10101e3
     field public static final int alwaysDrawnWithCache = 16842991; // 0x10100ef
     field public static final int alwaysRetainTaskState = 16843267; // 0x1010203
+    field public static final int amPmSelectedBackgroundColor = 16843946; // 0x10104aa
+    field public static final int amPmTextColor = 16843944; // 0x10104a8
+    field public static final int amPmUnselectedBackgroundColor = 16843945; // 0x10104a9
     field public static final int angle = 16843168; // 0x10101a0
     field public static final int animateFirstView = 16843477; // 0x10102d5
     field public static final int animateLayoutChanges = 16843506; // 0x10102f2
@@ -626,8 +629,12 @@ package android {
     field public static final int hapticFeedbackEnabled = 16843358; // 0x101025e
     field public static final int hardwareAccelerated = 16843475; // 0x10102d3
     field public static final int hasCode = 16842764; // 0x101000c
+    field public static final int headerAmPmTextAppearance = 16843938; // 0x10104a2
     field public static final int headerBackground = 16843055; // 0x101012f
+    field public static final int headerBackgroundColor = 16843940; // 0x10104a4
     field public static final int headerDividersEnabled = 16843310; // 0x101022e
+    field public static final int headerSelectedTextColor = 16843939; // 0x10104a3
+    field public static final int headerTimeTextAppearance = 16843937; // 0x10104a1
     field public static final int height = 16843093; // 0x1010155
     field public static final int hideOnContentScroll = 16843845; // 0x1010445
     field public static final int hint = 16843088; // 0x1010150
@@ -882,6 +889,9 @@ package android {
     field public static final int notificationTimeout = 16843651; // 0x1010383
     field public static final int numColumns = 16843032; // 0x1010118
     field public static final int numStars = 16843076; // 0x1010144
+    field public static final int numbersBackgroundColor = 16843942; // 0x10104a6
+    field public static final int numbersSelectorColor = 16843943; // 0x10104a7
+    field public static final int numbersTextColor = 16843941; // 0x10104a5
     field public static final deprecated int numeric = 16843109; // 0x1010165
     field public static final int numericShortcut = 16843236; // 0x10101e4
     field public static final int onClick = 16843375; // 0x101026f
@@ -1275,6 +1285,8 @@ package android {
     field public static final int tileMode = 16843265; // 0x1010201
     field public static final int tileModeX = 16843897; // 0x1010479
     field public static final int tileModeY = 16843898; // 0x101047a
+    field public static final int timePickerDialogTheme = 16843936; // 0x10104a0
+    field public static final int timePickerStyle = 16843935; // 0x101049f
     field public static final int timeZone = 16843724; // 0x10103cc
     field public static final int tint = 16843041; // 0x1010121
     field public static final int tintMode = 16843797; // 0x1010415

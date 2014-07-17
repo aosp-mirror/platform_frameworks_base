@@ -112,9 +112,6 @@
     <color name="timepicker_default_text_color_holo_light">#8c8c8c</color>
     <color name="timepicker_default_text_color_holo_dark">@color/white</color>
 
-    <color name="timepicker_default_disabled_color_holo_light">#7f000000</color>
-    <color name="timepicker_default_disabled_color_holo_dark">#7f08c8c8</color>
-
     <color name="timepicker_default_ampm_selected_background_color_holo_light">@color/holo_blue_light</color>
     <color name="timepicker_default_ampm_selected_background_color_holo_dark">@color/holo_blue_light</color>
 
