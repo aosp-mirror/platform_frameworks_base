@@ -18,7 +18,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"מעטפת"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"דוח הבאגים צולם"</string>
-    <string name="bugreport_finished_text" msgid="3559904746859400732">"גע כדי לשתף את דוח הבאגים שלך"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"החלק שמאלה כדי לשתף את דוח הבאגים"</string>
+    <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"גע כדי לשתף את דוח הבאגים שלך"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"דוחות על באגים כוללים נתונים מקובצי היומן השונים במערכת, כולל מידע אישי ופרטי. שתף דוחות באגים רק עם אפליקציות ואנשים שאתה סומך עליהם."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"הצג את ההודעה הזו בפעם הבאה"</string>
 </resources>
