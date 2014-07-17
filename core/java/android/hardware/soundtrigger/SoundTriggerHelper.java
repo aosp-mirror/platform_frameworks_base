@@ -80,7 +80,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         int status = SoundTrigger.listModules(modules);
         mActiveListeners = new SparseArray<>(1);
         if (status != SoundTrigger.STATUS_OK || modules.size() == 0) {
-            // TODO: Figure out how to handle errors in listing the modules here.
+            Slog.w(TAG, "listModules status=" + status + ", # of modules=" + modules.size());
             dspInfo = null;
             mModuleProperties = null;
             mModule = null;
@@ -98,8 +98,11 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
      * @return True, if a recognition for the given {@link Keyphrase} is active.
      */
     public synchronized boolean isKeyphraseActive(Keyphrase keyphrase) {
-        // TODO: Check if the recognition for the keyphrase is currently active.
-        return false;
+        if (keyphrase == null) {
+            Slog.w(TAG, "isKeyphraseActive requires a non-null keyphrase");
+            return false;
+        }
+        return mActiveListeners.get(keyphrase.id) != null;
     }
 
     /**
