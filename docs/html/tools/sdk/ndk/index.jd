@@ -349,8 +349,7 @@ injunctive remedies (or an equivalent type of urgent legal relief) in any jurisd
 <input id="agree" type="checkbox" name="agree" value="1" onclick="onAgreeChecked()" />
 <label id="agreeLabel" for="agree">I have read and agree with the above terms and conditions</label>
 </p>
-<p><a href="" class="button disabled ndk" id="downloadForRealz" onclick="return
-onDownloadNdkForRealz(this);"></a></p>
+<p><a href="" class="button disabled ndk" id="downloadForRealz" onclick="return onDownloadNdkForRealz(this);"></a></p>
 </div>
 
 
