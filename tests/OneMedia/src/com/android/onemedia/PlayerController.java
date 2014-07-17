@@ -161,7 +161,7 @@ public class PlayerController {
                 Log.e(TAG, "Error getting session", e);
                 return;
             }
-            mController = MediaController.fromToken(token);
+            mController = new MediaController(token);
             mContext.setMediaController(mController);
             mController.addCallback(mControllerCb, mHandler);
             mTransportControls = mController.getTransportControls();
