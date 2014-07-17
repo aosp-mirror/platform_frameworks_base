@@ -201,7 +201,7 @@ interface IAudioService {
 
     void disableSafeMediaVolume();
 
-    int setHdmiSystemAudioSupported(boolean on, int device, String name);
+    int setHdmiSystemAudioSupported(boolean on);
 
            boolean registerAudioPolicy(in AudioPolicyConfig policyConfig, IBinder cb);
     oneway void unregisterAudioPolicyAsync(in IBinder cb);
