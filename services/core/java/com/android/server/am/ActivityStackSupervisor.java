@@ -886,6 +886,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     requestCode, callingPid, callingUid, callingPackage, startFlags, options,
                     componentSpecified, null, container);
 
+            Binder.restoreCallingIdentity(origId);
+
             if (stack.mConfigWillChange) {
                 // If the caller also wants to switch to a new configuration,
                 // do so now.  This allows a clean switch, as we are waiting
@@ -898,8 +900,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
                         "Updating to new configuration after starting activity.");
                 mService.updateConfigurationLocked(config, null, false, false);
             }
-
-            Binder.restoreCallingIdentity(origId);
 
             if (outResult != null) {
                 outResult.result = res;
