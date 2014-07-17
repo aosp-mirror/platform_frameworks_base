@@ -23,6 +23,7 @@
     </style>
 
     <style name="Widget.Leanback.TimePicker" parent="Widget.Material.TimePicker">
+        <item name="legacyMode">true</item>
         <item name="legacyLayout">@layout/time_picker_legacy_leanback</item>
     </style>
 
