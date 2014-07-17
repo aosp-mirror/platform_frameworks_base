@@ -285,9 +285,6 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         mDateExpanded.setVisibility(mExpanded && !mOverscrolled ? View.VISIBLE : View.GONE);
         mSettingsButton.setVisibility(mExpanded && !mOverscrolled ? View.VISIBLE : View.GONE);
         mQsDetailHeader.setVisibility(mExpanded ? View.VISIBLE : View.GONE);
-        if (mStatusIcons != null) {
-            mStatusIcons.setVisibility(!mExpanded || mOverscrolled ? View.VISIBLE : View.GONE);
-        }
         if (mSignalCluster != null) {
             mSignalCluster.setVisibility(!mExpanded || mOverscrolled ? View.VISIBLE : View.GONE);
         }
@@ -440,12 +437,13 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     public void attachSystemIcons(LinearLayout systemIcons) {
         mSystemIconsContainer.addView(systemIcons);
         mStatusIcons = systemIcons.findViewById(R.id.statusIcons);
+        mStatusIcons.addOnLayoutChangeListener(mStatusIconsChanged);
         mSignalCluster = systemIcons.findViewById(R.id.signal_cluster);
     }
 
     public void onSystemIconsDetached() {
         if (mStatusIcons != null) {
-            mStatusIcons.setVisibility(View.VISIBLE);
+            mStatusIcons.removeOnLayoutChangeListener(mStatusIconsChanged);
         }
         if (mSignalCluster != null) {
             mSignalCluster.setVisibility(View.VISIBLE);
@@ -529,6 +527,23 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         // We don't want that everything lights up when we click on the header, so block the request
         // here.
     }
+
+    private final OnLayoutChangeListener mStatusIconsChanged = new OnLayoutChangeListener() {
+        private final Rect mClipBounds = new Rect();
+
+        @Override
+        public void onLayoutChange(View v, int left, int top, int right,
+                int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+            // Hide the statusIcons in the header by clipping them.  Can't touch visibility since
+            // they are mirrored to the real status bar.
+            final Rect r = mSystemIconsContainer.getClipBounds();
+            if (r == null || r.left != right) {
+                mClipBounds.set(right, 0, mSystemIconsContainer.getWidth(),
+                        mSystemIconsContainer.getHeight());
+                mSystemIconsContainer.setClipBounds(mClipBounds);
+            }
+        }
+    };
 
     private final QSPanel.Callback mQsPanelCallback = new QSPanel.Callback() {
         @Override
