@@ -16555,7 +16555,7 @@ package android.media.tv {
     method public android.graphics.drawable.Drawable loadIcon(android.content.pm.PackageManager);
     method public java.lang.CharSequence loadLabel(android.content.pm.PackageManager);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final java.lang.String EXTRA_SERVICE_NAME = "serviceName";
+    field public static final java.lang.String EXTRA_INPUT_ID = "inputId";
     field public static final int TYPE_HDMI = 1; // 0x1
     field public static final int TYPE_PASSTHROUGH = 3; // 0x3
     field public static final int TYPE_TUNER = 2; // 0x2
