@@ -281,12 +281,25 @@ public class VoiceInteractionManagerService extends SystemService {
                     throw new SecurityException("Caller does not hold the permission "
                             + Manifest.permission.MANAGE_VOICE_KEYPHRASES);
                 }
+                if (model == null) {
+                    throw new IllegalArgumentException("Model must not be null");
+                }
+
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    if (mDbHelper.addOrUpdateKeyphraseSoundModel(model)) {
-                        return STATUS_OK;
+                    // If the keyphrases are not present in the model, delete the model.
+                    if (model.keyphrases == null) {
+                        if (mDbHelper.deleteKeyphraseSoundModel(model.uuid)) {
+                            return STATUS_OK;
+                        } else {
+                            return STATUS_ERROR;
+                        }
                     } else {
-                        return STATUS_ERROR;
+                        if (mDbHelper.addOrUpdateKeyphraseSoundModel(model)) {
+                            return STATUS_OK;
+                        } else {
+                            return STATUS_ERROR;
+                        }
                     }
                 } finally {
                     Binder.restoreCallingIdentity(caller);
