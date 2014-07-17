@@ -222,6 +222,7 @@ import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
  * @attr ref android.R.styleable#TextView_imeActionId
  * @attr ref android.R.styleable#TextView_editorExtras
  * @attr ref android.R.styleable#TextView_elegantTextHeight
+ * @attr ref android.R.styleable#TextView_letterSpacing
  */
 @RemoteView
 public class TextView extends View implements ViewTreeObserver.OnPreDrawListener {
@@ -657,6 +658,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         int shadowcolor = 0;
         float dx = 0, dy = 0, r = 0;
         boolean elegant = false;
+        float letterSpacing = 0;
 
         final Resources.Theme theme = context.getTheme();
 
@@ -736,6 +738,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                 case com.android.internal.R.styleable.TextAppearance_elegantTextHeight:
                     elegant = appearance.getBoolean(attr, false);
+                    break;
+
+                case com.android.internal.R.styleable.TextAppearance_letterSpacing:
+                    letterSpacing = appearance.getFloat(attr, 0);
                     break;
                 }
             }
@@ -1078,6 +1084,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             case com.android.internal.R.styleable.TextView_elegantTextHeight:
                 elegant = a.getBoolean(attr, false);
                 break;
+
+            case com.android.internal.R.styleable.TextView_letterSpacing:
+                letterSpacing = a.getFloat(attr, 0);
+                break;
             }
         }
         a.recycle();
@@ -1259,6 +1269,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
         setRawTextSize(textSize);
         setElegantTextHeight(elegant);
+        setLetterSpacing(letterSpacing);
 
         if (allCaps) {
             setTransformationMethod(new AllCapsTransformationMethod(getContext()));
@@ -2487,6 +2498,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 com.android.internal.R.styleable.TextAppearance_elegantTextHeight, false));
         }
 
+        if (appearance.hasValue(com.android.internal.R.styleable.TextAppearance_letterSpacing)) {
+            setLetterSpacing(appearance.getFloat(
+                com.android.internal.R.styleable.TextAppearance_letterSpacing, 0));
+        }
+
         appearance.recycle();
     }
 
@@ -2665,6 +2681,41 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public void setElegantTextHeight(boolean elegant) {
         mTextPaint.setElegantTextHeight(elegant);
     }
+
+    /**
+     * @return the extent by which text is currently being letter-spaced.
+     * This will normally be 0.
+     *
+     * @see #setLetterSpacing(float)
+     * @hide
+     */
+    public float getLetterSpacing() {
+        return mTextPaint.getLetterSpacing();
+    }
+
+    /**
+     * Sets text letter-spacing.  The value is in 'EM' units.  Typical values
+     * for slight expansion will be around 0.05.  Negative values tighten text.
+     *
+     * @see #getLetterSpacing()
+     * @see Paint#setFlags
+     *
+     * @attr ref android.R.styleable#TextView_letterSpacing
+     * @hide
+     */
+    @android.view.RemotableViewMethod
+    public void setLetterSpacing(float letterSpacing) {
+        if (letterSpacing != mTextPaint.getLetterSpacing()) {
+            mTextPaint.setLetterSpacing(letterSpacing);
+
+            if (mLayout != null) {
+                nullLayouts();
+                requestLayout();
+                invalidate();
+            }
+        }
+    }
+
 
     /**
      * Sets the text color for all the states (normal, selected,
