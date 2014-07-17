@@ -887,7 +887,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see #REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE
      * @see #REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR
      * @see #REQUEST_AVAILABLE_CAPABILITIES_MANUAL_POST_PROCESSING
-     * @see #REQUEST_AVAILABLE_CAPABILITIES_DNG
+     * @see #REQUEST_AVAILABLE_CAPABILITIES_RAW
      */
     public static final Key<int[]> REQUEST_AVAILABLE_CAPABILITIES =
             new Key<int[]>("android.request.availableCapabilities", int[].class);
@@ -1068,17 +1068,17 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <tr>
      * <td align="left">RAW_OPAQUE</td>
      * <td align="left">RAW16</td>
-     * <td align="left">DNG</td>
+     * <td align="left">RAW</td>
      * </tr>
      * <tr>
      * <td align="left">RAW16</td>
      * <td align="left">YUV_420_888</td>
-     * <td align="left">DNG</td>
+     * <td align="left">RAW</td>
      * </tr>
      * <tr>
      * <td align="left">RAW16</td>
      * <td align="left">JPEG</td>
-     * <td align="left">DNG</td>
+     * <td align="left">RAW</td>
      * </tr>
      * </tbody>
      * </table>

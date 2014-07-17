@@ -8686,9 +8686,13 @@ package android.content.pm {
     field public static final java.lang.String FEATURE_CAMERA = "android.hardware.camera";
     field public static final java.lang.String FEATURE_CAMERA_ANY = "android.hardware.camera.any";
     field public static final java.lang.String FEATURE_CAMERA_AUTOFOCUS = "android.hardware.camera.autofocus";
+    field public static final java.lang.String FEATURE_CAMERA_CAPABILITY_MANUAL_POST_PROCESSING = "android.hardware.camera.capability.manual_post_processing";
+    field public static final java.lang.String FEATURE_CAMERA_CAPABILITY_MANUAL_SENSOR = "android.hardware.camera.capability.manual_sensor";
+    field public static final java.lang.String FEATURE_CAMERA_CAPABILITY_RAW = "android.hardware.camera.capability.raw";
     field public static final java.lang.String FEATURE_CAMERA_EXTERNAL = "android.hardware.camera.external";
     field public static final java.lang.String FEATURE_CAMERA_FLASH = "android.hardware.camera.flash";
     field public static final java.lang.String FEATURE_CAMERA_FRONT = "android.hardware.camera.front";
+    field public static final java.lang.String FEATURE_CAMERA_LEVEL_FULL = "android.hardware.camera.level.full";
     field public static final java.lang.String FEATURE_CONSUMER_IR = "android.hardware.consumerir";
     field public static final java.lang.String FEATURE_DEVICE_ADMIN = "android.software.device_admin";
     field public static final java.lang.String FEATURE_FAKETOUCH = "android.hardware.faketouch";
@@ -12766,9 +12770,9 @@ package android.hardware.camera2 {
     field public static final int NOISE_REDUCTION_MODE_HIGH_QUALITY = 2; // 0x2
     field public static final int NOISE_REDUCTION_MODE_OFF = 0; // 0x0
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE = 0; // 0x0
-    field public static final int REQUEST_AVAILABLE_CAPABILITIES_DNG = 3; // 0x3
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_MANUAL_POST_PROCESSING = 2; // 0x2
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR = 1; // 0x1
+    field public static final int REQUEST_AVAILABLE_CAPABILITIES_RAW = 3; // 0x3
     field public static final int SCALER_CROPPING_TYPE_CENTER_ONLY = 0; // 0x0
     field public static final int SCALER_CROPPING_TYPE_FREEFORM = 1; // 0x1
     field public static final int SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_BGGR = 3; // 0x3
