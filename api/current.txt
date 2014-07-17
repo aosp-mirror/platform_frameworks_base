@@ -5602,6 +5602,52 @@ package android.app.job {
 
 }
 
+package android.app.usage {
+
+  public final class PackageUsageStats implements android.os.Parcelable {
+    method public int describeContents();
+    method public long getLastTimeUsed();
+    method public java.lang.String getPackageName();
+    method public long getTotalTimeSpent();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
+  public final class UsageStats implements android.os.Parcelable {
+    ctor public UsageStats(android.app.usage.UsageStats);
+    method public int describeContents();
+    method public long getFirstTimeStamp();
+    method public long getLastTimeStamp();
+    method public android.app.usage.PackageUsageStats getPackage(int);
+    method public android.app.usage.PackageUsageStats getPackage(java.lang.String);
+    method public int getPackageCount();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
+  public static class UsageStats.Event implements android.os.Parcelable {
+    ctor public UsageStats.Event();
+    method public int describeContents();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final int MOVE_TO_BACKGROUND = 2; // 0x2
+    field public static final int MOVE_TO_FOREGROUND = 1; // 0x1
+    field public static final int NONE = 0; // 0x0
+    field public int eventType;
+    field public java.lang.String packageName;
+    field public long timeStamp;
+  }
+
+  public final class UsageStatsManager {
+    method public android.app.usage.UsageStats[] getDailyStatsSince(long);
+    method public android.app.usage.UsageStats[] getMonthlyStatsSince(long);
+    method public android.app.usage.UsageStats getRecentStatsSince(long);
+    method public android.app.usage.UsageStats[] getWeeklyStatsSince(long);
+    method public android.app.usage.UsageStats[] getYearlyStatsSince(long);
+  }
+
+}
+
 package android.appwidget {
 
   public class AppWidgetHost {

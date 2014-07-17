@@ -19,7 +19,6 @@ package android.app;
 import android.os.BatteryStats;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
-import com.android.internal.app.IUsageStats;
 import com.android.internal.app.ProcessStats;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.util.FastPrintWriter;
@@ -2226,7 +2225,7 @@ public class ActivityManager {
      *
      * @hide
      */
-    public Map<String, Integer> getAllPackageLaunchCounts() {
+    /*public Map<String, Integer> getAllPackageLaunchCounts() {
         try {
             IUsageStats usageStatsService = IUsageStats.Stub.asInterface(
                     ServiceManager.getService("usagestats"));
@@ -2250,7 +2249,7 @@ public class ActivityManager {
             Log.w(TAG, "Could not query launch counts", e);
             return new HashMap<String, Integer>();
         }
-    }
+    }*/
 
     /** @hide */
     public static int checkComponentPermission(String permission, int uid,
@@ -2349,24 +2348,6 @@ public class ActivityManager {
         } catch (RemoteException e) {
             return 0;
         }
-    }
-
-    /**
-     * Returns the usage statistics of each installed package.
-     *
-     * @hide
-     */
-    public UsageStats.PackageStats[] getAllPackageUsageStats() {
-        try {
-            IUsageStats usageStatsService = IUsageStats.Stub.asInterface(
-                    ServiceManager.getService("usagestats"));
-            if (usageStatsService != null) {
-                return usageStatsService.getAllPkgUsageStats(ActivityThread.currentPackageName());
-            }
-        } catch (RemoteException e) {
-            Log.w(TAG, "Could not query usage stats", e);
-        }
-        return new UsageStats.PackageStats[0];
     }
 
     /**
