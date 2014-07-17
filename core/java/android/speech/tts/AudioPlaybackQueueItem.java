@@ -54,7 +54,11 @@ class AudioPlaybackQueueItem extends PlaybackQueueItem {
         final UtteranceProgressDispatcher dispatcher = getDispatcher();
 
         dispatcher.dispatchOnStart();
-        mPlayer = MediaPlayer.create(mContext, mUri);
+
+        int sessionId = mAudioParams.mSessionId;
+        mPlayer = MediaPlayer.create(
+                mContext, mUri, null, mAudioParams.mAudioAttributes,
+                sessionId > 0 ? sessionId : AudioSystem.AUDIO_SESSION_ALLOCATE);
         if (mPlayer == null) {
             dispatcher.dispatchOnError(TextToSpeech.ERROR_OUTPUT);
             return;
@@ -76,11 +80,8 @@ class AudioPlaybackQueueItem extends PlaybackQueueItem {
                     mDone.open();
                 }
             });
-            mPlayer.setAudioStreamType(mAudioParams.mStreamType);
+
             setupVolume(mPlayer, mAudioParams.mVolume, mAudioParams.mPan);
-            if (mAudioParams.mSessionId != AudioSystem.AUDIO_SESSION_ALLOCATE) {
-                mPlayer.setAudioSessionId(mAudioParams.mSessionId);
-            }
             mPlayer.start();
             mDone.block();
             finish();
