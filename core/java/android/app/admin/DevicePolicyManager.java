@@ -2270,6 +2270,45 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Called by a profile owner to set whether caller-Id information from the managed
+     * profile will be shown for incoming calls.
+     *
+     * <p>The calling device admin must be a profile owner. If it is not, a
+     * security exception will be thrown.
+     *
+     * @param who Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param disabled If true caller-Id information in the managed profile is not displayed.
+     */
+    public void setCrossProfileCallerIdDisabled(ComponentName who, boolean disabled) {
+        if (mService != null) {
+            try {
+                mService.setCrossProfileCallerIdDisabled(who, disabled);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+    }
+
+    /**
+     * Determine whether or not caller-Id information has been disabled.
+     *
+     * <p>The calling device admin must be a profile owner. If it is not, a
+     * security exception will be thrown.
+     *
+     * @param who Which {@link DeviceAdminReceiver} this request is associated with.
+     */
+    public boolean getCrossProfileCallerIdDisabled(ComponentName who) {
+        if (mService != null) {
+            try {
+                return mService.getCrossProfileCallerIdDisabled(who);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+        return false;
+    }
+
+    /**
      * Called by the profile owner so that some intents sent in the managed profile can also be
      * resolved in the parent, or vice versa.
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
