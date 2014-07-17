@@ -129,10 +129,10 @@ public final class RemoteConnection {
         }
     }
 
-    public void answer() {
+    public void answer(int videoState) {
         try {
             if (mConnected) {
-                mConnectionService.answer(mConnectionId);
+                mConnectionService.answer(mConnectionId, videoState);
             }
         } catch (RemoteException ignored) {
         }

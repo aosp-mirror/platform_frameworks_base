@@ -45,10 +45,11 @@ public final class InCallAdapter {
      * Instructs Telecomm to answer the specified call.
      *
      * @param callId The identifier of the call to answer.
+     * @param videoState The video state in which to answer the call.
      */
-    public void answerCall(String callId) {
+    public void answerCall(String callId, int videoState) {
         try {
-            mAdapter.answerCall(callId);
+            mAdapter.answerCall(callId, videoState);
         } catch (RemoteException e) {
         }
     }
