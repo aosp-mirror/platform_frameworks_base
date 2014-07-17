@@ -698,6 +698,7 @@ public final class PowerManagerService extends com.android.server.SystemService
 
             WakeLock wakeLock;
             int index = findWakeLockIndexLocked(lock);
+            boolean notifyAcquire;
             if (index >= 0) {
                 wakeLock = mWakeLocks.get(index);
                 if (!wakeLock.hasSameProperties(flags, tag, ws, uid, pid)) {
@@ -706,6 +707,7 @@ public final class PowerManagerService extends com.android.server.SystemService
                             uid, pid, ws, historyTag);
                     wakeLock.updateProperties(flags, tag, packageName, ws, historyTag, uid, pid);
                 }
+                notifyAcquire = false;
             } else {
                 wakeLock = new WakeLock(lock, flags, tag, packageName, ws, historyTag, uid, pid);
                 try {
@@ -713,13 +715,21 @@ public final class PowerManagerService extends com.android.server.SystemService
                 } catch (RemoteException ex) {
                     throw new IllegalArgumentException("Wake lock is already dead.");
                 }
-                notifyWakeLockAcquiredLocked(wakeLock);
                 mWakeLocks.add(wakeLock);
+                notifyAcquire = true;
             }
 
             applyWakeLockFlagsOnAcquireLocked(wakeLock);
             mDirty |= DIRTY_WAKE_LOCKS;
             updatePowerStateLocked();
+            if (notifyAcquire) {
+                // This needs to be done last so we are sure we have acquired the
+                // kernel wake lock.  Otherwise we have a race where the system may
+                // go to sleep between the time we start the accounting in battery
+                // stats and when we actually get around to telling the kernel to
+                // stay awake.
+                notifyWakeLockAcquiredLocked(wakeLock);
+            }
         }
     }
 
