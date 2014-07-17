@@ -617,14 +617,23 @@
     <!-- Description of the left direction in which one can to slide the handle in the Slide unlock screen. [CHAR LIMIT=NONE] -->
     <string name="description_direction_left">"Slide left for <xliff:g id="target_description" example="Unlock">%s</xliff:g>.</string>
 
-    <!-- Zen mode: No interruptions title, with a warning about alarms and timers. [CHAR LIMIT=60] -->
-    <string name="zen_no_interruptions_with_warning">No interruptions, including alarms and timers</string>
+    <!-- Zen mode: No interruptions title, with a warning about alarms. [CHAR LIMIT=60] -->
+    <string name="zen_no_interruptions_with_warning">No interruptions, including alarms</string>
 
     <!-- Zen mode: No interruptions. [CHAR LIMIT=40] -->
     <string name="zen_no_interruptions">No interruptions</string>
 
     <!-- Zen mode: Only important interruptions. [CHAR LIMIT=40] -->
     <string name="zen_important_interruptions">Priority interruptions only</string>
+
+    <!-- Zen mode: Next alarm information - just a time. [CHAR LIMIT=40] -->
+    <string name="zen_alarm_information_time">Your next alarm is at <xliff:g id="alarm_time" example="5:00 PM">%s</xliff:g></string>
+
+    <!-- Zen mode: Next alarm information - day and time. [CHAR LIMIT=40] -->
+    <string name="zen_alarm_information_day_time">Your next alarm is <xliff:g id="alarm_day_and_time" example="Fri 5:00 PM">%s</xliff:g></string>
+
+    <!-- Zen mode: Next alarm warning. [CHAR LIMIT=40] -->
+    <string name="zen_alarm_warning">You won\'t hear your alarm at <xliff:g id="alarm_time" example="5:00 PM">%s</xliff:g></string>
 
     <!-- Text for overflow card on Keyguard when there is not enough space for all notifications on Keyguard. [CHAR LIMIT=1] -->
     <string name="keyguard_more_overflow_text">+<xliff:g id="number_of_notifications" example="5">%d</xliff:g></string>

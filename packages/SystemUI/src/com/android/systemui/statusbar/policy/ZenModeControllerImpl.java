@@ -16,19 +16,25 @@
 
 package com.android.systemui.statusbar.policy;
 
+import android.app.AlarmClockInfo;
+import android.app.AlarmManager;
 import android.app.INotificationManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.provider.Settings.Global;
 import android.service.notification.Condition;
 import android.service.notification.IConditionListener;
 import android.service.notification.ZenModeConfig;
+import android.util.Log;
 import android.util.Slog;
 
-import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.qs.GlobalSetting;
 
 import java.util.ArrayList;
@@ -36,8 +42,8 @@ import java.util.LinkedHashMap;
 
 /** Platform implementation of the zen mode controller. **/
 public class ZenModeControllerImpl implements ZenModeController {
-    private static final String TAG = "ZenModeControllerImpl";
-    private static final boolean DEBUG = false;
+    private static final String TAG = "ZenModeController";
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private final ArrayList<Callback> mCallbacks = new ArrayList<Callback>();
     private final Context mContext;
@@ -45,13 +51,13 @@ public class ZenModeControllerImpl implements ZenModeController {
     private final GlobalSetting mConfigSetting;
     private final INotificationManager mNoMan;
     private final LinkedHashMap<Uri, Condition> mConditions = new LinkedHashMap<Uri, Condition>();
-    private final LockPatternUtils mUtils;
+    private final AlarmManager mAlarmManager;
 
+    private int mUserId;
     private boolean mRequesting;
 
     public ZenModeControllerImpl(Context context, Handler handler) {
         mContext = context;
-        mUtils = new LockPatternUtils(mContext);
         mModeSetting = new GlobalSetting(mContext, handler, Global.ZEN_MODE) {
             @Override
             protected void handleValueChanged(int value) {
@@ -68,6 +74,7 @@ public class ZenModeControllerImpl implements ZenModeController {
         mConfigSetting.setListening(true);
         mNoMan = INotificationManager.Stub.asInterface(
                 ServiceManager.getService(Context.NOTIFICATION_SERVICE));
+        mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
     }
 
     @Override
@@ -126,8 +133,22 @@ public class ZenModeControllerImpl implements ZenModeController {
     }
 
     @Override
-    public boolean hasNextAlarm() {
-        return mUtils.getNextAlarm() != null;
+    public long getNextAlarm() {
+        final AlarmClockInfo info = mAlarmManager.getNextAlarmClock(mUserId);
+        return info != null ? info.getTriggerTime() : 0;
+    }
+
+    @Override
+    public void setUserId(int userId) {
+        mUserId = userId;
+        mContext.registerReceiverAsUser(mReceiver, new UserHandle(mUserId),
+                new IntentFilter(AlarmManager.ACTION_NEXT_ALARM_CLOCK_CHANGED), null, null);
+    }
+
+    private void fireNextAlarmChanged() {
+        for (Callback cb : mCallbacks) {
+            cb.onNextAlarmChanged();
+        }
     }
 
     private void fireZenChanged(int zen) {
@@ -167,6 +188,15 @@ public class ZenModeControllerImpl implements ZenModeController {
                     + (conditions == null ? 0 : conditions.length) + " mRequesting=" + mRequesting);
             if (!mRequesting) return;
             updateConditions(conditions);
+        }
+    };
+
+    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (AlarmManager.ACTION_NEXT_ALARM_CLOCK_CHANGED.equals(intent.getAction())) {
+                fireNextAlarmChanged();
+            }
         }
     };
 }

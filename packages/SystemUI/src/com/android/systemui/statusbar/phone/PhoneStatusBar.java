@@ -549,6 +549,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         mDozeServiceHost = new DozeServiceHost();
         putComponent(DozeService.Host.class, mDozeServiceHost);
+
+        setControllerUsers();
     }
 
     // ================================================================================
@@ -2797,6 +2799,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         animateCollapsePanels();
         updateNotifications();
         resetUserSetupObserver();
+        setControllerUsers();
+    }
+
+    private void setControllerUsers() {
+        if (mZenModeController != null) {
+            mZenModeController.setUserId(mCurrentUserId);
+        }
     }
 
     private void resetUserSetupObserver() {
