@@ -79,7 +79,7 @@ public class NetlinkTracker extends BaseNetworkObserver {
     private final LinkProperties mLinkProperties;
     private DnsServerRepository mDnsServerRepository;
 
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
 
     public NetlinkTracker(String iface, Callback callback) {
         TAG = "NetlinkTracker/" + iface;
