@@ -75,4 +75,13 @@ public class ActivityRecognitionEvent implements Parcelable {
         parcel.writeInt(mEventType);
         parcel.writeLong(mTimestampNs);
     }
+
+    @Override
+    public String toString() {
+        return String.format(
+                "Activity='%s', EventType=%s, TimestampNs=%s",
+                mActivity,
+                mEventType,
+                mTimestampNs);
+    }
 }

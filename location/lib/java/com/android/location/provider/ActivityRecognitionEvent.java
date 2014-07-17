@@ -41,4 +41,30 @@ public class ActivityRecognitionEvent {
     public long getTimestampNs() {
         return mTimestampNs;
     }
+
+    @Override
+    public String toString() {
+        String eventString;
+        switch (mEventType) {
+            case ActivityRecognitionProvider.EVENT_TYPE_ENTER:
+                eventString = "Enter";
+                break;
+            case ActivityRecognitionProvider.EVENT_TYPE_EXIT:
+                eventString = "Exit";
+                break;
+            case ActivityRecognitionProvider.EVENT_TYPE_FLUSH_COMPLETE:
+                eventString = "FlushComplete";
+                break;
+            default:
+                eventString = "<Invalid>";
+                break;
+        }
+
+        return String.format(
+                "Activity='%s', EventType=%s(%s), TimestampNs=%s",
+                mActivity,
+                eventString,
+                mEventType,
+                mTimestampNs);
+    }
 }
