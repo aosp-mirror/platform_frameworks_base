@@ -3979,16 +3979,6 @@
     <!-- Optional button to Skip a PreferenceActivity [CHAR LIMIT=20] -->
     <string name="skip_button_label">Skip</string>
 
-    <!-- Strings for throttling notification -->
-    <!-- Shown when the user is in danger of being throttled -->
-    <string name="throttle_warning_notification_title">High mobile data use</string>
-    <string name="throttle_warning_notification_message">Touch to learn more about mobile data use.</string>
-
-    <!-- Strings for throttling notification -->
-    <!-- Shown when the users bandwidth is reduced because of excessive data use -->
-    <string name="throttled_notification_title">Mobile data limit exceeded</string>
-    <string name="throttled_notification_message">Touch to learn more about mobile data use.</string>
-
     <!-- Displayed on the Find dialog when there are no matches [CHAR LIMIT=NONE]-->
     <string name="no_matches">No matches</string>
 
@@ -4198,22 +4188,22 @@
     <string name="data_usage_warning_body">Touch to view usage and settings.</string>
 
     <!-- Notification title when 2G-3G data usage has exceeded limit threshold, and has been disabled. [CHAR LIMIT=32] -->
-    <string name="data_usage_3g_limit_title">2G-3G data disabled</string>
+    <string name="data_usage_3g_limit_title">2G-3G data is off</string>
     <!-- Notification title when 4G data usage has exceeded limit threshold, and has been disabled. [CHAR LIMIT=32] -->
-    <string name="data_usage_4g_limit_title">4G data disabled</string>
+    <string name="data_usage_4g_limit_title">4G data is off</string>
     <!-- Notification title when mobile data usage has exceeded limit threshold, and has been disabled. [CHAR LIMIT=32] -->
-    <string name="data_usage_mobile_limit_title">Mobile data disabled</string>
+    <string name="data_usage_mobile_limit_title">Cellular data is off</string>
     <!-- Notification title when Wi-Fi data usage has exceeded limit threshold, and has been disabled. [CHAR LIMIT=32] -->
-    <string name="data_usage_wifi_limit_title">Wi-Fi data disabled</string>
+    <string name="data_usage_wifi_limit_title">Wi-Fi data is off</string>
     <!-- Notification body when data usage has exceeded limit threshold, and has been disabled. [CHAR LIMIT=32] -->
-    <string name="data_usage_limit_body">Touch to enable.</string>
+    <string name="data_usage_limit_body">Limit reached</string>
 
     <!-- Notification title when 2G-3G data usage has exceeded limit threshold. [CHAR LIMIT=32] -->
     <string name="data_usage_3g_limit_snoozed_title">2G-3G data limit exceeded</string>
     <!-- Notification title when 4G data usage has exceeded limit threshold. [CHAR LIMIT=32] -->
     <string name="data_usage_4g_limit_snoozed_title">4G data limit exceeded</string>
     <!-- Notification title when mobile data usage has exceeded limit threshold. [CHAR LIMIT=32] -->
-    <string name="data_usage_mobile_limit_snoozed_title">Mobile data limit exceeded</string>
+    <string name="data_usage_mobile_limit_snoozed_title">Cellular data limit exceeded</string>
     <!-- Notification title when Wi-Fi data usage has exceeded limit threshold. [CHAR LIMIT=32] -->
     <string name="data_usage_wifi_limit_snoozed_title">Wi-Fi data limit exceeded</string>
     <!-- Notification body when data usage has exceeded limit threshold. [CHAR LIMIT=32] -->
