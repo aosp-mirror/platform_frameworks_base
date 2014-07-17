@@ -3171,25 +3171,34 @@ final class Settings {
         file.delete();
         file = getUserPackagesStateBackupFile(userId);
         file.delete();
-        removeCrossProfileIntentFiltersToUserLPr(userId);
+        removeCrossProfileIntentFiltersLPw(userId);
         removeCrossProfilePackagesLPw(userId);
     }
 
-    void removeCrossProfileIntentFiltersToUserLPr(int targetUserId) {
-        for (int i = 0; i < mCrossProfileIntentResolvers.size(); i++) {
-            int sourceUserId = mCrossProfileIntentResolvers.keyAt(i);
-            CrossProfileIntentResolver cpir = mCrossProfileIntentResolvers.get(sourceUserId);
-            boolean needsWriting = false;
-            HashSet<CrossProfileIntentFilter> cpifs =
-                    new HashSet<CrossProfileIntentFilter>(cpir.filterSet());
-            for (CrossProfileIntentFilter cpif : cpifs) {
-                if (cpif.getTargetUserId() == targetUserId) {
-                    needsWriting = true;
-                    cpir.removeFilter(cpif);
-                }
+    void removeCrossProfileIntentFiltersLPw(int userId) {
+        synchronized (mCrossProfileIntentResolvers) {
+            // userId is the source user
+            if (mCrossProfileIntentResolvers.get(userId) != null) {
+                mCrossProfileIntentResolvers.remove(userId);
+                writePackageRestrictionsLPr(userId);
             }
-            if (needsWriting) {
-                writePackageRestrictionsLPr(sourceUserId);
+            // userId is the target user
+            int count = mCrossProfileIntentResolvers.size();
+            for (int i = 0; i < count; i++) {
+                int sourceUserId = mCrossProfileIntentResolvers.keyAt(i);
+                CrossProfileIntentResolver cpir = mCrossProfileIntentResolvers.get(sourceUserId);
+                boolean needsWriting = false;
+                HashSet<CrossProfileIntentFilter> cpifs =
+                        new HashSet<CrossProfileIntentFilter>(cpir.filterSet());
+                for (CrossProfileIntentFilter cpif : cpifs) {
+                    if (cpif.getTargetUserId() == userId) {
+                        needsWriting = true;
+                        cpir.removeFilter(cpif);
+                    }
+                }
+                if (needsWriting) {
+                    writePackageRestrictionsLPr(sourceUserId);
+                }
             }
         }
     }
