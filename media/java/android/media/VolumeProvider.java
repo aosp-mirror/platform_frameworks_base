@@ -32,14 +32,14 @@ public abstract class VolumeProvider {
 
     /**
      * The volume control uses relative adjustment via
-     * {@link #onAdjustVolumeBy(int)}. Attempts to set the volume to a specific
+     * {@link #onAdjustVolume(int)}. Attempts to set the volume to a specific
      * value should be ignored.
      */
     public static final int VOLUME_CONTROL_RELATIVE = 1;
 
     /**
      * The volume control uses an absolute value. It may be adjusted using
-     * {@link #onAdjustVolumeBy(int)} or set directly using
+     * {@link #onAdjustVolume(int)} or set directly using
      * {@link #onSetVolumeTo(int)}.
      */
     public static final int VOLUME_CONTROL_ABSOLUTE = 2;
@@ -104,12 +104,13 @@ public abstract class VolumeProvider {
     }
 
     /**
-     * Override to handle requests to adjust the volume of the current
-     * output.
-     *
-     * @param delta The amount to change the volume
+     * Override to handle requests to adjust the volume of the current output.
+     * Direction will be one of {@link AudioManager#ADJUST_LOWER},
+     * {@link AudioManager#ADJUST_RAISE}, {@link AudioManager#ADJUST_SAME}.
+     * 
+     * @param direction The direction to change the volume in.
      */
-    public void onAdjustVolumeBy(int delta) {
+    public void onAdjustVolume(int direction) {
     }
 
     /**

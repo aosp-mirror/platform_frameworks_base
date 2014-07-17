@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
+import android.media.AudioManager;
 import android.media.IRemoteVolumeController;
 import android.media.session.ISessionManager;
 import android.os.IBinder;
@@ -229,17 +230,19 @@ public final class MediaSessionManager {
 
     /**
      * Dispatch an adjust volume request to the system. It will be sent to the
-     * most relevant audio stream or media session.
+     * most relevant audio stream or media session. The direction must be one of
+     * {@link AudioManager#ADJUST_LOWER}, {@link AudioManager#ADJUST_RAISE},
+     * {@link AudioManager#ADJUST_SAME}.
      *
      * @param suggestedStream The stream to fall back to if there isn't a
      *            relevant stream
-     * @param delta The amount to adjust the volume by.
+     * @param direction The direction to adjust volume in.
      * @param flags Any flags to include with the volume change.
      * @hide
      */
-    public void dispatchAdjustVolumeBy(int suggestedStream, int delta, int flags) {
+    public void dispatchAdjustVolume(int suggestedStream, int direction, int flags) {
         try {
-            mService.dispatchAdjustVolumeBy(suggestedStream, delta, flags);
+            mService.dispatchAdjustVolume(suggestedStream, direction, flags);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to send adjust volume.", e);
         }

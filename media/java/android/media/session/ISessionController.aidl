@@ -41,7 +41,7 @@ interface ISessionController {
     MediaSessionInfo getSessionInfo();
     long getFlags();
     ParcelableVolumeInfo getVolumeAttributes();
-    void adjustVolumeBy(int delta, int flags);
+    void adjustVolume(int direction, int flags);
     void setVolumeTo(int value, int flags);
 
     IMediaRouterDelegate createMediaRouterDelegate(IMediaRouterStateCallback callback);
