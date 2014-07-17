@@ -18,6 +18,8 @@ package com.android.test.voiceinteraction;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.service.voice.AlwaysOnHotwordDetector;
+import android.service.voice.AlwaysOnHotwordDetector.Callback;
 import android.service.voice.VoiceInteractionService;
 import android.util.Log;
 
@@ -26,6 +28,25 @@ import java.util.Arrays;
 public class MainInteractionService extends VoiceInteractionService {
     static final String TAG = "MainInteractionService";
 
+    private final Callback mHotwordCallback = new Callback() {
+        @Override
+        public void onDetected(byte[] data) {
+            Log.i(TAG, "onDetected");
+        }
+
+        @Override
+        public void onDetectionStarted() {
+            Log.i(TAG, "onDetectionStarted");
+        }
+
+        @Override
+        public void onDetectionStopped() {
+            Log.i(TAG, "onDetectionStopped");
+        }
+    };
+
+    private AlwaysOnHotwordDetector mHotwordDetector;
+
     @Override
     public void onReady() {
         super.onReady();
@@ -33,6 +54,31 @@ public class MainInteractionService extends VoiceInteractionService {
         Log.i(TAG, "Keyphrase enrollment error? " + getKeyphraseEnrollmentInfo().getParseError());
         Log.i(TAG, "Keyphrase enrollment meta-data: "
                 + Arrays.toString(getKeyphraseEnrollmentInfo().listKeyphraseMetadata()));
+
+        mHotwordDetector = getAlwaysOnHotwordDetector("Hello There", "en-US", mHotwordCallback);
+        int availability = mHotwordDetector.getAvailability();
+        Log.i(TAG, "Hotword availability = " + availability);
+
+        switch (availability) {
+            case AlwaysOnHotwordDetector.KEYPHRASE_HARDWARE_UNAVAILABLE:
+                Log.i(TAG, "KEYPHRASE_HARDWARE_UNAVAILABLE");
+                break;
+            case AlwaysOnHotwordDetector.KEYPHRASE_UNSUPPORTED:
+                Log.i(TAG, "KEYPHRASE_UNSUPPORTED");
+                break;
+            case AlwaysOnHotwordDetector.KEYPHRASE_UNENROLLED:
+                Log.i(TAG, "KEYPHRASE_UNENROLLED");
+                Intent enroll = mHotwordDetector.getManageIntent(
+                        AlwaysOnHotwordDetector.MANAGE_ACTION_ENROLL);
+                Log.i(TAG, "Need to enroll with " + enroll);
+                break;
+            case AlwaysOnHotwordDetector.KEYPHRASE_ENROLLED:
+                Log.i(TAG, "KEYPHRASE_ENROLLED");
+                int status = mHotwordDetector.startRecognition(
+                        AlwaysOnHotwordDetector.RECOGNITION_FLAG_NONE);
+                Log.i(TAG, "startRecognition status = " + status);
+                break;
+        }
     }
 
     @Override
