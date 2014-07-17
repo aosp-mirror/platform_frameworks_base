@@ -125,6 +125,21 @@ oneway interface IBackupAgent {
             int token, IBackupManager callbackBinder);
 
     /**
+     * Provide the app with a canonical "all data has been delivered" end-of-restore
+     * callback so that it can do any postprocessing of the restored data that might
+     * be appropriate.  This is issued after both key/value and full data restore
+     * operations have completed.
+     *
+     * @param token Opaque token identifying this transaction.  This must
+     *        be echoed back to the backup service binder once the agent is
+     *        finished restoring the application based on the restore data
+     *        contents.
+     * @param callbackBinder Binder on which to indicate operation completion,
+     *        passed here as a convenience to the agent.
+     */
+    void doRestoreFinished(int token, IBackupManager callbackBinder);
+
+    /**
      * Out of band: instruct the agent to crash within the client process.  This is used
      * when the backup infrastructure detects a semantic error post-hoc and needs to
      * pass the problem back to the app.
