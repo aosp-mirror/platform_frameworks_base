@@ -19,6 +19,7 @@ package com.android.ims;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.telecomm.VideoCallProfile;
 
 /**
  * Parcelable object to handle IMS call profile.
@@ -286,4 +287,63 @@ public class ImsCallProfile implements Parcelable {
             return new ImsCallProfile[size];
         }
     };
+
+    /**
+     * Converts from the call types defined in {@link com.android.ims.ImsCallProfile} to the
+     * video state values defined in {@link android.telecomm.VideoCallProfile}.
+     *
+     * @param callType The call type.
+     * @return The video state.
+     */
+    public static int getVideoStateFromCallType(int callType) {
+        switch (callType) {
+            case CALL_TYPE_VT_NODIR:
+                return VideoCallProfile.VIDEO_STATE_PAUSED |
+                        VideoCallProfile.VIDEO_STATE_BIDIRECTIONAL;
+            case CALL_TYPE_VT_TX:
+                return VideoCallProfile.VIDEO_STATE_TX_ENABLED;
+            case CALL_TYPE_VT_RX:
+                return VideoCallProfile.VIDEO_STATE_RX_ENABLED;
+            case CALL_TYPE_VT:
+                return VideoCallProfile.VIDEO_STATE_BIDIRECTIONAL;
+            case CALL_TYPE_VOICE:
+                return VideoCallProfile.VIDEO_STATE_AUDIO_ONLY;
+            default:
+                return VideoCallProfile.VIDEO_STATE_AUDIO_ONLY;
+        }
+    }
+
+    /**
+     * Converts from the video state values defined in {@link android.telecomm.VideoCallProfile}
+     * to the call types defined in {@link ImsCallProfile}.
+     *
+     * @param videoState The video state.
+     * @return The call type.
+     */
+    public static int getCallTypeFromVideoState(int videoState) {
+        boolean videoTx = isVideoStateSet(videoState, VideoCallProfile.VIDEO_STATE_TX_ENABLED);
+        boolean videoRx = isVideoStateSet(videoState, VideoCallProfile.VIDEO_STATE_RX_ENABLED);
+        boolean isPaused = isVideoStateSet(videoState, VideoCallProfile.VIDEO_STATE_PAUSED);
+        if (isPaused) {
+            return ImsCallProfile.CALL_TYPE_VT_NODIR;
+        } else if (videoTx && !videoRx) {
+            return ImsCallProfile.CALL_TYPE_VT_TX;
+        } else if (!videoTx && videoRx) {
+            return ImsCallProfile.CALL_TYPE_VT_RX;
+        } else if (videoTx && videoRx) {
+            return ImsCallProfile.CALL_TYPE_VT;
+        }
+        return ImsCallProfile.CALL_TYPE_VOICE;
+    }
+
+    /**
+     * Determines if a video state is set in a video state bit-mask.
+     *
+     * @param videoState The video state bit mask.
+     * @param videoStateToCheck The particular video state to check.
+     * @return True if the video state is set in the bit-mask.
+     */
+    private static boolean isVideoStateSet(int videoState, int videoStateToCheck) {
+        return (videoState & videoStateToCheck) == videoStateToCheck;
+    }
 }
