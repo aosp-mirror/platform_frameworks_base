@@ -998,8 +998,8 @@ public final class Pm {
 
         final InstallSessionParams params = new InstallSessionParams();
         params.installFlags = PackageManager.INSTALL_ALL_USERS;
-        params.mode = InstallSessionParams.MODE_FULL_INSTALL;
-        params.progressMax = -1;
+        params.setModeFullInstall();
+        params.setProgressMax(-1);
 
         String opt;
         while ((opt = nextOption()) != null) {
@@ -1021,10 +1021,11 @@ public final class Pm {
             } else if (opt.equals("-d")) {
                 params.installFlags |= PackageManager.INSTALL_ALLOW_DOWNGRADE;
             } else if (opt.equals("-p")) {
-                params.mode = InstallSessionParams.MODE_INHERIT_EXISTING;
+                params.setModeInheritExisting();
             } else if (opt.equals("-S")) {
-                params.deltaSize = Long.parseLong(nextOptionData());
-                params.progressMax = (int) params.deltaSize;
+                final long deltaSize = Long.parseLong(nextOptionData());
+                params.setDeltaSize(deltaSize);
+                params.setProgressMax((int) params.deltaSize);
             } else if (opt.equals("--abi")) {
                 params.abiOverride = checkAbiArgument(nextOptionData());
             } else {
