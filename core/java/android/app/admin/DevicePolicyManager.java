@@ -2598,9 +2598,17 @@ public class DevicePolicyManager {
      * @see #setAccountManagementDisabled
      */
     public String[] getAccountTypesWithManagementDisabled() {
+        return getAccountTypesWithManagementDisabledAsUser(UserHandle.getCallingUserId());
+    }
+
+    /**
+     * @see #getAccountTypesWithManagementDisabled()
+     * @hide
+     */
+    public String[] getAccountTypesWithManagementDisabledAsUser(int userId) {
         if (mService != null) {
             try {
-                return mService.getAccountTypesWithManagementDisabled();
+                return mService.getAccountTypesWithManagementDisabledAsUser(userId);
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }
