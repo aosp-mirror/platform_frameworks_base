@@ -185,7 +185,7 @@ void CanvasContext::draw() {
     } else if (!mDirtyRegionsEnabled || mHaveNewSurface) {
         dirty.setEmpty();
     } else {
-        if (!dirty.intersect(0, 0, width, height)) {
+        if (!dirty.isEmpty() && !dirty.intersect(0, 0, width, height)) {
             ALOGW("Dirty " RECT_STRING " doesn't intersect with 0 0 %d %d ?",
                     SK_RECT_ARGS(dirty), width, height);
             dirty.setEmpty();
