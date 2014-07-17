@@ -462,12 +462,14 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Holo.TimePicker" parent="Widget.TimePicker">
+        <item name="legacyMode">true</item>
         <item name="legacyLayout">@layout/time_picker_legacy_holo</item>
+        <!-- Attributes for new-style TimePicker. -->
         <item name="internalLayout">@layout/time_picker_holo</item>
-        <item name="disabledColor">@color/timepicker_default_disabled_color_holo_dark</item>
-        <item name="headerSelectedTextColor">@color/holo_blue_light</item>
-        <item name="headerUnselectedTextColor">@color/timepicker_default_text_color_holo_dark</item>
+        <item name="headerTimeTextAppearance">@style/TextAppearance.Holo.TimePicker.TimeLabel</item>
+        <item name="headerAmPmTextAppearance">@style/TextAppearance.Holo.TimePicker.AmPmLabel</item>
         <item name="headerBackgroundColor">@color/timepicker_default_background_holo_dark</item>
+        <item name="headerSelectedTextColor">@color/holo_blue_light</item>
         <item name="numbersTextColor">@color/timepicker_default_text_color_holo_dark</item>
         <item name="numbersBackgroundColor">@color/timepicker_default_background_holo_dark</item>
         <item name="amPmTextColor">@color/timepicker_default_text_color_holo_dark</item>
@@ -880,12 +882,14 @@ please see styles_device_defaults.xml.
     <style name="Widget.Holo.Light.NumberPicker" parent="Widget.Holo.NumberPicker" />
 
     <style name="Widget.Holo.Light.TimePicker" parent="Widget.TimePicker">
+        <item name="legacyMode">true</item>
         <item name="legacyLayout">@layout/time_picker_legacy_holo</item>
+        <!-- Non-legacy styling -->
         <item name="internalLayout">@layout/time_picker_holo</item>
-        <item name="disabledColor">@color/timepicker_default_disabled_color_holo_light</item>
-        <item name="headerSelectedTextColor">@color/holo_blue_light</item>
-        <item name="headerUnselectedTextColor">@color/timepicker_default_text_color_holo_light</item>
+        <item name="headerTimeTextAppearance">@style/TextAppearance.Holo.Light.TimePicker.TimeLabel</item>
+        <item name="headerAmPmTextAppearance">@style/TextAppearance.Holo.Light.TimePicker.AmPmLabel</item>
         <item name="headerBackgroundColor">@color/timepicker_default_background_holo_light</item>
+        <item name="headerSelectedTextColor">@color/holo_blue_light</item>
         <item name="numbersTextColor">@color/timepicker_default_text_color_holo_light</item>
         <item name="numbersBackgroundColor">@color/timepicker_default_background_holo_light</item>
         <item name="amPmTextColor">@color/timepicker_default_text_color_holo_light</item>

@@ -19,6 +19,7 @@ package android.widget;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.format.DateFormat;
@@ -104,14 +105,13 @@ class LegacyTimePickerDelegate extends TimePicker.AbstractTimePickerDelegate {
         super(delegator, context);
 
         // process style attributes
-        final TypedArray attributesArray = mContext.obtainStyledAttributes(
+        final TypedArray a = mContext.obtainStyledAttributes(
                 attrs, R.styleable.TimePicker, defStyleAttr, defStyleRes);
-        final int layoutResourceId = attributesArray.getResourceId(
+        final int layoutResourceId = a.getResourceId(
                 R.styleable.TimePicker_legacyLayout, R.layout.time_picker_legacy);
-        attributesArray.recycle();
+        a.recycle();
 
-        final LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(
-                Context.LAYOUT_INFLATER_SERVICE);
+        final LayoutInflater inflater = LayoutInflater.from(mContext);
         inflater.inflate(layoutResourceId, mDelegator, true);
 
         // hour

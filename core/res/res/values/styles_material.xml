@@ -343,13 +343,13 @@ please see styles_device_defaults.xml.
 
     <style name="TextAppearance.Material.TimePicker.TimeLabel" parent="TextAppearance.Material">
         <item name="textSize">@dimen/timepicker_time_label_size</item>
-        <item name="textColor">?attr/textColorSecondary</item>
+        <item name="textColor">?attr/textColorPrimary</item>
     </style>
 
     <style name="TextAppearance.Material.TimePicker.AmPmLabel" parent="TextAppearance.Material">
         <item name="textSize">@dimen/timepicker_ampm_label_size</item>
         <item name="textAllCaps">true</item>
-        <item name="textColor">?attr/textColorSecondary</item>
+        <item name="textColor">?attr/textColorPrimary</item>
         <item name="textStyle">bold</item>
     </style>
 
@@ -616,11 +616,11 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Material.TimePicker" parent="Widget.TimePicker">
-        <item name="legacyLayout">@layout/time_picker_legacy_holo</item>
+        <item name="legacyMode">false</item>
         <item name="internalLayout">@layout/time_picker_holo</item>
-        <item name="disabledColor">@color/bright_foreground_disabled_material_dark</item>
+        <item name="headerTimeTextAppearance">@style/TextAppearance.Material.TimePicker.TimeLabel</item>
+        <item name="headerAmPmTextAppearance">@style/TextAppearance.Material.TimePicker.AmPmLabel</item>
         <item name="headerSelectedTextColor">?attr/colorControlActivated</item>
-        <item name="headerUnselectedTextColor">?attr/textColorPrimary</item>
         <item name="headerBackgroundColor">@color/transparent</item>
         <item name="numbersTextColor">?attr/textColorSecondary</item>
         <item name="numbersBackgroundColor">@color/transparent</item>
@@ -956,12 +956,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Material.Light.NumberPicker" parent="Widget.Material.NumberPicker"/>
-
-    <style name="Widget.Material.Light.TimePicker" parent="Widget.Material.TimePicker">
-        <item name="legacyLayout">@layout/time_picker_legacy_holo</item>
-        <item name="internalLayout">@layout/time_picker_holo</item>
-        <item name="disabledColor">@color/bright_foreground_disabled_material_light</item>
-    </style>
+    <style name="Widget.Material.Light.TimePicker" parent="Widget.Material.TimePicker" />
 
     <style name="Widget.Material.Light.DatePicker" parent="Widget.DatePicker">
         <item name="legacyLayout">@layout/date_picker_legacy_holo</item>

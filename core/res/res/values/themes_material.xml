@@ -352,15 +352,6 @@ please see themes_device_defaults.xml.
         <!-- TimePicker style -->
         <item name="timePickerStyle">@style/Widget.Material.TimePicker</item>
 
-        <!-- TimePicker background color -->
-        <item name="timePickerHeaderBackgroundColor">?colorBackground</item>
-
-        <!-- TimePicker Header time label text appearance -->
-        <item name="timePickerHeaderTimeLabelTextAppearance">@style/TextAppearance.Material.TimePicker.TimeLabel</item>
-
-        <!-- TimePicker Header am pm label text appearance -->
-        <item name="timePickerHeaderAmPmLabelTextAppearance">@style/TextAppearance.Material.TimePicker.AmPmLabel</item>
-
         <!-- TimePicker dialog theme -->
         <item name="timePickerDialogTheme">@style/Theme.Material.Dialog.TimePicker</item>
 
@@ -726,15 +717,6 @@ please see themes_device_defaults.xml.
 
         <!-- TimePicker style -->
         <item name="timePickerStyle">@style/Widget.Material.Light.TimePicker</item>
-
-        <!-- TimePicker Header background color -->
-        <item name="timePickerHeaderBackgroundColor">?attr/colorBackground</item>
-
-        <!-- TimePicker Header time label text appearance -->
-        <item name="timePickerHeaderTimeLabelTextAppearance">@style/TextAppearance.Material.TimePicker.TimeLabel</item>
-
-        <!-- TimePicker Header am pm label text appearance -->
-        <item name="timePickerHeaderAmPmLabelTextAppearance">@style/TextAppearance.Material.TimePicker.AmPmLabel</item>
 
         <!-- TimePicker dialog theme -->
         <item name="timePickerDialogTheme">@style/Theme.Material.Light.Dialog.TimePicker</item>
@@ -1153,12 +1135,8 @@ please see themes_device_defaults.xml.
          AlertDialog theme. -->
     <style name="Theme.Material.Dialog.Alert" parent="Theme.Material.Dialog.BaseAlert"/>
 
-    <style name="Theme.Material.Dialog.BaseTimePicker">
-        <item name="windowBackground">@color/transparent</item>
-        <item name="windowElevation">0dp</item>
-        <item name="windowTitleStyle">@style/DialogWindowTitle.Material</item>
-        <item name="windowContentOverlay">@null</item>
-    </style>
+    <!-- Base theme used to prevent circular references in Leanback overrides. -->
+    <style name="Theme.Material.Dialog.BaseTimePicker" />
 
     <!-- Material theme for the TimePicker dialog windows, which is used by the
          {@link android.app.TimePickerDialog} class. -->
@@ -1282,16 +1260,12 @@ please see themes_device_defaults.xml.
          AlertDialog theme. -->
     <style name="Theme.Material.Light.Dialog.Alert" parent="Theme.Material.Light.Dialog.BaseAlert"/>
 
-    <style name="Theme.Material.Light.Dialog.BaseTimePicker">
-        <item name="windowBackground">@color/transparent</item>
-        <item name="windowElevation">0dp</item>
-        <item name="windowTitleStyle">@style/DialogWindowTitle.Material.Light</item>
-        <item name="windowContentOverlay">@null</item>
-    </style>
+    <!-- Base theme used to prevent circular references in Leanback overrides. -->
+    <style name="Theme.Material.Light.Dialog.BaseTimePicker" />
 
     <!-- Material Light theme for the TimePicker dialog windows, which is used by the
          {@link android.app.TimePickerDialog} class. -->
-    <style name="Theme.Material.Light.Dialog.TimePicker" parent="Theme.Material.Light.Dialog.BaseTimePicker"/>
+    <style name="Theme.Material.Light.Dialog.TimePicker" parent="Theme.Material.Light.Dialog.BaseTimePicker" />
 
     <style name="Theme.Material.Light.Dialog.BaseDatePicker">
         <item name="windowBackground">@color/transparent</item>
