@@ -271,15 +271,26 @@ public class UserManager {
     public static final String DISALLOW_ADJUST_VOLUME = "no_adjust_volume";
 
     /**
-     * Key for user restrictions. Specifies that the user is not allowed to send or receive
-     * phone calls or text messages. Emergency calls may still be permitted.
+     * Key for user restrictions. Specifies that the user is not allowed to make outgoing
+     * phone calls. Emergency calls are still permitted.
      * The default value is <code>false</code>.
      * <p/>
      * Type: Boolean
      * @see #setUserRestrictions(Bundle)
      * @see #getUserRestrictions()
      */
-    public static final String DISALLOW_TELEPHONY = "no_telephony";
+    public static final String DISALLOW_OUTGOING_CALLS = "no_outgoing_calls";
+
+    /**
+     * Key for user restrictions. Specifies that the user is not allowed to send or receive
+     * SMS messages.
+     * The default value is <code>false</code>.
+     * <p/>
+     * Type: Boolean
+     * @see #setUserRestrictions(Bundle)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_SMS = "no_sms";
 
     /**
      * Key for user restrictions. Specifies that windows besides app windows should not be
