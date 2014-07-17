@@ -1443,6 +1443,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         somthingChanged |= readEnabledAccessibilityServicesLocked(userState);
         somthingChanged |= readTouchExplorationGrantedAccessibilityServicesLocked(userState);
         somthingChanged |= readTouchExplorationEnabledSettingLocked(userState);
+        somthingChanged |= readHighTextContrastEnabledSettingLocked(userState);
         somthingChanged |= readEnhancedWebAccessibilityEnabledChangedLocked(userState);
         somthingChanged |= readDisplayMagnificationEnabledSettingLocked(userState);
         somthingChanged |= readDisplayColorAdjustmentSettingsLocked(userState);
@@ -1504,6 +1505,18 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         // If display adjustment is enabled, always assume there was a change in
         // the adjustment settings.
         return displayAdjustmentsEnabled;
+    }
+
+    private boolean readHighTextContrastEnabledSettingLocked(UserState userState) {
+        final boolean highTextContrastEnabled = Settings.Secure.getIntForUser(
+                mContext.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_HIGH_TEXT_CONTRAST_ENABLED, 0,
+                userState.mUserId) == 1;
+        if (highTextContrastEnabled != userState.mIsTextHighContrastEnabled) {
+            userState.mIsTextHighContrastEnabled = highTextContrastEnabled;
+            return true;
+        }
+        return false;
     }
 
     private void updateTouchExplorationLocked(UserState userState) {
@@ -3586,6 +3599,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
         public boolean mIsAccessibilityEnabled;
         public boolean mIsTouchExplorationEnabled;
+        public boolean mIsTextHighContrastEnabled;
         public boolean mIsEnhancedWebAccessibilityEnabled;
         public boolean mIsDisplayMagnificationEnabled;
         public boolean mIsFilterKeyEventsEnabled;
@@ -3621,6 +3635,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             // Touch exploration relies on enabled accessibility.
             if (mIsAccessibilityEnabled && mIsTouchExplorationEnabled) {
                 clientState |= AccessibilityManager.STATE_FLAG_TOUCH_EXPLORATION_ENABLED;
+            }
+            if (mIsTextHighContrastEnabled) {
+                clientState |= AccessibilityManager.STATE_FLAG_HIGH_TEXT_CONTRAST_ENABLED;
             }
             return clientState;
         }
@@ -3687,8 +3704,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
         private final Uri mDisplayDaltonizerEnabledUri = Settings.Secure.getUriFor(
                 Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED);
+
         private final Uri mDisplayDaltonizerUri = Settings.Secure.getUriFor(
                 Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER);
+
+        private final Uri mHighTextContrastUri = Settings.Secure.getUriFor(
+                Settings.Secure.ACCESSIBILITY_HIGH_TEXT_CONTRAST_ENABLED);
 
         public AccessibilityContentObserver(Handler handler) {
             super(handler);
@@ -3714,94 +3735,55 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     mDisplayDaltonizerEnabledUri, false, this, UserHandle.USER_ALL);
             contentResolver.registerContentObserver(
                     mDisplayDaltonizerUri, false, this, UserHandle.USER_ALL);
+            contentResolver.registerContentObserver(
+                    mHighTextContrastUri, false, this, UserHandle.USER_ALL);
         }
 
         @Override
         public void onChange(boolean selfChange, Uri uri) {
-            if (mAccessibilityEnabledUri.equals(uri)) {
-                synchronized (mLock) {
-                    // Profiles share the accessibility state of the parent. Therefore,
-                    // we are checking for changes only the parent settings.
-                    UserState userState = getCurrentUserStateLocked();
-                    // We will update when the automation service dies.
-                    if (userState.mUiAutomationService == null) {
-                        if (readAccessibilityEnabledSettingLocked(userState)) {
-                            onUserStateChangedLocked(userState);
-                        }
-                    }
+            synchronized (mLock) {
+                // Profiles share the accessibility state of the parent. Therefore,
+                // we are checking for changes only the parent settings.
+                UserState userState = getCurrentUserStateLocked();
+
+                // We will update when the automation service dies.
+                if (userState.mUiAutomationService != null) {
+                    return;
                 }
-            } else if (mTouchExplorationEnabledUri.equals(uri)) {
-                synchronized (mLock) {
-                    // Profiles share the accessibility state of the parent. Therefore,
-                    // we are checking for changes only the parent settings.
-                    UserState userState = getCurrentUserStateLocked();
-                    // We will update when the automation service dies.
-                    if (userState.mUiAutomationService == null) {
-                        if (readTouchExplorationEnabledSettingLocked(userState)) {
-                            onUserStateChangedLocked(userState);
-                        }
+
+                if (mAccessibilityEnabledUri.equals(uri)) {
+                    if (readAccessibilityEnabledSettingLocked(userState)) {
+                        onUserStateChangedLocked(userState);
                     }
-                }
-            } else if (mDisplayMagnificationEnabledUri.equals(uri)) {
-                synchronized (mLock) {
-                    // Profiles share the accessibility state of the parent. Therefore,
-                    // we are checking for changes only the parent settings.
-                    UserState userState = getCurrentUserStateLocked();
-                    // We will update when the automation service dies.
-                    if (userState.mUiAutomationService == null) {
-                        if (readDisplayMagnificationEnabledSettingLocked(userState)) {
-                            onUserStateChangedLocked(userState);
-                        }
+                } else if (mTouchExplorationEnabledUri.equals(uri)) {
+                    if (readTouchExplorationEnabledSettingLocked(userState)) {
+                        onUserStateChangedLocked(userState);
                     }
-                }
-            } else if (mEnabledAccessibilityServicesUri.equals(uri)) {
-                synchronized (mLock) {
-                    // Profiles share the accessibility state of the parent. Therefore,
-                    // we are checking for changes only the parent settings.
-                    UserState userState = getCurrentUserStateLocked();
-                    // We will update when the automation service dies.
-                    if (userState.mUiAutomationService == null) {
-                        if (readEnabledAccessibilityServicesLocked(userState)) {
-                            onUserStateChangedLocked(userState);
-                        }
+                } else if (mDisplayMagnificationEnabledUri.equals(uri)) {
+                    if (readDisplayMagnificationEnabledSettingLocked(userState)) {
+                        onUserStateChangedLocked(userState);
                     }
-                }
-            } else if (mTouchExplorationGrantedAccessibilityServicesUri.equals(uri)) {
-                synchronized (mLock) {
-                    // Profiles share the accessibility state of the parent. Therefore,
-                    // we are checking for changes only the parent settings.
-                    UserState userState = getCurrentUserStateLocked();
-                    // We will update when the automation service dies.
-                    if (userState.mUiAutomationService == null) {
-                        if (readTouchExplorationGrantedAccessibilityServicesLocked(userState)) {
-                            onUserStateChangedLocked(userState);
-                        }
+                } else if (mEnabledAccessibilityServicesUri.equals(uri)) {
+                    if (readEnabledAccessibilityServicesLocked(userState)) {
+                        onUserStateChangedLocked(userState);
                     }
-                }
-            } else if (mEnhancedWebAccessibilityUri.equals(uri)) {
-                synchronized (mLock) {
-                    // Profiles share the accessibility state of the parent. Therefore,
-                    // we are checking for changes only the parent settings.
-                    UserState userState = getCurrentUserStateLocked();
-                    // We will update when the automation service dies.
-                    if (userState.mUiAutomationService == null) {
-                        if (readEnhancedWebAccessibilityEnabledChangedLocked(userState)) {
-                            onUserStateChangedLocked(userState);
-                        }
+                } else if (mTouchExplorationGrantedAccessibilityServicesUri.equals(uri)) {
+                    if (readTouchExplorationGrantedAccessibilityServicesLocked(userState)) {
+                        onUserStateChangedLocked(userState);
                     }
-                }
-            } else if (mDisplayInversionEnabledUri.equals(uri)
-                    || mDisplayDaltonizerEnabledUri.equals(uri)
-                    || mDisplayDaltonizerUri.equals(uri)) {
-                synchronized (mLock) {
-                    // Profiles share the accessibility state of the parent. Therefore,
-                    // we are checking for changes only the parent settings.
-                    UserState userState = getCurrentUserStateLocked();
-                    // We will update when the automation service dies.
-                    if (userState.mUiAutomationService == null) {
-                        if (readDisplayColorAdjustmentSettingsLocked(userState)) {
-                            updateDisplayColorAdjustmentSettingsLocked(userState);
-                        }
+                } else if (mEnhancedWebAccessibilityUri.equals(uri)) {
+                    if (readEnhancedWebAccessibilityEnabledChangedLocked(userState)) {
+                        onUserStateChangedLocked(userState);
+                    }
+                } else if (mDisplayInversionEnabledUri.equals(uri)
+                        || mDisplayDaltonizerEnabledUri.equals(uri)
+                        || mDisplayDaltonizerUri.equals(uri)) {
+                    if (readDisplayColorAdjustmentSettingsLocked(userState)) {
+                        updateDisplayColorAdjustmentSettingsLocked(userState);
+                    }
+                } else if (mHighTextContrastUri.equals(uri)) {
+                    if (readHighTextContrastEnabledSettingLocked(userState)) {
+                        onUserStateChangedLocked(userState);
                     }
                 }
             }

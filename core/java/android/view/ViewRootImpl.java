@@ -63,6 +63,7 @@ import android.view.View.MeasureSpec;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityManager.AccessibilityStateChangeListener;
+import android.view.accessibility.AccessibilityManager.HighTextContrastChangeListener;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeProvider;
 import android.view.accessibility.IAccessibilityInteractionConnection;
@@ -313,6 +314,7 @@ public final class ViewRootImpl implements ViewParent,
     AccessibilityInteractionController mAccessibilityInteractionController;
 
     AccessibilityInteractionConnectionManager mAccessibilityInteractionConnectionManager;
+    HighContrastTextManager mHighContrastTextManager;
 
     SendWindowContentChangedAccessibilityEvent mSendWindowContentChangedAccessibilityEvent;
 
@@ -370,12 +372,15 @@ public final class ViewRootImpl implements ViewParent,
         mPreviousTransparentRegion = new Region();
         mFirst = true; // true for the first time the view is added
         mAdded = false;
+        mAttachInfo = new View.AttachInfo(mWindowSession, mWindow, display, this, mHandler, this);
         mAccessibilityManager = AccessibilityManager.getInstance(context);
         mAccessibilityInteractionConnectionManager =
             new AccessibilityInteractionConnectionManager();
         mAccessibilityManager.addAccessibilityStateChangeListener(
                 mAccessibilityInteractionConnectionManager);
-        mAttachInfo = new View.AttachInfo(mWindowSession, mWindow, display, this, mHandler, this);
+        mHighContrastTextManager = new HighContrastTextManager();
+        mAccessibilityManager.addHighTextContrastStateChangeListener(
+                mHighContrastTextManager);
         mViewConfiguration = ViewConfiguration.get(context);
         mDensity = context.getResources().getDisplayMetrics().densityDpi;
         mNoncompatDensity = context.getResources().getDisplayMetrics().noncompatDensityDpi;
@@ -2914,6 +2919,8 @@ public final class ViewRootImpl implements ViewParent,
         mAccessibilityInteractionConnectionManager.ensureNoConnection();
         mAccessibilityManager.removeAccessibilityStateChangeListener(
                 mAccessibilityInteractionConnectionManager);
+        mAccessibilityManager.removeHighTextContrastStateChangeListener(
+                mHighContrastTextManager);
         removeSendWindowContentChangedCallback();
 
         destroyHardwareRenderer();
@@ -6585,7 +6592,7 @@ public final class ViewRootImpl implements ViewParent,
         public void onAccessibilityStateChanged(boolean enabled) {
             if (enabled) {
                 ensureConnection();
-                if (mAttachInfo != null && mAttachInfo.mHasWindowFocus) {
+                if (mAttachInfo.mHasWindowFocus) {
                     mView.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
                     View focusedView = mView.findFocus();
                     if (focusedView != null && focusedView != mView) {
@@ -6599,14 +6606,12 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         public void ensureConnection() {
-            if (mAttachInfo != null) {
-                final boolean registered =
+            final boolean registered =
                     mAttachInfo.mAccessibilityWindowId != AccessibilityNodeInfo.UNDEFINED_ITEM_ID;
-                if (!registered) {
-                    mAttachInfo.mAccessibilityWindowId =
+            if (!registered) {
+                mAttachInfo.mAccessibilityWindowId =
                         mAccessibilityManager.addAccessibilityInteractionConnection(mWindow,
                                 new AccessibilityInteractionConnection(ViewRootImpl.this));
-                }
             }
         }
 
@@ -6617,6 +6622,19 @@ public final class ViewRootImpl implements ViewParent,
                 mAttachInfo.mAccessibilityWindowId = AccessibilityNodeInfo.UNDEFINED_ITEM_ID;
                 mAccessibilityManager.removeAccessibilityInteractionConnection(mWindow);
             }
+        }
+    }
+
+    final class HighContrastTextManager implements HighTextContrastChangeListener {
+        HighContrastTextManager() {
+            mAttachInfo.mHighContrastText = mAccessibilityManager.isHighTextContrastEnabled();
+        }
+        @Override
+        public void onHighTextContrastStateChanged(boolean enabled) {
+            mAttachInfo.mHighContrastText = enabled;
+
+            // Destroy Displaylists so they can be recreated with high contrast recordings
+            destroyHardwareResources();
         }
     }
 

@@ -168,7 +168,15 @@ class GLES20Canvas extends HardwareCanvas {
         nSetViewport(mRenderer, width, height);
     }
 
-    private static native void nSetViewport(long renderer, int width, int height);
+    private static native void nSetViewport(long renderer,
+            int width, int height);
+
+    @Override
+    public void setHighContrastText(boolean highContrastText) {
+        nSetHighContrastText(mRenderer, highContrastText);
+    }
+
+    private static native void nSetHighContrastText(long renderer, boolean highContrastText);
 
     @Override
     public int onPreDraw(Rect dirty) {
