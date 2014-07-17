@@ -55,6 +55,7 @@ final class ProcessRecord {
     // List of packages running in the process
     final ArrayMap<String, ProcessStats.ProcessStateHolder> pkgList
             = new ArrayMap<String, ProcessStats.ProcessStateHolder>();
+    ArraySet<String> pkgDeps;   // additional packages we have a dependency on
     IApplicationThread thread;  // the actual proc...  may be null only if
                                 // 'persistent' is true (in which case we
                                 // are in the process of launching the app)
@@ -124,7 +125,7 @@ final class ProcessRecord {
     String adjType;             // Debugging: primary thing impacting oom_adj.
     int adjTypeCode;            // Debugging: adj code to report to app.
     Object adjSource;           // Debugging: option dependent object.
-    int adjSourceOom;           // Debugging: oom_adj of adjSource's process.
+    int adjSourceProcState;     // Debugging: proc state of adjSource's process.
     Object adjTarget;           // Debugging: target component impacting oom_adj.
     
     // contains HistoryRecord objects
@@ -195,6 +196,14 @@ final class ProcessRecord {
             pw.print(pkgList.keyAt(i));
         }
         pw.println("}");
+        if (pkgDeps != null) {
+            pw.print(prefix); pw.print("packageDependencies={");
+            for (int i=0; i<pkgDeps.size(); i++) {
+                if (i > 0) pw.print(", ");
+                pw.print(pkgDeps.valueAt(i));
+            }
+            pw.println("}");
+        }
         pw.print(prefix); pw.print("compat="); pw.println(compat);
         if (instrumentationClass != null || instrumentationProfileFile != null
                 || instrumentationArguments != null) {

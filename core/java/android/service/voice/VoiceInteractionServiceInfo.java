@@ -40,6 +40,7 @@ public class VoiceInteractionServiceInfo {
 
     private ServiceInfo mServiceInfo;
     private String mSessionService;
+    private String mRecognitionService;
     private String mSettingsActivity;
 
     public VoiceInteractionServiceInfo(PackageManager pm, ComponentName comp)
@@ -82,6 +83,8 @@ public class VoiceInteractionServiceInfo {
                     com.android.internal.R.styleable.VoiceInteractionService);
             mSessionService = array.getString(
                     com.android.internal.R.styleable.VoiceInteractionService_sessionService);
+            mRecognitionService = array.getString(
+                    com.android.internal.R.styleable.VoiceInteractionService_recognitionService);
             mSettingsActivity = array.getString(
                     com.android.internal.R.styleable.VoiceInteractionService_settingsActivity);
             array.recycle();
@@ -117,6 +120,10 @@ public class VoiceInteractionServiceInfo {
 
     public String getSessionService() {
         return mSessionService;
+    }
+
+    public String getRecognitionService() {
+        return mRecognitionService;
     }
 
     public String getSettingsActivity() {

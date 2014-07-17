@@ -1819,7 +1819,29 @@ public class ActivityManager {
          * actively running code.
          */
         public static final int IMPORTANCE_EMPTY = 500;
-        
+
+        /**
+         * Constant for {@link #importance}: this process does not exist.
+         */
+        public static final int IMPORTANCE_GONE = 1000;
+
+        /** @hide */
+        public static int procStateToImportance(int procState) {
+            if (procState >= ActivityManager.PROCESS_STATE_HOME) {
+                return ActivityManager.RunningAppProcessInfo.IMPORTANCE_BACKGROUND;
+            } else if (procState >= ActivityManager.PROCESS_STATE_SERVICE) {
+                return ActivityManager.RunningAppProcessInfo.IMPORTANCE_SERVICE;
+            } else if (procState > ActivityManager.PROCESS_STATE_HEAVY_WEIGHT) {
+                return ActivityManager.RunningAppProcessInfo.IMPORTANCE_CANT_SAVE_STATE;
+            } else if (procState >= ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND) {
+                return ActivityManager.RunningAppProcessInfo.IMPORTANCE_PERCEPTIBLE;
+            } else if (procState >= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND) {
+                return ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE;
+            } else {
+                return ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
+            }
+        }
+
         /**
          * The relative importance level that the system places on this
          * process.  May be one of {@link #IMPORTANCE_FOREGROUND},

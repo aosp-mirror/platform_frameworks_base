@@ -48,7 +48,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Arrays;
 
 /**
  * A helper class for retrieving the power usage information for all applications and services.
@@ -95,6 +94,7 @@ public class BatteryStatsHelper {
 
     private long mStatsPeriod = 0;
     private double mMaxPower = 1;
+    private double mMaxRealPower = 1;
     private double mComputedPower;
     private double mTotalPower;
     private double mWifiPower;
@@ -208,6 +208,7 @@ public class BatteryStatsHelper {
         getStats();
 
         mMaxPower = 0;
+        mMaxRealPower = 0;
         mComputedPower = 0;
         mTotalPower = 0;
         mWifiPower = 0;
@@ -542,6 +543,7 @@ public class BatteryStatsHelper {
                 } else {
                     mUsageList.add(app);
                     if (power > mMaxPower) mMaxPower = power;
+                    if (power > mMaxRealPower) mMaxRealPower = power;
                     mComputedPower += power;
                 }
                 if (u.getUid() == 0) {
@@ -567,6 +569,7 @@ public class BatteryStatsHelper {
                 osApp.value += power;
                 osApp.values[0] += power;
                 if (osApp.value > mMaxPower) mMaxPower = osApp.value;
+                if (osApp.value > mMaxRealPower) mMaxRealPower = osApp.value;
                 mComputedPower += power;
             }
         }
@@ -806,6 +809,7 @@ public class BatteryStatsHelper {
 
     private BatterySipper addEntry(DrainType drainType, long time, double power) {
         mComputedPower += power;
+        if (power > mMaxRealPower) mMaxRealPower = power;
         return addEntryNoTotal(drainType, time, power);
     }
 
@@ -830,6 +834,8 @@ public class BatteryStatsHelper {
     public int getStatsType() { return mStatsType; };
 
     public double getMaxPower() { return mMaxPower; }
+
+    public double getMaxRealPower() { return mMaxRealPower; }
 
     public double getTotalPower() { return mTotalPower; }
 

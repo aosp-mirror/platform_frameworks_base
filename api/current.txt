@@ -996,6 +996,7 @@ package android {
     field public static final int ratingBarStyleIndicator = 16843280; // 0x1010210
     field public static final int ratingBarStyleSmall = 16842877; // 0x101007d
     field public static final int readPermission = 16842759; // 0x1010007
+    field public static final int recognitionService = 16843935; // 0x101049f
     field public static final int relinquishTaskIdentity = 16843896; // 0x1010478
     field public static final int repeatCount = 16843199; // 0x10101bf
     field public static final int repeatMode = 16843200; // 0x10101c0
@@ -3613,6 +3614,7 @@ package android.app {
     field public static final int IMPORTANCE_BACKGROUND = 400; // 0x190
     field public static final int IMPORTANCE_EMPTY = 500; // 0x1f4
     field public static final int IMPORTANCE_FOREGROUND = 100; // 0x64
+    field public static final int IMPORTANCE_GONE = 1000; // 0x3e8
     field public static final int IMPORTANCE_PERCEPTIBLE = 130; // 0x82
     field public static final int IMPORTANCE_SERVICE = 300; // 0x12c
     field public static final int IMPORTANCE_VISIBLE = 200; // 0xc8
@@ -26990,7 +26992,9 @@ package android.service.voice {
   public class VoiceInteractionService extends android.app.Service {
     ctor public VoiceInteractionService();
     method public final android.service.voice.AlwaysOnHotwordDetector getAlwaysOnHotwordDetector(java.lang.String, java.lang.String, android.service.voice.AlwaysOnHotwordDetector.Callback);
+    method public static boolean isActiveService(android.content.Context, android.content.ComponentName);
     method public android.os.IBinder onBind(android.content.Intent);
+    method public void onReady();
     method public void startSession(android.os.Bundle);
     field public static final java.lang.String SERVICE_INTERFACE = "android.service.voice.VoiceInteractionService";
     field public static final java.lang.String SERVICE_META_DATA = "android.voice_interaction";
