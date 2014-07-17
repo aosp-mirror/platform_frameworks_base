@@ -3535,19 +3535,30 @@ public class BackupManagerService extends IBackupManager.Stub {
                                 }
                             } while (nRead > 0 && result == BackupTransport.TRANSPORT_OK);
 
-                            // Done -- how did it turn out?
-                            if (result == BackupTransport.TRANSPORT_OK){
-                                result = transport.finishBackup();
-                            } else {
-                                Slog.w(TAG, "Error backing up " + target.packageName);
+                            // In all cases we need to give the transport its finish callback
+                            int finishResult = transport.finishBackup();
+
+                            // If we were otherwise in a good state, now interpret the final
+                            // result based on what finishBackup() returned.  If we're in a
+                            // failure case already, preserve that result and ignore whatever
+                            // finishBackup() reported.
+                            if (result == BackupTransport.TRANSPORT_OK) {
+                                result = finishResult;
                             }
-                        } else if (result == BackupTransport.TRANSPORT_PACKAGE_REJECTED) {
+
+                            if (result != BackupTransport.TRANSPORT_OK) {
+                                Slog.e(TAG, "Error " + result
+                                        + " backing up " + target.packageName);
+                            }
+                        }
+
+                        if (result == BackupTransport.TRANSPORT_PACKAGE_REJECTED) {
                             if (DEBUG) {
                                 Slog.i(TAG, "Transport rejected backup of " + target.packageName
                                         + ", skipping");
                             }
                             // do nothing, clean up, and continue looping
-                        } else {
+                        } else if (result != BackupTransport.TRANSPORT_OK) {
                             if (DEBUG) {
                                 Slog.i(TAG, "Transport failed; aborting backup");
                                 return;
