@@ -4,7 +4,6 @@
 #include "JNIHelp.h"
 #include "GraphicsJNI.h"
 
-#include "Canvas.h"
 #include "SkCanvas.h"
 #include "SkDevice.h"
 #include "SkMath.h"
@@ -365,7 +364,7 @@ SkCanvas* GraphicsJNI::getNativeCanvas(JNIEnv* env, jobject canvas) {
     SkASSERT(canvas);
     SkASSERT(env->IsInstanceOf(canvas, gCanvas_class));
     jlong canvasHandle = env->GetLongField(canvas, gCanvas_nativeInstanceID);
-    SkCanvas* c = reinterpret_cast<android::Canvas*>(canvasHandle)->getSkCanvas();
+    SkCanvas* c = getNativeCanvas(canvasHandle);
     SkASSERT(c);
     return c;
 }
