@@ -209,7 +209,7 @@ public abstract class BackupAgent extends ContextWrapper {
      *            output stream.
      */
     public abstract void onBackup(ParcelFileDescriptor oldState, BackupDataOutput data,
-             ParcelFileDescriptor newState) throws IOException;
+            ParcelFileDescriptor newState) throws IOException;
 
     /**
      * The application is being restored from backup and should replace any
@@ -243,8 +243,7 @@ public abstract class BackupAgent extends ContextWrapper {
      *            When a full-backup dataset is being restored, this will be <code>null</code>.
      */
     public abstract void onRestore(BackupDataInput data, int appVersionCode,
-            ParcelFileDescriptor newState)
-            throws IOException;
+            ParcelFileDescriptor newState) throws IOException;
 
     /**
      * The application is having its entire file system contents backed up.  {@code data}
@@ -575,6 +574,20 @@ public abstract class BackupAgent extends ContextWrapper {
         FullBackup.restoreFile(data, size, type, mode, mtime, null);
     }
 
+    /**
+     * The application's restore operation has completed.  This method is called after
+     * all available data has been delivered to the application for restore (via either
+     * the {@link #onRestore(BackupDataInput, int, ParcelFileDescriptor) onRestore()} or
+     * {@link #onRestoreFile(ParcelFileDescriptor, long, File, int, long, long) onRestoreFile()}
+     * callbacks).  This provides the app with a stable end-of-restore opportunity to
+     * perform any appropriate post-processing on the data that was just delivered.
+     *
+     * @see #onRestore(BackupDataInput, int, ParcelFileDescriptor)
+     * @see #onRestoreFile(ParcelFileDescriptor, long, File, int, long, long)
+     */
+    public void onRestoreFinished() {
+    }
+
     // ----- Core implementation -----
 
     /** @hide */
@@ -709,6 +722,24 @@ public abstract class BackupAgent extends ContextWrapper {
                 BackupAgent.this.onRestoreFile(data, size, type, domain, path, mode, mtime);
             } catch (IOException e) {
                 throw new RuntimeException(e);
+            } finally {
+                // Ensure that any side-effect SharedPreferences writes have landed
+                waitForSharedPrefs();
+
+                Binder.restoreCallingIdentity(ident);
+                try {
+                    callbackBinder.opComplete(token);
+                } catch (RemoteException e) {
+                    // we'll time out anyway, so we're safe
+                }
+            }
+        }
+
+        @Override
+        public void doRestoreFinished(int token, IBackupManager callbackBinder) {
+            long ident = Binder.clearCallingIdentity();
+            try {
+                BackupAgent.this.onRestoreFinished();
             } finally {
                 // Ensure that any side-effect SharedPreferences writes have landed
                 waitForSharedPrefs();
