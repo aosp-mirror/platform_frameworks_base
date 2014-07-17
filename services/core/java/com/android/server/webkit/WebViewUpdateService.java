@@ -16,10 +16,15 @@
 
 package com.android.server.webkit;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Binder;
 import android.os.Process;
 import android.util.Log;
 import android.webkit.IWebViewUpdateService;
+import android.webkit.WebViewFactory;
 
 /**
  * Private service to wait for the updatable WebView to be ready for use.
@@ -32,7 +37,22 @@ public class WebViewUpdateService extends IWebViewUpdateService.Stub {
     private boolean mRelroReady32Bit = false;
     private boolean mRelroReady64Bit = false;
 
-    public WebViewUpdateService() {
+    private BroadcastReceiver mWebViewUpdatedReceiver;
+
+    public WebViewUpdateService(Context context) {
+        mWebViewUpdatedReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    String webviewPackage = "package:" + WebViewFactory.getWebViewPackageName();
+                    if (webviewPackage.equals(intent.getDataString())) {
+                        onWebViewUpdateInstalled();
+                    }
+                }
+        };
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_PACKAGE_REPLACED);
+        filter.addDataScheme("package");
+        context.registerReceiver(mWebViewUpdatedReceiver, filter);
     }
 
     /**
@@ -74,5 +94,15 @@ public class WebViewUpdateService extends IWebViewUpdateService.Stub {
                 }
             }
         }
+    }
+
+    private void onWebViewUpdateInstalled() {
+        Log.d(TAG, "WebView Package updated!");
+
+        synchronized (this) {
+            mRelroReady32Bit = false;
+            mRelroReady64Bit = false;
+        }
+        WebViewFactory.prepareWebViewInSystemServer();
     }
 }
