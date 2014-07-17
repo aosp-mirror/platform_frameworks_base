@@ -162,4 +162,8 @@ interface IDevicePolicyManager {
 
     void setBlockUninstall(in ComponentName admin, in String packageName, boolean blockUninstall);
     boolean getBlockUninstall(in ComponentName admin, in String packageName);
+
+    void setCrossProfileCallerIdDisabled(in ComponentName who, boolean disabled);
+    boolean getCrossProfileCallerIdDisabled(in ComponentName who);
+    boolean getCrossProfileCallerIdDisabledForUser(int userId);
 }
