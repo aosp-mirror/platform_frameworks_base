@@ -4715,6 +4715,28 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    @Override
+    public void addPackageDependency(String packageName) {
+        synchronized (this) {
+            int callingPid = Binder.getCallingPid();
+            if (callingPid == Process.myPid()) {
+                //  Yeah, um, no.
+                Slog.w(TAG, "Can't addPackageDependency on system process");
+                return;
+            }
+            ProcessRecord proc;
+            synchronized (mPidsSelfLocked) {
+                proc = mPidsSelfLocked.get(Binder.getCallingPid());
+            }
+            if (proc != null) {
+                if (proc.pkgDeps == null) {
+                    proc.pkgDeps = new ArraySet<String>(1);
+                }
+                proc.pkgDeps.add(packageName);
+            }
+        }
+    }
+
     /*
      * The pkg name and app id have to be specified.
      */
@@ -4911,7 +4933,6 @@ public final class ActivityManagerService extends ActivityManagerNative
         // Remove all processes this package may have touched: all with the
         // same UID (except for the system or root user), and all whose name
         // matches the package name.
-        final String procNamePrefix = packageName != null ? (packageName + ":") : null;
         final int NP = mProcessNames.getMap().size();
         for (int ip=0; ip<NP; ip++) {
             SparseArray<ProcessRecord> apps = mProcessNames.getMap().valueAt(ip);
@@ -4947,13 +4968,15 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // that match it.  We need to qualify this by the processes
                 // that are running under the specified app and user ID.
                 } else {
-                    if (UserHandle.getAppId(app.uid) != appId) {
+                    final boolean isDep = app.pkgDeps != null
+                            && app.pkgDeps.contains(packageName);
+                    if (!isDep && UserHandle.getAppId(app.uid) != appId) {
                         continue;
                     }
                     if (userId != UserHandle.USER_ALL && app.userId != userId) {
                         continue;
                     }
-                    if (!app.pkgList.containsKey(packageName)) {
+                    if (!app.pkgList.containsKey(packageName) && !isDep) {
                         continue;
                     }
                 }
@@ -11030,30 +11053,15 @@ public final class ActivityManagerService extends ActivityManagerNative
         return errList;
     }
 
-    static int oomAdjToImportance(int adj, ActivityManager.RunningAppProcessInfo currApp) {
-        if (adj >= ProcessList.CACHED_APP_MIN_ADJ) {
-            if (currApp != null) {
-                currApp.lru = adj - ProcessList.CACHED_APP_MIN_ADJ + 1;
-            }
-            return ActivityManager.RunningAppProcessInfo.IMPORTANCE_BACKGROUND;
-        } else if (adj >= ProcessList.SERVICE_B_ADJ) {
-            return ActivityManager.RunningAppProcessInfo.IMPORTANCE_SERVICE;
-        } else if (adj >= ProcessList.HOME_APP_ADJ) {
-            if (currApp != null) {
-                currApp.lru = 0;
-            }
-            return ActivityManager.RunningAppProcessInfo.IMPORTANCE_BACKGROUND;
-        } else if (adj >= ProcessList.SERVICE_ADJ) {
-            return ActivityManager.RunningAppProcessInfo.IMPORTANCE_SERVICE;
-        } else if (adj >= ProcessList.HEAVY_WEIGHT_APP_ADJ) {
-            return ActivityManager.RunningAppProcessInfo.IMPORTANCE_CANT_SAVE_STATE;
-        } else if (adj >= ProcessList.PERCEPTIBLE_APP_ADJ) {
-            return ActivityManager.RunningAppProcessInfo.IMPORTANCE_PERCEPTIBLE;
-        } else if (adj >= ProcessList.VISIBLE_APP_ADJ) {
-            return ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE;
+    static int procStateToImportance(int procState, int memAdj,
+            ActivityManager.RunningAppProcessInfo currApp) {
+        int imp = ActivityManager.RunningAppProcessInfo.procStateToImportance(procState);
+        if (imp == ActivityManager.RunningAppProcessInfo.IMPORTANCE_BACKGROUND) {
+            currApp.lru = memAdj;
         } else {
-            return ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
+            currApp.lru = 0;
         }
+        return imp;
     }
 
     private void fillInProcMemInfo(ProcessRecord app,
@@ -11071,7 +11079,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
         outInfo.lastTrimLevel = app.trimMemoryLevel;
         int adj = app.curAdj;
-        outInfo.importance = oomAdjToImportance(adj, outInfo);
+        int procState = app.curProcState;
+        outInfo.importance = procStateToImportance(procState, adj, outInfo);
         outInfo.importanceReasonCode = app.adjTypeCode;
         outInfo.processState = app.curProcState;
     }
@@ -11098,8 +11107,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                     fillInProcMemInfo(app, currApp);
                     if (app.adjSource instanceof ProcessRecord) {
                         currApp.importanceReasonPid = ((ProcessRecord)app.adjSource).pid;
-                        currApp.importanceReasonImportance = oomAdjToImportance(
-                                app.adjSourceOom, null);
+                        currApp.importanceReasonImportance =
+                                ActivityManager.RunningAppProcessInfo.procStateToImportance(
+                                        app.adjSourceProcState);
                     } else if (app.adjSource instanceof ActivityRecord) {
                         ActivityRecord r = (ActivityRecord)app.adjSource;
                         if (r.app != null) currApp.importanceReasonPid = r.app.pid;
@@ -15615,7 +15625,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                             app.adjTypeCode = ActivityManager.RunningAppProcessInfo
                                     .REASON_SERVICE_IN_USE;
                             app.adjSource = cr.binding.client;
-                            app.adjSourceOom = clientAdj;
+                            app.adjSourceProcState = clientProcState;
                             app.adjTarget = s.name;
                         }
                     }
@@ -15636,7 +15646,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                             app.adjTypeCode = ActivityManager.RunningAppProcessInfo
                                     .REASON_SERVICE_IN_USE;
                             app.adjSource = a;
-                            app.adjSourceOom = adj;
+                            app.adjSourceProcState = procState;
                             app.adjTarget = s.name;
                         }
                     }
@@ -15681,7 +15691,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     app.adjTypeCode = ActivityManager.RunningAppProcessInfo
                             .REASON_PROVIDER_IN_USE;
                     app.adjSource = client;
-                    app.adjSourceOom = clientAdj;
+                    app.adjSourceProcState = clientProcState;
                     app.adjTarget = cpr.name;
                 }
                 if (clientProcState <= ActivityManager.PROCESS_STATE_TOP) {

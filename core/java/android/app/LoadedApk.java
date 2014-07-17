@@ -93,6 +93,7 @@ public final class LoadedApk {
     private final ClassLoader mBaseClassLoader;
     private final boolean mSecurityViolation;
     private final boolean mIncludeCode;
+    private final boolean mRegisterPackage;
     private final DisplayAdjustments mDisplayAdjustments = new DisplayAdjustments();
     Resources mResources;
     private ClassLoader mClassLoader;
@@ -121,7 +122,7 @@ public final class LoadedApk {
      */
     public LoadedApk(ActivityThread activityThread, ApplicationInfo aInfo,
             CompatibilityInfo compatInfo, ClassLoader baseLoader,
-            boolean securityViolation, boolean includeCode) {
+            boolean securityViolation, boolean includeCode, boolean registerPackage) {
         final int myUid = Process.myUid();
         aInfo = adjustNativeLibraryPaths(aInfo);
 
@@ -144,6 +145,7 @@ public final class LoadedApk {
         mBaseClassLoader = baseLoader;
         mSecurityViolation = securityViolation;
         mIncludeCode = includeCode;
+        mRegisterPackage = registerPackage;
         mDisplayAdjustments.setCompatibilityInfo(compatInfo);
     }
 
@@ -189,6 +191,7 @@ public final class LoadedApk {
         mBaseClassLoader = null;
         mSecurityViolation = false;
         mIncludeCode = true;
+        mRegisterPackage = false;
         mClassLoader = ClassLoader.getSystemClassLoader();
         mResources = Resources.getSystem();
     }
@@ -271,6 +274,13 @@ public final class LoadedApk {
 
                 final ArrayList<String> zipPaths = new ArrayList<>();
                 final ArrayList<String> libPaths = new ArrayList<>();
+
+                if (mRegisterPackage) {
+                    try {
+                        ActivityManagerNative.getDefault().addPackageDependency(mPackageName);
+                    } catch (RemoteException e) {
+                    }
+                }
 
                 zipPaths.add(mAppDir);
                 if (mSplitAppDirs != null) {

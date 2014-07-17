@@ -1465,7 +1465,15 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             reply.writeNoException();
             return true;
         }
-        
+
+        case ADD_PACKAGE_DEPENDENCY_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            String packageName = data.readString();
+            addPackageDependency(packageName);
+            reply.writeNoException();
+            return true;
+        }
+
         case KILL_APPLICATION_WITH_APPID_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             String pkg = data.readString();
@@ -1475,7 +1483,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             reply.writeNoException();
             return true;
         }
-        
+
         case CLOSE_SYSTEM_DIALOGS_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             String reason = data.readString();
@@ -4050,7 +4058,18 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
         data.recycle();
     }
-    
+
+    public void addPackageDependency(String packageName) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeString(packageName);
+        mRemote.transact(ADD_PACKAGE_DEPENDENCY_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+    }
+
     public void killApplicationWithAppId(String pkg, int appid, String reason)
             throws RemoteException {
         Parcel data = Parcel.obtain();

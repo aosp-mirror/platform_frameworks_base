@@ -87,6 +87,10 @@ class VoiceInteractionManagerServiceImpl {
         public void onServiceConnected(ComponentName name, IBinder service) {
             synchronized (mLock) {
                 mService = IVoiceInteractionService.Stub.asInterface(service);
+                try {
+                    mService.ready();
+                } catch (RemoteException e) {
+                }
             }
         }
 

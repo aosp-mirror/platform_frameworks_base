@@ -294,7 +294,9 @@ public interface IActivityManager extends IInterface {
     
     public void stopAppSwitches() throws RemoteException;
     public void resumeAppSwitches() throws RemoteException;
-    
+
+    public void addPackageDependency(String packageName) throws RemoteException;
+
     public void killApplicationWithAppId(String pkg, int appid, String reason)
             throws RemoteException;
     
@@ -640,7 +642,7 @@ public interface IActivityManager extends IInterface {
     int UNBIND_BACKUP_AGENT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+91;
     int GET_UID_FOR_INTENT_SENDER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+92;
     int HANDLE_INCOMING_USER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+93;
-    int ___AVAILABLE_2___ = IBinder.FIRST_CALL_TRANSACTION+94;
+    int ADD_PACKAGE_DEPENDENCY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+94;
     int KILL_APPLICATION_WITH_APPID_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+95;
     int CLOSE_SYSTEM_DIALOGS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+96;
     int GET_PROCESS_MEMORY_INFO_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+97;

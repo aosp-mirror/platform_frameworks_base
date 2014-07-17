@@ -2250,6 +2250,7 @@
   <public type="attr" name="dateSelectorYearListItemTextAppearance" />
   <public type="attr" name="dateSelectorYearListSelectedCircleColor" />
   <public type="attr" name="calendarTextColor" />
+  <public type="attr" name="recognitionService" />
 
   <!-- For the TimePicker -->
   <public type="attr" name="timePickerStyle" />

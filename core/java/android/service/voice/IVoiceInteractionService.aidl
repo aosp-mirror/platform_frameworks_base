@@ -20,4 +20,5 @@ package android.service.voice;
  * @hide
  */
 oneway interface IVoiceInteractionService {
+    void ready();
 }

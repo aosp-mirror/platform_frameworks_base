@@ -2475,11 +2475,11 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService} to retrieve a {@link
-     * android.net.ethernet.EthernetManager} for handling management of
+     * android.net.EthernetManager} for handling management of
      * Ethernet access.
      *
      * @see #getSystemService
-     * @see android.net.ethernet.EthernetManager
+     * @see android.net.EthernetManager
      *
      * @hide
      */
@@ -3249,6 +3249,12 @@ public abstract class Context {
      * context would ignore particular XML attributes.
      */
     public static final int CONTEXT_RESTRICTED = 0x00000004;
+
+    /**
+     * @hide Used to indicate we should tell the activity manager about the process
+     * loading this code.
+     */
+    public static final int CONTEXT_REGISTER_PACKAGE = 0x40000000;
 
     /**
      * Return a new Context object for the given application name.  This
