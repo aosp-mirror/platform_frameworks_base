@@ -475,7 +475,7 @@ public class CameraMetadataNative implements Parcelable {
                     @Override
                     @SuppressWarnings("unchecked")
                     public <T> T getValue(CameraMetadataNative metadata, Key<T> key) {
-                        return (T) metadata.getFaceRectangles();
+                        return (T) metadata.getFaces();
                     }
                 });
         sGetCommandMap.put(
@@ -483,7 +483,7 @@ public class CameraMetadataNative implements Parcelable {
                     @Override
                     @SuppressWarnings("unchecked")
                     public <T> T getValue(CameraMetadataNative metadata, Key<T> key) {
-                        return (T) metadata.getFaces();
+                        return (T) metadata.getFaceRectangles();
                     }
                 });
         sGetCommandMap.put(
