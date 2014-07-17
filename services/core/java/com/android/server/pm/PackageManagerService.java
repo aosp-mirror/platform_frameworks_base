@@ -6231,31 +6231,26 @@ public class PackageManagerService extends IPackageManager.Stub {
         info.nativeLibraryDir = null;
         info.secondaryNativeLibraryDir = null;
 
-        if (bundledApp) {
-            // Monolithic bundled install
-            // TODO: support cluster bundled installs?
-
-            final boolean is64Bit = (info.primaryCpuAbi != null)
-                    && VMRuntime.is64BitAbi(info.primaryCpuAbi);
-
-            // This is a bundled system app so choose the path based on the ABI.
-            // if it's a 64 bit abi, use lib64 otherwise use lib32. Note that this
-            // is just the default path.
-            final String apkName = deriveCodePathName(codePath);
-            final String libDir = is64Bit ? LIB64_DIR_NAME : LIB_DIR_NAME;
-            info.nativeLibraryRootDir = Environment.buildPath(new File(apkRoot), libDir,
-                    apkName).getAbsolutePath();
-            info.nativeLibraryRootRequiresIsa = false;
-
-            info.nativeLibraryDir = info.nativeLibraryRootDir;
-            if (info.secondaryCpuAbi != null) {
-                final String secondaryLibDir = is64Bit ? LIB_DIR_NAME : LIB64_DIR_NAME;
-                info.secondaryNativeLibraryDir = Environment.buildPath(new File(apkRoot),
-                        secondaryLibDir, apkName).getAbsolutePath();
-            }
-        } else if (isApkFile(codeFile)) {
+        if (isApkFile(codeFile)) {
             // Monolithic install
-            if (asecApp) {
+            if (bundledApp) {
+                final boolean is64Bit = VMRuntime.is64BitInstructionSet(
+                        getPrimaryInstructionSet(info));
+
+                // This is a bundled system app so choose the path based on the ABI.
+                // if it's a 64 bit abi, use lib64 otherwise use lib32. Note that this
+                // is just the default path.
+                final String apkName = deriveCodePathName(codePath);
+                final String libDir = is64Bit ? LIB64_DIR_NAME : LIB_DIR_NAME;
+                info.nativeLibraryRootDir = Environment.buildPath(new File(apkRoot), libDir,
+                        apkName).getAbsolutePath();
+
+                if (info.secondaryCpuAbi != null) {
+                    final String secondaryLibDir = is64Bit ? LIB_DIR_NAME : LIB64_DIR_NAME;
+                    info.secondaryNativeLibraryDir = Environment.buildPath(new File(apkRoot),
+                            secondaryLibDir, apkName).getAbsolutePath();
+                }
+            } else if (asecApp) {
                 info.nativeLibraryRootDir = new File(codeFile.getParentFile(), LIB_DIR_NAME)
                         .getAbsolutePath();
             } else {
@@ -6271,10 +6266,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             info.nativeLibraryRootDir = new File(codeFile, LIB_DIR_NAME).getAbsolutePath();
             info.nativeLibraryRootRequiresIsa = true;
 
-            if (info.primaryCpuAbi != null) {
-                info.nativeLibraryDir = new File(info.nativeLibraryRootDir,
-                        VMRuntime.getInstructionSet(info.primaryCpuAbi)).getAbsolutePath();
-            }
+            info.nativeLibraryDir = new File(info.nativeLibraryRootDir,
+                    getPrimaryInstructionSet(info)).getAbsolutePath();
 
             if (info.secondaryCpuAbi != null) {
                 info.secondaryNativeLibraryDir = new File(info.nativeLibraryRootDir,
