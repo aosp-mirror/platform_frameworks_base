@@ -40,4 +40,12 @@
     -->
     <integer name="config_mobile_mtu">1410</integer>
 
+    <string-array translatable="false" name="config_operatorConsideredNonRoaming">
+        <item>302220</item>
+        <item>302610</item>
+        <item>302660</item>
+        <item>302720</item>
+        <item>302780</item>
+    </string-array>
+
 </resources>

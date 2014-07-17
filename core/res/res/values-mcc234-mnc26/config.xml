@@ -5,7 +5,7 @@
 **
 ** Licensed under the Apache License, Version 2.0 (the "License");
 ** you may not use this file except in compliance with the License.
-** You my obtain a copy of the License at
+** You may obtain a copy of the License at
 **
 **     http://www.apache.org/licenses/LICENSE-2.0
 **
@@ -17,16 +17,10 @@
 */
 -->
 
-<!-- These resources are around just to allow their values to be customized
-     for different hardware and product builds. -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-
-    <!-- Configure mobile network MTU. Carrier specific value is set here.
-    -->
-    <integer name="config_mobile_mtu">1440</integer>
     <string-array translatable="false" name="config_operatorConsideredNonRoaming">
         <item>23410</item>
-        <item>23426</item>
+        <item>23420</item>
         <item>23430</item>
         <item>23431</item>
         <item>23432</item>
@@ -34,5 +28,4 @@
         <item>23434</item>
         <item>23486</item>
     </string-array>
-
 </resources>
