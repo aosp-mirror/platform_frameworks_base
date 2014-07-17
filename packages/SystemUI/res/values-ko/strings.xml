@@ -193,6 +193,8 @@
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"블루투스"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"블루투스(<xliff:g id="NUMBER">%d</xliff:g>개의 기기)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"블루투스 사용 안함"</string>
+    <!-- no translation found for quick_settings_bluetooth_detail_empty_text (4910015762433302860) -->
+    <skip />
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"밝기"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"자동 회전"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"방향 고정"</string>
@@ -207,26 +209,50 @@
     <string name="quick_settings_settings_label" msgid="5326556592578065401">"설정"</string>
     <string name="quick_settings_time_label" msgid="4635969182239736408">"시간"</string>
     <string name="quick_settings_user_label" msgid="5238995632130897840">"나"</string>
+    <!-- no translation found for quick_settings_user_title (4467690427642392403) -->
+    <skip />
+    <!-- no translation found for quick_settings_user_new_user (9030521362023479778) -->
+    <skip />
     <string name="quick_settings_wifi_label" msgid="9135344704899546041">"Wi-Fi"</string>
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"연결되어 있지 않음"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"네트워크가 연결되지 않음"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi 꺼짐"</string>
-    <string name="quick_settings_remote_display_no_connection_label" msgid="7482103121002965053">"화면 전송"</string>
+    <!-- no translation found for quick_settings_wifi_detail_empty_text (2831702993995222755) -->
+    <skip />
+    <!-- no translation found for quick_settings_cast_title (1893629685050355115) -->
+    <skip />
+    <!-- no translation found for quick_settings_casting (6601710681033353316) -->
+    <skip />
+    <!-- no translation found for quick_settings_cast_device_default_name (5367253104742382945) -->
+    <skip />
+    <!-- no translation found for quick_settings_cast_device_default_description (2484573682378634413) -->
+    <skip />
+    <!-- no translation found for quick_settings_cast_detail_empty_text (311785821261640623) -->
+    <skip />
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"밝기"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"자동"</string>
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"색상 반전"</string>
     <string name="quick_settings_color_space_label" msgid="853443689745584770">"색상 보정 모드"</string>
     <string name="quick_settings_more_settings" msgid="326112621462813682">"설정 더보기"</string>
-    <!-- no translation found for quick_settings_done (3402999958839153376) -->
-    <skip />
-    <!-- no translation found for quick_settings_connected (1722253542984847487) -->
+    <string name="quick_settings_done" msgid="3402999958839153376">"완료"</string>
+    <string name="quick_settings_connected" msgid="1722253542984847487">"연결됨"</string>
+    <!-- no translation found for quick_settings_connecting (47623027419264404) -->
     <skip />
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"테더링"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"핫스팟"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"알림"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"손전등"</string>
+    <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"모바일 데이터"</string>
+    <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"데이터 사용"</string>
+    <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"잔여 데이터"</string>
+    <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"한도 초과"</string>
+    <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> 사용됨"</string>
+    <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"한도: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
+    <!-- no translation found for quick_settings_cellular_detail_data_warning (2440098045692399009) -->
+    <skip />
     <string name="recents_empty_message" msgid="7883614615463619450">"최근에 사용한 앱 없음"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"애플리케이션 정보"</string>
+    <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"앱에 잠금"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"검색"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"충전됨"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"충전 중"</string>
@@ -236,14 +262,19 @@
     <string name="description_target_search" msgid="3091587249776033139">"검색"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>하려면 위로 슬라이드"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>하려면 왼쪽으로 슬라이드"</string>
-    <string name="zen_mode_title" msgid="8793432092004749188">"알림 일시중지"</string>
+    <string name="zen_no_interruptions_with_warning" msgid="7669163720139116154">"방해 금지(알람 및 타이머 포함)"</string>
+    <string name="zen_no_interruptions" msgid="7970973750143632592">"모든 알림 차단"</string>
+    <string name="zen_important_interruptions" msgid="3477041776609757628">"최우선 알림만 수신"</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"아래에 덜 급한 알림 표시"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"다시 탭하여 열기"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"위로 스와이프하여 잠금 해제"</string>
     <string name="phone_hint" msgid="3101468054914424646">"전화 기능을 사용하려면 오른쪽으로 스와이프하세요."</string>
     <string name="camera_hint" msgid="5241441720959174226">"카메라를 사용하려면 왼쪽으로 스와이프하세요."</string>
-    <string name="zen_mode_forever" msgid="7420011936770086993">"이 기능을 사용 중지할 때까지"</string>
+    <string name="zen_mode_forever" msgid="4316804956488785559">"무제한"</string>
+    <string name="interruption_level_none" msgid="3831278883136066646">"수신 안함"</string>
+    <string name="interruption_level_priority" msgid="6517366750688942030">"최우선만 수신"</string>
+    <string name="interruption_level_all" msgid="1330581184930945764">"모두 수신"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"충전 중(<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> 후 충전 완료)"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"손님"</string>
     <string name="guest_new_guest" msgid="4259024453643879653">"새 손님 추가"</string>
@@ -258,4 +289,7 @@
     <string name="battery_saver_notification_title" msgid="237918726750955859">"배터리 세이버 사용 중"</string>
     <string name="battery_saver_notification_text" msgid="7796554871101546872">"기기의 성능이 저하됩니다."</string>
     <string name="battery_saver_notification_action_text" msgid="7546297220816993504">"배터리 세이버 설정 열기"</string>
+    <string name="battery_level_template" msgid="1609636980292580020">"<xliff:g id="LEVEL">%d</xliff:g>%%"</string>
+    <!-- no translation found for notification_hidden_text (1135169301897151909) -->
+    <skip />
 </resources>

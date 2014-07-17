@@ -193,6 +193,8 @@
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> appareils)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth désactivé"</string>
+    <!-- no translation found for quick_settings_bluetooth_detail_empty_text (4910015762433302860) -->
+    <skip />
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Luminosité"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Rotation automatique"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"Rotation verrouillée"</string>
@@ -207,11 +209,26 @@
     <string name="quick_settings_settings_label" msgid="5326556592578065401">"Paramètres"</string>
     <string name="quick_settings_time_label" msgid="4635969182239736408">"Heure"</string>
     <string name="quick_settings_user_label" msgid="5238995632130897840">"Moi"</string>
+    <!-- no translation found for quick_settings_user_title (4467690427642392403) -->
+    <skip />
+    <!-- no translation found for quick_settings_user_new_user (9030521362023479778) -->
+    <skip />
     <string name="quick_settings_wifi_label" msgid="9135344704899546041">"Wi-Fi"</string>
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Non connecté"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Aucun réseau"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi désactivé"</string>
-    <string name="quick_settings_remote_display_no_connection_label" msgid="7482103121002965053">"Caster l\'écran"</string>
+    <!-- no translation found for quick_settings_wifi_detail_empty_text (2831702993995222755) -->
+    <skip />
+    <!-- no translation found for quick_settings_cast_title (1893629685050355115) -->
+    <skip />
+    <!-- no translation found for quick_settings_casting (6601710681033353316) -->
+    <skip />
+    <!-- no translation found for quick_settings_cast_device_default_name (5367253104742382945) -->
+    <skip />
+    <!-- no translation found for quick_settings_cast_device_default_description (2484573682378634413) -->
+    <skip />
+    <!-- no translation found for quick_settings_cast_detail_empty_text (311785821261640623) -->
+    <skip />
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Luminosité"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTOMATIQUE"</string>
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Inverser les couleurs"</string>
@@ -219,12 +236,23 @@
     <string name="quick_settings_more_settings" msgid="326112621462813682">"Plus de paramètres"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"OK"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"Connecté"</string>
+    <!-- no translation found for quick_settings_connecting (47623027419264404) -->
+    <skip />
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Partage de connexion"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Point d\'accès"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Notifications"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Lampe de poche"</string>
+    <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Données mobiles"</string>
+    <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Consommation des données"</string>
+    <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Données restantes"</string>
+    <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"Limite dépassée"</string>
+    <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> utilisés"</string>
+    <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"<xliff:g id="DATA_LIMIT">%s</xliff:g> au maximum"</string>
+    <!-- no translation found for quick_settings_cellular_detail_data_warning (2440098045692399009) -->
+    <skip />
     <string name="recents_empty_message" msgid="7883614615463619450">"Aucune application récente"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Informations sur l\'application"</string>
+    <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"verrouiller sur l\'application"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"rechercher"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Chargé"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"En charge"</string>
@@ -234,14 +262,19 @@
     <string name="description_target_search" msgid="3091587249776033139">"Rechercher"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Faites glisser vers le haut pour <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Faites glisser vers la gauche pour <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_mode_title" msgid="8793432092004749188">"Ne pas déranger"</string>
+    <string name="zen_no_interruptions_with_warning" msgid="7669163720139116154">"Aucune interruption (alarmes et minuteurs inclus)"</string>
+    <string name="zen_no_interruptions" msgid="7970973750143632592">"Aucune interruption"</string>
+    <string name="zen_important_interruptions" msgid="3477041776609757628">"Interruptions prioritaires seulement"</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Notifications moins urgentes ci-dessous"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Appuyer à nouveau pour ouvrir"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Faire glisser pour déverrouiller"</string>
     <string name="phone_hint" msgid="3101468054914424646">"Balayer l\'écran vers la droite pour accéder au téléphone"</string>
     <string name="camera_hint" msgid="5241441720959174226">"Balayer l\'écran vers la gauche pour accéder à l\'appareil photo"</string>
-    <string name="zen_mode_forever" msgid="7420011936770086993">"Jusqu\'à la désactivation"</string>
+    <string name="zen_mode_forever" msgid="4316804956488785559">"Indéfiniment"</string>
+    <string name="interruption_level_none" msgid="3831278883136066646">"Aucune"</string>
+    <string name="interruption_level_priority" msgid="6517366750688942030">"Prioritaire"</string>
+    <string name="interruption_level_all" msgid="1330581184930945764">"Toutes"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Charge en cours… (chargé à 100 %% dans <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"Invité"</string>
     <string name="guest_new_guest" msgid="4259024453643879653">"Ajouter un invité"</string>
@@ -256,4 +289,7 @@
     <string name="battery_saver_notification_title" msgid="237918726750955859">"L\'économiseur de batterie est activé"</string>
     <string name="battery_saver_notification_text" msgid="7796554871101546872">"Les performances de l\'appareil sont réduites."</string>
     <string name="battery_saver_notification_action_text" msgid="7546297220816993504">"Ouvrir les paramètres de l\'économiseur de batterie"</string>
+    <string name="battery_level_template" msgid="1609636980292580020">"<xliff:g id="LEVEL">%d</xliff:g> %%"</string>
+    <!-- no translation found for notification_hidden_text (1135169301897151909) -->
+    <skip />
 </resources>
