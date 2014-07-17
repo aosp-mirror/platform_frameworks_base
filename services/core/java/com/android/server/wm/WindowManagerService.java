@@ -11173,17 +11173,17 @@ public class WindowManagerService extends IWindowManager.Stub
         public void waitForAllWindowsDrawn(Runnable callback, long timeout) {
             synchronized (mWindowMap) {
                 mWaitingForDrawnCallback = callback;
-                final WindowList windows = getDefaultWindowListLocked();
-                for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
-                    final WindowState win = windows.get(winNdx);
-                    if (win.mHasSurface && win.isWinVisibleLw()) {
-                        if (!win.mIsWallpaper) {
-                            // Don't force wallpaper to redraw.
+                for (int displayNdx = mDisplayContents.size() - 1; displayNdx >= 0; --displayNdx) {
+                    final WindowList windows =
+                            mDisplayContents.valueAt(displayNdx).getWindowList();
+                    for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
+                        final WindowState win = windows.get(winNdx);
+                        if (win.mHasSurface && win.isWinVisibleLw() && !win.mIsWallpaper) {
                             win.mWinAnimator.mDrawState = WindowStateAnimator.DRAW_PENDING;
+                            // Force add to mResizingWindows.
+                            win.mLastContentInsets.set(-1, -1, -1, -1);
+                            mWaitingForDrawn.add(win);
                         }
-                        // Force add to mResizingWindows.
-                        win.mLastContentInsets.set(-1, -1, -1, -1);
-                        mWaitingForDrawn.add(win);
                     }
                 }
                 requestTraversalLocked();
