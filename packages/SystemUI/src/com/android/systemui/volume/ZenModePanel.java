@@ -100,7 +100,8 @@ public class ZenModePanel extends LinearLayout {
     private Uri mExitConditionId;
     private int mBucketIndex = -1;
     private boolean mExpanded;
-    private int mAttachedZen;
+    private int mSessionZen;
+    private Uri mSessionExitConditionId;
     private String mExitConditionText;
     private long mNextAlarm;
 
@@ -162,7 +163,8 @@ public class ZenModePanel extends LinearLayout {
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         if (DEBUG) Log.d(mTag, "onAttachedToWindow");
-        mAttachedZen = getSelectedZen(-1);
+        mSessionZen = getSelectedZen(-1);
+        mSessionExitConditionId = mExitConditionId;
         refreshExitConditionText();
         refreshNextAlarm();
         updateWidgets();
@@ -172,7 +174,8 @@ public class ZenModePanel extends LinearLayout {
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         if (DEBUG) Log.d(mTag, "onDetachedFromWindow");
-        mAttachedZen = -1;
+        mSessionZen = -1;
+        mSessionExitConditionId = null;
         setExpanded(false);
     }
 
@@ -215,7 +218,7 @@ public class ZenModePanel extends LinearLayout {
         updateTag();
         setExitConditionId(mController.getExitConditionId());
         refreshExitConditionText();
-        mAttachedZen = getSelectedZen(-1);
+        mSessionZen = getSelectedZen(-1);
         handleUpdateZen(mController.getZen());
         if (DEBUG) Log.d(mTag, "init mExitConditionId=" + mExitConditionId);
         mZenConditions.removeAllViews();
@@ -262,9 +265,9 @@ public class ZenModePanel extends LinearLayout {
     }
 
     private void handleUpdateZen(int zen) {
-        if (mAttachedZen != -1 && mAttachedZen != zen) {
+        if (mSessionZen != -1 && mSessionZen != zen) {
             setExpanded(zen != Global.ZEN_MODE_OFF);
-            mAttachedZen = zen;
+            mSessionZen = zen;
         }
         mZenButtons.setSelectedValue(zen);
         updateWidgets();
@@ -379,6 +382,8 @@ public class ZenModePanel extends LinearLayout {
         // are we left without anything selected?  if so, set a default
         for (int i = 0; i < mZenConditions.getChildCount(); i++) {
             if (getConditionTagAt(i).rb.isChecked()) {
+                if (DEBUG) Log.d(mTag, "Not selecting a default, checked="
+                        + getConditionTagAt(i).conditionId);
                 return;
             }
         }
@@ -422,7 +427,7 @@ public class ZenModePanel extends LinearLayout {
         }
         tag.conditionId = condition != null ? condition.id : null;
         tag.rb.setEnabled(enabled);
-        if (Objects.equals(tag.conditionId, mExitConditionId)) {
+        if (mSessionExitConditionId != null && mSessionExitConditionId.equals(tag.conditionId)) {
             tag.rb.setChecked(true);
         }
         tag.rb.setOnCheckedChangeListener(new OnCheckedChangeListener() {
@@ -535,6 +540,7 @@ public class ZenModePanel extends LinearLayout {
         } else if (ZenModeConfig.isValidCountdownConditionId(conditionId) && mBucketIndex != -1) {
             mFavorites.setMinuteIndex(mBucketIndex);
         }
+        mSessionExitConditionId = conditionId;
     }
 
     private void fireMoreSettings() {
@@ -660,7 +666,6 @@ public class ZenModePanel extends LinearLayout {
             if (value != null && mZenButtons.isShown()) {
                 if (DEBUG) Log.d(mTag, "mZenButtonsCallback selected=" + value);
                 mController.setZen((Integer) value);
-                mController.setExitConditionId(null);
             }
         }
     };
