@@ -21,6 +21,7 @@
 #include <sys/types.h>
 
 #include <SkCanvas.h>
+#include <SkColor.h>
 #include <SkShader.h>
 #include <SkTypeface.h>
 
@@ -1462,7 +1463,7 @@ void OpenGLRenderer::setStencilFromClip() {
             mSkipOutlineClip = true;
 
             SkPaint paint;
-            paint.setColor(0xff000000);
+            paint.setColor(SK_ColorBLACK);
             paint.setXfermodeMode(SkXfermode::kSrc_Mode);
 
             // NOTE: We could use the region contour path to generate a smaller mesh
