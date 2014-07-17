@@ -836,10 +836,6 @@ public class PackageParser {
             pkg.baseCodePath = apkPath;
             pkg.mSignatures = null;
 
-            // TODO: Remove this when the WebView can load resources dynamically. b/11505352
-            pkg.usesOptionalLibraries = ArrayUtils.add(pkg.usesOptionalLibraries,
-                    "com.android.webview");
-
             return pkg;
 
         } catch (PackageParserException e) {

@@ -100,7 +100,7 @@ public final class AssetManager implements AutoCloseable {
         synchronized (sSync) {
             if (sSystem == null) {
                 AssetManager system = new AssetManager(true);
-                system.makeStringBlocks(false);
+                system.makeStringBlocks(null);
                 sSystem = system;
             }
         }
@@ -246,21 +246,21 @@ public final class AssetManager implements AutoCloseable {
         if (mStringBlocks == null) {
             synchronized (this) {
                 if (mStringBlocks == null) {
-                    makeStringBlocks(true);
+                    makeStringBlocks(sSystem.mStringBlocks);
                 }
             }
         }
     }
 
-    /*package*/ final void makeStringBlocks(boolean copyFromSystem) {
-        final int sysNum = copyFromSystem ? sSystem.mStringBlocks.length : 0;
+    /*package*/ final void makeStringBlocks(StringBlock[] seed) {
+        final int seedNum = (seed != null) ? seed.length : 0;
         final int num = getStringBlockCount();
         mStringBlocks = new StringBlock[num];
         if (localLOGV) Log.v(TAG, "Making string blocks for " + this
                 + ": " + num);
         for (int i=0; i<num; i++) {
-            if (i < sysNum) {
-                mStringBlocks[i] = sSystem.mStringBlocks[i];
+            if (i < seedNum) {
+                mStringBlocks[i] = seed[i];
             } else {
                 mStringBlocks[i] = new StringBlock(getNativeStringBlock(i), true);
             }
@@ -610,8 +610,11 @@ public final class AssetManager implements AutoCloseable {
      * {@hide}
      */
     public final int addAssetPath(String path) {
-        int res = addAssetPathNative(path);
-        return res;
+        synchronized (this) {
+            int res = addAssetPathNative(path);
+            makeStringBlocks(mStringBlocks);
+            return res;
+        }
     }
 
     private native final int addAssetPathNative(String path);
