@@ -16,6 +16,7 @@
 
 package com.android.systemui.recents.misc;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Rect;
 import com.android.systemui.recents.RecentsConfiguration;
@@ -92,5 +93,11 @@ public class Utilities {
     public static void setShadowProperty(String property, String value)
             throws IllegalAccessException, InvocationTargetException {
         sPropertyMethod.invoke(null, property, value);
+    }
+
+    /** Returns whether the specified intent is a document. */
+    public static boolean isDocument(Intent intent) {
+        int flags = intent.getFlags();
+        return (flags & Intent.FLAG_ACTIVITY_NEW_DOCUMENT) == Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
     }
 }

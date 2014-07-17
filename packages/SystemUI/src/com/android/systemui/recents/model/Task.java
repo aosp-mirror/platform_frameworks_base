@@ -51,10 +51,6 @@ public class Task {
             this.lastActiveTime = lastActiveTime;
         }
 
-        public void updateLastActiveTime(long lastActiveTime) {
-            this.lastActiveTime = lastActiveTime;
-        }
-
         @Override
         public boolean equals(Object o) {
             if (!(o instanceof TaskKey)) {
