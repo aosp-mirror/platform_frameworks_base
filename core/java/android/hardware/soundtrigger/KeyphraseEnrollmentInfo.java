@@ -156,6 +156,9 @@ public class KeyphraseEnrollmentInfo {
             if (searchKeyphraseId != -1) {
                 String searchKeyphrase = array.getString(com.android.internal.R.styleable
                         .VoiceEnrollmentApplication_searchKeyphrase);
+                if (searchKeyphrase == null) {
+                    searchKeyphrase = "";
+                }
                 String searchKeyphraseSupportedLocales =
                         array.getString(com.android.internal.R.styleable
                                 .VoiceEnrollmentApplication_searchKeyphraseSupportedLocales);
@@ -165,9 +168,11 @@ public class KeyphraseEnrollmentInfo {
                         && !searchKeyphraseSupportedLocales.isEmpty()) {
                     supportedLocales = searchKeyphraseSupportedLocales.split(",");
                 }
+                int recognitionModes = array.getInt(com.android.internal.R.styleable
+                        .VoiceEnrollmentApplication_searchKeyphraseRecognitionFlags, 0);
                 mKeyphrases = new KeyphraseMetadata[1];
                 mKeyphrases[0] = new KeyphraseMetadata(
-                        searchKeyphraseId, searchKeyphrase, supportedLocales);
+                        searchKeyphraseId, searchKeyphrase, supportedLocales, recognitionModes);
             } else {
                 mParseError = "searchKeyphraseId not specified in meta-data";
                 return;
@@ -239,8 +244,8 @@ public class KeyphraseEnrollmentInfo {
      * @param keyphrase The keyphrase that the user needs to be enrolled to.
      * @param locale The locale for which the enrollment needs to be performed.
      *        This is a Java locale, for example "en_US".
-     * @return The metadata, if an enrollment client supports the given keyphrase
-     *         and the given locale, null otherwise.
+     * @return The metadata, if the enrollment client supports the given keyphrase
+     *         and locale, null otherwise.
      */
     public KeyphraseMetadata getKeyphraseMetadata(String keyphrase, String locale) {
         if (mKeyphrases == null || mKeyphrases.length == 0) {

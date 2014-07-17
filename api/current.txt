@@ -1061,6 +1061,7 @@ package android {
     field public static final int searchIcon = 16843909; // 0x1010485
     field public static final int searchKeyphrase = 16843873; // 0x1010461
     field public static final int searchKeyphraseId = 16843872; // 0x1010460
+    field public static final int searchKeyphraseRecognitionFlags = 16843947; // 0x10104ab
     field public static final int searchKeyphraseSupportedLocales = 16843874; // 0x1010462
     field public static final int searchMode = 16843221; // 0x10101d5
     field public static final int searchSettingsDescription = 16843402; // 0x101028a
@@ -26957,7 +26958,8 @@ package android.service.voice {
     method public int getAvailability();
     method public android.content.Intent getManageIntent(int);
     method public int getRecognitionStatus();
-    method public int startRecognition();
+    method public int getSupportedRecognitionModes();
+    method public int startRecognition(int);
     method public int stopRecognition();
     field public static final int KEYPHRASE_ENROLLED = 2; // 0x2
     field public static final int KEYPHRASE_HARDWARE_UNAVAILABLE = -2; // 0xfffffffe
@@ -26966,17 +26968,21 @@ package android.service.voice {
     field public static final int MANAGE_ACTION_ENROLL = 0; // 0x0
     field public static final int MANAGE_ACTION_RE_ENROLL = 1; // 0x1
     field public static final int MANAGE_ACTION_UN_ENROLL = 2; // 0x2
-    field public static final int RECOGNITION_ACTIVE = 2; // 0x2
-    field public static final int RECOGNITION_DISABLED_TEMPORARILY = -1; // 0xffffffff
-    field public static final int RECOGNITION_NOT_AVAILABLE = -3; // 0xfffffffd
-    field public static final int RECOGNITION_NOT_REQUESTED = -2; // 0xfffffffe
-    field public static final int RECOGNITION_REQUESTED = 1; // 0x1
+    field public static final int RECOGNITION_FLAG_CAPTURE_TRIGGER_AUDIO = 1; // 0x1
+    field public static final int RECOGNITION_FLAG_NONE = 0; // 0x0
+    field public static final int RECOGNITION_MODE_USER_IDENTIFICATION = 2; // 0x2
+    field public static final int RECOGNITION_MODE_VOICE_TRIGGER = 1; // 0x1
+    field public static final int RECOGNITION_STATUS_ACTIVE = 16; // 0x10
+    field public static final int RECOGNITION_STATUS_DISABLED_TEMPORARILY = 8; // 0x8
+    field public static final int RECOGNITION_STATUS_NOT_AVAILABLE = 1; // 0x1
+    field public static final int RECOGNITION_STATUS_NOT_REQUESTED = 2; // 0x2
+    field public static final int RECOGNITION_STATUS_REQUESTED = 4; // 0x4
     field public static final int STATUS_ERROR = -2147483648; // 0x80000000
     field public static final int STATUS_OK = 1; // 0x1
   }
 
   public static abstract interface AlwaysOnHotwordDetector.Callback {
-    method public abstract void onDetected();
+    method public abstract void onDetected(byte[]);
     method public abstract void onDetectionStarted();
     method public abstract void onDetectionStopped();
   }
