@@ -198,6 +198,7 @@ bool Caches::initProperties() {
         drawDeferDisabled = !strcasecmp(property, "true");
         INIT_LOGD("  Draw defer %s", drawDeferDisabled ? "disabled" : "enabled");
     } else {
+        drawDeferDisabled = false;
         INIT_LOGD("  Draw defer enabled");
     }
 
@@ -205,6 +206,7 @@ bool Caches::initProperties() {
         drawReorderDisabled = !strcasecmp(property, "true");
         INIT_LOGD("  Draw reorder %s", drawReorderDisabled ? "disabled" : "enabled");
     } else {
+        drawReorderDisabled = false;
         INIT_LOGD("  Draw reorder enabled");
     }
 
