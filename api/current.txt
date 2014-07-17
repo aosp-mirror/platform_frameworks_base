@@ -7191,6 +7191,7 @@ package android.content {
     field public static final java.lang.String SEARCH_SERVICE = "search";
     field public static final java.lang.String SENSOR_SERVICE = "sensor";
     field public static final java.lang.String STORAGE_SERVICE = "storage";
+    field public static final java.lang.String TELECOMM_SERVICE = "telecomm";
     field public static final java.lang.String TELEPHONY_SERVICE = "phone";
     field public static final java.lang.String TEXT_SERVICES_MANAGER_SERVICE = "textservices";
     field public static final java.lang.String TV_INPUT_SERVICE = "tv_input";
@@ -28427,6 +28428,14 @@ package android.telecomm {
     field public static final java.lang.String EXTRA_PHONE_ACCOUNT = "android.intent.extra.PHONE_ACCOUNT";
     field public static final java.lang.String EXTRA_START_CALL_WITH_SPEAKERPHONE = "android.intent.extra.START_CALL_WITH_SPEAKERPHONE";
     field public static final java.lang.String EXTRA_START_CALL_WITH_VIDEO_STATE = "android.intent.extra.START_CALL_WITH_VIDEO_STATE";
+  }
+
+  public class TelecommManager {
+    method public void clearAccounts(java.lang.String);
+    method public java.util.List<android.telecomm.PhoneAccount> getEnabledPhoneAccounts();
+    method public android.telecomm.PhoneAccountMetadata getPhoneAccountMetadata(android.telecomm.PhoneAccount);
+    method public void registerPhoneAccount(android.telecomm.PhoneAccount, android.telecomm.PhoneAccountMetadata);
+    method public void unregisterPhoneAccount(android.telecomm.PhoneAccount);
   }
 
   public class VideoCallProfile implements android.os.Parcelable {

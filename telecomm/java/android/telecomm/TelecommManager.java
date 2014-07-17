@@ -28,9 +28,9 @@ import java.util.List;
 /**
  * Provides access to Telecomm-related functionality.
  * TODO(santoscordon): Move this all into PhoneManager.
- * @hide
  */
 public class TelecommManager {
+
     private static final String TAG = "TelecommManager";
     private static final String TELECOMM_SERVICE_NAME = "telecomm";
 
@@ -126,8 +126,6 @@ public class TelecommManager {
      * Remove all Accounts for a given package from the system.
      *
      * @param packageName A package name that may have registered Accounts.
-     *
-     * @hide
      */
     @SystemApi
     public void clearAccounts(String packageName) {
@@ -240,6 +238,44 @@ public class TelecommManager {
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelecommService#silenceRinger", e);
         }
+    }
+
+    /**
+     * Returns whether TTY is supported on this device.
+     *
+     * @hide
+     */
+    @SystemApi
+    public boolean isTtySupported() {
+        try {
+            if (isServiceConnected()) {
+                return getTelecommService().isTtySupported();
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException attempting to get TTY supported state.", e);
+        }
+        return false;
+    }
+
+    /**
+     * Returns the current TTY mode of the device. For TTY to be on the user must enable it in
+     * settings and have a wired headset plugged in. Valid modes are:
+     * - {@link android.telecomm.TelecommConstants#TTY_MODE_OFF}
+     * - {@link android.telecomm.TelecommConstants#TTY_MODE_FULL}
+     * - {@link android.telecomm.TelecommConstants#TTY_MODE_HCO}
+     * - {@link android.telecomm.TelecommConstants#TTY_MODE_VCO}
+     *
+     * @hide
+     */
+    public int getCurrentTtyMode() {
+        try {
+            if (isServiceConnected()) {
+                return getTelecommService().getCurrentTtyMode();
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException attempting to get the current TTY mode.", e);
+        }
+        return TelecommConstants.TTY_MODE_OFF;
     }
 
     private ITelecommService getTelecommService() {
