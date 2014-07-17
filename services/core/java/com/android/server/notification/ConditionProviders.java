@@ -273,7 +273,7 @@ public class ConditionProviders extends ManagedServices {
         }
     }
 
-    public void setZenModeCondition(Uri conditionId) {
+    public void setZenModeCondition(Uri conditionId, String reason) {
         if (DEBUG) Slog.d(TAG, "setZenModeCondition " + conditionId);
         synchronized(mMutex) {
             ComponentName conditionComponent = null;
@@ -306,6 +306,7 @@ public class ConditionProviders extends ManagedServices {
             if (!Objects.equals(mExitConditionId, conditionId)) {
                 mExitConditionId = conditionId;
                 mExitConditionComponent = conditionComponent;
+                ZenLog.traceExitCondition(mExitConditionId, mExitConditionComponent, reason);
                 saveZenConfigLocked();
             }
         }
@@ -314,15 +315,16 @@ public class ConditionProviders extends ManagedServices {
     private void subscribeLocked(ConditionRecord r) {
         if (DEBUG) Slog.d(TAG, "subscribeLocked " + r);
         final IConditionProvider provider = provider(r);
-        if (provider == null) {
-            Slog.w(TAG, "subscribeLocked: no provider");
-            return;
+        RemoteException re = null;
+        if (provider != null) {
+            try {
+                provider.onSubscribe(r.id);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Error subscribing to " + r, e);
+                re = e;
+            }
         }
-        try {
-            provider.onSubscribe(r.id);
-        } catch (RemoteException e) {
-            Slog.w(TAG, "Error subscribing to " + r, e);
-        }
+        ZenLog.traceSubscribe(r != null ? r.id : null, provider, re);
     }
 
     private static <T> ArraySet<T> safeSet(T... items) {
@@ -388,15 +390,16 @@ public class ConditionProviders extends ManagedServices {
     private void unsubscribeLocked(ConditionRecord r) {
         if (DEBUG) Slog.d(TAG, "unsubscribeLocked " + r);
         final IConditionProvider provider = provider(r);
-        if (provider == null) {
-            Slog.w(TAG, "unsubscribeLocked: no provider");
-            return;
+        RemoteException re = null;
+        if (provider != null) {
+            try {
+                provider.onUnsubscribe(r.id);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Error unsubscribing to " + r, e);
+                re = e;
+            }
         }
-        try {
-            provider.onUnsubscribe(r.id);
-        } catch (RemoteException e) {
-            Slog.w(TAG, "Error unsubscribing to " + r, e);
-        }
+        ZenLog.traceUnsubscribe(r != null ? r.id : null, provider, re);
     }
 
     private static IConditionProvider provider(ConditionRecord r) {
@@ -433,8 +436,12 @@ public class ConditionProviders extends ManagedServices {
             return;
         }
         synchronized (mMutex) {
+            final boolean changingExit = !Objects.equals(mExitConditionId, config.exitConditionId);
             mExitConditionId = config.exitConditionId;
             mExitConditionComponent = config.exitConditionComponent;
+            if (changingExit) {
+                ZenLog.traceExitCondition(mExitConditionId, mExitConditionComponent, "config");
+            }
             if (config.conditionComponents == null || config.conditionIds == null
                     || config.conditionComponents.length != config.conditionIds.length) {
                 if (DEBUG) Slog.d(TAG, "loadZenConfig: no conditions");
@@ -498,7 +505,7 @@ public class ConditionProviders extends ManagedServices {
             final int mode = mZenModeHelper.getZenMode();
             if (mode == Global.ZEN_MODE_OFF) {
                 // ensure any manual condition is cleared
-                setZenModeCondition(null);
+                setZenModeCondition(null, "zenOff");
             }
         }
     }
