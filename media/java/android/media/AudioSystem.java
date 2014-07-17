@@ -254,6 +254,7 @@ public class AudioSystem
     public static final int DEVICE_OUT_HDMI_ARC = 0x40000;
     public static final int DEVICE_OUT_SPDIF = 0x80000;
     public static final int DEVICE_OUT_FM = 0x100000;
+    public static final int DEVICE_OUT_AUX_LINE = 0x200000;
 
     public static final int DEVICE_OUT_DEFAULT = DEVICE_BIT_DEFAULT;
 
@@ -278,6 +279,7 @@ public class AudioSystem
                                               DEVICE_OUT_HDMI_ARC |
                                               DEVICE_OUT_SPDIF |
                                               DEVICE_OUT_FM |
+                                              DEVICE_OUT_AUX_LINE |
                                               DEVICE_OUT_DEFAULT);
     public static final int DEVICE_OUT_ALL_A2DP = (DEVICE_OUT_BLUETOOTH_A2DP |
                                                    DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES |
@@ -287,7 +289,7 @@ public class AudioSystem
                                                   DEVICE_OUT_BLUETOOTH_SCO_CARKIT);
     public static final int DEVICE_OUT_ALL_USB = (DEVICE_OUT_USB_ACCESSORY |
                                                   DEVICE_OUT_USB_DEVICE);
-    public static final int DEVICE_OUT_ALL_HDMI_SYSTEM_AUDIO = (DEVICE_OUT_LINE |
+    public static final int DEVICE_OUT_ALL_HDMI_SYSTEM_AUDIO = (DEVICE_OUT_AUX_LINE |
                                                                 DEVICE_OUT_HDMI_ARC |
                                                                 DEVICE_OUT_SPDIF);
     public static final int DEVICE_ALL_HDMI_SYSTEM_AUDIO_AND_SPEAKER =
@@ -440,7 +442,8 @@ public class AudioSystem
     public static final int FORCE_DIGITAL_DOCK = 9;
     public static final int FORCE_NO_BT_A2DP = 10;
     public static final int FORCE_SYSTEM_ENFORCED = 11;
-    private static final int NUM_FORCE_CONFIG = 12;
+    public static final int FORCE_HDMI_SYSTEM_AUDIO_ENFORCED = 12;
+    private static final int NUM_FORCE_CONFIG = 13;
     public static final int FORCE_DEFAULT = FORCE_NONE;
 
     // usage for setForceUse, must match AudioSystem::force_use
@@ -449,7 +452,8 @@ public class AudioSystem
     public static final int FOR_RECORD = 2;
     public static final int FOR_DOCK = 3;
     public static final int FOR_SYSTEM = 4;
-    private static final int NUM_FORCE_USE = 5;
+    public static final int FOR_HDMI_SYSTEM_AUDIO = 5;
+    private static final int NUM_FORCE_USE = 6;
 
     // usage for AudioRecord.startRecordingSync(), must match AudioSystem::sync_event_t
     public static final int SYNC_EVENT_NONE = 0;

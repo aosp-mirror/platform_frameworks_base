@@ -2954,15 +2954,12 @@ public class AudioManager {
      * Set Hdmi Cec system audio mode.
      *
      * @param on whether to be on system audio mode
-     * @param device out device type to be used for system audio mode.
-     *               Ignored if {@code on} is {@code false}
-     * @param name name of system audio device
      * @return output device type. 0 (DEVICE_NONE) if failed to set device.
      * @hide
      */
-    public int setHdmiSystemAudioSupported(boolean on, int device, String name) {
+    public int setHdmiSystemAudioSupported(boolean on) {
         try {
-            return getService().setHdmiSystemAudioSupported(on, device, name);
+            return getService().setHdmiSystemAudioSupported(on);
         } catch (RemoteException e) {
             Log.w(TAG, "Error setting system audio mode", e);
             return AudioSystem.DEVICE_NONE;
