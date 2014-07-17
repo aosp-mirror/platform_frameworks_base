@@ -161,6 +161,12 @@ public final class AudioAttributes implements Parcelable {
      * Usage value to use when the usage is for game audio.
      */
     public final static int USAGE_GAME = 14;
+    /**
+     * @hide
+     * Usage value to use when feeding audio to the platform and replacing "traditional" audio
+     * source, such as audio capture devices.
+     */
+    public final static int USAGE_VIRTUAL_SOURCE = 15;
 
     /**
      * Flag defining a behavior where the audibility of the sound will be ensured by the system.
@@ -374,6 +380,7 @@ public final class AudioAttributes implements Parcelable {
                 case USAGE_ASSISTANCE_NAVIGATION_GUIDANCE:
                 case USAGE_ASSISTANCE_SONIFICATION:
                 case USAGE_GAME:
+                case USAGE_VIRTUAL_SOURCE:
                      mUsage = usage;
                      break;
                 default:

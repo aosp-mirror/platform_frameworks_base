@@ -23,7 +23,7 @@ import java.util.Iterator;
 
 
 /**
- * @hide CANDIDATE FOR PUBLIC API
+ * @hide
  *
  * Here's an example of creating a mixing rule for all media playback:
  * <pre>

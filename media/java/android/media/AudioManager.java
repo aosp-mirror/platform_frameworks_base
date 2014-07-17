@@ -2663,9 +2663,13 @@ public class AudioManager {
         }
         IAudioService service = getService();
         try {
-            if (!service.registerAudioPolicy(policy.getConfig(), policy.token())) {
+            String regId = service.registerAudioPolicy(policy.getConfig(), policy.token());
+            if (regId == null) {
                 return ERROR;
+            } else {
+                policy.setRegistration(regId);
             }
+            // successful registration
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in registerAudioPolicyAsync()", e);
             return ERROR;

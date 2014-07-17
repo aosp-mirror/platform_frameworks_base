@@ -48,6 +48,7 @@ import android.hardware.hdmi.HdmiTvClient;
 import android.hardware.usb.UsbManager;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
+import android.media.audiopolicy.AudioMix;
 import android.media.audiopolicy.AudioPolicyConfig;
 import android.media.session.MediaSessionLegacyHelper;
 import android.os.Binder;
@@ -118,6 +119,10 @@ public class AudioService extends IAudioService.Stub {
 
     /** Debug audio mode */
     protected static final boolean DEBUG_MODE = Log.isLoggable(TAG + ".MOD", Log.DEBUG);
+
+    /** Debug audio policy feature */
+    protected static final boolean DEBUG_AP = Log.isLoggable(TAG + ".AP", Log.DEBUG);
+
     /** Debug volumes */
     protected static final boolean DEBUG_VOL = Log.isLoggable(TAG + ".VOL", Log.DEBUG);
 
@@ -5630,31 +5635,33 @@ public class AudioService extends IAudioService.Stub {
     //==========================================================================================
     // Audio policy management
     //==========================================================================================
-    public boolean registerAudioPolicy(AudioPolicyConfig policyConfig, IBinder cb) {
+    public String registerAudioPolicy(AudioPolicyConfig policyConfig, IBinder cb) {
         //Log.v(TAG, "registerAudioPolicy for " + cb + " got policy:" + policyConfig);
+        String regId = null;
         boolean hasPermissionForPolicy =
                 (PackageManager.PERMISSION_GRANTED == mContext.checkCallingOrSelfPermission(
                         android.Manifest.permission.MODIFY_AUDIO_ROUTING));
         if (!hasPermissionForPolicy) {
             Slog.w(TAG, "Can't register audio policy for pid " + Binder.getCallingPid() + " / uid "
                     + Binder.getCallingUid() + ", need MODIFY_AUDIO_ROUTING");
-            return false;
+            return null;
         }
         synchronized (mAudioPolicies) {
-            AudioPolicyProxy app = new AudioPolicyProxy(policyConfig, cb);
             try {
+                AudioPolicyProxy app = new AudioPolicyProxy(policyConfig, cb);
                 cb.linkToDeath(app, 0/*flags*/);
+                regId = app.connectMixes();
                 mAudioPolicies.put(cb, app);
             } catch (RemoteException e) {
                 // audio policy owner has already died!
                 Slog.w(TAG, "Audio policy registration failed, could not link to " + cb +
                         " binder death", e);
-                return false;
+                return null;
             }
         }
-        // TODO implement registration with native audio policy (including permission check)
-        return true;
+        return regId;
     }
+
     public void unregisterAudioPolicyAsync(IBinder cb) {
         synchronized (mAudioPolicies) {
             AudioPolicyProxy app = mAudioPolicies.remove(cb);
@@ -5664,27 +5671,59 @@ public class AudioService extends IAudioService.Stub {
             } else {
                 cb.unlinkToDeath(app, 0/*flags*/);
             }
+            app.disconnectMixes();
         }
-        // TODO implement registration with native audio policy
+        // TODO implement clearing mix attribute matching info in native audio policy
     }
 
-    public class AudioPolicyProxy implements IBinder.DeathRecipient {
+    /**
+     * This internal class inherits from AudioPolicyConfig which contains all the mixes and
+     * their configurations.
+     */
+    public class AudioPolicyProxy extends AudioPolicyConfig implements IBinder.DeathRecipient {
         private static final String TAG = "AudioPolicyProxy";
         AudioPolicyConfig mConfig;
         IBinder mToken;
         AudioPolicyProxy(AudioPolicyConfig config, IBinder token) {
-            mConfig = config;
+            super(config);
+            setRegistration(new String(config.toString() + ":ap:" + mAudioPolicyCounter++));
             mToken = token;
         }
 
         public void binderDied() {
             synchronized (mAudioPolicies) {
-                Log.v(TAG, "audio policy " + mToken + " died");
+                Log.i(TAG, "audio policy " + mToken + " died");
                 mAudioPolicies.remove(mToken);
+                disconnectMixes();
+            }
+        }
+
+        String connectMixes() {
+            updateMixes(AudioSystem.DEVICE_STATE_AVAILABLE);
+            return mRegistrationId;
+        }
+
+        void disconnectMixes() {
+            updateMixes(AudioSystem.DEVICE_STATE_UNAVAILABLE);
+        }
+
+        void updateMixes(int connectionState) {
+            for (AudioMix mix : mMixes) {
+                // TODO implement sending the mix attribute matching info to native audio policy
+                if (DEBUG_AP) {
+                    Log.v(TAG, "AudioPolicyProxy connect mix state=" + connectionState
+                            + " addr=" + mix.getRegistration()); }
+                AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_IN_REMOTE_SUBMIX,
+                        connectionState,
+                        mix.getRegistration());
+                AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_REMOTE_SUBMIX,
+                        connectionState,
+                        mix.getRegistration());
             }
         }
     };
 
     private HashMap<IBinder, AudioPolicyProxy> mAudioPolicies =
             new HashMap<IBinder, AudioPolicyProxy>();
+    private int mAudioPolicyCounter = 0; // always accessed synchronized on mAudioPolicies
 }
