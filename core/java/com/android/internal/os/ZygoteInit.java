@@ -34,6 +34,7 @@ import android.system.Os;
 import android.system.OsConstants;
 import android.util.EventLog;
 import android.util.Log;
+import android.webkit.WebViewFactory;
 
 import dalvik.system.VMRuntime;
 
@@ -250,6 +251,9 @@ public class ZygoteInit {
         preloadClasses();
         preloadResources();
         preloadOpenGL();
+        // Ask the WebViewFactory to do any initialization that must run in the zygote process,
+        // for memory sharing purposes.
+        WebViewFactory.prepareWebViewInZygote();
         Log.d(TAG, "end preload");
     }
 
