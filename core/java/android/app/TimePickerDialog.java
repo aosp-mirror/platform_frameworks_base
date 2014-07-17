@@ -113,7 +113,6 @@ public class TimePickerDialog extends AlertDialog
         if (targetSdkVersion < Build.VERSION_CODES.L) {
             setIcon(0);
             setTitle(R.string.time_picker_dialog_title);
-            setButton(BUTTON_POSITIVE, themeContext.getText(R.string.date_time_done), this);
         }
 
         final LayoutInflater inflater = LayoutInflater.from(themeContext);
@@ -122,6 +121,11 @@ public class TimePickerDialog extends AlertDialog
 
         mTimePicker = (TimePicker) view.findViewById(R.id.timePicker);
         mTimePicker.setShowDoneButton(true);
+        // If time picker layout has no done button, add a dialog button.
+        if (!mTimePicker.isShowDoneButton()) {
+            setButton(BUTTON_POSITIVE, themeContext.getText(R.string.date_time_done), this);
+        }
+
         mTimePicker.setDismissCallback(new TimePicker.TimePickerDismissCallback() {
             @Override
             public void dismiss(TimePicker view, boolean isCancel, int hourOfDay, int minute) {
