@@ -13746,6 +13746,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             int layerType = getLayerType();
 
             final HardwareCanvas canvas = renderNode.start(width, height);
+            canvas.setHighContrastText(mAttachInfo.mHighContrastText);
 
             try {
                 final HardwareLayer layer = getHardwareLayer();
@@ -19911,6 +19912,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * Set to true if a view has been scrolled.
          */
         boolean mViewScrollChanged;
+
+        /**
+         * Set to true if high contrast mode enabled
+         */
+        boolean mHighContrastText;
 
         /**
          * Global to the view hierarchy used as a temporary for dealing with

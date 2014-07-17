@@ -18,6 +18,7 @@ package android.view.accessibility;
 
 import android.Manifest;
 import android.accessibilityservice.AccessibilityServiceInfo;
+import android.annotation.NonNull;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
@@ -76,6 +77,9 @@ public final class AccessibilityManager {
     public static final int STATE_FLAG_TOUCH_EXPLORATION_ENABLED = 0x00000002;
 
     /** @hide */
+    public static final int STATE_FLAG_HIGH_TEXT_CONTRAST_ENABLED = 0x00000004;
+
+    /** @hide */
     public static final int INVERSION_DISABLED = -1;
 
     /** @hide */
@@ -127,13 +131,19 @@ public final class AccessibilityManager {
 
     boolean mIsTouchExplorationEnabled;
 
+    boolean mIsHighTextContrastEnabled;
+
     private final CopyOnWriteArrayList<AccessibilityStateChangeListener>
             mAccessibilityStateChangeListeners = new CopyOnWriteArrayList<
                     AccessibilityStateChangeListener>();
 
     private final CopyOnWriteArrayList<TouchExplorationStateChangeListener>
             mTouchExplorationStateChangeListeners = new CopyOnWriteArrayList<
-                    TouchExplorationStateChangeListener>();
+            TouchExplorationStateChangeListener>();
+
+    private final CopyOnWriteArrayList<HighTextContrastChangeListener>
+            mHighTextContrastStateChangeListeners = new CopyOnWriteArrayList<
+            HighTextContrastChangeListener>();
 
     /**
      * Listener for the system accessibility state. To listen for changes to the
@@ -164,6 +174,24 @@ public final class AccessibilityManager {
          * @param enabled Whether touch exploration is enabled.
          */
         public void onTouchExplorationStateChanged(boolean enabled);
+    }
+
+    /**
+     * Listener for the system high text contrast state. To listen for changes to
+     * the high text contrast state on the device, implement this interface and
+     * register it with the system by calling
+     * {@link #addHighTextContrastStateChangeListener}.
+     *
+     * @hide
+     */
+    public interface HighTextContrastChangeListener {
+
+        /**
+         * Called when the high text contrast enabled state changes.
+         *
+         * @param enabled Whether high text contrast is enabled.
+         */
+        public void onHighTextContrastStateChanged(boolean enabled);
     }
 
     private final IAccessibilityManagerClient.Stub mClient =
@@ -258,6 +286,27 @@ public final class AccessibilityManager {
                 return false;
             }
             return mIsTouchExplorationEnabled;
+        }
+    }
+
+    /**
+     * Returns if the high text contrast in the system is enabled.
+     * <p>
+     * <strong>Note:</strong> You need to query this only if you application is
+     * doing its own rendering and does not rely on the platform rendering pipeline.
+     * </p>
+     *
+     * @return True if high text contrast is enabled, false otherwise.
+     *
+     * @hide
+     */
+    public boolean isHighTextContrastEnabled() {
+        synchronized (mLock) {
+            IAccessibilityManager service = getServiceLocked();
+            if (service == null) {
+                return false;
+            }
+            return mIsHighTextContrastEnabled;
         }
     }
 
@@ -434,7 +483,7 @@ public final class AccessibilityManager {
      * @return True if successfully registered.
      */
     public boolean addAccessibilityStateChangeListener(
-            AccessibilityStateChangeListener listener) {
+            @NonNull AccessibilityStateChangeListener listener) {
         // Final CopyOnArrayList - no lock needed.
         return mAccessibilityStateChangeListeners.add(listener);
     }
@@ -446,7 +495,7 @@ public final class AccessibilityManager {
      * @return True if successfully unregistered.
      */
     public boolean removeAccessibilityStateChangeListener(
-            AccessibilityStateChangeListener listener) {
+            @NonNull AccessibilityStateChangeListener listener) {
         // Final CopyOnArrayList - no lock needed.
         return mAccessibilityStateChangeListeners.remove(listener);
     }
@@ -459,7 +508,7 @@ public final class AccessibilityManager {
      * @return True if successfully registered.
      */
     public boolean addTouchExplorationStateChangeListener(
-            TouchExplorationStateChangeListener listener) {
+            @NonNull TouchExplorationStateChangeListener listener) {
         // Final CopyOnArrayList - no lock needed.
         return mTouchExplorationStateChangeListeners.add(listener);
     }
@@ -471,9 +520,38 @@ public final class AccessibilityManager {
      * @return True if successfully unregistered.
      */
     public boolean removeTouchExplorationStateChangeListener(
-            TouchExplorationStateChangeListener listener) {
+            @NonNull TouchExplorationStateChangeListener listener) {
         // Final CopyOnArrayList - no lock needed.
         return mTouchExplorationStateChangeListeners.remove(listener);
+    }
+
+    /**
+     * Registers a {@link HighTextContrastChangeListener} for changes in
+     * the global high text contrast state of the system.
+     *
+     * @param listener The listener.
+     * @return True if successfully registered.
+     *
+     * @hide
+     */
+    public boolean addHighTextContrastStateChangeListener(
+            @NonNull HighTextContrastChangeListener listener) {
+        // Final CopyOnArrayList - no lock needed.
+        return mHighTextContrastStateChangeListeners.add(listener);
+    }
+
+    /**
+     * Unregisters a {@link HighTextContrastChangeListener}.
+     *
+     * @param listener The listener.
+     * @return True if successfully unregistered.
+     *
+     * @hide
+     */
+    public boolean removeHighTextContrastStateChangeListener(
+            @NonNull HighTextContrastChangeListener listener) {
+        // Final CopyOnArrayList - no lock needed.
+        return mHighTextContrastStateChangeListeners.remove(listener);
     }
 
     /**
@@ -485,13 +563,17 @@ public final class AccessibilityManager {
         final boolean enabled = (stateFlags & STATE_FLAG_ACCESSIBILITY_ENABLED) != 0;
         final boolean touchExplorationEnabled =
                 (stateFlags & STATE_FLAG_TOUCH_EXPLORATION_ENABLED) != 0;
+        final boolean highTextContrastEnabled =
+                (stateFlags & STATE_FLAG_HIGH_TEXT_CONTRAST_ENABLED) != 0;
 
         final boolean wasEnabled = mIsEnabled;
         final boolean wasTouchExplorationEnabled = mIsTouchExplorationEnabled;
+        final boolean wasHighTextContrastEnabled = mIsHighTextContrastEnabled;
 
         // Ensure listeners get current state from isZzzEnabled() calls.
         mIsEnabled = enabled;
         mIsTouchExplorationEnabled = touchExplorationEnabled;
+        mIsHighTextContrastEnabled = highTextContrastEnabled;
 
         if (wasEnabled != enabled) {
             mHandler.sendEmptyMessage(MyHandler.MSG_NOTIFY_ACCESSIBILITY_STATE_CHANGED);
@@ -499,6 +581,10 @@ public final class AccessibilityManager {
 
         if (wasTouchExplorationEnabled != touchExplorationEnabled) {
             mHandler.sendEmptyMessage(MyHandler.MSG_NOTIFY_EXPLORATION_STATE_CHANGED);
+        }
+
+        if (wasHighTextContrastEnabled != highTextContrastEnabled) {
+            mHandler.sendEmptyMessage(MyHandler.MSG_NOTIFY_HIGH_TEXT_CONTRAST_STATE_CHANGED);
         }
     }
 
@@ -600,9 +686,25 @@ public final class AccessibilityManager {
         }
     }
 
+    /**
+     * Notifies the registered {@link HighTextContrastChangeListener}s.
+     */
+    private void handleNotifyHighTextContrastStateChanged() {
+        final boolean isHighTextContrastEnabled;
+        synchronized (mLock) {
+            isHighTextContrastEnabled = mIsHighTextContrastEnabled;
+        }
+        final int listenerCount = mHighTextContrastStateChangeListeners.size();
+        for (int i = 0; i < listenerCount; i++) {
+            mHighTextContrastStateChangeListeners.get(i)
+                    .onHighTextContrastStateChanged(isHighTextContrastEnabled);
+        }
+    }
+
     private final class MyHandler extends Handler {
         public static final int MSG_NOTIFY_ACCESSIBILITY_STATE_CHANGED = 1;
         public static final int MSG_NOTIFY_EXPLORATION_STATE_CHANGED = 2;
+        public static final int MSG_NOTIFY_HIGH_TEXT_CONTRAST_STATE_CHANGED = 3;
 
         public MyHandler(Looper looper) {
             super(looper, null, false);
@@ -617,7 +719,11 @@ public final class AccessibilityManager {
 
                 case MSG_NOTIFY_EXPLORATION_STATE_CHANGED: {
                     handleNotifyTouchExplorationStateChanged();
-                }
+                } break;
+
+                case MSG_NOTIFY_HIGH_TEXT_CONTRAST_STATE_CHANGED: {
+                    handleNotifyHighTextContrastStateChanged();
+                } break;
             }
         }
     }

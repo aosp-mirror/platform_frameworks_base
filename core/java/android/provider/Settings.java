@@ -3678,6 +3678,14 @@ public final class Settings {
         public static final String ACCESSIBILITY_SPEAK_PASSWORD = "speak_password";
 
         /**
+         * Whether to draw text with high contrast while in accessibility mode.
+         *
+         * @hide
+         */
+        public static final String ACCESSIBILITY_HIGH_TEXT_CONTRAST_ENABLED =
+                "high_text_contrast_enabled";
+
+        /**
          * If injection of accessibility enhancing JavaScript screen-reader
          * is enabled.
          * <p>
@@ -4644,6 +4652,7 @@ public final class Settings {
             TOUCH_EXPLORATION_ENABLED,
             ACCESSIBILITY_ENABLED,
             ACCESSIBILITY_SPEAK_PASSWORD,
+            ACCESSIBILITY_HIGH_TEXT_CONTRAST_ENABLED,
             ACCESSIBILITY_CAPTIONING_ENABLED,
             ACCESSIBILITY_CAPTIONING_LOCALE,
             ACCESSIBILITY_CAPTIONING_BACKGROUND_COLOR,
