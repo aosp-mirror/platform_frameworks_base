@@ -88,6 +88,7 @@ import android.view.ViewParent;
 import android.view.ViewRootImpl;
 import android.view.ViewStub;
 import android.view.Window;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
@@ -2092,6 +2093,22 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         public boolean superDispatchGenericMotionEvent(MotionEvent event) {
             return super.dispatchGenericMotionEvent(event);
         }
+
+        @Override
+        public WindowInsets dispatchApplyWindowInsets(WindowInsets insets) {
+            if (mOutsetBottom != null) {
+                final DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
+                int bottom = (int) mOutsetBottom.getDimension(metrics);
+                WindowInsets newInsets = insets.replaceSystemWindowInsets(
+                        insets.getSystemWindowInsetLeft(), insets.getSystemWindowInsetTop(),
+                        insets.getSystemWindowInsetRight(),
+                        insets.getSystemWindowInsetBottom() + bottom);
+                return super.dispatchApplyWindowInsets(newInsets);
+            } else {
+                return super.dispatchApplyWindowInsets(insets);
+            }
+        }
+
 
         @Override
         public boolean onTouchEvent(MotionEvent event) {
