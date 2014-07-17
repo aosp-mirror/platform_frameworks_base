@@ -79,6 +79,7 @@ public final class Call {
         private final long mConnectTimeMillis;
         private final GatewayInfo mGatewayInfo;
         private final int mVideoState;
+        private final StatusHints mStatusHints;
 
         /**
          * @return The handle (e.g., phone number) to which the {@code Call} is currently
@@ -165,6 +166,13 @@ public final class Call {
             return mVideoState;
         }
 
+        /*
+         * @return The current {@link android.telecomm.StatusHints}, or null if none has been set.
+         */
+        public StatusHints getStatusHints() {
+            return mStatusHints;
+        }
+
         @Override
         public boolean equals(Object o) {
             if (o instanceof Details) {
@@ -181,7 +189,8 @@ public final class Call {
                         Objects.equals(mDisconnectCauseMsg, d.mDisconnectCauseMsg) &&
                         Objects.equals(mConnectTimeMillis, d.mConnectTimeMillis) &&
                         Objects.equals(mGatewayInfo, d.mGatewayInfo) &&
-                        Objects.equals(mVideoState, d.mVideoState);
+                        Objects.equals(mVideoState, d.mVideoState) &&
+                        Objects.equals(mStatusHints, d.mStatusHints);
             }
             return false;
         }
@@ -199,7 +208,8 @@ public final class Call {
                     Objects.hashCode(mDisconnectCauseMsg) +
                     Objects.hashCode(mConnectTimeMillis) +
                     Objects.hashCode(mGatewayInfo) +
-                    Objects.hashCode(mVideoState);
+                    Objects.hashCode(mVideoState) +
+                    Objects.hashCode(mStatusHints);
         }
 
         /** {@hide} */
@@ -214,7 +224,8 @@ public final class Call {
                 String disconnectCauseMsg,
                 long connectTimeMillis,
                 GatewayInfo gatewayInfo,
-                int videoState) {
+                int videoState,
+                StatusHints statusHints) {
             mHandle = handle;
             mHandlePresentation = handlePresentation;
             mCallerDisplayName = callerDisplayName;
@@ -226,6 +237,7 @@ public final class Call {
             mConnectTimeMillis = connectTimeMillis;
             mGatewayInfo = gatewayInfo;
             mVideoState = videoState;
+            mStatusHints = statusHints;
         }
     }
 
@@ -572,7 +584,8 @@ public final class Call {
                 inCallCall.getDisconnectCauseMsg(),
                 inCallCall.getConnectTimeMillis(),
                 inCallCall.getGatewayInfo(),
-                inCallCall.getVideoState());
+                inCallCall.getVideoState(),
+                inCallCall.getStatusHints());
         boolean detailsChanged = !Objects.equals(mDetails, details);
         if (detailsChanged) {
             mDetails = details;
