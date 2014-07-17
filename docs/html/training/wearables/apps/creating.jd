@@ -161,8 +161,8 @@ dependencies are imported for you in the appropriate module's <code>build.gradle
 However, these dependencies are not required, so read the following descriptions to find out if you need them or not:</p>
 
 <b>Notifications</b>
-<p>The <a href="{@docRoot}tools/support-library/features.html#v4">The
-Android v4 support library</a> (or v13, which includes v4)
+<p>The <a href="{@docRoot}tools/support-library/features.html#v4">Android
+v4 support library</a> (or v13, which includes v4)
 contains the APIs to extend your existing notifications on handhelds to support wearables.</p>
 
 <p>For notifications that appear only on
