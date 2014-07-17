@@ -564,7 +564,8 @@ class TimePickerDelegate extends TimePicker.AbstractTimePickerDelegate implement
         return mRadialTimePickerView.getCurrentItemShowing();
     }
 
-    private boolean isShowDoneButton() {
+    @Override
+    public boolean isShowDoneButton() {
         return mShowDoneButton;
     }
 
