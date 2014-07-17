@@ -938,4 +938,319 @@ public class TtsSpan implements ParcelableSpan {
             return setStringArgument(TtsSpan.ARG_DENOMINATOR, denominator);
         }
     }
+
+    /**
+     * A builder for TtsSpans of type {@link TtsSpan #TYPE_MEASURE}.
+     */
+    public static class MeasureBuilder
+            extends SemioticClassBuilder<MeasureBuilder> {
+
+        /**
+         * Creates a builder for a TtsSpan of type {@link TtsSpan#TYPE_MEASURE}.
+         */
+        public MeasureBuilder() {
+            super(TtsSpan.TYPE_MEASURE);
+        }
+
+        /**
+         * Convenience method that converts the number to a String and set it to
+         * the value for {@link TtsSpan#ARG_NUMBER}.
+         * @param number The amount of the measure.
+         * @return This instance.
+         */
+        public MeasureBuilder setNumber(long number) {
+            return setNumber(String.valueOf(number));
+        }
+
+        /**
+         * Sets the {@link TtsSpan#ARG_NUMBER} argument.
+         * @param number A non-empty string of digits with an optional
+         *     leading + or -.
+         * @return This instance.
+         */
+        public MeasureBuilder setNumber(String number) {
+            return setStringArgument(TtsSpan.ARG_NUMBER, number);
+        }
+
+        /**
+         * Convenience method that converts the integer part to a String and set
+         * it to the value for {@link TtsSpan#ARG_INTEGER_PART}.
+         * @param integerPart The integer part of a decimal or fraction.
+         * @return This instance.
+         */
+        public MeasureBuilder setIntegerPart(long integerPart) {
+            return setNumber(String.valueOf(integerPart));
+        }
+
+        /**
+         * Sets the {@link TtsSpan#ARG_INTEGER_PART} argument.
+         * @param integerPart The integer part of a decimal or fraction; a
+         * non-empty string of digits with an optional
+         *     leading + or -.
+         * @return This instance.
+         */
+        public MeasureBuilder setIntegerPart(String integerPart) {
+            return setStringArgument(TtsSpan.ARG_INTEGER_PART, integerPart);
+        }
+
+        /**
+         * Sets the {@link TtsSpan#ARG_FRACTIONAL_PART} argument.
+         * @param fractionalPart The fractional part of a decimal; a non-empty
+         * string of digits with an optional
+         *     leading + or -.
+         * @return This instance.
+         */
+        public MeasureBuilder setFractionalPart(String fractionalPart) {
+            return setStringArgument(TtsSpan.ARG_FRACTIONAL_PART,
+                                     fractionalPart);
+        }
+
+        /**
+         * Convenience method that converts the numerator to a String and set it
+         * to the value for {@link TtsSpan#ARG_NUMERATOR}.
+         * @param numerator The numerator of a fraction.
+         * @return This instance.
+         */
+        public MeasureBuilder setNumerator(long numerator) {
+            return setNumerator(String.valueOf(numerator));
+        }
+
+        /**
+         * Sets the {@link TtsSpan#ARG_NUMERATOR} argument.
+         * @param numerator The numerator of a fraction; a non-empty string of
+         *     digits with an optional leading + or -.
+         * @return This instance.
+         */
+        public MeasureBuilder setNumerator(String numerator) {
+            return setStringArgument(TtsSpan.ARG_NUMERATOR, numerator);
+        }
+
+        /**
+         * Convenience method that converts the denominator to a String and set
+         * it to the value for {@link TtsSpan#ARG_DENOMINATOR}.
+         * @param denominator The denominator of a fraction.
+         * @return This instance.
+         */
+        public MeasureBuilder setDenominator(long denominator) {
+            return setDenominator(String.valueOf(denominator));
+        }
+
+        /**
+         * Sets the {@link TtsSpan#ARG_DENOMINATOR} argument.
+         * @param denominator The denominator of a fraction; a non-empty string
+         *     of digits with an optional leading + or -.
+         * @return This instance.
+         */
+        public MeasureBuilder setDenominator(String denominator) {
+            return setStringArgument(TtsSpan.ARG_DENOMINATOR, denominator);
+        }
+
+        /**
+         * Sets the {@link TtsSpan#ARG_UNIT} argument.
+         * @param unit The unit of the measure.
+         * @return This instance.
+         * @see {@link TtsSpan.ARG_UNIT}
+         */
+        public MeasureBuilder setUnit(String unit) {
+            return setStringArgument(TtsSpan.ARG_UNIT, unit);
+        }
+    }
+
+    /**
+     * A builder for TtsSpans of type {@link TtsSpan #TYPE_TIME}.
+     */
+    public static class TimeBuilder
+            extends SemioticClassBuilder<TimeBuilder> {
+
+        /**
+         * Creates a builder for a TtsSpan of type {@link TtsSpan#TYPE_TIME}.
+         */
+        public TimeBuilder() {
+            super(TtsSpan.TYPE_TIME);
+        }
+
+        /**
+         * Creates a builder for a TtsSpan of type {@link TtsSpan#TYPE_TIME} and
+         * sets the {@link TtsSpan#ARG_HOURS} and {@link TtsSpan#ARG_MINUTES}
+         * arguments.
+         */
+        public TimeBuilder(int hours, int minutes) {
+            this();
+            setHours(hours);
+            setMinutes(minutes);
+        }
+
+        /**
+         * Sets the {@link TtsSpan#ARG_HOURS} argument.
+         * @param hours The value to be set for hours. See
+         * {@link TtsSpan#ARG_HOURS}.
+         * @return This instance.
+         * @see {@link TtsSpan#ARG_HOURS}
+         */
+        public TimeBuilder setHours(int hours) {
+            return setIntArgument(TtsSpan.ARG_HOURS, hours);
+        }
+
+        /**
+         * Sets the {@link TtsSpan#ARG_MINUTES} argument.
+         * @param minutes The value to be set for minutes. See
+         * {@link TtsSpan#ARG_MINUTES}.
+         * @return This instance.
+         * @see {@link TtsSpan#ARG_MINUTES}
+         */
+        public TimeBuilder setMinutes(int minutes) {
+            return setIntArgument(TtsSpan.ARG_MINUTES, minutes);
+        }
+    }
+
+    /**
+     * A builder for TtsSpans of type {@link TtsSpan #TYPE_DATE}.
+     */
+    public static class DateBuilder
+            extends SemioticClassBuilder<DateBuilder> {
+
+        /**
+         * Creates a builder for a TtsSpan of type {@link TtsSpan#TYPE_DATE}.
+         */
+        public DateBuilder() {
+            super(TtsSpan.TYPE_DATE);
+        }
+
+        /**
+         * Creates a builder for a TtsSpan of type {@link TtsSpan#TYPE_TIME} and
+         * possibly sets the {@link TtsSpan#ARG_WEEKDAY},
+         * {@link TtsSpan#ARG_DAY}, {@link TtsSpan#ARG_MONTH} and
+         * {@link TtsSpan#ARG_YEAR} arguments. Pass null to any argument to
+         * leave it unset.
+         */
+        public DateBuilder(Integer weekday,
+                           Integer day,
+                           Integer month,
+                           Integer year) {
+            this();
+            if (weekday != null) {
+                setWeekday(weekday);
+            }
+            if (day != null) {
+                setDay(day);
+            }
+            if (month != null) {
+                setMonth(month);
+            }
+            if (year != null) {
+                setYear(year);
+            }
+        }
+
+        /**
+         * Sets the {@link TtsSpan#ARG_WEEKDAY} argument.
+         * @param weekday The value to be set for weekday. See
+         * {@link TtsSpan#ARG_WEEKDAY}.
+         * @return This instance.
+         * @see {@link TtsSpan#ARG_WEEKDAY}
+         */
+        public DateBuilder setWeekday(int weekday) {
+            return setIntArgument(TtsSpan.ARG_WEEKDAY, weekday);
+        }
+
+        /**
+         * Sets the {@link TtsSpan#ARG_DAY} argument.
+         * @param day The value to be set for day. See
+         * {@link TtsSpan#ARG_DAY}.
+         * @return This instance.
+         * @see {@link TtsSpan#ARG_DAY}
+         */
+        public DateBuilder setDay(int day) {
+            return setIntArgument(TtsSpan.ARG_DAY, day);
+        }
+
+        /**
+         * Sets the {@link TtsSpan#ARG_MONTH} argument.
+         * @param month The value to be set for month. See
+         * {@link TtsSpan#ARG_MONTH}.
+         * @return This instance.
+         * @see {@link TtsSpan#ARG_MONTH}
+         */
+        public DateBuilder setMonth(int month) {
+            return setIntArgument(TtsSpan.ARG_MONTH, month);
+        }
+
+        /**
+         * Sets the {@link TtsSpan#ARG_YEAR} argument.
+         * @param year The value to be set for year. See
+         * {@link TtsSpan#ARG_YEAR}.
+         * @return This instance.
+         * @see {@link TtsSpan#ARG_YEAR}
+         */
+        public DateBuilder setYear(int year) {
+            return setIntArgument(TtsSpan.ARG_YEAR, year);
+        }
+    }
+
+    /**
+     * A builder for TtsSpans of type {@link TtsSpan #TYPE_DIGITS}.
+     */
+    public static class DigitsBuilder
+            extends SemioticClassBuilder<DigitsBuilder> {
+
+        /**
+         * Creates a builder for a TtsSpan of type
+         * {@link TtsSpan#TYPE_VERBATIM}.
+         */
+        public DigitsBuilder() {
+            super(TtsSpan.TYPE_DIGITS);
+        }
+
+        /**
+         * Creates a builder for a TtsSpan of type {@link TtsSpan#TYPE_DIGITS}
+         * and sets the {@link TtsSpan#ARG_DIGITS} argument.
+         */
+        public DigitsBuilder(String digits) {
+            this();
+            setDigits(digits);
+        }
+
+        /**
+         * Sets the {@link TtsSpan#ARG_DIGITS} argument.
+         * @param digits A string of digits.
+         * @return This instance.
+         */
+        public DigitsBuilder setDigits(String digits) {
+            return setStringArgument(TtsSpan.ARG_DIGITS, digits);
+        }
+    }
+
+    /**
+     * A builder for TtsSpans of type {@link TtsSpan #TYPE_VERBATIM}.
+     */
+    public static class VerbatimBuilder
+            extends SemioticClassBuilder<VerbatimBuilder> {
+
+        /**
+         * Creates a builder for a TtsSpan of type
+         * {@link TtsSpan#TYPE_VERBATIM}.
+         */
+        public VerbatimBuilder() {
+            super(TtsSpan.TYPE_VERBATIM);
+        }
+
+        /**
+         * Creates a builder for a TtsSpan of type {@link TtsSpan#TYPE_VERBATIM}
+         * and sets the {@link TtsSpan#ARG_VERBATIM} argument.
+         */
+        public VerbatimBuilder(String verbatim) {
+            this();
+            setVerbatim(verbatim);
+        }
+
+        /**
+         * Sets the {@link TtsSpan#ARG_VERBATIM} argument.
+         * @param verbatim A string of characters that will be read verbatim,
+         *     except whitespace.
+         * @return This instance.
+         */
+        public VerbatimBuilder setVerbatim(String verbatim) {
+            return setStringArgument(TtsSpan.ARG_VERBATIM, verbatim);
+        }
+    }
 }
