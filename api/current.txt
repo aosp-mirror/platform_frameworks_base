@@ -16466,6 +16466,7 @@ package android.media.tv {
     method public static final android.net.Uri buildChannelUri(long);
     method public static final android.net.Uri buildChannelsUriForInput(java.lang.String);
     method public static final android.net.Uri buildChannelsUriForInput(java.lang.String, boolean);
+    method public static final java.lang.String buildInputId(android.content.ComponentName);
     method public static final android.net.Uri buildProgramUri(long);
     method public static final android.net.Uri buildProgramsUriForChannel(long);
     method public static final android.net.Uri buildProgramsUriForChannel(android.net.Uri);
