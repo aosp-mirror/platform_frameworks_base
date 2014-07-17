@@ -16721,6 +16721,22 @@ package android.media.tv {
     method public void onInputStateChanged(java.lang.String, int);
   }
 
+  public abstract class TvInputPassthroughWrapperService extends android.media.tv.TvInputService {
+    ctor public TvInputPassthroughWrapperService();
+    method public abstract java.lang.String getPassthroughInputId(java.lang.String);
+    method public abstract android.media.tv.TvInputPassthroughWrapperService.PassthroughWrapperSession onCreatePassthroughWrapperSession();
+    method public final android.media.tv.TvInputService.Session onCreateSession(java.lang.String);
+  }
+
+  public abstract class TvInputPassthroughWrapperService.PassthroughWrapperSession extends android.media.tv.TvInputService.Session {
+    ctor public TvInputPassthroughWrapperService.PassthroughWrapperSession();
+    method public abstract void onPassthroughSessionCreationFailed();
+    method public abstract void onPassthroughSessionReleased();
+    method public abstract void onPassthroughVideoAvailable();
+    method public abstract void onPassthroughVideoUnavailable(int);
+    method public final boolean onSetSurface(android.view.Surface);
+  }
+
   public abstract class TvInputService extends android.app.Service {
     ctor public TvInputService();
     method public final android.os.IBinder onBind(android.content.Intent);
