@@ -76,6 +76,7 @@ public final class TvInputInfo implements Parcelable {
 
     private final ResolveInfo mService;
     private final String mId;
+    private final String mParentId;
 
     // Attributes from XML meta data.
     private String mSetupActivity;
@@ -114,7 +115,7 @@ public final class TvInputInfo implements Parcelable {
                         "Meta-data does not start with tv-input-service tag in " + si.name);
             }
 
-            TvInputInfo input = new TvInputInfo(context, service);
+            TvInputInfo input = new TvInputInfo(context, service, null);
             TypedArray sa = res.obtainAttributes(attrs,
                     com.android.internal.R.styleable.TvInputService);
             input.mSetupActivity = sa.getString(
@@ -154,10 +155,11 @@ public final class TvInputInfo implements Parcelable {
      * @param service The ResolveInfo returned from the package manager about this TV input service.
      * @hide
      */
-    private TvInputInfo(Context context, ResolveInfo service) {
+    private TvInputInfo(Context context, ResolveInfo service, String parentId) {
         mService = service;
         ServiceInfo si = service.serviceInfo;
         mId = generateInputIdForComponentName(new ComponentName(si.packageName, si.name));
+        mParentId = parentId;
     }
 
     /**
@@ -166,6 +168,24 @@ public final class TvInputInfo implements Parcelable {
      */
     public String getId() {
         return mId;
+    }
+
+    /**
+     * Returns the parent input ID.
+     * <p>
+     * When a part of the functionalities of a TV input is actually provided by another TV input,
+     * we can describe this relationship as the depending input having a "parent". It is primarily
+     * used for controlling underlying hardware when the current input itself does not have direct
+     * access to it. Examples include a TV input for a specific HDMI CEC logical device having a
+     * generic HDMI input as its parent and a HDMI-paired virtual input whose video stream comes
+     * from an external settop box. Applications may group inputs by parent ID to provide an easier
+     * access to similar inputs.
+     *
+     * @return the ID of the parent input, if exists. Returns {@code null} if the parent input is
+     *         not specified.
+     */
+    public String getParentId() {
+        return mParentId;
     }
 
     /**
@@ -260,9 +280,7 @@ public final class TvInputInfo implements Parcelable {
         }
 
         TvInputInfo obj = (TvInputInfo) o;
-        return mId.equals(obj.mId)
-                && mService.serviceInfo.packageName.equals(obj.mService.serviceInfo.packageName)
-                && mService.serviceInfo.name.equals(obj.mService.serviceInfo.name);
+        return mId.equals(obj.mId);
     }
 
     @Override
@@ -281,9 +299,11 @@ public final class TvInputInfo implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mId);
+        dest.writeString(mParentId);
         mService.writeToParcel(dest, flags);
         dest.writeString(mSetupActivity);
         dest.writeString(mSettingsActivity);
+        dest.writeInt(mType);
     }
 
     /**
@@ -317,8 +337,10 @@ public final class TvInputInfo implements Parcelable {
 
     private TvInputInfo(Parcel in) {
         mId = in.readString();
+        mParentId = in.readString();
         mService = ResolveInfo.CREATOR.createFromParcel(in);
         mSetupActivity = in.readString();
         mSettingsActivity = in.readString();
+        mType = in.readInt();
     }
 }

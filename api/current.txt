@@ -16552,6 +16552,7 @@ package android.media.tv {
     method public java.lang.String getId();
     method public android.content.Intent getIntentForSettingsActivity();
     method public android.content.Intent getIntentForSetupActivity();
+    method public java.lang.String getParentId();
     method public android.content.pm.ServiceInfo getServiceInfo();
     method public int getType();
     method public android.graphics.drawable.Drawable loadIcon(android.content.pm.PackageManager);
