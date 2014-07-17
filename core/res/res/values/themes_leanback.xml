@@ -31,7 +31,6 @@
     </style>
 
     <style name="Theme.Leanback.Dialog.TimePicker" parent="Theme.Material.Dialog.BaseTimePicker">
-      <item name="legacyMode">true</item>
       <item name="colorBackground">@color/background_leanback_dark</item>
       <item name="textColorPrimary">@color/primary_text_leanback_dark</item>
       <item name="textColorSecondary">@color/secondary_text_leanback_dark</item>
@@ -41,7 +40,6 @@
     </style>
 
     <style name="Theme.Leanback.Light.Dialog.TimePicker" parent="Theme.Material.Light.Dialog.BaseTimePicker">
-      <item name="legacyMode">true</item>
       <item name="colorBackground">@color/background_leanback_light</item>
       <item name="textColorPrimary">@color/primary_text_leanback_light</item>
       <item name="textColorSecondary">@color/secondary_text_leanback_light</item>
