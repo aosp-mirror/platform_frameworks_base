@@ -76,4 +76,17 @@ public class ActivityChangedEvent implements Parcelable {
         parcel.writeInt(activityRecognitionEventArray.length);
         parcel.writeTypedArray(activityRecognitionEventArray, flags);
     }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder("[ ActivityChangedEvent:");
+
+        for (ActivityRecognitionEvent event : mActivityRecognitionEvents) {
+            builder.append("\n    ");
+            builder.append(event.toString());
+        }
+        builder.append("\n]");
+
+        return builder.toString();
+    }
 }
