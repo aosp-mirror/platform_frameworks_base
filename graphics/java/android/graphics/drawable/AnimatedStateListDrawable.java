@@ -16,8 +16,6 @@
 
 package android.graphics.drawable;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.TimeInterpolator;
 import android.annotation.NonNull;
@@ -160,47 +158,50 @@ public class AnimatedStateListDrawable extends StateListDrawable {
     }
 
     private boolean selectTransition(int toIndex) {
-        if (toIndex == mTransitionToIndex) {
-            // Already animating to that keyframe.
-            return true;
-        }
-
+        final int fromIndex;
         final Transition currentTransition = mTransition;
         if (currentTransition != null) {
             if (toIndex == mTransitionToIndex) {
+                // Already animating to that keyframe.
                 return true;
-            } else if (toIndex == mTransitionFromIndex) {
+            } else if (toIndex == mTransitionFromIndex && currentTransition.canReverse()) {
                 // Reverse the current animation.
                 currentTransition.reverse();
-                mTransitionFromIndex = mTransitionToIndex;
-                mTransitionToIndex = toIndex;
+                mTransitionToIndex = mTransitionFromIndex;
+                mTransitionFromIndex = toIndex;
                 return true;
             }
 
+            // Start the next transition from the end of the current one.
+            fromIndex = mTransitionToIndex;
+
             // Changing animation, end the current animation.
             currentTransition.stop();
-            mTransition = null;
+        } else {
+            fromIndex = getCurrentIndex();
         }
 
         // Reset state.
+        mTransition = null;
         mTransitionFromIndex = -1;
         mTransitionToIndex = -1;
 
         final AnimatedStateListState state = mState;
-        final int fromIndex = getCurrentIndex();
         final int fromId = state.getKeyframeIdAt(fromIndex);
         final int toId = state.getKeyframeIdAt(toIndex);
-
         if (toId == 0 || fromId == 0) {
             // Missing a keyframe ID.
             return false;
         }
 
         final int transitionIndex = state.indexOfTransition(fromId, toId);
-        if (transitionIndex < 0 || !selectDrawable(transitionIndex)) {
+        if (transitionIndex < 0) {
             // Couldn't select a transition.
             return false;
         }
+
+        // This may fail if we're already on the transition, but that's okay!
+        selectDrawable(transitionIndex);
 
         final Transition transition;
         final Drawable d = getCurrent();
@@ -499,17 +500,6 @@ public class AnimatedStateListDrawable extends StateListDrawable {
 
         return this;
     }
-
-    private final AnimatorListenerAdapter mAnimListener = new AnimatorListenerAdapter() {
-        @Override
-        public void onAnimationEnd(Animator anim) {
-            selectDrawable(mTransitionToIndex);
-
-            mTransitionToIndex = -1;
-            mTransitionFromIndex = -1;
-            mTransition = null;
-        }
-    };
 
     static class AnimatedStateListState extends StateListState {
         private static final int REVERSE_SHIFT = 32;
