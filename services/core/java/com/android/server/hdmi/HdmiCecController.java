@@ -506,15 +506,20 @@ final class HdmiCecController {
                 && mService.handleCecCommand(message)) {
             return;
         }
-
-        if (message.getDestination() != Constants.ADDR_BROADCAST) {
-            int sourceAddress = message.getDestination();
-            // Reply <Feature Abort> to initiator (source) for all requests.
-            HdmiCecMessage cecMessage = HdmiCecMessageBuilder.buildFeatureAbortCommand(
-                    sourceAddress, message.getSource(), message.getOpcode(),
-                    Constants.ABORT_REFUSED);
-            sendCommand(cecMessage);
+        if (message.getDestination() == Constants.ADDR_BROADCAST) {
+            return;
         }
+        if (message.getOpcode() == Constants.MESSAGE_FEATURE_ABORT) {
+            Slog.v(TAG, "Unhandled <Feature Abort> message:" + message);
+            return;
+        }
+
+        int sourceAddress = message.getDestination();
+        // Reply <Feature Abort> to initiator (source) for all requests.
+        HdmiCecMessage cecMessage = HdmiCecMessageBuilder.buildFeatureAbortCommand(
+                sourceAddress, message.getSource(), message.getOpcode(),
+                Constants.ABORT_REFUSED);
+        sendCommand(cecMessage);
     }
 
     @ServiceThreadOnly
