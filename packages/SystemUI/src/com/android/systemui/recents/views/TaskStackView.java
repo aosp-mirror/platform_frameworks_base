@@ -628,6 +628,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     public void computeScroll() {
         if (mScroller.computeScrollOffset()) {
             setStackScroll(mScroller.getCurrY());
+            invalidate();
 
             // If we just finished scrolling, then disable the hw layers
             if (mScroller.isFinished()) {
