@@ -775,16 +775,18 @@ public class PropertyValuesHolder implements Cloneable {
      * @param target The object on which the setter (and possibly getter) exist.
      */
     void setupSetterAndGetter(Object target) {
+        mKeyframeSet.invalidateCache();
         if (mProperty != null) {
             // check to make sure that mProperty is on the class of target
             try {
                 Object testValue = null;
                 for (Keyframe kf : mKeyframeSet.mKeyframes) {
-                    if (!kf.hasValue()) {
+                    if (!kf.hasValue() || kf.valueWasSetOnStart()) {
                         if (testValue == null) {
                             testValue = convertBack(mProperty.get(target));
                         }
                         kf.setValue(testValue);
+                        kf.setValueWasSetOnStart(true);
                     }
                 }
                 return;
@@ -799,7 +801,7 @@ public class PropertyValuesHolder implements Cloneable {
             setupSetter(targetClass);
         }
         for (Keyframe kf : mKeyframeSet.mKeyframes) {
-            if (!kf.hasValue()) {
+            if (!kf.hasValue() || kf.valueWasSetOnStart()) {
                 if (mGetter == null) {
                     setupGetter(targetClass);
                     if (mGetter == null) {
@@ -810,6 +812,7 @@ public class PropertyValuesHolder implements Cloneable {
                 try {
                     Object value = convertBack(mGetter.invoke(target));
                     kf.setValue(value);
+                    kf.setValueWasSetOnStart(true);
                 } catch (InvocationTargetException e) {
                     Log.e("PropertyValuesHolder", e.toString());
                 } catch (IllegalAccessException e) {
