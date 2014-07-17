@@ -361,4 +361,8 @@
 
     <!-- Battery level padding end when in expanded QS (but not on Keyguard) -->
     <dimen name="battery_level_padding_end">4dp</dimen>
+
+    <!-- Largest size an avatar might need to be drawn in the user picker, status bar, or
+         quick settings header -->
+    <dimen name="max_avatar_size">48dp</dimen>
 </resources>

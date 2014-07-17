@@ -28,10 +28,12 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -46,6 +48,7 @@ import android.util.Log;
 import android.util.Pair;
 
 import com.android.internal.view.RotationPolicy;
+import com.android.systemui.BitmapHelper;
 import com.android.systemui.R;
 
 import java.util.ArrayList;
@@ -124,17 +127,6 @@ public final class UserInfoController {
         queryForUserInformation();
     }
 
-    private Bitmap circularClip(Bitmap input) {
-        Bitmap output = Bitmap.createBitmap(input.getWidth(),
-                input.getHeight(), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(output);
-        final Paint paint = new Paint();
-        paint.setShader(new BitmapShader(input, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP));
-        paint.setAntiAlias(true);
-        canvas.drawCircle(input.getWidth() / 2, input.getHeight() / 2, input.getWidth() / 2, paint);
-        return output;
-    }
-
     private void queryForUserInformation() {
         Context currentUserContext;
         UserInfo userInfo;
@@ -151,6 +143,8 @@ public final class UserInfoController {
         }
         final int userId = userInfo.id;
         final String userName = userInfo.name;
+        final int avatarSize
+                = mContext.getResources().getDimensionPixelSize(R.dimen.max_avatar_size);
 
         final Context context = currentUserContext;
         mUserInfoTask = new AsyncTask<Void, Void, Pair<String, Drawable>>() {
@@ -164,7 +158,8 @@ public final class UserInfoController {
                 Drawable avatar = null;
                 Bitmap rawAvatar = um.getUserIcon(userId);
                 if (rawAvatar != null) {
-                    avatar = new BitmapDrawable(mContext.getResources(), circularClip(rawAvatar));
+                    avatar = new BitmapDrawable(mContext.getResources(),
+                            BitmapHelper.createCircularClip(rawAvatar, avatarSize, avatarSize));
                 } else {
                     avatar = mContext.getResources().getDrawable(R.drawable.ic_account_circle);
                     mUseDefaultAvatar = true;
