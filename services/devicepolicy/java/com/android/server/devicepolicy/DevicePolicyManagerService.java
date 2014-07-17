@@ -3888,11 +3888,17 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public String[] getAccountTypesWithManagementDisabled() {
+        return getAccountTypesWithManagementDisabledAsUser(UserHandle.getCallingUserId());
+    }
+
+    @Override
+    public String[] getAccountTypesWithManagementDisabledAsUser(int userId) {
+        enforceCrossUserPermission(userId);
         if (!mHasFeature) {
             return null;
         }
         synchronized (this) {
-            DevicePolicyData policy = getUserData(UserHandle.getCallingUserId());
+            DevicePolicyData policy = getUserData(userId);
             final int N = policy.mAdminList.size();
             HashSet<String> resultSet = new HashSet<String>();
             for (int i = 0; i < N; i++) {
