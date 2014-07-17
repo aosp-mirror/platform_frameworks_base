@@ -56,7 +56,7 @@ public abstract class InCallService {
                 case MSG_UPDATE_CALL:
                     mPhone.internalUpdateCall((InCallCall) msg.obj);
                     break;
-                                case MSG_SET_POST_DIAL: {
+                case MSG_SET_POST_DIAL: {
                     SomeArgs args = (SomeArgs) msg.obj;
                     try {
                         String callId = (String) args.arg1;
