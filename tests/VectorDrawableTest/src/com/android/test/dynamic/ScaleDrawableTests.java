@@ -36,30 +36,9 @@ public class ScaleDrawableTests extends Activity {
             "CENTER_INSIDE (7)"
     };
 
-    protected int[] icon = {
-            R.drawable.bitmap_drawable01,
-            R.drawable.bitmap_drawable01,
-            R.drawable.bitmap_drawable01,
-            R.drawable.bitmap_drawable01,
-            R.drawable.bitmap_drawable01,
-            R.drawable.bitmap_drawable01,
-            R.drawable.bitmap_drawable01,
-            R.drawable.bitmap_drawable01,
-    };
+    protected int icon = R.drawable.bitmap_drawable01;
 
-    protected int[] vector_icons = {
-            R.drawable.vector_drawable16,
-            R.drawable.vector_drawable16,
-            R.drawable.vector_drawable16,
-            R.drawable.vector_drawable16,
-            R.drawable.vector_drawable16,
-            R.drawable.vector_drawable16,
-            R.drawable.vector_drawable16,
-            R.drawable.vector_drawable16,
-            R.drawable.vector_drawable16,
-    };
-
-
+    protected int vector_icon = R.drawable.vector_drawable16;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,21 +53,23 @@ public class ScaleDrawableTests extends Activity {
         params.width = 400;
         params.height = 300;
 
-        for (int i = 0; i < icon.length; i++) {
+        for (int i = 0; i < scaleTypes.length; i++) {
             TextView t = new TextView(this);
             t.setText(scaleTypes[i]);
             container.addView(t);
 
+            ImageView.ScaleType scaleType = ImageView.ScaleType.values()[i];
+
             ImageView png_view = new ImageView(this);
             png_view.setLayoutParams(params);
-            png_view.setScaleType(ImageView.ScaleType.values()[i]);
-            png_view.setImageResource(icon[i]);
+            png_view.setScaleType(scaleType);
+            png_view.setImageResource(icon);
             container.addView(png_view);
 
             ImageView view = new ImageView(this);
             view.setLayoutParams(params);
-            view.setScaleType(ImageView.ScaleType.values()[i]);
-            view.setImageResource(vector_icons[i]);
+            view.setScaleType(scaleType);
+            view.setImageResource(vector_icon);
             container.addView(view);
         }
 
