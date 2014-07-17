@@ -28072,6 +28072,7 @@ package android.telecomm {
     method public android.telecomm.GatewayInfo getGatewayInfo();
     method public android.net.Uri getHandle();
     method public int getHandlePresentation();
+    method public android.telecomm.StatusHints getStatusHints();
     method public int getVideoState();
   }
 
@@ -28467,6 +28468,7 @@ package android.telecomm {
     field public static final java.lang.String EXTRA_CALL_DISCONNECT_CAUSE = "android.telecomm.extra.CALL_DISCONNECT_CAUSE";
     field public static final java.lang.String EXTRA_CALL_DISCONNECT_MESSAGE = "android.telecomm.extra.CALL_DISCONNECT_MESSAGE";
     field public static final java.lang.String EXTRA_CONNECTION_SERVICE = "android.telecomm.extra.CONNECTION_SERVICE";
+    field public static final java.lang.String EXTRA_EMERGENCY_CALL_BACK_NUMBER = "android.telecomm.extra.EMERGENCY_CALL_BACK_NUMBER";
     field public static final java.lang.String EXTRA_INCOMING_CALL_EXTRAS = "android.intent.extra.INCOMING_CALL_EXTRAS";
     field public static final java.lang.String EXTRA_PHONE_ACCOUNT = "android.intent.extra.PHONE_ACCOUNT";
     field public static final java.lang.String EXTRA_START_CALL_WITH_SPEAKERPHONE = "android.intent.extra.START_CALL_WITH_SPEAKERPHONE";
