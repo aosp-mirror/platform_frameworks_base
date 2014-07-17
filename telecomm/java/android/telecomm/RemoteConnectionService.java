@@ -260,9 +260,7 @@ final class RemoteConnectionService implements DeathRecipient {
         List<PhoneAccount> accounts = new LinkedList<>();
         accounts.add(new PhoneAccount(
                 mComponentName,
-                null /* id */,
-                null /* handle */,
-                0 /* capabilities */));
+                null /* id */));
         return accounts;
     }
 
