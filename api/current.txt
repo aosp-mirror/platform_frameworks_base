@@ -25492,6 +25492,8 @@ package android.provider {
   public static final class Telephony.Mms.Intents {
     field public static final java.lang.String CONTENT_CHANGED_ACTION = "android.intent.action.CONTENT_CHANGED";
     field public static final java.lang.String DELETED_CONTENTS = "deleted_contents";
+    field public static final java.lang.String MMS_DOWNLOAD_ACTION = "android.provider.Telephony.MMS_DOWNLOAD";
+    field public static final java.lang.String MMS_SEND_ACTION = "android.provider.Telephony.MMS_SEND";
   }
 
   public static final class Telephony.Mms.Outbox implements android.provider.Telephony.BaseMmsColumns {
@@ -25595,8 +25597,10 @@ package android.provider {
     field public static final java.lang.String SMS_CB_RECEIVED_ACTION = "android.provider.Telephony.SMS_CB_RECEIVED";
     field public static final java.lang.String SMS_DELIVER_ACTION = "android.provider.Telephony.SMS_DELIVER";
     field public static final java.lang.String SMS_EMERGENCY_CB_RECEIVED_ACTION = "android.provider.Telephony.SMS_EMERGENCY_CB_RECEIVED";
+    field public static final java.lang.String SMS_FILTER_ACTION = "android.provider.Telephony.SMS_FILTER";
     field public static final java.lang.String SMS_RECEIVED_ACTION = "android.provider.Telephony.SMS_RECEIVED";
     field public static final java.lang.String SMS_REJECTED_ACTION = "android.provider.Telephony.SMS_REJECTED";
+    field public static final java.lang.String SMS_SEND_ACTION = "android.provider.Telephony.SMS_SEND";
     field public static final java.lang.String SMS_SERVICE_CATEGORY_PROGRAM_DATA_RECEIVED_ACTION = "android.provider.Telephony.SMS_SERVICE_CATEGORY_PROGRAM_DATA_RECEIVED";
     field public static final java.lang.String WAP_PUSH_DELIVER_ACTION = "android.provider.Telephony.WAP_PUSH_DELIVER";
     field public static final java.lang.String WAP_PUSH_RECEIVED_ACTION = "android.provider.Telephony.WAP_PUSH_RECEIVED";
@@ -28782,9 +28786,13 @@ package android.telephony {
   public final class SmsManager {
     method public java.util.ArrayList<java.lang.String> divideMessage(java.lang.String);
     method public static android.telephony.SmsManager getDefault();
+    method public void injectSmsPdu(byte[], java.lang.String, android.app.PendingIntent);
     method public void sendDataMessage(java.lang.String, java.lang.String, short, byte[], android.app.PendingIntent, android.app.PendingIntent);
     method public void sendMultipartTextMessage(java.lang.String, java.lang.String, java.util.ArrayList<java.lang.String>, java.util.ArrayList<android.app.PendingIntent>, java.util.ArrayList<android.app.PendingIntent>);
     method public void sendTextMessage(java.lang.String, java.lang.String, java.lang.String, android.app.PendingIntent, android.app.PendingIntent);
+    method public void updateMmsDownloadStatus(int, byte[]);
+    method public void updateMmsSendStatus(int, boolean);
+    method public void updateSmsSendStatus(int, boolean);
     field public static final int RESULT_ERROR_GENERIC_FAILURE = 1; // 0x1
     field public static final int RESULT_ERROR_NO_SERVICE = 4; // 0x4
     field public static final int RESULT_ERROR_NULL_PDU = 3; // 0x3
