@@ -22,10 +22,13 @@ import android.text.ParcelableSpan;
 import android.text.TextUtils;
 
 /**
- * A span that supplies additional meta-data intended for text-to-speech rendering
- * of the associated text.  If the text is being processed by a text-to-speech
- * engine, the engine may use the data in this span in addition to or instead of
- * its associated text.
+ * A span that supplies additional meta-data for the associated text intended
+ * for text-to-speech engines.  If the text is being processed by a
+ * text-to-speech engine, the engine may use the data in this span in addition
+ * to or instead of its associated text.
+ *
+ * The inner classes are there for convenience and provide builders for each
+ * TtsSpan type.
  */
 public class TtsSpan implements ParcelableSpan {
     private final String mType;
@@ -432,10 +435,18 @@ public class TtsSpan implements ParcelableSpan {
         mArgs = src.readPersistableBundle();
     }
 
+    /**
+     * Returns the type.
+     * @return The type of this instance.
+     */
     public String getType() {
         return mType;
     }
 
+    /**
+     * Returns a bundle of the arguments set.
+     * @return The bundle of the arguments set.
+     */
     public PersistableBundle getArgs() {
         return mArgs;
     }
@@ -454,5 +465,218 @@ public class TtsSpan implements ParcelableSpan {
     @Override
     public int getSpanTypeId() {
         return TextUtils.TTS_SPAN;
+    }
+
+    /**
+     * A simple builder for TtsSpans.
+     * This builder can be used directly, but the more specific subclasses of
+     * this builder like {@link TtsSpan.TextBuilder} and
+     * {@link TtsSpan.CardinalBuilder} are likely more useful.
+     *
+     * This class uses generics so methods from this class can return instances of
+     * its child classes, resulting in a fluent API (CRTP pattern).
+     */
+    public static abstract class Builder<C extends Builder<C>> {
+        // Holds the type of this class.
+        private final String mType;
+
+        // Holds the arguments of this class. It only stores objects of type
+        // String, Integer and Long.
+        private PersistableBundle mArgs = new PersistableBundle();
+
+        public Builder(String type) {
+            mType = type;
+        }
+
+        /**
+         * Returns a TtsSpan built from the parameters set by the setter
+         * methods.
+         * @return A TtsSpan built with parameters of this builder.
+         */
+        public TtsSpan build() {
+            return new TtsSpan(mType, mArgs);
+        }
+
+        /**
+         * Sets an argument to a string value.
+         * @param arg The argument name.
+         * @param value The value the argument should be set to.
+         * @return This instance.
+         */
+        @SuppressWarnings("unchecked")
+        public C setStringArgument(String arg, String value) {
+            mArgs.putString(arg, value);
+            return (C) this;
+        }
+
+        /**
+         * Sets an argument to an int value.
+         * @param arg The argument name.
+         * @param value The value the argument should be set to.
+         */
+        @SuppressWarnings("unchecked")
+        public C setIntArgument(String arg, int value) {
+            mArgs.putInt(arg, value);
+            return (C) this;
+        }
+
+        /**
+         * Sets an argument to a long value.
+         * @param arg The argument name.
+         * @param value The value the argument should be set to.
+         */
+        @SuppressWarnings("unchecked")
+        public C setLongArgument(String arg, long value) {
+            mArgs.putLong(arg, value);
+            return (C) this;
+        }
+    }
+
+    /**
+     * A builder for TtsSpans, has setters for morphosyntactic features.
+     * This builder can be used directly, but the more specific subclasses of
+     * this builder like {@link TtsSpan.TextBuilder} and
+     * {@link TtsSpan.CardinalBuilder} are likely more useful.
+     */
+    public static class SemioticClassBuilder<C extends SemioticClassBuilder<C>>
+            extends Builder<C> {
+
+        public SemioticClassBuilder(String type) {
+            super(type);
+        }
+
+        /**
+         * Sets the gender information for this instance.
+         * @param gender Can any of {@link TtsSpan#GENDER_NEUTRAL},
+         *     {@link TtsSpan#GENDER_MALE} and {@link TtsSpan#GENDER_FEMALE}.
+         * @return This instance.
+         */
+        public C setGender(String gender) {
+            return setStringArgument(TtsSpan.ARG_GENDER, gender);
+        }
+
+        /**
+         * Sets the animacy information for this instance.
+         * @param animacy Can be any of {@link TtsSpan#ANIMACY_ANIMATE} and
+         *     {@link TtsSpan#ANIMACY_INANIMATE}.
+         * @return This instance.
+         */
+        public C setAnimacy(String animacy) {
+            return setStringArgument(TtsSpan.ARG_ANIMACY, animacy);
+        }
+
+        /**
+         * Sets the multiplicity information for this instance.
+         * @param multiplicity Can be any of
+         *     {@link TtsSpan#MULTIPLICITY_SINGLE},
+         *     {@link TtsSpan#MULTIPLICITY_DUAL} and
+         *     {@link TtsSpan#MULTIPLICITY_PLURAL}.
+         * @return This instance.
+         */
+        public C setMultiplicity(String multiplicity) {
+            return setStringArgument(TtsSpan.ARG_MULTIPLICITY, multiplicity);
+        }
+
+        /**
+         * Sets the grammatical case information for this instance.
+         * @param grammaticalCase Can be any of {@link TtsSpan#CASE_NOMINATIVE},
+         *     {@link TtsSpan#CASE_ACCUSATIVE}, {@link TtsSpan#CASE_DATIVE},
+         *     {@link TtsSpan#CASE_ABLATIVE}, {@link TtsSpan#CASE_GENITIVE},
+         *     {@link TtsSpan#CASE_VOCATIVE}, {@link TtsSpan#CASE_LOCATIVE} and
+         *     {@link TtsSpan#CASE_INSTRUMENTAL}.
+         * @return This instance.
+         */
+        public C setCase(String grammaticalCase) {
+            return setStringArgument(TtsSpan.ARG_CASE, grammaticalCase);
+        }
+    }
+
+    /**
+     * A builder for TtsSpans of type {@link TtsSpan #TYPE_TEXT}.
+     */
+    public static class TextBuilder extends SemioticClassBuilder<TextBuilder> {
+
+        /**
+         * Creates a TtsSpan of type {@link TtsSpan#TYPE_TEXT}.
+         */
+        public TextBuilder() {
+            super(TtsSpan.TYPE_TEXT);
+        }
+
+        /**
+         * Creates a TtsSpan of type {@link TtsSpan#TYPE_TEXT} and sets the
+         * {@link TtsSpan#ARG_TEXT} argument.
+         * @param text The text to be synthesized.
+         * @see #setText(String)
+         */
+        public TextBuilder(String text) {
+            this();
+            setText(text);
+        }
+
+        /**
+         * Sets the {@link TtsSpan#ARG_TEXT} argument, the text to be
+         * synthesized.
+         * @param text The string that will be synthesized.
+         * @return This instance.
+         */
+        public TextBuilder setText(String text) {
+            return setStringArgument(TtsSpan.ARG_TEXT, text);
+        }
+    }
+
+    /**
+     * A builder for TtsSpans of type {@link TtsSpan #TYPE_CARDINAL}.
+     */
+    public static class CardinalBuilder extends SemioticClassBuilder<CardinalBuilder> {
+
+        /**
+         * Creates a TtsSpan of type {@link TtsSpan#TYPE_CARDINAL}.
+         */
+        public CardinalBuilder() {
+            super(TtsSpan.TYPE_CARDINAL);
+        }
+
+        /**
+         * Creates a TtsSpan of type {@link TtsSpan#TYPE_CARDINAL} and sets the
+         * {@link TtsSpan#ARG_NUMBER} argument.
+         * @param number The number to synthesize.
+         * @see #setNumber(long)
+         */
+        public CardinalBuilder(long number) {
+            this();
+            setNumber(number);
+        }
+
+        /**
+         * Creates a TtsSpan of type {@link TtsSpan#TYPE_CARDINAL} and sets the
+         * {@link TtsSpan#ARG_NUMBER} argument.
+         * @param number The number to synthesize.
+         * @see #setNumber(String)
+         */
+        public CardinalBuilder(String number) {
+            this();
+            setNumber(number);
+        }
+
+        /**
+         * Convenience method that converts the number to a String and set it to
+         * the value for {@link TtsSpan#ARG_NUMBER}.
+         * @param number The number that will be synthesized.
+         * @return This instance.
+         */
+        public CardinalBuilder setNumber(long number) {
+            return setNumber(String.valueOf(number));
+        }
+
+        /**
+         * Sets the {@link TtsSpan#ARG_NUMBER} argument.
+         * @param number A non-empty string of digits with an optional
+         *     leading + or -.
+         * @return This instance.
+         */
+        public CardinalBuilder setNumber(String number) {
+            return setStringArgument(TtsSpan.ARG_NUMBER, number);
+        }
     }
 }
