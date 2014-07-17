@@ -24,7 +24,6 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
-import android.telecomm.PhoneAccount;
 import android.util.Log;
 
 import com.android.internal.telecomm.ITelecommService;
