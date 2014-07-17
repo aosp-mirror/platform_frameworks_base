@@ -2,6 +2,7 @@
 
 package android.speech.tts;
 
+import android.media.AudioAttributes;
 import android.media.AudioFormat;
 import android.media.AudioTrack;
 import android.speech.tts.TextToSpeechService.AudioOutputParams;
@@ -214,9 +215,14 @@ class BlockingAudioTrack {
                 = AudioTrack.getMinBufferSize(mSampleRateInHz, channelConfig, mAudioFormat);
         int bufferSizeInBytes = Math.max(MIN_AUDIO_BUFFER_SIZE, minBufferSizeInBytes);
 
-        AudioTrack audioTrack = new AudioTrack(mAudioParams.mStreamType, mSampleRateInHz,
-                channelConfig, mAudioFormat, bufferSizeInBytes, AudioTrack.MODE_STREAM,
+        AudioFormat audioFormat = (new AudioFormat.Builder())
+                .setChannelMask(channelConfig)
+                .setEncoding(mAudioFormat)
+                .setSampleRate(mSampleRateInHz).build();
+        AudioTrack audioTrack = new AudioTrack(mAudioParams.mAudioAttributes,
+                audioFormat, bufferSizeInBytes, AudioTrack.MODE_STREAM,
                 mAudioParams.mSessionId);
+
         if (audioTrack.getState() != AudioTrack.STATE_INITIALIZED) {
             Log.w(TAG, "Unable to create audio track.");
             audioTrack.release();
