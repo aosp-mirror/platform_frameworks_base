@@ -1962,10 +1962,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
             thumbnails = null;
         }
 
-        if (isFrontStack(mHomeStack)) {
-            booting = mService.mBooting;
-            mService.mBooting = false;
-        }
+        booting = mService.mBooting;
+        mService.mBooting = false;
 
         if (mStartingUsers.size() > 0) {
             startingUsers = new ArrayList<UserStartedState>(mStartingUsers);
