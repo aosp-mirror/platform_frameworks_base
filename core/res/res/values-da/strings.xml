@@ -294,10 +294,8 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Tillader, at appen kan skrive til sms-beskeder, der er gemt på din telefon eller dit SIM-kort. Ondsindede apps kan slette dine beskeder."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"modtage tekstbeskeder (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Tillader, at appen kan modtage og behandle WAP-beskeder. Denne tilladelse omfatter muligheden for at overvåge eller slette de beskeder, der sendes til dig, uden at vise dem til dig."</string>
-    <!-- no translation found for permlab_receiveBluetoothMap (7593811487142360528) -->
-    <skip />
-    <!-- no translation found for permdesc_receiveBluetoothMap (8656755936919466345) -->
-    <skip />
+    <string name="permlab_receiveBluetoothMap" msgid="7593811487142360528">"modtage Bluetooth-beskeder (MAP)"</string>
+    <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Tillader, at appen kan modtage og behandle Bluetooth MAP-beskeder. Det betyder, at appen kan overvåge eller slette de beskeder, der sendes til din enhed, uden at vise dem til dig."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"hente kørende apps"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Tillader, at appen kan hente oplysninger om nuværende og seneste opgaver. Med denne tilladelse kan appen finde oplysninger om, hvilke applikationer der bruges på enheden."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"kommunikere på tværs af brugere"</string>
@@ -506,7 +504,7 @@
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"imiterede placeringskilder til test"</string>
     <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"Opret imiterede placeringskilder til test, eller installer en ny placeringsudbyder. Med denne tilladelse kan appen tilsidesætte den placering og/eller status, der returneres af andre placeringskilder, f.eks. GPS eller placeringsudbydere."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"få adgang til yderligere kommandoer for placeringsudbyder"</string>
-    <string name="permdesc_accessLocationExtraCommands" msgid="5945166642335800763">"Tillader, at appen kan få adgang til yderligere kommandoer for placeringsudbydere. Dette bevirker muligvis, at appen kan forstyrre GPS-funktionen eller andre placeringskilder."</string>
+    <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Tillader, at appen kan få adgang til yderligere kommandoer for placeringsudbydere. Dette kan gøre det muligt for appen at forstyrre GPS-funktionen eller andre placeringskilder."</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"tilladelse til at installere en placeringsudbyder"</string>
     <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"Opret imiterede placeringskilder til test, eller installer en ny placeringsudbyder. Herved kan appen tilsidesætte den placering og/eller status, der returneres af andre placeringskilder, som f.eks. GPS eller placeringsudbydere."</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"præcis placering (GPS- og netværksbaseret)"</string>
@@ -715,14 +713,16 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Tillader, at appen kan administrere netværkspolitikker og definere appspecifikke regler."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"skift afregning af netværksbrug"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Tillader, at appen kan ændre den måde, som netværksforbrug udregnes på i forhold til apps. Anvendes ikke af normale apps."</string>
-    <string name="permlab_markNetworkSocket" msgid="3658527214914959749">"ændre socketmærker"</string>
-    <string name="permdesc_markNetworkSocket" msgid="7655568433696356578">"Tillader, at appen ændrer socketmærker ved omdirigering"</string>
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"adgang til underretninger"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Tillader, at appen kan hente, undersøge og rydde underretninger, f.eks. dem, der er sendt af andre apps."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"forpligte sig til en underretningslyttertjeneste"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Tillader brugeren at forpligte sig til en underretningslyttertjenestes grænseflade på øverste niveau. Bør aldrig være nødvendigt til almindelige apps."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"oprette binding til en tjeneste til formidling af betingelser"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Tillader, at brugeren opretter en binding til det øverste niveau af grænsefladen i en tjeneste til formidling af betingelser. Dette bør aldrig være nødvendigt for almindelige apps."</string>
+    <!-- no translation found for permlab_bindMediaRouteService (6637740382272686835) -->
+    <skip />
+    <!-- no translation found for permdesc_bindMediaRouteService (6436655024972496687) -->
+    <skip />
     <string name="permlab_bindDreamService" msgid="4153646965978563462">"fastlås til en drømmetjeneste"</string>
     <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Tillader, at indehaveren fastlåser det øverste niveau af brugergrænsefladen for en drømmetjeneste. Dette bør aldrig være nødvendigt for almindelige apps."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"aktivere konfigurationsappen, der leveres af mobilselskabet"</string>
@@ -733,8 +733,8 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Tillader, at appen ændrer kalibreringsparametrene for berøringsskærmen. Dette bør aldrig være nødvendigt for almindelige apps."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"få adgang til DRM-certifikater"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Tillader, at en applikation leverer og anvender DRM-certfikater. Dette bør aldrig være nødvendigt for almindelige apps."</string>
-    <string name="permlab_handoverStatus" msgid="4558616203830448763">"Modtag overdragelse af udsendelser."</string>
-    <string name="permdesc_handoverStatus" msgid="5738446261941364055">"Tillader modtagelse af statusoplysninger om overdragelse."</string>
+    <string name="permlab_handoverStatus" msgid="1159132046126626731">"Modtag staus for Android Beam-overførsler"</string>
+    <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Tillader, at applikationen modtager oplysninger om aktuelle Android Beam-overførsler"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Indstil regler for adgangskode"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Kontroller længden samt tilladte tegn i adgangskoder til oplåsning af skærmen."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Overvåg forsøg på oplåsning af skærm"</string>
@@ -1008,8 +1008,8 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Tillader, at appen kan ændre browserens historik eller de bogmærker, der er gemt på din telefon. Dette kan give appen tilladelse til at slette eller ændre browserdata. Bemærk! Denne tilladelse håndhæves muligvis ikke af tredjepartsbrowsere eller andre applikationer med websøgningsfunktioner."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"indstille en alarm"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Tillader, at appen kan indstille en alarm i en installeret alarmapp. Nogle alarmapps har muligvis ikke denne funktion."</string>
-    <string name="permlab_removeVoicemail" msgid="6328485960478155867">"fjern talebeskeder"</string>
-    <string name="permdesc_removeVoicemail" msgid="8113704917331103065">"Tillader, at appen fjerner beskeder fra indbakken for din telefonsvarer."</string>
+    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"administrer beskeder i telefonsvareren"</string>
+    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"Tillader, at appen ændrer og fjerner beskeder fra indbakken for din telefonsvarer."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"tilføje telefonsvarer"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Tillader, at appen kan tilføje beskeder på din telefonsvarer."</string>
     <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"læs alle talebeskeder"</string>
@@ -1181,6 +1181,20 @@
     <string name="capital_on" msgid="1544682755514494298">"TIL"</string>
     <string name="capital_off" msgid="6815870386972805832">"FRA"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Brug"</string>
+    <!-- no translation found for whichApplicationNamed (8260158865936942783) -->
+    <skip />
+    <!-- no translation found for whichViewApplication (3272778576700572102) -->
+    <skip />
+    <!-- no translation found for whichViewApplicationNamed (2286418824011249620) -->
+    <skip />
+    <!-- no translation found for whichEditApplication (144727838241402655) -->
+    <skip />
+    <!-- no translation found for whichEditApplicationNamed (1775815530156447790) -->
+    <skip />
+    <!-- no translation found for whichSendApplication (6902512414057341668) -->
+    <skip />
+    <!-- no translation found for whichSendApplicationNamed (2799370240005424391) -->
+    <skip />
     <string name="whichHomeApplication" msgid="4616420172727326782">"Vælg en startapp"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Brug som standard til denne handling."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Ryd standard i Systemindstillinger &gt; Apps &gt; Downloadet."</string>
@@ -1283,10 +1297,12 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Tillad altid"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Tillad aldrig"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM-kort blev fjernet"</string>
-    <string name="sim_removed_message" msgid="2333164559970958645">"Det mobile netværk er utilgængeligt, indtil du genstarter med et gyldigt SIM-kort."</string>
+    <!-- no translation found for sim_removed_message (5450336489923274918) -->
+    <skip />
     <string name="sim_done_button" msgid="827949989369963775">"Afslut"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIM-kort blev tilføjet"</string>
-    <string name="sim_added_message" msgid="6599945301141050216">"Genstart din enhed for at få adgang til mobilnetværket."</string>
+    <!-- no translation found for sim_added_message (7797975656153714319) -->
+    <skip />
     <string name="sim_restart_button" msgid="4722407842815232347">"Genstart"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Angiv tidspunkt"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Angiv dato"</string>
@@ -1376,7 +1392,7 @@
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Angiv en tillidsagent."</string>
     <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Tillader, at en applikation angiver en tillidsagent."</string>
     <string name="permlab_launch_trust_agent_settings" msgid="5859430082240410200">"Åbn indstillingsmenuen for trust agent."</string>
-    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"Tillader, at en app starter en aktivitet, der ændrer adfærden for en betroet agent."</string>
+    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"Tillader, at en app starter en aktivitet, der ændrer adfærden for trust agent."</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Knytte sig til en trust agent-tjeneste"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Tillader, at en applikation knytter sig til en trust agent-tjeneste."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Interager med opdaterings- og gendannelsessystemet"</string>
@@ -1737,10 +1753,25 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> er valgt"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> er slettet"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> – arbejde"</string>
-    <string name="lock_to_app_title" msgid="5895142291937470019">"Vil du bruge Lås-til-app?"</string>
-    <string name="lock_to_app_description" msgid="8597199033462406175">"Med Lås-til-app låses skærmen, så den kun viser én app.\n\nHvis du vil afslutte denne tilstand, skal du trykke på knappen for seneste apps og holde fingeren nede $"</string>
-    <string name="lock_to_app_negative" msgid="8522854387366288195">"NEJ"</string>
+    <!-- no translation found for lock_to_app_toast (2126866321272822564) -->
+    <skip />
+    <string name="lock_to_app_toast_locked" msgid="4229650395479263497">"Du bruger tilstanden Lås-til-app."</string>
+    <string name="lock_to_app_title" msgid="5895142291937470019">"Vil du bruge Bliv i app?"</string>
+    <!-- no translation found for lock_to_app_description (2800403592608529611) -->
+    <skip />
+    <!-- no translation found for lock_to_app_negative (2259143719362732728) -->
+    <skip />
     <string name="lock_to_app_positive" msgid="7085139175671313864">"START"</string>
-    <string name="lock_to_app_start" msgid="8889002974248178076">"Start Lås-til-app"</string>
-    <string name="lock_to_app_exit" msgid="7033017307788432861">"Afslut Lås-til-app"</string>
+    <!-- no translation found for lock_to_app_start (3074665051586318340) -->
+    <skip />
+    <!-- no translation found for lock_to_app_exit (8967089657201849300) -->
+    <skip />
+    <!-- no translation found for lock_to_app_use_screen_lock (1434584309048590886) -->
+    <skip />
+    <!-- no translation found for lock_to_app_unlock_pin (7908385370846820001) -->
+    <skip />
+    <!-- no translation found for lock_to_app_unlock_pattern (7763071104790758405) -->
+    <skip />
+    <!-- no translation found for lock_to_app_unlock_password (795224196583495868) -->
+    <skip />
 </resources>

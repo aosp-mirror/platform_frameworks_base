@@ -294,10 +294,8 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Hiermee kan de app naar de op uw telefoon of simkaart opgeslagen sms\'jes schrijven. Schadelijke apps kunnen uw berichten mogelijk verwijderen."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"tekstberichten (WAP) ontvangen"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Hiermee kan de app WAP-berichten ontvangen en verwerken. Dit betekent dat de app berichten die naar uw apparaat zijn verzonden, kan bijhouden of verwijderen zonder deze aan u weer te geven."</string>
-    <!-- no translation found for permlab_receiveBluetoothMap (7593811487142360528) -->
-    <skip />
-    <!-- no translation found for permdesc_receiveBluetoothMap (8656755936919466345) -->
-    <skip />
+    <string name="permlab_receiveBluetoothMap" msgid="7593811487142360528">"Bluetooth-berichten (MAP) ontvangen"</string>
+    <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Hiermee kan de app Bluetooth MAP-berichten ontvangen en verwerken. Dit betekent dat de app berichten die naar uw apparaat zijn verzonden, kan controleren of verwijderen zonder ze aan u te laten zien."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"actieve apps ophalen"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Hiermee kan de app informatie ophalen over actieve en recent uitgevoerde taken. Zo kan de app informatie vinden over welke apps op het apparaat worden gebruikt."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"interactie tussen gebruikers"</string>
@@ -506,7 +504,7 @@
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"neplocatiebronnen voor test"</string>
     <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"Voorbeeld-locatiebronnen maken voor tests of een nieuwe locatieprovider instellen. Hiermee kan de app de locatie en/of status overschrijven van andere locatiebronnen zoals GPS of locatieproviders."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"toegang tot extra opdrachten van locatieaanbieder"</string>
-    <string name="permdesc_accessLocationExtraCommands" msgid="5945166642335800763">"Hiermee krijgt de app toegang tot extra opdrachten voor de locatieprovider. De app kan hiermee de werking van GPS of andere locatiebronnen te verstoren."</string>
+    <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Hiermee kan de app toegang krijgen tot extra opdrachten voor de locatieprovider. De app kan hiermee de werking van GPS of andere locatiebronnen te verstoren."</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"toestemming om een locatieprovider te installeren"</string>
     <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"Voorbeeld-locatiebronnen maken voor tests of een nieuwe locatieprovider instellen. Hiermee kan de app de locatie en/of status overschrijven van andere locatiebronnen zoals GPS of locatieproviders."</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"precieze locatie (GPS- en netwerkgebaseerd)"</string>
@@ -715,14 +713,14 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Hiermee kan de app het netwerkbeleid beheren en app-specifieke regels definiëren."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"verrekening van netwerkgebruik aanpassen"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Hiermee kan een app aanpassen hoe het netwerkgebruik wordt toegekend aan apps. Dit wordt niet gebruikt door normale apps."</string>
-    <string name="permlab_markNetworkSocket" msgid="3658527214914959749">"socketmarkeringen aanpassen"</string>
-    <string name="permdesc_markNetworkSocket" msgid="7655568433696356578">"Hiermee kan de app socketmarkeringen voor routeren aanpassen"</string>
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"toegang tot meldingen"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Hiermee kan de app meldingen ophalen, onderzoeken en wissen, waaronder meldingen die zijn verzonden door andere apps."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"koppelen aan een listener-service voor meldingen"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Hiermee kan de houder koppelen aan de hoofdinterface van een listener-service voor meldingen. Nooit vereist voor normale apps."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"binden aan de service van een provider van voorwaarden"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Hiermee kan de houder binden aan de hoofdinterface van de service van een provider van voorwaarden. Nooit vereist voor normale apps."</string>
+    <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"binden aan een service voor mediaroutering"</string>
+    <string name="permdesc_bindMediaRouteService" msgid="6436655024972496687">"Hiermee kan de houder binden aan de hoofdinterface van een service voor mediaroutering. Nooit vereist voor normale apps."</string>
     <string name="permlab_bindDreamService" msgid="4153646965978563462">"verbinding maken met een droomservice"</string>
     <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Hiermee wordt de houder toegestaan verbinding te maken met de hoofdinterface van een droomservice. Nooit vereist voor normale apps."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"de door de provider geleverde configuratie-app aanroepen"</string>
@@ -733,8 +731,8 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Hiermee kan de app de kalibratieparameters van het aanraakscherm aanpassen. Nooit vereist voor normale apps."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"toegang tot DRM-certificaten"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Toestaan dat een app DRM-certificaten registreert en gebruikt. Nooit vereist voor normale apps."</string>
-    <string name="permlab_handoverStatus" msgid="4558616203830448763">"Overdrachtsuitzendingen over de handover ontvangen."</string>
-    <string name="permdesc_handoverStatus" msgid="5738446261941364055">"Hiermee kan informatie over de overdrachtsstatus van de handover worden ontvangen."</string>
+    <string name="permlab_handoverStatus" msgid="1159132046126626731">"Android Beam-overdrachtsstatus ontvangen"</string>
+    <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Hiermee kan deze app informatie over huidige Android Beam-overdrachten ontvangen"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Wachtwoordregels instellen"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"De lengte en tekens beheren die zijn toegestaan in wachtwoorden voor schermontgrendeling."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Pogingen voor schermontgrendeling bijhouden"</string>
@@ -1008,8 +1006,8 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Hiermee kan de app de webgeschiedenis wijzigen in de systeemeigen browser en de bladwijzers die zijn opgeslagen op uw telefoon. Deze toestemming kan niet worden geforceerd door andere browsers of andere apps met internetmogelijkheden."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"een alarm instellen"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Hiermee kan de app een alarm instellen in een geïnstalleerde wekkerapp. Deze functie wordt door sommige wekkerapps niet geïmplementeerd."</string>
-    <string name="permlab_removeVoicemail" msgid="6328485960478155867">"voicemails verwijderen"</string>
-    <string name="permdesc_removeVoicemail" msgid="8113704917331103065">"Hiermee kan de app berichten verwijderen uit de inbox van uw voicemail."</string>
+    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"voicemails beheren"</string>
+    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"Hiermee kan de app berichten in de inbox van uw voicemail aanpassen en verwijderen."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"voicemail toevoegen"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Hiermee kan de app berichten toevoegen aan de inbox van uw voicemail."</string>
     <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"alle voicemails lezen"</string>
@@ -1181,6 +1179,13 @@
     <string name="capital_on" msgid="1544682755514494298">"AAN"</string>
     <string name="capital_off" msgid="6815870386972805832">"UIT"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Actie voltooien met"</string>
+    <string name="whichApplicationNamed" msgid="8260158865936942783">"Actie voltooien via %1$s"</string>
+    <string name="whichViewApplication" msgid="3272778576700572102">"Openen met"</string>
+    <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Openen met %1$s"</string>
+    <string name="whichEditApplication" msgid="144727838241402655">"Bewerken met"</string>
+    <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Bewerken met %1$s"</string>
+    <string name="whichSendApplication" msgid="6902512414057341668">"Delen met"</string>
+    <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Delen met %1$s"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"Een startscherm-app selecteren"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Standaard gebruiken voor deze actie."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Standaardinstelling wissen via Systeeminstellingen &gt; Apps &gt; Gedownload."</string>
@@ -1283,10 +1288,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Altijd toestaan"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Nooit toestaan"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"Simkaart verwijderd"</string>
-    <string name="sim_removed_message" msgid="2333164559970958645">"Het mobiele netwerk is niet beschikbaar totdat u het apparaat opnieuw start met een geldige simkaart."</string>
+    <string name="sim_removed_message" msgid="5450336489923274918">"Het mobiele netwerk is pas beschikbaar zodra u het apparaat opnieuw start met een geldige simkaart."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Gereed"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"Simkaart aangesloten"</string>
-    <string name="sim_added_message" msgid="6599945301141050216">"Start uw apparaat opnieuw voor toegang tot het mobiele netwerk."</string>
+    <string name="sim_added_message" msgid="7797975656153714319">"Start uw apparaat opnieuw voor toegang tot het mobiele netwerk."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Opnieuw starten"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Tijd instellen"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Datum instellen"</string>
@@ -1737,10 +1742,25 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> geselecteerd"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> verwijderd"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Werk <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_title" msgid="5895142291937470019">"Lock-to-app gebruiken?"</string>
-    <string name="lock_to_app_description" msgid="8597199033462406175">"Met Lock-to-app wordt het scherm vergrendeld in één app.\n\nAls u dit wilt afsluiten, houdt u de knop \'Recente apps\' $ ingedrukt"</string>
-    <string name="lock_to_app_negative" msgid="8522854387366288195">"NEE"</string>
+    <!-- no translation found for lock_to_app_toast (2126866321272822564) -->
+    <skip />
+    <string name="lock_to_app_toast_locked" msgid="4229650395479263497">"U bevindt zich in de App-slotmodus."</string>
+    <string name="lock_to_app_title" msgid="5895142291937470019">"App-slot gebruiken?"</string>
+    <!-- no translation found for lock_to_app_description (2800403592608529611) -->
+    <skip />
+    <!-- no translation found for lock_to_app_negative (2259143719362732728) -->
+    <skip />
     <string name="lock_to_app_positive" msgid="7085139175671313864">"START"</string>
-    <string name="lock_to_app_start" msgid="8889002974248178076">"Lock-to-app starten"</string>
-    <string name="lock_to_app_exit" msgid="7033017307788432861">"Lock-to-app afsluiten"</string>
+    <!-- no translation found for lock_to_app_start (3074665051586318340) -->
+    <skip />
+    <!-- no translation found for lock_to_app_exit (8967089657201849300) -->
+    <skip />
+    <!-- no translation found for lock_to_app_use_screen_lock (1434584309048590886) -->
+    <skip />
+    <!-- no translation found for lock_to_app_unlock_pin (7908385370846820001) -->
+    <skip />
+    <!-- no translation found for lock_to_app_unlock_pattern (7763071104790758405) -->
+    <skip />
+    <!-- no translation found for lock_to_app_unlock_password (795224196583495868) -->
+    <skip />
 </resources>

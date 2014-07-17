@@ -504,7 +504,7 @@
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"ក្លែង​ប្រភព​ទីតាំង​សម្រាប់​សាកល្បង"</string>
     <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"បង្កើត​ប្រភព​ទីតាំង​ក្លែង​ក្លាយ​សម្រាប់​សាកល្បង ឬ​ដំឡើង​ក្រុមហ៊ុន​ផ្ដល់​ទីតាំង​ថ្មី។ វា​អនុញ្ញាត​ឲ្យ​កម្មវិធី​បដិសេធ​ទីតាំង​​ និង/ឬ​ស្ថានភាព​បាន​ត្រឡប់​ដោយ​ប្រភព​ទីតាំង​ផ្សេង​ដូច​ជា GPS ឬ​ក្រុមហ៊ុន​ផ្ដល់​ទីតាំង។"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"ចូល​ដំណើរការ​ពាក្យ​បញ្ជា​ក្រុមហ៊ុន​ផ្ដល់​ទីតាំង"</string>
-    <string name="permdesc_accessLocationExtraCommands" msgid="5945166642335800763">"ឲ្យ​កម្មវិធី​ចូល​ពាក្យ​បញ្ជា​ក្រុមហ៊ុន​ផ្ដល់​ទីតាំង​បន្ថែម។ កម្មវិធី​ព្យាបាទ​អាច​ប្រើ​វា​ដើម្បី​ជ្រៀតជ្រែក​ជា​មួយ​ប្រតិបត្តិការ​ GPS ឬ​ប្រភព​ទីតាំង​ផ្សេង​ទៀត។"</string>
+    <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"ឲ្យ​កម្មវិធី​ចូល​ដំណើរការ​ពាក្យ​បញ្ជា​កម្មវិធី​ផ្ដល់​​ទីតាំង​បន្ថែម។ វា​អាច​អនុញ្ញាត​ឲ្យ​កម្មវិធី​ទាក់ទង​ជា​មួយ​ប្រតិបត្តិការ​ជីភីអេស ឬ​ប្រភព​ទីតាំង​ផ្សេង។"</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"សិទ្ធិ ដើម្បី​ដំឡើង​ក្រុមហ៊ុន​ផ្ដល់​ទីតាំង"</string>
     <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"បង្កើត​ប្រភព​ទីតាំង​ក្លែងក្លាយ​សម្រាប់​សាកល្បង ឬ​ដំឡើង​ក្រុមហ៊ុន​ផ្ដល់​ទីតាំង​ថ្មី។ វា​អនុញ្ញាត​ឲ្យ​កម្មវិធី​បដិសេធ​ទីតាំង​ និង/ឬ​ស្ថានភាព​បាន​ត្រឡប់​ដោយ​ប្រភព​ទីតាំង​ផ្សេងៗ​ដូចជា GPS ឬ​ក្រុមហ៊ុន​ផ្ដល់​ទីតាំង។"</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"ទីតាំង​ពិតប្រាកដ (GPS និង​មាន​មូលដ្ឋាន​លើ​បណ្ដាញ)"</string>
@@ -713,14 +713,14 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"ឲ្យ​កម្មវិធី​គ្រប់គ្រង​គោលនយោបាយ​បណ្ដាញ និង​កំណត់​ក្បួន​ជាក់លាក់​សម្រាប់​កម្មវិធី។"</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"កែ​គណនី​ប្រើ​បណ្ដាញ"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"ឲ្យ​កម្មវិធី​កែ​វិធី​គិត​ថ្លៃ​សេវាកម្ម​ប្រើ​បណ្ដាញ​​តាម​កម្មវិធី។ មិន​សម្រាប់​ប្រើ​ដោយ​កម្មវិធី​ធម្មតា។"</string>
-    <string name="permlab_markNetworkSocket" msgid="3658527214914959749">"កែប្រែ​សញ្ញា​រន្ធ"</string>
-    <string name="permdesc_markNetworkSocket" msgid="7655568433696356578">"ឲ្យ​កម្មវិធី​កែ​សញ្ញា​រន្ធ​​សម្រាប់​នាំ​ផ្លូវ"</string>
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"ចូល​ដំណើរ​ការ​ការ​ជូន​ដំណឹង"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"ឲ្យ​កម្មវិធី​ទៅ​យក ពិនិត្យ និង​សម្អាត​ការ​ជូន​ដំណឹង រួមមាន​​ប្រកាស​ដោយ​កម្មវិធី​ផ្សេងៗ។"</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"ចង​ទៅ​សេវាកម្ម​ស្ដាប់​ការ​ជូន​ដំណឹង"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"ឲ្យ​ម្ចាស់​ចង​ចំណុច​ប្រទាក់​កម្រិត​កំពូល​នៃ​សេវាកម្ម​កម្មវិធី​ស្ដាប់​ការ​ជូន​ដំណឹង។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​​ទេ។"</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"ភ្ជាប់​ទៅ​សេវាកម្ម​ក្រុមហ៊ុន​ផ្ដល់​លក្ខខណ្ឌ"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"អនុញ្ញាត​ឲ្យ​ម្ចាស់​ភ្ជាប់​ទៅ​ចំណុច​ប្រទាក់​កម្រិត​កំពូល​​របស់​សេវាកម្ម​ក្រុមហ៊ុន​ផ្ដល់​លក្ខខណ្ឌ។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
+    <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"ភ្ជាប់​​ទៅ​សេវា​ផ្លូវ​មេឌៀ"</string>
+    <string name="permdesc_bindMediaRouteService" msgid="6436655024972496687">"អនុញ្ញាត​ឲ្យ​ម្ចាស់​​ភ្ជាប់​​ទៅ​ចំណុច​ប្រទាក់​ពេញ​និយម​នៃ​សេវាកម្ម​ផ្លូវ​មេឌៀ​។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ​។"</string>
     <string name="permlab_bindDreamService" msgid="4153646965978563462">"ភ្ជាប់​ទៅ​សេវាកម្ម​ស្រមោល​ស្រមៃ"</string>
     <string name="permdesc_bindDreamService" msgid="7325825272223347863">"អនុញ្ញាត​ឲ្យ​ម្ចាស់​ភ្ជាប់​ទៅ​ចំណុច​ប្រទាក់​កម្រិត​កំពូល​នៃ​សេវាកម្ម​ស្រមើ​ស្រមៃ។ មិន​គួរ​ចាំបាច់​​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"ដកហូត​កម្មវិធី​កំណត់​រចនាសម្ព័ន្ធ​ដែល​បាន​ផ្ដល់​ដោយ​ក្រុមហ៊ុន​បញ្ជូន"</string>
@@ -731,8 +731,8 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"ឲ្យ​​កម្មវិធី​កែ​ប៉ារ៉ាម៉ែត្រ​កែ​ចំណុច​​នៃ​ការ​ប៉ះ​អេក្រង់។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"ចូល​មើល​វិញ្ញាបនបត្រ DRM"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"ឲ្យ​កម្មវិធី​ផ្ដល់ និង​ប្រើ​វិញ្ញាបនបត្រ DRM ។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
-    <string name="permlab_handoverStatus" msgid="4558616203830448763">"ទទួល​បាន​ការ​ផ្សាយ​ផ្ទេរ។"</string>
-    <string name="permdesc_handoverStatus" msgid="5738446261941364055">"អនុញ្ញាត​ឲ្យ​ទទួល​បាន​ព័ត៌មាន​ស្ថានភាព​ផ្ទេរ​​។"</string>
+    <string name="permlab_handoverStatus" msgid="1159132046126626731">"ទទួល​ស្ថានភាព​ផ្ទេរ Android Beam"</string>
+    <string name="permdesc_handoverStatus" msgid="4788144087245714948">"ឲ្យ​កម្មវិធី​ទទួល​ព័ត៌មាន​អំពី​ការ​ផ្ទេរ​​ Android Beam បច្ចុប្បន្ន"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"កំណត់​ក្បួន​ពាក្យ​សម្ងាត់"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"ពិនិត្យ​ប្រវែង និង​តួអក្សរ​ដែល​បាន​អនុញ្ញាត​ក្នុង​ពាក្យ​សម្ងាត់​ចាក់​សោ​អេក្រង់។"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"ពិនិត្យ​ការ​ព្យាយាម​ដោះ​សោ​អេក្រង់"</string>
@@ -1006,8 +1006,8 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"ឲ្យ​កម្មវិធី​កែ​ប្រវត្តិ ឬ​ចំណាំ​របស់​កម្មវិធី​អ៊ីនធឺណិត​ដែល​បាន​រក្សាទុក​ក្នុង​ទូរស័ព្ទ​​របស់​អ្នក។ កម្មវិធី​ព្យាបាទ​អាច​ប្រើ​វា​ដើម្បី​លុប ឬ​កែ​ទិន្នន័យ​នៃ​កម្មវិធី​អ៊ីនធឺណិត​របស់​អ្នក។ ចំណាំ៖ សិទ្ធិ​នេះ​អាច​ត្រូវ​បាន​បង្ខំ​ដោយ​កម្មវិធី​អ៊ីនធឺណិត​​ភាគី​ទីបី​ ឬ​​កម្មវិធី​ផ្សេង​ដែល​មាន​សមត្ថភាព​រុករក​បណ្ដាញ។ស"</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"កំណត់​សំឡេង​រោទ៍"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"ឲ្យ​កម្មវិធី​កំណត់​​សំឡេង​រោទ៍​ក្នុង​កម្មវិធី​នាឡិកា​រោទ៍​បាន​ដំឡើង។​ កម្មវិធី​នាឡិកា​រោទ៍​មួយ​ចំនួន​អាច​មិន​អនុវត្ត​លក្ខណៈ​នេះ។"</string>
-    <string name="permlab_removeVoicemail" msgid="6328485960478155867">"លុប​សារ​ជា​សំឡេង"</string>
-    <string name="permdesc_removeVoicemail" msgid="8113704917331103065">"អនុញ្ញាត​ឲ្យ​កម្មវិធី​​លុប​​សារ​ចេញពី​ប្រអប់​ទទួល​សារ​​ជា​សំឡេង​របស់​អ្នក។"</string>
+    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"គ្រប់គ្រង​សារ​ជា​សំឡេង"</string>
+    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"ឲ្យ​កម្មវិធី​កែប្រែ​ និង​លុប​សារ​ចេញ​ពី​ប្រអប់​ទទួល​សារ​ជា​សំឡេង​របស់​អ្នក។"</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"បន្ថែម​សារ​ជា​សំឡេង"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"ឲ្យ​កម្មវិធី​បន្ថែម​សារ​ទៅ​ប្រអប់​ទទួល​សារ​ជា​សំឡេង​របស់​អ្នក។"</string>
     <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"អាន​សារ​ជា​សំឡេង​ទាំងអស់"</string>
@@ -1179,6 +1179,15 @@
     <string name="capital_on" msgid="1544682755514494298">"បើក"</string>
     <string name="capital_off" msgid="6815870386972805832">"បិទ"</string>
     <string name="whichApplication" msgid="4533185947064773386">"បញ្ចប់​សកម្មភាព​ដោយ​ប្រើ"</string>
+    <!-- String.format failed for translation -->
+    <!-- no translation found for whichApplicationNamed (8260158865936942783) -->
+    <skip />
+    <string name="whichViewApplication" msgid="3272778576700572102">"បើក​ជា​មួយ"</string>
+    <string name="whichViewApplicationNamed" msgid="2286418824011249620">"បើក​ជាមួយ %1$s"</string>
+    <string name="whichEditApplication" msgid="144727838241402655">"កែសម្រួល​ជាមួយ"</string>
+    <string name="whichEditApplicationNamed" msgid="1775815530156447790">"កែសម្រួល​ជាមួយ​ %1$s"</string>
+    <string name="whichSendApplication" msgid="6902512414057341668">"ចែករំលែក​ជាមួយ"</string>
+    <string name="whichSendApplicationNamed" msgid="2799370240005424391">"ចែករំលែកជាមួយ"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"ជ្រើស​កម្មវិធី​ដើម"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"ប្រើ​តាម​លំនាំដើម​សម្រាប់​សកម្មភាព​នេះ។"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"សម្អាត​លំនាំដើម​ក្នុង​ការកំណត់​ប្រព័ន្ធ &gt; កម្មវិធី &gt; ទាញ​យក។"</string>
@@ -1281,10 +1290,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"អនុញ្ញាត​ជា​និច្ច"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"កុំ​អនុញ្ញាត"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"បាន​ដក​ស៊ីម​កាត​ចេញ"</string>
-    <string name="sim_removed_message" msgid="2333164559970958645">"បណ្ដាញ​ចល័ត​នឹង​ប្រើ​លែង​បាន​រហូត​ដល់​អ្នក​ចាប់ផ្ដើម​ជា​មួយ​ស៊ីម​កាត​ដែល​បា​បញ្ចូល​ត្រឹមត្រូវ។​"</string>
+    <string name="sim_removed_message" msgid="5450336489923274918">"បណ្ដាញ​ចល័ត​នឹង​​មិន​អាច​ប្រើ​បាន លុះត្រាតែ​អ្នក​ចាប់ផ្ដើម​ឡើង​វិញ​ដោយ​បញ្ចូល​ស៊ីមកាត​ត្រឹមត្រូវ។"</string>
     <string name="sim_done_button" msgid="827949989369963775">"រួចរាល់"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"បាន​បន្ថែម​ស៊ីម​កាត"</string>
-    <string name="sim_added_message" msgid="6599945301141050216">"ចាប់ផ្ដើម​ឧបករណ៍​របស់​អ្នក​ឡើង​វិញ ដើម្បី​ចូល​ដំណើរការ​បណ្ដាញ​ចល័ត។"</string>
+    <string name="sim_added_message" msgid="7797975656153714319">"ចាប់ផ្ដើម​ឧបករណ៍​របស់​អ្នក ដើម្បី​ចូល​ប្រើ​បណ្ដាញ​ចល័ត។"</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"ចាប់ផ្ដើម​ឡើងវិញ"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"កំណត់​ម៉ោង​"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"កំណត់​កាល​បរិច្ឆេទ​"</string>
@@ -1735,10 +1744,25 @@
     <string name="item_is_selected" msgid="949687401682476608">"បាន​ជ្រើស <xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"បាន​លុប <xliff:g id="KEY">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"កន្លែង​ធ្វើការ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <!-- no translation found for lock_to_app_toast (2126866321272822564) -->
+    <skip />
+    <string name="lock_to_app_toast_locked" msgid="4229650395479263497">"អ្នក​ស្ថិត​ក្នុង​របៀប​ចាក់សោ​ទៅ​កម្មវិធី។"</string>
     <string name="lock_to_app_title" msgid="5895142291937470019">"ប្រើ​ការ​ចាក់សោ​កម្មវិធី?"</string>
-    <string name="lock_to_app_description" msgid="8597199033462406175">"ចាក់សោ​កម្មវិធី​គឺ​ចាក់​សោ​ការ​បង្ហាញ​​ក្នុង​កម្មវិធី​តែ​មួយ។\n\nដើម្បី​ចាកចេញ ចុច​ និង​សង្កត់​ប៊ូតុង​កម្មវិធី​ថ្មីៗ $"</string>
-    <string name="lock_to_app_negative" msgid="8522854387366288195">"ទេ"</string>
+    <!-- no translation found for lock_to_app_description (2800403592608529611) -->
+    <skip />
+    <!-- no translation found for lock_to_app_negative (2259143719362732728) -->
+    <skip />
     <string name="lock_to_app_positive" msgid="7085139175671313864">"ចាប់ផ្ដើម"</string>
-    <string name="lock_to_app_start" msgid="8889002974248178076">"ចាប់ផ្ដើម​ការ​ចាក់​សោ​កម្មវិធី"</string>
-    <string name="lock_to_app_exit" msgid="7033017307788432861">"ចេញ​ពី​ការ​ចាក់​សោ​កម្មវិធី"</string>
+    <!-- no translation found for lock_to_app_start (3074665051586318340) -->
+    <skip />
+    <!-- no translation found for lock_to_app_exit (8967089657201849300) -->
+    <skip />
+    <!-- no translation found for lock_to_app_use_screen_lock (1434584309048590886) -->
+    <skip />
+    <!-- no translation found for lock_to_app_unlock_pin (7908385370846820001) -->
+    <skip />
+    <!-- no translation found for lock_to_app_unlock_pattern (7763071104790758405) -->
+    <skip />
+    <!-- no translation found for lock_to_app_unlock_password (795224196583495868) -->
+    <skip />
 </resources>

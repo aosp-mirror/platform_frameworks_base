@@ -504,7 +504,7 @@
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"mock location sources for testing"</string>
     <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"Create mock location sources for testing or install a new location provider. This allows the app to override the location and/or status returned by other location sources such as GPS or location providers."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"access extra location provider commands"</string>
-    <string name="permdesc_accessLocationExtraCommands" msgid="5945166642335800763">"Allows the app to access extra location provider commands. This may allow the app to interfere with the operation of the GPS or other location sources."</string>
+    <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Allows the app to access extra location provider commands. This may allow the app to interfere with the operation of the GPS or other location sources."</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"permission to install a location provider"</string>
     <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"Create mock location sources for testing or install a new location provider. This allows the app to override the location and/or status returned by other location sources such as GPS or location providers."</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"precise location (GPS and network-based)"</string>
@@ -713,14 +713,14 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Allows the app to manage network policies and define app-specific rules."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"modify network usage accounting"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Allows the app to modify how network usage is accounted against apps. Not for use by normal apps."</string>
-    <string name="permlab_markNetworkSocket" msgid="3658527214914959749">"modify socket marks"</string>
-    <string name="permdesc_markNetworkSocket" msgid="7655568433696356578">"Allows the app to modify socket marks for routing"</string>
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"access notifications"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Allows the app to retrieve, examine, and clear notifications, including those posted by other apps."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"bind to a notification listener service"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Allows the holder to bind to the top-level interface of a notification listener service. Should never be needed for normal apps."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"bind to a condition provider service"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Allows the holder to bind to the top-level interface of a condition provider service. Should never be needed for normal apps."</string>
+    <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"bind to a media route service"</string>
+    <string name="permdesc_bindMediaRouteService" msgid="6436655024972496687">"Allows the holder to bind to the top-level interface of a media route service. Should never be needed for normal apps."</string>
     <string name="permlab_bindDreamService" msgid="4153646965978563462">"bind to a dream service"</string>
     <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Allows the holder to bind to the top-level interface of a dream service. Should never be needed for normal apps."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"invoke the carrier-provided configuration app"</string>
@@ -731,8 +731,8 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Allows the app to modify the calibration parameters of the touch screen. Should never be needed for normal apps."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"access DRM certificates"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Allows an application to provision and use DRM certficates. Should never be needed for normal apps."</string>
-    <string name="permlab_handoverStatus" msgid="4558616203830448763">"Receive handover transfer broadcasts."</string>
-    <string name="permdesc_handoverStatus" msgid="5738446261941364055">"Allows receiving handover transfer status information."</string>
+    <string name="permlab_handoverStatus" msgid="1159132046126626731">"Receive Android Beam transfer status"</string>
+    <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Allows this application to receive information about current Android Beam transfers"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Set password rules"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Control the length and the characters allowed in screen-unlock passwords."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Monitor screen-unlock attempts"</string>
@@ -1006,8 +1006,8 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Allows the app to modify the Browser\'s history or bookmarks stored on your phone. This may allow the app to delete or modify Browser data. Note: this permission may not be enforced by third-party browsers or other applications with web browsing capabilities."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"set an alarm"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Allows the app to set an alarm in an installed alarm clock app. Some alarm clock apps may not implement this feature."</string>
-    <string name="permlab_removeVoicemail" msgid="6328485960478155867">"remove voicemails"</string>
-    <string name="permdesc_removeVoicemail" msgid="8113704917331103065">"Allows the app to remove messages from your voicemail inbox."</string>
+    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"manage voicemails"</string>
+    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"Allows the app to modify and remove messages from your voicemail inbox."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"add voicemail"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Allows the app to add messages to your voicemail inbox."</string>
     <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"read all voicemail"</string>
@@ -1179,6 +1179,13 @@
     <string name="capital_on" msgid="1544682755514494298">"ON"</string>
     <string name="capital_off" msgid="6815870386972805832">"OFF"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Complete action using"</string>
+    <string name="whichApplicationNamed" msgid="8260158865936942783">"Complete action using %1$s"</string>
+    <string name="whichViewApplication" msgid="3272778576700572102">"Open with"</string>
+    <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Open with %1$s"</string>
+    <string name="whichEditApplication" msgid="144727838241402655">"Edit with"</string>
+    <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Edit with %1$s"</string>
+    <string name="whichSendApplication" msgid="6902512414057341668">"Share with"</string>
+    <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Share with %1$s"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"Select a home app"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Use by default for this action."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Clear default in System settings &gt; Apps &gt; Downloaded."</string>
@@ -1281,10 +1288,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Always Allow*"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Never Allow"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM card removed"</string>
-    <string name="sim_removed_message" msgid="2333164559970958645">"The mobile network will be unavailable until you restart with a valid SIM card inserted."</string>
+    <string name="sim_removed_message" msgid="5450336489923274918">"The mobile network will be unavailable until you restart with a valid SIM card inserted."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Done"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIM card added"</string>
-    <string name="sim_added_message" msgid="6599945301141050216">"Restart your device to access the mobile network."</string>
+    <string name="sim_added_message" msgid="7797975656153714319">"Restart your device to access the mobile network."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Restart"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Set time"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Set date"</string>
@@ -1735,10 +1742,25 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> selected"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> deleted"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Work <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_title" msgid="5895142291937470019">"Use lock-to-app?"</string>
-    <string name="lock_to_app_description" msgid="8597199033462406175">"Lock-to-app locks the display in a single app.\n\nTo exit press and hold the recent apps button $"</string>
-    <string name="lock_to_app_negative" msgid="8522854387366288195">"NO"</string>
+    <!-- no translation found for lock_to_app_toast (2126866321272822564) -->
+    <skip />
+    <string name="lock_to_app_toast_locked" msgid="4229650395479263497">"You are in Lock-to-App mode."</string>
+    <string name="lock_to_app_title" msgid="5895142291937470019">"Use Lock-to-app?"</string>
+    <!-- no translation found for lock_to_app_description (2800403592608529611) -->
+    <skip />
+    <!-- no translation found for lock_to_app_negative (2259143719362732728) -->
+    <skip />
     <string name="lock_to_app_positive" msgid="7085139175671313864">"START"</string>
-    <string name="lock_to_app_start" msgid="8889002974248178076">"Start Lock-to-app"</string>
-    <string name="lock_to_app_exit" msgid="7033017307788432861">"Exit Lock-to-app"</string>
+    <!-- no translation found for lock_to_app_start (3074665051586318340) -->
+    <skip />
+    <!-- no translation found for lock_to_app_exit (8967089657201849300) -->
+    <skip />
+    <!-- no translation found for lock_to_app_use_screen_lock (1434584309048590886) -->
+    <skip />
+    <!-- no translation found for lock_to_app_unlock_pin (7908385370846820001) -->
+    <skip />
+    <!-- no translation found for lock_to_app_unlock_pattern (7763071104790758405) -->
+    <skip />
+    <!-- no translation found for lock_to_app_unlock_password (795224196583495868) -->
+    <skip />
 </resources>

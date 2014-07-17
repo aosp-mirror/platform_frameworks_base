@@ -241,7 +241,7 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"访问可用的帐户。"</string>
     <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"硬件控制"</string>
     <string name="permgroupdesc_hardwareControls" msgid="4357057861225462702">"直接访问手机上的硬件。"</string>
-    <string name="permgrouplab_phoneCalls" msgid="9067173988325865923">"手机通话"</string>
+    <string name="permgrouplab_phoneCalls" msgid="9067173988325865923">"电话"</string>
     <string name="permgroupdesc_phoneCalls" msgid="7489701620446183770">"监管、记录和处理电话呼叫。"</string>
     <string name="permgrouplab_systemTools" msgid="4652191644082714048">"系统工具"</string>
     <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"对系统进行低级访问和控制。"</string>
@@ -294,10 +294,8 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"允许应用对手机或 SIM 卡上存储的短信执行写入操作。恶意应用可能会删除您的短信。"</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"接收讯息 (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"允许该应用接收和处理 WAP 消息。此权限包括监视发送给您的消息或删除发送给您的消息而不向您显示的功能。"</string>
-    <!-- no translation found for permlab_receiveBluetoothMap (7593811487142360528) -->
-    <skip />
-    <!-- no translation found for permdesc_receiveBluetoothMap (8656755936919466345) -->
-    <skip />
+    <string name="permlab_receiveBluetoothMap" msgid="7593811487142360528">"接收蓝牙信息(MAP)"</string>
+    <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"允许此应用接收和处理蓝牙MAP信息。这意味着，该应用可能会监视发送或到您设备的信息，在您阅读发送到您设备的信息之前擅自删除信息。"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"检索正在运行的应用"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"允许该应用检索近期运行的和当前正在运行的任务的相关信息。此权限可让该应用了解设备上使用了哪些应用。"</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"用户间互动"</string>
@@ -506,7 +504,7 @@
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"使用模拟地点来源进行测试"</string>
     <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"创建用于测试的模拟位置源或安装新的位置提供程序。此权限可让该应用覆盖由其他位置源（如 GPS）或位置提供程序返回的位置和/或状态信息。"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"获取额外的位置信息提供程序命令"</string>
-    <string name="permdesc_accessLocationExtraCommands" msgid="5945166642335800763">"允许该应用访问额外的位置提供程序命令。此权限可让该应用干扰 GPS 或其他位置源的运行。"</string>
+    <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"允许该应用使用其他的位置信息提供程序命令。此权限使该应用可以干扰GPS或其他位置信息源的运作。"</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"允许安装位置信息提供程序"</string>
     <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"创建用于测试的模拟位置源或安装新的位置提供程序。此权限可让该应用覆盖由其他位置源（如 GPS）或位置提供程序返回的位置和/或状态信息。"</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"精确位置（基于 GPS 和网络）"</string>
@@ -715,14 +713,16 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"允许应用管理网络政策和定义专门针对应用的规则。"</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"修改网络使用情况记录方式"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"允许该应用修改对于各应用的网络使用情况的统计方式。普通应用不应使用此权限。"</string>
-    <string name="permlab_markNetworkSocket" msgid="3658527214914959749">"修改套接字标记"</string>
-    <string name="permdesc_markNetworkSocket" msgid="7655568433696356578">"允许应用修改用于路由的套接字标记"</string>
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"访问通知"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"允许该应用检索、检查并清除通知，包括其他应用发布的通知。"</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"绑定到通知侦听器服务"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"允许应用绑定到通知侦听器服务的顶级接口（普通应用绝不需要此权限）。"</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"绑定到条件提供程序服务"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"允许应用绑定到条件提供程序服务的顶级接口。普通应用绝不需要此权限。"</string>
+    <!-- no translation found for permlab_bindMediaRouteService (6637740382272686835) -->
+    <skip />
+    <!-- no translation found for permdesc_bindMediaRouteService (6436655024972496687) -->
+    <skip />
     <string name="permlab_bindDreamService" msgid="4153646965978563462">"绑定到互动屏保服务"</string>
     <string name="permdesc_bindDreamService" msgid="7325825272223347863">"允许应用绑定到互动屏保服务的顶级接口。普通应用绝不需要此权限。"</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"调用运营商提供的配置应用"</string>
@@ -733,8 +733,8 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"允许应用修改触摸屏的校准参数。普通应用绝不需要此权限。"</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"访问DRM证书"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"允许应用配置和使用DRM证书。普通应用绝不需要此权限。"</string>
-    <string name="permlab_handoverStatus" msgid="4558616203830448763">"接收交接传输广播"</string>
-    <string name="permdesc_handoverStatus" msgid="5738446261941364055">"允许接收交接传输状态信息。"</string>
+    <string name="permlab_handoverStatus" msgid="1159132046126626731">"接收Android Beam的传输状态"</string>
+    <string name="permdesc_handoverStatus" msgid="4788144087245714948">"允许此应用接收Android Beam当前传输内容的相关信息"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"设置密码规则"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"控制屏幕解锁密码所允许的长度和字符。"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"监视屏幕解锁尝试次数"</string>
@@ -1008,8 +1008,8 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"允许该应用修改您手机上存储的浏览器历史记录或浏览器书签。此权限可让该应用清除或修改浏览器数据。请注意：此权限可能不适用于第三方浏览器或具备网页浏览功能的其他应用。"</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"设置闹钟"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"允许应用在已安装的闹钟应用中设置闹钟。有些闹钟应用可能无法实现此功能。"</string>
-    <string name="permlab_removeVoicemail" msgid="6328485960478155867">"移除语音邮件"</string>
-    <string name="permdesc_removeVoicemail" msgid="8113704917331103065">"允许应用移除您语音信箱中的邮件。"</string>
+    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"管理语音信箱"</string>
+    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"允许应用修改和移除您语音信箱中的语音邮件。"</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"添加语音邮件"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"允许应用向您的语音信箱收件箱添加邮件。"</string>
     <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"读取所有语音邮件"</string>
@@ -1181,6 +1181,20 @@
     <string name="capital_on" msgid="1544682755514494298">"开启"</string>
     <string name="capital_off" msgid="6815870386972805832">"关闭"</string>
     <string name="whichApplication" msgid="4533185947064773386">"选择要使用的应用："</string>
+    <!-- no translation found for whichApplicationNamed (8260158865936942783) -->
+    <skip />
+    <!-- no translation found for whichViewApplication (3272778576700572102) -->
+    <skip />
+    <!-- no translation found for whichViewApplicationNamed (2286418824011249620) -->
+    <skip />
+    <!-- no translation found for whichEditApplication (144727838241402655) -->
+    <skip />
+    <!-- no translation found for whichEditApplicationNamed (1775815530156447790) -->
+    <skip />
+    <!-- no translation found for whichSendApplication (6902512414057341668) -->
+    <skip />
+    <!-- no translation found for whichSendApplicationNamed (2799370240005424391) -->
+    <skip />
     <string name="whichHomeApplication" msgid="4616420172727326782">"选择主屏幕应用"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"设为默认选项。"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"在“系统设置”&gt;“应用”&gt;“已下载”中清除默认设置。"</string>
@@ -1283,10 +1297,12 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"始终允许"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"永不允许"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"已移除 SIM 卡"</string>
-    <string name="sim_removed_message" msgid="2333164559970958645">"移动网络不可用。请插入有效的 SIM 卡并重新启动。"</string>
+    <!-- no translation found for sim_removed_message (5450336489923274918) -->
+    <skip />
     <string name="sim_done_button" msgid="827949989369963775">"完成"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"已添加 SIM 卡"</string>
-    <string name="sim_added_message" msgid="6599945301141050216">"请重新启动您的设备，以便访问移动网络。"</string>
+    <!-- no translation found for sim_added_message (7797975656153714319) -->
+    <skip />
     <string name="sim_restart_button" msgid="4722407842815232347">"重新启动"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"设置时间"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"设置日期"</string>
@@ -1375,10 +1391,8 @@
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"允许应用检测信任状态的变化。"</string>
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"提供信任的代理。"</string>
     <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"允许应用提供信任的代理。"</string>
-    <!-- no translation found for permlab_launch_trust_agent_settings (5859430082240410200) -->
-    <skip />
-    <!-- no translation found for permdesc_launch_trust_agent_settings (8185142708644913381) -->
-    <skip />
+    <string name="permlab_launch_trust_agent_settings" msgid="5859430082240410200">"启动信任的代理设置菜单。"</string>
+    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"允许应用启动可变更信任的代理行为的活动。"</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"绑定至信任的代理服务"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"允许应用绑定至信任的代理服务。"</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"与更新和恢复系统互动"</string>
@@ -1739,10 +1753,25 @@
     <string name="item_is_selected" msgid="949687401682476608">"已选择<xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"已删除<xliff:g id="KEY">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"工作<xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <!-- no translation found for lock_to_app_toast (2126866321272822564) -->
+    <skip />
+    <string name="lock_to_app_toast_locked" msgid="4229650395479263497">"您目前处于单应用模式。"</string>
     <string name="lock_to_app_title" msgid="5895142291937470019">"要使用“单应用模式”吗？"</string>
-    <string name="lock_to_app_description" msgid="8597199033462406175">"“单应用模式”功能会锁定屏幕，使其只显示一个应用。\n\n要退出，请按住“最近用过的应用”按钮 $"</string>
-    <string name="lock_to_app_negative" msgid="8522854387366288195">"算了"</string>
+    <!-- no translation found for lock_to_app_description (2800403592608529611) -->
+    <skip />
+    <!-- no translation found for lock_to_app_negative (2259143719362732728) -->
+    <skip />
     <string name="lock_to_app_positive" msgid="7085139175671313864">"启动"</string>
-    <string name="lock_to_app_start" msgid="8889002974248178076">"启动单应用模式"</string>
-    <string name="lock_to_app_exit" msgid="7033017307788432861">"退出单应用模式"</string>
+    <!-- no translation found for lock_to_app_start (3074665051586318340) -->
+    <skip />
+    <!-- no translation found for lock_to_app_exit (8967089657201849300) -->
+    <skip />
+    <!-- no translation found for lock_to_app_use_screen_lock (1434584309048590886) -->
+    <skip />
+    <!-- no translation found for lock_to_app_unlock_pin (7908385370846820001) -->
+    <skip />
+    <!-- no translation found for lock_to_app_unlock_pattern (7763071104790758405) -->
+    <skip />
+    <!-- no translation found for lock_to_app_unlock_password (795224196583495868) -->
+    <skip />
 </resources>

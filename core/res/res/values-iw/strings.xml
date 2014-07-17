@@ -294,10 +294,8 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"‏מאפשר לאפליקציה לכתוב להודעות SMS המאוחסנות בטלפון או בכרטיס ה-SIM שלך. אפליקציות זדוניות עלולות למחוק את ההודעות שלך."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"‏קבלת הודעות טקסט (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"‏מאפשר לאפליקציה לקבל ולעבד הודעות WAP. אישור זה כולל את היכולת לעקוב אחר הודעות שנשלחו אליך ולמחוק אותן מבלי להציג לך אותן."</string>
-    <!-- no translation found for permlab_receiveBluetoothMap (7593811487142360528) -->
-    <skip />
-    <!-- no translation found for permdesc_receiveBluetoothMap (8656755936919466345) -->
-    <skip />
+    <string name="permlab_receiveBluetoothMap" msgid="7593811487142360528">"‏קבלת הודעות Bluetooth ‏(MAP)"</string>
+    <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"‏הרשאה זו מאפשרת לאפליקציה לקבל ולעבד הודעות MAP של Bluetooth. משמעות הדבר היא שהאפליקציה יכולה לעקוב אחר הודעות הנשלחות למכשיר שלך או למחוק אותן מבלי להראות לך אותן."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"אחזור אפליקציות פעילות"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"מאפשר לאפליקציה לאחזר מידע לגבי משימות הפועלות כרגע ושפעלו לאחרונה. ייתכן שהדבר יתיר לאפליקציה לגלות מידע לגבי האפליקציות שבהן נעשה שימוש במכשיר."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"אינטראקציה בין משתמשים"</string>
@@ -506,7 +504,7 @@
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"צור מקורות מיקום מדומים לצורך בדיקה"</string>
     <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"‏צור מקורות מיקום מדומים לבדיקה, או התקן ספק מיקום חדש. פעולה זו מאפשרת לאפליקציה לעקוף את המיקום ו/או הסטטוס המוחזרים על ידי מקורות מיקום אחרים כמו GPS או ספקי מיקום."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"גישה לפקודות ספק מיקום נוספות"</string>
-    <string name="permdesc_accessLocationExtraCommands" msgid="5945166642335800763">"‏מאפשר לאפליקציה לגשת לפקודות נוספות של ספק שירות המיקום. אישור זה עשוי לאפשר לאפליקציה לשבש את פעולת ה-GPS או מקורות מיקום אחרים."</string>
+    <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"‏מאפשרת לאפליקציה לגשת לפקודות נוספות של ספק המיקום. הרשאה זו עשויה לאפשר לאפליקציה לשבש את פעולת ה-GPS או מקורות מיקום אחרים."</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"הרשאה להתקין ספק מיקום"</string>
     <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"‏צור מקורות מיקום מדומים לבדיקה, או התקן ספק מיקום חדש. פעולה זו מאפשרת לאפליקציה לעקוף את המיקום ו/או הסטטוס המוחזרים על ידי מקורות מיקום אחרים כמו GPS או ספקי מיקום."</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"‏מיקום מדויק (מבוסס GPS ורשת)"</string>
@@ -715,14 +713,14 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"מאפשר לאפליקציה לנהל מדיניות הרשת להגדיר כללים ספציפיים-לאפליקציה."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"שנה ניהול חשבונות של שימוש ברשת"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"הרשאה זו מאפשרת לאפליקציה לשנות את אופן החישוב של נתוני שימוש ברשת מול כל אפליקציה. לא מיועד לשימוש באפליקציות רגילות."</string>
-    <string name="permlab_markNetworkSocket" msgid="3658527214914959749">"‏שינוי של סימני Socket"</string>
-    <string name="permdesc_markNetworkSocket" msgid="7655568433696356578">"‏ההרשאה הזו מאפשרת לאפליקציה לשנות סימני Socket עבור ניתוב"</string>
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"גישה להתראות"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"מאפשר לאפליקציה לאחזר, לבדוק ולמחוק התראות, כולל כאלה שפורסמו על ידי אפליקציות אחרות."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"איגוד לשירות של מאזין להתראות"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"הרשאה זו מאפשרת למשתמש לבצע איגוד לממשק הרמה העליונה של שירות מאזין להתראות. הרשאה זו אף פעם אינה נחוצה לאפליקציות רגילים."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"איגוד לשירות ספק תנאי"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"מאפשרת לבעלים לאגד לממשק ברמה העליונה של שירות ספק תנאי. לעולם לא אמורה להיות נחוצה עבור אפליקציות רגילות."</string>
+    <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"איגוד לשירות ניתוב מדיה"</string>
+    <string name="permdesc_bindMediaRouteService" msgid="6436655024972496687">"מאפשרת לבעלים לאגוד לממשק ברמה העליונה של שירות ניתוב מדיה. לעולם לא אמורה להיות נחוצה עבור אפליקציות רגילות."</string>
     <string name="permlab_bindDreamService" msgid="4153646965978563462">"‏איגוד לשירות Dream"</string>
     <string name="permdesc_bindDreamService" msgid="7325825272223347863">"‏מאפשרת לבעלים לבצע איגוד לממשק הרמה העליונה של שירות Dream. הרשאה זו אף פעם אינה נחוצה לאפליקציות רגילות."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"הפעלה של אפליקציית תצורה שסופקה על ידי ספק"</string>
@@ -733,8 +731,8 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"מאפשרת לאפליקציה לשנות את פרמטרי הכיול של מסך המגע. לעולם לא אמורה להיות נחוצה לאפליקציות רגילות."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"‏גישה אל אישורי DRM"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"‏מאפשרת לאפליקציה לנהל תצורה של אישורי DRM ולהשתמש בהם. לעולם לא אמורה להיות נחוצה עבור אפליקציה רגילה."</string>
-    <string name="permlab_handoverStatus" msgid="4558616203830448763">"קבל שידורים על העברת שליטה."</string>
-    <string name="permdesc_handoverStatus" msgid="5738446261941364055">"מאפשר קבלה של מידע על סטטוס העברת שליטה."</string>
+    <string name="permlab_handoverStatus" msgid="1159132046126626731">"‏קבלת סטטוס העברה של Android Beam"</string>
+    <string name="permdesc_handoverStatus" msgid="4788144087245714948">"‏מאפשר לאפליקציה הזו לקבל מידע על העברות Android Beam נוכחיות"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"הגדר כללי סיסמה"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"שלוט באורך ובתווים המותרים בסיסמאות לביטול נעילת מסך."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"עקוב אחר ניסיונות לביטול נעילת מסך"</string>
@@ -1008,8 +1006,8 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"‏מאפשר לאפליקציה לשנות את ההיסטוריה או ה-Bookmarks של הדפדפן המאוחסנים בטלפון. הדבר עשוי לאפשר לאפליקציה למחוק או לשנות נתוני דפדפן. שים לב: אישור זה אינו ניתן לאכיפה על ידי דפדפני צד שלישי או אפליקציות אחרות בעלות יכולות גלישה באינטרנט."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"הגדרת התראה"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"מאפשר לאפליקציה להגדיר התראה באפליקציה מותקנת של שעון מעורר. אפליקציות מסוימות של שעון מעורר אינן מיישמות תכונה זו."</string>
-    <string name="permlab_removeVoicemail" msgid="6328485960478155867">"הסרה של הודעות דואר קולי"</string>
-    <string name="permdesc_removeVoicemail" msgid="8113704917331103065">"מאפשרת לאפליקציה להסיר הודעות מתיבת הדואר הנכנס של דואר קולי."</string>
+    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"ניהול של הודעות דואר קולי"</string>
+    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"מאפשרת לאפליקציה לשנות ולהסיר הודעות מתיבת הדואר הנכנס של דואר קולי."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"הוסף דואר קולי"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"מאפשר לאפליקציה להוסיף הודעות לתיבת הדואר הקולי."</string>
     <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"קריאת כל הדואר הקולי"</string>
@@ -1181,6 +1179,13 @@
     <string name="capital_on" msgid="1544682755514494298">"מופעל"</string>
     <string name="capital_off" msgid="6815870386972805832">"כבוי"</string>
     <string name="whichApplication" msgid="4533185947064773386">"השלמת פעולה באמצעות"</string>
+    <string name="whichApplicationNamed" msgid="8260158865936942783">"‏השלם את הפעולה באמצעות %1$s"</string>
+    <string name="whichViewApplication" msgid="3272778576700572102">"פתח באמצעות"</string>
+    <string name="whichViewApplicationNamed" msgid="2286418824011249620">"‏פתח באמצעות %1$s"</string>
+    <string name="whichEditApplication" msgid="144727838241402655">"ערוך באמצעות"</string>
+    <string name="whichEditApplicationNamed" msgid="1775815530156447790">"‏ערוך באמצעות %1$s"</string>
+    <string name="whichSendApplication" msgid="6902512414057341668">"שתף באמצעות"</string>
+    <string name="whichSendApplicationNamed" msgid="2799370240005424391">"‏שתף באמצעות %1$s"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"בחר אפליקציה לדף הבית"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"השתמש כברירת מחדל עבור פעולה זו."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"‏נקה את הגדרת המחדל ב\'הגדרות מערכת\' &lt;‏ Google Apps‏ &lt; \'הורדות\'."</string>
@@ -1283,10 +1288,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"אפשר תמיד"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"לעולם אל תאפשר"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"‏כרטיס ה-SIM הוסר"</string>
-    <string name="sim_removed_message" msgid="2333164559970958645">"‏הרשת הסלולרית לא תהיה זמינה עד שתפעיל מחדש לאחר הכנסת כרטיס SIM חוקי."</string>
+    <string name="sim_removed_message" msgid="5450336489923274918">"‏הרשת הסלולרית לא תהיה זמינה עד שתבצע אתחול לאחר הכנסה של כרטיס SIM חוקי."</string>
     <string name="sim_done_button" msgid="827949989369963775">"סיום"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"‏כרטיס ה-SIM נוסף"</string>
-    <string name="sim_added_message" msgid="6599945301141050216">"הפעל מחדש את המכשיר כדי לגשת אל הרשת הסלולרית."</string>
+    <string name="sim_added_message" msgid="7797975656153714319">"אתחל את המכשיר כדי לגשת אל הרשת הסלולרית."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"הפעל מחדש"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"הגדרת שעה"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"הגדר תאריך"</string>
@@ -1737,10 +1742,25 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> נבחר"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> נמחק"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"עבודה <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_title" msgid="5895142291937470019">"האם להשתמש ב\'נעל באפליקציה\'?"</string>
-    <string name="lock_to_app_description" msgid="8597199033462406175">"\'נעל באפליקציה\' נועל את המסך באפליקציה יחידה.\n\nכדי לצאת, לחץ על לחצן האפליקציות האחרונות $"</string>
-    <string name="lock_to_app_negative" msgid="8522854387366288195">"לא"</string>
+    <!-- no translation found for lock_to_app_toast (2126866321272822564) -->
+    <skip />
+    <string name="lock_to_app_toast_locked" msgid="4229650395479263497">"אתה במצב \'נעילה באפליקציה\'."</string>
+    <string name="lock_to_app_title" msgid="5895142291937470019">"האם להשתמש ב\'נעילה באפליקציה\'?"</string>
+    <!-- no translation found for lock_to_app_description (2800403592608529611) -->
+    <skip />
+    <!-- no translation found for lock_to_app_negative (2259143719362732728) -->
+    <skip />
     <string name="lock_to_app_positive" msgid="7085139175671313864">"הפעל"</string>
-    <string name="lock_to_app_start" msgid="8889002974248178076">"הפעל את \'נעל באפליקציה\'"</string>
-    <string name="lock_to_app_exit" msgid="7033017307788432861">"צא מ\'נעל באפליקציה\'"</string>
+    <!-- no translation found for lock_to_app_start (3074665051586318340) -->
+    <skip />
+    <!-- no translation found for lock_to_app_exit (8967089657201849300) -->
+    <skip />
+    <!-- no translation found for lock_to_app_use_screen_lock (1434584309048590886) -->
+    <skip />
+    <!-- no translation found for lock_to_app_unlock_pin (7908385370846820001) -->
+    <skip />
+    <!-- no translation found for lock_to_app_unlock_pattern (7763071104790758405) -->
+    <skip />
+    <!-- no translation found for lock_to_app_unlock_password (795224196583495868) -->
+    <skip />
 </resources>

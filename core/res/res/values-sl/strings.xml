@@ -294,10 +294,8 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Programu omogoča zapisovanje v sporočila SMS, shranjena v telefonu ali na kartici SIM. Zlonamerni programi lahko izbrišejo vaša sporočila."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"prejemanje sporočil (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Aplikaciji omogoča prejemanje in obdelavo sporočil WAP. S tem lahko aplikacija nadzoruje ali izbriše sporočila, poslana v napravo, ne da bi vam jih pokazala."</string>
-    <!-- no translation found for permlab_receiveBluetoothMap (7593811487142360528) -->
-    <skip />
-    <!-- no translation found for permdesc_receiveBluetoothMap (8656755936919466345) -->
-    <skip />
+    <string name="permlab_receiveBluetoothMap" msgid="7593811487142360528">"prejemanje sporočil Bluetooth (MAP)"</string>
+    <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Aplikaciji omogoča prejemanje in obdelavo sporočil Bluetooth MAP. To pomeni, da lahko aplikacija nadzira in izbriše sporočila, poslana v napravo, ne da bi vam jih prikazala."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"dobivanje programov, ki se izvajajo"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Aplikaciji omogoča prejemanje podatkov o trenutnih in nedavno izvajajočih se opravilih. S tem lahko aplikacija odkrije podatke o aplikacijah, ki se uporabljajo v napravi."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"interakcija z uporabniki"</string>
@@ -506,7 +504,7 @@
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"simulirani viri lokacije za preverjanje"</string>
     <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"Ustvarjanje simuliranih virov lokacije za preverjanje ali namestitev novega ponudnika lokacije. S tem lahko aplikacija preglasi lokacijo in/ali stanje, ki ga vrnejo drugi viri lokacije, kot so GPS in ponudniki lokacij."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"dostopanje do ukazov ponudnika dodatnih lokacij"</string>
-    <string name="permdesc_accessLocationExtraCommands" msgid="5945166642335800763">"Aplikaciji omogoča, da dostopa do dodatnih ukazov ponudnika lokacij. S tem lahko moti delovanje sistema GPS ali drugih virov lokacije."</string>
+    <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Aplikaciji omogoča dostop do dodatnih ukazov ponudnika lokacij. S tem lahko aplikacija moti delovanje sistema GPS ali drugih virov lokacije."</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"dovoljenje za namestitev ponudnika lokacije"</string>
     <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"Ustvarjanje simuliranih virov lokacije za preverjanje ali namestitev novega ponudnika lokacije. S tem lahko aplikacija preglasi lokacijo in/ali stanje, ki ga vrnejo drugi viri lokacije, kot so GPS in ponudniki lokacij."</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"natančna lokacija (na podlagi podatkov GPS in omrežja)"</string>
@@ -715,14 +713,16 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Programu omogoča upravljanje pravilnikov o omrežju in določanje pravil za program."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"spremeni obračunavanje uporabe omrežja"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Programu omogoča, da spremeni uporabo omrežja na podlagi programov. Ni za uporabo z navadnimi programi."</string>
-    <string name="permlab_markNetworkSocket" msgid="3658527214914959749">"spreminjanje oznak vtičnic"</string>
-    <string name="permdesc_markNetworkSocket" msgid="7655568433696356578">"Aplikaciji omogoča spreminjanje oznak vtičnic za usmerjanje"</string>
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"dostop do obvestil"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Dovoli aplikaciji, da prenese, razišče in izbriše obvestila, tudi tista, ki so jih objavile druge aplikacije."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"poveži se s storitvijo poslušalca obvestil"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Lastniku omogoča povezovanje z vmesnikom storitve poslušalca obvestil najvišje ravni. Tega nikoli ni treba uporabiti za navadne aplikacije."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"povezovanje s storitvijo ponudnika pogojev"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Imetniku omogoča povezovanje z vmesnikom storitve ponudnika pogojev najvišje ravni. Tega ni treba nikoli uporabiti za navadne aplikacije."</string>
+    <!-- no translation found for permlab_bindMediaRouteService (6637740382272686835) -->
+    <skip />
+    <!-- no translation found for permdesc_bindMediaRouteService (6436655024972496687) -->
+    <skip />
     <string name="permlab_bindDreamService" msgid="4153646965978563462">"povezava s storitvijo sanjarjenja"</string>
     <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Imetniku omogoča povezovanje z vmesnikom storitve sanjarjenja najvišje ravni. Tega ni treba nikoli uporabiti za navadne aplikacije."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"sprožitev operaterjeve aplikacije za konfiguracijo"</string>
@@ -733,8 +733,8 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Aplikaciji dovoli spreminjanje parametrov za umerjanje zaslona na dotik. Tega ni treba nikoli uporabiti za navadne aplikacije."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"dostop do potrdil za upravljanje digitalnih pravic"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Aplikaciji omogoča pripravo in uporabo potrdil za upravljanje digitalnih pravic. To naj ne bi bilo nikoli potrebno za običajne aplikacije."</string>
-    <string name="permlab_handoverStatus" msgid="4558616203830448763">"Prejemanje oddaj o prenosu predaje."</string>
-    <string name="permdesc_handoverStatus" msgid="5738446261941364055">"Omogoča prejemanje podatkov o stanju prenosa predaje."</string>
+    <string name="permlab_handoverStatus" msgid="1159132046126626731">"Prejemanje stanja prenosov s funkcijo Android Beam"</string>
+    <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Omogoči tej aplikaciji prejemanje podatkov o trenutnih prenosih s funkcijo Android Beam"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Nastavitev pravil za geslo"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Nadzor nad dolžino in znaki, ki so dovoljeni v geslih za odklepanje zaslona."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"nadzor nad poskusi odklepanja zaslona"</string>
@@ -1008,8 +1008,8 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Aplikaciji omogoča spreminjanje zgodovine ali zaznamkov brskalnika v telefonu. S tem lahko aplikacija izbriše ali spremeni podatke v brskalniku. Opomba: Tega dovoljenja ne morejo uveljavljati drugi brskalniki ali aplikacije, s katerimi je mogoče brskati po spletu."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"nastavitev alarma"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Programu omogoča nastavitev alarma v nameščenem programu budilke. Nekateri programi budilke morda nimajo te funkcije."</string>
-    <string name="permlab_removeVoicemail" msgid="6328485960478155867">"odstranjevanje sporočil iz odzivnika"</string>
-    <string name="permdesc_removeVoicemail" msgid="8113704917331103065">"Aplikaciji omogoča odstranjevanje sporočil iz odzivnika."</string>
+    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"upravljanje sporočil v odzivniku"</string>
+    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"Aplikaciji omogoča spreminjanje in odstranjevanje sporočil iz odzivnika."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"dodajanje odzivnika"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Programu omogoča dodajanje sporočil prejetim sporočilom odzivnika."</string>
     <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"branje vseh sporočil v odzivniku"</string>
@@ -1181,6 +1181,20 @@
     <string name="capital_on" msgid="1544682755514494298">"VKLOPLJENO"</string>
     <string name="capital_off" msgid="6815870386972805832">"IZKLOPLJENO"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Dokončanje dejanja z"</string>
+    <!-- no translation found for whichApplicationNamed (8260158865936942783) -->
+    <skip />
+    <!-- no translation found for whichViewApplication (3272778576700572102) -->
+    <skip />
+    <!-- no translation found for whichViewApplicationNamed (2286418824011249620) -->
+    <skip />
+    <!-- no translation found for whichEditApplication (144727838241402655) -->
+    <skip />
+    <!-- no translation found for whichEditApplicationNamed (1775815530156447790) -->
+    <skip />
+    <!-- no translation found for whichSendApplication (6902512414057341668) -->
+    <skip />
+    <!-- no translation found for whichSendApplicationNamed (2799370240005424391) -->
+    <skip />
     <string name="whichHomeApplication" msgid="4616420172727326782">"Izberite aplikacijo za začetno stran"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Privzeta uporaba za to dejanje."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Izbrišite privzeti program v sistemskih nastavitvah &gt; Programi &gt; Preneseno."</string>
@@ -1283,10 +1297,12 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Vedno dovoli"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Nikoli ne dovoli"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"Kartica SIM odstranjena"</string>
-    <string name="sim_removed_message" msgid="2333164559970958645">"Mobilno omrežje ne bo na voljo, dokler naprave vnovič ne zaženete z veljavno kartico SIM."</string>
+    <!-- no translation found for sim_removed_message (5450336489923274918) -->
+    <skip />
     <string name="sim_done_button" msgid="827949989369963775">"Dokončano"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"Kartica SIM dodana"</string>
-    <string name="sim_added_message" msgid="6599945301141050216">"Za dostop do mobilnega omrežja znova zaženite napravo."</string>
+    <!-- no translation found for sim_added_message (7797975656153714319) -->
+    <skip />
     <string name="sim_restart_button" msgid="4722407842815232347">"Vnovičen zagon"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Nastavi uro"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Nastavi datum"</string>
@@ -1737,10 +1753,25 @@
     <string name="item_is_selected" msgid="949687401682476608">"Izbrano: <xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"Številka <xliff:g id="KEY">%1$s</xliff:g> je izbrisana"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> za delo"</string>
+    <!-- no translation found for lock_to_app_toast (2126866321272822564) -->
+    <skip />
+    <string name="lock_to_app_toast_locked" msgid="4229650395479263497">"Ste v načinu zaklepanja v aplikacijo."</string>
     <string name="lock_to_app_title" msgid="5895142291937470019">"Želite uporabiti zaklepanje v aplikacijo?"</string>
-    <string name="lock_to_app_description" msgid="8597199033462406175">"Zaklepanje v aplikacijo zaklene zaslon v eni aplikaciji.\n\nČe želite zapustiti ta način, pritisnite in pridržite gumb za nedavne aplikacije $"</string>
-    <string name="lock_to_app_negative" msgid="8522854387366288195">"NE"</string>
+    <!-- no translation found for lock_to_app_description (2800403592608529611) -->
+    <skip />
+    <!-- no translation found for lock_to_app_negative (2259143719362732728) -->
+    <skip />
     <string name="lock_to_app_positive" msgid="7085139175671313864">"ZAŽENI"</string>
-    <string name="lock_to_app_start" msgid="8889002974248178076">"Zagon zaklepanja v aplikacijo"</string>
-    <string name="lock_to_app_exit" msgid="7033017307788432861">"Izhod iz zaklepanja v aplikacijo"</string>
+    <!-- no translation found for lock_to_app_start (3074665051586318340) -->
+    <skip />
+    <!-- no translation found for lock_to_app_exit (8967089657201849300) -->
+    <skip />
+    <!-- no translation found for lock_to_app_use_screen_lock (1434584309048590886) -->
+    <skip />
+    <!-- no translation found for lock_to_app_unlock_pin (7908385370846820001) -->
+    <skip />
+    <!-- no translation found for lock_to_app_unlock_pattern (7763071104790758405) -->
+    <skip />
+    <!-- no translation found for lock_to_app_unlock_password (795224196583495868) -->
+    <skip />
 </resources>

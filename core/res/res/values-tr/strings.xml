@@ -294,10 +294,8 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Uygulamaya, telefonunuzdaki veya SIM kartınızdaki SMS mesajlarına yazma izni verir. Kötü amaçlı uygulamalar mesajlarınızı silebilir."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"kısa mesajları (WAP) al"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Uygulamaya WAP mesajlarını alma ve işleme izni verir. Buna, size gönderilen mesajları takip edip size göstermeden silebilme izni de dahildir."</string>
-    <!-- no translation found for permlab_receiveBluetoothMap (7593811487142360528) -->
-    <skip />
-    <!-- no translation found for permdesc_receiveBluetoothMap (8656755936919466345) -->
-    <skip />
+    <string name="permlab_receiveBluetoothMap" msgid="7593811487142360528">"Bluetooth iletilerini al (MAP)"</string>
+    <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Uygulamanın Bluetooth MAP iletilerini alıp işlemesine izin verir. Bu izin, uygulamanın cihazınıza gönderilen iletileri izleyebileceği veya size göstermeden silebileceği anlamına gelir."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"çalışan uygulamaları al"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Uygulamaya o anda ve son çalışan görevler hakkında bilgi alma izni verir. Bu izin, uygulamanın cihaz tarafından kullanılan uygulamalar hakkında bilgi elde etmesine olanak sağlayabilir."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"kullanıcılar arasında etkileşim kurma"</string>
@@ -506,7 +504,7 @@
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"test için sahte konum kaynakları"</string>
     <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"Test amacıyla veya yeni bir konum sağlayıcı yüklemek için sahte konum kaynakları oluşturma. Bu izin, uygulamanın GPS veya konum sağlayıcıları gibi diğer konum kaynakları tarafından döndürülen konum ve/veya durum bilgisini geçersiz kılmasına olanak sağlar."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"ek konum sağlayıcı komutlarına eriş"</string>
-    <string name="permdesc_accessLocationExtraCommands" msgid="5945166642335800763">"Uygulamaya ekstra konum sağlayıcı komutlarına erişim izni verir. Bu izin, uygulamanın GPS veya diğer konum kaynaklarının çalışmasına müdahale etmesine olanak sağlayabilir."</string>
+    <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Uygulamanın, ekstra konum sağlayıcı komutlarına erişmesine izin verir. Bu izin, uygulamanın GPS veya diğer konum kaynaklarının çalışmasını kesmesine olanak sağlayabilir."</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"konum sağlayıcı yükleme izni"</string>
     <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"Test amacıyla veya yeni bir konum sağlayıcı yüklemek için sahte konum kaynakları oluşturma. Bu izin, uygulamanın GPS veya konum sağlayıcıları gibi diğer konum kaynakları tarafından döndürülen konum ve/veya durum bilgisini geçersiz kılmasına olanak sağlar."</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"hassas konum (GPS ve ağ tabanlı)"</string>
@@ -715,14 +713,16 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Uygulamaya, ağ politikalarını yönetme ve uygulamaya özgü kuralları tanımlama izni verir."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"ağ kullanım hesaplamasını değiştir"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Uygulamaya, ağın uygulamalara göre nasıl kullanılacağını değiştirme izni verir. Normal uygulamalar tarafından kullanılmak için değildir."</string>
-    <string name="permlab_markNetworkSocket" msgid="3658527214914959749">"yuva işaretlerini değiştir"</string>
-    <string name="permdesc_markNetworkSocket" msgid="7655568433696356578">"Uygulamaya, yönlendirme için yuva işaretlerini değiştirme izni verir"</string>
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"bildirimlere eriş"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Uygulamanın bildirimler almasına, bildirimleri incelemesine ve temizlemesine izin verir. Buna diğer uygulamalar tarafından yayınlanan bildirimler de dahildir."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"bildirim dinleyici hizmetine bağlan"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"İzin sahibine bir bildirim dinleyici hizmetinin en üst düzey arayüzüne bağlanma izni verir. Normal uygulamalarda hiçbir zaman gerek duyulmaz."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"bir durum sağlayıcı hizmetine bağlanma"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"İzin sahibinin, bir durum sağlayıcı hizmete ait üst düzey arayüze bağlanmasına izin verir. Normal uygulamalar için hiçbir zaman gerekli değildir."</string>
+    <!-- no translation found for permlab_bindMediaRouteService (6637740382272686835) -->
+    <skip />
+    <!-- no translation found for permdesc_bindMediaRouteService (6436655024972496687) -->
+    <skip />
     <string name="permlab_bindDreamService" msgid="4153646965978563462">"bir dream hizmetine bağla"</string>
     <string name="permdesc_bindDreamService" msgid="7325825272223347863">"İzin sahibine bir dream hizmetinin üst seviye arayüzüne bağlanma olanağı sunar. Normal uygulamalarda hiçbir zaman ihtiyaç duyulmamalıdır."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"operatör tarafından sağlanan yapılandırma uygulamasını çalıştır"</string>
@@ -733,8 +733,8 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Uygulamaya, dokunmatik ekranın kalibrasyon parametrelerini değiştirme izni verir. Normal uygulamalar için hiçbir zaman gerekmez."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"DRM sertifikalarına eriş"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Bir uygulamanın DRM sertifikaları için temel hazırlık yapmasına ve bunları kullanmasına izin verir. Normal uygulamalar için hiçbir zaman gerekmez."</string>
-    <string name="permlab_handoverStatus" msgid="4558616203830448763">"Devir aktarımı yayınlarını al."</string>
-    <string name="permdesc_handoverStatus" msgid="5738446261941364055">"Devir aktarımı durum bilgilerini almaya izin verir."</string>
+    <string name="permlab_handoverStatus" msgid="1159132046126626731">"Android Beam aktarım durumunu al"</string>
+    <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Bu uygulamanın mevcut Android Beam aktarımlarıyla ilgili bilgi almasına izin verir"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Şifre kuralları ayarla"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Ekran kilidini açma şifrelerinde izin verilen uzunluğu ve karakterleri denetleme."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Ekran kilidini açma denemelerini izle"</string>
@@ -1008,8 +1008,8 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Uygulamaya Tarayıcı geçmişini ve telefonunuzda depolanan yer işaretlerini değiştirme izni verir. Bu izin, uygulamanın Tarayıcı geçmişini silmesine ve değiştirmesine olanak sağlar. Not: Bu izin, üçüncü taraf cihazlar veya Web\'e göz atma işlevine sahip diğer uygulamalar tarafından kullanılmayabilir."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"alarm ayarla"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Uygulamaya, çalar saat uygulamasının alarmını ayarlama izni verir. Bazı çalar saat uygulamaları bu özelliği uygulayamayabilir."</string>
-    <string name="permlab_removeVoicemail" msgid="6328485960478155867">"sesli mesajları kaldır"</string>
-    <string name="permdesc_removeVoicemail" msgid="8113704917331103065">"Uygulamaya, sesli mesaj gelen kutunuzdaki mesajları kaldırma izni verir."</string>
+    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"sesli mesajları yönet"</string>
+    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"Uygulamanın sesli mesaj gelen kutunuzdaki mesajları değiştirmesine ve kaldırmasına izin verir."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"sesli mesaj ekle"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Uygulamaya, sesli mesaj gelen kutunuza mesaj ekleme izni verir."</string>
     <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"tüm sesli mesajları oku"</string>
@@ -1181,6 +1181,20 @@
     <string name="capital_on" msgid="1544682755514494298">"AÇIK"</string>
     <string name="capital_off" msgid="6815870386972805832">"KAPALI"</string>
     <string name="whichApplication" msgid="4533185947064773386">"İşlemi şunu kullanarak tamamla"</string>
+    <!-- no translation found for whichApplicationNamed (8260158865936942783) -->
+    <skip />
+    <!-- no translation found for whichViewApplication (3272778576700572102) -->
+    <skip />
+    <!-- no translation found for whichViewApplicationNamed (2286418824011249620) -->
+    <skip />
+    <!-- no translation found for whichEditApplication (144727838241402655) -->
+    <skip />
+    <!-- no translation found for whichEditApplicationNamed (1775815530156447790) -->
+    <skip />
+    <!-- no translation found for whichSendApplication (6902512414057341668) -->
+    <skip />
+    <!-- no translation found for whichSendApplicationNamed (2799370240005424391) -->
+    <skip />
     <string name="whichHomeApplication" msgid="4616420172727326782">"Ana ekran uygulaması seçin"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Varsayılan olarak bu işlem için kullan."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Sistem ayarları &gt; Uygulamalar &gt; İndirilen bölümünden varsayılanı temizleyin."</string>
@@ -1283,10 +1297,12 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Her Zaman İzin Ver"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Asla İzin Verme"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM kart çıkarıldı"</string>
-    <string name="sim_removed_message" msgid="2333164559970958645">"Geçerli bir SIM kart yerleştirilmiş olarak yeniden başlatana kadar mobil ağ kullanılamayacak."</string>
+    <!-- no translation found for sim_removed_message (5450336489923274918) -->
+    <skip />
     <string name="sim_done_button" msgid="827949989369963775">"Tamamlandı"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIM kart eklendi"</string>
-    <string name="sim_added_message" msgid="6599945301141050216">"Mobil ağa erişmek için cihazınızı yeniden başlatın."</string>
+    <!-- no translation found for sim_added_message (7797975656153714319) -->
+    <skip />
     <string name="sim_restart_button" msgid="4722407842815232347">"Yeniden başlat"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Saati ayarlayın"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Tarihi ayarlayın"</string>
@@ -1737,10 +1753,25 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> seçildi"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> silindi"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> (İş)"</string>
-    <string name="lock_to_app_title" msgid="5895142291937470019">"Uygulamaya kilitleme özelliği kullanılsın mı?"</string>
-    <string name="lock_to_app_description" msgid="8597199033462406175">"Uygulamaya kilitleme özelliği, ekranı tek bir uygulamaya kilitler.\n\nÇıkmak için son uygulamalar düğmesine ($) uzun basın"</string>
-    <string name="lock_to_app_negative" msgid="8522854387366288195">"HAYIR"</string>
+    <!-- no translation found for lock_to_app_toast (2126866321272822564) -->
+    <skip />
+    <string name="lock_to_app_toast_locked" msgid="4229650395479263497">"Uygulamaya Kilitleme modundasınız."</string>
+    <string name="lock_to_app_title" msgid="5895142291937470019">"Uygulamaya Kilitleme özelliği kullanılsın mı?"</string>
+    <!-- no translation found for lock_to_app_description (2800403592608529611) -->
+    <skip />
+    <!-- no translation found for lock_to_app_negative (2259143719362732728) -->
+    <skip />
     <string name="lock_to_app_positive" msgid="7085139175671313864">"BAŞLAT"</string>
-    <string name="lock_to_app_start" msgid="8889002974248178076">"Uygulamaya kilitleme özelliğini başlat"</string>
-    <string name="lock_to_app_exit" msgid="7033017307788432861">"Uygulamaya kilitleme özelliğinden çık"</string>
+    <!-- no translation found for lock_to_app_start (3074665051586318340) -->
+    <skip />
+    <!-- no translation found for lock_to_app_exit (8967089657201849300) -->
+    <skip />
+    <!-- no translation found for lock_to_app_use_screen_lock (1434584309048590886) -->
+    <skip />
+    <!-- no translation found for lock_to_app_unlock_pin (7908385370846820001) -->
+    <skip />
+    <!-- no translation found for lock_to_app_unlock_pattern (7763071104790758405) -->
+    <skip />
+    <!-- no translation found for lock_to_app_unlock_password (795224196583495868) -->
+    <skip />
 </resources>
