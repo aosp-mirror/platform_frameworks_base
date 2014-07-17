@@ -111,6 +111,16 @@ public final class TelecommConstants {
             "android.telecomm.extra.CONNECTION_SERVICE";
 
     /**
+     * The number which emergency services will use to return calls, if necessary. The in-call UI
+     * will take care of displaying this to the user.
+     * <p>
+     * Note that this should only be populated for emergency numbers, and if the number emergency
+     * services will see is different than the user's known phone number.
+     */
+    public static final String EXTRA_EMERGENCY_CALL_BACK_NUMBER =
+            "android.telecomm.extra.EMERGENCY_CALL_BACK_NUMBER";
+
+    /**
      * The dual tone multi-frequency signaling character sent to indicate the dialing system should
      * pause for a predefined period.
      */
