@@ -23,7 +23,6 @@
 
 #include <Caches.h>
 
-#include "Canvas.h"
 #include "SkCanvas.h"
 #include "SkRegion.h"
 #include "GraphicsJNI.h"
@@ -120,7 +119,7 @@ public:
     static void drawF(JNIEnv* env, jobject, jlong canvasHandle, jobject boundsRectF,
             jlong bitmapHandle, jlong chunkHandle, jlong paintHandle,
             jint destDensity, jint srcDensity) {
-        SkCanvas* canvas       = reinterpret_cast<Canvas*>(canvasHandle)->getSkCanvas();
+        SkCanvas* canvas       = GraphicsJNI::getNativeCanvas(canvasHandle);
         const SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
         Res_png_9patch* chunk  = reinterpret_cast<Res_png_9patch*>(chunkHandle);
         const SkPaint* paint   = reinterpret_cast<SkPaint*>(paintHandle);
@@ -139,7 +138,7 @@ public:
     static void drawI(JNIEnv* env, jobject, jlong canvasHandle, jobject boundsRect,
             jlong bitmapHandle, jlong chunkHandle, jlong paintHandle,
             jint destDensity, jint srcDensity) {
-        SkCanvas* canvas       = reinterpret_cast<Canvas*>(canvasHandle)->getSkCanvas();
+        SkCanvas* canvas       = GraphicsJNI::getNativeCanvas(canvasHandle);
         const SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
         Res_png_9patch* chunk  = reinterpret_cast<Res_png_9patch*>(chunkHandle);
         const SkPaint* paint   = reinterpret_cast<SkPaint*>(paintHandle);
