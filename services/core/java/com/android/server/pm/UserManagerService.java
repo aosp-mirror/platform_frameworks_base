@@ -52,7 +52,6 @@ import android.util.TimeUtils;
 import android.util.Xml;
 
 import com.android.internal.app.IAppOpsService;
-import com.android.internal.content.PackageMonitor;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
 
@@ -241,7 +240,6 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     void systemReady() {
-        mUserPackageMonitor.register(mContext, null, UserHandle.ALL, false);
         userForeground(UserHandle.USER_OWNER);
         mAppOpsService = IAppOpsService.Stub.asInterface(
                 ServiceManager.getService(Context.APP_OPS_SERVICE));
@@ -1039,11 +1037,10 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     /**
-     * Removes all the restrictions files (res_<packagename>) for a given user, if all is true,
-     * else removes only those packages that have been uninstalled.
+     * Removes all the restrictions files (res_<packagename>) for a given user.
      * Does not do any permissions checking.
      */
-    private void cleanAppRestrictions(int userId, boolean all) {
+    private void cleanAppRestrictions(int userId) {
         synchronized (mPackagesLock) {
             File dir = Environment.getUserSystemDirectory(userId);
             String[] files = dir.list();
@@ -1052,14 +1049,7 @@ public class UserManagerService extends IUserManager.Stub {
                 if (fileName.startsWith(RESTRICTIONS_FILE_PREFIX)) {
                     File resFile = new File(dir, fileName);
                     if (resFile.exists()) {
-                        if (all) {
-                            resFile.delete();
-                        } else {
-                            String pkg = restrictionsFileNameToPackage(fileName);
-                            if (!isPackageInstalled(pkg, userId)) {
-                                resFile.delete();
-                            }
-                        }
+                        resFile.delete();
                     }
                 }
             }
@@ -1326,15 +1316,21 @@ public class UserManagerService extends IUserManager.Stub {
             checkManageUsersPermission("Only system can set restrictions for other users/apps");
         }
         synchronized (mPackagesLock) {
-            // Write the restrictions to XML
-            writeApplicationRestrictionsLocked(packageName, restrictions, userId);
+            if (restrictions == null || restrictions.isEmpty()) {
+                cleanAppRestrictionsForPackage(packageName, userId);
+            } else {
+                // Write the restrictions to XML
+                writeApplicationRestrictionsLocked(packageName, restrictions, userId);
+            }
         }
 
-        // Notify package of changes via an intent - only sent to explicitly registered receivers.
-        Intent changeIntent = new Intent(Intent.ACTION_APPLICATION_RESTRICTIONS_CHANGED);
-        changeIntent.setPackage(packageName);
-        changeIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-        mContext.sendBroadcastAsUser(changeIntent, new UserHandle(userId));
+        if (isPackageInstalled(packageName, userId)) {
+            // Notify package of changes via an intent - only sent to explicitly registered receivers.
+            Intent changeIntent = new Intent(Intent.ACTION_APPLICATION_RESTRICTIONS_CHANGED);
+            changeIntent.setPackage(packageName);
+            changeIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+            mContext.sendBroadcastAsUser(changeIntent, new UserHandle(userId));
+        }
     }
 
     @Override
@@ -1437,7 +1433,7 @@ public class UserManagerService extends IUserManager.Stub {
             // Remove restrictions pin
             setRestrictionsChallenge(null);
             // Remove any app restrictions
-            cleanAppRestrictions(userHandle, true);
+            cleanAppRestrictions(userHandle);
         }
         if (unblockApps) {
             unblockAllAppsForUser(userHandle);
@@ -1691,12 +1687,6 @@ public class UserManagerService extends IUserManager.Stub {
                 user.lastLoggedInTime = now;
                 writeUserLocked(user);
             }
-            // If this is not a restricted profile and there is no restrictions pin, clean up
-            // all restrictions files that might have been left behind, else clean up just the
-            // ones with uninstalled packages
-            RestrictionsPinState pinState = mRestrictionsPinStates.get(userId);
-            final long salt = pinState == null ? 0 : pinState.salt;
-            cleanAppRestrictions(userId, (!user.isRestricted() && salt == 0));
         }
     }
 
@@ -1772,17 +1762,4 @@ public class UserManagerService extends IUserManager.Stub {
             }
         }
     }
-
-    private PackageMonitor mUserPackageMonitor = new PackageMonitor() {
-        @Override
-        public void onPackageRemoved(String pkg, int uid) {
-            final int userId = this.getChangingUserId();
-            // Package could be disappearing because it is being blocked, so also check if
-            // it has been uninstalled.
-            final boolean uninstalled = isPackageDisappearing(pkg) == PACKAGE_PERMANENT_CHANGE;
-            if (uninstalled && userId >= 0 && !isPackageInstalled(pkg, userId)) {
-                cleanAppRestrictionsForPackage(pkg, userId);
-            }
-        }
-    };
 }
