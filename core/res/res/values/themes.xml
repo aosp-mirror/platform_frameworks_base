@@ -394,15 +394,6 @@ please see themes_device_defaults.xml.
         <!-- TimePicker style -->
         <item name="timePickerStyle">@style/Widget.TimePicker</item>
 
-        <!-- TimePicker background color -->
-        <item name="timePickerHeaderBackgroundColor">@color/darker_gray</item>
-
-        <!-- TimePicker Header time label text appearance -->
-        <item name="timePickerHeaderTimeLabelTextAppearance">@style/TextAppearance.TimePicker.TimeLabel</item>
-
-        <!-- TimePicker Header am pm label text appearance -->
-        <item name="timePickerHeaderAmPmLabelTextAppearance">@style/TextAppearance.TimePicker.AmPmLabel</item>
-
         <!-- TimePicker dialog theme -->
         <item name="timePickerDialogTheme">@style/Theme.Dialog.TimePicker</item>
 

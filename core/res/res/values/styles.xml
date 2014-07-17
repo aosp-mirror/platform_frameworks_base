@@ -568,6 +568,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.TimePicker">
+        <item name="legacyMode">true</item>
         <item name="legacyLayout">@layout/time_picker_legacy</item>
     </style>
 
@@ -1331,11 +1332,8 @@ please see styles_device_defaults.xml.
         <item name="orientation">vertical</item>
     </style>
 
-    <style name="TextAppearance.TimePicker.TimeLabel" parent="TextAppearance">
-    </style>
-
-    <style name="TextAppearance.TimePicker.AmPmLabel" parent="TextAppearance">
-    </style>
+    <style name="TextAppearance.TimePicker.TimeLabel" parent="TextAppearance" />
+    <style name="TextAppearance.TimePicker.AmPmLabel" parent="TextAppearance" />
 
     <style name="Widget.FastScroll">
         <item name="thumbDrawable">?attr/fastScrollThumbDrawable</item>

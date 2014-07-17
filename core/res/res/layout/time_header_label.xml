@@ -25,8 +25,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_toLeftOf="@+id/separator"
-            android:layout_alignBaseline="@+id/separator"
-            android:textAppearance="?android:attr/timePickerHeaderTimeLabelTextAppearance"/>
+            android:layout_alignBaseline="@+id/separator"/>
 
     <TextView
             android:id="@+id/separator"
@@ -35,7 +34,6 @@
             android:paddingLeft="@dimen/timepicker_separator_padding"
             android:paddingRight="@dimen/timepicker_separator_padding"
             android:layout_centerInParent="true"
-            android:textAppearance="?android:attr/timePickerHeaderTimeLabelTextAppearance"
             android:importantForAccessibility="no" />
 
     <TextView
@@ -43,8 +41,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_toRightOf="@+id/separator"
-            android:layout_alignBaseline="@+id/separator"
-            android:textAppearance="?android:attr/timePickerHeaderTimeLabelTextAppearance" />
+            android:layout_alignBaseline="@+id/separator" />
 
     <TextView
             android:id="@+id/ampm_label"
@@ -53,7 +50,6 @@
             android:paddingLeft="@dimen/timepicker_ampm_left_padding"
             android:paddingRight="@dimen/timepicker_ampm_left_padding"
             android:layout_toRightOf="@+id/separator"
-            android:layout_alignBaseline="@+id/separator"
-            android:textAppearance="?android:attr/timePickerHeaderAmPmLabelTextAppearance" />
+            android:layout_alignBaseline="@+id/separator" />
 
 </RelativeLayout>

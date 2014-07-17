@@ -212,8 +212,6 @@ easier.
     <style name="TextAppearance.DeviceDefault.Small.Inverse" parent="TextAppearance.Material.Small.Inverse"/>
     <style name="TextAppearance.DeviceDefault.SearchResult.Title" parent="TextAppearance.Material.SearchResult.Title"/>
     <style name="TextAppearance.DeviceDefault.SearchResult.Subtitle" parent="TextAppearance.Material.SearchResult.Subtitle"/>
-    <style name="TextAppearance.DeviceDefault.TimePicker.TimeLabel" parent="TextAppearance.Material.TimePicker.TimeLabel"/>
-    <style name="TextAppearance.DeviceDefault.TimePicker.AmPmLabel" parent="TextAppearance.Material.TimePicker.AmPmLabel"/>
     <style name="TextAppearance.DeviceDefault.Widget" parent="TextAppearance.Material.Widget"/>
     <style name="TextAppearance.DeviceDefault.Widget.Button" parent="TextAppearance.Material.Widget.Button"/>
     <style name="TextAppearance.DeviceDefault.Widget.IconMenu.Item" parent="TextAppearance.Material.Widget.IconMenu.Item"/>
@@ -280,9 +278,6 @@ easier.
     <style name="DeviceDefault.Light.ButtonBar" parent="Widget.Material.Light.ButtonBar"/>
     <style name="DeviceDefault.Light.ButtonBar.AlertDialog" parent="Widget.Material.Light.ButtonBar.AlertDialog"/>
     <style name="DeviceDefault.Light.SegmentedButton" parent="Widget.Material.Light.SegmentedButton"/>
-
-    <style name="TextAppearance.DeviceDefault.Light.TimePicker.TimeLabel" parent="TextAppearance.Material.TimePicker.TimeLabel"/>
-    <style name="TextAppearance.DeviceDefault.Light.TimePicker.AmPmLabel" parent="TextAppearance.Material.TimePicker.AmPmLabel"/>
 
     <style name="Theme.DeviceDefault.Dialog.TimePicker" parent="Theme.Material.Dialog.TimePicker"/>
     <style name="Theme.DeviceDefault.Light.Dialog.TimePicker" parent="Theme.Material.Light.Dialog.TimePicker"/>
