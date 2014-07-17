@@ -55,6 +55,7 @@ public class ZenModeControllerImpl implements ZenModeController {
 
     private int mUserId;
     private boolean mRequesting;
+    private boolean mRegistered;
 
     public ZenModeControllerImpl(Context context, Handler handler) {
         mContext = context;
@@ -141,8 +142,12 @@ public class ZenModeControllerImpl implements ZenModeController {
     @Override
     public void setUserId(int userId) {
         mUserId = userId;
+        if (mRegistered) {
+            mContext.unregisterReceiver(mReceiver);
+        }
         mContext.registerReceiverAsUser(mReceiver, new UserHandle(mUserId),
                 new IntentFilter(AlarmManager.ACTION_NEXT_ALARM_CLOCK_CHANGED), null, null);
+        mRegistered = true;
     }
 
     private void fireNextAlarmChanged() {
