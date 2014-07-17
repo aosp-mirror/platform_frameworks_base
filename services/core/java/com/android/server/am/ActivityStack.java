@@ -2559,17 +2559,22 @@ final class ActivityStack {
         return r;
     }
 
-    void finishAllActivitiesLocked() {
+    void finishAllActivitiesLocked(boolean immediately) {
+        boolean noActivitiesInStack = true;
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
             for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
                 final ActivityRecord r = activities.get(activityNdx);
-                if (r.finishing) {
+                noActivitiesInStack = false;
+                if (r.finishing && !immediately) {
                     continue;
                 }
-                Slog.d(TAG, "finishAllActivitiesLocked: finishing " + r);
+                Slog.d(TAG, "finishAllActivitiesLocked: finishing " + r + " immediately");
                 finishCurrentActivityLocked(r, FINISH_IMMEDIATELY, false);
             }
+        }
+        if (noActivitiesInStack) {
+            mActivityContainer.onTaskListEmptyLocked();
         }
     }
 
@@ -2687,6 +2692,7 @@ final class ActivityStack {
         // down to the max limit while they are still waiting to finish.
         mStackSupervisor.mFinishingActivities.remove(r);
         mStackSupervisor.mWaitingVisibleActivities.remove(r);
+        mStackSupervisor.removePendingActivityLaunchesLocked(r);
 
         // Remove any pending results.
         if (r.finishing && r.pendingResults != null) {
