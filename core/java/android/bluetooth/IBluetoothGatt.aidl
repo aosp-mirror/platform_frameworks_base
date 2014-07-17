@@ -76,6 +76,7 @@ interface IBluetoothGatt {
     void endReliableWrite(in int clientIf, in String address, in boolean execute);
     void readRemoteRssi(in int clientIf, in String address);
     void configureMTU(in int clientIf, in String address, in int mtu);
+    void connectionParameterUpdate(in int clientIf, in String address, in int connectionPriority);
 
     void registerServer(in ParcelUuid appId, in IBluetoothGattServerCallback callback);
     void unregisterServer(in int serverIf);
