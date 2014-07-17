@@ -219,24 +219,24 @@ public final class TvInputInfo implements Parcelable {
     /**
      * Loads the user-displayed label for this TV input service.
      *
-     * @param pm Supplies a PackageManager used to load the TV input's resources.
+     * @param context Supplies a {@link Context} used to load the label.
      * @return a CharSequence containing the TV input's label. If the TV input does not have
      *         a label, its name is returned.
      */
-    public CharSequence loadLabel(PackageManager pm) {
-        return mService.loadLabel(pm);
+    public CharSequence loadLabel(Context context) {
+        return mService.loadLabel(context.getPackageManager());
     }
 
     /**
      * Loads the user-displayed icon for this TV input service.
      *
-     * @param pm Supplies a PackageManager used to load the TV input's resources.
+     * @param context Supplies a {@link Context} used to load the icon.
      * @return a Drawable containing the TV input's icon. If the TV input does not have
      *         an icon, application icon is returned. If it's unavailable too, system default is
      *         returned.
      */
-    public Drawable loadIcon(PackageManager pm) {
-        return mService.serviceInfo.loadIcon(pm);
+    public Drawable loadIcon(Context context) {
+        return mService.serviceInfo.loadIcon(context.getPackageManager());
     }
 
     @Override
