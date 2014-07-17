@@ -16,6 +16,7 @@
 
 package android.net;
 
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -28,6 +29,7 @@ import java.util.regex.Pattern;
  *
  * @hide
  */
+@SystemApi
 public class WifiKey implements Parcelable {
 
     // Patterns used for validation.
