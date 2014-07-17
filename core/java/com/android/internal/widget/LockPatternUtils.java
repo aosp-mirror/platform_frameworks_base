@@ -57,6 +57,7 @@ import java.util.List;
 public class LockPatternUtils {
 
     private static final String TAG = "LockPatternUtils";
+    private static final boolean DEBUG = false;
 
     /**
      * The maximum number of incorrect attempts before the user is prevented
@@ -1046,8 +1047,11 @@ public class LockPatternUtils {
             return false;
         }
 
-
-        return true;
+        // TODO: If we decide not to proceed with Face Unlock as a trustlet, this must be changed
+        // back to returning true.  If we become certain that Face Unlock will be a trustlet, this
+        // entire function and a lot of other code can be removed.
+        if (DEBUG) Log.d(TAG, "Forcing isBiometricWeakInstalled() to return false to disable it");
+        return false;
     }
 
     /**
