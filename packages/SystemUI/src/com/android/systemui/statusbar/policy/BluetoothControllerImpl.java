@@ -180,8 +180,13 @@ public class BluetoothControllerImpl implements BluetoothController {
         final BluetoothDevice device = (BluetoothDevice) pd.tag;
         final String action = connect ? "connect" : "disconnect";
         if (DEBUG) Log.d(TAG, action + " " + deviceToString(device));
+        final ParcelUuid[] uuids = device.getUuids();
+        if (uuids == null) {
+            Log.w(TAG, "No uuids returned, aborting " + action + " for " + deviceToString(device));
+            return;
+        }
         final SparseBooleanArray profiles = new SparseBooleanArray();
-        for (ParcelUuid uuid : device.getUuids()) {
+        for (ParcelUuid uuid : uuids) {
             final int profile = uuidToProfile(uuid);
             if (profile == 0) {
                 Log.w(TAG, "Device " + deviceToString(device) + " has an unsupported uuid: "
