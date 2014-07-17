@@ -355,6 +355,8 @@ public class MediaRecorder
         public static final int H264 = 2;
         public static final int MPEG_4_SP = 3;
         public static final int VP8 = 4;
+        /** @hide */
+        public static final int H265 = 5;
     }
 
     /**
