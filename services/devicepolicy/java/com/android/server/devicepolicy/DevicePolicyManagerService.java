@@ -257,6 +257,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     static class ActiveAdmin {
         private static final String TAG_DISABLE_KEYGUARD_FEATURES = "disable-keyguard-features";
         private static final String TAG_DISABLE_CAMERA = "disable-camera";
+        private static final String TAG_DISABLE_CALLER_ID = "disable-caller-id";
         private static final String TAG_DISABLE_ACCOUNT_MANAGEMENT = "disable-account-management";
         private static final String TAG_ACCOUNT_TYPE = "account-type";
         private static final String TAG_ENCRYPTION_REQUESTED = "encryption-requested";
@@ -324,6 +325,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         boolean encryptionRequested = false;
         boolean disableCamera = false;
+        boolean disableCallerId = false;
         Set<String> accountTypesWithManagementDisabled = new HashSet<String>();
 
         // TODO: review implementation decisions with frameworks team
@@ -436,6 +438,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 out.attribute(null, ATTR_VALUE, Boolean.toString(disableCamera));
                 out.endTag(null, TAG_DISABLE_CAMERA);
             }
+            if (disableCallerId) {
+                out.startTag(null, TAG_DISABLE_CALLER_ID);
+                out.attribute(null, ATTR_VALUE, Boolean.toString(disableCallerId));
+                out.endTag(null, TAG_DISABLE_CALLER_ID);
+            }
             if (disabledKeyguardFeatures != DEF_KEYGUARD_FEATURES_DISABLED) {
                 out.startTag(null, TAG_DISABLE_KEYGUARD_FEATURES);
                 out.attribute(null, ATTR_VALUE, Integer.toString(disabledKeyguardFeatures));
@@ -518,6 +525,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 } else if (TAG_DISABLE_CAMERA.equals(tag)) {
                     disableCamera = Boolean.parseBoolean(
                             parser.getAttributeValue(null, ATTR_VALUE));
+                } else if (TAG_DISABLE_CALLER_ID.equals(tag)) {
+                    disableCallerId = Boolean.parseBoolean(
+                            parser.getAttributeValue(null, ATTR_VALUE));
                 } else if (TAG_DISABLE_KEYGUARD_FEATURES.equals(tag)) {
                     disabledKeyguardFeatures = Integer.parseInt(
                             parser.getAttributeValue(null, ATTR_VALUE));
@@ -594,6 +604,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     pw.println(encryptionRequested);
             pw.print(prefix); pw.print("disableCamera=");
                     pw.println(disableCamera);
+            pw.print(prefix); pw.print("disableCallerId=");
+                    pw.println(disableCallerId);
             pw.print(prefix); pw.print("disabledKeyguardFeatures=");
                     pw.println(disabledKeyguardFeatures);
         }
@@ -3291,6 +3303,25 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         return null;
     }
 
+    // Returns the active profile owner for this user or null if the current user has no
+    // profile owner.
+    private ActiveAdmin getProfileOwnerAdmin(int userHandle) {
+        String profileOwnerPackage = getProfileOwner(userHandle);
+        if (profileOwnerPackage == null) {
+            return null;
+        }
+
+        DevicePolicyData policy = getUserData(userHandle);
+        final int n = policy.mAdminList.size();
+        for (int i = 0; i < n; i++) {
+            ActiveAdmin admin = policy.mAdminList.get(i);
+            if (profileOwnerPackage.equals(admin.info.getPackageName())) {
+                return admin;
+            }
+        }
+        return null;
+    }
+
     @Override
     public String getProfileOwnerName(int userHandle) {
         if (!mHasFeature) {
@@ -3326,6 +3357,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, "Must be system or have"
                     + " INTERACT_ACROSS_USERS_FULL permission");
+        }
+    }
+
+    private void enforceSystemProcess(String message) {
+        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+            throw new SecurityException(message);
         }
     }
 
@@ -3954,6 +3991,50 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
         }
         return false;
+    }
+
+    @Override
+    public void setCrossProfileCallerIdDisabled(ComponentName who, boolean disabled) {
+        if (!mHasFeature) {
+            return;
+        }
+        synchronized (this) {
+            if (who == null) {
+                throw new NullPointerException("ComponentName is null");
+            }
+            ActiveAdmin admin = getActiveAdminForCallerLocked(who,
+                    DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            if (admin.disableCallerId != disabled) {
+                admin.disableCallerId = disabled;
+                saveSettingsLocked(UserHandle.getCallingUserId());
+            }
+        }
+    }
+
+    @Override
+    public boolean getCrossProfileCallerIdDisabled(ComponentName who) {
+        if (!mHasFeature) {
+            return false;
+        }
+
+        synchronized (this) {
+            if (who == null) {
+                throw new NullPointerException("ComponentName is null");
+            }
+
+            ActiveAdmin admin = getActiveAdminForCallerLocked(who,
+                    DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            return admin.disableCallerId;
+        }
+    }
+
+    @Override
+    public boolean getCrossProfileCallerIdDisabledForUser(int userId) {
+        enforceSystemProcess("getCrossProfileCallerIdDisabled can only be called by system");
+        synchronized (this) {
+            ActiveAdmin admin = getProfileOwnerAdmin(userId);
+            return (admin != null) ? admin.disableCallerId : false;
+        }
     }
 
     /**
