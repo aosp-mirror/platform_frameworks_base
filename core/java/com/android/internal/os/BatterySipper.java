@@ -80,6 +80,15 @@ public class BatterySipper implements Comparable<BatterySipper> {
 
     @Override
     public int compareTo(BatterySipper other) {
+        // Over-counted always goes to the bottom.
+        if (drainType != other.drainType) {
+            if (drainType == DrainType.OVERCOUNTED) {
+                // This is "larger"
+                return 1;
+            } else if (other.drainType == DrainType.OVERCOUNTED) {
+                return -1;
+            }
+        }
         // Return the flipped value because we want the items in descending order
         return Double.compare(other.value, value);
     }

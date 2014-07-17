@@ -1684,6 +1684,7 @@ public final class ActivityThread {
                 && ai.uid != Process.SYSTEM_UID && (mBoundApplication != null
                         ? !UserHandle.isSameApp(ai.uid, mBoundApplication.appInfo.uid)
                         : true);
+        boolean registerPackage = includeCode && (flags&Context.CONTEXT_REGISTER_PACKAGE) != 0;
         if ((flags&(Context.CONTEXT_INCLUDE_CODE
                 |Context.CONTEXT_IGNORE_SECURITY))
                 == Context.CONTEXT_INCLUDE_CODE) {
@@ -1698,12 +1699,13 @@ public final class ActivityThread {
                 throw new SecurityException(msg);
             }
         }
-        return getPackageInfo(ai, compatInfo, null, securityViolation, includeCode);
+        return getPackageInfo(ai, compatInfo, null, securityViolation, includeCode,
+                registerPackage);
     }
 
     public final LoadedApk getPackageInfoNoCheck(ApplicationInfo ai,
             CompatibilityInfo compatInfo) {
-        return getPackageInfo(ai, compatInfo, null, false, true);
+        return getPackageInfo(ai, compatInfo, null, false, true, false);
     }
 
     public final LoadedApk peekPackageInfo(String packageName, boolean includeCode) {
@@ -1719,7 +1721,8 @@ public final class ActivityThread {
     }
 
     private LoadedApk getPackageInfo(ApplicationInfo aInfo, CompatibilityInfo compatInfo,
-            ClassLoader baseLoader, boolean securityViolation, boolean includeCode) {
+            ClassLoader baseLoader, boolean securityViolation, boolean includeCode,
+            boolean registerPackage) {
         synchronized (mResourcesManager) {
             WeakReference<LoadedApk> ref;
             if (includeCode) {
@@ -1738,7 +1741,7 @@ public final class ActivityThread {
                 packageInfo =
                     new LoadedApk(this, aInfo, compatInfo, baseLoader,
                             securityViolation, includeCode &&
-                            (aInfo.flags&ApplicationInfo.FLAG_HAS_CODE) != 0);
+                            (aInfo.flags&ApplicationInfo.FLAG_HAS_CODE) != 0, registerPackage);
                 if (includeCode) {
                     mPackages.put(aInfo.packageName,
                             new WeakReference<LoadedApk>(packageInfo));
@@ -4394,7 +4397,7 @@ public final class ActivityThread {
             instrApp.dataDir = ii.dataDir;
             instrApp.nativeLibraryDir = ii.nativeLibraryDir;
             LoadedApk pi = getPackageInfo(instrApp, data.compatInfo,
-                    appContext.getClassLoader(), false, true);
+                    appContext.getClassLoader(), false, true, false);
             ContextImpl instrContext = ContextImpl.createAppContext(this, pi);
 
             try {

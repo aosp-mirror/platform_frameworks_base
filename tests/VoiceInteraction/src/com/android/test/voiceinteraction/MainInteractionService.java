@@ -27,8 +27,8 @@ public class MainInteractionService extends VoiceInteractionService {
     static final String TAG = "MainInteractionService";
 
     @Override
-    public void onCreate() {
-        super.onCreate();
+    public void onReady() {
+        super.onReady();
         Log.i(TAG, "Creating " + this);
         Log.i(TAG, "Keyphrase enrollment error? " + getKeyphraseEnrollmentInfo().getParseError());
         Log.i(TAG, "Keyphrase enrollment meta-data: "
