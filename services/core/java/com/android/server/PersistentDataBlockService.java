@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2014 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.android.server;
 
 import android.Manifest;
@@ -8,8 +24,9 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.service.persistentdata.IPersistentDataBlockService;
-import android.util.Log;
+import android.util.Slog;
 import com.android.internal.R;
+import libcore.io.IoUtils;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -23,7 +40,8 @@ import java.nio.channels.FileChannel;
 
 /**
  * Service for reading and writing blocks to a persistent partition.
- * This data will live across factory resets.
+ * This data will live across factory resets not initiated via the Settings UI.
+ * When a device is factory reset through Settings this data is wiped.
  *
  * Allows writing one block at a time. Namely, each time
  * {@link android.service.persistentdata.IPersistentDataBlockService}.write(byte[] data)
@@ -40,19 +58,29 @@ public class PersistentDataBlockService extends SystemService {
 
     private static final String PERSISTENT_DATA_BLOCK_PROP = "ro.frp.pst";
     private static final int HEADER_SIZE = 8;
-    private static final int BLOCK_ID = 0x1990;
+    // Magic number to mark block device as adhering to the format consumed by this service
+    private static final int PARTITION_TYPE_MARKER = 0x1990;
+    // Limit to 100k as blocks larger than this might cause strain on Binder.
+    // TODO(anmorales): Consider splitting up too-large blocks in PersistentDataBlockManager
+    private static final int MAX_DATA_BLOCK_SIZE = 1024 * 100;
 
     private final Context mContext;
     private final String mDataBlockFile;
-    private long mBlockDeviceSize;
-
     private final int mAllowedUid;
+    private final Object mLock = new Object();
+    /*
+     * Separate lock for OEM unlock related operations as they can happen in parallel with regular
+     * block operations.
+     */
+    private final Object mOemLock = new Object();
+
+    private long mBlockDeviceSize;
 
     public PersistentDataBlockService(Context context) {
         super(context);
         mContext = context;
         mDataBlockFile = SystemProperties.get(PERSISTENT_DATA_BLOCK_PROP);
-        mBlockDeviceSize = 0; // Load lazily
+        mBlockDeviceSize = -1; // Load lazily
         String allowedPackage = context.getResources()
                 .getString(R.string.config_persistentDataPackageName);
         PackageManager pm = mContext.getPackageManager();
@@ -62,7 +90,7 @@ public class PersistentDataBlockService extends SystemService {
                     Binder.getCallingUserHandle().getIdentifier());
         } catch (PackageManager.NameNotFoundException e) {
             // not expected
-            Log.e(TAG, "not able to find package " + allowedPackage, e);
+            Slog.e(TAG, "not able to find package " + allowedPackage, e);
         }
 
         mAllowedUid = allowedUid;
@@ -85,10 +113,10 @@ public class PersistentDataBlockService extends SystemService {
         }
     }
 
-    private int getTotalDataSize(DataInputStream inputStream) throws IOException {
+    private int getTotalDataSizeLocked(DataInputStream inputStream) throws IOException {
         int totalDataSize;
         int blockId = inputStream.readInt();
-        if (blockId == BLOCK_ID) {
+        if (blockId == PARTITION_TYPE_MARKER) {
             totalDataSize = inputStream.readInt();
         } else {
             totalDataSize = 0;
@@ -96,17 +124,18 @@ public class PersistentDataBlockService extends SystemService {
         return totalDataSize;
     }
 
-    private long maybeReadBlockDeviceSize() {
-        synchronized (this) {
-            if (mBlockDeviceSize == 0) {
-                mBlockDeviceSize = getBlockDeviceSize(mDataBlockFile);
+    private long getBlockDeviceSize() {
+        synchronized (mLock) {
+            if (mBlockDeviceSize == -1) {
+                mBlockDeviceSize = nativeGetBlockDeviceSize(mDataBlockFile);
             }
         }
 
         return mBlockDeviceSize;
     }
 
-    private native long getBlockDeviceSize(String path);
+    private native long nativeGetBlockDeviceSize(String path);
+    private native int nativeWipe(String path);
 
     private final IBinder mService = new IPersistentDataBlockService.Stub() {
         @Override
@@ -114,62 +143,93 @@ public class PersistentDataBlockService extends SystemService {
             enforceUid(Binder.getCallingUid());
 
             // Need to ensure we don't write over the last byte
-            if (data.length > maybeReadBlockDeviceSize() - HEADER_SIZE - 1) {
-                return -1;
+            long maxBlockSize = getBlockDeviceSize() - HEADER_SIZE - 1;
+            if (data.length > maxBlockSize) {
+                // partition is ~500k so shouldn't be a problem to downcast
+                return (int) -maxBlockSize;
             }
 
             DataOutputStream outputStream;
             try {
                 outputStream = new DataOutputStream(new FileOutputStream(new File(mDataBlockFile)));
             } catch (FileNotFoundException e) {
-                Log.e(TAG, "partition not available?", e);
+                Slog.e(TAG, "partition not available?", e);
                 return -1;
             }
 
             ByteBuffer headerAndData = ByteBuffer.allocate(data.length + HEADER_SIZE);
-            headerAndData.putInt(BLOCK_ID);
+            headerAndData.putInt(PARTITION_TYPE_MARKER);
             headerAndData.putInt(data.length);
             headerAndData.put(data);
 
             try {
-                outputStream.write(headerAndData.array());
-                return data.length;
+                synchronized (mLock) {
+                    outputStream.write(headerAndData.array());
+                    return data.length;
+                }
             } catch (IOException e) {
-                Log.e(TAG, "failed writing to the persistent data block", e);
+                Slog.e(TAG, "failed writing to the persistent data block", e);
                 return -1;
             } finally {
                 try {
                     outputStream.close();
                 } catch (IOException e) {
-                    Log.e(TAG, "failed closing output stream", e);
+                    Slog.e(TAG, "failed closing output stream", e);
                 }
             }
         }
 
         @Override
-        public int read(byte[] data) {
+        public byte[] read() {
             enforceUid(Binder.getCallingUid());
 
             DataInputStream inputStream;
             try {
                 inputStream = new DataInputStream(new FileInputStream(new File(mDataBlockFile)));
             } catch (FileNotFoundException e) {
-                Log.e(TAG, "partition not available?", e);
-                return -1;
+                Slog.e(TAG, "partition not available?", e);
+                return null;
             }
 
             try {
-                int totalDataSize = getTotalDataSize(inputStream);
-                return inputStream.read(data, 0,
-                        (data.length > totalDataSize) ? totalDataSize : data.length);
+                synchronized (mLock) {
+                    int totalDataSize = getTotalDataSizeLocked(inputStream);
+
+                    if (totalDataSize == 0) {
+                        return new byte[0];
+                    }
+
+                    byte[] data = new byte[totalDataSize];
+                    int read = inputStream.read(data, 0, totalDataSize);
+                    if (read < totalDataSize) {
+                        // something went wrong, not returning potentially corrupt data
+                        Slog.e(TAG, "failed to read entire data block. bytes read: " +
+                                read + "/" + totalDataSize);
+                        return null;
+                    }
+                    return data;
+                }
             } catch (IOException e) {
-                Log.e(TAG, "failed to read data", e);
-                return -1;
+                Slog.e(TAG, "failed to read data", e);
+                return null;
             } finally {
                 try {
                     inputStream.close();
                 } catch (IOException e) {
-                    Log.e(TAG, "failed to close OutputStream");
+                    Slog.e(TAG, "failed to close OutputStream");
+                }
+            }
+        }
+
+        @Override
+        public void wipe() {
+            enforceOemUnlockPermission();
+
+            synchronized (mLock) {
+                int ret = nativeWipe(mDataBlockFile);
+
+                if (ret < 0) {
+                    Slog.e(TAG, "failed to wipe persistent partition");
                 }
             }
         }
@@ -181,28 +241,26 @@ public class PersistentDataBlockService extends SystemService {
             try {
                 outputStream = new FileOutputStream(new File(mDataBlockFile));
             } catch (FileNotFoundException e) {
-                Log.e(TAG, "parition not available", e);
+                Slog.e(TAG, "parition not available", e);
                 return;
             }
 
             try {
                 FileChannel channel = outputStream.getChannel();
 
-                channel.position(maybeReadBlockDeviceSize() - 1);
+                channel.position(getBlockDeviceSize() - 1);
 
                 ByteBuffer data = ByteBuffer.allocate(1);
                 data.put(enabled ? (byte) 1 : (byte) 0);
                 data.flip();
 
-                channel.write(data);
-            } catch (IOException e) {
-                Log.e(TAG, "unable to access persistent partition", e);
-            } finally {
-                try {
-                    outputStream.close();
-                } catch (IOException e) {
-                    Log.e(TAG, "failed to close OutputStream");
+                synchronized (mOemLock) {
+                    channel.write(data);
                 }
+            } catch (IOException e) {
+                Slog.e(TAG, "unable to access persistent partition", e);
+            } finally {
+                IoUtils.closeQuietly(outputStream);
             }
         }
 
@@ -213,22 +271,20 @@ public class PersistentDataBlockService extends SystemService {
             try {
                 inputStream = new DataInputStream(new FileInputStream(new File(mDataBlockFile)));
             } catch (FileNotFoundException e) {
-                Log.e(TAG, "partition not available");
+                Slog.e(TAG, "partition not available");
                 return false;
             }
 
             try {
-                inputStream.skip(maybeReadBlockDeviceSize() - 1);
-                return inputStream.readByte() != 0;
+                inputStream.skip(getBlockDeviceSize() - 1);
+                synchronized (mOemLock) {
+                    return inputStream.readByte() != 0;
+                }
             } catch (IOException e) {
-                Log.e(TAG, "unable to access persistent partition", e);
+                Slog.e(TAG, "unable to access persistent partition", e);
                 return false;
             } finally {
-                try {
-                    inputStream.close();
-                } catch (IOException e) {
-                    Log.e(TAG, "failed to close OutputStream");
-                }
+                IoUtils.closeQuietly(inputStream);
             }
         }
 
@@ -240,22 +296,27 @@ public class PersistentDataBlockService extends SystemService {
             try {
                 inputStream = new DataInputStream(new FileInputStream(new File(mDataBlockFile)));
             } catch (FileNotFoundException e) {
-                Log.e(TAG, "partition not available");
+                Slog.e(TAG, "partition not available");
                 return 0;
             }
 
             try {
-                return getTotalDataSize(inputStream);
+                synchronized (mLock) {
+                    return getTotalDataSizeLocked(inputStream);
+                }
             } catch (IOException e) {
-                Log.e(TAG, "error reading data block size");
+                Slog.e(TAG, "error reading data block size");
                 return 0;
             } finally {
-                try {
-                    inputStream.close();
-                } catch (IOException e) {
-                    Log.e(TAG, "failed to close OutputStream");
-                }
+                IoUtils.closeQuietly(inputStream);
             }
         }
+
+        @Override
+        public long getMaximumDataBlockSize() {
+            long actualSize = getBlockDeviceSize() - HEADER_SIZE - 1;
+            return actualSize <= MAX_DATA_BLOCK_SIZE ? actualSize : MAX_DATA_BLOCK_SIZE;
+        }
+
     };
 }
