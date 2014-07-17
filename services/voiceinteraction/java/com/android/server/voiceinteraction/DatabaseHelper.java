@@ -94,7 +94,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public boolean addOrUpdateKeyphraseSoundModel(KeyphraseSoundModel soundModel) {
-        SQLiteDatabase db = this.getWritableDatabase();
+        SQLiteDatabase db = getWritableDatabase();
         ContentValues values = new ContentValues();
         // Generate a random ID for the model.
         values.put(SoundModelContract.KEY_ID, soundModel.uuid.toString());
@@ -105,7 +105,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if (db.insertWithOnConflict(
                 SoundModelContract.TABLE, null, values, SQLiteDatabase.CONFLICT_REPLACE) != -1) {
             for (Keyphrase keyphrase : soundModel.keyphrases) {
-                status &= addKeyphrase(soundModel.uuid, keyphrase);
+                status &= addOrUpdateKeyphrase(soundModel.uuid, keyphrase);
             }
             return status;
         } else {
@@ -114,23 +114,41 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
-    /**
-     * TODO(sansid): Change to addOrUpdate to handle changes here.
-     */
-    private boolean addKeyphrase(UUID modelId, Keyphrase keyphrase) {
-        SQLiteDatabase db = this.getWritableDatabase();
+    private boolean addOrUpdateKeyphrase(UUID modelId, Keyphrase keyphrase) {
+        SQLiteDatabase db = getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(KeyphraseContract.KEY_ID, keyphrase.id);
         values.put(KeyphraseContract.KEY_RECOGNITION_MODES, keyphrase.recognitionModeFlags);
-        values.put(KeyphraseContract.KEY_SOUND_MODEL_ID, keyphrase.id);
+        values.put(KeyphraseContract.KEY_SOUND_MODEL_ID, modelId.toString());
         values.put(KeyphraseContract.KEY_HINT_TEXT, keyphrase.hintText);
         values.put(KeyphraseContract.KEY_LOCALE, keyphrase.locale);
-        if (db.insert(KeyphraseContract.TABLE, null, values) != -1) {
+        if (db.insertWithOnConflict(
+                KeyphraseContract.TABLE, null, values, SQLiteDatabase.CONFLICT_REPLACE) != -1) {
             return true;
         } else {
             Slog.w(TAG, "Failed to persist keyphrase to database");
             return false;
         }
+    }
+
+    /**
+     * Deletes the sound model and associated keyphrases.
+     */
+    public boolean deleteKeyphraseSoundModel(UUID uuid) {
+        SQLiteDatabase db = getWritableDatabase();
+        String modelId = uuid.toString();
+        String soundModelClause = SoundModelContract.KEY_ID + "=" + modelId;
+        boolean status = true;
+        if (db.delete(SoundModelContract.TABLE, soundModelClause, null) == 0) {
+            Slog.w(TAG, "No sound models deleted from the database");
+            status = false;
+        }
+        String keyphraseClause = KeyphraseContract.KEY_SOUND_MODEL_ID + "=" + modelId;
+        if (db.delete(KeyphraseContract.TABLE, keyphraseClause, null) == 0) {
+            Slog.w(TAG, "No keyphrases deleted from the database");
+            status = false;
+        }
+        return status;
     }
 
     /**
