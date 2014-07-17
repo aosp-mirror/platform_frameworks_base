@@ -94,6 +94,7 @@ static void activity_callback(
     JNIEnv* env = NULL;
     int result = attach_thread(&env);
     if (result != JNI_OK) {
+        ALOGE("Unable to attach thread with JNI.");
         return;
     }
 
@@ -215,7 +216,7 @@ static jobjectArray get_supported_activities(JNIEnv* env, jobject obj) {
         return NULL;
     }
 
-    jclass string_class = env->FindClass("java/lang/String;");
+    jclass string_class = env->FindClass("java/lang/String");
     if (string_class == NULL) {
         ALOGE("Unable to find String class for supported activities.");
         return NULL;
@@ -229,14 +230,8 @@ static jobjectArray get_supported_activities(JNIEnv* env, jobject obj) {
 
     for (int i = 0; i < list_size; ++i) {
         const char* string_ptr = const_cast<const char*>(list[i]);
-        jsize string_length = strlen(string_ptr);
-        jstring string = env->NewString((const jchar*) string_ptr, string_length);
+        jstring string = env->NewStringUTF(string_ptr);
         env->SetObjectArrayElement(string_array, i, string);
-
-        // log debugging information in case we need to try to trace issues with the strings
-        if (string_length) {
-            ALOGD("Invalid activity (index=%d) name size: %d", i, string_length);
-        }
     }
 
     return string_array;

@@ -40,4 +40,17 @@ public class ActivityChangedEvent {
     public Iterable<ActivityRecognitionEvent> getActivityRecognitionEvents() {
         return mActivityRecognitionEvents;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder("[ ActivityChangedEvent:");
+
+        for (ActivityRecognitionEvent event : mActivityRecognitionEvents) {
+            builder.append("\n    ");
+            builder.append(event.toString());
+        }
+        builder.append("\n]");
+
+        return builder.toString();
+    }
 }
