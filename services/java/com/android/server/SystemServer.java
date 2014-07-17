@@ -49,6 +49,7 @@ import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
 import android.view.WindowManager;
+import android.webkit.WebViewFactory;
 
 import com.android.internal.R;
 import com.android.internal.os.BinderInternal;
@@ -91,6 +92,7 @@ import com.android.server.tv.TvInputManagerService;
 import com.android.server.twilight.TwilightService;
 import com.android.server.usb.UsbService;
 import com.android.server.wallpaper.WallpaperManagerService;
+import com.android.server.webkit.WebViewUpdateService;
 import com.android.server.wm.WindowManagerService;
 
 import dalvik.system.VMRuntime;
@@ -407,6 +409,12 @@ public final class SystemServer {
         try {
             Slog.i(TAG, "Reading configuration...");
             SystemConfig.getInstance();
+
+            Slog.i(TAG, "WebView Update Service");
+            ServiceManager.addService("webviewupdate", new WebViewUpdateService());
+
+            Slog.i(TAG, "WebViewFactory preparation");
+            WebViewFactory.prepareWebViewInSystemServer();
 
             Slog.i(TAG, "Scheduling Policy");
             ServiceManager.addService("scheduling_policy", new SchedulingPolicyService());

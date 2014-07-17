@@ -131,6 +131,12 @@ public class Process {
     public static final int PACKAGE_INFO_GID = 1032;
 
     /**
+     * Defines the UID/GID for the shared RELRO file updater process.
+     * @hide
+     */
+    public static final int SHARED_RELRO_UID = 1037;
+
+    /**
      * Defines the start of a range of UIDs (and GIDs), going from this
      * number to {@link #LAST_APPLICATION_UID} that are reserved for assigning
      * to applications.
