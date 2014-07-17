@@ -8054,7 +8054,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 checkedGrants = true;
             }
             userId = handleIncomingUser(callingPid, callingUid, userId,
-                    false, ALLOW_NON_FULL_IN_PROFILE,
+                    false, ALLOW_NON_FULL,
                     "checkContentProviderPermissionLocked " + cpi.authority, null);
             if (userId != tmpTargetUserId) {
                 // When we actually went to determine the final targer user ID, this ended
