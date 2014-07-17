@@ -30,8 +30,10 @@ import android.content.pm.UserInfo;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManagerGlobal;
@@ -64,15 +66,37 @@ public class UserSwitcherController {
         filter.addAction(Intent.ACTION_USER_REMOVED);
         filter.addAction(Intent.ACTION_USER_INFO_CHANGED);
         filter.addAction(Intent.ACTION_USER_SWITCHED);
-        mContext.registerReceiver(mReceiver, filter);
-        refreshUsers();
+        filter.addAction(Intent.ACTION_USER_STOPPING);
+        mContext.registerReceiverAsUser(mReceiver, UserHandle.OWNER, filter,
+                null /* permission */, null /* scheduler */);
+        refreshUsers(UserHandle.USER_NULL);
     }
 
-    private void refreshUsers() {
-        new AsyncTask<Void, Void, ArrayList<UserRecord>>() {
+    /**
+     * Refreshes users from UserManager.
+     *
+     * The pictures are only loaded if they have not been loaded yet.
+     *
+     * @param forcePictureLoadForId forces the picture of the given user to be reloaded.
+     */
+    private void refreshUsers(int forcePictureLoadForId) {
 
+        SparseArray<Bitmap> bitmaps = new SparseArray<>(mUsers.size());
+        final int N = mUsers.size();
+        for (int i = 0; i < N; i++) {
+            UserRecord r = mUsers.get(i);
+            if (r == null || r.info == null
+                    || r.info.id == forcePictureLoadForId || r.picture == null) {
+                continue;
+            }
+            bitmaps.put(r.info.id, r.picture);
+        }
+
+        new AsyncTask<SparseArray<Bitmap>, Void, ArrayList<UserRecord>>() {
+            @SuppressWarnings("unchecked")
             @Override
-            protected ArrayList<UserRecord> doInBackground(Void... params) {
+            protected ArrayList<UserRecord> doInBackground(SparseArray<Bitmap>... params) {
+                final SparseArray<Bitmap> bitmaps = params[0];
                 List<UserInfo> infos = mUserManager.getUsers(true);
                 if (infos == null) {
                     return null;
@@ -87,8 +111,11 @@ public class UserSwitcherController {
                         guestRecord = new UserRecord(info, null /* picture */,
                                 true /* isGuest */, isCurrent);
                     } else if (!info.isManagedProfile()) {
-                        records.add(new UserRecord(info, mUserManager.getUserIcon(info.id),
-                                false /* isGuest */, isCurrent));
+                        Bitmap picture = bitmaps.get(info.id);
+                        if (picture == null) {
+                            picture = mUserManager.getUserIcon(info.id);
+                        }
+                        records.add(new UserRecord(info, picture, false /* isGuest */, isCurrent));
                     }
                 }
 
@@ -109,7 +136,7 @@ public class UserSwitcherController {
                     notifyAdapters();
                 }
             }
-        }.execute((Void[])null);
+        }.execute((SparseArray)bitmaps);
     }
 
     private void notifyAdapters() {
@@ -134,15 +161,28 @@ public class UserSwitcherController {
         }
 
         if (ActivityManager.getCurrentUser() == id) {
+            if (record.isGuest) {
+                exitGuest(id);
+            }
             return;
         }
 
+        switchToUserId(id);
+    }
+
+    private void switchToUserId(int id) {
         try {
             WindowManagerGlobal.getWindowManagerService().lockNow(null);
             ActivityManagerNative.getDefault().switchUser(id);
         } catch (RemoteException e) {
             Log.e(TAG, "Couldn't switch user.", e);
         }
+    }
+
+    private void exitGuest(int id) {
+        // TODO: show confirmation dialog
+        switchToUserId(UserHandle.USER_OWNER);
+        mUserManager.removeUser(id);
     }
 
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
@@ -153,15 +193,20 @@ public class UserSwitcherController {
                 final int N = mUsers.size();
                 for (int i = 0; i < N; i++) {
                     UserRecord record = mUsers.get(i);
+                    if (record.info == null) continue;
                     boolean shouldBeCurrent = record.info.id == currentId;
                     if (record.isCurrent != shouldBeCurrent) {
                         mUsers.set(i, record.copyWithIsCurrent(shouldBeCurrent));
                     }
                 }
                 notifyAdapters();
-            } else {
-                refreshUsers();
             }
+            int forcePictureLoadForId = UserHandle.USER_NULL;
+            if (Intent.ACTION_USER_INFO_CHANGED.equals(intent.getAction())) {
+                forcePictureLoadForId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE,
+                        UserHandle.USER_NULL);
+            }
+            refreshUsers(forcePictureLoadForId);
         }
     };
 
@@ -195,11 +240,24 @@ public class UserSwitcherController {
 
         @Override
         public long getItemId(int position) {
-            return mController.mUsers.get(position).info.id;
+            return position;
         }
 
         public void switchTo(UserRecord record) {
             mController.switchTo(record);
+        }
+
+        public String getName(Context context, UserRecord item) {
+            if (item.isGuest) {
+                if (item.isCurrent) {
+                    return context.getString(R.string.guest_exit_guest);
+                } else {
+                    return context.getString(
+                            item.info == null ? R.string.guest_new_guest : R.string.guest_nickname);
+                }
+            } else {
+                return item.info.name;
+            }
         }
     }
 

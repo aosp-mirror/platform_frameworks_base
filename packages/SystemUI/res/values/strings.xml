@@ -694,4 +694,5 @@
 
     <!-- Text shown in place of notification contents when the notification is hidden on a secure lockscreen -->
     <string name="notification_hidden_text">Contents hidden</string>
+    <string name="guest_exit_guest">Exit guest</string>
 </resources>

@@ -70,6 +70,7 @@
     <uses-permission android:name="android.permission.STOP_APP_SWITCHES" />
     <uses-permission android:name="android.permission.SET_SCREEN_COMPATIBILITY" />
     <uses-permission android:name="android.permission.START_ANY_ACTIVITY" />
+    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" />
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
     <uses-permission android:name="android.permission.GET_TOP_ACTIVITY_INFO" />
     <uses-permission android:name="android.permission.MANAGE_ACTIVITY_STACKS" />
