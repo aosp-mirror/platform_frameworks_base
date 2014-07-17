@@ -608,6 +608,9 @@ public final class Path_Delegate {
      * @param y The y-coordinate of the end of a line
      */
     private void lineTo(float x, float y) {
+        if (isEmpty()) {
+            mPath.moveTo(mLastX = 0, mLastY = 0);
+        }
         mPath.lineTo(mLastX = x, mLastY = y);
     }
 
