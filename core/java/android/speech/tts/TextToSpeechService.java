@@ -17,7 +17,7 @@ package android.speech.tts;
 
 import android.app.Service;
 import android.content.Intent;
-import android.media.AudioManager;
+import android.media.AudioAttributes;
 import android.media.AudioSystem;
 import android.net.Uri;
 import android.os.Binder;
@@ -608,12 +608,6 @@ public abstract class TextToSpeechService extends Service {
         public final int mSessionId;
 
         /**
-         * Audio stream type. Must be one of the STREAM_ contants defined in
-         * {@link android.media.AudioManager}.
-         */
-        public final int mStreamType;
-
-        /**
          * Volume, in the range [0.0f, 1.0f]. The default value is
          * {@link TextToSpeech.Engine#DEFAULT_VOLUME} (1.0f).
          */
@@ -625,42 +619,62 @@ public abstract class TextToSpeechService extends Service {
          */
         public final float mPan;
 
+
+        /**
+         * Audio attributes, set by {@link TextToSpeech#setAudioAttributes}
+         * or created from the value of {@link TextToSpeech.Engine#KEY_PARAM_STREAM}.
+         */
+        public final AudioAttributes mAudioAttributes;
+
         /** Create AudioOutputParams with default values */
         AudioOutputParams() {
             mSessionId = AudioSystem.AUDIO_SESSION_ALLOCATE;
-            mStreamType = Engine.DEFAULT_STREAM;
             mVolume = Engine.DEFAULT_VOLUME;
             mPan = Engine.DEFAULT_PAN;
+            mAudioAttributes = null;
         }
 
-        AudioOutputParams(int sessionId, int streamType, float volume, float pan) {
+        AudioOutputParams(int sessionId, float volume, float pan,
+                AudioAttributes audioAttributes) {
             mSessionId = sessionId;
-            mStreamType = streamType;
             mVolume = volume;
             mPan = pan;
+            mAudioAttributes = audioAttributes;
         }
 
         /** Create AudioOutputParams from A {@link SynthesisRequest#getParams()} bundle */
-        static AudioOutputParams createFromV1ParamsBundle(Bundle paramsBundle) {
+        static AudioOutputParams createFromV1ParamsBundle(Bundle paramsBundle,
+                boolean isSpeech) {
             if (paramsBundle == null) {
                 return new AudioOutputParams();
+            }
+
+            AudioAttributes audioAttributes =
+                    (AudioAttributes) paramsBundle.getParcelable(
+                            Engine.KEY_PARAM_AUDIO_ATTRIBUTES);
+            if (audioAttributes == null) {
+                int streamType = paramsBundle.getInt(
+                        Engine.KEY_PARAM_STREAM, Engine.DEFAULT_STREAM);
+                audioAttributes = (new AudioAttributes.Builder())
+                        .setLegacyStreamType(streamType)
+                        .setContentType((isSpeech ?
+                                AudioAttributes.CONTENT_TYPE_SPEECH :
+                                AudioAttributes.CONTENT_TYPE_SONIFICATION))
+                        .build();
             }
 
             return new AudioOutputParams(
                     paramsBundle.getInt(
                             Engine.KEY_PARAM_SESSION_ID,
                             AudioSystem.AUDIO_SESSION_ALLOCATE),
-                    paramsBundle.getInt(
-                            Engine.KEY_PARAM_STREAM,
-                            Engine.DEFAULT_STREAM),
                     paramsBundle.getFloat(
                             Engine.KEY_PARAM_VOLUME,
                             Engine.DEFAULT_VOLUME),
                     paramsBundle.getFloat(
                             Engine.KEY_PARAM_PAN,
-                            Engine.DEFAULT_PAN));
+                            Engine.DEFAULT_PAN),
+                    audioAttributes);
         }
-
     }
 
 
@@ -832,7 +846,7 @@ public abstract class TextToSpeechService extends Service {
         }
 
         AudioOutputParams getAudioParams() {
-            return AudioOutputParams.createFromV1ParamsBundle(mParams);
+            return AudioOutputParams.createFromV1ParamsBundle(mParams, true);
         }
     }
 
@@ -1004,6 +1018,11 @@ public abstract class TextToSpeechService extends Service {
         @Override
         public String getUtteranceId() {
             return getStringParam(mParams, Engine.KEY_PARAM_UTTERANCE_ID, null);
+        }
+
+        @Override
+        AudioOutputParams getAudioParams() {
+            return AudioOutputParams.createFromV1ParamsBundle(mParams, false);
         }
     }
 

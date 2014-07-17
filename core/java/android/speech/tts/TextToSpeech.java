@@ -22,6 +22,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -522,6 +523,17 @@ public class TextToSpeech {
          * @see TextToSpeech#playEarcon(String, int, HashMap)
          */
         public static final String KEY_PARAM_STREAM = "streamType";
+
+        /**
+         * Parameter key to specify the audio attributes to be used when
+         * speaking text or playing back a file. The value should be set
+         * using {@link TextToSpeech#setAudioAttributes(AudioAttributes)}.
+         *
+         * @see TextToSpeech#speak(String, int, HashMap)
+         * @see TextToSpeech#playEarcon(String, int, HashMap)
+         * @hide
+         */
+        public static final String KEY_PARAM_AUDIO_ATTRIBUTES = "audioAttributes";
 
         /**
          * Parameter key to identify an utterance in the
@@ -1352,6 +1364,25 @@ public class TextToSpeech {
                 }
                 return SUCCESS;
             }
+        }
+        return ERROR;
+    }
+
+    /**
+     * Sets the audio attributes to be used when speaking text or playing
+     * back a file.
+     *
+     * @param audioAttributes Valid AudioAttributes instance.
+     *
+     * @return {@link #ERROR} or {@link #SUCCESS}.
+     */
+    public int setAudioAttributes(AudioAttributes audioAttributes) {
+        if (audioAttributes != null) {
+            synchronized (mStartLock) {
+                mParams.putParcelable(Engine.KEY_PARAM_AUDIO_ATTRIBUTES,
+                    audioAttributes);
+            }
+            return SUCCESS;
         }
         return ERROR;
     }
