@@ -6066,6 +6066,14 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     /**
+     * @inheritDoc
+     */
+    @Override
+    public boolean onNestedPreFling(View target, float velocityX, float velocityY) {
+        return false;
+    }
+
+    /**
      * Return the current axes of nested scrolling for this ViewGroup.
      *
      * <p>A ViewGroup returning something other than {@link #SCROLL_AXIS_NONE} is currently
