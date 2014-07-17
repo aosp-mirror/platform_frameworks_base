@@ -192,8 +192,10 @@ public class AppOpsManager {
     public static final int OP_MUTE_MICROPHONE = 44;
     /** @hide */
     public static final int OP_TOAST_WINDOW = 45;
+    /** @hide Capture the device's display contents and/or audio */
+    public static final int OP_PROJECT_MEDIA = 46;
     /** @hide */
-    public static final int _NUM_OP = 46;
+    public static final int _NUM_OP = 47;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION =
@@ -263,6 +265,7 @@ public class AppOpsManager {
             OP_GET_USAGE_STATS,
             OP_MUTE_MICROPHONE,
             OP_TOAST_WINDOW,
+            OP_PROJECT_MEDIA,
     };
 
     /**
@@ -313,6 +316,7 @@ public class AppOpsManager {
             null,
             OPSTR_MONITOR_LOCATION,
             OPSTR_MONITOR_HIGH_POWER_LOCATION,
+            null,
             null,
             null,
             null,
@@ -367,8 +371,9 @@ public class AppOpsManager {
             "MONITOR_LOCATION",
             "MONITOR_HIGH_POWER_LOCATION",
             "GET_USAGE_STATS",
-            "OP_MUTE_MICROPHONE",
+            "MUTE_MICROPHONE",
             "TOAST_WINDOW",
+            "PROJECT_MEDIA",
     };
 
     /**
@@ -422,6 +427,7 @@ public class AppOpsManager {
             android.Manifest.permission.PACKAGE_USAGE_STATS,
             null, // no permission for muting/unmuting microphone
             null, // no permission for displaying toasts
+            null, // no permission for projecting media
     };
 
     /**
@@ -476,6 +482,7 @@ public class AppOpsManager {
             null, //GET_USAGE_STATS
             UserManager.DISALLOW_UNMUTE_MICROPHONE, // MUTE_MICROPHONE
             UserManager.DISALLOW_CREATE_WINDOWS, // TOAST_WINDOW
+            null, //PROJECT_MEDIA
     };
 
     /**
@@ -527,8 +534,9 @@ public class AppOpsManager {
             false, //MONITOR_LOCATION
             false, //MONITOR_HIGH_POWER_LOCATION
             false, //GET_USAGE_STATS
-            false, // MUTE_MICROPHONE
-            true, // TOAST_WINDOW
+            false, //MUTE_MICROPHONE
+            true, //TOAST_WINDOW
+            false, //PROJECT_MEDIA
     };
 
     /**
@@ -581,6 +589,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_IGNORED, // OP_GET_USAGE_STATS
             AppOpsManager.MODE_ALLOWED,
             AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_IGNORED, // OP_PROJECT_MEDIA
     };
 
     /**
@@ -607,6 +616,7 @@ public class AppOpsManager {
             false,
             false,
             true,      // OP_WRITE_SMS
+            false,
             false,
             false,
             false,

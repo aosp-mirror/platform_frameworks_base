@@ -35,11 +35,11 @@ import android.view.Surface;
 public final class VirtualDisplay {
     private final DisplayManagerGlobal mGlobal;
     private final Display mDisplay;
-    private IBinder mToken;
+    private IVirtualDisplayCallbacks mToken;
     private Surface mSurface;
 
-    VirtualDisplay(DisplayManagerGlobal global, Display display, IBinder token,
-            Surface surface) {
+    VirtualDisplay(DisplayManagerGlobal global, Display display,
+            IVirtualDisplayCallbacks token, Surface surface) {
         mGlobal = global;
         mDisplay = display;
         mToken = token;
@@ -97,5 +97,32 @@ public final class VirtualDisplay {
     public String toString() {
         return "VirtualDisplay{display=" + mDisplay + ", token=" + mToken
                 + ", surface=" + mSurface + "}";
+    }
+
+    /**
+     * Interface for receiving information about a {@link VirtualDisplay}'s state changes.
+     */
+    public static abstract class Callbacks {
+        /**
+         * Called when the virtual display video projection has been
+         * paused by the system or when the surface has been detached
+         * by the application by calling setSurface(null).
+         * The surface will not receive any more buffers while paused.
+         */
+         public void onDisplayPaused() { }
+
+        /**
+         * Called when the virtual display video projection has been
+         * resumed after having been paused.
+         */
+         public void onDisplayResumed() { }
+
+        /**
+         * Called when the virtual display video projection has been
+         * stopped by the system.  It will no longer receive frames
+         * and it will never be resumed.  It is still the responsibility
+         * of the application to release() the virtual display.
+         */
+        public void onDisplayStopped() { }
     }
 }

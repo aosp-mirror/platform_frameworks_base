@@ -18,15 +18,21 @@ package com.android.server.display;
 
 import android.content.Context;
 import android.hardware.display.DisplayManager;
+import android.hardware.display.IVirtualDisplayCallbacks;
+import android.media.projection.IMediaProjection;
+import android.media.projection.IMediaProjectionCallback;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IBinder.DeathRecipient;
+import android.os.Message;
 import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.Slog;
 import android.view.Display;
 import android.view.Surface;
 import android.view.SurfaceControl;
+
+import java.io.PrintWriter;
 
 /**
  * A display adapter that provides virtual displays on behalf of applications.
@@ -40,29 +46,37 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
 
     private final ArrayMap<IBinder, VirtualDisplayDevice> mVirtualDisplayDevices =
             new ArrayMap<IBinder, VirtualDisplayDevice>();
+    private Handler mHandler;
 
     // Called with SyncRoot lock held.
     public VirtualDisplayAdapter(DisplayManagerService.SyncRoot syncRoot,
             Context context, Handler handler, Listener listener) {
         super(syncRoot, context, handler, listener, TAG);
+        mHandler = handler;
     }
 
-    public DisplayDevice createVirtualDisplayLocked(IBinder appToken,
-            int ownerUid, String ownerPackageName,
+    public DisplayDevice createVirtualDisplayLocked(IVirtualDisplayCallbacks callbacks,
+            IMediaProjection projection, int ownerUid, String ownerPackageName,
             String name, int width, int height, int densityDpi, Surface surface, int flags) {
         boolean secure = (flags & DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE) != 0;
+        IBinder appToken = callbacks.asBinder();
         IBinder displayToken = SurfaceControl.createDisplay(name, secure);
         VirtualDisplayDevice device = new VirtualDisplayDevice(displayToken, appToken,
-                ownerUid, ownerPackageName, name, width, height, densityDpi, surface, flags);
+                ownerUid, ownerPackageName, name, width, height, densityDpi, surface, flags,
+                new Callbacks(callbacks, mHandler));
+
+        mVirtualDisplayDevices.put(appToken, device);
 
         try {
+            if (projection != null) {
+                projection.addCallback(new MediaProjectionCallback(appToken));
+            }
             appToken.linkToDeath(device, 0);
         } catch (RemoteException ex) {
+            mVirtualDisplayDevices.remove(appToken);
             device.destroyLocked();
             return null;
         }
-
-        mVirtualDisplayDevices.put(appToken, device);
 
         // Return the display device without actually sending the event indicating
         // that it was added.  The caller will handle it.
@@ -98,23 +112,35 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
         }
     }
 
-    private final class VirtualDisplayDevice extends DisplayDevice
-            implements DeathRecipient {
+    private void handleMediaProjectionStoppedLocked(IBinder appToken) {
+        VirtualDisplayDevice device = mVirtualDisplayDevices.remove(appToken);
+        if (device != null) {
+            Slog.i(TAG, "Virtual display device released because media projection stopped: "
+                    + device.mName);
+            device.stopLocked();
+        }
+    }
+
+    private final class VirtualDisplayDevice extends DisplayDevice implements DeathRecipient {
         private final IBinder mAppToken;
         private final int mOwnerUid;
         final String mOwnerPackageName;
-        private final String mName;
+        final String mName;
         private final int mWidth;
         private final int mHeight;
         private final int mDensityDpi;
         private final int mFlags;
+        private final Callbacks mCallbacks;
 
         private Surface mSurface;
         private DisplayDeviceInfo mInfo;
+        private int mState;
+        private boolean mStopped;
 
-        public VirtualDisplayDevice(IBinder displayToken,
-                IBinder appToken, int ownerUid, String ownerPackageName,
-                String name, int width, int height, int densityDpi, Surface surface, int flags) {
+        public VirtualDisplayDevice(IBinder displayToken, IBinder appToken,
+                int ownerUid, String ownerPackageName,
+                String name, int width, int height, int densityDpi, Surface surface, int flags,
+                Callbacks callbacks) {
             super(VirtualDisplayAdapter.this, displayToken);
             mAppToken = appToken;
             mOwnerUid = ownerUid;
@@ -125,6 +151,8 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
             mDensityDpi = densityDpi;
             mSurface = surface;
             mFlags = flags;
+            mCallbacks = callbacks;
+            mState = Display.STATE_UNKNOWN;
         }
 
         @Override
@@ -142,6 +170,19 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
                 mSurface = null;
             }
             SurfaceControl.destroyDisplay(getDisplayTokenLocked());
+            mCallbacks.dispatchDisplayStopped();
+        }
+
+        @Override
+        public void requestDisplayStateLocked(int state) {
+            if (state != mState) {
+                mState = state;
+                if (state == Display.STATE_OFF) {
+                    mCallbacks.dispatchDisplayPaused();
+                } else {
+                    mCallbacks.dispatchDisplayResumed();
+                }
+            }
         }
 
         @Override
@@ -150,7 +191,7 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
         }
 
         public void setSurfaceLocked(Surface surface) {
-            if (mSurface != surface) {
+            if (!mStopped && mSurface != surface) {
                 if ((mSurface != null) != (surface != null)) {
                     sendDisplayDeviceEventLocked(this, DISPLAY_DEVICE_EVENT_CHANGED);
                 }
@@ -159,6 +200,20 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
                 mInfo = null;
             }
         }
+
+        public void stopLocked() {
+            setSurfaceLocked(null);
+            mStopped = true;
+        }
+
+        @Override
+        public void dumpLocked(PrintWriter pw) {
+            super.dumpLocked(pw);
+            pw.println("mFlags=" + mFlags);
+            pw.println("mState=" + Display.stateToString(mState));
+            pw.println("mStopped=" + mStopped);
+        }
+
 
         @Override
         public DisplayDeviceInfo getDisplayDeviceInfoLocked() {
@@ -174,9 +229,11 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
                 mInfo.presentationDeadlineNanos = 1000000000L / (int) mInfo.refreshRate; // 1 frame
                 mInfo.flags = 0;
                 if ((mFlags & DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC) == 0) {
-                    mInfo.flags |= DisplayDeviceInfo.FLAG_PRIVATE
-                            | DisplayDeviceInfo.FLAG_NEVER_BLANK
-                            | DisplayDeviceInfo.FLAG_OWN_CONTENT_ONLY;
+                    mInfo.flags |= DisplayDeviceInfo.FLAG_PRIVATE;
+                    if ((mFlags & DisplayManager.VIRTUAL_DISPLAY_FLAG_SCREEN_SHARE) == 0) {
+                        mInfo.flags |=  DisplayDeviceInfo.FLAG_OWN_CONTENT_ONLY
+                                | DisplayDeviceInfo.FLAG_NEVER_BLANK;
+                    }
                 } else if ((mFlags & DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY) != 0) {
                     mInfo.flags |= DisplayDeviceInfo.FLAG_OWN_CONTENT_ONLY;
                 }
@@ -193,6 +250,64 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
                 mInfo.ownerPackageName = mOwnerPackageName;
             }
             return mInfo;
+        }
+    }
+
+    private static class Callbacks extends Handler {
+        private static final int MSG_ON_DISPLAY_PAUSED = 0;
+        private static final int MSG_ON_DISPLAY_RESUMED = 1;
+        private static final int MSG_ON_DISPLAY_STOPPED = 2;
+
+        private final IVirtualDisplayCallbacks mCallbacks;
+
+        public Callbacks(IVirtualDisplayCallbacks callbacks, Handler handler) {
+            super(handler.getLooper());
+            mCallbacks = callbacks;
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            try {
+                switch (msg.what) {
+                    case MSG_ON_DISPLAY_PAUSED:
+                        mCallbacks.onDisplayPaused();
+                        break;
+                    case MSG_ON_DISPLAY_RESUMED:
+                        mCallbacks.onDisplayResumed();
+                        break;
+                    case MSG_ON_DISPLAY_STOPPED:
+                        mCallbacks.onDisplayStopped();
+                        break;
+                }
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Failed to notify listener of virtual display event.", e);
+            }
+        }
+
+        public void dispatchDisplayPaused() {
+            sendEmptyMessage(MSG_ON_DISPLAY_PAUSED);
+        }
+
+        public void dispatchDisplayResumed() {
+            sendEmptyMessage(MSG_ON_DISPLAY_RESUMED);
+        }
+
+        public void dispatchDisplayStopped() {
+            sendEmptyMessage(MSG_ON_DISPLAY_STOPPED);
+        }
+    }
+
+    private final class MediaProjectionCallback extends IMediaProjectionCallback.Stub {
+        private IBinder mAppToken;
+        public MediaProjectionCallback(IBinder appToken) {
+            mAppToken = appToken;
+        }
+
+        @Override
+        public void onStop() {
+            synchronized (getSyncRoot()) {
+                handleMediaProjectionStoppedLocked(mAppToken);
+            }
         }
     }
 }

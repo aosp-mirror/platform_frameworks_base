@@ -148,6 +148,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/hardware/ISerialManager.aidl \
 	core/java/android/hardware/display/IDisplayManager.aidl \
 	core/java/android/hardware/display/IDisplayManagerCallback.aidl \
+	core/java/android/hardware/display/IVirtualDisplayCallbacks.aidl \
 	core/java/android/hardware/hdmi/IHdmiControlCallback.aidl \
 	core/java/android/hardware/hdmi/IHdmiControlService.aidl \
 	core/java/android/hardware/hdmi/IHdmiDeviceEventListener.aidl \
@@ -325,6 +326,9 @@ LOCAL_SRC_FILES += \
 	media/java/android/media/routing/IMediaRouterDelegate.aidl \
 	media/java/android/media/routing/IMediaRouterRoutingCallback.aidl \
 	media/java/android/media/routing/IMediaRouterStateCallback.aidl \
+	media/java/android/media/projection/IMediaProjection.aidl \
+	media/java/android/media/projection/IMediaProjectionCallback.aidl \
+	media/java/android/media/projection/IMediaProjectionManager.aidl \
 	media/java/android/media/session/IActiveSessionsListener.aidl \
 	media/java/android/media/session/ISessionController.aidl \
 	media/java/android/media/session/ISessionControllerCallback.aidl \
