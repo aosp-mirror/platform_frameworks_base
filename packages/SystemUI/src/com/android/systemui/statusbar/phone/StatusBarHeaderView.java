@@ -285,6 +285,9 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         mDateExpanded.setVisibility(mExpanded && !mOverscrolled ? View.VISIBLE : View.GONE);
         mSettingsButton.setVisibility(mExpanded && !mOverscrolled ? View.VISIBLE : View.GONE);
         mQsDetailHeader.setVisibility(mExpanded ? View.VISIBLE : View.GONE);
+        if (mStatusIcons != null) {
+            mStatusIcons.setVisibility(!mExpanded || mOverscrolled ? View.VISIBLE : View.GONE);
+        }
         if (mSignalCluster != null) {
             mSignalCluster.setVisibility(!mExpanded || mOverscrolled ? View.VISIBLE : View.GONE);
         }
@@ -437,15 +440,16 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     public void attachSystemIcons(LinearLayout systemIcons) {
         mSystemIconsContainer.addView(systemIcons);
         mStatusIcons = systemIcons.findViewById(R.id.statusIcons);
-        mStatusIcons.addOnLayoutChangeListener(mStatusIconsChanged);
         mSignalCluster = systemIcons.findViewById(R.id.signal_cluster);
+        mSignalCluster.addOnLayoutChangeListener(mSignalClusterChanged);
     }
 
     public void onSystemIconsDetached() {
         if (mStatusIcons != null) {
-            mStatusIcons.removeOnLayoutChangeListener(mStatusIconsChanged);
+            mStatusIcons.setVisibility(View.VISIBLE);
         }
         if (mSignalCluster != null) {
+            mSignalCluster.removeOnLayoutChangeListener(mSignalClusterChanged);
             mSignalCluster.setVisibility(View.VISIBLE);
         }
         mStatusIcons = null;
@@ -528,7 +532,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         // here.
     }
 
-    private final OnLayoutChangeListener mStatusIconsChanged = new OnLayoutChangeListener() {
+    private final OnLayoutChangeListener mSignalClusterChanged = new OnLayoutChangeListener() {
         private final Rect mClipBounds = new Rect();
 
         @Override
@@ -536,12 +540,9 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
                 int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
             // Hide the statusIcons in the header by clipping them.  Can't touch visibility since
             // they are mirrored to the real status bar.
-            final Rect r = mSystemIconsContainer.getClipBounds();
-            if (r == null || r.left != right) {
-                mClipBounds.set(right, 0, mSystemIconsContainer.getWidth(),
-                        mSystemIconsContainer.getHeight());
-                mSystemIconsContainer.setClipBounds(mClipBounds);
-            }
+            mClipBounds.set(left, 0, mSystemIconsContainer.getWidth(),
+                    mSystemIconsContainer.getHeight());
+            mSystemIconsContainer.setClipBounds(mClipBounds);
         }
     };
 
