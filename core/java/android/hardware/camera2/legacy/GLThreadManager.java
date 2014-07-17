@@ -25,6 +25,8 @@ import android.view.Surface;
 
 import java.util.Collection;
 
+import static com.android.internal.util.Preconditions.*;
+
 /**
  * GLThreadManager handles the thread used for rendering into the configured output surfaces.
  */
@@ -37,6 +39,8 @@ public class GLThreadManager {
     private static final int MSG_CLEANUP = 3;
     private static final int MSG_DROP_FRAMES = 4;
     private static final int MSG_ALLOW_FRAMES = 5;
+
+    private CaptureCollector mCaptureCollector;
 
     private final SurfaceTextureRenderer mTextureRenderer;
 
@@ -51,10 +55,13 @@ public class GLThreadManager {
     private static class ConfigureHolder {
         public final ConditionVariable condition;
         public final Collection<Surface> surfaces;
+        public final CaptureCollector collector;
 
-        public ConfigureHolder(ConditionVariable condition, Collection<Surface> surfaces) {
+        public ConfigureHolder(ConditionVariable condition, Collection<Surface> surfaces,
+                               CaptureCollector collector) {
             this.condition = condition;
             this.surfaces = surfaces;
+            this.collector = collector;
         }
     }
 
@@ -74,6 +81,7 @@ public class GLThreadManager {
                     ConfigureHolder configure = (ConfigureHolder) msg.obj;
                     mTextureRenderer.cleanupEGLContext();
                     mTextureRenderer.configureSurfaces(configure.surfaces);
+                    mCaptureCollector = checkNotNull(configure.collector);
                     configure.condition.open();
                     mConfigured = true;
                     break;
@@ -88,7 +96,7 @@ public class GLThreadManager {
                     if (!mConfigured) {
                         Log.e(TAG, "Dropping frame, EGL context not configured!");
                     }
-                    mTextureRenderer.drawIntoSurfaces((Collection<Surface>) msg.obj);
+                    mTextureRenderer.drawIntoSurfaces(mCaptureCollector);
                     break;
                 case MSG_CLEANUP:
                     mTextureRenderer.cleanupEGLContext();
@@ -158,16 +166,11 @@ public class GLThreadManager {
     }
 
     /**
-     * Queue a new call to draw into a given set of surfaces.
-     *
-     * <p>
-     * The set of surfaces passed here must be a subset of the set of surfaces passed in
-     * the last call to {@link #setConfigurationAndWait}.
-     * </p>
-     *
-     * @param targets a collection of {@link android.view.Surface}s to draw into.
+     * Queue a new call to draw into the surfaces specified in the next available preview
+     * request from the {@link CaptureCollector} passed to
+     * {@link #setConfigurationAndWait(java.util.Collection, CaptureCollector)};
      */
-    public void queueNewFrame(Collection<Surface> targets) {
+    public void queueNewFrame() {
         Handler handler = mGLHandlerThread.getHandler();
 
         /**
@@ -175,7 +178,7 @@ public class GLThreadManager {
          * are produced, drop frames rather than allowing the queue to back up.
          */
         if (!handler.hasMessages(MSG_NEW_FRAME)) {
-            handler.sendMessage(handler.obtainMessage(MSG_NEW_FRAME, targets));
+            handler.sendMessage(handler.obtainMessage(MSG_NEW_FRAME));
         } else {
             Log.e(TAG, "GLThread dropping frame.  Not consuming frames quickly enough!");
         }
@@ -186,12 +189,14 @@ public class GLThreadManager {
      * this configuration has been applied.
      *
      * @param surfaces a collection of {@link android.view.Surface}s to configure.
+     * @param collector a {@link CaptureCollector} to retrieve requests from.
      */
-    public void setConfigurationAndWait(Collection<Surface> surfaces) {
+    public void setConfigurationAndWait(Collection<Surface> surfaces, CaptureCollector collector) {
+        checkNotNull(collector, "collector must not be null");
         Handler handler = mGLHandlerThread.getHandler();
 
         final ConditionVariable condition = new ConditionVariable(/*closed*/false);
-        ConfigureHolder configure = new ConfigureHolder(condition, surfaces);
+        ConfigureHolder configure = new ConfigureHolder(condition, surfaces, collector);
 
         Message m = handler.obtainMessage(MSG_NEW_CONFIGURATION, /*arg1*/0, /*arg2*/0, configure);
         handler.sendMessage(m);

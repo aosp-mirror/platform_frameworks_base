@@ -16,6 +16,8 @@
 
 package com.android.internal.util;
 
+import java.util.Collection;
+
 /**
  * Simple static methods to be called at the start of your own methods to verify
  * correct arguments and state.
@@ -210,7 +212,7 @@ public class Preconditions {
     }
 
     /**
-     * Ensures that the array is not {@code null}, and none if its elements are {@code null}.
+     * Ensures that the array is not {@code null}, and none of its elements are {@code null}.
      *
      * @param value an array of boxed objects
      * @param valueName the name of the argument to use if the check fails
@@ -231,6 +233,57 @@ public class Preconditions {
             }
         }
 
+        return value;
+    }
+
+    /**
+     * Ensures that the {@link Collection} is not {@code null}, and none of its elements are
+     * {@code null}.
+     *
+     * @param value a {@link Collection} of boxed objects
+     * @param valueName the name of the argument to use if the check fails
+     *
+     * @return the validated {@link Collection}
+     *
+     * @throws NullPointerException if the {@code value} or any of its elements were {@code null}
+     */
+    public static <T> Collection<T> checkCollectionElementsNotNull(final Collection<T> value,
+            final String valueName) {
+        if (value == null) {
+            throw new NullPointerException(valueName + " must not be null");
+        }
+
+        long ctr = 0;
+        for (T elem : value) {
+            if (elem == null) {
+                throw new NullPointerException(
+                        String.format("%s[%d] must not be null", valueName, ctr));
+            }
+            ++ctr;
+        }
+
+        return value;
+    }
+
+    /**
+     * Ensures that the {@link Collection} is not {@code null}, and contains at least one element.
+     *
+     * @param value a {@link Collection} of boxed elements.
+     * @param valueName the name of the argument to use if the check fails.
+
+     * @return the validated {@link Collection}
+     *
+     * @throws NullPointerException if the {@code value} was {@code null}
+     * @throws IllegalArgumentException if the {@code value} was empty
+     */
+    public static <T> Collection<T> checkCollectionNotEmpty(final Collection<T> value,
+            final String valueName) {
+        if (value == null) {
+            throw new NullPointerException(valueName + " must not be null");
+        }
+        if (value.isEmpty()) {
+            throw new IllegalArgumentException(valueName + " is empty");
+        }
         return value;
     }
 
