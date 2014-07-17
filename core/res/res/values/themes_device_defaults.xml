@@ -195,12 +195,6 @@ easier.
         <!-- TimePicker style -->
         <item name="timePickerStyle">@style/Widget.DeviceDefault.TimePicker</item>
 
-        <!-- TimePicker Header time label text appearance -->
-        <item name="timePickerHeaderTimeLabelTextAppearance">@style/TextAppearance.DeviceDefault.TimePicker.TimeLabel</item>
-
-        <!-- TimePicker Header am pm label text appearance -->
-        <item name="timePickerHeaderAmPmLabelTextAppearance">@style/TextAppearance.DeviceDefault.TimePicker.AmPmLabel</item>
-
         <!-- TimePicker dialog theme -->
         <item name="timePickerDialogTheme">@style/Theme.DeviceDefault.Dialog.TimePicker</item>
 
@@ -469,12 +463,6 @@ easier.
 
         <!-- TimePicker style -->
         <item name="timePickerStyle">@style/Widget.DeviceDefault.Light.TimePicker</item>
-
-        <!-- TimePicker Header time label text appearance -->
-        <item name="timePickerHeaderTimeLabelTextAppearance">@style/TextAppearance.DeviceDefault.TimePicker.TimeLabel</item>
-
-        <!-- TimePicker Header am pm label text appearance -->
-        <item name="timePickerHeaderAmPmLabelTextAppearance">@style/TextAppearance.DeviceDefault.TimePicker.AmPmLabel</item>
 
         <!-- TimePicker dialog theme -->
         <item name="timePickerDialogTheme">@style/Theme.DeviceDefault.Light.Dialog.TimePicker</item>

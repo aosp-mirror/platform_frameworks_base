@@ -36,6 +36,7 @@ import android.text.format.DateUtils;
 import android.text.format.Time;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.View;
@@ -190,6 +191,8 @@ public class RadialTimePickerView extends View implements View.OnTouchListener {
     private int mAmOrPm;
     private int mAmOrPmPressed;
 
+    private int mDisabledAlpha;
+
     private RectF mRectF = new RectF();
     private boolean mInputEnabled = true;
     private OnValueSelectedListener mListener;
@@ -310,15 +313,18 @@ public class RadialTimePickerView extends View implements View.OnTouchListener {
     public RadialTimePickerView(Context context, AttributeSet attrs, int defStyle)  {
         super(context, attrs);
 
+        // Pull disabled alpha from theme.
+        final TypedValue outValue = new TypedValue();
+        context.getTheme().resolveAttribute(android.R.attr.disabledAlpha, outValue, true);
+        mDisabledAlpha = (int) (outValue.getFloat() * 255 + 0.5f);
+
         // process style attributes
+        final Resources res = getResources();
         final TypedArray a = mContext.obtainStyledAttributes(attrs, R.styleable.TimePicker,
                 defStyle, 0);
 
-        final Resources res = getResources();
-
         mAmPmUnselectedColor = a.getColor(R.styleable.TimePicker_amPmUnselectedBackgroundColor,
                 res.getColor(R.color.timepicker_default_ampm_unselected_background_color_material));
-
         mAmPmSelectedColor = a.getColor(R.styleable.TimePicker_amPmSelectedBackgroundColor,
                 res.getColor(R.color.timepicker_default_ampm_selected_background_color_material));
 
@@ -405,10 +411,6 @@ public class RadialTimePickerView extends View implements View.OnTouchListener {
         mPaintBackground.setColor(a.getColor(R.styleable.TimePicker_numbersBackgroundColor,
                 res.getColor(R.color.timepicker_default_numbers_background_color_material)));
         mPaintBackground.setAntiAlias(true);
-
-        mPaintDisabled.setColor(a.getColor(R.styleable.TimePicker_disabledColor,
-                res.getColor(R.color.timepicker_default_disabled_color_material)));
-        mPaintDisabled.setAntiAlias(true);
 
         if (DEBUG) {
             mPaintDebug.setColor(DEBUG_COLOR);
@@ -722,7 +724,11 @@ public class RadialTimePickerView extends View implements View.OnTouchListener {
 
     @Override
     public void onDraw(Canvas canvas) {
-        canvas.save();
+        if (!mInputEnabled) {
+            canvas.saveLayerAlpha(0, 0, getWidth(), getHeight(), mDisabledAlpha);
+        } else {
+            canvas.save();
+        }
 
         calculateGridSizesHours();
         calculateGridSizesMinutes();
@@ -747,12 +753,6 @@ public class RadialTimePickerView extends View implements View.OnTouchListener {
         drawCenter(canvas);
         if (!mIs24HourMode) {
             drawAmPm(canvas);
-        }
-
-        if(!mInputEnabled) {
-            // Draw outer view rectangle
-            mRectF.set(0, 0, getWidth(), getHeight());
-            canvas.drawRect(mRectF, mPaintDisabled);
         }
 
         if (DEBUG) {

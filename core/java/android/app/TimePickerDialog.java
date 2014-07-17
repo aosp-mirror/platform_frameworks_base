@@ -19,6 +19,7 @@ package android.app;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -27,8 +28,6 @@ import android.widget.TimePicker;
 import android.widget.TimePicker.OnTimeChangedListener;
 
 import com.android.internal.R;
-
-import static android.os.Build.VERSION_CODES.L;
 
 /**
  * A dialog that prompts the user for the time of day using a {@link TimePicker}.
@@ -102,26 +101,26 @@ public class TimePickerDialog extends AlertDialog
             OnTimeSetListener callBack,
             int hourOfDay, int minute, boolean is24HourView) {
         super(context, resolveDialogTheme(context, theme));
+
         mTimeSetCallback = callBack;
         mInitialHourOfDay = hourOfDay;
         mInitialMinute = minute;
         mIs24HourView = is24HourView;
 
-        Context themeContext = getContext();
+        final Context themeContext = getContext();
 
-        final int targetSdkVersion = getContext().getApplicationInfo().targetSdkVersion;
-        if (targetSdkVersion < L) {
+        final int targetSdkVersion = themeContext.getApplicationInfo().targetSdkVersion;
+        if (targetSdkVersion < Build.VERSION_CODES.L) {
             setIcon(0);
             setTitle(R.string.time_picker_dialog_title);
             setButton(BUTTON_POSITIVE, themeContext.getText(R.string.date_time_done), this);
         }
 
-        LayoutInflater inflater =
-                (LayoutInflater) themeContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View view = inflater.inflate(R.layout.time_picker_dialog, null);
+        final LayoutInflater inflater = LayoutInflater.from(themeContext);
+        final View view = inflater.inflate(R.layout.time_picker_dialog, null);
         setView(view);
-        mTimePicker = (TimePicker) view.findViewById(R.id.timePicker);
 
+        mTimePicker = (TimePicker) view.findViewById(R.id.timePicker);
         mTimePicker.setShowDoneButton(true);
         mTimePicker.setDismissCallback(new TimePicker.TimePickerDismissCallback() {
             @Override

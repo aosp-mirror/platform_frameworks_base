@@ -33,8 +33,7 @@
         <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dip"
-                android:layout_weight="1"
-                android:background="?android:attr/timePickerHeaderBackgroundColor">
+                android:layout_weight="1">
             <include
                     layout="@layout/time_header_label"
                     android:layout_width="match_parent"
@@ -47,7 +46,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:background="?android:attr/timePickerHeaderBackgroundColor"
                 android:divider="?android:attr/dividerHorizontal"
                 android:showDividers="beginning">
             <Button

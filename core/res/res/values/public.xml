@@ -2251,6 +2251,20 @@
   <public type="attr" name="dateSelectorYearListSelectedCircleColor" />
   <public type="attr" name="calendarTextColor" />
 
+  <!-- For the TimePicker -->
+  <public type="attr" name="timePickerStyle" />
+  <public type="attr" name="timePickerDialogTheme" />
+  <public type="attr" name="headerTimeTextAppearance" />
+  <public type="attr" name="headerAmPmTextAppearance" />
+  <public type="attr" name="headerSelectedTextColor" />
+  <public type="attr" name="headerBackgroundColor" />
+  <public type="attr" name="numbersTextColor" />
+  <public type="attr" name="numbersBackgroundColor" />
+  <public type="attr" name="numbersSelectorColor" />
+  <public type="attr" name="amPmTextColor" />
+  <public type="attr" name="amPmUnselectedBackgroundColor" />
+  <public type="attr" name="amPmSelectedBackgroundColor" />
+
   <public-padding type="dimen" name="l_resource_pad" end="0x01050010" />
 
   <public-padding type="id" name="l_resource_pad" end="0x01020040" />

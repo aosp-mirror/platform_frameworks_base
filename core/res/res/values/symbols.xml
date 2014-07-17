@@ -1846,17 +1846,13 @@
 
   <!-- From the new TimePicker and DatePicker -->
   <java-symbol type="attr" name="timePickerDialogTheme" />
-  <java-symbol type="attr" name="timePickerHeaderTimeLabelTextAppearance" />
-  <java-symbol type="attr" name="timePickerHeaderBackgroundColor" />
   <java-symbol type="attr" name="headerSelectedTextColor" />
-  <java-symbol type="attr" name="headerUnselectedTextColor" />
   <java-symbol type="attr" name="numbersTextColor" />
   <java-symbol type="attr" name="numbersBackgroundColor" />
   <java-symbol type="attr" name="amPmTextColor" />
   <java-symbol type="attr" name="amPmUnselectedBackgroundColor" />
   <java-symbol type="attr" name="amPmSelectedBackgroundColor" />
   <java-symbol type="attr" name="numbersSelectorColor" />
-  <java-symbol type="attr" name="timePickerHeaderTimeLabelTextAppearance" />
   <java-symbol type="attr" name="nestedScrollingEnabled" />
   <java-symbol type="attr" name="datePickerDialogTheme" />
   <java-symbol type="attr" name="datePickerHeaderSelectorBackgroundColor" />
@@ -1926,7 +1922,6 @@
   <java-symbol type="dimen" name="datepicker_year_picker_padding_top" />
 
   <java-symbol type="color" name="timepicker_default_text_color_holo_light" />
-  <java-symbol type="color" name="timepicker_default_disabled_color_holo_light" />
   <java-symbol type="color" name="timepicker_default_ampm_unselected_background_color_holo_light" />
   <java-symbol type="color" name="timepicker_default_ampm_selected_background_color_holo_light" />
 
@@ -1955,7 +1950,6 @@
   <java-symbol type="style" name="Animation.VolumePanel" />
   <java-symbol type="transition" name="no_transition" />
   <java-symbol type="color" name="timepicker_default_text_color_material" />
-  <java-symbol type="color" name="timepicker_default_disabled_color_material" />
   <java-symbol type="color" name="timepicker_default_ampm_unselected_background_color_material" />
   <java-symbol type="color" name="timepicker_default_ampm_selected_background_color_material" />
   <java-symbol type="color" name="timepicker_default_selector_color_material" />

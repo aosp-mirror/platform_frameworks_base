@@ -17,7 +17,6 @@
 package android.widget;
 
 import android.annotation.Widget;
-import android.app.UiModeManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
@@ -30,8 +29,6 @@ import com.android.internal.R;
 
 import java.util.Locale;
 
-import static android.os.Build.VERSION_CODES.L;
-
 /**
  * A view for selecting the time of day, in either 24 hour or AM/PM mode. The
  * hour, each minute digit, and AM/PM (if applicable) can be conrolled by
@@ -41,20 +38,14 @@ import static android.os.Build.VERSION_CODES.L;
  * by entering single digits. Under AM/PM mode, the user can hit 'a', 'A", 'p'
  * or 'P' to pick. For a dialog using this view, see
  * {@link android.app.TimePickerDialog}.
- *<p>
+ * <p>
  * See the <a href="{@docRoot}guide/topics/ui/controls/pickers.html">Pickers</a>
  * guide.
  * </p>
  */
 @Widget
 public class TimePicker extends FrameLayout {
-
-    private TimePickerDelegate mDelegate;
-
-    private AttributeSet mAttrs;
-    private int mDefStyleAttr;
-    private int mDefStyleRes;
-    private Context mContext;
+    private final TimePickerDelegate mDelegate;
 
     /**
      * The callback interface used to indicate the time has been adjusted.
@@ -84,50 +75,18 @@ public class TimePicker extends FrameLayout {
     public TimePicker(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
 
-        mContext = context;
-        mAttrs = attrs;
-        mDefStyleAttr = defStyleAttr;
-        mDefStyleRes = defStyleRes;
-
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.TimePicker,
-                mDefStyleAttr, mDefStyleRes);
-
-        // Create the correct UI delegate. Legacy mode is used when API Levels is below L
-        // release or when it is a TV UI
-        final boolean isLegacyMode =  a.getBoolean(
-                R.styleable.TimePicker_legacyMode, isLegacyMode());
-
+        final TypedArray a = context.obtainStyledAttributes(
+                attrs, R.styleable.TimePicker, defStyleAttr, defStyleRes);
+        final boolean legacyMode = a.getBoolean(R.styleable.TimePicker_legacyMode, true);
         a.recycle();
 
-        setLegacyMode(isLegacyMode);
-    }
-
-    private boolean isLegacyMode() {
-        UiModeManager uiModeManager =
-                (UiModeManager) mContext.getSystemService(Context.UI_MODE_SERVICE);
-        if (uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION) {
-            return true;
+        if (legacyMode) {
+            mDelegate = new LegacyTimePickerDelegate(
+                    this, context, attrs, defStyleAttr, defStyleRes);
+        } else {
+            mDelegate = new android.widget.TimePickerDelegate(
+                    this, context, attrs, defStyleAttr, defStyleRes);
         }
-        final int targetSdkVersion = getContext().getApplicationInfo().targetSdkVersion;
-        return targetSdkVersion < L;
-    }
-
-    private TimePickerDelegate createLegacyUIDelegate(Context context, AttributeSet attrs,
-            int defStyleAttr, int defStyleRes) {
-        return new LegacyTimePickerDelegate(this, context, attrs, defStyleAttr, defStyleRes);
-    }
-
-    private TimePickerDelegate createNewUIDelegate(Context context, AttributeSet attrs,
-            int defStyleAttr, int defStyleRes) {
-        return new android.widget.TimePickerDelegate(this, context, attrs, defStyleAttr,
-                defStyleRes);
-    }
-
-    private void setLegacyMode(boolean isLegacyMode) {
-        removeAllViewsInLayout();
-        mDelegate = isLegacyMode ?
-                createLegacyUIDelegate(mContext, mAttrs, mDefStyleAttr, mDefStyleRes) :
-                createNewUIDelegate(mContext, mAttrs, mDefStyleAttr, mDefStyleRes);
     }
 
     /**
@@ -185,9 +144,6 @@ public class TimePicker extends FrameLayout {
 
     @Override
     public void setEnabled(boolean enabled) {
-        if (mDelegate.isEnabled() == enabled) {
-            return;
-        }
         super.setEnabled(enabled);
         mDelegate.setEnabled(enabled);
     }
