@@ -27,7 +27,7 @@ import android.telecomm.PhoneAccount;
  * {@hide}
  */
 oneway interface IInCallAdapter {
-    void answerCall(String callId);
+    void answerCall(String callId, int videoState);
 
     void rejectCall(String callId, boolean rejectWithMessage, String textMessage);
 

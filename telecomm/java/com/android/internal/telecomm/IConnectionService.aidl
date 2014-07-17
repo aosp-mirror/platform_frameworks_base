@@ -36,7 +36,7 @@ oneway interface IConnectionService {
 
     void abort(String callId);
 
-    void answer(String callId);
+    void answer(String callId, int videoState);
 
     void reject(String callId);
 
