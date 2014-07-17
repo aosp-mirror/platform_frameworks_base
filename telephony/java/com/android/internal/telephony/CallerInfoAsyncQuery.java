@@ -16,23 +16,25 @@
 
 package com.android.internal.telephony;
 
+import android.app.ActivityManager;
 import android.content.AsyncQueryHandler;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.os.SystemProperties;
-import android.provider.ContactsContract.CommonDataKinds.SipAddress;
-import android.provider.ContactsContract.Data;
+import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.ContactsContract.PhoneLookup;
 import android.telephony.PhoneNumberUtils;
 import android.text.TextUtils;
 import android.telephony.Rlog;
 import android.telephony.SubscriptionManager;
-import android.telephony.TelephonyManager;
+import android.util.Log;
 
 /**
  * Helper class to make it easier to run asynchronous caller-id lookup queries.
@@ -93,17 +95,52 @@ public class CallerInfoAsyncQuery {
     }
 
     /**
+     * @return {@link ContentResolver} for the "current" user.
+     */
+    static ContentResolver getCurrentProfileContentResolver(Context context) {
+
+        if (DBG) Rlog.d(LOG_TAG, "Trying to get current content resolver...");
+
+        final int currentUser = ActivityManager.getCurrentUser();
+        final int myUser = UserManager.get(context).getUserHandle();
+
+        if (DBG) Rlog.d(LOG_TAG, "myUser=" + myUser + "currentUser=" + currentUser);
+
+        if (myUser != currentUser) {
+            final Context otherContext;
+            try {
+                otherContext = context.createPackageContextAsUser(context.getPackageName(),
+                        /* flags =*/ 0, new UserHandle(currentUser));
+                return otherContext.getContentResolver();
+            } catch (NameNotFoundException e) {
+                Rlog.e(LOG_TAG, "Can't find self package", e);
+                // Fall back to the primary user.
+            }
+        }
+        return context.getContentResolver();
+    }
+
+    /**
      * Our own implementation of the AsyncQueryHandler.
      */
     private class CallerInfoAsyncQueryHandler extends AsyncQueryHandler {
 
-        /**
+        /*
          * The information relevant to each CallerInfo query.  Each query may have multiple
          * listeners, so each AsyncCursorInfo is associated with 2 or more CookieWrapper
          * objects in the queue (one with a new query event, and one with a end event, with
          * 0 or more additional listeners in between).
          */
-        private Context mQueryContext;
+
+        /**
+         * Context passed by the caller.
+         *
+         * NOTE: The actual context we use for query may *not* be this context; since we query
+         * against the "current" contacts provider.  In the constructor we pass the "current"
+         * context resolver (obtained via {@link #getCurrentProfileContentResolver) and pass it
+         * to the super class.
+         */
+        private Context mContext;
         private Uri mQueryUri;
         private CallerInfo mCallerInfo;
 
@@ -182,7 +219,8 @@ public class CallerInfoAsyncQuery {
          * Asynchronous query handler class for the contact / callerinfo object.
          */
         private CallerInfoAsyncQueryHandler(Context context) {
-            super(context.getContentResolver());
+            super(getCurrentProfileContentResolver(context));
+            mContext = context;
         }
 
         @Override
@@ -228,7 +266,7 @@ public class CallerInfoAsyncQuery {
 
             // check the token and if needed, create the callerinfo object.
             if (mCallerInfo == null) {
-                if ((mQueryContext == null) || (mQueryUri == null)) {
+                if ((mContext == null) || (mQueryUri == null)) {
                     throw new QueryPoolException
                             ("Bad context or query uri, or CallerInfoAsyncQuery already released.");
                 }
@@ -241,15 +279,15 @@ public class CallerInfoAsyncQuery {
                 if (cw.event == EVENT_EMERGENCY_NUMBER) {
                     // Note we're setting the phone number here (refer to javadoc
                     // comments at the top of CallerInfo class).
-                    mCallerInfo = new CallerInfo().markAsEmergency(mQueryContext);
+                    mCallerInfo = new CallerInfo().markAsEmergency(mContext);
                 } else if (cw.event == EVENT_VOICEMAIL_NUMBER) {
                     mCallerInfo = new CallerInfo().markAsVoiceMail(cw.subId);
                 } else {
-                    mCallerInfo = CallerInfo.getCallerInfo(mQueryContext, mQueryUri, cursor);
+                    mCallerInfo = CallerInfo.getCallerInfo(mContext, mQueryUri, cursor);
                     if (DBG) Rlog.d(LOG_TAG, "==> Got mCallerInfo: " + mCallerInfo);
 
                     CallerInfo newCallerInfo = CallerInfo.doSecondaryLookupIfNecessary(
-                            mQueryContext, cw.number, mCallerInfo);
+                            mContext, cw.number, mCallerInfo);
                     if (newCallerInfo != mCallerInfo) {
                         mCallerInfo = newCallerInfo;
                         if (DBG) Rlog.d(LOG_TAG, "#####async contact look up with numeric username"
@@ -274,7 +312,7 @@ public class CallerInfoAsyncQuery {
                             // the CallerInfo object is totally blank here (i.e. no name
                             // *or* phoneNumber).  So we need to pass in cw.number as
                             // a fallback number.
-                            mCallerInfo.updateGeoDescription(mQueryContext, cw.number);
+                            mCallerInfo.updateGeoDescription(mContext, cw.number);
                         }
                     }
 
@@ -282,7 +320,7 @@ public class CallerInfoAsyncQuery {
                     if (!TextUtils.isEmpty(cw.number)) {
                         mCallerInfo.phoneNumber = PhoneNumberUtils.formatNumber(cw.number,
                                 mCallerInfo.normalizedNumber,
-                                CallerInfo.getCurrentCountryIso(mQueryContext));
+                                CallerInfo.getCurrentCountryIso(mContext));
                     }
                 }
 
@@ -441,7 +479,6 @@ public class CallerInfoAsyncQuery {
             throw new QueryPoolException("Bad context or query uri.");
         }
         mHandler = new CallerInfoAsyncQueryHandler(context);
-        mHandler.mQueryContext = context;
         mHandler.mQueryUri = contactRef;
     }
 
@@ -449,7 +486,7 @@ public class CallerInfoAsyncQuery {
      * Releases the relevant data.
      */
     private void release() {
-        mHandler.mQueryContext = null;
+        mHandler.mContext = null;
         mHandler.mQueryUri = null;
         mHandler.mCallerInfo = null;
         mHandler = null;
