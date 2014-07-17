@@ -5720,6 +5720,17 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         oldNetwork.asyncChannel.disconnect();
     }
 
+    private void makeDefault(NetworkAgentInfo newNetwork) {
+        if (VDBG) log("Switching to new default network: " + newNetwork);
+        setupDataActivityTracking(newNetwork);
+        try {
+            mNetd.setDefaultNetId(newNetwork.network.netId);
+        } catch (Exception e) {
+            loge("Exception setting default network :" + e);
+        }
+        handleApplyDefaultProxy(newNetwork.linkProperties.getHttpProxy());
+    }
+
     private void handleConnectionValidated(NetworkAgentInfo newNetwork) {
         if (newNetwork == null) {
             loge("Unknown NetworkAgentInfo in handleConnectionValidated");
@@ -5813,16 +5824,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
         if (keep) {
             if (isNewDefault) {
-                if (VDBG) log("Switching to new default network: " + newNetwork);
-                setupDataActivityTracking(newNetwork);
-                try {
-                    mNetd.setDefaultNetId(newNetwork.network.netId);
-                } catch (Exception e) {
-                    loge("Exception setting default network :" + e);
-                }
-                if (newNetwork.equals(mNetworkForRequestId.get(mDefaultRequest.requestId))) {
-                    handleApplyDefaultProxy(newNetwork.linkProperties.getHttpProxy());
-                }
+                makeDefault(newNetwork);
                 synchronized (ConnectivityService.this) {
                     // have a new default network, release the transition wakelock in
                     // a second if it's held.  The second pause is to allow apps
@@ -5918,6 +5920,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     }
                 }
                 // TODO: support proxy per network.
+            }
+            // Make default network if we have no default.  Any network is better than no network.
+            if (mNetworkForRequestId.get(mDefaultRequest.requestId) == null &&
+                    networkAgent.isVPN() == false &&
+                    mDefaultRequest.networkCapabilities.satisfiedByNetworkCapabilities(
+                    networkAgent.networkCapabilities)) {
+                makeDefault(networkAgent);
             }
         } else if (state == NetworkInfo.State.DISCONNECTED ||
                 state == NetworkInfo.State.SUSPENDED) {
