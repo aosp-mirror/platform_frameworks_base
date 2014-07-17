@@ -216,4 +216,17 @@ public class UserAvatarView extends View {
             super.invalidateDrawable(dr);
         }
     }
+
+    @Override
+    protected boolean verifyDrawable(Drawable who) {
+        return who == mDrawable || super.verifyDrawable(who);
+    }
+
+    @Override
+    protected void drawableStateChanged() {
+        super.drawableStateChanged();
+        if (mDrawable != null && mDrawable.isStateful()) {
+            mDrawable.setState(getDrawableState());
+        }
+    }
 }
