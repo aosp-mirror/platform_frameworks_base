@@ -6499,14 +6499,15 @@ package android.bluetooth.le {
     method public void onStartFailure(int);
     method public void onStartSuccess(android.bluetooth.le.AdvertiseSettings);
     field public static final int ADVERTISE_FAILED_ALREADY_STARTED = 3; // 0x3
+    field public static final int ADVERTISE_FAILED_DATA_TOO_LARGE = 1; // 0x1
     field public static final int ADVERTISE_FAILED_FEATURE_UNSUPPORTED = 5; // 0x5
     field public static final int ADVERTISE_FAILED_INTERNAL_ERROR = 4; // 0x4
-    field public static final int ADVERTISE_FAILED_SERVICE_UNKNOWN = 1; // 0x1
     field public static final int ADVERTISE_FAILED_TOO_MANY_ADVERTISERS = 2; // 0x2
   }
 
   public final class AdvertiseData implements android.os.Parcelable {
     method public int describeContents();
+    method public boolean getIncludeDeviceName();
     method public boolean getIncludeTxPowerLevel();
     method public int getManufacturerId();
     method public byte[] getManufacturerSpecificData();
@@ -6514,16 +6515,16 @@ package android.bluetooth.le {
     method public android.os.ParcelUuid getServiceDataUuid();
     method public java.util.List<android.os.ParcelUuid> getServiceUuids();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
   }
 
   public static final class AdvertiseData.Builder {
     ctor public AdvertiseData.Builder();
+    method public android.bluetooth.le.AdvertiseData.Builder addServiceUuid(android.os.ParcelUuid);
     method public android.bluetooth.le.AdvertiseData build();
+    method public android.bluetooth.le.AdvertiseData.Builder setIncludeDeviceName(boolean);
     method public android.bluetooth.le.AdvertiseData.Builder setIncludeTxPowerLevel(boolean);
     method public android.bluetooth.le.AdvertiseData.Builder setManufacturerData(int, byte[]);
     method public android.bluetooth.le.AdvertiseData.Builder setServiceData(android.os.ParcelUuid, byte[]);
-    method public android.bluetooth.le.AdvertiseData.Builder setServiceUuids(java.util.List<android.os.ParcelUuid>);
   }
 
   public final class AdvertiseSettings implements android.os.Parcelable {
@@ -6540,7 +6541,6 @@ package android.bluetooth.le {
     field public static final int ADVERTISE_TX_POWER_LOW = 1; // 0x1
     field public static final int ADVERTISE_TX_POWER_MEDIUM = 2; // 0x2
     field public static final int ADVERTISE_TX_POWER_ULTRA_LOW = 0; // 0x0
-    field public static final android.os.Parcelable.Creator CREATOR;
   }
 
   public static final class AdvertiseSettings.Builder {
@@ -6583,15 +6583,12 @@ package android.bluetooth.le {
     method public byte[] getManufacturerData();
     method public byte[] getManufacturerDataMask();
     method public int getManufacturerId();
-    method public int getMaxRssi();
-    method public int getMinRssi();
     method public byte[] getServiceData();
     method public byte[] getServiceDataMask();
     method public android.os.ParcelUuid getServiceUuid();
     method public android.os.ParcelUuid getServiceUuidMask();
     method public boolean matches(android.bluetooth.le.ScanResult);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
   }
 
   public static final class ScanFilter.Builder {
@@ -6601,15 +6598,15 @@ package android.bluetooth.le {
     method public android.bluetooth.le.ScanFilter.Builder setDeviceName(java.lang.String);
     method public android.bluetooth.le.ScanFilter.Builder setManufacturerData(int, byte[]);
     method public android.bluetooth.le.ScanFilter.Builder setManufacturerData(int, byte[], byte[]);
-    method public android.bluetooth.le.ScanFilter.Builder setRssiRange(int, int);
-    method public android.bluetooth.le.ScanFilter.Builder setServiceData(byte[]);
-    method public android.bluetooth.le.ScanFilter.Builder setServiceData(byte[], byte[]);
+    method public android.bluetooth.le.ScanFilter.Builder setServiceData(android.os.ParcelUuid, byte[]);
+    method public android.bluetooth.le.ScanFilter.Builder setServiceData(android.os.ParcelUuid, byte[], byte[]);
     method public android.bluetooth.le.ScanFilter.Builder setServiceUuid(android.os.ParcelUuid);
     method public android.bluetooth.le.ScanFilter.Builder setServiceUuid(android.os.ParcelUuid, android.os.ParcelUuid);
   }
 
   public final class ScanRecord {
     method public int getAdvertiseFlags();
+    method public byte[] getBytes();
     method public java.lang.String getDeviceName();
     method public int getManufacturerId();
     method public byte[] getManufacturerSpecificData();
@@ -6617,30 +6614,28 @@ package android.bluetooth.le {
     method public android.os.ParcelUuid getServiceDataUuid();
     method public java.util.List<android.os.ParcelUuid> getServiceUuids();
     method public int getTxPowerLevel();
-    method public static android.bluetooth.le.ScanRecord parseFromBytes(byte[]);
   }
 
   public final class ScanResult implements android.os.Parcelable {
+    ctor public ScanResult(android.bluetooth.BluetoothDevice, android.bluetooth.le.ScanRecord, int, long);
     method public int describeContents();
     method public android.bluetooth.BluetoothDevice getDevice();
     method public int getRssi();
-    method public byte[] getScanRecord();
+    method public android.bluetooth.le.ScanRecord getScanRecord();
     method public long getTimestampNanos();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
   }
 
   public final class ScanSettings implements android.os.Parcelable {
     method public int describeContents();
     method public int getCallbackType();
-    method public long getReportDelaySeconds();
+    method public long getReportDelayMillis();
     method public int getScanMode();
     method public int getScanResultType();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int CALLBACK_TYPE_ALL_MATCHES = 1; // 0x1
     field public static final int CALLBACK_TYPE_FIRST_MATCH = 2; // 0x2
     field public static final int CALLBACK_TYPE_MATCH_LOST = 4; // 0x4
-    field public static final android.os.Parcelable.Creator CREATOR;
     field public static final int SCAN_MODE_BALANCED = 1; // 0x1
     field public static final int SCAN_MODE_LOW_LATENCY = 2; // 0x2
     field public static final int SCAN_MODE_LOW_POWER = 0; // 0x0
@@ -6651,7 +6646,7 @@ package android.bluetooth.le {
     ctor public ScanSettings.Builder();
     method public android.bluetooth.le.ScanSettings build();
     method public android.bluetooth.le.ScanSettings.Builder setCallbackType(int);
-    method public android.bluetooth.le.ScanSettings.Builder setReportDelaySeconds(long);
+    method public android.bluetooth.le.ScanSettings.Builder setReportDelayMillis(long);
     method public android.bluetooth.le.ScanSettings.Builder setScanMode(int);
   }
 

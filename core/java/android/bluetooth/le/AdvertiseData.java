@@ -27,10 +27,10 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Advertisement data packet container for Bluetooth LE advertising. This represents the data to be
+ * Advertise data packet container for Bluetooth LE advertising. This represents the data to be
  * advertised as well as the scan response data for active scans.
- *
- * <p>Use {@link AdvertiseData.Builder} to create an instance of {@link AdvertiseData} to be
+ * <p>
+ * Use {@link AdvertiseData.Builder} to create an instance of {@link AdvertiseData} to be
  * advertised.
  *
  * @see BluetoothLeAdvertiser
@@ -50,18 +50,21 @@ public final class AdvertiseData implements Parcelable {
     @Nullable
     private final byte[] mServiceData;
 
-    private boolean mIncludeTxPowerLevel;
+    private final boolean mIncludeTxPowerLevel;
+    private final boolean mIncludeDeviceName;
 
     private AdvertiseData(List<ParcelUuid> serviceUuids,
             ParcelUuid serviceDataUuid, byte[] serviceData,
             int manufacturerId,
-            byte[] manufacturerSpecificData, boolean includeTxPowerLevel) {
+            byte[] manufacturerSpecificData, boolean includeTxPowerLevel,
+            boolean includeDeviceName) {
         mServiceUuids = serviceUuids;
         mManufacturerId = manufacturerId;
         mManufacturerSpecificData = manufacturerSpecificData;
         mServiceDataUuid = serviceDataUuid;
         mServiceData = serviceData;
         mIncludeTxPowerLevel = includeTxPowerLevel;
+        mIncludeDeviceName = includeDeviceName;
     }
 
     /**
@@ -109,13 +112,20 @@ public final class AdvertiseData implements Parcelable {
         return mIncludeTxPowerLevel;
     }
 
+    /**
+     * Whether the device name will be included in the advertisement packet.
+     */
+    public boolean getIncludeDeviceName() {
+        return mIncludeDeviceName;
+    }
+
     @Override
     public String toString() {
         return "AdvertiseData [mServiceUuids=" + mServiceUuids + ", mManufacturerId="
                 + mManufacturerId + ", mManufacturerSpecificData="
                 + Arrays.toString(mManufacturerSpecificData) + ", mServiceDataUuid="
                 + mServiceDataUuid + ", mServiceData=" + Arrays.toString(mServiceData)
-                + ", mIncludeTxPowerLevel=" + mIncludeTxPowerLevel + "]";
+                + ", mIncludeTxPowerLevel=" + mIncludeTxPowerLevel + ", mIncludeDeviceName=" + "]";
     }
 
     @Override
@@ -153,8 +163,12 @@ public final class AdvertiseData implements Parcelable {
             }
         }
         dest.writeByte((byte) (getIncludeTxPowerLevel() ? 1 : 0));
+        dest.writeByte((byte) (getIncludeDeviceName() ? 1 : 0));
     }
 
+    /**
+     * @hide
+     */
     public static final Parcelable.Creator<AdvertiseData> CREATOR =
             new Creator<AdvertiseData>() {
             @Override
@@ -168,7 +182,9 @@ public final class AdvertiseData implements Parcelable {
                     if (in.readInt() > 0) {
                         List<ParcelUuid> uuids = new ArrayList<ParcelUuid>();
                         in.readList(uuids, ParcelUuid.class.getClassLoader());
-                        builder.setServiceUuids(uuids);
+                        for (ParcelUuid uuid : uuids) {
+                            builder.addServiceUuid(uuid);
+                        }
                     }
                     int manufacturerId = in.readInt();
                     int manufacturerDataLength = in.readInt();
@@ -188,6 +204,7 @@ public final class AdvertiseData implements Parcelable {
                         }
                     }
                     builder.setIncludeTxPowerLevel(in.readByte() == 1);
+                    builder.setIncludeDeviceName(in.readByte() == 1);
                     return builder.build();
                 }
             };
@@ -203,8 +220,7 @@ public final class AdvertiseData implements Parcelable {
         private static final int FLAGS_FIELD_BYTES = 3;
 
         @Nullable
-        private List<ParcelUuid> mServiceUuids;
-        private boolean mIncludeTxPowerLevel;
+        private List<ParcelUuid> mServiceUuids = new ArrayList<ParcelUuid>();
         private int mManufacturerId;
         @Nullable
         private byte[] mManufacturerSpecificData;
@@ -212,27 +228,25 @@ public final class AdvertiseData implements Parcelable {
         private ParcelUuid mServiceDataUuid;
         @Nullable
         private byte[] mServiceData;
+        private boolean mIncludeTxPowerLevel;
+        private boolean mIncludeDeviceName;
 
         /**
-         * Set the service UUIDs.
+         * Add a service UUID to advertise data.
          *
-         * <p><b>Note:</b> The corresponding Bluetooth Gatt services need to already
-         * be added on the device (using {@link android.bluetooth.BluetoothGattServer#addService}) prior
-         * to advertising them.
-         *
-         * @param serviceUuids Service UUIDs to be advertised.
+         * @param serviceUuid A service UUID to be advertised.
          * @throws IllegalArgumentException If the {@code serviceUuids} are null.
          */
-        public Builder setServiceUuids(List<ParcelUuid> serviceUuids) {
-            if (serviceUuids == null) {
+        public Builder addServiceUuid(ParcelUuid serviceUuid) {
+            if (serviceUuid == null) {
                 throw new IllegalArgumentException("serivceUuids are null");
             }
-            mServiceUuids = serviceUuids;
+            mServiceUuids.add(serviceUuid);
             return this;
         }
 
         /**
-         * Add service data to advertisement.
+         * Add service data to advertise data.
          *
          * @param serviceDataUuid 16-bit UUID of the service the data is associated with
          * @param serviceData Service data
@@ -251,10 +265,10 @@ public final class AdvertiseData implements Parcelable {
 
         /**
          * Set manufacturer specific data.
-         *
-         * <p>Please refer to the Bluetooth Assigned Numbers document provided by the
-         * <a href="https://www.bluetooth.org">Bluetooth SIG</a> for a list of existing
-         * company identifiers.
+         * <p>
+         * Please refer to the Bluetooth Assigned Numbers document provided by the <a
+         * href="https://www.bluetooth.org">Bluetooth SIG</a> for a list of existing company
+         * identifiers.
          *
          * @param manufacturerId Manufacturer ID assigned by Bluetooth SIG.
          * @param manufacturerSpecificData Manufacturer specific data
@@ -275,7 +289,8 @@ public final class AdvertiseData implements Parcelable {
         }
 
         /**
-         * Whether the transmission power level should be included in the advertising packet.
+         * Whether the transmission power level should be included in the advertise packet. Tx power
+         * level field takes 3 bytes in advertise packet.
          */
         public Builder setIncludeTxPowerLevel(boolean includeTxPowerLevel) {
             mIncludeTxPowerLevel = includeTxPowerLevel;
@@ -283,19 +298,22 @@ public final class AdvertiseData implements Parcelable {
         }
 
         /**
+         * Set whether the device name should be included in advertise packet.
+         */
+        public Builder setIncludeDeviceName(boolean includeDeviceName) {
+            mIncludeDeviceName = includeDeviceName;
+            return this;
+        }
+
+        /**
          * Build the {@link AdvertiseData}.
          *
-         * @throws IllegalArgumentException If the data size is larger than 31 bytes.
          */
         public AdvertiseData build() {
-            if (totalBytes() > MAX_ADVERTISING_DATA_BYTES) {
-                throw new IllegalArgumentException(
-                        "advertisement data size is larger than 31 bytes");
-            }
             return new AdvertiseData(mServiceUuids,
                     mServiceDataUuid,
                     mServiceData, mManufacturerId, mManufacturerSpecificData,
-                    mIncludeTxPowerLevel);
+                    mIncludeTxPowerLevel, mIncludeDeviceName);
         }
 
         // Compute the size of the advertisement data.

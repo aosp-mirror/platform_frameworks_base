@@ -36,8 +36,8 @@ import java.util.UUID;
 
 /**
  * This class provides methods to perform scan related operations for Bluetooth LE devices. An
- * application can scan for a particular type of Bluetotoh LE devices using {@link ScanFilter}.
- * It can also request different types of callbacks for delivering the result.
+ * application can scan for a particular type of Bluetotoh LE devices using {@link ScanFilter}. It
+ * can also request different types of callbacks for delivering the result.
  * <p>
  * Use {@link BluetoothAdapter#getBluetoothLeScanner()} to get an instance of
  * {@link BluetoothLeScanner}.
@@ -59,7 +59,8 @@ public final class BluetoothLeScanner {
 
     /**
      * Use {@link BluetoothAdapter#getBluetoothLeScanner()} instead.
-     * @param bluetoothManager BluetoothManager that conducts overall Bluetooth Management
+     *
+     * @param bluetoothManager BluetoothManager that conducts overall Bluetooth Management.
      * @hide
      */
     public BluetoothLeScanner(IBluetoothManager bluetoothManager) {
@@ -70,8 +71,8 @@ public final class BluetoothLeScanner {
     }
 
     /**
-     * Start Bluetooth LE scan with default parameters and no filters.
-     * The scan results will be delivered through {@code callback}.
+     * Start Bluetooth LE scan with default parameters and no filters. The scan results will be
+     * delivered through {@code callback}.
      * <p>
      * Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission.
      *
@@ -191,7 +192,7 @@ public final class BluetoothLeScanner {
         // mLeHandle 0: not registered
         // -1: scan stopped
         // > 0: registered and scan started
-        private int mLeHandle;
+        private int mClientIf;
 
         public BleScanCallbackWrapper(IBluetoothGatt bluetoothGatt,
                 List<ScanFilter> filters, ScanSettings settings,
@@ -200,12 +201,12 @@ public final class BluetoothLeScanner {
             mFilters = filters;
             mSettings = settings;
             mScanCallback = scanCallback;
-            mLeHandle = 0;
+            mClientIf = 0;
         }
 
         public boolean scanStarted() {
             synchronized (this) {
-                if (mLeHandle == -1) {
+                if (mClientIf == -1) {
                     return false;
                 }
                 try {
@@ -214,34 +215,34 @@ public final class BluetoothLeScanner {
                     Log.e(TAG, "Callback reg wait interrupted: " + e);
                 }
             }
-            return mLeHandle > 0;
+            return mClientIf > 0;
         }
 
         public void stopLeScan() {
             synchronized (this) {
-                if (mLeHandle <= 0) {
-                    Log.e(TAG, "Error state, mLeHandle: " + mLeHandle);
+                if (mClientIf <= 0) {
+                    Log.e(TAG, "Error state, mLeHandle: " + mClientIf);
                     return;
                 }
                 try {
-                    mBluetoothGatt.stopScan(mLeHandle, false);
-                    mBluetoothGatt.unregisterClient(mLeHandle);
+                    mBluetoothGatt.stopScan(mClientIf, false);
+                    mBluetoothGatt.unregisterClient(mClientIf);
                 } catch (RemoteException e) {
                     Log.e(TAG, "Failed to stop scan and unregister", e);
                 }
-                mLeHandle = -1;
+                mClientIf = -1;
                 notifyAll();
             }
         }
 
         void flushPendingBatchResults() {
             synchronized (this) {
-                if (mLeHandle <= 0) {
-                    Log.e(TAG, "Error state, mLeHandle: " + mLeHandle);
+                if (mClientIf <= 0) {
+                    Log.e(TAG, "Error state, mLeHandle: " + mClientIf);
                     return;
                 }
                 try {
-                    mBluetoothGatt.flushPendingBatchResults(mLeHandle, false);
+                    mBluetoothGatt.flushPendingBatchResults(mClientIf, false);
                 } catch (RemoteException e) {
                     Log.e(TAG, "Failed to get pending scan results", e);
                 }
@@ -257,22 +258,22 @@ public final class BluetoothLeScanner {
                     " clientIf=" + clientIf);
 
             synchronized (this) {
-                if (mLeHandle == -1) {
+                if (mClientIf == -1) {
                     if (DBG)
                         Log.d(TAG, "onClientRegistered LE scan canceled");
                 }
 
                 if (status == BluetoothGatt.GATT_SUCCESS) {
-                    mLeHandle = clientIf;
+                    mClientIf = clientIf;
                     try {
-                        mBluetoothGatt.startScanWithFilters(mLeHandle, false, mSettings, mFilters);
+                        mBluetoothGatt.startScanWithFilters(mClientIf, false, mSettings, mFilters);
                     } catch (RemoteException e) {
                         Log.e(TAG, "fail to start le scan: " + e);
-                        mLeHandle = -1;
+                        mClientIf = -1;
                     }
                 } else {
                     // registration failed
-                    mLeHandle = -1;
+                    mClientIf = -1;
                 }
                 notifyAll();
             }
@@ -296,14 +297,14 @@ public final class BluetoothLeScanner {
 
             // Check null in case the scan has been stopped
             synchronized (this) {
-                if (mLeHandle <= 0)
+                if (mClientIf <= 0)
                     return;
             }
             BluetoothDevice device = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(
                     address);
             long scanNanos = SystemClock.elapsedRealtimeNanos();
-            final ScanResult result = new ScanResult(device, advData, rssi,
-                    scanNanos);
+            final ScanResult result = new ScanResult(device, ScanRecord.parseFromBytes(advData),
+                    rssi, scanNanos);
             Handler handler = new Handler(Looper.getMainLooper());
             handler.post(new Runnable() {
                     @Override
@@ -433,7 +434,7 @@ public final class BluetoothLeScanner {
             BluetoothDevice device = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(
                     address);
             long scanNanos = SystemClock.elapsedRealtimeNanos();
-            ScanResult result = new ScanResult(device, advData, rssi,
+            ScanResult result = new ScanResult(device, ScanRecord.parseFromBytes(advData), rssi,
                     scanNanos);
             if (onFound) {
                 mScanCallback.onScanResult(ScanSettings.CALLBACK_TYPE_FIRST_MATCH, result);
@@ -453,13 +454,15 @@ public final class BluetoothLeScanner {
     }
 
     private boolean isSettingsConfigAllowedForScan(ScanSettings settings) {
-        final int callbackType = settings.getCallbackType();
-        if ((  callbackType != ScanSettings.CALLBACK_TYPE_ALL_MATCHES
-           || (callbackType == ScanSettings.CALLBACK_TYPE_ALL_MATCHES
-           && settings.getReportDelaySeconds() > 0))
-           && !mBluetoothAdapter.isOffloadedFilteringSupported()) {
-            return false;
+        if (mBluetoothAdapter.isOffloadedFilteringSupported()) {
+            return true;
         }
-        return true;
+        final int callbackType = settings.getCallbackType();
+        // Only support regular scan if no offloaded filter support.
+        if (callbackType == ScanSettings.CALLBACK_TYPE_ALL_MATCHES
+                && settings.getReportDelayMillis() == 0) {
+            return true;
+        }
+        return false;
     }
 }
