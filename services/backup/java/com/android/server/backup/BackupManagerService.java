@@ -233,6 +233,7 @@ public class BackupManagerService extends IBackupManager.Stub {
     static final long TIMEOUT_FULL_BACKUP_INTERVAL = 5 * 60 * 1000;
     static final long TIMEOUT_SHARED_BACKUP_INTERVAL = 30 * 60 * 1000;
     static final long TIMEOUT_RESTORE_INTERVAL = 60 * 1000;
+    static final long TIMEOUT_RESTORE_FINISHED_INTERVAL = 30 * 1000;
 
     // User confirmation timeout for a full backup/restore operation.  It's this long in
     // order to give them time to enter the backup password.
@@ -6309,6 +6310,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         RUNNING_QUEUE,
         RESTORE_KEYVALUE,
         RESTORE_FULL,
+        RESTORE_FINISHED,
         FINAL
     }
 
@@ -6342,6 +6344,9 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
 
         // Our bookkeeping about the ancestral dataset
         private PackageManagerBackupAgent mPmAgent;
+
+        // Currently-bound backup agent for restore + restoreFinished purposes
+        private IBackupAgent mAgent;
 
         // What sort of restore we're doing now
         private RestoreDescription mRestoreDescription;
@@ -6441,6 +6446,13 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                     // this one is always valid too
                 }
             }
+
+            if (MORE_DEBUG) {
+                Slog.v(TAG, "Restore; accept set size is " + mAcceptSet.size());
+                for (PackageInfo info : mAcceptSet) {
+                    Slog.v(TAG, "   " + info.packageName);
+                }
+            }
         }
 
         private String[] packagesToNames(List<PackageInfo> apps) {
@@ -6471,6 +6483,10 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
 
                 case RESTORE_FULL:
                     restoreFull();
+                    break;
+
+                case RESTORE_FINISHED:
+                    restoreFinished();
                     break;
 
                 case FINAL:
@@ -6529,7 +6545,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         private  void startRestore() {
             sendStartRestore(mAcceptSet.size());
 
-            UnifiedRestoreState nextState = UnifiedRestoreState.RUNNING_QUEUE;
+            UnifiedRestoreState nextState = UnifiedRestoreState.RESTORE_FINISHED;
             try {
                 // If we don't yet have PM metadata for this token, synthesize an
                 // entry for the PM pseudopackage and make it the first to be
@@ -6544,6 +6560,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                     mPmAgent = new PackageManagerBackupAgent(metadataFile);
                 } catch (IOException e) {
                     // Nope, we need to get it via restore
+                    if (MORE_DEBUG) Slog.v(TAG, "Need to restore @pm@");
                     PackageInfo pmPackage = new PackageInfo();
                     pmPackage.packageName = PACKAGE_MANAGER_SENTINEL;
                     mAcceptSet.add(0, pmPackage);
@@ -6581,8 +6598,11 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                     mCurrentPackage = new PackageInfo();
                     mCurrentPackage.packageName = PACKAGE_MANAGER_SENTINEL;
                     mPmAgent = new PackageManagerBackupAgent(mPackageManager, null);
-                    initiateOneRestore(mCurrentPackage, 0,
-                            IBackupAgent.Stub.asInterface(mPmAgent.onBind()));
+                    mAgent = IBackupAgent.Stub.asInterface(mPmAgent.onBind());
+                    if (MORE_DEBUG) {
+                        Slog.v(TAG, "initiating restore for PMBA");
+                    }
+                    initiateOneRestore(mCurrentPackage, 0);
                     // The PM agent called operationComplete() already, because our invocation
                     // of it is process-local and therefore synchronous.  That means that a
                     // RUNNING_QUEUE message is already enqueued.  Only if we're unable to
@@ -6621,6 +6641,11 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                         nextState = UnifiedRestoreState.FINAL;
                         return;
                     }
+                } else {
+                    // We have the PMBA already, so we can proceed directly to
+                    // the RUNNING_QUEUE state ourselves.
+                    if (MORE_DEBUG) Slog.v(TAG, "PMBA from cache; proceeding to run queue");
+                    nextState = UnifiedRestoreState.RUNNING_QUEUE;
                 }
             } catch (RemoteException e) {
                 // If we lost the transport at any time, halt
@@ -6762,10 +6787,10 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
             }
 
             // Good to go!  Set up and bind the agent...
-            IBackupAgent agent = bindToAgentSynchronous(
+            mAgent = bindToAgentSynchronous(
                     mCurrentPackage.applicationInfo,
                     IApplicationThread.BACKUP_MODE_INCREMENTAL);
-            if (agent == null) {
+            if (mAgent == null) {
                 Slog.w(TAG, "Can't find backup agent for " + packageName);
                 EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE, packageName,
                         "Restore agent missing");
@@ -6775,7 +6800,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
 
             // And then finally start the restore on this agent
             try {
-                initiateOneRestore(mCurrentPackage, metaInfo.versionCode, agent);
+                initiateOneRestore(mCurrentPackage, metaInfo.versionCode);
                 ++mCount;
             } catch (Exception e) {
                 Slog.e(TAG, "Error when attempting restore: " + e.toString());
@@ -6785,7 +6810,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         }
 
         // Guts of a key/value restore operation
-        void initiateOneRestore(PackageInfo app, int appVersionCode, IBackupAgent agent) {
+        void initiateOneRestore(PackageInfo app, int appVersionCode) {
             final String packageName = app.packageName;
 
             if (DEBUG) Slog.d(TAG, "initiateOneRestore packageName=" + packageName);
@@ -6881,7 +6906,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                 // the operationComplete() callback will schedule the next step,
                 // so we do not do that here.
                 prepareOperationTimeout(token, TIMEOUT_RESTORE_INTERVAL, this);
-                agent.doRestore(mBackupData, appVersionCode, mNewState,
+                mAgent.doRestore(mBackupData, appVersionCode, mNewState,
                         token, mBackupManagerBinder);
             } catch (Exception e) {
                 Slog.e(TAG, "Unable to call app for restore: " + packageName, e);
@@ -6923,6 +6948,20 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                 // so we can do that simply by going back to running the restore queue.
                 Slog.e(TAG, "Unable to construct pipes for stream restore!");
                 executeNextState(UnifiedRestoreState.RUNNING_QUEUE);
+            }
+        }
+
+        // state RESTORE_FINISHED : provide the "no more data" signpost callback at the end
+        private void restoreFinished() {
+            try {
+                final int token = generateToken();
+                prepareOperationTimeout(token, TIMEOUT_RESTORE_FINISHED_INTERVAL, this);
+                mAgent.doRestoreFinished(token, mBackupManagerBinder);
+                // If we get this far, the callback or timeout will schedule the
+                // next restore state, so we're done
+            } catch (Exception e) {
+                Slog.e(TAG, "Unable to finalize restore of " + mCurrentPackage.packageName);
+                executeNextState(UnifiedRestoreState.FINAL);
             }
         }
 
@@ -7202,23 +7241,58 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
 
         @Override
         public void operationComplete() {
-            int size = (int) mBackupDataName.length();
-            EventLog.writeEvent(EventLogTags.RESTORE_PACKAGE, mCurrentPackage.packageName, size);
-
-            // Just go back to running the restore queue
-            keyValueAgentCleanup();
-
-            // If there was widget state associated with this app, get the OS to
-            // incorporate it into current bookeeping and then pass that along to
-            // the app as part of the restore operation.
-            if (mWidgetData != null) {
-                restoreWidgetData(mCurrentPackage.packageName, mWidgetData);
+            if (MORE_DEBUG) {
+                Slog.i(TAG, "operationComplete() during restore: target="
+                        + mCurrentPackage.packageName
+                        + " state=" + mState);
             }
 
-            executeNextState(UnifiedRestoreState.RUNNING_QUEUE);
+            final UnifiedRestoreState nextState;
+            switch (mState) {
+                case RESTORE_KEYVALUE:
+                case RESTORE_FULL: {
+                    // Okay, we've just heard back from the agent that it's done with
+                    // the restore itself.  We now have to send the same agent its
+                    // doRestoreFinished() callback, so roll into that state.
+                    nextState = UnifiedRestoreState.RESTORE_FINISHED;
+                    break;
+                }
+
+                case RESTORE_FINISHED: {
+                    // Okay, we're done with this package.  Tidy up and go on to the next
+                    // app in the queue.
+                    int size = (int) mBackupDataName.length();
+                    EventLog.writeEvent(EventLogTags.RESTORE_PACKAGE,
+                            mCurrentPackage.packageName, size);
+
+                    // Just go back to running the restore queue
+                    keyValueAgentCleanup();
+
+                    // If there was widget state associated with this app, get the OS to
+                    // incorporate it into current bookeeping and then pass that along to
+                    // the app as part of the restore-time work.
+                    if (mWidgetData != null) {
+                        restoreWidgetData(mCurrentPackage.packageName, mWidgetData);
+                    }
+
+                    nextState = UnifiedRestoreState.RUNNING_QUEUE;
+                    break;
+                }
+
+                default: {
+                    // Some kind of horrible semantic error; we're in an unexpected state.
+                    // Back off hard and wind up.
+                    Slog.e(TAG, "Unexpected restore callback into state " + mState);
+                    keyValueAgentErrorCleanup();
+                    nextState = UnifiedRestoreState.FINAL;
+                    break;
+                }
+            }
+
+            executeNextState(nextState);
         }
 
-        // A call to agent.doRestore() has timed out
+        // A call to agent.doRestore() or agent.doRestoreFinished() has timed out
         @Override
         public void handleTimeout() {
             Slog.e(TAG, "Timeout restoring application " + mCurrentPackage.packageName);

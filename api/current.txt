@@ -5454,6 +5454,7 @@ package android.app.backup {
     method public void onFullBackup(android.app.backup.FullBackupDataOutput) throws java.io.IOException;
     method public abstract void onRestore(android.app.backup.BackupDataInput, int, android.os.ParcelFileDescriptor) throws java.io.IOException;
     method public void onRestoreFile(android.os.ParcelFileDescriptor, long, java.io.File, int, long, long) throws java.io.IOException;
+    method public void onRestoreFinished();
     field public static final int TYPE_DIRECTORY = 2; // 0x2
     field public static final int TYPE_FILE = 1; // 0x1
   }
