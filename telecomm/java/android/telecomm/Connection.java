@@ -486,8 +486,10 @@ public abstract class Connection {
     /**
      * Notifies this Connection, which is in {@link State#RINGING}, of
      * a request to accept.
+     *
+     * @param videoState The video state in which to answer the call.
      */
-    protected void onAnswer() {}
+    protected void onAnswer(int videoState) {}
 
     /**
      * Notifies this Connection, which is in {@link State#RINGING}, of
