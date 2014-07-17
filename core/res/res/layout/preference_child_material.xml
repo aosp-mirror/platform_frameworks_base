@@ -29,7 +29,7 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:minWidth="58dip"
-        android:gravity="left|center_vertical"
+        android:gravity="start|center_vertical"
         android:orientation="horizontal">
         <ImageView
             android:id="@+android:id/icon"
@@ -67,7 +67,7 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:minWidth="58dip"
-        android:gravity="right|center_vertical"
+        android:gravity="end|center_vertical"
         android:orientation="vertical" />
 
 </LinearLayout>
