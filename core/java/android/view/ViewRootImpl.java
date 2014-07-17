@@ -1052,25 +1052,24 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private boolean collectViewAttributes() {
-        final View.AttachInfo attachInfo = mAttachInfo;
-        if (attachInfo.mRecomputeGlobalAttributes) {
+        if (mAttachInfo.mRecomputeGlobalAttributes) {
             //Log.i(TAG, "Computing view hierarchy attributes!");
-            attachInfo.mRecomputeGlobalAttributes = false;
-            boolean oldScreenOn = attachInfo.mKeepScreenOn;
-            attachInfo.mKeepScreenOn = false;
-            attachInfo.mSystemUiVisibility = 0;
-            attachInfo.mHasSystemUiListeners = false;
-            mView.dispatchCollectViewAttributes(attachInfo, 0);
-            attachInfo.mSystemUiVisibility &= ~attachInfo.mDisabledSystemUiVisibility;
+            mAttachInfo.mRecomputeGlobalAttributes = false;
+            boolean oldScreenOn = mAttachInfo.mKeepScreenOn;
+            mAttachInfo.mKeepScreenOn = false;
+            mAttachInfo.mSystemUiVisibility = 0;
+            mAttachInfo.mHasSystemUiListeners = false;
+            mView.dispatchCollectViewAttributes(mAttachInfo, 0);
+            mAttachInfo.mSystemUiVisibility &= ~mAttachInfo.mDisabledSystemUiVisibility;
             WindowManager.LayoutParams params = mWindowAttributes;
-            attachInfo.mSystemUiVisibility |= getImpliedSystemUiVisibility(params);
-            if (attachInfo.mKeepScreenOn != oldScreenOn
-                    || attachInfo.mSystemUiVisibility != params.subtreeSystemUiVisibility
-                    || attachInfo.mHasSystemUiListeners != params.hasSystemUiListeners) {
+            mAttachInfo.mSystemUiVisibility |= getImpliedSystemUiVisibility(params);
+            if (mAttachInfo.mKeepScreenOn != oldScreenOn
+                    || mAttachInfo.mSystemUiVisibility != params.subtreeSystemUiVisibility
+                    || mAttachInfo.mHasSystemUiListeners != params.hasSystemUiListeners) {
                 applyKeepScreenOnFlag(params);
-                params.subtreeSystemUiVisibility = attachInfo.mSystemUiVisibility;
-                params.hasSystemUiListeners = attachInfo.mHasSystemUiListeners;
-                mView.dispatchWindowSystemUiVisiblityChanged(attachInfo.mSystemUiVisibility);
+                params.subtreeSystemUiVisibility = mAttachInfo.mSystemUiVisibility;
+                params.hasSystemUiListeners = mAttachInfo.mHasSystemUiListeners;
+                mView.dispatchWindowSystemUiVisiblityChanged(mAttachInfo.mSystemUiVisibility);
                 return true;
             }
         }
@@ -1162,8 +1161,7 @@ public final class ViewRootImpl implements ViewParent,
      * @param m input matrix to modify
      */
     void transformMatrixToGlobal(Matrix m) {
-        final View.AttachInfo attachInfo = mAttachInfo;
-        m.postTranslate(attachInfo.mWindowLeft, attachInfo.mWindowTop);
+        m.postTranslate(mAttachInfo.mWindowLeft, mAttachInfo.mWindowTop);
     }
 
     /**
@@ -1173,8 +1171,7 @@ public final class ViewRootImpl implements ViewParent,
      * @param m input matrix to modify
      */
     void transformMatrixToLocal(Matrix m) {
-        final View.AttachInfo attachInfo = mAttachInfo;
-        m.preTranslate(-attachInfo.mWindowLeft, -attachInfo.mWindowTop);
+        m.preTranslate(-mAttachInfo.mWindowLeft, -mAttachInfo.mWindowTop);
     }
 
     void dispatchApplyInsets(View host) {
@@ -1215,8 +1212,6 @@ public final class ViewRootImpl implements ViewParent,
 
         int desiredWindowWidth;
         int desiredWindowHeight;
-
-        final View.AttachInfo attachInfo = mAttachInfo;
 
         final int viewVisibility = getHostVisibility();
         boolean viewVisibilityChanged = mViewVisibility != viewVisibility
@@ -1266,10 +1261,10 @@ public final class ViewRootImpl implements ViewParent,
             // We used to use the following condition to choose 32 bits drawing caches:
             // PixelFormat.hasAlpha(lp.format) || lp.format == PixelFormat.RGBX_8888
             // However, windows are now always 32 bits by default, so choose 32 bits
-            attachInfo.mUse32BitDrawingCache = true;
-            attachInfo.mHasWindowFocus = false;
-            attachInfo.mWindowVisibility = viewVisibility;
-            attachInfo.mRecomputeGlobalAttributes = false;
+            mAttachInfo.mUse32BitDrawingCache = true;
+            mAttachInfo.mHasWindowFocus = false;
+            mAttachInfo.mWindowVisibility = viewVisibility;
+            mAttachInfo.mRecomputeGlobalAttributes = false;
             viewVisibilityChanged = false;
             mLastConfiguration.setTo(host.getResources().getConfiguration());
             mLastSystemUiVisibility = mAttachInfo.mSystemUiVisibility;
@@ -1277,8 +1272,8 @@ public final class ViewRootImpl implements ViewParent,
             if (mViewLayoutDirectionInitial == View.LAYOUT_DIRECTION_INHERIT) {
                 host.setLayoutDirection(mLastConfiguration.getLayoutDirection());
             }
-            host.dispatchAttachedToWindow(attachInfo, 0);
-            attachInfo.mTreeObserver.dispatchOnWindowAttachedChange(true);
+            host.dispatchAttachedToWindow(mAttachInfo, 0);
+            mAttachInfo.mTreeObserver.dispatchOnWindowAttachedChange(true);
             dispatchApplyInsets(host);
             //Log.i(TAG, "Screen on initialized: " + attachInfo.mKeepScreenOn);
 
@@ -1295,7 +1290,7 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         if (viewVisibilityChanged) {
-            attachInfo.mWindowVisibility = viewVisibility;
+            mAttachInfo.mWindowVisibility = viewVisibility;
             host.dispatchWindowVisibilityChanged(viewVisibility);
             if (viewVisibility != View.VISIBLE || mNewSurfaceNeeded) {
                 destroyHardwareResources();
@@ -1308,7 +1303,7 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         // Execute enqueued actions on every traversal in case a detached view enqueued an action
-        getRunQueue().executeActions(attachInfo.mHandler);
+        getRunQueue().executeActions(mAttachInfo.mHandler);
 
         boolean insetsChanged = false;
 
@@ -1364,21 +1359,21 @@ public final class ViewRootImpl implements ViewParent,
         if (collectViewAttributes()) {
             params = lp;
         }
-        if (attachInfo.mForceReportNewAttributes) {
-            attachInfo.mForceReportNewAttributes = false;
+        if (mAttachInfo.mForceReportNewAttributes) {
+            mAttachInfo.mForceReportNewAttributes = false;
             params = lp;
         }
 
-        if (mFirst || attachInfo.mViewVisibilityChanged) {
-            attachInfo.mViewVisibilityChanged = false;
+        if (mFirst || mAttachInfo.mViewVisibilityChanged) {
+            mAttachInfo.mViewVisibilityChanged = false;
             int resizeMode = mSoftInputMode &
                     WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
             // If we are in auto resize mode, then we need to determine
             // what mode to use now.
             if (resizeMode == WindowManager.LayoutParams.SOFT_INPUT_ADJUST_UNSPECIFIED) {
-                final int N = attachInfo.mScrollContainers.size();
+                final int N = mAttachInfo.mScrollContainers.size();
                 for (int i=0; i<N; i++) {
-                    if (attachInfo.mScrollContainers.get(i).isShown()) {
+                    if (mAttachInfo.mScrollContainers.get(i).isShown()) {
                         resizeMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
                     }
                 }
@@ -1437,8 +1432,8 @@ public final class ViewRootImpl implements ViewParent,
         // If there are no inset listeners remaining then we may still need to compute
         // insets in case the old insets were non-empty and must be reset.
         final boolean computesInternalInsets =
-                attachInfo.mTreeObserver.hasComputeInternalInsetsListeners()
-                || attachInfo.mHasNonEmptyGivenInternalInsets;
+                mAttachInfo.mTreeObserver.hasComputeInternalInsetsListeners()
+                || mAttachInfo.mHasNonEmptyGivenInternalInsets;
 
         boolean insetsPending = false;
         int relayoutResult = 0;
@@ -1659,8 +1654,8 @@ public final class ViewRootImpl implements ViewParent,
             if (DEBUG_ORIENTATION) Log.v(
                     TAG, "Relayout returned: frame=" + frame + ", surface=" + mSurface);
 
-            attachInfo.mWindowLeft = frame.left;
-            attachInfo.mWindowTop = frame.top;
+            mAttachInfo.mWindowLeft = frame.left;
+            mAttachInfo.mWindowTop = frame.top;
 
             // !!FIXME!! This next section handles the case where we did not get the
             // window size we asked for. We should avoid this by getting a maximum size from
@@ -1799,20 +1794,20 @@ public final class ViewRootImpl implements ViewParent,
             // true since we are comparing a not translated value to a translated one.
             // This scenario is rare but we may want to fix that.
 
-            final boolean windowMoved = (attachInfo.mWindowLeft != frame.left
-                    || attachInfo.mWindowTop != frame.top);
+            final boolean windowMoved = (mAttachInfo.mWindowLeft != frame.left
+                    || mAttachInfo.mWindowTop != frame.top);
             if (windowMoved) {
                 if (mTranslator != null) {
                     mTranslator.translateRectInScreenToAppWinFrame(frame);
                 }
-                attachInfo.mWindowLeft = frame.left;
-                attachInfo.mWindowTop = frame.top;
+                mAttachInfo.mWindowLeft = frame.left;
+                mAttachInfo.mWindowTop = frame.top;
             }
         }
 
         final boolean didLayout = layoutRequested && !mStopped;
         boolean triggerGlobalLayoutListener = didLayout
-                || attachInfo.mRecomputeGlobalAttributes;
+                || mAttachInfo.mRecomputeGlobalAttributes;
         if (didLayout) {
             performLayout(lp, desiredWindowWidth, desiredWindowHeight);
 
@@ -1851,18 +1846,18 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         if (triggerGlobalLayoutListener) {
-            attachInfo.mRecomputeGlobalAttributes = false;
-            attachInfo.mTreeObserver.dispatchOnGlobalLayout();
+            mAttachInfo.mRecomputeGlobalAttributes = false;
+            mAttachInfo.mTreeObserver.dispatchOnGlobalLayout();
         }
 
         if (computesInternalInsets) {
             // Clear the original insets.
-            final ViewTreeObserver.InternalInsetsInfo insets = attachInfo.mGivenInternalInsets;
+            final ViewTreeObserver.InternalInsetsInfo insets = mAttachInfo.mGivenInternalInsets;
             insets.reset();
 
             // Compute new insets in place.
-            attachInfo.mTreeObserver.dispatchOnComputeInternalInsets(insets);
-            attachInfo.mHasNonEmptyGivenInternalInsets = !insets.isEmpty();
+            mAttachInfo.mTreeObserver.dispatchOnComputeInternalInsets(insets);
+            mAttachInfo.mHasNonEmptyGivenInternalInsets = !insets.isEmpty();
 
             // Tell the window manager.
             if (insetsPending || !mLastGivenInsets.equals(insets)) {
@@ -1941,7 +1936,7 @@ public final class ViewRootImpl implements ViewParent,
             mReportNextDraw = true;
         }
 
-        boolean cancelDraw = attachInfo.mTreeObserver.dispatchOnPreDraw() ||
+        boolean cancelDraw = mAttachInfo.mTreeObserver.dispatchOnPreDraw() ||
                 viewVisibility != View.VISIBLE;
 
         if (!cancelDraw && !newSurface) {
@@ -2379,10 +2374,9 @@ public final class ViewRootImpl implements ViewParent,
 
         scrollToRectOrFocus(null, false);
 
-        final AttachInfo attachInfo = mAttachInfo;
-        if (attachInfo.mViewScrollChanged) {
-            attachInfo.mViewScrollChanged = false;
-            attachInfo.mTreeObserver.dispatchOnScrollChanged();
+        if (mAttachInfo.mViewScrollChanged) {
+            mAttachInfo.mViewScrollChanged = false;
+            mAttachInfo.mTreeObserver.dispatchOnScrollChanged();
         }
 
         boolean animating = mScroller != null && mScroller.computeScrollOffset();
@@ -2397,8 +2391,8 @@ public final class ViewRootImpl implements ViewParent,
             fullRedrawNeeded = true;
         }
 
-        final float appScale = attachInfo.mApplicationScale;
-        final boolean scalingRequired = attachInfo.mScalingRequired;
+        final float appScale = mAttachInfo.mApplicationScale;
+        final boolean scalingRequired = mAttachInfo.mScalingRequired;
 
         int resizeAlpha = 0;
         if (mResizeBuffer != null) {
@@ -2427,7 +2421,7 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         if (fullRedrawNeeded) {
-            attachInfo.mIgnoreDirtyState = true;
+            mAttachInfo.mIgnoreDirtyState = true;
             dirty.set(0, 0, (int) (mWidth * appScale + 0.5f), (int) (mHeight * appScale + 0.5f));
         }
 
@@ -2440,7 +2434,7 @@ public final class ViewRootImpl implements ViewParent,
                     appScale + ", width=" + mWidth + ", height=" + mHeight);
         }
 
-        attachInfo.mTreeObserver.dispatchOnDraw();
+        mAttachInfo.mTreeObserver.dispatchOnDraw();
 
         int xOffset = 0;
         int yOffset = curScrollY;
@@ -2455,7 +2449,7 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         if (!dirty.isEmpty() || mIsAnimating) {
-            if (attachInfo.mHardwareRenderer != null && attachInfo.mHardwareRenderer.isEnabled()) {
+            if (mAttachInfo.mHardwareRenderer != null && mAttachInfo.mHardwareRenderer.isEnabled()) {
                 // Draw with hardware renderer.
                 mIsAnimating = false;
                 if (mHardwareYOffset != yOffset || mHardwareXOffset != xOffset) {
@@ -2468,7 +2462,7 @@ public final class ViewRootImpl implements ViewParent,
                 dirty.setEmpty();
 
                 mBlockResizeBuffer = false;
-                attachInfo.mHardwareRenderer.draw(mView, attachInfo, this);
+                mAttachInfo.mHardwareRenderer.draw(mView, mAttachInfo, this);
             } else {
                 // If we get here with a disabled & requested hardware renderer, something went
                 // wrong (an invalidate posted right before we destroyed the hardware surface
@@ -2478,12 +2472,12 @@ public final class ViewRootImpl implements ViewParent,
                 // Before we request a new frame we must however attempt to reinitiliaze the
                 // hardware renderer if it's in requested state. This would happen after an
                 // eglTerminate() for instance.
-                if (attachInfo.mHardwareRenderer != null &&
-                        !attachInfo.mHardwareRenderer.isEnabled() &&
-                        attachInfo.mHardwareRenderer.isRequested()) {
+                if (mAttachInfo.mHardwareRenderer != null &&
+                        !mAttachInfo.mHardwareRenderer.isEnabled() &&
+                        mAttachInfo.mHardwareRenderer.isRequested()) {
 
                     try {
-                        attachInfo.mHardwareRenderer.initializeIfNeeded(
+                        mAttachInfo.mHardwareRenderer.initializeIfNeeded(
                                 mWidth, mHeight, mSurface, surfaceInsets);
                     } catch (OutOfResourcesException e) {
                         handleOutOfResourcesException(e);
@@ -2495,7 +2489,7 @@ public final class ViewRootImpl implements ViewParent,
                     return;
                 }
 
-                if (!drawSoftware(surface, attachInfo, xOffset, yOffset, scalingRequired, dirty)) {
+                if (!drawSoftware(surface, mAttachInfo, xOffset, yOffset, scalingRequired, dirty)) {
                     return;
                 }
             }
@@ -2651,20 +2645,17 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private Drawable getAccessibilityFocusedDrawable() {
-        if (mAttachInfo != null) {
-            // Lazily load the accessibility focus drawable.
-            if (mAttachInfo.mAccessibilityFocusDrawable == null) {
-                TypedValue value = new TypedValue();
-                final boolean resolved = mView.mContext.getTheme().resolveAttribute(
-                        R.attr.accessibilityFocusedDrawable, value, true);
-                if (resolved) {
-                    mAttachInfo.mAccessibilityFocusDrawable =
+        // Lazily load the accessibility focus drawable.
+        if (mAttachInfo.mAccessibilityFocusDrawable == null) {
+            TypedValue value = new TypedValue();
+            final boolean resolved = mView.mContext.getTheme().resolveAttribute(
+                    R.attr.accessibilityFocusedDrawable, value, true);
+            if (resolved) {
+                mAttachInfo.mAccessibilityFocusDrawable =
                         mView.mContext.getDrawable(value.resourceId);
-                }
             }
-            return mAttachInfo.mAccessibilityFocusDrawable;
         }
-        return null;
+        return mAttachInfo.mAccessibilityFocusDrawable;
     }
 
     /**
@@ -2678,9 +2669,8 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     boolean scrollToRectOrFocus(Rect rectangle, boolean immediate) {
-        final View.AttachInfo attachInfo = mAttachInfo;
-        final Rect ci = attachInfo.mContentInsets;
-        final Rect vi = attachInfo.mVisibleInsets;
+        final Rect ci = mAttachInfo.mContentInsets;
+        final Rect vi = mAttachInfo.mVisibleInsets;
         int scrollY = 0;
         boolean handled = false;
 
@@ -5147,12 +5137,11 @@ public final class ViewRootImpl implements ViewParent,
         if (args.localChanges != 0) {
             mView.updateLocalSystemUiVisibility(args.localValue, args.localChanges);
         }
-        if (mAttachInfo != null) {
-            int visibility = args.globalVisibility&View.SYSTEM_UI_CLEARABLE_FLAGS;
-            if (visibility != mAttachInfo.mGlobalSystemUiVisibility) {
-                mAttachInfo.mGlobalSystemUiVisibility = visibility;
-                mView.dispatchSystemUiVisibilityChanged(visibility);
-            }
+
+        int visibility = args.globalVisibility&View.SYSTEM_UI_CLEARABLE_FLAGS;
+        if (visibility != mAttachInfo.mGlobalSystemUiVisibility) {
+            mAttachInfo.mGlobalSystemUiVisibility = visibility;
+            mView.dispatchSystemUiVisibilityChanged(visibility);
         }
     }
 
@@ -5485,8 +5474,7 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private void destroyHardwareRenderer() {
-        AttachInfo attachInfo = mAttachInfo;
-        HardwareRenderer hardwareRenderer = attachInfo.mHardwareRenderer;
+        HardwareRenderer hardwareRenderer = mAttachInfo.mHardwareRenderer;
 
         if (hardwareRenderer != null) {
             if (mView != null) {
@@ -5495,8 +5483,8 @@ public final class ViewRootImpl implements ViewParent,
             hardwareRenderer.destroy();
             hardwareRenderer.setRequested(false);
 
-            attachInfo.mHardwareRenderer = null;
-            attachInfo.mHardwareAccelerated = false;
+            mAttachInfo.mHardwareRenderer = null;
+            mAttachInfo.mHardwareAccelerated = false;
         }
     }
 
@@ -6197,37 +6185,35 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private View getCommonPredecessor(View first, View second) {
-        if (mAttachInfo != null) {
-            if (mTempHashSet == null) {
-                mTempHashSet = new HashSet<View>();
-            }
-            HashSet<View> seen = mTempHashSet;
-            seen.clear();
-            View firstCurrent = first;
-            while (firstCurrent != null) {
-                seen.add(firstCurrent);
-                ViewParent firstCurrentParent = firstCurrent.mParent;
-                if (firstCurrentParent instanceof View) {
-                    firstCurrent = (View) firstCurrentParent;
-                } else {
-                    firstCurrent = null;
-                }
-            }
-            View secondCurrent = second;
-            while (secondCurrent != null) {
-                if (seen.contains(secondCurrent)) {
-                    seen.clear();
-                    return secondCurrent;
-                }
-                ViewParent secondCurrentParent = secondCurrent.mParent;
-                if (secondCurrentParent instanceof View) {
-                    secondCurrent = (View) secondCurrentParent;
-                } else {
-                    secondCurrent = null;
-                }
-            }
-            seen.clear();
+        if (mTempHashSet == null) {
+            mTempHashSet = new HashSet<View>();
         }
+        HashSet<View> seen = mTempHashSet;
+        seen.clear();
+        View firstCurrent = first;
+        while (firstCurrent != null) {
+            seen.add(firstCurrent);
+            ViewParent firstCurrentParent = firstCurrent.mParent;
+            if (firstCurrentParent instanceof View) {
+                firstCurrent = (View) firstCurrentParent;
+            } else {
+                firstCurrent = null;
+            }
+        }
+        View secondCurrent = second;
+        while (secondCurrent != null) {
+            if (seen.contains(secondCurrent)) {
+                seen.clear();
+                return secondCurrent;
+            }
+            ViewParent secondCurrentParent = secondCurrent.mParent;
+            if (secondCurrentParent instanceof View) {
+                secondCurrent = (View) secondCurrentParent;
+            } else {
+                secondCurrent = null;
+            }
+        }
+        seen.clear();
         return null;
     }
 
@@ -6640,6 +6626,9 @@ public final class ViewRootImpl implements ViewParent,
 
             // Destroy Displaylists so they can be recreated with high contrast recordings
             destroyHardwareResources();
+
+            // Schedule redraw, which will rerecord + redraw all text
+            invalidate();
         }
     }
 
