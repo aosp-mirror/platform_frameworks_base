@@ -48,7 +48,7 @@ final class SystemAudioActionFromAvr extends SystemAudioAction {
     }
 
     private void handleSystemAudioActionFromAvr() {
-        if (mTargetAudioStatus == tv().getSystemAudioMode()) {
+        if (mTargetAudioStatus == tv().isSystemAudioActivated()) {
             finishWithCallback(HdmiControlManager.RESULT_SUCCESS);
             return;
         }

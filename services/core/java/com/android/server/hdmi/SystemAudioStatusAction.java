@@ -68,7 +68,7 @@ final class SystemAudioStatusAction extends FeatureAction {
         // the audio amplifier is unknown.
         tv().setAudioStatus(false, Constants.UNKNOWN_VOLUME);
 
-        int uiCommand = tv().getSystemAudioMode()
+        int uiCommand = tv().isSystemAudioActivated()
                 ? HdmiCecKeycode.CEC_KEYCODE_RESTORE_VOLUME_FUNCTION  // SystemAudioMode: ON
                 : HdmiCecKeycode.CEC_KEYCODE_MUTE_FUNCTION;           // SystemAudioMode: OFF
         sendUserControlPressedAndReleased(mAvrAddress, uiCommand);
@@ -98,7 +98,7 @@ final class SystemAudioStatusAction extends FeatureAction {
         int volume = params[0] & 0x7F;
         tv().setAudioStatus(mute, volume);
 
-        if ((tv().getSystemAudioMode() && mute) || (!tv().getSystemAudioMode() && !mute)) {
+        if (!(tv().isSystemAudioActivated() ^ mute)) {
             // Toggle AVR's mute status to match with the system audio status.
             sendUserControlPressedAndReleased(mAvrAddress, HdmiCecKeycode.CEC_KEYCODE_MUTE);
         }
