@@ -27,11 +27,13 @@ public interface ZenModeController {
     void requestConditions(boolean request);
     void setExitConditionId(Uri exitConditionId);
     Uri getExitConditionId();
-    boolean hasNextAlarm();
+    long getNextAlarm();
+    void setUserId(int userId);
 
     public static class Callback {
         public void onZenChanged(int zen) {}
         public void onExitConditionChanged(Uri exitConditionId) {}
         public void onConditionsChanged(Condition[] conditions) {}
+        public void onNextAlarmChanged() {}
     }
 }
