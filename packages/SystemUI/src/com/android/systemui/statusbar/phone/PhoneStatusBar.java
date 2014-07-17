@@ -45,15 +45,23 @@ import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.inputmethodservice.InputMethodService;
 import android.media.AudioManager;
+import android.media.MediaMetadata;
+import android.media.session.MediaController;
+import android.media.session.MediaSession;
+import android.media.session.MediaSessionManager;
+import android.media.session.PlaybackState;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -91,6 +99,7 @@ import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -140,6 +149,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         DragDownHelper.OnDragDownListener, ActivityStarter {
@@ -148,16 +158,18 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     public static final boolean SPEW = false;
     public static final boolean DUMPTRUCK = true; // extra dumpsys info
     public static final boolean DEBUG_GESTURES = false;
+    public static final boolean DEBUG_MEDIA = false;
+    public static final boolean DEBUG_MEDIA_FAKE_ARTWORK = false;
 
     public static final boolean DEBUG_WINDOW_STATE = false;
-
-    public static final boolean SETTINGS_DRAG_SHORTCUT = true;
 
     // additional instrumentation for testing purposes; intended to be left on during development
     public static final boolean CHATTY = DEBUG;
 
     public static final String ACTION_STATUSBAR_START
             = "com.android.internal.policy.statusbar.START";
+
+    public static final boolean SHOW_LOCKSCREEN_MEDIA_ARTWORK = true;
 
     private static final int MSG_OPEN_NOTIFICATION_PANEL = 1000;
     private static final int MSG_CLOSE_PANELS = 1001;
@@ -378,6 +390,38 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private Interpolator mAlphaIn = new PathInterpolator(0f, 0.2f, 1f, 1f);
     private Interpolator mAlphaOut = new PathInterpolator(0f, 0f, 0.8f, 1f);
 
+    private FrameLayout mBackdrop;
+    private ImageView mBackdropFront, mBackdropBack;
+
+    private MediaSessionManager mMediaSessionManager;
+    private MediaController mMediaController;
+    private String mMediaNotificationKey;
+    private MediaMetadata mMediaMetadata;
+    private MediaController.Callback mMediaListener
+            = new MediaController.Callback() {
+        @Override
+        public void onPlaybackStateChanged(PlaybackState state) {
+            super.onPlaybackStateChanged(state);
+            if (DEBUG_MEDIA) Log.v(TAG, "DEBUG_MEDIA: onPlaybackStateChanged: " + state);
+        }
+
+        @Override
+        public void onMetadataChanged(MediaMetadata metadata) {
+            super.onMetadataChanged(metadata);
+            if (DEBUG_MEDIA) Log.v(TAG, "DEBUG_MEDIA: onMetadataChanged: " + metadata);
+            mMediaMetadata = metadata;
+            updateMediaMetaData(true);
+        }
+    };
+
+    private final OnChildLocationsChangedListener mOnChildLocationsChangedListener =
+            new OnChildLocationsChangedListener() {
+        @Override
+        public void onChildLocationsChanged(NotificationStackScrollLayout stackScrollLayout) {
+            userActivity();
+        }
+    };
+
     private int mDisabledUnmodified;
 
     /** Keys of notifications currently visible to the user. */
@@ -479,6 +523,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 .getDefaultDisplay();
         updateDisplaySize();
         super.start(); // calls createAndAddWindows()
+
+        mMediaSessionManager
+                = (MediaSessionManager) mContext.getSystemService(Context.MEDIA_SESSION_SERVICE);
+        // TODO: use MediaSessionManager.SessionListener to hook us up to future updates
+        // in session state
 
         addNavigationBar();
 
@@ -710,6 +759,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mHeader.setQSPanel(mQSPanel);
         }
 
+        mBackdrop = (FrameLayout) mStatusBarWindow.findViewById(R.id.backdrop);
+        mBackdropFront = (ImageView) mBackdrop.findViewById(R.id.backdrop_front);
+        mBackdropBack = (ImageView) mBackdrop.findViewById(R.id.backdrop_back);
+
         // User info. Trigger first load.
         mHeader.setUserInfoController(mUserInfoController);
         mUserInfoController.reloadUserInfo();
@@ -725,6 +778,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction(Intent.ACTION_SCREEN_ON);
+        if (DEBUG_MEDIA_FAKE_ARTWORK) {
+            filter.addAction("fake_artwork");
+        }
         filter.addAction(ACTION_DEMO);
         context.registerReceiver(mBroadcastReceiver, filter);
 
@@ -1409,7 +1465,238 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 .start();
         }
 
+        findAndUpdateMediaNotifications();
+
         updateCarrierLabelVisibility(false);
+    }
+
+    public void findAndUpdateMediaNotifications() {
+        boolean metaDataChanged = false;
+
+        synchronized (mNotificationData) {
+            final int N = mNotificationData.size();
+            Entry mediaNotification = null;
+            MediaController controller = null;
+            for (int i=0; i<N; i++) {
+                final Entry entry = mNotificationData.get(i);
+                if (isMediaNotification(entry)) {
+                    final MediaSession.Token token = entry.notification.getNotification().extras
+                            .getParcelable(Notification.EXTRA_MEDIA_SESSION);
+                    if (token != null) {
+                        controller = new MediaController(token);
+                        if (controller != null) {
+                            // we've got a live one, here
+                            mediaNotification = entry;
+                        }
+                    }
+                }
+            }
+
+            if (mediaNotification == null) {
+                // Still nothing? OK, let's just look for live media sessions and see if they match
+                // one of our notifications. This will catch apps that aren't (yet!) using media
+                // notifications.
+
+                if (mMediaSessionManager != null) {
+                    final List<MediaController> sessions
+                            = mMediaSessionManager.getActiveSessionsForUser(
+                                    null,
+                                    UserHandle.USER_ALL);
+
+                    for (MediaController aController : sessions) {
+                        if (aController == null) continue;
+                        final PlaybackState state = aController.getPlaybackState();
+                        if (state == null) continue;
+                        switch (state.getState()) {
+                            case PlaybackState.STATE_STOPPED:
+                            case PlaybackState.STATE_ERROR:
+                                continue;
+                            default:
+                                // now to see if we have one like this
+                                final String pkg = aController.getSessionInfo().getPackageName();
+
+                                for (int i = 0; i < N; i++) {
+                                    final Entry entry = mNotificationData.get(i);
+                                    if (entry.notification.getPackageName().equals(pkg)) {
+                                        if (DEBUG_MEDIA) {
+                                            Log.v(TAG, "DEBUG_MEDIA: found controller matching "
+                                                + entry.notification.getKey());
+                                        }
+                                        controller = aController;
+                                        mediaNotification = entry;
+                                        break;
+                                    }
+                                }
+                        }
+                    }
+                }
+            }
+
+            if (controller != mMediaController) {
+                // We have a new media session
+
+                if (mMediaController != null) {
+                    // something old was playing
+                    Log.v(TAG, "DEBUG_MEDIA: Disconnecting from old controller: "
+                            + mMediaController);
+                    mMediaController.removeCallback(mMediaListener);
+                }
+                mMediaController = controller;
+
+                if (mMediaController != null) {
+                    mMediaController.addCallback(mMediaListener);
+                    mMediaMetadata = mMediaController.getMetadata();
+                    if (DEBUG_MEDIA) {
+                        Log.v(TAG, "DEBUG_MEDIA: insert listener, receive metadata: "
+                                + mMediaMetadata);
+                    }
+
+                    final String notificationKey = mediaNotification == null
+                            ? null
+                            : mediaNotification.notification.getKey();
+
+                    if (notificationKey == null || !notificationKey.equals(mMediaNotificationKey)) {
+                        // we have a new notification!
+                        if (DEBUG_MEDIA) {
+                            Log.v(TAG, "DEBUG_MEDIA: Found new media notification: key="
+                                    + notificationKey + " controller=" + controller);
+                        }
+                        mMediaNotificationKey = notificationKey;
+                    }
+                } else {
+                    mMediaMetadata = null;
+                    mMediaNotificationKey = null;
+                }
+
+                metaDataChanged = true;
+            } else {
+                // Media session unchanged
+
+                if (DEBUG_MEDIA) {
+                    Log.v(TAG, "DEBUG_MEDIA: Continuing media notification: key=" + mMediaNotificationKey);
+                }
+            }
+        }
+
+        updateMediaMetaData(metaDataChanged);
+    }
+
+    private void removeAndRecycleImageViewDrawable(ImageView iv) {
+        Bitmap oldBitmap = null;
+        final Drawable drawable = iv.getDrawable();
+        if (drawable != null && drawable instanceof BitmapDrawable) {
+            oldBitmap = ((BitmapDrawable) drawable).getBitmap();
+        }
+        iv.animate().cancel();
+        iv.setImageDrawable(null);
+        if (oldBitmap != null) {
+            if (DEBUG_MEDIA) {
+                Log.v(TAG, "DEBUG_MEDIA: recycling bitmap " + oldBitmap + " from ImageView " + iv);
+            }
+            oldBitmap.recycle();
+        }
+    }
+
+    /**
+     * Hide the album artwork that is fading out and release its memory.
+     */
+    private Runnable mHideBackdropFront = new Runnable() {
+        @Override
+        public void run() {
+            if (DEBUG_MEDIA) {
+                Log.v(TAG, "DEBUG_MEDIA: removing fade layer");
+            }
+            mBackdropFront.setVisibility(View.INVISIBLE);
+            removeAndRecycleImageViewDrawable(mBackdropFront);
+        }
+    };
+
+    /**
+     * Refresh or remove lockscreen artwork from media metadata.
+     */
+    public void updateMediaMetaData(boolean metaDataChanged) {
+        if (!SHOW_LOCKSCREEN_MEDIA_ARTWORK) return;
+
+        if (mBackdrop == null) return; // called too early
+
+        if (DEBUG_MEDIA) {
+            Log.v(TAG, "DEBUG_MEDIA: updating album art for notification " + mMediaNotificationKey
+                + " metadata=" + mMediaMetadata
+                + " metaDataChanged=" + metaDataChanged
+                + " state=" + mState);
+        }
+
+        Bitmap artworkBitmap = null;
+        if (mMediaMetadata != null) {
+            artworkBitmap = mMediaMetadata.getBitmap(MediaMetadata.METADATA_KEY_ART);
+            if (artworkBitmap == null) {
+                artworkBitmap = mMediaMetadata.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART);
+                // might still be null
+            }
+        }
+
+        final boolean hasArtwork = artworkBitmap != null;
+
+        if ((hasArtwork || DEBUG_MEDIA_FAKE_ARTWORK)
+                && (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED)) {
+            // time to show some art!
+            if (mBackdrop.getVisibility() != View.VISIBLE) {
+                mBackdrop.setVisibility(View.VISIBLE);
+                mBackdrop.animate().alpha(1f);
+                metaDataChanged = true;
+                if (DEBUG_MEDIA) {
+                    Log.v(TAG, "DEBUG_MEDIA: Fading in album artwork");
+                }
+            }
+            if (metaDataChanged) {
+                if (mBackdropBack.getDrawable() != null) {
+                    mBackdropFront.setImageDrawable(mBackdropBack.getDrawable());
+                    mBackdropFront.setAlpha(1f);
+                    mBackdropFront.setVisibility(View.VISIBLE);
+                } else {
+                    mBackdropFront.setVisibility(View.INVISIBLE);
+                }
+
+                if (DEBUG_MEDIA_FAKE_ARTWORK) {
+                    final int c = 0xFF000000 | (int)(Math.random() * 0xFFFFFF);
+                    Log.v(TAG, String.format("DEBUG_MEDIA: setting new color: 0x%08x", c));
+                    mBackdropBack.setBackgroundColor(0xFFFFFFFF);
+                    mBackdropBack.setImageDrawable(new ColorDrawable(c));
+                } else {
+                    mBackdropBack.setImageBitmap(artworkBitmap);
+                }
+
+                if (mBackdropFront.getVisibility() == View.VISIBLE) {
+                    if (DEBUG_MEDIA) {
+                        Log.v(TAG, "DEBUG_MEDIA: Crossfading album artwork from "
+                                + mBackdropFront.getDrawable()
+                                + " to "
+                                + mBackdropBack.getDrawable());
+                    }
+                    mBackdropFront.animate().withLayer()
+                            .setDuration(250)
+                            .alpha(0f).withEndAction(mHideBackdropFront);
+                }
+            }
+        } else {
+            // need to hide the album art, either because we are unlocked or because
+            // the metadata isn't there to support it
+            if (mBackdrop.getVisibility() != View.GONE) {
+                if (DEBUG_MEDIA) {
+                    Log.v(TAG, "DEBUG_MEDIA: Fading out album artwork");
+                }
+                mBackdrop.animate().withLayer()
+                        .alpha(0f).withEndAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        mBackdrop.setVisibility(View.GONE);
+                        mBackdropFront.animate().cancel();
+                        mBackdropBack.animate().cancel();
+                        mHandler.post(mHideBackdropFront);
+                    }
+                });
+            }
+        }
     }
 
     public void showClock(boolean show) {
@@ -2272,6 +2559,23 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mNavigationBarView.dump(fd, pw, args);
         }
 
+        pw.print("  mMediaSessionManager=");
+        pw.println(mMediaSessionManager);
+        pw.print("  mMediaNotificationKey=");
+        pw.println(mMediaNotificationKey);
+        pw.print("  mMediaController=");
+        pw.print(mMediaController);
+        if (mMediaController != null) {
+            pw.print(" state=" + mMediaController.getPlaybackState());
+        }
+        pw.println();
+        pw.print("  mMediaMetadata=");
+        pw.print(mMediaMetadata);
+        if (mMediaMetadata != null) {
+            pw.print(" title=" + mMediaMetadata.getString(MediaMetadata.METADATA_KEY_TITLE));
+        }
+        pw.println();
+
         pw.println("  Panels: ");
         if (mNotificationPanel != null) {
             pw.println("    mNotificationPanel=" +
@@ -2452,6 +2756,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                             Log.w(TAG, "Error running demo command, intent=" + intent, t);
                         }
                     }
+                }
+            } else if ("fake_artwork".equals(action)) {
+                if (DEBUG_MEDIA_FAKE_ARTWORK) {
+                    updateMediaMetaData(true);
                 }
             }
         }
@@ -2890,6 +3198,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         updateNotifications();
         checkBarModes();
         updateCarrierLabelVisibility(false);
+        updateMediaMetaData(false);
     }
 
     private void updateDozingState() {

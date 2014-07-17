@@ -26,6 +26,23 @@
     android:fitsSystemWindows="true"
     android:descendantFocusability="afterDescendants">
 
+    <FrameLayout
+            android:id="@+id/backdrop"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"
+            >
+        <ImageView android:id="@+id/backdrop_back"
+                   android:layout_width="match_parent"
+                   android:scaleType="centerCrop"
+                   android:layout_height="match_parent" />
+        <ImageView android:id="@+id/backdrop_front"
+                   android:layout_width="match_parent"
+                   android:layout_height="match_parent"
+                   android:scaleType="centerCrop"
+                   android:visibility="invisible" />
+    </FrameLayout>
+
     <View android:id="@+id/scrim_behind"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
