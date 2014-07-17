@@ -21,6 +21,7 @@
     #define LOG_TAG "OpenGLRenderer"
 #endif
 
+#include <SkColor.h>
 #include <SkPath.h>
 #include <SkPathOps.h>
 #include <SkXfermode.h>
@@ -1315,7 +1316,7 @@ public:
         FontRenderer& fontRenderer = renderer.getCaches().fontRenderer->getFontRenderer(paint);
         fontRenderer.precache(paint, mText, mCount, SkMatrix::I());
 
-        deferInfo.batchId = mPaint->getColor() == 0xff000000 ?
+        deferInfo.batchId = mPaint->getColor() == SK_ColorBLACK ?
                 DeferredDisplayList::kOpBatch_Text :
                 DeferredDisplayList::kOpBatch_ColorText;
     }
@@ -1385,17 +1386,19 @@ public:
             fontRenderer.precache(paint, mText, mCount, transform);
             mPrecacheTransform = transform;
         }
-        deferInfo.batchId = mPaint->getColor() == 0xff000000 ?
+        deferInfo.batchId = mPaint->getColor() == SK_ColorBLACK ?
                 DeferredDisplayList::kOpBatch_Text :
                 DeferredDisplayList::kOpBatch_ColorText;
 
         deferInfo.mergeId = reinterpret_cast<mergeid_t>(mPaint->getColor());
 
         // don't merge decorated text - the decorations won't draw in order
-        bool noDecorations = !(mPaint->getFlags() & (SkPaint::kUnderlineText_Flag |
-                        SkPaint::kStrikeThruText_Flag));
-        deferInfo.mergeable = state.mMatrix.isPureTranslate() && noDecorations &&
-                OpenGLRenderer::getXfermodeDirect(mPaint) == SkXfermode::kSrcOver_Mode;
+        bool hasDecorations = mPaint->getFlags()
+                & (SkPaint::kUnderlineText_Flag | SkPaint::kStrikeThruText_Flag);
+
+        deferInfo.mergeable = state.mMatrix.isPureTranslate()
+                && !hasDecorations
+                && OpenGLRenderer::getXfermodeDirect(mPaint) == SkXfermode::kSrcOver_Mode;
     }
 
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
