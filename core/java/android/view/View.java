@@ -18445,6 +18445,43 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Dispatch a fling to a nested scrolling parent before it is processed by this view.
+     *
+     * <p>Nested pre-fling events are to nested fling events what touch intercept is to touch
+     * and what nested pre-scroll is to nested scroll. <code>dispatchNestedPreFling</code>
+     * offsets an opportunity for the parent view in a nested fling to fully consume the fling
+     * before the child view consumes it. If this method returns <code>true</code>, a nested
+     * parent view consumed the fling and this view should not scroll as a result.</p>
+     *
+     * <p>For a better user experience, only one view in a nested scrolling chain should consume
+     * the fling at a time. If a parent view consumed the fling this method will return false.
+     * Custom view implementations should account for this in two ways:</p>
+     *
+     * <ul>
+     *     <li>If a custom view is paged and needs to settle to a fixed page-point, do not
+     *     call <code>dispatchNestedPreFling</code>; consume the fling and settle to a valid
+     *     position regardless.</li>
+     *     <li>If a nested parent does consume the fling, this view should not scroll at all,
+     *     even to settle back to a valid idle position.</li>
+     * </ul>
+     *
+     * <p>Views should also not offer fling velocities to nested parent views along an axis
+     * where scrolling is not currently supported; a {@link android.widget.ScrollView ScrollView}
+     * should not offer a horizontal fling velocity to its parents since scrolling along that
+     * axis is not permitted and carrying velocity along that motion does not make sense.</p>
+     *
+     * @param velocityX Horizontal fling velocity in pixels per second
+     * @param velocityY Vertical fling velocity in pixels per second
+     * @return true if a nested scrolling parent consumed the fling
+     */
+    public boolean dispatchNestedPreFling(float velocityX, float velocityY) {
+        if (isNestedScrollingEnabled() && mNestedScrollingParent != null) {
+            return mNestedScrollingParent.onNestedPreFling(this, velocityX, velocityY);
+        }
+        return false;
+    }
+
+    /**
      * Gets a scale factor that determines the distance the view should scroll
      * vertically in response to {@link MotionEvent#ACTION_SCROLL}.
      * @return The vertical scroll scale factor.
