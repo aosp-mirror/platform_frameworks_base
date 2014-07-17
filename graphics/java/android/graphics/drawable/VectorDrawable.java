@@ -33,6 +33,7 @@ import android.graphics.Region;
 import android.graphics.PorterDuff.Mode;
 import android.util.ArrayMap;
 import android.util.AttributeSet;
+import android.util.LayoutDirection;
 import android.util.Log;
 import android.util.PathParser;
 import android.util.Xml;
@@ -187,7 +188,13 @@ public class VectorDrawable extends Drawable {
     public void draw(Canvas canvas) {
         final int saveCount = canvas.save();
         final Rect bounds = getBounds();
+        final boolean needMirroring = needMirroring();
+
         canvas.translate(bounds.left, bounds.top);
+        if (needMirroring) {
+            canvas.translate(bounds.width(), 0);
+            canvas.scale(-1.0f, 1.0f);
+        }
 
         if (!mAllowCaching) {
             mVectorState.mVPathRenderer.draw(canvas, bounds.width(), bounds.height());
@@ -205,6 +212,7 @@ public class VectorDrawable extends Drawable {
             }
             canvas.drawBitmap(bitmap, null, bounds, null);
         }
+
         canvas.restoreToCount(saveCount);
     }
 
@@ -352,6 +360,9 @@ public class VectorDrawable extends Drawable {
         if (tint != null) {
             state.mTint = tint;
         }
+
+        state.mAutoMirrored = a.getBoolean(
+                R.styleable.VectorDrawable_autoMirrored, state.mAutoMirrored);
     }
 
     private void inflateInternal(Resources res, XmlPullParser parser, AttributeSet attrs,
@@ -469,12 +480,30 @@ public class VectorDrawable extends Drawable {
         mAllowCaching = allowCaching;
     }
 
+    private boolean needMirroring() {
+        return isAutoMirrored() && getLayoutDirection() == LayoutDirection.RTL;
+    }
+
+    @Override
+    public void setAutoMirrored(boolean mirrored) {
+        if (mVectorState.mAutoMirrored != mirrored) {
+            mVectorState.mAutoMirrored = mirrored;
+            invalidateSelf();
+        }
+    }
+
+    @Override
+    public boolean isAutoMirrored() {
+        return mVectorState.mAutoMirrored;
+    }
+
     private static class VectorDrawableState extends ConstantState {
         int[] mThemeAttrs;
         int mChangingConfigurations;
         VPathRenderer mVPathRenderer;
         ColorStateList mTint;
         Mode mTintMode;
+        boolean mAutoMirrored;
 
         Bitmap mCachedBitmap;
         int[] mCachedThemeAttrs;
@@ -490,6 +519,7 @@ public class VectorDrawable extends Drawable {
                 mVPathRenderer = new VPathRenderer(copy.mVPathRenderer);
                 mTint = copy.mTint;
                 mTintMode = copy.mTintMode;
+                mAutoMirrored = copy.mAutoMirrored;
             }
         }
 
@@ -497,6 +527,7 @@ public class VectorDrawable extends Drawable {
             if (mCachedThemeAttrs == mThemeAttrs
                     && mCachedTint == mTint
                     && mCachedTintMode == mTintMode
+                    && mAutoMirrored == mAutoMirrored
                     && width == mCachedBitmap.getWidth()
                     && height == mCachedBitmap.getHeight()
                     && mCachedRootAlpha == mVPathRenderer.getRootAlpha())  {
