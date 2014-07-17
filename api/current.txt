@@ -28031,7 +28031,7 @@ package android.telecomm {
 
   public final class Call {
     method public void addListener(android.telecomm.Call.Listener);
-    method public void answer();
+    method public void answer(int);
     method public void conference();
     method public void disconnect();
     method public android.telecomm.RemoteCallVideoProvider getCallVideoProvider();
@@ -28199,7 +28199,7 @@ package android.telecomm {
     method public final boolean isConferenceConnection();
     method public final boolean isRequestingRingback();
     method protected void onAbort();
-    method protected void onAnswer();
+    method protected void onAnswer(int);
     method protected void onChildrenChanged(java.util.List<android.telecomm.Connection>);
     method protected void onDisconnect();
     method protected void onHold();
@@ -28286,7 +28286,7 @@ package android.telecomm {
   }
 
   public final class InCallAdapter {
-    method public void answerCall(java.lang.String);
+    method public void answerCall(java.lang.String, int);
     method public void disconnectCall(java.lang.String);
     method public void holdCall(java.lang.String);
     method public void mute(boolean);
@@ -28400,7 +28400,7 @@ package android.telecomm {
   public final class RemoteConnection {
     method public void abort();
     method public void addListener(android.telecomm.RemoteConnection.Listener);
-    method public void answer();
+    method public void answer(int);
     method public void disconnect();
     method public boolean getAudioModeIsVoip();
     method public int getCallCapabilities();
