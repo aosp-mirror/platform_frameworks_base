@@ -1729,6 +1729,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                         return true;
                     }
                 }
+                return false;
             }
 
             case KeyEvent.KEYCODE_MENU: {
@@ -1822,6 +1823,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                         return true;
                     }
                 }
+                return false;
             }
 
             case KeyEvent.KEYCODE_MENU: {
