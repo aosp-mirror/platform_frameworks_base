@@ -190,14 +190,36 @@ public class EditableInputConnection extends BaseInputConnection {
     @Override
     public int requestCursorAnchorInfo(CursorAnchorInfoRequest request) {
         if (DEBUG) Log.v(TAG, "requestCursorAnchorInfo " + request);
-        final int result = super.requestCursorAnchorInfo(request);
-        if (mIMM != null && request != null && (request.getRequestType() ==
-                CursorAnchorInfoRequest.TYPE_CURSOR_ANCHOR_INFO)) {
-            mIMM.setCursorAnchorInfoMonitorMode(request.getRequestFlags());
-            // One-shot event is not yet fully supported.
-            // TODO: Support one-shot event correctly.
-            return CursorAnchorInfoRequest.RESULT_SCHEDULED;
+
+        // This implementation supports TYPE_CURSOR_ANCHOR_INFO only. Other events will be
+        // delegated to the super class.
+        if (request == null ||
+                request.getRequestType() != CursorAnchorInfoRequest.TYPE_CURSOR_ANCHOR_INFO) {
+            return super.requestCursorAnchorInfo(request);
         }
-        return result;
+        if (mIMM == null) {
+            // In this case, TYPE_CURSOR_ANCHOR_INFO is not handled.
+            // TODO: Return some notification code for the input method that indicates
+            // CursorAnchorInfo is temporarily unavailable.
+            return CursorAnchorInfoRequest.RESULT_NOT_HANDLED;
+        }
+        final int flags = request.getRequestFlags();
+        mIMM.setCursorAnchorInfoMonitorMode(flags);
+        if ((flags & CursorAnchorInfoRequest.FLAG_CURSOR_ANCHOR_INFO_IMMEDIATE) != 0) {
+            if (mTextView == null) {
+                // In this case, FLAG_CURSOR_ANCHOR_INFO_IMMEDIATE is silently ignored.
+                // TODO: Return some notification code for the input method that indicates
+                // FLAG_CURSOR_ANCHOR_INFO_IMMEDIATE is ignored.
+            } else if (mTextView.isInLayout()) {
+                // In this case, the view hierarchy is currently undergoing a layout pass.
+                // IMM#updateCursorAnchorInfo is supposed to be called soon after the layout
+                // pass is finished.
+            } else {
+                // This will schedule a layout pass of the view tree, and the layout event
+                // eventually triggers IMM#updateCursorAnchorInfo.
+                mTextView.requestLayout();
+            }
+        }
+        return CursorAnchorInfoRequest.RESULT_SCHEDULED;
     }
 }
