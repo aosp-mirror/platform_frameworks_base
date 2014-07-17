@@ -69,6 +69,7 @@ import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.ActionMode;
 import android.view.ContextThemeWrapper;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.IRotationWatcher;
 import android.view.IWindowManager;
@@ -2941,9 +2942,17 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             a.getValue(com.android.internal.R.styleable.Window_windowFixedHeightMinor,
                     mFixedHeightMinor);
         }
-        if (a.hasValue(com.android.internal.R.styleable.Window_windowOutsetBottom)) {
-            if (mOutsetBottom == null) mOutsetBottom = new TypedValue();
-            a.getValue(com.android.internal.R.styleable.Window_windowOutsetBottom, mOutsetBottom);
+
+        final WindowManager windowService = (WindowManager) getContext().getSystemService(
+                Context.WINDOW_SERVICE);
+        if (windowService != null) {
+            final Display display = windowService.getDefaultDisplay();
+            if (display.getDisplayId() == Display.DEFAULT_DISPLAY &&
+                    a.hasValue(com.android.internal.R.styleable.Window_windowOutsetBottom)) {
+                if (mOutsetBottom == null) mOutsetBottom = new TypedValue();
+                a.getValue(com.android.internal.R.styleable.Window_windowOutsetBottom,
+                        mOutsetBottom);
+            }
         }
 
         final Context context = getContext();
