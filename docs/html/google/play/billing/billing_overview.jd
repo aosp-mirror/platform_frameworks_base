@@ -38,6 +38,16 @@ same look-and-feel as for app purchases.</li>
 features that you need to understand in order to add In-app 
 Billing features into your application.</p>
 
+<p class="note"><b>Note</b>: Ensure that you comply with applicable laws in the countries where you
+distribute apps. For example, in EU countries, laws based on the
+<a href="http://ec.europa.eu/justice/consumer-marketing/unfair-trade/unfair-practices/">Unfair
+Commercial Practices Directive</a> prohibit direct exhortations to children to buy advertised
+products or to persuade their parents or other adults to buy advertised products for them.
+See the
+<a href="http://ec.europa.eu/consumers/enforcement/docs/common_position_on_online_games_en.pdf">position
+of the EU consumer protection authorities</a> for more information on this and other topics.
+</p>
+
 <h2 id="api">In-app Billing API</h2>
 <p>Your application accesses the In-app Billing service using an API that is 
 exposed by the Google Play app that is installed on the device. The Google Play 
