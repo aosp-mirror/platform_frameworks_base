@@ -2271,6 +2271,22 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
 
         @Override
+        public WindowInsets dispatchApplyWindowInsets(WindowInsets insets) {
+            if (mOutsetBottom != null) {
+                final DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
+                int bottom = (int) mOutsetBottom.getDimension(metrics);
+                WindowInsets newInsets = insets.replaceSystemWindowInsets(
+                        insets.getSystemWindowInsetLeft(), insets.getSystemWindowInsetTop(),
+                        insets.getSystemWindowInsetRight(),
+                        insets.getSystemWindowInsetBottom() + bottom);
+                return super.dispatchApplyWindowInsets(newInsets);
+            } else {
+                return super.dispatchApplyWindowInsets(insets);
+            }
+        }
+
+
+        @Override
         public boolean onTouchEvent(MotionEvent event) {
             return onInterceptTouchEvent(event);
         }
