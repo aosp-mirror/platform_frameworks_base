@@ -2097,7 +2097,7 @@ class ContextImpl extends Context {
         }
 
         LoadedApk pi = mMainThread.getPackageInfo(packageName, mResources.getCompatibilityInfo(),
-                flags, user.getIdentifier());
+                flags | CONTEXT_REGISTER_PACKAGE, user.getIdentifier());
         if (pi != null) {
             ContextImpl c = new ContextImpl(this, mMainThread, pi, mActivityToken,
                     user, restricted, mDisplay, mOverrideConfiguration);

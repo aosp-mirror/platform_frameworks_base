@@ -18,15 +18,19 @@ package android.service.voice;
 
 import android.annotation.SdkConstant;
 import android.app.Service;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.soundtrigger.KeyphraseEnrollmentInfo;
 import android.hardware.soundtrigger.SoundTriggerHelper;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 
+import android.provider.Settings;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IVoiceInteractionManagerService;
 
@@ -64,14 +68,58 @@ public class VoiceInteractionService extends Service {
     public static final String SERVICE_META_DATA = "android.voice_interaction";
 
     IVoiceInteractionService mInterface = new IVoiceInteractionService.Stub() {
+        @Override public void ready() {
+            mHandler.sendEmptyMessage(MSG_READY);
+        }
     };
+
+    MyHandler mHandler;
 
     IVoiceInteractionManagerService mSystemService;
 
     private KeyphraseEnrollmentInfo mKeyphraseEnrollmentInfo;
     private SoundTriggerHelper mSoundTriggerHelper;
 
+    static final int MSG_READY = 1;
+
+    class MyHandler extends Handler {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_READY:
+                    onReady();
+                    break;
+                default:
+                    super.handleMessage(msg);
+            }
+        }
+    }
+
+    /**
+     * Check whether the given service component is the currently active
+     * VoiceInteractionService.
+     */
+    public static boolean isActiveService(Context context, ComponentName service) {
+        String cur = Settings.Secure.getString(context.getContentResolver(),
+                Settings.Secure.VOICE_INTERACTION_SERVICE);
+        if (cur == null || cur.isEmpty()) {
+            return false;
+        }
+        ComponentName curComp = ComponentName.unflattenFromString(cur);
+        if (curComp == null) {
+            return false;
+        }
+        return curComp.equals(cur);
+    }
+
+    /**
+     * Initiate the execution of a new {@link android.service.voice.VoiceInteractionSession}.
+     * @param args Arbitrary arguments that will be propagated to the session.
+     */
     public void startSession(Bundle args) {
+        if (mSystemService == null) {
+            throw new IllegalStateException("Not available until onReady() is called");
+        }
         try {
             mSystemService.startSession(mInterface, args);
         } catch (RemoteException e) {
@@ -81,10 +129,7 @@ public class VoiceInteractionService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        mSystemService = IVoiceInteractionManagerService.Stub.asInterface(
-                ServiceManager.getService(Context.VOICE_INTERACTION_MANAGER_SERVICE));
-        mKeyphraseEnrollmentInfo = new KeyphraseEnrollmentInfo(getPackageManager());
-        mSoundTriggerHelper = new SoundTriggerHelper();
+        mHandler = new MyHandler();
     }
 
     @Override
@@ -96,6 +141,19 @@ public class VoiceInteractionService extends Service {
     }
 
     /**
+     * Called during service initialization to tell you when the system is ready
+     * to receive interaction from it.  You should generally do initialization here
+     * rather than in {@link #onCreate()}.  Methods such as {@link #startSession}
+     * and {@link #getAlwaysOnHotwordDetector} will not be operational until this point.
+     */
+    public void onReady() {
+        mSystemService = IVoiceInteractionManagerService.Stub.asInterface(
+                ServiceManager.getService(Context.VOICE_INTERACTION_MANAGER_SERVICE));
+        mKeyphraseEnrollmentInfo = new KeyphraseEnrollmentInfo(getPackageManager());
+        mSoundTriggerHelper = new SoundTriggerHelper();
+    }
+
+    /**
      * @param keyphrase The keyphrase that's being used, for example "Hello Android".
      * @param locale The locale for which the enrollment needs to be performed.
      *        This is a Java locale, for example "en_US".
@@ -104,6 +162,11 @@ public class VoiceInteractionService extends Service {
      */
     public final AlwaysOnHotwordDetector getAlwaysOnHotwordDetector(
             String keyphrase, String locale, AlwaysOnHotwordDetector.Callback callback) {
+        if (mSystemService == null) {
+            throw new IllegalStateException("Not available until onReady() is called");
+        }
+        // TODO: Cache instances and return the same one instead of creating a new interactor
+        // for the same keyphrase/locale combination.
         return new AlwaysOnHotwordDetector(keyphrase, locale, callback,
                 mKeyphraseEnrollmentInfo, mSoundTriggerHelper, mInterface, mSystemService);
     }
