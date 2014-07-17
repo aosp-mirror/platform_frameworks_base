@@ -158,7 +158,7 @@ final class NewDeviceAction extends FeatureAction {
 
         if (HdmiUtils.getTypeFromAddress(mDeviceLogicalAddress)
                 == HdmiCecDeviceInfo.DEVICE_AUDIO_SYSTEM) {
-            if (tv().getSystemAudioMode()) {
+            if (tv().getSystemAudioModeSetting()) {
                 addAndStartAction(new SystemAudioAutoInitiationAction(localDevice(),
                         mDeviceLogicalAddress));
             }
