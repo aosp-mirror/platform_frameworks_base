@@ -81,13 +81,7 @@ public class UserDetailView extends GridView {
             UserSwitcherController.UserRecord item = getItem(position);
             UserDetailItemView v = UserDetailItemView.convertOrInflate(
                     mContext, convertView, parent);
-            String name;
-            if (item.isGuest) {
-                name = mContext.getString(
-                        item.info == null ? R.string.guest_new_guest : R.string.guest_nickname);
-            } else {
-                name = item.info.name;
-            }
+            String name = getName(mContext, item);
             if (item.picture == null) {
                 v.bind(name, mContext.getDrawable(R.drawable.ic_account_circle_qs));
             } else {
