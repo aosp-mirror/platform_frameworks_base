@@ -20,6 +20,7 @@ import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.impl.DelegateManager;
 import com.android.layoutlib.bridge.impl.GcSnapshot;
+import com.android.layoutlib.bridge.impl.PorterDuffUtility;
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 import android.graphics.Bitmap.Config;
@@ -534,7 +535,8 @@ public final class Canvas_Delegate {
                 // set the color
                 graphics.setColor(new Color(color, true /*alpha*/));
 
-                Composite composite = PorterDuffXfermode_Delegate.getComposite(mode, 0xFF);
+                Composite composite = PorterDuffUtility.getComposite(
+                        PorterDuffUtility.getPorterDuffMode(mode), 0xFF);
                 if (composite != null) {
                     graphics.setComposite(composite);
                 }
