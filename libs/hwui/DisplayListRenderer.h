@@ -154,6 +154,9 @@ public:
     // TODO: rename for consistency
     virtual status_t callDrawGLFunction(Functor* functor, Rect& dirty);
 
+    void setHighContrastText(bool highContrastText) {
+        mHighContrastText = highContrastText;
+    }
 private:
     void insertRestoreToCount();
     void insertTranslate();
@@ -201,9 +204,7 @@ private:
     }
 
     inline const SkPaint* refPaint(const SkPaint* paint) {
-        if (!paint) {
-            return paint;
-        }
+        if (!paint) return NULL;
 
         const SkPaint* paintCopy = mPaintMap.valueFor(paint);
         if (paintCopy == NULL || paintCopy->getGenerationID() != paint->getGenerationID()) {
@@ -212,6 +213,14 @@ private:
             mPaintMap.replaceValueFor(paint, paintCopy);
             mDisplayListData->paints.add(paintCopy);
         }
+
+        return paintCopy;
+    }
+
+    inline SkPaint* copyPaint(const SkPaint* paint) {
+        if (!paint) return NULL;
+        SkPaint* paintCopy = new SkPaint(*paint);
+        mDisplayListData->paints.add(paintCopy);
 
         return paintCopy;
     }
@@ -271,6 +280,7 @@ private:
     float mTranslateX;
     float mTranslateY;
     bool mHasTranslate;
+    bool mHighContrastText;
 
     int mRestoreSaveCount;
 

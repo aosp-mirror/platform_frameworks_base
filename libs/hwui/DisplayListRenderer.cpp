@@ -31,10 +31,14 @@
 namespace android {
 namespace uirenderer {
 
-DisplayListRenderer::DisplayListRenderer():
-        mCaches(Caches::getInstance()), mDisplayListData(0),
-        mTranslateX(0.0f), mTranslateY(0.0f), mHasTranslate(false),
-        mRestoreSaveCount(-1) {
+DisplayListRenderer::DisplayListRenderer()
+    : mCaches(Caches::getInstance())
+    , mDisplayListData(0)
+    , mTranslateX(0.0f)
+    , mTranslateY(0.0f)
+    , mHasTranslate(false)
+    , mHighContrastText(false)
+    , mRestoreSaveCount(-1) {
 }
 
 DisplayListRenderer::~DisplayListRenderer() {
@@ -367,6 +371,16 @@ status_t DisplayListRenderer::drawPosText(const char* text, int bytesCount, int 
     return DrawGlInfo::kStatusDone;
 }
 
+static void simplifyPaint(int color, SkPaint* paint) {
+    paint->setColor(color);
+    paint->setShader(NULL);
+    paint->setColorFilter(NULL);
+    paint->setLooper(NULL);
+    paint->setStrokeWidth(4 + 0.04 * paint->getTextSize());
+    paint->setStrokeJoin(SkPaint::kRound_Join);
+    paint->setLooper(NULL);
+}
+
 status_t DisplayListRenderer::drawText(const char* text, int bytesCount, int count,
         float x, float y, const float* positions, const SkPaint* paint,
         float totalAdvance, const Rect& bounds, DrawOpMode drawOpMode) {
@@ -375,11 +389,34 @@ status_t DisplayListRenderer::drawText(const char* text, int bytesCount, int cou
 
     text = refText(text, bytesCount);
     positions = refBuffer<float>(positions, count * 2);
-    paint = refPaint(paint);
 
-    DrawOp* op = new (alloc()) DrawTextOp(text, bytesCount, count,
-            x, y, positions, paint, totalAdvance, bounds);
-    addDrawOp(op);
+    if (CC_UNLIKELY(mHighContrastText)) {
+        // high contrast draw path
+        int color = paint->getColor();
+        int channelSum = SkColorGetR(color) + SkColorGetG(color) + SkColorGetB(color);
+        bool darken = channelSum < (128 * 3);
+
+        // outline
+        SkPaint* outlinePaint = copyPaint(paint);
+        simplifyPaint(darken ? SK_ColorWHITE : SK_ColorBLACK, outlinePaint);
+        outlinePaint->setStyle(SkPaint::kStrokeAndFill_Style);
+        addDrawOp(new (alloc()) DrawTextOp(text, bytesCount, count,
+                x, y, positions, outlinePaint, totalAdvance, bounds)); // bounds?
+
+        // inner
+        SkPaint* innerPaint = copyPaint(paint);
+        simplifyPaint(darken ? SK_ColorBLACK : SK_ColorWHITE, innerPaint);
+        innerPaint->setStyle(SkPaint::kFill_Style);
+        addDrawOp(new (alloc()) DrawTextOp(text, bytesCount, count,
+                x, y, positions, innerPaint, totalAdvance, bounds));
+    } else {
+        // standard draw path
+        paint = refPaint(paint);
+
+        DrawOp* op = new (alloc()) DrawTextOp(text, bytesCount, count,
+                x, y, positions, paint, totalAdvance, bounds);
+        addDrawOp(op);
+    }
     return DrawGlInfo::kStatusDone;
 }
 
