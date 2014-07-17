@@ -1502,7 +1502,7 @@
   <java-symbol type="drawable" name="ic_menu_refresh" />
   <java-symbol type="drawable" name="ic_settings" />
   <java-symbol type="drawable" name="stat_notify_car_mode" />
-  <java-symbol type="drawable" name="stat_notify_disabled" />
+  <java-symbol type="drawable" name="stat_notify_disabled_data" />
   <java-symbol type="drawable" name="stat_notify_disk_full" />
   <java-symbol type="drawable" name="stat_sys_adb" />
   <java-symbol type="drawable" name="stat_sys_battery" />
