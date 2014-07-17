@@ -16,6 +16,7 @@
 
 package android.net;
 
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -26,6 +27,7 @@ import java.util.Objects;
  *
  * @hide
  */
+@SystemApi
 // NOTE: Ideally, we would abstract away the details of what identifies a network of a specific
 // type, so that all networks appear the same and can be scored without concern to the network type
 // itself. However, because no such cross-type identifier currently exists in the Android framework,
