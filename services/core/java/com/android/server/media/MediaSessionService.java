@@ -681,7 +681,7 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
 
         @Override
-        public void dispatchAdjustVolumeBy(int suggestedStream, int delta, int flags)
+        public void dispatchAdjustVolume(int suggestedStream, int delta, int flags)
                 throws RemoteException {
             final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();
@@ -690,7 +690,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                 synchronized (mLock) {
                     MediaSessionRecord session = mPriorityStack
                             .getDefaultVolumeSession(mCurrentUserId);
-                    dispatchAdjustVolumeByLocked(suggestedStream, delta, flags, session);
+                    dispatchAdjustVolumeLocked(suggestedStream, delta, flags, session);
                 }
             } finally {
                 Binder.restoreCallingIdentity(token);
@@ -764,11 +764,11 @@ public class MediaSessionService extends SystemService implements Monitor {
             return resolvedUserId;
         }
 
-        private void dispatchAdjustVolumeByLocked(int suggestedStream, int delta, int flags,
+        private void dispatchAdjustVolumeLocked(int suggestedStream, int direction, int flags,
                 MediaSessionRecord session) {
             if (DEBUG) {
                 String sessionInfo = session == null ? null : session.getSessionInfo().toString();
-                Log.d(TAG, "Adjusting session " + sessionInfo + " by " + delta + ". flags=" + flags
+                Log.d(TAG, "Adjusting session " + sessionInfo + " by " + direction + ". flags=" + flags
                         + ", suggestedStream=" + suggestedStream);
 
             }
@@ -780,28 +780,13 @@ public class MediaSessionService extends SystemService implements Monitor {
                     }
                 }
                 try {
-                    if (delta == 0) {
-                        mAudioService.adjustSuggestedStreamVolume(delta, suggestedStream, flags,
-                                getContext().getOpPackageName());
-                    } else {
-                        int direction = 0;
-                        int steps = delta;
-                        if (delta > 0) {
-                            direction = 1;
-                        } else if (delta < 0) {
-                            direction = -1;
-                            steps = -delta;
-                        }
-                        for (int i = 0; i < steps; i++) {
-                            mAudioService.adjustSuggestedStreamVolume(direction, suggestedStream,
-                                    flags, getContext().getOpPackageName());
-                        }
-                    }
+                    mAudioService.adjustSuggestedStreamVolume(direction, suggestedStream, flags,
+                            getContext().getOpPackageName());
                 } catch (RemoteException e) {
                     Log.e(TAG, "Error adjusting default volume.", e);
                 }
             } else {
-                session.adjustVolumeBy(delta, flags);
+                session.adjustVolume(direction, flags);
                 if (session.getPlaybackType() == MediaSession.PLAYBACK_TYPE_REMOTE
                         && mRvc != null) {
                     try {

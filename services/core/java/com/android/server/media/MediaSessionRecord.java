@@ -203,39 +203,32 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     }
 
     /**
-     * Send a volume adjustment to the session owner.
+     * Send a volume adjustment to the session owner. Direction must be one of
+     * {@link AudioManager#ADJUST_LOWER}, {@link AudioManager#ADJUST_RAISE},
+     * {@link AudioManager#ADJUST_SAME}.
      *
-     * @param delta The amount to adjust the volume by.
+     * @param direction The direction to adjust volume in.
      */
-    public void adjustVolumeBy(int delta, int flags) {
+    public void adjustVolume(int direction, int flags) {
         if (isPlaybackActive(false)) {
             flags &= ~AudioManager.FLAG_PLAY_SOUND;
         }
+        if (direction > 1) {
+            direction = 1;
+        } else if (direction < -1) {
+            direction = -1;
+        }
         if (mVolumeType == MediaSession.PLAYBACK_TYPE_LOCAL) {
-            if (delta == 0) {
-                mAudioManager.adjustStreamVolume(mAudioStream, delta, flags);
-            } else {
-                int direction = 0;
-                int steps = delta;
-                if (delta > 0) {
-                    direction = 1;
-                } else if (delta < 0) {
-                    direction = -1;
-                    steps = -delta;
-                }
-                for (int i = 0; i < steps; i++) {
-                    mAudioManager.adjustStreamVolume(mAudioStream, direction, flags);
-                }
-            }
+            mAudioManager.adjustStreamVolume(mAudioStream, direction, flags);
         } else {
             if (mVolumeControlType == VolumeProvider.VOLUME_CONTROL_FIXED) {
                 // Nothing to do, the volume cannot be changed
                 return;
             }
-            mSessionCb.adjustVolumeBy(delta);
+            mSessionCb.adjustVolume(direction);
 
             int volumeBefore = (mOptimisticVolume < 0 ? mCurrentVolume : mOptimisticVolume);
-            mOptimisticVolume = volumeBefore + delta;
+            mOptimisticVolume = volumeBefore + direction;
             mOptimisticVolume = Math.max(0, Math.min(mOptimisticVolume, mMaxVolume));
             mHandler.removeCallbacks(mClearOptimisticVolumeRunnable);
             mHandler.postDelayed(mClearOptimisticVolumeRunnable, OPTIMISTIC_VOLUME_TIMEOUT);
@@ -752,11 +745,11 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
             }
         }
 
-        public void adjustVolumeBy(int delta) {
+        public void adjustVolume(int direction) {
             try {
-                mCb.onAdjustVolumeBy(delta);
+                mCb.onAdjustVolume(direction);
             } catch (RemoteException e) {
-                Slog.e(TAG, "Remote failure in adjustVolumeBy.", e);
+                Slog.e(TAG, "Remote failure in adjustVolume.", e);
             }
         }
 
@@ -764,7 +757,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
             try {
                 mCb.onSetVolumeTo(value);
             } catch (RemoteException e) {
-                Slog.e(TAG, "Remote failure in adjustVolumeBy.", e);
+                Slog.e(TAG, "Remote failure in setVolumeTo.", e);
             }
         }
     }
@@ -838,10 +831,10 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
 
         @Override
-        public void adjustVolumeBy(int delta, int flags) {
+        public void adjustVolume(int direction, int flags) {
             final long token = Binder.clearCallingIdentity();
             try {
-                MediaSessionRecord.this.adjustVolumeBy(delta, flags);
+                MediaSessionRecord.this.adjustVolume(direction, flags);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
