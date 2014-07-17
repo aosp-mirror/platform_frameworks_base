@@ -7037,6 +7037,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                             // handling will deal properly with that.
                             Slog.e(TAG, "Error " + result + " streaming restore for "
                                     + mCurrentPackage.packageName);
+                            status = result;
                         }
                     }
                     if (MORE_DEBUG) Slog.v(TAG, "Done copying to engine, falling through");
