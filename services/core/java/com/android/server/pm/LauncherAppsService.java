@@ -269,13 +269,39 @@ public class LauncherAppsService extends SystemService {
 
             Intent launchIntent = new Intent(Intent.ACTION_MAIN);
             launchIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-            launchIntent.setComponent(component);
             launchIntent.setSourceBounds(sourceBounds);
             launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            launchIntent.setPackage(component.getPackageName());
 
             long ident = Binder.clearCallingIdentity();
             try {
-                mContext.startActivityAsUser(launchIntent, opts, user);
+                IPackageManager pm = AppGlobals.getPackageManager();
+                ActivityInfo info = pm.getActivityInfo(component, 0, user.getIdentifier());
+                if (!info.exported) {
+                    throw new SecurityException("Cannot launch non-exported components "
+                            + component);
+                }
+
+                // Check that the component actually has Intent.CATEGORY_LAUCNCHER
+                // as calling startActivityAsUser ignores the category and just
+                // resolves based on the component if present.
+                List<ResolveInfo> apps = mPm.queryIntentActivitiesAsUser(launchIntent,
+                        PackageManager.NO_CROSS_PROFILE, // We only want the apps for this user
+                        user.getIdentifier());
+                final int size = apps.size();
+                for (int i = 0; i < size; ++i) {
+                    ActivityInfo activityInfo = apps.get(i).activityInfo;
+                    if (activityInfo.packageName.equals(component.getPackageName()) &&
+                            activityInfo.name.equals(component.getClassName())) {
+                        // Found an activity with category launcher that matches
+                        // this component so ok to launch.
+                        launchIntent.setComponent(component);
+                        mContext.startActivityAsUser(launchIntent, opts, user);
+                        return;
+                    }
+                }
+                throw new SecurityException("Attempt to launch activity without "
+                        + " category Intent.CATEGORY_LAUNCHER " + component);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
