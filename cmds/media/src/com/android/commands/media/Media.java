@@ -114,7 +114,7 @@ public class Media extends BaseCommand {
             List<IBinder> sessions = mSessionService
                     .getSessions(null, ActivityManager.getCurrentUser());
             for (IBinder session : sessions) {
-                MediaController controller = MediaController.fromBinder(ISessionController.Stub
+                MediaController controller = new MediaController(ISessionController.Stub
                         .asInterface(session));
                 if (controller != null && controller.getSessionInfo().getId().equals(id)) {
                     ControllerMonitor monitor = new ControllerMonitor(controller);
@@ -248,7 +248,7 @@ public class Media extends BaseCommand {
             List<IBinder> sessions = mSessionService
                     .getSessions(null, ActivityManager.getCurrentUser());
             for (IBinder session : sessions) {
-                MediaController controller = MediaController.fromBinder(ISessionController.Stub
+                MediaController controller = new MediaController(ISessionController.Stub
                         .asInterface(session));
                 if (controller != null) {
                     MediaSessionInfo info = controller.getSessionInfo();

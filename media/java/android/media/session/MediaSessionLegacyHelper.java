@@ -28,6 +28,7 @@ import android.media.MediaMetadataRetriever;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -46,6 +47,7 @@ public class MediaSessionLegacyHelper {
     private static final Object sLock = new Object();
     private static MediaSessionLegacyHelper sInstance;
 
+    private Context mContext;
     private MediaSessionManager mSessionManager;
     private Handler mHandler = new Handler(Looper.getMainLooper());
     // The legacy APIs use PendingIntents to register/unregister media button
@@ -54,6 +56,7 @@ public class MediaSessionLegacyHelper {
             = new ArrayMap<PendingIntent, SessionHolder>();
 
     private MediaSessionLegacyHelper(Context context) {
+        mContext = context;
         mSessionManager = (MediaSessionManager) context
                 .getSystemService(Context.MEDIA_SESSION_SERVICE);
     }
@@ -225,6 +228,9 @@ public class MediaSessionLegacyHelper {
             return;
         }
         SessionHolder holder = getHolder(pi, true);
+        if (holder == null) {
+            return;
+        }
         if (holder.mRccListener != null) {
             if (holder.mRccListener == listener) {
                 if (DEBUG) {
@@ -270,6 +276,9 @@ public class MediaSessionLegacyHelper {
             return;
         }
         SessionHolder holder = getHolder(pi, true);
+        if (holder == null) {
+            return;
+        }
         if (holder.mMediaButtonListener != null) {
             // Already have this listener registered, but update it anyway as
             // the extras may have changed.
@@ -316,7 +325,8 @@ public class MediaSessionLegacyHelper {
     private SessionHolder getHolder(PendingIntent pi, boolean createIfMissing) {
         SessionHolder holder = mSessions.get(pi);
         if (holder == null && createIfMissing) {
-            MediaSession session = mSessionManager.createSession(TAG);
+            MediaSession session;
+            session = new MediaSession(mContext, TAG);
             session.setActive(true);
             holder = new SessionHolder(session, pi);
             mSessions.put(pi, holder);
