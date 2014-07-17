@@ -1706,7 +1706,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public boolean isForceHiding(WindowManager.LayoutParams attrs) {
         return (attrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0 ||
-                (isKeyguardHostWindow(attrs) && isKeyguardSecureIncludingHidden());
+                (isKeyguardHostWindow(attrs) && isKeyguardSecureIncludingHidden()) ||
+                (attrs.type == TYPE_KEYGUARD_SCRIM);
     }
 
     @Override
