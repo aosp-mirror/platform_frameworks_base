@@ -20,7 +20,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.hardware.soundtrigger.SoundTrigger;
 import android.hardware.soundtrigger.Keyphrase;
@@ -75,7 +74,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + SoundModelContract.KEY_TYPE + " INTEGER,"
             + SoundModelContract.KEY_DATA + " BLOB" + ")";
 
-    public DatabaseHelper(Context context, CursorFactory factory) {
+    public DatabaseHelper(Context context) {
         super(context, NAME, null, VERSION);
     }
 
@@ -94,10 +93,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    /**
-     * TODO: Change to addOrUpdate to handle changes here.
-     */
-    public void addKeyphraseSoundModel(KeyphraseSoundModel soundModel) {
+    public boolean addOrUpdateKeyphraseSoundModel(KeyphraseSoundModel soundModel) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         // Generate a random ID for the model.
@@ -105,19 +101,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(SoundModelContract.KEY_DATA, soundModel.data);
         values.put(SoundModelContract.KEY_TYPE, SoundTrigger.SoundModel.TYPE_KEYPHRASE);
 
-        if (db.insert(SoundModelContract.TABLE, null, values) != -1) {
+        boolean status = true;
+        if (db.insertWithOnConflict(
+                SoundModelContract.TABLE, null, values, SQLiteDatabase.CONFLICT_REPLACE) != -1) {
             for (Keyphrase keyphrase : soundModel.keyphrases) {
-                addKeyphrase(soundModel.uuid, keyphrase);
+                status &= addKeyphrase(soundModel.uuid, keyphrase);
             }
+            return status;
         } else {
             Slog.w(TAG, "Failed to persist sound model to database");
+            return false;
         }
     }
 
     /**
      * TODO(sansid): Change to addOrUpdate to handle changes here.
      */
-    private void addKeyphrase(UUID modelId, Keyphrase keyphrase) {
+    private boolean addKeyphrase(UUID modelId, Keyphrase keyphrase) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(KeyphraseContract.KEY_ID, keyphrase.id);
@@ -125,8 +125,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(KeyphraseContract.KEY_SOUND_MODEL_ID, keyphrase.id);
         values.put(KeyphraseContract.KEY_HINT_TEXT, keyphrase.hintText);
         values.put(KeyphraseContract.KEY_LOCALE, keyphrase.locale);
-        if (db.insert(KeyphraseContract.TABLE, null, values) == -1) {
+        if (db.insert(KeyphraseContract.TABLE, null, values) != -1) {
+            return true;
+        } else {
             Slog.w(TAG, "Failed to persist keyphrase to database");
+            return false;
         }
     }
 

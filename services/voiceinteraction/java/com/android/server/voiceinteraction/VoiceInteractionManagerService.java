@@ -62,11 +62,13 @@ public class VoiceInteractionManagerService extends SystemService {
 
     final Context mContext;
     final ContentResolver mResolver;
+    final DatabaseHelper mDbHelper;
 
     public VoiceInteractionManagerService(Context context) {
         super(context);
         mContext = context;
         mResolver = context.getContentResolver();
+        mDbHelper = new DatabaseHelper(context);
     }
 
     @Override
@@ -264,8 +266,7 @@ public class VoiceInteractionManagerService extends SystemService {
 
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    // TODO: Add the implementation here.
-                    return null;
+                    return mDbHelper.getKephraseSoundModels();
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
@@ -282,8 +283,11 @@ public class VoiceInteractionManagerService extends SystemService {
                 }
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    // TODO: Add the implementation here.
-                    return VoiceInteractionManagerService.STATUS_ERROR;
+                    if (mDbHelper.addOrUpdateKeyphraseSoundModel(model)) {
+                        return STATUS_OK;
+                    } else {
+                        return STATUS_ERROR;
+                    }
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
