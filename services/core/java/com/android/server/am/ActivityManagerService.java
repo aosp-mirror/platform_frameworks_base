@@ -364,28 +364,6 @@ public final class ActivityManagerService extends ActivityManagerNative
     // devices.
     private boolean mShowDialogs = true;
 
-    /**
-     * Description of a request to start a new activity, which has been held
-     * due to app switches being disabled.
-     */
-    static class PendingActivityLaunch {
-        final ActivityRecord r;
-        final ActivityRecord sourceRecord;
-        final int startFlags;
-        final ActivityStack stack;
-
-        PendingActivityLaunch(ActivityRecord _r, ActivityRecord _sourceRecord,
-                int _startFlags, ActivityStack _stack) {
-            r = _r;
-            sourceRecord = _sourceRecord;
-            startFlags = _startFlags;
-            stack = _stack;
-        }
-    }
-
-    final ArrayList<PendingActivityLaunch> mPendingActivityLaunches
-            = new ArrayList<PendingActivityLaunch>();
-
     BroadcastQueue mFgBroadcastQueue;
     BroadcastQueue mBgBroadcastQueue;
     // Convenient for easy iteration over the queues. Foreground is first
@@ -1438,7 +1416,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             } break;
             case DO_PENDING_ACTIVITY_LAUNCHES_MSG: {
                 synchronized (ActivityManagerService.this) {
-                    doPendingActivityLaunchesLocked(true);
+                    mStackSupervisor.doPendingActivityLaunchesLocked(true);
                 }
             } break;
             case KILL_APPLICATION_MSG: {
@@ -3337,19 +3315,6 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
         mProcessObservers.finishBroadcast();
-    }
-
-    final void doPendingActivityLaunchesLocked(boolean doResume) {
-        final int N = mPendingActivityLaunches.size();
-        if (N <= 0) {
-            return;
-        }
-        for (int i=0; i<N; i++) {
-            PendingActivityLaunch pal = mPendingActivityLaunches.get(i);
-            mStackSupervisor.startActivityUncheckedLocked(pal.r, pal.sourceRecord, null, null, pal.startFlags,
-                    doResume && i == (N-1), null);
-        }
-        mPendingActivityLaunches.clear();
     }
 
     @Override
@@ -9140,6 +9105,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    @Override
     public void stopAppSwitches() {
         if (checkCallingPermission(android.Manifest.permission.STOP_APP_SWITCHES)
                 != PackageManager.PERMISSION_GRANTED) {
