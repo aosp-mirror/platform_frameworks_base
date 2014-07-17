@@ -18,7 +18,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Обвивка"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"Извештајот за грешка е снимен"</string>
-    <string name="bugreport_finished_text" msgid="3559904746859400732">"Допри да се сподели твојот извештај за грешка"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Повлечете налево за да споделите пријава за грешка"</string>
+    <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Допри да се сподели твојот извештај за грешка"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"Извештаите за грешка содржат податоци од разни датотеки за евиденција на системот, вклучувајќи лични и приватни информации. Извештаите за грешка споделувајте ги само со апликации и луѓе на коишто им верувате."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Прикажи ја поракава следниот пат"</string>
 </resources>
