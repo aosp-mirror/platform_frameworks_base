@@ -16,8 +16,6 @@
 
 package android.app;
 
-import android.net.wifi.IWifiScanner;
-import android.net.wifi.WifiScanner;
 import android.os.Build;
 
 import android.service.persistentdata.IPersistentDataBlockService;
@@ -93,6 +91,10 @@ import android.net.wifi.passpoint.IWifiPasspointManager;
 import android.net.wifi.passpoint.WifiPasspointManager;
 import android.net.wifi.p2p.IWifiP2pManager;
 import android.net.wifi.p2p.WifiP2pManager;
+import android.net.wifi.IWifiScanner;
+import android.net.wifi.WifiScanner;
+import android.net.wifi.IRttManager;
+import android.net.wifi.RttManager;
 import android.nfc.NfcManager;
 import android.os.BatteryManager;
 import android.os.Binder;
@@ -620,6 +622,13 @@ class ContextImpl extends Context {
                 IBinder b = ServiceManager.getService(WIFI_SCANNING_SERVICE);
                 IWifiScanner service = IWifiScanner.Stub.asInterface(b);
                 return new WifiScanner(ctx.getOuterContext(), service);
+            }});
+
+        registerService(WIFI_RTT_SERVICE, new ServiceFetcher() {
+            public Object createService(ContextImpl ctx) {
+                IBinder b = ServiceManager.getService(WIFI_RTT_SERVICE);
+                IRttManager service = IRttManager.Stub.asInterface(b);
+                return new RttManager(ctx.getOuterContext(), service);
             }});
 
         registerService(ETHERNET_SERVICE, new ServiceFetcher() {

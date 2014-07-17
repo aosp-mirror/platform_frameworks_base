@@ -2067,6 +2067,7 @@ public abstract class Context {
             WIFI_P2P_SERVICE,
             WIFI_SCANNING_SERVICE,
             //@hide: ETHERNET_SERVICE,
+            WIFI_RTT_SERVICE,
             NSD_SERVICE,
             AUDIO_SERVICE,
             MEDIA_ROUTER_SERVICE,
@@ -2460,6 +2461,17 @@ public abstract class Context {
      */
     @SystemApi
     public static final String WIFI_SCANNING_SERVICE = "wifiscanner";
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a {@link
+     * android.net.wifi.RttManager} for ranging devices with wifi
+     *
+     * @see #getSystemService
+     * @see android.net.wifi.RttManager
+     * @hide
+     */
+    @SystemApi
+    public static final String WIFI_RTT_SERVICE = "rttmanager";
 
     /**
      * Use with {@link #getSystemService} to retrieve a {@link
