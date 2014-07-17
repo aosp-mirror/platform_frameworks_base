@@ -73,8 +73,6 @@ public class PhoneAccount implements Parcelable {
         return new StringBuilder().append(mComponentName)
                     .append(", ")
                     .append(mId)
-                    .append(", ")
-                    .append(", ")
                     .toString();
     }
 

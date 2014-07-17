@@ -111,14 +111,15 @@ public final class TelecommConstants {
             "android.telecomm.extra.CONNECTION_SERVICE";
 
     /**
-     * The number which emergency services will use to return calls, if necessary. The in-call UI
-     * will take care of displaying this to the user.
+     * The number which the party on the other side of the line will see (and use to return the
+     * call).
      * <p>
-     * Note that this should only be populated for emergency numbers, and if the number emergency
-     * services will see is different than the user's known phone number.
+     * {@link android.telecomm.ConnectionService}s which interact with
+     * {@link android.telecomm.RemoteConnection}s should only populate this if the
+     * {@link android.telephony.TelephonyManager#getLine1Number()} value, as that is the user's
+     * expected caller ID.
      */
-    public static final String EXTRA_EMERGENCY_CALL_BACK_NUMBER =
-            "android.telecomm.extra.EMERGENCY_CALL_BACK_NUMBER";
+    public static final String EXTRA_CALL_BACK_NUMBER = "android.telecomm.extra.CALL_BACK_NUMBER";
 
     /**
      * The dual tone multi-frequency signaling character sent to indicate the dialing system should
