@@ -668,12 +668,19 @@ public class ResolverActivity extends Activity {
                 && mAdapter.mOrigResolveList != null) {
             // Build a reasonable intent filter, based on what matched.
             IntentFilter filter = new IntentFilter();
-            String action = intent.getAction();
+            Intent filterIntent;
 
+            if (intent.getSelector() != null) {
+                filterIntent = intent.getSelector();
+            } else {
+                filterIntent = intent;
+            }
+
+            String action = filterIntent.getAction();
             if (action != null) {
                 filter.addAction(action);
             }
-            Set<String> categories = intent.getCategories();
+            Set<String> categories = filterIntent.getCategories();
             if (categories != null) {
                 for (String cat : categories) {
                     filter.addCategory(cat);
@@ -682,9 +689,9 @@ public class ResolverActivity extends Activity {
             filter.addCategory(Intent.CATEGORY_DEFAULT);
 
             int cat = ri.match & IntentFilter.MATCH_CATEGORY_MASK;
-            Uri data = intent.getData();
+            Uri data = filterIntent.getData();
             if (cat == IntentFilter.MATCH_CATEGORY_TYPE) {
-                String mimeType = intent.resolveType(this);
+                String mimeType = filterIntent.resolveType(this);
                 if (mimeType != null) {
                     try {
                         filter.addDataType(mimeType);
