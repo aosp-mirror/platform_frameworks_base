@@ -38,6 +38,7 @@ import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.misc.Console;
 import com.android.systemui.recents.misc.SystemServicesProxy;
+import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.RecentsPackageMonitor;
 import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.SpaceNode;
@@ -458,7 +459,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                     Intent i = new Intent(task.key.baseIntent);
                     i.addFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY
                             | Intent.FLAG_ACTIVITY_TASK_ON_HOME);
-                    if ((i.getFlags() & Intent.FLAG_ACTIVITY_NEW_DOCUMENT) == 0) {
+                    if (!Utilities.isDocument(i)) {
                         i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     }
                     try {
@@ -510,11 +511,8 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         loader.deleteTaskData(t, false);
 
         // Remove the old task from activity manager
-        int flags = t.key.baseIntent.getFlags();
-        boolean isDocument = (flags & Intent.FLAG_ACTIVITY_NEW_DOCUMENT) ==
-                Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
         RecentsTaskLoader.getInstance().getSystemServicesProxy().removeTask(t.key.id,
-                isDocument);
+                Utilities.isDocument(t.key.baseIntent));
     }
 
     @Override
