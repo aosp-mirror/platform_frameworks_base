@@ -98,7 +98,6 @@ import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.server.LocalServices;
-import com.android.server.am.ActivityManagerService.PendingActivityLaunch;
 import com.android.server.am.ActivityStack.ActivityState;
 import com.android.server.wm.WindowManagerService;
 
@@ -270,6 +269,28 @@ public final class ActivityStackSupervisor implements DisplayListener {
      * Notifies the user when entering/exiting lock-task.
      */
     private LockTaskNotify mLockTaskNotify;
+
+    final ArrayList<PendingActivityLaunch> mPendingActivityLaunches
+            = new ArrayList<PendingActivityLaunch>();
+
+    /**
+     * Description of a request to start a new activity, which has been held
+     * due to app switches being disabled.
+     */
+    static class PendingActivityLaunch {
+        final ActivityRecord r;
+        final ActivityRecord sourceRecord;
+        final int startFlags;
+        final ActivityStack stack;
+
+        PendingActivityLaunch(ActivityRecord _r, ActivityRecord _sourceRecord,
+                int _startFlags, ActivityStack _stack) {
+            r = _r;
+            sourceRecord = _sourceRecord;
+            startFlags = _startFlags;
+            stack = _stack;
+        }
+    }
 
     public ActivityStackSupervisor(ActivityManagerService service) {
         mService = service;
@@ -1421,7 +1442,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             if (!mService.checkAppSwitchAllowedLocked(callingPid, callingUid, "Activity start")) {
                 PendingActivityLaunch pal =
                         new PendingActivityLaunch(r, sourceRecord, startFlags, stack);
-                mService.mPendingActivityLaunches.add(pal);
+                mPendingActivityLaunches.add(pal);
                 setDismissKeyguard(false);
                 ActivityOptions.abort(options);
                 return ActivityManager.START_SWITCHES_CANCELED;
@@ -1439,7 +1460,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             mService.mDidAppSwitch = true;
         }
 
-        mService.doPendingActivityLaunchesLocked(false);
+        doPendingActivityLaunchesLocked(false);
 
         err = startActivityUncheckedLocked(r, sourceRecord, voiceSession, voiceInteractor,
                 startFlags, true, options);
@@ -2006,6 +2027,23 @@ public final class ActivityStackSupervisor implements DisplayListener {
             mService.setFocusedActivityLocked(r);
         }
         return ActivityManager.START_SUCCESS;
+    }
+
+    final void doPendingActivityLaunchesLocked(boolean doResume) {
+        while (!mPendingActivityLaunches.isEmpty()) {
+            PendingActivityLaunch pal = mPendingActivityLaunches.remove(0);
+            startActivityUncheckedLocked(pal.r, pal.sourceRecord, null, null, pal.startFlags,
+                    doResume && mPendingActivityLaunches.isEmpty(), null);
+        }
+    }
+
+    void removePendingActivityLaunchesLocked(ActivityRecord r) {
+        for (int palNdx = mPendingActivityLaunches.size() - 1; palNdx >= 0; --palNdx) {
+            PendingActivityLaunch pal = mPendingActivityLaunches.get(palNdx);
+            if (pal.r == r) {
+                mPendingActivityLaunches.remove(palNdx);
+            }
+        }
     }
 
     void acquireLaunchWakelock() {
@@ -3312,7 +3350,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     synchronized (mService) {
                         Slog.w(TAG, "Timeout waiting for all activities in task to finish. " +
                                 msg.obj);
-                        ((ActivityContainer) msg.obj).onTaskListEmptyLocked();
+                        final ActivityContainer container = (ActivityContainer) msg.obj;
+                        container.mStack.finishAllActivitiesLocked(true);
+                        container.onTaskListEmptyLocked();
                     }
                 } break;
                 case LAUNCH_TASK_BEHIND_COMPLETE: {
@@ -3414,11 +3454,11 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
                 final Message msg =
                         mHandler.obtainMessage(CONTAINER_TASK_LIST_EMPTY_TIMEOUT, this);
-                mHandler.sendMessageDelayed(msg, 1000);
+                mHandler.sendMessageDelayed(msg, 2000);
 
                 long origId = Binder.clearCallingIdentity();
                 try {
-                    mStack.finishAllActivitiesLocked();
+                    mStack.finishAllActivitiesLocked(false);
                 } finally {
                     Binder.restoreCallingIdentity(origId);
                 }
