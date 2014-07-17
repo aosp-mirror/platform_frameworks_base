@@ -191,6 +191,7 @@
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> ອຸປະກອນ)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth ປິດ"</string>
+    <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"ບໍ່​ມີ​ອຸ​ປະ​ກອນ​ທີ່​ສາ​ມາດ​ຈັບ​ຄູ່​ໄດ້"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"ຄວາມສະຫວ່າງ"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"ໝຸນ​ອັດ​ຕະ​ໂນ​ມັດ"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"​ລັອກ​ການ​ໝຸນ​ຈ​ໍ​ແລ້ວ"</string>
@@ -205,11 +206,18 @@
     <string name="quick_settings_settings_label" msgid="5326556592578065401">"ການຕັ້ງຄ່າ"</string>
     <string name="quick_settings_time_label" msgid="4635969182239736408">"ເວລາ"</string>
     <string name="quick_settings_user_label" msgid="5238995632130897840">"ຂ້ອຍ"</string>
+    <string name="quick_settings_user_title" msgid="4467690427642392403">"ຜູ່ໃຊ້"</string>
+    <string name="quick_settings_user_new_user" msgid="9030521362023479778">"ຜູ່ໃຊ້ໃໝ່"</string>
     <string name="quick_settings_wifi_label" msgid="9135344704899546041">"Wi​-Fi"</string>
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"ບໍ່ໄດ້ເຊື່ອມຕໍ່"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"ບໍ່ມີເຄືອຂ່າຍ"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi​-Fi ປິດ"</string>
-    <string name="quick_settings_remote_display_no_connection_label" msgid="7482103121002965053">"ສົ່ງ​ສັນ​ຍານ​ພາບ"</string>
+    <string name="quick_settings_wifi_detail_empty_text" msgid="2831702993995222755">"ບໍ່​ມີ​ເຄືອ​ຂ່າຍ​ທີ່​ບັນ​ທຶກ​ໄວ້​ທີ່​ສາ​ມາດ​ໃຊ້​ໄດ້"</string>
+    <string name="quick_settings_cast_title" msgid="1893629685050355115">"​ສົ່ງ​ສັນ​ຍານ​ໜ້າ​ຈໍ"</string>
+    <string name="quick_settings_casting" msgid="6601710681033353316">"​ກຳ​ລັງ​ສົ່ງ​ສັນ​ຍານ"</string>
+    <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"​ອຸ​ປະ​ກອນບໍ່​ມີ​ຊື່"</string>
+    <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"​ພ້ອ​ມ​ສົ່ງ​ສັນ​ຍານ​ແລ້ວ"</string>
+    <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"​ບໍ່​ມີ​ອຸ​ປະ​ກອນ​ທີ່​ສາ​ມາດ​ໃຊ້​ໄດ້"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"ຄວາມແຈ້ງ"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"ອັດຕະໂນມັດ"</string>
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"​ສະ​ລັບ​ສີ"</string>
@@ -217,12 +225,21 @@
     <string name="quick_settings_more_settings" msgid="326112621462813682">"​ການ​ຕັ້ງ​ຄ່າ​ເພີ່ມ​ເຕີມ"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"ແລ້ວໆ"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"ເຊື່ອມ​ຕໍ່ແລ້ວ"</string>
+    <string name="quick_settings_connecting" msgid="47623027419264404">"ກຳລັງເຊື່ອມຕໍ່..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"​ການ​ປ່ອນ​ສັນ​ຍານ"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"​ຮັອດ​ສະ​ປອດ"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"ການແຈ້ງເຕືອນ"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"​ໄຟ​ສາຍ"</string>
+    <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"​ຂໍ້​ມູນ​ອິນ​ເຕີ​ເນັດ​ມື​ຖື"</string>
+    <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"​ການ​​ນຳ​ໃຊ້​​ຂໍ້​ມູນ"</string>
+    <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"​ຂໍ້​ມູນ​ທີ່​ຍັງ​ເຫຼືອ"</string>
+    <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"​ເກີນ​ຂີດ​ຈຳ​ກັດ"</string>
+    <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"ໃຊ້​ໄປ​ແລ້ວ <xliff:g id="DATA_USED">%s</xliff:g>"</string>
+    <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"ຈຳ​ກັດ <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
+    <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"ຄຳ​ເຕືອນ <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="recents_empty_message" msgid="7883614615463619450">"ບໍ່​ມີ​ແອັບຯ​ທີ່​ຫາ​ກໍ​ໃຊ້"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"​ຂໍ້​ມູນ​ແອັບ​ພ​ລິ​ເຄ​ຊັນ"</string>
+    <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"lock to app"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"ຊອກຫາ"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"ສາກເຕັມແລ້ວ."</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"ກຳລັງສາກໄຟ"</string>
@@ -232,14 +249,19 @@
     <string name="description_target_search" msgid="3091587249776033139">"ຊອກຫາ"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"ເລື່ອນຂຶ້ນເພື່ອ <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"ເລື່ອນໄປທາງຊ້າຍເພື່ອ <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_mode_title" msgid="8793432092004749188">"ຫ້າມລົບກວນ"</string>
+    <string name="zen_no_interruptions_with_warning" msgid="7669163720139116154">"ບໍ່​ມີ​ການ​ລົບ​ກວນ ຮວມ​ເຖິງ​ໂມງ​ປຸກ ແລະ​ໂມງ​ຈັບ​ເວ​ລາ"</string>
+    <string name="zen_no_interruptions" msgid="7970973750143632592">"ບໍ່​ມີ​ການ​ລົບກວນ"</string>
+    <string name="zen_important_interruptions" msgid="3477041776609757628">"ການ​ລົບກວນ​ທີ່​ສຳຄັນ​ເທົ່າ​ນັ້ນ"</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"ການ​ແຈ້ງເຕືອນ​ທີ່​ສຳຄັນ​ໜ້ອຍ​ກວ່າ​ຢູ່​ດ້ານ​ລຸ່ມ"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"ແຕະ​ອີກ​ຄັ້ງ​ເພື່ອ​ເປີດ"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"ເລື່ອນ​ຂຶ້ນ​ເພື່ອ​ປົດ​ລັອກ"</string>
     <string name="phone_hint" msgid="3101468054914424646">"ປັດ​ຂວາ​ເພື່ອ​ໃຊ້​ໂທ​ລະ​ສັບ"</string>
     <string name="camera_hint" msgid="5241441720959174226">"ປັດ​ຊ້າຍ​ເພື່ອ​ໃຊ້​ກ້ອງ"</string>
-    <string name="zen_mode_forever" msgid="7420011936770086993">"ຈົນກວ່າ​ທ່ານ​ຈະ​ປິດ​"</string>
+    <string name="zen_mode_forever" msgid="4316804956488785559">"ຢ່າງ​ບໍ່​ມີ​ກຳນົດ"</string>
+    <string name="interruption_level_none" msgid="3831278883136066646">"ບໍ່ມີ"</string>
+    <string name="interruption_level_priority" msgid="6517366750688942030">"ລະດັບຄວາມສຳຄັນ"</string>
+    <string name="interruption_level_all" msgid="1330581184930945764">"ທັງໝົດ"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"ກຳ​ລັງ​ສາກ​ໄຟ (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> ກວ່າ​ຈ​ະ​ເຕັມ)"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"ແຂກ"</string>
     <string name="guest_new_guest" msgid="4259024453643879653">"+ ແຂກ"</string>
@@ -254,4 +276,7 @@
     <string name="battery_saver_notification_title" msgid="237918726750955859">"ເປີດ​ໃຊ້​ໂຕ​ປະຢັດ​ແບັດເຕີຣີ​ແລ້ວ"</string>
     <string name="battery_saver_notification_text" msgid="7796554871101546872">"ປະສິດທິພາບ​ຂອງ​ອຸປະກອນ​ຖືກ​ຫຼຸດ​ລົງ​ແລ້ວ."</string>
     <string name="battery_saver_notification_action_text" msgid="7546297220816993504">"ເປີດ​ການ​ຕັ້ງຄ່າ​ໂຕ​ປະຢັດ​ແບັດເຕີຣີ"</string>
+    <string name="battery_level_template" msgid="1609636980292580020">"<xliff:g id="LEVEL">%d</xliff:g>%%"</string>
+    <!-- no translation found for notification_hidden_text (1135169301897151909) -->
+    <skip />
 </resources>

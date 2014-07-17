@@ -191,6 +191,8 @@
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> устройства)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth е изключен"</string>
+    <!-- no translation found for quick_settings_bluetooth_detail_empty_text (4910015762433302860) -->
+    <skip />
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Яркост"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Автоматична ориентация"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"Ориентацията е заключена"</string>
@@ -205,11 +207,26 @@
     <string name="quick_settings_settings_label" msgid="5326556592578065401">"Настройки"</string>
     <string name="quick_settings_time_label" msgid="4635969182239736408">"Време"</string>
     <string name="quick_settings_user_label" msgid="5238995632130897840">"Аз"</string>
+    <!-- no translation found for quick_settings_user_title (4467690427642392403) -->
+    <skip />
+    <!-- no translation found for quick_settings_user_new_user (9030521362023479778) -->
+    <skip />
     <string name="quick_settings_wifi_label" msgid="9135344704899546041">"Wi-Fi"</string>
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Няма връзка"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Няма мрежа"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi е изключен"</string>
-    <string name="quick_settings_remote_display_no_connection_label" msgid="7482103121002965053">"Екран за предаване"</string>
+    <!-- no translation found for quick_settings_wifi_detail_empty_text (2831702993995222755) -->
+    <skip />
+    <!-- no translation found for quick_settings_cast_title (1893629685050355115) -->
+    <skip />
+    <!-- no translation found for quick_settings_casting (6601710681033353316) -->
+    <skip />
+    <!-- no translation found for quick_settings_cast_device_default_name (5367253104742382945) -->
+    <skip />
+    <!-- no translation found for quick_settings_cast_device_default_description (2484573682378634413) -->
+    <skip />
+    <!-- no translation found for quick_settings_cast_detail_empty_text (311785821261640623) -->
+    <skip />
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Яркост"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"АВТ."</string>
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Обръщане на цветовете"</string>
@@ -217,12 +234,23 @@
     <string name="quick_settings_more_settings" msgid="326112621462813682">"Още настройки"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"Готово"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"Установена е връзка"</string>
+    <!-- no translation found for quick_settings_connecting (47623027419264404) -->
+    <skip />
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Тетъринг"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Точка за достъп"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Известия"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Светкавица"</string>
+    <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Мобилни данни"</string>
+    <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Пренос на данни"</string>
+    <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Оставащи данни"</string>
+    <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"Над ограничението"</string>
+    <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"Използвано: <xliff:g id="DATA_USED">%s</xliff:g>"</string>
+    <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"Ограничение от <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
+    <!-- no translation found for quick_settings_cellular_detail_data_warning (2440098045692399009) -->
+    <skip />
     <string name="recents_empty_message" msgid="7883614615463619450">"Няма скорошни приложения"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Информация за приложението"</string>
+    <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"заключване в приложението"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"търсене"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Заредена"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"Зарежда се"</string>
@@ -232,14 +260,19 @@
     <string name="description_target_search" msgid="3091587249776033139">"Търсене"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Плъзнете нагоре за <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Плъзнете наляво за <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_mode_title" msgid="8793432092004749188">"Не ме безпокойте"</string>
+    <string name="zen_no_interruptions_with_warning" msgid="7669163720139116154">"Без прекъсвания, включително будилници и таймери"</string>
+    <string name="zen_no_interruptions" msgid="7970973750143632592">"Без прекъсвания"</string>
+    <string name="zen_important_interruptions" msgid="3477041776609757628">"Само приоритетни прекъсвания"</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Ппоказване на по-малко спешните известия по-долу"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Докоснете отново, за да отворите"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Прекарайте пръст нагоре, за да отключите"</string>
     <string name="phone_hint" msgid="3101468054914424646">"Прекарайте пръст надясно, за да използвате телефона"</string>
     <string name="camera_hint" msgid="5241441720959174226">"Прекарайте пръст наляво, за да включите камерата"</string>
-    <string name="zen_mode_forever" msgid="7420011936770086993">"Докато не изключите това"</string>
+    <string name="zen_mode_forever" msgid="4316804956488785559">"За неопределено време"</string>
+    <string name="interruption_level_none" msgid="3831278883136066646">"Няма"</string>
+    <string name="interruption_level_priority" msgid="6517366750688942030">"Приоритет"</string>
+    <string name="interruption_level_all" msgid="1330581184930945764">"Всички"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Зарежда се (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> до пълно зареждане)"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"Гост"</string>
     <string name="guest_new_guest" msgid="4259024453643879653">"+ гост"</string>
@@ -254,4 +287,7 @@
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Режимът за запазване на батерията е включен"</string>
     <string name="battery_saver_notification_text" msgid="7796554871101546872">"Ефективността на устройството е намалена."</string>
     <string name="battery_saver_notification_action_text" msgid="7546297220816993504">"Отваряне на настройките за режима за запазване на батерията"</string>
+    <string name="battery_level_template" msgid="1609636980292580020">"<xliff:g id="LEVEL">%d</xliff:g>%%"</string>
+    <!-- no translation found for notification_hidden_text (1135169301897151909) -->
+    <skip />
 </resources>

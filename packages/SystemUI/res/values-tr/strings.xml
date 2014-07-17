@@ -191,6 +191,8 @@
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> Cihaz)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth Kapalı"</string>
+    <!-- no translation found for quick_settings_bluetooth_detail_empty_text (4910015762433302860) -->
+    <skip />
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Parlaklık"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Otomatik döndür"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"Döndürme kilitlendi"</string>
@@ -205,26 +207,50 @@
     <string name="quick_settings_settings_label" msgid="5326556592578065401">"Ayarlar"</string>
     <string name="quick_settings_time_label" msgid="4635969182239736408">"Saat"</string>
     <string name="quick_settings_user_label" msgid="5238995632130897840">"Ben"</string>
+    <!-- no translation found for quick_settings_user_title (4467690427642392403) -->
+    <skip />
+    <!-- no translation found for quick_settings_user_new_user (9030521362023479778) -->
+    <skip />
     <string name="quick_settings_wifi_label" msgid="9135344704899546041">"Kablosuz"</string>
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Bağlı Değil"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Ağ yok"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Kablosuz Kapalı"</string>
-    <string name="quick_settings_remote_display_no_connection_label" msgid="7482103121002965053">"Ekranı yayınla"</string>
+    <!-- no translation found for quick_settings_wifi_detail_empty_text (2831702993995222755) -->
+    <skip />
+    <!-- no translation found for quick_settings_cast_title (1893629685050355115) -->
+    <skip />
+    <!-- no translation found for quick_settings_casting (6601710681033353316) -->
+    <skip />
+    <!-- no translation found for quick_settings_cast_device_default_name (5367253104742382945) -->
+    <skip />
+    <!-- no translation found for quick_settings_cast_device_default_description (2484573682378634413) -->
+    <skip />
+    <!-- no translation found for quick_settings_cast_detail_empty_text (311785821261640623) -->
+    <skip />
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Parlaklık"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"OTOMATİK"</string>
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Renkleri çevir"</string>
     <string name="quick_settings_color_space_label" msgid="853443689745584770">"Renk düzeltme modu"</string>
     <string name="quick_settings_more_settings" msgid="326112621462813682">"Diğer ayarlar"</string>
-    <!-- no translation found for quick_settings_done (3402999958839153376) -->
-    <skip />
-    <!-- no translation found for quick_settings_connected (1722253542984847487) -->
+    <string name="quick_settings_done" msgid="3402999958839153376">"Bitti"</string>
+    <string name="quick_settings_connected" msgid="1722253542984847487">"Bağlı"</string>
+    <!-- no translation found for quick_settings_connecting (47623027419264404) -->
     <skip />
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Tethering"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Hotspot"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Bildirimler"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Fener"</string>
+    <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Hücresel veriler"</string>
+    <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Veri kullanımı"</string>
+    <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Kalan veri"</string>
+    <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"Sınır aşıldı"</string>
+    <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> kullanıldı"</string>
+    <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"Sınır: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
+    <!-- no translation found for quick_settings_cellular_detail_data_warning (2440098045692399009) -->
+    <skip />
     <string name="recents_empty_message" msgid="7883614615463619450">"Yakın zamanda kullanılan uygulama yok"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Uygulama Bilgileri"</string>
+    <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"uygulamaya kilitle"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"ara"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Ödeme alındı"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"Şarj oluyor"</string>
@@ -234,14 +260,19 @@
     <string name="description_target_search" msgid="3091587249776033139">"Ara"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> için yukarı kaydırın."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> için sola kaydırın."</string>
-    <string name="zen_mode_title" msgid="8793432092004749188">"Rahatsız etmeyin"</string>
+    <string name="zen_no_interruptions_with_warning" msgid="7669163720139116154">"Alarmlar ve zamanlayıcılar dahil kesinti yok"</string>
+    <string name="zen_no_interruptions" msgid="7970973750143632592">"Kesinti yok"</string>
+    <string name="zen_important_interruptions" msgid="3477041776609757628">"Sadece öncelikli kesintiler"</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Daha az acil bildirimler aşağıdadır"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Açmak için tekrar hafifçe vurun"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Kilidi açmak için hızlıca yukarı kaydırın"</string>
     <string name="phone_hint" msgid="3101468054914424646">"Telefon için sağa kaydırın"</string>
     <string name="camera_hint" msgid="5241441720959174226">"Kamera için sola kaydırın"</string>
-    <string name="zen_mode_forever" msgid="7420011936770086993">"Siz bunu kapatana kadar"</string>
+    <string name="zen_mode_forever" msgid="4316804956488785559">"Süresiz"</string>
+    <string name="interruption_level_none" msgid="3831278883136066646">"Yok"</string>
+    <string name="interruption_level_priority" msgid="6517366750688942030">"Öncelik"</string>
+    <string name="interruption_level_all" msgid="1330581184930945764">"Tümü"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Şarj oluyor (tamamen dolmasına <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> kaldı)"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"Misafir"</string>
     <string name="guest_new_guest" msgid="4259024453643879653">"+ Misafir"</string>
@@ -256,4 +287,7 @@
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Pil tasarrufu açık"</string>
     <string name="battery_saver_notification_text" msgid="7796554871101546872">"Cihazın performansı düşürüldü."</string>
     <string name="battery_saver_notification_action_text" msgid="7546297220816993504">"Pil tasarrufu ayarlarını aç"</string>
+    <string name="battery_level_template" msgid="1609636980292580020">"%%<xliff:g id="LEVEL">%d</xliff:g>"</string>
+    <!-- no translation found for notification_hidden_text (1135169301897151909) -->
+    <skip />
 </resources>

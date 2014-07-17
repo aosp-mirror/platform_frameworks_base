@@ -34,15 +34,15 @@
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"通知"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"電量低"</string>
     <string name="battery_low_percent_format" msgid="1077244949318261761">"剩餘 <xliff:g id="NUMBER">%d%%</xliff:g>"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="6534746636002666456">"電量剩下 <xliff:g id="NUMBER">%d%%</xliff:g>，節約電池用量模式已啟用。"</string>
+    <string name="battery_low_percent_format_saver_started" msgid="6534746636002666456">"電量尚餘 <xliff:g id="NUMBER">%d%%</xliff:g>，省電模式已開啟。"</string>
     <string name="invalid_charger" msgid="4549105996740522523">"不支援 USB 充電。\n僅能使用隨附的充電器。"</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"不支援 USB 充電功能。"</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"僅限使用裝置隨附的充電器。"</string>
     <string name="battery_low_why" msgid="4553600287639198111">"設定"</string>
-    <string name="battery_saver_confirmation_title" msgid="5987726159603849352">"啟動節約電池用量模式？"</string>
+    <string name="battery_saver_confirmation_title" msgid="5987726159603849352">"啟動省電模式？"</string>
     <string name="battery_saver_confirmation_ok" msgid="7283108887345688413">"開始"</string>
-    <string name="battery_saver_start_action" msgid="7245333922937402896">"啟動節約電池用量模式"</string>
-    <string name="battery_saver_confirmation_text" msgid="8417584516834617662">"節約電池用量模式有助於延長電池壽命，但會降低裝置的效能。\n\n裝置接上電源時，節約電池用量模式會自動停用。"</string>
+    <string name="battery_saver_start_action" msgid="7245333922937402896">"啟動省電模式"</string>
+    <string name="battery_saver_confirmation_text" msgid="8417584516834617662">"省電模式可延長電池使用時間，但會降低裝置的效能。\n\n裝置充電時，省電模式會自動停用。"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"設定"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"飛行模式"</string>
@@ -51,7 +51,7 @@
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"自動"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"通知"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"已經由藍牙進行網絡共享"</string>
-    <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"設定輸入方式"</string>
+    <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"設定輸入法"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"實體鍵盤"</string>
     <string name="usb_device_permission_prompt" msgid="834698001271562057">"允許「<xliff:g id="APPLICATION">%1$s</xliff:g>」應用程式存取 USB 裝置嗎？"</string>
     <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"允許「<xliff:g id="APPLICATION">%1$s</xliff:g>」應用程式存取 USB 配件嗎？"</string>
@@ -67,13 +67,13 @@
     <string name="usb_debugging_always" msgid="303335496705863070">"一律允許透過這部電腦進行"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"放大為全螢幕"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"放大為全螢幕"</string>
-    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"正在儲存屏幕擷取畫面..."</string>
-    <string name="screenshot_saving_title" msgid="8242282144535555697">"正在儲存屏幕擷取畫面..."</string>
-    <string name="screenshot_saving_text" msgid="2419718443411738818">"正在儲存屏幕擷取畫面。"</string>
-    <string name="screenshot_saved_title" msgid="6461865960961414961">"已擷取屏幕畫面。"</string>
-    <string name="screenshot_saved_text" msgid="1152839647677558815">"輕觸即可查看屏幕擷取畫面。"</string>
-    <string name="screenshot_failed_title" msgid="705781116746922771">"無法擷取屏幕畫面。"</string>
-    <string name="screenshot_failed_text" msgid="8134011269572415402">"無法儲存屏幕擷取畫面，儲存裝置可能正在使用。"</string>
+    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"正在儲存螢幕擷取畫面..."</string>
+    <string name="screenshot_saving_title" msgid="8242282144535555697">"正在儲存螢幕擷取畫面..."</string>
+    <string name="screenshot_saving_text" msgid="2419718443411738818">"正在儲存螢幕擷取畫面。"</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"已擷取螢幕畫面。"</string>
+    <string name="screenshot_saved_text" msgid="1152839647677558815">"輕觸即可查看螢幕擷取畫面。"</string>
+    <string name="screenshot_failed_title" msgid="705781116746922771">"無法擷取螢幕畫面。"</string>
+    <string name="screenshot_failed_text" msgid="8134011269572415402">"無法儲存螢幕擷取畫面，儲存裝置可能正在使用。"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB 檔案傳輸選項"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"掛接為媒體播放器 (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"掛接為相機 (PTP)"</string>
@@ -139,7 +139,7 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"無 SIM 卡。"</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"藍牙數據連線。"</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"藍牙網絡共享。"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"飛航模式。"</string>
     <!-- String.format failed for translation -->
     <!-- no translation found for accessibility_battery_level (7451474187113371965) -->
@@ -181,9 +181,9 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"位置要求啟動中"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"清除所有通知。"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"應用程式資訊"</string>
-    <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"屏幕會自動旋轉。"</string>
-    <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"屏幕已鎖定為橫向模式。"</string>
-    <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"屏幕已鎖定為垂直模式。"</string>
+    <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"螢幕會自動旋轉。"</string>
+    <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"螢幕已鎖定為橫向模式。"</string>
+    <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"螢幕已鎖定為垂直模式。"</string>
     <string name="dessert_case" msgid="1295161776223959221">"Dessert Case"</string>
     <string name="start_dreams" msgid="7219575858348719790">"Daydream"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"以太網"</string>
@@ -193,6 +193,8 @@
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"藍牙"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"藍牙 (<xliff:g id="NUMBER">%d</xliff:g> 部裝置)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"藍牙關閉"</string>
+    <!-- no translation found for quick_settings_bluetooth_detail_empty_text (4910015762433302860) -->
+    <skip />
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"亮度"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"自動旋轉"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"輪流展示鎖定"</string>
@@ -207,26 +209,50 @@
     <string name="quick_settings_settings_label" msgid="5326556592578065401">"設定"</string>
     <string name="quick_settings_time_label" msgid="4635969182239736408">"時間"</string>
     <string name="quick_settings_user_label" msgid="5238995632130897840">"我"</string>
+    <!-- no translation found for quick_settings_user_title (4467690427642392403) -->
+    <skip />
+    <!-- no translation found for quick_settings_user_new_user (9030521362023479778) -->
+    <skip />
     <string name="quick_settings_wifi_label" msgid="9135344704899546041">"Wi-Fi"</string>
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"未連線"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"沒有網絡"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi 關閉"</string>
-    <string name="quick_settings_remote_display_no_connection_label" msgid="7482103121002965053">"放送螢幕"</string>
+    <!-- no translation found for quick_settings_wifi_detail_empty_text (2831702993995222755) -->
+    <skip />
+    <!-- no translation found for quick_settings_cast_title (1893629685050355115) -->
+    <skip />
+    <!-- no translation found for quick_settings_casting (6601710681033353316) -->
+    <skip />
+    <!-- no translation found for quick_settings_cast_device_default_name (5367253104742382945) -->
+    <skip />
+    <!-- no translation found for quick_settings_cast_device_default_description (2484573682378634413) -->
+    <skip />
+    <!-- no translation found for quick_settings_cast_detail_empty_text (311785821261640623) -->
+    <skip />
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"亮度"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"自動"</string>
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"反轉顏色"</string>
     <string name="quick_settings_color_space_label" msgid="853443689745584770">"色彩校準模式"</string>
     <string name="quick_settings_more_settings" msgid="326112621462813682">"更多設定"</string>
-    <!-- no translation found for quick_settings_done (3402999958839153376) -->
+    <string name="quick_settings_done" msgid="3402999958839153376">"完成"</string>
+    <string name="quick_settings_connected" msgid="1722253542984847487">"已連線"</string>
+    <!-- no translation found for quick_settings_connecting (47623027419264404) -->
     <skip />
-    <!-- no translation found for quick_settings_connected (1722253542984847487) -->
-    <skip />
-    <string name="quick_settings_tethering_label" msgid="7153452060448575549">"網路共用"</string>
+    <string name="quick_settings_tethering_label" msgid="7153452060448575549">"網絡共享"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"熱點"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"通知"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"閃光燈"</string>
+    <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"流動數據"</string>
+    <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"數據用量"</string>
+    <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"剩餘資料"</string>
+    <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"超過上限"</string>
+    <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"已使用 <xliff:g id="DATA_USED">%s</xliff:g>"</string>
+    <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"上限為 <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
+    <!-- no translation found for quick_settings_cellular_detail_data_warning (2440098045692399009) -->
+    <skip />
     <string name="recents_empty_message" msgid="7883614615463619450">"沒有最近使用的應用程式"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"應用程式資料"</string>
+    <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"應用程式鎖定"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"搜尋"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"已完成充電"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"充電中"</string>
@@ -236,14 +262,19 @@
     <string name="description_target_search" msgid="3091587249776033139">"搜尋"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"向上滑動即可<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>。"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"向左滑動即可<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>。"</string>
-    <string name="zen_mode_title" msgid="8793432092004749188">"請勿騷擾"</string>
+    <string name="zen_no_interruptions_with_warning" msgid="7669163720139116154">"不允許干擾 (包含鬧鐘和計時器)"</string>
+    <string name="zen_no_interruptions" msgid="7970973750143632592">"不允許干擾"</string>
+    <string name="zen_important_interruptions" msgid="3477041776609757628">"僅限優先干擾"</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"還有 <xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g> 則通知"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"不太緊急的通知會在下方顯示"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"再次輕按即可開啟"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"向上快速滑動即可解鎖"</string>
     <string name="phone_hint" msgid="3101468054914424646">"向右快速滑動即可使用手機功能"</string>
     <string name="camera_hint" msgid="5241441720959174226">"向左快速滑動即可使用相機功能"</string>
-    <string name="zen_mode_forever" msgid="7420011936770086993">"直至您關閉這項設定"</string>
+    <string name="zen_mode_forever" msgid="4316804956488785559">"無限期"</string>
+    <string name="interruption_level_none" msgid="3831278883136066646">"無"</string>
+    <string name="interruption_level_priority" msgid="6517366750688942030">"優先順序"</string>
+    <string name="interruption_level_all" msgid="1330581184930945764">"全部"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"充電中 (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>後完成充電)"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"訪客"</string>
     <string name="guest_new_guest" msgid="4259024453643879653">"新增訪客"</string>
@@ -255,7 +286,10 @@
     <item quantity="one" msgid="3480040795582254384">"1 小時"</item>
     <item quantity="other" msgid="5408537517529822157">"%d 小時"</item>
   </plurals>
-    <string name="battery_saver_notification_title" msgid="237918726750955859">"節約電池用量模式已啟用"</string>
+    <string name="battery_saver_notification_title" msgid="237918726750955859">"省電模式已開啟"</string>
     <string name="battery_saver_notification_text" msgid="7796554871101546872">"裝置效能已降低。"</string>
-    <string name="battery_saver_notification_action_text" msgid="7546297220816993504">"開啟節約電池用量設定"</string>
+    <string name="battery_saver_notification_action_text" msgid="7546297220816993504">"開啟省電設定"</string>
+    <string name="battery_level_template" msgid="1609636980292580020">"<xliff:g id="LEVEL">%d</xliff:g>%%"</string>
+    <!-- no translation found for notification_hidden_text (1135169301897151909) -->
+    <skip />
 </resources>
