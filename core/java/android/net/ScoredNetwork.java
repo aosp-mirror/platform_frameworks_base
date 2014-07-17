@@ -16,6 +16,7 @@
 
 package android.net;
 
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -26,6 +27,7 @@ import java.util.Objects;
  *
  * @hide
  */
+@SystemApi
 public class ScoredNetwork implements Parcelable {
 
     /** A {@link NetworkKey} uniquely identifying this network. */

@@ -833,7 +833,7 @@
         android:description="@string/permdesc_changeWimaxState"
         android:label="@string/permlab_changeWimaxState" />
 
-    <!-- Allows applications to act as network scorers. @hide -->
+    <!-- Allows applications to act as network scorers. @hide @SystemApi-->
     <permission android:name="android.permission.SCORE_NETWORKS"
         android:permissionGroup="android.permission-group.NETWORK"
         android:protectionLevel="normal"
