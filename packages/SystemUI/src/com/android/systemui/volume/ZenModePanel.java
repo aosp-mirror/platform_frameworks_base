@@ -30,6 +30,8 @@ import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.service.notification.Condition;
 import android.service.notification.ZenModeConfig;
+import android.text.format.DateFormat;
+import android.text.format.Time;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -46,7 +48,10 @@ import android.widget.TextView;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.ZenModeController;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.Locale;
 import java.util.Objects;
 
 public class ZenModePanel extends LinearLayout {
@@ -75,6 +80,8 @@ public class ZenModePanel extends LinearLayout {
     private final H mHandler = new H();
     private final Favorites mFavorites;
     private final Interpolator mFastOutSlowInInterpolator;
+    private final int mTextColor;
+    private final int mAccentColor;
 
     private char mLogTag = '?';
     private String mTag;
@@ -85,6 +92,7 @@ public class ZenModePanel extends LinearLayout {
     private TextView mZenSubheadExpanded;
     private View mMoreSettings;
     private LinearLayout mZenConditions;
+    private TextView mAlarmWarning;
 
     private Callback mCallback;
     private ZenModeController mController;
@@ -94,6 +102,7 @@ public class ZenModePanel extends LinearLayout {
     private boolean mExpanded;
     private int mAttachedZen;
     private String mExitConditionText;
+    private long mNextAlarm;
 
     public ZenModePanel(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -102,6 +111,8 @@ public class ZenModePanel extends LinearLayout {
         mInflater = LayoutInflater.from(mContext.getApplicationContext());
         mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(mContext,
                 android.R.interpolator.fast_out_slow_in);
+        mTextColor = mContext.getResources().getColor(R.color.qs_text);
+        mAccentColor = mContext.getResources().getColor(R.color.system_accent_color);
         updateTag();
         if (DEBUG) Log.d(mTag, "new ZenModePanel");
     }
@@ -144,6 +155,7 @@ public class ZenModePanel extends LinearLayout {
         });
 
         mZenConditions = (LinearLayout) findViewById(R.id.zen_conditions);
+        mAlarmWarning = (TextView) findViewById(R.id.zen_alarm_warning);
     }
 
     @Override
@@ -152,6 +164,7 @@ public class ZenModePanel extends LinearLayout {
         if (DEBUG) Log.d(mTag, "onAttachedToWindow");
         mAttachedZen = getSelectedZen(-1);
         refreshExitConditionText();
+        refreshNextAlarm();
         updateWidgets();
     }
 
@@ -213,6 +226,7 @@ public class ZenModePanel extends LinearLayout {
         if (Objects.equals(mExitConditionId, exitConditionId)) return;
         mExitConditionId = exitConditionId;
         refreshExitConditionText();
+        updateWidgets();
     }
 
     private void refreshExitConditionText() {
@@ -267,12 +281,34 @@ public class ZenModePanel extends LinearLayout {
         final boolean zenImportant = zen == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
         final boolean zenNone = zen == Global.ZEN_MODE_NO_INTERRUPTIONS;
         final boolean foreverSelected = mExitConditionId == null;
+        final boolean hasNextAlarm = mNextAlarm != 0;
 
         mZenSubhead.setVisibility(!zenOff && (mExpanded || !foreverSelected) ? VISIBLE : GONE);
         mZenSubheadExpanded.setVisibility(mExpanded ? VISIBLE : GONE);
         mZenSubheadCollapsed.setVisibility(!mExpanded ? VISIBLE : GONE);
         mMoreSettings.setVisibility(zenImportant && mExpanded ? VISIBLE : GONE);
         mZenConditions.setVisibility(!zenOff && mExpanded ? VISIBLE : GONE);
+        mAlarmWarning.setVisibility(zenNone && mExpanded && hasNextAlarm ? VISIBLE : GONE);
+
+        if (zenNone && mExpanded && hasNextAlarm) {
+            final long exitTime = ZenModeConfig.tryParseCountdownConditionId(mExitConditionId);
+            final long now = System.currentTimeMillis();
+            final boolean alarmToday = time(mNextAlarm).yearDay == time(now).yearDay;
+            final String skeleton = (alarmToday ? "" : "E")
+                    + (DateFormat.is24HourFormat(mContext) ? "Hm" : "hma");
+            final String pattern = DateFormat.getBestDateTimePattern(Locale.getDefault(), skeleton);
+            final String alarm = new SimpleDateFormat(pattern).format(new Date(mNextAlarm));
+            final boolean isWarning = exitTime > 0 && mNextAlarm > now && mNextAlarm < exitTime;
+            if (isWarning) {
+                mAlarmWarning.setText(mContext.getString(R.string.zen_alarm_warning, alarm));
+                mAlarmWarning.setTextColor(mAccentColor);
+            } else {
+                mAlarmWarning.setText(mContext.getString(alarmToday
+                        ? R.string.zen_alarm_information_time
+                        : R.string.zen_alarm_information_day_time, alarm));
+                mAlarmWarning.setTextColor(mTextColor);
+            }
+        }
 
         if (zenNone) {
             mZenSubheadExpanded.setText(R.string.zen_no_interruptions_with_warning);
@@ -281,6 +317,12 @@ public class ZenModePanel extends LinearLayout {
             mZenSubheadExpanded.setText(R.string.zen_important_interruptions);
             mZenSubheadCollapsed.setText(mExitConditionText);
         }
+    }
+
+    private static Time time(long millis) {
+        final Time t = new Time();
+        t.set(millis);
+        return t;
     }
 
     private Condition parseExistingTimeCondition(Uri conditionId) {
@@ -306,6 +348,15 @@ public class ZenModePanel extends LinearLayout {
         final Uri id = ZenModeConfig.toCountdownConditionId(time);
         return new Condition(id, caption, "", "", 0, Condition.STATE_TRUE,
                 Condition.FLAG_RELEVANT_NOW);
+    }
+
+    private void refreshNextAlarm() {
+        mNextAlarm = mController.getNextAlarm();
+    }
+
+    private void handleNextAlarmChanged() {
+        refreshNextAlarm();
+        updateWidgets();
     }
 
     private void handleUpdateConditions(Condition[] conditions) {
@@ -518,12 +569,18 @@ public class ZenModePanel extends LinearLayout {
         public void onExitConditionChanged(Uri exitConditionId) {
             mHandler.obtainMessage(H.EXIT_CONDITION_CHANGED, exitConditionId).sendToTarget();
         }
+
+        @Override
+        public void onNextAlarmChanged() {
+            mHandler.sendEmptyMessage(H.NEXT_ALARM_CHANGED);
+        }
     };
 
     private final class H extends Handler {
         private static final int UPDATE_CONDITIONS = 1;
         private static final int EXIT_CONDITION_CHANGED = 2;
         private static final int UPDATE_ZEN = 3;
+        private static final int NEXT_ALARM_CHANGED = 4;
 
         private H() {
             super(Looper.getMainLooper());
@@ -532,12 +589,14 @@ public class ZenModePanel extends LinearLayout {
         @Override
         public void handleMessage(Message msg) {
             if (msg.what == UPDATE_CONDITIONS) {
-                handleUpdateConditions((Condition[])msg.obj);
+                handleUpdateConditions((Condition[]) msg.obj);
                 checkForDefault();
             } else if (msg.what == EXIT_CONDITION_CHANGED) {
-                handleExitConditionChanged((Uri)msg.obj);
+                handleExitConditionChanged((Uri) msg.obj);
             } else if (msg.what == UPDATE_ZEN) {
                 handleUpdateZen(msg.arg1);
+            } else if (msg.what == NEXT_ALARM_CHANGED) {
+                handleNextAlarmChanged();
             }
         }
     }
