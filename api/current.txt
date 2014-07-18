@@ -16608,6 +16608,7 @@ package android.media.tv {
 
   public final class TvInputManager {
     method public int getInputState(java.lang.String);
+    method public android.media.tv.TvInputInfo getTvInputInfo(java.lang.String);
     method public java.util.List<android.media.tv.TvInputInfo> getTvInputList();
     method public void registerListener(android.media.tv.TvInputManager.TvInputListener, android.os.Handler);
     method public void unregisterListener(android.media.tv.TvInputManager.TvInputListener);
