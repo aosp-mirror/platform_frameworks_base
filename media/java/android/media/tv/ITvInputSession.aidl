@@ -41,4 +41,6 @@ oneway interface ITvInputSession {
     void createOverlayView(in IBinder windowToken, in Rect frame);
     void relayoutOverlayView(in Rect frame);
     void removeOverlayView();
+
+    void unblockContent(in String unblockedRating);
 }
