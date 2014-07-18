@@ -225,13 +225,27 @@ public final class Display {
     public static final int STATE_ON = 2;
 
     /**
-     * Display state: The display is dozing in a low-power state; it may be showing
-     * system-provided content while the device is in a non-interactive state.
+     * Display state: The display is dozing in a low power state; it is still
+     * on but is optimized for showing system-provided content while the
+     * device is non-interactive.
      *
      * @see #getState
      * @see android.os.PowerManager#isInteractive
      */
-    public static final int STATE_DOZING = 3;
+    public static final int STATE_DOZE = 3;
+
+    /**
+     * Display state: The display is dozing in a suspended low power state; it is still
+     * on but is optimized for showing static system-provided content while the device
+     * is non-interactive.  This mode may be used to conserve even more power by allowing
+     * the hardware to stop applying frame buffer updates from the graphics subsystem or
+     * to take over the display and manage it autonomously to implement low power always-on
+     * display functionality.
+     *
+     * @see #getState
+     * @see android.os.PowerManager#isInteractive
+     */
+    public static final int STATE_DOZE_SUSPEND = 4;
 
     /**
      * Internal method to create a display.
@@ -697,7 +711,7 @@ public final class Display {
      * Gets the state of the display, such as whether it is on or off.
      *
      * @return The state of the display: one of {@link #STATE_OFF}, {@link #STATE_ON},
-     * {@link #STATE_DOZING}, or {@link #STATE_UNKNOWN}.
+     * {@link #STATE_DOZE}, {@link #STATE_DOZE_SUSPEND}, or {@link #STATE_UNKNOWN}.
      */
     public int getState() {
         synchronized (this) {
@@ -809,8 +823,10 @@ public final class Display {
                 return "OFF";
             case STATE_ON:
                 return "ON";
-            case STATE_DOZING:
-                return "DOZING";
+            case STATE_DOZE:
+                return "DOZE";
+            case STATE_DOZE_SUSPEND:
+                return "DOZE_SUSPEND";
             default:
                 return Integer.toString(state);
         }

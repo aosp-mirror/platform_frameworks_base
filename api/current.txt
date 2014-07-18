@@ -32571,7 +32571,8 @@ package android.view {
     field public static final int FLAG_PRIVATE = 4; // 0x4
     field public static final int FLAG_SECURE = 2; // 0x2
     field public static final int FLAG_SUPPORTS_PROTECTED_BUFFERS = 1; // 0x1
-    field public static final int STATE_DOZING = 3; // 0x3
+    field public static final int STATE_DOZE = 3; // 0x3
+    field public static final int STATE_DOZE_SUSPEND = 4; // 0x4
     field public static final int STATE_OFF = 1; // 0x1
     field public static final int STATE_ON = 2; // 0x2
     field public static final int STATE_UNKNOWN = 0; // 0x0
