@@ -57,17 +57,45 @@ public final class TvInputInfo implements Parcelable {
     // Should be in sync with hardware/libhardware/include/hardware/tv_input.h
 
     /**
-     * TV input type: the TV input service is HDMI. (e.g. HDMI 1)
+     * TV input type: a generic hardware TV input type.
      */
-    public static final int TYPE_HDMI = 1;
+    public static final int TYPE_OTHER_HARDWARE = 1;
     /**
      * TV input type: the TV input service is a tuner. (e.g. terrestrial tuner)
      */
     public static final int TYPE_TUNER = 2;
     /**
-     * TV input type: the TV input service is stateless pass-through. (e.g. RGB, composite, etc.)
+     * TV input type: the TV input service is HDMI. (e.g. HDMI 1)
      */
-    public static final int TYPE_PASSTHROUGH = 3;
+    public static final int TYPE_HDMI = 3;
+    /**
+     * TV input type: the TV input service represents a display port.
+     */
+    public static final int TYPE_DISPLAY_PORT = 4;
+    /**
+     * TV input type: the TV input service represents a SCART port.
+     */
+    public static final int TYPE_SCART = 5;
+    /**
+     * TV input type: the TV input service represents a DVI port.
+     */
+    public static final int TYPE_DVI = 6;
+    /**
+     * TV input type: the TV input service represents a VGA port.
+     */
+    public static final int TYPE_VGA = 7;
+    /**
+     * TV input type: the TV input service represents a component port.
+     */
+    public static final int TYPE_COMPONENT = 8;
+    /**
+     * TV input type: the TV input service represents a composite port.
+     */
+    public static final int TYPE_COMPOSITE = 9;
+    /**
+     * TV input type: the TV input service represents a SVIDEO port.
+     */
+    public static final int TYPE_SVIDEO = 10;
 
     /**
      * The ID of the TV input to provide to the setup activity and settings activity.
@@ -274,6 +302,21 @@ public final class TvInputInfo implements Parcelable {
      */
     public int getType() {
         return mType;
+    }
+
+    /**
+     * Returns {@code true} if this TV input is pass-though which does not have any real channels
+     * in TvProvider. {@code false} otherwise.
+     *
+     * @see TvContract#buildChannelUriForPassthroughTvInput(String)
+     */
+    public boolean isPassthroughInputType() {
+        if (mType == TYPE_HDMI || mType == TYPE_DISPLAY_PORT || mType == TYPE_SCART
+                || mType == TYPE_DVI || mType == TYPE_VGA || mType == TYPE_COMPONENT
+                || mType == TYPE_COMPOSITE || mType == TYPE_SVIDEO) {
+            return true;
+        }
+        return false;
     }
 
     /**
