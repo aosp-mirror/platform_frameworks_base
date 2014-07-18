@@ -6185,10 +6185,14 @@ package android.bluetooth {
     method public boolean readCharacteristic(android.bluetooth.BluetoothGattCharacteristic);
     method public boolean readDescriptor(android.bluetooth.BluetoothGattDescriptor);
     method public boolean readRemoteRssi();
+    method public boolean requestConnectionParameterUpdate(int);
     method public boolean setCharacteristicNotification(android.bluetooth.BluetoothGattCharacteristic, boolean);
     method public boolean writeCharacteristic(android.bluetooth.BluetoothGattCharacteristic);
     method public boolean writeDescriptor(android.bluetooth.BluetoothGattDescriptor);
+    field public static final int GATT_CONNECTION_BALANCED = 0; // 0x0
     field public static final int GATT_CONNECTION_CONGESTED = 143; // 0x8f
+    field public static final int GATT_CONNECTION_HIGH_PRIORITY = 1; // 0x1
+    field public static final int GATT_CONNECTION_LOW_POWER = 2; // 0x2
     field public static final int GATT_FAILURE = 257; // 0x101
     field public static final int GATT_INSUFFICIENT_AUTHENTICATION = 5; // 0x5
     field public static final int GATT_INSUFFICIENT_ENCRYPTION = 15; // 0xf
