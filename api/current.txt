@@ -28618,12 +28618,12 @@ package android.telecomm {
     method public void sendSessionModifyRequest(android.telecomm.VideoCallProfile);
     method public void sendSessionModifyResponse(android.telecomm.VideoCallProfile);
     method public void setCallVideoClient(android.telecomm.CallVideoClient);
-    method public void setCamera(java.lang.String) throws android.os.RemoteException;
+    method public void setCamera(java.lang.String);
     method public void setDeviceOrientation(int);
     method public void setDisplaySurface(android.view.Surface);
     method public void setPauseImage(java.lang.String);
     method public void setPreviewSurface(android.view.Surface);
-    method public void setZoom(float) throws android.os.RemoteException;
+    method public void setZoom(float);
   }
 
   public final class RemoteConnection {
