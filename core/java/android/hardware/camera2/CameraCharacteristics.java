@@ -858,6 +858,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * then immediately dispatch this state via a partial result to
      * the application, and the rest of the metadata via later
      * partial results.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      */
     public static final Key<Integer> REQUEST_PARTIAL_RESULT_COUNT =
             new Key<Integer>("android.request.partialResultCount", int.class);
