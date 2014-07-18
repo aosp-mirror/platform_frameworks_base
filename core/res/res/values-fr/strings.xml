@@ -719,10 +719,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Permet à l\'application de s\'associer à l\'interface de niveau supérieur d\'un service d\'écoute des notifications. Ne devrait jamais être nécessaire pour les applications normales."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"s\'associer à un service de fournisseur de conditions"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Permet à l\'application de s\'associer à l\'interface de niveau supérieur d\'un service de fournisseur de conditions. Ne devrait pas être nécessaire pour les applications standards."</string>
-    <!-- no translation found for permlab_bindMediaRouteService (6637740382272686835) -->
-    <skip />
-    <!-- no translation found for permdesc_bindMediaRouteService (6436655024972496687) -->
-    <skip />
+    <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"s\'associer à un service d\'itinéraires médias"</string>
+    <string name="permdesc_bindMediaRouteService" msgid="6436655024972496687">"Permet à l\'application de s\'associer à l\'interface de niveau supérieur d\'un service d\'itinéraires médias. Ne devrait pas être nécessaire pour les applications standards."</string>
     <string name="permlab_bindDreamService" msgid="4153646965978563462">"associer à un service d\'écran de veille interactif"</string>
     <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Permet à l\'application autorisée de s\'associer à l\'interface de plus haut niveau d\'un service d\'écran de veille interactif. Cette autorisation ne devrait jamais être nécessaire pour les applications standards."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"faire appel à l\'application de configuration fournie par l\'opérateur"</string>
@@ -1181,20 +1179,13 @@
     <string name="capital_on" msgid="1544682755514494298">"OUI"</string>
     <string name="capital_off" msgid="6815870386972805832">"NON"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Continuer avec"</string>
-    <!-- no translation found for whichApplicationNamed (8260158865936942783) -->
-    <skip />
-    <!-- no translation found for whichViewApplication (3272778576700572102) -->
-    <skip />
-    <!-- no translation found for whichViewApplicationNamed (2286418824011249620) -->
-    <skip />
-    <!-- no translation found for whichEditApplication (144727838241402655) -->
-    <skip />
-    <!-- no translation found for whichEditApplicationNamed (1775815530156447790) -->
-    <skip />
-    <!-- no translation found for whichSendApplication (6902512414057341668) -->
-    <skip />
-    <!-- no translation found for whichSendApplicationNamed (2799370240005424391) -->
-    <skip />
+    <string name="whichApplicationNamed" msgid="8260158865936942783">"Terminer l\'action avec %1$s"</string>
+    <string name="whichViewApplication" msgid="3272778576700572102">"Ouvrir avec"</string>
+    <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Ouvrir avec %1$s"</string>
+    <string name="whichEditApplication" msgid="144727838241402655">"Modifier avec"</string>
+    <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Modifier avec %1$s"</string>
+    <string name="whichSendApplication" msgid="6902512414057341668">"Partager avec"</string>
+    <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Partager avec %1$s"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"Sélectionner une application de l\'écran d\'accueil"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Utiliser cette application par défaut pour cette action"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Pour supprimer les valeurs par défaut, accédez à Paramètres système &gt; Applications &gt; Téléchargements."</string>
@@ -1297,12 +1288,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Toujours autoriser"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Ne jamais autoriser"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"Carte SIM retirée"</string>
-    <!-- no translation found for sim_removed_message (5450336489923274918) -->
-    <skip />
+    <string name="sim_removed_message" msgid="5450336489923274918">"Le réseau mobile ne sera pas disponible tant que vous n\'aurez pas redémarré l\'appareil avec une carte SIM valide."</string>
     <string name="sim_done_button" msgid="827949989369963775">"OK"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"Carte SIM ajoutée."</string>
-    <!-- no translation found for sim_added_message (7797975656153714319) -->
-    <skip />
+    <string name="sim_added_message" msgid="7797975656153714319">"Redémarrez votre appareil pour accéder au réseau mobile."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Redémarrer"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Définir l\'heure"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Définir la date"</string>
@@ -1441,10 +1430,6 @@
     <string name="back_button_label" msgid="2300470004503343439">"Retour"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Suivant"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"Ignorer"</string>
-    <string name="throttle_warning_notification_title" msgid="4890894267454867276">"Utilisation élevée des données mobiles"</string>
-    <string name="throttle_warning_notification_message" msgid="3340822228599337743">"Appuyez ici pour en savoir plus sur la consommation des données mobiles."</string>
-    <string name="throttled_notification_title" msgid="6269541897729781332">"Quota d\'utilisation des données mobiles dépassé"</string>
-    <string name="throttled_notification_message" msgid="5443457321354907181">"Appuyez ici pour en savoir plus sur la consommation des données mobiles."</string>
     <string name="no_matches" msgid="8129421908915840737">"Aucune correspondance"</string>
     <string name="find_on_page" msgid="1946799233822820384">"Rechercher sur la page"</string>
   <plurals name="matches_found">
@@ -1525,14 +1510,20 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Modifier"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Avertissement utilisation données"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"Appuyez pour conso/paramètres"</string>
-    <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"Données 2G-3G désactivées"</string>
-    <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"Données 4G désactivées"</string>
-    <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Données mobiles désactivées"</string>
-    <string name="data_usage_wifi_limit_title" msgid="8992154736441284865">"Wi-Fi désactivé"</string>
-    <string name="data_usage_limit_body" msgid="3317964706973601386">"Appuyez ici pour réactiver."</string>
+    <!-- no translation found for data_usage_3g_limit_title (4462365924791862301) -->
+    <skip />
+    <!-- no translation found for data_usage_4g_limit_title (7476424187522765328) -->
+    <skip />
+    <!-- no translation found for data_usage_mobile_limit_title (3393439305227911006) -->
+    <skip />
+    <!-- no translation found for data_usage_wifi_limit_title (3461968509557554571) -->
+    <skip />
+    <!-- no translation found for data_usage_limit_body (6131350187562939365) -->
+    <skip />
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Quota de données 2G-3G dépassé"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Quota de données 4G dépassé"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Quota utilisation données dépassé"</string>
+    <!-- no translation found for data_usage_mobile_limit_snoozed_title (4941346653729943789) -->
+    <skip />
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Quota de données Wi-Fi dépassé"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> au-delà de la limite spécifiée."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Données en arrière-plan limitées"</string>
@@ -1753,25 +1744,16 @@
     <string name="item_is_selected" msgid="949687401682476608">"\"<xliff:g id="ITEM">%1$s</xliff:g>\" sélectionné"</string>
     <string name="deleted_key" msgid="7659477886625566590">"\"<xliff:g id="KEY">%1$s</xliff:g>\" supprimé"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> (travail)"</string>
-    <!-- no translation found for lock_to_app_toast (2126866321272822564) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="2126866321272822564">"Vous utilisez la fonctionnalité Verrouiller sur l\'application. Pour quitter ce mode, appuyez de manière prolongée sur le bouton \"Récents\"."</string>
     <string name="lock_to_app_toast_locked" msgid="4229650395479263497">"Vous êtes en mode \"Verrouiller sur l\'application\"."</string>
     <string name="lock_to_app_title" msgid="5895142291937470019">"Utiliser la fonctionnalité Verrouiller sur l\'application ?"</string>
-    <!-- no translation found for lock_to_app_description (2800403592608529611) -->
-    <skip />
-    <!-- no translation found for lock_to_app_negative (2259143719362732728) -->
-    <skip />
+    <string name="lock_to_app_description" msgid="2800403592608529611">"La fonctionnalité Verrouiller sur l\'application verrouille l\'écran sur une seule application.\n\nPour quitter ce mode, appuyez de manière prolongée sur le bouton \"Récents\"."</string>
+    <string name="lock_to_app_negative" msgid="2259143719362732728">"NON, MERCI"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"ACTIVER"</string>
-    <!-- no translation found for lock_to_app_start (3074665051586318340) -->
-    <skip />
-    <!-- no translation found for lock_to_app_exit (8967089657201849300) -->
-    <skip />
-    <!-- no translation found for lock_to_app_use_screen_lock (1434584309048590886) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_pin (7908385370846820001) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_pattern (7763071104790758405) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_password (795224196583495868) -->
-    <skip />
+    <string name="lock_to_app_start" msgid="3074665051586318340">"Verrouillage sur l\'application activé"</string>
+    <string name="lock_to_app_exit" msgid="8967089657201849300">"Verrouillage sur l\'application désactivé"</string>
+    <string name="lock_to_app_use_screen_lock" msgid="1434584309048590886">"Demander le %1$s avant de quitter"</string>
+    <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"code PIN"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"schéma de déverrouillage"</string>
+    <string name="lock_to_app_unlock_password" msgid="795224196583495868">"mot de passe"</string>
 </resources>

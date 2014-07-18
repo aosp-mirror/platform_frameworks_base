@@ -719,10 +719,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"允許應用程式繫結至通知接聽器服務的頂層介面 (不建議一般應用程式使用)。"</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"繫結至條件供應商服務"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"允許應用程式繫結至條件供應商服務的頂層介面，但一般應用程式並不需要使用。"</string>
-    <!-- no translation found for permlab_bindMediaRouteService (6637740382272686835) -->
-    <skip />
-    <!-- no translation found for permdesc_bindMediaRouteService (6436655024972496687) -->
-    <skip />
+    <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"繫結至媒體轉送服務"</string>
+    <string name="permdesc_bindMediaRouteService" msgid="6436655024972496687">"允許應用程式繫結至媒體轉送服務的頂層介面，但一般應用程式並不需要使用。"</string>
     <string name="permlab_bindDreamService" msgid="4153646965978563462">"繫結至 Dream 服務"</string>
     <string name="permdesc_bindDreamService" msgid="7325825272223347863">"允許應用程式繫結至 Dream 服務的頂層介面 (不建議一般應用程式使用)。"</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"調用流動網絡供應商提供的設定應用程式"</string>
@@ -1181,20 +1179,13 @@
     <string name="capital_on" msgid="1544682755514494298">"開啟"</string>
     <string name="capital_off" msgid="6815870386972805832">"關"</string>
     <string name="whichApplication" msgid="4533185947064773386">"完成操作需使用"</string>
-    <!-- no translation found for whichApplicationNamed (8260158865936942783) -->
-    <skip />
-    <!-- no translation found for whichViewApplication (3272778576700572102) -->
-    <skip />
-    <!-- no translation found for whichViewApplicationNamed (2286418824011249620) -->
-    <skip />
-    <!-- no translation found for whichEditApplication (144727838241402655) -->
-    <skip />
-    <!-- no translation found for whichEditApplicationNamed (1775815530156447790) -->
-    <skip />
-    <!-- no translation found for whichSendApplication (6902512414057341668) -->
-    <skip />
-    <!-- no translation found for whichSendApplicationNamed (2799370240005424391) -->
-    <skip />
+    <string name="whichApplicationNamed" msgid="8260158865936942783">"完成操作需使用 %1$s"</string>
+    <string name="whichViewApplication" msgid="3272778576700572102">"用於開啟的應用程式"</string>
+    <string name="whichViewApplicationNamed" msgid="2286418824011249620">"使用 %1$s 開啟"</string>
+    <string name="whichEditApplication" msgid="144727838241402655">"使用以下選擇器編輯："</string>
+    <string name="whichEditApplicationNamed" msgid="1775815530156447790">"使用 %1$s 編輯"</string>
+    <string name="whichSendApplication" msgid="6902512414057341668">"分享對象"</string>
+    <string name="whichSendApplicationNamed" msgid="2799370240005424391">"與 %1$s 分享"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"選取主畫面應用程式"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"設定用於執行這項操作。"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"前往 [系統設定] &gt; [應用程式] &gt; [已下載] 清除預設值。"</string>
@@ -1297,12 +1288,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"一律允許"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"絕不允許"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM 卡已移除"</string>
-    <!-- no translation found for sim_removed_message (5450336489923274918) -->
-    <skip />
+    <string name="sim_removed_message" msgid="5450336489923274918">"您必須先插入有效的 SIM 卡再重新啟動手機，才能使用流動網絡。"</string>
     <string name="sim_done_button" msgid="827949989369963775">"完成"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIM 卡已新增"</string>
-    <!-- no translation found for sim_added_message (7797975656153714319) -->
-    <skip />
+    <string name="sim_added_message" msgid="7797975656153714319">"重新啟動裝置，才能使用流動網絡。"</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"重新啟動"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"設定時間"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"日期設定"</string>
@@ -1441,10 +1430,6 @@
     <string name="back_button_label" msgid="2300470004503343439">"返回"</string>
     <string name="next_button_label" msgid="1080555104677992408">"繼續"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"略過"</string>
-    <string name="throttle_warning_notification_title" msgid="4890894267454867276">"高流動數據用量"</string>
-    <string name="throttle_warning_notification_message" msgid="3340822228599337743">"輕觸即可瞭解流動數據用量的詳情。"</string>
-    <string name="throttled_notification_title" msgid="6269541897729781332">"已達流動數據上限"</string>
-    <string name="throttled_notification_message" msgid="5443457321354907181">"輕觸即可瞭解流動數據用量的詳情。"</string>
     <string name="no_matches" msgid="8129421908915840737">"沒有相符的結果"</string>
     <string name="find_on_page" msgid="1946799233822820384">"在頁面中尋找"</string>
   <plurals name="matches_found">
@@ -1525,14 +1510,20 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"編輯"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"資料用量警告"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"輕觸即可查看使用量和設定。"</string>
-    <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"已停用 2G-3G 數據"</string>
-    <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"已停用 4G 數據"</string>
-    <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"已停用流動數據"</string>
-    <string name="data_usage_wifi_limit_title" msgid="8992154736441284865">"Wi-Fi 數據已停用"</string>
-    <string name="data_usage_limit_body" msgid="3317964706973601386">"輕觸即可啟用。"</string>
+    <!-- no translation found for data_usage_3g_limit_title (4462365924791862301) -->
+    <skip />
+    <!-- no translation found for data_usage_4g_limit_title (7476424187522765328) -->
+    <skip />
+    <!-- no translation found for data_usage_mobile_limit_title (3393439305227911006) -->
+    <skip />
+    <!-- no translation found for data_usage_wifi_limit_title (3461968509557554571) -->
+    <skip />
+    <!-- no translation found for data_usage_limit_body (6131350187562939365) -->
+    <skip />
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"已達 2G-3G 數據上限"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"已達 4G 數據上限"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"已達流動數據上限"</string>
+    <!-- no translation found for data_usage_mobile_limit_snoozed_title (4941346653729943789) -->
+    <skip />
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"已達 Wi-Fi 數據上限"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> 超過規定上限。"</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"已限制背景資料"</string>

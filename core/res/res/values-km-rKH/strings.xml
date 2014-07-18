@@ -1187,7 +1187,7 @@
     <string name="whichEditApplication" msgid="144727838241402655">"កែសម្រួល​ជាមួយ"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"កែសម្រួល​ជាមួយ​ %1$s"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"ចែករំលែក​ជាមួយ"</string>
-    <string name="whichSendApplicationNamed" msgid="2799370240005424391">"ចែករំលែកជាមួយ"</string>
+    <string name="whichSendApplicationNamed" msgid="2799370240005424391">"ចែករំលែក​ជាមួយ"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"ជ្រើស​កម្មវិធី​ដើម"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"ប្រើ​តាម​លំនាំដើម​សម្រាប់​សកម្មភាព​នេះ។"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"សម្អាត​លំនាំដើម​ក្នុង​ការកំណត់​ប្រព័ន្ធ &gt; កម្មវិធី &gt; ទាញ​យក។"</string>
@@ -1290,10 +1290,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"អនុញ្ញាត​ជា​និច្ច"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"កុំ​អនុញ្ញាត"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"បាន​ដក​ស៊ីម​កាត​ចេញ"</string>
-    <string name="sim_removed_message" msgid="5450336489923274918">"បណ្ដាញ​ចល័ត​នឹង​​មិន​អាច​ប្រើ​បាន លុះត្រាតែ​អ្នក​ចាប់ផ្ដើម​ឡើង​វិញ​ដោយ​បញ្ចូល​ស៊ីមកាត​ត្រឹមត្រូវ។"</string>
+    <string name="sim_removed_message" msgid="5450336489923274918">"បណ្ដាញ​ចល័ត​នឹង​​មិន​អាច​ប្រើ​បាន​ទេ លុះត្រាតែ​អ្នក​ចាប់ផ្ដើម​ឡើង​វិញ​ដោយ​បញ្ចូល​ស៊ីមកាត​ត្រឹមត្រូវ។"</string>
     <string name="sim_done_button" msgid="827949989369963775">"រួចរាល់"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"បាន​បន្ថែម​ស៊ីម​កាត"</string>
-    <string name="sim_added_message" msgid="7797975656153714319">"ចាប់ផ្ដើម​ឧបករណ៍​របស់​អ្នក ដើម្បី​ចូល​ប្រើ​បណ្ដាញ​ចល័ត។"</string>
+    <string name="sim_added_message" msgid="7797975656153714319">"ចាប់ផ្ដើម​ឧបករណ៍​របស់​អ្នក​ឡើងវិញ ដើម្បី​ចូល​ប្រើ​បណ្ដាញ​ចល័ត។"</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"ចាប់ផ្ដើម​ឡើងវិញ"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"កំណត់​ម៉ោង​"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"កំណត់​កាល​បរិច្ឆេទ​"</string>
@@ -1432,10 +1432,6 @@
     <string name="back_button_label" msgid="2300470004503343439">"ថយក្រោយ"</string>
     <string name="next_button_label" msgid="1080555104677992408">"បន្ទាប់​"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"រំលង"</string>
-    <string name="throttle_warning_notification_title" msgid="4890894267454867276">"ការ​ប្រើ​ទិន្នន័យ​ចល័ត​ខ្ពស់"</string>
-    <string name="throttle_warning_notification_message" msgid="3340822228599337743">"ប៉ះ​ ដើម្បី​​ស្វែងយល់​បន្ថែម​អំពី​ការ​ប្រើ​​​ទិន្នន័យ​ចល័ត​។"</string>
-    <string name="throttled_notification_title" msgid="6269541897729781332">"លើក​ដែន​កំណត់​ទិន្នន័យ​ចល័ត"</string>
-    <string name="throttled_notification_message" msgid="5443457321354907181">"ប៉ះ ដើម្បី​ស្វែងយល់​បន្ថែម​អំពី​ការ​ប្រើ​ទិន្នន័យ​ចល័ត។"</string>
     <string name="no_matches" msgid="8129421908915840737">"គ្មាន​ការ​ផ្គូផ្គង"</string>
     <string name="find_on_page" msgid="1946799233822820384">"រក​ក្នុង​ទំព័រ"</string>
   <plurals name="matches_found">
@@ -1516,14 +1512,20 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"កែសម្រួល​"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"ការព្រមាន​ប្រើ​ទិន្នន័យ"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"ប៉ះ ដើម្បី​មើល​ការ​ប្រើ និង​ការ​កំណត់។"</string>
-    <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"បាន​បិទ​ទិន្នន័យ 2G​-3G"</string>
-    <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"បាន​បិទ​ទិន្នន័យ 4G"</string>
-    <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"បាន​បិទ​ទិន្នន័យ​ចល័ត"</string>
-    <string name="data_usage_wifi_limit_title" msgid="8992154736441284865">"បាន​បិទ​ទិន្នន័យ​វ៉ាយហ្វាយ"</string>
-    <string name="data_usage_limit_body" msgid="3317964706973601386">"ប៉ះ​​ ដើម្បី​បើក​។"</string>
+    <!-- no translation found for data_usage_3g_limit_title (4462365924791862301) -->
+    <skip />
+    <!-- no translation found for data_usage_4g_limit_title (7476424187522765328) -->
+    <skip />
+    <!-- no translation found for data_usage_mobile_limit_title (3393439305227911006) -->
+    <skip />
+    <!-- no translation found for data_usage_wifi_limit_title (3461968509557554571) -->
+    <skip />
+    <!-- no translation found for data_usage_limit_body (6131350187562939365) -->
+    <skip />
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"លើស​ដែន​កំណត់​ទិន្នន័យ 2G​-3G"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"បាន​លើស​ដែន​កំណត់​ទិន្នន័យ 4G"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"បាន​លើស​ដែន​កំណត់​ទិន្នន័យ​ចល័ត"</string>
+    <!-- no translation found for data_usage_mobile_limit_snoozed_title (4941346653729943789) -->
+    <skip />
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"លើស​ដែន​កំណត់​ទិន្នន័យ​វ៉ាយហ្វាយ"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> លើ​ដែន​កំណត់​បាន​បញ្ជាក់។"</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"បាន​ដាក់​កម្រិត​ទិន្នន័យ​ផ្ទៃ​ខាង​ក្រោយ"</string>

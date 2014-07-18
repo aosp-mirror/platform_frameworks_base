@@ -1441,10 +1441,6 @@
     <string name="back_button_label" msgid="2300470004503343439">"Précédent"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Suivante"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"Passer"</string>
-    <string name="throttle_warning_notification_title" msgid="4890894267454867276">"Utilisation élevée des données mobiles"</string>
-    <string name="throttle_warning_notification_message" msgid="3340822228599337743">"Appuyez ici pour en savoir plus sur la consommation des données mobiles."</string>
-    <string name="throttled_notification_title" msgid="6269541897729781332">"Quota utilisation données dépassé"</string>
-    <string name="throttled_notification_message" msgid="5443457321354907181">"Appuyez ici pour en savoir plus sur la consommation des données mobiles."</string>
     <string name="no_matches" msgid="8129421908915840737">"Aucune partie"</string>
     <string name="find_on_page" msgid="1946799233822820384">"Rechercher sur la page"</string>
   <plurals name="matches_found">
@@ -1525,14 +1521,20 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Modifier"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Avertissement utilisation données"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"Appuyez pour conso/paramètres"</string>
-    <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"Données 2G-3G  désactivées"</string>
-    <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"Données 4G désactivées"</string>
-    <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Données mobiles désactivées"</string>
-    <string name="data_usage_wifi_limit_title" msgid="8992154736441284865">"Wi-Fi désactivé"</string>
-    <string name="data_usage_limit_body" msgid="3317964706973601386">"Appuyez ici pour réactiver."</string>
+    <!-- no translation found for data_usage_3g_limit_title (4462365924791862301) -->
+    <skip />
+    <!-- no translation found for data_usage_4g_limit_title (7476424187522765328) -->
+    <skip />
+    <!-- no translation found for data_usage_mobile_limit_title (3393439305227911006) -->
+    <skip />
+    <!-- no translation found for data_usage_wifi_limit_title (3461968509557554571) -->
+    <skip />
+    <!-- no translation found for data_usage_limit_body (6131350187562939365) -->
+    <skip />
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Quota de données 2G-3G dépassé"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Quota de données 4G dépassé"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Quota utilisation données dépassé"</string>
+    <!-- no translation found for data_usage_mobile_limit_snoozed_title (4941346653729943789) -->
+    <skip />
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Quota de données Wi-Fi dépassé"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> au-delà de la limite spécifiée."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Données en arrière-plan limitées"</string>
