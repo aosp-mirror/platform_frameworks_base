@@ -34,6 +34,11 @@ interface ITelecommService {
     void showCallScreen(boolean showDialpad);
 
     /**
+     * @see TelecommManager#getDefaultOutgoingPhoneAccount
+     */
+    PhoneAccount getDefaultOutgoingPhoneAccount();
+
+    /**
      * @see TelecommManager#getEnabledPhoneAccounts
      */
     List<PhoneAccount> getEnabledPhoneAccounts();
@@ -46,7 +51,7 @@ interface ITelecommService {
     /**
      * @see TelecommManager#registerPhoneAccount
      */
-    void registerPhoneAccount(in PhoneAccount account, in PhoneAccountMetadata metadata);
+    void registerPhoneAccount(in PhoneAccountMetadata metadata);
 
     /**
      * @see TelecommManager#unregisterPhoneAccount
