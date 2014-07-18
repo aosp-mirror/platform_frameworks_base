@@ -17,6 +17,7 @@
 package android.media.tv;
 
 import android.annotation.SuppressLint;
+import android.annotation.SystemApi;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
@@ -104,7 +105,8 @@ public abstract class TvInputService extends Service {
             }
 
             @Override
-            public void createSession(InputChannel channel, ITvInputSessionCallback cb) {
+            public void createSession(InputChannel channel, ITvInputSessionCallback cb,
+                    String inputId) {
                 if (channel == null) {
                     Log.w(TAG, "Creating session without input channel");
                 }
@@ -114,7 +116,20 @@ public abstract class TvInputService extends Service {
                 SomeArgs args = SomeArgs.obtain();
                 args.arg1 = channel;
                 args.arg2 = cb;
+                args.arg3 = inputId;
                 mHandler.obtainMessage(ServiceHandler.DO_CREATE_SESSION, args).sendToTarget();
+            }
+
+            @Override
+            public void notifyHardwareAdded(TvInputHardwareInfo hardwareInfo) {
+                mHandler.obtainMessage(ServiceHandler.DO_ADD_TV_INPUT_FROM_HARDWARE,
+                        hardwareInfo).sendToTarget();
+            }
+
+            @Override
+            public void notifyHardwareRemoved(int deviceId) {
+                mHandler.obtainMessage(ServiceHandler.DO_REMOVE_TV_INPUT_FROM_HARDWARE,
+                        deviceId, 0).sendToTarget();
             }
         };
     }
@@ -136,6 +151,44 @@ public abstract class TvInputService extends Service {
      * </p>
      */
     public abstract Session onCreateSession();
+
+    /**
+     * Returns a concrete implementation of {@link Session}.
+     * <p>
+     * May return {@code null} if this TV input service fails to create a session for some reason.
+     * </p>
+     * @param inputId The ID of the TV input associated with the session.
+     *
+     * @hide
+     */
+    @SystemApi
+    public Session onCreateSession(String inputId) {
+        return onCreateSession();
+    }
+
+    /**
+     * Returns a new TvInputInfo object if this service is responsible for {@code hardwareInfo};
+     * otherwise, return {@code null}. Override to modify default behavior of ignoring all input.
+     *
+     * @param hardwareInfo TvInputHardwareInfo object just added.
+     *
+     * @hide
+     */
+    @SystemApi
+    public TvInputInfo onHardwareAdded(TvInputHardwareInfo hardwareInfo) {
+        return null;
+    }
+
+    /**
+     * Returns the input ID for {@code deviceId} if it is handled by this service;
+     * otherwise, return {@code null}. Override to modify default behavior of ignoring all input.
+     *
+     * @hide
+     */
+    @SystemApi
+    public String onHardwareRemoved(int deviceId) {
+        return null;
+    }
 
     /**
      * Base class for derived classes to implement to provide a TV input session.
@@ -715,6 +768,32 @@ public abstract class TvInputService extends Service {
     @SuppressLint("HandlerLeak")
     private final class ServiceHandler extends Handler {
         private static final int DO_CREATE_SESSION = 1;
+        private static final int DO_ADD_TV_INPUT_FROM_HARDWARE = 2;
+        private static final int DO_REMOVE_TV_INPUT_FROM_HARDWARE = 3;
+
+        private void broadcastAddTvInput(TvInputInfo inputInfo) {
+            int n = mCallbacks.beginBroadcast();
+            for (int i = 0; i < n; ++i) {
+                try {
+                    mCallbacks.getBroadcastItem(i).addTvInput(inputInfo);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Error while broadcasting: " + e);
+                }
+            }
+            mCallbacks.finishBroadcast();
+        }
+
+        private void broadcastRemoveTvInput(String inputId) {
+            int n = mCallbacks.beginBroadcast();
+            for (int i = 0; i < n; ++i) {
+                try {
+                    mCallbacks.getBroadcastItem(i).removeTvInput(inputId);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Error while broadcasting: " + e);
+                }
+            }
+            mCallbacks.finishBroadcast();
+        }
 
         @Override
         public final void handleMessage(Message msg) {
@@ -723,8 +802,9 @@ public abstract class TvInputService extends Service {
                     SomeArgs args = (SomeArgs) msg.obj;
                     InputChannel channel = (InputChannel) args.arg1;
                     ITvInputSessionCallback cb = (ITvInputSessionCallback) args.arg2;
+                    String inputId = (String) args.arg3;
                     try {
-                        Session sessionImpl = onCreateSession();
+                        Session sessionImpl = onCreateSession(inputId);
                         if (sessionImpl == null) {
                             // Failed to create a session.
                             cb.onSessionCreated(null);
@@ -738,6 +818,22 @@ public abstract class TvInputService extends Service {
                         Log.e(TAG, "error in onSessionCreated");
                     }
                     args.recycle();
+                    return;
+                }
+                case DO_ADD_TV_INPUT_FROM_HARDWARE: {
+                    TvInputHardwareInfo hardwareInfo = (TvInputHardwareInfo) msg.obj;
+                    TvInputInfo inputInfo = onHardwareAdded(hardwareInfo);
+                    if (inputInfo != null) {
+                        broadcastAddTvInput(inputInfo);
+                    }
+                    return;
+                }
+                case DO_REMOVE_TV_INPUT_FROM_HARDWARE: {
+                    int deviceId = msg.arg1;
+                    String inputId = onHardwareRemoved(deviceId);
+                    if (inputId != null) {
+                        broadcastRemoveTvInput(inputId);
+                    }
                     return;
                 }
                 default: {
