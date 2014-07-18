@@ -163,7 +163,7 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
     private static final ViewOutlineProvider CONTENT_HOLDER_OUTLINE_PROVIDER =
             new ViewOutlineProvider() {
         @Override
-        public boolean getOutline(View view, Outline outline) {
+        public void getOutline(View view, Outline outline) {
             int outlineLeft = view.getPaddingLeft();
             int outlineTop = view.getPaddingTop();
 
@@ -171,7 +171,6 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
             outline.setRect(outlineLeft, outlineTop,
                     view.getWidth() - outlineLeft - view.getPaddingRight(),
                     view.getHeight() - outlineTop - view.getPaddingBottom());
-            return true;
         }
     };
 

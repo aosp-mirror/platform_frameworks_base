@@ -316,8 +316,8 @@ public class InsetDrawable extends Drawable implements Drawable.Callback {
     }
 
     @Override
-    public boolean getOutline(@NonNull Outline outline) {
-        return mInsetState.mDrawable.getOutline(outline);
+    public void getOutline(@NonNull Outline outline) {
+        mInsetState.mDrawable.getOutline(outline);
     }
 
     @Override
