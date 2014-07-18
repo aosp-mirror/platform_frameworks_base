@@ -16,6 +16,7 @@
 
 package android.telecomm;
 
+import android.app.PendingIntent;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -40,6 +41,7 @@ public abstract class InCallService {
     private static final int MSG_SET_POST_DIAL_WAIT = 5;
     private static final int MSG_ON_AUDIO_STATE_CHANGED = 6;
     private static final int MSG_BRING_TO_FOREGROUND = 7;
+    private static final int MSG_START_ACTIVITY = 8;
 
     /** Default Handler used to consolidate binder method calls onto a single thread. */
     private final Handler mHandler = new Handler(Looper.getMainLooper()) {
@@ -83,6 +85,15 @@ public abstract class InCallService {
                     break;
                 case MSG_BRING_TO_FOREGROUND:
                     mPhone.internalBringToForeground(msg.arg1 == 1);
+                    break;
+                case MSG_START_ACTIVITY:
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    try {
+                        mPhone.internalStartActivity(
+                                (String) args.arg1, (PendingIntent) args.arg2);
+                    } finally {
+                        args.recycle();
+                    }
                     break;
                 default:
                     break;
@@ -136,6 +147,15 @@ public abstract class InCallService {
         @Override
         public void bringToForeground(boolean showDialpad) {
             mHandler.obtainMessage(MSG_BRING_TO_FOREGROUND, showDialpad ? 1 : 0, 0).sendToTarget();
+        }
+
+        /** {@inheritDoc} */
+        @Override
+        public void startActivity(String callId, PendingIntent intent) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = callId;
+            args.arg2 = intent;
+            mHandler.obtainMessage(MSG_START_ACTIVITY, args).sendToTarget();
         }
     }
 
