@@ -33,14 +33,6 @@ import java.util.Objects;
  * PhoneAccountMetadata.
  */
 public class PhoneAccount implements Parcelable {
-
-    /**
-     * Flag indicating that this {@code PhoneAccount} represents  built-in PSTN SIM subscription.
-     * <p>
-     * Only the android framework can set this capability on a phone account.
-     */
-    public static final int CAPABILITY_SIM_SUBSCRIPTION = 0x4;
-
     private ComponentName mComponentName;
     private String mId;
 
