@@ -28432,28 +28432,29 @@ package android.telecomm {
   }
 
   public class PhoneAccount implements android.os.Parcelable {
-    ctor public PhoneAccount(android.content.ComponentName, java.lang.String, android.net.Uri, int);
+    ctor public PhoneAccount(android.content.ComponentName, java.lang.String);
     method public int describeContents();
-    method public int getCapabilities();
     method public android.content.ComponentName getComponentName();
-    method public android.net.Uri getHandle();
     method public java.lang.String getId();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final int CAPABILITY_CALL_PROVIDER = 2; // 0x2
-    field public static final int CAPABILITY_SIM_CALL_MANAGER = 1; // 0x1
     field public static final int CAPABILITY_SIM_SUBSCRIPTION = 4; // 0x4
     field public static final android.os.Parcelable.Creator CREATOR;
   }
 
   public class PhoneAccountMetadata implements android.os.Parcelable {
-    ctor public PhoneAccountMetadata(android.telecomm.PhoneAccount, int, java.lang.String, java.lang.String, boolean);
+    ctor public PhoneAccountMetadata(android.telecomm.PhoneAccount, android.net.Uri, int, int, java.lang.String, java.lang.String, boolean);
     method public int describeContents();
     method public android.telecomm.PhoneAccount getAccount();
+    method public int getCapabilities();
+    method public android.net.Uri getHandle();
     method public android.graphics.drawable.Drawable getIcon(android.content.Context);
+    method public int getIconResId();
     method public java.lang.String getLabel();
     method public java.lang.String getShortDescription();
     method public boolean isVideoCallingSupported();
     method public void writeToParcel(android.os.Parcel, int);
+    field public static final int CAPABILITY_CALL_PROVIDER = 2; // 0x2
+    field public static final int CAPABILITY_SIM_CALL_MANAGER = 1; // 0x1
     field public static final android.os.Parcelable.Creator CREATOR;
   }
 
@@ -28563,9 +28564,10 @@ package android.telecomm {
 
   public class TelecommManager {
     method public void clearAccounts(java.lang.String);
+    method public android.telecomm.PhoneAccount getDefaultOutgoingPhoneAccount();
     method public java.util.List<android.telecomm.PhoneAccount> getEnabledPhoneAccounts();
     method public android.telecomm.PhoneAccountMetadata getPhoneAccountMetadata(android.telecomm.PhoneAccount);
-    method public void registerPhoneAccount(android.telecomm.PhoneAccount, android.telecomm.PhoneAccountMetadata);
+    method public void registerPhoneAccount(android.telecomm.PhoneAccountMetadata);
     method public void unregisterPhoneAccount(android.telecomm.PhoneAccount);
   }
 
