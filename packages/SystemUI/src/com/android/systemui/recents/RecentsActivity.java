@@ -340,7 +340,8 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
         // Initialize the loader and the configuration
         RecentsTaskLoader.initialize(this);
-        mConfig = RecentsConfiguration.reinitialize(this);
+        mConfig = RecentsConfiguration.reinitialize(this,
+                RecentsTaskLoader.getInstance().getSystemServicesProxy());
 
         // Create the home intent runnable
         Intent homeIntent = new Intent(Intent.ACTION_MAIN, null);
@@ -405,7 +406,8 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
     void onConfigurationChange() {
         // Update RecentsConfiguration
-        mConfig = RecentsConfiguration.reinitialize(this);
+        mConfig = RecentsConfiguration.reinitialize(this,
+                RecentsTaskLoader.getInstance().getSystemServicesProxy());
 
         // Try and start the enter animation (or restart it on configuration changed)
         ReferenceCountedTrigger t = new ReferenceCountedTrigger(this, null, null, null);

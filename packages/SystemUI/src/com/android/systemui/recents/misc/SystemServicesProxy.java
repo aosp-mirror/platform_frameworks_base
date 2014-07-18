@@ -26,6 +26,7 @@ import android.appwidget.AppWidgetHost;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -47,6 +48,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.Settings;
 import android.util.Log;
 import android.util.Pair;
 import android.view.Display;
@@ -410,6 +412,22 @@ public class SystemServicesProxy {
 
         // Delete the app widget
         host.deleteAppWidgetId(appWidgetId);
+    }
+
+    /**
+     * Returns a global setting.
+     */
+    public int getGlobalSetting(Context context, String setting) {
+        ContentResolver cr = context.getContentResolver();
+        return Settings.Global.getInt(cr, setting, 0);
+    }
+
+    /**
+     * Returns a system setting.
+     */
+    public int getSystemSetting(Context context, String setting) {
+        ContentResolver cr = context.getContentResolver();
+        return Settings.System.getInt(cr, setting, 0);
     }
 
     /**
