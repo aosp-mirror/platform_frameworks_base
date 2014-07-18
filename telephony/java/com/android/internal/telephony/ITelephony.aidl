@@ -634,8 +634,9 @@ interface ITelephony {
 
     /**
      * Get P-CSCF address from PCO after data connection is established or modified.
+     * @param apnType the apnType, "ims" for IMS APN, "emergency" for EMERGENCY APN
      */
-    String[] getPcscfAddress();
+    String[] getPcscfAddress(String apnType);
 
     /**
      * Set IMS registration state

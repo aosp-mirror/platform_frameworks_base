@@ -2789,13 +2789,13 @@ public class TelephonyManager {
 
     /**
      * Get P-CSCF address from PCO after data connection is established or modified.
-     *
+     * @param apnType the apnType, "ims" for IMS APN, "emergency" for EMERGENCY APN
      * @return array of P-CSCF address
      * @hide
      */
-    public String[] getPcscfAddress() {
+    public String[] getPcscfAddress(String apnType) {
         try {
-            return getITelephony().getPcscfAddress();
+            return getITelephony().getPcscfAddress(apnType);
         } catch (RemoteException e) {
             return new String[0];
         }
