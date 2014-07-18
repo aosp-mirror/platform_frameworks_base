@@ -16652,6 +16652,7 @@ package android.media.tv {
     method public abstract void onSetCaptionEnabled(boolean);
     method public abstract void onSetStreamVolume(float);
     method public abstract boolean onSetSurface(android.view.Surface);
+    method public void onSurfaceChanged(int, int, int);
     method public boolean onTouchEvent(android.view.MotionEvent);
     method public boolean onTrackballEvent(android.view.MotionEvent);
     method public abstract boolean onTune(android.net.Uri);
