@@ -3539,6 +3539,11 @@ public class BackupManagerService extends IBackupManager.Stub {
                             // In all cases we need to give the transport its finish callback
                             int finishResult = transport.finishBackup();
 
+                            if (MORE_DEBUG) {
+                                Slog.i(TAG, "Done trying to send backup data: result="
+                                        + result + " finishResult=" + finishResult);
+                            }
+
                             // If we were otherwise in a good state, now interpret the final
                             // result based on what finishBackup() returned.  If we're in a
                             // failure case already, preserve that result and ignore whatever
@@ -3561,7 +3566,7 @@ public class BackupManagerService extends IBackupManager.Stub {
                             // do nothing, clean up, and continue looping
                         } else if (result != BackupTransport.TRANSPORT_OK) {
                             if (DEBUG) {
-                                Slog.i(TAG, "Transport failed; aborting backup");
+                                Slog.i(TAG, "Transport failed; aborting backup: " + result);
                                 return;
                             }
                         }
@@ -4083,6 +4088,9 @@ public class BackupManagerService extends IBackupManager.Stub {
                             // okay, if the remote end failed at any point, deal with
                             // it by ignoring the rest of the restore on it
                             if (!agentSuccess) {
+                                if (DEBUG) {
+                                    Slog.i(TAG, "Agent failure; ending restore");
+                                }
                                 mBackupHandler.removeMessages(MSG_TIMEOUT);
                                 tearDownPipes();
                                 tearDownAgent(mTargetApp);
@@ -4124,6 +4132,11 @@ public class BackupManagerService extends IBackupManager.Stub {
 
             // If we got here we're either running smoothly or we've finished
             if (info == null) {
+                if (MORE_DEBUG) {
+                    Slog.i(TAG, "No [more] data for this package; tearing down");
+                }
+                tearDownPipes();
+                tearDownAgent(mTargetApp);
                 setRunning(false);
             }
             return (info != null);
@@ -7063,6 +7076,10 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
 
                     // Don't proceed until the engine has torn down the agent etc
                     eThread.waitForResult();
+
+                    if (MORE_DEBUG) {
+                        Slog.i(TAG, "engine thread finished; proceeding");
+                    }
 
                     // Now we're really done with this one too
                     IoUtils.closeQuietly(mEnginePipes[0]);
