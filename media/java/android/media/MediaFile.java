@@ -46,6 +46,16 @@ public class MediaFile {
     private static final int FIRST_AUDIO_FILE_TYPE = FILE_TYPE_MP3;
     private static final int LAST_AUDIO_FILE_TYPE = FILE_TYPE_FLAC;
 
+    // More audio file types
+    public static final int FILE_TYPE_DTS   = 100;
+    public static final int FILE_TYPE_3GPA  = 101;
+    public static final int FILE_TYPE_AC3   = 102;
+    public static final int FILE_TYPE_QCP   = 103;
+    public static final int FILE_TYPE_PCM   = 104;
+    public static final int FILE_TYPE_EC3   = 105;
+    private static final int FIRST_AUDIO_FILE_TYPE_EXT = FILE_TYPE_DTS;
+    private static final int LAST_AUDIO_FILE_TYPE_EXT = FILE_TYPE_EC3;
+
     // MIDI file types
     public static final int FILE_TYPE_MID     = 11;
     public static final int FILE_TYPE_SMF     = 12;
@@ -240,13 +250,18 @@ public class MediaFile {
         addFileType("ZIP", FILE_TYPE_ZIP, "application/zip");
         addFileType("MPG", FILE_TYPE_MP2PS, "video/mp2p");
         addFileType("MPEG", FILE_TYPE_MP2PS, "video/mp2p");
+        addFileType("QCP", FILE_TYPE_QCP, "audio/qcelp");
+        addFileType("AC3", FILE_TYPE_AC3, "audio/ac3");
+        addFileType("EC3", FILE_TYPE_EC3, "audio/eac3");
     }
 
     public static boolean isAudioFileType(int fileType) {
         return ((fileType >= FIRST_AUDIO_FILE_TYPE &&
                 fileType <= LAST_AUDIO_FILE_TYPE) ||
                 (fileType >= FIRST_MIDI_FILE_TYPE &&
-                fileType <= LAST_MIDI_FILE_TYPE));
+                fileType <= LAST_MIDI_FILE_TYPE) ||
+                (fileType >= FIRST_AUDIO_FILE_TYPE_EXT &&
+                fileType <= LAST_AUDIO_FILE_TYPE_EXT));
     }
 
     public static boolean isVideoFileType(int fileType) {

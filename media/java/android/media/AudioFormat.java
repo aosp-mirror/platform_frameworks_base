@@ -48,6 +48,18 @@ public class AudioFormat {
     public static final int ENCODING_AC3 = 5;
     /** Audio data format: E-AC-3 compressed */
     public static final int ENCODING_E_AC3 = 6;
+    /** @hide */
+    public static final int ENCODING_AMRNB = 100;   // accessed by native code
+    /** @hide */
+    public static final int ENCODING_AMRWB = 101;   // accessed by native code
+    /** @hide */
+    public static final int ENCODING_EVRC = 102;    // accessed by native code
+    /** @hide */
+    public static final int ENCODING_EVRCB = 103;   // accessed by native code
+    /** @hide */
+    public static final int ENCODING_EVRCWB = 104;  // accessed by native code
+    /** @hide */
+    public static final int ENCODING_EVRCNW = 105;  // accessed by native code
 
     /** Invalid audio channel configuration */
     /** @deprecated use CHANNEL_INVALID instead  */
@@ -207,6 +219,11 @@ public class AudioFormat {
     public static final int CHANNEL_IN_STEREO = (CHANNEL_IN_LEFT | CHANNEL_IN_RIGHT);
     /** @hide */
     public static final int CHANNEL_IN_FRONT_BACK = CHANNEL_IN_FRONT | CHANNEL_IN_BACK;
+    /** @hide */
+    public static final int CHANNEL_IN_5POINT1 = (CHANNEL_IN_LEFT |
+            CHANNEL_IN_RIGHT | CHANNEL_IN_FRONT | CHANNEL_IN_BACK |
+            CHANNEL_IN_LEFT_PROCESSED | CHANNEL_IN_RIGHT_PROCESSED);
+
     // CHANNEL_IN_ALL is not yet defined; if added then it should match AUDIO_CHANNEL_IN_ALL
 
     /** @hide */
@@ -220,6 +237,15 @@ public class AudioFormat {
             return 2;
         case ENCODING_PCM_FLOAT:
             return 4;
+        case ENCODING_AMRNB:
+            return 32;
+        case ENCODING_AMRWB:
+            return 61;
+        case ENCODING_EVRC:
+        case ENCODING_EVRCB:
+        case ENCODING_EVRCWB:
+        case ENCODING_EVRCNW:
+            return 23;
         case ENCODING_INVALID:
         default:
             throw new IllegalArgumentException("Bad audio format " + audioFormat);
@@ -235,6 +261,12 @@ public class AudioFormat {
         case ENCODING_PCM_FLOAT:
         case ENCODING_AC3:
         case ENCODING_E_AC3:
+        case ENCODING_AMRNB:
+        case ENCODING_AMRWB:
+        case ENCODING_EVRC:
+        case ENCODING_EVRCB:
+        case ENCODING_EVRCWB:
+        case ENCODING_EVRCNW:
             return true;
         default:
             return false;
@@ -252,6 +284,12 @@ public class AudioFormat {
             return true;
         case ENCODING_AC3:
         case ENCODING_E_AC3:
+        case ENCODING_AMRNB:
+        case ENCODING_AMRWB:
+        case ENCODING_EVRC:
+        case ENCODING_EVRCB:
+        case ENCODING_EVRCWB:
+        case ENCODING_EVRCNW:
             return false;
         case ENCODING_INVALID:
         default:
@@ -400,6 +438,12 @@ public class AudioFormat {
          *     {@link AudioFormat#ENCODING_PCM_FLOAT},
          *     {@link AudioFormat#ENCODING_AC3},
          *     {@link AudioFormat#ENCODING_E_AC3}.
+         *     {@link AudioFormat#ENCODING_AMRNB}.
+         *     {@link AudioFormat#ENCODING_AMRWB}.
+         *     {@link AudioFormat#ENCODING_EVRC}.
+         *     {@link AudioFormat#ENCODING_EVRCB}.
+         *     {@link AudioFormat#ENCODING_EVRCWB}.
+         *     {@link AudioFormat#ENCODING_EVRCNW}.
          * @return the same Builder instance.
          * @throws java.lang.IllegalArgumentException
          */
@@ -413,6 +457,12 @@ public class AudioFormat {
                 case ENCODING_PCM_FLOAT:
                 case ENCODING_AC3:
                 case ENCODING_E_AC3:
+                case ENCODING_AMRNB:
+                case ENCODING_AMRWB:
+                case ENCODING_EVRC:
+                case ENCODING_EVRCB:
+                case ENCODING_EVRCWB:
+                case ENCODING_EVRCNW:
                     mEncoding = encoding;
                     break;
                 case ENCODING_INVALID:
@@ -478,7 +528,13 @@ public class AudioFormat {
         ENCODING_PCM_16BIT,
         ENCODING_PCM_FLOAT,
         ENCODING_AC3,
-        ENCODING_E_AC3
+        ENCODING_E_AC3,
+        ENCODING_AMRNB,
+        ENCODING_AMRWB,
+        ENCODING_EVRC,
+        ENCODING_EVRCB,
+        ENCODING_EVRCWB,
+        ENCODING_EVRCNW
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Encoding {}

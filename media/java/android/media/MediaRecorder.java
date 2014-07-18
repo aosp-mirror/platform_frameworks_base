@@ -221,6 +221,11 @@ public class MediaRecorder
          */
         public static final int REMOTE_SUBMIX = 8;
 
+        /** @hide */
+        public static final int FM_RX = 10;
+
+        /** @hide */
+        public static final int FM_RX_A2DP = 11;
         /**
          * Audio source for FM, which is used to capture current FM tuner output by FMRadio app.
          * There are two use cases, one is for record FM stream for later listening, another is
@@ -315,6 +320,13 @@ public class MediaRecorder
 
         /** VP8/VORBIS data in a WEBM container */
         public static final int WEBM = 9;
+
+        /** @hide QCP file format */
+        public static final int QCP = 20;
+
+        /** @hide WAVE media file format*/
+        public static final int WAVE = 21;
+
     };
 
     /**
@@ -339,6 +351,12 @@ public class MediaRecorder
         public static final int AAC_ELD = 5;
         /** Ogg Vorbis audio codec */
         public static final int VORBIS = 6;
+        /** @hide EVRC audio codec */
+        public static final int EVRC = 10;
+        /** @hide QCELP audio codec */
+        public static final int QCELP = 11;
+        /** @hide Linear PCM audio codec */
+        public static final int LPCM = 12;
     }
 
     /**
@@ -377,7 +395,7 @@ public class MediaRecorder
      * @see android.media.MediaRecorder.AudioSource
      */
     public static final int getAudioSourceMax() {
-        return AudioSource.REMOTE_SUBMIX;
+        return AudioSource.FM_RX_A2DP;
     }
 
     /**

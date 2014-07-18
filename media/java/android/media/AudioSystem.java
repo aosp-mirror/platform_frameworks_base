@@ -91,6 +91,23 @@ public class AudioSystem
     public static final int NUM_MODES               = 4;
 
 
+    /* Call states for Voice calls */
+    /* @hide Call state for inactive call state. */
+    public static final int CALL_INACTIVE           = 0x1;
+    /* @hide Call state for active call state. */
+    public static final int CALL_ACTIVE             = 0x2;
+    /* @hide Call state for hold call state. */
+    public static final int CALL_HOLD               = 0x3;
+    /* @hide Call state for local hold call state. */
+    public static final int CALL_LOCAL_HOLD         = 0x4;
+    /* @hide Key for vsid used in setParameters */
+    public static final String VSID_KEY             = "vsid";
+
+    /* @hide Key for call_state used in setParameters */
+    public static final String CALL_STATE_KEY       = "call_state";
+
+    /* @hide Key for all_call_states used in getParameters */
+    public static final String ALL_CALL_STATES_KEY  = "all_call_states";
     /* Routing bits for the former setRouting/getRouting API */
     /** @deprecated */
     @Deprecated public static final int ROUTE_EARPIECE          = (1 << 0);
@@ -257,6 +274,8 @@ public class AudioSystem
     public static final int DEVICE_OUT_FM = 0x100000;
     public static final int DEVICE_OUT_AUX_LINE = 0x200000;
     public static final int DEVICE_OUT_SPEAKER_SAFE = 0x400000;
+    public static final int DEVICE_OUT_FM_TX = 0x1000000;
+    public static final int DEVICE_OUT_PROXY = 0x2000000;
 
     public static final int DEVICE_OUT_DEFAULT = DEVICE_BIT_DEFAULT;
 
@@ -283,6 +302,8 @@ public class AudioSystem
                                               DEVICE_OUT_FM |
                                               DEVICE_OUT_AUX_LINE |
                                               DEVICE_OUT_SPEAKER_SAFE |
+                                              DEVICE_OUT_FM_TX |
+                                              DEVICE_OUT_PROXY |
                                               DEVICE_OUT_DEFAULT);
     public static final int DEVICE_OUT_ALL_A2DP = (DEVICE_OUT_BLUETOOTH_A2DP |
                                                    DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES |
@@ -321,6 +342,9 @@ public class AudioSystem
     public static final int DEVICE_IN_SPDIF = DEVICE_BIT_IN | 0x10000;
     public static final int DEVICE_IN_BLUETOOTH_A2DP = DEVICE_BIT_IN | 0x20000;
     public static final int DEVICE_IN_LOOPBACK = DEVICE_BIT_IN | 0x40000;
+    public static final int DEVICE_IN_PROXY = DEVICE_BIT_IN | 0x100000;
+    public static final int DEVICE_IN_FM_RX = DEVICE_BIT_IN | 0x200000;
+    public static final int DEVICE_IN_FM_RX_A2DP = DEVICE_BIT_IN | 0x400000;
     public static final int DEVICE_IN_DEFAULT = DEVICE_BIT_IN | DEVICE_BIT_DEFAULT;
 
     public static final int DEVICE_IN_ALL = (DEVICE_IN_COMMUNICATION |
@@ -342,6 +366,9 @@ public class AudioSystem
                                              DEVICE_IN_SPDIF |
                                              DEVICE_IN_BLUETOOTH_A2DP |
                                              DEVICE_IN_LOOPBACK |
+                                             DEVICE_IN_PROXY |
+                                             DEVICE_IN_FM_RX |
+                                             DEVICE_IN_FM_RX_A2DP |
                                              DEVICE_IN_DEFAULT);
     public static final int DEVICE_IN_ALL_SCO = DEVICE_IN_BLUETOOTH_SCO_HEADSET;
     public static final int DEVICE_IN_ALL_USB = (DEVICE_IN_USB_ACCESSORY |
@@ -396,6 +423,8 @@ public class AudioSystem
     public static final String DEVICE_IN_SPDIF_NAME = "spdif";
     public static final String DEVICE_IN_BLUETOOTH_A2DP_NAME = "bt_a2dp";
     public static final String DEVICE_IN_LOOPBACK_NAME = "loopback";
+    public static final String DEVICE_OUT_FM_TX_NAME = "fm_tx";
+    public static final String DEVICE_OUT_PROXY_NAME = "proxy";
 
     public static String getOutputDeviceName(int device)
     {
@@ -446,6 +475,10 @@ public class AudioSystem
             return DEVICE_OUT_AUX_LINE_NAME;
         case DEVICE_OUT_SPEAKER_SAFE:
             return DEVICE_OUT_SPEAKER_SAFE_NAME;
+        case DEVICE_OUT_FM_TX:
+            return DEVICE_OUT_FM_TX_NAME;
+        case DEVICE_OUT_PROXY:
+            return DEVICE_OUT_PROXY_NAME;
         case DEVICE_OUT_DEFAULT:
         default:
             return Integer.toString(device);
