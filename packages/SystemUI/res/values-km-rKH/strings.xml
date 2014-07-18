@@ -166,12 +166,18 @@
     <string name="accessibility_quick_settings_close" msgid="2571790856136835943">"បិទ​បន្ទះ"</string>
     <string name="accessibility_quick_settings_more_time" msgid="5778794273488176726">"ពេល​ច្រើនជាង"</string>
     <string name="accessibility_quick_settings_less_time" msgid="101026945195230084">"ពេល​តិចជាង"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"បាន​បិទ​ទិន្នន័យ 2G-3G"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"បាន​បិទ​ទិន្នន័យ 4G"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"បាន​បិទ​ទិន្នន័យ​ចល័ត"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"បាន​បិទ​ទិន្នន័យ"</string>
-    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"អ្នក​បាន​ដល់​ដែន​កំណត់​ប្រើ​ទិន្នន័យ​បាន​បញ្ជាក់។\n\nបើ​អ្នក​បើក​ទិន្នន័យ​ឡើងវិញ អ្នក​អាច​ត្រូវ​បាន​ប្ដូរ​ដោយ​ប្រតិបត្តិ​ករ។"</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"បើក​​ទិន្នន័យ​ឡើងវិញ"</string>
+    <!-- no translation found for data_usage_disabled_dialog_3g_title (2626865386971800302) -->
+    <skip />
+    <!-- no translation found for data_usage_disabled_dialog_4g_title (4629078114195977196) -->
+    <skip />
+    <!-- no translation found for data_usage_disabled_dialog_mobile_title (5793456071535876132) -->
+    <skip />
+    <!-- no translation found for data_usage_disabled_dialog_title (8723412000355709802) -->
+    <skip />
+    <!-- no translation found for data_usage_disabled_dialog (6468718338038876604) -->
+    <skip />
+    <!-- no translation found for data_usage_disabled_dialog_enable (5538068036107372895) -->
+    <skip />
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"គ្មាន​ការ​តភ្ជាប់​អ៊ីនធឺណិត"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"បាន​ភ្ជាប់​វ៉ាយហ្វាយ"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"ស្វែងរក GPS"</string>
@@ -206,8 +212,8 @@
     <string name="quick_settings_settings_label" msgid="5326556592578065401">"ការ​កំណត់"</string>
     <string name="quick_settings_time_label" msgid="4635969182239736408">"ពេលវេលា"</string>
     <string name="quick_settings_user_label" msgid="5238995632130897840">"ខ្ញុំ"</string>
-    <string name="quick_settings_user_title" msgid="4467690427642392403">"អ្នក​ប្រើ"</string>
-    <string name="quick_settings_user_new_user" msgid="9030521362023479778">"អ្នក​ប្រើ​ថ្មី"</string>
+    <string name="quick_settings_user_title" msgid="4467690427642392403">"អ្នកប្រើ"</string>
+    <string name="quick_settings_user_new_user" msgid="9030521362023479778">"អ្នកប្រើ​ថ្មី"</string>
     <string name="quick_settings_wifi_label" msgid="9135344704899546041">"វ៉ាយហ្វាយ"</string>
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"មិន​បាន​តភ្ជាប់"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"គ្មាន​បណ្ដាញ"</string>
@@ -249,9 +255,16 @@
     <string name="description_target_search" msgid="3091587249776033139">"ស្វែងរក"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"រុញ​ឡើង​លើ​ដើម្បី <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ។"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"រុញ​ទៅ​ឆ្វេង​ដើម្បី <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ។"</string>
-    <string name="zen_no_interruptions_with_warning" msgid="7669163720139116154">"មិនមានការ​ផ្អាក រួម​ទាំងការជូនដំណឹង និងកម្មវិធី​កំណត់ម៉ោង"</string>
+    <!-- no translation found for zen_no_interruptions_with_warning (2522931836819051293) -->
+    <skip />
     <string name="zen_no_interruptions" msgid="7970973750143632592">"គ្មាន​ការ​ផ្អាក"</string>
     <string name="zen_important_interruptions" msgid="3477041776609757628">"តែ​ការ​ផ្អាក​អាទិភាព​ប៉ុណ្ណោះ"</string>
+    <!-- no translation found for zen_alarm_information_time (5235772206174372272) -->
+    <skip />
+    <!-- no translation found for zen_alarm_information_day_time (8422733576255047893) -->
+    <skip />
+    <!-- no translation found for zen_alarm_warning (6873910860111498041) -->
+    <skip />
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"ការ​ជូន​ដំណឹង​​មិន​សូវ​បន្ទាន់​ខាង​ក្រោម"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"ប៉ះ​ម្ដង​ទៀត ដើម្បី​បើក"</string>
@@ -278,5 +291,7 @@
     <string name="battery_saver_notification_action_text" msgid="7546297220816993504">"បើក​ការ​កំណត់​កម្មវិធី​សន្សំ​ថ្ម"</string>
     <string name="battery_level_template" msgid="1609636980292580020">"<xliff:g id="LEVEL">%d</xliff:g>%%"</string>
     <!-- no translation found for notification_hidden_text (1135169301897151909) -->
+    <skip />
+    <!-- no translation found for guest_exit_guest (1619100760451149682) -->
     <skip />
 </resources>

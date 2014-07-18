@@ -166,12 +166,18 @@
     <string name="accessibility_quick_settings_close" msgid="2571790856136835943">"Loka glugga"</string>
     <string name="accessibility_quick_settings_more_time" msgid="5778794273488176726">"Meiri tími"</string>
     <string name="accessibility_quick_settings_less_time" msgid="101026945195230084">"Minni tími"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"2G- og 3G-gögn óvirk"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"4G-gögn óvirk"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Slökkt á farsímagögnum"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Slökkt á gagnatengingu"</string>
-    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"Tilgreindu hámarki gagnanotkunar hefur verið náð.\n\nEf þú gerir gögn virk að nýju kann símafyrirtækið að rukka þig."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Koma gagnatengingu á aftur"</string>
+    <!-- no translation found for data_usage_disabled_dialog_3g_title (2626865386971800302) -->
+    <skip />
+    <!-- no translation found for data_usage_disabled_dialog_4g_title (4629078114195977196) -->
+    <skip />
+    <!-- no translation found for data_usage_disabled_dialog_mobile_title (5793456071535876132) -->
+    <skip />
+    <!-- no translation found for data_usage_disabled_dialog_title (8723412000355709802) -->
+    <skip />
+    <!-- no translation found for data_usage_disabled_dialog (6468718338038876604) -->
+    <skip />
+    <!-- no translation found for data_usage_disabled_dialog_enable (5538068036107372895) -->
+    <skip />
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Engin nettenging"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi tengt"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Leitar að GPS"</string>
@@ -191,6 +197,7 @@
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> tæki)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Slökkt á Bluetooth"</string>
+    <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"Engin pöruð tæki til staðar"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Birtustig"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Sjálfvirkur snúningur"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"Snúningur læstur"</string>
@@ -205,26 +212,40 @@
     <string name="quick_settings_settings_label" msgid="5326556592578065401">"Stillingar"</string>
     <string name="quick_settings_time_label" msgid="4635969182239736408">"Tími"</string>
     <string name="quick_settings_user_label" msgid="5238995632130897840">"Ég"</string>
+    <string name="quick_settings_user_title" msgid="4467690427642392403">"Notandi"</string>
+    <string name="quick_settings_user_new_user" msgid="9030521362023479778">"Nýr notandi"</string>
     <string name="quick_settings_wifi_label" msgid="9135344704899546041">"Wi-Fi"</string>
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Engin tenging"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Ekkert net"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Slökkt á Wi-Fi"</string>
-    <string name="quick_settings_remote_display_no_connection_label" msgid="7482103121002965053">"Útsendingarskjár"</string>
+    <string name="quick_settings_wifi_detail_empty_text" msgid="2831702993995222755">"Engin vistuð net til staðar"</string>
+    <string name="quick_settings_cast_title" msgid="1893629685050355115">"Útsendingarskjár"</string>
+    <string name="quick_settings_casting" msgid="6601710681033353316">"Sendir út"</string>
+    <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Ónefnt tæki"</string>
+    <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Tilbúið í útsendingu"</string>
+    <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"Engin tæki til staðar"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Birtustig"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"SJÁLFVIRKT"</string>
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Umsnúa litum"</string>
     <string name="quick_settings_color_space_label" msgid="853443689745584770">"Litaleiðrétting"</string>
     <string name="quick_settings_more_settings" msgid="326112621462813682">"Fleiri stillingar"</string>
-    <!-- no translation found for quick_settings_done (3402999958839153376) -->
-    <skip />
-    <!-- no translation found for quick_settings_connected (1722253542984847487) -->
-    <skip />
+    <string name="quick_settings_done" msgid="3402999958839153376">"Lokið"</string>
+    <string name="quick_settings_connected" msgid="1722253542984847487">"Tengt"</string>
+    <string name="quick_settings_connecting" msgid="47623027419264404">"Tengist..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Tjóðrun"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Heitur reitur"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Tilkynningar"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Vasaljós"</string>
+    <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Farsímagögn"</string>
+    <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Gagnanotkun"</string>
+    <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Gögn eftir"</string>
+    <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"Yfir mörkum"</string>
+    <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> notuð"</string>
+    <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"<xliff:g id="DATA_LIMIT">%s</xliff:g> hámark"</string>
+    <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> viðvörun"</string>
     <string name="recents_empty_message" msgid="7883614615463619450">"Engin nýleg forrit"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Forritsupplýsingar"</string>
+    <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"forritslæsing"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"leita"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Fullhlaðin"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"Í hleðslu"</string>
@@ -234,14 +255,26 @@
     <string name="description_target_search" msgid="3091587249776033139">"Leita"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Strjúktu upp til að <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Strjúktu til vinstri til að <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_mode_title" msgid="8793432092004749188">"Ónáðið ekki"</string>
+    <!-- no translation found for zen_no_interruptions_with_warning (2522931836819051293) -->
+    <skip />
+    <string name="zen_no_interruptions" msgid="7970973750143632592">"Engin truflun"</string>
+    <string name="zen_important_interruptions" msgid="3477041776609757628">"Aðeins forgangstruflanir"</string>
+    <!-- no translation found for zen_alarm_information_time (5235772206174372272) -->
+    <skip />
+    <!-- no translation found for zen_alarm_information_day_time (8422733576255047893) -->
+    <skip />
+    <!-- no translation found for zen_alarm_warning (6873910860111498041) -->
+    <skip />
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Minna áríðandi tilkynningar fyrir neðan"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Ýttu aftur til að opna"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Strjúktu upp til að opna"</string>
     <string name="phone_hint" msgid="3101468054914424646">"Strjúktu til hægri fyrir síma"</string>
     <string name="camera_hint" msgid="5241441720959174226">"Strjúktu til vinstri fyrir myndavél"</string>
-    <string name="zen_mode_forever" msgid="7420011936770086993">"Þar til þú slekkur á þessu"</string>
+    <string name="zen_mode_forever" msgid="4316804956488785559">"Án tímatakmarkana"</string>
+    <string name="interruption_level_none" msgid="3831278883136066646">"Engar"</string>
+    <string name="interruption_level_priority" msgid="6517366750688942030">"Forgangur"</string>
+    <string name="interruption_level_all" msgid="1330581184930945764">"Allar"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Í hleðslu (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> fram að fullri hleðslu)"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"Gestur"</string>
     <string name="guest_new_guest" msgid="4259024453643879653">"+ Gestur"</string>
@@ -256,4 +289,8 @@
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Kveikt er á rafhlöðusparnaði"</string>
     <string name="battery_saver_notification_text" msgid="7796554871101546872">"Þetta dregur úr afköstum tækisins."</string>
     <string name="battery_saver_notification_action_text" msgid="7546297220816993504">"Opna stillingar rafhlöðusparnaðar"</string>
+    <string name="battery_level_template" msgid="1609636980292580020">"<xliff:g id="LEVEL">%d</xliff:g>%%"</string>
+    <string name="notification_hidden_text" msgid="1135169301897151909">"Innihald falið"</string>
+    <!-- no translation found for guest_exit_guest (1619100760451149682) -->
+    <skip />
 </resources>
