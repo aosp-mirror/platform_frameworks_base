@@ -378,6 +378,8 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         }
         // Re-enable clipping with the stack (we will reuse this view)
         tv.setClipViewInStack(true);
+        // Re-enable touch events from this task view
+        tv.setTouchEnabled(true);
         // Remove the task view from the stack
         mSv.onTaskViewDismissed(tv);
     }
