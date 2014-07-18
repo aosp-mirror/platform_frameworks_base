@@ -429,11 +429,14 @@ class LegacyTimePickerDelegate extends TimePicker.AbstractTimePickerDelegate {
 
     @Override
     public void setShowDoneButton(boolean showDoneButton) {
-        mShowDoneButton = showDoneButton;
-        updateDoneButton();
+        if (mDoneButton != null) {
+            mShowDoneButton = showDoneButton;
+            updateDoneButton();
+        }
     }
 
-    private boolean isShowDoneButton() {
+    @Override
+    public boolean isShowDoneButton() {
         return mShowDoneButton;
     }
 
