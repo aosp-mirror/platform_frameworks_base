@@ -16,6 +16,7 @@
 
 package android.media.tv;
 
+import android.annotation.SystemApi;
 import android.media.AudioManager;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -27,6 +28,7 @@ import android.util.Log;
  *
  * @hide
  */
+@SystemApi
 public final class TvInputHardwareInfo implements Parcelable {
     static final String TAG = "TvInputHardwareInfo";
 
