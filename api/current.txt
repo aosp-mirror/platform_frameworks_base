@@ -31288,6 +31288,15 @@ package android.text.style {
     method public android.text.style.TtsSpan.CardinalBuilder setNumber(java.lang.String);
   }
 
+  public static class TtsSpan.DateBuilder extends android.text.style.TtsSpan.SemioticClassBuilder {
+    ctor public TtsSpan.DateBuilder();
+    ctor public TtsSpan.DateBuilder(java.lang.Integer, java.lang.Integer, java.lang.Integer, java.lang.Integer);
+    method public android.text.style.TtsSpan.DateBuilder setDay(int);
+    method public android.text.style.TtsSpan.DateBuilder setMonth(int);
+    method public android.text.style.TtsSpan.DateBuilder setWeekday(int);
+    method public android.text.style.TtsSpan.DateBuilder setYear(int);
+  }
+
   public static class TtsSpan.DecimalBuilder extends android.text.style.TtsSpan.SemioticClassBuilder {
     ctor public TtsSpan.DecimalBuilder();
     ctor public TtsSpan.DecimalBuilder(double, int, int);
@@ -31296,6 +31305,12 @@ package android.text.style {
     method public android.text.style.TtsSpan.DecimalBuilder setFractionalPart(java.lang.String);
     method public android.text.style.TtsSpan.DecimalBuilder setIntegerPart(long);
     method public android.text.style.TtsSpan.DecimalBuilder setIntegerPart(java.lang.String);
+  }
+
+  public static class TtsSpan.DigitsBuilder extends android.text.style.TtsSpan.SemioticClassBuilder {
+    ctor public TtsSpan.DigitsBuilder();
+    ctor public TtsSpan.DigitsBuilder(java.lang.String);
+    method public android.text.style.TtsSpan.DigitsBuilder setDigits(java.lang.String);
   }
 
   public static class TtsSpan.FractionBuilder extends android.text.style.TtsSpan.SemioticClassBuilder {
@@ -31307,6 +31322,20 @@ package android.text.style {
     method public android.text.style.TtsSpan.FractionBuilder setIntegerPart(java.lang.String);
     method public android.text.style.TtsSpan.FractionBuilder setNumerator(long);
     method public android.text.style.TtsSpan.FractionBuilder setNumerator(java.lang.String);
+  }
+
+  public static class TtsSpan.MeasureBuilder extends android.text.style.TtsSpan.SemioticClassBuilder {
+    ctor public TtsSpan.MeasureBuilder();
+    method public android.text.style.TtsSpan.MeasureBuilder setDenominator(long);
+    method public android.text.style.TtsSpan.MeasureBuilder setDenominator(java.lang.String);
+    method public android.text.style.TtsSpan.MeasureBuilder setFractionalPart(java.lang.String);
+    method public android.text.style.TtsSpan.MeasureBuilder setIntegerPart(long);
+    method public android.text.style.TtsSpan.MeasureBuilder setIntegerPart(java.lang.String);
+    method public android.text.style.TtsSpan.MeasureBuilder setNumber(long);
+    method public android.text.style.TtsSpan.MeasureBuilder setNumber(java.lang.String);
+    method public android.text.style.TtsSpan.MeasureBuilder setNumerator(long);
+    method public android.text.style.TtsSpan.MeasureBuilder setNumerator(java.lang.String);
+    method public android.text.style.TtsSpan.MeasureBuilder setUnit(java.lang.String);
   }
 
   public static class TtsSpan.OrdinalBuilder extends android.text.style.TtsSpan.SemioticClassBuilder {
@@ -31329,6 +31358,19 @@ package android.text.style {
     ctor public TtsSpan.TextBuilder();
     ctor public TtsSpan.TextBuilder(java.lang.String);
     method public android.text.style.TtsSpan.TextBuilder setText(java.lang.String);
+  }
+
+  public static class TtsSpan.TimeBuilder extends android.text.style.TtsSpan.SemioticClassBuilder {
+    ctor public TtsSpan.TimeBuilder();
+    ctor public TtsSpan.TimeBuilder(int, int);
+    method public android.text.style.TtsSpan.TimeBuilder setHours(int);
+    method public android.text.style.TtsSpan.TimeBuilder setMinutes(int);
+  }
+
+  public static class TtsSpan.VerbatimBuilder extends android.text.style.TtsSpan.SemioticClassBuilder {
+    ctor public TtsSpan.VerbatimBuilder();
+    ctor public TtsSpan.VerbatimBuilder(java.lang.String);
+    method public android.text.style.TtsSpan.VerbatimBuilder setVerbatim(java.lang.String);
   }
 
   public class TypefaceSpan extends android.text.style.MetricAffectingSpan implements android.text.ParcelableSpan {
