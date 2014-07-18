@@ -16,6 +16,7 @@
 
 package android.telecomm;
 
+import android.app.PendingIntent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.telecomm.CallVideoProvider;
@@ -48,6 +49,7 @@ public abstract class Connection {
         public void onCallVideoProviderChanged(Connection c, CallVideoProvider callVideoProvider) {}
         public void onAudioModeIsVoipChanged(Connection c, boolean isVoip) {}
         public void onStatusHintsChanged(Connection c, StatusHints statusHints) {}
+        public void onStartActivityFromInCall(Connection c, PendingIntent intent) {}
     }
 
     public final class State {
@@ -460,6 +462,20 @@ public abstract class Connection {
         mStatusHints = statusHints;
         for (Listener l : mListeners) {
             l.onStatusHintsChanged(this, statusHints);
+        }
+    }
+
+    /**
+     * Launches an activity for this connection on top of the in-call UI.
+     *
+     * @param intent The intent to use to start the activity.
+     */
+    public final void startActivityFromInCall(PendingIntent intent) {
+        if (!intent.isActivity()) {
+            throw new IllegalArgumentException("Activity intent required.");
+        }
+        for (Listener l : mListeners) {
+            l.onStartActivityFromInCall(this, intent);
         }
     }
 

@@ -16,6 +16,7 @@
 
 package android.telecomm;
 
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.content.ComponentName;
@@ -397,6 +398,12 @@ public abstract class ConnectionService extends Service {
         public void onStatusHintsChanged(Connection c, StatusHints statusHints) {
             String id = mIdByConnection.get(c);
             mAdapter.setStatusHints(id, statusHints);
+        }
+
+        @Override
+        public void onStartActivityFromInCall(Connection c, PendingIntent intent) {
+            String id = mIdByConnection.get(c);
+            mAdapter.startActivityFromInCall(id, intent);
         }
     };
 
