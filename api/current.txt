@@ -13966,6 +13966,29 @@ package android.media {
     method public android.media.AudioAttributes.Builder setUsage(int);
   }
 
+  public class AudioDevice {
+    field public static final int DEVICE_TYPE_AUX_LINE = 19; // 0x13
+    field public static final int DEVICE_TYPE_BLUETOOTH_A2DP = 8; // 0x8
+    field public static final int DEVICE_TYPE_BLUETOOTH_SCO = 7; // 0x7
+    field public static final int DEVICE_TYPE_BUILTIN_EARPIECE = 1; // 0x1
+    field public static final int DEVICE_TYPE_BUILTIN_MIC = 15; // 0xf
+    field public static final int DEVICE_TYPE_BUILTIN_SPEAKER = 2; // 0x2
+    field public static final int DEVICE_TYPE_DOCK = 13; // 0xd
+    field public static final int DEVICE_TYPE_FM = 14; // 0xe
+    field public static final int DEVICE_TYPE_FM_TUNER = 16; // 0x10
+    field public static final int DEVICE_TYPE_HDMI = 9; // 0x9
+    field public static final int DEVICE_TYPE_HDMI_ARC = 10; // 0xa
+    field public static final int DEVICE_TYPE_LINE_ANALOG = 5; // 0x5
+    field public static final int DEVICE_TYPE_LINE_DIGITAL = 6; // 0x6
+    field public static final int DEVICE_TYPE_TELEPHONY = 18; // 0x12
+    field public static final int DEVICE_TYPE_TV_TUNER = 17; // 0x11
+    field public static final int DEVICE_TYPE_UNKNOWN = 0; // 0x0
+    field public static final int DEVICE_TYPE_USB_ACCESSORY = 12; // 0xc
+    field public static final int DEVICE_TYPE_USB_DEVICE = 11; // 0xb
+    field public static final int DEVICE_TYPE_WIRED_HEADPHONES = 4; // 0x4
+    field public static final int DEVICE_TYPE_WIRED_HEADSET = 3; // 0x3
+  }
+
   public class AudioFormat {
     field public static final deprecated int CHANNEL_CONFIGURATION_DEFAULT = 1; // 0x1
     field public static final deprecated int CHANNEL_CONFIGURATION_INVALID = 0; // 0x0
@@ -15898,8 +15921,11 @@ package android.media.audiofx {
 
   public class Virtualizer extends android.media.audiofx.AudioEffect {
     ctor public Virtualizer(int, int) throws java.lang.IllegalArgumentException, java.lang.IllegalStateException, java.lang.RuntimeException, java.lang.UnsupportedOperationException;
+    method public boolean canVirtualize(int, int) throws java.lang.IllegalArgumentException, java.lang.IllegalStateException, java.lang.UnsupportedOperationException;
+    method public boolean forceVirtualizationMode(int) throws java.lang.IllegalArgumentException, java.lang.IllegalStateException, java.lang.UnsupportedOperationException;
     method public android.media.audiofx.Virtualizer.Settings getProperties() throws java.lang.IllegalArgumentException, java.lang.IllegalStateException, java.lang.UnsupportedOperationException;
     method public short getRoundedStrength() throws java.lang.IllegalArgumentException, java.lang.IllegalStateException, java.lang.UnsupportedOperationException;
+    method public boolean getSpeakerAngles(int, int, int[]) throws java.lang.IllegalArgumentException, java.lang.IllegalStateException, java.lang.UnsupportedOperationException;
     method public boolean getStrengthSupported();
     method public void setParameterListener(android.media.audiofx.Virtualizer.OnParameterChangeListener);
     method public void setProperties(android.media.audiofx.Virtualizer.Settings) throws java.lang.IllegalArgumentException, java.lang.IllegalStateException, java.lang.UnsupportedOperationException;
