@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
@@ -80,8 +81,8 @@ public class ZenModePanel extends LinearLayout {
     private final H mHandler = new H();
     private final Favorites mFavorites;
     private final Interpolator mFastOutSlowInInterpolator;
-    private final int mTextColor;
-    private final int mAccentColor;
+    private final int mHardWarningColor;
+    private final int mSoftWarningColor;
 
     private char mLogTag = '?';
     private String mTag;
@@ -94,6 +95,7 @@ public class ZenModePanel extends LinearLayout {
     private LinearLayout mZenConditions;
     private TextView mAlarmWarning;
 
+    private int mBottomPadding;
     private Callback mCallback;
     private ZenModeController mController;
     private boolean mRequestingConditions;
@@ -112,8 +114,9 @@ public class ZenModePanel extends LinearLayout {
         mInflater = LayoutInflater.from(mContext.getApplicationContext());
         mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(mContext,
                 android.R.interpolator.fast_out_slow_in);
-        mTextColor = mContext.getResources().getColor(R.color.qs_text);
-        mAccentColor = mContext.getResources().getColor(R.color.system_accent_color);
+        final Resources res = mContext.getResources();
+        mHardWarningColor = res.getColor(R.color.qs_text);
+        mSoftWarningColor = res.getColor(R.color.zen_alarm_soft_warning_text);
         updateTag();
         if (DEBUG) Log.d(mTag, "new ZenModePanel");
     }
@@ -125,6 +128,8 @@ public class ZenModePanel extends LinearLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+
+        mBottomPadding = getPaddingBottom();
 
         mZenButtons = (SegmentedButtons) findViewById(R.id.zen_buttons);
         mZenButtons.addButton(R.string.interruption_level_none, Global.ZEN_MODE_NO_INTERRUPTIONS);
@@ -285,6 +290,7 @@ public class ZenModePanel extends LinearLayout {
         final boolean zenNone = zen == Global.ZEN_MODE_NO_INTERRUPTIONS;
         final boolean foreverSelected = mExitConditionId == null;
         final boolean hasNextAlarm = mNextAlarm != 0;
+        final boolean showAlarmWarning = zenNone && mExpanded && hasNextAlarm;
 
         mZenSubhead.setVisibility(!zenOff && (mExpanded || !foreverSelected) ? VISIBLE : GONE);
         mZenSubheadExpanded.setVisibility(mExpanded ? VISIBLE : GONE);
@@ -292,8 +298,8 @@ public class ZenModePanel extends LinearLayout {
         mMoreSettings.setVisibility(zenImportant && mExpanded ? VISIBLE : GONE);
         mZenConditions.setVisibility(!zenOff && mExpanded ? VISIBLE : GONE);
         mAlarmWarning.setVisibility(zenNone && mExpanded && hasNextAlarm ? VISIBLE : GONE);
-
-        if (zenNone && mExpanded && hasNextAlarm) {
+        setPadding(0, 0, 0, showAlarmWarning ? 0 : mBottomPadding);
+        if (showAlarmWarning) {
             final long exitTime = ZenModeConfig.tryParseCountdownConditionId(mExitConditionId);
             final long now = System.currentTimeMillis();
             final boolean alarmToday = time(mNextAlarm).yearDay == time(now).yearDay;
@@ -304,12 +310,14 @@ public class ZenModePanel extends LinearLayout {
             final boolean isWarning = exitTime > 0 && mNextAlarm > now && mNextAlarm < exitTime;
             if (isWarning) {
                 mAlarmWarning.setText(mContext.getString(R.string.zen_alarm_warning, alarm));
-                mAlarmWarning.setTextColor(mAccentColor);
+                mAlarmWarning.setTextColor(mHardWarningColor);
+                mAlarmWarning.setBackgroundResource(R.drawable.zen_alarm_hard_background);
             } else {
                 mAlarmWarning.setText(mContext.getString(alarmToday
                         ? R.string.zen_alarm_information_time
                         : R.string.zen_alarm_information_day_time, alarm));
-                mAlarmWarning.setTextColor(mTextColor);
+                mAlarmWarning.setTextColor(mSoftWarningColor);
+                mAlarmWarning.setBackgroundResource(R.drawable.zen_alarm_soft_background);
             }
         }
 

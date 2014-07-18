@@ -267,8 +267,8 @@
 
     <!-- Window animations used for volume panel. -->
     <style name="VolumePanelAnimation">
-        <item name="android:windowEnterAnimation">@*android:anim/dock_top_enter</item>
-        <item name="android:windowExitAnimation">@*android:anim/dock_top_exit</item>
+        <item name="android:windowEnterAnimation">@*android:anim/popup_enter_material</item>
+        <item name="android:windowExitAnimation">@*android:anim/popup_exit_material</item>
     </style>
 
     <style name="TextAppearance.StatusBar.Material.EventContent.Parenthetical"

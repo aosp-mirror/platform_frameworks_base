@@ -18,6 +18,7 @@
     android:id="@+id/visible_panel"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:paddingTop="8dp"
     android:orientation="vertical" >
 
     <FrameLayout
