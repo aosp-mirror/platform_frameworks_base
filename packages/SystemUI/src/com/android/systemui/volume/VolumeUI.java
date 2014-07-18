@@ -132,6 +132,9 @@ public class VolumeUI extends SystemUI {
                     final Intent intent = ZenModePanel.ZEN_SETTINGS;
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     mContext.startActivityAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
+
+                    // dismiss shade if showing
+                    mContext.sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
                 }
             });
             mDialogPanel.postDismiss(mDismissDelay);
