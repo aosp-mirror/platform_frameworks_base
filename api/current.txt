@@ -28981,6 +28981,7 @@ package android.telephony {
     method public boolean deleteStoredMessage(android.net.Uri);
     method public java.util.ArrayList<java.lang.String> divideMessage(java.lang.String);
     method public void downloadMultimediaMessage(java.lang.String, android.app.PendingIntent);
+    method public void downloadMultimediaMessage(long, java.lang.String, android.app.PendingIntent);
     method public boolean getAutoPersisting();
     method public static android.telephony.SmsManager getDefault();
     method public android.net.Uri importMultimediaMessage(byte[], java.lang.String, long, boolean, boolean);
@@ -28988,10 +28989,14 @@ package android.telephony {
     method public void injectSmsPdu(byte[], java.lang.String, android.app.PendingIntent);
     method public void sendDataMessage(java.lang.String, java.lang.String, short, byte[], android.app.PendingIntent, android.app.PendingIntent);
     method public void sendMultimediaMessage(byte[], java.lang.String, android.app.PendingIntent);
+    method public void sendMultimediaMessage(long, byte[], java.lang.String, android.app.PendingIntent);
     method public void sendMultipartTextMessage(java.lang.String, java.lang.String, java.util.ArrayList<java.lang.String>, java.util.ArrayList<android.app.PendingIntent>, java.util.ArrayList<android.app.PendingIntent>);
     method public void sendStoredMultimediaMessage(android.net.Uri, android.app.PendingIntent);
+    method public void sendStoredMultimediaMessage(long, android.net.Uri, android.app.PendingIntent);
     method public void sendStoredMultipartTextMessage(android.net.Uri, java.lang.String, java.util.ArrayList<android.app.PendingIntent>, java.util.ArrayList<android.app.PendingIntent>);
+    method public void sendStoredMultipartTextMessage(long, android.net.Uri, java.lang.String, java.util.ArrayList<android.app.PendingIntent>, java.util.ArrayList<android.app.PendingIntent>);
     method public void sendStoredTextMessage(android.net.Uri, java.lang.String, android.app.PendingIntent, android.app.PendingIntent);
+    method public void sendStoredTextMessage(long, android.net.Uri, java.lang.String, android.app.PendingIntent, android.app.PendingIntent);
     method public void sendTextMessage(java.lang.String, java.lang.String, java.lang.String, android.app.PendingIntent, android.app.PendingIntent);
     method public void setAutoPersisting(boolean);
     method public void updateMmsDownloadStatus(int, byte[]);
