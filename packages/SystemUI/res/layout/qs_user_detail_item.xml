@@ -29,8 +29,8 @@
 
     <com.android.systemui.statusbar.phone.UserAvatarView
             android:id="@+id/user_picture"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="@dimen/max_avatar_size"
+            android:layout_height="@dimen/max_avatar_size"
             android:layout_marginBottom="12dp"
             systemui:frameWidth="2dp"
             systemui:activeFrameColor="@color/current_user_border_color"/>

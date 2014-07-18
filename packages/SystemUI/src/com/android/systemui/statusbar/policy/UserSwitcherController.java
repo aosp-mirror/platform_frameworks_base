@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.policy;
 
+import com.android.systemui.BitmapHelper;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.qs.tiles.UserDetailView;
@@ -104,6 +105,8 @@ public class UserSwitcherController {
                 ArrayList<UserRecord> records = new ArrayList<>(infos.size());
                 int currentId = ActivityManager.getCurrentUser();
                 UserRecord guestRecord = null;
+                int avatarSize = mContext.getResources()
+                        .getDimensionPixelSize(R.dimen.max_avatar_size);
 
                 for (UserInfo info : infos) {
                     boolean isCurrent = currentId == info.id;
@@ -114,6 +117,10 @@ public class UserSwitcherController {
                         Bitmap picture = bitmaps.get(info.id);
                         if (picture == null) {
                             picture = mUserManager.getUserIcon(info.id);
+                        }
+                        if (picture != null) {
+                            picture = BitmapHelper.createCircularClip(
+                                    picture, avatarSize, avatarSize);
                         }
                         records.add(new UserRecord(info, picture, false /* isGuest */, isCurrent));
                     }
