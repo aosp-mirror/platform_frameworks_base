@@ -29,6 +29,7 @@ oneway interface ITvInputSession {
     void release();
 
     void setSurface(in Surface surface);
+    void dispatchSurfaceChanged(int format, int width, int height);
     // TODO: Remove this once it becomes irrelevant for applications to handle audio focus. The plan
     // is to introduce some new concepts that will solve a number of problems in audio policy today.
     void setVolume(float volume);
