@@ -29,8 +29,11 @@ import android.hardware.display.DisplayViewport;
 import android.hardware.display.DisplayManagerInternal.DisplayTransactionListener;
 import android.hardware.display.IDisplayManager;
 import android.hardware.display.IDisplayManagerCallback;
+import android.hardware.display.IVirtualDisplayCallbacks;
 import android.hardware.display.WifiDisplayStatus;
 import android.hardware.input.InputManagerInternal;
+import android.media.projection.IMediaProjection;
+import android.media.projection.IMediaProjectionManager;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -39,6 +42,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.text.TextUtils;
@@ -127,6 +131,7 @@ public final class DisplayManagerService extends SystemService {
     private final DisplayAdapterListener mDisplayAdapterListener;
     private WindowManagerInternal mWindowManagerInternal;
     private InputManagerInternal mInputManagerInternal;
+    private IMediaProjectionManager mProjectionService;
 
     // The synchronization root for the display manager.
     // This lock guards most of the display manager's state.
@@ -486,7 +491,8 @@ public final class DisplayManagerService extends SystemService {
         }
     }
 
-    private int createVirtualDisplayInternal(IBinder appToken, int callingUid, String packageName,
+    private int createVirtualDisplayInternal(IVirtualDisplayCallbacks callbacks,
+            IMediaProjection projection, int callingUid, String packageName,
             String name, int width, int height, int densityDpi, Surface surface, int flags) {
         synchronized (mSyncRoot) {
             if (mVirtualDisplayAdapter == null) {
@@ -496,8 +502,8 @@ public final class DisplayManagerService extends SystemService {
             }
 
             DisplayDevice device = mVirtualDisplayAdapter.createVirtualDisplayLocked(
-                    appToken, callingUid, packageName, name, width, height, densityDpi,
-                    surface, flags);
+                    callbacks, projection, callingUid, packageName,
+                    name, width, height, densityDpi, surface, flags);
             if (device == null) {
                 return -1;
             }
@@ -511,7 +517,7 @@ public final class DisplayManagerService extends SystemService {
             // Something weird happened and the logical display was not created.
             Slog.w(TAG, "Rejecting request to create virtual display "
                     + "because the logical display was not created.");
-            mVirtualDisplayAdapter.releaseVirtualDisplayLocked(appToken);
+            mVirtualDisplayAdapter.releaseVirtualDisplayLocked(callbacks.asBinder());
             handleDisplayDeviceRemovedLocked(device);
         }
         return -1;
@@ -878,6 +884,14 @@ public final class DisplayManagerService extends SystemService {
         mTempCallbacks.clear();
     }
 
+    private IMediaProjectionManager getProjectionService() {
+        if (mProjectionService == null) {
+            IBinder b = ServiceManager.getService(Context.MEDIA_PROJECTION_SERVICE);
+            mProjectionService = IMediaProjectionManager.Stub.asInterface(b);
+        }
+        return mProjectionService;
+    }
+
     private void dumpInternal(PrintWriter pw) {
         pw.println("DISPLAY MANAGER (dumpsys display)");
 
@@ -1215,13 +1229,14 @@ public final class DisplayManagerService extends SystemService {
         }
 
         @Override // Binder call
-        public int createVirtualDisplay(IBinder appToken, String packageName,
-                String name, int width, int height, int densityDpi, Surface surface, int flags) {
+        public int createVirtualDisplay(IVirtualDisplayCallbacks callbacks,
+                IMediaProjection projection, String packageName, String name,
+                int width, int height, int densityDpi, Surface surface, int flags) {
             final int callingUid = Binder.getCallingUid();
             if (!validatePackageName(callingUid, packageName)) {
                 throw new SecurityException("packageName must match the calling uid");
             }
-            if (appToken == null) {
+            if (callbacks == null) {
                 throw new IllegalArgumentException("appToken must not be null");
             }
             if (TextUtils.isEmpty(name)) {
@@ -1231,51 +1246,78 @@ public final class DisplayManagerService extends SystemService {
                 throw new IllegalArgumentException("width, height, and densityDpi must be "
                         + "greater than 0");
             }
+
+            if (projection != null) {
+                try {
+                    if (!getProjectionService().isValidMediaProjection(projection)) {
+                        throw new SecurityException("Invalid media projection");
+                    }
+                } catch (RemoteException e) {
+                    throw new SecurityException("unable to validate media projection");
+                }
+                flags &= DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE;
+                try {
+                    flags |= projection.getVirtualDisplayFlags();
+                } catch (RemoteException e) {
+                    throw new RuntimeException("unable to retrieve media projection flags");
+                }
+            }
+
+            if ((flags & DisplayManager.VIRTUAL_DISPLAY_FLAG_SCREEN_SHARE) != 0) {
+                if ((flags & DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC) != 0 ||
+                        (flags & DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION) != 0) {
+                    throw new IllegalArgumentException("screen sharing virtual displays must not "
+                            + "be public or presentation displays");
+                }
+                if (!canProjectVideo(projection)) {
+                    throw new SecurityException("Requires CAPTURE_VIDEO_OUTPUT or "
+                            + "CAPTURE_SECURE_VIDEO_OUTPUT permission, or an appropriate "
+                            + "MediaProjection token in order to create a screen sharing virtual "
+                            + "display.");
+                }
+            }
+
+
             if (callingUid != Process.SYSTEM_UID &&
                     (flags & DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC) != 0) {
-                if (mContext.checkCallingPermission(android.Manifest.permission.CAPTURE_VIDEO_OUTPUT)
-                        != PackageManager.PERMISSION_GRANTED
-                        && mContext.checkCallingPermission(
-                                android.Manifest.permission.CAPTURE_SECURE_VIDEO_OUTPUT)
-                                != PackageManager.PERMISSION_GRANTED) {
+                if (!canProjectVideo(projection)) {
                     throw new SecurityException("Requires CAPTURE_VIDEO_OUTPUT or "
-                            + "CAPTURE_SECURE_VIDEO_OUTPUT permission to create a "
-                            + "public virtual display.");
+                            + "CAPTURE_SECURE_VIDEO_OUTPUT permission, or an appropriate "
+                            + "MediaProjection token to create a public virtual display.");
                 }
             }
             if ((flags & DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE) != 0) {
-                if (mContext.checkCallingPermission(
-                        android.Manifest.permission.CAPTURE_SECURE_VIDEO_OUTPUT)
-                        != PackageManager.PERMISSION_GRANTED) {
+                if (!canProjectSecureVideo(projection)) {
                     throw new SecurityException("Requires CAPTURE_SECURE_VIDEO_OUTPUT "
-                            + "to create a secure virtual display.");
+                            + "or an appropriate MediaProjection token to create a "
+                            + "secure virtual display.");
                 }
             }
 
             final long token = Binder.clearCallingIdentity();
             try {
-                return createVirtualDisplayInternal(appToken, callingUid, packageName,
-                        name, width, height, densityDpi, surface, flags);
+                return createVirtualDisplayInternal(callbacks, projection, callingUid,
+                        packageName, name, width, height, densityDpi, surface, flags);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
         }
 
         @Override // Binder call
-        public void setVirtualDisplaySurface(IBinder appToken, Surface surface) {
+        public void setVirtualDisplaySurface(IVirtualDisplayCallbacks callbacks, Surface surface) {
             final long token = Binder.clearCallingIdentity();
             try {
-                setVirtualDisplaySurfaceInternal(appToken, surface);
+                setVirtualDisplaySurfaceInternal(callbacks.asBinder(), surface);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
         }
 
         @Override // Binder call
-        public void releaseVirtualDisplay(IBinder appToken) {
+        public void releaseVirtualDisplay(IVirtualDisplayCallbacks callbacks) {
             final long token = Binder.clearCallingIdentity();
             try {
-                releaseVirtualDisplayInternal(appToken);
+                releaseVirtualDisplayInternal(callbacks.asBinder());
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -1311,6 +1353,39 @@ public final class DisplayManagerService extends SystemService {
                 }
             }
             return false;
+        }
+
+        private boolean canProjectVideo(IMediaProjection projection) {
+            if (projection != null) {
+                try {
+                    if (projection.canProjectVideo()) {
+                        return true;
+                    }
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Unable to query projection service for permissions", e);
+                }
+            }
+            if (mContext.checkCallingPermission(
+                    android.Manifest.permission.CAPTURE_VIDEO_OUTPUT)
+                    != PackageManager.PERMISSION_GRANTED) {
+                return true;
+            }
+            return canProjectSecureVideo(projection);
+        }
+
+        private boolean canProjectSecureVideo(IMediaProjection projection) {
+            if (projection != null) {
+                try {
+                    if (projection.canProjectSecureVideo()){
+                        return true;
+                    }
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Unable to query projection service for permissions", e);
+                }
+            }
+            return mContext.checkCallingPermission(
+                    android.Manifest.permission.CAPTURE_SECURE_VIDEO_OUTPUT)
+                    != PackageManager.PERMISSION_GRANTED;
         }
     }
 

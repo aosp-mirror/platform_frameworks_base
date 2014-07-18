@@ -3757,9 +3757,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         VirtualActivityDisplay(int width, int height, int density) {
             DisplayManagerGlobal dm = DisplayManagerGlobal.getInstance();
-            mVirtualDisplay = dm.createVirtualDisplay(mService.mContext, VIRTUAL_DISPLAY_BASE_NAME,
-                    width, height, density, null, DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC |
-                    DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY);
+            mVirtualDisplay = dm.createVirtualDisplay(mService.mContext, null,
+                    VIRTUAL_DISPLAY_BASE_NAME, width, height, density, null,
+                    DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC |
+                    DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY, null, null);
 
             init(mVirtualDisplay.getDisplay());
 

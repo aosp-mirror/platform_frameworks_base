@@ -2859,6 +2859,15 @@ public abstract class Context {
     public static final String PERSISTENT_DATA_BLOCK_SERVICE = "persistent_data_block";
 
     /**
+     * Use with {@link #getSystemService} to retrieve a {@link
+     * android.media.projection.MediaProjectionManager} instance for managing
+     * media projection sessions.
+     * @see #getSystemService
+     * @see android.media.projection.ProjectionManager
+     */
+    public static final String MEDIA_PROJECTION_SERVICE = "media_projection";
+
+    /**
      * Determine whether the given permission is allowed for a particular
      * process and user ID running in the system.
      *

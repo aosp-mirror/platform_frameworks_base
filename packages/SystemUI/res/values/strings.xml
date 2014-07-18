@@ -703,5 +703,15 @@
 
     <!-- Text shown in place of notification contents when the notification is hidden on a secure lockscreen -->
     <string name="notification_hidden_text">Contents hidden</string>
+
     <string name="guest_exit_guest">Exit guest</string>
+
+    <!-- Media projection permission dialog warning text. [CHAR LIMIT=NONE] -->
+    <string name="media_projection_dialog_text"><xliff:g id="app_seeking_permission" example="Hangouts">%s</xliff:g> will start capturing everything that\'s displayed on your screen.</string>
+
+    <!-- Media projection permission dialog permanent grant check box. [CHAR LIMIT=NONE] -->
+    <string name="media_projection_remember_text">Don\'t show again</string>
+
+    <!-- Media projection permission dialog action text. [CHAR LIMIT=60] -->
+    <string name="media_projection_action_text">Start now</string>
 </resources>
