@@ -97,6 +97,16 @@ public class CaptivePortalLoginActivity extends Activity {
     }
 
     @Override
+    public void onBackPressed() {
+        WebView myWebView = (WebView) findViewById(R.id.webview);
+        if (myWebView.canGoBack()) {
+            myWebView.goBack();
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_use_network) {
