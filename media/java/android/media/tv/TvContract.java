@@ -16,9 +16,9 @@
 
 package android.media.tv;
 
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.ContentUris;
-import android.media.tv.TvContract.Programs;
 import android.net.Uri;
 import android.provider.BaseColumns;
 import android.util.ArraySet;
@@ -86,6 +86,16 @@ public final class TvContract {
      * @hide
      */
     public static final String PARAM_CANONICAL_GENRE = "canonical_genre";
+
+    /**
+     * Builds an ID that uniquely identifies a TV input service.
+     *
+     * @param name The {@link ComponentName} of the TV input service to build ID for.
+     * @return the ID for the given TV input service.
+     */
+    public static final String buildInputId(ComponentName name) {
+        return name.flattenToShortString();
+    }
 
     /**
      * Builds a URI that points to a specific channel.
@@ -475,7 +485,9 @@ public final class TvContract {
         }
 
         /**
-         * The ID of the TV input that provides this TV channel.
+         * The ID of the TV input service that provides this TV channel.
+         * <p>
+         * Use {@link #buildInputId} to build the ID.
          * <p>
          * This is a required field.
          * </p><p>
