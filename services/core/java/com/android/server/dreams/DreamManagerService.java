@@ -80,6 +80,7 @@ public final class DreamManagerService extends SystemService {
     private boolean mCurrentDreamIsTest;
     private boolean mCurrentDreamCanDoze;
     private boolean mCurrentDreamIsDozing;
+    private boolean mCurrentDreamIsWaking;
     private DozeHardwareWrapper mCurrentDreamDozeHardware;
 
     public DreamManagerService(Context context) {
@@ -113,7 +114,7 @@ public final class DreamManagerService extends SystemService {
                 @Override
                 public void onReceive(Context context, Intent intent) {
                     synchronized (mLock) {
-                        stopDreamLocked();
+                        stopDreamLocked(false /*immediate*/);
                     }
                 }
             }, new IntentFilter(Intent.ACTION_USER_SWITCHED), null, mHandler);
@@ -132,6 +133,7 @@ public final class DreamManagerService extends SystemService {
         pw.println("mCurrentDreamIsTest=" + mCurrentDreamIsTest);
         pw.println("mCurrentDreamCanDoze=" + mCurrentDreamCanDoze);
         pw.println("mCurrentDreamIsDozing=" + mCurrentDreamIsDozing);
+        pw.println("mCurrentDreamIsWaking=" + mCurrentDreamIsWaking);
         pw.println("mCurrentDreamDozeHardware=" + mCurrentDreamDozeHardware);
         pw.println("getDozeComponent()=" + getDozeComponent());
         pw.println();
@@ -146,7 +148,8 @@ public final class DreamManagerService extends SystemService {
 
     private boolean isDreamingInternal() {
         synchronized (mLock) {
-            return mCurrentDreamToken != null && !mCurrentDreamIsTest;
+            return mCurrentDreamToken != null && !mCurrentDreamIsTest
+                    && !mCurrentDreamIsWaking;
         }
     }
 
@@ -166,12 +169,12 @@ public final class DreamManagerService extends SystemService {
         // for example when being undocked.
         long time = SystemClock.uptimeMillis();
         mPowerManager.userActivity(time, false /*noChangeLights*/);
-        stopDreamInternal();
+        stopDreamInternal(false /*immediate*/);
     }
 
-    private void finishSelfInternal(IBinder token) {
+    private void finishSelfInternal(IBinder token, boolean immediate) {
         if (DEBUG) {
-            Slog.d(TAG, "Dream finished: " + token);
+            Slog.d(TAG, "Dream finished: " + token + ", immediate=" + immediate);
         }
 
         // Note that a dream finishing and self-terminating is not
@@ -183,7 +186,7 @@ public final class DreamManagerService extends SystemService {
         // device may simply go to sleep.
         synchronized (mLock) {
             if (mCurrentDreamToken == token) {
-                stopDreamLocked();
+                stopDreamLocked(immediate);
             }
         }
     }
@@ -204,9 +207,9 @@ public final class DreamManagerService extends SystemService {
         }
     }
 
-    private void stopDreamInternal() {
+    private void stopDreamInternal(boolean immediate) {
         synchronized (mLock) {
-            stopDreamLocked();
+            stopDreamLocked(immediate);
         }
     }
 
@@ -345,9 +348,9 @@ public final class DreamManagerService extends SystemService {
             return;
         }
 
-        stopDreamLocked();
+        stopDreamLocked(true /*immediate*/);
 
-        if (DEBUG) Slog.i(TAG, "Entering dreamland.");
+        Slog.i(TAG, "Entering dreamland.");
 
         final Binder newToken = new Binder();
         mCurrentDreamToken = newToken;
@@ -364,16 +367,22 @@ public final class DreamManagerService extends SystemService {
         });
     }
 
-    private void stopDreamLocked() {
+    private void stopDreamLocked(final boolean immediate) {
         if (mCurrentDreamToken != null) {
-            if (DEBUG) Slog.i(TAG, "Leaving dreamland.");
-
-            cleanupDreamLocked();
+            if (immediate) {
+                Slog.i(TAG, "Leaving dreamland.");
+                cleanupDreamLocked();
+            } else if (mCurrentDreamIsWaking) {
+                return; // already waking
+            } else {
+                Slog.i(TAG, "Gently waking up from dream.");
+                mCurrentDreamIsWaking = true;
+            }
 
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    mController.stopDream();
+                    mController.stopDream(immediate);
                 }
             });
         }
@@ -385,6 +394,7 @@ public final class DreamManagerService extends SystemService {
         mCurrentDreamIsTest = false;
         mCurrentDreamCanDoze = false;
         mCurrentDreamUserId = 0;
+        mCurrentDreamIsWaking = false;
         if (mCurrentDreamIsDozing) {
             mCurrentDreamIsDozing = false;
             mDozeWakeLock.release();
@@ -568,7 +578,7 @@ public final class DreamManagerService extends SystemService {
         }
 
         @Override // Binder call
-        public void finishSelf(IBinder token) {
+        public void finishSelf(IBinder token, boolean immediate) {
             // Requires no permission, called by Dream from an arbitrary process.
             if (token == null) {
                 throw new IllegalArgumentException("token must not be null");
@@ -576,7 +586,7 @@ public final class DreamManagerService extends SystemService {
 
             final long ident = Binder.clearCallingIdentity();
             try {
-                finishSelfInternal(token);
+                finishSelfInternal(token, immediate);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -635,8 +645,8 @@ public final class DreamManagerService extends SystemService {
         }
 
         @Override
-        public void stopDream() {
-            stopDreamInternal();
+        public void stopDream(boolean immediate) {
+            stopDreamInternal(immediate);
         }
 
         @Override
@@ -683,11 +693,11 @@ public final class DreamManagerService extends SystemService {
         @Override
         public void run() {
             if (DEBUG) Slog.d(TAG, "System properties changed");
-            synchronized(mLock) {
+            synchronized (mLock) {
                 if (mCurrentDreamName != null && mCurrentDreamCanDoze
                         && !mCurrentDreamName.equals(getDozeComponent())) {
-                    // may have updated the doze component, wake up
-                    stopDreamLocked();
+                    // May have updated the doze component, wake up
+                    mPowerManager.wakeUp(SystemClock.uptimeMillis());
                 }
             }
         }
