@@ -5226,17 +5226,6 @@ public final class Settings {
        public static final String HDMI_SYSTEM_AUDIO_ENABLED = "hdmi_system_audio_enabled";
 
        /**
-        * Output of the audio to be used for system audio mode, as defined in AudioSystem.java.
-        * <ul>
-        * <li>DEVICE_OUT_SPDIF</li>
-        * <li>DEVICE_OUT_HDMI_ARC</li>
-        * <li>DEVICE_OUT_LINE</li>
-        * </ul>
-        * @hide
-        */
-       public static final String HDMI_SYSTEM_AUDIO_OUTPUT = "hdmi_system_audio_output";
-
-       /**
         * Whether TV will automatically turn on upon reception of the CEC command
         * &lt;Text View On&gt; or &lt;Image View On&gt;. (0 = false, 1 = true)
         * @hide
