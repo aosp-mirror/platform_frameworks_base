@@ -19,6 +19,7 @@ package android.telecomm;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -26,21 +27,55 @@ import java.util.MissingResourceException;
 
 /**
  * Provides user interface description information for a {@code PhoneAccount}.
+ *
+ * TODO: Per feedback from API Council, rename to "PhoneAccount". See also comment on class
+ * PhoneAccount.
  */
 public class PhoneAccountMetadata implements Parcelable {
-    private PhoneAccount mAccount;
-    private int mIconResId;
-    private String mLabel;
-    private String mShortDescription;
+
+    /**
+     * Flag indicating that this {@code PhoneAccount} can act as a call manager for traditional
+     * SIM-based telephony calls. The {@link ConnectionService} associated with this phone-account
+     * will be allowed to manage SIM-based phone calls including using its own proprietary
+     * phone-call implementation (like VoIP calling) to make calls instead of the telephony stack.
+     * When a user opts to place a call using the SIM-based telephony stack, the connection-service
+     * associated with this phone-account will be attempted first if the user has explicitly
+     * selected it to be used as the default call-manager.
+     * <p>
+     * See {@link #getCapabilities}
+     */
+    public static final int CAPABILITY_SIM_CALL_MANAGER = 0x1;
+
+    /**
+     * Flag indicating that this {@code PhoneAccount} can make phone calls in place of traditional
+     * SIM-based telephony calls. This account will be treated as a distinct method for placing
+     * calls alongside the traditional SIM-based telephony stack. This flag is distinct from
+     * {@link #CAPABILITY_SIM_CALL_MANAGER} in that it is not allowed to manage calls from or use
+     * the built-in telephony stack to place its calls.
+     * <p>
+     * See {@link #getCapabilities}
+     */
+    public static final int CAPABILITY_CALL_PROVIDER = 0x2;
+
+    private final PhoneAccount mAccount;
+    private final Uri mHandle;
+    private final int mCapabilities;
+    private final int mIconResId;
+    private final String mLabel;
+    private final String mShortDescription;
     private boolean mVideoCallingSupported;
 
     public PhoneAccountMetadata(
             PhoneAccount account,
+            Uri handle,
+            int capabilities,
             int iconResId,
             String label,
             String shortDescription,
             boolean supportsVideoCalling) {
         mAccount = account;
+        mHandle = handle;
+        mCapabilities = capabilities;
         mIconResId = iconResId;
         mLabel = label;
         mShortDescription = shortDescription;
@@ -54,6 +89,27 @@ public class PhoneAccountMetadata implements Parcelable {
      */
     public PhoneAccount getAccount() {
         return mAccount;
+    }
+
+    /**
+     * The handle (e.g., a phone number) associated with this {@code PhoneAccount}. This represents
+     * the destination from which outgoing calls using this {@code PhoneAccount} will appear to
+     * come, if applicable, and the destination to which incoming calls using this
+     * {@code PhoneAccount} may be addressed.
+     *
+     * @return A handle expressed as a {@code Uri}, for example, a phone number.
+     */
+    public Uri getHandle() {
+        return mHandle;
+    }
+
+    /**
+     * The capabilities of this {@code PhoneAccount}.
+     *
+     * @return A bit field of flags describing this {@code PhoneAccount}'s capabilities.
+     */
+    public int getCapabilities() {
+        return mCapabilities;
     }
 
     /**
@@ -72,6 +128,15 @@ public class PhoneAccountMetadata implements Parcelable {
      */
     public String getShortDescription() {
         return mShortDescription;
+    }
+
+    /**
+     * The icon resource ID for the icon of this {@code PhoneAccount}.
+     *
+     * @return A resource ID.
+     */
+    public int getIconResId() {
+        return mIconResId;
     }
 
     /**
@@ -122,10 +187,12 @@ public class PhoneAccountMetadata implements Parcelable {
     @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeParcelable(mAccount, 0);
+        out.writeParcelable(mHandle, 0);
+        out.writeInt(mCapabilities);
         out.writeInt(mIconResId);
         out.writeString(mLabel);
         out.writeString(mShortDescription);
-        out.writeInt(mVideoCallingSupported ? 1: 0);
+        out.writeInt(mVideoCallingSupported ? 1 : 0);
     }
 
     public static final Creator<PhoneAccountMetadata> CREATOR
@@ -143,6 +210,8 @@ public class PhoneAccountMetadata implements Parcelable {
 
     private PhoneAccountMetadata(Parcel in) {
         mAccount = in.readParcelable(getClass().getClassLoader());
+        mHandle = in.readParcelable(getClass().getClassLoader());
+        mCapabilities = in.readInt();
         mIconResId = in.readInt();
         mLabel = in.readString();
         mShortDescription = in.readString();
