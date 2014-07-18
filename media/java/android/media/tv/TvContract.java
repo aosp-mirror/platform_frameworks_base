@@ -53,6 +53,7 @@ public final class TvContract {
     private static final String PATH_CHANNEL = "channel";
     private static final String PATH_PROGRAM = "program";
     private static final String PATH_INPUT = "input";
+    private static final String PATH_PASSTHROUGH = "passthrough";
 
     /**
      * An optional query, update or delete URI parameter that allows the caller to specify start
@@ -104,6 +105,18 @@ public final class TvContract {
      */
     public static final Uri buildChannelUri(long channelId) {
         return ContentUris.withAppendedId(Channels.CONTENT_URI, channelId);
+    }
+
+    /**
+     * Build a special channel URI intended to be used with pass-through type inputs. (e.g. HDMI)
+     *
+     * @param inputId The ID of the TV input to build a channels URI for.
+     * @see TvInputInfo#isPassthroughInputType()
+     */
+    public static final Uri buildChannelUriForPassthroughTvInput(String inputId) {
+        return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(AUTHORITY)
+                .appendPath(PATH_INPUT).appendPath(inputId).appendPath(PATH_CHANNEL)
+                .appendPath(PATH_PASSTHROUGH).build();
     }
 
     /**
@@ -338,68 +351,65 @@ public final class TvContract {
         /** The channel type for SECAM. */
         public static final int TYPE_SECAM = 0x3;
 
-        /** The special channel type used for pass-through inputs such as HDMI. */
-        public static final int TYPE_PASSTHROUGH = 0x00010000;
-
         /** The channel type for DVB-T (terrestrial). */
-        public static final int TYPE_DVB_T = 0x00020000;
+        public static final int TYPE_DVB_T = 0x00010000;
 
         /** The channel type for DVB-T2 (terrestrial). */
-        public static final int TYPE_DVB_T2 = 0x00020001;
+        public static final int TYPE_DVB_T2 = 0x00010001;
 
         /** The channel type for DVB-S (satellite). */
-        public static final int TYPE_DVB_S = 0x00020100;
+        public static final int TYPE_DVB_S = 0x00010100;
 
         /** The channel type for DVB-S2 (satellite). */
-        public static final int TYPE_DVB_S2 = 0x00020101;
+        public static final int TYPE_DVB_S2 = 0x00010101;
 
         /** The channel type for DVB-C (cable). */
-        public static final int TYPE_DVB_C = 0x00020200;
+        public static final int TYPE_DVB_C = 0x00010200;
 
         /** The channel type for DVB-C2 (cable). */
-        public static final int TYPE_DVB_C2 = 0x00020201;
+        public static final int TYPE_DVB_C2 = 0x00010201;
 
         /** The channel type for DVB-H (handheld). */
-        public static final int TYPE_DVB_H = 0x00020300;
+        public static final int TYPE_DVB_H = 0x00010300;
 
         /** The channel type for DVB-SH (satellite). */
-        public static final int TYPE_DVB_SH = 0x00020400;
+        public static final int TYPE_DVB_SH = 0x00010400;
 
         /** The channel type for ATSC (terrestrial). */
-        public static final int TYPE_ATSC_T = 0x00030000;
+        public static final int TYPE_ATSC_T = 0x00020000;
 
         /** The channel type for ATSC (cable). */
-        public static final int TYPE_ATSC_C = 0x00030200;
+        public static final int TYPE_ATSC_C = 0x00020200;
 
         /** The channel type for ATSC-M/H (mobile/handheld). */
-        public static final int TYPE_ATSC_M_H = 0x00030300;
+        public static final int TYPE_ATSC_M_H = 0x00020300;
 
         /** The channel type for ISDB-T (terrestrial). */
-        public static final int TYPE_ISDB_T = 0x00040000;
+        public static final int TYPE_ISDB_T = 0x00030000;
 
         /** The channel type for ISDB-Tb (Brazil). */
-        public static final int TYPE_ISDB_TB = 0x00040100;
+        public static final int TYPE_ISDB_TB = 0x00030100;
 
         /** The channel type for ISDB-S (satellite). */
-        public static final int TYPE_ISDB_S = 0x00040200;
+        public static final int TYPE_ISDB_S = 0x00030200;
 
         /** The channel type for ISDB-C (cable). */
-        public static final int TYPE_ISDB_C = 0x00040300;
+        public static final int TYPE_ISDB_C = 0x00030300;
 
         /** The channel type for 1seg (handheld). */
-        public static final int TYPE_1SEG = 0x00040400;
+        public static final int TYPE_1SEG = 0x00030400;
 
         /** The channel type for DTMB (terrestrial). */
-        public static final int TYPE_DTMB = 0x00050000;
+        public static final int TYPE_DTMB = 0x00040000;
 
         /** The channel type for CMMB (handheld). */
-        public static final int TYPE_CMMB = 0x00050100;
+        public static final int TYPE_CMMB = 0x00040100;
 
         /** The channel type for T-DMB (terrestrial). */
-        public static final int TYPE_T_DMB = 0x00060000;
+        public static final int TYPE_T_DMB = 0x00050000;
 
         /** The channel type for S-DMB (satellite). */
-        public static final int TYPE_S_DMB = 0x00060100;
+        public static final int TYPE_S_DMB = 0x00050100;
 
         /** A generic service type. */
         public static final int SERVICE_TYPE_OTHER = 0x0;
@@ -501,14 +511,13 @@ public final class TvContract {
          * The predefined type of this TV channel.
          * <p>
          * This is primarily used to indicate which broadcast standard (e.g. ATSC, DVB or ISDB) the
-         * current channel conforms to, with an exception being {@link #TYPE_PASSTHROUGH}, which is
-         * a special channel type used only by pass-through inputs such as HDMI. The value should
-         * match to one of the followings: {@link #TYPE_OTHER}, {@link #TYPE_PASSTHROUGH},
-         * {@link #TYPE_DVB_T}, {@link #TYPE_DVB_T2}, {@link #TYPE_DVB_S}, {@link #TYPE_DVB_S2},
-         * {@link #TYPE_DVB_C}, {@link #TYPE_DVB_C2}, {@link #TYPE_DVB_H}, {@link #TYPE_DVB_SH},
-         * {@link #TYPE_ATSC_T}, {@link #TYPE_ATSC_C}, {@link #TYPE_ATSC_M_H}, {@link #TYPE_ISDB_T},
-         * {@link #TYPE_ISDB_TB}, {@link #TYPE_ISDB_S}, {@link #TYPE_ISDB_C} {@link #TYPE_1SEG},
-         * {@link #TYPE_DTMB}, {@link #TYPE_CMMB}, {@link #TYPE_T_DMB}, {@link #TYPE_S_DMB}
+         * current channel conforms to. The value should match to one of the followings:
+         * {@link #TYPE_OTHER}, {@link #TYPE_DVB_T}, {@link #TYPE_DVB_T2}, {@link #TYPE_DVB_S},
+         * {@link #TYPE_DVB_S2}, {@link #TYPE_DVB_C}, {@link #TYPE_DVB_C2}, {@link #TYPE_DVB_H},
+         * {@link #TYPE_DVB_SH}, {@link #TYPE_ATSC_T}, {@link #TYPE_ATSC_C},
+         * {@link #TYPE_ATSC_M_H}, {@link #TYPE_ISDB_T}, {@link #TYPE_ISDB_TB},
+         * {@link #TYPE_ISDB_S}, {@link #TYPE_ISDB_C}, {@link #TYPE_1SEG}, {@link #TYPE_DTMB},
+         * {@link #TYPE_CMMB}, {@link #TYPE_T_DMB}, {@link #TYPE_S_DMB}
          * </p><p>
          * This is a required field.
          * </p><p>
