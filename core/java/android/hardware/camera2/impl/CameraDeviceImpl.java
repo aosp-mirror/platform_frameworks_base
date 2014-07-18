@@ -1095,7 +1095,7 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
                         @Override
                         public void run() {
                             if (!CameraDeviceImpl.this.isClosed()){
-                                holder.getListener().onCapturePartial(
+                                holder.getListener().onCaptureProgressed(
                                     CameraDeviceImpl.this,
                                     request,
                                     resultAsCapture);
