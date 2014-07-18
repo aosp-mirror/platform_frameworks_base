@@ -142,6 +142,17 @@ public class TtsSpan implements ParcelableSpan {
     public static final String TYPE_ELECTRONIC = "android.type.electronic";
 
     /**
+     * The text associated with this span is an amount of money. Set the amount
+     * with the same arguments as {@link #TYPE_DECIMAL}.
+     * {@link #ARG_CURRENCY} is used to set the currency. {@link #ARG_QUANTITY}
+     * is optional.
+     * Also accepts the arguments {@link #ARG_GENDER},
+     * {@link #ARG_ANIMACY}, {@link #ARG_MULTIPLICITY} and
+     * {@link #ARG_CASE}.
+     */
+    public static final String TYPE_MONEY = "android.type.money";
+
+    /**
      * The text associated with this span is a series of digits that have to be
      * read sequentially. {@link #ARG_DIGITS} is required.
      * Also accepts the arguments {@link #ARG_GENDER},
@@ -242,6 +253,24 @@ public class TtsSpan implements ParcelableSpan {
         "android.arg.fractional_part";
 
     /**
+     * Argument used to choose the suffix (thousand, million, etc) that is used
+     * to pronounce large amounts of money. For example it can be used to
+     * disambiguate between "two thousand five hundred dollars" and
+     * "two point five thousand dollars".
+     * If implemented, engines should support at least "1000", "1000000",
+     * "1000000000" and "1000000000000".
+     * Example: if the {@link #ARG_INTEGER_PART} argument is "10", the
+     * {@link #ARG_FRACTIONAL_PART} argument is "4", the {@link #ARG_QUANTITY}
+     * argument is "1000" and the {@link #ARG_CURRENCY} argument is "usd", the
+     * TTS engine may pronounce the span as "ten point four thousand dollars".
+     * With the same example but with the quantity set as "1000000" the TTS
+     * engine may pronounce the span as "ten point four million dollars".
+     * Can be used with {@link #TYPE_MONEY}.
+     */
+    public static final String ARG_QUANTITY =
+            "android.arg.quantity";
+
+    /**
      * Argument used to specify the numerator of a fraction. The value can be a
      * string of digits of any size optionally prefixed with a - or +.
      * Can be used with {@link #TYPE_FRACTION}.
@@ -259,9 +288,9 @@ public class TtsSpan implements ParcelableSpan {
      * Argument used to specify the unit of a measure. The unit should always be
      * specified in English singular form. Prefixes may be used. Engines will do
      * their best to pronounce them correctly in the language used. Engines are
-     * expected to at least support the most common ones like 'meter', 'second',
-     * 'degree celcius' and 'degree fahrenheit' with some common prefixes like
-     * 'milli' and 'kilo'.
+     * expected to at least support the most common ones like "meter", "second",
+     * "degree celcius" and "degree fahrenheit" with some common prefixes like
+     * "milli" and "kilo".
      * Can be used with {@link #TYPE_MEASURE}.
      */
     public static final String ARG_UNIT = "android.arg.unit";
@@ -357,8 +386,8 @@ public class TtsSpan implements ParcelableSpan {
     public static final String ARG_EXTENSION = "android.arg.extension";
 
     /**
-     * Argument used to specify the protocol of a URI. Examples are 'http' and
-     * 'ftp'.
+     * Argument used to specify the protocol of a URI. Examples are "http" and
+     * "ftp".
      * Can be used with {@link #TYPE_ELECTRONIC}.
      */
     public static final String ARG_PROTOCOL = "android.arg.protocol";
@@ -378,8 +407,8 @@ public class TtsSpan implements ParcelableSpan {
     public static final String ARG_PASSWORD = "android.arg.password";
 
     /**
-     * Argument used to specify the domain part of a URI. For example are
-     * 'source.android.com'.
+     * Argument used to specify the domain part of a URI. For example
+     * "source.android.com".
      * Can be used with {@link #TYPE_ELECTRONIC}.
      */
     public static final String ARG_DOMAIN = "android.arg.domain";
@@ -393,14 +422,14 @@ public class TtsSpan implements ParcelableSpan {
 
     /**
      * Argument used to specify the path part of a URI. For example
-     * 'source/index.html'.
+     * "source/index.html".
      * Can be used with {@link #TYPE_ELECTRONIC}.
      */
     public static final String ARG_PATH = "android.arg.path";
 
     /**
      * Argument used to specify the query string of a URI. For example
-     * 'arg=value&argtwo=value'.
+     * "arg=value&argtwo=value".
      * Can be used with {@link #TYPE_ELECTRONIC}.
      */
     public static final String ARG_QUERY_STRING = "android.arg.query_string";
@@ -411,6 +440,13 @@ public class TtsSpan implements ParcelableSpan {
      * Can be used with {@link #TYPE_ELECTRONIC}.
      */
     public static final String ARG_FRAGMENT_ID = "android.arg.fragment_id";
+
+    /**
+     * Argument used to specify the currency. Should be a ISO4217 currency code,
+     * e.g. "USD".
+     * Can be used with {@link #TYPE_MONEY}.
+     */
+    public static final String ARG_CURRENCY = "android.arg.money";
 
     /**
      * Argument used to specify a string of digits.

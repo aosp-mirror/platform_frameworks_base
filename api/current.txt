@@ -31096,6 +31096,7 @@ package android.text.style {
     field public static final java.lang.String ARG_ANIMACY = "android.arg.animacy";
     field public static final java.lang.String ARG_CASE = "android.arg.case";
     field public static final java.lang.String ARG_COUNTRY_CODE = "android.arg.country_code";
+    field public static final java.lang.String ARG_CURRENCY = "android.arg.money";
     field public static final java.lang.String ARG_DAY = "android.arg.day";
     field public static final java.lang.String ARG_DENOMINATOR = "android.arg.denominator";
     field public static final java.lang.String ARG_DIGITS = "android.arg.digits";
@@ -31116,6 +31117,7 @@ package android.text.style {
     field public static final java.lang.String ARG_PATH = "android.arg.path";
     field public static final java.lang.String ARG_PORT = "android.arg.port";
     field public static final java.lang.String ARG_PROTOCOL = "android.arg.protocol";
+    field public static final java.lang.String ARG_QUANTITY = "android.arg.quantity";
     field public static final java.lang.String ARG_QUERY_STRING = "android.arg.query_string";
     field public static final java.lang.String ARG_TEXT = "android.arg.text";
     field public static final java.lang.String ARG_UNIT = "android.arg.unit";
@@ -31156,6 +31158,7 @@ package android.text.style {
     field public static final java.lang.String TYPE_ELECTRONIC = "android.type.electronic";
     field public static final java.lang.String TYPE_FRACTION = "android.type.fraction";
     field public static final java.lang.String TYPE_MEASURE = "android.type.measure";
+    field public static final java.lang.String TYPE_MONEY = "android.type.money";
     field public static final java.lang.String TYPE_ORDINAL = "android.type.ordinal";
     field public static final java.lang.String TYPE_TELEPHONE = "android.type.telephone";
     field public static final java.lang.String TYPE_TEXT = "android.type.text";
