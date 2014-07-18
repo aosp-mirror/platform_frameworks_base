@@ -28174,6 +28174,7 @@ package android.telecomm {
     method public void onParentChanged(android.telecomm.Call, android.telecomm.Call);
     method public void onPostDial(android.telecomm.Call, java.lang.String);
     method public void onPostDialWait(android.telecomm.Call, java.lang.String);
+    method public void onStartActivity(android.telecomm.Call, android.app.PendingIntent);
     method public void onStateChanged(android.telecomm.Call, int);
   }
 
@@ -28319,6 +28320,7 @@ package android.telecomm {
     method public final void setSignal(android.os.Bundle);
     method public final void setStatusHints(android.telecomm.StatusHints);
     method public final void setVideoState(int);
+    method public final void startActivityFromInCall(android.app.PendingIntent);
     method public static java.lang.String stateToString(int);
   }
 
@@ -28525,6 +28527,7 @@ package android.telecomm {
     method public abstract void onHandleChanged(android.telecomm.RemoteConnection, android.net.Uri, int);
     method public abstract void onPostDialWait(android.telecomm.RemoteConnection, java.lang.String);
     method public abstract void onRequestingRingback(android.telecomm.RemoteConnection, boolean);
+    method public abstract void onStartActivityFromInCall(android.telecomm.RemoteConnection, android.app.PendingIntent);
     method public abstract void onStateChanged(android.telecomm.RemoteConnection, int);
     method public abstract void onStatusHintsChanged(android.telecomm.RemoteConnection, android.telecomm.StatusHints);
     method public abstract void onVideoStateChanged(android.telecomm.RemoteConnection, int);

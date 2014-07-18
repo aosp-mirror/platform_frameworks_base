@@ -16,6 +16,7 @@
 
 package com.android.internal.telecomm;
 
+import android.app.PendingIntent;
 import android.net.Uri;
 import android.telecomm.ConnectionRequest;
 import android.telecomm.StatusHints;
@@ -73,4 +74,6 @@ oneway interface IConnectionServiceAdapter {
     void setHandle(String callId, in Uri handle, int presentation);
 
     void setCallerDisplayName(String callId, String callerDisplayName, int presentation);
+
+    void startActivityFromInCall(String callId, in PendingIntent intent);
 }

@@ -63,7 +63,7 @@ public class RemoteCallVideoClient implements IBinder.DeathRecipient {
      *               {@link CallVideoClient#SESSION_MODIFY_REQUEST_SUCCESS},
      *               {@link CallVideoClient#SESSION_MODIFY_REQUEST_FAIL},
      *               {@link CallVideoClient#SESSION_MODIFY_REQUEST_INVALID}
-     * @param requestProfile The original request which was sent to the remote device.
+     * @param requestedProfile The original request which was sent to the remote device.
      * @param responseProfile The actual profile changes made by the remote device.
      */
     public void receiveSessionModifyResponse(int status, VideoCallProfile requestedProfile,
