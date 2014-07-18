@@ -5423,6 +5423,7 @@ package android.app.admin {
     field public static int FLAG_PARENT_CAN_ACCESS_MANAGED;
     field public static final int KEYGUARD_DISABLE_FEATURES_ALL = 2147483647; // 0x7fffffff
     field public static final int KEYGUARD_DISABLE_FEATURES_NONE = 0; // 0x0
+    field public static final int KEYGUARD_DISABLE_FINGERPRINT = 32; // 0x20
     field public static final int KEYGUARD_DISABLE_SECURE_CAMERA = 2; // 0x2
     field public static final int KEYGUARD_DISABLE_SECURE_NOTIFICATIONS = 4; // 0x4
     field public static final int KEYGUARD_DISABLE_TRUST_AGENTS = 16; // 0x10
