@@ -1142,6 +1142,15 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device supports the OpenGL ES
+     * <a href="http://www.khronos.org/registry/gles/extensions/ANDROID/ANDROID_extension_pack_es31a.txt">
+     * Android Extension Pack</a>.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_OPENGLES_EXTENSION_PACK = "android.hardware.opengles.aep";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device includes an accelerometer.
      */
     @SdkConstant(SdkConstantType.FEATURE)
