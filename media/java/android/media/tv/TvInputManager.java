@@ -932,6 +932,21 @@ public final class TvInputManager {
         }
 
         /**
+         * Unblock content blocked by parental controls.
+         */
+        void unblockContent(TvContentRating unblockedRating) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.unblockContent(mToken, unblockedRating.flattenToString(), mUserId);
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        /**
          * Dispatches an input event to this session.
          *
          * @param event An {@link InputEvent} to dispatch.

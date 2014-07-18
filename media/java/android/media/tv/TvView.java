@@ -62,7 +62,7 @@ public class TvView extends ViewGroup {
     private static final int VIDEO_SIZE_VALUE_UNKNOWN = 0;
 
     private final Handler mHandler = new Handler();
-    private TvInputManager.Session mSession;
+    private Session mSession;
     private final SurfaceView mSurfaceView;
     private Surface mSurface;
     private boolean mOverlayViewCreated;
@@ -216,6 +216,22 @@ public class TvView extends ViewGroup {
     public void reset() {
         if (mSession != null) {
             release();
+        }
+    }
+
+    /**
+     * Unblock TV content.
+     * <p>
+     * This notifies TV input that blocked content is now OK to play.
+     * </p>
+     *
+     * @param unblockedRating a TvContentRating to unblock.
+     * @see TvInputService.Session#dispatchContentBlocked(TvContentRating)
+     * @hide
+     */
+    public void unblockContent(TvContentRating unblockedRating) {
+        if (mSession != null) {
+            mSession.unblockContent(unblockedRating);
         }
     }
 
@@ -712,11 +728,12 @@ public class TvView extends ViewGroup {
             }
         }
 
-        @Override
-        public void onSessionEvent(TvInputManager.Session session, String eventType,
-                Bundle eventArgs) {
+        public void onSessionEvent(Session session, String eventType, Bundle eventArgs) {
             if (this != mSessionCallback) {
                 return;
+            }
+            if (DEBUG) {
+                Log.d(TAG, "onSessionEvent(" + eventType + ")");
             }
             if (mListener != null) {
                 mListener.onEvent(mInputId, eventType, eventArgs);

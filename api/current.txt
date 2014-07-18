@@ -16677,6 +16677,7 @@ package android.media.tv {
     method public void dispatchTrackInfoChanged(java.util.List<android.media.tv.TvTrackInfo>);
     method public void dispatchVideoAvailable();
     method public void dispatchVideoUnavailable(int);
+    method public abstract void onContentUnblocked(android.media.tv.TvContentRating);
     method public android.view.View onCreateOverlayView();
     method public boolean onGenericMotionEvent(android.view.MotionEvent);
     method public boolean onKeyDown(int, android.view.KeyEvent);
