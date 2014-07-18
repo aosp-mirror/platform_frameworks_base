@@ -33,5 +33,6 @@ oneway interface ITvInputSessionCallback {
     void onTrackInfoChanged(in List<TvTrackInfo> tracks);
     void onVideoAvailable();
     void onVideoUnavailable(int reason);
+    void onContentAllowed();
     void onContentBlocked(in String rating);
 }

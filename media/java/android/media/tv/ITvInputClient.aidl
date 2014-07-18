@@ -36,5 +36,6 @@ oneway interface ITvInputClient {
     void onTrackInfoChanged(in List<TvTrackInfo> tracks, int seq);
     void onVideoAvailable(int seq);
     void onVideoUnavailable(int reason, int seq);
+    void onContentAllowed(int seq);
     void onContentBlocked(in String rating, int seq);
 }

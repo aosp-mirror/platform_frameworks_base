@@ -306,42 +306,6 @@ public abstract class TvInputService extends Service {
         }
 
         /**
-         * Informs the application that the current program content is blocked by parent controls.
-         * <p>
-         * Each TV input service is required to query the system whether the user is allowed to
-         * watch the current program before showing it to the user if the parental control is turned
-         * on, which can be checked by calling {@link TvParentalControlManager#isEnabled}. Whether
-         * the TV input service should block the content or not is determined by invoking
-         * {@link TvParentalControlManager#isRatingBlocked} with the content rating for the current
-         * program. Then the TvParentalControlManager makes a judgment based on the user blocked
-         * ratings stored in the secure settings and returns the result. If the rating in question
-         * turns out to be blocked, the TV input service must immediately block the content and call
-         * this method with the content rating of the current program to prompt the PIN verification
-         * screen.
-         * </p><p>
-         * Each TV input service also needs to continuously listen to any changes made to the
-         * parental control settings by registering a
-         * {@link TvParentalControlManager.ParentalControlCallback} to the manager and immediately
-         * reevaluate the current program with the new parental control settings.
-         * </p>
-         *
-         * @param rating The content rating for the current TV program.
-         */
-        public void dispatchContentBlocked(final TvContentRating rating) {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        if (DEBUG) Log.d(TAG, "dispatchContentBlocked");
-                        mSessionCallback.onContentBlocked(rating.flattenToString());
-                    } catch (RemoteException e) {
-                        Log.w(TAG, "error in dispatchContentBlocked");
-                    }
-                }
-            });
-        }
-
-        /**
          * Informs the application that video is not available, so the TV input cannot continue
          * playing the TV stream.
          *
@@ -366,6 +330,84 @@ public abstract class TvInputService extends Service {
                         mSessionCallback.onVideoUnavailable(reason);
                     } catch (RemoteException e) {
                         Log.w(TAG, "error in dispatchVideoUnavailable");
+                    }
+                }
+            });
+        }
+
+        /**
+         * Informs the application that the user is allowed to watch the current program content.
+         * <p>
+         * Each TV input service is required to query the system whether the user is allowed to
+         * watch the current program before showing it to the user if the parental control is
+         * enabled (i.e. {@link TvParentalControlManager#isEnabled
+         * TvParentalControlManager.isEnabled()} returns {@code true}). Whether the TV input service
+         * should block the content or not is determined by invoking
+         * {@link TvParentalControlManager#isRatingBlocked
+         * TvParentalControlManager.isRatingBlocked(TvContentRating)} with the content rating for
+         * the current program. Then the {@link TvParentalControlManager} makes a judgment based on
+         * the user blocked ratings stored in the secure settings and returns the result. If the
+         * rating in question turns out to be allowed by the user, the TV input service must call
+         * this method to notify the application that is permitted to show the content.
+         * </p><p>
+         * Each TV input service also needs to continuously listen to any changes made to the
+         * parental control settings by registering a
+         * {@link TvParentalControlManager.ParentalControlCallback} to the manager and immediately
+         * reevaluate the current program with the new parental control settings.
+         * </p>
+         *
+         * @see #dispatchContentBlocked
+         * @see TvParentalControlManager
+         */
+        public void dispatchContentAllowed() {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) Log.d(TAG, "dispatchContentAllowed");
+                        mSessionCallback.onContentAllowed();
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in dispatchContentAllowed");
+                    }
+                }
+            });
+        }
+
+        /**
+         * Informs the application that the current program content is blocked by parent controls.
+         * <p>
+         * Each TV input service is required to query the system whether the user is allowed to
+         * watch the current program before showing it to the user if the parental control is
+         * enabled (i.e. {@link TvParentalControlManager#isEnabled
+         * TvParentalControlManager.isEnabled()} returns {@code true}). Whether the TV input service
+         * should block the content or not is determined by invoking
+         * {@link TvParentalControlManager#isRatingBlocked
+         * TvParentalControlManager.isRatingBlocked(TvContentRating)} with the content rating for
+         * the current program. Then the {@link TvParentalControlManager} makes a judgment based on
+         * the user blocked ratings stored in the secure settings and returns the result. If the
+         * rating in question turns out to be blocked, the TV input service must immediately block
+         * the content and call this method with the content rating of the current program to prompt
+         * the PIN verification screen.
+         * </p><p>
+         * Each TV input service also needs to continuously listen to any changes made to the
+         * parental control settings by registering a
+         * {@link TvParentalControlManager.ParentalControlCallback} to the manager and immediately
+         * reevaluate the current program with the new parental control settings.
+         * </p>
+         *
+         * @param rating The content rating for the current TV program.
+         * @see #dispatchContentAllowed
+         * @see TvParentalControlManager
+         */
+        public void dispatchContentBlocked(final TvContentRating rating) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) Log.d(TAG, "dispatchContentBlocked");
+                        mSessionCallback.onContentBlocked(rating.flattenToString());
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in dispatchContentBlocked");
                     }
                 }
             });
