@@ -36,7 +36,6 @@ import android.view.Surface;
 import android.view.View;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -49,10 +48,13 @@ import java.util.Map;
 public final class TvInputManager {
     private static final String TAG = "TvInputManager";
 
+    static final int VIDEO_UNAVAILABLE_REASON_START = 0;
+    static final int VIDEO_UNAVAILABLE_REASON_END = 3;
+
     /**
      * A generic reason. Video is not available due to an unspecified error.
      */
-    public static final int VIDEO_UNAVAILABLE_REASON_UNKNOWN = 0;
+    public static final int VIDEO_UNAVAILABLE_REASON_UNKNOWN = VIDEO_UNAVAILABLE_REASON_START;
     /**
      * Video is not available because the TV input is tuning to another channel.
      */
@@ -65,7 +67,7 @@ public final class TvInputManager {
      * Video is not available because the TV input stopped the playback temporarily to buffer more
      * data.
      */
-    public static final int VIDEO_UNAVAILABLE_REASON_BUFFERING = 3;
+    public static final int VIDEO_UNAVAILABLE_REASON_BUFFERING = VIDEO_UNAVAILABLE_REASON_END;
 
     /**
      * The TV input is connected.
@@ -185,6 +187,15 @@ public final class TvInputManager {
         }
 
         /**
+         * This is called when the current program content is blocked by parental controls.
+         *
+         * @param session A {@link TvInputManager.Session} associated with this callback
+         * @param rating The content ration of the blocked program.
+         */
+        public void onContentBlocked(Session session, TvContentRating rating) {
+        }
+
+        /**
          * This is called when a custom event has been sent from this session.
          *
          * @param session A {@link TvInputManager.Session} associated with this callback
@@ -259,6 +270,15 @@ public final class TvInputManager {
                 @Override
                 public void run() {
                     mSessionCallback.onVideoUnavailable(mSession, reason);
+                }
+            });
+        }
+
+        public void postContentBlocked(final TvContentRating rating) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onContentBlocked(mSession, rating);
                 }
             });
         }
@@ -399,6 +419,18 @@ public final class TvInputManager {
                         return;
                     }
                     record.postVideoUnavailable(reason);
+                }
+            }
+
+            @Override
+            public void onContentBlocked(String rating, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postContentBlocked(TvContentRating.unflattenFromString(rating));
                 }
             }
 

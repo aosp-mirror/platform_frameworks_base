@@ -75,6 +75,7 @@ import android.media.MediaRouter;
 import android.media.projection.MediaProjectionManager;
 import android.media.session.MediaSessionManager;
 import android.media.tv.ITvInputManager;
+import android.media.tv.TvParentalControlManager;
 import android.media.tv.TvInputManager;
 import android.net.ConnectivityManager;
 import android.net.IConnectivityManager;
@@ -729,6 +730,11 @@ class ContextImpl extends Context {
                 ITvInputManager service = ITvInputManager.Stub.asInterface(iBinder);
                 return new TvInputManager(service, UserHandle.myUserId());
             }});
+
+        registerService(TV_PARENTAL_CONTROL_SERVICE, new ServiceFetcher() {
+                public Object getService(ContextImpl ctx) {
+                    return new TvParentalControlManager(ctx);
+                }});
 
         registerService(NETWORK_SCORE_SERVICE, new ServiceFetcher() {
             public Object createService(ContextImpl ctx) {

@@ -548,6 +548,15 @@ public class TvView extends ViewGroup {
         }
 
         /**
+         * This is called when the current program content is blocked by parental controls.
+         *
+         * @param inputId The ID of the TV input bound to this view.
+         * @param rating The content rating of the blocked program.
+         */
+        public void onContentBlocked(String inputId, TvContentRating rating) {
+        }
+
+        /**
          * This is invoked when a custom event from the bound TV input is sent to this view.
          *
          * @param eventType The type of the event.
@@ -648,6 +657,7 @@ public class TvView extends ViewGroup {
             }
         }
 
+        @Override
         public void onVideoAvailable(Session session) {
             if (DEBUG) {
                 Log.d(TAG, "onVideoAvailable()");
@@ -657,12 +667,23 @@ public class TvView extends ViewGroup {
             }
         }
 
+        @Override
         public void onVideoUnavailable(Session session, int reason) {
             if (DEBUG) {
                 Log.d(TAG, "onVideoUnavailable(" + reason + ")");
             }
             if (mListener != null) {
                 mListener.onVideoUnavailable(mInputId, reason);
+            }
+        }
+
+        @Override
+        public void onContentBlocked(Session session, TvContentRating rating) {
+            if (DEBUG) {
+                Log.d(TAG, "onContentBlocked()");
+            }
+            if (mListener != null) {
+                mListener.onContentBlocked(mInputId, rating);
             }
         }
 

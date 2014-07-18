@@ -3627,6 +3627,20 @@ public final class Settings {
          */
         public static final String PARENTAL_CONTROL_REDIRECT_URL = "parental_control_redirect_url";
 
+
+        /**
+         * Whether the TV parental control is enabled.
+         * @hide
+         */
+        public static final String TV_PARENTAL_CONTROL_ENABLED = "tv_parental_control_enabled";
+
+        /**
+         * List of TV content ratings blocked by the user. (comma-delimited)
+         * @hide
+         */
+        public static final String TV_PARENTAL_CONTROL_BLOCKED_RATINGS =
+                "tv_parental_control_blocked_ratings";
+
         /**
          * Settings classname to launch when Settings is clicked from All
          * Applications.  Needed because of user testing between the old
