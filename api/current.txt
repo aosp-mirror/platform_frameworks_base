@@ -16642,8 +16642,8 @@ package android.media.tv {
     method public int getInputState(java.lang.String);
     method public android.media.tv.TvInputInfo getTvInputInfo(java.lang.String);
     method public java.util.List<android.media.tv.TvInputInfo> getTvInputList();
-    method public void registerListener(android.media.tv.TvInputManager.TvInputListener, android.os.Handler);
-    method public void unregisterListener(android.media.tv.TvInputManager.TvInputListener);
+    method public void registerCallback(android.media.tv.TvInputManager.TvInputCallback, android.os.Handler);
+    method public void unregisterCallback(android.media.tv.TvInputManager.TvInputCallback);
     field public static final int INPUT_STATE_CONNECTED = 0; // 0x0
     field public static final int INPUT_STATE_CONNECTED_STANDBY = 1; // 0x1
     field public static final int INPUT_STATE_DISCONNECTED = 2; // 0x2
@@ -16653,8 +16653,10 @@ package android.media.tv {
     field public static final int VIDEO_UNAVAILABLE_REASON_WEAK_SIGNAL = 2; // 0x2
   }
 
-  public static abstract class TvInputManager.TvInputListener {
-    ctor public TvInputManager.TvInputListener();
+  public static abstract class TvInputManager.TvInputCallback {
+    ctor public TvInputManager.TvInputCallback();
+    method public void onInputAdded(java.lang.String);
+    method public void onInputRemoved(java.lang.String);
     method public void onInputStateChanged(java.lang.String, int);
   }
 

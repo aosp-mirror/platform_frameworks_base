@@ -73,7 +73,7 @@ public final class TvInputManager {
      * The TV input is connected.
      * <p>
      * State for {@link #getInputState} and {@link
-     * TvInputManager.TvInputListener#onInputStateChanged}.
+     * TvInputManager.TvInputCallback#onInputStateChanged}.
      * </p>
      */
     public static final int INPUT_STATE_CONNECTED = 0;
@@ -82,7 +82,7 @@ public final class TvInputManager {
      * fully ready.
      * <p>
      * State for {@link #getInputState} and {@link
-     * TvInputManager.TvInputListener#onInputStateChanged}.
+     * TvInputManager.TvInputCallback#onInputStateChanged}.
      * </p>
      */
     public static final int INPUT_STATE_CONNECTED_STANDBY = 1;
@@ -90,7 +90,7 @@ public final class TvInputManager {
      * The TV input is disconnected.
      * <p>
      * State for {@link #getInputState} and {@link
-     * TvInputManager.TvInputListener#onInputStateChanged}.
+     * TvInputManager.TvInputCallback#onInputStateChanged}.
      * </p>
      */
     public static final int INPUT_STATE_DISCONNECTED = 2;
@@ -100,8 +100,8 @@ public final class TvInputManager {
     private final Object mLock = new Object();
 
     // @GuardedBy(mLock)
-    private final List<TvInputListenerRecord> mTvInputListenerRecordsList =
-            new LinkedList<TvInputListenerRecord>();
+    private final List<TvInputCallbackRecord> mTvInputCallbackRecordsList =
+            new LinkedList<TvInputCallbackRecord>();
 
     // A mapping from TV input ID to the state of corresponding input.
     // @GuardedBy(mLock)
@@ -296,12 +296,12 @@ public final class TvInputManager {
     /**
      * Interface used to monitor status of the TV input.
      */
-    public abstract static class TvInputListener {
+    public abstract static class TvInputCallback {
         /**
          * This is called when the state of a given TV input is changed.
          *
-         * @param inputId the id of the TV input.
-         * @param state state of the TV input. The value is one of the following:
+         * @param inputId The id of the TV input.
+         * @param state State of the TV input. The value is one of the following:
          * <ul>
          * <li>{@link TvInputManager#INPUT_STATE_CONNECTED}
          * <li>{@link TvInputManager#INPUT_STATE_CONNECTED_STANDBY}
@@ -310,26 +310,60 @@ public final class TvInputManager {
          */
         public void onInputStateChanged(String inputId, int state) {
         }
+
+        /**
+         * This is called when a TV input is added.
+         *
+         * @param inputId The id of the TV input.
+         */
+        public void onInputAdded(String inputId) {
+        }
+
+        /**
+         * This is called when a TV input is removed.
+         *
+         * @param inputId The id of the TV input.
+         */
+        public void onInputRemoved(String inputId) {
+        }
     }
 
-    private static final class TvInputListenerRecord {
-        private final TvInputListener mListener;
+    private static final class TvInputCallbackRecord {
+        private final TvInputCallback mCallback;
         private final Handler mHandler;
 
-        public TvInputListenerRecord(TvInputListener listener, Handler handler) {
-            mListener = listener;
+        public TvInputCallbackRecord(TvInputCallback callback, Handler handler) {
+            mCallback = callback;
             mHandler = handler;
         }
 
-        public TvInputListener getListener() {
-            return mListener;
+        public TvInputCallback getCallback() {
+            return mCallback;
         }
 
-        public void postStateChanged(final String inputId, final int state) {
+        public void postInputStateChanged(final String inputId, final int state) {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    mListener.onInputStateChanged(inputId, state);
+                    mCallback.onInputStateChanged(inputId, state);
+                }
+            });
+        }
+
+        public void postInputAdded(final String inputId) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mCallback.onInputAdded(inputId);
+                }
+            });
+        }
+
+        public void postInputRemoved(final String inputId) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mCallback.onInputRemoved(inputId);
                 }
             });
         }
@@ -451,8 +485,28 @@ public final class TvInputManager {
             public void onInputStateChanged(String inputId, int state) {
                 synchronized (mLock) {
                     mStateMap.put(inputId, state);
-                    for (TvInputListenerRecord record : mTvInputListenerRecordsList) {
-                        record.postStateChanged(inputId, state);
+                    for (TvInputCallbackRecord record : mTvInputCallbackRecordsList) {
+                        record.postInputStateChanged(inputId, state);
+                    }
+                }
+            }
+
+            @Override
+            public void onInputAdded(String inputId) {
+                synchronized (mLock) {
+                    mStateMap.put(inputId, INPUT_STATE_CONNECTED);
+                    for (TvInputCallbackRecord record : mTvInputCallbackRecordsList) {
+                        record.postInputAdded(inputId);
+                    }
+                }
+            }
+
+            @Override
+            public void onInputRemoved(String inputId) {
+                synchronized (mLock) {
+                    mStateMap.remove(inputId);
+                    for (TvInputCallbackRecord record : mTvInputCallbackRecordsList) {
+                        record.postInputRemoved(inputId);
                     }
                 }
             }
@@ -499,7 +553,7 @@ public final class TvInputManager {
      * <li>{@link #INPUT_STATE_DISCONNECTED}
      * </ul>
      *
-     * @param inputId the id of the TV input.
+     * @param inputId The id of the TV input.
      * @throws IllegalArgumentException if the argument is {@code null} or if there is no
      *        {@link TvInputInfo} corresponding to {@code inputId}.
      */
@@ -517,39 +571,39 @@ public final class TvInputManager {
     }
 
     /**
-     * Registers a {@link TvInputListener}.
+     * Registers a {@link TvInputCallback}.
      *
-     * @param listener a listener used to monitor status of the TV inputs.
-     * @param handler a {@link Handler} that the status change will be delivered to.
+     * @param callback A callback used to monitor status of the TV inputs.
+     * @param handler A {@link Handler} that the status change will be delivered to.
      * @throws IllegalArgumentException if any of the arguments is {@code null}.
      */
-    public void registerListener(TvInputListener listener, Handler handler) {
-        if (listener == null) {
-            throw new IllegalArgumentException("listener cannot be null");
+    public void registerCallback(TvInputCallback callback, Handler handler) {
+        if (callback == null) {
+            throw new IllegalArgumentException("callback cannot be null");
         }
         if (handler == null) {
             throw new IllegalArgumentException("handler cannot be null");
         }
         synchronized (mLock) {
-            mTvInputListenerRecordsList.add(new TvInputListenerRecord(listener, handler));
+            mTvInputCallbackRecordsList.add(new TvInputCallbackRecord(callback, handler));
         }
     }
 
     /**
-     * Unregisters the existing {@link TvInputListener}.
+     * Unregisters the existing {@link TvInputCallback}.
      *
-     * @param listener the existing listener to remove.
+     * @param callback The existing callback to remove.
      * @throws IllegalArgumentException if any of the arguments is {@code null}.
      */
-    public void unregisterListener(final TvInputListener listener) {
-        if (listener == null) {
-            throw new IllegalArgumentException("listener cannot be null");
+    public void unregisterCallback(final TvInputCallback callback) {
+        if (callback == null) {
+            throw new IllegalArgumentException("callback cannot be null");
         }
         synchronized (mLock) {
-            for (Iterator<TvInputListenerRecord> it = mTvInputListenerRecordsList.iterator();
+            for (Iterator<TvInputCallbackRecord> it = mTvInputCallbackRecordsList.iterator();
                     it.hasNext(); ) {
-                TvInputListenerRecord record = it.next();
-                if (record.getListener() == listener) {
+                TvInputCallbackRecord record = it.next();
+                if (record.getCallback() == callback) {
                     it.remove();
                     break;
                 }
@@ -564,9 +618,9 @@ public final class TvInputManager {
      * the given TV input.
      * </p>
      *
-     * @param inputId the id of the TV input.
-     * @param callback a callback used to receive the created session.
-     * @param handler a {@link Handler} that the session creation will be delivered to.
+     * @param inputId The id of the TV input.
+     * @param callback A callback used to receive the created session.
+     * @param handler A {@link Handler} that the session creation will be delivered to.
      * @throws IllegalArgumentException if any of the arguments is {@code null}.
      * @hide
      */
@@ -752,7 +806,7 @@ public final class TvInputManager {
         /**
          * Select a track.
          *
-         * @param track the track to be selected.
+         * @param track The track to be selected.
          * @see #getTracks()
          */
         public void selectTrack(TvTrackInfo track) {
@@ -773,7 +827,7 @@ public final class TvInputManager {
         /**
          * Unselect a track.
          *
-         * @param track the track to be selected.
+         * @param track The track to be selected.
          * @see #getTracks()
          */
         public void unselectTrack(TvTrackInfo track) {
@@ -880,10 +934,10 @@ public final class TvInputManager {
         /**
          * Dispatches an input event to this session.
          *
-         * @param event {@link InputEvent} to dispatch.
+         * @param event An {@link InputEvent} to dispatch.
          * @param token A token used to identify the input event later in the callback.
          * @param callback A callback used to receive the dispatch result.
-         * @param handler {@link Handler} that the dispatch result will be delivered to.
+         * @param handler A {@link Handler} that the dispatch result will be delivered to.
          * @return Returns {@link #DISPATCH_HANDLED} if the event was handled. Returns
          *         {@link #DISPATCH_NOT_HANDLED} if the event was not handled. Returns
          *         {@link #DISPATCH_IN_PROGRESS} if the event is in progress and the callback will
@@ -927,7 +981,7 @@ public final class TvInputManager {
             /**
              * Called when the dispatched input event is finished.
              *
-             * @param token a token passed to {@link #dispatchInputEvent}.
+             * @param token A token passed to {@link #dispatchInputEvent}.
              * @param handled {@code true} if the dispatched input event was handled properly.
              *            {@code false} otherwise.
              */

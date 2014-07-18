@@ -212,9 +212,7 @@ public final class TvInputManagerService extends SystemService {
     private void buildTvInputListLocked(int userId) {
         UserState userState = getUserStateLocked(userId);
 
-        Map<String, TvInputState> oldInputMap = userState.inputMap;
-        userState.inputMap = new HashMap<String, TvInputState>();
-
+        Map<String, TvInputState> inputMap = new HashMap<String, TvInputState>();
         userState.packageSet.clear();
 
         if (DEBUG) Slog.d(TAG, "buildTvInputList");
@@ -250,12 +248,12 @@ public final class TvInputManagerService extends SystemService {
 
                 for (TvInputInfo info : infoList) {
                     if (DEBUG) Slog.d(TAG, "add " + info.getId());
-                    TvInputState state = oldInputMap.get(info.getId());
+                    TvInputState state = userState.inputMap.get(info.getId());
                     if (state == null) {
                         state = new TvInputState();
                     }
-                    userState.inputMap.put(info.getId(), state);
                     state.mInfo = info;
+                    inputMap.put(info.getId(), state);
                 }
 
                 // Reconnect the service if existing input is updated.
@@ -266,7 +264,21 @@ public final class TvInputManagerService extends SystemService {
                 Slog.e(TAG, "Can't load TV input " + si.name, e);
             }
         }
-        oldInputMap.clear();
+
+        for (String inputId : inputMap.keySet()) {
+            if (!userState.inputMap.containsKey(inputId)) {
+                notifyInputAddedLocked(userState, inputId);
+            }
+        }
+
+        for (String inputId : userState.inputMap.keySet()) {
+            if (!inputMap.containsKey(inputId)) {
+                notifyInputRemovedLocked(userState, inputId);
+            }
+        }
+
+        userState.inputMap.clear();
+        userState.inputMap = inputMap;
     }
 
     private void switchUser(int userId) {
@@ -694,10 +706,36 @@ public final class TvInputManagerService extends SystemService {
         }
     }
 
-    private void notifyStateChangedLocked(UserState userState, String inputId,
+    private void notifyInputAddedLocked(UserState userState, String inputId) {
+        if (DEBUG) {
+            Slog.d(TAG, "notifyInputAdded: inputId = " + inputId);
+        }
+        for (ITvInputManagerCallback callback : userState.callbackSet) {
+            try {
+                callback.onInputAdded(inputId);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to report added input to callback.");
+            }
+        }
+    }
+
+    private void notifyInputRemovedLocked(UserState userState, String inputId) {
+        if (DEBUG) {
+            Slog.d(TAG, "notifyInputRemovedLocked: inputId = " + inputId);
+        }
+        for (ITvInputManagerCallback callback : userState.callbackSet) {
+            try {
+                callback.onInputRemoved(inputId);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to report removed input to callback.");
+            }
+        }
+    }
+
+    private void notifyInputStateChangedLocked(UserState userState, String inputId,
             int state, ITvInputManagerCallback targetCallback) {
         if (DEBUG) {
-            Slog.d(TAG, "notifyStateChangedLocked: inputId = " + inputId
+            Slog.d(TAG, "notifyInputStateChangedLocked: inputId = " + inputId
                     + "; state = " + state);
         }
         if (targetCallback == null) {
@@ -729,7 +767,7 @@ public final class TvInputManagerService extends SystemService {
             return;
         }
         if (oldState != state) {
-            notifyStateChangedLocked(userState, inputId, state, null);
+            notifyInputStateChangedLocked(userState, inputId, state, null);
         }
     }
 
@@ -779,7 +817,7 @@ public final class TvInputManagerService extends SystemService {
                     UserState userState = getUserStateLocked(resolvedUserId);
                     userState.callbackSet.add(callback);
                     for (TvInputState state : userState.inputMap.values()) {
-                        notifyStateChangedLocked(userState, state.mInfo.getId(),
+                        notifyInputStateChangedLocked(userState, state.mInfo.getId(),
                                 state.mState, callback);
                     }
                 }
@@ -1200,8 +1238,8 @@ public final class TvInputManagerService extends SystemService {
 
                     pw.println("inputMap: inputId -> TvInputState");
                     pw.increaseIndent();
-                    for (TvInputState state : userState.inputMap.values()) {
-                        pw.println(state.toString());
+                    for (Map.Entry<String, TvInputState> entry: userState.inputMap.entrySet()) {
+                        pw.println(entry.getKey() + ": " + entry.getValue());
                     }
                     pw.decreaseIndent();
 
@@ -1477,7 +1515,7 @@ public final class TvInputManagerService extends SystemService {
                 for (TvInputState inputState : userState.inputMap.values()) {
                     if (inputState.mInfo.getComponent().equals(name)
                             && inputState.mState != INPUT_STATE_DISCONNECTED) {
-                        notifyStateChangedLocked(userState, inputState.mInfo.getId(),
+                        notifyInputStateChangedLocked(userState, inputState.mInfo.getId(),
                                 inputState.mState, null);
                     }
                 }
@@ -1526,7 +1564,7 @@ public final class TvInputManagerService extends SystemService {
 
                     for (TvInputState inputState : userState.inputMap.values()) {
                         if (inputState.mInfo.getComponent().equals(name)) {
-                            notifyStateChangedLocked(userState, inputState.mInfo.getId(),
+                            notifyInputStateChangedLocked(userState, inputState.mInfo.getId(),
                                     INPUT_STATE_DISCONNECTED, null);
                         }
                     }
