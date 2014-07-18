@@ -4642,7 +4642,7 @@ package android.app {
     field public android.app.Notification publicVersion;
     field public android.net.Uri sound;
     field public java.lang.CharSequence tickerText;
-    field public android.widget.RemoteViews tickerView;
+    field public deprecated android.widget.RemoteViews tickerView;
     field public long[] vibrate;
     field public int visibility;
     field public long when;
@@ -4743,7 +4743,7 @@ package android.app {
     method public android.app.Notification.Builder setStyle(android.app.Notification.Style);
     method public android.app.Notification.Builder setSubText(java.lang.CharSequence);
     method public android.app.Notification.Builder setTicker(java.lang.CharSequence);
-    method public android.app.Notification.Builder setTicker(java.lang.CharSequence, android.widget.RemoteViews);
+    method public deprecated android.app.Notification.Builder setTicker(java.lang.CharSequence, android.widget.RemoteViews);
     method public android.app.Notification.Builder setUsesChronometer(boolean);
     method public android.app.Notification.Builder setVibrate(long[]);
     method public android.app.Notification.Builder setVisibility(int);
