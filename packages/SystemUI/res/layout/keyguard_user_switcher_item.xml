@@ -32,8 +32,8 @@
             android:textAppearance="@style/TextAppearance.StatusBar.Expanded.UserSwitcher.UserName"
             />
     <com.android.systemui.statusbar.phone.UserAvatarView android:id="@+id/picture"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="@dimen/max_avatar_size"
+            android:layout_height="@dimen/max_avatar_size"
             android:contentDescription="@null"
             sysui:frameWidth="@dimen/keyguard_user_switcher_border_thickness"
             sysui:activeFrameColor="@color/current_user_border_color" />
