@@ -478,6 +478,20 @@ public final class TvInputManager {
     }
 
     /**
+     * Returns the {@link TvInputInfo} for a given TV input.
+     *
+     * @param inputId The ID of the TV input.
+     * @return the {@link TvInputInfo} for a given TV input. {@code null} if not found.
+     */
+    public TvInputInfo getTvInputInfo(String inputId) {
+        try {
+            return mService.getTvInputInfo(inputId, mUserId);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
      * Returns the state of a given TV input. It retuns one of the following:
      * <ul>
      * <li>{@link #INPUT_STATE_CONNECTED}

@@ -754,6 +754,22 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
+        public TvInputInfo getTvInputInfo(String inputId, int userId) {
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(),
+                    Binder.getCallingUid(), userId, "getTvInputInfo");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    UserState userState = getUserStateLocked(resolvedUserId);
+                    TvInputState state = userState.inputMap.get(inputId);
+                    return state == null ? null : state.mInfo;
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
         public void registerCallback(final ITvInputManagerCallback callback, int userId) {
             final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(),
                     Binder.getCallingUid(), userId, "registerCallback");
