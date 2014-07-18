@@ -249,8 +249,8 @@ public class NetworkMonitor extends StateMachine {
                     transitionTo(mEvaluatingState);
                     break;
                 case CMD_NETWORK_DISCONNECTED:
-                    if (DBG) log("Disconnected");
-                    transitionTo(mOfflineState);
+                    if (DBG) log("Disconnected - quitting");
+                    quit();
                     break;
                 case CMD_FORCE_REEVALUATION:
                     if (DBG) log("Forcing reevaluation");
