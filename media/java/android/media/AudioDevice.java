@@ -19,30 +19,91 @@ package android.media;
 import android.util.SparseIntArray;
 
 /**
- * @hide
- * CANDIDATE FOR PUBLIC API
+ * Class to provide information about the audio devices.
  */
 public class AudioDevice {
 
+    /**
+     * A device type associated with an unknown or uninitialized device.
+     */
     public static final int DEVICE_TYPE_UNKNOWN          = 0;
+    /**
+     * A device type describing the attached earphone speaker.
+     */
     public static final int DEVICE_TYPE_BUILTIN_EARPIECE = 1;
+    /**
+     * A device type describing the speaker system (i.e. a mono speaker or stereo speakers) built
+     * in a device.
+     */
     public static final int DEVICE_TYPE_BUILTIN_SPEAKER  = 2;
+    /**
+     * A device type describing a headset, which is the combination of a headphones and microphone.
+     */
     public static final int DEVICE_TYPE_WIRED_HEADSET    = 3;
+    /**
+     * A device type describing a pair of wired headphones .
+     */
     public static final int DEVICE_TYPE_WIRED_HEADPHONES = 4;
+    /**
+     * A device type describing an analog line-level connection.
+     */
     public static final int DEVICE_TYPE_LINE_ANALOG      = 5;
+    /**
+     * A device type describing a digital line connection (e.g. SPDIF).
+     */
     public static final int DEVICE_TYPE_LINE_DIGITAL     = 6;
+    /**
+     * A device type describing a Bluetooth device typically used for telephony .
+     */
     public static final int DEVICE_TYPE_BLUETOOTH_SCO    = 7;
+    /**
+     * A device type describing a Bluetooth device supporting the A2DP profile.
+     */
     public static final int DEVICE_TYPE_BLUETOOTH_A2DP   = 8;
+    /**
+     * A device type describing an HDMI connection .
+     */
     public static final int DEVICE_TYPE_HDMI             = 9;
+    /**
+     * A device type describing the Audio Return Channel of an HDMI connection.
+     */
     public static final int DEVICE_TYPE_HDMI_ARC         = 10;
+    /**
+     * A device type describing a USB audio device.
+     */
     public static final int DEVICE_TYPE_USB_DEVICE       = 11;
+    /**
+     * A device type describing a USB audio device in accessory mode.
+     */
     public static final int DEVICE_TYPE_USB_ACCESSORY    = 12;
+    /**
+     * A device type describing the audio device associated with a dock.
+     */
     public static final int DEVICE_TYPE_DOCK             = 13;
+    /**
+     * A device type associated with the transmission of audio signals over FM.
+     */
     public static final int DEVICE_TYPE_FM               = 14;
+    /**
+     * A device type describing the microphone(s) built in a device.
+     */
     public static final int DEVICE_TYPE_BUILTIN_MIC      = 15;
+    /**
+     * A device type for accessing the audio content transmitted over FM.
+     */
     public static final int DEVICE_TYPE_FM_TUNER         = 16;
+    /**
+     * A device type for accessing the audio content transmitted over the TV tuner system.
+     */
     public static final int DEVICE_TYPE_TV_TUNER         = 17;
+    /**
+     * A device type describing the transmission of audio signals over the telephony network.
+     */
     public static final int DEVICE_TYPE_TELEPHONY        = 18;
+    /**
+     * A device type describing the auxiliary line-level connectors.
+     */
+    public static final int DEVICE_TYPE_AUX_LINE         = 19;
 
     AudioDevicePortConfig mConfig;
 
@@ -50,18 +111,38 @@ public class AudioDevice {
         mConfig = new AudioDevicePortConfig(config);
     }
 
+    /**
+     * @hide
+     * CANDIDATE FOR PUBLIC API
+     * @return
+     */
     public boolean isInputDevice() {
         return (mConfig.port().role() == AudioPort.ROLE_SOURCE);
     }
 
+    /**
+     * @hide
+     * CANDIDATE FOR PUBLIC API
+     * @return
+     */
     public boolean isOutputDevice() {
         return (mConfig.port().role() == AudioPort.ROLE_SINK);
     }
 
+    /**
+     * @hide
+     * CANDIDATE FOR PUBLIC API
+     * @return
+     */
     public int getDeviceType() {
         return INT_TO_EXT_DEVICE_MAPPING.get(mConfig.port().type(), DEVICE_TYPE_UNKNOWN);
     }
 
+    /**
+     * @hide
+     * CANDIDATE FOR PUBLIC API
+     * @return
+     */
     public String getAddress() {
         return mConfig.port().address();
     }
@@ -102,6 +183,7 @@ public class AudioDevice {
         INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_OUT_HDMI_ARC, DEVICE_TYPE_HDMI_ARC);
         INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_OUT_SPDIF, DEVICE_TYPE_LINE_DIGITAL);
         INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_OUT_FM, DEVICE_TYPE_FM);
+        INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_OUT_AUX_LINE, DEVICE_TYPE_AUX_LINE);
 
         INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_IN_BUILTIN_MIC, DEVICE_TYPE_BUILTIN_MIC);
         INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_IN_BLUETOOTH_SCO_HEADSET, DEVICE_TYPE_BLUETOOTH_SCO);
@@ -143,6 +225,7 @@ public class AudioDevice {
         EXT_TO_INT_DEVICE_MAPPING.put(DEVICE_TYPE_FM_TUNER, AudioSystem.DEVICE_IN_FM_TUNER);
         EXT_TO_INT_DEVICE_MAPPING.put(DEVICE_TYPE_TV_TUNER, AudioSystem.DEVICE_IN_TV_TUNER);
         EXT_TO_INT_DEVICE_MAPPING.put(DEVICE_TYPE_TELEPHONY, AudioSystem.DEVICE_OUT_TELEPHONY_TX);
+        EXT_TO_INT_DEVICE_MAPPING.put(DEVICE_TYPE_AUX_LINE, AudioSystem.DEVICE_OUT_AUX_LINE);
     }
 }
 
