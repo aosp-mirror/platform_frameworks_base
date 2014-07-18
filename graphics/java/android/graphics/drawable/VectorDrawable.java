@@ -336,6 +336,7 @@ public class VectorDrawable extends Drawable {
         a.recycle();
 
         final VectorDrawableState state = mVectorState;
+        mVectorState.mCacheDirty = true;
         inflateInternal(res, parser, attrs, theme);
 
         mTintFilter = updateTintFilter(mTintFilter, state.mTint, state.mTintMode);
@@ -510,6 +511,8 @@ public class VectorDrawable extends Drawable {
         ColorStateList mCachedTint;
         Mode mCachedTintMode;
         int mCachedRootAlpha;
+        boolean mCachedAutoMirrored;
+        boolean mCacheDirty;
 
         // Deep copy for mutate() or implicitly mutate.
         public VectorDrawableState(VectorDrawableState copy) {
@@ -524,10 +527,11 @@ public class VectorDrawable extends Drawable {
         }
 
         public boolean canReuseCache(int width, int height) {
-            if (mCachedThemeAttrs == mThemeAttrs
+            if (!mCacheDirty
+                    && mCachedThemeAttrs == mThemeAttrs
                     && mCachedTint == mTint
                     && mCachedTintMode == mTintMode
-                    && mAutoMirrored == mAutoMirrored
+                    && mCachedAutoMirrored == mAutoMirrored
                     && width == mCachedBitmap.getWidth()
                     && height == mCachedBitmap.getHeight()
                     && mCachedRootAlpha == mVPathRenderer.getRootAlpha())  {
@@ -543,6 +547,8 @@ public class VectorDrawable extends Drawable {
             mCachedTint = mTint;
             mCachedTintMode = mTintMode;
             mCachedRootAlpha = mVPathRenderer.getRootAlpha();
+            mCachedAutoMirrored = mAutoMirrored;
+            mCacheDirty = false;
         }
 
         public VectorDrawableState() {
