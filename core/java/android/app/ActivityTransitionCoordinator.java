@@ -21,6 +21,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -28,7 +29,6 @@ import android.os.ResultReceiver;
 import android.transition.Transition;
 import android.transition.TransitionSet;
 import android.util.ArrayMap;
-import android.util.Pair;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
@@ -120,11 +120,11 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
      */
     static final String KEY_REMOTE_RECEIVER = "android:remoteReceiver";
 
-    protected static final String KEY_SCREEN_X = "shared_element:screenX";
-    protected static final String KEY_SCREEN_Y = "shared_element:screenY";
+    protected static final String KEY_SCREEN_LEFT = "shared_element:screenLeft";
+    protected static final String KEY_SCREEN_TOP = "shared_element:screenTop";
+    protected static final String KEY_SCREEN_RIGHT = "shared_element:screenRight";
+    protected static final String KEY_SCREEN_BOTTOM= "shared_element:screenBottom";
     protected static final String KEY_TRANSLATION_Z = "shared_element:translationZ";
-    protected static final String KEY_WIDTH = "shared_element:width";
-    protected static final String KEY_HEIGHT = "shared_element:height";
     protected static final String KEY_BITMAP = "shared_element:bitmap";
     protected static final String KEY_SCALE_TYPE = "shared_element:scaleType";
     protected static final String KEY_IMAGE_MATRIX = "shared_element:imageMatrix";
@@ -363,7 +363,7 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
     protected abstract Transition getViewsTransition();
 
     private static void setSharedElementState(View view, String name, Bundle transitionArgs,
-            int[] parentLoc) {
+            Matrix tempMatrix, RectF tempRect, int[] decorLoc) {
         Bundle sharedElementBundle = transitionArgs.getBundle(name);
         if (sharedElementBundle == null) {
             return;
@@ -377,9 +377,8 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
                 imageView.setScaleType(scaleType);
                 if (scaleType == ImageView.ScaleType.MATRIX) {
                     float[] matrixValues = sharedElementBundle.getFloatArray(KEY_IMAGE_MATRIX);
-                    Matrix matrix = new Matrix();
-                    matrix.setValues(matrixValues);
-                    imageView.setImageMatrix(matrix);
+                    tempMatrix.setValues(matrixValues);
+                    imageView.setImageMatrix(tempMatrix);
                 }
             }
         }
@@ -387,20 +386,53 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         float z = sharedElementBundle.getFloat(KEY_TRANSLATION_Z);
         view.setTranslationZ(z);
 
-        int x = sharedElementBundle.getInt(KEY_SCREEN_X);
-        int y = sharedElementBundle.getInt(KEY_SCREEN_Y);
-        int width = sharedElementBundle.getInt(KEY_WIDTH);
-        int height = sharedElementBundle.getInt(KEY_HEIGHT);
+        float left = sharedElementBundle.getFloat(KEY_SCREEN_LEFT);
+        float top = sharedElementBundle.getFloat(KEY_SCREEN_TOP);
+        float right = sharedElementBundle.getFloat(KEY_SCREEN_RIGHT);
+        float bottom = sharedElementBundle.getFloat(KEY_SCREEN_BOTTOM);
 
+        if (decorLoc != null) {
+            left -= decorLoc[0];
+            top -= decorLoc[1];
+        } else {
+            // Find the location in the view's parent
+            ViewGroup parent = (ViewGroup) view.getParent();
+            tempMatrix.reset();
+            parent.transformMatrixToLocal(tempMatrix);
+            tempRect.set(left, top, right, bottom);
+            tempMatrix.mapRect(tempRect);
+
+            float leftInParent = tempRect.left;
+            float topInParent = tempRect.top;
+
+            // Find the size of the view
+            view.getInverseMatrix().mapRect(tempRect);
+            float width = tempRect.width();
+            float height = tempRect.height();
+
+            // Now determine the offset due to view transform:
+            view.setLeft(0);
+            view.setTop(0);
+            view.setRight(Math.round(width));
+            view.setBottom(Math.round(height));
+            tempRect.set(0, 0, width, height);
+            view.getMatrix().mapRect(tempRect);
+
+            left = leftInParent - tempRect.left + parent.getScrollX();
+            top = topInParent - tempRect.top + parent.getScrollY();
+            right = left + width;
+            bottom = top + height;
+        }
+
+        int x = Math.round(left);
+        int y = Math.round(top);
+        int width = Math.round(right) - x;
+        int height = Math.round(bottom) - y;
         int widthSpec = View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY);
         int heightSpec = View.MeasureSpec.makeMeasureSpec(height, View.MeasureSpec.EXACTLY);
         view.measure(widthSpec, heightSpec);
 
-        int left = x - parentLoc[0];
-        int top = y - parentLoc[1];
-        int right = left + width;
-        int bottom = top + height;
-        view.layout(left, top, right, bottom);
+        view.layout(x, y, x + width, y + height);
     }
 
     protected ArrayList<SharedElementOriginalState> setSharedElementState(
@@ -408,16 +440,16 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         ArrayList<SharedElementOriginalState> originalImageState =
                 new ArrayList<SharedElementOriginalState>();
         if (sharedElementState != null) {
-            int[] tempLoc = new int[2];
+            Matrix tempMatrix = new Matrix();
+            RectF tempRect = new RectF();
             for (int i = 0; i < mSharedElementNames.size(); i++) {
                 View sharedElement = mSharedElements.get(i);
                 String name = mSharedElementNames.get(i);
                 SharedElementOriginalState originalState = getOldSharedElementState(sharedElement,
                         name, sharedElementState);
                 originalImageState.add(originalState);
-                View parent = (View) sharedElement.getParent();
-                parent.getLocationOnScreen(tempLoc);
-                setSharedElementState(sharedElement, name, sharedElementState, tempLoc);
+                setSharedElementState(sharedElement, name, sharedElementState,
+                        tempMatrix, tempRect, null);
             }
         }
         mListener.setSharedElementStart(mSharedElementNames, mSharedElements, snapshots);
@@ -473,8 +505,8 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         }
         ArrayList<View> snapshots = new ArrayList<View>(numSharedElements);
         Context context = getWindow().getContext();
-        int[] parentLoc = new int[2];
-        getDecor().getLocationOnScreen(parentLoc);
+        int[] decorLoc = new int[2];
+        getDecor().getLocationOnScreen(decorLoc);
         for (String name: names) {
             Bundle sharedElementBundle = state.getBundle(name);
             if (sharedElementBundle != null) {
@@ -485,7 +517,7 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
                     snapshot.setBackground(new BitmapDrawable(resources, bitmap));
                 }
                 snapshot.setTransitionName(name);
-                setSharedElementState(snapshot, name, state, parentLoc);
+                setSharedElementState(snapshot, name, state, null, null, decorLoc);
                 snapshots.add(snapshot);
             }
         }
@@ -504,9 +536,7 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
                   imageView.setImageMatrix(state.mMatrix);
                 }
             }
-            // origignal widthspec might be AT_MOST,  but it should work for most
-            // cases.
-            int widthSpec = View.MeasureSpec.makeMeasureSpec(state.mMeasuredWidth,
+           int widthSpec = View.MeasureSpec.makeMeasureSpec(state.mMeasuredWidth,
                     View.MeasureSpec.EXACTLY);
             int heightSpec = View.MeasureSpec.makeMeasureSpec(state.mMeasuredHeight,
                     View.MeasureSpec.EXACTLY);
@@ -517,11 +547,12 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
 
     protected Bundle captureSharedElementState() {
         Bundle bundle = new Bundle();
-        Rect tempBounds = new Rect();
+        RectF tempBounds = new RectF();
+        Matrix tempMatrix = new Matrix();
         for (int i = 0; i < mSharedElementNames.size(); i++) {
             View sharedElement = mSharedElements.get(i);
             String name = mSharedElementNames.get(i);
-            captureSharedElementState(sharedElement, name, bundle, tempBounds);
+            captureSharedElementState(sharedElement, name, bundle, tempMatrix, tempBounds);
         }
         return bundle;
     }
@@ -557,22 +588,23 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
      * @param tempBounds     A temporary Rect for capturing the current location of views.
      */
     protected static void captureSharedElementState(View view, String name, Bundle transitionArgs,
-            Rect tempBounds) {
+            Matrix tempMatrix, RectF tempBounds) {
         Bundle sharedElementBundle = new Bundle();
+        tempMatrix.reset();
+        view.transformMatrixToGlobal(tempMatrix);
         tempBounds.set(0, 0, view.getWidth(), view.getHeight());
-        view.getBoundsOnScreen(tempBounds);
-        sharedElementBundle.putInt(KEY_SCREEN_X, tempBounds.left);
-        int width = tempBounds.width();
-        sharedElementBundle.putInt(KEY_WIDTH, width);
+        tempMatrix.mapRect(tempBounds);
 
-        sharedElementBundle.putInt(KEY_SCREEN_Y, tempBounds.top);
-        int height = tempBounds.height();
-        sharedElementBundle.putInt(KEY_HEIGHT, height);
-
+        sharedElementBundle.putFloat(KEY_SCREEN_LEFT, tempBounds.left);
+        sharedElementBundle.putFloat(KEY_SCREEN_RIGHT, tempBounds.right);
+        sharedElementBundle.putFloat(KEY_SCREEN_TOP, tempBounds.top);
+        sharedElementBundle.putFloat(KEY_SCREEN_BOTTOM, tempBounds.bottom);
         sharedElementBundle.putFloat(KEY_TRANSLATION_Z, view.getTranslationZ());
 
-        if (width > 0 && height > 0) {
-            Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        int bitmapWidth = Math.round(tempBounds.width());
+        int bitmapHeight = Math.round(tempBounds.height());
+        if (bitmapWidth > 0 && bitmapHeight > 0) {
+            Bitmap bitmap = Bitmap.createBitmap(bitmapWidth, bitmapWidth, Bitmap.Config.ARGB_8888);
             Canvas canvas = new Canvas(bitmap);
             view.draw(canvas);
             sharedElementBundle.putParcelable(KEY_BITMAP, bitmap);

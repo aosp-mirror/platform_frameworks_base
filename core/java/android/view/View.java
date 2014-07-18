@@ -9780,8 +9780,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * have not changed.
      *
      * @return The inverse of the current matrix of this view.
+     * @hide
      */
-    final Matrix getInverseMatrix() {
+    public final Matrix getInverseMatrix() {
         ensureTransformationInfo();
         if (mTransformationInfo.mInverseMatrix == null) {
             mTransformationInfo.mInverseMatrix = new Matrix();
@@ -16432,23 +16433,24 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * on-screen coordinates.
      *
      * @param m input matrix to modify
+     * @hide
      */
-    void transformMatrixToGlobal(Matrix m) {
+    public void transformMatrixToGlobal(Matrix m) {
         final ViewParent parent = mParent;
         if (parent instanceof View) {
             final View vp = (View) parent;
             vp.transformMatrixToGlobal(m);
-            m.postTranslate(-vp.mScrollX, -vp.mScrollY);
+            m.preTranslate(-vp.mScrollX, -vp.mScrollY);
         } else if (parent instanceof ViewRootImpl) {
             final ViewRootImpl vr = (ViewRootImpl) parent;
             vr.transformMatrixToGlobal(m);
-            m.postTranslate(0, -vr.mCurScrollY);
+            m.preTranslate(0, -vr.mCurScrollY);
         }
 
-        m.postTranslate(mLeft, mTop);
+        m.preTranslate(mLeft, mTop);
 
         if (!hasIdentityMatrix()) {
-            m.postConcat(getMatrix());
+            m.preConcat(getMatrix());
         }
     }
 
@@ -16457,23 +16459,24 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * view-local coordinates.
      *
      * @param m input matrix to modify
+     * @hide
      */
-    void transformMatrixToLocal(Matrix m) {
+    public void transformMatrixToLocal(Matrix m) {
         final ViewParent parent = mParent;
         if (parent instanceof View) {
             final View vp = (View) parent;
             vp.transformMatrixToLocal(m);
-            m.preTranslate(vp.mScrollX, vp.mScrollY);
+            m.postTranslate(vp.mScrollX, vp.mScrollY);
         } else if (parent instanceof ViewRootImpl) {
             final ViewRootImpl vr = (ViewRootImpl) parent;
             vr.transformMatrixToLocal(m);
-            m.preTranslate(0, vr.mCurScrollY);
+            m.postTranslate(0, vr.mCurScrollY);
         }
 
-        m.preTranslate(-mLeft, -mTop);
+        m.postTranslate(-mLeft, -mTop);
 
         if (!hasIdentityMatrix()) {
-            m.preConcat(getInverseMatrix());
+            m.postConcat(getInverseMatrix());
         }
     }
 

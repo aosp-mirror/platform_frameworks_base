@@ -19,7 +19,8 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.content.Intent;
-import android.graphics.Rect;
+import android.graphics.Matrix;
+import android.graphics.RectF;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -27,10 +28,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.transition.Transition;
 import android.transition.TransitionManager;
-import android.util.ArrayMap;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewGroupOverlay;
 import android.view.ViewTreeObserver;
 
 import java.util.ArrayList;
@@ -328,7 +327,8 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
 
     private Bundle captureExitSharedElementsState() {
         Bundle bundle = new Bundle();
-        Rect bounds = new Rect();
+        RectF bounds = new RectF();
+        Matrix matrix = new Matrix();
         for (int i = 0; i < mSharedElements.size(); i++) {
             String name = mSharedElementNames.get(i);
             Bundle sharedElementState = mExitSharedElementBundle.getBundle(name);
@@ -336,7 +336,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
                 bundle.putBundle(name, sharedElementState);
             } else {
                 View view = mSharedElements.get(i);
-                captureSharedElementState(view, name, bundle, bounds);
+                captureSharedElementState(view, name, bundle, matrix, bounds);
             }
         }
         return bundle;
