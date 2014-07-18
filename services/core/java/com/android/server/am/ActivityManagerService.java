@@ -7423,9 +7423,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                             continue;
                         }
                     }
-                    if (tr.intent != null &&
-                            (tr.intent.getFlags() & Intent.FLAG_ACTIVITY_AUTO_REMOVE_FROM_RECENTS)
-                            != 0 && tr.getTopActivity() == null) {
+                    if (tr.autoRemoveRecents && tr.getTopActivity() == null) {
                         // Don't include auto remove tasks that are finished or finishing.
                         continue;
                     }
