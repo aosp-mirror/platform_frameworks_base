@@ -3223,6 +3223,10 @@ public class Notification implements Parcelable
      * {@link #setShowActionsInCompactView(int...)} you can promote up to 2 actions to be displayed
      * in the standard view alongside the usual content.
      *
+     * Notifications created with MediaStyle will have their category set to
+     * {@link Notification#CATEGORY_TRANSPORT CATEGORY_TRANSPORT} unless you set a different
+     * category using {@link Notification.Builder#setCategory(String) setCategory()}.
+     *
      * Finally, if you attach a {@link android.media.session.MediaSession.Token} using
      * {@link android.app.Notification.MediaStyle#setMediaSession(MediaSession.Token)},
      * the System UI can identify this as a notification representing an active media session
@@ -3235,9 +3239,9 @@ public class Notification implements Parcelable
      *     .setSmallIcon(R.drawable.ic_stat_player)
      *     .setContentTitle(&quot;Track title&quot;)     // these three lines are optional
      *     .setContentText(&quot;Artist - Album&quot;)   // if you use
-     *     .setLargeIcon(albumArtBitmap))      // setMediaSession(token, true)
-     *     .setMediaSession(mySession, true)
-     *     .setStyle(<b>new Notification.MediaStyle()</b>)
+     *     .setLargeIcon(albumArtBitmap))      // setMediaSession(token)
+     *     .setStyle(<b>new Notification.MediaStyle()</b>
+     *         .setMediaSession(mySession))
      *     .build();
      * </pre>
      *
@@ -3279,7 +3283,9 @@ public class Notification implements Parcelable
         public Notification buildStyled(Notification wip) {
             wip.contentView = makeMediaContentView();
             wip.bigContentView = makeMediaBigContentView();
-
+            if (wip.category == null) {
+                wip.category = Notification.CATEGORY_TRANSPORT;
+            }
             return wip;
         }
 
