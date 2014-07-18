@@ -433,4 +433,39 @@ public abstract class Animator implements Cloneable {
          */
         void onAnimationResume(Animator animation);
     }
+
+    /**
+     * <p>Whether or not the Animator is allowed to run asynchronously off of
+     * the UI thread. This is a hint that informs the Animator that it is
+     * OK to run the animation off-thread, however the Animator may decide
+     * that it must run the animation on the UI thread anyway.
+     *
+     * <p>Regardless of whether or not the animation runs asynchronously, all
+     * listener callbacks will be called on the UI thread.</p>
+     *
+     * <p>To be able to use this hint the following must be true:</p>
+     * <ol>
+     * <li>The animator is immutable while {@link #isStarted()} is true. Requests
+     *    to change duration, delay, etc... may be ignored.</li>
+     * <li>Lifecycle callback events may be asynchronous. Events such as
+     *    {@link Animator.AnimatorListener#onAnimationEnd(Animator)} or
+     *    {@link Animator.AnimatorListener#onAnimationRepeat(Animator)} may end up delayed
+     *    as they must be posted back to the UI thread, and any actions performed
+     *    by those callbacks (such as starting new animations) will not happen
+     *    in the same frame.</li>
+     * <li>State change requests ({@link #cancel()}, {@link #end()}, {@link #reverse()}, etc...)
+     *    may be asynchronous. It is guaranteed that all state changes that are
+     *    performed on the UI thread in the same frame will be applied as a single
+     *    atomic update, however that frame may be the current frame,
+     *    the next frame, or some future frame. This will also impact the observed
+     *    state of the Animator. For example, {@link #isStarted()} may still return true
+     *    after a call to {@link #end()}. Using the lifecycle callbacks is preferred over
+     *    queries to {@link #isStarted()}, {@link #isRunning()}, and {@link #isPaused()}
+     *    for this reason.</li>
+     * </ol>
+     * @hide
+     */
+    public void setAllowRunningAsynchronously(boolean mayRunAsync) {
+        // It is up to subclasses to support this, if they can.
+    }
 }

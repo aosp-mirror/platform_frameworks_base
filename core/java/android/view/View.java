@@ -10711,24 +10711,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Returns a ValueAnimator which can animate a clearing circle.
-     * <p>
-     * The View is prevented from drawing within the circle, so the content
-     * behind the View shows through.
-     *
-     * @param centerX The x coordinate of the center of the animating circle.
-     * @param centerY The y coordinate of the center of the animating circle.
-     * @param startRadius The starting radius of the animating circle.
-     * @param endRadius The ending radius of the animating circle.
-     *
-     * @hide
-     */
-    public final ValueAnimator createClearCircleAnimator(int centerX,  int centerY,
-            float startRadius, float endRadius) {
-        return new RevealAnimator(this, centerX, centerY, startRadius, endRadius, true);
-    }
-
-    /**
      * Returns the current StateListAnimator if exists.
      *
      * @return StateListAnimator or null if it does not exists

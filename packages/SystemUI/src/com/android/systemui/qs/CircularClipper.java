@@ -19,7 +19,6 @@ package com.android.systemui.qs;
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorListenerAdapter;
-import android.animation.ValueAnimator;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 
@@ -28,7 +27,7 @@ public class CircularClipper {
 
     private final View mTarget;
 
-    private ValueAnimator mAnimator;
+    private Animator mAnimator;
 
     public CircularClipper(View target) {
         mTarget = target;
