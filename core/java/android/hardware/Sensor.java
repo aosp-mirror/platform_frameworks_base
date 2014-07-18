@@ -737,17 +737,49 @@ public final class Sensor {
      * Values of events created by this sensors should not be used.
      *
      * @see #isWakeUpSensor()
-     * @hide This sensor is expected to only be used by the power manager
+     * @hide This sensor is expected to only be used by the system ui
      */
     public static final int TYPE_WAKE_GESTURE = 42;
 
     /**
      * A constant string describing a wake gesture sensor.
      *
-     * @hide This sensor is expected to only be used by the power manager
+     * @hide This sensor is expected to only be used by the system ui
      * @see #TYPE_WAKE_GESTURE
      */
     public static final String STRING_TYPE_WAKE_GESTURE = "android.sensor.wake_gesture";
+
+    /**
+     * A constant describing a wake gesture sensor.
+     * <p>
+     * A sensor enabling briefly turning the screen on to enable the user to
+     * glance content on screen based on a specific motion.  The device should
+     * turn the screen off after a few moments.
+     * <p>
+     * When this sensor triggers, the device turns the screen on momentarily
+     * to allow the user to glance notifications or other content while the
+     * device remains locked in a non-interactive state (dozing). This behavior
+     * (briefly turning on the screen when this sensor triggers) might be deactivated
+     * by the user in the device settings. Changes in settings do not impact the
+     * behavior of the sensor: only whether the framework briefly turns the screen on
+     * when it triggers.
+     * <p>
+     * The actual gesture to be detected is not specified, and can be chosen by the manufacturer of
+     * the device. This sensor must be low power, as it is likely to be activated 24/7.
+     * Values of events created by this sensors should not be used.
+     *
+     * @see #isWakeUpSensor()
+     * @hide This sensor is expected to only be used by the system ui
+     */
+    public static final int TYPE_GLANCE_GESTURE = 43;
+
+    /**
+     * A constant string describing a wake gesture sensor.
+     *
+     * @hide This sensor is expected to only be used by the system ui
+     * @see #TYPE_GLANCE_GESTURE
+     */
+    public static final String STRING_TYPE_GLANCE_GESTURE = "android.sensor.glance_gesture";
 
     /**
      * A constant describing all sensor types.
@@ -847,6 +879,7 @@ public final class Sensor {
             1, // SENSOR_TYPE_WAKE_UP_HEART_RATE_MONITOR
             1, // SENSOR_TYPE_WAKE_UP_TILT_DETECTOR
             1, // SENSOR_TYPE_WAKE_GESTURE
+            1, // SENSOR_TYPE_GLANCE_GESTURE
     };
 
     /**
