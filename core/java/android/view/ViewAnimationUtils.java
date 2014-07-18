@@ -38,7 +38,6 @@ public final class ViewAnimationUtils {
      */
     public static final ValueAnimator createCircularReveal(View view,
             int centerX,  int centerY, float startRadius, float endRadius) {
-        return RevealAnimator.ofRevealCircle(view, centerX, centerY,
-                startRadius, endRadius, false);
+        return new RevealAnimator(view, centerX, centerY, startRadius, endRadius, false);
     }
 }
