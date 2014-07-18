@@ -212,17 +212,22 @@ public class Notification implements Parcelable
     public PendingIntent fullScreenIntent;
 
     /**
-     * Text to scroll across the screen when this item is added to
-     * the status bar on large and smaller devices.
+     * Text that summarizes this notification for accessibility services.
+     *
+     * As of the L release, this text is no longer shown on screen, but it is still useful to
+     * accessibility services (where it serves as an audible announcement of the notification's
+     * appearance).
      *
      * @see #tickerView
      */
     public CharSequence tickerText;
 
     /**
-     * The view to show as the ticker in the status bar when the notification
-     * is posted.
+     * Formerly, a view showing the {@link #tickerText}.
+     *
+     * No longer displayed in the status bar as of API 21.
      */
+    @Deprecated
     public RemoteViews tickerView;
 
     /**
@@ -1950,8 +1955,7 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Set the "ticker" text which is displayed in the status bar when the notification first
-         * arrives.
+         * Set the "ticker" text which is sent to accessibility services.
          *
          * @see Notification#tickerText
          */
@@ -1961,16 +1965,13 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Set the text that is displayed in the status bar when the notification first
-         * arrives, and also a RemoteViews object that may be displayed instead on some
-         * devices.
+         * Obsolete version of {@link #setTicker(CharSequence)}.
          *
-         * @see Notification#tickerText
-         * @see Notification#tickerView
          */
+        @Deprecated
         public Builder setTicker(CharSequence tickerText, RemoteViews views) {
             mTickerText = safeCharSequence(tickerText);
-            mTickerView = views;
+            mTickerView = views; // we'll save it for you anyway
             return this;
         }
 
@@ -2511,15 +2512,8 @@ public class Notification implements Parcelable
         private RemoteViews makeTickerView() {
             if (mTickerView != null) {
                 return mTickerView;
-            } else {
-                if (mContentView == null) {
-                    return applyStandardTemplate(mLargeIcon == null
-                            ? R.layout.status_bar_latest_event_ticker
-                            : R.layout.status_bar_latest_event_ticker_large_icon, true);
-                } else {
-                    return null;
-                }
             }
+            return null; // tickers are not created by default anymore
         }
 
         private RemoteViews makeBigContentView() {
