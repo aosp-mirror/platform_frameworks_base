@@ -27,6 +27,8 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
+import android.hardware.hdmi.HdmiCecDeviceInfo;
+import android.media.tv.TvInputHardwareInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -88,9 +90,46 @@ public final class TvInputInfo implements Parcelable {
      * instantiating it from the given Context and ResolveInfo.
      *
      * @param service The ResolveInfo returned from the package manager about this TV input service.
-     * @hide */
+     * @hide
+     */
     public static TvInputInfo createTvInputInfo(Context context, ResolveInfo service)
             throws XmlPullParserException, IOException {
+        return createTvInputInfo(context, service, generateInputIdForComponentName(
+                new ComponentName(service.serviceInfo.packageName, service.serviceInfo.name)));
+    }
+
+    /**
+     * Create a new instance of the TvInputInfo class,
+     * instantiating it from the given Context, ResolveInfo, and HdmiCecDeviceInfo.
+     *
+     * @param service The ResolveInfo returned from the package manager about this TV input service.
+     * @param cecInfo The HdmiCecDeviceInfo for a HDMI CEC logical device.
+     * @hide
+     */
+    public static TvInputInfo createTvInputInfo(Context context, ResolveInfo service,
+            HdmiCecDeviceInfo cecInfo) throws XmlPullParserException, IOException {
+        return createTvInputInfo(context, service, generateInputIdForHdmiCec(
+                new ComponentName(service.serviceInfo.packageName, service.serviceInfo.name),
+                cecInfo));
+    }
+
+    /**
+     * Create a new instance of the TvInputInfo class,
+     * instantiating it from the given Context, ResolveInfo, and TvInputHardwareInfo.
+     *
+     * @param service The ResolveInfo returned from the package manager about this TV input service.
+     * @param hardwareInfo The TvInputHardwareInfo for a TV input hardware device.
+     * @hide
+     */
+    public static TvInputInfo createTvInputInfo(Context context, ResolveInfo service,
+            TvInputHardwareInfo hardwareInfo) throws XmlPullParserException, IOException {
+        return createTvInputInfo(context, service, generateInputIdForHardware(
+                new ComponentName(service.serviceInfo.packageName, service.serviceInfo.name),
+                hardwareInfo));
+    }
+
+    private static TvInputInfo createTvInputInfo(Context context, ResolveInfo service,
+            String id) throws XmlPullParserException, IOException {
         ServiceInfo si = service.serviceInfo;
         PackageManager pm = context.getPackageManager();
         XmlResourceParser parser = null;
@@ -115,7 +154,7 @@ public final class TvInputInfo implements Parcelable {
                         "Meta-data does not start with tv-input-service tag in " + si.name);
             }
 
-            TvInputInfo input = new TvInputInfo(context, service, null);
+            TvInputInfo input = new TvInputInfo(context, service, id, null);
             TypedArray sa = res.obtainAttributes(attrs,
                     com.android.internal.R.styleable.TvInputService);
             input.mSetupActivity = sa.getString(
@@ -153,12 +192,13 @@ public final class TvInputInfo implements Parcelable {
      * Constructor.
      *
      * @param service The ResolveInfo returned from the package manager about this TV input service.
-     * @hide
+     * @param id ID of this TV input. Should be generated via generateInputId*().
+     * @param parentId ID of this TV input's parent input. {@code null} if none exists.
      */
-    private TvInputInfo(Context context, ResolveInfo service, String parentId) {
+    private TvInputInfo(Context context, ResolveInfo service, String id, String parentId) {
         mService = service;
         ServiceInfo si = service.serviceInfo;
-        mId = generateInputIdForComponentName(new ComponentName(si.packageName, si.name));
+        mId = id;
         mParentId = parentId;
     }
 
@@ -311,10 +351,34 @@ public final class TvInputInfo implements Parcelable {
      *
      * @param name the component name for generating an input id.
      * @return the generated input id for the given {@code name}.
-     * @hide
      */
-    public static final String generateInputIdForComponentName(ComponentName name) {
+    private static final String generateInputIdForComponentName(ComponentName name) {
         return name.flattenToShortString();
+    }
+
+    /**
+     * Used to generate an input id from a ComponentName and HdmiCecDeviceInfo.
+     *
+     * @param name the component name for generating an input id.
+     * @param cecInfo HdmiCecDeviceInfo describing this TV input.
+     * @return the generated input id for the given {@code name} and {@code cecInfo}.
+     */
+    private static final String generateInputIdForHdmiCec(
+            ComponentName name, HdmiCecDeviceInfo cecInfo) {
+        return name.flattenToShortString() + String.format("|CEC%08X%08X",
+                cecInfo.getPhysicalAddress(), cecInfo.getLogicalAddress());
+    }
+
+    /**
+     * Used to generate an input id from a ComponentName and TvInputHardwareInfo
+     *
+     * @param name the component name for generating an input id.
+     * @param hardwareInfo TvInputHardwareInfo describing this TV input.
+     * @return the generated input id for the given {@code name} and {@code hardwareInfo}.
+     */
+    private static final String generateInputIdForHardware(
+            ComponentName name, TvInputHardwareInfo hardwareInfo) {
+        return name.flattenToShortString() + String.format("|HW%d", hardwareInfo.getDeviceId());
     }
 
     /**

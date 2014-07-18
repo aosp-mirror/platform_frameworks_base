@@ -20,8 +20,10 @@ import static android.media.tv.TvInputManager.INPUT_STATE_CONNECTED;
 import static android.media.tv.TvInputManager.INPUT_STATE_DISCONNECTED;
 
 import android.content.Context;
+import android.hardware.hdmi.HdmiCecDeviceInfo;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiHotplugEvent;
+import android.hardware.hdmi.IHdmiDeviceEventListener;
 import android.media.AudioDevicePort;
 import android.media.AudioManager;
 import android.media.AudioPatch;
@@ -33,7 +35,6 @@ import android.media.tv.TvInputHardwareInfo;
 import android.media.tv.TvInputInfo;
 import android.media.tv.TvStreamConfig;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
@@ -66,27 +67,24 @@ class TvInputHardwareManager
     private final SparseArray<Connection> mConnections = new SparseArray<Connection>();
     private final List<TvInputHardwareInfo> mInfoList = new ArrayList<TvInputHardwareInfo>();
     private final Context mContext;
-    private final TvInputManagerService.Client mClient;
+    private final Listener mListener;
     private final Set<Integer> mActiveHdmiSources = new HashSet<Integer>();
     private final AudioManager mAudioManager;
     private final SparseBooleanArray mHdmiStateMap = new SparseBooleanArray();
     // TODO: Should handle INACTIVE case.
     private final SparseArray<TvInputInfo> mTvInputInfoMap = new SparseArray<TvInputInfo>();
+    private final IHdmiDeviceEventListener mHdmiDeviceEventListener = new HdmiDeviceEventListener();
 
-    // Calls to mClient should happen here.
-    private final HandlerThread mHandlerThread = new HandlerThread(TAG);
-    private final Handler mHandler;
+    // Calls to mListener should happen here.
+    private final Handler mHandler = new ListenerHandler();
 
     private final Object mLock = new Object();
 
-    public TvInputHardwareManager(Context context, TvInputManagerService.Client client) {
+    public TvInputHardwareManager(Context context, Listener listener) {
         mContext = context;
-        mClient = client;
+        mListener = listener;
         mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         mHal.init();
-
-        mHandlerThread.start();
-        mHandler = new ClientHandler(mHandlerThread.getLooper());
     }
 
     public void onBootPhase(int phase) {
@@ -105,7 +103,8 @@ class TvInputHardwareManager
             connection.updateConfigsLocked(configs);
             mConnections.put(info.getDeviceId(), connection);
             buildInfoListLocked();
-            // TODO: notify if necessary
+            mHandler.obtainMessage(
+                    ListenerHandler.HARDWARE_DEVICE_ADDED, 0, 0, info).sendToTarget();
         }
     }
 
@@ -127,7 +126,8 @@ class TvInputHardwareManager
             connection.resetLocked(null, null, null, null, null);
             mConnections.remove(deviceId);
             buildInfoListLocked();
-            // TODO: notify if necessary
+            mHandler.obtainMessage(
+                    ListenerHandler.HARDWARE_DEVICE_REMOVED, deviceId, 0).sendToTarget();
         }
     }
 
@@ -191,7 +191,7 @@ class TvInputHardwareManager
             for (int i = 0; i < mHdmiStateMap.size(); ++i) {
                 String inputId = findInputIdForHdmiPortLocked(mHdmiStateMap.keyAt(i));
                 if (inputId != null && inputId.equals(info.getId())) {
-                    mHandler.obtainMessage(ClientHandler.DO_SET_AVAILABLE,
+                    mHandler.obtainMessage(ListenerHandler.STATE_CHANGED,
                             convertConnectedToState(mHdmiStateMap.valueAt(i)), 0,
                             inputId).sendToTarget();
                 }
@@ -273,7 +273,7 @@ class TvInputHardwareManager
             if (inputId == null) {
                 return;
             }
-            mHandler.obtainMessage(ClientHandler.DO_SET_AVAILABLE,
+            mHandler.obtainMessage(ListenerHandler.STATE_CHANGED,
                     convertConnectedToState(event.isConnected()), 0, inputId).sendToTarget();
         }
     }
@@ -502,20 +502,48 @@ class TvInputHardwareManager
         }
     }
 
-    private class ClientHandler extends Handler {
-        private static final int DO_SET_AVAILABLE = 1;
+    interface Listener {
+        public void onStateChanged(String inputId, int state);
+        public void onHardwareDeviceAdded(TvInputHardwareInfo info);
+        public void onHardwareDeviceRemoved(int deviceId);
+        public void onHdmiCecDeviceAdded(HdmiCecDeviceInfo cecDevice);
+        public void onHdmiCecDeviceRemoved(HdmiCecDeviceInfo cecDevice);
+    }
 
-        ClientHandler(Looper looper) {
-            super(looper);
-        }
+    private class ListenerHandler extends Handler {
+        private static final int STATE_CHANGED = 1;
+        private static final int HARDWARE_DEVICE_ADDED = 2;
+        private static final int HARDWARE_DEVICE_REMOVED = 3;
+        private static final int CEC_DEVICE_ADDED = 4;
+        private static final int CEC_DEVICE_REMOVED = 5;
 
         @Override
         public final void handleMessage(Message msg) {
             switch (msg.what) {
-                case DO_SET_AVAILABLE: {
+                case STATE_CHANGED: {
                     String inputId = (String) msg.obj;
                     int state = msg.arg1;
-                    mClient.setState(inputId, state);
+                    mListener.onStateChanged(inputId, state);
+                    break;
+                }
+                case HARDWARE_DEVICE_ADDED: {
+                    TvInputHardwareInfo info = (TvInputHardwareInfo) msg.obj;
+                    mListener.onHardwareDeviceAdded(info);
+                    break;
+                }
+                case HARDWARE_DEVICE_REMOVED: {
+                    int deviceId = msg.arg1;
+                    mListener.onHardwareDeviceRemoved(deviceId);
+                    break;
+                }
+                case CEC_DEVICE_ADDED: {
+                    HdmiCecDeviceInfo info = (HdmiCecDeviceInfo) msg.obj;
+                    mListener.onHdmiCecDeviceAdded(info);
+                    break;
+                }
+                case CEC_DEVICE_REMOVED: {
+                    HdmiCecDeviceInfo info = (HdmiCecDeviceInfo) msg.obj;
+                    mListener.onHdmiCecDeviceRemoved(info);
                     break;
                 }
                 default: {
@@ -523,6 +551,16 @@ class TvInputHardwareManager
                     break;
                 }
             }
+        }
+    }
+
+    private final class HdmiDeviceEventListener extends IHdmiDeviceEventListener.Stub {
+        @Override
+        public void onStatusChanged(HdmiCecDeviceInfo deviceInfo, boolean activated) {
+            mHandler.obtainMessage(
+                    activated ? ListenerHandler.CEC_DEVICE_ADDED
+                    : ListenerHandler.CEC_DEVICE_REMOVED,
+                    0, 0, deviceInfo).sendToTarget();
         }
     }
 }
