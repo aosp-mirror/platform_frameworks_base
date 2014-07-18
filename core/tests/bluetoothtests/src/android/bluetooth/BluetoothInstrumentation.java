@@ -20,6 +20,8 @@ import android.app.Instrumentation;
 import android.content.Context;
 import android.os.Bundle;
 
+import junit.framework.Assert;
+
 import java.util.Set;
 
 public class BluetoothInstrumentation extends Instrumentation {
@@ -70,6 +72,8 @@ public class BluetoothInstrumentation extends Instrumentation {
             getAddress();
         } else if ("getBondedDevices".equals(command)) {
             getBondedDevices();
+        } else if ("enableBtSnoop".equals(command)) {
+            enableBtSnoop();
         } else {
             finish(null);
         }
@@ -109,6 +113,12 @@ public class BluetoothInstrumentation extends Instrumentation {
             mSuccessResult.putString(String.format("device-%02d", i), device.getAddress());
             i++;
         }
+        finish(mSuccessResult);
+    }
+
+    public void enableBtSnoop() {
+        Assert.assertTrue("failed to enable snoop log",
+                getBluetoothAdapter().configHciSnoopLog(true));
         finish(mSuccessResult);
     }
 
