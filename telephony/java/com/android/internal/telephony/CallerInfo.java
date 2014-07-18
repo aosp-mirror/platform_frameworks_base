@@ -279,7 +279,8 @@ public class CallerInfo {
     public static CallerInfo getCallerInfo(Context context, Uri contactRef) {
 
         return getCallerInfo(context, contactRef,
-                context.getContentResolver().query(contactRef, null, null, null, null));
+                CallerInfoAsyncQuery.getCurrentProfileContentResolver(context)
+                        .query(contactRef, null, null, null, null));
     }
 
     /**
