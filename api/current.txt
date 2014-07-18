@@ -14132,7 +14132,6 @@ package android.media {
     method public deprecated void setWiredHeadsetOn(boolean);
     method public deprecated boolean shouldVibrate(int);
     method public void startBluetoothSco();
-    method public void startBluetoothScoVirtualCall();
     method public void stopBluetoothSco();
     method public void unloadSoundEffects();
     method public void unregisterMediaButtonEventReceiver(android.content.ComponentName);
