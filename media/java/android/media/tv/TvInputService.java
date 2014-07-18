@@ -427,6 +427,21 @@ public abstract class TvInputService extends Service {
         public abstract void onSetCaptionEnabled(boolean enabled);
 
         /**
+         * Called when the user allowed to unblock the content.
+         * <p>
+         * The implementation should unblock the content.
+         * TV input service has responsibility to decide when/how the unblock expires
+         * while it can keep previously unblocked ratings in order not to ask a user
+         * to unblock whenever a content rating is changed.
+         * Therefore an unblocked rating can be valid for a channel, a program,
+         * or certain amount of time depending on the implementation.
+         * </p>
+         *
+         * @param unblockedRating An unblocked content rating
+         */
+        public abstract void onContentUnblocked(TvContentRating unblockedRating);
+
+        /**
          * Selects a given track.
          * <p>
          * If it is called multiple times on the same type of track (ie. Video, Audio, Text), the
@@ -656,6 +671,14 @@ public abstract class TvInputService extends Service {
          */
         void unselectTrack(TvTrackInfo track) {
             onUnselectTrack(track);
+            // TODO: Handle failure.
+        }
+
+        /**
+         * Calls {@link #onContentUnblocked}.
+         */
+        void unblockContent(String unblockedRating) {
+            onContentUnblocked(TvContentRating.unflattenFromString(unblockedRating));
             // TODO: Handle failure.
         }
 

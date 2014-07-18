@@ -51,6 +51,7 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     private static final int DO_CREATE_OVERLAY_VIEW = 9;
     private static final int DO_RELAYOUT_OVERLAY_VIEW = 10;
     private static final int DO_REMOVE_OVERLAY_VIEW = 11;
+    private static final int DO_UNBLOCK_CONTENT = 12;
 
     private final HandlerCaller mCaller;
 
@@ -132,6 +133,10 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
                 mTvInputSessionImpl.removeOverlayView(true);
                 return;
             }
+            case DO_UNBLOCK_CONTENT: {
+                mTvInputSessionImpl.unblockContent((String) msg.obj);
+                return;
+            }
             default: {
                 Log.w(TAG, "Unhandled message code: " + msg.what);
                 return;
@@ -194,6 +199,11 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     @Override
     public void removeOverlayView() {
         mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_REMOVE_OVERLAY_VIEW));
+    }
+
+    @Override
+    public void unblockContent(String unblockedRating) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_UNBLOCK_CONTENT, unblockedRating));
     }
 
     private final class TvInputEventReceiver extends InputEventReceiver {
