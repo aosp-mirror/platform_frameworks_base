@@ -167,6 +167,13 @@ final class RemoteConnectionService implements DeathRecipient {
         }
 
         @Override
+        public void setVideoState(String connectionId, int videoState) {
+            if (isCurrentConnection(connectionId)) {
+                mConnection.setVideoState(videoState);
+            }
+        }
+
+        @Override
         public final void setAudioModeIsVoip(String connectionId, boolean isVoip) {
             if (isCurrentConnection(connectionId)) {
                 mConnection.setAudioModeIsVoip(isVoip);

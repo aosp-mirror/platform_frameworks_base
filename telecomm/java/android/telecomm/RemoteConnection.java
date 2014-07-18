@@ -42,6 +42,7 @@ public final class RemoteConnection {
         void onHandleChanged(RemoteConnection connection, Uri handle, int presentation);
         void onCallerDisplayNameChanged(
                 RemoteConnection connection, String callerDisplayName, int presentation);
+        void onVideoStateChanged(RemoteConnection connection, int videoState);
         void onDestroyed(RemoteConnection connection);
     }
 
@@ -55,6 +56,7 @@ public final class RemoteConnection {
     private boolean mRequestingRingback;
     private boolean mConnected;
     private int mCallCapabilities;
+    private int mVideoState;
     private boolean mAudioModeIsVoip;
     private StatusHints mStatusHints;
     private Uri mHandle;
@@ -118,6 +120,10 @@ public final class RemoteConnection {
 
     public int getCallerDisplayNamePresentation() {
         return mCallerDisplayNamePresentation;
+    }
+
+    public int getVideoState() {
+        return mVideoState;
     }
 
     public void abort() {
@@ -294,6 +300,16 @@ public final class RemoteConnection {
     void setPostDialWait(String remainingDigits) {
         for (Listener l : mListeners) {
             l.onPostDialWait(this, remainingDigits);
+        }
+    }
+
+    /**
+     * @hide
+     */
+    void setVideoState(int videoState) {
+        mVideoState = videoState;
+        for (Listener l : mListeners) {
+            l.onVideoStateChanged(this, videoState);
         }
     }
 
