@@ -2822,6 +2822,16 @@ public abstract class Context {
     public static final String TV_INPUT_SERVICE = "tv_input";
 
     /**
+     * Use with {@link #getSystemService} to retrieve a
+     * {@link android.media.tv.TvParentalControlManager} for obtaining parental
+     * control settings and listening to their changes.
+     *
+     * @see #getSystemService
+     * @see android.media.tv.TvParentalControlManager
+     */
+    public static final String TV_PARENTAL_CONTROL_SERVICE = "tv_parental_control";
+
+    /**
      * {@link android.net.NetworkScoreManager} for managing network scoring.
      * @see #getSystemService
      * @see android.net.NetworkScoreManager
