@@ -324,6 +324,13 @@ public abstract class ConnectionService extends Service {
         }
 
         @Override
+        public void onVideoStateChanged(Connection c, int videoState) {
+            String id = mIdByConnection.get(c);
+            Log.d(this, "Adapter set video state %d", videoState);
+            mAdapter.setVideoState(id, videoState);
+        }
+
+        @Override
         public void onHandleChanged(Connection c, Uri handle, int presentation) {
             String id = mIdByConnection.get(c);
             mAdapter.setHandle(id, handle, presentation);

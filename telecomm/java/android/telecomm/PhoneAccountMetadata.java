@@ -22,9 +22,6 @@ import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.io.IOException;
-import java.io.ObjectStreamException;
-import java.io.Serializable;
 import java.util.MissingResourceException;
 
 /**
@@ -35,16 +32,19 @@ public class PhoneAccountMetadata implements Parcelable {
     private int mIconResId;
     private String mLabel;
     private String mShortDescription;
+    private boolean mVideoCallingSupported;
 
     public PhoneAccountMetadata(
             PhoneAccount account,
             int iconResId,
             String label,
-            String shortDescription) {
+            String shortDescription,
+            boolean supportsVideoCalling) {
         mAccount = account;
         mIconResId = iconResId;
         mLabel = label;
         mShortDescription = shortDescription;
+        mVideoCallingSupported = supportsVideoCalling;
     }
 
     /**
@@ -101,6 +101,15 @@ public class PhoneAccountMetadata implements Parcelable {
         }
     }
 
+    /**
+     * Determines whether this {@code PhoneAccount} supports video calling.
+     *
+     * @return {@code true} if this {@code PhoneAccount} supports video calling.
+     */
+    public boolean isVideoCallingSupported() {
+        return mVideoCallingSupported;
+    }
+
     //
     // Parcelable implementation
     //
@@ -116,6 +125,7 @@ public class PhoneAccountMetadata implements Parcelable {
         out.writeInt(mIconResId);
         out.writeString(mLabel);
         out.writeString(mShortDescription);
+        out.writeInt(mVideoCallingSupported ? 1: 0);
     }
 
     public static final Creator<PhoneAccountMetadata> CREATOR
@@ -136,5 +146,6 @@ public class PhoneAccountMetadata implements Parcelable {
         mIconResId = in.readInt();
         mLabel = in.readString();
         mShortDescription = in.readString();
+        mVideoCallingSupported = in.readInt() == 1;
     }
 }

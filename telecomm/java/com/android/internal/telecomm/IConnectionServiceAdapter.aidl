@@ -64,6 +64,8 @@ oneway interface IConnectionServiceAdapter {
 
     void setCallVideoProvider(String callId, ICallVideoProvider callVideoProvider);
 
+    void setVideoState(String callId, int videoState);
+
     void setAudioModeIsVoip(String callId, boolean isVoip);
 
     void setStatusHints(String callId, in StatusHints statusHints);
