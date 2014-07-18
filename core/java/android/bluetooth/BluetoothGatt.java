@@ -93,6 +93,25 @@ public final class BluetoothGatt implements BluetoothProfile {
     public static final int GATT_FAILURE = 0x101;
 
     /**
+     * Connection paramter update - Use the connection paramters recommended by the
+     * Bluetooth SIG. This is the default value if no connection parameter update
+     * is requested.
+     */
+    public static final int GATT_CONNECTION_BALANCED = 0;
+
+    /**
+     * Connection paramter update - Request a high priority, low latency connection.
+     * An application should only request high priority connection paramters to transfer
+     * large amounts of data over LE quickly. Once the transfer is complete, the application
+     * should request {@link BluetoothGatt#GATT_CONNECTION_BALANCED} connectoin parameters
+     * to reduce energy use.
+     */
+    public static final int GATT_CONNECTION_HIGH_PRIORITY = 1;
+
+    /** Connection paramter update - Request low power, reduced data rate connection parameters. */
+    public static final int GATT_CONNECTION_LOW_POWER = 2;
+
+    /**
      * No authentication required.
      * @hide
      */
@@ -738,7 +757,7 @@ public final class BluetoothGatt implements BluetoothProfile {
      * {@link BluetoothGattCallback#onConnectionStateChange} callback will be
      * invoked when the connection state changes as a result of this function.
      *
-     * <p>The autoConnect paramter determines whether to actively connect to
+     * <p>The autoConnect parameter determines whether to actively connect to
      * the remote device, or rather passively scan and finalize the connection
      * when the remote device is in range/available. Generally, the first ever
      * connection to a device should be direct (autoConnect set to false) and
@@ -1278,6 +1297,38 @@ public final class BluetoothGatt implements BluetoothProfile {
 
         try {
             mService.configureMTU(mClientIf, mDevice.getAddress(), mtu);
+        } catch (RemoteException e) {
+            Log.e(TAG,"",e);
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Request a connection parameter update.
+     *
+     * <p>This function will send a connection parameter update request to the
+     * remote device.
+     *
+     * @param connectionPriority Request a specific connection priority. Must be one of
+     *          {@link BluetoothGatt#GATT_CONNECTION_BALANCED},
+     *          {@link BluetoothGatt#GATT_CONNECTION_HIGH_PRIORITY}
+     *          or {@link BluetoothGatt#GATT_CONNECTION_LOW_POWER}.
+     * @throws IllegalArgumentException If the parameters are outside of their
+     *                                  specified range.
+     */
+    public boolean requestConnectionParameterUpdate(int connectionPriority) {
+        if (connectionPriority < GATT_CONNECTION_BALANCED ||
+            connectionPriority > GATT_CONNECTION_LOW_POWER) {
+            throw new IllegalArgumentException("connectionPriority not within valid range");
+        }
+
+        if (DBG) Log.d(TAG, "requestConnectionParameterUpdate() - params: " + connectionPriority);
+        if (mService == null || mClientIf == 0) return false;
+
+        try {
+            mService.connectionParameterUpdate(mClientIf, mDevice.getAddress(), connectionPriority);
         } catch (RemoteException e) {
             Log.e(TAG,"",e);
             return false;
