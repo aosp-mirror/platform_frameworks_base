@@ -36704,6 +36704,7 @@ package android.webkit {
     method public void setWebViewClient(android.webkit.WebViewClient);
     method public deprecated boolean showFindDialog(java.lang.String, boolean);
     method public void stopLoading();
+    method public boolean zoomBy(float);
     method public boolean zoomIn();
     method public boolean zoomOut();
     field public static final java.lang.String SCHEME_GEO = "geo:0,0?q=";
