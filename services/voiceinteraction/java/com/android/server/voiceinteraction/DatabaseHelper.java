@@ -105,17 +105,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if (db.insertWithOnConflict(
                 SoundModelContract.TABLE, null, values, SQLiteDatabase.CONFLICT_REPLACE) != -1) {
             for (Keyphrase keyphrase : soundModel.keyphrases) {
-                status &= addOrUpdateKeyphrase(soundModel.uuid, keyphrase);
+                status &= addOrUpdateKeyphrase(db, soundModel.uuid, keyphrase);
             }
+            db.close();
             return status;
         } else {
             Slog.w(TAG, "Failed to persist sound model to database");
+            db.close();
             return false;
         }
     }
 
-    private boolean addOrUpdateKeyphrase(UUID modelId, Keyphrase keyphrase) {
-        SQLiteDatabase db = getWritableDatabase();
+    private boolean addOrUpdateKeyphrase(SQLiteDatabase db, UUID modelId, Keyphrase keyphrase) {
         ContentValues values = new ContentValues();
         values.put(KeyphraseContract.KEY_ID, keyphrase.id);
         values.put(KeyphraseContract.KEY_RECOGNITION_MODES, keyphrase.recognitionModeFlags);
@@ -148,6 +149,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             Slog.w(TAG, "No keyphrases deleted from the database");
             status = false;
         }
+        db.close();
         return status;
     }
 
@@ -157,7 +159,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public List<KeyphraseSoundModel> getKephraseSoundModels() {
         List<KeyphraseSoundModel> models = new ArrayList<>();
         String selectQuery = "SELECT  * FROM " + SoundModelContract.TABLE;
-        SQLiteDatabase db = this.getReadableDatabase();
+        SQLiteDatabase db = getReadableDatabase();
         Cursor c = db.rawQuery(selectQuery, null);
 
         // looping through all rows and adding to list
@@ -172,17 +174,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 byte[] data = c.getBlob(c.getColumnIndex(SoundModelContract.KEY_DATA));
                 // Get all the keyphrases for this this sound model.
                 models.add(new KeyphraseSoundModel(
-                        UUID.fromString(id), data, getKeyphrasesForSoundModel(id)));
+                        UUID.fromString(id), data, getKeyphrasesForSoundModel(db, id)));
             } while (c.moveToNext());
         }
+        c.close();
+        db.close();
         return models;
     }
 
-    private Keyphrase[] getKeyphrasesForSoundModel(String modelId) {
+    private Keyphrase[] getKeyphrasesForSoundModel(SQLiteDatabase db, String modelId) {
         List<Keyphrase> keyphrases = new ArrayList<>();
         String selectQuery = "SELECT  * FROM " + KeyphraseContract.TABLE
                 + " WHERE " + KeyphraseContract.KEY_SOUND_MODEL_ID + " = '" + modelId + "'";
-        SQLiteDatabase db = this.getReadableDatabase();
         Cursor c = db.rawQuery(selectQuery, null);
 
         // looping through all rows and adding to list
@@ -199,6 +202,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
         Keyphrase[] keyphraseArr = new Keyphrase[keyphrases.size()];
         keyphrases.toArray(keyphraseArr);
+        c.close();
         return keyphraseArr;
     }
 }
