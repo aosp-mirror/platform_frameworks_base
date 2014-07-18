@@ -323,4 +323,25 @@ final class ConnectionServiceAdapter implements DeathRecipient {
             }
         }
     }
+
+    /**
+     * Sets the video state associated with a call.
+     *
+     * Valid values: {@link android.telecomm.VideoCallProfile#VIDEO_STATE_AUDIO_ONLY},
+     * {@link android.telecomm.VideoCallProfile#VIDEO_STATE_BIDIRECTIONAL},
+     * {@link android.telecomm.VideoCallProfile#VIDEO_STATE_TX_ENABLED},
+     * {@link android.telecomm.VideoCallProfile#VIDEO_STATE_RX_ENABLED}.
+     *
+     * @param callId The unique ID of the call to set the video state for.
+     * @param videoState The video state.
+     */
+    void setVideoState(String callId, int videoState) {
+        Log.v(this, "setVideoState: %d", videoState);
+        for (IConnectionServiceAdapter adapter : mAdapters) {
+            try {
+                adapter.setVideoState(callId, videoState);
+            } catch (RemoteException ignored) {
+            }
+        }
+    }
 }

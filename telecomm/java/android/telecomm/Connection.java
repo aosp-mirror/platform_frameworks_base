@@ -37,6 +37,7 @@ public abstract class Connection {
         public void onHandleChanged(Connection c, Uri newHandle, int presentation) {}
         public void onCallerDisplayNameChanged(
                 Connection c, String callerDisplayName, int presentation) {}
+        public void onVideoStateChanged(Connection c, int videoState) {}
         public void onSignalChanged(Connection c, Bundle details) {}
         public void onDisconnected(Connection c, int cause, String message) {}
         public void onPostDialWait(Connection c, String remaining) {}
@@ -75,6 +76,7 @@ public abstract class Connection {
     private CallVideoProvider mCallVideoProvider;
     private boolean mAudioModeIsVoip;
     private StatusHints mStatusHints;
+    private int mVideoState;
 
     /**
      * Create a new Connection.
@@ -115,6 +117,19 @@ public abstract class Connection {
      */
     public final int getState() {
         return mState;
+    }
+
+    /**
+     * Returns the video state of the call.
+     * Valid values: {@link android.telecomm.VideoCallProfile#VIDEO_STATE_AUDIO_ONLY},
+     * {@link android.telecomm.VideoCallProfile#VIDEO_STATE_BIDIRECTIONAL},
+     * {@link android.telecomm.VideoCallProfile#VIDEO_STATE_TX_ENABLED},
+     * {@link android.telecomm.VideoCallProfile#VIDEO_STATE_RX_ENABLED}.
+     *
+     * @return The video state of the call.
+     */
+    public final int getVideoState() {
+        return mVideoState;
     }
 
     /**
@@ -281,6 +296,23 @@ public abstract class Connection {
         mCallerDisplayNamePresentation = presentation;
         for (Listener l : mListeners) {
             l.onCallerDisplayNameChanged(this, callerDisplayName, presentation);
+        }
+    }
+
+    /**
+     * Set the video state for the connection.
+     * Valid values: {@link android.telecomm.VideoCallProfile#VIDEO_STATE_AUDIO_ONLY},
+     * {@link android.telecomm.VideoCallProfile#VIDEO_STATE_BIDIRECTIONAL},
+     * {@link android.telecomm.VideoCallProfile#VIDEO_STATE_TX_ENABLED},
+     * {@link android.telecomm.VideoCallProfile#VIDEO_STATE_RX_ENABLED}.
+     *
+     * @param videoState The new video state.
+     */
+    public final void setVideoState(int videoState) {
+        Log.d(this, "setVideoState %d", videoState);
+        mVideoState = videoState;
+        for (Listener l : mListeners) {
+            l.onVideoStateChanged(this, mVideoState);
         }
     }
 
