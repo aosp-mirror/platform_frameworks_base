@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.policy;
 
+import com.android.systemui.BitmapHelper;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.StatusBarHeaderView;
 import com.android.systemui.statusbar.phone.UserAvatarView;
@@ -176,11 +177,16 @@ public class KeyguardUserSwitcher implements View.OnClickListener {
         } catch (RemoteException e) {
             Log.e(TAG, "Couln't get current user.", e);
         }
+        final int avatarSize
+                = mContext.getResources().getDimensionPixelSize(R.dimen.max_avatar_size);
         for (int i = 0; i < N; i++) {
             UserInfo user = users.get(i);
             if (user.supportsSwitchTo()) {
                 boolean isCurrent = user.id == currentUser;
-                result.add(new UserData(user, mUserManager.getUserIcon(user.id), isCurrent));
+                final Bitmap picture = BitmapHelper.createCircularClip(
+                        mUserManager.getUserIcon(user.id),
+                        avatarSize, avatarSize);
+                result.add(new UserData(user, picture, isCurrent));
             }
         }
         return result;
