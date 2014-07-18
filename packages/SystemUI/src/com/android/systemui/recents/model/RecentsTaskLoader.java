@@ -27,6 +27,9 @@ import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.UserHandle;
+import android.provider.Settings;
+import android.provider.Settings.SettingNotFoundException;
+
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.misc.SystemServicesProxy;
@@ -340,7 +343,7 @@ public class RecentsTaskLoader {
             // Create a new task
             Task task = new Task(t.persistentId, (t.id > -1), t.baseIntent, t.affiliatedTaskId,
                     activityLabel, activityIcon, activityColor, t.userId, t.firstActiveTime,
-                    t.lastActiveTime, (i == (taskCount - 1)));
+                    t.lastActiveTime, (i == (taskCount - 1)), config.lockToAppEnabled);
 
             // Preload the specified number of apps
             if (i >= (taskCount - preloadCount)) {
@@ -395,6 +398,7 @@ public class RecentsTaskLoader {
 
     /** Creates a lightweight stack of the current recent tasks, without thumbnails and icons. */
     public static TaskStack getShallowTaskStack(SystemServicesProxy ssp) {
+        RecentsConfiguration config = RecentsConfiguration.getInstance();
         List<ActivityManager.RecentTaskInfo> tasks = getRecentTasks(ssp);
         TaskStack stack = new TaskStack();
 
@@ -405,7 +409,8 @@ public class RecentsTaskLoader {
             if (info == null) continue;
 
             stack.addTask(new Task(t.persistentId, true, t.baseIntent, t.affiliatedTaskId, null,
-                    null, 0, 0, t.firstActiveTime, t.lastActiveTime, (i == (taskCount - 1))));
+                    null, 0, 0, t.firstActiveTime, t.lastActiveTime, (i == (taskCount - 1)),
+                    config.lockToAppEnabled));
         }
         stack.createAffiliatedGroupings();
         return stack;

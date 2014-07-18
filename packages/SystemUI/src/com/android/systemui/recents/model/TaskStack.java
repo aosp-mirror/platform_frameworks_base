@@ -17,6 +17,7 @@
 package com.android.systemui.recents.model;
 
 import com.android.systemui.recents.Constants;
+import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.misc.NamedCounter;
 
 import java.util.ArrayList;
@@ -204,10 +205,10 @@ public class TaskStack {
                 removeGroup(group);
             }
             // Update the lock-to-app state
-            t.canLockToTask = false;
+            t.lockToThisTask = false;
             Task newFrontMostTask = getFrontMostTask();
-            if (newFrontMostTask != null) {
-                newFrontMostTask.canLockToTask = true;
+            if (newFrontMostTask != null && newFrontMostTask.lockToTaskEnabled) {
+                newFrontMostTask.lockToThisTask = true;
             }
             if (mCb != null) {
                 // Notify that a task has been removed

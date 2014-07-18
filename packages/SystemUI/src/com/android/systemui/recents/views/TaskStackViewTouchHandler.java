@@ -356,7 +356,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         // Disallow touch events from this task view
         tv.setTouchEnabled(false);
         // Hide the footer
-        tv.animateFooterVisibility(false, mSv.mConfig.taskViewLockToAppShortAnimDuration, 0);
+        tv.animateFooterVisibility(false, mSv.mConfig.taskViewLockToAppShortAnimDuration);
         // Disallow parents from intercepting touch events
         final ViewParent parent = mSv.getParent();
         if (parent != null) {
@@ -394,7 +394,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         // Re-enable touch events from this task view
         tv.setTouchEnabled(true);
         // Restore the footer
-        tv.animateFooterVisibility(true, mSv.mConfig.taskViewLockToAppShortAnimDuration, 0);
+        tv.animateFooterVisibility(true, mSv.mConfig.taskViewLockToAppShortAnimDuration);
     }
 
     @Override

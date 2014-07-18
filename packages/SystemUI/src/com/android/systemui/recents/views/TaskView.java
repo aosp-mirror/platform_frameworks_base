@@ -32,11 +32,9 @@ import android.view.ViewPropertyAnimator;
 import android.view.animation.AccelerateInterpolator;
 import android.widget.FrameLayout;
 import com.android.systemui.R;
-import com.android.systemui.recents.misc.Console;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.model.Task;
-import com.android.systemui.recents.model.TaskStack;
 
 
 /* A task view */
@@ -314,7 +312,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
                         mBarView.startEnterRecentsAnimation(0, mEnableThumbnailClip);
                         setVisibility(View.VISIBLE);
                         // Animate the footer into view
-                        animateFooterVisibility(true, mConfig.taskBarEnterAnimDuration, 0);
+                        animateFooterVisibility(true, mConfig.taskBarEnterAnimDuration);
                         // Decrement the post animation trigger
                         ctx.postAnimationTrigger.decrement();
                     }
@@ -363,8 +361,8 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
                 ctx.postAnimationTrigger.increment();
 
                 // Animate the footer into view
-                animateFooterVisibility(true, mConfig.taskBarEnterAnimDuration,
-                        mConfig.taskBarEnterAnimDelay);
+                animateFooterVisibility(true, mConfig.taskBarEnterAnimDuration
+                );
             } else {
                 mEnableThumbnailClip.run();
             }
@@ -398,14 +396,14 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
             ctx.postAnimationTrigger.increment();
 
             // Animate the footer into view
-            animateFooterVisibility(true, mConfig.taskViewEnterFromHomeDuration,
-                    mConfig.taskBarEnterAnimDelay);
+            animateFooterVisibility(true, mConfig.taskViewEnterFromHomeDuration
+            );
         } else {
             // Otherwise, just enable the thumbnail clip
             mEnableThumbnailClip.run();
 
             // Animate the footer into view
-            animateFooterVisibility(true, 0, 0);
+            animateFooterVisibility(true, 0);
         }
     }
 
@@ -555,8 +553,8 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
     }
 
     /** Animates the footer into and out of view. */
-    public void animateFooterVisibility(boolean visible, int duration, int delay) {
-        if (!mTask.canLockToTask) {
+    public void animateFooterVisibility(boolean visible, int duration) {
+        if (!mTask.lockToThisTask) {
             if (mLockToAppButtonView.getVisibility() == View.VISIBLE) {
                 mLockToAppButtonView.setVisibility(View.INVISIBLE);
             }
@@ -684,9 +682,9 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         mTask.setCallbacks(this);
         if (getMeasuredWidth() == 0) {
             // If we haven't yet measured, we should just set the footer height with any animation
-            animateFooterVisibility(t.canLockToTask, 0, 0);
+            animateFooterVisibility(t.lockToThisTask, 0);
         } else {
-            animateFooterVisibility(t.canLockToTask, mConfig.taskViewLockToAppLongAnimDuration, 0);
+            animateFooterVisibility(t.lockToThisTask, mConfig.taskViewLockToAppLongAnimDuration);
         }
     }
 
@@ -754,7 +752,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
                         }
                     });
                     // Hide the footer
-                    tv.animateFooterVisibility(false, mConfig.taskViewRemoveAnimDuration, 0);
+                    tv.animateFooterVisibility(false, mConfig.taskViewRemoveAnimDuration);
                 } else if (v == tv || v == mLockToAppButtonView) {
                     mCb.onTaskViewClicked(tv, tv.getTask(), (v == mLockToAppButtonView));
                 }

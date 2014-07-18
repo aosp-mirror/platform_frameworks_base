@@ -29,6 +29,7 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import com.android.systemui.R;
 import com.android.systemui.recents.misc.Console;
+import com.android.systemui.recents.misc.SystemServicesProxy;
 
 
 /** A static Recents configuration for the current context
@@ -109,7 +110,8 @@ public class RecentsConfiguration {
     public boolean launchedFromHome;
     public int launchedToTaskId;
 
-    /** Dev options */
+    /** Dev options and global settings */
+    public boolean lockToAppEnabled;
     public boolean developerOptionsEnabled;
     public boolean debugModeEnabled;
 
@@ -127,15 +129,10 @@ public class RecentsConfiguration {
                 com.android.internal.R.interpolator.linear_out_slow_in);
         quintOutInterpolator = AnimationUtils.loadInterpolator(context,
                 com.android.internal.R.interpolator.decelerate_quint);
-
-        // Check if the developer options are enabled
-        ContentResolver cr = context.getContentResolver();
-        developerOptionsEnabled = Settings.Global.getInt(cr,
-                Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 0) != 0;
     }
 
     /** Updates the configuration to the current context */
-    public static RecentsConfiguration reinitialize(Context context) {
+    public static RecentsConfiguration reinitialize(Context context, SystemServicesProxy ssp) {
         if (sInstance == null) {
             sInstance = new RecentsConfiguration(context);
         }
@@ -144,6 +141,7 @@ public class RecentsConfiguration {
             sInstance.update(context);
             sPrevConfigurationHashCode = configHashCode;
         }
+        sInstance.updateOnReinitialize(context, ssp);
         return sInstance;
     }
 
@@ -258,6 +256,15 @@ public class RecentsConfiguration {
         SharedPreferences settings = context.getSharedPreferences(context.getPackageName(), 0);
         settings.edit().putInt(Constants.Values.App.Key_SearchAppWidgetId,
                 appWidgetId).apply();
+    }
+
+    /** Updates the states that need to be re-read whenever we re-initialize. */
+    void updateOnReinitialize(Context context, SystemServicesProxy ssp) {
+        // Check if the developer options are enabled
+        developerOptionsEnabled = ssp.getGlobalSetting(context,
+                Settings.Global.DEVELOPMENT_SETTINGS_ENABLED) != 0;
+        lockToAppEnabled = ssp.getSystemSetting(context,
+                Settings.System.LOCK_TO_APP_ENABLED) != 0;
     }
 
     /** Called when the configuration has changed, and we want to reset any configuration specific

@@ -84,7 +84,8 @@ public class Task {
     public boolean useLightOnPrimaryColor;
     public Bitmap thumbnail;
     public boolean isActive;
-    public boolean canLockToTask;
+    public boolean lockToThisTask;
+    public boolean lockToTaskEnabled;
     public int userId;
 
     TaskCallbacks mCb;
@@ -95,7 +96,8 @@ public class Task {
 
     public Task(int id, boolean isActive, Intent intent, int taskAffiliation, String activityTitle,
                 Drawable activityIcon, int colorPrimary, int userId,
-                long firstActiveTime, long lastActiveTime, boolean canLockToTask) {
+                long firstActiveTime, long lastActiveTime, boolean lockToThisTask,
+                boolean lockToTaskEnabled) {
         this.key = new TaskKey(id, intent, userId, firstActiveTime, lastActiveTime);
         this.taskAffiliation = taskAffiliation;
         this.activityLabel = activityTitle;
@@ -104,7 +106,8 @@ public class Task {
         this.useLightOnPrimaryColor = Utilities.computeContrastBetweenColors(colorPrimary,
                 Color.WHITE) > 3f;
         this.isActive = isActive;
-        this.canLockToTask = canLockToTask;
+        this.lockToThisTask = lockToTaskEnabled && lockToThisTask;
+        this.lockToTaskEnabled = lockToTaskEnabled;
         this.userId = userId;
     }
 
