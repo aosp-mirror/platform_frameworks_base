@@ -2742,6 +2742,7 @@ package android.accounts {
     method public android.accounts.AccountManagerFuture<android.os.Bundle> getAuthTokenByFeatures(java.lang.String, java.lang.String, java.lang.String[], android.app.Activity, android.os.Bundle, android.os.Bundle, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler);
     method public android.accounts.AuthenticatorDescription[] getAuthenticatorTypes();
     method public java.lang.String getPassword(android.accounts.Account);
+    method public java.lang.String getPreviousName(android.accounts.Account);
     method public java.lang.String getUserData(android.accounts.Account, java.lang.String);
     method public android.accounts.AccountManagerFuture<java.lang.Boolean> hasFeatures(android.accounts.Account, java.lang.String[], android.accounts.AccountManagerCallback<java.lang.Boolean>, android.os.Handler);
     method public void invalidateAuthToken(java.lang.String, java.lang.String);
@@ -2749,6 +2750,7 @@ package android.accounts {
     method public java.lang.String peekAuthToken(android.accounts.Account, java.lang.String);
     method public android.accounts.AccountManagerFuture<java.lang.Boolean> removeAccount(android.accounts.Account, android.accounts.AccountManagerCallback<java.lang.Boolean>, android.os.Handler);
     method public void removeOnAccountsUpdatedListener(android.accounts.OnAccountsUpdateListener);
+    method public android.accounts.AccountManagerFuture<android.accounts.Account> renameAccount(android.accounts.Account, java.lang.String, android.accounts.AccountManagerCallback<android.accounts.Account>, android.os.Handler);
     method public void setAuthToken(android.accounts.Account, java.lang.String, java.lang.String);
     method public void setPassword(android.accounts.Account, java.lang.String);
     method public void setUserData(android.accounts.Account, java.lang.String, java.lang.String);
