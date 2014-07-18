@@ -56,6 +56,34 @@ public class TelecommManager {
     }
 
     /**
+     * Return the {@link PhoneAccount} which is the user-chosen default for making outgoing
+     * phone calls. This {@code PhoneAccount} will always be a member of the list which is
+     * returned from calling {@link #getEnabledPhoneAccounts()}.
+     * <p>
+     * Apps must be prepared for this method to return {@code null}, indicating that there
+     * currently exists no user-chosen default {@code PhoneAccount}. In this case, apps wishing to
+     * initiate a phone call must either create their {@link android.content.Intent#ACTION_CALL} or
+     * {@link android.content.Intent#ACTION_DIAL} {@code Intent} with no
+     * {@link TelecommConstants#EXTRA_PHONE_ACCOUNT}, or present the user with an affordance
+     * to select one of the elements of {@link #getEnabledPhoneAccounts()}.
+     * <p>
+     * An {@link android.content.Intent#ACTION_CALL} or {@link android.content.Intent#ACTION_DIAL}
+     * {@code Intent} with no {@link TelecommConstants#EXTRA_PHONE_ACCOUNT} is valid, and subsequent
+     * steps in the phone call flow are responsible for presenting the user with an affordance, if
+     * necessary, to choose a {@code PhoneAccount}.
+     */
+    public PhoneAccount getDefaultOutgoingPhoneAccount() {
+        try {
+            if (isServiceConnected()) {
+                return getTelecommService().getDefaultOutgoingPhoneAccount();
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelecommService#getDefaultOutgoingPhoneAccount", e);
+        }
+        return null;
+    }
+
+    /**
      * Return a list of {@link PhoneAccount}s which can be used to make and receive phone calls.
      *
      * @see #EXTRA_PHONE_ACCOUNT
@@ -94,13 +122,12 @@ public class TelecommManager {
     /**
      * Register a {@link PhoneAccount} for use by the system.
      *
-     * @param account The {@link PhoneAccount}.
-     * @param metadata The metadata for the account.
+     * @param metadata The complete {@link PhoneAccountMetadata}.
      */
-    public void registerPhoneAccount(PhoneAccount account, PhoneAccountMetadata metadata) {
+    public void registerPhoneAccount(PhoneAccountMetadata metadata) {
         try {
             if (isServiceConnected()) {
-                getTelecommService().registerPhoneAccount(account, metadata);
+                getTelecommService().registerPhoneAccount(metadata);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelecommService#registerPhoneAccount", e);
