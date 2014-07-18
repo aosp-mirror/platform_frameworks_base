@@ -48539,6 +48539,13 @@ package java.util {
     method public int getWidth();
   }
 
+  public class IllformedLocaleException extends java.lang.RuntimeException {
+    ctor public IllformedLocaleException();
+    ctor public IllformedLocaleException(java.lang.String);
+    ctor public IllformedLocaleException(java.lang.String, int);
+    method public int getErrorIndex();
+  }
+
   public class InputMismatchException extends java.util.NoSuchElementException implements java.io.Serializable {
     ctor public InputMismatchException();
     ctor public InputMismatchException(java.lang.String);
