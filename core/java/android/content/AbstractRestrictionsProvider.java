@@ -17,8 +17,8 @@
 package android.content;
 
 import android.app.admin.DevicePolicyManager;
-import android.os.Bundle;
 import android.os.IBinder;
+import android.os.PersistableBundle;
 
 /**
  * Abstract implementation of a Restrictions Provider BroadcastReceiver. To implement a
@@ -30,7 +30,7 @@ import android.os.IBinder;
  * The function of a Restrictions Provider is to transport permission requests from apps on this
  * device to an administrator (most likely on a remote device or computer) and deliver back
  * responses. The response should be sent back to the app via
- * {@link RestrictionsManager#notifyPermissionResponse(String, Bundle)}.
+ * {@link RestrictionsManager#notifyPermissionResponse(String, PersistableBundle)}.
  *
  * @see RestrictionsManager
  */
@@ -59,7 +59,7 @@ public abstract class AbstractRestrictionsProvider extends BroadcastReceiver {
      * @see RestrictionsManager#REQUEST_KEY_ID
      */
     public abstract void requestPermission(Context context,
-            String packageName, String requestType, Bundle request);
+            String packageName, String requestType, String requestId, PersistableBundle request);
 
     /**
      * Intercept standard Restrictions Provider broadcasts.  Implementations
@@ -73,8 +73,10 @@ public abstract class AbstractRestrictionsProvider extends BroadcastReceiver {
         if (RestrictionsManager.ACTION_REQUEST_PERMISSION.equals(action)) {
             String packageName = intent.getStringExtra(RestrictionsManager.EXTRA_PACKAGE_NAME);
             String requestType = intent.getStringExtra(RestrictionsManager.EXTRA_REQUEST_TYPE);
-            Bundle request = intent.getBundleExtra(RestrictionsManager.EXTRA_REQUEST_BUNDLE);
-            requestPermission(context, packageName, requestType, request);
+            String requestId = intent.getStringExtra(RestrictionsManager.EXTRA_REQUEST_ID);
+            PersistableBundle request = (PersistableBundle)
+                    intent.getParcelableExtra(RestrictionsManager.EXTRA_REQUEST_BUNDLE);
+            requestPermission(context, packageName, requestType, requestId, request);
         }
     }
 }
