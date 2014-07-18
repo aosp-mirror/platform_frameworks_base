@@ -735,10 +735,12 @@ public class VectorDrawable extends Drawable {
 
         private void drawPath(VGroup vGroup, VPath vPath, float stackedAlpha,
                 Canvas canvas, int w, int h) {
-            final float scale = Math.min(h / mViewportHeight, w / mViewportWidth);
+            final float scaleX =  w / mViewportWidth;
+            final float scaleY = h / mViewportHeight;
+            final float minScale = Math.min(scaleX, scaleY);
 
             mFinalPathMatrix.set(vGroup.mStackedMatrix);
-            mFinalPathMatrix.postScale(scale, scale, mViewportWidth / 2f, mViewportHeight / 2f);
+            mFinalPathMatrix.postScale(scaleX, scaleY, mViewportWidth / 2f, mViewportHeight / 2f);
             mFinalPathMatrix.postTranslate(
                     w / 2f - mViewportWidth / 2f, h / 2f - mViewportHeight / 2f);
 
@@ -802,10 +804,10 @@ public class VectorDrawable extends Drawable {
                         strokePaint.setStrokeCap(vPath.mStrokeLineCap);
                     }
 
-                    strokePaint.setStrokeMiter(vPath.mStrokeMiterlimit * scale);
+                    strokePaint.setStrokeMiter(vPath.mStrokeMiterlimit * minScale);
 
                     strokePaint.setColor(applyAlpha(vPath.mStrokeColor, stackedAlpha));
-                    strokePaint.setStrokeWidth(vPath.mStrokeWidth * scale);
+                    strokePaint.setStrokeWidth(vPath.mStrokeWidth * minScale);
                     canvas.drawPath(mRenderPath, strokePaint);
                 }
             }
