@@ -149,22 +149,9 @@ public abstract class TvInputService extends Service {
      * <p>
      * May return {@code null} if this TV input service fails to create a session for some reason.
      * </p>
-     */
-    public abstract Session onCreateSession();
-
-    /**
-     * Returns a concrete implementation of {@link Session}.
-     * <p>
-     * May return {@code null} if this TV input service fails to create a session for some reason.
-     * </p>
      * @param inputId The ID of the TV input associated with the session.
-     *
-     * @hide
      */
-    @SystemApi
-    public Session onCreateSession(String inputId) {
-        return onCreateSession();
-    }
+    public abstract Session onCreateSession(String inputId);
 
     /**
      * Returns a new TvInputInfo object if this service is responsible for {@code hardwareInfo};
