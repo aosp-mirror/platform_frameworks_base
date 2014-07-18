@@ -2314,6 +2314,23 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Determine whether or not caller-Id information has been disabled.
+     *
+     * @param userHandle The user for whom to check the caller-id permission
+     * @hide
+     */
+    public boolean getCrossProfileCallerIdDisabled(UserHandle userHandle) {
+        if (mService != null) {
+            try {
+                return mService.getCrossProfileCallerIdDisabledForUser(userHandle.getIdentifier());
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+        return false;
+    }
+
+    /**
      * Called by the profile owner so that some intents sent in the managed profile can also be
      * resolved in the parent, or vice versa.
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
