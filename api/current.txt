@@ -16439,7 +16439,7 @@ package android.media.tv {
     ctor public TvContentRating(java.lang.String);
     ctor public TvContentRating(java.lang.String, java.lang.String[]);
     method public java.lang.String flattenToString();
-    method public java.lang.String getRating();
+    method public java.lang.String getMainRating();
     method public java.util.List<java.lang.String> getSubRatings();
     method public static android.media.tv.TvContentRating unflattenFromString(java.lang.String);
     field public static final java.lang.String RATING_KR_12 = "RATING_KR_12";
