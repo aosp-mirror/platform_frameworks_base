@@ -7191,6 +7191,7 @@ package android.content {
     field public static final java.lang.String LAUNCHER_APPS_SERVICE = "launcherapps";
     field public static final java.lang.String LAYOUT_INFLATER_SERVICE = "layout_inflater";
     field public static final java.lang.String LOCATION_SERVICE = "location";
+    field public static final java.lang.String MEDIA_PROJECTION_SERVICE = "media_projection";
     field public static final java.lang.String MEDIA_ROUTER_SERVICE = "media_router";
     field public static final java.lang.String MEDIA_SESSION_SERVICE = "media_session";
     field public static final int MODE_APPEND = 32768; // 0x8000
@@ -13109,6 +13110,7 @@ package android.hardware.display {
 
   public final class DisplayManager {
     method public android.hardware.display.VirtualDisplay createVirtualDisplay(java.lang.String, int, int, int, android.view.Surface, int);
+    method public android.hardware.display.VirtualDisplay createVirtualDisplay(java.lang.String, int, int, int, android.view.Surface, int, android.hardware.display.VirtualDisplay.Callbacks, android.os.Handler);
     method public android.view.Display getDisplay(int);
     method public android.view.Display[] getDisplays();
     method public android.view.Display[] getDisplays(java.lang.String);
@@ -13118,6 +13120,7 @@ package android.hardware.display {
     field public static final int VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY = 8; // 0x8
     field public static final int VIRTUAL_DISPLAY_FLAG_PRESENTATION = 2; // 0x2
     field public static final int VIRTUAL_DISPLAY_FLAG_PUBLIC = 1; // 0x1
+    field public static final int VIRTUAL_DISPLAY_FLAG_SCREEN_SHARE = 16; // 0x10
     field public static final int VIRTUAL_DISPLAY_FLAG_SECURE = 4; // 0x4
   }
 
@@ -13132,6 +13135,13 @@ package android.hardware.display {
     method public android.view.Surface getSurface();
     method public void release();
     method public void setSurface(android.view.Surface);
+  }
+
+  public static abstract class VirtualDisplay.Callbacks {
+    ctor public VirtualDisplay.Callbacks();
+    method public void onDisplayPaused();
+    method public void onDisplayResumed();
+    method public void onDisplayStopped();
   }
 
 }
@@ -16006,6 +16016,28 @@ package android.media.effect {
 
   public abstract interface EffectUpdateListener {
     method public abstract void onEffectUpdated(android.media.effect.Effect, java.lang.Object);
+  }
+
+}
+
+package android.media.projection {
+
+  public final class MediaProjection {
+    method public void addCallback(android.media.projection.MediaProjection.Callback, android.os.Handler);
+    method public android.media.AudioRecord createAudioRecord(int, int, int, int);
+    method public android.hardware.display.VirtualDisplay createVirtualDisplay(java.lang.String, int, int, int, boolean, android.view.Surface, android.hardware.display.VirtualDisplay.Callbacks, android.os.Handler);
+    method public void removeCallback(android.media.projection.MediaProjection.Callback);
+    method public void stop();
+  }
+
+  public static abstract class MediaProjection.Callback {
+    ctor public MediaProjection.Callback();
+    method public void onStop();
+  }
+
+  public final class MediaProjectionManager {
+    method public android.media.projection.MediaProjection getMediaProjection(int, android.content.Intent);
+    method public android.content.Intent getScreenCaptureIntent();
   }
 
 }

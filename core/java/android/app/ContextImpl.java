@@ -72,6 +72,7 @@ import android.location.ILocationManager;
 import android.location.LocationManager;
 import android.media.AudioManager;
 import android.media.MediaRouter;
+import android.media.projection.MediaProjectionManager;
 import android.media.session.MediaSessionManager;
 import android.media.tv.ITvInputManager;
 import android.media.tv.TvInputManager;
@@ -752,6 +753,12 @@ class ContextImpl extends Context {
                 return new PersistentDataBlockManager(
                         IPersistentDataBlockService.Stub.asInterface(b));
         }});
+
+        registerService(MEDIA_PROJECTION_SERVICE, new ServiceFetcher() {
+                public Object createService(ContextImpl ctx) {
+                    return new MediaProjectionManager(ctx);
+                }
+        });
     }
 
     static ContextImpl getImpl(Context context) {
