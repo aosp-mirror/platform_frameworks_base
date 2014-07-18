@@ -16,6 +16,8 @@
 
 package android.app;
 
+import android.app.usage.IUsageStatsManager;
+import android.app.usage.UsageStatsManager;
 import android.os.Build;
 
 import android.service.persistentdata.IPersistentDataBlockService;
@@ -729,7 +731,8 @@ class ContextImpl extends Context {
                 IBinder iBinder = ServiceManager.getService(TV_INPUT_SERVICE);
                 ITvInputManager service = ITvInputManager.Stub.asInterface(iBinder);
                 return new TvInputManager(service, UserHandle.myUserId());
-            }});
+            }
+        });
 
         registerService(TV_PARENTAL_CONTROL_SERVICE, new ServiceFetcher() {
                 public Object getService(ContextImpl ctx) {
@@ -743,9 +746,12 @@ class ContextImpl extends Context {
         });
 
         registerService(USAGE_STATS_SERVICE, new ServiceFetcher() {
-                public Object createService(ContextImpl ctx) {
-                return new UsageStatsManager(ctx.getOuterContext());
-        }});
+            public Object createService(ContextImpl ctx) {
+                IBinder iBinder = ServiceManager.getService(USAGE_STATS_SERVICE);
+                IUsageStatsManager service = IUsageStatsManager.Stub.asInterface(iBinder);
+                return new UsageStatsManager(ctx.getOuterContext(), service);
+            }
+        });
 
         registerService(JOB_SCHEDULER_SERVICE, new ServiceFetcher() {
             public Object createService(ContextImpl ctx) {

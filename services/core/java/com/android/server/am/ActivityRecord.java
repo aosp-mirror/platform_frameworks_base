@@ -854,7 +854,7 @@ final class ActivityRecord {
                 Log.i(ActivityManagerService.TAG, sb.toString());
             }
             if (totalTime > 0) {
-                service.mUsageStatsService.noteFullyDrawnTime(realActivity, (int) totalTime);
+                //service.mUsageStatsService.noteFullyDrawnTime(realActivity, (int) totalTime);
             }
             fullyDrawnStartTime = 0;
             stack.mFullyDrawnStartTime = 0;
@@ -886,7 +886,7 @@ final class ActivityRecord {
         }
         mStackSupervisor.reportActivityLaunchedLocked(false, this, thisTime, totalTime);
         if (totalTime > 0) {
-            service.mUsageStatsService.noteLaunchTime(realActivity, (int)totalTime);
+            //service.mUsageStatsService.noteLaunchTime(realActivity, (int)totalTime);
         }
         displayStartTime = 0;
         stack.mLaunchStartTime = 0;

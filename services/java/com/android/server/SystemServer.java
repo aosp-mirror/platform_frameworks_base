@@ -20,6 +20,7 @@ import android.app.ActivityManagerNative;
 import android.app.ActivityThread;
 import android.app.IAlarmManager;
 import android.app.INotificationManager;
+import android.app.usage.UsageStatsManagerInternal;
 import android.bluetooth.BluetoothAdapter;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -91,6 +92,7 @@ import com.android.server.storage.DeviceStorageMonitorService;
 import com.android.server.trust.TrustManagerService;
 import com.android.server.tv.TvInputManagerService;
 import com.android.server.twilight.TwilightService;
+import com.android.server.usage.UsageStatsService;
 import com.android.server.usb.UsbService;
 import com.android.server.wallpaper.WallpaperManagerService;
 import com.android.server.webkit.WebViewUpdateService;
@@ -366,6 +368,11 @@ public final class SystemServer {
 
         // Tracks the battery level.  Requires LightService.
         mSystemServiceManager.startService(BatteryService.class);
+
+        // Tracks application usage stats.
+        mSystemServiceManager.startService(UsageStatsService.class);
+        mActivityManagerService.setUsageStatsManager(
+                LocalServices.getService(UsageStatsManagerInternal.class));
     }
 
     /**
