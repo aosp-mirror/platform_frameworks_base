@@ -17,6 +17,7 @@
 package android.os;
 
 import android.content.Context;
+import android.media.AudioAttributes;
 import android.util.Log;
 
 /**
@@ -58,13 +59,13 @@ public class SystemVibrator extends Vibrator {
      * @hide
      */
     @Override
-    public void vibrate(int uid, String opPkg, long milliseconds, int streamHint) {
+    public void vibrate(int uid, String opPkg, long milliseconds, AudioAttributes attributes) {
         if (mService == null) {
             Log.w(TAG, "Failed to vibrate; no vibrator service.");
             return;
         }
         try {
-            mService.vibrate(uid, opPkg, milliseconds, streamHint, mToken);
+            mService.vibrate(uid, opPkg, milliseconds, usageForAttributes(attributes), mToken);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to vibrate.", e);
         }
@@ -75,7 +76,7 @@ public class SystemVibrator extends Vibrator {
      */
     @Override
     public void vibrate(int uid, String opPkg, long[] pattern, int repeat,
-            int streamHint) {
+            AudioAttributes attributes) {
         if (mService == null) {
             Log.w(TAG, "Failed to vibrate; no vibrator service.");
             return;
@@ -85,7 +86,7 @@ public class SystemVibrator extends Vibrator {
         // anyway
         if (repeat < pattern.length) {
             try {
-                mService.vibratePattern(uid, opPkg, pattern, repeat, streamHint,
+                mService.vibratePattern(uid, opPkg, pattern, repeat, usageForAttributes(attributes),
                         mToken);
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed to vibrate.", e);
@@ -93,6 +94,10 @@ public class SystemVibrator extends Vibrator {
         } else {
             throw new ArrayIndexOutOfBoundsException();
         }
+    }
+
+    private static int usageForAttributes(AudioAttributes attributes) {
+        return attributes != null ? attributes.getUsage() : AudioAttributes.USAGE_UNKNOWN;
     }
 
     @Override

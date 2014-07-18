@@ -41,6 +41,7 @@ import android.content.res.TypedArray;
 import android.database.ContentObserver;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.IAudioService;
 import android.media.Ringtone;
@@ -187,6 +188,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             | View.STATUS_BAR_TRANSLUCENT
             | View.NAVIGATION_BAR_TRANSLUCENT
             | View.SYSTEM_UI_TRANSPARENT;
+
+    private static final AudioAttributes VIBRATION_ATTRIBUTES = new AudioAttributes.Builder()
+            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+            .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
+            .build();
 
     /**
      * Keyguard stuff
@@ -5435,10 +5441,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
         if (pattern.length == 1) {
             // One-shot vibration
-            mVibrator.vibrate(owningUid, owningPackage, pattern[0], AudioManager.STREAM_SYSTEM);
+            mVibrator.vibrate(owningUid, owningPackage, pattern[0], VIBRATION_ATTRIBUTES);
         } else {
             // Pattern vibration
-            mVibrator.vibrate(owningUid, owningPackage, pattern, -1, AudioManager.STREAM_SYSTEM);
+            mVibrator.vibrate(owningUid, owningPackage, pattern, -1, VIBRATION_ATTRIBUTES);
         }
         return true;
     }

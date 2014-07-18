@@ -25,7 +25,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
-import android.media.AudioManager;
+import android.media.AudioAttributes;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -58,6 +58,12 @@ public class SearchPanelView extends FrameLayout implements
     public static final boolean DEBUG_GESTURES = true;
     private static final String ASSIST_ICON_METADATA_NAME =
             "com.android.systemui.action_assist_icon";
+
+    private static final AudioAttributes VIBRATION_ATTRIBUTES = new AudioAttributes.Builder()
+            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+            .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
+            .build();
+
     private final Context mContext;
     private BaseStatusBar mBar;
 
@@ -209,7 +215,7 @@ public class SearchPanelView extends FrameLayout implements
             Resources res = context.getResources();
             Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
             vibrator.vibrate(res.getInteger(R.integer.config_search_panel_view_vibration_duration),
-                    AudioManager.STREAM_SYSTEM);
+                    VIBRATION_ATTRIBUTES);
         }
     }
 

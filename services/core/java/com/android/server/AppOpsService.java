@@ -36,7 +36,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.media.AudioService;
+import android.media.AudioAttributes;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Bundle;
@@ -46,7 +46,6 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
-import android.os.UserManager;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
@@ -62,7 +61,6 @@ import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
-import com.google.android.util.AbstractMessageParser.MusicTrack;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -577,9 +575,9 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     @Override
-    public int checkAudioOperation(int code, int stream, int uid, String packageName) {
+    public int checkAudioOperation(int code, int usage, int uid, String packageName) {
         synchronized (this) {
-            final int mode = checkRestrictionLocked(code, stream, uid, packageName);
+            final int mode = checkRestrictionLocked(code, usage, uid, packageName);
             if (mode != AppOpsManager.MODE_ALLOWED) {
                 return mode;
             }
@@ -587,10 +585,10 @@ public class AppOpsService extends IAppOpsService.Stub {
         return checkOperation(code, uid, packageName);
     }
 
-    private int checkRestrictionLocked(int code, int stream, int uid, String packageName) {
-        final SparseArray<Restriction> streamRestrictions = mAudioRestrictions.get(code);
-        if (streamRestrictions != null) {
-            final Restriction r = streamRestrictions.get(stream);
+    private int checkRestrictionLocked(int code, int usage, int uid, String packageName) {
+        final SparseArray<Restriction> usageRestrictions = mAudioRestrictions.get(code);
+        if (usageRestrictions != null) {
+            final Restriction r = usageRestrictions.get(usage);
             if (r != null && !r.exceptionPackages.contains(packageName)) {
                 return r.mode;
             }
@@ -599,17 +597,17 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     @Override
-    public void setAudioRestriction(int code, int stream, int uid, int mode,
+    public void setAudioRestriction(int code, int usage, int uid, int mode,
             String[] exceptionPackages) {
         verifyIncomingUid(uid);
         verifyIncomingOp(code);
         synchronized (this) {
-            SparseArray<Restriction> streamRestrictions = mAudioRestrictions.get(code);
-            if (streamRestrictions == null) {
-                streamRestrictions = new SparseArray<Restriction>();
-                mAudioRestrictions.put(code, streamRestrictions);
+            SparseArray<Restriction> usageRestrictions = mAudioRestrictions.get(code);
+            if (usageRestrictions == null) {
+                usageRestrictions = new SparseArray<Restriction>();
+                mAudioRestrictions.put(code, usageRestrictions);
             }
-            streamRestrictions.remove(stream);
+            usageRestrictions.remove(usage);
             if (mode != AppOpsManager.MODE_ALLOWED) {
                 final Restriction r = new Restriction();
                 r.mode = mode;
@@ -623,7 +621,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                         }
                     }
                 }
-                streamRestrictions.put(stream, r);
+                usageRestrictions.put(usage, r);
             }
         }
     }
@@ -1205,9 +1203,9 @@ public class AppOpsService extends IAppOpsService.Stub {
                             printedHeader = true;
                             needSep = true;
                         }
-                        final int stream = restrictions.keyAt(i);
+                        final int usage = restrictions.keyAt(i);
                         pw.print("    "); pw.print(op);
-                        pw.print(" stream="); pw.print(AudioService.streamToString(stream));
+                        pw.print(" usage="); pw.print(AudioAttributes.usageToString(usage));
                         Restriction r = restrictions.valueAt(i);
                         pw.print(": mode="); pw.println(r.mode);
                         if (!r.exceptionPackages.isEmpty()) {

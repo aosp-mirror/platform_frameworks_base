@@ -16,6 +16,10 @@
 
 package com.android.server.notification;
 
+import static android.media.AudioAttributes.USAGE_ALARM;
+import static android.media.AudioAttributes.USAGE_NOTIFICATION_TELEPHONY_RINGTONE;
+import static android.media.AudioAttributes.USAGE_UNKNOWN;
+
 import android.app.AlarmManager;
 import android.app.AppOpsManager;
 import android.app.Notification;
@@ -193,24 +197,24 @@ public class ZenModeHelper {
 
         // call restrictions
         final boolean muteCalls = zen && !mConfig.allowCalls;
-        mAppOps.setRestriction(AppOpsManager.OP_VIBRATE, AudioManager.STREAM_RING,
+        mAppOps.setRestriction(AppOpsManager.OP_VIBRATE, USAGE_NOTIFICATION_TELEPHONY_RINGTONE,
                 muteCalls ? AppOpsManager.MODE_IGNORED : AppOpsManager.MODE_ALLOWED,
                 exceptionPackages);
-        mAppOps.setRestriction(AppOpsManager.OP_PLAY_AUDIO, AudioManager.STREAM_RING,
+        mAppOps.setRestriction(AppOpsManager.OP_PLAY_AUDIO, USAGE_NOTIFICATION_TELEPHONY_RINGTONE,
                 muteCalls ? AppOpsManager.MODE_IGNORED : AppOpsManager.MODE_ALLOWED,
                 exceptionPackages);
 
         // restrict vibrations with no hints
-        mAppOps.setRestriction(AppOpsManager.OP_VIBRATE, AudioManager.USE_DEFAULT_STREAM_TYPE,
+        mAppOps.setRestriction(AppOpsManager.OP_VIBRATE, USAGE_UNKNOWN,
                 zen ? AppOpsManager.MODE_IGNORED : AppOpsManager.MODE_ALLOWED,
                 exceptionPackages);
 
         // alarm restrictions
         final boolean muteAlarms = mZenMode == Global.ZEN_MODE_NO_INTERRUPTIONS;
-        mAppOps.setRestriction(AppOpsManager.OP_VIBRATE, AudioManager.STREAM_ALARM,
+        mAppOps.setRestriction(AppOpsManager.OP_VIBRATE, USAGE_ALARM,
                 muteAlarms ? AppOpsManager.MODE_IGNORED : AppOpsManager.MODE_ALLOWED,
                 exceptionPackages);
-        mAppOps.setRestriction(AppOpsManager.OP_PLAY_AUDIO, AudioManager.STREAM_ALARM,
+        mAppOps.setRestriction(AppOpsManager.OP_PLAY_AUDIO, USAGE_ALARM,
                 muteAlarms ? AppOpsManager.MODE_IGNORED : AppOpsManager.MODE_ALLOWED,
                 exceptionPackages);
 
