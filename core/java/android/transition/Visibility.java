@@ -50,16 +50,16 @@ public abstract class Visibility extends Transition {
     /**
      * Mode used in {@link #setMode(int)} to make the transition
      * operate on targets that are appearing. Maybe be combined with
-     * {@link #OUT} to target Visibility changes both in and out.
+     * {@link #MODE_OUT} to target Visibility changes both in and out.
      */
-    public static final int IN = 0x1;
+    public static final int MODE_IN = 0x1;
 
     /**
      * Mode used in {@link #setMode(int)} to make the transition
      * operate on targets that are disappearing. Maybe be combined with
-     * {@link #IN} to target Visibility changes both in and out.
+     * {@link #MODE_IN} to target Visibility changes both in and out.
      */
-    public static final int OUT = 0x2;
+    public static final int MODE_OUT = 0x2;
 
     private static final String[] sTransitionProperties = {
             PROPNAME_VISIBILITY,
@@ -76,7 +76,7 @@ public abstract class Visibility extends Transition {
         ViewGroup endParent;
     }
 
-    private int mMode = IN | OUT;
+    private int mMode = MODE_IN | MODE_OUT;
 
     private int mForcedStartVisibility = -1;
     private int mForcedEndVisibility = -1;
@@ -98,12 +98,12 @@ public abstract class Visibility extends Transition {
      * on <code>mode</code>.
      *
      * @param mode The behavior supported by this transition, a combination of
-     *             {@link #IN} and {@link #OUT}.
+     *             {@link #MODE_IN} and {@link #MODE_OUT}.
      * @attr ref android.R.styleable#VisibilityTransition_visibilityMode
      */
     public void setMode(int mode) {
-        if ((mode & ~(IN | OUT)) != 0) {
-            throw new IllegalArgumentException("Only IN and OUT flags are allowed");
+        if ((mode & ~(MODE_IN | MODE_OUT)) != 0) {
+            throw new IllegalArgumentException("Only MODE_IN and MODE_OUT flags are allowed");
         }
         mMode = mode;
     }
@@ -112,7 +112,7 @@ public abstract class Visibility extends Transition {
      * Returns whether appearing and/or disappearing Views are supported.
      *
      * Returns whether appearing and/or disappearing Views are supported. A combination of
-     *         {@link #IN} and {@link #OUT}.
+     *         {@link #MODE_IN} and {@link #MODE_OUT}.
      * @attr ref android.R.styleable#VisibilityTransition_visibilityMode
      */
     public int getMode() {
@@ -276,7 +276,7 @@ public abstract class Visibility extends Transition {
     public Animator onAppear(ViewGroup sceneRoot,
             TransitionValues startValues, int startVisibility,
             TransitionValues endValues, int endVisibility) {
-        if ((mMode & IN) != IN || endValues == null) {
+        if ((mMode & MODE_IN) != MODE_IN || endValues == null) {
             return null;
         }
         return onAppear(sceneRoot, endValues.view, startValues, endValues);
@@ -339,7 +339,7 @@ public abstract class Visibility extends Transition {
     public Animator onDisappear(ViewGroup sceneRoot,
             TransitionValues startValues, int startVisibility,
             TransitionValues endValues, int endVisibility) {
-        if ((mMode & OUT) != OUT) {
+        if ((mMode & MODE_OUT) != MODE_OUT) {
             return null;
         }
 
