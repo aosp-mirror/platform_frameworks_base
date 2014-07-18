@@ -16,18 +16,20 @@
 
 package android.media.tv;
 
+import android.annotation.SystemApi;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.Log;
 
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 /**
  * A class representing a TV content rating.
  */
-public class TvContentRating {
+public final class TvContentRating {
     private static final String TAG = "TvContentRating";
 
     private static final int RATING_PREFIX_LENGTH = 10;
@@ -124,10 +126,10 @@ public class TvContentRating {
     // A mapping from two-letter country code (ISO 3166-1 alpha-2) to its rating-to-sub-ratings map.
     // This is used for validating the builder parameters.
     private static final Map<String, Map<String, String[]>> sRatings
-            = new HashMap<String, Map<String, String[]>>();
+            = new ArrayMap<String, Map<String, String[]>>();
 
     static {
-        Map<String, String[]> usRatings = new HashMap<String, String[]>();
+        Map<String, String[]> usRatings = new ArrayMap<String, String[]>();
         usRatings.put(RATING_US_TV_Y, null);
         usRatings.put(RATING_US_TV_Y7, new String[] { SUBRATING_US_FV });
         usRatings.put(RATING_US_TV_G, null);
@@ -139,7 +141,7 @@ public class TvContentRating {
                 SUBRATING_US_L, SUBRATING_US_S, SUBRATING_US_V });
         sRatings.put(PREFIX_RATING_US, usRatings);
 
-        Map<String, String[]> krRatings = new HashMap<String, String[]>();
+        Map<String, String[]> krRatings = new ArrayMap<String, String[]>();
         krRatings.put(RATING_KR_ALL, null);
         krRatings.put(RATING_KR_7, null);
         krRatings.put(RATING_KR_12, null);
@@ -157,8 +159,7 @@ public class TvContentRating {
      * @param rating The rating constant defined in this class.
      */
     public TvContentRating(String rating) {
-        mRating = rating;
-        mSubRatings = null;
+        this(rating, null);
     }
 
     /**
@@ -168,11 +169,11 @@ public class TvContentRating {
      * @param subRatings The String array of sub-rating constants defined in this class.
      */
     public TvContentRating(String rating, String[] subRatings) {
-        mRating = rating;
-        mSubRatings = subRatings;
-        if (TextUtils.isEmpty(mRating)) {
+        if (TextUtils.isEmpty(rating)) {
             throw new IllegalArgumentException("rating cannot be null");
         }
+        mRating = rating;
+        mSubRatings = subRatings;
         String prefix = "";
         if (mRating.length() > RATING_PREFIX_LENGTH) {
             prefix = mRating.substring(0, RATING_PREFIX_LENGTH);
@@ -188,6 +189,10 @@ public class TvContentRating {
                 } else {
                     List<String> validSubRatingList = Arrays.asList(subRatings);
                     for (String sr : mSubRatings) {
+                        if (TextUtils.isEmpty(sr)) {
+                            throw new IllegalArgumentException(
+                                    "subRatings cannot contain empty elements");
+                        }
                         if (!validSubRatingList.contains(sr)) {
                             Log.w(TAG, "Invalid subrating: " + sr);
                             break;
@@ -198,6 +203,52 @@ public class TvContentRating {
         } else {
             Log.w(TAG, "Rating undefined for " + mRating);
         }
+    }
+
+    /**
+     * Returns the main rating constant.
+     *
+     * @return the rating string that starts with "RATING_" prefix as defined in this class.
+     */
+    public String getMainRating() {
+        return mRating;
+    }
+
+    /**
+     * Returns the list of sub-rating constants.
+     *
+     * @return the unmodifiable {@code List} of sub-rating strings that start with "SUBRATING_"
+     *         prefix as defined in this class.
+     */
+    public List<String> getSubRatings() {
+        if (mSubRatings == null) {
+            return null;
+        }
+        return Collections.unmodifiableList(Arrays.asList(mSubRatings));
+    }
+
+
+    /**
+     * Returns a String that unambiguously describes both the rating and sub-rating information
+     * contained in the TvContentRating. You can later recover the TvContentRating from this string
+     * through {@link #unflattenFromString}.
+     *
+     * @return a new String holding rating/sub-rating information, which can later be stored in the
+     *         database and settings.
+     * @see #unflattenFromString
+     */
+    public String flattenToString() {
+        // TODO: Consider removing all obvious/redundant sub-strings including "RATING" and
+        // "SUBRATING" and find out a storage-efficient string format such as:
+        // <country>-<primary>/<sub1>/<sub2>/<sub3>
+        StringBuilder builder = new StringBuilder(mRating);
+        if (mSubRatings != null) {
+            for (String subRating : mSubRatings) {
+                builder.append(DELIMITER);
+                builder.append(subRating);
+            }
+        }
+        return builder.toString();
     }
 
     /**
@@ -226,20 +277,35 @@ public class TvContentRating {
     }
 
     /**
-     * @return a String that unambiguously describes both the rating and sub-rating information
-     *         contained in the TvContentRating. You can later recover the TvContentRating from this
-     *         string through {@link #unflattenFromString}.
-     * @see #unflattenFromString
+     * Returns true if this rating has the same main rating as the specified rating and when this
+     * rating's sub-ratings contain the other's.
+     * <p>
+     * For example, a TvContentRating object that represents TV-PG with S(Sexual content) and
+     * V(Violence) contains TV-PG, TV-PG/S, TV-PG/V and itself.
+     * </p>
+     *
+     * @param rating The {@link TvContentRating} to check.
+     * @return {@code true} if this object contains {@code rating}, {@code false} otherwise.
+     * @hide
      */
-    public String flattenToString() {
-        StringBuffer ratingStr = new StringBuffer();
-        ratingStr.append(mRating);
-        if (mSubRatings != null) {
-            for (String subRating : mSubRatings) {
-                ratingStr.append(DELIMITER);
-                ratingStr.append(subRating);
-            }
+    @SystemApi
+    public final boolean contains(TvContentRating rating) {
+        if (rating == null) {
+            throw new IllegalArgumentException("rating cannot be null");
         }
-        return ratingStr.toString();
+        if (!rating.getMainRating().equals(mRating)) {
+            return false;
+        }
+        List<String> subRatings = getSubRatings();
+        List<String> subRatingsOther = rating.getSubRatings();
+        if (subRatings == null && subRatingsOther == null) {
+            return true;
+        } else if (subRatings == null && subRatingsOther != null) {
+            return false;
+        } else if (subRatings != null && subRatingsOther == null) {
+            return true;
+        } else {
+            return subRatings.containsAll(subRatingsOther);
+        }
     }
 }
