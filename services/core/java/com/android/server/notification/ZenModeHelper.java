@@ -137,6 +137,13 @@ public class ZenModeHelper {
                 }
                 return false;
             }
+            // allow user-prioritized packages through in priority mode
+            if (mZenMode == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS) {
+                if (record.getPackagePriority() == Notification.PRIORITY_MAX) {
+                    ZenLog.traceNotIntercepted(record, "priorityApp");
+                    return false;
+                }
+            }
             // audience has veto power over all following rules
             if (!audienceMatches(record)) {
                 ZenLog.traceIntercepted(record, "!audienceMatches");
