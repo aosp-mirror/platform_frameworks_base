@@ -42,14 +42,15 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
 
     private static final int DO_RELEASE = 1;
     private static final int DO_SET_SURFACE = 2;
-    private static final int DO_SET_VOLUME = 3;
-    private static final int DO_TUNE = 4;
-    private static final int DO_SET_CAPTION_ENABLED = 5;
-    private static final int DO_SELECT_TRACK = 6;
-    private static final int DO_UNSELECT_TRACK = 7;
-    private static final int DO_CREATE_OVERLAY_VIEW = 8;
-    private static final int DO_RELAYOUT_OVERLAY_VIEW = 9;
-    private static final int DO_REMOVE_OVERLAY_VIEW = 10;
+    private static final int DO_DISPATCH_SURFACE_CHANGED = 3;
+    private static final int DO_SET_VOLUME = 4;
+    private static final int DO_TUNE = 5;
+    private static final int DO_SET_CAPTION_ENABLED = 6;
+    private static final int DO_SELECT_TRACK = 7;
+    private static final int DO_UNSELECT_TRACK = 8;
+    private static final int DO_CREATE_OVERLAY_VIEW = 9;
+    private static final int DO_RELAYOUT_OVERLAY_VIEW = 10;
+    private static final int DO_REMOVE_OVERLAY_VIEW = 11;
 
     private final HandlerCaller mCaller;
 
@@ -89,6 +90,12 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
             }
             case DO_SET_SURFACE: {
                 mTvInputSessionImpl.setSurface((Surface) msg.obj);
+                return;
+            }
+            case DO_DISPATCH_SURFACE_CHANGED: {
+                SomeArgs args = (SomeArgs) msg.obj;
+                mTvInputSessionImpl.dispatchSurfaceChanged(args.argi1, args.argi2, args.argi3);
+                args.recycle();
                 return;
             }
             case DO_SET_VOLUME: {
@@ -140,6 +147,12 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     @Override
     public void setSurface(Surface surface) {
         mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_SET_SURFACE, surface));
+    }
+
+    @Override
+    public void dispatchSurfaceChanged(int format, int width, int height) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageIIII(DO_DISPATCH_SURFACE_CHANGED,
+                format, width, height, 0));
     }
 
     @Override
