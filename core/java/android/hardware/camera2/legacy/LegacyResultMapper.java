@@ -34,11 +34,13 @@ import android.util.Size;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.android.internal.util.Preconditions.*;
 import static android.hardware.camera2.CaptureResult.*;
 
 /**
  * Provide legacy-specific implementations of camera2 CaptureResult for legacy devices.
  */
+@SuppressWarnings("deprecation")
 public class LegacyResultMapper {
     private static final String TAG = "LegacyResultMapper";
     private static final boolean VERBOSE = Log.isLoggable(TAG, Log.VERBOSE);
@@ -98,16 +100,14 @@ public class LegacyResultMapper {
         /*
          * control
          */
-        // control.afState
-        if (LegacyMetadataMapper.LIE_ABOUT_AF) {
-            // TODO: Implement autofocus state machine
-            result.set(CaptureResult.CONTROL_AF_MODE, request.get(CaptureRequest.CONTROL_AF_MODE));
-        }
 
         /*
          * control.ae*
          */
         mapAe(result, characteristics, request, activeArraySize, zoomData, /*out*/params);
+
+        // control.afMode
+        result.set(CaptureResult.CONTROL_AF_MODE, convertLegacyAfMode(params.getFocusMode()));
 
         // control.awbLock
         result.set(CaptureResult.CONTROL_AWB_LOCK, params.getAutoWhiteBalanceLock());
@@ -137,6 +137,13 @@ public class LegacyResultMapper {
         /*
          * lens
          */
+        // lens.focusDistance
+        {
+            if (Parameters.FOCUS_MODE_INFINITY.equals(params.getFocusMode())) {
+                result.set(CaptureResult.LENS_FOCUS_DISTANCE, 0.0f);
+            }
+        }
+
         // lens.focalLength
         result.set(CaptureResult.LENS_FOCAL_LENGTH, params.getFocalLength());
 
@@ -299,6 +306,33 @@ public class LegacyResultMapper {
         m.set(FLASH_MODE, flashMode);
         // control.aeMode
         m.set(CONTROL_AE_MODE, aeMode);
+    }
+
+    private static int convertLegacyAfMode(String mode) {
+        if (mode == null) {
+            Log.w(TAG, "convertLegacyAfMode - no AF mode, default to OFF");
+            return CONTROL_AF_MODE_OFF;
+        }
+
+        switch (mode) {
+            case Parameters.FOCUS_MODE_AUTO:
+                return CONTROL_AF_MODE_AUTO;
+            case Parameters.FOCUS_MODE_CONTINUOUS_PICTURE:
+                return CONTROL_AF_MODE_CONTINUOUS_PICTURE;
+            case Parameters.FOCUS_MODE_CONTINUOUS_VIDEO:
+                return CONTROL_AF_MODE_CONTINUOUS_VIDEO;
+            case Parameters.FOCUS_MODE_EDOF:
+                return CONTROL_AF_MODE_EDOF;
+            case Parameters.FOCUS_MODE_MACRO:
+                return CONTROL_AF_MODE_MACRO;
+            case Parameters.FOCUS_MODE_FIXED:
+                return CONTROL_AF_MODE_OFF;
+            case Parameters.FOCUS_MODE_INFINITY:
+                return CONTROL_AF_MODE_OFF;
+            default:
+                Log.w(TAG, "convertLegacyAfMode - unknown mode " + mode + " , ignoring");
+                return CONTROL_AF_MODE_OFF;
+        }
     }
 
     /** Map results for scaler.* */

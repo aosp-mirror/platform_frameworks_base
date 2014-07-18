@@ -67,6 +67,36 @@ public class ArrayUtils {
             return null;
         }
 
+        List<Integer> convertedList = convertStringListToIntList(list, convertFrom, convertTo);
+
+        int[] returnArray = new int[convertedList.size()];
+        for (int i = 0; i < returnArray.length; ++i) {
+            returnArray[i] = convertedList.get(i);
+        }
+
+        return returnArray;
+    }
+
+    /**
+     * Create an {@code List<Integer>} from the {@code List<>} by using {@code convertFrom} and
+     * {@code convertTo} as a one-to-one map (via the index).
+     *
+     * <p>Strings not appearing in {@code convertFrom} are ignored (with a logged warning);
+     * strings appearing in {@code convertFrom} but not {@code convertTo} are silently
+     * dropped.</p>
+     *
+     * @param list Source list of strings
+     * @param convertFrom Conversion list of strings
+     * @param convertTo Conversion list of ints
+     * @return A list of ints where the values correspond to the ones in {@code convertTo}
+     *         or {@code null} if {@code list} was {@code null}
+     */
+    public static List<Integer> convertStringListToIntList(
+            List<String> list, String[] convertFrom, int[] convertTo) {
+        if (list == null) {
+            return null;
+        }
+
         List<Integer> convertedList = new ArrayList<>(list.size());
 
         for (String str : list) {
@@ -84,12 +114,33 @@ public class ArrayUtils {
             }
         }
 
-        int[] returnArray = new int[convertedList.size()];
-        for (int i = 0; i < returnArray.length; ++i) {
-            returnArray[i] = convertedList.get(i);
+        return convertedList;
+    }
+
+    /**
+     * Convert the list of integers in {@code list} to an {@code int} array.
+     *
+     * <p>Every element in {@code list} must be non-{@code null}.</p>
+     *
+     * @param list a list of non-{@code null} integers
+     *
+     * @return a new int array containing all the elements from {@code list}
+     *
+     * @throws NullPointerException if any of the elements in {@code list} were {@code null}
+     */
+    public static int[] toIntArray(List<Integer> list) {
+        if (list == null) {
+            return null;
         }
 
-        return returnArray;
+        int[] arr = new int[list.size()];
+        int i = 0;
+        for (int elem : list) {
+            arr[i] = elem;
+            i++;
+        }
+
+        return arr;
     }
 
     private ArrayUtils() {

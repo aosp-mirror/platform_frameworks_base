@@ -28,6 +28,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
 import android.util.Log;
+import android.util.MutableLong;
 import android.util.Pair;
 import android.util.Size;
 import android.view.Surface;
@@ -65,6 +66,7 @@ public class RequestThreadManager {
 
     private final CameraDeviceState mDeviceState;
     private final CaptureCollector mCaptureCollector;
+    private final LegacyFocusStateMapper mFocusStateMapper;
 
     private static final int MSG_CONFIGURE_OUTPUTS = 1;
     private static final int MSG_SUBMIT_CAPTURE_REQUEST = 2;
@@ -74,6 +76,7 @@ public class RequestThreadManager {
 
     private static final int PREVIEW_FRAME_TIMEOUT = 300; // ms
     private static final int JPEG_FRAME_TIMEOUT = 3000; // ms (same as CTS for API2)
+    private static final int REQUEST_COMPLETE_TIMEOUT = 3000; // ms (same as JPEG timeout)
 
     private static final float ASPECT_RATIO_TOLERANCE = 0.01f;
     private boolean mPreviewRunning = false;
@@ -510,7 +513,7 @@ public class RequestThreadManager {
 
     private final Handler.Callback mRequestHandlerCb = new Handler.Callback() {
         private boolean mCleanup = false;
-        private LegacyResultMapper mMapper = new LegacyResultMapper();
+        private final LegacyResultMapper mMapper = new LegacyResultMapper();
 
         @Override
         public boolean handleMessage(Message msg) {
@@ -586,6 +589,8 @@ public class RequestThreadManager {
                         CaptureRequest request = holder.getRequest();
 
                         boolean paramsChanged = false;
+
+                        // Lazily process the rest of the request
                         if (mLastRequest == null || mLastRequest.captureRequest != request) {
 
                             // The intermediate buffer is sometimes null, but we always need
@@ -607,6 +612,9 @@ public class RequestThreadManager {
                                 paramsChanged = true;
                             }
                         }
+
+                        // Unconditionally process AF triggers, since they're non-idempotent
+                        mFocusStateMapper.processRequestTriggers(request, mParams);
 
                         try {
                             boolean success = mCaptureCollector.queueRequest(holder,
@@ -649,6 +657,27 @@ public class RequestThreadManager {
                             // Update parameters to the latest that we think the camera is using
                             mLastRequest.setParameters(mParams);
                         }
+
+                        MutableLong timestampMutable = new MutableLong(/*value*/0L);
+                        try {
+                            boolean success = mCaptureCollector.waitForRequestCompleted(holder,
+                                    REQUEST_COMPLETE_TIMEOUT, TimeUnit.MILLISECONDS,
+                                    /*out*/timestampMutable);
+
+                            if (!success) {
+                                Log.e(TAG, "Timed out while waiting for request to complete.");
+                            }
+                        } catch (InterruptedException e) {
+                         // TODO: report error to CameraDevice
+                            Log.e(TAG, "Interrupted during request completition.", e);
+                        }
+
+                        CameraMetadataNative result = mMapper.cachedConvertResultMetadata(
+                                mLastRequest, timestampMutable.value);
+                        // Update AF state
+                        mFocusStateMapper.mapResultTriggers(result);
+
+                        mDeviceState.setCaptureResult(holder, result);
                     }
                     if (DEBUG) {
                         long totalTime = SystemClock.elapsedRealtimeNanos() - startTime;
@@ -700,6 +729,7 @@ public class RequestThreadManager {
         String name = String.format("RequestThread-%d", cameraId);
         TAG = name;
         mDeviceState = checkNotNull(deviceState, "deviceState must not be null");
+        mFocusStateMapper = new LegacyFocusStateMapper(mCamera);
         mCaptureCollector = new CaptureCollector(MAX_IN_FLIGHT_REQUESTS, mDeviceState);
         mRequestThread = new RequestHandlerThread(name, mRequestHandlerCb);
     }
