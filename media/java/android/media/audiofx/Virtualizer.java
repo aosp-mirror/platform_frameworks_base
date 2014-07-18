@@ -349,8 +349,6 @@ public class Virtualizer extends AudioEffect {
     }
 
     /**
-     * @hide
-     * CANDIDATE FOR PUBLIC API
      * Return the device type which reflects the virtualization mode being used, if any.
      * @return a device type (as defined in {@link AudioDevice}) which reflects the virtualization
      *     mode being used.
@@ -358,8 +356,18 @@ public class Virtualizer extends AudioEffect {
      *     {@link AudioDevice#DEVICE_TYPE_UNKNOWN}. Virtualization may not be active either because
      *     the effect is not enabled or because the current output device is not compatible with
      *     this virtualization implementation.
+     *     <p>Note that the return value may differ from a device type successfully set with
+     *     {@link #forceVirtualizationMode(int)} as the implementation
+     *     may use a single mode for multiple devices. An example of this is with
+     *     {@link AudioDevice#DEVICE_TYPE_WIRED_HEADSET} that would typically be handled
+     *     like {@link AudioDevice#DEVICE_TYPE_WIRED_HEADPHONES} from a virtualization
+     *     standpoint.
+     * @throws IllegalStateException
+     * @throws IllegalArgumentException
+     * @throws UnsupportedOperationException
      */
-    public int getVirtualizationMode() {
+    public int getVirtualizationMode()
+            throws IllegalStateException, IllegalArgumentException, UnsupportedOperationException {
         int[] value = new int[1];
         int status = getParameter(PARAM_VIRTUALIZATION_MODE, value);
         if (status >= 0) {
