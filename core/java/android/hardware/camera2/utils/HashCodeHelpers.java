@@ -113,7 +113,16 @@ public final class HashCodeHelpers {
     public static <T> int hashCode(T a, T b, T c) {
         int h = hashCode(a, b);
 
-        int x = (a == null) ? 0 : a.hashCode();
+        int x = (c == null) ? 0 : c.hashCode();
+        h = ((h << 5) - h) ^ x; // (h * 31) XOR x
+
+        return h;
+    }
+
+    public static <T> int hashCode(T a, T b, T c, T d) {
+        int h = hashCode(a, b, c);
+
+        int x = (d == null) ? 0 : d.hashCode();
         h = ((h << 5) - h) ^ x; // (h * 31) XOR x
 
         return h;
