@@ -31258,6 +31258,35 @@ package android.text.style {
     method public android.text.style.TtsSpan.CardinalBuilder setNumber(java.lang.String);
   }
 
+  public static class TtsSpan.DecimalBuilder extends android.text.style.TtsSpan.SemioticClassBuilder {
+    ctor public TtsSpan.DecimalBuilder();
+    ctor public TtsSpan.DecimalBuilder(double, int, int);
+    ctor public TtsSpan.DecimalBuilder(java.lang.String, java.lang.String);
+    method public android.text.style.TtsSpan.DecimalBuilder setArgumentsFromDouble(double, int, int);
+    method public android.text.style.TtsSpan.DecimalBuilder setFractionalPart(java.lang.String);
+    method public android.text.style.TtsSpan.DecimalBuilder setIntegerPart(long);
+    method public android.text.style.TtsSpan.DecimalBuilder setIntegerPart(java.lang.String);
+  }
+
+  public static class TtsSpan.FractionBuilder extends android.text.style.TtsSpan.SemioticClassBuilder {
+    ctor public TtsSpan.FractionBuilder();
+    ctor public TtsSpan.FractionBuilder(long, long, long);
+    method public android.text.style.TtsSpan.FractionBuilder setDenominator(long);
+    method public android.text.style.TtsSpan.FractionBuilder setDenominator(java.lang.String);
+    method public android.text.style.TtsSpan.FractionBuilder setIntegerPart(long);
+    method public android.text.style.TtsSpan.FractionBuilder setIntegerPart(java.lang.String);
+    method public android.text.style.TtsSpan.FractionBuilder setNumerator(long);
+    method public android.text.style.TtsSpan.FractionBuilder setNumerator(java.lang.String);
+  }
+
+  public static class TtsSpan.OrdinalBuilder extends android.text.style.TtsSpan.SemioticClassBuilder {
+    ctor public TtsSpan.OrdinalBuilder();
+    ctor public TtsSpan.OrdinalBuilder(long);
+    ctor public TtsSpan.OrdinalBuilder(java.lang.String);
+    method public android.text.style.TtsSpan.OrdinalBuilder setNumber(long);
+    method public android.text.style.TtsSpan.OrdinalBuilder setNumber(java.lang.String);
+  }
+
   public static class TtsSpan.SemioticClassBuilder extends android.text.style.TtsSpan.Builder {
     ctor public TtsSpan.SemioticClassBuilder(java.lang.String);
     method public C setAnimacy(java.lang.String);
