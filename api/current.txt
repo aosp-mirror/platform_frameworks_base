@@ -28224,6 +28224,7 @@ package android.telecomm {
     method public final android.telecomm.Connection getParentConnection();
     method public final int getState();
     method public final android.telecomm.StatusHints getStatusHints();
+    method public final int getVideoState();
     method public final boolean isConferenceConnection();
     method public final boolean isRequestingRingback();
     method protected void onAbort();
@@ -28257,6 +28258,7 @@ package android.telecomm {
     method public final void setRinging();
     method public final void setSignal(android.os.Bundle);
     method public final void setStatusHints(android.telecomm.StatusHints);
+    method public final void setVideoState(int);
     method public static java.lang.String stateToString(int);
   }
 
@@ -28391,12 +28393,13 @@ package android.telecomm {
   }
 
   public class PhoneAccountMetadata implements android.os.Parcelable {
-    ctor public PhoneAccountMetadata(android.telecomm.PhoneAccount, int, java.lang.String, java.lang.String);
+    ctor public PhoneAccountMetadata(android.telecomm.PhoneAccount, int, java.lang.String, java.lang.String, boolean);
     method public int describeContents();
     method public android.telecomm.PhoneAccount getAccount();
     method public android.graphics.drawable.Drawable getIcon(android.content.Context);
     method public java.lang.String getLabel();
     method public java.lang.String getShortDescription();
+    method public boolean isVideoCallingSupported();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
   }
@@ -28440,6 +28443,7 @@ package android.telecomm {
     method public int getHandlePresentation();
     method public int getState();
     method public android.telecomm.StatusHints getStatusHints();
+    method public int getVideoState();
     method public void hold();
     method public void playDtmf(char);
     method public void postDialContinue(boolean);
@@ -28462,6 +28466,7 @@ package android.telecomm {
     method public abstract void onRequestingRingback(android.telecomm.RemoteConnection, boolean);
     method public abstract void onStateChanged(android.telecomm.RemoteConnection, int);
     method public abstract void onStatusHintsChanged(android.telecomm.RemoteConnection, android.telecomm.StatusHints);
+    method public abstract void onVideoStateChanged(android.telecomm.RemoteConnection, int);
   }
 
   public abstract interface Response {
