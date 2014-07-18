@@ -1240,22 +1240,25 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
             if (!notificationIsForCurrentProfiles(ent.notification)) continue;
 
+            final boolean hideSensitive = shouldHideSensitiveContents(ent.notification.getUserId());
             final int vis = ent.notification.getNotification().visibility;
-            if (vis != Notification.VISIBILITY_SECRET) {
-                // when isLockscreenPublicMode() we show the public form of VISIBILITY_PRIVATE notifications
-                boolean showingPublic = isLockscreenPublicMode()
-                        && vis == Notification.VISIBILITY_PRIVATE
-                        && !userAllowsPrivateNotificationsInPublic(ent.notification.getUserId());
-                ent.row.setShowingPublic(showingPublic);
-                if (ent.autoRedacted && ent.legacy) {
-                    if (showingPublic) {
-                        ent.row.setShowingLegacyBackground(false);
-                    } else {
-                        ent.row.setShowingLegacyBackground(true);
-                    }
-                }
-                toShow.add(ent.row);
+
+            // when isLockscreenPublicMode() we suppress VISIBILITY_SECRET notifications
+            if (vis == Notification.VISIBILITY_SECRET && hideSensitive) {
+                continue;
             }
+
+            // when isLockscreenPublicMode() we show the public form of VISIBILITY_PRIVATE notifications
+            boolean showingPublic = vis == Notification.VISIBILITY_PRIVATE && hideSensitive;
+            ent.row.setShowingPublic(showingPublic);
+            if (ent.autoRedacted && ent.legacy) {
+                if (showingPublic) {
+                    ent.row.setShowingLegacyBackground(false);
+                } else {
+                    ent.row.setShowingLegacyBackground(true);
+                }
+            }
+            toShow.add(ent.row);
         }
 
         ArrayList<View> toRemove = new ArrayList<View>();
@@ -1333,6 +1336,15 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         updateNotificationIcons();
     }
 
+    /**
+     * Returns true if we're on a secure lockscreen and the user wants to hide "sensitive"
+     * notification data. If so, private notifications should show their (possibly
+     * auto-generated) publicVersion, and secret notifications should be totally invisible.
+     */
+    private boolean shouldHideSensitiveContents(int userid) {
+        return isLockscreenPublicMode() && !userAllowsPrivateNotificationsInPublic(userid);
+    }
+
     private void updateNotificationIcons() {
         final LinearLayout.LayoutParams params
             = new LinearLayout.LayoutParams(mIconSize + 2*mIconHPadding, mNaturalBarHeight);
@@ -1353,10 +1365,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             if (!((provisioned && ent.notification.getScore() >= HIDE_ICONS_BELOW_SCORE)
                     || showNotificationEvenIfUnprovisioned(ent.notification))) continue;
             if (!notificationIsForCurrentProfiles(ent.notification)) continue;
-            if (isLockscreenPublicMode()
-                    && ent.notification.getNotification().visibility
-                            == Notification.VISIBILITY_SECRET
-                    && !userAllowsPrivateNotificationsInPublic(ent.notification.getUserId())) {
+            if (ent.notification.getNotification().visibility == Notification.VISIBILITY_SECRET
+                    && shouldHideSensitiveContents(ent.notification.getUserId())) {
                 // in "public" mode (atop a secure keyguard), secret notifs are totally hidden
                 continue;
             }

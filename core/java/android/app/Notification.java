@@ -1576,7 +1576,6 @@ public class Notification implements Parcelable
         } else {
             sb.append("null");
         }
-        // TODO(dsandler): defaults take precedence over local values, so reorder the branches below
         sb.append(" vibrate=");
         if ((this.defaults & DEFAULT_VIBRATE) != 0) {
             sb.append("default");
@@ -1620,13 +1619,33 @@ public class Notification implements Parcelable
             sb.append(this.mSortKey);
         }
         if (actions != null) {
-            sb.append(" ");
+            sb.append(" actions=");
             sb.append(actions.length);
-            sb.append(" action");
-            if (actions.length > 1) sb.append("s");
+        }
+        sb.append(" vis=");
+        sb.append(visibilityToString(this.visibility));
+        if (this.publicVersion != null) {
+            sb.append(" publicVersion=");
+            sb.append(publicVersion.toString());
         }
         sb.append(")");
         return sb.toString();
+    }
+
+    /**
+     * {@hide}
+     */
+    public static String visibilityToString(int vis) {
+        switch (vis) {
+            case VISIBILITY_PRIVATE:
+                return "PRIVATE";
+            case VISIBILITY_PUBLIC:
+                return "PUBLIC";
+            case VISIBILITY_SECRET:
+                return "SECRET";
+            default:
+                return "UNKNOWN(" + String.valueOf(vis) + ")";
+        }
     }
 
     /** {@hide} */
