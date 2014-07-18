@@ -16,6 +16,9 @@
 
 package android.text.style;
 
+import java.text.NumberFormat;
+import java.util.Locale;
+
 import android.os.Parcel;
 import android.os.PersistableBundle;
 import android.text.ParcelableSpan;
@@ -228,7 +231,8 @@ public class TtsSpan implements ParcelableSpan {
 
     /**
      * Argument used to specify the integer part of a decimal or fraction. The
-     * value can be a string of digits of any size optionally prefixed with a - or +.
+     * value can be a string of digits of any size optionally prefixed with
+     * a - or +.
      * Can be used with {@link #TYPE_DECIMAL} and {@link #TYPE_FRACTION}.
      */
     public static final String ARG_INTEGER_PART = "android.arg.integer_part";
@@ -308,9 +312,10 @@ public class TtsSpan implements ParcelableSpan {
     /**
      * Argument used to specify the month of a date. The value should be
      * provided as an integer and can be any of {@link #MONTH_JANUARY},
-     * {@link #MONTH_FEBRUARY},  {@link #MONTH_MARCH}, {@link #MONTH_APRIL}, {@link #MONTH_MAY},
-     * {@link #MONTH_JUNE}, {@link #MONTH_JULY}, {@link #MONTH_AUGUST}, {@link #MONTH_SEPTEMBER},
-     * {@link #MONTH_OCTOBER}, {@link #MONTH_NOVEMBER} and {@link #MONTH_DECEMBER}.
+     * {@link #MONTH_FEBRUARY},  {@link #MONTH_MARCH}, {@link #MONTH_APRIL},
+     * {@link #MONTH_MAY}, {@link #MONTH_JUNE}, {@link #MONTH_JULY},
+     * {@link #MONTH_AUGUST}, {@link #MONTH_SEPTEMBER}, {@link #MONTH_OCTOBER},
+     * {@link #MONTH_NOVEMBER} and {@link #MONTH_DECEMBER}.
      * Can be used with {@link #TYPE_DATE}.
      */
     public static final String ARG_MONTH = "android.arg.month";
@@ -344,7 +349,8 @@ public class TtsSpan implements ParcelableSpan {
 
     /**
      * Argument used to specify the main number part of a telephone number. Can
-     * be a string of digits.
+     * be a string of digits where the different parts of the telephone number
+     * can be separated with a space, '-', '/' or '.'.
      * Can be used with {@link #TYPE_TELEPHONE}.
      */
     public static final String ARG_NUMBER_PART = "android.arg.number_part";
@@ -473,8 +479,8 @@ public class TtsSpan implements ParcelableSpan {
      * this builder like {@link TtsSpan.TextBuilder} and
      * {@link TtsSpan.CardinalBuilder} are likely more useful.
      *
-     * This class uses generics so methods from this class can return instances of
-     * its child classes, resulting in a fluent API (CRTP pattern).
+     * This class uses generics so methods from this class can return instances
+     * of its child classes, resulting in a fluent API (CRTP pattern).
      */
     public static abstract class Builder<C extends Builder<C>> {
         // Holds the type of this class.
@@ -597,7 +603,7 @@ public class TtsSpan implements ParcelableSpan {
     public static class TextBuilder extends SemioticClassBuilder<TextBuilder> {
 
         /**
-         * Creates a TtsSpan of type {@link TtsSpan#TYPE_TEXT}.
+         * Creates a builder for a TtsSpan of type {@link TtsSpan#TYPE_TEXT}.
          */
         public TextBuilder() {
             super(TtsSpan.TYPE_TEXT);
@@ -628,10 +634,12 @@ public class TtsSpan implements ParcelableSpan {
     /**
      * A builder for TtsSpans of type {@link TtsSpan #TYPE_CARDINAL}.
      */
-    public static class CardinalBuilder extends SemioticClassBuilder<CardinalBuilder> {
+    public static class CardinalBuilder
+            extends SemioticClassBuilder<CardinalBuilder> {
 
         /**
-         * Creates a TtsSpan of type {@link TtsSpan#TYPE_CARDINAL}.
+         * Creates a builder for a TtsSpan of type
+         * {@link TtsSpan#TYPE_CARDINAL}.
          */
         public CardinalBuilder() {
             super(TtsSpan.TYPE_CARDINAL);
@@ -677,6 +685,257 @@ public class TtsSpan implements ParcelableSpan {
          */
         public CardinalBuilder setNumber(String number) {
             return setStringArgument(TtsSpan.ARG_NUMBER, number);
+        }
+    }
+
+    /**
+     * A builder for TtsSpans of type {@link TtsSpan#TYPE_ORDINAL}.
+     */
+    public static class OrdinalBuilder
+            extends SemioticClassBuilder<OrdinalBuilder> {
+
+        /**
+         * Creates a builder for a TtsSpan of type {@link TtsSpan#TYPE_ORDINAL}.
+         */
+        public OrdinalBuilder() {
+            super(TtsSpan.TYPE_ORDINAL);
+        }
+
+        /**
+         * Creates a TtsSpan of type {@link TtsSpan#TYPE_ORDINAL} and sets the
+         * {@link TtsSpan#ARG_NUMBER} argument.
+         * @param number The ordinal number to synthesize.
+         * @see #setNumber(long)
+         */
+        public OrdinalBuilder(long number) {
+            this();
+            setNumber(number);
+        }
+
+        /**
+         * Creates a TtsSpan of type {@link TtsSpan#TYPE_ORDINAL} and sets the
+         * {@link TtsSpan#ARG_NUMBER} argument.
+         * @param number The number to synthesize.
+         * @see #setNumber(String)
+         */
+        public OrdinalBuilder(String number) {
+            this();
+            setNumber(number);
+        }
+
+        /**
+         * Convenience method that converts the number to a String and sets it
+         * to the value for {@link TtsSpan#ARG_NUMBER}.
+         * @param number The ordinal number that will be synthesized.
+         * @return This instance.
+         */
+        public OrdinalBuilder setNumber(long number) {
+            return setNumber(String.valueOf(number));
+        }
+
+        /**
+         * Sets the {@link TtsSpan#ARG_NUMBER} argument.
+         * @param number A non-empty string of digits with an optional
+         *     leading + or -.
+         * @return This instance.
+         */
+        public OrdinalBuilder setNumber(String number) {
+            return setStringArgument(TtsSpan.ARG_NUMBER, number);
+        }
+    }
+
+    /**
+     * A builder for TtsSpans of type {@link TtsSpan#TYPE_DECIMAL}.
+     */
+    public static class DecimalBuilder
+            extends SemioticClassBuilder<DecimalBuilder> {
+
+        /**
+         * Creates a builder for a TtsSpan of type {@link TtsSpan#TYPE_DECIMAL}.
+         */
+        public DecimalBuilder() {
+            super(TtsSpan.TYPE_DECIMAL);
+        }
+
+        /**
+         * Creates a TtsSpan of type {@link TtsSpan#TYPE_DECIMAL} and sets the
+         * {@link TtsSpan#ARG_INTEGER_PART} and
+         * {@link TtsSpan#ARG_FRACTIONAL_PART} arguments.
+         * @see {@link #setArgumentsFromDouble(double, int, int)
+         */
+        public DecimalBuilder(double number,
+                              int minimumFractionDigits,
+                              int maximumFractionDigits) {
+            this();
+            setArgumentsFromDouble(number,
+                                   minimumFractionDigits,
+                                   maximumFractionDigits);
+        }
+
+        /**
+         * Creates a TtsSpan of type {@link TtsSpan#TYPE_DECIMAL} and sets the
+         * {@link TtsSpan#ARG_INTEGER_PART} and
+         * {@link TtsSpan#ARG_FRACTIONAL_PART} arguments.
+         */
+        public DecimalBuilder(String integerPart, String fractionalPart) {
+            this();
+            setIntegerPart(integerPart);
+            setFractionalPart(fractionalPart);
+        }
+
+        /**
+         * Convenience method takes a double and a maximum number of fractional
+         * digits, it sets the {@link TtsSpan#ARG_INTEGER_PART} and
+         * {@link TtsSpan#ARG_FRACTIONAL_PART} arguments.
+         * @param number The number to be synthesized.
+         * @param minimumFractionDigits The minimum number of fraction digits
+         *     that are pronounced.
+         * @param maximumFractionDigits The maximum number of fraction digits
+         *     that are pronounced. If maximumFractionDigits <
+         *     minimumFractionDigits then minimumFractionDigits will be assumed
+         *     to be equal to maximumFractionDigits.
+         * @return This instance.
+         */
+        public DecimalBuilder setArgumentsFromDouble(
+                double number,
+                int minimumFractionDigits,
+                int maximumFractionDigits) {
+            // Format double.
+            NumberFormat formatter = NumberFormat.getInstance(Locale.US);
+            formatter.setMinimumFractionDigits(maximumFractionDigits);
+            formatter.setMaximumFractionDigits(maximumFractionDigits);
+            formatter.setGroupingUsed(false);
+            String str = formatter.format(number);
+
+            // Split at decimal point.
+            int i = str.indexOf('.');
+            if (i >= 0) {
+                setIntegerPart(str.substring(0, i));
+                setFractionalPart(str.substring(i + 1));
+            } else {
+                setIntegerPart(str);
+            }
+            return this;
+        }
+
+        /**
+         * Convenience method that converts the number to a String and sets it
+         * to the value for {@link TtsSpan#ARG_INTEGER_PART}.
+         * @param integerPart The integer part of the decimal.
+         * @return This instance.
+         */
+        public DecimalBuilder setIntegerPart(long integerPart) {
+            return setIntegerPart(String.valueOf(integerPart));
+        }
+
+        /**
+         * Sets the {@link TtsSpan#ARG_INTEGER_PART} argument.
+         * @param integerPart A non-empty string of digits with an optional
+         *     leading + or -.
+         * @return This instance.
+         */
+        public DecimalBuilder setIntegerPart(String integerPart) {
+            return setStringArgument(TtsSpan.ARG_INTEGER_PART, integerPart);
+        }
+
+        /**
+         * Sets the {@link TtsSpan#ARG_FRACTIONAL_PART} argument.
+         * @param fractionalPart A non-empty string of digits.
+         * @return This instance.
+         */
+        public DecimalBuilder setFractionalPart(String fractionalPart) {
+            return setStringArgument(TtsSpan.ARG_FRACTIONAL_PART,
+                                     fractionalPart);
+        }
+    }
+
+    /**
+     * A builder for TtsSpans of type {@link TtsSpan#TYPE_FRACTION}.
+     */
+    public static class FractionBuilder
+            extends SemioticClassBuilder<FractionBuilder> {
+
+        /**
+         * Creates a builder for a TtsSpan of type
+         * {@link TtsSpan#TYPE_FRACTION}.
+         */
+        public FractionBuilder() {
+            super(TtsSpan.TYPE_FRACTION);
+        }
+
+        /**
+         * Creates a TtsSpan of type {@link TtsSpan#TYPE_FRACTION} and sets the
+         * {@link TtsSpan#ARG_INTEGER_PART}, {@link TtsSpan#ARG_NUMERATOR}, and
+         * {@link TtsSpan#ARG_DENOMINATOR} arguments.
+         */
+        public FractionBuilder(long integerPart,
+                               long numerator,
+                               long denominator) {
+            this();
+            setIntegerPart(integerPart);
+            setNumerator(numerator);
+            setDenominator(denominator);
+        }
+
+
+        /**
+         * Convenience method that converts the integer to a String and sets the
+         * argument {@link TtsSpan#ARG_NUMBER}.
+         * @param integerPart The integer part.
+         * @return This instance.
+         */
+        public FractionBuilder setIntegerPart(long integerPart) {
+            return setIntegerPart(String.valueOf(integerPart));
+        }
+
+        /**
+         * Sets the {@link TtsSpan#ARG_INTEGER_PART} argument.
+         * @param integerPart A non-empty string of digits with an optional
+         *     leading + or -.
+         * @return This instance.
+         */
+        public FractionBuilder setIntegerPart(String integerPart) {
+            return setStringArgument(TtsSpan.ARG_INTEGER_PART, integerPart);
+        }
+
+        /**
+         * Convenience method that converts the numerator to a String and sets
+         * the argument {@link TtsSpan#ARG_NUMERATOR}.
+         * @param numerator The numerator.
+         * @return This instance.
+         */
+        public FractionBuilder setNumerator(long numerator) {
+            return setNumerator(String.valueOf(numerator));
+        }
+
+        /**
+         * Sets the {@link TtsSpan#ARG_NUMERATOR} argument.
+         * @param numerator A non-empty string of digits with an optional
+         *     leading + or -.
+         * @return This instance.
+         */
+        public FractionBuilder setNumerator(String numerator) {
+            return setStringArgument(TtsSpan.ARG_NUMERATOR, numerator);
+        }
+
+        /**
+         * Convenience method that converts the denominator to a String and sets
+         * the argument {@link TtsSpan#ARG_DENOMINATOR}.
+         * @param denominator The denominator.
+         * @return This instance.
+         */
+        public FractionBuilder setDenominator(long denominator) {
+            return setDenominator(String.valueOf(denominator));
+        }
+
+        /**
+         * Sets the {@link TtsSpan#ARG_DENOMINATOR} argument.
+         * @param denominator A non-empty string of digits with an optional
+         *     leading + or -.
+         * @return This instance.
+         */
+        public FractionBuilder setDenominator(String denominator) {
+            return setStringArgument(TtsSpan.ARG_DENOMINATOR, denominator);
         }
     }
 }
