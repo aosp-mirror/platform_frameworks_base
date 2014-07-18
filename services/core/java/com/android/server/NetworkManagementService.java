@@ -108,15 +108,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     private static final String NETD_TAG = "NetdConnector";
     private static final String NETD_SOCKET_NAME = "netd";
 
-    private static final String ADD = "add";
-    private static final String REMOVE = "remove";
-
-    private static final String ALLOW = "allow";
-    private static final String DENY = "deny";
-
-    private static final String DEFAULT = "default";
-    private static final String SECONDARY = "secondary";
-
     private static final int MAX_UID_RANGES_PER_COMMAND = 10;
 
     /**
@@ -946,15 +937,15 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public void addRoute(int netId, RouteInfo route) {
-        modifyRoute(netId, ADD, route);
+        modifyRoute("add", "" + netId, route);
     }
 
     @Override
     public void removeRoute(int netId, RouteInfo route) {
-        modifyRoute(netId, REMOVE, route);
+        modifyRoute("remove", "" + netId, route);
     }
 
-    private void modifyRoute(int netId, String action, RouteInfo route) {
+    private void modifyRoute(String action, String netId, RouteInfo route) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
         final Command cmd = new Command("network", "route", action, netId);
@@ -1175,6 +1166,11 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
         }
+        List<RouteInfo> routes = new ArrayList<RouteInfo>();
+        // The RouteInfo constructor truncates the LinkAddress to a network prefix, thus making it
+        // suitable to use as a route destination.
+        routes.add(new RouteInfo(getInterfaceConfig(iface).getLinkAddress(), null, iface));
+        addInterfaceToLocalNetwork(iface, routes);
     }
 
     @Override
@@ -1185,6 +1181,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
         }
+        removeInterfaceFromLocalNetwork(iface);
     }
 
     @Override
@@ -1798,7 +1795,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     public void setFirewallInterfaceRule(String iface, boolean allow) {
         enforceSystemUid();
         Preconditions.checkState(mFirewallEnabled);
-        final String rule = allow ? ALLOW : DENY;
+        final String rule = allow ? "allow" : "deny";
         try {
             mConnector.execute("firewall", "set_interface_rule", iface, rule);
         } catch (NativeDaemonConnectorException e) {
@@ -1810,7 +1807,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     public void setFirewallEgressSourceRule(String addr, boolean allow) {
         enforceSystemUid();
         Preconditions.checkState(mFirewallEnabled);
-        final String rule = allow ? ALLOW : DENY;
+        final String rule = allow ? "allow" : "deny";
         try {
             mConnector.execute("firewall", "set_egress_source_rule", addr, rule);
         } catch (NativeDaemonConnectorException e) {
@@ -1822,7 +1819,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     public void setFirewallEgressDestRule(String addr, int port, boolean allow) {
         enforceSystemUid();
         Preconditions.checkState(mFirewallEnabled);
-        final String rule = allow ? ALLOW : DENY;
+        final String rule = allow ? "allow" : "deny";
         try {
             mConnector.execute("firewall", "set_egress_dest_rule", addr, port, rule);
         } catch (NativeDaemonConnectorException e) {
@@ -1834,7 +1831,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     public void setFirewallUidRule(int uid, boolean allow) {
         enforceSystemUid();
         Preconditions.checkState(mFirewallEnabled);
-        final String rule = allow ? ALLOW : DENY;
+        final String rule = allow ? "allow" : "deny";
         try {
             mConnector.execute("firewall", "set_uid_rule", uid, rule);
         } catch (NativeDaemonConnectorException e) {
@@ -2003,21 +2000,18 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public void addInterfaceToNetwork(String iface, int netId) {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-
-        try {
-            mConnector.execute("network", "addiface", netId, iface);
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
-        }
+        modifyInterfaceInNetwork("add", "" + netId, iface);
     }
 
     @Override
     public void removeInterfaceFromNetwork(String iface, int netId) {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+        modifyInterfaceInNetwork("remove", "" + netId, iface);
+    }
 
+    private void modifyInterfaceInNetwork(String action, String netId, String iface) {
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
-            mConnector.execute("network", "removeiface", netId, iface);
+            mConnector.execute("network", "interface", action, netId, iface);
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
         }
@@ -2025,15 +2019,15 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public void addLegacyRouteForNetId(int netId, RouteInfo routeInfo, int uid) {
-        modifyLegacyRouteForNetId(netId, routeInfo, uid, ADD);
+        modifyLegacyRouteForNetId("add", netId, routeInfo, uid);
     }
 
     @Override
     public void removeLegacyRouteForNetId(int netId, RouteInfo routeInfo, int uid) {
-        modifyLegacyRouteForNetId(netId, routeInfo, uid, REMOVE);
+        modifyLegacyRouteForNetId("remove", netId, routeInfo, uid);
     }
 
-    private void modifyLegacyRouteForNetId(int netId, RouteInfo routeInfo, int uid, String action) {
+    private void modifyLegacyRouteForNetId(String action, int netId, RouteInfo routeInfo, int uid) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
         final Command cmd = new Command("network", "route", "legacy", uid, action, netId);
@@ -2131,4 +2125,19 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         }
     }
 
+    @Override
+    public void addInterfaceToLocalNetwork(String iface, List<RouteInfo> routes) {
+        modifyInterfaceInNetwork("add", "local", iface);
+
+        for (RouteInfo route : routes) {
+            if (!route.isDefaultRoute()) {
+                modifyRoute("add", "local", route);
+            }
+        }
+    }
+
+    @Override
+    public void removeInterfaceFromLocalNetwork(String iface) {
+        modifyInterfaceInNetwork("remove", "local", iface);
+    }
 }
