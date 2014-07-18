@@ -163,6 +163,13 @@ public class TimePicker extends FrameLayout {
     /**
      * @hide
      */
+    public boolean isShowDoneButton() {
+        return mDelegate.isShowDoneButton();
+    }
+
+    /**
+     * @hide
+     */
     public void setDismissCallback(TimePickerDismissCallback callback) {
         mDelegate.setDismissCallback(callback);
     }
@@ -234,6 +241,7 @@ public class TimePicker extends FrameLayout {
         void setEnabled(boolean enabled);
         boolean isEnabled();
 
+        boolean isShowDoneButton();
         void setShowDoneButton(boolean showDoneButton);
         void setDismissCallback(TimePickerDismissCallback callback);
 
