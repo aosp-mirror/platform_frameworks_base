@@ -271,6 +271,9 @@ public class LocalTransport extends BackupTransport {
                 mFullTargetPackage = null;
                 mSocket.close();
             } catch (IOException e) {
+                if (DEBUG) {
+                    Log.w(TAG, "Exception caught in finishBackup()", e);
+                }
                 return TRANSPORT_ERROR;
             } finally {
                 mSocket = null;
@@ -576,7 +579,7 @@ public class LocalTransport extends BackupTransport {
                 return TRANSPORT_PACKAGE_REJECTED;
             }
             mFullRestoreSocketStream = new FileOutputStream(socket.getFileDescriptor());
-            mFullRestoreBuffer = new byte[32*1024];
+            mFullRestoreBuffer = new byte[2*1024];
         }
 
         int nRead;
