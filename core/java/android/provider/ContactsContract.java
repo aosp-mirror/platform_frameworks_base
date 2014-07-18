@@ -1721,16 +1721,28 @@ public final class ContactsContract {
          * Querying for social stream data requires android.permission.READ_SOCIAL_STREAM
          * permission.
          * </p>
+         *
+         * @deprecated - Do not use. This will not be supported in the future. In the future,
+         * cursors returned from related queries will be empty.
          */
+        @Deprecated
         public static final class StreamItems implements StreamItemsColumns {
             /**
              * no public constructor since this is a utility class
+             *
+             * @deprecated - Do not use. This will not be supported in the future. In the future,
+             * cursors returned from related queries will be empty.
              */
+            @Deprecated
             private StreamItems() {}
 
             /**
              * The directory twig for this sub-table
+             *
+             * @deprecated - Do not use. This will not be supported in the future. In the future,
+             * cursors returned from related queries will be empty.
              */
+            @Deprecated
             public static final String CONTENT_DIRECTORY = "stream_items";
         }
 
@@ -2830,17 +2842,29 @@ public final class ContactsContract {
          * inserting or updating social stream items requires android.permission.WRITE_SOCIAL_STREAM
          * permission.
          * </p>
+         *
+         * @deprecated - Do not use. This will not be supported in the future. In the future,
+         * cursors returned from related queries will be empty.
          */
+        @Deprecated
         public static final class StreamItems implements BaseColumns, StreamItemsColumns {
             /**
              * No public constructor since this is a utility class
+             *
+             * @deprecated - Do not use. This will not be supported in the future. In the future,
+             * cursors returned from related queries will be empty.
              */
+            @Deprecated
             private StreamItems() {
             }
 
             /**
              * The directory twig for this sub-table
+             *
+             * @deprecated - Do not use. This will not be supported in the future. In the future,
+             * cursors returned from related queries will be empty.
              */
+            @Deprecated
             public static final String CONTENT_DIRECTORY = "stream_items";
         }
 
@@ -3255,18 +3279,30 @@ public final class ContactsContract {
      * </pre>
      * </dd>
      * </dl>
+     *
+     * @deprecated - Do not use. This will not be supported in the future. In the future,
+     * cursors returned from related queries will be empty.
      */
+    @Deprecated
     public static final class StreamItems implements BaseColumns, StreamItemsColumns {
         /**
          * This utility class cannot be instantiated
+         *
+         * @deprecated - Do not use. This will not be supported in the future. In the future,
+         * cursors returned from related queries will be empty.
          */
+        @Deprecated
         private StreamItems() {
         }
 
         /**
          * The content:// style URI for this table, which handles social network stream
          * updates for the user's contacts.
+         *
+         * @deprecated - Do not use. This will not be supported in the future. In the future,
+         * cursors returned from related queries will be empty.
          */
+        @Deprecated
         public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, "stream_items");
 
         /**
@@ -3281,31 +3317,51 @@ public final class ContactsContract {
          * When using this URI, the stream item ID for the photo(s) must be identified
          * in the {@link ContentValues} passed in.
          * </p>
+         *
+         * @deprecated - Do not use. This will not be supported in the future. In the future,
+         * cursors returned from related queries will be empty.
          */
+        @Deprecated
         public static final Uri CONTENT_PHOTO_URI = Uri.withAppendedPath(CONTENT_URI, "photo");
 
         /**
          * This URI allows the caller to query for the maximum number of stream items
          * that will be stored under any single raw contact.
+         *
+         * @deprecated - Do not use. This will not be supported in the future. In the future,
+         * cursors returned from related queries will be empty.
          */
+        @Deprecated
         public static final Uri CONTENT_LIMIT_URI =
                 Uri.withAppendedPath(AUTHORITY_URI, "stream_items_limit");
 
         /**
          * The MIME type of a directory of stream items.
+         *
+         * @deprecated - Do not use. This will not be supported in the future. In the future,
+         * cursors returned from related queries will be empty.
          */
+        @Deprecated
         public static final String CONTENT_TYPE = "vnd.android.cursor.dir/stream_item";
 
         /**
          * The MIME type of a single stream item.
+         *
+         * @deprecated - Do not use. This will not be supported in the future. In the future,
+         * cursors returned from related queries will be empty.
          */
+        @Deprecated
         public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/stream_item";
 
         /**
          * Queries to {@link ContactsContract.StreamItems#CONTENT_LIMIT_URI} will
          * contain this column, with the value indicating the maximum number of
          * stream items that will be stored under any single raw contact.
+         *
+         * @deprecated - Do not use. This will not be supported in the future. In the future,
+         * cursors returned from related queries will be empty.
          */
+        @Deprecated
         public static final String MAX_ITEMS = "max_items";
 
         /**
@@ -3321,28 +3377,48 @@ public final class ContactsContract {
          * requires android.permission.READ_SOCIAL_STREAM permission, and inserting or updating
          * social stream photos requires android.permission.WRITE_SOCIAL_STREAM permission.
          * </p>
+         *
+         * @deprecated - Do not use. This will not be supported in the future. In the future,
+         * cursors returned from related queries will be empty.
          */
+        @Deprecated
         public static final class StreamItemPhotos
                 implements BaseColumns, StreamItemPhotosColumns {
             /**
              * No public constructor since this is a utility class
+             *
+             * @deprecated - Do not use. This will not be supported in the future. In the future,
+             * cursors returned from related queries will be empty.
              */
+            @Deprecated
             private StreamItemPhotos() {
             }
 
             /**
              * The directory twig for this sub-table
+             *
+             * @deprecated - Do not use. This will not be supported in the future. In the future,
+             * cursors returned from related queries will be empty.
              */
+            @Deprecated
             public static final String CONTENT_DIRECTORY = "photo";
 
             /**
              * The MIME type of a directory of stream item photos.
+             *
+             * @deprecated - Do not use. This will not be supported in the future. In the future,
+             * cursors returned from related queries will be empty.
              */
+            @Deprecated
             public static final String CONTENT_TYPE = "vnd.android.cursor.dir/stream_item_photo";
 
             /**
              * The MIME type of a single stream item photo.
+             *
+             * @deprecated - Do not use. This will not be supported in the future. In the future,
+             * cursors returned from related queries will be empty.
              */
+            @Deprecated
             public static final String CONTENT_ITEM_TYPE
                     = "vnd.android.cursor.item/stream_item_photo";
         }
@@ -3352,7 +3428,10 @@ public final class ContactsContract {
      * Columns in the StreamItems table.
      *
      * @see ContactsContract.StreamItems
+     * @deprecated - Do not use. This will not be supported in the future. In the future,
+     * cursors returned from related queries will be empty.
      */
+    @Deprecated
     protected interface StreamItemsColumns {
         /**
          * A reference to the {@link android.provider.ContactsContract.Contacts#_ID}
@@ -3360,7 +3439,11 @@ public final class ContactsContract {
          *
          * <p>Type: INTEGER</p>
          * <p>read-only</p>
+         *
+         * @deprecated - Do not use. This will not be supported in the future. In the future,
+         * cursors returned from related queries will be empty.
          */
+        @Deprecated
         public static final String CONTACT_ID = "contact_id";
 
         /**
@@ -3369,14 +3452,22 @@ public final class ContactsContract {
          *
          * <p>Type: TEXT</p>
          * <p>read-only</p>
+         *
+         * @deprecated - Do not use. This will not be supported in the future. In the future,
+         * cursors returned from related queries will be empty.
          */
+        @Deprecated
         public static final String CONTACT_LOOKUP_KEY = "contact_lookup";
 
         /**
          * A reference to the {@link RawContacts#_ID}
          * that this stream item belongs to.
          * <p>Type: INTEGER</p>
+         *
+         * @deprecated - Do not use. This will not be supported in the future. In the future,
+         * cursors returned from related queries will be empty.
          */
+        @Deprecated
         public static final String RAW_CONTACT_ID = "raw_contact_id";
 
         /**
@@ -3384,7 +3475,11 @@ public final class ContactsContract {
          * this stream item. This value is only designed for use when building
          * user interfaces, and should not be used to infer the owner.
          * <P>Type: TEXT</P>
+         *
+         * @deprecated - Do not use. This will not be supported in the future. In the future,
+         * cursors returned from related queries will be empty.
          */
+        @Deprecated
         public static final String RES_PACKAGE = "res_package";
 
         /**
@@ -3393,7 +3488,11 @@ public final class ContactsContract {
          *
          * <p>Type: TEXT</p>
          * <p>read-only</p>
+         *
+         * @deprecated - Do not use. This will not be supported in the future. In the future,
+         * cursors returned from related queries will be empty.
          */
+        @Deprecated
         public static final String ACCOUNT_TYPE = "account_type";
 
         /**
@@ -3402,7 +3501,11 @@ public final class ContactsContract {
          *
          * <p>Type: TEXT</p>
          * <p>read-only</p>
+         *
+         * @deprecated - Do not use. This will not be supported in the future. In the future,
+         * cursors returned from related queries will be empty.
          */
+        @Deprecated
         public static final String ACCOUNT_NAME = "account_name";
 
         /**
@@ -3413,7 +3516,11 @@ public final class ContactsContract {
          *
          * <P>Type: TEXT</P>
          * <p>read-only</p>
+         *
+         * @deprecated - Do not use. This will not be supported in the future. In the future,
+         * cursors returned from related queries will be empty.
          */
+        @Deprecated
         public static final String DATA_SET = "data_set";
 
         /**
@@ -3422,7 +3529,11 @@ public final class ContactsContract {
          *
          * <P>Type: TEXT</P>
          * <p>read-only</p>
+         *
+         * @deprecated - Do not use. This will not be supported in the future. In the future,
+         * cursors returned from related queries will be empty.
          */
+        @Deprecated
         public static final String RAW_CONTACT_SOURCE_ID = "raw_contact_source_id";
 
         /**
@@ -3430,7 +3541,11 @@ public final class ContactsContract {
          * This resource should be scoped by the {@link #RES_PACKAGE}. As this can only reference
          * drawables, the "@drawable/" prefix must be omitted.
          * <P>Type: TEXT</P>
+         *
+         * @deprecated - Do not use. This will not be supported in the future. In the future,
+         * cursors returned from related queries will be empty.
          */
+        @Deprecated
         public static final String RES_ICON = "icon";
 
         /**
@@ -3438,7 +3553,11 @@ public final class ContactsContract {
          * Talk". This resource should be scoped by the {@link #RES_PACKAGE}. As this can only
          * reference strings, the "@string/" prefix must be omitted.
          * <p>Type: TEXT</p>
+         *
+         * @deprecated - Do not use. This will not be supported in the future. In the future,
+         * cursors returned from related queries will be empty.
          */
+        @Deprecated
         public static final String RES_LABEL = "label";
 
         /**
@@ -3455,14 +3574,22 @@ public final class ContactsContract {
          * is unspecified, but it should not break tags.
          * </P>
          * <P>Type: TEXT</P>
+         *
+         * @deprecated - Do not use. This will not be supported in the future. In the future,
+         * cursors returned from related queries will be empty.
          */
+        @Deprecated
         public static final String TEXT = "text";
 
         /**
          * The absolute time (milliseconds since epoch) when this stream item was
          * inserted/updated.
          * <P>Type: NUMBER</P>
+         *
+         * @deprecated - Do not use. This will not be supported in the future. In the future,
+         * cursors returned from related queries will be empty.
          */
+        @Deprecated
         public static final String TIMESTAMP = "timestamp";
 
         /**
@@ -3480,16 +3607,44 @@ public final class ContactsContract {
          * is unspecified, but it should not break tags.
          * </P>
          * <P>Type: TEXT</P>
+         *
+         * @deprecated - Do not use. This will not be supported in the future. In the future,
+         * cursors returned from related queries will be empty.
          */
+        @Deprecated
         public static final String COMMENTS = "comments";
 
-        /** Generic column for use by sync adapters. */
+        /**
+         * Generic column for use by sync adapters.
+         *
+         * @deprecated - Do not use. This will not be supported in the future. In the future,
+         * cursors returned from related queries will be empty.
+         */
+        @Deprecated
         public static final String SYNC1 = "stream_item_sync1";
-        /** Generic column for use by sync adapters. */
+        /**
+         * Generic column for use by sync adapters.
+         *
+         * @deprecated - Do not use. This will not be supported in the future. In the future,
+         * cursors returned from related queries will be empty.
+         */
+        @Deprecated
         public static final String SYNC2 = "stream_item_sync2";
-        /** Generic column for use by sync adapters. */
+        /**
+         * Generic column for use by sync adapters.
+         *
+         * @deprecated - Do not use. This will not be supported in the future. In the future,
+         * cursors returned from related queries will be empty.
+         */
+        @Deprecated
         public static final String SYNC3 = "stream_item_sync3";
-        /** Generic column for use by sync adapters. */
+        /**
+         * Generic column for use by sync adapters.
+         *
+         * @deprecated - Do not use. This will not be supported in the future. In the future,
+         * cursors returned from related queries will be empty.
+         */
+        @Deprecated
         public static final String SYNC4 = "stream_item_sync4";
     }
 
@@ -3662,11 +3817,19 @@ public final class ContactsContract {
      * <pre>
      * </dd>
      * </dl>
+     *
+     * @deprecated - Do not use. This will not be supported in the future. In the future,
+     * cursors returned from related queries will be empty.
      */
+    @Deprecated
     public static final class StreamItemPhotos implements BaseColumns, StreamItemPhotosColumns {
         /**
          * No public constructor since this is a utility class
+         *
+         * @deprecated - Do not use. This will not be supported in the future. In the future,
+         * cursors returned from related queries will be empty.
          */
+        @Deprecated
         private StreamItemPhotos() {
         }
 
@@ -3681,7 +3844,11 @@ public final class ContactsContract {
          * as an asset file.
          * </p>
          * <P>Type: BLOB</P>
+         *
+         * @deprecated - Do not use. This will not be supported in the future. In the future,
+         * cursors returned from related queries will be empty.
          */
+        @Deprecated
         public static final String PHOTO = "photo";
     }
 
@@ -3689,42 +3856,85 @@ public final class ContactsContract {
      * Columns in the StreamItemPhotos table.
      *
      * @see ContactsContract.StreamItemPhotos
+     * @deprecated - Do not use. This will not be supported in the future. In the future,
+     * cursors returned from related queries will be empty.
      */
+    @Deprecated
     protected interface StreamItemPhotosColumns {
         /**
          * A reference to the {@link StreamItems#_ID} this photo is associated with.
          * <P>Type: NUMBER</P>
+         *
+         * @deprecated - Do not use. This will not be supported in the future. In the future,
+         * cursors returned from related queries will be empty.
          */
+        @Deprecated
         public static final String STREAM_ITEM_ID = "stream_item_id";
 
         /**
          * An integer to use for sort order for photos in the stream item.  If not
          * specified, the {@link StreamItemPhotos#_ID} will be used for sorting.
          * <P>Type: NUMBER</P>
+         *
+         * @deprecated - Do not use. This will not be supported in the future. In the future,
+         * cursors returned from related queries will be empty.
          */
+        @Deprecated
         public static final String SORT_INDEX = "sort_index";
 
         /**
          * Photo file ID for the photo.
          * See {@link ContactsContract.DisplayPhoto}.
          * <P>Type: NUMBER</P>
+         *
+         * @deprecated - Do not use. This will not be supported in the future. In the future,
+         * cursors returned from related queries will be empty.
          */
+        @Deprecated
         public static final String PHOTO_FILE_ID = "photo_file_id";
 
         /**
          * URI for retrieving the photo content, automatically populated.  Callers
          * may retrieve the photo content by opening this URI as an asset file.
          * <P>Type: TEXT</P>
+         *
+         * @deprecated - Do not use. This will not be supported in the future. In the future,
+         * cursors returned from related queries will be empty.
          */
+        @Deprecated
         public static final String PHOTO_URI = "photo_uri";
 
-        /** Generic column for use by sync adapters. */
+        /**
+         * Generic column for use by sync adapters.
+         *
+         * @deprecated - Do not use. This will not be supported in the future. In the future,
+         * cursors returned from related queries will be empty.
+         */
+        @Deprecated
         public static final String SYNC1 = "stream_item_photo_sync1";
-        /** Generic column for use by sync adapters. */
+        /**
+         * Generic column for use by sync adapters.
+         *
+         * @deprecated - Do not use. This will not be supported in the future. In the future,
+         * cursors returned from related queries will be empty.
+         */
+        @Deprecated
         public static final String SYNC2 = "stream_item_photo_sync2";
-        /** Generic column for use by sync adapters. */
+        /**
+         * Generic column for use by sync adapters.
+         *
+         * @deprecated - Do not use. This will not be supported in the future. In the future,
+         * cursors returned from related queries will be empty.
+         */
+        @Deprecated
         public static final String SYNC3 = "stream_item_photo_sync3";
-        /** Generic column for use by sync adapters. */
+        /**
+         * Generic column for use by sync adapters.
+         *
+         * @deprecated - Do not use. This will not be supported in the future. In the future,
+         * cursors returned from related queries will be empty.
+         */
+        @Deprecated
         public static final String SYNC4 = "stream_item_photo_sync4";
     }
 
