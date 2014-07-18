@@ -14079,6 +14079,8 @@ package android.media {
     field public static final int CHANNEL_OUT_LOW_FREQUENCY = 32; // 0x20
     field public static final int CHANNEL_OUT_MONO = 4; // 0x4
     field public static final int CHANNEL_OUT_QUAD = 204; // 0xcc
+    field public static final int CHANNEL_OUT_SIDE_LEFT = 2048; // 0x800
+    field public static final int CHANNEL_OUT_SIDE_RIGHT = 4096; // 0x1000
     field public static final int CHANNEL_OUT_STEREO = 12; // 0xc
     field public static final int CHANNEL_OUT_SURROUND = 1052; // 0x41c
     field public static final int ENCODING_AC3 = 5; // 0x5
@@ -14088,6 +14090,15 @@ package android.media {
     field public static final int ENCODING_PCM_16BIT = 2; // 0x2
     field public static final int ENCODING_PCM_8BIT = 3; // 0x3
     field public static final int ENCODING_PCM_FLOAT = 4; // 0x4
+  }
+
+  public static class AudioFormat.Builder {
+    ctor public AudioFormat.Builder();
+    ctor public AudioFormat.Builder(android.media.AudioFormat);
+    method public android.media.AudioFormat build();
+    method public android.media.AudioFormat.Builder setChannelMask(int);
+    method public android.media.AudioFormat.Builder setEncoding(int) throws java.lang.IllegalArgumentException;
+    method public android.media.AudioFormat.Builder setSampleRate(int) throws java.lang.IllegalArgumentException;
   }
 
   public class AudioManager {
@@ -14272,6 +14283,7 @@ package android.media {
   public class AudioTrack {
     ctor public AudioTrack(int, int, int, int, int, int) throws java.lang.IllegalArgumentException;
     ctor public AudioTrack(int, int, int, int, int, int, int) throws java.lang.IllegalArgumentException;
+    ctor public AudioTrack(android.media.AudioAttributes, android.media.AudioFormat, int, int, int) throws java.lang.IllegalArgumentException;
     method public int attachAuxEffect(int);
     method public void flush();
     method public int getAudioFormat();
