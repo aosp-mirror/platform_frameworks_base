@@ -16629,7 +16629,7 @@ package android.media.tv {
   public abstract class TvInputService extends android.app.Service {
     ctor public TvInputService();
     method public final android.os.IBinder onBind(android.content.Intent);
-    method public abstract android.media.tv.TvInputService.Session onCreateSession();
+    method public abstract android.media.tv.TvInputService.Session onCreateSession(java.lang.String);
     field public static final java.lang.String SERVICE_INTERFACE = "android.media.tv.TvInputService";
     field public static final java.lang.String SERVICE_META_DATA = "android.media.tv.input";
   }
