@@ -238,6 +238,8 @@ public interface WebViewProvider {
 
     public boolean canZoomOut();
 
+    public boolean zoomBy(float zoomFactor);
+
     public boolean zoomIn();
 
     public boolean zoomOut();
