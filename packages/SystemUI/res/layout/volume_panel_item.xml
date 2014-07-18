@@ -26,10 +26,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:contentDescription="@null"
-        android:paddingBottom="12dip"
+        android:paddingBottom="10dip"
         android:paddingLeft="16dip"
         android:paddingRight="16dip"
-        android:paddingTop="12dip" />
+        android:paddingTop="10dip" />
 
     <SeekBar
         android:id="@+id/seekbar"

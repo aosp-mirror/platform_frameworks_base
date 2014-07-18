@@ -30,7 +30,7 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/qs_panel_padding"
         android:layout_marginRight="@dimen/qs_panel_padding"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="12dp"
         android:background="@drawable/segmented_buttons"
         android:clipChildren="false" />
 
@@ -81,8 +81,10 @@
     <TextView
         android:id="@+id/zen_alarm_warning"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingTop="@dimen/qs_panel_padding"
-        android:gravity="center"
-        android:textAppearance="@style/TextAppearance.QS.DetailItemPrimary" />
+        android:layout_height="48dp"
+        android:layout_marginTop="@dimen/qs_panel_padding"
+        android:paddingLeft="@dimen/qs_panel_padding"
+        android:paddingRight="@dimen/qs_panel_padding"
+        android:gravity="center_vertical"
+        android:textAppearance="@style/TextAppearance.QS.DetailEmpty" />
 </com.android.systemui.volume.ZenModePanel>
