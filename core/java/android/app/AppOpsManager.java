@@ -17,10 +17,12 @@
 package android.app;
 
 import android.Manifest;
+import android.media.AudioAttributes.AttributeUsage;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.UserManager;
 import android.util.ArrayMap;
+
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IAppOpsCallback;
 
@@ -954,15 +956,16 @@ public class AppOpsManager {
      * defined by {@link #setMode}.
      *
      * @param code The operation to restrict.
-     * @param stream The {@link android.media.AudioManager} stream type.
+     * @param usage The {@link android.media.AudioAttributes} usage value.
      * @param mode The restriction mode (MODE_IGNORED,MODE_ERRORED) or MODE_ALLOWED to unrestrict.
      * @param exceptionPackages Optional list of packages to exclude from the restriction.
      * @hide
      */
-    public void setRestriction(int code, int stream, int mode, String[] exceptionPackages) {
+    public void setRestriction(int code, @AttributeUsage int usage, int mode,
+            String[] exceptionPackages) {
         try {
             final int uid = Binder.getCallingUid();
-            mService.setAudioRestriction(code, stream, uid, mode, exceptionPackages);
+            mService.setAudioRestriction(code, usage, uid, mode, exceptionPackages);
         } catch (RemoteException e) {
         }
     }

@@ -18,7 +18,7 @@ package android.os;
 
 import android.app.ActivityThread;
 import android.content.Context;
-import android.media.AudioManager;
+import android.media.AudioAttributes;
 
 /**
  * Class that operates the vibrator on the device.
@@ -62,7 +62,7 @@ public abstract class Vibrator {
      * @param milliseconds The number of milliseconds to vibrate.
      */
     public void vibrate(long milliseconds) {
-        vibrate(milliseconds, AudioManager.USE_DEFAULT_STREAM_TYPE);
+        vibrate(milliseconds, null);
     }
 
     /**
@@ -71,12 +71,13 @@ public abstract class Vibrator {
      * {@link android.Manifest.permission#VIBRATE}.
      *
      * @param milliseconds The number of milliseconds to vibrate.
-     * @param streamHint An {@link AudioManager} stream type corresponding to the vibration type.
-     *        For example, specify {@link AudioManager#STREAM_ALARM} for alarm vibrations or
-     *        {@link AudioManager#STREAM_RING} for vibrations associated with incoming calls.
+     * @param attributes {@link AudioAttributes} corresponding to the vibration. For example,
+     *        specify {@link AudioAttributes#USAGE_ALARM} for alarm vibrations or
+     *        {@link AudioAttributes#USAGE_NOTIFICATION_TELEPHONY_RINGTONE} for
+     *        vibrations associated with incoming calls.
      */
-    public void vibrate(long milliseconds, int streamHint) {
-        vibrate(Process.myUid(), mPackageName, milliseconds, streamHint);
+    public void vibrate(long milliseconds, AudioAttributes attributes) {
+        vibrate(Process.myUid(), mPackageName, milliseconds, attributes);
     }
 
     /**
@@ -100,7 +101,7 @@ public abstract class Vibrator {
      *        you don't want to repeat.
      */
     public void vibrate(long[] pattern, int repeat) {
-        vibrate(pattern, repeat, AudioManager.USE_DEFAULT_STREAM_TYPE);
+        vibrate(pattern, repeat, null);
     }
 
     /**
@@ -122,29 +123,30 @@ public abstract class Vibrator {
      * @param pattern an array of longs of times for which to turn the vibrator on or off.
      * @param repeat the index into pattern at which to repeat, or -1 if
      *        you don't want to repeat.
-     * @param streamHint An {@link AudioManager} stream type corresponding to the vibration type.
-     *        For example, specify {@link AudioManager#STREAM_ALARM} for alarm vibrations or
-     *        {@link AudioManager#STREAM_RING} for vibrations associated with incoming calls.
+     * @param attributes {@link AudioAttributes} corresponding to the vibration. For example,
+     *        specify {@link AudioAttributes#USAGE_ALARM} for alarm vibrations or
+     *        {@link AudioAttributes#USAGE_NOTIFICATION_TELEPHONY_RINGTONE} for
+     *        vibrations associated with incoming calls.
      */
-    public void vibrate(long[] pattern, int repeat, int streamHint) {
-        vibrate(Process.myUid(), mPackageName, pattern, repeat, streamHint);
+    public void vibrate(long[] pattern, int repeat, AudioAttributes attributes) {
+        vibrate(Process.myUid(), mPackageName, pattern, repeat, attributes);
     }
 
     /**
      * @hide
-     * Like {@link #vibrate(long, int)}, but allowing the caller to specify that
+     * Like {@link #vibrate(long, AudioAttributes)}, but allowing the caller to specify that
      * the vibration is owned by someone else.
      */
-    public abstract void vibrate(int uid, String opPkg,
-            long milliseconds, int streamHint);
+    public abstract void vibrate(int uid, String opPkg, long milliseconds,
+            AudioAttributes attributes);
 
     /**
      * @hide
-     * Like {@link #vibrate(long[], int, int)}, but allowing the caller to specify that
+     * Like {@link #vibrate(long[], int, AudioAttributes)}, but allowing the caller to specify that
      * the vibration is owned by someone else.
      */
-    public abstract void vibrate(int uid, String opPkg,
-            long[] pattern, int repeat, int streamHint);
+    public abstract void vibrate(int uid, String opPkg, long[] pattern, int repeat,
+            AudioAttributes attributes);
 
     /**
      * Turn the vibrator off.

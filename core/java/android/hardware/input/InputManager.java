@@ -21,6 +21,7 @@ import com.android.internal.util.ArrayUtils;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.content.Context;
+import android.media.AudioAttributes;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -857,8 +858,7 @@ public final class InputManager {
          * @hide
          */
         @Override
-        public void vibrate(int uid, String opPkg, long milliseconds,
-                int streamHint) {
+        public void vibrate(int uid, String opPkg, long milliseconds, AudioAttributes attributes) {
             vibrate(new long[] { 0, milliseconds}, -1);
         }
 
@@ -867,7 +867,7 @@ public final class InputManager {
          */
         @Override
         public void vibrate(int uid, String opPkg, long[] pattern, int repeat,
-                int streamHint) {
+                AudioAttributes attributes) {
             if (repeat >= pattern.length) {
                 throw new ArrayIndexOutOfBoundsException();
             }
