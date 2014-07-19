@@ -1006,6 +1006,24 @@ public class Toolbar extends ViewGroup {
         super.onRestoreInstanceState(ss.getSuperState());
     }
 
+    /**
+     * @hide
+     */
+    @Override
+    protected void onSetLayoutParams(View child, ViewGroup.LayoutParams lp) {
+        /*
+         * Apps may set ActionBar.LayoutParams on their action bar custom views when
+         * a Toolbar is actually acting in the role of the action bar. Perform a quick
+         * switch with Toolbar.LayoutParams whenever this happens. This does leave open
+         * one potential gotcha: if an app retains the ActionBar.LayoutParams reference
+         * and attempts to keep making changes to it before layout those changes won't
+         * be reflected in the final results.
+         */
+        if (!checkLayoutParams(lp)) {
+            child.setLayoutParams(generateLayoutParams(lp));
+        }
+    }
+
     private void measureChildConstrained(View child, int parentWidthSpec, int widthUsed,
             int parentHeightSpec, int heightUsed, int heightConstraint) {
         final MarginLayoutParams lp = (MarginLayoutParams) child.getLayoutParams();
