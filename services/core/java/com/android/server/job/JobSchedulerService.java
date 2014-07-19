@@ -287,8 +287,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                 ArraySet<JobStatus> jobs = mJobs.getJobs();
                 for (int i=0; i<jobs.size(); i++) {
                     JobStatus job = jobs.valueAt(i);
-                    for (int j=0; j<mControllers.size(); j++) {
-                        mControllers.get(i).maybeStartTrackingJob(job);
+                    for (int controller=0; controller<mControllers.size(); controller++) {
+                        mControllers.get(controller).maybeStartTrackingJob(job);
                     }
                 }
                 // GO GO GO!
