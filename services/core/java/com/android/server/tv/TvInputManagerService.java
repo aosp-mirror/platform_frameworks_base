@@ -1116,6 +1116,27 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
+        public void sendAppPrivateCommand(IBinder sessionToken, String command, Bundle data,
+                int userId) {
+            final int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
+                    userId, "sendAppPrivateCommand");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        getSessionLocked(sessionToken, callingUid, resolvedUserId)
+                                .appPrivateCommand(command, data);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "error in sendAppPrivateCommand", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
         public void createOverlayView(IBinder sessionToken, IBinder windowToken, Rect frame,
                 int userId) {
             final int callingUid = Binder.getCallingUid();

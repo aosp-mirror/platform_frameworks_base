@@ -519,6 +519,21 @@ public abstract class TvInputService extends Service {
         }
 
         /**
+         * Processes a private command sent from the application to the TV input. This can be used
+         * to provide domain-specific features that are only known between certain TV inputs and
+         * their clients.
+         *
+         * @param action Name of the command to be performed. This <em>must</em> be a scoped name,
+         *            i.e. prefixed with a package name you own, so that different developers will
+         *            not create conflicting commands.
+         * @param data Any data to include with the command.
+         * @hide
+         */
+        @SystemApi
+        public void onAppPrivateCommand(String action, Bundle data) {
+        }
+
+        /**
          * Called when an application requests to create an overlay view. Each session
          * implementation can override this method and return its own view.
          *
@@ -723,6 +738,13 @@ public abstract class TvInputService extends Service {
         void requestUnblockContent(String unblockedRating) {
             onRequestUnblockContent(TvContentRating.unflattenFromString(unblockedRating));
             // TODO: Handle failure.
+        }
+
+        /**
+         * Calls {@link #onAppPrivateCommand}.
+         */
+        void appPrivateCommand(String action, Bundle data) {
+            onAppPrivateCommand(action, data);
         }
 
         /**

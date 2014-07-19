@@ -26,6 +26,7 @@ import android.media.tv.TvInputHardwareInfo;
 import android.media.tv.TvInputInfo;
 import android.media.tv.TvTrackInfo;
 import android.net.Uri;
+import android.os.Bundle;
 import android.view.Surface;
 
 /**
@@ -50,6 +51,9 @@ interface ITvInputManager {
     void setCaptionEnabled(in IBinder sessionToken, boolean enabled, int userId);
     void selectTrack(in IBinder sessionToken, in TvTrackInfo track, int userId);
     void unselectTrack(in IBinder sessionToken, in TvTrackInfo track, int userId);
+
+    void sendAppPrivateCommand(in IBinder sessionToken, in String action, in Bundle data,
+            int userId);
 
     void createOverlayView(in IBinder sessionToken, in IBinder windowToken, in Rect frame,
             int userId);

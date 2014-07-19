@@ -16,6 +16,7 @@
 
 package android.media.tv;
 
+import android.annotation.SystemApi;
 import android.content.Context;
 import android.graphics.Rect;
 import android.media.tv.TvInputManager.Session;
@@ -288,6 +289,26 @@ public class TvView extends ViewGroup {
             return null;
         }
         return mSession.getTracks();
+    }
+
+    /**
+     * Call {@link TvInputService.Session#appPrivateCommand(String, Bundle)
+     * TvInputService.Session.appPrivateCommand()} on the current TvView.
+     *
+     * @param action Name of the command to be performed. This <em>must</em> be a scoped name, i.e.
+     *            prefixed with a package name you own, so that different developers will not create
+     *            conflicting commands.
+     * @param data Any data to include with the command.
+     * @hide
+     */
+    @SystemApi
+    public void sendAppPrivateCommand(String action, Bundle data) {
+        if (TextUtils.isEmpty(action)) {
+            throw new IllegalArgumentException("action cannot be null or an empty string");
+        }
+        if (mSession != null) {
+            mSession.sendAppPrivateCommand(action, data);
+        }
     }
 
     /**
