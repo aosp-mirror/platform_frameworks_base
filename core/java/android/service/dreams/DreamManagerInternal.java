@@ -24,13 +24,19 @@ package android.service.dreams;
 public abstract class DreamManagerInternal {
     /**
      * Called by the power manager to start a dream.
+     *
+     * @param doze If true, starts the doze dream component if one has been configured,
+     * otherwise starts the user-specified dream.
      */
     public abstract void startDream(boolean doze);
 
     /**
      * Called by the power manager to stop a dream.
+     *
+     * @param immediate If true, ends the dream summarily, otherwise gives it some time
+     * to perform a proper exit transition.
      */
-    public abstract void stopDream();
+    public abstract void stopDream(boolean immediate);
 
     /**
      * Called by the power manager to determine whether a dream is running.

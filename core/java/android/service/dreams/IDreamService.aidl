@@ -22,4 +22,5 @@ package android.service.dreams;
 oneway interface IDreamService {
     void attach(IBinder windowToken, boolean canDoze);
     void detach();
+    void wakeUp();
 }

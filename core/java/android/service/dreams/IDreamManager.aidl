@@ -31,7 +31,7 @@ interface IDreamManager {
     ComponentName getDefaultDreamComponent();
     void testDream(in ComponentName componentName);
     boolean isDreaming();
-    void finishSelf(in IBinder token);
+    void finishSelf(in IBinder token, boolean immediate);
     void startDozing(in IBinder token);
     void stopDozing(in IBinder token);
     IDozeHardware getDozeHardware(in IBinder token);

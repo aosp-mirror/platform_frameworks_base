@@ -1551,7 +1551,7 @@ public final class PowerManagerService extends com.android.server.SystemService
         if (mDreamManager != null) {
             // Restart the dream whenever the sandman is summoned.
             if (startDreaming) {
-                mDreamManager.stopDream();
+                mDreamManager.stopDream(false /*immediate*/);
                 mDreamManager.startDream(wakefulness == WAKEFULNESS_DOZING);
             }
             isDreaming = mDreamManager.isDreaming();
@@ -1619,7 +1619,7 @@ public final class PowerManagerService extends com.android.server.SystemService
 
         // Stop dream.
         if (isDreaming) {
-            mDreamManager.stopDream();
+            mDreamManager.stopDream(false /*immediate*/);
         }
     }
 
