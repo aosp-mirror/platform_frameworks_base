@@ -366,19 +366,33 @@ public class AudioTrack
     }
 
     /**
-     * @hide
-     * CANDIDATE FOR PUBLIC API
-     * Constructor with AudioAttributes and AudioFormat
-     * @param aa
-     * @param format
-     * @param bufferSizeInBytes
-     * @param mode
-     * @param sessionId
+     * Class constructor with {@link AudioAttributes} and {@link AudioFormat}.
+     * @param attributes a non-null {@link AudioAttributes} instance.
+     * @param format a non-null {@link AudioFormat} instance describing the format of the data
+     *     that will be played through this AudioTrack. See {@link AudioFormat.Builder} for
+     *     configuring the audio format parameters such as encoding, channel mask and sample rate.
+     * @param bufferSizeInBytes the total size (in bytes) of the buffer where audio data is read
+     *   from for playback. If using the AudioTrack in streaming mode, you can write data into
+     *   this buffer in smaller chunks than this size. If using the AudioTrack in static mode,
+     *   this is the maximum size of the sound that will be played for this instance.
+     *   See {@link #getMinBufferSize(int, int, int)} to determine the minimum required buffer size
+     *   for the successful creation of an AudioTrack instance in streaming mode. Using values
+     *   smaller than getMinBufferSize() will result in an initialization failure.
+     * @param mode streaming or static buffer. See {@link #MODE_STATIC} and {@link #MODE_STREAM}.
+     * @param sessionId ID of audio session the AudioTrack must be attached to.
+     * @throws IllegalArgumentException
      */
     public AudioTrack(AudioAttributes attributes, AudioFormat format, int bufferSizeInBytes,
             int mode, int sessionId)
                     throws IllegalArgumentException {
         // mState already == STATE_UNINITIALIZED
+
+        if (attributes == null) {
+            throw new IllegalArgumentException("Illegal null AudioAttributes");
+        }
+        if (format == null) {
+            throw new IllegalArgumentException("Illegal null AudioFormat");
+        }
 
         // remember which looper is associated with the AudioTrack instantiation
         Looper looper;
