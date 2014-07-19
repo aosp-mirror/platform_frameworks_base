@@ -1112,23 +1112,19 @@ public final class ContactsContract {
         public static final String SORT_KEY_ALTERNATIVE = "sort_key_alt";
     }
 
-    /**
-     * URI parameter and cursor extras that return counts of rows grouped by the
-     * address book index, which is usually the first letter of the sort key.
-     * When this parameter is supplied, the row counts are returned in the
-     * cursor extras bundle.
-     */
-    public final static class ContactCounts {
+    interface ContactCounts {
 
         /**
-         * Add this query parameter to a URI to get back row counts grouped by
-         * the address book index as cursor extras. For most languages it is the
-         * first letter of the sort key. This parameter does not affect the main
-         * content of the cursor.
+         * Add this query parameter to a URI to get back row counts grouped by the address book
+         * index as cursor extras. For most languages it is the first letter of the sort key. This
+         * parameter does not affect the main content of the cursor.
          *
          * <p>
          * <pre>
          * Example:
+         *
+         * import android.provider.ContactsContract.Contacts;
+         *
          * Uri uri = Contacts.CONTENT_URI.buildUpon()
          *          .appendQueryParameter(ContactCounts.ADDRESS_BOOK_INDEX_EXTRAS, "true")
          *          .build();
@@ -1136,11 +1132,12 @@ public final class ContactsContract {
          *          new String[] {Contacts.DISPLAY_NAME},
          *          null, null, null);
          * Bundle bundle = cursor.getExtras();
-         * if (bundle.containsKey(ContactCounts.EXTRA_ADDRESS_BOOK_INDEX_TITLES) &&
-         *         bundle.containsKey(ContactCounts.EXTRA_ADDRESS_BOOK_INDEX_COUNTS)) {
+         * if (bundle.containsKey(Contacts.ContactCounts.EXTRA_ADDRESS_BOOK_INDEX_TITLES) &&
+         *         bundle.containsKey(Contacts.ContactCounts.EXTRA_ADDRESS_BOOK_INDEX_COUNTS)) {
          *     String sections[] =
-         *             bundle.getStringArray(ContactCounts.EXTRA_ADDRESS_BOOK_INDEX_TITLES);
-         *     int counts[] = bundle.getIntArray(ContactCounts.EXTRA_ADDRESS_BOOK_INDEX_COUNTS);
+         *             bundle.getStringArray(Contacts.ContactCounts.EXTRA_ADDRESS_BOOK_INDEX_TITLES);
+         *     int counts[] = bundle.getIntArray(
+         *             Contacts.ContactCounts.EXTRA_ADDRESS_BOOK_INDEX_COUNTS);
          * }
          * </pre>
          * </p>
@@ -1375,7 +1372,7 @@ public final class ContactsContract {
      * </table>
      */
     public static class Contacts implements BaseColumns, ContactsColumns,
-            ContactOptionsColumns, ContactNameColumns, ContactStatusColumns {
+            ContactOptionsColumns, ContactNameColumns, ContactStatusColumns, ContactCounts {
         /**
          * This utility class cannot be instantiated
          */
@@ -4610,7 +4607,7 @@ public final class ContactsContract {
      * </tr>
      * </table>
      */
-    public final static class Data implements DataColumnsWithJoins {
+    public final static class Data implements DataColumnsWithJoins, ContactCounts {
         /**
          * This utility class cannot be instantiated
          */
@@ -5518,7 +5515,7 @@ public final class ContactsContract {
          * </tr>
          * </table>
          */
-        public static final class StructuredName implements DataColumnsWithJoins {
+        public static final class StructuredName implements DataColumnsWithJoins, ContactCounts {
             /**
              * This utility class cannot be instantiated
              */
@@ -5663,7 +5660,8 @@ public final class ContactsContract {
          * </tr>
          * </table>
          */
-        public static final class Nickname implements DataColumnsWithJoins, CommonColumns {
+        public static final class Nickname implements DataColumnsWithJoins, CommonColumns,
+                ContactCounts{
             /**
              * This utility class cannot be instantiated
              */
@@ -5747,7 +5745,8 @@ public final class ContactsContract {
          * </tr>
          * </table>
          */
-        public static final class Phone implements DataColumnsWithJoins, CommonColumns {
+        public static final class Phone implements DataColumnsWithJoins, CommonColumns,
+                ContactCounts {
             /**
              * This utility class cannot be instantiated
              */
@@ -5939,7 +5938,8 @@ public final class ContactsContract {
          * </tr>
          * </table>
          */
-        public static final class Email implements DataColumnsWithJoins, CommonColumns {
+        public static final class Email implements DataColumnsWithJoins, CommonColumns,
+                ContactCounts {
             /**
              * This utility class cannot be instantiated
              */
@@ -6131,7 +6131,8 @@ public final class ContactsContract {
          * </tr>
          * </table>
          */
-        public static final class StructuredPostal implements DataColumnsWithJoins, CommonColumns {
+        public static final class StructuredPostal implements DataColumnsWithJoins, CommonColumns,
+                ContactCounts {
             /**
              * This utility class cannot be instantiated
              */
@@ -6325,7 +6326,7 @@ public final class ContactsContract {
          * </tr>
          * </table>
          */
-        public static final class Im implements DataColumnsWithJoins, CommonColumns {
+        public static final class Im implements DataColumnsWithJoins, CommonColumns, ContactCounts {
             /**
              * This utility class cannot be instantiated
              */
@@ -6509,7 +6510,8 @@ public final class ContactsContract {
          * </tr>
          * </table>
          */
-        public static final class Organization implements DataColumnsWithJoins, CommonColumns {
+        public static final class Organization implements DataColumnsWithJoins, CommonColumns,
+                ContactCounts {
             /**
              * This utility class cannot be instantiated
              */
@@ -6652,7 +6654,8 @@ public final class ContactsContract {
          * </tr>
          * </table>
          */
-        public static final class Relation implements DataColumnsWithJoins, CommonColumns {
+        public static final class Relation implements DataColumnsWithJoins, CommonColumns,
+                ContactCounts {
             /**
              * This utility class cannot be instantiated
              */
@@ -6767,7 +6770,8 @@ public final class ContactsContract {
          * </tr>
          * </table>
          */
-        public static final class Event implements DataColumnsWithJoins, CommonColumns {
+        public static final class Event implements DataColumnsWithJoins, CommonColumns,
+                ContactCounts {
             /**
              * This utility class cannot be instantiated
              */
@@ -6855,7 +6859,7 @@ public final class ContactsContract {
          * </tr>
          * </table>
          */
-        public static final class Photo implements DataColumnsWithJoins {
+        public static final class Photo implements DataColumnsWithJoins, ContactCounts {
             /**
              * This utility class cannot be instantiated
              */
@@ -6903,7 +6907,7 @@ public final class ContactsContract {
          * </tr>
          * </table>
          */
-        public static final class Note implements DataColumnsWithJoins {
+        public static final class Note implements DataColumnsWithJoins, ContactCounts {
             /**
              * This utility class cannot be instantiated
              */
@@ -6958,7 +6962,7 @@ public final class ContactsContract {
          * </tr>
          * </table>
          */
-        public static final class GroupMembership implements DataColumnsWithJoins {
+        public static final class GroupMembership implements DataColumnsWithJoins, ContactCounts {
             /**
              * This utility class cannot be instantiated
              */
@@ -7030,7 +7034,8 @@ public final class ContactsContract {
          * </tr>
          * </table>
          */
-        public static final class Website implements DataColumnsWithJoins, CommonColumns {
+        public static final class Website implements DataColumnsWithJoins, CommonColumns,
+                ContactCounts {
             /**
              * This utility class cannot be instantiated
              */
@@ -7097,7 +7102,8 @@ public final class ContactsContract {
          * </tr>
          * </table>
          */
-        public static final class SipAddress implements DataColumnsWithJoins, CommonColumns {
+        public static final class SipAddress implements DataColumnsWithJoins, CommonColumns,
+                ContactCounts {
             /**
              * This utility class cannot be instantiated
              */
@@ -7155,7 +7161,7 @@ public final class ContactsContract {
          * to the same person.
          * </p>
          */
-        public static final class Identity implements DataColumnsWithJoins {
+        public static final class Identity implements DataColumnsWithJoins, ContactCounts {
             /**
              * This utility class cannot be instantiated
              */
@@ -7193,7 +7199,8 @@ public final class ContactsContract {
          * {@link SipAddress}'s.
          * </p>
          */
-        public static final class Callable implements DataColumnsWithJoins, CommonColumns {
+        public static final class Callable implements DataColumnsWithJoins, CommonColumns,
+                ContactCounts {
             /**
              * Similar to {@link Phone#CONTENT_URI}, but returns callable data instead of only
              * phone numbers.
@@ -7217,7 +7224,8 @@ public final class ContactsContract {
          * can use to initiate communications with another contact. {@link Phone} and {@link Email}
          * are the current data types in this category.
          */
-        public static final class Contactables implements DataColumnsWithJoins, CommonColumns {
+        public static final class Contactables implements DataColumnsWithJoins, CommonColumns,
+                ContactCounts {
             /**
              * The content:// style URI for these data items, which requests a directory of data
              * rows matching the selection criteria.
@@ -8039,25 +8047,27 @@ public final class ContactsContract {
      */
     public static final class PinnedPositions {
         /**
-         * <p>
          * The method to invoke in order to undemote a formerly demoted contact. The contact id of
          * the contact must be provided as an argument. If the contact was not previously demoted,
          * nothing will be done.
-         * </p>
-         *
-         * <p>
-         * Example:
-         * <pre>
-         * final long contactId = 10;
-         * resolver.call(ContactsContract.AUTHORITY_URI, PinnedPositions.UNDEMOTE_METHOD,
-         *         String.valueOf(contactId), null);
-         * </pre>
-         * </p>
+         * @hide
          */
         public static final String UNDEMOTE_METHOD = "undemote";
 
         /**
-         * Default value for the pinned position of an unpinned contact. Also equal to 0.
+         * Undemotes a formerly demoted contact. If the contact was not previously demoted, nothing
+         * will be done.
+         *
+         * @param contentResolver to perform the undemote operation on.
+         * @param contactId the id of the contact to undemote.
+         */
+        public static void undemote(ContentResolver contentResolver, long contactId) {
+            contentResolver.call(ContactsContract.AUTHORITY_URI, PinnedPositions.UNDEMOTE_METHOD,
+                    String.valueOf(contactId), null);
+        }
+
+        /**
+         * Default value for the pinned position of an unpinned contact.
          */
         public static final int UNPINNED = 0;
 
