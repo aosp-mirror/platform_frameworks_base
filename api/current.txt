@@ -7751,6 +7751,7 @@ package android.content {
     field public static final java.lang.String EXTRA_PHONE_NUMBER = "android.intent.extra.PHONE_NUMBER";
     field public static final java.lang.String EXTRA_REFERRER = "android.intent.extra.REFERRER";
     field public static final java.lang.String EXTRA_REMOTE_INTENT_TOKEN = "android.intent.extra.remote_intent_token";
+    field public static final java.lang.String EXTRA_REPLACEMENT_EXTRAS = "android.intent.extra.REPLACEMENT_EXTRAS";
     field public static final java.lang.String EXTRA_REPLACING = "android.intent.extra.REPLACING";
     field public static final java.lang.String EXTRA_RESTRICTIONS_BUNDLE = "android.intent.extra.restrictions_bundle";
     field public static final java.lang.String EXTRA_RESTRICTIONS_INTENT = "android.intent.extra.restrictions_intent";
