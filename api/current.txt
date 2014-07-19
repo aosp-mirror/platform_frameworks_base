@@ -28573,10 +28573,10 @@ package android.telecomm {
     field public static final android.os.Parcelable.Creator CREATOR;
   }
 
-  public abstract class InCallService {
-    ctor protected InCallService();
-    method public final android.os.IBinder getBinder();
+  public abstract class InCallService extends android.app.Service {
+    ctor public InCallService();
     method public android.telecomm.Phone getPhone();
+    method public android.os.IBinder onBind(android.content.Intent);
     method public void onPhoneCreated(android.telecomm.Phone);
     method public void onPhoneDestroyed(android.telecomm.Phone);
   }
