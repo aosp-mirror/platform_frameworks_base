@@ -427,7 +427,7 @@ class TvInputHardwareManager
                 if (surface == null && mActiveConfig == null) {
                     return false;
                 }
-                if (mInfo.getType() == TvInputHal.TYPE_HDMI) {
+                if (mInfo.getType() == TvInputHardwareInfo.TV_INPUT_TYPE_HDMI) {
                     if (surface != null) {
                         // Set "Active Source" for HDMI.
                         // TODO(hdmi): mHdmiClient.deviceSelect(...);
@@ -494,7 +494,7 @@ class TvInputHardwareManager
                     throw new IllegalStateException("Device already released.");
                 }
             }
-            if (mInfo.getType() != TvInputHal.TYPE_HDMI) {
+            if (mInfo.getType() != TvInputHardwareInfo.TV_INPUT_TYPE_HDMI) {
                 return false;
             }
             // TODO(hdmi): mHdmiClient.sendKeyEvent(event);
