@@ -213,22 +213,27 @@ public class SurfaceControl {
 
     /**
      * Display power mode off: used while blanking the screen.
-     * Use only with {@link SurfaceControl#setDisplayPowerMode()}.
+     * Use only with {@link SurfaceControl#setDisplayPowerMode}.
      */
     public static final int POWER_MODE_OFF = 0;
 
     /**
      * Display power mode doze: used while putting the screen into low power mode.
-     * Use only with {@link SurfaceControl#setDisplayPowerMode()}.
+     * Use only with {@link SurfaceControl#setDisplayPowerMode}.
      */
     public static final int POWER_MODE_DOZE = 1;
 
     /**
      * Display power mode normal: used while unblanking the screen.
-     * Use only with {@link SurfaceControl#setDisplayPowerMode()}.
+     * Use only with {@link SurfaceControl#setDisplayPowerMode}.
      */
     public static final int POWER_MODE_NORMAL = 2;
 
+    /**
+     * Display power mode doze: used while putting the screen into a suspended
+     * low power mode.  Use only with {@link SurfaceControl#setDisplayPowerMode}.
+     */
+    public static final int POWER_MODE_DOZE_SUSPEND = 3;
 
     /**
      * Create a surface with a name.
