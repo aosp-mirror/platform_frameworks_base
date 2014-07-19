@@ -352,7 +352,7 @@ public abstract class TvInputService extends Service {
          * </p><p>
          * Each TV input service also needs to continuously listen to any changes made to the
          * parental control settings by registering a
-         * {@link TvParentalControlManager.ParentalControlCallback} to the manager and immediately
+         * {@link TvParentalControlManager.ParentalControlListener} to the manager and immediately
          * reevaluate the current program with the new parental control settings.
          * </p>
          *
@@ -391,7 +391,7 @@ public abstract class TvInputService extends Service {
          * </p><p>
          * Each TV input service also needs to continuously listen to any changes made to the
          * parental control settings by registering a
-         * {@link TvParentalControlManager.ParentalControlCallback} to the manager and immediately
+         * {@link TvParentalControlManager.ParentalControlListener} to the manager and immediately
          * reevaluate the current program with the new parental control settings.
          * </p>
          *
@@ -469,7 +469,7 @@ public abstract class TvInputService extends Service {
         public abstract void onSetCaptionEnabled(boolean enabled);
 
         /**
-         * Called when the user allowed to unblock the content.
+         * Requests to unblock the content according to the given rating.
          * <p>
          * The implementation should unblock the content.
          * TV input service has responsibility to decide when/how the unblock expires
@@ -481,7 +481,8 @@ public abstract class TvInputService extends Service {
          *
          * @param unblockedRating An unblocked content rating
          */
-        public abstract void onContentUnblocked(TvContentRating unblockedRating);
+        public void onRequestUnblockContent(TvContentRating unblockedRating) {
+        }
 
         /**
          * Selects a given track.
@@ -717,10 +718,10 @@ public abstract class TvInputService extends Service {
         }
 
         /**
-         * Calls {@link #onContentUnblocked}.
+         * Calls {@link #onRequestUnblockContent}.
          */
-        void unblockContent(String unblockedRating) {
-            onContentUnblocked(TvContentRating.unflattenFromString(unblockedRating));
+        void requestUnblockContent(String unblockedRating) {
+            onRequestUnblockContent(TvContentRating.unflattenFromString(unblockedRating));
             // TODO: Handle failure.
         }
 

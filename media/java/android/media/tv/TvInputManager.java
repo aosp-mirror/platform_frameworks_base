@@ -73,7 +73,7 @@ public final class TvInputManager {
      * The TV input is connected.
      * <p>
      * State for {@link #getInputState} and {@link
-     * TvInputManager.TvInputCallback#onInputStateChanged}.
+     * TvInputManager.TvInputListener#onInputStateChanged}.
      * </p>
      */
     public static final int INPUT_STATE_CONNECTED = 0;
@@ -82,7 +82,7 @@ public final class TvInputManager {
      * fully ready.
      * <p>
      * State for {@link #getInputState} and {@link
-     * TvInputManager.TvInputCallback#onInputStateChanged}.
+     * TvInputManager.TvInputListener#onInputStateChanged}.
      * </p>
      */
     public static final int INPUT_STATE_CONNECTED_STANDBY = 1;
@@ -90,7 +90,7 @@ public final class TvInputManager {
      * The TV input is disconnected.
      * <p>
      * State for {@link #getInputState} and {@link
-     * TvInputManager.TvInputCallback#onInputStateChanged}.
+     * TvInputManager.TvInputListener#onInputStateChanged}.
      * </p>
      */
     public static final int INPUT_STATE_DISCONNECTED = 2;
@@ -100,8 +100,8 @@ public final class TvInputManager {
     private final Object mLock = new Object();
 
     // @GuardedBy(mLock)
-    private final List<TvInputCallbackRecord> mTvInputCallbackRecordsList =
-            new LinkedList<TvInputCallbackRecord>();
+    private final List<TvInputListenerRecord> mTvInputListenerRecordsList =
+            new LinkedList<TvInputListenerRecord>();
 
     // A mapping from TV input ID to the state of corresponding input.
     // @GuardedBy(mLock)
@@ -315,7 +315,7 @@ public final class TvInputManager {
     /**
      * Interface used to monitor status of the TV input.
      */
-    public abstract static class TvInputCallback {
+    public abstract static class TvInputListener {
         /**
          * This is called when the state of a given TV input is changed.
          *
@@ -347,24 +347,24 @@ public final class TvInputManager {
         }
     }
 
-    private static final class TvInputCallbackRecord {
-        private final TvInputCallback mCallback;
+    private static final class TvInputListenerRecord {
+        private final TvInputListener mListener;
         private final Handler mHandler;
 
-        public TvInputCallbackRecord(TvInputCallback callback, Handler handler) {
-            mCallback = callback;
+        public TvInputListenerRecord(TvInputListener listener, Handler handler) {
+            mListener = listener;
             mHandler = handler;
         }
 
-        public TvInputCallback getCallback() {
-            return mCallback;
+        public TvInputListener getListener() {
+            return mListener;
         }
 
         public void postInputStateChanged(final String inputId, final int state) {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    mCallback.onInputStateChanged(inputId, state);
+                    mListener.onInputStateChanged(inputId, state);
                 }
             });
         }
@@ -373,7 +373,7 @@ public final class TvInputManager {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    mCallback.onInputAdded(inputId);
+                    mListener.onInputAdded(inputId);
                 }
             });
         }
@@ -382,7 +382,7 @@ public final class TvInputManager {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    mCallback.onInputRemoved(inputId);
+                    mListener.onInputRemoved(inputId);
                 }
             });
         }
@@ -516,7 +516,7 @@ public final class TvInputManager {
             public void onInputStateChanged(String inputId, int state) {
                 synchronized (mLock) {
                     mStateMap.put(inputId, state);
-                    for (TvInputCallbackRecord record : mTvInputCallbackRecordsList) {
+                    for (TvInputListenerRecord record : mTvInputListenerRecordsList) {
                         record.postInputStateChanged(inputId, state);
                     }
                 }
@@ -526,7 +526,7 @@ public final class TvInputManager {
             public void onInputAdded(String inputId) {
                 synchronized (mLock) {
                     mStateMap.put(inputId, INPUT_STATE_CONNECTED);
-                    for (TvInputCallbackRecord record : mTvInputCallbackRecordsList) {
+                    for (TvInputListenerRecord record : mTvInputListenerRecordsList) {
                         record.postInputAdded(inputId);
                     }
                 }
@@ -536,7 +536,7 @@ public final class TvInputManager {
             public void onInputRemoved(String inputId) {
                 synchronized (mLock) {
                     mStateMap.remove(inputId);
-                    for (TvInputCallbackRecord record : mTvInputCallbackRecordsList) {
+                    for (TvInputListenerRecord record : mTvInputListenerRecordsList) {
                         record.postInputRemoved(inputId);
                     }
                 }
@@ -602,39 +602,39 @@ public final class TvInputManager {
     }
 
     /**
-     * Registers a {@link TvInputCallback}.
+     * Registers a {@link TvInputListener}.
      *
-     * @param callback A callback used to monitor status of the TV inputs.
+     * @param listener A listener used to monitor status of the TV inputs.
      * @param handler A {@link Handler} that the status change will be delivered to.
      * @throws IllegalArgumentException if any of the arguments is {@code null}.
      */
-    public void registerCallback(TvInputCallback callback, Handler handler) {
-        if (callback == null) {
+    public void registerListener(TvInputListener listener, Handler handler) {
+        if (listener == null) {
             throw new IllegalArgumentException("callback cannot be null");
         }
         if (handler == null) {
             throw new IllegalArgumentException("handler cannot be null");
         }
         synchronized (mLock) {
-            mTvInputCallbackRecordsList.add(new TvInputCallbackRecord(callback, handler));
+            mTvInputListenerRecordsList.add(new TvInputListenerRecord(listener, handler));
         }
     }
 
     /**
-     * Unregisters the existing {@link TvInputCallback}.
+     * Unregisters the existing {@link TvInputListener}.
      *
-     * @param callback The existing callback to remove.
+     * @param listener The existing listener to remove.
      * @throws IllegalArgumentException if any of the arguments is {@code null}.
      */
-    public void unregisterCallback(final TvInputCallback callback) {
-        if (callback == null) {
+    public void unregisterListener(final TvInputListener listener) {
+        if (listener == null) {
             throw new IllegalArgumentException("callback cannot be null");
         }
         synchronized (mLock) {
-            for (Iterator<TvInputCallbackRecord> it = mTvInputCallbackRecordsList.iterator();
+            for (Iterator<TvInputListenerRecord> it = mTvInputListenerRecordsList.iterator();
                     it.hasNext(); ) {
-                TvInputCallbackRecord record = it.next();
-                if (record.getCallback() == callback) {
+                TvInputListenerRecord record = it.next();
+                if (record.getListener() == listener) {
                     it.remove();
                     break;
                 }
@@ -963,15 +963,15 @@ public final class TvInputManager {
         }
 
         /**
-         * Unblock content blocked by parental controls.
+         * Requests to unblock content blocked by parental controls.
          */
-        void unblockContent(TvContentRating unblockedRating) {
+        void requestUnblockContent(TvContentRating unblockedRating) {
             if (mToken == null) {
                 Log.w(TAG, "The session has been already released");
                 return;
             }
             try {
-                mService.unblockContent(mToken, unblockedRating.flattenToString(), mUserId);
+                mService.requestUnblockContent(mToken, unblockedRating.flattenToString(), mUserId);
             } catch (RemoteException e) {
                 throw new RuntimeException(e);
             }

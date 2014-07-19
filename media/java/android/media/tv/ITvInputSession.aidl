@@ -42,5 +42,5 @@ oneway interface ITvInputSession {
     void relayoutOverlayView(in Rect frame);
     void removeOverlayView();
 
-    void unblockContent(in String unblockedRating);
+    void requestUnblockContent(in String unblockedRating);
 }

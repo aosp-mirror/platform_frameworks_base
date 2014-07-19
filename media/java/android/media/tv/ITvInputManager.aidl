@@ -56,7 +56,7 @@ interface ITvInputManager {
     void relayoutOverlayView(in IBinder sessionToken, in Rect frame, int userId);
     void removeOverlayView(in IBinder sessionToken, int userId);
 
-    void unblockContent(in IBinder sessionToken, in String unblockedRating, int userId);
+    void requestUnblockContent(in IBinder sessionToken, in String unblockedRating, int userId);
 
     // For TV input hardware binding
     List<TvInputHardwareInfo> getHardwareList();
