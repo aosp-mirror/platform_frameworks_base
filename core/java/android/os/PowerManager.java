@@ -263,6 +263,12 @@ public final class PowerManager {
      */
     public static final int BRIGHTNESS_OFF = 0;
 
+    /**
+     * Brightness value for default policy handling by the system.
+     * @hide
+     */
+    public static final int BRIGHTNESS_DEFAULT = -1;
+
     // Note: Be sure to update android.os.BatteryStats and PowerManager.h
     // if adding or modifying user activity event constants.
 

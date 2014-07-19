@@ -22,11 +22,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Handler;
 import android.os.PowerManager;
 import android.service.dreams.DozeHardware;
 import android.service.dreams.DreamService;
 import android.text.format.DateFormat;
 import android.util.Log;
+import android.view.Display;
 import android.widget.TextView;
 
 import java.util.Date;
@@ -51,10 +53,16 @@ public class DozeTestDream extends DreamService {
     // Doesn't mean anything.  Real hardware won't handle it.
     private static final String TEST_PING_MESSAGE = "test.ping";
 
+    // Not all hardware supports dozing.  We should use Display.STATE_DOZE but
+    // for testing purposes it is convenient to use Display.STATE_ON so the
+    // test still works on hardware that does not support dozing.
+    private static final int DISPLAY_STATE_WHEN_DOZING = Display.STATE_ON;
+
     private PowerManager mPowerManager;
     private PowerManager.WakeLock mWakeLock;
     private AlarmManager mAlarmManager;
     private PendingIntent mAlarmIntent;
+    private Handler mHandler = new Handler();
 
     private TextView mAlarmClock;
 
@@ -63,6 +71,8 @@ public class DozeTestDream extends DreamService {
 
     private boolean mDreaming;
     private DozeHardware mDozeHardware;
+
+    private long mLastTime = Long.MIN_VALUE;
 
     @Override
     public void onCreate() {
@@ -80,6 +90,8 @@ public class DozeTestDream extends DreamService {
         registerReceiver(mAlarmReceiver, filter);
         mAlarmIntent = PendingIntent.getBroadcast(this, 0, intent,
                 PendingIntent.FLAG_CANCEL_CURRENT);
+
+        setDozeScreenState(DISPLAY_STATE_WHEN_DOZING);
     }
 
     @Override
@@ -143,13 +155,33 @@ public class DozeTestDream extends DreamService {
         if (mDreaming) {
             long now = System.currentTimeMillis();
             now -= now % 60000; // back up to last minute boundary
+            if (mLastTime == now) {
+                return;
+            }
 
+            mLastTime = now;
             mTime.setTime(now);
             mAlarmClock.setText(mTimeFormat.format(mTime));
 
             mAlarmManager.setExact(AlarmManager.RTC_WAKEUP, now + 60000, mAlarmIntent);
 
-            mWakeLock.acquire(UPDATE_TIME_TIMEOUT);
+            mWakeLock.acquire(UPDATE_TIME_TIMEOUT + 5000 /*for testing brightness*/);
+
+            // flash the screen a bit to test these functions
+            setDozeScreenState(DISPLAY_STATE_WHEN_DOZING);
+            setDozeScreenBrightness(200);
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    setDozeScreenBrightness(50);
+                }
+            }, 2000);
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    setDozeScreenState(Display.STATE_OFF);
+                }
+            }, 5000);
         }
     }
 

@@ -27,10 +27,13 @@ import android.graphics.PixelFormat;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.PowerManager;
+import android.os.RemoteException;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Slog;
 import android.view.ActionMode;
+import android.view.Display;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -42,6 +45,7 @@ import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.WindowManager.LayoutParams;
 import android.view.accessibility.AccessibilityEvent;
+import android.util.MathUtils;
 
 import com.android.internal.policy.PolicyManager;
 import com.android.internal.util.DumpUtils;
@@ -133,8 +137,11 @@ import com.android.internal.util.DumpUtils.Dump;
  *     android:exported="true"
  *     android:icon="@drawable/my_icon"
  *     android:label="@string/my_dream_label"
- *     android:permission="android.permission.BIND_DREAM_SERVICE" >
- *  ...
+ *     android:permission="android.permission.BIND_DREAM_SERVICE">
+ *   &lt;intent-filter>
+ *     &lt;action android:name=”android.service.dreams.DreamService” />
+ *     &lt;category android:name=”android.intent.category.DEFAULT” />
+ *   &lt;/intent-filter>
  * &lt;/service>
  * </pre>
  */
@@ -177,6 +184,8 @@ public class DreamService extends Service implements Window.Callback {
     private boolean mDozing;
     private boolean mWindowless;
     private DozeHardware mDozeHardware;
+    private int mDozeScreenState = Display.STATE_UNKNOWN;
+    private int mDozeScreenBrightness = PowerManager.BRIGHTNESS_DEFAULT;
 
     private boolean mDebug = false;
 
@@ -560,7 +569,7 @@ public class DreamService extends Service implements Window.Callback {
      *
      * @return True if this dream can doze.
      * @see #startDozing
-     * @hide experimental
+     * @hide For use by system UI components only.
      */
     public boolean canDoze() {
         return mCanDoze;
@@ -593,13 +602,19 @@ public class DreamService extends Service implements Window.Callback {
      * </p>
      *
      * @see #stopDozing
-     * @hide experimental
+     * @hide For use by system UI components only.
      */
     public void startDozing() {
         if (mCanDoze && !mDozing) {
             mDozing = true;
+            updateDoze();
+        }
+    }
+
+    private void updateDoze() {
+        if (mDozing) {
             try {
-                mSandman.startDozing(mWindowToken);
+                mSandman.startDozing(mWindowToken, mDozeScreenState, mDozeScreenBrightness);
             } catch (RemoteException ex) {
                 // system server died
             }
@@ -615,7 +630,7 @@ public class DreamService extends Service implements Window.Callback {
      * </p>
      *
      * @see #startDozing
-     * @hide experimental
+     * @hide For use by system UI components only.
      */
     public void stopDozing() {
         if (mDozing) {
@@ -636,7 +651,7 @@ public class DreamService extends Service implements Window.Callback {
      * @return True if the dream is dozing.
      *
      * @see #setDozing(boolean)
-     * @hide experimental
+     * @hide For use by system UI components only.
      */
     public boolean isDozing() {
         return mDozing;
@@ -649,7 +664,7 @@ public class DreamService extends Service implements Window.Callback {
      * @return An instance of {@link DozeHardware} or null if this device does not offer
      * hardware support for dozing.
      *
-     * @hide experimental
+     * @hide For use by system UI components only.
      */
     public DozeHardware getDozeHardware() {
         if (mCanDoze && mDozeHardware == null && mWindowToken != null) {
@@ -666,11 +681,116 @@ public class DreamService extends Service implements Window.Callback {
     }
 
     /**
+     * Gets the screen state to use while dozing.
+     *
+     * @return The screen state to use while dozing, such as {@link Display#STATE_ON},
+     * {@link Display#STATE_DOZE}, {@link Display#STATE_DOZE_SUSPEND},
+     * or {@link Display#STATE_OFF}, or {@link Display#STATE_UNKNOWN} for the default
+     * behavior.
+     *
+     * @see #setDozeScreenState
+     * @hide For use by system UI components only.
+     */
+    public int getDozeScreenState() {
+        return mDozeScreenState;
+    }
+
+    /**
+     * Sets the screen state to use while dozing.
+     * <p>
+     * The value of this property determines the power state of the primary display
+     * once {@link #startDozing} has been called.  The default value is
+     * {@link Display#STATE_UNKNOWN} which lets the system decide.
+     * The dream may set a different state before starting to doze and may
+     * perform transitions between states while dozing to conserve power and
+     * achieve various effects.
+     * </p><p>
+     * It is recommended that the state be set to {@link Display#STATE_DOZE_SUSPEND}
+     * once the dream has completely finished drawing and before it releases its wakelock
+     * to allow the display hardware to be fully suspended.  While suspended, the
+     * display will preserve its on-screen contents or hand off control to dedicated
+     * doze hardware if the devices supports it.  If the doze suspend state is
+     * used, the dream must make sure to set the mode back
+     * to {@link Display#STATE_DOZE} or {@link Display#STATE_ON} before drawing again
+     * since the display updates may be ignored and not seen by the user otherwise.
+     * </p><p>
+     * The set of available display power states and their behavior while dozing is
+     * hardware dependent and may vary across devices.  The dream may therefore
+     * need to be modified or configured to correctly support the hardware.
+     * </p>
+     *
+     * @param state The screen state to use while dozing, such as {@link Display#STATE_ON},
+     * {@link Display#STATE_DOZE}, {@link Display#STATE_DOZE_SUSPEND},
+     * or {@link Display#STATE_OFF}, or {@link Display#STATE_UNKNOWN} for the default
+     * behavior.
+     *
+     * @hide For use by system UI components only.
+     */
+    public void setDozeScreenState(int state) {
+        if (mDozeScreenState != state) {
+            mDozeScreenState = state;
+            updateDoze();
+        }
+    }
+
+    /**
+     * Gets the screen brightness to use while dozing.
+     *
+     * @return The screen brightness while dozing as a value between
+     * {@link PowerManager#BRIGHTNESS_OFF} (0) and {@link PowerManager#BRIGHTNESS_ON} (255),
+     * or {@link PowerManager#BRIGHTNESS_DEFAULT} (-1) to ask the system to apply
+     * its default policy based on the screen state.
+     *
+     * @see #setDozeScreenBrightness
+     * @hide For use by system UI components only.
+     */
+    public int getDozeScreenBrightness() {
+        return mDozeScreenBrightness;
+    }
+
+    /**
+     * Sets the screen brightness to use while dozing.
+     * <p>
+     * The value of this property determines the power state of the primary display
+     * once {@link #startDozing} has been called.  The default value is
+     * {@link PowerManager#BRIGHTNESS_DEFAULT} which lets the system decide.
+     * The dream may set a different brightness before starting to doze and may adjust
+     * the brightness while dozing to conserve power and achieve various effects.
+     * </p><p>
+     * Note that dream may specify any brightness in the full 0-255 range, including
+     * values that are less than the minimum value for manual screen brightness
+     * adjustments by the user.  In particular, the value may be set to 0 which may
+     * turn off the backlight entirely while still leaving the screen on although
+     * this behavior is device dependent and not guaranteed.
+     * </p><p>
+     * The available range of display brightness values and their behavior while dozing is
+     * hardware dependent and may vary across devices.  The dream may therefore
+     * need to be modified or configured to correctly support the hardware.
+     * </p>
+     *
+     * @param brightness The screen brightness while dozing as a value between
+     * {@link PowerManager#BRIGHTNESS_OFF} (0) and {@link PowerManager#BRIGHTNESS_ON} (255),
+     * or {@link PowerManager#BRIGHTNESS_DEFAULT} (-1) to ask the system to apply
+     * its default policy based on the screen state.
+     *
+     * @hide For use by system UI components only.
+     */
+    public void setDozeScreenBrightness(int brightness) {
+        if (brightness != PowerManager.BRIGHTNESS_DEFAULT) {
+            brightness = clampAbsoluteBrightness(brightness);
+        }
+        if (mDozeScreenBrightness != brightness) {
+            mDozeScreenBrightness = brightness;
+            updateDoze();
+        }
+    }
+
+    /**
      * Called when this Dream is constructed.
      */
     @Override
     public void onCreate() {
-        if (mDebug) Slog.v(TAG, "onCreate() on thread " + Thread.currentThread().getId());
+        if (mDebug) Slog.v(TAG, "onCreate()");
         super.onCreate();
     }
 
@@ -844,8 +964,6 @@ public class DreamService extends Service implements Window.Callback {
             return;
         }
 
-        if (mDebug) Slog.v(TAG, "Attached on thread " + Thread.currentThread().getId());
-
         mWindowToken = windowToken;
         mCanDoze = canDoze;
         if (mWindowless && !mCanDoze) {
@@ -963,7 +1081,17 @@ public class DreamService extends Service implements Window.Callback {
         if (isScreenBright()) pw.print(" bright");
         if (isWindowless()) pw.print(" windowless");
         if (isDozing()) pw.print(" dozing");
+        else if (canDoze()) pw.print(" candoze");
         pw.println();
+        if (canDoze()) {
+            pw.println("  doze hardware: " + mDozeHardware);
+            pw.println("  doze screen state: " + Display.stateToString(mDozeScreenState));
+            pw.println("  doze screen brightness: " + mDozeScreenBrightness);
+        }
+    }
+
+    private static int clampAbsoluteBrightness(int value) {
+        return MathUtils.constrain(value, PowerManager.BRIGHTNESS_OFF, PowerManager.BRIGHTNESS_ON);
     }
 
     private final class DreamServiceWrapper extends IDreamService.Stub {
