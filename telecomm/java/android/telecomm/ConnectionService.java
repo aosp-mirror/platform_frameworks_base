@@ -427,6 +427,12 @@ public abstract class ConnectionService extends Service {
                         request.getCallId());
                 mAdapter.handleCreateConnectionSuccessful(request);
                 addConnection(request.getCallId(), connection);
+
+                // TODO: onSuccess should pass through the entire state of the connection instead of
+                // having to set it like this afterwards.  Also, it would eliminate the hack of
+                // having to change the request object that we pass back.
+                mConnectionListener.onCallCapabilitiesChanged(
+                        connection, connection.getCallCapabilities());
             }
 
             @Override
