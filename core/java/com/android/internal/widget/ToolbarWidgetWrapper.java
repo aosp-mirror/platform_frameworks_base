@@ -81,77 +81,81 @@ public class ToolbarWidgetWrapper implements DecorToolbar {
 
     private int mNavigationMode = ActionBar.NAVIGATION_MODE_STANDARD;
 
-    public ToolbarWidgetWrapper(Toolbar toolbar) {
+    public ToolbarWidgetWrapper(Toolbar toolbar, boolean style) {
         mToolbar = toolbar;
 
         mTitle = toolbar.getTitle();
         mSubtitle = toolbar.getSubtitle();
         mTitleSet = !TextUtils.isEmpty(mTitle);
 
-        final TypedArray a = toolbar.getContext().obtainStyledAttributes(null,
-                R.styleable.ActionBar, R.attr.actionBarStyle, 0);
+        if (style) {
+            final TypedArray a = toolbar.getContext().obtainStyledAttributes(null,
+                    R.styleable.ActionBar, R.attr.actionBarStyle, 0);
 
-        final CharSequence title = a.getText(R.styleable.ActionBar_title);
-        if (!TextUtils.isEmpty(title)) {
-            setTitle(title);
+            final CharSequence title = a.getText(R.styleable.ActionBar_title);
+            if (!TextUtils.isEmpty(title)) {
+                setTitle(title);
+            }
+
+            final CharSequence subtitle = a.getText(R.styleable.ActionBar_subtitle);
+            if (!TextUtils.isEmpty(subtitle)) {
+                setSubtitle(subtitle);
+            }
+
+            final Drawable logo = a.getDrawable(R.styleable.ActionBar_logo);
+            if (logo != null) {
+                setLogo(logo);
+            }
+
+            final Drawable icon = a.getDrawable(R.styleable.ActionBar_icon);
+            if (icon != null) {
+                setIcon(icon);
+            }
+
+            final Drawable navIcon = a.getDrawable(R.styleable.ActionBar_homeAsUpIndicator);
+            if (navIcon != null) {
+                setNavigationIcon(navIcon);
+            }
+
+            setDisplayOptions(a.getInt(R.styleable.ActionBar_displayOptions, 0));
+
+            final int customNavId = a.getResourceId(
+                    R.styleable.ActionBar_customNavigationLayout, 0);
+            if (customNavId != 0) {
+                setCustomView(LayoutInflater.from(mToolbar.getContext()).inflate(customNavId,
+                        mToolbar, false));
+                setDisplayOptions(mDisplayOpts | ActionBar.DISPLAY_SHOW_CUSTOM);
+            }
+
+            final int height = a.getLayoutDimension(R.styleable.ActionBar_height, 0);
+            if (height > 0) {
+                final ViewGroup.LayoutParams lp = mToolbar.getLayoutParams();
+                lp.height = height;
+                mToolbar.setLayoutParams(lp);
+            }
+
+            final int contentInsetStart = a.getDimensionPixelOffset(
+                    R.styleable.ActionBar_contentInsetStart, -1);
+            final int contentInsetEnd = a.getDimensionPixelOffset(
+                    R.styleable.ActionBar_contentInsetEnd, -1);
+            if (contentInsetStart >= 0 || contentInsetEnd >= 0) {
+                mToolbar.setContentInsetsRelative(Math.max(contentInsetStart, 0),
+                        Math.max(contentInsetEnd, 0));
+            }
+
+            final int titleTextStyle = a.getResourceId(R.styleable.ActionBar_titleTextStyle, 0);
+            if (titleTextStyle != 0) {
+                mToolbar.setTitleTextAppearance(mToolbar.getContext(), titleTextStyle);
+            }
+
+            final int subtitleTextStyle = a.getResourceId(
+                    R.styleable.ActionBar_subtitleTextStyle, 0);
+            if (subtitleTextStyle != 0) {
+                mToolbar.setSubtitleTextAppearance(mToolbar.getContext(), subtitleTextStyle);
+            }
+
+            a.recycle();
         }
-
-        final CharSequence subtitle = a.getText(R.styleable.ActionBar_subtitle);
-        if (!TextUtils.isEmpty(subtitle)) {
-            setSubtitle(subtitle);
-        }
-
-        final Drawable logo = a.getDrawable(R.styleable.ActionBar_logo);
-        if (logo != null) {
-            setLogo(logo);
-        }
-
-        final Drawable icon = a.getDrawable(R.styleable.ActionBar_icon);
-        if (icon != null) {
-            setIcon(icon);
-        }
-
-        final Drawable navIcon = a.getDrawable(R.styleable.ActionBar_homeAsUpIndicator);
-        if (navIcon != null) {
-            setNavigationIcon(navIcon);
-        }
-
-        setDisplayOptions(a.getInt(R.styleable.ActionBar_displayOptions, 0));
-
-        final int customNavId = a.getResourceId(R.styleable.ActionBar_customNavigationLayout, 0);
-        if (customNavId != 0) {
-            setCustomView(LayoutInflater.from(mToolbar.getContext()).inflate(customNavId,
-                    mToolbar, false));
-            setDisplayOptions(mDisplayOpts | ActionBar.DISPLAY_SHOW_CUSTOM);
-        }
-
-        final int height = a.getLayoutDimension(R.styleable.ActionBar_height, 0);
-        if (height > 0) {
-            final ViewGroup.LayoutParams lp = mToolbar.getLayoutParams();
-            lp.height = height;
-            mToolbar.setLayoutParams(lp);
-        }
-
-        final int contentInsetStart = a.getDimensionPixelOffset(
-                R.styleable.ActionBar_contentInsetStart, -1);
-        final int contentInsetEnd = a.getDimensionPixelOffset(
-                R.styleable.ActionBar_contentInsetEnd, -1);
-        if (contentInsetStart >= 0 || contentInsetEnd >= 0) {
-            mToolbar.setContentInsetsRelative(Math.max(contentInsetStart, 0),
-                    Math.max(contentInsetEnd, 0));
-        }
-
-        final int titleTextStyle = a.getResourceId(R.styleable.ActionBar_titleTextStyle, 0);
-        if (titleTextStyle != 0) {
-            mToolbar.setTitleTextAppearance(mToolbar.getContext(), titleTextStyle);
-        }
-
-        final int subtitleTextStyle = a.getResourceId(R.styleable.ActionBar_subtitleTextStyle, 0);
-        if (subtitleTextStyle != 0) {
-            mToolbar.setSubtitleTextAppearance(mToolbar.getContext(), subtitleTextStyle);
-        }
-
-        a.recycle();
 
         if (TextUtils.isEmpty(mToolbar.getNavigationContentDescription())) {
             mToolbar.setNavigationContentDescription(
