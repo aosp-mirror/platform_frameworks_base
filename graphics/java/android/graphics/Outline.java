@@ -96,6 +96,8 @@ public final class Outline {
      *
      * A filled outline is assumed, by the drawing system, to fully cover content beneath it,
      * meaning content beneath may be optimized away.
+     *
+     * @hide
      */
     public void setFilled(boolean isFilled) {
         mIsFilled = isFilled;
@@ -103,6 +105,8 @@ public final class Outline {
 
     /**
      * Returns whether the outline represents a fully opaque area.
+     *
+     * @hide
      */
     public boolean isFilled() {
         return !isEmpty() && mIsFilled;

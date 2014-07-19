@@ -96,12 +96,8 @@ public abstract class Shape implements Cloneable {
      * Compute the Outline of the shape.
      *
      * The default implementation does not supply an outline.
-     *
-     * @return True if a valid outline has been computed, false otherwise.
      */
-    public boolean getOutline(Outline outline) {
-        return false;
-    }
+    public void getOutline(Outline outline) {}
 
     @Override
     public Shape clone() throws CloneNotSupportedException {
