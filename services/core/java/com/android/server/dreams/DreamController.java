@@ -47,6 +47,9 @@ final class DreamController {
     // How long we wait for a newly bound dream to create the service connection
     private static final int DREAM_CONNECTION_TIMEOUT = 5 * 1000;
 
+    // Time to allow the dream to perform an exit transition when waking up.
+    private static final int DREAM_FINISH_TIMEOUT = 5 * 1000;
+
     private final Context mContext;
     private final Handler mHandler;
     private final Listener mListener;
@@ -66,8 +69,16 @@ final class DreamController {
         public void run() {
             if (mCurrentDream != null && mCurrentDream.mBound && !mCurrentDream.mConnected) {
                 Slog.w(TAG, "Bound dream did not connect in the time allotted");
-                stopDream();
+                stopDream(true /*immediate*/);
             }
+        }
+    };
+
+    private final Runnable mStopStubbornDreamRunnable = new Runnable() {
+        @Override
+        public void run() {
+            Slog.w(TAG, "Stubborn dream did not finish itself in the time allotted");
+            stopDream(true /*immediate*/);
         }
     };
 
@@ -90,6 +101,7 @@ final class DreamController {
             pw.println("    mBound=" + mCurrentDream.mBound);
             pw.println("    mService=" + mCurrentDream.mService);
             pw.println("    mSentStartBroadcast=" + mCurrentDream.mSentStartBroadcast);
+            pw.println("    mWakingGently=" + mCurrentDream.mWakingGently);
         } else {
             pw.println("  mCurrentDream: null");
         }
@@ -97,7 +109,7 @@ final class DreamController {
 
     public void startDream(Binder token, ComponentName name,
             boolean isTest, boolean canDoze, int userId) {
-        stopDream();
+        stopDream(true /*immediate*/);
 
         // Close the notification shade. Don't need to send to all, but better to be explicit.
         mContext.sendBroadcastAsUser(mCloseNotificationShadeIntent, UserHandle.ALL);
@@ -112,7 +124,7 @@ final class DreamController {
             mIWindowManager.addWindowToken(token, WindowManager.LayoutParams.TYPE_DREAM);
         } catch (RemoteException ex) {
             Slog.e(TAG, "Unable to add window token for dream.", ex);
-            stopDream();
+            stopDream(true /*immediate*/);
             return;
         }
 
@@ -123,12 +135,12 @@ final class DreamController {
             if (!mContext.bindServiceAsUser(intent, mCurrentDream,
                     Context.BIND_AUTO_CREATE, new UserHandle(userId))) {
                 Slog.e(TAG, "Unable to bind dream service: " + intent);
-                stopDream();
+                stopDream(true /*immediate*/);
                 return;
             }
         } catch (SecurityException ex) {
             Slog.e(TAG, "Unable to bind dream service: " + intent, ex);
-            stopDream();
+            stopDream(true /*immediate*/);
             return;
         }
 
@@ -136,9 +148,27 @@ final class DreamController {
         mHandler.postDelayed(mStopUnconnectedDreamRunnable, DREAM_CONNECTION_TIMEOUT);
     }
 
-    public void stopDream() {
+    public void stopDream(boolean immediate) {
         if (mCurrentDream == null) {
             return;
+        }
+
+        if (!immediate) {
+            if (mCurrentDream.mWakingGently) {
+                return; // already waking gently
+            }
+
+            if (mCurrentDream.mService != null) {
+                // Give the dream a moment to wake up and finish itself gently.
+                mCurrentDream.mWakingGently = true;
+                try {
+                    mCurrentDream.mService.wakeUp();
+                    mHandler.postDelayed(mStopStubbornDreamRunnable, DREAM_FINISH_TIMEOUT);
+                    return;
+                } catch (RemoteException ex) {
+                    // oh well, we tried, finish immediately instead
+                }
+            }
         }
 
         final DreamRecord oldDream = mCurrentDream;
@@ -148,6 +178,7 @@ final class DreamController {
                 + ", userId=" + oldDream.mUserId);
 
         mHandler.removeCallbacks(mStopUnconnectedDreamRunnable);
+        mHandler.removeCallbacks(mStopStubbornDreamRunnable);
 
         if (oldDream.mSentStartBroadcast) {
             mContext.sendBroadcastAsUser(mDreamingStoppedIntent, UserHandle.ALL);
@@ -195,7 +226,7 @@ final class DreamController {
             service.attach(mCurrentDream.mToken, mCurrentDream.mCanDoze);
         } catch (RemoteException ex) {
             Slog.e(TAG, "The dream service died unexpectedly.", ex);
-            stopDream();
+            stopDream(true /*immediate*/);
             return;
         }
 
@@ -226,6 +257,8 @@ final class DreamController {
         public IDreamService mService;
         public boolean mSentStartBroadcast;
 
+        public boolean mWakingGently;
+
         public DreamRecord(Binder token, ComponentName name,
                 boolean isTest, boolean canDoze, int userId) {
             mToken = token;
@@ -243,7 +276,7 @@ final class DreamController {
                 public void run() {
                     mService = null;
                     if (mCurrentDream == DreamRecord.this) {
-                        stopDream();
+                        stopDream(true /*immediate*/);
                     }
                 }
             });
@@ -271,7 +304,7 @@ final class DreamController {
                 public void run() {
                     mService = null;
                     if (mCurrentDream == DreamRecord.this) {
-                        stopDream();
+                        stopDream(true /*immediate*/);
                     }
                 }
             });
