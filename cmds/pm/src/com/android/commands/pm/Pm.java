@@ -197,13 +197,13 @@ public final class Pm {
             return;
         }
 
-        if ("block".equals(op)) {
-            runSetBlockedSetting(true);
+        if ("hide".equals(op)) {
+            runSetHiddenSetting(true);
             return;
         }
 
-        if ("unblock".equals(op)) {
-            runSetBlockedSetting(false);
+        if ("unhide".equals(op)) {
+            runSetHiddenSetting(false);
             return;
         }
 
@@ -1471,7 +1471,7 @@ public final class Pm {
         }
     }
 
-    private void runSetBlockedSetting(boolean state) {
+    private void runSetHiddenSetting(boolean state) {
         int userId = 0;
         String option = nextOption();
         if (option != null && option.equals("--user")) {
@@ -1492,9 +1492,9 @@ public final class Pm {
             return;
         }
         try {
-            mPm.setApplicationBlockedSettingAsUser(pkg, state, userId);
-            System.err.println("Package " + pkg + " new blocked state: "
-                    + mPm.getApplicationBlockedSettingAsUser(pkg, userId));
+            mPm.setApplicationHiddenSettingAsUser(pkg, state, userId);
+            System.err.println("Package " + pkg + " new hidden state: "
+                    + mPm.getApplicationHiddenSettingAsUser(pkg, userId));
         } catch (RemoteException e) {
             System.err.println(e.toString());
             System.err.println(PM_NOT_RUNNING_ERR);
@@ -1751,8 +1751,8 @@ public final class Pm {
         System.err.println("       pm disable [--user USER_ID] PACKAGE_OR_COMPONENT");
         System.err.println("       pm disable-user [--user USER_ID] PACKAGE_OR_COMPONENT");
         System.err.println("       pm disable-until-used [--user USER_ID] PACKAGE_OR_COMPONENT");
-        System.err.println("       pm block [--user USER_ID] PACKAGE_OR_COMPONENT");
-        System.err.println("       pm unblock [--user USER_ID] PACKAGE_OR_COMPONENT");
+        System.err.println("       pm hide [--user USER_ID] PACKAGE_OR_COMPONENT");
+        System.err.println("       pm unhide [--user USER_ID] PACKAGE_OR_COMPONENT");
         System.err.println("       pm grant PACKAGE PERMISSION");
         System.err.println("       pm revoke PACKAGE PERMISSION");
         System.err.println("       pm set-install-location [0/auto] [1/internal] [2/external]");

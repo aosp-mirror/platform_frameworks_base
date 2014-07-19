@@ -5355,7 +5355,7 @@ package android.app.admin {
     method public boolean installCaCert(android.content.ComponentName, byte[]);
     method public boolean isActivePasswordSufficient();
     method public boolean isAdminActive(android.content.ComponentName);
-    method public boolean isApplicationBlocked(android.content.ComponentName, java.lang.String);
+    method public boolean isApplicationHidden(android.content.ComponentName, java.lang.String);
     method public boolean isDeviceOwnerApp(java.lang.String);
     method public boolean isLockTaskPermitted(java.lang.String);
     method public boolean isMasterVolumeMuted(android.content.ComponentName);
@@ -5365,9 +5365,9 @@ package android.app.admin {
     method public boolean removeUser(android.content.ComponentName, android.os.UserHandle);
     method public boolean resetPassword(java.lang.String, int);
     method public void setAccountManagementDisabled(android.content.ComponentName, java.lang.String, boolean);
-    method public boolean setApplicationBlocked(android.content.ComponentName, java.lang.String, boolean);
+    method public boolean setApplicationHidden(android.content.ComponentName, java.lang.String, boolean);
     method public void setApplicationRestrictions(android.content.ComponentName, java.lang.String, android.os.Bundle);
-    method public int setApplicationsBlocked(android.content.ComponentName, android.content.Intent, boolean);
+    method public int setApplicationsHidden(android.content.ComponentName, android.content.Intent, boolean);
     method public void setBlockUninstall(android.content.ComponentName, java.lang.String, boolean);
     method public void setCameraDisabled(android.content.ComponentName, boolean);
     method public void setCrossProfileCallerIdDisabled(android.content.ComponentName, boolean);
