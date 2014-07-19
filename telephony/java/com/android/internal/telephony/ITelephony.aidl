@@ -706,5 +706,23 @@ interface ITelephony {
      *         not set.
      */
     String getLine1AlphaTagForDisplay(long subId);
+
+    /**
+     * Override the operator branding for the input ICCID.
+     *
+     * Once set, whenever the ICCID is inserted into the device, the service
+     * provider name (SPN) and the operator name will both be replaced by the
+     * brand value input. To unset the value, the same function should be
+     * called with a null brand value.
+     *
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     *  or has to be carrier app - see #hasCarrierPrivileges.
+     *
+     * @param iccid The ICCID of that the branding applies to.
+     * @param brand The brand name to display/set.
+     * @return true if the operation was executed correctly.
+     */
+    boolean setOperatorBrandOverride(String iccId, String brand);
 }
 

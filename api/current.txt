@@ -29182,6 +29182,7 @@ package android.telephony {
     method public boolean setCdmaSubscription(int);
     method public void setLine1NumberForDisplay(java.lang.String, java.lang.String);
     method public void setLine1NumberForDisplay(long, java.lang.String, java.lang.String);
+    method public boolean setOperatorBrandOverride(java.lang.String, java.lang.String);
     method public boolean setPreferredNetworkType(int);
     field public static final java.lang.String ACTION_PHONE_STATE_CHANGED = "android.intent.action.PHONE_STATE";
     field public static final java.lang.String ACTION_RESPOND_VIA_MESSAGE = "android.intent.action.RESPOND_VIA_MESSAGE";
