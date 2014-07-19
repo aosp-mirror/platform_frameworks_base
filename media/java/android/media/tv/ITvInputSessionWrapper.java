@@ -43,7 +43,7 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     private static final int DO_RELEASE = 1;
     private static final int DO_SET_SURFACE = 2;
     private static final int DO_DISPATCH_SURFACE_CHANGED = 3;
-    private static final int DO_SET_VOLUME = 4;
+    private static final int DO_SET_STREAM_VOLUME = 4;
     private static final int DO_TUNE = 5;
     private static final int DO_SET_CAPTION_ENABLED = 6;
     private static final int DO_SELECT_TRACK = 7;
@@ -99,8 +99,8 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
                 args.recycle();
                 return;
             }
-            case DO_SET_VOLUME: {
-                mTvInputSessionImpl.setVolume((Float) msg.obj);
+            case DO_SET_STREAM_VOLUME: {
+                mTvInputSessionImpl.setStreamVolume((Float) msg.obj);
                 return;
             }
             case DO_TUNE: {
@@ -162,7 +162,7 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
 
     @Override
     public final void setVolume(float volume) {
-        mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_SET_VOLUME, volume));
+        mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_SET_STREAM_VOLUME, volume));
     }
 
     @Override
