@@ -23,15 +23,15 @@ public abstract class AdvertiseCallback {
 
     /**
      * The requested operation was successful.
+     *
      * @hide
      */
     public static final int ADVERTISE_SUCCESS = 0;
 
     /**
-     * Failed to start advertising as the advertisement data contains services that are not
-     * added to the local Bluetooth GATT server.
+     * Failed to start advertising as the advertise data to be broadcasted is larger than 31 bytes.
      */
-    public static final int ADVERTISE_FAILED_SERVICE_UNKNOWN = 1;
+    public static final int ADVERTISE_FAILED_DATA_TOO_LARGE = 1;
 
     /**
      * Failed to start advertising because no advertising instance is available.
@@ -53,7 +53,6 @@ public abstract class AdvertiseCallback {
      */
     public static final int ADVERTISE_FAILED_FEATURE_UNSUPPORTED = 5;
 
-
     /**
      * Callback triggered in response to {@link BluetoothLeAdvertiser#startAdvertising} indicating
      * that the advertising has been started successfully.
@@ -67,7 +66,8 @@ public abstract class AdvertiseCallback {
     /**
      * Callback when advertising could not be started.
      *
-     * @param errorCode Error code (see ADVERTISE_FAILED_* constants) for
+     * @param errorCode Error code (see ADVERTISE_FAILED_* constants) for advertising start
+     *            failures.
      */
     public void onStartFailure(int errorCode) {
     }
