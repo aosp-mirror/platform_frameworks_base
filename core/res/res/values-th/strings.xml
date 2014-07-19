@@ -719,10 +719,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"อนุญาตให้เจ้าของเชื่อมโยงกับอินเตอร์เฟซระดับสูงสุดของบริการตัวฟังการแจ้งเตือน ซึ่งไม่มีความจำเป็นสำหรับแอปธรรมดา"</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"เชื่อมโยงกับบริการของผู้เสนอเงื่อนไข"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"อนุญาตให้ผู้ใช้อุปกรณ์เชื่อมโยงกับอินเทอร์เฟซระดับบนสุดของบริการของผู้เสนอเงื่อนไข ไม่จำเป็นสำหรับแอปทั่วไป"</string>
-    <!-- no translation found for permlab_bindMediaRouteService (6637740382272686835) -->
-    <skip />
-    <!-- no translation found for permdesc_bindMediaRouteService (6436655024972496687) -->
-    <skip />
+    <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"เชื่อมโยงกับบริการเส้นทางสื่อ"</string>
+    <string name="permdesc_bindMediaRouteService" msgid="6436655024972496687">"อนุญาตให้แอปพลิเคชันเชื่อมโยงกับอินเทอร์เฟซระดับบนสุดของบริการเส้นทางสื่อ ไม่จำเป็นสำหรับแอปทั่วไป"</string>
     <string name="permlab_bindDreamService" msgid="4153646965978563462">"เชื่อมโยงกับบริการที่ต้องการ"</string>
     <string name="permdesc_bindDreamService" msgid="7325825272223347863">"อนุญาตให้แอปพลิเคชันเชื่อมโยงกับอินเทอร์เฟซระดับบนสุดของบริการที่ต้องการ ไม่จำเป็นสำหรับแอปทั่วไป"</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"เรียกใช้แอปการกำหนดค่าของผู้ให้บริการ"</string>
@@ -1181,20 +1179,13 @@
     <string name="capital_on" msgid="1544682755514494298">"เปิด"</string>
     <string name="capital_off" msgid="6815870386972805832">"ปิด"</string>
     <string name="whichApplication" msgid="4533185947064773386">"ทำงานให้เสร็จโดยใช้"</string>
-    <!-- no translation found for whichApplicationNamed (8260158865936942783) -->
-    <skip />
-    <!-- no translation found for whichViewApplication (3272778576700572102) -->
-    <skip />
-    <!-- no translation found for whichViewApplicationNamed (2286418824011249620) -->
-    <skip />
-    <!-- no translation found for whichEditApplication (144727838241402655) -->
-    <skip />
-    <!-- no translation found for whichEditApplicationNamed (1775815530156447790) -->
-    <skip />
-    <!-- no translation found for whichSendApplication (6902512414057341668) -->
-    <skip />
-    <!-- no translation found for whichSendApplicationNamed (2799370240005424391) -->
-    <skip />
+    <string name="whichApplicationNamed" msgid="8260158865936942783">"ดำเนินการให้เสร็จสมบูรณ์โดยใช้ %1$s"</string>
+    <string name="whichViewApplication" msgid="3272778576700572102">"เปิดด้วย"</string>
+    <string name="whichViewApplicationNamed" msgid="2286418824011249620">"เปิดด้วย %1$s"</string>
+    <string name="whichEditApplication" msgid="144727838241402655">"แก้ไขด้วย"</string>
+    <string name="whichEditApplicationNamed" msgid="1775815530156447790">"แก้ไขด้วย %1$s"</string>
+    <string name="whichSendApplication" msgid="6902512414057341668">"แชร์กับ"</string>
+    <string name="whichSendApplicationNamed" msgid="2799370240005424391">"แชร์กับ %1$s"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"เลือกแอปหน้าแรก"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"ใช้ค่าเริ่มต้นสำหรับการทำงานนี้"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"ล้างค่าเริ่มต้นในการตั้งค่าระบบ &gt; แอปพลิเคชัน &gt; ดาวน์โหลด"</string>
@@ -1297,12 +1288,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"อนุญาตทุกครั้ง"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"ไม่อนุญาตเลย"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"นำซิมการ์ดออกแล้ว"</string>
-    <!-- no translation found for sim_removed_message (5450336489923274918) -->
-    <skip />
+    <string name="sim_removed_message" msgid="5450336489923274918">"เครือข่ายมือถือจะไม่พร้อมให้บริการจนกว่าคุณจะรีสตาร์ทโดยมีการเสียบซิมการ์ดที่ถูกต้อง"</string>
     <string name="sim_done_button" msgid="827949989369963775">"เสร็จสิ้น"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"เพิ่มซิมการ์ดแล้ว"</string>
-    <!-- no translation found for sim_added_message (7797975656153714319) -->
-    <skip />
+    <string name="sim_added_message" msgid="7797975656153714319">"รีสตาร์ทอุปกรณ์เพื่อเข้าถึงเครือข่ายมือถือ"</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"รีสตาร์ท"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"ตั้งเวลา"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"ตั้งวันที่"</string>
@@ -1441,10 +1430,6 @@
     <string name="back_button_label" msgid="2300470004503343439">"กลับ"</string>
     <string name="next_button_label" msgid="1080555104677992408">"ถัดไป"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"ข้าม"</string>
-    <string name="throttle_warning_notification_title" msgid="4890894267454867276">"การใช้งานข้อมูลมือถือในระดับสูง"</string>
-    <string name="throttle_warning_notification_message" msgid="3340822228599337743">"แตะเพื่อเรียนรู้เพิ่มเติมเกี่ยวกับการใช้ข้อมูลมือถือ"</string>
-    <string name="throttled_notification_title" msgid="6269541897729781332">"เกินจำนวนสูงสุดของข้อมูลมือถือ"</string>
-    <string name="throttled_notification_message" msgid="5443457321354907181">"แตะเพื่อเรียนรู้เพิ่มเติมเกี่ยวกับการใช้ข้อมูลมือถือ"</string>
     <string name="no_matches" msgid="8129421908915840737">"ไม่พบรายการที่ตรงกัน"</string>
     <string name="find_on_page" msgid="1946799233822820384">"ค้นหาบนหน้า"</string>
   <plurals name="matches_found">
@@ -1525,14 +1510,20 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"แก้ไข"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"คำเตือนการใช้ข้อมูล"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"แตะเพื่อดูการใช้งานและการตั้งค่า"</string>
-    <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"ปิดใช้งานข้อมูล 2G-3G"</string>
-    <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"ปิดใช้งานข้อมูล 4G"</string>
-    <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"ปิดใช้งานข้อมูลมือถือ"</string>
-    <string name="data_usage_wifi_limit_title" msgid="8992154736441284865">"ปิดใช้งานข้อมูล WiFi แล้ว"</string>
-    <string name="data_usage_limit_body" msgid="3317964706973601386">"แตะเพื่อเปิดใช้งาน"</string>
+    <!-- no translation found for data_usage_3g_limit_title (4462365924791862301) -->
+    <skip />
+    <!-- no translation found for data_usage_4g_limit_title (7476424187522765328) -->
+    <skip />
+    <!-- no translation found for data_usage_mobile_limit_title (3393439305227911006) -->
+    <skip />
+    <!-- no translation found for data_usage_wifi_limit_title (3461968509557554571) -->
+    <skip />
+    <!-- no translation found for data_usage_limit_body (6131350187562939365) -->
+    <skip />
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"เกินขีดจำกัดข้อมูล 2G - 3G"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"เกินขีดจำกัดของข้อมูล 4G"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"เกินขีดจำกัดข้อมูลมือถือ"</string>
+    <!-- no translation found for data_usage_mobile_limit_snoozed_title (4941346653729943789) -->
+    <skip />
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"เกินขีดจำกัดข้อมูล WiFi แล้ว"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> เกินขีดจำกัดที่ระบุไว้"</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"จำกัดข้อมูลแบ็กกราวด์"</string>

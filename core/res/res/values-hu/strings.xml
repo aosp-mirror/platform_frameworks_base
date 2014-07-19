@@ -719,10 +719,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Lehetővé teszi a használó számára, hogy csatlakozzon egy értesítésfigyelő szolgáltatás legfelső szintű felületéhez. A normál alkalmazásoknak erre soha nincs szükségük."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"csatlakozás egy feltételbiztosító szolgáltatáshoz"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Lehetővé teszi a használó számára, hogy csatlakozzon egy feltételbiztosító szolgáltatás legfelső szintű kezelőfelületéhez. A normál alkalmazásoknak erre soha nincs szükségük."</string>
-    <!-- no translation found for permlab_bindMediaRouteService (6637740382272686835) -->
-    <skip />
-    <!-- no translation found for permdesc_bindMediaRouteService (6436655024972496687) -->
-    <skip />
+    <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"csatlakozás egy médiaútvonal-szolgáltatáshoz"</string>
+    <string name="permdesc_bindMediaRouteService" msgid="6436655024972496687">"Lehetővé teszi a használó számára, hogy csatlakozzon egy médiaútvonal-szolgáltatás legfelső szintű kezelőfelületéhez. A normál alkalmazásoknak erre soha nincs szükségük."</string>
     <string name="permlab_bindDreamService" msgid="4153646965978563462">"csatlakozás egy képernyővédő szolgáltatáshoz"</string>
     <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Lehetővé teszi a használó számára, hogy csatlakozzon egy képernyővédő szolgáltatás legfelső szintű kezelőfelületéhez. A normál alkalmazásoknak erre soha nincs szükségük."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"a szolgáltatói konfigurációs alkalmazás hívása"</string>
@@ -1181,20 +1179,13 @@
     <string name="capital_on" msgid="1544682755514494298">"Be"</string>
     <string name="capital_off" msgid="6815870386972805832">"Ki"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Művelet végrehajtása a következővel:"</string>
-    <!-- no translation found for whichApplicationNamed (8260158865936942783) -->
-    <skip />
-    <!-- no translation found for whichViewApplication (3272778576700572102) -->
-    <skip />
-    <!-- no translation found for whichViewApplicationNamed (2286418824011249620) -->
-    <skip />
-    <!-- no translation found for whichEditApplication (144727838241402655) -->
-    <skip />
-    <!-- no translation found for whichEditApplicationNamed (1775815530156447790) -->
-    <skip />
-    <!-- no translation found for whichSendApplication (6902512414057341668) -->
-    <skip />
-    <!-- no translation found for whichSendApplicationNamed (2799370240005424391) -->
-    <skip />
+    <string name="whichApplicationNamed" msgid="8260158865936942783">"Művelet elvégzése a(z) %1$s segítségével"</string>
+    <string name="whichViewApplication" msgid="3272778576700572102">"Megnyitás a következővel:"</string>
+    <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Megnyitás a következővel: %1$s"</string>
+    <string name="whichEditApplication" msgid="144727838241402655">"Szerkesztés a következővel:"</string>
+    <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Szerkesztés a következővel: %1$s"</string>
+    <string name="whichSendApplication" msgid="6902512414057341668">"Megosztás a következővel:"</string>
+    <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Megosztás a következővel: %1$s"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"A kezdőalkalmazás kiválasztása"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Ez legyen az alapértelmezett program ehhez a művelethez."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Alapértelmezés törlése itt: Rendszerbeállítások &gt; Alkalmazások &gt; Letöltve."</string>
@@ -1297,12 +1288,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Engedélyezés mindig"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Soha nem engedélyezem"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM kártya eltávolítva"</string>
-    <!-- no translation found for sim_removed_message (5450336489923274918) -->
-    <skip />
+    <string name="sim_removed_message" msgid="5450336489923274918">"A mobilhálózat nem lesz elérhető, amíg újra nem indítja egy érvényes SIM kártya behelyezése után."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Kész"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIM kártya hozzáadva"</string>
-    <!-- no translation found for sim_added_message (7797975656153714319) -->
-    <skip />
+    <string name="sim_added_message" msgid="7797975656153714319">"A mobilhálózat eléréséhez indítsa újra az eszközt."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Újraindítás"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Idő beállítása"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Dátum beállítása"</string>
@@ -1441,10 +1430,6 @@
     <string name="back_button_label" msgid="2300470004503343439">"Vissza"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Tovább"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"Kihagyás"</string>
-    <string name="throttle_warning_notification_title" msgid="4890894267454867276">"Nagymértékű adathasználat"</string>
-    <string name="throttle_warning_notification_message" msgid="3340822228599337743">"Érintse meg, ha többre kíváncsi a mobil adathasználattal kapcsolatban."</string>
-    <string name="throttled_notification_title" msgid="6269541897729781332">"Elérte a mobil adatkorlátot"</string>
-    <string name="throttled_notification_message" msgid="5443457321354907181">"Érintse meg, ha többre kíváncsi a mobil adathasználattal kapcsolatban."</string>
     <string name="no_matches" msgid="8129421908915840737">"Nincs találat"</string>
     <string name="find_on_page" msgid="1946799233822820384">"Keresés az oldalon"</string>
   <plurals name="matches_found">
@@ -1525,14 +1510,20 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Szerkesztés"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Adathasználati figyelmeztetés"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"Érintse meg az adatokért."</string>
-    <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"2G-3G adatforgalom letiltva"</string>
-    <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"4G adatforgalom letiltva"</string>
-    <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Mobil adatforgalom letiltva"</string>
-    <string name="data_usage_wifi_limit_title" msgid="8992154736441284865">"Wi-Fi adatok letiltva"</string>
-    <string name="data_usage_limit_body" msgid="3317964706973601386">"Érintse meg az engedélyezéshez."</string>
+    <!-- no translation found for data_usage_3g_limit_title (4462365924791862301) -->
+    <skip />
+    <!-- no translation found for data_usage_4g_limit_title (7476424187522765328) -->
+    <skip />
+    <!-- no translation found for data_usage_mobile_limit_title (3393439305227911006) -->
+    <skip />
+    <!-- no translation found for data_usage_wifi_limit_title (3461968509557554571) -->
+    <skip />
+    <!-- no translation found for data_usage_limit_body (6131350187562939365) -->
+    <skip />
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Elérte a 2G/3G adatkorlátot"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Elérte a 4G adatkorlátot"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Elérte a mobil adatkorlátot"</string>
+    <!-- no translation found for data_usage_mobile_limit_snoozed_title (4941346653729943789) -->
+    <skip />
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Elérte a Wi-Fi adatkorlátot"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g>-tal túllépte a korlátot."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Háttéradatok korlátozva"</string>
@@ -1753,25 +1744,16 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> kiválasztva"</string>
     <string name="deleted_key" msgid="7659477886625566590">"A(z) <xliff:g id="KEY">%1$s</xliff:g> érték törölve"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Munkahelyi <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (2126866321272822564) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="2126866321272822564">"Alkalmazászárolás módban van. A kilépéshez tartsa lenyomva a Legutóbbiak gombot."</string>
     <string name="lock_to_app_toast_locked" msgid="4229650395479263497">"Ön alkalmazászárolási módban van."</string>
     <string name="lock_to_app_title" msgid="5895142291937470019">"Használni szeretné az alkalmazászárolást?"</string>
-    <!-- no translation found for lock_to_app_description (2800403592608529611) -->
-    <skip />
-    <!-- no translation found for lock_to_app_negative (2259143719362732728) -->
-    <skip />
+    <string name="lock_to_app_description" msgid="2800403592608529611">"Az alkalmazászárolás lezárja a kijelzőt az adott alkalmazásban.\n\nA kilépéshez tartsa lenyomva a Legutóbbiak gombot."</string>
+    <string name="lock_to_app_negative" msgid="2259143719362732728">"KÖSZÖNÖM, NEM"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"INDÍT"</string>
-    <!-- no translation found for lock_to_app_start (3074665051586318340) -->
-    <skip />
-    <!-- no translation found for lock_to_app_exit (8967089657201849300) -->
-    <skip />
-    <!-- no translation found for lock_to_app_use_screen_lock (1434584309048590886) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_pin (7908385370846820001) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_pattern (7763071104790758405) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_password (795224196583495868) -->
-    <skip />
+    <string name="lock_to_app_start" msgid="3074665051586318340">"Alkalmazászárolás aktiválva"</string>
+    <string name="lock_to_app_exit" msgid="8967089657201849300">"Az alkalmazászárolás megszűnt"</string>
+    <string name="lock_to_app_use_screen_lock" msgid="1434584309048590886">"%1$s kérése kilépés előtt"</string>
+    <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN kód"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"feloldási minta"</string>
+    <string name="lock_to_app_unlock_password" msgid="795224196583495868">"jelszó"</string>
 </resources>

@@ -719,10 +719,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Ļauj īpašniekam izveidot saiti ar paziņojumu uztvērēja pakalpojuma augšējā līmeņa saskarni. Parastajām lietotnēm tas nekad nav nepieciešams."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"Saistīšana ar nosacījumu sniedzēja pakalpojumu"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Ļauj īpašniekam izveidot savienojumu ar drukas nosacījumu sniedzēja pakalpojuma augšējā līmeņa saskarni. Parastajām lietotnēm tas nekad nav nepieciešams."</string>
-    <!-- no translation found for permlab_bindMediaRouteService (6637740382272686835) -->
-    <skip />
-    <!-- no translation found for permdesc_bindMediaRouteService (6436655024972496687) -->
-    <skip />
+    <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"Saistīšana ar multivides datu maršrutēšanas pakalpojumu"</string>
+    <string name="permdesc_bindMediaRouteService" msgid="6436655024972496687">"Ļauj īpašniekam izveidot saiti ar multivides datu maršrutēšanas pakalpojuma augstākā līmeņa saskarni. Nekad nav nepieciešama parastām lietotnēm."</string>
     <string name="permlab_bindDreamService" msgid="4153646965978563462">"piesaistīt ekrānsaudzētāja pakalpojumu"</string>
     <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Ļauj īpašniekam piesaistīt ekrānsaudzētāja pakalpojuma augšējā līmeņa saskarni. Parastajām lietotnēm tas nekad nav nepieciešams."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"Operatora nodrošinātas konfigurācijas lietotnes izsaukšana"</string>
@@ -1181,20 +1179,13 @@
     <string name="capital_on" msgid="1544682755514494298">"IESLĒGT"</string>
     <string name="capital_off" msgid="6815870386972805832">"IZSLĒGT"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Pabeigt darbību, izmantojot"</string>
-    <!-- no translation found for whichApplicationNamed (8260158865936942783) -->
-    <skip />
-    <!-- no translation found for whichViewApplication (3272778576700572102) -->
-    <skip />
-    <!-- no translation found for whichViewApplicationNamed (2286418824011249620) -->
-    <skip />
-    <!-- no translation found for whichEditApplication (144727838241402655) -->
-    <skip />
-    <!-- no translation found for whichEditApplicationNamed (1775815530156447790) -->
-    <skip />
-    <!-- no translation found for whichSendApplication (6902512414057341668) -->
-    <skip />
-    <!-- no translation found for whichSendApplicationNamed (2799370240005424391) -->
-    <skip />
+    <string name="whichApplicationNamed" msgid="8260158865936942783">"Pabeigt darbību, izmantojot %1$s"</string>
+    <string name="whichViewApplication" msgid="3272778576700572102">"Atvērt, izmantojot"</string>
+    <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Atvērt, izmantojot %1$s"</string>
+    <string name="whichEditApplication" msgid="144727838241402655">"Rediģēt, izmantojot"</string>
+    <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Rediģēt, izmantojot %1$s"</string>
+    <string name="whichSendApplication" msgid="6902512414057341668">"Kopīgot, izmantojot"</string>
+    <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Kopīgot, izmantojot %1$s"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"Sākuma ekrāna lietotnes atlase"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Pēc noklusējuma izmantot šai darbībai."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Notīriet noklusējuma iestatījumus šeit: Sistēmas iestatījumi &gt; Lietotnes &gt; Lejupielādētās."</string>
@@ -1297,12 +1288,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Vienmēr atļaut"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Neatļaut nekad"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM karte ir izņemta."</string>
-    <!-- no translation found for sim_removed_message (5450336489923274918) -->
-    <skip />
+    <string name="sim_removed_message" msgid="5450336489923274918">"Mobilais tīkls nebūs pieejams, kamēr nebūsiet restartējis ierīci ar ievietotu derīgu SIM karti."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Gatavs"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIM karte ir pievienota."</string>
-    <!-- no translation found for sim_added_message (7797975656153714319) -->
-    <skip />
+    <string name="sim_added_message" msgid="7797975656153714319">"Lai piekļūtu mobilajam tīklam, restartējiet ierīci."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Restartēt"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Laika iestatīšana"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Datuma iestatīšana"</string>
@@ -1441,10 +1430,6 @@
     <string name="back_button_label" msgid="2300470004503343439">"Atpakaļ"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Tālāk"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"Izlaist"</string>
-    <string name="throttle_warning_notification_title" msgid="4890894267454867276">"Augsts mobilo datu lietojums"</string>
-    <string name="throttle_warning_notification_message" msgid="3340822228599337743">"Pieskarieties, lai uzzinātu vairāk par mobilo datu izmantošanu."</string>
-    <string name="throttled_notification_title" msgid="6269541897729781332">"Ir pārsniegts mobilo datu ierobežojums."</string>
-    <string name="throttled_notification_message" msgid="5443457321354907181">"Pieskarieties, lai uzzinātu vairāk par mobilo datu izmantošanu."</string>
     <string name="no_matches" msgid="8129421908915840737">"Nav atbilstību"</string>
     <string name="find_on_page" msgid="1946799233822820384">"Atrast lapā"</string>
   <plurals name="matches_found">
@@ -1525,14 +1510,20 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Rediģēt"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Datu izmantošanas brīdinājums"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"Piesk., lai sk. lietoš. un iest."</string>
-    <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"2G–3G dati ir atspējoti"</string>
-    <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"4G dati ir atspējoti"</string>
-    <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Mobilie dati ir atspējoti"</string>
-    <string name="data_usage_wifi_limit_title" msgid="8992154736441284865">"Wi-Fi dati atspējoti"</string>
-    <string name="data_usage_limit_body" msgid="3317964706973601386">"Pieskarieties, lai iespējotu."</string>
+    <!-- no translation found for data_usage_3g_limit_title (4462365924791862301) -->
+    <skip />
+    <!-- no translation found for data_usage_4g_limit_title (7476424187522765328) -->
+    <skip />
+    <!-- no translation found for data_usage_mobile_limit_title (3393439305227911006) -->
+    <skip />
+    <!-- no translation found for data_usage_wifi_limit_title (3461968509557554571) -->
+    <skip />
+    <!-- no translation found for data_usage_limit_body (6131350187562939365) -->
+    <skip />
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G datu ierobež. pārsniegts"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G datu limits pārsniegts"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Pārsniegts mobilo datu ierobežoj."</string>
+    <!-- no translation found for data_usage_mobile_limit_snoozed_title (4941346653729943789) -->
+    <skip />
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Wi-Fi datu ierobež. pārsniegts"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> virs norādītā ierobežojuma."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Fona dati ir ierobežoti."</string>

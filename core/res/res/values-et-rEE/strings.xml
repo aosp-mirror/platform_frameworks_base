@@ -719,10 +719,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Võimaldab omanikul siduda märguannete kuulamisteenuse ülemise taseme kasutajaliidese. Seda ei tohiks tavarakenduste puhul kunagi vaja olla."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"seo tingimuse pakkuja teenusega"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Lubab omanikul siduda tingimuse pakkuja teenuse ülataseme liidesega. Pole kunagi vajalik tavaliste rakenduste puhul."</string>
-    <!-- no translation found for permlab_bindMediaRouteService (6637740382272686835) -->
-    <skip />
-    <!-- no translation found for permdesc_bindMediaRouteService (6436655024972496687) -->
-    <skip />
+    <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"meediumi marsruutimise teenusega sidumine"</string>
+    <string name="permdesc_bindMediaRouteService" msgid="6436655024972496687">"Lubab omanikul siduda meediumi marsruutimise teenuse ülataseme liidesega. Pole kunagi vajalik tavaliste rakenduste puhul."</string>
     <string name="permlab_bindDreamService" msgid="4153646965978563462">"sidumine uneteenusega"</string>
     <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Lubab omanikul siduda uneteenuse ülataseme liidesega. Tavarakenduste puhul ei peaks seda kunagi vaja minema."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"operaatoripoolse konfiguratsioonirakenduse aktiveerimine"</string>
@@ -1181,20 +1179,13 @@
     <string name="capital_on" msgid="1544682755514494298">"SEES"</string>
     <string name="capital_off" msgid="6815870386972805832">"VÄLJAS"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Lõpetage toiming rakendusega"</string>
-    <!-- no translation found for whichApplicationNamed (8260158865936942783) -->
-    <skip />
-    <!-- no translation found for whichViewApplication (3272778576700572102) -->
-    <skip />
-    <!-- no translation found for whichViewApplicationNamed (2286418824011249620) -->
-    <skip />
-    <!-- no translation found for whichEditApplication (144727838241402655) -->
-    <skip />
-    <!-- no translation found for whichEditApplicationNamed (1775815530156447790) -->
-    <skip />
-    <!-- no translation found for whichSendApplication (6902512414057341668) -->
-    <skip />
-    <!-- no translation found for whichSendApplicationNamed (2799370240005424391) -->
-    <skip />
+    <string name="whichApplicationNamed" msgid="8260158865936942783">"Toimingu lõpetamine, kasutades rakendust %1$s"</string>
+    <string name="whichViewApplication" msgid="3272778576700572102">"Avamine:"</string>
+    <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Avamine rakendusega %1$s"</string>
+    <string name="whichEditApplication" msgid="144727838241402655">"Muutmine:"</string>
+    <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Muutmine rakendusega %1$s"</string>
+    <string name="whichSendApplication" msgid="6902512414057341668">"Jagamine:"</string>
+    <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Jagamine rakendusega %1$s"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"Avalehe rakenduse valimine"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Kasuta vaikimisi selleks toiminguks."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Tühjendage vaikeandmed valikutes Süsteemiseaded &gt; Rakendused &gt; Allalaaditud."</string>
@@ -1297,12 +1288,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Luba alati"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Ära luba"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM-kaart eemaldatud"</string>
-    <!-- no translation found for sim_removed_message (5450336489923274918) -->
-    <skip />
+    <string name="sim_removed_message" msgid="5450336489923274918">"Mobiilsidevõrk ei ole saadaval, kuni sisestate kehtiva SIM-kaardi ja taaskäivitate seadme."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Valmis"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIM-kaart lisatud"</string>
-    <!-- no translation found for sim_added_message (7797975656153714319) -->
-    <skip />
+    <string name="sim_added_message" msgid="7797975656153714319">"Mobiilsidevõrku pääsemiseks taaskäivitage seade."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Taaskäivita"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Kellaaja määramine"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Kuupäeva määramine"</string>
@@ -1441,10 +1430,6 @@
     <string name="back_button_label" msgid="2300470004503343439">"Tagasi"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Järgmine"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"Jäta vahele"</string>
-    <string name="throttle_warning_notification_title" msgid="4890894267454867276">"Kõrge mobiilse andmeside kasutus"</string>
-    <string name="throttle_warning_notification_message" msgid="3340822228599337743">"Mobiilse andmeside kasutamise kohta lisateabe saamiseks puudutage."</string>
-    <string name="throttled_notification_title" msgid="6269541897729781332">"Mobiili andmemahupiirang ületatud"</string>
-    <string name="throttled_notification_message" msgid="5443457321354907181">"Mobiilse andmeside kasutamise kohta lisateabe saamiseks puudutage."</string>
     <string name="no_matches" msgid="8129421908915840737">"Vasted puuduvad"</string>
     <string name="find_on_page" msgid="1946799233822820384">"Otsige lehelt"</string>
   <plurals name="matches_found">
@@ -1525,14 +1510,20 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Muuda"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Andmete kasutamise hoiatus"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"Kasutuse/sätete vaat. puudutage."</string>
-    <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"2G–3G-andmeside on keelatud"</string>
-    <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"4G-andmeside on keelatud"</string>
-    <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Mobiilne andmeside on keelatud"</string>
-    <string name="data_usage_wifi_limit_title" msgid="8992154736441284865">"WiFi-andmed on keelatud"</string>
-    <string name="data_usage_limit_body" msgid="3317964706973601386">"Lubamiseks puudutage."</string>
+    <!-- no translation found for data_usage_3g_limit_title (4462365924791862301) -->
+    <skip />
+    <!-- no translation found for data_usage_4g_limit_title (7476424187522765328) -->
+    <skip />
+    <!-- no translation found for data_usage_mobile_limit_title (3393439305227911006) -->
+    <skip />
+    <!-- no translation found for data_usage_wifi_limit_title (3461968509557554571) -->
+    <skip />
+    <!-- no translation found for data_usage_limit_body (6131350187562939365) -->
+    <skip />
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G andmemahupiirang ületatud"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G andmemahupiirang ületatud"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Mobiilne andmemahupiirang ületatud"</string>
+    <!-- no translation found for data_usage_mobile_limit_snoozed_title (4941346653729943789) -->
+    <skip />
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"WiFi-andmete piir on ületatud"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> üle määratud piirmäära."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Taustandmed on piiratud"</string>

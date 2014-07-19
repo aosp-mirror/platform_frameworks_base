@@ -1430,10 +1430,6 @@
     <string name="back_button_label" msgid="2300470004503343439">"ກັບຄືນ"</string>
     <string name="next_button_label" msgid="1080555104677992408">"ຕໍ່ໄປ"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"ຂ້າມ"</string>
-    <string name="throttle_warning_notification_title" msgid="4890894267454867276">"ມີການໃຊ້ອິນເຕີເນັດຫຼາຍ"</string>
-    <string name="throttle_warning_notification_message" msgid="3340822228599337743">"ແຕະເພື່ອສຶກສາເພີ່ມເຕີມກ່ຽວກັບການໃຊ້ຂໍ້ມູນມືຖື."</string>
-    <string name="throttled_notification_title" msgid="6269541897729781332">"ການນຳໃຊ້ອິນເຕີເນັດຮອດຂີດຈຳກັດແລ້ວ"</string>
-    <string name="throttled_notification_message" msgid="5443457321354907181">"ແຕະເພື່ອສຶກສາເພີ່ມເຕີມກ່ຽວກັບການນຳໃຊ້ຂໍ້ມູນມືຖື."</string>
     <string name="no_matches" msgid="8129421908915840737">"ບໍ່ພົບຜົນການຊອກຫາ"</string>
     <string name="find_on_page" msgid="1946799233822820384">"ຊອກໃນໜ້າ"</string>
   <plurals name="matches_found">
@@ -1514,14 +1510,20 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"ແກ້ໄຂ"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"ເຕືອນກ່ຽວກັບການນຳໃຊ້ຂໍ້ມູນ"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"ແຕະເພື່ອເບິ່ງການນຳໃຊ້ ແລະການຕັ້ງຄ່າ."</string>
-    <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"ປິດການນຳໃຊ້ຂໍ້ມູນ 2G-3G"</string>
-    <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"ການນຳໃຊ້ຂໍ້ມູນ 4G ຖືກປິດແລ້ວ"</string>
-    <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"ຂໍ້ມູນມືຖືຖືກປິດໄວ້"</string>
-    <string name="data_usage_wifi_limit_title" msgid="8992154736441284865">"ປິດຂໍ້ມູນ Wi-Fi ແລ້ວ"</string>
-    <string name="data_usage_limit_body" msgid="3317964706973601386">"ແຕະເພື່ອເປີດໃຊ້."</string>
+    <!-- no translation found for data_usage_3g_limit_title (4462365924791862301) -->
+    <skip />
+    <!-- no translation found for data_usage_4g_limit_title (7476424187522765328) -->
+    <skip />
+    <!-- no translation found for data_usage_mobile_limit_title (3393439305227911006) -->
+    <skip />
+    <!-- no translation found for data_usage_wifi_limit_title (3461968509557554571) -->
+    <skip />
+    <!-- no translation found for data_usage_limit_body (6131350187562939365) -->
+    <skip />
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"ຂໍ້ມູນ 2G-3G ຮອດຂີດຈຳກັດແລ້ວ"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"ໝົດກຳນົດການນຳໃຊ້ຂໍ້ມູນ 4G"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"ໝົດກຳນົດການນຳໃຊ້ຂໍ້ມູນໃນມືຖື"</string>
+    <!-- no translation found for data_usage_mobile_limit_snoozed_title (4941346653729943789) -->
+    <skip />
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"ໝົດກໍານົດການນຳໃຊ້ຂໍ້ມູນ Wi-Fi"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> ເກີນທີ່ກໍາ​ນົດໄວ້."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"ຂໍ້ມູນແບັກກຣາວຖືກຈຳກັດແລ້ວ"</string>
