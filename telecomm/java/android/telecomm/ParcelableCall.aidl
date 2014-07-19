@@ -16,4 +16,4 @@
 
 package android.telecomm;
 
-parcelable InCallCall;
+parcelable ParcelableCall;

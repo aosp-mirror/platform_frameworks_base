@@ -581,58 +581,59 @@ public final class Call {
     }
 
     /** {@hide} */
-    final void internalUpdate(InCallCall inCallCall) {
+    final void internalUpdate(ParcelableCall parcelableCall) {
         // First, we update the internal state as far as possible before firing any updates.
 
         Details details = new Details(
-                inCallCall.getHandle(),
-                inCallCall.getHandlePresentation(),
-                inCallCall.getCallerDisplayName(),
-                inCallCall.getCallerDisplayNamePresentation(),
-                inCallCall.getAccountHandle(),
-                inCallCall.getCapabilities(),
-                inCallCall.getDisconnectCauseCode(),
-                inCallCall.getDisconnectCauseMsg(),
-                inCallCall.getConnectTimeMillis(),
-                inCallCall.getGatewayInfo(),
-                inCallCall.getVideoState(),
-                inCallCall.getStatusHints());
+                parcelableCall.getHandle(),
+                parcelableCall.getHandlePresentation(),
+                parcelableCall.getCallerDisplayName(),
+                parcelableCall.getCallerDisplayNamePresentation(),
+                parcelableCall.getAccountHandle(),
+                parcelableCall.getCapabilities(),
+                parcelableCall.getDisconnectCauseCode(),
+                parcelableCall.getDisconnectCauseMsg(),
+                parcelableCall.getConnectTimeMillis(),
+                parcelableCall.getGatewayInfo(),
+                parcelableCall.getVideoState(),
+                parcelableCall.getStatusHints());
         boolean detailsChanged = !Objects.equals(mDetails, details);
         if (detailsChanged) {
             mDetails = details;
         }
 
         boolean cannedTextResponsesChanged = false;
-        if (mCannedTextResponses == null && inCallCall.getCannedSmsResponses() != null
-                && !inCallCall.getCannedSmsResponses().isEmpty()) {
-            mCannedTextResponses = Collections.unmodifiableList(inCallCall.getCannedSmsResponses());
+        if (mCannedTextResponses == null && parcelableCall.getCannedSmsResponses() != null
+                && !parcelableCall.getCannedSmsResponses().isEmpty()) {
+            mCannedTextResponses =
+                    Collections.unmodifiableList(parcelableCall.getCannedSmsResponses());
         }
 
         boolean callVideoProviderChanged = false;
         try {
             callVideoProviderChanged =
-                    !Objects.equals(mCallVideoProvider, inCallCall.getCallVideoProvider());
+                    !Objects.equals(mCallVideoProvider, parcelableCall.getCallVideoProvider());
             if (callVideoProviderChanged) {
-                mCallVideoProvider = inCallCall.getCallVideoProvider();
+                mCallVideoProvider = parcelableCall.getCallVideoProvider();
             }
         } catch (RemoteException e) {
         }
 
-        int state = stateFromInCallCallState(inCallCall.getState());
+        int state = stateFromParcelableCallState(parcelableCall.getState());
         boolean stateChanged = mState != state;
         if (stateChanged) {
             mState = state;
         }
 
-        if (inCallCall.getParentCallId() != null) {
-            mParent = mPhone.internalGetCallByTelecommId(inCallCall.getParentCallId());
+        if (parcelableCall.getParentCallId() != null) {
+            mParent = mPhone.internalGetCallByTelecommId(parcelableCall.getParentCallId());
         }
 
         mChildren.clear();
-        if (inCallCall.getChildCallIds() != null) {
-            for (int i = 0; i < inCallCall.getChildCallIds().size(); i++) {
+        if (parcelableCall.getChildCallIds() != null) {
+            for (int i = 0; i < parcelableCall.getChildCallIds().size(); i++) {
                 mChildren.add(mPhone.internalGetCallByTelecommId(
-                        inCallCall.getChildCallIds().get(i)));
+                        parcelableCall.getChildCallIds().get(i)));
             }
         }
 
@@ -749,8 +750,8 @@ public final class Call {
         }
     }
 
-    private int stateFromInCallCallState(CallState inCallCallState) {
-        switch (inCallCallState) {
+    private int stateFromParcelableCallState(CallState parcelableCallState) {
+        switch (parcelableCallState) {
             case NEW:
                 return STATE_NEW;
             case PRE_DIAL_WAIT:
@@ -768,7 +769,7 @@ public final class Call {
             case ABORTED:
                 return STATE_DISCONNECTED;
             default:
-                Log.wtf(this, "Unrecognized CallState %s", inCallCallState);
+                Log.wtf(this, "Unrecognized CallState %s", parcelableCallState);
                 return STATE_NEW;
         }
     }
