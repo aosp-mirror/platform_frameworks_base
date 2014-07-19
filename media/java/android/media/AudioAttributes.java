@@ -525,6 +525,45 @@ public final class AudioAttributes implements Parcelable {
     }
 
     /** @hide */
+    public static int toLegacyStreamType(AudioAttributes aa) {
+        // flags to stream type mapping
+        if ((aa.getFlags() & FLAG_AUDIBILITY_ENFORCED) == FLAG_AUDIBILITY_ENFORCED) {
+            return AudioSystem.STREAM_SYSTEM_ENFORCED;
+        }
+        if ((aa.getFlags() & FLAG_SCO) == FLAG_SCO) {
+            return AudioSystem.STREAM_BLUETOOTH_SCO;
+        }
+
+        // usage to stream type mapping
+        switch (aa.getUsage()) {
+            case USAGE_MEDIA:
+            case USAGE_GAME:
+            case USAGE_ASSISTANCE_ACCESSIBILITY:
+            case USAGE_ASSISTANCE_NAVIGATION_GUIDANCE:
+                return AudioSystem.STREAM_MUSIC;
+            case USAGE_ASSISTANCE_SONIFICATION:
+                return AudioSystem.STREAM_SYSTEM;
+            case USAGE_VOICE_COMMUNICATION:
+                return AudioSystem.STREAM_VOICE_CALL;
+            case USAGE_VOICE_COMMUNICATION_SIGNALLING:
+                return AudioSystem.STREAM_DTMF;
+            case USAGE_ALARM:
+                return AudioSystem.STREAM_ALARM;
+            case USAGE_NOTIFICATION_TELEPHONY_RINGTONE:
+                return AudioSystem.STREAM_RING;
+            case USAGE_NOTIFICATION:
+            case USAGE_NOTIFICATION_COMMUNICATION_REQUEST:
+            case USAGE_NOTIFICATION_COMMUNICATION_INSTANT:
+            case USAGE_NOTIFICATION_COMMUNICATION_DELAYED:
+            case USAGE_NOTIFICATION_EVENT:
+                return AudioSystem.STREAM_NOTIFICATION;
+            case USAGE_UNKNOWN:
+            default:
+                return AudioSystem.STREAM_MUSIC;
+        }
+    }
+
+    /** @hide */
     @IntDef({
         USAGE_UNKNOWN,
         USAGE_MEDIA,
