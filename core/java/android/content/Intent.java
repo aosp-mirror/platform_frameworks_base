@@ -3175,6 +3175,33 @@ public class Intent implements Parcelable, Cloneable {
     public static final String EXTRA_INITIAL_INTENTS = "android.intent.extra.INITIAL_INTENTS";
 
     /**
+     * A Bundle forming a mapping of potential target package names to different extras Bundles
+     * to add to the default intent extras in {@link #EXTRA_INTENT} when used with
+     * {@link #ACTION_CHOOSER}. Each key should be a package name. The package need not
+     * be currently installed on the device.
+     *
+     * <p>An application may choose to provide alternate extras for the case where a user
+     * selects an activity from a predetermined set of target packages. If the activity
+     * the user selects from the chooser belongs to a package with its package name as
+     * a key in this bundle, the corresponding extras for that package will be merged with
+     * the extras already present in the intent at {@link #EXTRA_INTENT}. If a replacement
+     * extra has the same key as an extra already present in the intent it will overwrite
+     * the extra from the intent.</p>
+     *
+     * <p><em>Examples:</em>
+     * <ul>
+     *     <li>An application may offer different {@link #EXTRA_TEXT} to an application
+     *     when sharing with it via {@link #ACTION_SEND}, augmenting a link with additional query
+     *     parameters for that target.</li>
+     *     <li>An application may offer additional metadata for known targets of a given intent
+     *     to pass along information only relevant to that target such as account or content
+     *     identifiers already known to that application.</li>
+     * </ul></p>
+     */
+    public static final String EXTRA_REPLACEMENT_EXTRAS =
+            "android.intent.extra.REPLACEMENT_EXTRAS";
+
+    /**
      * A {@link android.view.KeyEvent} object containing the event that
      * triggered the creation of the Intent it is in.
      */
