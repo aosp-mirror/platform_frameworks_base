@@ -78,9 +78,7 @@ public class AudioFormat {
     public static final int CHANNEL_OUT_FRONT_LEFT_OF_CENTER = 0x100;
     public static final int CHANNEL_OUT_FRONT_RIGHT_OF_CENTER = 0x200;
     public static final int CHANNEL_OUT_BACK_CENTER = 0x400;
-    /** @hide  CANDIDATE FOR PUBLIC API */
     public static final int CHANNEL_OUT_SIDE_LEFT =         0x800;
-    /** @hide  CANDIDATE FOR PUBLIC API */
     public static final int CHANNEL_OUT_SIDE_RIGHT =       0x1000;
     /** @hide */
     public static final int CHANNEL_OUT_TOP_CENTER =       0x2000;
@@ -277,7 +275,6 @@ public class AudioFormat {
     }
 
     /**
-     * @hide CANDIDATE FOR PUBLIC API
      * Builder class for {@link AudioFormat} objects.
      */
     public static class Builder {
@@ -287,7 +284,7 @@ public class AudioFormat {
         private int mPropertySetMask = AUDIO_FORMAT_HAS_PROPERTY_NONE;
 
         /**
-         * Constructs a new Builder with the defaults.
+         * Constructs a new Builder with the defaults format values.
          */
         public Builder() {
         }
