@@ -169,4 +169,8 @@ interface IDevicePolicyManager {
     void setCrossProfileCallerIdDisabled(in ComponentName who, boolean disabled);
     boolean getCrossProfileCallerIdDisabled(in ComponentName who);
     boolean getCrossProfileCallerIdDisabledForUser(int userId);
+
+    void setTrustAgentFeaturesEnabled(in ComponentName admin, in ComponentName agent, in List<String> features, int userId);
+    List<String> getTrustAgentFeaturesEnabled(in ComponentName admin, in ComponentName agent, int userId);
+
 }
