@@ -28,7 +28,6 @@ import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
 import android.hardware.hdmi.HdmiCecDeviceInfo;
-import android.media.tv.TvInputHardwareInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -54,48 +53,48 @@ public final class TvInputInfo implements Parcelable {
      */
     public static final int TYPE_VIRTUAL = 0;
 
-    // Should be in sync with hardware/libhardware/include/hardware/tv_input.h
+    // Should be in sync with TvInputHardwareInfo.
 
     /**
      * TV input type: a generic hardware TV input type.
      */
-    public static final int TYPE_OTHER_HARDWARE = 1;
+    public static final int TYPE_OTHER_HARDWARE = TvInputHardwareInfo.TV_INPUT_TYPE_OTHER_HARDWARE;
     /**
      * TV input type: the TV input service is a tuner. (e.g. terrestrial tuner)
      */
-    public static final int TYPE_TUNER = 2;
-    /**
-     * TV input type: the TV input service is HDMI. (e.g. HDMI 1)
-     */
-    public static final int TYPE_HDMI = 3;
-    /**
-     * TV input type: the TV input service represents a display port.
-     */
-    public static final int TYPE_DISPLAY_PORT = 4;
-    /**
-     * TV input type: the TV input service represents a SCART port.
-     */
-    public static final int TYPE_SCART = 5;
-    /**
-     * TV input type: the TV input service represents a DVI port.
-     */
-    public static final int TYPE_DVI = 6;
-    /**
-     * TV input type: the TV input service represents a VGA port.
-     */
-    public static final int TYPE_VGA = 7;
-    /**
-     * TV input type: the TV input service represents a component port.
-     */
-    public static final int TYPE_COMPONENT = 8;
+    public static final int TYPE_TUNER = TvInputHardwareInfo.TV_INPUT_TYPE_TUNER;
     /**
      * TV input type: the TV input service represents a composite port.
      */
-    public static final int TYPE_COMPOSITE = 9;
+    public static final int TYPE_COMPOSITE = TvInputHardwareInfo.TV_INPUT_TYPE_COMPOSITE;
     /**
      * TV input type: the TV input service represents a SVIDEO port.
      */
-    public static final int TYPE_SVIDEO = 10;
+    public static final int TYPE_SVIDEO = TvInputHardwareInfo.TV_INPUT_TYPE_SVIDEO;
+    /**
+     * TV input type: the TV input service represents a SCART port.
+     */
+    public static final int TYPE_SCART = TvInputHardwareInfo.TV_INPUT_TYPE_SCART;
+    /**
+     * TV input type: the TV input service represents a component port.
+     */
+    public static final int TYPE_COMPONENT = TvInputHardwareInfo.TV_INPUT_TYPE_COMPONENT;
+    /**
+     * TV input type: the TV input service represents a VGA port.
+     */
+    public static final int TYPE_VGA = TvInputHardwareInfo.TV_INPUT_TYPE_VGA;
+    /**
+     * TV input type: the TV input service represents a DVI port.
+     */
+    public static final int TYPE_DVI = TvInputHardwareInfo.TV_INPUT_TYPE_DVI;
+    /**
+     * TV input type: the TV input service is HDMI. (e.g. HDMI 1)
+     */
+    public static final int TYPE_HDMI = TvInputHardwareInfo.TV_INPUT_TYPE_HDMI;
+    /**
+     * TV input type: the TV input service represents a display port.
+     */
+    public static final int TYPE_DISPLAY_PORT = TvInputHardwareInfo.TV_INPUT_TYPE_DISPLAY_PORT;
 
     /**
      * The ID of the TV input to provide to the setup activity and settings activity.

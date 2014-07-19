@@ -16686,14 +16686,14 @@ package android.media.tv {
     method public java.lang.CharSequence loadLabel(android.content.Context);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final java.lang.String EXTRA_INPUT_ID = "inputId";
-    field public static final int TYPE_COMPONENT = 8; // 0x8
-    field public static final int TYPE_COMPOSITE = 9; // 0x9
-    field public static final int TYPE_DISPLAY_PORT = 4; // 0x4
-    field public static final int TYPE_DVI = 6; // 0x6
-    field public static final int TYPE_HDMI = 3; // 0x3
+    field public static final int TYPE_COMPONENT = 6; // 0x6
+    field public static final int TYPE_COMPOSITE = 3; // 0x3
+    field public static final int TYPE_DISPLAY_PORT = 10; // 0xa
+    field public static final int TYPE_DVI = 8; // 0x8
+    field public static final int TYPE_HDMI = 9; // 0x9
     field public static final int TYPE_OTHER_HARDWARE = 1; // 0x1
     field public static final int TYPE_SCART = 5; // 0x5
-    field public static final int TYPE_SVIDEO = 10; // 0xa
+    field public static final int TYPE_SVIDEO = 4; // 0x4
     field public static final int TYPE_TUNER = 2; // 0x2
     field public static final int TYPE_VGA = 7; // 0x7
     field public static final int TYPE_VIRTUAL = 0; // 0x0

@@ -33,9 +33,16 @@ public final class TvInputHardwareInfo implements Parcelable {
     static final String TAG = "TvInputHardwareInfo";
 
     // Match hardware/libhardware/include/hardware/tv_input.h
-    public static final int TV_INPUT_TYPE_HDMI           = 1;
-    public static final int TV_INPUT_TYPE_BUILT_IN_TUNER = 2;
-    public static final int TV_INPUT_TYPE_PASSTHROUGH    = 3;
+    public static final int TV_INPUT_TYPE_OTHER_HARDWARE = 1;
+    public static final int TV_INPUT_TYPE_TUNER          = 2;
+    public static final int TV_INPUT_TYPE_COMPOSITE      = 3;
+    public static final int TV_INPUT_TYPE_SVIDEO         = 4;
+    public static final int TV_INPUT_TYPE_SCART          = 5;
+    public static final int TV_INPUT_TYPE_COMPONENT      = 6;
+    public static final int TV_INPUT_TYPE_VGA            = 7;
+    public static final int TV_INPUT_TYPE_DVI            = 8;
+    public static final int TV_INPUT_TYPE_HDMI           = 9;
+    public static final int TV_INPUT_TYPE_DISPLAY_PORT   = 10;
 
     public static final Parcelable.Creator<TvInputHardwareInfo> CREATOR =
             new Parcelable.Creator<TvInputHardwareInfo>() {
@@ -87,6 +94,20 @@ public final class TvInputHardwareInfo implements Parcelable {
             throw new IllegalStateException();
         }
         return mHdmiPortId;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder b = new StringBuilder(128);
+        b.append("TvInputHardwareInfo {id=").append(mDeviceId);
+        b.append(", type=").append(mType);
+        b.append(", audio_type=").append(mAudioType);
+        b.append(", audio_addr=").append(mAudioAddress);
+        if (mType == TV_INPUT_TYPE_HDMI) {
+            b.append(", hdmi_port=").append(mHdmiPortId);
+        }
+        b.append("}");
+        return b.toString();
     }
 
     // Parcelable
