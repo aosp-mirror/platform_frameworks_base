@@ -1341,6 +1341,7 @@ public class AudioManager {
     }
 
     /**
+     * @hide
      * Start bluetooth SCO audio connection in virtual call mode.
      * <p>Requires Permission:
      *   {@link android.Manifest.permission#MODIFY_AUDIO_SETTINGS}.
@@ -1368,12 +1369,11 @@ public class AudioManager {
      * <p>Requires Permission:
      *   {@link android.Manifest.permission#MODIFY_AUDIO_SETTINGS}.
      * <p>This method must be called by applications having requested the use of
-     * bluetooth SCO audio with {@link #startBluetoothSco()} or
-     * {@link #startBluetoothScoVirtualCall()} when finished with the SCO connection or
-     * if connection fails.
+     * bluetooth SCO audio with {@link #startBluetoothSco()} when finished with the SCO
+     * connection or if connection fails.
      * @see #startBluetoothSco()
-     * @see #startBluetoothScoVirtualCall()
      */
+    // Also used for connections started with {@link #startBluetoothScoVirtualCall()}
     public void stopBluetoothSco(){
         IAudioService service = getService();
         try {
