@@ -31,7 +31,195 @@ import java.util.List;
  */
 public class TelecommManager {
 
+    /**
+     * <p>Activity action: Starts the UI for handing an incoming call. This intent starts the
+     * in-call UI by notifying the Telecomm system that an incoming call exists for a specific call
+     * service (see {@link ConnectionService}). Telecomm reads the Intent extras
+     * to find and bind to the appropriate {@link ConnectionService} which
+     * Telecomm will ultimately use to control and get information about the call.</p>
+     *
+     * <p>Input: get*Extra field {@link #EXTRA_PHONE_ACCOUNT} contains the component name of the
+     * {@link ConnectionService} that Telecomm should bind to. Telecomm will then
+     * ask the connection service for more information about the call prior to showing any UI.
+     *
+     * TODO(santoscordon): Needs permissions.
+     * TODO(santoscordon): Consider moving this into a simple method call on a system service.
+     */
+    public static final String ACTION_INCOMING_CALL = "android.intent.action.INCOMING_CALL";
+
+    /**
+     * The service action used to bind to {@link android.telecomm.ConnectionService} implementations.
+     */
+    public static final String ACTION_CONNECTION_SERVICE = ConnectionService.class.getName();
+
+    /**
+     * The {@link android.content.Intent} action used to configure a {@link android.telecomm.ConnectionService}.
+     */
+    public static final String ACTION_CONNECTION_SERVICE_CONFIGURE =
+            "android.intent.action.CONNECTION_SERVICE_CONFIGURE";
+
+    /**
+     * Optional extra for {@link android.content.Intent#ACTION_CALL} containing a boolean that determines whether
+     * the speakerphone should be automatically turned on for an outgoing call.
+     */
+    public static final String EXTRA_START_CALL_WITH_SPEAKERPHONE =
+            "android.intent.extra.START_CALL_WITH_SPEAKERPHONE";
+
+    /**
+     * Optional extra for {@link android.content.Intent#ACTION_CALL} containing an integer that determines the
+     * desired video state for an outgoing call.
+     * Valid options: {@link android.telecomm.VideoCallProfile#VIDEO_STATE_AUDIO_ONLY},
+     * {@link android.telecomm.VideoCallProfile#VIDEO_STATE_BIDIRECTIONAL},
+     * {@link android.telecomm.VideoCallProfile#VIDEO_STATE_RX_ENABLED},
+     * {@link android.telecomm.VideoCallProfile#VIDEO_STATE_TX_ENABLED}.
+     */
+    public static final String EXTRA_START_CALL_WITH_VIDEO_STATE =
+            "android.intent.extra.START_CALL_WITH_VIDEO_STATE";
+
+    /**
+     * The extra used with an {@link android.content.Intent#ACTION_CALL},
+     * {@link #ACTION_INCOMING_CALL}, {@link android.content.Intent#ACTION_DIAL} {@code Intent} to
+     * specify a {@link android.telecomm.PhoneAccount} to use when making the call.
+     *
+     * <p class="note">
+     * Retrieve with
+     * {@link android.content.Intent#getParcelableExtra(String)}.
+     */
+    public static final String EXTRA_PHONE_ACCOUNT = "android.intent.extra.PHONE_ACCOUNT";
+
+    /**
+     * Optional extra for {@link #ACTION_INCOMING_CALL} containing a {@link android.os.Bundle} which contains
+     * metadata about the call. This {@link android.os.Bundle} will be returned to the
+     * {@link android.telecomm.ConnectionService}.
+     */
+    public static final String EXTRA_INCOMING_CALL_EXTRAS =
+            "android.intent.extra.INCOMING_CALL_EXTRAS";
+
+    /**
+     * Optional extra for {@link android.telephony.TelephonyManager#ACTION_PHONE_STATE_CHANGED} containing the
+     * disconnect code.
+     */
+    public static final String EXTRA_CALL_DISCONNECT_CAUSE =
+            "android.telecomm.extra.CALL_DISCONNECT_CAUSE";
+
+    /**
+     * Optional extra for {@link android.telephony.TelephonyManager#ACTION_PHONE_STATE_CHANGED} containing the
+     * disconnect message.
+     */
+    public static final String EXTRA_CALL_DISCONNECT_MESSAGE =
+            "android.telecomm.extra.CALL_DISCONNECT_MESSAGE";
+
+    /**
+     * Optional extra for {@link android.telephony.TelephonyManager#ACTION_PHONE_STATE_CHANGED} containing the
+     * component name of the associated connection service.
+     */
+    public static final String EXTRA_CONNECTION_SERVICE =
+            "android.telecomm.extra.CONNECTION_SERVICE";
+
+    /**
+     * The number which the party on the other side of the line will see (and use to return the
+     * call).
+     * <p>
+     * {@link ConnectionService}s which interact with
+     * {@link RemoteConnection}s should only populate this if the
+     * {@link android.telephony.TelephonyManager#getLine1Number()} value, as that is the user's
+     * expected caller ID.
+     */
+    public static final String EXTRA_CALL_BACK_NUMBER = "android.telecomm.extra.CALL_BACK_NUMBER";
+
+    /**
+     * The dual tone multi-frequency signaling character sent to indicate the dialing system should
+     * pause for a predefined period.
+     */
+    public static final char DTMF_CHARACTER_PAUSE = ',';
+
+    /**
+     * The dual-tone multi-frequency signaling character sent to indicate the dialing system should
+     * wait for user confirmation before proceeding.
+     */
+    public static final char DTMF_CHARACTER_WAIT = ';';
+
+    /**
+     * TTY (teletypewriter) mode is off.
+     *
+     * @hide
+     */
+    public static final int TTY_MODE_OFF = 0;
+
+    /**
+     * TTY (teletypewriter) mode is on. The speaker is off and the microphone is muted. The user
+     * will communicate with the remote party by sending and receiving text messages.
+     *
+     * @hide
+     */
+    public static final int TTY_MODE_FULL = 1;
+
+    /**
+     * TTY (teletypewriter) mode is in hearing carryover mode (HCO). The microphone is muted but the
+     * speaker is on. The user will communicate with the remote party by sending text messages and
+     * hearing an audible reply.
+     *
+     * @hide
+     */
+    public static final int TTY_MODE_HCO = 2;
+
+    /**
+     * TTY (teletypewriter) mode is in voice carryover mode (VCO). The speaker is off but the
+     * microphone is still on. User will communicate with the remote party by speaking and receiving
+     * text message replies.
+     *
+     * @hide
+     */
+    public static final int TTY_MODE_VCO = 3;
+
+    /**
+     * Broadcast intent action indicating that the current TTY mode has changed. An intent extra
+     * provides this state as an int.
+     * @see #EXTRA_CURRENT_TTY_MODE
+     *
+     * @hide
+     */
+    public static final String ACTION_CURRENT_TTY_MODE_CHANGED =
+            "android.telecomm.intent.action.CURRENT_TTY_MODE_CHANGED";
+
+    /**
+     * The lookup key for an int that indicates the current TTY mode.
+     * Valid modes are:
+     * - {@link #TTY_MODE_OFF}
+     * - {@link #TTY_MODE_FULL}
+     * - {@link #TTY_MODE_HCO}
+     * - {@link #TTY_MODE_VCO}
+     *
+     * @hide
+     */
+    public static final String EXTRA_CURRENT_TTY_MODE =
+            "android.telecomm.intent.extra.CURRENT_TTY_MODE";
+
+    /**
+     * Broadcast intent action indicating that the TTY preferred operating mode
+     * has changed. An intent extra provides the new mode as an int.
+     * @see #EXTRA_TTY_PREFERRED_MODE
+     *
+     * @hide
+     */
+    public static final String ACTION_TTY_PREFERRED_MODE_CHANGED =
+            "android.telecomm.intent.action.TTY_PREFERRED_MODE_CHANGED";
+
+    /**
+     * The lookup key for an int that indicates preferred TTY mode.
+     * Valid modes are:
+     * - {@link #TTY_MODE_OFF}
+     * - {@link #TTY_MODE_FULL}
+     * - {@link #TTY_MODE_HCO}
+     * - {@link #TTY_MODE_VCO}
+     *
+     * @hide
+     */
+    public static final String EXTRA_TTY_PREFERRED_MODE =
+            "android.telecomm.intent.extra.TTY_PREFERRED";
+
     private static final String TAG = "TelecommManager";
+    
     private static final String TELECOMM_SERVICE_NAME = "telecomm";
 
     private final Context mContext;
@@ -64,11 +252,11 @@ public class TelecommManager {
      * currently exists no user-chosen default {@code PhoneAccount}. In this case, apps wishing to
      * initiate a phone call must either create their {@link android.content.Intent#ACTION_CALL} or
      * {@link android.content.Intent#ACTION_DIAL} {@code Intent} with no
-     * {@link TelecommConstants#EXTRA_PHONE_ACCOUNT}, or present the user with an affordance
+     * {@link TelecommManager#EXTRA_PHONE_ACCOUNT}, or present the user with an affordance
      * to select one of the elements of {@link #getEnabledPhoneAccounts()}.
      * <p>
      * An {@link android.content.Intent#ACTION_CALL} or {@link android.content.Intent#ACTION_DIAL}
-     * {@code Intent} with no {@link TelecommConstants#EXTRA_PHONE_ACCOUNT} is valid, and subsequent
+     * {@code Intent} with no {@link TelecommManager#EXTRA_PHONE_ACCOUNT} is valid, and subsequent
      * steps in the phone call flow are responsible for presenting the user with an affordance, if
      * necessary, to choose a {@code PhoneAccount}.
      */
@@ -287,10 +475,10 @@ public class TelecommManager {
     /**
      * Returns the current TTY mode of the device. For TTY to be on the user must enable it in
      * settings and have a wired headset plugged in. Valid modes are:
-     * - {@link android.telecomm.TelecommConstants#TTY_MODE_OFF}
-     * - {@link android.telecomm.TelecommConstants#TTY_MODE_FULL}
-     * - {@link android.telecomm.TelecommConstants#TTY_MODE_HCO}
-     * - {@link android.telecomm.TelecommConstants#TTY_MODE_VCO}
+     * - {@link TelecommManager#TTY_MODE_OFF}
+     * - {@link TelecommManager#TTY_MODE_FULL}
+     * - {@link TelecommManager#TTY_MODE_HCO}
+     * - {@link TelecommManager#TTY_MODE_VCO}
      *
      * @hide
      */
@@ -302,7 +490,7 @@ public class TelecommManager {
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException attempting to get the current TTY mode.", e);
         }
-        return TelecommConstants.TTY_MODE_OFF;
+        return TTY_MODE_OFF;
     }
 
     private ITelecommService getTelecommService() {
