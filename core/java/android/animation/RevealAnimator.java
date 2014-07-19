@@ -167,38 +167,9 @@ public class RevealAnimator extends ValueAnimator {
     }
 
     @Override
-    public ValueAnimator clone() {
+    public RevealAnimator clone() {
         RevealAnimator anim = (RevealAnimator) super.clone();
         anim.mRtAnimator = null;
         return anim;
-    }
-
-    // ----------------------------------------
-    //  All the things we don't allow
-    // ----------------------------------------
-
-    @Override
-    public void setValues(PropertyValuesHolder... values) {
-        throw new IllegalStateException("Cannot change the values of RevealAnimator");
-    }
-
-    @Override
-    public void setFloatValues(float... values) {
-        throw new IllegalStateException("Cannot change the values of RevealAnimator");
-    }
-
-    @Override
-    public void setIntValues(int... values) {
-        throw new IllegalStateException("Cannot change the values of RevealAnimator");
-    }
-
-    @Override
-    public void setObjectValues(Object... values) {
-        throw new IllegalStateException("Cannot change the values of RevealAnimator");
-    }
-
-    @Override
-    public void setEvaluator(TypeEvaluator value) {
-        throw new IllegalStateException("Cannot change the evaluator of RevealAnimator");
     }
 }

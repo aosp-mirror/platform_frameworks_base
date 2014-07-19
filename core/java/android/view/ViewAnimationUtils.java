@@ -16,8 +16,8 @@
 
 package android.view;
 
+import android.animation.Animator;
 import android.animation.RevealAnimator;
-import android.animation.ValueAnimator;
 
 /**
  * Defines common utilities for working with View's animations.
@@ -36,7 +36,7 @@ public final class ViewAnimationUtils {
      * @param startRadius The starting radius of the animating circle.
      * @param endRadius The ending radius of the animating circle.
      */
-    public static final ValueAnimator createCircularReveal(View view,
+    public static final Animator createCircularReveal(View view,
             int centerX,  int centerY, float startRadius, float endRadius) {
         return new RevealAnimator(view, centerX, centerY, startRadius, endRadius, false);
     }

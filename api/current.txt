@@ -34414,7 +34414,7 @@ package android.view {
   }
 
   public final class ViewAnimationUtils {
-    method public static final android.animation.ValueAnimator createCircularReveal(android.view.View, int, int, float, float);
+    method public static final android.animation.Animator createCircularReveal(android.view.View, int, int, float, float);
   }
 
   public class ViewConfiguration {

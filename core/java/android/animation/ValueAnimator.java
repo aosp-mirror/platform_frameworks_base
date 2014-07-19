@@ -1409,6 +1409,7 @@ public class ValueAnimator extends Animator {
      * </ol>
      * @hide
      */
+    @Override
     public void setAllowRunningAsynchronously(boolean mayRunAsync) {
         // It is up to subclasses to support this, if they can.
     }
