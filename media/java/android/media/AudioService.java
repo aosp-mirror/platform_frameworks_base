@@ -2898,8 +2898,9 @@ public class AudioService extends IAudioService.Stub {
                             Log.v(TAG, "getActiveStreamType: Forcing STREAM_REMOTE_MUSIC");
                         return STREAM_REMOTE_MUSIC;
                 } else {
-                    if (DEBUG_VOL) Log.v(TAG, "getActiveStreamType: using STREAM_MUSIC as default");
-                    return AudioSystem.STREAM_MUSIC;
+                    if (DEBUG_VOL) Log.v(TAG,
+                            "getActiveStreamType: using STREAM_NOTIFICATION as default");
+                    return AudioSystem.STREAM_NOTIFICATION;
                 }
             } else {
                 if (DEBUG_VOL) Log.v(TAG, "getActiveStreamType: Returning suggested type "
