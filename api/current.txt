@@ -28435,6 +28435,7 @@ package android.telecomm {
 
   public abstract class Connection {
     ctor protected Connection();
+    method public final void destroy();
     method public final boolean getAudioModeIsVoip();
     method public final android.telecomm.CallAudioState getCallAudioState();
     method public final int getCallCapabilities();
@@ -28470,7 +28471,6 @@ package android.telecomm {
     method public final void setCallCapabilities(int);
     method public final void setCallVideoProvider(android.telecomm.CallVideoProvider);
     method public final void setCallerDisplayName(java.lang.String, int);
-    method public final void setDestroyed();
     method public final void setDialing();
     method public final void setDisconnected(int, java.lang.String);
     method public final void setHandle(android.net.Uri, int);
