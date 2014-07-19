@@ -18,6 +18,7 @@ package com.android.internal.telecomm;
 
 import android.content.ComponentName;
 import android.telecomm.PhoneAccountHandle;
+import android.os.Bundle;
 import android.telecomm.PhoneAccount;
 
 /**
@@ -116,4 +117,9 @@ interface ITelecommService {
      * @see TelecomManager#getCurrentTtyMode
      */
     int getCurrentTtyMode();
+
+    /**
+     * @see TelecommManager#addNewIncomingCall
+     */
+    void addNewIncomingCall(in PhoneAccountHandle phoneAccount, in Bundle extras);
 }

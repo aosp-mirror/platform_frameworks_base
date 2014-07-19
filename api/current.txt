@@ -28719,6 +28719,7 @@ package android.telecomm {
   }
 
   public class TelecommManager {
+    method public void addNewIncomingCall(android.telecomm.PhoneAccountHandle, android.os.Bundle);
     method public void clearAccounts(java.lang.String);
     method public android.telecomm.PhoneAccountHandle getDefaultOutgoingPhoneAccount();
     method public java.util.List<android.telecomm.PhoneAccountHandle> getEnabledPhoneAccounts();
@@ -28727,14 +28728,12 @@ package android.telecomm {
     method public void unregisterPhoneAccount(android.telecomm.PhoneAccountHandle);
     field public static final java.lang.String ACTION_CONNECTION_SERVICE;
     field public static final java.lang.String ACTION_CONNECTION_SERVICE_CONFIGURE = "android.intent.action.CONNECTION_SERVICE_CONFIGURE";
-    field public static final java.lang.String ACTION_INCOMING_CALL = "android.intent.action.INCOMING_CALL";
     field public static final char DTMF_CHARACTER_PAUSE = 44; // 0x002c ','
     field public static final char DTMF_CHARACTER_WAIT = 59; // 0x003b ';'
     field public static final java.lang.String EXTRA_CALL_BACK_NUMBER = "android.telecomm.extra.CALL_BACK_NUMBER";
     field public static final java.lang.String EXTRA_CALL_DISCONNECT_CAUSE = "android.telecomm.extra.CALL_DISCONNECT_CAUSE";
     field public static final java.lang.String EXTRA_CALL_DISCONNECT_MESSAGE = "android.telecomm.extra.CALL_DISCONNECT_MESSAGE";
     field public static final java.lang.String EXTRA_CONNECTION_SERVICE = "android.telecomm.extra.CONNECTION_SERVICE";
-    field public static final java.lang.String EXTRA_INCOMING_CALL_EXTRAS = "android.intent.extra.INCOMING_CALL_EXTRAS";
     field public static final java.lang.String EXTRA_PHONE_ACCOUNT_HANDLE = "android.intent.extra.PHONE_ACCOUNT_HANDLE";
     field public static final java.lang.String EXTRA_START_CALL_WITH_SPEAKERPHONE = "android.intent.extra.START_CALL_WITH_SPEAKERPHONE";
     field public static final java.lang.String EXTRA_START_CALL_WITH_VIDEO_STATE = "android.intent.extra.START_CALL_WITH_VIDEO_STATE";
