@@ -576,7 +576,17 @@ public class TvView extends ViewGroup {
         }
 
         /**
-         * This is called when the current program content is blocked by parental controls.
+         * This is called when the current program content turns out to be allowed to watch since
+         * its content rating is not blocked by parental controls.
+         *
+         * @param inputId The ID of the TV input bound to this view.
+         */
+        public void onContentAllowed(String inputId) {
+        }
+
+        /**
+         * This is called when the current program content turns out to be not allowed to watch
+         * since its content rating is blocked by parental controls.
          *
          * @param inputId The ID of the TV input bound to this view.
          * @param rating The content rating of the blocked program.
@@ -719,6 +729,19 @@ public class TvView extends ViewGroup {
         }
 
         @Override
+        public void onContentAllowed(Session session) {
+            if (this != mSessionCallback) {
+                return;
+            }
+            if (DEBUG) {
+                Log.d(TAG, "onContentAllowed()");
+            }
+            if (mListener != null) {
+                mListener.onContentAllowed(mInputId);
+            }
+        }
+
+        @Override
         public void onContentBlocked(Session session, TvContentRating rating) {
             if (DEBUG) {
                 Log.d(TAG, "onContentBlocked()");
@@ -728,6 +751,7 @@ public class TvView extends ViewGroup {
             }
         }
 
+        @Override
         public void onSessionEvent(Session session, String eventType, Bundle eventArgs) {
             if (this != mSessionCallback) {
                 return;
