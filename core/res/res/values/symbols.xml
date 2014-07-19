@@ -1022,8 +1022,6 @@
 
   <java-symbol type="drawable" name="default_wallpaper" />
   <java-symbol type="drawable" name="indicator_input_error" />
-  <java-symbol type="drawable" name="overscroll_edge" />
-  <java-symbol type="drawable" name="overscroll_glow" />
   <java-symbol type="drawable" name="popup_bottom_dark" />
   <java-symbol type="drawable" name="popup_bottom_bright" />
   <java-symbol type="drawable" name="popup_bottom_medium" />
