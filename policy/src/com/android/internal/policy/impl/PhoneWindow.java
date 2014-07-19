@@ -1704,7 +1704,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     mMediaController.adjustVolume(direction, AudioManager.FLAG_SHOW_UI);
                 } else {
                     MediaSessionLegacyHelper.getHelper(getContext()).sendAdjustVolumeBy(
-                            mVolumeControlStreamType, direction, AudioManager.FLAG_SHOW_UI);
+                            mVolumeControlStreamType, direction,
+                            AudioManager.FLAG_SHOW_UI | AudioManager.FLAG_VIBRATE);
                 }
                 return true;
             }
