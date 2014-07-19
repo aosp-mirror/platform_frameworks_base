@@ -1478,7 +1478,7 @@ public class AudioService extends IAudioService.Stub {
         if (mVoiceCapable) {
             return AudioSystem.STREAM_RING;
         } else {
-            return AudioSystem.STREAM_MUSIC;
+            return AudioSystem.STREAM_NOTIFICATION;
         }
     }
 
