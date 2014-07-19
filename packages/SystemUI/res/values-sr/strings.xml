@@ -166,12 +166,18 @@
     <string name="accessibility_quick_settings_close" msgid="2571790856136835943">"Затворите таблу"</string>
     <string name="accessibility_quick_settings_more_time" msgid="5778794273488176726">"Више времена"</string>
     <string name="accessibility_quick_settings_less_time" msgid="101026945195230084">"Мање времена"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"2G–3G подаци су онемогућени"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"4G подаци су онемогућени"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Подаци мобилне мреже су онемогућени"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Подаци су онемогућени"</string>
-    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"Достигли сте наведено ограничење за коришћење података.\n\nАко поново омогућите податке, мобилни оператер ће вам можда наплатити."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Поново омогући податке"</string>
+    <!-- no translation found for data_usage_disabled_dialog_3g_title (2626865386971800302) -->
+    <skip />
+    <!-- no translation found for data_usage_disabled_dialog_4g_title (4629078114195977196) -->
+    <skip />
+    <!-- no translation found for data_usage_disabled_dialog_mobile_title (5793456071535876132) -->
+    <skip />
+    <!-- no translation found for data_usage_disabled_dialog_title (8723412000355709802) -->
+    <skip />
+    <!-- no translation found for data_usage_disabled_dialog (6468718338038876604) -->
+    <skip />
+    <!-- no translation found for data_usage_disabled_dialog_enable (5538068036107372895) -->
+    <skip />
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Нема интернет везе"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi је повезан"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Тражи се GPS"</string>
@@ -260,9 +266,16 @@
     <string name="description_target_search" msgid="3091587249776033139">"Претрага"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Превуците нагоре за <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Превуците улево за <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_no_interruptions_with_warning" msgid="7669163720139116154">"Без прекида, укључујући аларме и тајмере"</string>
+    <!-- no translation found for zen_no_interruptions_with_warning (2522931836819051293) -->
+    <skip />
     <string name="zen_no_interruptions" msgid="7970973750143632592">"Без прекида"</string>
     <string name="zen_important_interruptions" msgid="3477041776609757628">"Само приоритетни прекиди"</string>
+    <!-- no translation found for zen_alarm_information_time (5235772206174372272) -->
+    <skip />
+    <!-- no translation found for zen_alarm_information_day_time (8422733576255047893) -->
+    <skip />
+    <!-- no translation found for zen_alarm_warning (6873910860111498041) -->
+    <skip />
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Мање хитна обавештења су у наставку"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Додирните поново да бисте отворили"</string>
@@ -288,6 +301,7 @@
     <string name="battery_saver_notification_text" msgid="7796554871101546872">"Перформансе уређаја су умањене."</string>
     <string name="battery_saver_notification_action_text" msgid="7546297220816993504">"Отворите подешавања Штедње батерије"</string>
     <string name="battery_level_template" msgid="1609636980292580020">"<xliff:g id="LEVEL">%d</xliff:g>%%"</string>
-    <!-- no translation found for notification_hidden_text (1135169301897151909) -->
+    <string name="notification_hidden_text" msgid="1135169301897151909">"Садржај је сакривен"</string>
+    <!-- no translation found for guest_exit_guest (1619100760451149682) -->
     <skip />
 </resources>

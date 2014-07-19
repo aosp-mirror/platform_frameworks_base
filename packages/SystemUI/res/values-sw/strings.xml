@@ -164,12 +164,18 @@
     <string name="accessibility_quick_settings_close" msgid="2571790856136835943">"Funga paneli ya maelezo"</string>
     <string name="accessibility_quick_settings_more_time" msgid="5778794273488176726">"Muda zaidi"</string>
     <string name="accessibility_quick_settings_less_time" msgid="101026945195230084">"Muda kidogo"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"Data ya 2G-3G imelemazwa"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Data ya 4G imelemazwa"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Data ya kifaa cha mkononi imelemazwa"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Data imelemazwa"</string>
-    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"Umefika kikomo maalum cha matumizi ya data. \n \n Ukiwezesha data tena, unaweza kutozwa na mtoa huduma."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Wezesha upya data"</string>
+    <!-- no translation found for data_usage_disabled_dialog_3g_title (2626865386971800302) -->
+    <skip />
+    <!-- no translation found for data_usage_disabled_dialog_4g_title (4629078114195977196) -->
+    <skip />
+    <!-- no translation found for data_usage_disabled_dialog_mobile_title (5793456071535876132) -->
+    <skip />
+    <!-- no translation found for data_usage_disabled_dialog_title (8723412000355709802) -->
+    <skip />
+    <!-- no translation found for data_usage_disabled_dialog (6468718338038876604) -->
+    <skip />
+    <!-- no translation found for data_usage_disabled_dialog_enable (5538068036107372895) -->
+    <skip />
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Hakuna muunganisho wa mtandao"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Mtandao-hewa umeunganishwa"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Inatafuta GPS"</string>
@@ -189,8 +195,7 @@
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (Vifaa <xliff:g id="NUMBER">%d</xliff:g>)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth Imezimwa"</string>
-    <!-- no translation found for quick_settings_bluetooth_detail_empty_text (4910015762433302860) -->
-    <skip />
+    <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"Hakuna vifaa vilivyooanishwa vinavyopatikana"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Ung\'avu"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Zungusha kiotomatiki"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"Mzunguko umefungwa"</string>
@@ -205,26 +210,18 @@
     <string name="quick_settings_settings_label" msgid="5326556592578065401">"Mipangilio"</string>
     <string name="quick_settings_time_label" msgid="4635969182239736408">"Muda"</string>
     <string name="quick_settings_user_label" msgid="5238995632130897840">"Mimi"</string>
-    <!-- no translation found for quick_settings_user_title (4467690427642392403) -->
-    <skip />
-    <!-- no translation found for quick_settings_user_new_user (9030521362023479778) -->
-    <skip />
+    <string name="quick_settings_user_title" msgid="4467690427642392403">"Mtumiaji"</string>
+    <string name="quick_settings_user_new_user" msgid="9030521362023479778">"Mtumiaji mpya"</string>
     <string name="quick_settings_wifi_label" msgid="9135344704899546041">"Wi-Fi"</string>
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Haijaunganishwa"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Hakuna Mtandao"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi Imezimwa"</string>
-    <!-- no translation found for quick_settings_wifi_detail_empty_text (2831702993995222755) -->
-    <skip />
-    <!-- no translation found for quick_settings_cast_title (1893629685050355115) -->
-    <skip />
-    <!-- no translation found for quick_settings_casting (6601710681033353316) -->
-    <skip />
-    <!-- no translation found for quick_settings_cast_device_default_name (5367253104742382945) -->
-    <skip />
-    <!-- no translation found for quick_settings_cast_device_default_description (2484573682378634413) -->
-    <skip />
-    <!-- no translation found for quick_settings_cast_detail_empty_text (311785821261640623) -->
-    <skip />
+    <string name="quick_settings_wifi_detail_empty_text" msgid="2831702993995222755">"Hakuna mitandao iliyohifadhiwa inayopatikana"</string>
+    <string name="quick_settings_cast_title" msgid="1893629685050355115">"Tuma skrini"</string>
+    <string name="quick_settings_casting" msgid="6601710681033353316">"Inatuma"</string>
+    <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Kifaa kisichokuwa na jina"</string>
+    <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Tayari kwa kutuma"</string>
+    <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"Hakuna vifaa vilivyopatikana"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Ung\'avu"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"KIOTOMATIKI"</string>
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Pindua rangi"</string>
@@ -232,8 +229,7 @@
     <string name="quick_settings_more_settings" msgid="326112621462813682">"Mipangilio zaidi"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"Imemaliza"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"Imeunganishwa"</string>
-    <!-- no translation found for quick_settings_connecting (47623027419264404) -->
-    <skip />
+    <string name="quick_settings_connecting" msgid="47623027419264404">"Inaunganisha..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Kusambaza mtandao"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Mtandao-hewa"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Arifa"</string>
@@ -244,8 +240,7 @@
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"Imezidi kikomo"</string>
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> imetumika"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"kikomo <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
-    <!-- no translation found for quick_settings_cellular_detail_data_warning (2440098045692399009) -->
-    <skip />
+    <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Onyo <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="recents_empty_message" msgid="7883614615463619450">"Hakuna programu za karibuni"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Maelezo ya Programu"</string>
     <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"lazimisha kutumia programu"</string>
@@ -258,9 +253,16 @@
     <string name="description_target_search" msgid="3091587249776033139">"Tafuta"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Sogeza juu kwa <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Sogeza kushoto kwa <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ."</string>
-    <string name="zen_no_interruptions_with_warning" msgid="7669163720139116154">"Hakuna usumbufu, ikiwa ni pamoja na kengele na vipima muda"</string>
+    <!-- no translation found for zen_no_interruptions_with_warning (2522931836819051293) -->
+    <skip />
     <string name="zen_no_interruptions" msgid="7970973750143632592">"Hakuna katizo"</string>
     <string name="zen_important_interruptions" msgid="3477041776609757628">"Katizo za kipaumbele pekee"</string>
+    <!-- no translation found for zen_alarm_information_time (5235772206174372272) -->
+    <skip />
+    <!-- no translation found for zen_alarm_information_day_time (8422733576255047893) -->
+    <skip />
+    <!-- no translation found for zen_alarm_warning (6873910860111498041) -->
+    <skip />
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>+"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Arifa zisizo za dharura sana ziko hapo chini"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Gonga tena ili ufungue"</string>
@@ -287,5 +289,7 @@
     <string name="battery_saver_notification_action_text" msgid="7546297220816993504">"Fungua mipangilio ya hali inayookoa betri"</string>
     <string name="battery_level_template" msgid="1609636980292580020">"<xliff:g id="LEVEL">%d</xliff:g>%%"</string>
     <!-- no translation found for notification_hidden_text (1135169301897151909) -->
+    <skip />
+    <!-- no translation found for guest_exit_guest (1619100760451149682) -->
     <skip />
 </resources>
