@@ -31,13 +31,11 @@ public abstract class ViewOutlineProvider {
      */
     public static final ViewOutlineProvider BACKGROUND = new ViewOutlineProvider() {
         @Override
-        public boolean getOutline(View view, Outline outline) {
+        public void getOutline(View view, Outline outline) {
             Drawable background = view.getBackground();
-            if (background == null) {
-                // no background, no outline
-                return false;
+            if (background != null) {
+                background.getOutline(outline);
             }
-            return background.getOutline(outline);
         }
     };
 
@@ -50,8 +48,6 @@ public abstract class ViewOutlineProvider {
      *
      * @param view The view building the outline.
      * @param outline The empty outline to be populated.
-     * @return true if this View should have an outline, else false. The outline must be
-     *         populated by this method, and non-empty if true is returned.
      */
-    public abstract boolean getOutline(View view, Outline outline);
+    public abstract void getOutline(View view, Outline outline);
 }

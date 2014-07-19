@@ -148,9 +148,8 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         });
         setOutlineProvider(new ViewOutlineProvider() {
             @Override
-            public boolean getOutline(View view, Outline outline) {
+            public void getOutline(View view, Outline outline) {
                 outline.setRect(mClipBounds);
-                return true;
             }
         });
     }

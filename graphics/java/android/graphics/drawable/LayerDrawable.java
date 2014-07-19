@@ -603,16 +603,16 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
      * @return <code>true</code> if an outline is available
      */
     @Override
-    public boolean getOutline(@NonNull Outline outline) {
+    public void getOutline(@NonNull Outline outline) {
         final LayerState state = mLayerState;
         final ChildDrawable[] children = state.mChildren;
         final int N = state.mNum;
         for (int i = 0; i < N; i++) {
-            if (children[i].mDrawable.getOutline(outline)) {
-                return true;
+            children[i].mDrawable.getOutline(outline);
+            if (!outline.isEmpty()) {
+                return;
             }
         }
-        return false;
     }
 
     @Override

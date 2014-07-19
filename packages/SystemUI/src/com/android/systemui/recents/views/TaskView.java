@@ -116,13 +116,12 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         setFooterHeight(getFooterHeight());
         setOutlineProvider(new ViewOutlineProvider() {
             @Override
-            public boolean getOutline(View view, Outline outline) {
+            public void getOutline(View view, Outline outline) {
                 // The current height is measured with the footer, so account for the footer height
                 // and the current clip (in the stack)
                 int height = getMeasuredHeight() - mClipFromBottom - mMaxFooterHeight + mFooterHeight;
                 outline.setRoundRect(0, 0, getWidth(), height,
                         mConfig.taskViewRoundedCornerRadiusPx);
-                return true;
             }
         });
     }

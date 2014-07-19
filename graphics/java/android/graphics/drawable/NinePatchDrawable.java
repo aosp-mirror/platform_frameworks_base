@@ -284,9 +284,9 @@ public class NinePatchDrawable extends Drawable {
     }
 
     @Override
-    public boolean getOutline(@NonNull Outline outline) {
+    public void getOutline(@NonNull Outline outline) {
         final Rect bounds = getBounds();
-        if (bounds.isEmpty()) return false;
+        if (bounds.isEmpty()) return;
 
         if (mNinePatchState != null) {
             NinePatch.InsetStruct insets = mNinePatchState.getBitmap().getNinePatchInsets();
@@ -298,10 +298,10 @@ public class NinePatchDrawable extends Drawable {
                         bounds.bottom - outlineInsets.bottom,
                         insets.outlineRadius);
                 outline.setFilled(insets.outlineFilled);
-                return true;
+                return;
             }
         }
-        return super.getOutline(outline);
+        super.getOutline(outline);
     }
 
     /**
