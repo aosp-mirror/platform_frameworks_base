@@ -604,7 +604,7 @@ public class TextToSpeech {
 
         /**
          * Parameter key to specify an audio session identifier (obtained from
-         * {@link AudioManager#allocateAudioSessionId()}) that will be used by the request audio
+         * {@link AudioManager#generateAudioSessionId()}) that will be used by the request audio
          * output. It can be used to associate one of the {@link android.media.audiofx.AudioEffect}
          * objects with the synthesis (or earcon) output.
          *

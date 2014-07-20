@@ -837,7 +837,7 @@ public class MediaPlayer implements SubtitleController.Listener
      * @param holder the SurfaceHolder to use for displaying the video, may be null.
      * @param audioAttributes the {@link AudioAttributes} to be used by the media player.
      * @param audioSessionId the audio session ID to be used by the media player,
-     *     see {@link AudioManager#allocateAudioSessionId()} to obtain a new session.
+     *     see {@link AudioManager#generateAudioSessionId()} to obtain a new session.
      * @return a MediaPlayer object, or null if creation failed
      */
     public static MediaPlayer create(Context context, Uri uri, SurfaceHolder holder,
@@ -900,7 +900,7 @@ public class MediaPlayer implements SubtitleController.Listener
      *              the resource to use as the datasource
      * @param audioAttributes the {@link AudioAttributes} to be used by the media player.
      * @param audioSessionId the audio session ID to be used by the media player,
-     *     see {@link AudioManager#allocateAudioSessionId()} to obtain a new session.
+     *     see {@link AudioManager#generateAudioSessionId()} to obtain a new session.
      * @return a MediaPlayer object, or null if creation failed
      */
     public static MediaPlayer create(Context context, int resid,

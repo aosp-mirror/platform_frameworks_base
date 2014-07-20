@@ -379,7 +379,10 @@ public class AudioTrack
      *   for the successful creation of an AudioTrack instance in streaming mode. Using values
      *   smaller than getMinBufferSize() will result in an initialization failure.
      * @param mode streaming or static buffer. See {@link #MODE_STATIC} and {@link #MODE_STREAM}.
-     * @param sessionId ID of audio session the AudioTrack must be attached to.
+     * @param sessionId ID of audio session the AudioTrack must be attached to, or
+     *   {@link AudioManager#AUDIO_SESSION_ID_GENERATE} if the session isn't known at construction
+     *   time. See also {@link AudioManager#generateAudioSessionId()} to obtain a session ID before
+     *   construction.
      * @throws IllegalArgumentException
      */
     public AudioTrack(AudioAttributes attributes, AudioFormat format, int bufferSizeInBytes,

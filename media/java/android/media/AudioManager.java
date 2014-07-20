@@ -1697,19 +1697,28 @@ public class AudioManager {
     /**
      * Return a new audio session identifier not associated with any player or effect.
      * It can for instance be used to create one of the {@link android.media.audiofx.AudioEffect}
-     * objects.
+     * objects or specify a session for speech synthesis in
+     * {@link android.speech.tts.TextToSpeech.Engine}.
      * @return a new unclaimed and unused audio session identifier, or {@link #ERROR} when the
-     *   system failed to allocate a new session.
+     *   system failed to generate a new session.
      */
-    public int allocateAudioSessionId() {
+    public int generateAudioSessionId() {
         int session = AudioSystem.newAudioSessionId();
         if (session > 0) {
             return session;
         } else {
-            Log.e(TAG, "Failure to allocate a new audio session ID");
+            Log.e(TAG, "Failure to generate a new audio session ID");
             return ERROR;
         }
     }
+
+    /**
+     * A special audio session ID to indicate that the audio session ID isn't known and the
+     * framework should generate a new value. This can be used when building a new
+     * {@link AudioTrack} instance with
+     * {@link AudioTrack#AudioTrack(AudioAttributes, AudioFormat, int, int, int)}.
+     */
+    public static final int AUDIO_SESSION_ID_GENERATE = AudioSystem.AUDIO_SESSION_ALLOCATE;
 
 
     /*
