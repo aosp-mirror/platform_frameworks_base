@@ -57,6 +57,13 @@ public class PhoneAccountMetadata implements Parcelable {
      */
     public static final int CAPABILITY_CALL_PROVIDER = 0x2;
 
+    /**
+     * Flag indicating that this {@code PhoneAccount} represents  built-in PSTN SIM subscription.
+     * <p>
+     * Only the android framework can set this capability on a phone account.
+     */
+    public static final int CAPABILITY_SIM_SUBSCRIPTION = 0x4;
+
     private final PhoneAccount mAccount;
     private final Uri mHandle;
     private final int mCapabilities;

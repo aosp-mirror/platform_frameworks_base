@@ -28498,7 +28498,6 @@ package android.telecomm {
     method public android.content.ComponentName getComponentName();
     method public java.lang.String getId();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final int CAPABILITY_SIM_SUBSCRIPTION = 4; // 0x4
     field public static final android.os.Parcelable.Creator CREATOR;
   }
 
@@ -28516,6 +28515,7 @@ package android.telecomm {
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int CAPABILITY_CALL_PROVIDER = 2; // 0x2
     field public static final int CAPABILITY_SIM_CALL_MANAGER = 1; // 0x1
+    field public static final int CAPABILITY_SIM_SUBSCRIPTION = 4; // 0x4
     field public static final android.os.Parcelable.Creator CREATOR;
   }
 
