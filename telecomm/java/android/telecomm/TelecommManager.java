@@ -247,12 +247,12 @@ public class TelecommManager {
     }
 
     /**
-     * Return the {@link PhoneAccountHandle} which is the user-chosen default for making outgoing
-     * phone calls. This {@code PhoneAccountHandle} will always be a member of the list which is
+     * Return the {@link PhoneAccount} which is the user-chosen default for making outgoing
+     * phone calls. This {@code PhoneAccount} will always be a member of the list which is
      * returned from calling {@link #getEnabledPhoneAccounts()}.
      * <p>
      * Apps must be prepared for this method to return {@code null}, indicating that there
-     * currently exists no user-chosen default {@code PhoneAccountHandle}. In this case, apps
+     * currently exists no user-chosen default {@code PhoneAccount}. In this case, apps
      * wishing to initiate a phone call must either create their {@link android.content
      * .Intent#ACTION_CALL} or {@link android.content.Intent#ACTION_DIAL} {@code Intent} with no
      * {@link TelecommManager#EXTRA_PHONE_ACCOUNT_HANDLE}, or present the user with an affordance
@@ -261,7 +261,7 @@ public class TelecommManager {
      * An {@link android.content.Intent#ACTION_CALL} or {@link android.content.Intent#ACTION_DIAL}
      * {@code Intent} with no {@link TelecommManager#EXTRA_PHONE_ACCOUNT_HANDLE} is valid, and
      * subsequent steps in the phone call flow are responsible for presenting the user with an
-     * affordance, if necessary, to choose a {@code PhoneAccountHandle}.
+     * affordance, if necessary, to choose a {@code PhoneAccount}.
      */
     public PhoneAccountHandle getDefaultOutgoingPhoneAccount() {
         try {
@@ -293,33 +293,33 @@ public class TelecommManager {
     }
 
     /**
-     * Return the metadata for a specified {@link PhoneAccountHandle}. Metadata includes resources
-     * which can be used in a user interface.
+     * Return the {@link PhoneAccount} for a specified {@link PhoneAccountHandle}. Object includes
+     * resources which can be used in a user interface.
      *
      * @param account The {@link PhoneAccountHandle}.
      *
-     * @return The metadata for the account.
+     * @return The {@link PhoneAccount} object.
      */
-    public PhoneAccountMetadata getPhoneAccountMetadata(PhoneAccountHandle account) {
+    public PhoneAccount getPhoneAccount(PhoneAccountHandle account) {
         try {
             if (isServiceConnected()) {
-                return getTelecommService().getPhoneAccountMetadata(account);
+                return getTelecommService().getPhoneAccount(account);
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelecommService#getPhoneAccountMetadata", e);
+            Log.e(TAG, "Error calling ITelecommService#getPhoneAccount", e);
         }
         return null;
     }
 
     /**
-     * Register a {@link PhoneAccountHandle} for use by the system.
+     * Register a {@link PhoneAccount} for use by the system.
      *
-     * @param metadata The complete {@link PhoneAccountMetadata}.
+     * @param account The complete {@link PhoneAccount}.
      */
-    public void registerPhoneAccount(PhoneAccountMetadata metadata) {
+    public void registerPhoneAccount(PhoneAccount account) {
         try {
             if (isServiceConnected()) {
-                getTelecommService().registerPhoneAccount(metadata);
+                getTelecommService().registerPhoneAccount(account);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelecommService#registerPhoneAccount", e);
@@ -327,14 +327,14 @@ public class TelecommManager {
     }
 
     /**
-     * Remove a {@link PhoneAccountHandle} registration from the system.
+     * Remove a {@link PhoneAccount} registration from the system.
      *
-     * @param account An Account.
+     * @param accountHandle A {@link PhoneAccountHandle} for the {@link PhoneAccount} to unregister.
      */
-    public void unregisterPhoneAccount(PhoneAccountHandle account) {
+    public void unregisterPhoneAccount(PhoneAccountHandle accountHandle) {
         try {
             if (isServiceConnected()) {
-                getTelecommService().unregisterPhoneAccount(account);
+                getTelecommService().unregisterPhoneAccount(accountHandle);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelecommService#unregisterPhoneAccount", e);

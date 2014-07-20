@@ -33,9 +33,9 @@ public enum CallState {
 
     /**
      * Indicates that the call is about to go into the outgoing and dialing state but is waiting for
-     * user input before it proceeds. For example, where no default {@link PhoneAccountHandle} is
-     * set, this is the state where the InCallUI is waiting for the user to select a
-     * {@link PhoneAccountHandle} to call from.
+     * user input before it proceeds. For example, where no default {@link PhoneAccount} is set,
+     * this is the state where the InCallUI is waiting for the user to select a
+     * {@link PhoneAccount} to call from.
      */
     PRE_DIAL_WAIT,
 
