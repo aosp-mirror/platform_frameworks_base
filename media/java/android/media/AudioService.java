@@ -583,11 +583,6 @@ public class AudioService extends IAudioService.Stub {
             setRotationForAudioSystem();
         }
 
-        HdmiControlManager hdmiManager =
-                (HdmiControlManager) mContext.getSystemService(Context.HDMI_CONTROL_SERVICE);
-        // Null if device is not Tv.
-        mHdmiTvClient = hdmiManager.getTvClient();
-
         context.registerReceiver(mReceiver, intentFilter);
 
         mUseMasterVolume = context.getResources().getBoolean(
@@ -626,6 +621,11 @@ public class AudioService extends IAudioService.Stub {
             adapter.getProfileProxy(mContext, mBluetoothProfileServiceListener,
                                     BluetoothProfile.A2DP);
         }
+
+        HdmiControlManager hdmiManager =
+                (HdmiControlManager) mContext.getSystemService(Context.HDMI_CONTROL_SERVICE);
+        // Null if device is not Tv.
+        mHdmiTvClient = hdmiManager.getTvClient();
 
         sendMsg(mAudioHandler,
                 MSG_CONFIGURE_SAFE_MEDIA_VOLUME_FORCED,
