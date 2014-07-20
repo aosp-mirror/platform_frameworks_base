@@ -1225,7 +1225,8 @@ public class VolumePanel extends Handler {
             final Object tag = seekBar.getTag();
             if (fromUser && tag instanceof StreamControl) {
                 StreamControl sc = (StreamControl) tag;
-                setStreamVolume(sc, progress, 0);
+                setStreamVolume(sc, progress,
+                        AudioManager.FLAG_SHOW_UI | AudioManager.FLAG_VIBRATE);
             }
             resetTimeout();
         }
