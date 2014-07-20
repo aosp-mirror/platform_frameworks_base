@@ -29,22 +29,18 @@ import android.graphics.RectF;
  */
 public class OvalShape extends RectShape {
 
-    /**
-     * OvalShape constructor.
-     */
     public OvalShape() {}
-    
+
     @Override
     public void draw(Canvas canvas, Paint paint) {
         canvas.drawOval(rect(), paint);
     }
 
     @Override
-    public boolean getOutline(Outline outline) {
+    public void getOutline(Outline outline) {
         final RectF rect = rect();
         outline.setOval((int) Math.ceil(rect.left), (int) Math.ceil(rect.top),
                 (int) Math.floor(rect.right), (int) Math.floor(rect.bottom));
-        return true;
     }
 }
 

@@ -10899,11 +10899,9 @@ package android.graphics {
     ctor public Outline(android.graphics.Outline);
     method public boolean canClip();
     method public boolean isEmpty();
-    method public boolean isFilled();
     method public void set(android.graphics.Outline);
     method public void setConvexPath(android.graphics.Path);
     method public void setEmpty();
-    method public void setFilled(boolean);
     method public void setOval(int, int, int, int);
     method public void setOval(android.graphics.Rect);
     method public void setRect(int, int, int, int);
@@ -11649,7 +11647,7 @@ package android.graphics.drawable {
     method public int getMinimumHeight();
     method public int getMinimumWidth();
     method public abstract int getOpacity();
-    method public boolean getOutline(android.graphics.Outline);
+    method public void getOutline(android.graphics.Outline);
     method public boolean getPadding(android.graphics.Rect);
     method public int[] getState();
     method public android.graphics.Region getTransparentRegion();
@@ -11981,7 +11979,7 @@ package android.graphics.drawable.shapes {
     method public android.graphics.drawable.shapes.Shape clone() throws java.lang.CloneNotSupportedException;
     method public abstract void draw(android.graphics.Canvas, android.graphics.Paint);
     method public final float getHeight();
-    method public boolean getOutline(android.graphics.Outline);
+    method public void getOutline(android.graphics.Outline);
     method public final float getWidth();
     method public boolean hasAlpha();
     method protected void onResize(float, float);
@@ -34136,7 +34134,6 @@ package android.view {
     method public void setOnLongClickListener(android.view.View.OnLongClickListener);
     method public void setOnSystemUiVisibilityChangeListener(android.view.View.OnSystemUiVisibilityChangeListener);
     method public void setOnTouchListener(android.view.View.OnTouchListener);
-    method public deprecated void setOutline(android.graphics.Outline);
     method public void setOutlineProvider(android.view.ViewOutlineProvider);
     method public void setOverScrollMode(int);
     method public void setPadding(int, int, int, int);
@@ -34689,7 +34686,7 @@ package android.view {
 
   public abstract class ViewOutlineProvider {
     ctor public ViewOutlineProvider();
-    method public abstract boolean getOutline(android.view.View, android.graphics.Outline);
+    method public abstract void getOutline(android.view.View, android.graphics.Outline);
     field public static final android.view.ViewOutlineProvider BACKGROUND;
   }
 

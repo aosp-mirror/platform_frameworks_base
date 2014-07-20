@@ -10762,7 +10762,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
     }
 
-    /** Deprecated, pending removal */
+    /**
+     * Deprecated, pending removal
+     *
+     * @hide
+     */
     @Deprecated
     public void setOutline(@Nullable Outline outline) {}
 
@@ -10843,16 +10847,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             // no provider, remove outline
             mRenderNode.setOutline(null);
         } else {
-            if (mOutlineProvider.getOutline(this, outline)) {
-                if (outline.isEmpty()) {
-                    throw new IllegalStateException("Outline provider failed to build outline");
-                }
-                // provider has provided
-                mRenderNode.setOutline(outline);
-            } else {
-                // provider failed to provide
-                mRenderNode.setOutline(null);
-            }
+            mOutlineProvider.getOutline(this, outline);
+            mRenderNode.setOutline(outline);
         }
 
         notifySubtreeAccessibilityStateChangedIfNeeded();

@@ -467,13 +467,10 @@ public class ShapeDrawable extends Drawable {
     }
 
     @Override
-    public boolean getOutline(Outline outline) {
-        if (mShapeState.mShape == null) {
-            // don't publish outline without a shape
-            return false;
+    public void getOutline(Outline outline) {
+        if (mShapeState.mShape != null) {
+            mShapeState.mShape.getOutline(outline);
         }
-
-        return mShapeState.mShape.getOutline(outline);
     }
 
     @Override

@@ -126,11 +126,10 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
     }
 
     @Override
-    public boolean getOutline(@NonNull Outline outline) {
+    public void getOutline(@NonNull Outline outline) {
         if (mCurrDrawable != null) {
-            return mCurrDrawable.getOutline(outline);
+            mCurrDrawable.getOutline(outline);
         }
-        return false;
     }
 
     @Override

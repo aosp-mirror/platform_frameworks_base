@@ -29,10 +29,7 @@ import android.graphics.RectF;
  */
 public class RectShape extends Shape {
     private RectF mRect = new RectF();
-    
-    /**
-     * RectShape constructor.
-     */
+
     public RectShape() {}
     
     @Override
@@ -41,11 +38,10 @@ public class RectShape extends Shape {
     }
 
     @Override
-    public boolean getOutline(Outline outline) {
+    public void getOutline(Outline outline) {
         final RectF rect = rect();
         outline.setRect((int) Math.ceil(rect.left), (int) Math.ceil(rect.top),
                 (int) Math.floor(rect.right), (int) Math.floor(rect.bottom));
-        return true;
     }
 
     @Override

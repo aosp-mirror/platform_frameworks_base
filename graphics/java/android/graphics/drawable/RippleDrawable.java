@@ -497,16 +497,16 @@ public class RippleDrawable extends LayerDrawable {
      * @return <code>true</code> if an outline is available
      */
     @Override
-    public boolean getOutline(@NonNull Outline outline) {
+    public void getOutline(@NonNull Outline outline) {
         final LayerState state = mLayerState;
         final ChildDrawable[] children = state.mChildren;
         final int N = state.mNum;
         for (int i = 0; i < N; i++) {
-            if (children[i].mId != R.id.mask && children[i].mDrawable.getOutline(outline)) {
-                return true;
+            if (children[i].mId != R.id.mask) {
+                children[i].mDrawable.getOutline(outline);
+                if (!outline.isEmpty()) return;
             }
         }
-        return false;
     }
 
     @Override

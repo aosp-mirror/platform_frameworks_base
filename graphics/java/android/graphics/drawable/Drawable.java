@@ -869,9 +869,8 @@ public abstract class Drawable {
      *
      * @see android.view.View#setOutlineProvider(android.view.ViewOutlineProvider)
      */
-    public boolean getOutline(@NonNull Outline outline) {
+    public void getOutline(@NonNull Outline outline) {
         outline.setRect(getBounds());
-        return true;
     }
 
     /**

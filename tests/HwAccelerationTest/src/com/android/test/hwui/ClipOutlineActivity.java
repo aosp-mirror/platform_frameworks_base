@@ -25,6 +25,8 @@ import android.graphics.Outline;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.view.View;
+import android.view.ViewOutlineProvider;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
@@ -58,11 +60,23 @@ public class ClipOutlineActivity extends Activity {
 
     public static class RegionView extends FrameLayout {
         private float mClipPosition = 0.0f;
-        private Outline mOutline = new Outline();
         private Rect mRect = new Rect();
 
         public RegionView(Context c) {
             super(c);
+            setOutlineProvider(new ViewOutlineProvider() {
+
+                @Override
+                public void getOutline(View view, Outline outline) {
+                    int w = getWidth() / 2;
+                    int h = getHeight() / 2;
+
+                    mRect.set(0, 0, w, h);
+                    mRect.offset((int) (mClipPosition * w), getHeight() / 4);
+
+                    outline.setRoundRect(mRect, w / 2);
+                }
+            });
             setClipToOutline(true);
         }
 
@@ -72,14 +86,7 @@ public class ClipOutlineActivity extends Activity {
 
         public void setClipPosition(float clipPosition) {
             mClipPosition = clipPosition;
-            int w = getWidth() / 2;
-            int h = getHeight() / 2;
-
-            mRect.set(0, 0, w, h);
-            mRect.offset((int) (clipPosition * w), getHeight() / 4);
-            mOutline.setRoundRect(mRect, w / 2);
-            setOutline(mOutline);
-            invalidate();
+            invalidateOutline();
         }
     }
 
