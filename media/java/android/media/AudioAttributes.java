@@ -93,11 +93,6 @@ public final class AudioAttributes implements Parcelable {
      */
     public final static int USAGE_NOTIFICATION_RINGTONE = 6;
     /**
-     * @hide
-     * TEMPORARY TO PREVENT BUILD BREAKAGES DURING RENAME - DO NOT SHIP
-     */
-    public final static int USAGE_NOTIFICATION_TELEPHONY_RINGTONE = USAGE_NOTIFICATION_RINGTONE;
-    /**
      * Usage value to use when the usage is a request to enter/end a
      * communication, such as a VoIP communication or video-conference.
      */
