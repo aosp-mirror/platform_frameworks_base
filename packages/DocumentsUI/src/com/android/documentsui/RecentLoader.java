@@ -135,6 +135,8 @@ public class RecentLoader extends AsyncTaskLoader<DirectoryResult> {
 
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed to load " + authority + ", " + rootId, e);
+            } catch (UnsupportedOperationException e) {
+                Log.w(TAG, "Recents not supported " + authority + ", " + rootId, e);
             } finally {
                 ContentProviderClient.releaseQuietly(client);
             }
