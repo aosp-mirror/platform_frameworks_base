@@ -419,9 +419,11 @@ LOCAL_JAR_PACKAGES := \
 # List of packages to exclude along with their descendants.
 # Overrides inclusion.
 LOCAL_JAR_EXCLUDE_PACKAGES := \
+    android.bluetooth \
     android.filterfw \
     android.filterpacks \
-    android.hardware
+    android.hardware \
+    android.telephony
 
 # List of classes and interfaces which should be loaded by the Zygote.
 LOCAL_JAVA_RESOURCE_FILES += $(LOCAL_PATH)/preloaded-classes
@@ -441,9 +443,11 @@ LOCAL_DX_FLAGS := --core-library
 
 # List of packages to include along with their descendants.
 LOCAL_JAR_PACKAGES := \
+    android.bluetooth \
     android.filterfw \
     android.filterpacks \
     android.hardware \
+    android.telephony \
     com \
     javax
 
