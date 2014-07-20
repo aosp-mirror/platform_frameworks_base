@@ -719,10 +719,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Membenarkan pemegang terikat dengan antara muka peringkat tertinggi bagi perkhidmatan pendengar pemberitahuan. Tidak sekali-kali diperlukan untuk apl biasa."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"terikat kepada perkhidmatan pembekal keadaan"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Membenarkan pemegang terikat dengan antara muka peringkat tertinggi bagi perkhidmatan pembekal keadaan. Tidak sekali-kali diperlukan untuk apl biasa."</string>
-    <!-- no translation found for permlab_bindMediaRouteService (6637740382272686835) -->
-    <skip />
-    <!-- no translation found for permdesc_bindMediaRouteService (6436655024972496687) -->
-    <skip />
+    <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"terikat kepada perkhidmatan laluan media"</string>
+    <string name="permdesc_bindMediaRouteService" msgid="6436655024972496687">"Membenarkan pemegang terikat dengan antara muka peringkat tertinggi bagi perkhidmatan laluan media. Tidak sekali-kali diperlukan untuk apl biasa."</string>
     <string name="permlab_bindDreamService" msgid="4153646965978563462">"terikat kepada perkhidmatan impian"</string>
     <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Membenarkan pemegang terikat dengan antara muka peringkat tertinggi bagi perkhidmatan impian. Tidak sekali-kali diperlukan untuk apl biasa."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"gunakan apl konfigurasi yang disediakan oleh pembawa"</string>
@@ -1008,12 +1006,16 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Membenarkan apl mengubah suai sejarah atau penanda halaman Penyemak Imbas yang tersimpan pada telefon anda. Ini boleh membenarkan apl untuk memadam atau mengubah suai data Penyemak Imbas. Nota: kebenaran ini tidak boleh dikuatkuasakan oleh penyemak imbas pihak ketiga atau aplikasi lain dengan keupayaan menyemak imbas web."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"tetapkan penggera"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Membenarkan apl untuk menetapkan penggera dalam apl penggera jam yang dipasang. Sesetengah applikasi jam penggera tidak boleh melaksanakan ciri ini."</string>
-    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"urus mel suara"</string>
-    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"Membenarkan apl mengubah suai dan mengalih keluar mesej dari peti masuk mel suara anda."</string>
+    <!-- no translation found for permlab_writeVoicemail (7309899891683938100) -->
+    <skip />
+    <!-- no translation found for permdesc_writeVoicemail (6592572839715924830) -->
+    <skip />
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"tambah mel suara"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Membenarkan apl untuk menambahkan mesej pada peti masuk mel suara anda."</string>
-    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"baca semua mel suara"</string>
-    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"Membenarkan apl membaca semua mel suara anda."</string>
+    <!-- no translation found for permlab_readVoicemail (8415201752589140137) -->
+    <skip />
+    <!-- no translation found for permdesc_readVoicemail (8926534735321616550) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"ubah suai kebenaran geolokasi Penyemak Imbas"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Membenarkan apl untuk mengubah suai kebenaran geolokasi Penyemak Imbas. Apl hasad boleh menggunakannya untuk membenarkan menghantar maklumat lokasi kepada laman web sembarangan."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"sahkan pakej"</string>
@@ -1181,20 +1183,13 @@
     <string name="capital_on" msgid="1544682755514494298">"HIDUP"</string>
     <string name="capital_off" msgid="6815870386972805832">"MATIKAN"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Selesaikan tindakan menggunakan"</string>
-    <!-- no translation found for whichApplicationNamed (8260158865936942783) -->
-    <skip />
-    <!-- no translation found for whichViewApplication (3272778576700572102) -->
-    <skip />
-    <!-- no translation found for whichViewApplicationNamed (2286418824011249620) -->
-    <skip />
-    <!-- no translation found for whichEditApplication (144727838241402655) -->
-    <skip />
-    <!-- no translation found for whichEditApplicationNamed (1775815530156447790) -->
-    <skip />
-    <!-- no translation found for whichSendApplication (6902512414057341668) -->
-    <skip />
-    <!-- no translation found for whichSendApplicationNamed (2799370240005424391) -->
-    <skip />
+    <string name="whichApplicationNamed" msgid="8260158865936942783">"Selesaikan tindakan menggunakan %1$s"</string>
+    <string name="whichViewApplication" msgid="3272778576700572102">"Buka dengan"</string>
+    <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Buka dengan %1$s"</string>
+    <string name="whichEditApplication" msgid="144727838241402655">"Edit dengan"</string>
+    <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Edit dengan %1$s"</string>
+    <string name="whichSendApplication" msgid="6902512414057341668">"Kongsi dengan"</string>
+    <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Kongsi dengan %1$s"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"Pilih apl laman utama"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Gunakannya secara lalai untuk tindakan ini."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Padam bersih lalai dalam tetapan Sistem &gt; Apl &gt; Dimuat turun."</string>
@@ -1297,12 +1292,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Sentiasa Benarkan"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Jangan Benarkan"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"Kad SIM dikeluarkan"</string>
-    <!-- no translation found for sim_removed_message (5450336489923274918) -->
-    <skip />
+    <string name="sim_removed_message" msgid="5450336489923274918">"Rangkaian selular tidak akan tersedia sehingga anda mula semula dengan kad SIM yang sah dimasukkan."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Selesai"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"Kad SIM ditambah"</string>
-    <!-- no translation found for sim_added_message (7797975656153714319) -->
-    <skip />
+    <string name="sim_added_message" msgid="7797975656153714319">"Mulakan semula peranti anda untuk mengakses rangkaian selular."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Mulakan semula"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Tetapkan masa"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Tetapkan tarikh"</string>
@@ -1397,6 +1390,10 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Membenarkan aplikasi terikat kepada perkhidmatan ejen amanah."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Berinteraksi dengan kemas kini dan sistem pemulihan"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Membenarkan aplikasi berinteraksi dengan sistem pemulihan dan kemas kini sistem."</string>
+    <!-- no translation found for permlab_createMediaProjection (4941338725487978112) -->
+    <skip />
+    <!-- no translation found for permdesc_createMediaProjection (1284530992706219702) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Sentuh dua kali untuk mendapatkan kawalan zum"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Tidak dapat menambahkan widget."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Pergi"</string>

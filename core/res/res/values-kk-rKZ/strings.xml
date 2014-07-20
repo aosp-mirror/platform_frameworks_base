@@ -719,10 +719,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Пайдаланушыға хабар есту қызметінің жоғары деңгейлі интерфейсіне жалғану мүмкіндігін ұсынады. Қалыпты қолданбаны ешқашан қажет етпеуі тиіс."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"шарттар провайдері қызметіне байластыру"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Пайдаланушыға шарт провайдері қызметінің жоғары деңгейлі интерфейсіне байластыруға рұқсат береді. Қалыпты қолданбалар үшін ешқашан қажет болмайды."</string>
-    <!-- no translation found for permlab_bindMediaRouteService (6637740382272686835) -->
-    <skip />
-    <!-- no translation found for permdesc_bindMediaRouteService (6436655024972496687) -->
-    <skip />
+    <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"медианы бағыттау қызметіне байластыру"</string>
+    <string name="permdesc_bindMediaRouteService" msgid="6436655024972496687">"Иесіне медиа бағыттау қызметінің жоғарғы деңгейлі интерфейсіне байластыруға рұқсат етеді. Қалыпты қолданбалар үшін ешқашан қажет болмайды."</string>
     <string name="permlab_bindDreamService" msgid="4153646965978563462">"dream қызметіне байластыру"</string>
     <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Иесіне dream қызметінің жоғарғы деңгейлі интерфейсіне байластыруға рұқсат береді. Қалыпты қолданбалар үшін ешқашан қажет болмайды."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"жабдықтаушы ұсынатын жасақтамалық қолданбаны қосу"</string>
@@ -1008,12 +1006,16 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Қолданбаларға телефонда сақталған Браузер кіріп шыққан барлық URL тарихын және Браузер бетбелгілерін өзгерту мүмкіндігін береді. Есіңізде болсын: бұл рұқсатты үшінші жақ браузерлері немесе веб шолу қабілеті бар басқа қолданбалар қолданбауы мүмкін."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"дабылды орнату"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Қолданбаға орнатылған оятқыш қолданбасында дабылды орнатуға рұқсат береді. Кейбір қолданбаларда бұл мүмкіндік іске асырылмауы мүмкін."</string>
-    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"дауыстық хабарларды басқару"</string>
-    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"Қолданбаға дауыстық поштаңыздың «Кіріс» қалтасындағы хабарларды өзгертуге және жоюға рұқсат ету."</string>
+    <!-- no translation found for permlab_writeVoicemail (7309899891683938100) -->
+    <skip />
+    <!-- no translation found for permdesc_writeVoicemail (6592572839715924830) -->
+    <skip />
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"дауыс хабарын қосу"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Қолданбаға дауыстық поштаңыздың «Кіріс» қалтасына хабарлар қосуға рұқсат береді."</string>
-    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"барлық дауыстық хабарларды оқу"</string>
-    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"Қолданбаға барлық дауыстық хабарларыңызды оқуға рұқсат береді."</string>
+    <!-- no translation found for permlab_readVoicemail (8415201752589140137) -->
+    <skip />
+    <!-- no translation found for permdesc_readVoicemail (8926534735321616550) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"браузердің геолокация рұқсаттарын өзгерту"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Қолданбаға браузердің геолокация рұқсаттарын өзгертуге рұқсат береді. Зиянкес қолданбалар мұны кездейсоқ веб-сайттарға орын туралы ақпаратты жіберуге рұқсат беру үшін пайдалануы мүмкін."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"жинақтарды растау"</string>
@@ -1181,20 +1183,13 @@
     <string name="capital_on" msgid="1544682755514494298">"Қосулы"</string>
     <string name="capital_off" msgid="6815870386972805832">"Өшірулі"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Әрекетті аяқтау"</string>
-    <!-- no translation found for whichApplicationNamed (8260158865936942783) -->
-    <skip />
-    <!-- no translation found for whichViewApplication (3272778576700572102) -->
-    <skip />
-    <!-- no translation found for whichViewApplicationNamed (2286418824011249620) -->
-    <skip />
-    <!-- no translation found for whichEditApplication (144727838241402655) -->
-    <skip />
-    <!-- no translation found for whichEditApplicationNamed (1775815530156447790) -->
-    <skip />
-    <!-- no translation found for whichSendApplication (6902512414057341668) -->
-    <skip />
-    <!-- no translation found for whichSendApplicationNamed (2799370240005424391) -->
-    <skip />
+    <string name="whichApplicationNamed" msgid="8260158865936942783">"Әрекетті %1$s қолданбасын пайдаланып аяқтау"</string>
+    <string name="whichViewApplication" msgid="3272778576700572102">"Басқаша ашу"</string>
+    <string name="whichViewApplicationNamed" msgid="2286418824011249620">"%1$s қолданбасымен ашу"</string>
+    <string name="whichEditApplication" msgid="144727838241402655">"Келесімен өңдеу"</string>
+    <string name="whichEditApplicationNamed" msgid="1775815530156447790">"%1$s көмегімен өңдеу"</string>
+    <string name="whichSendApplication" msgid="6902512414057341668">"Бөлісу"</string>
+    <string name="whichSendApplicationNamed" msgid="2799370240005424391">"%1$s қолданбасымен бөлісу"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"Негізгі қолданбаны таңдау"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Бұл әрекет үшін бастапқы параметрін қолданыңыз."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Әдепкі параметрден «Жүйелік параметрлер» &gt; «Қолданбалар» &gt; «Жүктелгендер» тармағында құсбелгіні алу."</string>
@@ -1297,12 +1292,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Әрқашан рұқсат беру"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Ешқашан рұқсат бермеу"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM картасы алынды"</string>
-    <!-- no translation found for sim_removed_message (5450336489923274918) -->
-    <skip />
+    <string name="sim_removed_message" msgid="5450336489923274918">"Жарамды SIM картасын салып қайта іске қосқанша ұялы желі қол жетімді болмайды."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Орындалды"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIM картасы қосылды"</string>
-    <!-- no translation found for sim_added_message (7797975656153714319) -->
-    <skip />
+    <string name="sim_added_message" msgid="7797975656153714319">"Ұялы желіге қатынасу үшін құрылғыны қайта іске қосыңыз."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Қайта бастау"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Уақытты реттеу"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Мезгілін реттеу"</string>
@@ -1397,6 +1390,10 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Қолданбаға сенімді агент қызметіне байластыруға рұқсат береді."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Жаңарту және қалпына келтіру жүйелерімен қатынасу"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Қолданбаның қалпына келтіру жүйесімен және жүйе жаңартуларымен қатынасу мүмкіндігін береді."</string>
+    <!-- no translation found for permlab_createMediaProjection (4941338725487978112) -->
+    <skip />
+    <!-- no translation found for permdesc_createMediaProjection (1284530992706219702) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Масштабтауды басқару үшін екі рет түртіңіз"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Виджетті қосу."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Өту"</string>
@@ -1755,25 +1752,16 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> таңдалды"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> жойылды"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Жұмыс <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (2126866321272822564) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="2126866321272822564">"Сіз қолданбаға бекіту режиміндесіз. Шығу үшін «Жақындағылар» түймесін түртіп, ұстап тұрыңыз"</string>
     <string name="lock_to_app_toast_locked" msgid="4229650395479263497">"Сіз қолданбаға бекіту режиміндесіз."</string>
     <string name="lock_to_app_title" msgid="5895142291937470019">"Қолданбаға бекітуді пайдалану керек пе?"</string>
-    <!-- no translation found for lock_to_app_description (2800403592608529611) -->
-    <skip />
-    <!-- no translation found for lock_to_app_negative (2259143719362732728) -->
-    <skip />
+    <string name="lock_to_app_description" msgid="2800403592608529611">"Қолданбаға бекіту дисплейді бір қолданбада бекітеді.\n\nШығу үшін «Жақындағылар» түймесін түртіп, ұстап тұрыңыз."</string>
+    <string name="lock_to_app_negative" msgid="2259143719362732728">"ЖОҚ, РАҚМЕТ"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"БАСТАУ"</string>
-    <!-- no translation found for lock_to_app_start (3074665051586318340) -->
-    <skip />
-    <!-- no translation found for lock_to_app_exit (8967089657201849300) -->
-    <skip />
-    <!-- no translation found for lock_to_app_use_screen_lock (1434584309048590886) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_pin (7908385370846820001) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_pattern (7763071104790758405) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_password (795224196583495868) -->
-    <skip />
+    <string name="lock_to_app_start" msgid="3074665051586318340">"Қолданбаға бекітілді"</string>
+    <string name="lock_to_app_exit" msgid="8967089657201849300">"Енді қолданбаға бекітілмеген"</string>
+    <string name="lock_to_app_use_screen_lock" msgid="1434584309048590886">"Шығу алдында %1$s сұрау"</string>
+    <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"бекітпесін ашу әдісі"</string>
+    <string name="lock_to_app_unlock_password" msgid="795224196583495868">"құпия сөз"</string>
 </resources>

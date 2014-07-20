@@ -1006,12 +1006,16 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Cho phép ứng dụng sửa đổi lịch sử hoặc dấu trang của Trình duyệt được lưu trữ trên điện thoại của bạn. Việc này có thể cho phép ứng dụng xóa hoặc sửa đổi dữ liệu của Trình duyệt. Lưu ý: quyền này có thể không được thực thi bởi các trình duyệt của bên thứ ba hoặc các ứng dụng khác có khả năng duyệt web."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"đặt báo thức"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Cho phép ứng dụng đặt báo thức trong ứng dụng đồng hồ báo thức được cài đặt. Một số ứng dụng đồng hồ báo thức có thể không thực thi tính  năng này."</string>
-    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"quản lý thư thoại"</string>
-    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"Cho phép ứng dụng sửa đổi và xóa thư khỏi hộp thư thoại đến của bạn."</string>
+    <!-- no translation found for permlab_writeVoicemail (7309899891683938100) -->
+    <skip />
+    <!-- no translation found for permdesc_writeVoicemail (6592572839715924830) -->
+    <skip />
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"thêm thư thoại"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Cho phép ứng dụng thêm thông báo vào hộp thư thoại đến của bạn."</string>
-    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"đọc tất cả các thư thoại"</string>
-    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"Cho phép ứng dụng này đọc tất cả các thư thoại của bạn."</string>
+    <!-- no translation found for permlab_readVoicemail (8415201752589140137) -->
+    <skip />
+    <!-- no translation found for permdesc_readVoicemail (8926534735321616550) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"sửa đổi các quyền về vị trí địa lý của Trình duyệt"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Cho phép ứng dụng sửa đổi cấp phép vị trí địa lý của Trình duyệt. Ứng dụng độc hại có thể lợi dụng quyền này để cho phép gửi thông tin vị trí tới các trang web tùy ý."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"xác minh gói"</string>
@@ -1386,6 +1390,10 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Cho phép ứng dụng liên kết với một dịch vụ của đại lý đáng tin cậy."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Tương tác với hệ thống khôi phục và bản cập nhật"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Cho phép ứng dụng tương tác với hệ thống khôi phục và bản cập nhật hệ thống."</string>
+    <!-- no translation found for permlab_createMediaProjection (4941338725487978112) -->
+    <skip />
+    <!-- no translation found for permdesc_createMediaProjection (1284530992706219702) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Chạm hai lần để kiểm soát thu phóng"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Không thể thêm tiện ích."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Đến"</string>
@@ -1744,25 +1752,16 @@
     <string name="item_is_selected" msgid="949687401682476608">"Đã chọn <xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"Đã xóa <xliff:g id="KEY">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> làm việc"</string>
-    <!-- no translation found for lock_to_app_toast (2126866321272822564) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="2126866321272822564">"Bạn đang ở chế độ khóa trong ứng dụng. Để thoát, chạm và giữ nút Gần đây"</string>
     <string name="lock_to_app_toast_locked" msgid="4229650395479263497">"Bạn đang ở chế độ Khóa trong ứng dụng."</string>
     <string name="lock_to_app_title" msgid="5895142291937470019">"Sử dụng Khóa trong ứng dụng?"</string>
-    <!-- no translation found for lock_to_app_description (2800403592608529611) -->
-    <skip />
-    <!-- no translation found for lock_to_app_negative (2259143719362732728) -->
-    <skip />
+    <string name="lock_to_app_description" msgid="2800403592608529611">"Tính năng khóa trong ứng dụng khóa màn hình trong một ứng dụng.\n\nĐể thoát, chạm và giữ nút Gần đây."</string>
+    <string name="lock_to_app_negative" msgid="2259143719362732728">"KHÔNG, CẢM ƠN"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"BẮT ĐẦU"</string>
-    <!-- no translation found for lock_to_app_start (3074665051586318340) -->
-    <skip />
-    <!-- no translation found for lock_to_app_exit (8967089657201849300) -->
-    <skip />
-    <!-- no translation found for lock_to_app_use_screen_lock (1434584309048590886) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_pin (7908385370846820001) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_pattern (7763071104790758405) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_password (795224196583495868) -->
-    <skip />
+    <string name="lock_to_app_start" msgid="3074665051586318340">"Bị khóa trong ứng dụng"</string>
+    <string name="lock_to_app_exit" msgid="8967089657201849300">"Không còn bị khóa trong ứng dụng nữa"</string>
+    <string name="lock_to_app_use_screen_lock" msgid="1434584309048590886">"Yêu cầu %1$s trước khi thoát"</string>
+    <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"Mã PIN"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"hình mở khóa"</string>
+    <string name="lock_to_app_unlock_password" msgid="795224196583495868">"mật khẩu"</string>
 </resources>

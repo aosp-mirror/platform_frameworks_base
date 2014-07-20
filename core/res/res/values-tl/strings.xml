@@ -1008,12 +1008,16 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Pinapayagan ang app na baguhin ang kasaysayan o mga bookmark ng Browser na naka-imbak sa iyong telepono. Maaari nitong payagan ang app na burahin o baguhin ang data ng Browser. Tandaan: hindi maaaring ipatupad ang pahintulot na ito ng mga third-party na browser o iba pang mga application na may mga kakayahan sa pagba-browse sa web."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"magtakda ng alarm"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Pinapayagan ang app na magtakda ng alarm sa isang naka-install na app ng alarm clock. Maaaring hindi ipatupad ng ilang apps ng alarm clock ang tampok na ito."</string>
-    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"pamahalaan ang mga voicemail"</string>
-    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"Pinapayagan ang app na magbago at mag-alis ng mga mensahe mula sa iyong inbox ng voicemail."</string>
+    <!-- no translation found for permlab_writeVoicemail (7309899891683938100) -->
+    <skip />
+    <!-- no translation found for permdesc_writeVoicemail (6592572839715924830) -->
+    <skip />
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"magdagdag ng voicemail"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Pinapayagan ang app na magdagdag ng mga mensahe sa iyong inbox ng voicemail."</string>
-    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"basahin ang lahat ng voicemail"</string>
-    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"Pinapayagan ang app na basahin ang lahat ng iyong voicemail."</string>
+    <!-- no translation found for permlab_readVoicemail (8415201752589140137) -->
+    <skip />
+    <!-- no translation found for permdesc_readVoicemail (8926534735321616550) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"baguhin ang mga pahintulot ng geolocation ng Browser"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Pinapayagan ang app na baguhin ang mga pahintulot sa geolocation ng Browser. Maaari itong gamitin ng nakakahamak na apps upang payagan ang pagpapadala ng impormasyon ng lokasyon sa mga hindi tukoy na web site."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"i-verify ang mga package"</string>
@@ -1397,6 +1401,10 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Pinapayagan ang isang application na sumailalim sa isang serbisyo ng trust agent."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Makipag-ugnay sa system ng pag-update at pagbawi"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Binibigyang-daan ang isang application na makipag-ugnay sa system ng pagbawi at mga pag-update ng system."</string>
+    <!-- no translation found for permlab_createMediaProjection (4941338725487978112) -->
+    <skip />
+    <!-- no translation found for permdesc_createMediaProjection (1284530992706219702) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Pindutin nang dalawang beses para sa pagkontrol ng zoom"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Hindi maidagdag ang widget."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Pumunta"</string>
@@ -1755,25 +1763,16 @@
     <string name="item_is_selected" msgid="949687401682476608">"Napili ang <xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"Tinanggal ang <xliff:g id="KEY">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> sa Trabaho"</string>
-    <!-- no translation found for lock_to_app_toast (2126866321272822564) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="2126866321272822564">"Ikaw ay nasa lock-to-app mode. Upang lumabas, pindutin nang matagal ang button na Mga Kamakailang Ginamit."</string>
     <string name="lock_to_app_toast_locked" msgid="4229650395479263497">"Ikaw ay nasa Lock-to-App mode."</string>
     <string name="lock_to_app_title" msgid="5895142291937470019">"Gagamitin ang lock-to-app?"</string>
-    <!-- no translation found for lock_to_app_description (2800403592608529611) -->
-    <skip />
-    <!-- no translation found for lock_to_app_negative (2259143719362732728) -->
-    <skip />
+    <string name="lock_to_app_description" msgid="2800403592608529611">"Nila-lock ng lock-to-app ang display sa iisang app.\n\nUpang lumabas, pindutin nang matagal ang button na Mga Kamakailang Ginamit."</string>
+    <string name="lock_to_app_negative" msgid="2259143719362732728">"HINDI, SALAMAT NA LANG"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"SIMULAN"</string>
-    <!-- no translation found for lock_to_app_start (3074665051586318340) -->
-    <skip />
-    <!-- no translation found for lock_to_app_exit (8967089657201849300) -->
-    <skip />
-    <!-- no translation found for lock_to_app_use_screen_lock (1434584309048590886) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_pin (7908385370846820001) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_pattern (7763071104790758405) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_password (795224196583495868) -->
-    <skip />
+    <string name="lock_to_app_start" msgid="3074665051586318340">"Naka-lock sa app"</string>
+    <string name="lock_to_app_exit" msgid="8967089657201849300">"Hindi na naka-lock sa app"</string>
+    <string name="lock_to_app_use_screen_lock" msgid="1434584309048590886">"Humingi ng %1$s bago lumabas"</string>
+    <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"pattern sa pag-unlock"</string>
+    <string name="lock_to_app_unlock_password" msgid="795224196583495868">"password"</string>
 </resources>

@@ -1006,12 +1006,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Апп нь таны утсан дээр хадгалагдсан Хөтчийн түүх эсвэл хавчуургыг өөрчлөх боломжтой. Энэ нь апп-д Хөтчийн датаг арилгах эсвэл өөрчлөх боломжийг олгоно. Анхаар: Энэ зөвшөөрөл нь гуравдагч талын хөтөч эсвэл вебээр хөтөчлөх чадвартай аппликешнд ажиллахгүй байх боломжтой."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"сэрүүлэг тохируулах"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Апп нь суулгагдсан сэрүүлэгний апп дээр сэрүүлэг тохируулах боломжтой. Зарим сэрүүлэгний апп нь энэ функцийг дэмжихгүй байж болзошгүй."</string>
-    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"дуут шууданг удирдах"</string>
-    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"Апп нь таны дуут шуудангийн ирсэн мэйлээс зурвас хасах боломжтой."</string>
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"дуут шуудан бичих"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"Апп нь таны дуут шуудангийн ирсэн мэйлээс зурвас хасах боломжтой."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"дуут шуудан нэмэх"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Таны дуут шуудангийн ирсэн мэйлд зурвас нэмэхийг апп-д зөвшөөрөх."</string>
-    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"бүх дуут шууданг унших"</string>
-    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"Апп-д таны бүх дуут шууданг унших боломж олгоно."</string>
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"дуут шууданг унших"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"Апп-д таны дуут шууданг унших боломж олгоно."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"Хөтчийн геобайршлын зөвшөөрлийг өөрчлөх"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Апп нь Хөтчийн гео байршлын зөвшөөрлийг өөрчлөх боломжтой. Хортой апп нь энийг ашиглан дурын веб хуудасруу байршлын мэдээллийг илгээх боломжтой."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"багцийг тулгах"</string>
@@ -1386,6 +1386,8 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Аппликешнд итгэмжлэгдсэн төлөөлөгчтэй холбогдох боломж олгоно."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Шинэчлэлт болон сэргээх системтэй харилцах"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Аппликешнд сэргээх систем болон системийн шинэчлэлтэй харилцах боломж олгоно."</string>
+    <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Медиа проекци үүсгэх"</string>
+    <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"Аппликешнд медиа проекци үүсгэхийг зөвшөөрнө. Ингэснээр аппликешнд дэлгэц болон аудио контентыг бичих боломж олгоно. Энгийн апп-д шаардагдахгүй."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Өсгөх контрол дээр хоёр удаа товшино уу"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Виджет нэмж чадсангүй."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Очих"</string>
@@ -1510,20 +1512,14 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Засах"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Дата хэрэглээний анхааруулга"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"Ашиглалт болон тохиргоог харах бол хүрнэ үү."</string>
-    <!-- no translation found for data_usage_3g_limit_title (4462365924791862301) -->
-    <skip />
-    <!-- no translation found for data_usage_4g_limit_title (7476424187522765328) -->
-    <skip />
-    <!-- no translation found for data_usage_mobile_limit_title (3393439305227911006) -->
-    <skip />
-    <!-- no translation found for data_usage_wifi_limit_title (3461968509557554571) -->
-    <skip />
-    <!-- no translation found for data_usage_limit_body (6131350187562939365) -->
-    <skip />
+    <string name="data_usage_3g_limit_title" msgid="4462365924791862301">"2G-3G дата идэвхгүй"</string>
+    <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"4G дата идэвхгүй"</string>
+    <string name="data_usage_mobile_limit_title" msgid="3393439305227911006">"Үүрэн дата идэвхгүй"</string>
+    <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"Wi-Fi дата идэвхгүй"</string>
+    <string name="data_usage_limit_body" msgid="6131350187562939365">"Хязгаарт хүрсэн"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G дата хязгаар хэтрэв"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G дата хязгаар хэтрэв"</string>
-    <!-- no translation found for data_usage_mobile_limit_snoozed_title (4941346653729943789) -->
-    <skip />
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Үүрэн дата хязгаар хэтэрсэн"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Wi-Fi дата хязгаар хэтрэв"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> заасан хязгаарыг давав."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Арын дата хязгаарлагдсан"</string>
@@ -1744,25 +1740,16 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> сонгогдсон"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> устсан"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Ажлын <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (2126866321272822564) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="2126866321272822564">"Та Апп-дотор-түгжих горимд байна. Гарахын тулд Саяхны товчинд хүрч дарна уу"</string>
     <string name="lock_to_app_toast_locked" msgid="4229650395479263497">"Та Апп-дотор-түгжих горимд байна."</string>
     <string name="lock_to_app_title" msgid="5895142291937470019">"Апп-дотор-түгжих-г ашиглах уу?"</string>
-    <!-- no translation found for lock_to_app_description (2800403592608529611) -->
-    <skip />
-    <!-- no translation found for lock_to_app_negative (2259143719362732728) -->
-    <skip />
+    <string name="lock_to_app_description" msgid="2800403592608529611">"Апп-дотор-түгжих нь дэлгэцийг нэг апп дотор түгжинэ.\n\nГарахын тулд Саяхны товчинд хүрч, дарна."</string>
+    <string name="lock_to_app_negative" msgid="2259143719362732728">"ҮГҮЙ"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"ЭХЛҮҮЛЭХ"</string>
-    <!-- no translation found for lock_to_app_start (3074665051586318340) -->
-    <skip />
-    <!-- no translation found for lock_to_app_exit (8967089657201849300) -->
-    <skip />
-    <!-- no translation found for lock_to_app_use_screen_lock (1434584309048590886) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_pin (7908385370846820001) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_pattern (7763071104790758405) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_password (795224196583495868) -->
-    <skip />
+    <string name="lock_to_app_start" msgid="3074665051586318340">"Апп дотор түгжигдсэн"</string>
+    <string name="lock_to_app_exit" msgid="8967089657201849300">"Апп дотор түгжихийг зогсоосон"</string>
+    <string name="lock_to_app_use_screen_lock" msgid="1434584309048590886">"Гарахын өмнө %1$s-г асуух"</string>
+    <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"тайлах хээ"</string>
+    <string name="lock_to_app_unlock_password" msgid="795224196583495868">"нууц үг"</string>
 </resources>

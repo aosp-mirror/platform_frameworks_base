@@ -1006,12 +1006,16 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"ऐप्स  को आपके फ़ोन में संग्रहीत ब्राउज़र के इतिहास या बुकमार्क को संशोधित करने देता है. इससे ऐप्स  ब्राउज़र डेटा को मिटा सकता है या संशोधित कर सकता है. ध्‍यान दें: यह अनुमति तृतीय-पक्ष ब्राउज़र या वेब ब्राउज़िंग क्षमताओं वाले अन्‍य ऐप्स  द्वारा लागू नहीं की जा सकती."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"अलार्म सेट करें"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"ऐप्स को इंस्‍टॉल किए गए अलार्म घड़ी ऐप्स में अलार्म सेट करने देता है. हो सकता है कुछ अलार्म घड़ी ऐप्स में यह सुविधा न हो."</string>
-    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"ध्वनिमेल प्रबंधित करें"</string>
-    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"ऐप्स को आपके ध्वनिमेल इनबॉक्स के संदेशों को बदलने या निकालने देती है."</string>
+    <!-- no translation found for permlab_writeVoicemail (7309899891683938100) -->
+    <skip />
+    <!-- no translation found for permdesc_writeVoicemail (6592572839715924830) -->
+    <skip />
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"ध्‍वनिमेल जोड़ें"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"ऐप्स  को आपके ध्‍वनिमेल इनबॉक्‍स में संदेश जोड़ने देता है."</string>
-    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"सभी ध्वनिमेल पढ़ें"</string>
-    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"ऐप्स को आपके सभी ध्वनिमेल पढ़ने देती है."</string>
+    <!-- no translation found for permlab_readVoicemail (8415201752589140137) -->
+    <skip />
+    <!-- no translation found for permdesc_readVoicemail (8926534735321616550) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"ब्राउज़र भौगोलिक-स्थान अनुमतियों को बदलें"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"ऐप्स को ब्राउज़र के भौगोलिक-स्‍थान की अनुमतियां संशोधित करने देता है. दुर्भावनापूर्ण ऐप्स इसका उपयोग एकपक्षीय वेबसाइट को स्‍थान जानकारी भेजने में कर सकते हैं."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"पैकेज सत्‍यापि‍त करें"</string>
@@ -1386,6 +1390,8 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"किसी ऐप्लिकेशन को ट्रस्ट एजेंट सेवा से आबद्ध करने की अनुमति देती है."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"अपडेट और पुनर्प्राप्ति सिस्टम के साथ सहभागिता करें"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"ऐप्लिकेशन को पुनर्प्राप्ति सिस्टम और सिस्टम अपडेट के साथ सहभागिता करने देती है."</string>
+    <string name="permlab_createMediaProjection" msgid="4941338725487978112">"मीडिया प्रोजेक्शन सत्र बनाएं"</string>
+    <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"ऐप्लिकेशन को मीडिया प्रोजेक्शन सत्र बनाने देती है. ये सत्र ऐप्लिकेशन को प्रदर्शन और ऑडियो सामग्री कैप्चर करने की क्षमता प्रदान कर सकते हैं. सामान्य ऐप्लिकेशन को इसकी कभी भी आवश्यकता नहीं होगी."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"ज़ूम नियंत्रण के लिए दो बार स्पर्श करें"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"विजेट नहीं जोड़ा जा सका."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"जाएं"</string>
@@ -1510,20 +1516,14 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"संपादित करें"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"डेटा उपयोग की चेतावनी"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"उपयोग व सेटिंग देखने हेतु स्‍पर्श करें."</string>
-    <!-- no translation found for data_usage_3g_limit_title (4462365924791862301) -->
-    <skip />
-    <!-- no translation found for data_usage_4g_limit_title (7476424187522765328) -->
-    <skip />
-    <!-- no translation found for data_usage_mobile_limit_title (3393439305227911006) -->
-    <skip />
-    <!-- no translation found for data_usage_wifi_limit_title (3461968509557554571) -->
-    <skip />
-    <!-- no translation found for data_usage_limit_body (6131350187562939365) -->
-    <skip />
+    <string name="data_usage_3g_limit_title" msgid="4462365924791862301">"2G-3G डेटा बंद है"</string>
+    <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"4G डेटा बंद है"</string>
+    <string name="data_usage_mobile_limit_title" msgid="3393439305227911006">"सेल्युलर डेटा बंद है"</string>
+    <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"Wi-Fi डेटा बंद है"</string>
+    <string name="data_usage_limit_body" msgid="6131350187562939365">"सीमा पार हो गई है"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G डेटा सीमा पार हो गई है"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G डेटा सीमा पार हो गई है"</string>
-    <!-- no translation found for data_usage_mobile_limit_snoozed_title (4941346653729943789) -->
-    <skip />
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"सेल्युलर डेटा की सीमा पार हो गई"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Wi-Fi डेटा सीमा पार हो गई है"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> निर्दिष्ट सीमा से अधिक."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"पृष्ठभूमि डेटा प्रतिबंधित है"</string>

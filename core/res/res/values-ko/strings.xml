@@ -719,10 +719,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"권한을 가진 프로그램이 알림 수신기 서비스에 대한 최상위 인터페이스를 사용하도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"조건 제공자 서비스 사용"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"권한을 가진 프로그램이 조건 제공자 서비스의 최상위 인터페이스를 사용하도록 합니다. 일반 앱에는 필요하지 않습니다."</string>
-    <!-- no translation found for permlab_bindMediaRouteService (6637740382272686835) -->
-    <skip />
-    <!-- no translation found for permdesc_bindMediaRouteService (6436655024972496687) -->
-    <skip />
+    <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"미디어 경로 서비스 사용"</string>
+    <string name="permdesc_bindMediaRouteService" msgid="6436655024972496687">"권한을 가진 프로그램이 미디어 경로 서비스의 최상위 인터페이스를 사용하도록 합니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="permlab_bindDreamService" msgid="4153646965978563462">"드림 서비스에 연결"</string>
     <string name="permdesc_bindDreamService" msgid="7325825272223347863">"권한을 가진 프로그램이 드림 서비스에 대한 최상위 인터페이스를 사용하도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"이동통신사에서 제공한 구성 앱 호출"</string>
@@ -1008,12 +1006,16 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"앱이 휴대전화에 저장된 브라우저 기록 또는 북마크를 수정할 수 있도록 허용합니다. 이 경우 앱이 브라우저 데이터를 삭제 또는 수정할 수 있습니다. 참고: 이 권한은 타사 브라우저 또는 브라우저 기능을 가진 기타 애플리케이션에 적용되지 않습니다."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"알람 설정"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"앱이 설치된 알람 시계 앱에서 알람을 설정할 수 있도록 허용합니다. 일부 알람 시계 앱에는 이 기능이 구현되지 않을 수 있습니다."</string>
-    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"음성사서함 관리"</string>
-    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"앱이 음성사서함에서 메시지를 수정하고 삭제하도록 허용합니다."</string>
+    <!-- no translation found for permlab_writeVoicemail (7309899891683938100) -->
+    <skip />
+    <!-- no translation found for permdesc_writeVoicemail (6592572839715924830) -->
+    <skip />
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"음성사서함 추가"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"앱이 음성사서함에 메시지를 추가할 수 있도록 허용합니다."</string>
-    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"모든 음성사서함 읽기"</string>
-    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"앱이 모든 음성사서함을 읽을 수 있도록 허용합니다."</string>
+    <!-- no translation found for permlab_readVoicemail (8415201752589140137) -->
+    <skip />
+    <!-- no translation found for permdesc_readVoicemail (8926534735321616550) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"브라우저 위치 정보 권한 수정"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"앱이 브라우저의 위치 정보 권한을 수정할 수 있도록 허용합니다. 이 경우 악성 앱이 이 기능을 이용하여 임의의 웹사이트에 위치 정보를 보낼 수 있습니다."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"패키지 확인"</string>
@@ -1181,20 +1183,13 @@
     <string name="capital_on" msgid="1544682755514494298">"ON"</string>
     <string name="capital_off" msgid="6815870386972805832">"OFF"</string>
     <string name="whichApplication" msgid="4533185947064773386">"작업을 수행할 때 사용하는 애플리케이션"</string>
-    <!-- no translation found for whichApplicationNamed (8260158865936942783) -->
-    <skip />
-    <!-- no translation found for whichViewApplication (3272778576700572102) -->
-    <skip />
-    <!-- no translation found for whichViewApplicationNamed (2286418824011249620) -->
-    <skip />
-    <!-- no translation found for whichEditApplication (144727838241402655) -->
-    <skip />
-    <!-- no translation found for whichEditApplicationNamed (1775815530156447790) -->
-    <skip />
-    <!-- no translation found for whichSendApplication (6902512414057341668) -->
-    <skip />
-    <!-- no translation found for whichSendApplicationNamed (2799370240005424391) -->
-    <skip />
+    <string name="whichApplicationNamed" msgid="8260158865936942783">"%1$s을(를) 사용하여 작업 완료"</string>
+    <string name="whichViewApplication" msgid="3272778576700572102">"연결 프로그램"</string>
+    <string name="whichViewApplicationNamed" msgid="2286418824011249620">"%1$s(으)로 열기"</string>
+    <string name="whichEditApplication" msgid="144727838241402655">"편집 프로그램:"</string>
+    <string name="whichEditApplicationNamed" msgid="1775815530156447790">"%1$s(으)로 수정"</string>
+    <string name="whichSendApplication" msgid="6902512414057341668">"공유 대상"</string>
+    <string name="whichSendApplicationNamed" msgid="2799370240005424391">"%1$s와(과) 공유"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"홈 앱 선택"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"이 작업에 대해 기본값으로 사용"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"시스템 설정 &gt; 앱 &gt; 다운로드로 이동하여 기본 설정을 지웁니다."</string>
@@ -1297,12 +1292,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"항상 허용"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"허용 안함"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM 카드 제거됨"</string>
-    <!-- no translation found for sim_removed_message (5450336489923274918) -->
-    <skip />
+    <string name="sim_removed_message" msgid="5450336489923274918">"유효한 SIM 카드를 삽입하고 다시 시작해야 이동통신망을 사용할 수 있습니다."</string>
     <string name="sim_done_button" msgid="827949989369963775">"완료"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIM 카드 추가됨"</string>
-    <!-- no translation found for sim_added_message (7797975656153714319) -->
-    <skip />
+    <string name="sim_added_message" msgid="7797975656153714319">"이동통신망에 액세스하려면 기기를 다시 시작하세요."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"다시 시작"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"시간 설정"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"날짜 설정"</string>
@@ -1397,6 +1390,10 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"애플리케이션이 Trust Agent 서비스에 바인딩할 수 있도록 허용합니다."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"업데이트 및 복구 시스템과 상호작용"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"애플리케이션이 복구 시스템 및 시스템 업데이트와 상호작용할 수 있도록 허용합니다."</string>
+    <!-- no translation found for permlab_createMediaProjection (4941338725487978112) -->
+    <skip />
+    <!-- no translation found for permdesc_createMediaProjection (1284530992706219702) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"확대/축소하려면 두 번 터치하세요."</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"위젯을 추가할 수 없습니다."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"이동"</string>
@@ -1755,25 +1752,16 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g>이(가) 선택됨"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> 삭제됨"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"업무용 <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (2126866321272822564) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="2126866321272822564">"앱 잠금 기능을 사용 중입니다. 종료하려면 최근 버튼을 길게 터치하세요."</string>
     <string name="lock_to_app_toast_locked" msgid="4229650395479263497">"앱 잠금 기능을 사용 중입니다."</string>
     <string name="lock_to_app_title" msgid="5895142291937470019">"앱 잠금 기능을 사용하시겠습니까?"</string>
-    <!-- no translation found for lock_to_app_description (2800403592608529611) -->
-    <skip />
-    <!-- no translation found for lock_to_app_negative (2259143719362732728) -->
-    <skip />
+    <string name="lock_to_app_description" msgid="2800403592608529611">"앱 잠금 기능은 단일 앱의 화면을 잠급니다.\n\n종료하려면 최근 버튼을 길게 터치합니다."</string>
+    <string name="lock_to_app_negative" msgid="2259143719362732728">"아니요"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"시작"</string>
-    <!-- no translation found for lock_to_app_start (3074665051586318340) -->
-    <skip />
-    <!-- no translation found for lock_to_app_exit (8967089657201849300) -->
-    <skip />
-    <!-- no translation found for lock_to_app_use_screen_lock (1434584309048590886) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_pin (7908385370846820001) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_pattern (7763071104790758405) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_password (795224196583495868) -->
-    <skip />
+    <string name="lock_to_app_start" msgid="3074665051586318340">"앱 잠금 기능 사용"</string>
+    <string name="lock_to_app_exit" msgid="8967089657201849300">"앱 잠금 기능 사용 안함"</string>
+    <string name="lock_to_app_use_screen_lock" msgid="1434584309048590886">"종료 전에 %1$s 요청"</string>
+    <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"잠금해제 패턴"</string>
+    <string name="lock_to_app_unlock_password" msgid="795224196583495868">"비밀번호"</string>
 </resources>

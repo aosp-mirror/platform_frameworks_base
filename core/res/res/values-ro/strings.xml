@@ -719,10 +719,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Permite proprietarului să se conecteze la interfața de nivel superior a unui serviciu de citire a notificărilor. În mod normal aplicațiile nu ar trebui să aibă nevoie de această permisiune."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"conectare la un serviciu furnizor de condiții"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Permite proprietarului să se conecteze la interfața de nivel superior a unui serviciu furnizor de condiții. Nu ar trebui să fie necesară pentru aplicațiile obișnuite."</string>
-    <!-- no translation found for permlab_bindMediaRouteService (6637740382272686835) -->
-    <skip />
-    <!-- no translation found for permdesc_bindMediaRouteService (6436655024972496687) -->
-    <skip />
+    <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"conectare la un serviciu de trasee multimedia"</string>
+    <string name="permdesc_bindMediaRouteService" msgid="6436655024972496687">"Permite proprietarului să se conecteze la interfața de nivel superior a unui serviciu de trasee multimedia. Nu ar trebui să fie necesară pentru aplicațiile obișnuite."</string>
     <string name="permlab_bindDreamService" msgid="4153646965978563462">"se conectează la un serviciu de vis"</string>
     <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Permite deținătorului să se conecteze la interfața superioară a unui serviciu de vis. Această opțiune nu ar trebui să fie necesară pentru aplicațiile obișnuite."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"apelarea aplicației de configurare furnizată de operator"</string>
@@ -1008,12 +1006,16 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Permite aplicaţiei să modifice istoricul Browserului sau marcajele stocate pe telefon. În acest fel, aplicaţia poate şterge sau modifica datele din Browser. Notă: această permisiune nu poate fi aplicată de browsere terţă parte sau de alte aplicaţii cu capacităţi de navigare pe web."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"setează o alarmă"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Permite aplicaţiei să seteze o alarmă într-o aplicaţie de ceas cu alarmă instalată. Este posibil ca unele aplicaţii de ceas cu alarmă să nu implementeze această funcţie."</string>
-    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"gestionarea mesajelor vocale"</string>
-    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"Permite aplicației să modifice și să elimine mesaje din secțiunea de mesaje vocale primite."</string>
+    <!-- no translation found for permlab_writeVoicemail (7309899891683938100) -->
+    <skip />
+    <!-- no translation found for permdesc_writeVoicemail (6592572839715924830) -->
+    <skip />
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"adăugare mesagerie vocală"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Permite aplicaţiei să adauge mesaje în Mesaje primite în mesageria vocală."</string>
-    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"acces la toate mesajele vocale"</string>
-    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"Permite aplicației să acceseze toate mesajele vocale."</string>
+    <!-- no translation found for permlab_readVoicemail (8415201752589140137) -->
+    <skip />
+    <!-- no translation found for permdesc_readVoicemail (8926534735321616550) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"modificare permisiuni pentru locaţia geografică a browserului"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Permite aplicaţiei să modifice permisiunile privind locaţia geografică a browserului. Aplicaţiile rău intenţionate pot utiliza această permisiune pentru a permite trimiterea informaţiilor privind locaţia către site-uri web arbitrare."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"verificare pachete"</string>
@@ -1181,20 +1183,13 @@
     <string name="capital_on" msgid="1544682755514494298">"DA"</string>
     <string name="capital_off" msgid="6815870386972805832">"NU"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Finalizare acţiune utilizând"</string>
-    <!-- no translation found for whichApplicationNamed (8260158865936942783) -->
-    <skip />
-    <!-- no translation found for whichViewApplication (3272778576700572102) -->
-    <skip />
-    <!-- no translation found for whichViewApplicationNamed (2286418824011249620) -->
-    <skip />
-    <!-- no translation found for whichEditApplication (144727838241402655) -->
-    <skip />
-    <!-- no translation found for whichEditApplicationNamed (1775815530156447790) -->
-    <skip />
-    <!-- no translation found for whichSendApplication (6902512414057341668) -->
-    <skip />
-    <!-- no translation found for whichSendApplicationNamed (2799370240005424391) -->
-    <skip />
+    <string name="whichApplicationNamed" msgid="8260158865936942783">"Finalizați acțiunea utilizând %1$s"</string>
+    <string name="whichViewApplication" msgid="3272778576700572102">"Deschideți cu"</string>
+    <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Deschideți cu %1$s"</string>
+    <string name="whichEditApplication" msgid="144727838241402655">"Editați cu"</string>
+    <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Editați cu %1$s"</string>
+    <string name="whichSendApplication" msgid="6902512414057341668">"Distribuiți cu"</string>
+    <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Distribuiți cu %1$s"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"Selectați o aplicație de pe ecranul de pornire"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Se utilizează în mod prestabilit pentru această acţiune."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Ștergeţi setările prestabilite din Setări de sistem &gt; Aplicaţii &gt; Descărcate."</string>
@@ -1297,12 +1292,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Permiteţi întotdeauna"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Nu permiteţi niciodată"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"Card SIM eliminat"</string>
-    <!-- no translation found for sim_removed_message (5450336489923274918) -->
-    <skip />
+    <string name="sim_removed_message" msgid="5450336489923274918">"Rețeaua mobilă va fi indisponibilă până când reporniți cu un card SIM valabil introdus."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Terminat"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"Card SIM adăugat"</string>
-    <!-- no translation found for sim_added_message (7797975656153714319) -->
-    <skip />
+    <string name="sim_added_message" msgid="7797975656153714319">"Reporniți dispozitivul pentru a accesa rețeaua mobilă."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Reporniţi"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Setaţi ora"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Setaţi data"</string>
@@ -1397,6 +1390,10 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Permite unei aplicații să se asocieze la un serviciu „agent de încredere”."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Interacțiune cu sistemul de recuperare și de actualizare"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Permite unei aplicații să interacționeze cu sistemul de recuperare și cu actualizările de sistem."</string>
+    <!-- no translation found for permlab_createMediaProjection (4941338725487978112) -->
+    <skip />
+    <!-- no translation found for permdesc_createMediaProjection (1284530992706219702) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Atingeţi de două ori pentru a mări/micşora"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Nu s-a putut adăuga widgetul."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Accesaţi"</string>
@@ -1755,25 +1752,16 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> selectat"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> a fost șters"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> de serviciu"</string>
-    <!-- no translation found for lock_to_app_toast (2126866321272822564) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="2126866321272822564">"Sunteți în modul Blocare la aplicație. Apăsați lung pe butonul Recente pentru a ieși."</string>
     <string name="lock_to_app_toast_locked" msgid="4229650395479263497">"Sunteți în modul Blocare la aplicație."</string>
     <string name="lock_to_app_title" msgid="5895142291937470019">"Utilizați Blocarea la aplicație?"</string>
-    <!-- no translation found for lock_to_app_description (2800403592608529611) -->
-    <skip />
-    <!-- no translation found for lock_to_app_negative (2259143719362732728) -->
-    <skip />
+    <string name="lock_to_app_description" msgid="2800403592608529611">"Blocarea la aplicație blochează ecranul într-o singură aplicație.\n\nPentru a ieși, apăsați lung pe butonul Recente."</string>
+    <string name="lock_to_app_negative" msgid="2259143719362732728">"NU, MULȚUMESC"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"PORNIȚI"</string>
-    <!-- no translation found for lock_to_app_start (3074665051586318340) -->
-    <skip />
-    <!-- no translation found for lock_to_app_exit (8967089657201849300) -->
-    <skip />
-    <!-- no translation found for lock_to_app_use_screen_lock (1434584309048590886) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_pin (7908385370846820001) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_pattern (7763071104790758405) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_password (795224196583495868) -->
-    <skip />
+    <string name="lock_to_app_start" msgid="3074665051586318340">"Blocat la aplicație"</string>
+    <string name="lock_to_app_exit" msgid="8967089657201849300">"S-a anulat blocarea la aplicație"</string>
+    <string name="lock_to_app_use_screen_lock" msgid="1434584309048590886">"Se solicită %1$s înainte de închidere"</string>
+    <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"model pentru deblocare"</string>
+    <string name="lock_to_app_unlock_password" msgid="795224196583495868">"parolă"</string>
 </resources>

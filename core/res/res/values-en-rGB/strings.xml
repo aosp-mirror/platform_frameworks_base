@@ -1006,12 +1006,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Allows the app to modify the Browser\'s history or bookmarks stored on your phone. This may allow the app to delete or modify Browser data. Note: this permission may not be enforced by third-party browsers or other applications with web browsing capabilities."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"set an alarm"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Allows the app to set an alarm in an installed alarm clock app. Some alarm clock apps may not implement this feature."</string>
-    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"manage voicemails"</string>
-    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"Allows the app to modify and remove messages from your voicemail inbox."</string>
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"write voicemails"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"Allows the app to modify and remove messages from your voicemail inbox."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"add voicemail"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Allows the app to add messages to your voicemail inbox."</string>
-    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"read all voicemail"</string>
-    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"Allows the app to read all your voicemails."</string>
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"read voicemail"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"Allows the app to read your voicemails."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"Modify Browser geo-location permissions"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Allows the app to modify the Browser\'s geo-location permissions. Malicious apps may use this to allow sending location information to arbitrary websites."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"verify packages"</string>
@@ -1386,6 +1386,8 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Allows an application to bind to a trust agent service."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Interact with update and recovery system"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Allows an application to interact with the recovery system and system updates."</string>
+    <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Create media projection sessions"</string>
+    <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"Allows an application to create media projection sessions. These sessions can provide applications the ability to capture display and audio contents. Should never be needed by normal apps."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Touch twice for zoom control"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Couldn\'t add widget."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Go"</string>
@@ -1510,20 +1512,14 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Edit"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Data usage warning"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"Touch to view usage and settings."</string>
-    <!-- no translation found for data_usage_3g_limit_title (4462365924791862301) -->
-    <skip />
-    <!-- no translation found for data_usage_4g_limit_title (7476424187522765328) -->
-    <skip />
-    <!-- no translation found for data_usage_mobile_limit_title (3393439305227911006) -->
-    <skip />
-    <!-- no translation found for data_usage_wifi_limit_title (3461968509557554571) -->
-    <skip />
-    <!-- no translation found for data_usage_limit_body (6131350187562939365) -->
-    <skip />
+    <string name="data_usage_3g_limit_title" msgid="4462365924791862301">"2G-3G data is off"</string>
+    <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"4G data is off"</string>
+    <string name="data_usage_mobile_limit_title" msgid="3393439305227911006">"Mobile data is off"</string>
+    <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"Wi-Fi data is off"</string>
+    <string name="data_usage_limit_body" msgid="6131350187562939365">"Limit reached"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G data limit exceeded"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G data limit exceeded"</string>
-    <!-- no translation found for data_usage_mobile_limit_snoozed_title (4941346653729943789) -->
-    <skip />
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Mobile data limit exceeded"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Wi-Fi data limit exceeded"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> over specified limit."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Background data restricted"</string>

@@ -719,10 +719,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"İzin sahibine bir bildirim dinleyici hizmetinin en üst düzey arayüzüne bağlanma izni verir. Normal uygulamalarda hiçbir zaman gerek duyulmaz."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"bir durum sağlayıcı hizmetine bağlanma"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"İzin sahibinin, bir durum sağlayıcı hizmete ait üst düzey arayüze bağlanmasına izin verir. Normal uygulamalar için hiçbir zaman gerekli değildir."</string>
-    <!-- no translation found for permlab_bindMediaRouteService (6637740382272686835) -->
-    <skip />
-    <!-- no translation found for permdesc_bindMediaRouteService (6436655024972496687) -->
-    <skip />
+    <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"bir medya yönlendirme hizmetine bağlan"</string>
+    <string name="permdesc_bindMediaRouteService" msgid="6436655024972496687">"İzin sahibinin, bir medya yönlendirme hizmetine ait üst düzey arayüze bağlanmasına izin verir. Normal uygulamalar için hiçbir zaman gerekli değildir."</string>
     <string name="permlab_bindDreamService" msgid="4153646965978563462">"bir dream hizmetine bağla"</string>
     <string name="permdesc_bindDreamService" msgid="7325825272223347863">"İzin sahibine bir dream hizmetinin üst seviye arayüzüne bağlanma olanağı sunar. Normal uygulamalarda hiçbir zaman ihtiyaç duyulmamalıdır."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"operatör tarafından sağlanan yapılandırma uygulamasını çalıştır"</string>
@@ -1008,12 +1006,16 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Uygulamaya Tarayıcı geçmişini ve telefonunuzda depolanan yer işaretlerini değiştirme izni verir. Bu izin, uygulamanın Tarayıcı geçmişini silmesine ve değiştirmesine olanak sağlar. Not: Bu izin, üçüncü taraf cihazlar veya Web\'e göz atma işlevine sahip diğer uygulamalar tarafından kullanılmayabilir."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"alarm ayarla"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Uygulamaya, çalar saat uygulamasının alarmını ayarlama izni verir. Bazı çalar saat uygulamaları bu özelliği uygulayamayabilir."</string>
-    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"sesli mesajları yönet"</string>
-    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"Uygulamanın sesli mesaj gelen kutunuzdaki mesajları değiştirmesine ve kaldırmasına izin verir."</string>
+    <!-- no translation found for permlab_writeVoicemail (7309899891683938100) -->
+    <skip />
+    <!-- no translation found for permdesc_writeVoicemail (6592572839715924830) -->
+    <skip />
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"sesli mesaj ekle"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Uygulamaya, sesli mesaj gelen kutunuza mesaj ekleme izni verir."</string>
-    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"tüm sesli mesajları oku"</string>
-    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"Uygulamanın tüm sesli mesajlarınızı okumasına izin verir."</string>
+    <!-- no translation found for permlab_readVoicemail (8415201752589140137) -->
+    <skip />
+    <!-- no translation found for permdesc_readVoicemail (8926534735321616550) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"Tarayıcı\'nın coğrafi konum izinlerini değiştir"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Uygulamaya, Tarayıcı\'nın coğrafi konum izinlerini değiştirme izni verir. Kötü amaçlı uygulamalar keyfi web sitelerine konum bilgisi gönderilmesini sağlamak için bunu kullanabilirler."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"paketleri doğrula"</string>
@@ -1181,20 +1183,13 @@
     <string name="capital_on" msgid="1544682755514494298">"AÇIK"</string>
     <string name="capital_off" msgid="6815870386972805832">"KAPALI"</string>
     <string name="whichApplication" msgid="4533185947064773386">"İşlemi şunu kullanarak tamamla"</string>
-    <!-- no translation found for whichApplicationNamed (8260158865936942783) -->
-    <skip />
-    <!-- no translation found for whichViewApplication (3272778576700572102) -->
-    <skip />
-    <!-- no translation found for whichViewApplicationNamed (2286418824011249620) -->
-    <skip />
-    <!-- no translation found for whichEditApplication (144727838241402655) -->
-    <skip />
-    <!-- no translation found for whichEditApplicationNamed (1775815530156447790) -->
-    <skip />
-    <!-- no translation found for whichSendApplication (6902512414057341668) -->
-    <skip />
-    <!-- no translation found for whichSendApplicationNamed (2799370240005424391) -->
-    <skip />
+    <string name="whichApplicationNamed" msgid="8260158865936942783">"İşlemi %1$s kullanarak tamamla"</string>
+    <string name="whichViewApplication" msgid="3272778576700572102">"Şununla aç:"</string>
+    <string name="whichViewApplicationNamed" msgid="2286418824011249620">"%1$s ile aç"</string>
+    <string name="whichEditApplication" msgid="144727838241402655">"Şununla düzenle:"</string>
+    <string name="whichEditApplicationNamed" msgid="1775815530156447790">"%1$s ile düzenle"</string>
+    <string name="whichSendApplication" msgid="6902512414057341668">"Şununla paylaş:"</string>
+    <string name="whichSendApplicationNamed" msgid="2799370240005424391">"%1$s ile paylaş"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"Ana ekran uygulaması seçin"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Varsayılan olarak bu işlem için kullan."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Sistem ayarları &gt; Uygulamalar &gt; İndirilen bölümünden varsayılanı temizleyin."</string>
@@ -1297,12 +1292,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Her Zaman İzin Ver"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Asla İzin Verme"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM kart çıkarıldı"</string>
-    <!-- no translation found for sim_removed_message (5450336489923274918) -->
-    <skip />
+    <string name="sim_removed_message" msgid="5450336489923274918">"Hücresel ağ, geçerli bir SIM kart takıp cihazınızı yeniden başlatıncaya kadar kullanılamayacak."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Tamamlandı"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIM kart eklendi"</string>
-    <!-- no translation found for sim_added_message (7797975656153714319) -->
-    <skip />
+    <string name="sim_added_message" msgid="7797975656153714319">"Hücresel ağa erişmek için cihazınızı yeniden başlatın."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Yeniden başlat"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Saati ayarlayın"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Tarihi ayarlayın"</string>
@@ -1397,6 +1390,10 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Bir uygulamanın, güven aracı hizmetine bağlanmasına izin verir."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Güncelleme ve kurtarma sistemiyle etkileşim kur"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Bir uygulamaya, kurtarma sistemi ve sistem güncellemeriyle etkileşim kurma izni verir."</string>
+    <!-- no translation found for permlab_createMediaProjection (4941338725487978112) -->
+    <skip />
+    <!-- no translation found for permdesc_createMediaProjection (1284530992706219702) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Yakınlaştırma denetimi için iki kez dokunun"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Widget eklenemedi."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Git"</string>
@@ -1755,25 +1752,16 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> seçildi"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> silindi"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> (İş)"</string>
-    <!-- no translation found for lock_to_app_toast (2126866321272822564) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="2126866321272822564">"Uygulamaya kilitleme modundasınız. Çıkmak için Son Uygulamalar düğmesine dokunun ve basılı tutun"</string>
     <string name="lock_to_app_toast_locked" msgid="4229650395479263497">"Uygulamaya Kilitleme modundasınız."</string>
     <string name="lock_to_app_title" msgid="5895142291937470019">"Uygulamaya Kilitleme özelliği kullanılsın mı?"</string>
-    <!-- no translation found for lock_to_app_description (2800403592608529611) -->
-    <skip />
-    <!-- no translation found for lock_to_app_negative (2259143719362732728) -->
-    <skip />
+    <string name="lock_to_app_description" msgid="2800403592608529611">"Uygulamaya kilitleme, ekranı tek bir uygulamada kilitler\n\nÇıkmak için Son uygulamalar düğmesine dokunun ve basılı tutun."</string>
+    <string name="lock_to_app_negative" msgid="2259143719362732728">"HAYIR, TEŞEKKÜRLER"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"BAŞLAT"</string>
-    <!-- no translation found for lock_to_app_start (3074665051586318340) -->
-    <skip />
-    <!-- no translation found for lock_to_app_exit (8967089657201849300) -->
-    <skip />
-    <!-- no translation found for lock_to_app_use_screen_lock (1434584309048590886) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_pin (7908385370846820001) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_pattern (7763071104790758405) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_password (795224196583495868) -->
-    <skip />
+    <string name="lock_to_app_start" msgid="3074665051586318340">"Uygulamaya kilitli"</string>
+    <string name="lock_to_app_exit" msgid="8967089657201849300">"Artık uygulamaya kilitli değil"</string>
+    <string name="lock_to_app_use_screen_lock" msgid="1434584309048590886">"Çıkmadan önce %1$s iste"</string>
+    <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"kilit açma deseni"</string>
+    <string name="lock_to_app_unlock_password" msgid="795224196583495868">"şifre"</string>
 </resources>

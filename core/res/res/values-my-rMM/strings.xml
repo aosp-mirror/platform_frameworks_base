@@ -1006,12 +1006,16 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"အပလီကေးရှင်းအား ဘရောင်ဇာမှ မှတ်တမ်း သို့ မှတ်သားမှု အမှတ်များအား ပြင်ဆင်ခွင့် ပေးခြင်း။ အပလီကေးရှင်းမှ ဘရောင်ဇာ မှတ်တမ်းများကို ဖျက်ပစ်ခွင့် သို့ ပြင်ဆင်ခွင့် ရှိပါမည်။ မှတ်ချက်။ ဒီခွင့်ပြုချက်ကို တတိယပါတီ ဘရောင်ဇာများ၊ တခြား အပလီကေးရှင်းများမှ သုံးမည် မဟုတ်ပါ။"</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"နှိုးစက်သတ်မှတ်ရန်"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"appအား တပ်ဆင်ထားသည့် နှိုးစက်နာရီ app ထဲတွင် နှိုးစက်ကို သတ်မှတ်ခွင့် ပြုသည်။ အချို့ နှိုးစက် appများက ထိုအင်္ဂါရပ်ကို ပြီးမြောက်အောင် မလုပ်နိုင်ကြပါ။"</string>
-    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"အသံစာများကို စီမံကွပ်ကဲရန်"</string>
-    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"appအား သင့် ဝင်ထားသည့် အသံစာများကို မွမ်းမံခွင့် နှင့် ဖယ်ရှားခွင့် ပြုသည်။"</string>
+    <!-- no translation found for permlab_writeVoicemail (7309899891683938100) -->
+    <skip />
+    <!-- no translation found for permdesc_writeVoicemail (6592572839715924830) -->
+    <skip />
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"အသံစာပို့စနစ်အားထည့်ရန်"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"appအား သင့် အသံမေးလ် ဝင်စာသို့ စာများကို ထည့်ခွင့် ပြုသည်။"</string>
-    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"အသံမေးလ် အားလုံး ဖတ်ရန်"</string>
-    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"appအား သင်၏ အသံမေးလ် အားလုံး ဖတ်ခွင့် ပြုရန်"</string>
+    <!-- no translation found for permlab_readVoicemail (8415201752589140137) -->
+    <skip />
+    <!-- no translation found for permdesc_readVoicemail (8926534735321616550) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"ဘရောင်ဇာ ဘူမိဇုန်သတ်မှတ်မှု ခွင့်ပြုချက်များကို မွမ်းမံခြင်း"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"appအား ဘရောင်ဇာ၏ ဘူမိဇုန်သတ်မှတ်ရေး ခွင့်ပြုချက်များကို မွမ်းမံခွင့် ပြုသည်။ ကြံဖန် appများက ၎င်းကို အသုံးချပြီး လိုရာ ဝက်ဘ်ဆိုက်များသို့ တည်နေရာ အချက်အလက် ပို့မှုကို လုပ်နိုင်သည်။"</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"packages များကိုအတည်ပြုစိစစ်ခြင်း"</string>
@@ -1386,6 +1390,8 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"စွဲကိုင်ထားသူအား ယုံကြည်မှု အေဂျင့် ဝန်ဆောင်မှုသို့ ချိတ်တွဲခွင့်ကို ပေးသည်။"</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"အဆင့်မြှင့်ခြင်းနဲ့ ပြန်လည် ထိန်းသိမ်းခြင်း များနှင့် ဆက်ဆံစေခြင်း"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"အပလီကေးရှင်းအား စစ်စတန်အား ပြန်လည် ကယ်ဆယ်မှု နဲ့ အဆင့်မြှင့်ခြင်းများအား လုပ်ဆောင်ခွင့် ပေးခြင်း"</string>
+    <string name="permlab_createMediaProjection" msgid="4941338725487978112">"မီဒီယာ အနာဂတ် ချိတ်ဆက်မှုများကို ဖန်တီးရန်"</string>
+    <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"အပလီကေးရှင်း တစ်ခုအား မီဒီယာ အနာဂတ် ချိတ်ဆက်မှုများကို ဖန်တီးခွင့် ပြုသည်။ ယင်း ချိတ်ဆက်မှုများ ထဲမှာ အပလီကေးရှင်းအား ပြသမှု နှင့် အသံ အကြောင်းအရာများကို ဖမ်းယူခွင့် ပေးနိုင်သည်။ သာမန် appများ အတွက် ဘယ်တော့မှ မလိုအပ်နိုင်ပါ။."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"ချုံ့ချဲ့မှုကို ထိန်းချုပ်ရန် အတွက် နှစ်ကြိမ် ထိပါ"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"ဝဒ်ဂျက်ထည့်လို့ မရပါ"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"သွားပါ"</string>
@@ -1510,20 +1516,14 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"ပြင်ဆင်ရန်"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"ဒေတာအသုံးပြုမှုသတိပေးချက်"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"ဆက်တင်နှင့်သုံးစွဲမှုကြည့်ရန်ထိပါ"</string>
-    <!-- no translation found for data_usage_3g_limit_title (4462365924791862301) -->
-    <skip />
-    <!-- no translation found for data_usage_4g_limit_title (7476424187522765328) -->
-    <skip />
-    <!-- no translation found for data_usage_mobile_limit_title (3393439305227911006) -->
-    <skip />
-    <!-- no translation found for data_usage_wifi_limit_title (3461968509557554571) -->
-    <skip />
-    <!-- no translation found for data_usage_limit_body (6131350187562939365) -->
-    <skip />
+    <string name="data_usage_3g_limit_title" msgid="4462365924791862301">"2G-3G ဒေတာ ပိတ်ထား"</string>
+    <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"4G ဒေတာ ပိတ်ထား"</string>
+    <string name="data_usage_mobile_limit_title" msgid="3393439305227911006">"ဆယ်လူလာ ဒေတာ ပိတ်ထား"</string>
+    <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"ကြိုးမဲ့ ဒေတာ ပိတ်ထား"</string>
+    <string name="data_usage_limit_body" msgid="6131350187562939365">"ကန့်သတ်ချက် ပြည့်မီသွားပြီ"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"သတ်မှတ်ထားသော2G-3Gဒေတာအားကျော်လွန်နေသည်"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"သတ်မှတ်ထားသော4Gဒေတာအားကျော်လွန်နေသည်"</string>
-    <!-- no translation found for data_usage_mobile_limit_snoozed_title (4941346653729943789) -->
-    <skip />
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"ဆယ်လူလာ ကန့်သတ်ချက် ကျော်လွန်သွားပြီ"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"သတ်မှတ်ဝိုင်ဖိုင်ဒေတာထက်ကျော်နေ"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"သက်မှတ်နှုန်းထက် <xliff:g id="SIZE">%s</xliff:g> ကျော်နေပါသည်"</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"နောက်ခံဒေတာ ကန့်သတ်ထားသည်"</string>

@@ -1006,12 +1006,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"للسماح للتطبيق بتعديل سجل المتصفح أو الإشارات المرجعية المخزنة على هاتفك. وقد يتيح هذا للتطبيق محو بيانات المتصفح أو تعديلها. ملاحظة: لا يجوز فرض هذا الإذن من قِبل متصفحات جهات خارجية أو تطبيقات أخرى بها إمكانيات تصفح الويب."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"تعيين منبه"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"للسماح للتطبيق بضبط المنبه في تطبيق المنبه المثبّت. ربما لا تنفذ بعض تطبيقات المنبه هذه الميزة."</string>
-    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"إدارة رسائل البريد الصوتي"</string>
-    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"للسماح للتطبيق بتعديل الرسائل وإزالتها من صندوق البريد الصوتي."</string>
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"كتابة رسائل البريد الصوتي"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"للسماح للتطبيق بتعديل الرسائل وإزالتها من صندوق البريد الصوتي."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"إضافة بريد صوتي"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"للسماح للتطبيق بإضافة رسائل إلى صندوق البريد الصوتي."</string>
-    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"قراءة جميع رسائل البريد الصوتي"</string>
-    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"للسماح للتطبيق بقراءة جميع رسائل البريد الصوتي."</string>
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"قراءة رسائل البريد الصوتي"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"للسماح للتطبيق بقراءة رسائل البريد الصوتي."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"تعديل أذونات الموقع الجغرافي للمتصفح"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"للسماح لأحد التطبيقات بتعديل أذونات الموقع الجغرافي للمتصفح. يمكن أن تستخدم التطبيقات الضارة هذا للسماح بإرسال معلومات الموقع إلى مواقع ويب عشوائية."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"التحقق من الحزم"</string>
@@ -1386,6 +1386,10 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"للسماح لأحد التطبيقات بالالتزام بخدمة الوكيل المعتمد."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"التفاعل مع نظام التحديث والاسترداد"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"للسماح للتطبيق بالتفاعل مع نظام الاسترداد وتحديثات النظام."</string>
+    <!-- no translation found for permlab_createMediaProjection (4941338725487978112) -->
+    <skip />
+    <!-- no translation found for permdesc_createMediaProjection (1284530992706219702) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"المس مرتين للتحكم في التكبير/التصغير"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"تعذرت إضافة أداة."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"تنفيذ"</string>

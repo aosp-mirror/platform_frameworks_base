@@ -1006,12 +1006,16 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"อนุญาตให้แอปพลิเคชันเปลี่ยนแปลงประวัติหรือบุ๊กมาร์กของเบราว์เซอร์ที่จัดเก็บไว้ในโทรศัพท์ ซึ่งทำให้แอปพลิเคชันสามารถลบหรือเปลี่ยนข้อมูลเบราว์เซอร์ได้ หมายเหตุ: การอนุญาตนี้อาจไม่สามารถใช้งานได้กับเบราว์เซอร์ของบุคคลที่สามหรือแอปพลิเคชันอื่นๆ ที่มีความสามารถในการเรียกดูบนเว็บ"</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"ตั้งปลุก"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"อนุญาตให้แอปพลิเคชันตั้งเวลาปลุกในแอปพลิเคชันนาฬิกาปลุกที่ติดตั้ง แอปพลิเคชันนาฬิกาปลุกบางรายการอาจไม่ใช้คุณลักษณะนี้"</string>
-    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"จัดการข้อความเสียง"</string>
-    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"อนุญาตให้แอปแก้ไขและนำข้อความออกจากกล่องข้อความเสียงของคุณ"</string>
+    <!-- no translation found for permlab_writeVoicemail (7309899891683938100) -->
+    <skip />
+    <!-- no translation found for permdesc_writeVoicemail (6592572839715924830) -->
+    <skip />
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"เพิ่มข้อวามเสียง"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"อนุญาตให้แอปพลิเคชันเพิ่มข้อความลงในกล่องข้อความเสียงของคุณ"</string>
-    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"อ่านข้อความเสียงทั้งหมด"</string>
-    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"อนุญาตให้แอปอ่านข้อความเสียงทั้งหมดของคุณ"</string>
+    <!-- no translation found for permlab_readVoicemail (8415201752589140137) -->
+    <skip />
+    <!-- no translation found for permdesc_readVoicemail (8926534735321616550) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"แก้ไขการอนุญาตเกี่ยวกับการระบุตำแหน่งทางภูมิศาสตร์ของเบราว์เซอร์"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"อนุญาตให้แอปพลิเคชันแก้ไขการอนุญาตตำแหน่งทางภูมิศาสตร์ของเบราว์เซอร์ แอปพลิเคชันที่เป็นอันตรายอาจใช้การอนุญาตนี้ในการส่งข้อมูลตำแหน่งไปยังเว็บไซต์ต่างๆ ได้ตามต้องการ"</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"ยืนยันแพ็กเกจ"</string>
@@ -1386,6 +1390,10 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"อนุญาตให้แอปพลิเคชันผูกกับบริการของตัวแทนที่เชื่อถือได้"</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"โต้ตอบกับการอัปเดตและระบบการกู้คืน"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"ช่วยให้แอปพลิเคชันสามารถโต้ตอบกับระบบการกู้คืนและการอัปเดตระบบ"</string>
+    <!-- no translation found for permlab_createMediaProjection (4941338725487978112) -->
+    <skip />
+    <!-- no translation found for permdesc_createMediaProjection (1284530992706219702) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"แตะสองครั้งเพื่อควบคุมการซูม"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"ไม่สามารถเพิ่มวิดเจ็ต"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"ไป"</string>
@@ -1744,25 +1752,16 @@
     <string name="item_is_selected" msgid="949687401682476608">"เลือก <xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"ลบ <xliff:g id="KEY">%1$s</xliff:g> แล้ว"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g>ที่ทำงาน"</string>
-    <!-- no translation found for lock_to_app_toast (2126866321272822564) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="2126866321272822564">"คุณกำลังอยู่ในโหมดการล็อกแอป หากต้องการออก ให้แตะปุ่ม \"ล่าสุด\" ค้างไว้"</string>
     <string name="lock_to_app_toast_locked" msgid="4229650395479263497">"คุณกำลังใช้โหมดการล็อกแอป"</string>
     <string name="lock_to_app_title" msgid="5895142291937470019">"ใช้การล็อกแอปไหม"</string>
-    <!-- no translation found for lock_to_app_description (2800403592608529611) -->
-    <skip />
-    <!-- no translation found for lock_to_app_negative (2259143719362732728) -->
-    <skip />
+    <string name="lock_to_app_description" msgid="2800403592608529611">"การล็อกแอปจะล็อกการแสดงไว้ในแอปเดียว\n\nหากต้องการออก ให้แตะปุ่ม \"ล่าสุด\" ค้างไว้"</string>
+    <string name="lock_to_app_negative" msgid="2259143719362732728">"ไม่เป็นไร ขอบคุณ"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"เริ่มต้น"</string>
-    <!-- no translation found for lock_to_app_start (3074665051586318340) -->
-    <skip />
-    <!-- no translation found for lock_to_app_exit (8967089657201849300) -->
-    <skip />
-    <!-- no translation found for lock_to_app_use_screen_lock (1434584309048590886) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_pin (7908385370846820001) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_pattern (7763071104790758405) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_password (795224196583495868) -->
-    <skip />
+    <string name="lock_to_app_start" msgid="3074665051586318340">"ล็อกแอปแล้ว"</string>
+    <string name="lock_to_app_exit" msgid="8967089657201849300">"ไม่ล็อกแอปอีกต่อไป"</string>
+    <string name="lock_to_app_use_screen_lock" msgid="1434584309048590886">"ขอ %1$s ก่อนออก"</string>
+    <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"รูปแบบการปลดล็อก"</string>
+    <string name="lock_to_app_unlock_password" msgid="795224196583495868">"รหัสผ่าน"</string>
 </resources>

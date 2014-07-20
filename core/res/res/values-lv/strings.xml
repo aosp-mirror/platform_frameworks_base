@@ -1006,12 +1006,16 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Ļauj lietotnei mainīt tālrunī saglabāto pārlūkprogrammas vēsturi vai grāmatzīmes. Tas var ļaut lietotnei dzēst vai pārveidot pārlūkprogrammas datus. Piezīme: šo atļauju nevar piemērot trešo pušu pārlūkprogrammas vai citas lietojumprogrammas ar tīmekļa pārlūkošanas iespējām."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"iestatīt modinātāju"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Ļauj lietotnei iestatīt signālu instalētajā modinātājpulksteņa lietotnē. Dažās modinātājpulksteņu lietotnēs šo funkciju, iespējams, nevar ieviest."</string>
-    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"pārvaldīt balss pastu"</string>
-    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"Ļauj lietotnei rediģēt un noņemt ziņojumus no jūsu balss pasta iesūtnes."</string>
+    <!-- no translation found for permlab_writeVoicemail (7309899891683938100) -->
+    <skip />
+    <!-- no translation found for permdesc_writeVoicemail (6592572839715924830) -->
+    <skip />
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"pievienot balss pastu"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Ļauj lietotnei pievienot ziņojumus jūsu balss pasta iesūtnei."</string>
-    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"lasīt visus balss pasta ziņojumus"</string>
-    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"Ļauj lietotnei lasīt visus jūsu balss pasta ziņojumus."</string>
+    <!-- no translation found for permlab_readVoicemail (8415201752589140137) -->
+    <skip />
+    <!-- no translation found for permdesc_readVoicemail (8926534735321616550) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"pārveidot pārlūkprogrammas ģeogrāfiskās atrašanās vietas atļaujas"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Ļauj lietotnei modificēt pārlūkprogrammas ģeogrāfiskās atrašanās vietas atļaujas. Ļaunprātīgas lietotnes to var izmantot, lai atļautu atrašanās vietas informācijas sūtīšanu uz citām vietnēm."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"pakotņu verificēšana"</string>
@@ -1386,6 +1390,10 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Ļauj lietojumprogrammai izveidot savienojumu ar uzticamības pārbaudes pakalpojumu."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Mijiedarbošanās ar atjauninājumu un atkopšanas sistēmu"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Ļauj lietojumprogrammai mijiedarboties ar atkopšanas sistēmu un sistēmas atjauninājumiem."</string>
+    <!-- no translation found for permlab_createMediaProjection (4941338725487978112) -->
+    <skip />
+    <!-- no translation found for permdesc_createMediaProjection (1284530992706219702) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Pieskarieties divreiz, lai kontrolētu tālummaiņu."</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Nevarēja pievienot logrīku."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Doties uz"</string>
@@ -1744,25 +1752,16 @@
     <string name="item_is_selected" msgid="949687401682476608">"Atlasīts: <xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> tika dzēsts."</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Darbā: <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (2126866321272822564) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="2126866321272822564">"Jūs izmantojat režīmu “Fiksēt lietotnē”. Lai izietu, nospiediet un turiet pogu Pēdējās."</string>
     <string name="lock_to_app_toast_locked" msgid="4229650395479263497">"Jūs izmantojat režīmu “Bloķēšana darbībai vienā lietotnē”."</string>
     <string name="lock_to_app_title" msgid="5895142291937470019">"Vai izmantot funkciju \"Fiksēt lietotni\"?"</string>
-    <!-- no translation found for lock_to_app_description (2800403592608529611) -->
-    <skip />
-    <!-- no translation found for lock_to_app_negative (2259143719362732728) -->
-    <skip />
+    <string name="lock_to_app_description" msgid="2800403592608529611">"Izmantojot funkciju “Fiksēt lietotni”, ekrāns tiek nobloķēts vienā lietotnē.\n\nLai izietu, nospiediet un turiet pogu Pēdējās."</string>
+    <string name="lock_to_app_negative" msgid="2259143719362732728">"NĒ, PALDIES"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"SĀKT"</string>
-    <!-- no translation found for lock_to_app_start (3074665051586318340) -->
-    <skip />
-    <!-- no translation found for lock_to_app_exit (8967089657201849300) -->
-    <skip />
-    <!-- no translation found for lock_to_app_use_screen_lock (1434584309048590886) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_pin (7908385370846820001) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_pattern (7763071104790758405) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_password (795224196583495868) -->
-    <skip />
+    <string name="lock_to_app_start" msgid="3074665051586318340">"Lietotne fiksēta"</string>
+    <string name="lock_to_app_exit" msgid="8967089657201849300">"Lietotne vairs nav fiksēta"</string>
+    <string name="lock_to_app_use_screen_lock" msgid="1434584309048590886">"Pirms iziešanas jautāt: %1$s"</string>
+    <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN kods"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"grafiskā atslēga"</string>
+    <string name="lock_to_app_unlock_password" msgid="795224196583495868">"parole"</string>
 </resources>

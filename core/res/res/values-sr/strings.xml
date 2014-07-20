@@ -719,10 +719,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Дозвољава власнику да се повеже са интерфејсом услуге монитора обавештења највишег нивоа. Уобичајене апликације никада не би требало да је користе."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"повежи са услугом добављача услова"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Дозвољава власнику да се повеже са интерфејсом највишег нивоа услуге добављача услова. Не би требало никада да буде потребно за уобичајене апликације."</string>
-    <!-- no translation found for permlab_bindMediaRouteService (6637740382272686835) -->
-    <skip />
-    <!-- no translation found for permdesc_bindMediaRouteService (6436655024972496687) -->
-    <skip />
+    <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"повезивање са услугом усмеравања медија"</string>
+    <string name="permdesc_bindMediaRouteService" msgid="6436655024972496687">"Дозвољава власнику да се повеже са интерфејсом највишег нивоа услуге усмеравања медија. Никада не би требало да буде потребно за уобичајене апликације."</string>
     <string name="permlab_bindDreamService" msgid="4153646965978563462">"повезивање са услугом сањарења"</string>
     <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Дозвољава власнику да се повеже са интерфејсом услуге сањарења највишег нивоа. Уобичајене апликације никада не би требало да је користе."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"позивање апликације са конфигурацијом коју одређује оператер"</string>
@@ -1008,12 +1006,16 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Дозвољава апликацији да мења историју Прегледача или обележиваче ускладиштене на телефону. Ово може да омогући апликацији да брише или мења податке Прегледача. Напомена: Ова дозвола се можда на примењује на прегледаче треће стране и друге апликације са могућношћу веб прегледања."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"подешавање аларма"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Дозвољава апликацији да подеси аларм у инсталираној апликацији будилника. Неке апликације будилника можда не примењују ову функцију."</string>
-    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"управљање порукама говорне поште"</string>
-    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"Дозвољава апликацији да мења и уклања поруке из пријемног сандучета говорне поште."</string>
+    <!-- no translation found for permlab_writeVoicemail (7309899891683938100) -->
+    <skip />
+    <!-- no translation found for permdesc_writeVoicemail (6592572839715924830) -->
+    <skip />
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"додавање говорне поште"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Дозвољава апликацији да додаје поруке у пријемно сандуче говорне поште."</string>
-    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"читај сву говорну пошту"</string>
-    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"Дозвољава апликацији да чита говорну пошту."</string>
+    <!-- no translation found for permlab_readVoicemail (8415201752589140137) -->
+    <skip />
+    <!-- no translation found for permdesc_readVoicemail (8926534735321616550) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"измена дозвола за географске локације Прегледача"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Дозвољава апликацији да измени дозволе Прегледача за утврђивање географске локације. Злонамерне апликације то могу да злоупотребе и искористе за слање информација о локацији насумичним веб сајтовима."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"верификовање пакета"</string>
@@ -1181,20 +1183,13 @@
     <string name="capital_on" msgid="1544682755514494298">"ДА"</string>
     <string name="capital_off" msgid="6815870386972805832">"НЕ"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Довршавање радње помоћу"</string>
-    <!-- no translation found for whichApplicationNamed (8260158865936942783) -->
-    <skip />
-    <!-- no translation found for whichViewApplication (3272778576700572102) -->
-    <skip />
-    <!-- no translation found for whichViewApplicationNamed (2286418824011249620) -->
-    <skip />
-    <!-- no translation found for whichEditApplication (144727838241402655) -->
-    <skip />
-    <!-- no translation found for whichEditApplicationNamed (1775815530156447790) -->
-    <skip />
-    <!-- no translation found for whichSendApplication (6902512414057341668) -->
-    <skip />
-    <!-- no translation found for whichSendApplicationNamed (2799370240005424391) -->
-    <skip />
+    <string name="whichApplicationNamed" msgid="8260158865936942783">"Завршите радњу помоћу апликације %1$s"</string>
+    <string name="whichViewApplication" msgid="3272778576700572102">"Отворите помоћу"</string>
+    <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Отворите помоћу апликације %1$s"</string>
+    <string name="whichEditApplication" msgid="144727838241402655">"Измените помоћу"</string>
+    <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Измените помоћу апликације %1$s"</string>
+    <string name="whichSendApplication" msgid="6902512414057341668">"Делите помоћу"</string>
+    <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Делите помоћу апликације %1$s"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"Изаберите апликацију за почетну страницу"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Подразумевано користи за ову радњу."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Обришите подразумевано подешавање у менију Подешавања система &gt; Апликације &gt; Преузето."</string>
@@ -1297,12 +1292,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Увек дозволи"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Никада не дозволи"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM картица је уклоњена"</string>
-    <!-- no translation found for sim_removed_message (5450336489923274918) -->
-    <skip />
+    <string name="sim_removed_message" msgid="5450336489923274918">"Мобилна мрежа неће бити доступна док не покренете уређај поново уз уметање важеће SIM картице."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Готово"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIM картица је додата"</string>
-    <!-- no translation found for sim_added_message (7797975656153714319) -->
-    <skip />
+    <string name="sim_added_message" msgid="7797975656153714319">"Поново покрените уређај да бисте приступили мобилној мрежи."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Поново покрени"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Подешавање времена"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Подешавање датума"</string>
@@ -1397,6 +1390,10 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Дозвољава апликацији да се веже за услугу Trust agents."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Интеракција са системом за ажурирање и опоравак"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Дозвољава апликацији да ступа у интеракцију са системом за опоравак и ажурирањима система."</string>
+    <!-- no translation found for permlab_createMediaProjection (4941338725487978112) -->
+    <skip />
+    <!-- no translation found for permdesc_createMediaProjection (1284530992706219702) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Додирните двапут да бисте контролисали зум"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Није могуће додати виџет."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Иди"</string>

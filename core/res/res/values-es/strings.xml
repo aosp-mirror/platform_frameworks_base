@@ -1006,12 +1006,16 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Permite que la aplicación modifique el historial o los marcadores del navegador almacenados en el teléfono. La aplicación puede utilizar este permiso para borrar o modificar datos del navegador. Nota: este permiso no pueden utilizarlo navegadores externos ni otras aplicaciones que tengan funciones de navegación por Internet."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"establecer una alarma"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Permite que la aplicación establezca una alarma en una aplicación de reloj instalada. Es posible que algunas aplicaciones de reloj no incluyan esta función."</string>
-    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"administrar mensajes de voz"</string>
-    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"Permite que la aplicación modifique y elimine mensajes de la bandeja de entrada del buzón de voz."</string>
+    <!-- no translation found for permlab_writeVoicemail (7309899891683938100) -->
+    <skip />
+    <!-- no translation found for permdesc_writeVoicemail (6592572839715924830) -->
+    <skip />
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"añadir buzón de voz"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Permite que la aplicación añada mensajes a la bandeja de entrada del buzón de voz."</string>
-    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"consultar todos los mensajes de voz"</string>
-    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"Permite que la aplicación consulte todos tus mensajes de voz."</string>
+    <!-- no translation found for permlab_readVoicemail (8415201752589140137) -->
+    <skip />
+    <!-- no translation found for permdesc_readVoicemail (8926534735321616550) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"modificar los permisos de ubicación geográfica del navegador"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Permite que la aplicación modifique los permisos de ubicación geográfica del navegador. Las aplicaciones malintencionadas pueden usar este permiso para autorizar el envío de información sobre la ubicación a sitios web arbitrarios."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"verificar paquetes"</string>
@@ -1386,6 +1390,8 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Permite a una aplicación enlazar con un servicio de agente de confianza."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Interactuar con el sistema de recuperación y las actualizaciones"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Permite que una aplicación interactúe con el sistema de recuperación y las actualizaciones del sistema."</string>
+    <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Crear sesiones de proyección de contenido multimedia"</string>
+    <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"Permite que una aplicación cree sesiones de proyección de contenido multimedia. Estas sesiones pueden ofrecer a las aplicaciones la posibilidad de capturar contenido de audio e imágenes. Este permiso no debe ser necesario para aplicaciones normales."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Toca dos veces para acceder al control de zoom."</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"No se ha podido añadir el widget."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Ir"</string>
@@ -1510,20 +1516,14 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Editar"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Advertencia de uso de datos"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"Toca para ver el uso y ajustes."</string>
-    <!-- no translation found for data_usage_3g_limit_title (4462365924791862301) -->
-    <skip />
-    <!-- no translation found for data_usage_4g_limit_title (7476424187522765328) -->
-    <skip />
-    <!-- no translation found for data_usage_mobile_limit_title (3393439305227911006) -->
-    <skip />
-    <!-- no translation found for data_usage_wifi_limit_title (3461968509557554571) -->
-    <skip />
-    <!-- no translation found for data_usage_limit_body (6131350187562939365) -->
-    <skip />
+    <string name="data_usage_3g_limit_title" msgid="4462365924791862301">"Datos 2G-3G desactivados"</string>
+    <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"Datos 4G desactivados"</string>
+    <string name="data_usage_mobile_limit_title" msgid="3393439305227911006">"Datos móviles desactivados"</string>
+    <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"Datos Wi-Fi desactivados"</string>
+    <string name="data_usage_limit_body" msgid="6131350187562939365">"Límite alcanzado"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Límite de datos 2G-3G superado"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Límite de datos 4G superado"</string>
-    <!-- no translation found for data_usage_mobile_limit_snoozed_title (4941346653729943789) -->
-    <skip />
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Límite de datos móviles superado"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Límite de datos Wi-Fi superado"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"Límite superado en <xliff:g id="SIZE">%s</xliff:g>"</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Conexiones automáticas restringidas"</string>

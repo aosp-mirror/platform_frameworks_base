@@ -719,10 +719,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"होल्डरलाई सूचना श्रोता सेवाको शीर्ष-स्तरको इन्टरफेस बाँध्न अनुमति दिन्छ। सामान्य अनुप्रयोगहरूलाई कहिले पनि आवश्यक नपर्न सक्दछ।"</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"सर्त प्रदायक सेवामा जोड्न"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"सर्त प्रदायक सेवाको माथिल्लो स्तरको इन्टरफेसमा जोड्न बाहकलाई अनुमति दिन्छ। साधारण अनुप्रयोगहरूको लागि कहिल्यै पनि आवश्यक पर्दैन।"</string>
-    <!-- no translation found for permlab_bindMediaRouteService (6637740382272686835) -->
-    <skip />
-    <!-- no translation found for permdesc_bindMediaRouteService (6436655024972496687) -->
-    <skip />
+    <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"मिडिया मार्ग सेवासँग बाँध्नुहोस्"</string>
+    <string name="permdesc_bindMediaRouteService" msgid="6436655024972496687">"होल्डरलाई मिडिया मार्ग सेवाको शीर्ष तह इन्टरफेस बाध्ने गर्न अनुमति दिन्छ। साधारण अनुप्रयोगहरूको लागि कहिल्यै पनि आवश्यक पर्दैन।"</string>
     <string name="permlab_bindDreamService" msgid="4153646965978563462">"सपना सेवामा बाँध्नुहोस्"</string>
     <string name="permdesc_bindDreamService" msgid="7325825272223347863">"होल्डरलाई सपना सेवाको माथिल्लो स्तरको इन्टरफेसमा बाँध्न अनुमति दिन्छ। साधारण अनुप्रयोगहरूको लागि कहिल्यै पनि आवश्यक पर्दैन।"</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"वाहक-प्रदान विन्यास अनुप्रयोग सुरु गर्नुहोस्"</string>
@@ -1008,12 +1006,16 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"तपाईँको फोनमा भण्डारण भएको ब्राउजरको इतिहास वा बुकमार्कहरू परिवर्तन गर्नको लागि अनुप्रयोगलाई अनुमति दिन्छ। यसले सायद ब्राउजर डेटालाई मेट्न वा परिवर्तन गर्नको लागि अनुप्रयोगलाई अनुमति दिन्छ। नोट: वेब ब्राउज गर्ने क्षमतासहितका अन्य अनुप्रयोगहरू वा तेस्रो- पक्ष ब्राउजरद्वारा सायद यस अनुमतिलाई लागु गर्न सकिंदैन।"</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"एउटा आलर्म सेट गर्नुहोस्"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"स्थापना गरिएको सङ्केत घडी अनुप्रयोगमा सङ्केत समय मिलाउन अनुप्रयोगलाई अनुमति दिन्छ। केही सङ्केत घडी अनुप्रयोगहरूले यो सुविधा कार्यान्वयन नगर्न सक्छन्।"</string>
-    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"भ्वाइसमेल व्यवस्थापन गर्नुहोस्"</string>
-    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"तपाईँको भ्वाइसमेल इनबक्समा सन्देश परिमार्जन गर्न र हटाउन अनुमति दिनुहोस्।"</string>
+    <!-- no translation found for permlab_writeVoicemail (7309899891683938100) -->
+    <skip />
+    <!-- no translation found for permdesc_writeVoicemail (6592572839715924830) -->
+    <skip />
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"भ्वाइसमेल थप गर्नुहोस्"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"तपाईँको भ्वाइसमेल इनबक्समा सन्देश थप्नको लागि अनुप्रयोगलाई अनुमति दिन्छ।"</string>
-    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"सबै भ्वाइसमेल पढ्नुहोस्"</string>
-    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"अनुप्रयोगलाई सबै आफ्नो भ्वाइसमेलहरू पढ्न अनुमति दिन्छ।"</string>
+    <!-- no translation found for permlab_readVoicemail (8415201752589140137) -->
+    <skip />
+    <!-- no translation found for permdesc_readVoicemail (8926534735321616550) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"भूस्थान अनुमतिहरू ब्राउजर परिवर्तन गर्नुहोस्"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"ब्राउजरको भू-स्थान अनुमतिहरू परिमार्जन गर्न अनुप्रयोगलाई अनुमति दिन्छ। खराब अनुप्रयोगहरूले  स्थान सूचना मनपरी वेब साइटहरूमा पठाउने अनुमतिको लागि यसलाई प्रयोग गर्न सक्छन्।"</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"प्यकेजहरूको निरीक्षण गर्नुहोस्"</string>
@@ -1181,18 +1183,19 @@
     <string name="capital_on" msgid="1544682755514494298">"चालु"</string>
     <string name="capital_off" msgid="6815870386972805832">"बन्द"</string>
     <string name="whichApplication" msgid="4533185947064773386">"प्रयोग गरेर कारबाही पुरा गर्नुहोस्"</string>
+    <!-- String.format failed for translation -->
     <!-- no translation found for whichApplicationNamed (8260158865936942783) -->
     <skip />
-    <!-- no translation found for whichViewApplication (3272778576700572102) -->
-    <skip />
+    <string name="whichViewApplication" msgid="3272778576700572102">"साथमा खोल्नुहोस्"</string>
+    <!-- String.format failed for translation -->
     <!-- no translation found for whichViewApplicationNamed (2286418824011249620) -->
     <skip />
-    <!-- no translation found for whichEditApplication (144727838241402655) -->
-    <skip />
+    <string name="whichEditApplication" msgid="144727838241402655">"सँग सम्पादन गर्नुहोस्"</string>
+    <!-- String.format failed for translation -->
     <!-- no translation found for whichEditApplicationNamed (1775815530156447790) -->
     <skip />
-    <!-- no translation found for whichSendApplication (6902512414057341668) -->
-    <skip />
+    <string name="whichSendApplication" msgid="6902512414057341668">"साझेदारी गर्नुहोस्..."</string>
+    <!-- String.format failed for translation -->
     <!-- no translation found for whichSendApplicationNamed (2799370240005424391) -->
     <skip />
     <string name="whichHomeApplication" msgid="4616420172727326782">"मुख्य अनुप्रयोग चयन गर्नुहोस्"</string>
@@ -1297,12 +1300,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"सधैँ अनुमति दिनुहोस्"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"कहिल्यै अनुमति नदिनुहोस्"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM कार्ड हटाइयो"</string>
-    <!-- no translation found for sim_removed_message (5450336489923274918) -->
-    <skip />
+    <string name="sim_removed_message" msgid="5450336489923274918">"तपाईँ मान्य SIM कार्डसँग फेरि सुरु नगरे सम्म सेलुलर सञ्जाल उपलब्ध हुने छ।"</string>
     <string name="sim_done_button" msgid="827949989369963775">"भयो"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIM कार्ड थप गरियो"</string>
-    <!-- no translation found for sim_added_message (7797975656153714319) -->
-    <skip />
+    <string name="sim_added_message" msgid="7797975656153714319">"सेलुलर सञ्जाल पहुँच गर्न तपाईँको उपकरण पुनः सुरु गर्नुहोस्।"</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"पुनःस्टार्ट गर्नुहोस्"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"समय मिलाउनुहोस्"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"मिति मिलाउनुहोस्"</string>
@@ -1397,6 +1398,10 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"विश्वस्त प्रतिनिधि सेवालाई बाँध्न अनुप्रयोगलाई अनुमति दिन्छ।"</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"अद्यावधिक र रिकभरी प्रणालीको साथ अन्तर्क्रिया"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"अनुप्रयोगलाई रिकभरी प्रणाली र प्रणाली अद्यावधिकहरूको साथ अन्तर्क्रिया गर्न अनुमति दिन्छ।"</string>
+    <!-- no translation found for permlab_createMediaProjection (4941338725487978112) -->
+    <skip />
+    <!-- no translation found for permdesc_createMediaProjection (1284530992706219702) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"जुम नियन्त्रणको लागि दुई चोटि टच गर्नुहोस्"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"विजेट थप गर्न सकिँदैन।"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"जानुहोस्"</string>

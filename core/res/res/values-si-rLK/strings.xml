@@ -719,10 +719,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"දැනුම්දීම් අසන්නාගේ සේවාවේ ඉහළ මට්ටමේ අතුරුමුහුණතට බැඳීමට දරන්නාට අවසර දේ. සාමාන්‍ය යෙදුම් සඳහා කිසිසේත් අවශ්‍ය නොවේ."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"තත්ත්වය සපයන්නාගේ සේවාවට බඳින්න"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"තත්ත්වය සපයන්නාගේ සේවාවට ඉහළ-මට්ටමේ අතුරු මුහුණතක් බැඳිමට ධාරකයාට අවසර දෙන්න. සාමාන්‍ය යෙදුම් සඳහා කවදාවත් අවශ්‍යය නොවෙයි."</string>
-    <!-- no translation found for permlab_bindMediaRouteService (6637740382272686835) -->
-    <skip />
-    <!-- no translation found for permdesc_bindMediaRouteService (6436655024972496687) -->
-    <skip />
+    <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"bind to a media route service"</string>
+    <string name="permdesc_bindMediaRouteService" msgid="6436655024972496687">"*හඬ අන්තර් ක්‍රියාවේ සේවාවට ඉහළ-මට්ටමේ අතුරු මුහුණතක් බැඳිමට ධාරකයාට අවසර දෙන්න. සාමාන්‍ය යෙදුම් සඳහා කවදාවත් අවශ්‍යය නොවෙයි."</string>
     <string name="permlab_bindDreamService" msgid="4153646965978563462">"ඩ්‍රීම් සේවාවකට බැඳීම"</string>
     <string name="permdesc_bindDreamService" msgid="7325825272223347863">"ඩ්‍රීම් සේවාව ඉහල මට්ටමේ අතුරු මුහුණතක් වෙත සම්බන්ධ කිරීමට ධාරකයාට අවසර දෙන්න. සාමාන්‍ය යෙදුම්වලට කිසි විටෙක අවශ්‍ය නොවෙයි."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"වාහකය සැපයු වින්‍යාසය යෙදුම ඉල්ලා සිටින්න"</string>
@@ -1010,12 +1008,16 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"ඔබගේ දුරකථනයේ ආචයනය කරන ලද බ්‍රව්සර ඉතිහාසය හෝ පිටුසන වෙනස් කිරීමට යෙදුමට අවසර දෙන්න. ඔබගේ බ්‍රව්සර දත්ත මැකීමට හෝ වෙනස් කිරීමට අනිෂ්ට යෙදුම් මෙය භාවිත කරයි. සටහන: වෙබ් බ්‍රව්සර අවශ්‍යතාවය සමග තෙවෙනි පාර්ශව බ්‍රව්සර හෝ වෙනත් යෙදුම් විසින් මෙම අවසරය බල ගැන්විය හැක."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"සීනුවක් සැකසීම"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"ස්ථාපනය කරන ලද සීනු ඔරලෝසු යෙදුමේ සීනුව සකස් කරන්නට යෙදුමට ඉඩ දෙන්න. ඇතැම් සීනු ඔරලෝසු යෙදුම් මෙම අංගය ක්‍රියාවට නංවා නොතිබීමට ඉඩ තිබේ."</string>
-    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"හඬ තැපෑල කළමනාකරණය කරන්න"</string>
-    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"ඔබගේ හඬ තැපෑලේ එන ලිපි වෙත එන පණිවිඩ ඉවත් කිරීමට යෙදුමට අවසර දෙන්න."</string>
+    <!-- no translation found for permlab_writeVoicemail (7309899891683938100) -->
+    <skip />
+    <!-- no translation found for permdesc_writeVoicemail (6592572839715924830) -->
+    <skip />
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"හඬ තැපෑල එක් කිරීම"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"ඔබගේ හඬ තැපෑලේ එන ලිපි වෙත එන පණිවිඩ එකතු කිරීමට යෙදුමට අවසර දෙන්න."</string>
-    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"සියලු හඬ තැපැල් කියවීම"</string>
-    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"ඔබගේ හඬ තැපැල් කියවීමට යෙදුමට අවසර දේ."</string>
+    <!-- no translation found for permlab_readVoicemail (8415201752589140137) -->
+    <skip />
+    <!-- no translation found for permdesc_readVoicemail (8926534735321616550) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"බ්‍රව්සරයේ භූ අවසර වෙනස් කිරීම"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"බ්‍රවුසරයේ භූ ස්ථානීය අවසර වෙනස් කිරීමට යෙදුමට අවසර දෙන්න. අභිමත වෙබ් අඩවි වලට ස්ථානීය තොරතුරු යැවීමට අනිෂ්ට යෙදුම් මෙය භාවිතා කෙරේ."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"පැකේජ සත්‍යාපනය කරන්න"</string>
@@ -1183,20 +1185,13 @@
     <string name="capital_on" msgid="1544682755514494298">"සක්‍රීයයි"</string>
     <string name="capital_off" msgid="6815870386972805832">"අක්‍රිය කරන්න"</string>
     <string name="whichApplication" msgid="4533185947064773386">"පහත භාවිතයෙන් ක්‍රියාව සම්පූර්ණ කරන්න"</string>
-    <!-- no translation found for whichApplicationNamed (8260158865936942783) -->
-    <skip />
-    <!-- no translation found for whichViewApplication (3272778576700572102) -->
-    <skip />
-    <!-- no translation found for whichViewApplicationNamed (2286418824011249620) -->
-    <skip />
-    <!-- no translation found for whichEditApplication (144727838241402655) -->
-    <skip />
-    <!-- no translation found for whichEditApplicationNamed (1775815530156447790) -->
-    <skip />
-    <!-- no translation found for whichSendApplication (6902512414057341668) -->
-    <skip />
-    <!-- no translation found for whichSendApplicationNamed (2799370240005424391) -->
-    <skip />
+    <string name="whichApplicationNamed" msgid="8260158865936942783">"Complete action using %1$s"</string>
+    <string name="whichViewApplication" msgid="3272778576700572102">"සමඟ විවෘත කරන්න"</string>
+    <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Open with %1$s"</string>
+    <string name="whichEditApplication" msgid="144727838241402655">"සමඟ සංස්කරණය කරන්න"</string>
+    <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Edit with %1$s"</string>
+    <string name="whichSendApplication" msgid="6902512414057341668">"සමඟ බෙදාගන්න"</string>
+    <string name="whichSendApplicationNamed" msgid="2799370240005424391">"%s සමඟ බෙදාගන්න"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"මුල්පිටු යෙදුමක් තෝරන්න"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"මෙම ක්‍රියාව සඳහා සුපුරුද්දෙන් භාවිත කරන්න."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"පද්ධති සැකසීම් &gt; යෙදුම් &gt; බාගැනීම් තුළ ඇති සුපුරුද්ද හිස් කරන්න."</string>
@@ -1300,12 +1295,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"සැමවිටම ඉඩ දෙන්න"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"කිසිදා අවසර නොදෙන්න"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM පත ඉවත් කරන ලදි"</string>
-    <!-- no translation found for sim_removed_message (5450336489923274918) -->
-    <skip />
+    <string name="sim_removed_message" msgid="5450336489923274918">"ඔබ ඇතුළත් කරන ලද වලංගු SIM පත සමඟ නැවත ඇරඹීම කරන තුරු සෙලියුලර් ජාලය නොතිබේ."</string>
     <string name="sim_done_button" msgid="827949989369963775">"හරි"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIM පතක් එකතු කරන ලදි"</string>
-    <!-- no translation found for sim_added_message (7797975656153714319) -->
-    <skip />
+    <string name="sim_added_message" msgid="7797975656153714319">"සෙලියුලර් ජාලයට ප්‍රවේශ වීමට ඔබගේ උපාංගය නැවත අරඹන්න."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"යළි අරඹන්න"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"වේලාව සකසන්න"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"දිනය සැකසීම"</string>
@@ -1400,6 +1393,10 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"යෙදුමකට විශ්වාසනීය ඒජන්ත සේවාවකට බැඳීමට අවසර දේ."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"ප්‍රතිසාධන පද්ධතිය සහ යාවත්කාලීන සමඟ කටයුතු කරන්න"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"යෙදුමකට ප්‍රතිසාධන පද්ධතිය සහ පද්ධති යාවත්කාලීන සමඟ කටයුතු කිරීමට ඉඩ දෙන්න."</string>
+    <!-- no translation found for permlab_createMediaProjection (4941338725487978112) -->
+    <skip />
+    <!-- no translation found for permdesc_createMediaProjection (1284530992706219702) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"විශාලන පාලනය සඳහා දෙවරක් ස්පර්ශ කරන්න"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"විජටය එකතු කිරීමට නොහැකි විය."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"යන්න"</string>
