@@ -16,7 +16,7 @@
 
 package com.android.test.hwui;
 
-import android.animation.ValueAnimator;
+import android.animation.Animator;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -54,7 +54,7 @@ public class RevealActivity extends Activity implements OnClickListener {
 
     @Override
     public void onClick(View view) {
-        ValueAnimator animator = ViewAnimationUtils.createCircularReveal(view,
+        Animator animator = ViewAnimationUtils.createCircularReveal(view,
                 view.getWidth() / 2, view.getHeight() / 2,
                 0, Math.max(view.getWidth(), view.getHeight()));
         animator.setDuration(DURATION);
