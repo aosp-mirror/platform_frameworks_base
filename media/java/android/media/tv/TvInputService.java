@@ -681,7 +681,7 @@ public abstract class TvInputService extends Service {
         /**
          * Calls {@link #onSetStreamVolume}.
          */
-        void setVolume(float volume) {
+        void setStreamVolume(float volume) {
             onSetStreamVolume(volume);
         }
 
