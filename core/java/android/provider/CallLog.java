@@ -343,7 +343,7 @@ public class CallLog {
          *        "allowed", "payphone", "restricted" or "unknown"
          * @param callType enumerated values for "incoming", "outgoing", or "missed"
          * @param features features of the call (e.g. Video).
-         * @param account The account object describing the provider of the call
+         * @param accountHandle The accountHandle object identifying the provider of the call
          * @param start time stamp for the call in milliseconds
          * @param duration call duration in seconds
          * @param dataUsage data usage for the call in bytes, null if data usage was not tracked for
@@ -352,7 +352,7 @@ public class CallLog {
          * {@hide}
          */
         public static Uri addCall(CallerInfo ci, Context context, String number,
-                int presentation, int callType, int features, PhoneAccountHandle account,
+                int presentation, int callType, int features, PhoneAccountHandle accountHandle,
                 long start, int duration, Long dataUsage) {
             final ContentResolver resolver = context.getContentResolver();
             int numberPresentation = PRESENTATION_ALLOWED;
@@ -377,12 +377,12 @@ public class CallLog {
                 }
             }
 
-            // account information
+            // accountHandle information
             String accountComponentString = null;
             String accountId = null;
-            if (account != null) {
-                accountComponentString = account.getComponentName().flattenToString();
-                accountId = account.getId();
+            if (accountHandle != null) {
+                accountComponentString = accountHandle.getComponentName().flattenToString();
+                accountId = accountHandle.getId();
             }
 
             ContentValues values = new ContentValues(6);

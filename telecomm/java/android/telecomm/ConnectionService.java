@@ -281,7 +281,7 @@ public abstract class ConnectionService extends Service {
                     break;
                 }
                 case MSG_ON_PHONE_ACCOUNT_CLICKED:
-                    onPhoneAccountClicked((String) msg.obj);
+                    onPhoneAccountHandleClicked((String) msg.obj);
                     break;
                 default:
                     break;
@@ -553,7 +553,7 @@ public abstract class ConnectionService extends Service {
         findConnectionForAction(callId, "stopDtmfTone").onPostDialContinue(proceed);
     }
 
-    private void onPhoneAccountClicked(String callId) {
+    private void onPhoneAccountHandleClicked(String callId) {
         Log.d(this, "onPhoneAccountClicked %s", callId);
         findConnectionForAction(callId, "onPhoneAccountClicked").onPhoneAccountClicked();
     }

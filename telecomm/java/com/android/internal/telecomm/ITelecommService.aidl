@@ -18,7 +18,7 @@ package com.android.internal.telecomm;
 
 import android.content.ComponentName;
 import android.telecomm.PhoneAccountHandle;
-import android.telecomm.PhoneAccountMetadata;
+import android.telecomm.PhoneAccount;
 
 /**
  * Interface used to interact with Telecomm. Mostly this is used by TelephonyManager for passing
@@ -44,14 +44,14 @@ interface ITelecommService {
     List<PhoneAccountHandle> getEnabledPhoneAccounts();
 
     /**
-     * @see TelecommManager#getPhoneAccountMetadata
+     * @see TelecommManager#getPhoneAccount
      */
-    PhoneAccountMetadata getPhoneAccountMetadata(in PhoneAccountHandle account);
+    PhoneAccount getPhoneAccount(in PhoneAccountHandle account);
 
     /**
      * @see TelecommManager#registerPhoneAccount
      */
-    void registerPhoneAccount(in PhoneAccountMetadata metadata);
+    void registerPhoneAccount(in PhoneAccount metadata);
 
     /**
      * @see TelecommManager#unregisterPhoneAccount
