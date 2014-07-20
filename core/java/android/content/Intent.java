@@ -3755,6 +3755,13 @@ public class Intent implements Parcelable, Cloneable {
      * Activity to specify multiple document behavior for all launchers of the Activity
      * whereas using this flag requires each Intent that launches the Activity to specify it.
      *
+     * <p>Note that the default semantics of this flag w.r.t. whether the recents entry for
+     * it is kept after the activity is finished is different than the use of
+     * {@link #FLAG_ACTIVITY_NEW_TASK} and {@link android.R.attr#documentLaunchMode} -- if
+     * this flag is being used to create a new recents entry, then by default that entry
+     * will be removed once the activity is finished.  You can modify this behavior with
+     * {@link #FLAG_ACTIVITY_RETAIN_IN_RECENTS}.
+     *
      * <p>FLAG_ACTIVITY_NEW_DOCUMENT may be used in conjunction with {@link
      * #FLAG_ACTIVITY_MULTIPLE_TASK}. When used alone it is the
      * equivalent of the Activity manifest specifying {@link
@@ -3828,14 +3835,20 @@ public class Intent implements Parcelable, Cloneable {
      */
     public static final int FLAG_ACTIVITY_TASK_ON_HOME = 0X00004000;
     /**
-     * If set and the new activity is the root of a new task, then the task
-     * will remain in the list of recently launched tasks only until all of
-     * the activities in it are finished.
+     * By default a document created by {@link #FLAG_ACTIVITY_NEW_DOCUMENT} will
+     * have its entry in recent tasks removed when the user closes it (with back
+     * or however else it may finish()).  If you would like to instead allow the
+     * document to be kept in recents so that it can be re-launched, you can use
+     * this flag.  When set and the task's activity is finished, the recents entry
+     * will remain in the interface for the user to re-launch it, like a recents
+     * entry for a top-level application.
      *
-     * <p>This is equivalent to the attribute
-     * {@link android.R.styleable#AndroidManifestActivity_autoRemoveFromRecents}.
+     * <p>The receiving activity can override this request with
+     * {@link android.R.styleable#AndroidManifestActivity_autoRemoveFromRecents}
+     * or by explcitly calling {@link android.app.Activity#finishAndRemoveTask()
+     * Activity.finishAndRemoveTask()}.
      */
-    public static final int FLAG_ACTIVITY_AUTO_REMOVE_FROM_RECENTS = 0x00002000;
+    public static final int FLAG_ACTIVITY_RETAIN_IN_RECENTS = 0x00002000;
 
     /**
      * If set, when sending a broadcast only registered receivers will be
