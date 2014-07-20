@@ -16,8 +16,8 @@
 
 package android.telecomm;
 
+import android.app.PendingIntent;
 import android.net.Uri;
-
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.telephony.DisconnectCause;
@@ -43,6 +43,7 @@ public final class RemoteConnection {
         void onCallerDisplayNameChanged(
                 RemoteConnection connection, String callerDisplayName, int presentation);
         void onVideoStateChanged(RemoteConnection connection, int videoState);
+        void onStartActivityFromInCall(RemoteConnection connection, PendingIntent intent);
         void onDestroyed(RemoteConnection connection);
     }
 
@@ -344,6 +345,13 @@ public final class RemoteConnection {
         mCallerDisplayNamePresentation = presentation;
         for (Listener l : mListeners) {
             l.onCallerDisplayNameChanged(this, callerDisplayName, presentation);
+        }
+    }
+
+    /** @hide */
+    void startActivityFromInCall(PendingIntent intent) {
+        for (Listener l : mListeners) {
+            l.onStartActivityFromInCall(this, intent);
         }
     }
 }

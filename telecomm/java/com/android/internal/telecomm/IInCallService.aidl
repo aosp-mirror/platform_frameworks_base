@@ -16,6 +16,7 @@
 
 package com.android.internal.telecomm;
 
+import android.app.PendingIntent;
 import android.telecomm.CallAudioState;
 import android.telecomm.InCallCall;
 
@@ -42,4 +43,6 @@ oneway interface IInCallService {
     void onAudioStateChanged(in CallAudioState audioState);
 
     void bringToForeground(boolean showDialpad);
+
+    void startActivity(String callId, in PendingIntent intent);
 }
