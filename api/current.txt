@@ -7775,7 +7775,6 @@ package android.content {
     field public static final int FILL_IN_PACKAGE = 16; // 0x10
     field public static final int FILL_IN_SELECTOR = 64; // 0x40
     field public static final int FILL_IN_SOURCE_BOUNDS = 32; // 0x20
-    field public static final int FLAG_ACTIVITY_AUTO_REMOVE_FROM_RECENTS = 8192; // 0x2000
     field public static final int FLAG_ACTIVITY_BROUGHT_TO_FRONT = 4194304; // 0x400000
     field public static final int FLAG_ACTIVITY_CLEAR_TASK = 32768; // 0x8000
     field public static final int FLAG_ACTIVITY_CLEAR_TOP = 67108864; // 0x4000000
@@ -7792,6 +7791,7 @@ package android.content {
     field public static final int FLAG_ACTIVITY_PREVIOUS_IS_TOP = 16777216; // 0x1000000
     field public static final int FLAG_ACTIVITY_REORDER_TO_FRONT = 131072; // 0x20000
     field public static final int FLAG_ACTIVITY_RESET_TASK_IF_NEEDED = 2097152; // 0x200000
+    field public static final int FLAG_ACTIVITY_RETAIN_IN_RECENTS = 8192; // 0x2000
     field public static final int FLAG_ACTIVITY_SINGLE_TOP = 536870912; // 0x20000000
     field public static final int FLAG_ACTIVITY_TASK_ON_HOME = 16384; // 0x4000
     field public static final int FLAG_DEBUG_LOG_RESOLUTION = 8; // 0x8

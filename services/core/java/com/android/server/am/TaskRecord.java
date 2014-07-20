@@ -54,6 +54,7 @@ final class TaskRecord {
     private static final String TAG_ACTIVITY = "activity";
     private static final String ATTR_AFFINITY = "affinity";
     private static final String ATTR_ROOTHASRESET = "root_has_reset";
+    private static final String ATTR_AUTOREMOVERECENTS = "auto_remove_recents";
     private static final String ATTR_ASKEDCOMPATMODE = "asked_compat_mode";
     private static final String ATTR_USERID = "user_id";
     private static final String ATTR_TASKTYPE = "task_type";
@@ -83,6 +84,8 @@ final class TaskRecord {
     long lastActiveTime;    // Last time this task was active, including sleep.
     boolean rootWasReset;   // True if the intent at the root of the task had
                             // the FLAG_ACTIVITY_RESET_TASK_IF_NEEDED flag.
+    boolean autoRemoveRecents;  // If true, we should automatically remove the task from
+                                // recents when activity finishes
     boolean askedCompatMode;// Have asked the user about compat mode for this task.
     boolean hasBeenVisible; // Set if any activities in the task have been visible to the user.
 
@@ -159,7 +162,8 @@ final class TaskRecord {
 
     TaskRecord(ActivityManagerService service, int _taskId, Intent _intent, Intent _affinityIntent,
             String _affinity, ComponentName _realActivity, ComponentName _origActivity,
-            boolean _rootWasReset, boolean _askedCompatMode, int _taskType, int _userId,
+            boolean _rootWasReset, boolean _autoRemoveRecents, boolean _askedCompatMode,
+            int _taskType, int _userId,
             String _lastDescription, ArrayList<ActivityRecord> activities, long _firstActiveTime,
             long _lastActiveTime, long lastTimeMoved, boolean neverRelinquishIdentity,
             ActivityManager.TaskDescription _lastTaskDescription, int taskAffiliation,
@@ -177,6 +181,7 @@ final class TaskRecord {
         realActivity = _realActivity;
         origActivity = _origActivity;
         rootWasReset = _rootWasReset;
+        autoRemoveRecents = _autoRemoveRecents;
         askedCompatMode = _askedCompatMode;
         taskType = _taskType;
         mTaskToReturnTo = HOME_ACTIVITY_TYPE;
@@ -261,7 +266,20 @@ final class TaskRecord {
         userId = UserHandle.getUserId(info.applicationInfo.uid);
         creatorUid = info.applicationInfo.uid;
         if ((info.flags & ActivityInfo.FLAG_AUTO_REMOVE_FROM_RECENTS) != 0) {
-            intent.addFlags(Intent.FLAG_ACTIVITY_AUTO_REMOVE_FROM_RECENTS);
+            // If the activity itself has requested auto-remove, then just always do it.
+            autoRemoveRecents = true;
+        } else if ((intent.getFlags()&(Intent.FLAG_ACTIVITY_NEW_DOCUMENT
+                |Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS)) == Intent.FLAG_ACTIVITY_NEW_DOCUMENT) {
+            // If the caller has not asked for the document to be retained, then we may
+            // want to turn on auto-remove, depending on whether the target has set its
+            // own document launch mode.
+            if (info.documentLaunchMode != ActivityInfo.DOCUMENT_LAUNCH_NONE) {
+                autoRemoveRecents = false;
+            } else {
+                autoRemoveRecents = true;
+            }
+        } else {
+            autoRemoveRecents = false;
         }
     }
 
@@ -473,9 +491,7 @@ final class TaskRecord {
         // We will automatically remove the task either if it has explicitly asked for
         // this, or it is empty and has never contained an activity that got shown to
         // the user.
-        return (intent != null &&
-                (intent.getFlags() & Intent.FLAG_ACTIVITY_AUTO_REMOVE_FROM_RECENTS) != 0) ||
-                (mActivities.isEmpty() && !hasBeenVisible);
+        return autoRemoveRecents || (mActivities.isEmpty() && !hasBeenVisible);
     }
 
     /**
@@ -731,6 +747,7 @@ final class TaskRecord {
             out.attribute(null, ATTR_AFFINITY, affinity);
         }
         out.attribute(null, ATTR_ROOTHASRESET, String.valueOf(rootWasReset));
+        out.attribute(null, ATTR_AUTOREMOVERECENTS, String.valueOf(autoRemoveRecents));
         out.attribute(null, ATTR_ASKEDCOMPATMODE, String.valueOf(askedCompatMode));
         out.attribute(null, ATTR_USERID, String.valueOf(userId));
         out.attribute(null, ATTR_TASKTYPE, String.valueOf(taskType));
@@ -784,6 +801,7 @@ final class TaskRecord {
         ComponentName origActivity = null;
         String affinity = null;
         boolean rootHasReset = false;
+        boolean autoRemoveRecents = false;
         boolean askedCompatMode = false;
         int taskType = ActivityRecord.APPLICATION_ACTIVITY_TYPE;
         int userId = 0;
@@ -814,6 +832,8 @@ final class TaskRecord {
                 affinity = attrValue;
             } else if (ATTR_ROOTHASRESET.equals(attrName)) {
                 rootHasReset = Boolean.valueOf(attrValue);
+            } else if (ATTR_AUTOREMOVERECENTS.equals(attrName)) {
+                autoRemoveRecents = Boolean.valueOf(attrValue);
             } else if (ATTR_ASKEDCOMPATMODE.equals(attrName)) {
                 askedCompatMode = Boolean.valueOf(attrValue);
             } else if (ATTR_USERID.equals(attrName)) {
@@ -876,9 +896,9 @@ final class TaskRecord {
 
         final TaskRecord task = new TaskRecord(stackSupervisor.mService, taskId, intent,
                 affinityIntent, affinity, realActivity, origActivity, rootHasReset,
-                askedCompatMode, taskType, userId, lastDescription, activities, firstActiveTime,
-                lastActiveTime, lastTimeOnTop, neverRelinquishIdentity, taskDescription,
-                taskAffiliation, prevTaskId, nextTaskId);
+                autoRemoveRecents, askedCompatMode, taskType, userId, lastDescription, activities,
+                firstActiveTime, lastActiveTime, lastTimeOnTop, neverRelinquishIdentity,
+                taskDescription, taskAffiliation, prevTaskId, nextTaskId);
 
         for (int activityNdx = activities.size() - 1; activityNdx >=0; --activityNdx) {
             activities.get(activityNdx).task = task;

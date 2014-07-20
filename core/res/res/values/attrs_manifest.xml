@@ -988,12 +988,10 @@
     <attr name="maxRecents" format="integer" />
 
     <!-- Tasks launched by activities with this attribute will remain in the recent tasks
-         list until the last activity in the task is completed. When that happens the task
-         will be automatically removed from the recent tasks list.
-
-         This attribute is the equivalent of {@link
-         android.content.Intent#FLAG_ACTIVITY_AUTO_REMOVE_FROM_RECENTS
-         Intent.FLAG_ACTIVITY_AUTO_REMOVE_FROM_RECENTS} -->
+         list until the last activity in the task is completed.  When that happens the task
+         will be automatically removed from the recent tasks list.  This overrides the caller's
+         use of {@link android.content.Intent#FLAG_ACTIVITY_RETAIN_IN_RECENTS
+         Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS} -->
     <attr name="autoRemoveFromRecents" format="boolean" />
 
     <!-- Tasks whose root has this attribute set to true will replace baseIntent with that of the
