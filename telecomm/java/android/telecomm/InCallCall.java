@@ -43,7 +43,7 @@ public final class InCallCall implements Parcelable {
     private final String mCallerDisplayName;
     private final int mCallerDisplayNamePresentation;
     private final GatewayInfo mGatewayInfo;
-    private final PhoneAccountHandle mAccount;
+    private final PhoneAccountHandle mAccountHandle;
     private final ICallVideoProvider mCallVideoProvider;
     private RemoteCallVideoProvider mRemoteCallVideoProvider;
     private final String mParentCallId;
@@ -65,7 +65,7 @@ public final class InCallCall implements Parcelable {
             String callerDisplayName,
             int callerDisplayNamePresentation,
             GatewayInfo gatewayInfo,
-            PhoneAccountHandle account,
+            PhoneAccountHandle accountHandle,
             ICallVideoProvider callVideoProvider,
             String parentCallId,
             List<String> childCallIds,
@@ -83,7 +83,7 @@ public final class InCallCall implements Parcelable {
         mCallerDisplayName = callerDisplayName;
         mCallerDisplayNamePresentation = callerDisplayNamePresentation;
         mGatewayInfo = gatewayInfo;
-        mAccount = account;
+        mAccountHandle = accountHandle;
         mCallVideoProvider = callVideoProvider;
         mParentCallId = parentCallId;
         mChildCallIds = childCallIds;
@@ -160,8 +160,8 @@ public final class InCallCall implements Parcelable {
     }
 
     /** PhoneAccountHandle information for the call. */
-    public PhoneAccountHandle getAccount() {
-        return mAccount;
+    public PhoneAccountHandle getAccountHandle() {
+        return mAccountHandle;
     }
 
     /**
@@ -233,7 +233,7 @@ public final class InCallCall implements Parcelable {
             String callerDisplayName = source.readString();
             int callerDisplayNamePresentation = source.readInt();
             GatewayInfo gatewayInfo = source.readParcelable(classLoader);
-            PhoneAccountHandle account = source.readParcelable(classLoader);
+            PhoneAccountHandle accountHandle = source.readParcelable(classLoader);
             ICallVideoProvider callVideoProvider =
                     ICallVideoProvider.Stub.asInterface(source.readStrongBinder());
             String parentCallId = source.readString();
@@ -244,7 +244,7 @@ public final class InCallCall implements Parcelable {
             return new InCallCall(id, state, disconnectCauseCode, disconnectCauseMsg,
                     cannedSmsResponses, capabilities, connectTimeMillis, handle, handlePresentation,
                     callerDisplayName, callerDisplayNamePresentation, gatewayInfo,
-                    account, callVideoProvider, parentCallId, childCallIds, statusHints,
+                    accountHandle, callVideoProvider, parentCallId, childCallIds, statusHints,
                     videoState);
         }
 
@@ -275,7 +275,7 @@ public final class InCallCall implements Parcelable {
         destination.writeString(mCallerDisplayName);
         destination.writeInt(mCallerDisplayNamePresentation);
         destination.writeParcelable(mGatewayInfo, 0);
-        destination.writeParcelable(mAccount, 0);
+        destination.writeParcelable(mAccountHandle, 0);
         destination.writeStrongBinder(
                 mCallVideoProvider != null ? mCallVideoProvider.asBinder() : null);
         destination.writeString(mParentCallId);

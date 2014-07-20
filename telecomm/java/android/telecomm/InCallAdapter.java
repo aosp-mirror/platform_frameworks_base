@@ -204,11 +204,11 @@ public final class InCallAdapter {
      * Instructs Telecomm to add a PhoneAccountHandle to the specified call
      *
      * @param callId The identifier of the call
-     * @param account The PhoneAccountHandle through which to place the call
+     * @param accountHandle The PhoneAccountHandle through which to place the call
      */
-    public void phoneAccountSelected(String callId, PhoneAccountHandle account) {
+    public void phoneAccountSelected(String callId, PhoneAccountHandle accountHandle) {
         try {
-            mAdapter.phoneAccountSelected(callId, account);
+            mAdapter.phoneAccountSelected(callId, accountHandle);
         } catch (RemoteException e) {
         }
     }

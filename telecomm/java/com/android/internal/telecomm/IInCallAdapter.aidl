@@ -49,7 +49,7 @@ oneway interface IInCallAdapter {
 
     void phoneAccountClicked(String callId);
 
-    void phoneAccountSelected(String callId, in PhoneAccountHandle account);
+    void phoneAccountSelected(String callId, in PhoneAccountHandle accountHandle);
 
     void conference(String callId);
 

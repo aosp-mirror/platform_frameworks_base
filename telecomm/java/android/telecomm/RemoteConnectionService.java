@@ -420,7 +420,7 @@ final class RemoteConnectionService implements DeathRecipient {
         if (mConnectionId == null) {
             String id = UUID.randomUUID().toString();
             ConnectionRequest newRequest = new ConnectionRequest(
-                    request.getAccount(),
+                    request.getAccountHandle(),
                     id,
                     request.getHandle(),
                     request.getHandlePresentation(),
