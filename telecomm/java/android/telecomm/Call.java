@@ -16,6 +16,7 @@
 
 package android.telecomm;
 
+import android.app.PendingIntent;
 import android.net.Uri;
 import android.os.RemoteException;
 import android.telephony.DisconnectCause;
@@ -316,6 +317,14 @@ public final class Call {
 
         public void onCallVideoProviderChanged(Call call,
                 RemoteCallVideoProvider callVideoProvider) {}
+
+        /**
+         * Launches an activity for this connection on top of the in-call UI.
+         *
+         * @param call The {@code Call} invoking this method.
+         * @param intent The intent to use to start the activity.
+         */
+        public void onStartActivity(Call call, PendingIntent intent) {}
 
         /**
          * Invoked when the {@code Call} is destroyed. Clients should refrain from cleaning
@@ -664,6 +673,11 @@ public final class Call {
         firePostDialWait(mRemainingPostDialSequence);
     }
 
+    /** {@hide} */
+    final void internalStartActivity(PendingIntent intent) {
+        fireStartActivity(intent);
+    }
+
     private void fireStateChanged(int newState) {
         Listener[] listeners = mListeners.toArray(new Listener[mListeners.size()]);
         for (int i = 0; i < listeners.length; i++) {
@@ -717,6 +731,13 @@ public final class Call {
         Listener[] listeners = mListeners.toArray(new Listener[mListeners.size()]);
         for (int i = 0; i < listeners.length; i++) {
             listeners[i].onPostDialWait(this, remainingPostDialSequence);
+        }
+    }
+
+    private void fireStartActivity(PendingIntent intent) {
+        Listener[] listeners = mListeners.toArray(new Listener[mListeners.size()]);
+        for (int i = 0; i < listeners.length; i++) {
+            listeners[i].onStartActivity(this, intent);
         }
     }
 

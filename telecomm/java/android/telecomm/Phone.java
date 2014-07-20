@@ -16,6 +16,7 @@
 
 package android.telecomm;
 
+import android.app.PendingIntent;
 import android.util.ArrayMap;
 
 import java.util.ArrayList;
@@ -120,16 +121,16 @@ public final class Phone {
      }
 
     /** {@hide} */
-    final void internalSetPostDial(String callId, String remaining) {
-        Call call = mCallByTelecommCallId.get(callId);
+    final void internalSetPostDial(String telecommId, String remaining) {
+        Call call = mCallByTelecommCallId.get(telecommId);
         if (call != null) {
             call.internalSetPostDial(remaining);
         }
     }
 
     /** {@hide} */
-    final void internalSetPostDialWait(String callId, String remaining) {
-        Call call = mCallByTelecommCallId.get(callId);
+    final void internalSetPostDialWait(String telecommId, String remaining) {
+        Call call = mCallByTelecommCallId.get(telecommId);
         if (call != null) {
             call.internalSetPostDialWait(remaining);
         }
@@ -151,6 +152,14 @@ public final class Phone {
     /** {@hide} */
     final void internalBringToForeground(boolean showDialpad) {
         fireBringToForeground(showDialpad);
+    }
+
+    /** {@hide} */
+    final void internalStartActivity(String telecommId, PendingIntent intent) {
+        Call call = mCallByTelecommCallId.get(telecommId);
+        if (call != null) {
+            call.internalStartActivity(intent);
+        }
     }
 
     /**

@@ -16,6 +16,7 @@
 
 package android.telecomm;
 
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.net.Uri;
 import android.os.IBinder;
@@ -341,6 +342,15 @@ final class ConnectionServiceAdapter implements DeathRecipient {
             try {
                 adapter.setVideoState(callId, videoState);
             } catch (RemoteException ignored) {
+            }
+        }
+    }
+
+    void startActivityFromInCall(String callId, PendingIntent intent) {
+        for (IConnectionServiceAdapter adapter : mAdapters) {
+            try {
+                adapter.startActivityFromInCall(callId, intent);
+            } catch (RemoteException e) {
             }
         }
     }
