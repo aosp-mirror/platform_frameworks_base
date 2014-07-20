@@ -24,6 +24,9 @@ import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.statusbar.policy.ZenModeControllerImpl;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+
 /*
  * Copyright (C) 2014 The Android Open Source Project
  *
@@ -53,7 +56,6 @@ public class VolumeUI extends SystemUI {
     private VolumeController mVolumeController;
     private RemoteVolumeController mRemoteVolumeController;
 
-    private VolumePanel mDialogPanel;
     private VolumePanel mPanel;
     private int mDismissDelay;
 
@@ -68,6 +70,13 @@ public class VolumeUI extends SystemUI {
         putComponent(VolumeComponent.class, mVolumeController);
         updateController();
         mContext.getContentResolver().registerContentObserver(SETTING_URI, false, mObserver);
+    }
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        if (mPanel != null) {
+            mPanel.dump(fd, pw, args);
+        }
     }
 
     private void updateController() {
@@ -107,7 +116,6 @@ public class VolumeUI extends SystemUI {
                 }
             }
         });
-        mDialogPanel = mPanel;
     }
 
     private final ContentObserver mObserver = new ContentObserver(mHandler) {
@@ -137,7 +145,7 @@ public class VolumeUI extends SystemUI {
                     mContext.sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
                 }
             });
-            mDialogPanel.postDismiss(mDismissDelay);
+            mPanel.postDismiss(mDismissDelay);
         }
     };
 
@@ -178,12 +186,7 @@ public class VolumeUI extends SystemUI {
 
         @Override
         public ZenModeController getZenController() {
-            return mDialogPanel.getZenController();
-        }
-
-        @Override
-        public void setVolumePanel(VolumePanel panel) {
-            mPanel = panel == null ? mDialogPanel : panel;
+            return mPanel.getZenController();
         }
     }
 

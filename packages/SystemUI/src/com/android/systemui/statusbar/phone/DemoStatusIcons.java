@@ -60,11 +60,16 @@ public class DemoStatusIcons extends LinearLayout implements DemoMode {
         } else if (mDemoMode && command.equals(COMMAND_STATUS)) {
             String volume = args.getString("volume");
             if (volume != null) {
-                int iconId = volume.equals("important") ? R.drawable.stat_sys_zen_important
-                        : volume.equals("silent") ? R.drawable.stat_sys_ringer_silent
-                        : volume.equals("vibrate") ? R.drawable.stat_sys_ringer_vibrate
+                int iconId = volume.equals("vibrate") ? R.drawable.stat_sys_ringer_vibrate
                         : 0;
                 updateSlot("volume", null, iconId);
+            }
+            String zen = args.getString("zen");
+            if (zen != null) {
+                int iconId = zen.equals("important") ? R.drawable.stat_sys_zen_important
+                        : zen.equals("none") ? R.drawable.stat_sys_zen_none
+                        : 0;
+                updateSlot("zen", null, iconId);
             }
             String bt = args.getString("bluetooth");
             if (bt != null) {
