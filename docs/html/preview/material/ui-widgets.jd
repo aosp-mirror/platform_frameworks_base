@@ -132,7 +132,7 @@ public class MyAdapter extends RecyclerView.Adapter&lt;MyAdapter.ViewHolder> {
                                                    int viewType) {
         // create a new view
         View v = LayoutInflater.from(parent.getContext())
-                               .inflate(R.layout.my_text_view, null);
+                               .inflate(R.layout.my_text_view, parent);
         // set the view's size, margins, paddings and layout parameters
         ...
         ViewHolder vh = new ViewHolder(v);
