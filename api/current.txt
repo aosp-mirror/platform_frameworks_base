@@ -26977,6 +26977,7 @@ package android.service.dreams {
     method public void onPanelClosed(int, android.view.Menu);
     method public boolean onPreparePanel(int, android.view.View, android.view.Menu);
     method public boolean onSearchRequested();
+    method public void onWakeUp();
     method public void onWindowAttributesChanged(android.view.WindowManager.LayoutParams);
     method public void onWindowFocusChanged(boolean);
     method public android.view.ActionMode onWindowStartingActionMode(android.view.ActionMode.Callback);
@@ -26986,6 +26987,7 @@ package android.service.dreams {
     method public void setFullscreen(boolean);
     method public void setInteractive(boolean);
     method public void setScreenBright(boolean);
+    method public final void wakeUp();
     field public static final java.lang.String DREAM_META_DATA = "android.service.dream";
     field public static final java.lang.String SERVICE_INTERFACE = "android.service.dreams.DreamService";
   }
