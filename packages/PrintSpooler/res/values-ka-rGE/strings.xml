@@ -79,6 +79,6 @@
     <string name="print_write_error_message" msgid="5787642615179572543">"ფაილში ჩაწერა ვერ მოხერხდა"</string>
     <string name="print_error_default_message" msgid="8602678405502922346">"უკაცრავად, ვერ მოხერხდა. სცადეთ ისევ."</string>
     <string name="print_error_retry" msgid="1426421728784259538">"გამეორება"</string>
-    <string name="print_error_printer_unavailable" msgid="8985614415253203381">"This printer isn\'t available right now."</string>
-    <string name="print_preparing_preview" msgid="3939930735671364712">"Preparing preview…"</string>
+    <string name="print_error_printer_unavailable" msgid="8985614415253203381">"პრინტერი ამჟამად მიუწვდომელია."</string>
+    <string name="print_preparing_preview" msgid="3939930735671364712">"მზადდება გადახედვა…"</string>
 </resources>

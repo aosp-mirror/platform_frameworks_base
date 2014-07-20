@@ -26,7 +26,7 @@
     <string name="label_color" msgid="1108690305218188969">"Szín"</string>
     <string name="label_orientation" msgid="2853142581990496477">"Tájolás"</string>
     <string name="label_pages" msgid="7768589729282182230">"Oldalak"</string>
-    <string name="template_all_pages" msgid="3322235982020148762">"Mind a(z) <xliff:g id="PAGE_COUNT">%1$s</xliff:g>"</string>
+    <string name="template_all_pages" msgid="3322235982020148762">"Összes (<xliff:g id="PAGE_COUNT">%1$s</xliff:g>)"</string>
     <string name="template_page_range" msgid="428638530038286328">"<xliff:g id="PAGE_COUNT">%1$s</xliff:g> oldalas tartomány"</string>
     <string name="pages_range_example" msgid="8558694453556945172">"pl. 1–5, 8, 11–13"</string>
     <string name="print_preview" msgid="8010217796057763343">"Előnézet nyomtatása"</string>
