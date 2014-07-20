@@ -27242,7 +27242,7 @@ package android.service.voice {
     field public static final int RECOGNITION_STATUS_NOT_REQUESTED = 2; // 0x2
     field public static final int RECOGNITION_STATUS_REQUESTED = 4; // 0x4
     field public static final int STATUS_ERROR = -2147483648; // 0x80000000
-    field public static final int STATUS_OK = 1; // 0x1
+    field public static final int STATUS_OK = 0; // 0x0
   }
 
   public static abstract interface AlwaysOnHotwordDetector.Callback {

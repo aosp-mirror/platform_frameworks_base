@@ -22,8 +22,9 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.hardware.soundtrigger.SoundTrigger;
-import android.hardware.soundtrigger.Keyphrase;
-import android.hardware.soundtrigger.KeyphraseSoundModel;
+import android.hardware.soundtrigger.SoundTrigger.Keyphrase;
+import android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel;
+import android.text.TextUtils;
 import android.util.Slog;
 
 import java.util.ArrayList;
@@ -39,7 +40,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     static final String TAG = "SoundModelDBHelper";
 
     private static final String NAME = "sound_model.db";
-    private static final int VERSION = 1;
+    private static final int VERSION = 2;
 
     public static interface KeyphraseContract {
         public static final String TABLE = "keyphrase";
@@ -63,7 +64,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + KeyphraseContract.TABLE + "("
             + KeyphraseContract.KEY_ID + " INTEGER PRIMARY KEY,"
             + KeyphraseContract.KEY_RECOGNITION_MODES + " INTEGER,"
-            + KeyphraseContract.KEY_USERS + " INTEGER,"
+            + KeyphraseContract.KEY_USERS + " TEXT,"
             + KeyphraseContract.KEY_SOUND_MODEL_ID + " TEXT,"
             + KeyphraseContract.KEY_LOCALE + " TEXT,"
             + KeyphraseContract.KEY_HINT_TEXT + " TEXT" + ")";
@@ -119,10 +120,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private boolean addOrUpdateKeyphrase(SQLiteDatabase db, UUID modelId, Keyphrase keyphrase) {
         ContentValues values = new ContentValues();
         values.put(KeyphraseContract.KEY_ID, keyphrase.id);
-        values.put(KeyphraseContract.KEY_RECOGNITION_MODES, keyphrase.recognitionModeFlags);
+        values.put(KeyphraseContract.KEY_RECOGNITION_MODES, keyphrase.recognitionModes);
         values.put(KeyphraseContract.KEY_SOUND_MODEL_ID, modelId.toString());
-        values.put(KeyphraseContract.KEY_HINT_TEXT, keyphrase.hintText);
+        values.put(KeyphraseContract.KEY_HINT_TEXT, keyphrase.text);
         values.put(KeyphraseContract.KEY_LOCALE, keyphrase.locale);
+        values.put(KeyphraseContract.KEY_USERS, getCommaSeparatedString(keyphrase.users));
         if (db.insertWithOnConflict(
                 KeyphraseContract.TABLE, null, values, SQLiteDatabase.CONFLICT_REPLACE) != -1) {
             return true;
@@ -193,16 +195,42 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             do {
                 int id = c.getInt(c.getColumnIndex(KeyphraseContract.KEY_ID));
                 int modes = c.getInt(c.getColumnIndex(KeyphraseContract.KEY_RECOGNITION_MODES));
-                int[] users = {c.getInt(c.getColumnIndex(KeyphraseContract.KEY_USERS))};
+                int[] users = getArrayForCommaSeparatedString(
+                        c.getString(c.getColumnIndex(KeyphraseContract.KEY_USERS)));
                 String locale = c.getString(c.getColumnIndex(KeyphraseContract.KEY_LOCALE));
                 String hintText = c.getString(c.getColumnIndex(KeyphraseContract.KEY_HINT_TEXT));
 
-                keyphrases.add(new Keyphrase(id, hintText, locale, modes, users));
+                keyphrases.add(new Keyphrase(id, modes, locale, hintText, users));
             } while (c.moveToNext());
         }
         Keyphrase[] keyphraseArr = new Keyphrase[keyphrases.size()];
         keyphrases.toArray(keyphraseArr);
         c.close();
         return keyphraseArr;
+    }
+
+
+    private String getCommaSeparatedString(int[] users) {
+        if (users == null || users.length == 0) {
+            return "";
+        }
+        String csv = "";
+        for (int user : users) {
+            csv += String.valueOf(user);
+            csv += ",";
+        }
+        return csv.substring(0, csv.length() - 1);
+    }
+
+    private int[] getArrayForCommaSeparatedString(String text) {
+        if (TextUtils.isEmpty(text)) {
+            return null;
+        }
+        String[] usersStr = text.split(",");
+        int[] users = new int[usersStr.length];
+        for (int i = 0; i < usersStr.length; i++) {
+            users[i] = Integer.valueOf(usersStr[i]);
+        }
+        return users;
     }
 }
