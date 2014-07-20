@@ -18,6 +18,8 @@ package android.bluetooth.le;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.le.ScanFilter;
+import android.bluetooth.le.ScanRecord;
 import android.os.Parcel;
 import android.os.ParcelUuid;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -50,7 +52,8 @@ public class ScanFilterTest extends TestCase {
 
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
         BluetoothDevice device = adapter.getRemoteDevice(DEVICE_MAC);
-        mScanResult = new ScanResult(device, scanRecord, -10, 1397545200000000L);
+        mScanResult = new ScanResult(device, ScanRecord.parseFromBytes(scanRecord),
+                -10, 1397545200000000L);
         mFilterBuilder = new ScanFilter.Builder();
     }
 
@@ -94,17 +97,18 @@ public class ScanFilterTest extends TestCase {
     public void testsetServiceDataFilter() {
         byte[] setServiceData = new byte[] {
                 0x0b, 0x11, 0x50, 0x64 };
-        ScanFilter filter = mFilterBuilder.setServiceData(setServiceData).build();
+        ParcelUuid serviceDataUuid = ParcelUuid.fromString("0000110B-0000-1000-8000-00805F9B34FB");
+        ScanFilter filter = mFilterBuilder.setServiceData(serviceDataUuid, setServiceData).build();
         assertTrue("service data filter fails", filter.matches(mScanResult));
 
         byte[] nonMatchData = new byte[] {
                 0x0b, 0x01, 0x50, 0x64 };
-        filter = mFilterBuilder.setServiceData(nonMatchData).build();
+        filter = mFilterBuilder.setServiceData(serviceDataUuid, nonMatchData).build();
         assertFalse("service data filter fails", filter.matches(mScanResult));
 
         byte[] mask = new byte[] {
                 (byte) 0xFF, (byte) 0x00, (byte) 0xFF, (byte) 0xFF };
-        filter = mFilterBuilder.setServiceData(nonMatchData, mask).build();
+        filter = mFilterBuilder.setServiceData(serviceDataUuid, nonMatchData, mask).build();
         assertTrue("partial service data filter fails", filter.matches(mScanResult));
     }
 
@@ -152,12 +156,14 @@ public class ScanFilterTest extends TestCase {
         byte[] setServiceData = new byte[] {
                 0x0b, 0x11, 0x50, 0x64 };
 
-        filter = mFilterBuilder.setServiceData(setServiceData).build();
+        ParcelUuid serviceDataUuid = ParcelUuid.fromString("0000110B-0000-1000-8000-00805F9B34FB");
+        filter = mFilterBuilder.setServiceData(serviceDataUuid, setServiceData).build();
         testReadWriteParcelForFilter(filter);
 
         byte[] serviceDataMask = new byte[] {
                 (byte) 0xFF, (byte) 0x00, (byte) 0xFF, (byte) 0xFF };
-        filter = mFilterBuilder.setServiceData(setServiceData, serviceDataMask).build();
+        filter = mFilterBuilder.setServiceData(serviceDataUuid, setServiceData, serviceDataMask)
+                .build();
         testReadWriteParcelForFilter(filter);
 
         byte[] manufacturerData = new byte[] {

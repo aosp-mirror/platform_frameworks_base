@@ -45,7 +45,7 @@ public final class ScanSettings implements Parcelable {
     public static final int SCAN_MODE_LOW_LATENCY = 2;
 
     /**
-     * Triggger a callback for every Bluetooth advertisement found that matches the
+     * Trigger a callback for every Bluetooth advertisement found that matches the
      * filter criteria. If no filter is active, all advertisement packets are reported.
      */
     public static final int CALLBACK_TYPE_ALL_MATCHES = 1;
@@ -87,7 +87,7 @@ public final class ScanSettings implements Parcelable {
     private int mScanResultType;
 
     // Time of delay for reporting the scan result
-    private long mReportDelaySeconds;
+    private long mReportDelayMillis;
 
     public int getScanMode() {
         return mScanMode;
@@ -104,8 +104,8 @@ public final class ScanSettings implements Parcelable {
     /**
      * Returns report delay timestamp based on the device clock.
      */
-    public long getReportDelaySeconds() {
-        return mReportDelaySeconds;
+    public long getReportDelayMillis() {
+        return mReportDelayMillis;
     }
 
     private ScanSettings(int scanMode, int callbackType, int scanResultType,
@@ -113,14 +113,14 @@ public final class ScanSettings implements Parcelable {
         mScanMode = scanMode;
         mCallbackType = callbackType;
         mScanResultType = scanResultType;
-        mReportDelaySeconds = reportDelaySeconds;
+        mReportDelayMillis = reportDelaySeconds;
     }
 
     private ScanSettings(Parcel in) {
         mScanMode = in.readInt();
         mCallbackType = in.readInt();
         mScanResultType = in.readInt();
-        mReportDelaySeconds = in.readLong();
+        mReportDelayMillis = in.readLong();
     }
 
     @Override
@@ -128,7 +128,7 @@ public final class ScanSettings implements Parcelable {
         dest.writeInt(mScanMode);
         dest.writeInt(mCallbackType);
         dest.writeInt(mScanResultType);
-        dest.writeLong(mReportDelaySeconds);
+        dest.writeLong(mReportDelayMillis);
     }
 
     @Override
@@ -136,6 +136,9 @@ public final class ScanSettings implements Parcelable {
         return 0;
     }
 
+    /**
+     * @hide
+     */
     public static final Parcelable.Creator<ScanSettings>
             CREATOR = new Creator<ScanSettings>() {
                     @Override
@@ -156,7 +159,7 @@ public final class ScanSettings implements Parcelable {
         private int mScanMode = SCAN_MODE_LOW_POWER;
         private int mCallbackType = CALLBACK_TYPE_ALL_MATCHES;
         private int mScanResultType = SCAN_RESULT_TYPE_FULL;
-        private long mReportDelaySeconds = 0;
+        private long mReportDelayMillis = 0;
 
         /**
          * Set scan mode for Bluetooth LE scan.
@@ -212,13 +215,18 @@ public final class ScanSettings implements Parcelable {
 
         /**
          * Set report delay timestamp for Bluetooth LE scan.
-         * @param reportDelaySeconds Set to 0 to be notified of results immediately.
-         *                           Values &gt;0 causes the scan results to be queued
+         * @param reportDelayMillis Set to 0 to be notified of results immediately.
+         *                           Values &gt; 0 causes the scan results to be queued
          *                           up and delivered after the requested delay or when
          *                           the internal buffers fill up.
+         * @throws IllegalArgumentException If {@code reportDelaySeconds} &lt; 0.
+         *
          */
-        public Builder setReportDelaySeconds(long reportDelaySeconds) {
-            mReportDelaySeconds = reportDelaySeconds;
+        public Builder setReportDelayMillis(long reportDelayMillis) {
+            if (reportDelayMillis < 0) {
+                throw new IllegalArgumentException("reportDelaySeconds must be > 0");
+            }
+            mReportDelayMillis = reportDelayMillis;
             return this;
         }
 
@@ -227,7 +235,7 @@ public final class ScanSettings implements Parcelable {
          */
         public ScanSettings build() {
             return new ScanSettings(mScanMode, mCallbackType, mScanResultType,
-                    mReportDelaySeconds);
+                    mReportDelayMillis);
         }
     }
 }

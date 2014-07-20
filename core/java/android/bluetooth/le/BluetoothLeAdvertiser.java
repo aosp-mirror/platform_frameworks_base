@@ -57,6 +57,8 @@ public final class BluetoothLeAdvertiser {
 
     /**
      * Use BluetoothAdapter.getLeAdvertiser() instead.
+     *
+     * @param bluetoothManager BluetoothManager that conducts overall Bluetooth Management
      * @hide
      */
     public BluetoothLeAdvertiser(IBluetoothManager bluetoothManager) {
@@ -66,9 +68,8 @@ public final class BluetoothLeAdvertiser {
     }
 
     /**
-     * Start Bluetooth LE Advertising. On success, the {@code advertiseData} will be
-     * broadcasted. Returns immediately, the operation status is delivered through
-     * {@code callback}.
+     * Start Bluetooth LE Advertising. On success, the {@code advertiseData} will be broadcasted.
+     * Returns immediately, the operation status is delivered through {@code callback}.
      * <p>
      * Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission.
      *
@@ -83,9 +84,9 @@ public final class BluetoothLeAdvertiser {
 
     /**
      * Start Bluetooth LE Advertising. The {@code advertiseData} will be broadcasted if the
-     * operation succeeds. The {@code scanResponse} is returned when a scanning device sends
-     * an active scan request. This method returns immediately, the operation status is
-     * delivered through {@code callback}.
+     * operation succeeds. The {@code scanResponse} is returned when a scanning device sends an
+     * active scan request. This method returns immediately, the operation status is delivered
+     * through {@code callback}.
      * <p>
      * Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
      *
@@ -142,11 +143,13 @@ public final class BluetoothLeAdvertiser {
             throw new IllegalArgumentException("callback cannot be null");
         }
         AdvertiseCallbackWrapper wrapper = mLeAdvertisers.get(callback);
-        if (wrapper == null) return;
+        if (wrapper == null)
+            return;
 
         try {
             IBluetoothGatt gatt = mBluetoothManager.getBluetoothGatt();
-            if (gatt != null) gatt.stopMultiAdvertising(wrapper.mLeHandle);
+            if (gatt != null)
+                gatt.stopMultiAdvertising(wrapper.mClientIf);
 
             if (wrapper.advertiseStopped()) {
                 mLeAdvertisers.remove(callback);
@@ -167,10 +170,10 @@ public final class BluetoothLeAdvertiser {
         private final AdvertiseSettings mSettings;
         private final IBluetoothGatt mBluetoothGatt;
 
-        // mLeHandle 0: not registered
+        // mClientIf 0: not registered
         // -1: scan stopped
         // >0: registered and scan started
-        private int mLeHandle;
+        private int mClientIf;
         private boolean isAdvertising = false;
 
         public AdvertiseCallbackWrapper(AdvertiseCallback advertiseCallback,
@@ -182,13 +185,13 @@ public final class BluetoothLeAdvertiser {
             mScanResponse = scanResponse;
             mSettings = settings;
             mBluetoothGatt = bluetoothGatt;
-            mLeHandle = 0;
+            mClientIf = 0;
         }
 
         public boolean advertiseStarted() {
             boolean started = false;
             synchronized (this) {
-                if (mLeHandle == -1) {
+                if (mClientIf == -1) {
                     return false;
                 }
                 try {
@@ -196,7 +199,7 @@ public final class BluetoothLeAdvertiser {
                 } catch (InterruptedException e) {
                     Log.e(TAG, "Callback reg wait interrupted: ", e);
                 }
-                started = (mLeHandle > 0 && isAdvertising);
+                started = (mClientIf > 0 && isAdvertising);
             }
             return started;
         }
@@ -220,18 +223,18 @@ public final class BluetoothLeAdvertiser {
             Log.d(TAG, "onClientRegistered() - status=" + status + " clientIf=" + clientIf);
             synchronized (this) {
                 if (status == BluetoothGatt.GATT_SUCCESS) {
-                    mLeHandle = clientIf;
+                    mClientIf = clientIf;
                     try {
-                        mBluetoothGatt.startMultiAdvertising(mLeHandle, mAdvertisement,
+                        mBluetoothGatt.startMultiAdvertising(mClientIf, mAdvertisement,
                                 mScanResponse, mSettings);
                     } catch (RemoteException e) {
                         Log.e(TAG, "fail to start le advertise: " + e);
-                        mLeHandle = -1;
+                        mClientIf = -1;
                         notifyAll();
                     }
                 } else {
                     // registration failed
-                    mLeHandle = -1;
+                    mClientIf = -1;
                     notifyAll();
                 }
             }
@@ -334,16 +337,16 @@ public final class BluetoothLeAdvertiser {
         @Override
         public void onMultiAdvertiseCallback(int status) {
             // TODO: This logic needs to be re-visited to account
-            //       for whether the scan has actually been started
-            //       or not. Toggling the isAdvertising does not seem
-            //       correct.
+            // for whether the scan has actually been started
+            // or not. Toggling the isAdvertising does not seem
+            // correct.
             synchronized (this) {
                 if (status == AdvertiseCallback.ADVERTISE_SUCCESS) {
                     isAdvertising = !isAdvertising;
                     if (!isAdvertising) {
                         try {
-                            mBluetoothGatt.unregisterClient(mLeHandle);
-                            mLeHandle = -1;
+                            mBluetoothGatt.unregisterClient(mClientIf);
+                            mClientIf = -1;
                         } catch (RemoteException e) {
                             Log.e(TAG, "remote exception when unregistering", e);
                         }
@@ -351,7 +354,8 @@ public final class BluetoothLeAdvertiser {
                         mAdvertiseCallback.onStartSuccess(null);
                     }
                 } else {
-                    if (!isAdvertising) mAdvertiseCallback.onStartFailure(status);
+                    if (!isAdvertising)
+                        mAdvertiseCallback.onStartFailure(status);
                 }
                 notifyAll();
             }

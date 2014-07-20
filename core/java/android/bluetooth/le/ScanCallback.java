@@ -19,10 +19,9 @@ package android.bluetooth.le;
 import java.util.List;
 
 /**
- * Bluetooth LE scan callbacks.
- * Scan results are reported using these callbacks.
+ * Bluetooth LE scan callbacks. Scan results are reported using these callbacks.
  *
- * {@see BluetoothLeScanner#startScan}
+ * @see BluetoothLeScanner#startScan
  */
 public abstract class ScanCallback {
     /**
@@ -48,8 +47,8 @@ public abstract class ScanCallback {
     /**
      * Callback when a BLE advertisement has been found.
      *
-     * @param callbackType Determines if this callback was triggered because of first match,
-     *    a lost match indication or a regular scan result.
+     * @param callbackType Determines if this callback was triggered because of first match, a lost
+     *            match indication or a regular scan result.
      * @param result A Bluetooth LE scan result.
      */
     public void onScanResult(int callbackType, ScanResult result) {
@@ -65,6 +64,7 @@ public abstract class ScanCallback {
 
     /**
      * Callback when scan could not be started.
+     * @param errorCode Error code (one of SCAN_FAILED_*) for scan failure.
      */
     public void onScanFailed(int errorCode) {
     }
