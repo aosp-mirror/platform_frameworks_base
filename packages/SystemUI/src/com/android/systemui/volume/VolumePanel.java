@@ -484,6 +484,7 @@ public class VolumePanel extends Handler {
             sc.icon.setImageResource(sc.iconRes);
             sc.icon.setClickable(isNotificationOrRing(streamType));
             if (sc.icon.isClickable()) {
+                sc.icon.setSoundEffectsEnabled(false);
                 sc.icon.setOnClickListener(new OnClickListener() {
                     @Override
                     public void onClick(View v) {
