@@ -435,12 +435,19 @@ public class BaseInputConnection implements InputConnection {
      * {@link CursorAnchorInfoRequest#TYPE_CURSOR_RECT}.
      */
     public int requestCursorAnchorInfo(CursorAnchorInfoRequest request) {
-        if (request != null && mIMM != null &&
-                request.getRequestType() == CursorAnchorInfoRequest.TYPE_CURSOR_RECT) {
-            mIMM.setCursorRectMonitorMode(request.getRequestFlags());
-            return CursorAnchorInfoRequest.RESULT_SCHEDULED;
+        // This implementation supports TYPE_CURSOR_RECT only.
+        if (request == null ||
+                request.getRequestType() != CursorAnchorInfoRequest.TYPE_CURSOR_RECT) {
+            return CursorAnchorInfoRequest.RESULT_NOT_HANDLED;
         }
-        return CursorAnchorInfoRequest.RESULT_NOT_HANDLED;
+        if (mIMM == null) {
+            // In this case, TYPE_CURSOR_RECT is not handled.
+            // TODO: Return some notification code for the input method that indicates
+            // Cursor rect information is temporarily unavailable.
+            return CursorAnchorInfoRequest.RESULT_NOT_HANDLED;
+        }
+        mIMM.setCursorRectMonitorMode(request.getRequestFlags());
+        return CursorAnchorInfoRequest.RESULT_SCHEDULED;
     }
 
     /**
