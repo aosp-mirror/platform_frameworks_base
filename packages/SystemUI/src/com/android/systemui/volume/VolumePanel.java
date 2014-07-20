@@ -25,6 +25,7 @@ import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.ColorDrawable;
 import android.media.AudioAttributes;
@@ -42,13 +43,13 @@ import android.os.Message;
 import android.os.Vibrator;
 import android.provider.Settings.Global;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.ViewStub;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
@@ -59,7 +60,8 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import com.android.internal.R;
 import com.android.systemui.statusbar.policy.ZenModeController;
 
-import java.util.HashMap;
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 
 /**
  * Handles the user interface for the volume keys.
@@ -123,6 +125,9 @@ public class VolumePanel extends Handler {
     private boolean mZenModeCapable;
     private boolean mZenPanelExpanded;
     private int mTimeoutDelay = TIMEOUT_DELAY;
+    private float mDisabledAlpha;
+    private int mLastRingerMode = AudioManager.RINGER_MODE_NORMAL;
+    private int mLastRingerProgress = 0;
 
     // True if we want to play tones on the system stream when the master stream is specified.
     private final boolean mPlayMasterStreamTones;
@@ -145,7 +150,7 @@ public class VolumePanel extends Handler {
     /** Currently active stream that shows up at the top of the list of sliders */
     private int mActiveStreamType = -1;
     /** All the slider controls mapped by stream type */
-    private HashMap<Integer,StreamControl> mStreamControls;
+    private SparseArray<StreamControl> mStreamControls;
 
     private enum StreamResources {
         BluetoothSCOStream(AudioManager.STREAM_BLUETOOTH_SCO,
@@ -156,7 +161,7 @@ public class VolumePanel extends Handler {
         RingerStream(AudioManager.STREAM_RING,
                 R.string.volume_icon_description_ringer,
                 com.android.systemui.R.drawable.ic_ringer_audible,
-                com.android.systemui.R.drawable.ic_ringer_silent,
+                com.android.systemui.R.drawable.ic_ringer_vibrate,
                 false),
         VoiceStream(AudioManager.STREAM_VOICE_CALL,
                 R.string.volume_icon_description_incall,
@@ -176,7 +181,7 @@ public class VolumePanel extends Handler {
         NotificationStream(AudioManager.STREAM_NOTIFICATION,
                 R.string.volume_icon_description_notification,
                 com.android.systemui.R.drawable.ic_ringer_audible,
-                com.android.systemui.R.drawable.ic_ringer_silent,
+                com.android.systemui.R.drawable.ic_ringer_vibrate,
                 true),
         // for now, use media resources for master volume
         MasterStream(STREAM_MASTER,
@@ -271,7 +276,6 @@ public class VolumePanel extends Handler {
         }
     }
 
-
     public VolumePanel(Context context, ZenModeController zenController) {
         mTag = String.format("%s.%08x", TAG, hashCode());
         mContext = context;
@@ -288,6 +292,14 @@ public class VolumePanel extends Handler {
             }
         }
         if (LOGD) Log.d(mTag, "new VolumePanel");
+
+        mDisabledAlpha = 0.5f;
+        if (mContext.getTheme() != null) {
+            final TypedArray arr = mContext.getTheme().obtainStyledAttributes(
+                    new int[] { android.R.attr.disabledAlpha });
+            mDisabledAlpha = arr.getFloat(0, mDisabledAlpha);
+            arr.recycle();
+        }
 
         mDialog = new Dialog(context) {
             @Override
@@ -360,6 +372,43 @@ public class VolumePanel extends Handler {
         mPlayMasterStreamTones = masterVolumeOnly && masterVolumeKeySounds;
 
         listenToRingerMode();
+    }
+
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("VolumePanel state:");
+        pw.print("  mTag="); pw.println(mTag);
+        pw.print("  mRingIsSilent="); pw.println(mRingIsSilent);
+        pw.print("  mVoiceCapable="); pw.println(mVoiceCapable);
+        pw.print("  mZenModeCapable="); pw.println(mZenModeCapable);
+        pw.print("  mZenPanelExpanded="); pw.println(mZenPanelExpanded);
+        pw.print("  mTimeoutDelay="); pw.println(mTimeoutDelay);
+        pw.print("  mDisabledAlpha="); pw.println(mDisabledAlpha);
+        pw.print("  mLastRingerMode="); pw.println(mLastRingerMode);
+        pw.print("  mLastRingerProgress="); pw.println(mLastRingerProgress);
+        pw.print("  mPlayMasterStreamTones="); pw.println(mPlayMasterStreamTones);
+        pw.print("  isShowing()="); pw.println(isShowing());
+        pw.print("  mCallback="); pw.println(mCallback);
+        pw.print("  sConfirmSafeVolumeDialog=");
+        pw.println(sConfirmSafeVolumeDialog != null ? "<not null>" : null);
+        pw.print("  mActiveStreamType="); pw.println(mActiveStreamType);
+        pw.print("  mStreamControls=");
+        if (mStreamControls == null) {
+            pw.println("null");
+        } else {
+            final int N = mStreamControls.size();
+            pw.print("<size "); pw.print(N); pw.println('>');
+            for (int i = 0; i < N; i++) {
+                final StreamControl sc = mStreamControls.valueAt(i);
+                pw.print("    stream "); pw.print(sc.streamType); pw.print(":");
+                if (sc.seekbarView != null) {
+                    pw.print(" progress="); pw.print(sc.seekbarView.getProgress());
+                    pw.print(" of "); pw.print(sc.seekbarView.getMax());
+                    if (!sc.seekbarView.isEnabled()) pw.print(" (disabled)");
+                }
+                if (sc.icon != null && sc.icon.isClickable()) pw.print(" (clickable)");
+                pw.println();
+            }
+        }
     }
 
     private void initZenModePanel() {
@@ -474,7 +523,7 @@ public class VolumePanel extends Handler {
         final LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
 
-        mStreamControls = new HashMap<Integer, StreamControl>(STREAMS.length);
+        mStreamControls = new SparseArray<StreamControl>(STREAMS.length);
 
         for (int i = 0; i < STREAMS.length; i++) {
             StreamResources streamRes = STREAMS[i];
@@ -540,17 +589,40 @@ public class VolumePanel extends Handler {
         }
     }
 
+    private void updateSliderProgress(StreamControl sc, int progress) {
+        final boolean isRinger = isNotificationOrRing(sc.streamType);
+        if (isRinger && mAudioManager.getRingerMode() == AudioManager.RINGER_MODE_SILENT) {
+            progress = mLastRingerProgress;
+        }
+        if (progress < 0) {
+            progress = getStreamVolume(sc.streamType);
+        }
+        sc.seekbarView.setProgress(progress);
+        if (isRinger) {
+            mLastRingerProgress = progress;
+        }
+    }
+
+    private void updateSliderIcon(StreamControl sc, boolean muted) {
+        if (isNotificationOrRing(sc.streamType)) {
+            int ringerMode = mAudioManager.getRingerMode();
+            if (ringerMode == AudioManager.RINGER_MODE_SILENT) {
+                ringerMode = mLastRingerMode;
+            } else {
+                mLastRingerMode = ringerMode;
+            }
+            muted = ringerMode == AudioManager.RINGER_MODE_VIBRATE;
+        }
+        sc.icon.setImageResource(muted ? sc.iconMuteRes : sc.iconRes);
+    }
+
     /** Update the mute and progress state of a slider */
     private void updateSlider(StreamControl sc) {
-        sc.seekbarView.setProgress(getStreamVolume(sc.streamType));
+        updateSliderProgress(sc, -1);
         final boolean muted = isMuted(sc.streamType);
         // Force reloading the image resource
         sc.icon.setImageDrawable(null);
-        sc.icon.setImageResource(muted ? sc.iconMuteRes : sc.iconRes);
-        if (isNotificationOrRing(sc.streamType) &&
-                mAudioManager.getRingerMode() == AudioManager.RINGER_MODE_VIBRATE) {
-            sc.icon.setImageResource(com.android.systemui.R.drawable.ic_ringer_vibrate);
-        }
+        updateSliderIcon(sc, muted);
         updateSliderEnabled(sc, muted, false);
     }
 
@@ -568,10 +640,12 @@ public class VolumePanel extends Handler {
         } else if (isRinger && mAudioManager.getRingerMode() == AudioManager.RINGER_MODE_SILENT) {
             sc.seekbarView.setEnabled(false);
             sc.icon.setEnabled(false);
+            sc.icon.setAlpha(mDisabledAlpha);
             sc.icon.setClickable(false);
         } else {
             sc.seekbarView.setEnabled(true);
             sc.icon.setEnabled(true);
+            sc.icon.setAlpha(1f);
         }
         // show the silent hint when the disabled slider is touched in silent mode
         if (isRinger && wasEnabled != sc.seekbarView.isEnabled()) {
@@ -769,7 +843,7 @@ public class VolumePanel extends Handler {
 
         StreamControl sc = mStreamControls.get(streamType);
         if (sc != null) {
-            sc.icon.setImageResource(isMuted(sc.streamType) ? sc.iconMuteRes : sc.iconRes);
+            updateSliderIcon(sc, isMuted(sc.streamType));
         }
 
         onVolumeChanged(streamType, flags);
@@ -885,8 +959,7 @@ public class VolumePanel extends Handler {
             if (sc.seekbarView.getMax() != max) {
                 sc.seekbarView.setMax(max);
             }
-
-            sc.seekbarView.setProgress(index);
+            updateSliderProgress(sc, index);
             updateSliderEnabled(sc, isMuted(streamType),
                     (flags & AudioManager.FLAG_FIXED_VOLUME) != 0);
         }
@@ -1096,7 +1169,7 @@ public class VolumePanel extends Handler {
         if (sc != null) {
             sc.iconRes = resId;
             sc.iconMuteRes = resMuteId;
-            sc.icon.setImageResource(isMuted(sc.streamType) ? sc.iconMuteRes : sc.iconRes);
+            updateSliderIcon(sc, isMuted(sc.streamType));
         }
     }
 
