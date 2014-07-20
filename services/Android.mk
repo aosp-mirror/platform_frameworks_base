@@ -26,6 +26,7 @@ services := \
     devicepolicy \
     print \
     restrictions \
+    usage \
     usb \
     voiceinteraction
 

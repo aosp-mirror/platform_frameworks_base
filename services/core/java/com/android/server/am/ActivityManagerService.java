@@ -36,6 +36,8 @@ import android.app.IActivityContainer;
 import android.app.IActivityContainerCallback;
 import android.app.IAppTask;
 import android.app.admin.DevicePolicyManager;
+import android.app.usage.UsageStats;
+import android.app.usage.UsageStatsManagerInternal;
 import android.appwidget.AppWidgetManager;
 import android.graphics.Rect;
 import android.os.BatteryStats;
@@ -810,7 +812,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     /**
      * Information about component usage
      */
-    final UsageStatsService mUsageStatsService;
+    UsageStatsManagerInternal mUsageStatsService;
 
     /**
      * Information about and control over application operations
@@ -2026,6 +2028,10 @@ public final class ActivityManagerService extends ActivityManagerNative
         mStackSupervisor.setWindowManager(wm);
     }
 
+    public void setUsageStatsManager(UsageStatsManagerInternal usageStatsManager) {
+        mUsageStatsService = usageStatsManager;
+    }
+
     public void startObservingNativeCrashes() {
         final NativeCrashListener ncl = new NativeCrashListener(this);
         ncl.start();
@@ -2175,7 +2181,6 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         mProcessStats = new ProcessStatsService(this, new File(systemDir, "procstats"));
 
-        mUsageStatsService = new UsageStatsService(new File(systemDir, "usagestats").toString());
         mAppOpsService = new AppOpsService(new File(systemDir, "appops.xml"), mHandler);
 
         mGrantFile = new AtomicFile(new File(systemDir, "urigrants.xml"));
@@ -2247,7 +2252,6 @@ public final class ActivityManagerService extends ActivityManagerNative
         mProcessCpuThread.start();
 
         mBatteryStatsService.publish(mContext);
-        mUsageStatsService.publish(mContext);
         mAppOpsService.publish(mContext);
         Slog.d("AppOps", "AppOpsService published");
         LocalServices.addService(ActivityManagerInternal.class, new LocalService());
@@ -3073,12 +3077,18 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (DEBUG_SWITCH) Slog.d(TAG, "updateUsageStats: comp=" + component + "res=" + resumed);
         final BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
         if (resumed) {
-            mUsageStatsService.noteResumeComponent(component.realActivity);
+            if (mUsageStatsService != null) {
+                mUsageStatsService.reportEvent(component.realActivity, System.currentTimeMillis(),
+                        UsageStats.Event.MOVE_TO_FOREGROUND);
+            }
             synchronized (stats) {
                 stats.noteActivityResumedLocked(component.app.uid);
             }
         } else {
-            mUsageStatsService.notePauseComponent(component.realActivity);
+            if (mUsageStatsService != null) {
+                mUsageStatsService.reportEvent(component.realActivity, System.currentTimeMillis(),
+                        UsageStats.Event.MOVE_TO_BACKGROUND);
+            }
             synchronized (stats) {
                 stats.noteActivityPausedLocked(component.app.uid);
             }
@@ -8804,7 +8814,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         mCoreSettingsObserver = new CoreSettingsObserver(this);
 
-        mUsageStatsService.monitorPackages();
+        //mUsageStatsService.monitorPackages();
     }
 
     /**
@@ -9026,7 +9036,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         mAppOpsService.shutdown();
-        mUsageStatsService.shutdown();
+        if (mUsageStatsService != null) {
+            mUsageStatsService.prepareShutdown();
+        }
         mBatteryStatsService.shutdown();
         synchronized (this) {
             mProcessStats.shutdownLocked();
@@ -10086,7 +10098,6 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
 
             mAppOpsService.systemReady();
-            mUsageStatsService.systemReady();
             mSystemReady = true;
         }
 
@@ -14986,7 +14997,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 newConfig.seq = mConfigurationSeq;
                 mConfiguration = newConfig;
                 Slog.i(TAG, "Config changes=" + Integer.toHexString(changes) + " " + newConfig);
-                mUsageStatsService.noteStartConfig(newConfig);
+                //mUsageStatsService.noteStartConfig(newConfig);
 
                 final Configuration configCopy = new Configuration(mConfiguration);
                 
