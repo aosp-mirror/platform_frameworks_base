@@ -26,6 +26,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
 
@@ -36,6 +37,7 @@ import static android.os.BatteryManager.EXTRA_STATUS;
 import static android.os.BatteryManager.EXTRA_PLUGGED;
 import static android.os.BatteryManager.EXTRA_LEVEL;
 import static android.os.BatteryManager.EXTRA_HEALTH;
+
 import android.media.AudioManager;
 import android.media.IRemoteControlDisplay;
 import android.os.BatteryManager;
@@ -247,6 +249,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             Log.e(TAG, "Failed to get current user id: ", e);
             return;
         }
+        if (isFingerprintDisabled(userId)) {
+            Log.d(TAG, "Fingerprint disabled by DPM for userId: " + userId);
+            return;
+        }
         final ContentResolver res = mContext.getContentResolver();
         final int ids[] = FingerprintUtils.getFingerprintIdsForUser(res, userId);
         for (int i = 0; i < ids.length; i++) {
@@ -284,6 +290,13 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                         || disabledBySimPin;
         }
         return false;
+    }
+
+    private boolean isFingerprintDisabled(int userId) {
+        final DevicePolicyManager dpm =
+                (DevicePolicyManager) mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
+        return dpm != null && (dpm.getKeyguardDisabledFeatures(null, userId)
+                    & DevicePolicyManager.KEYGUARD_DISABLE_FINGERPRINT) != 0;
     }
 
     public boolean getUserHasTrust(int userId) {
