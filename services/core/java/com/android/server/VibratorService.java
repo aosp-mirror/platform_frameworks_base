@@ -373,7 +373,7 @@ public class VibratorService extends IVibratorService.Stub
     private void startVibrationLocked(final Vibration vib) {
         try {
             if (mLowPowerMode
-                    && vib.mUsageHint != AudioAttributes.USAGE_NOTIFICATION_TELEPHONY_RINGTONE) {
+                    && vib.mUsageHint != AudioAttributes.USAGE_NOTIFICATION_RINGTONE) {
                 return;
             }
 

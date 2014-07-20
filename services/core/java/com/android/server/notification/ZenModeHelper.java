@@ -17,7 +17,7 @@
 package com.android.server.notification;
 
 import static android.media.AudioAttributes.USAGE_ALARM;
-import static android.media.AudioAttributes.USAGE_NOTIFICATION_TELEPHONY_RINGTONE;
+import static android.media.AudioAttributes.USAGE_NOTIFICATION_RINGTONE;
 import static android.media.AudioAttributes.USAGE_UNKNOWN;
 
 import android.app.AlarmManager;
@@ -197,10 +197,10 @@ public class ZenModeHelper {
 
         // call restrictions
         final boolean muteCalls = zen && !mConfig.allowCalls;
-        mAppOps.setRestriction(AppOpsManager.OP_VIBRATE, USAGE_NOTIFICATION_TELEPHONY_RINGTONE,
+        mAppOps.setRestriction(AppOpsManager.OP_VIBRATE, USAGE_NOTIFICATION_RINGTONE,
                 muteCalls ? AppOpsManager.MODE_IGNORED : AppOpsManager.MODE_ALLOWED,
                 exceptionPackages);
-        mAppOps.setRestriction(AppOpsManager.OP_PLAY_AUDIO, USAGE_NOTIFICATION_TELEPHONY_RINGTONE,
+        mAppOps.setRestriction(AppOpsManager.OP_PLAY_AUDIO, USAGE_NOTIFICATION_RINGTONE,
                 muteCalls ? AppOpsManager.MODE_IGNORED : AppOpsManager.MODE_ALLOWED,
                 exceptionPackages);
 
