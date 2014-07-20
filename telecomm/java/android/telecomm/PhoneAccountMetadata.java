@@ -66,6 +66,7 @@ public class PhoneAccountMetadata implements Parcelable {
 
     private final PhoneAccount mAccount;
     private final Uri mHandle;
+    private final String mSubscriptionNumber;
     private final int mCapabilities;
     private final int mIconResId;
     private final String mLabel;
@@ -75,6 +76,7 @@ public class PhoneAccountMetadata implements Parcelable {
     public PhoneAccountMetadata(
             PhoneAccount account,
             Uri handle,
+            String subscriptionNumber,
             int capabilities,
             int iconResId,
             String label,
@@ -82,6 +84,7 @@ public class PhoneAccountMetadata implements Parcelable {
             boolean supportsVideoCalling) {
         mAccount = account;
         mHandle = handle;
+        mSubscriptionNumber = subscriptionNumber;
         mCapabilities = capabilities;
         mIconResId = iconResId;
         mLabel = label;
@@ -108,6 +111,17 @@ public class PhoneAccountMetadata implements Parcelable {
      */
     public Uri getHandle() {
         return mHandle;
+    }
+
+    /**
+     * The subscription number associated with the underlying transport. This may differ from the
+     * {@link #getHandle()} number; for example, if the number used to talk to the network is not
+     * the same number that will be on the remote party's caller ID display.
+     *
+     * @return The subscription number, suitable for display to the user.
+     */
+    public String getSubscriptionNumber() {
+        return mSubscriptionNumber;
     }
 
     /**
@@ -195,6 +209,7 @@ public class PhoneAccountMetadata implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         out.writeParcelable(mAccount, 0);
         out.writeParcelable(mHandle, 0);
+        out.writeString(mSubscriptionNumber);
         out.writeInt(mCapabilities);
         out.writeInt(mIconResId);
         out.writeString(mLabel);
@@ -218,6 +233,7 @@ public class PhoneAccountMetadata implements Parcelable {
     private PhoneAccountMetadata(Parcel in) {
         mAccount = in.readParcelable(getClass().getClassLoader());
         mHandle = in.readParcelable(getClass().getClassLoader());
+        mSubscriptionNumber = in.readString();
         mCapabilities = in.readInt();
         mIconResId = in.readInt();
         mLabel = in.readString();

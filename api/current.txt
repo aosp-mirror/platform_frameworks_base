@@ -28608,7 +28608,7 @@ package android.telecomm {
   }
 
   public class PhoneAccountMetadata implements android.os.Parcelable {
-    ctor public PhoneAccountMetadata(android.telecomm.PhoneAccount, android.net.Uri, int, int, java.lang.String, java.lang.String, boolean);
+    ctor public PhoneAccountMetadata(android.telecomm.PhoneAccount, android.net.Uri, java.lang.String, int, int, java.lang.String, java.lang.String, boolean);
     method public int describeContents();
     method public android.telecomm.PhoneAccount getAccount();
     method public int getCapabilities();
@@ -28617,6 +28617,7 @@ package android.telecomm {
     method public int getIconResId();
     method public java.lang.String getLabel();
     method public java.lang.String getShortDescription();
+    method public java.lang.String getSubscriptionNumber();
     method public boolean isVideoCallingSupported();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int CAPABILITY_CALL_PROVIDER = 2; // 0x2
@@ -28720,10 +28721,10 @@ package android.telecomm {
     field public static final java.lang.String ACTION_INCOMING_CALL = "android.intent.action.INCOMING_CALL";
     field public static final char DTMF_CHARACTER_PAUSE = 44; // 0x002c ','
     field public static final char DTMF_CHARACTER_WAIT = 59; // 0x003b ';'
+    field public static final java.lang.String EXTRA_CALL_BACK_NUMBER = "android.telecomm.extra.CALL_BACK_NUMBER";
     field public static final java.lang.String EXTRA_CALL_DISCONNECT_CAUSE = "android.telecomm.extra.CALL_DISCONNECT_CAUSE";
     field public static final java.lang.String EXTRA_CALL_DISCONNECT_MESSAGE = "android.telecomm.extra.CALL_DISCONNECT_MESSAGE";
     field public static final java.lang.String EXTRA_CONNECTION_SERVICE = "android.telecomm.extra.CONNECTION_SERVICE";
-    field public static final java.lang.String EXTRA_EMERGENCY_CALL_BACK_NUMBER = "android.telecomm.extra.EMERGENCY_CALL_BACK_NUMBER";
     field public static final java.lang.String EXTRA_INCOMING_CALL_EXTRAS = "android.intent.extra.INCOMING_CALL_EXTRAS";
     field public static final java.lang.String EXTRA_PHONE_ACCOUNT = "android.intent.extra.PHONE_ACCOUNT";
     field public static final java.lang.String EXTRA_START_CALL_WITH_SPEAKERPHONE = "android.intent.extra.START_CALL_WITH_SPEAKERPHONE";
