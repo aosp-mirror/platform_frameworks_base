@@ -53,8 +53,8 @@ public final class TvParentalControlManager {
     private final Object mLock = new Object();
 
     @GuardedBy("mLock")
-    private final List<ParentalControlCallbackRecord> mParentalControlCallbackRecordList =
-            new LinkedList<ParentalControlCallbackRecord>();
+    private final List<ParentalControlListenerRecord> mParentalControlListenerRecordList =
+            new LinkedList<ParentalControlListenerRecord>();
 
     @GuardedBy("mLock")
     private final List<TvContentRating> mBlockedRatings = new ArrayList<TvContentRating>();
@@ -122,26 +122,26 @@ public final class TvParentalControlManager {
     }
 
     /**
-     * Adds a callback for monitoring the changes in the user's parental control settings.
+     * Adds a listener for monitoring the changes in the user's parental control settings.
      *
-     * @param callback The callback to add.
+     * @param listener The listener to add.
      * @param handler a {@link Handler} that the settings change will be delivered to.
      */
-    public void addParentalControlCallback(ParentalControlCallback callback,
+    public void addParentalControlListener(ParentalControlListener listener,
             Handler handler) {
-        if (callback == null) {
-            throw new IllegalArgumentException("callback cannot be null");
+        if (listener == null) {
+            throw new IllegalArgumentException("listener cannot be null");
         }
         if (handler == null) {
             throw new IllegalArgumentException("handler cannot be null");
         }
         synchronized (mLock) {
-            if (mParentalControlCallbackRecordList.isEmpty()) {
+            if (mParentalControlListenerRecordList.isEmpty()) {
                 registerObserver(Settings.Secure.TV_PARENTAL_CONTROL_ENABLED);
                 registerObserver(Settings.Secure.TV_PARENTAL_CONTROL_BLOCKED_RATINGS);
             }
-            mParentalControlCallbackRecordList.add(
-                    new ParentalControlCallbackRecord(callback, handler));
+            mParentalControlListenerRecordList.add(
+                    new ParentalControlListenerRecord(listener, handler));
         }
     }
 
@@ -151,19 +151,19 @@ public final class TvParentalControlManager {
     }
 
     /**
-     * Removes a callback previously added using {@link #addParentalControlCallback}.
+     * Removes a listener previously added using {@link #addParentalControlListener}.
      *
-     * @param callback The callback to remove.
+     * @param listener The listener to remove.
      */
-    public void removeParentalControlCallback(ParentalControlCallback callback) {
-        if (callback == null) {
-            throw new IllegalArgumentException("callback cannot be null");
+    public void removeParentalControlListener(ParentalControlListener listener) {
+        if (listener == null) {
+            throw new IllegalArgumentException("listener cannot be null");
         }
         synchronized (mLock) {
-            for (Iterator<ParentalControlCallbackRecord> it =
-                    mParentalControlCallbackRecordList.iterator(); it.hasNext();) {
-                ParentalControlCallbackRecord record = it.next();
-                if (record.getCallback() == callback) {
+            for (Iterator<ParentalControlListenerRecord> it =
+                    mParentalControlListenerRecordList.iterator(); it.hasNext();) {
+                ParentalControlListenerRecord record = it.next();
+                if (record.getListener() == listener) {
                     it.remove();
                     break;
                 }
@@ -174,7 +174,7 @@ public final class TvParentalControlManager {
     private void notifyEnabledChanged() {
         final boolean enabled = isEnabled();
         synchronized (mLock) {
-            for (ParentalControlCallbackRecord record : mParentalControlCallbackRecordList) {
+            for (ParentalControlListenerRecord record : mParentalControlListenerRecordList) {
                 record.postEnabledChanged(enabled);
             }
         }
@@ -188,7 +188,7 @@ public final class TvParentalControlManager {
             if (Settings.Secure.TV_PARENTAL_CONTROL_ENABLED.equals(name)) {
                 notifyEnabledChanged();
             } else if (Settings.Secure.TV_PARENTAL_CONTROL_BLOCKED_RATINGS.equals(name)) {
-                // We only need a single callback when multiple ratings change in rapid
+                // We only need a single listener when multiple ratings change in rapid
                 // succession.
                 mHandler.removeCallbacks(mBlockedRatingsChangedRunnable);
                 mHandler.post(mBlockedRatingsChangedRunnable);
@@ -204,7 +204,7 @@ public final class TvParentalControlManager {
         @Override
         public void run() {
             synchronized (mLock) {
-                for (ParentalControlCallbackRecord record : mParentalControlCallbackRecordList) {
+                for (ParentalControlListenerRecord record : mParentalControlListenerRecordList) {
                     record.postBlockedRatingsChanged();
                 }
             }
@@ -212,9 +212,9 @@ public final class TvParentalControlManager {
     };
 
     /**
-     * Callback for changes in parental control settings, including enabled state.
+     * Listener for changes in parental control settings, including enabled state.
      */
-    public static abstract class ParentalControlCallback {
+    public static abstract class ParentalControlListener {
         /**
          * Called when the parental control enabled state changes.
          *
@@ -234,24 +234,24 @@ public final class TvParentalControlManager {
         public void onBlockedRatingsChanged() {}
     }
 
-    private static final class ParentalControlCallbackRecord {
-        private final ParentalControlCallback mCallback;
+    private static final class ParentalControlListenerRecord {
+        private final ParentalControlListener mListener;
         private final Handler mHandler;
 
-        public ParentalControlCallbackRecord(ParentalControlCallback callback, Handler handler) {
-            mCallback = callback;
+        public ParentalControlListenerRecord(ParentalControlListener listener, Handler handler) {
+            mListener = listener;
             mHandler = handler;
         }
 
-        public ParentalControlCallback getCallback() {
-            return mCallback;
+        public ParentalControlListener getListener() {
+            return mListener;
         }
 
         public void postEnabledChanged(final boolean enabled) {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    mCallback.onEnabledChanged(enabled);
+                    mListener.onEnabledChanged(enabled);
                 }
             });
         }
@@ -260,7 +260,7 @@ public final class TvParentalControlManager {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    mCallback.onBlockedRatingsChanged();
+                    mListener.onBlockedRatingsChanged();
                 }
             });
         }
