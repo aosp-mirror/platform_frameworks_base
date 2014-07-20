@@ -115,8 +115,10 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         switch (state) {
             case Display.STATE_OFF:
                 return SurfaceControl.POWER_MODE_OFF;
-            case Display.STATE_DOZING:
+            case Display.STATE_DOZE:
                 return SurfaceControl.POWER_MODE_DOZE;
+            case Display.STATE_DOZE_SUSPEND:
+                return SurfaceControl.POWER_MODE_DOZE_SUSPEND;
             default:
                 return SurfaceControl.POWER_MODE_NORMAL;
         }
