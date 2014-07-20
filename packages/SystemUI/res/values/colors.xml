@@ -34,17 +34,15 @@
     <color name="batterymeter_charge_color">#FFFFFFFF</color>
     <color name="batterymeter_bolt_color">#FFFFFFFF</color>
     <color name="qs_batterymeter_frame_color">#FF404040</color>
-    <color name="system_primary_color">#ff263238</color>
+    <color name="system_primary_color">#ff263238</color><!-- blue grey 900 -->
     <color name="system_secondary_color">#ff384248</color>
     <color name="system_accent_color">#ff80CBC4</color><!-- deep teal 200 -->
     <color name="system_warning_color">#fff4511e</color><!-- deep orange 600 -->
     <color name="qs_text">#FFFFFFFF</color>
     <color name="qs_tile_divider">#29ffffff</color><!-- 16% white -->
     <color name="qs_tile_text">#B3FFFFFF</color><!-- 70% white -->
-    <color name="qs_subhead">#66FFFFFF</color><!-- 40% white -->
+    <color name="qs_subhead">#99FFFFFF</color><!-- 60% white -->
     <color name="qs_detail_empty">#24B0BEC5</color><!-- 14% blue grey 200-->
-    <color name="zen_alarm_soft_warning_text">#99FFFFFF</color><!-- 60% white -->
-    <color name="zen_alarm_soft_warning_background">#15FFFFFF</color><!-- 8% white -->
     <color name="data_usage_secondary">#99FFFFFF</color><!-- 60% white -->
     <color name="data_usage_graph_track">#33FFFFFF</color><!-- 20% white -->
     <color name="data_usage_graph_warning">#FFFFFFFF</color>
@@ -94,7 +92,5 @@
     <!-- The color of the circle around the primary user in the user switcher -->
     <color name="current_user_border_color">@color/system_accent_color</color>
 
-    <color name="segmented_button_selected">#ff3d4549</color><!-- #33afbdc4 = 20% #afbdc4 = #ff3d4549 composite -->
-    <color name="segmented_button_background">#ff21272b</color>
-    <color name="segmented_button_text_inactive">#b3afbdc4</color><!-- 70% -->
+    <color name="segmented_button_text_inactive">#99afbdc4</color><!-- 60% -->
 </resources>

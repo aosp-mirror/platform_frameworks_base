@@ -84,7 +84,7 @@ public class VolumeUI extends SystemUI {
 
     private void initPanel() {
         mDismissDelay = mContext.getResources().getInteger(R.integer.volume_panel_dismiss_delay);
-        mPanel = new VolumePanel(mContext, null, new ZenModeControllerImpl(mContext, mHandler));
+        mPanel = new VolumePanel(mContext, new ZenModeControllerImpl(mContext, mHandler));
         mPanel.setCallback(new VolumePanel.Callback() {
             @Override
             public void onZenSettings() {

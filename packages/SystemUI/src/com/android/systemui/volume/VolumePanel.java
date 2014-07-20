@@ -130,18 +130,14 @@ public class VolumePanel extends Handler {
 
     /** Volume panel content view */
     private final View mView;
-    /** Dialog hosting the panel, if not embedded */
+    /** Dialog hosting the panel */
     private final Dialog mDialog;
-    /** Parent view hosting the panel, if embedded */
-    private final ViewGroup mParent;
 
     /** The visible portion of the volume overlay */
     private final ViewGroup mPanel;
     /** Contains the slider and its touchable icons */
     private final ViewGroup mSliderPanel;
-    /** The zen mode configuration panel view stub */
-    private final ViewStub mZenPanelStub;
-    /** The zen mode configuration panel view, once inflated */
+    /** The zen mode configuration panel view */
     private ZenModePanel mZenPanel;
 
     private Callback mCallback;
@@ -276,10 +272,9 @@ public class VolumePanel extends Handler {
     }
 
 
-    public VolumePanel(Context context, ViewGroup parent, ZenModeController zenController) {
-        mTag = String.format("%s.%s.%08x", TAG, parent == null ? "Dialog" : "Embed", hashCode());
+    public VolumePanel(Context context, ZenModeController zenController) {
+        mTag = String.format("%s.%08x", TAG, hashCode());
         mContext = context;
-        mParent = parent;
         mZenController = zenController;
         mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
 
@@ -292,71 +287,65 @@ public class VolumePanel extends Handler {
                 streamRes.show = (streamRes.streamType == STREAM_MASTER);
             }
         }
-        if (LOGD) Log.d(mTag, String.format("new VolumePanel hasParent=%s", parent != null));
-        if (parent == null) {
-            // dialog mode
-            mDialog = new Dialog(context) {
-                @Override
-                public boolean onTouchEvent(MotionEvent event) {
-                    if (isShowing() && event.getAction() == MotionEvent.ACTION_OUTSIDE &&
-                            sConfirmSafeVolumeDialog == null) {
-                        forceTimeout(0);
-                        return true;
-                    }
-                    return false;
+        if (LOGD) Log.d(mTag, "new VolumePanel");
+
+        mDialog = new Dialog(context) {
+            @Override
+            public boolean onTouchEvent(MotionEvent event) {
+                if (isShowing() && event.getAction() == MotionEvent.ACTION_OUTSIDE &&
+                        sConfirmSafeVolumeDialog == null) {
+                    forceTimeout(0);
+                    return true;
                 }
-            };
+                return false;
+            }
+        };
 
-            // Change some window properties
-            final Window window = mDialog.getWindow();
-            final LayoutParams lp = window.getAttributes();
-            lp.token = null;
-            // Offset from the top
-            lp.y = res.getDimensionPixelOffset(com.android.systemui.R.dimen.volume_panel_top);
-            lp.type = LayoutParams.TYPE_STATUS_BAR_PANEL;
-            lp.format = PixelFormat.TRANSLUCENT;
-            lp.windowAnimations = com.android.systemui.R.style.VolumePanelAnimation;
-            lp.gravity = Gravity.TOP;
-            window.setAttributes(lp);
-            window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-            window.requestFeature(Window.FEATURE_NO_TITLE);
-            window.addFlags(LayoutParams.FLAG_NOT_FOCUSABLE
-                    | LayoutParams.FLAG_NOT_TOUCH_MODAL
-                    | LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
-                    | LayoutParams.FLAG_HARDWARE_ACCELERATED);
-            mDialog.setCanceledOnTouchOutside(true);
-            mDialog.setContentView(com.android.systemui.R.layout.volume_dialog);
-            mDialog.setOnDismissListener(new OnDismissListener() {
-                @Override
-                public void onDismiss(DialogInterface dialog) {
-                    mActiveStreamType = -1;
-                    mAudioManager.forceVolumeControlStream(mActiveStreamType);
-                    setZenPanelVisible(false);
-                }
-            });
+        // Change some window properties
+        final Window window = mDialog.getWindow();
+        final LayoutParams lp = window.getAttributes();
+        lp.token = null;
+        // Offset from the top
+        lp.y = res.getDimensionPixelOffset(com.android.systemui.R.dimen.volume_panel_top);
+        lp.type = LayoutParams.TYPE_STATUS_BAR_PANEL;
+        lp.format = PixelFormat.TRANSLUCENT;
+        lp.windowAnimations = com.android.systemui.R.style.VolumePanelAnimation;
+        lp.gravity = Gravity.TOP;
+        window.setAttributes(lp);
+        window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+        window.requestFeature(Window.FEATURE_NO_TITLE);
+        window.addFlags(LayoutParams.FLAG_NOT_FOCUSABLE
+                | LayoutParams.FLAG_NOT_TOUCH_MODAL
+                | LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
+                | LayoutParams.FLAG_HARDWARE_ACCELERATED);
+        mDialog.setCanceledOnTouchOutside(true);
+        mDialog.setContentView(com.android.systemui.R.layout.volume_dialog);
+        mDialog.setOnDismissListener(new OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialog) {
+                mActiveStreamType = -1;
+                mAudioManager.forceVolumeControlStream(mActiveStreamType);
+                setZenPanelVisible(false);
+            }
+        });
 
-            mDialog.create();
-            // temporary workaround, until we support window-level shadows
-            mDialog.getWindow().setBackgroundDrawable(new ColorDrawable(0x00000000));
+        mDialog.create();
+        // temporary workaround, until we support window-level shadows
+        mDialog.getWindow().setBackgroundDrawable(new ColorDrawable(0x00000000));
 
-            mView = window.findViewById(R.id.content);
-            mView.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    resetTimeout();
-                    return false;
-                }
-            });
+        mView = window.findViewById(R.id.content);
+        mView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                resetTimeout();
+                return false;
+            }
+        });
 
-        } else {
-            // embedded mode
-            mDialog = null;
-            mView = LayoutInflater.from(mContext).inflate(
-                    com.android.systemui.R.layout.volume_panel, parent, false);
-        }
         mPanel = (ViewGroup) mView.findViewById(com.android.systemui.R.id.visible_panel);
         mSliderPanel = (ViewGroup) mView.findViewById(com.android.systemui.R.id.slider_panel);
-        mZenPanelStub = (ViewStub)mView.findViewById(com.android.systemui.R.id.zen_panel_stub);
+        mZenPanel = (ZenModePanel) mView.findViewById(com.android.systemui.R.id.zen_mode_panel);
+        initZenModePanel();
 
         mToneGenerators = new ToneGenerator[AudioSystem.getNumStreamTypes()];
         mVibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
@@ -373,8 +362,29 @@ public class VolumePanel extends Handler {
         listenToRingerMode();
     }
 
-    public View getContentView() {
-        return mView;
+    private void initZenModePanel() {
+        mZenPanel.init(mZenController);
+        mZenPanel.setCallback(new ZenModePanel.Callback() {
+            @Override
+            public void onMoreSettings() {
+                if (mCallback != null) {
+                    mCallback.onZenSettings();
+                }
+            }
+
+            @Override
+            public void onInteraction() {
+                resetTimeout();
+            }
+
+            @Override
+            public void onExpanded(boolean expanded) {
+                if (mZenPanelExpanded == expanded) return;
+                mZenPanelExpanded = expanded;
+                updateTimeoutDelay();
+                resetTimeout();
+            }
+        });
     }
 
     private void setLayoutDirection(int layoutDirection) {
@@ -612,37 +622,10 @@ public class VolumePanel extends Handler {
         if (LOGD) Log.d(mTag, "setZenPanelVisible " + visible + " mZenPanel=" + mZenPanel);
         final boolean changing = visible != isZenPanelVisible();
         if (visible) {
-            if (mZenPanel == null) {
-                mZenPanel = (ZenModePanel) mZenPanelStub.inflate();
-                mZenPanel.init(mZenController, mDialog != null ? 'D' : 'E');
-                mZenPanel.setCallback(new ZenModePanel.Callback() {
-                    @Override
-                    public void onMoreSettings() {
-                        if (mCallback != null) {
-                            mCallback.onZenSettings();
-                        }
-                    }
-
-                    @Override
-                    public void onInteraction() {
-                        resetTimeout();
-                    }
-
-                    @Override
-                    public void onExpanded(boolean expanded) {
-                        if (mZenPanelExpanded == expanded) return;
-                        mZenPanelExpanded = expanded;
-                        updateTimeoutDelay();
-                        resetTimeout();
-                    }
-                });
-            }
-            mZenPanel.setVisibility(View.VISIBLE);
+            mZenPanel.setHidden(false);
             resetTimeout();
         } else {
-            if (mZenPanel != null) {
-                mZenPanel.setVisibility(View.GONE);
-            }
+            mZenPanel.setHidden(true);
         }
         if (changing) {
             updateTimeoutDelay();
@@ -913,11 +896,9 @@ public class VolumePanel extends Handler {
             // when the stream is for remote playback, use -1 to reset the stream type evaluation
             mAudioManager.forceVolumeControlStream(stream);
 
-            if (mDialog != null) {
-                mDialog.show();
-                if (mCallback != null) {
-                    mCallback.onVisible(true);
-                }
+            mDialog.show();
+            if (mCallback != null) {
+                mCallback.onVisible(true);
             }
         }
 
@@ -936,7 +917,7 @@ public class VolumePanel extends Handler {
     }
 
     private boolean isShowing() {
-        return mDialog != null ? mDialog.isShowing() : mParent.isAttachedToWindow();
+        return mDialog.isShowing();
     }
 
     protected void onPlaySound(int streamType, int flags) {
@@ -1166,13 +1147,11 @@ public class VolumePanel extends Handler {
 
             case MSG_TIMEOUT: {
                 if (isShowing()) {
-                    if (mDialog != null) {
-                        mDialog.dismiss();
-                        clearRemoteStreamController();
-                        mActiveStreamType = -1;
-                        if (mCallback != null) {
-                            mCallback.onVisible(false);
-                        }
+                    mDialog.dismiss();
+                    clearRemoteStreamController();
+                    mActiveStreamType = -1;
+                    if (mCallback != null) {
+                        mCallback.onVisible(false);
                     }
                 }
                 synchronized (sConfirmSafeVolumeLock) {
