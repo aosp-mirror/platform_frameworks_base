@@ -84,7 +84,7 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
         mContext = context;
         mSystemServicesProxy = new SystemServicesProxy(context);
         mHandler = new Handler();
-        mConfig = RecentsConfiguration.reinitialize(context);
+        mConfig = RecentsConfiguration.reinitialize(context, mSystemServicesProxy);
         mWindowRect = mSystemServicesProxy.getWindowRect();
         mTaskStackBounds = new Rect();
         mConfig.getTaskStackBounds(mWindowRect.width(), mWindowRect.height(), mTaskStackBounds);
@@ -147,7 +147,7 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
     }
 
     public void onConfigurationChanged(Configuration newConfig) {
-        mConfig = RecentsConfiguration.reinitialize(mContext);
+        mConfig = RecentsConfiguration.reinitialize(mContext, mSystemServicesProxy);
         mConfig.updateOnConfigurationChange();
         mWindowRect = mSystemServicesProxy.getWindowRect();
         mConfig.getTaskStackBounds(mWindowRect.width(), mWindowRect.height(), mTaskStackBounds);
