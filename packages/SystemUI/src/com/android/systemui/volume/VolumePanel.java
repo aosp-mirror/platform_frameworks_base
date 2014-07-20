@@ -27,6 +27,7 @@ import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.ColorDrawable;
+import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.AudioService;
 import android.media.AudioSystem;
@@ -107,6 +108,11 @@ public class VolumePanel extends Handler {
     // Pseudo stream type for master volume
     private static final int STREAM_MASTER = -100;
     // Pseudo stream type for remote volume is defined in AudioService.STREAM_REMOTE_MUSIC
+
+    private static final AudioAttributes VIBRATION_ATTRIBUTES = new AudioAttributes.Builder()
+            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+            .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
+            .build();
 
     private final String mTag;
     protected final Context mContext;
@@ -969,7 +975,7 @@ public class VolumePanel extends Handler {
             return;
         }
 
-        mVibrator.vibrate(VIBRATE_DURATION, AudioManager.STREAM_SYSTEM);
+        mVibrator.vibrate(VIBRATE_DURATION, VIBRATION_ATTRIBUTES);
     }
 
     protected void onRemoteVolumeChanged(MediaController controller, int flags) {

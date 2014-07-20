@@ -21,6 +21,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.os.Vibrator;
 import android.util.Log;
@@ -65,6 +66,11 @@ public class ExpandHelper implements Gefingerpoken {
     // level of glow for a touch, without overstretch
     // overstretch fills the range (GLOW_BASE, 1.0]
     private static final float GLOW_BASE = 0.5f;
+
+    private static final AudioAttributes VIBRATION_ATTRIBUTES = new AudioAttributes.Builder()
+            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+            .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
+            .build();
 
     @SuppressWarnings("unused")
     private Context mContext;
@@ -550,7 +556,7 @@ public class ExpandHelper implements Gefingerpoken {
             mVibrator = (android.os.Vibrator)
                     mContext.getSystemService(Context.VIBRATOR_SERVICE);
         }
-        mVibrator.vibrate(duration, AudioManager.STREAM_SYSTEM);
+        mVibrator.vibrate(duration, VIBRATION_ATTRIBUTES);
     }
 }
 

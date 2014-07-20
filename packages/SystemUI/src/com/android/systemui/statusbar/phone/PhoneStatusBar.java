@@ -56,7 +56,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.inputmethodservice.InputMethodService;
-import android.media.AudioManager;
+import android.media.AudioAttributes;
 import android.media.MediaMetadata;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
@@ -192,6 +192,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
      * The delay to reset the hint text when the hint animation is finished running.
      */
     private static final int HINT_RESET_DELAY_MS = 1200;
+
+    private static final AudioAttributes VIBRATION_ATTRIBUTES = new AudioAttributes.Builder()
+            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+            .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
+            .build();
 
     PhoneStatusBarPolicy mIconPolicy;
 
@@ -2956,7 +2961,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     void vibrate() {
         android.os.Vibrator vib = (android.os.Vibrator)mContext.getSystemService(
                 Context.VIBRATOR_SERVICE);
-        vib.vibrate(250, AudioManager.STREAM_SYSTEM);
+        vib.vibrate(250, VIBRATION_ATTRIBUTES);
     }
 
     Runnable mStartTracing = new Runnable() {
