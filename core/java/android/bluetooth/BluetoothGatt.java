@@ -40,7 +40,7 @@ import java.util.UUID;
 public final class BluetoothGatt implements BluetoothProfile {
     private static final String TAG = "BluetoothGatt";
     private static final boolean DBG = true;
-    private static final boolean VDBG = true;
+    private static final boolean VDBG = false;
 
     private final Context mContext;
     private IBluetoothGatt mService;
@@ -213,7 +213,7 @@ public final class BluetoothGatt implements BluetoothProfile {
              */
             public void onGetService(String address, int srvcType,
                                      int srvcInstId, ParcelUuid srvcUuid) {
-                if (DBG) Log.d(TAG, "onGetService() - Device=" + address + " UUID=" + srvcUuid);
+                if (VDBG) Log.d(TAG, "onGetService() - Device=" + address + " UUID=" + srvcUuid);
                 if (!address.equals(mDevice.getAddress())) {
                     return;
                 }
@@ -230,7 +230,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                                              int srvcInstId, ParcelUuid srvcUuid,
                                              int inclSrvcType, int inclSrvcInstId,
                                              ParcelUuid inclSrvcUuid) {
-                if (DBG) Log.d(TAG, "onGetIncludedService() - Device=" + address
+                if (VDBG) Log.d(TAG, "onGetIncludedService() - Device=" + address
                     + " UUID=" + srvcUuid + " Included=" + inclSrvcUuid);
 
                 if (!address.equals(mDevice.getAddress())) {
@@ -256,7 +256,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                              int srvcInstId, ParcelUuid srvcUuid,
                              int charInstId, ParcelUuid charUuid,
                              int charProps) {
-                if (DBG) Log.d(TAG, "onGetCharacteristic() - Device=" + address + " UUID=" +
+                if (VDBG) Log.d(TAG, "onGetCharacteristic() - Device=" + address + " UUID=" +
                                charUuid);
 
                 if (!address.equals(mDevice.getAddress())) {
@@ -280,7 +280,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                              int srvcInstId, ParcelUuid srvcUuid,
                              int charInstId, ParcelUuid charUuid,
                              int descrInstId, ParcelUuid descUuid) {
-                if (DBG) Log.d(TAG, "onGetDescriptor() - Device=" + address + " UUID=" + descUuid);
+                if (VDBG) Log.d(TAG, "onGetDescriptor() - Device=" + address + " UUID=" + descUuid);
 
                 if (!address.equals(mDevice.getAddress())) {
                     return;
@@ -324,7 +324,7 @@ public final class BluetoothGatt implements BluetoothProfile {
             public void onCharacteristicRead(String address, int status, int srvcType,
                              int srvcInstId, ParcelUuid srvcUuid,
                              int charInstId, ParcelUuid charUuid, byte[] value) {
-                if (DBG) Log.d(TAG, "onCharacteristicRead() - Device=" + address
+                if (VDBG) Log.d(TAG, "onCharacteristicRead() - Device=" + address
                             + " UUID=" + charUuid + " Status=" + status);
 
                 if (!address.equals(mDevice.getAddress())) {
@@ -376,7 +376,7 @@ public final class BluetoothGatt implements BluetoothProfile {
             public void onCharacteristicWrite(String address, int status, int srvcType,
                              int srvcInstId, ParcelUuid srvcUuid,
                              int charInstId, ParcelUuid charUuid) {
-                if (DBG) Log.d(TAG, "onCharacteristicWrite() - Device=" + address
+                if (VDBG) Log.d(TAG, "onCharacteristicWrite() - Device=" + address
                             + " UUID=" + charUuid + " Status=" + status);
 
                 if (!address.equals(mDevice.getAddress())) {
@@ -428,7 +428,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                              int srvcInstId, ParcelUuid srvcUuid,
                              int charInstId, ParcelUuid charUuid,
                              byte[] value) {
-                if (DBG) Log.d(TAG, "onNotify() - Device=" + address + " UUID=" + charUuid);
+                if (VDBG) Log.d(TAG, "onNotify() - Device=" + address + " UUID=" + charUuid);
 
                 if (!address.equals(mDevice.getAddress())) {
                     return;
@@ -459,7 +459,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                              int charInstId, ParcelUuid charUuid,
                              int descrInstId, ParcelUuid descrUuid,
                              byte[] value) {
-                if (DBG) Log.d(TAG, "onDescriptorRead() - Device=" + address + " UUID=" + charUuid);
+                if (VDBG) Log.d(TAG, "onDescriptorRead() - Device=" + address + " UUID=" + charUuid);
 
                 if (!address.equals(mDevice.getAddress())) {
                     return;
@@ -513,7 +513,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                              int srvcInstId, ParcelUuid srvcUuid,
                              int charInstId, ParcelUuid charUuid,
                              int descrInstId, ParcelUuid descrUuid) {
-                if (DBG) Log.d(TAG, "onDescriptorWrite() - Device=" + address + " UUID=" + charUuid);
+                if (VDBG) Log.d(TAG, "onDescriptorWrite() - Device=" + address + " UUID=" + charUuid);
 
                 if (!address.equals(mDevice.getAddress())) {
                     return;
@@ -563,7 +563,7 @@ public final class BluetoothGatt implements BluetoothProfile {
              * @hide
              */
             public void onExecuteWrite(String address, int status) {
-                if (DBG) Log.d(TAG, "onExecuteWrite() - Device=" + address
+                if (VDBG) Log.d(TAG, "onExecuteWrite() - Device=" + address
                     + " status=" + status);
                 if (!address.equals(mDevice.getAddress())) {
                     return;
@@ -585,7 +585,7 @@ public final class BluetoothGatt implements BluetoothProfile {
              * @hide
              */
             public void onReadRemoteRssi(String address, int rssi, int status) {
-                if (DBG) Log.d(TAG, "onReadRemoteRssi() - Device=" + address +
+                if (VDBG) Log.d(TAG, "onReadRemoteRssi() - Device=" + address +
                             " rssi=" + rssi + " status=" + status);
                 if (!address.equals(mDevice.getAddress())) {
                     return;
@@ -935,7 +935,7 @@ public final class BluetoothGatt implements BluetoothProfile {
         if ((characteristic.getProperties() &
                 BluetoothGattCharacteristic.PROPERTY_READ) == 0) return false;
 
-        if (DBG) Log.d(TAG, "readCharacteristic() - uuid: " + characteristic.getUuid());
+        if (VDBG) Log.d(TAG, "readCharacteristic() - uuid: " + characteristic.getUuid());
         if (mService == null || mClientIf == 0) return false;
 
         BluetoothGattService service = characteristic.getService();
@@ -980,7 +980,7 @@ public final class BluetoothGatt implements BluetoothProfile {
             && (characteristic.getProperties() &
                 BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE) == 0) return false;
 
-        if (DBG) Log.d(TAG, "writeCharacteristic() - uuid: " + characteristic.getUuid());
+        if (VDBG) Log.d(TAG, "writeCharacteristic() - uuid: " + characteristic.getUuid());
         if (mService == null || mClientIf == 0) return false;
 
         BluetoothGattService service = characteristic.getService();
@@ -1023,7 +1023,7 @@ public final class BluetoothGatt implements BluetoothProfile {
      * @return true, if the read operation was initiated successfully
      */
     public boolean readDescriptor(BluetoothGattDescriptor descriptor) {
-        if (DBG) Log.d(TAG, "readDescriptor() - uuid: " + descriptor.getUuid());
+        if (VDBG) Log.d(TAG, "readDescriptor() - uuid: " + descriptor.getUuid());
         if (mService == null || mClientIf == 0) return false;
 
         BluetoothGattCharacteristic characteristic = descriptor.getCharacteristic();
@@ -1067,7 +1067,7 @@ public final class BluetoothGatt implements BluetoothProfile {
      * @return true, if the write operation was initiated successfully
      */
     public boolean writeDescriptor(BluetoothGattDescriptor descriptor) {
-        if (DBG) Log.d(TAG, "writeDescriptor() - uuid: " + descriptor.getUuid());
+        if (VDBG) Log.d(TAG, "writeDescriptor() - uuid: " + descriptor.getUuid());
         if (mService == null || mClientIf == 0) return false;
 
         BluetoothGattCharacteristic characteristic = descriptor.getCharacteristic();
@@ -1121,7 +1121,7 @@ public final class BluetoothGatt implements BluetoothProfile {
      * @return true, if the reliable write transaction has been initiated
      */
     public boolean beginReliableWrite() {
-        if (DBG) Log.d(TAG, "beginReliableWrite() - device: " + mDevice.getAddress());
+        if (VDBG) Log.d(TAG, "beginReliableWrite() - device: " + mDevice.getAddress());
         if (mService == null || mClientIf == 0) return false;
 
         try {
@@ -1148,7 +1148,7 @@ public final class BluetoothGatt implements BluetoothProfile {
      * @return true, if the request to execute the transaction has been sent
      */
     public boolean executeReliableWrite() {
-        if (DBG) Log.d(TAG, "executeReliableWrite() - device: " + mDevice.getAddress());
+        if (VDBG) Log.d(TAG, "executeReliableWrite() - device: " + mDevice.getAddress());
         if (mService == null || mClientIf == 0) return false;
 
         synchronized(mDeviceBusy) {
@@ -1176,7 +1176,7 @@ public final class BluetoothGatt implements BluetoothProfile {
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      */
     public void abortReliableWrite() {
-        if (DBG) Log.d(TAG, "abortReliableWrite() - device: " + mDevice.getAddress());
+        if (VDBG) Log.d(TAG, "abortReliableWrite() - device: " + mDevice.getAddress());
         if (mService == null || mClientIf == 0) return;
 
         try {
