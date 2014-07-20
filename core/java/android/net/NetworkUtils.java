@@ -36,12 +36,6 @@ public class NetworkUtils {
 
     private static final String TAG = "NetworkUtils";
 
-    /** Bring the named network interface up. */
-    public native static int enableInterface(String interfaceName);
-
-    /** Bring the named network interface down. */
-    public native static int disableInterface(String interfaceName);
-
     /** Setting bit 0 indicates reseting of IPv4 addresses required */
     public static final int RESET_IPV4_ADDRESSES = 0x01;
 
