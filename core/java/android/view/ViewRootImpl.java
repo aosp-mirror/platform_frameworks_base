@@ -1161,7 +1161,7 @@ public final class ViewRootImpl implements ViewParent,
      * @param m input matrix to modify
      */
     void transformMatrixToGlobal(Matrix m) {
-        m.postTranslate(mAttachInfo.mWindowLeft, mAttachInfo.mWindowTop);
+        m.preTranslate(mAttachInfo.mWindowLeft, mAttachInfo.mWindowTop);
     }
 
     /**
@@ -1171,7 +1171,7 @@ public final class ViewRootImpl implements ViewParent,
      * @param m input matrix to modify
      */
     void transformMatrixToLocal(Matrix m) {
-        m.preTranslate(-mAttachInfo.mWindowLeft, -mAttachInfo.mWindowTop);
+        m.postTranslate(-mAttachInfo.mWindowLeft, -mAttachInfo.mWindowTop);
     }
 
     void dispatchApplyInsets(View host) {
