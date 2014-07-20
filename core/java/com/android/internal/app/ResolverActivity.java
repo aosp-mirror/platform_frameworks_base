@@ -18,7 +18,6 @@ package com.android.internal.app;
 
 import android.app.Activity;
 import android.os.AsyncTask;
-import android.util.ArrayMap;
 import android.widget.AbsListView;
 import android.widget.GridView;
 import com.android.internal.R;
@@ -60,6 +59,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -426,6 +426,13 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
         Intent intent = mAdapter.intentForPosition(which, filtered);
         onIntentSelected(ri, intent, always);
         finish();
+    }
+
+    /**
+     * Replace me in subclasses!
+     */
+    public Intent getReplacementIntent(String packageName, Intent defIntent) {
+        return defIntent;
     }
 
     protected void onIntentSelected(ResolveInfo ri, Intent intent, boolean alwaysCheck) {
@@ -807,9 +814,9 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
 
         public Intent intentForPosition(int position, boolean filtered) {
             DisplayResolveInfo dri = filtered ? getItem(position) : mList.get(position);
-            
-            Intent intent = new Intent(dri.origIntent != null
-                    ? dri.origIntent : mIntent);
+
+            Intent intent = new Intent(dri.origIntent != null ? dri.origIntent :
+                    getReplacementIntent(dri.ri.activityInfo.packageName, mIntent));
             intent.addFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT
                     |Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
             ActivityInfo ai = dri.ri.activityInfo;
