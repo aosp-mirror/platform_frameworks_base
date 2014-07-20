@@ -439,11 +439,11 @@ final class RemoteConnectionService implements DeathRecipient {
         }
     }
 
-    final List<PhoneAccount> lookupAccounts(Uri handle) {
+    final List<PhoneAccountHandle> lookupAccounts(Uri handle) {
         // TODO(santoscordon): Update this so that is actually calls into the RemoteConnection
         // each time.
-        List<PhoneAccount> accounts = new LinkedList<>();
-        accounts.add(new PhoneAccount(
+        List<PhoneAccountHandle> accounts = new LinkedList<>();
+        accounts.add(new PhoneAccountHandle(
                 mComponentName,
                 null /* id */));
         return accounts;
