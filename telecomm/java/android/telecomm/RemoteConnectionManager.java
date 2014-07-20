@@ -45,27 +45,28 @@ public class RemoteConnectionManager {
     }
 
     List<PhoneAccountHandle> getAccounts(Uri handle) {
-        List<PhoneAccountHandle> accounts = new LinkedList<>();
-        Log.d(this, "Getting accounts: " + mRemoteConnectionServices.keySet());
+        List<PhoneAccountHandle> accountHandles = new LinkedList<>();
+        Log.d(this, "Getting accountHandles: " + mRemoteConnectionServices.keySet());
         for (RemoteConnectionService remoteService : mRemoteConnectionServices.values()) {
             // TODO(santoscordon): Eventually this will be async.
-            accounts.addAll(remoteService.lookupAccounts(handle));
+            accountHandles.addAll(remoteService.lookupAccounts(handle));
         }
-        return accounts;
+        return accountHandles;
     }
 
     public void createRemoteConnection(
             ConnectionRequest request,
             ConnectionService.CreateConnectionResponse response,
             boolean isIncoming) {
-        PhoneAccountHandle account = request.getAccount();
-        if (account == null) {
-            throw new IllegalArgumentException("account must be specified.");
+        PhoneAccountHandle accountHandle = request.getAccountHandle();
+        if (accountHandle == null) {
+            throw new IllegalArgumentException("accountHandle must be specified.");
         }
 
-        ComponentName componentName = request.getAccount().getComponentName();
+        ComponentName componentName = request.getAccountHandle().getComponentName();
         if (!mRemoteConnectionServices.containsKey(componentName)) {
-            throw new UnsupportedOperationException("account not supported: " + componentName);
+            throw new UnsupportedOperationException("accountHandle not supported: "
+                    + componentName);
         } else {
             RemoteConnectionService remoteService = mRemoteConnectionServices.get(componentName);
             remoteService.createRemoteConnection(request, response, isIncoming);
