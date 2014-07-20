@@ -30,6 +30,7 @@ import android.hardware.camera2.marshal.impl.MarshalQueryableBoolean;
 import android.hardware.camera2.marshal.impl.MarshalQueryableBlackLevelPattern;
 import android.hardware.camera2.marshal.impl.MarshalQueryableColorSpaceTransform;
 import android.hardware.camera2.marshal.impl.MarshalQueryableEnum;
+import android.hardware.camera2.marshal.impl.MarshalQueryableHighSpeedVideoConfiguration;
 import android.hardware.camera2.marshal.impl.MarshalQueryableMeteringRectangle;
 import android.hardware.camera2.marshal.impl.MarshalQueryableNativeByteToInteger;
 import android.hardware.camera2.marshal.impl.MarshalQueryablePair;
@@ -45,6 +46,7 @@ import android.hardware.camera2.marshal.impl.MarshalQueryableStreamConfiguration
 import android.hardware.camera2.marshal.impl.MarshalQueryableStreamConfigurationDuration;
 import android.hardware.camera2.marshal.impl.MarshalQueryableString;
 import android.hardware.camera2.params.Face;
+import android.hardware.camera2.params.HighSpeedVideoConfiguration;
 import android.hardware.camera2.params.LensShadingMap;
 import android.hardware.camera2.params.StreamConfiguration;
 import android.hardware.camera2.params.StreamConfigurationDuration;
@@ -747,8 +749,11 @@ public class CameraMetadataNative implements Parcelable {
                 CameraCharacteristics.SCALER_AVAILABLE_MIN_FRAME_DURATIONS);
         StreamConfigurationDuration[] stallDurations = getBase(
                 CameraCharacteristics.SCALER_AVAILABLE_STALL_DURATIONS);
+        HighSpeedVideoConfiguration[] highSpeedVideoConfigurations = getBase(
+                CameraCharacteristics.CONTROL_AVAILABLE_HIGH_SPEED_VIDEO_CONFIGURATIONS);
 
-        return new StreamConfigurationMap(configurations, minFrameDurations, stallDurations);
+        return new StreamConfigurationMap(
+                configurations, minFrameDurations, stallDurations, highSpeedVideoConfigurations);
     }
 
     private <T> Integer getMaxRegions(Key<T> key) {
@@ -1115,6 +1120,7 @@ public class CameraMetadataNative implements Parcelable {
                 new MarshalQueryableStreamConfigurationDuration(),
                 new MarshalQueryableRggbChannelVector(),
                 new MarshalQueryableBlackLevelPattern(),
+                new MarshalQueryableHighSpeedVideoConfiguration(),
 
                 // generic parcelable marshaler (MUST BE LAST since it has lowest priority)
                 new MarshalQueryableParcelable(),
