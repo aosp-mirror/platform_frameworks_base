@@ -76,7 +76,53 @@ import java.util.Map;
  * </table>
  */
 public final class MediaFormat {
+    public static final String MIMETYPE_VIDEO_VP8 = "video/x-vnd.on2.vp8";
+    public static final String MIMETYPE_VIDEO_VP9 = "video/x-vnd.on2.vp9";
+    public static final String MIMETYPE_VIDEO_AVC = "video/avc";
+    public static final String MIMETYPE_VIDEO_HEVC = "video/hevc";
+    public static final String MIMETYPE_VIDEO_MPEG4 = "video/mp4v-es";
+    public static final String MIMETYPE_VIDEO_H263 = "video/3gpp";
+    public static final String MIMETYPE_VIDEO_MPEG2 = "video/mpeg2";
+    public static final String MIMETYPE_VIDEO_RAW = "video/raw";
+
+    public static final String MIMETYPE_AUDIO_AMR_NB = "audio/3gpp";
+    public static final String MIMETYPE_AUDIO_AMR_WB = "audio/amr-wb";
+    public static final String MIMETYPE_AUDIO_MPEG = "audio/mpeg";
+    public static final String MIMETYPE_AUDIO_AAC = "audio/mp4a-latm";
+    public static final String MIMETYPE_AUDIO_QCELP = "audio/qcelp";
+    public static final String MIMETYPE_AUDIO_VORBIS = "audio/vorbis";
+    public static final String MIMETYPE_AUDIO_OPUS = "audio/opus";
+    public static final String MIMETYPE_AUDIO_G711_ALAW = "audio/g711-alaw";
+    public static final String MIMETYPE_AUDIO_G711_MLAW = "audio/g711-mlaw";
+    public static final String MIMETYPE_AUDIO_RAW = "audio/raw";
+    public static final String MIMETYPE_AUDIO_FLAC = "audio/flac";
+    public static final String MIMETYPE_AUDIO_MSGSM = "audio/gsm";
+    public static final String MIMETYPE_AUDIO_AC3 = "audio/ac3";
+
+    /**
+     * MIME type for WebVTT subtitle data.
+     */
+    public static final String MIMETYPE_TEXT_VTT = "text/vtt";
+
+    /**
+     * MIME type for CEA-608 closed caption data.
+     */
+    public static final String MIMETYPE_TEXT_CEA_608 = "text/cea-608";
+
     private Map<String, Object> mMap;
+
+    /**
+     * A key prefix used together with a {@link MediaCodecInfo.CodecCapabilities}
+     * feature name describing a required or optional feature for a codec capabilities
+     * query.
+     * The associated value is an integer, where non-0 value means the feature is
+     * requested to be present, while 0 value means the feature is requested to be not
+     * present.
+     * @see MediaCodecList#findDecoderForFormat
+     * @see MediaCodecList#findEncoderForFormat
+     * @see MediaCodecInfo.CodecCapabilities#isFormatSupported
+     */
+    public static final String KEY_FEATURE_ = "feature-";
 
     /**
      * A key describing the mime type of the MediaFormat.
@@ -220,6 +266,51 @@ public final class MediaFormat {
      * to 8 (slowest, most compression).
      */
     public static final String KEY_FLAC_COMPRESSION_LEVEL = "flac-compression-level";
+
+    /**
+     * A key describing the encoding complexity.
+     * The associated value is an integer.  These values are device and codec specific,
+     * but lower values generally result in faster and/or less power-hungry encoding.
+     *
+     * @see MediaCodecInfo.CodecCapabilities.EncoderCapabilities#getComplexityRange
+     */
+    public static final String KEY_COMPLEXITY = "complexity";
+
+    /**
+     * A key describing the desired encoding quality.
+     * The associated value is an integer.  This key is only supported for encoders
+     * that are configured in constant-quality mode.  These values are device and
+     * codec specific, but lower values generally result in more efficient
+     * (smaller-sized) encoding.
+     *
+     * @see MediaCodecInfo.CodecCapabilities.EncoderCapabilities#getQualityRange
+     */
+    public static final String KEY_QUALITY = "quality";
+
+    /**
+     * A key describing the desired profile to be used by an encoder.
+     * Constants are declared in {@link MediaCodecInfo.CodecProfileLevel}.
+     * This key is only supported for codecs that specify a profile.
+     *
+     * @see MediaCodecInfo.CodecCapabilities#profileLevels
+     */
+    public static final String KEY_PROFILE = "profile";
+
+    /**
+     * A key describing the desired bitrate mode to be used by an encoder.
+     * Constants are declared in {@link MediaCodecInfo.CodecCapabilities}.
+     *
+     * @see MediaCodecInfo.CodecCapabilities.EncoderCapabilities#isBitrateModeSupported
+     */
+    public static final String KEY_BITRATE_MODE = "bitrate-mode";
+
+    /**
+     * A key describing the reference clock ID for a tunneled codec.
+     * The associated value is an integer.
+     *
+     * @see MediaCodecInfo.CodecCapabilities#FEATURE_TunneledPlayback
+     */
+    public static final String KEY_REFERENCE_CLOCK_ID = "reference-clock-id";
 
     /**
      * A key for boolean AUTOSELECT behavior for the track. Tracks with AUTOSELECT=true
