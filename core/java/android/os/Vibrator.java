@@ -73,7 +73,7 @@ public abstract class Vibrator {
      * @param milliseconds The number of milliseconds to vibrate.
      * @param attributes {@link AudioAttributes} corresponding to the vibration. For example,
      *        specify {@link AudioAttributes#USAGE_ALARM} for alarm vibrations or
-     *        {@link AudioAttributes#USAGE_NOTIFICATION_TELEPHONY_RINGTONE} for
+     *        {@link AudioAttributes#USAGE_NOTIFICATION_RINGTONE} for
      *        vibrations associated with incoming calls.
      */
     public void vibrate(long milliseconds, AudioAttributes attributes) {
@@ -125,7 +125,7 @@ public abstract class Vibrator {
      *        you don't want to repeat.
      * @param attributes {@link AudioAttributes} corresponding to the vibration. For example,
      *        specify {@link AudioAttributes#USAGE_ALARM} for alarm vibrations or
-     *        {@link AudioAttributes#USAGE_NOTIFICATION_TELEPHONY_RINGTONE} for
+     *        {@link AudioAttributes#USAGE_NOTIFICATION_RINGTONE} for
      *        vibrations associated with incoming calls.
      */
     public void vibrate(long[] pattern, int repeat, AudioAttributes attributes) {
