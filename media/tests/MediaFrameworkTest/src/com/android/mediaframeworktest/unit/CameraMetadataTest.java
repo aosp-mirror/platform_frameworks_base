@@ -36,6 +36,7 @@ import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.marshal.impl.MarshalQueryableEnum;
 import android.hardware.camera2.params.ColorSpaceTransform;
 import android.hardware.camera2.params.Face;
+import android.hardware.camera2.params.HighSpeedVideoConfiguration;
 import android.hardware.camera2.params.MeteringRectangle;
 import android.hardware.camera2.params.ReprocessFormatsMap;
 import android.hardware.camera2.params.RggbChannelVector;
@@ -51,7 +52,6 @@ import static com.android.mediaframeworktest.unit.ByteArrayHelpers.*;
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -730,6 +730,32 @@ public class CameraMetadataTest extends junit.framework.TestCase {
     }
 
     @SmallTest
+    public void testReadWriteHighSpeedVideoConfiguration() {
+        // int32 x 4 x 1
+        checkKeyMarshal("android.control.availableHighSpeedVideoConfigurations",
+                new HighSpeedVideoConfiguration(
+                        /*width*/1000, /*height*/255, /*fpsMin*/30, /*fpsMax*/200),
+                /* width, height, fpsMin, fpsMax */
+                toByteArray(1000, 255, 30, 200));
+
+        // int32 x 4 x 3
+        checkKeyMarshal("android.control.availableHighSpeedVideoConfigurations",
+                new HighSpeedVideoConfiguration[] {
+                    new HighSpeedVideoConfiguration(
+                            /*width*/1280, /*height*/720, /*fpsMin*/60, /*fpsMax*/120),
+                    new HighSpeedVideoConfiguration(
+                            /*width*/123, /*height*/456, /*fpsMin*/1, /*fpsMax*/200),
+                    new HighSpeedVideoConfiguration(
+                            /*width*/4096, /*height*/2592, /*fpsMin*/30, /*fpsMax*/60)
+                },
+                toByteArray(
+                        1280, 720, 60, 120,
+                        123, 456, 1, 200,
+                        4096, 2592, 30, 60
+        ));
+    }
+
+    @SmallTest
     public void testReadWriteColorSpaceTransform() {
         // rational x 3 x 3
         checkKeyMarshal("android.colorCorrection.transform",
@@ -741,7 +767,7 @@ public class CameraMetadataTest extends junit.framework.TestCase {
                 toByteArray(
                         1, 2, 3, 4, 5, 6,
                         7, 8, 8, 9, 10, 11,
-                        1, 5, 2, 8, 3, 9));
+                        1, 5, 1, 4, 1, 3));
     }
 
     @SmallTest
