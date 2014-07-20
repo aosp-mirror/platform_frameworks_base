@@ -34,6 +34,8 @@ public class BitmapHelper {
      * @return A shiny new bitmap for you to use
      */
     public static Bitmap createCircularClip(Bitmap input, int width, int height) {
+        if (input == null) return null;
+
         final int inWidth = input.getWidth();
         final int inHeight = input.getHeight();
         final Bitmap output = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
