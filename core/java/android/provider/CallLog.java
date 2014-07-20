@@ -26,7 +26,7 @@ import android.net.Uri;
 import android.provider.ContactsContract.CommonDataKinds.Callable;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.DataUsageFeedback;
-import android.telecomm.PhoneAccount;
+import android.telecomm.PhoneAccountHandle;
 import android.text.TextUtils;
 
 import com.android.internal.telephony.CallerInfo;
@@ -352,8 +352,8 @@ public class CallLog {
          * {@hide}
          */
         public static Uri addCall(CallerInfo ci, Context context, String number,
-                int presentation, int callType, int features, PhoneAccount account, long start,
-                int duration, Long dataUsage) {
+                int presentation, int callType, int features, PhoneAccountHandle account,
+                long start, int duration, Long dataUsage) {
             final ContentResolver resolver = context.getContentResolver();
             int numberPresentation = PRESENTATION_ALLOWED;
 

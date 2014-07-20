@@ -17,7 +17,7 @@
 package com.android.internal.telecomm;
 
 import android.content.ComponentName;
-import android.telecomm.PhoneAccount;
+import android.telecomm.PhoneAccountHandle;
 import android.telecomm.PhoneAccountMetadata;
 
 /**
@@ -36,17 +36,17 @@ interface ITelecommService {
     /**
      * @see TelecommManager#getDefaultOutgoingPhoneAccount
      */
-    PhoneAccount getDefaultOutgoingPhoneAccount();
+    PhoneAccountHandle getDefaultOutgoingPhoneAccount();
 
     /**
      * @see TelecommManager#getEnabledPhoneAccounts
      */
-    List<PhoneAccount> getEnabledPhoneAccounts();
+    List<PhoneAccountHandle> getEnabledPhoneAccounts();
 
     /**
      * @see TelecommManager#getPhoneAccountMetadata
      */
-    PhoneAccountMetadata getPhoneAccountMetadata(in PhoneAccount account);
+    PhoneAccountMetadata getPhoneAccountMetadata(in PhoneAccountHandle account);
 
     /**
      * @see TelecommManager#registerPhoneAccount
@@ -56,7 +56,7 @@ interface ITelecommService {
     /**
      * @see TelecommManager#unregisterPhoneAccount
      */
-    void unregisterPhoneAccount(in PhoneAccount account);
+    void unregisterPhoneAccount(in PhoneAccountHandle account);
 
     /**
      * @see TelecommManager#clearAccounts

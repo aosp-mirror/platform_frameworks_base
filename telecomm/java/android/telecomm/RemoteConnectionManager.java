@@ -44,8 +44,8 @@ public class RemoteConnectionManager {
         }
     }
 
-    List<PhoneAccount> getAccounts(Uri handle) {
-        List<PhoneAccount> accounts = new LinkedList<>();
+    List<PhoneAccountHandle> getAccounts(Uri handle) {
+        List<PhoneAccountHandle> accounts = new LinkedList<>();
         Log.d(this, "Getting accounts: " + mRemoteConnectionServices.keySet());
         for (RemoteConnectionService remoteService : mRemoteConnectionServices.values()) {
             // TODO(santoscordon): Eventually this will be async.
@@ -58,7 +58,7 @@ public class RemoteConnectionManager {
             ConnectionRequest request,
             ConnectionService.CreateConnectionResponse response,
             boolean isIncoming) {
-        PhoneAccount account = request.getAccount();
+        PhoneAccountHandle account = request.getAccount();
         if (account == null) {
             throw new IllegalArgumentException("account must be specified.");
         }
