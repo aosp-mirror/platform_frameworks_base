@@ -206,7 +206,7 @@ public class ValueAnimator extends Animator {
     /**
      * The set of listeners to be sent events through the life of an animation.
      */
-    private ArrayList<AnimatorUpdateListener> mUpdateListeners = null;
+    ArrayList<AnimatorUpdateListener> mUpdateListeners = null;
 
     /**
      * The property/value sets being animated.
@@ -1064,8 +1064,9 @@ public class ValueAnimator extends Animator {
     /**
      * Called internally to end an animation by removing it from the animations list. Must be
      * called on the UI thread.
+     * @hide
      */
-    private void endAnimation(AnimationHandler handler) {
+    protected void endAnimation(AnimationHandler handler) {
         handler.mAnimations.remove(this);
         handler.mPendingAnimations.remove(this);
         handler.mDelayedAnims.remove(this);
@@ -1372,5 +1373,43 @@ public class ValueAnimator extends Animator {
             }
         }
         return returnVal;
+    }
+
+    /**
+     * <p>Whether or not the ValueAnimator is allowed to run asynchronously off of
+     * the UI thread. This is a hint that informs the ValueAnimator that it is
+     * OK to run the animation off-thread, however ValueAnimator may decide
+     * that it must run the animation on the UI thread anyway. For example if there
+     * is an {@link AnimatorUpdateListener} the animation will run on the UI thread,
+     * regardless of the value of this hint.</p>
+     *
+     * <p>Regardless of whether or not the animation runs asynchronously, all
+     * listener callbacks will be called on the UI thread.</p>
+     *
+     * <p>To be able to use this hint the following must be true:</p>
+     * <ol>
+     * <li>{@link #getAnimatedFraction()} is not needed (it will return undefined values).</li>
+     * <li>The animator is immutable while {@link #isStarted()} is true. Requests
+     *    to change values, duration, delay, etc... may be ignored.</li>
+     * <li>Lifecycle callback events may be asynchronous. Events such as
+     *    {@link Animator.AnimatorListener#onAnimationEnd(Animator)} or
+     *    {@link Animator.AnimatorListener#onAnimationRepeat(Animator)} may end up delayed
+     *    as they must be posted back to the UI thread, and any actions performed
+     *    by those callbacks (such as starting new animations) will not happen
+     *    in the same frame.</li>
+     * <li>State change requests ({@link #cancel()}, {@link #end()}, {@link #reverse()}, etc...)
+     *    may be asynchronous. It is guaranteed that all state changes that are
+     *    performed on the UI thread in the same frame will be applied as a single
+     *    atomic update, however that frame may be the current frame,
+     *    the next frame, or some future frame. This will also impact the observed
+     *    state of the Animator. For example, {@link #isStarted()} may still return true
+     *    after a call to {@link #end()}. Using the lifecycle callbacks is preferred over
+     *    queries to {@link #isStarted()}, {@link #isRunning()}, and {@link #isPaused()}
+     *    for this reason.</li>
+     * </ol>
+     * @hide
+     */
+    public void setAllowRunningAsynchronously(boolean mayRunAsync) {
+        // It is up to subclasses to support this, if they can.
     }
 }
