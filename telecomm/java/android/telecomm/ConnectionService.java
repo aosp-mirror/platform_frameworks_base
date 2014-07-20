@@ -26,7 +26,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.telecomm.CallVideoProvider;
 
 import com.android.internal.os.SomeArgs;
 import com.android.internal.telecomm.IConnectionService;
@@ -68,7 +67,7 @@ public abstract class ConnectionService extends Service {
     private final Map<Connection, String> mIdByConnection = new HashMap<>();
     private final RemoteConnectionManager mRemoteConnectionManager = new RemoteConnectionManager();
 
-    private SimpleResponse<Uri, List<PhoneAccount>> mAccountLookupResponse;
+    private SimpleResponse<Uri, List<PhoneAccountHandle>> mAccountLookupResponse;
     private Uri mAccountLookupHandle;
     private boolean mAreAccountsInitialized = false;
     private final ConnectionServiceAdapter mAdapter = new ConnectionServiceAdapter();
@@ -597,7 +596,7 @@ public abstract class ConnectionService extends Service {
     }
 
     public final void lookupRemoteAccounts(
-            Uri handle, SimpleResponse<Uri, List<PhoneAccount>> response) {
+            Uri handle, SimpleResponse<Uri, List<PhoneAccountHandle>> response) {
         mAccountLookupResponse = response;
         mAccountLookupHandle = handle;
         maybeRespondToAccountLookup();
