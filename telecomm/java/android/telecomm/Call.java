@@ -431,10 +431,10 @@ public final class Call {
      * While these tones are playing, this {@code Call} will notify listeners via
      * {@link Listener#onPostDial(Call, String)}.
      *
-     * If the DTMF string contains a {@link TelecommConstants#DTMF_CHARACTER_PAUSE} symbol, this
+     * If the DTMF string contains a {@link TelecommManager#DTMF_CHARACTER_PAUSE} symbol, this
      * {@code Call} will temporarily pause playing the tones for a pre-defined period of time.
      *
-     * If the DTMF string contains a {@link TelecommConstants#DTMF_CHARACTER_WAIT} symbol, this
+     * If the DTMF string contains a {@link TelecommManager#DTMF_CHARACTER_WAIT} symbol, this
      * {@code Call} will pause playing the tones and notify listeners via
      * {@link Listener#onPostDialWait(Call, String)}. At this point, the in-call app
      * should display to the user an indication of this state and an affordance to continue

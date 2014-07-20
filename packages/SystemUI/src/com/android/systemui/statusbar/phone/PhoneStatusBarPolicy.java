@@ -27,7 +27,6 @@ import android.media.AudioManager;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.provider.Settings.Global;
-import android.telecomm.TelecommConstants;
 import android.telecomm.TelecommManager;
 import android.util.Log;
 
@@ -90,7 +89,7 @@ public class PhoneStatusBarPolicy {
             else if (action.equals(TelephonyIntents.ACTION_SIM_STATE_CHANGED)) {
                 updateSimState(intent);
             }
-            else if (action.equals(TelecommConstants.ACTION_CURRENT_TTY_MODE_CHANGED)) {
+            else if (action.equals(TelecommManager.ACTION_CURRENT_TTY_MODE_CHANGED)) {
                 updateTTY(intent);
             }
             else if (action.equals(Intent.ACTION_USER_SWITCHED)) {
@@ -111,7 +110,7 @@ public class PhoneStatusBarPolicy {
         filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
         filter.addAction(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED);
         filter.addAction(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
-        filter.addAction(TelecommConstants.ACTION_CURRENT_TTY_MODE_CHANGED);
+        filter.addAction(TelecommManager.ACTION_CURRENT_TTY_MODE_CHANGED);
         filter.addAction(Intent.ACTION_USER_SWITCHED);
         mContext.registerReceiver(mIntentReceiver, filter, null, mHandler);
 
@@ -270,9 +269,9 @@ public class PhoneStatusBarPolicy {
     }
 
     private final void updateTTY(Intent intent) {
-        int currentTtyMode = intent.getIntExtra(TelecommConstants.EXTRA_CURRENT_TTY_MODE,
-                TelecommConstants.TTY_MODE_OFF);
-        boolean enabled = currentTtyMode != TelecommConstants.TTY_MODE_OFF;
+        int currentTtyMode = intent.getIntExtra(TelecommManager.EXTRA_CURRENT_TTY_MODE,
+                TelecommManager.TTY_MODE_OFF);
+        boolean enabled = currentTtyMode != TelecommManager.TTY_MODE_OFF;
 
         if (DEBUG) Log.v(TAG, "updateTTY: enabled: " + enabled);
 
