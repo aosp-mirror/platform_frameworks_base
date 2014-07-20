@@ -1006,12 +1006,16 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"మీ ఫోన్‌లో నిల్వ చేయబడిన బ్రౌజర్ చరిత్రను లేదా బుక్‌మార్క్‌లను సవరించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఇది బ్రౌజర్ డేటాను ఎరేజ్ చేయడానికి లేదా సవరించడానికి అనువర్తనాన్ని అనుమతించవచ్చు. గమనిక: ఈ అనుమతి మూడవ పక్షం బ్రౌజర్‌లు లేదా వెబ్ బ్రౌజింగ్ సామర్థ్యాలు గల ఇతర అనువర్తనాల ద్వారా అమలు చేయబడకపోవచ్చు."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"అలారం సెట్ చేయడం"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"ఇన్‌స్టాల్ చేయబడిన అలారం గడియారం అనువర్తనంలో అలారంను సెట్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. కొన్ని అలారం గల గడియారం అనువర్తనాలు ఈ లక్షణాన్ని అమలు చేయకపోవచ్చు."</string>
-    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"వాయిస్ కాల్‌లను నిర్వహించడం"</string>
-    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"మీ వాయిస్ మెయిల్ ఇన్‌బాక్స్ నుండి సందేశాలను సవరించడానికి మరియు తీసివేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <!-- no translation found for permlab_writeVoicemail (7309899891683938100) -->
+    <skip />
+    <!-- no translation found for permdesc_writeVoicemail (6592572839715924830) -->
+    <skip />
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"వాయిస్ మెయిల్‌ను జోడించడం"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"మీ వాయిస్ మెయిల్ ఇన్‌బాక్స్‌కి సందేశాలను జోడించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"అన్ని వాయిస్ మెయిల్‌లను చదవడం"</string>
-    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"మీ అన్ని వాయిస్ మెయిల్‌లను చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <!-- no translation found for permlab_readVoicemail (8415201752589140137) -->
+    <skip />
+    <!-- no translation found for permdesc_readVoicemail (8926534735321616550) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"బ్రౌజర్ భౌగోళిక స్థానం అనుమతులను సవరించడం"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"బ్రౌజర్ యొక్క భౌగోళిక స్థానం అనుమతులను సవరించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. హానికరమైన అనువర్తనాలు ఏకపక్ష వెబ్ సైట్‌లకు స్థాన సమాచారాన్ని అనుమతించడానికి దీన్ని ఉపయోగించవచ్చు."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"ప్యాకేజీలను ధృవీకరించడం"</string>
@@ -1386,6 +1390,8 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"విశ్వసనీయ ఏజెంట్ సేవకు అనుబంధించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"నవీకరణ మరియు పునరుద్ధరణ సిస్టమ్‌తో పరస్పర చర్య చేయడం"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"పునరుద్ధరణ సిస్టమ్ మరియు సిస్టమ్ నవీకరణలతో పరస్పర చర్య చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <string name="permlab_createMediaProjection" msgid="4941338725487978112">"మీడియా ప్రొజెక్షన్ సెషన్‌లను రూపొందించడం"</string>
+    <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"మీడియా ప్రొజెక్షన్ సెషన్‌లను రూపొందించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఈ సెషన్‌లు ప్రదర్శన మరియు ఆడియో కంటెంట్‌లను క్యాప్చర్ చేయగల సామర్థ్యాన్ని అనువర్తనాలకు అందించగలవు. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"జూమ్ నియంత్రణ కోసం రెండుసార్లు తాకండి"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"విడ్జెట్‌ను జోడించడం సాధ్యపడలేదు."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"వెళ్లు"</string>
@@ -1510,20 +1516,14 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"సవరించు"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"డేటా వినియోగం హెచ్చరిక"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"వినియోగం మరియు సెట్టింగ్‌లను వీక్షించడానికి తాకండి."</string>
-    <!-- no translation found for data_usage_3g_limit_title (4462365924791862301) -->
-    <skip />
-    <!-- no translation found for data_usage_4g_limit_title (7476424187522765328) -->
-    <skip />
-    <!-- no translation found for data_usage_mobile_limit_title (3393439305227911006) -->
-    <skip />
-    <!-- no translation found for data_usage_wifi_limit_title (3461968509557554571) -->
-    <skip />
-    <!-- no translation found for data_usage_limit_body (6131350187562939365) -->
-    <skip />
+    <string name="data_usage_3g_limit_title" msgid="4462365924791862301">"2G-3G డేటా ఆఫ్‌లో ఉంది"</string>
+    <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"4G డేటా ఆఫ్‌లో ఉంది"</string>
+    <string name="data_usage_mobile_limit_title" msgid="3393439305227911006">"సెల్యూలార్ డేటా ఆఫ్‌లో ఉంది"</string>
+    <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"Wi-Fi డేటా ఆఫ్‌లో ఉంది"</string>
+    <string name="data_usage_limit_body" msgid="6131350187562939365">"పరిమితిని చేరుకుంది"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G డేటా పరిమితి మించిపోయింది"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G డేటా పరిమితి మించిపోయింది"</string>
-    <!-- no translation found for data_usage_mobile_limit_snoozed_title (4941346653729943789) -->
-    <skip />
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"సెల్యులార్ డేటా పరిమితిని మించిపోయింది"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Wi-Fi డేటా పరిమితి మించిపోయింది"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"పేర్కొన్న పరిమితి కంటే <xliff:g id="SIZE">%s</xliff:g> మించిపోయింది."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"నేపథ్య డేటా పరిమితం చేయబడింది"</string>
@@ -1744,25 +1744,16 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> ఎంచుకోబడింది"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> తొలగించబడింది"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"కార్యాలయం <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (2126866321272822564) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="2126866321272822564">"మీరు లాక్-టు-యాప్ మోడ్‌లో ఉన్నారు. నిష్క్రమించడానికి, ఇటీవలివి బటన్‌ని నొక్కి ఉంచండి"</string>
     <string name="lock_to_app_toast_locked" msgid="4229650395479263497">"మీరు లాక్-టు-యాప్ మోడ్‌లో ఉన్నారు."</string>
     <string name="lock_to_app_title" msgid="5895142291937470019">"లాక్-టు-యాప్‌ను ఉపయోగించాలా?"</string>
-    <!-- no translation found for lock_to_app_description (2800403592608529611) -->
-    <skip />
-    <!-- no translation found for lock_to_app_negative (2259143719362732728) -->
-    <skip />
+    <string name="lock_to_app_description" msgid="2800403592608529611">"లాక్-టు-యాప్ ఒకే అనువర్తనంలో డిస్‌ప్లేని లాక్ చేస్తుంది.\n\nనిష్క్రమించడానికి, ఇటీవలివి బటన్‌ని నొక్కి ఉంచండి."</string>
+    <string name="lock_to_app_negative" msgid="2259143719362732728">"వద్దు, ధన్యవాదాలు"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"ప్రారంభించు"</string>
-    <!-- no translation found for lock_to_app_start (3074665051586318340) -->
-    <skip />
-    <!-- no translation found for lock_to_app_exit (8967089657201849300) -->
-    <skip />
-    <!-- no translation found for lock_to_app_use_screen_lock (1434584309048590886) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_pin (7908385370846820001) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_pattern (7763071104790758405) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_password (795224196583495868) -->
-    <skip />
+    <string name="lock_to_app_start" msgid="3074665051586318340">"అనువర్తనానికి లాక్ చేయబడింది"</string>
+    <string name="lock_to_app_exit" msgid="8967089657201849300">"అనువర్తనానికి లాక్ చేయబడలేదు"</string>
+    <string name="lock_to_app_use_screen_lock" msgid="1434584309048590886">"నిష్క్రమించడానికి ముందు %1$s కోసం అడుగు"</string>
+    <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"అన్‌లాక్ నమూనా"</string>
+    <string name="lock_to_app_unlock_password" msgid="795224196583495868">"పాస్‌వర్డ్"</string>
 </resources>

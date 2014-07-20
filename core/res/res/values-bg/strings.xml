@@ -719,10 +719,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Разрешава на притежателя да се обвърже с интерфейса от първо ниво на услуга за слушател на известия. Нормалните приложения не би трябвало никога да се нуждаят от това."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"свързване с услуга за предоставяне на условия"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Разрешава на притежателя да се свърже с интерфейса от най-високото ниво на услуга за предоставяне на условия. Нормалните приложения би трябвало никога да не се нуждаят от това."</string>
-    <!-- no translation found for permlab_bindMediaRouteService (6637740382272686835) -->
-    <skip />
-    <!-- no translation found for permdesc_bindMediaRouteService (6436655024972496687) -->
-    <skip />
+    <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"свързване с услуга за маршрутизиране на мултимедия"</string>
+    <string name="permdesc_bindMediaRouteService" msgid="6436655024972496687">"Разрешава на притежателя да се свърже с интерфейса от най-високото ниво на услуга за маршрутизиране на мултимедия. Нормалните приложения би трябвало никога да не се нуждаят от това."</string>
     <string name="permlab_bindDreamService" msgid="4153646965978563462">"свързване с услуга за „мечти“"</string>
     <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Разрешава на притежателя да се свърже с интерфейса от най-високото ниво на услуга за „мечти“. Нормалните приложения би трябвало никога да не се нуждаят от това."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"извикване на предоставеното от оператора приложение за конфигуриране"</string>
@@ -1008,12 +1006,16 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Разрешава на приложението да променя историята или отметките на браузъра, съхранени на телефона ви. Това може да му позволи да изтрива или променя данните на браузъра. Забележка: Възможно е браузъри на трети страни или други приложения с възможности за сърфиране в мрежата да не могат да наложат ограниченията на разрешението."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"навиване на будилника"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Разрешава на приложението да навие инсталирано приложение будилник. Някои будилници може да не изпълнят тази функция."</string>
-    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"управление на гласовите съобщения"</string>
-    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"Разрешава на приложението да променя и премахва съобщения от входящата ви гласова поща."</string>
+    <!-- no translation found for permlab_writeVoicemail (7309899891683938100) -->
+    <skip />
+    <!-- no translation found for permdesc_writeVoicemail (6592572839715924830) -->
+    <skip />
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"добавяне на гласова поща"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Разрешава на приложението да добавя съобщения към входящата ви гласова поща."</string>
-    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"четене на цялата гласова поща"</string>
-    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"Разрешава на приложението да чете цялата ви гласова поща."</string>
+    <!-- no translation found for permlab_readVoicemail (8415201752589140137) -->
+    <skip />
+    <!-- no translation found for permdesc_readVoicemail (8926534735321616550) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"промяна на разрешенията за местоположение в браузъра"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Разрешава на приложението да променя разрешенията на браузъра за местоположение. Злонамерените приложения могат да използват това, за да изпращат информация за местоположението до произволни уебсайтове."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"проверка на пакетите"</string>
@@ -1181,20 +1183,13 @@
     <string name="capital_on" msgid="1544682755514494298">"ВКЛ"</string>
     <string name="capital_off" msgid="6815870386972805832">"ИЗКЛ"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Изпълняване на действието чрез"</string>
-    <!-- no translation found for whichApplicationNamed (8260158865936942783) -->
-    <skip />
-    <!-- no translation found for whichViewApplication (3272778576700572102) -->
-    <skip />
-    <!-- no translation found for whichViewApplicationNamed (2286418824011249620) -->
-    <skip />
-    <!-- no translation found for whichEditApplication (144727838241402655) -->
-    <skip />
-    <!-- no translation found for whichEditApplicationNamed (1775815530156447790) -->
-    <skip />
-    <!-- no translation found for whichSendApplication (6902512414057341668) -->
-    <skip />
-    <!-- no translation found for whichSendApplicationNamed (2799370240005424391) -->
-    <skip />
+    <string name="whichApplicationNamed" msgid="8260158865936942783">"Завършване на действието посредством %1$s"</string>
+    <string name="whichViewApplication" msgid="3272778576700572102">"Отваряне чрез"</string>
+    <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Отваряне чрез %1$s"</string>
+    <string name="whichEditApplication" msgid="144727838241402655">"Редактиране чрез"</string>
+    <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Редактиране чрез %1$s"</string>
+    <string name="whichSendApplication" msgid="6902512414057341668">"Споделяне чрез"</string>
+    <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Споделяне чрез %1$s"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"Избиране на приложение за начало"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Използване по подразбиране за това действие."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Изчистване на стандартната настройка в „Системни настройки“ &gt; „Приложения“ &gt; „Изтеглени“."</string>
@@ -1297,12 +1292,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Винаги да се разрешава"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Никога да не се разрешава"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM картата е премахната"</string>
-    <!-- no translation found for sim_removed_message (5450336489923274918) -->
-    <skip />
+    <string name="sim_removed_message" msgid="5450336489923274918">"Няма да имате достъп до клетъчната мрежа, докато не рестартирате с поставена валидна SIM карта."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Готово"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIM картата е добавена"</string>
-    <!-- no translation found for sim_added_message (7797975656153714319) -->
-    <skip />
+    <string name="sim_added_message" msgid="7797975656153714319">"Рестартирайте устройството си, за да осъществите достъп до клетъчната мрежа."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Рестартиране"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Задаване на часа"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Задаване на дата"</string>
@@ -1397,6 +1390,8 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Разрешава на приложението да се обвърже с услуга за trust agents."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Взаимодействие със системата за актуализации и възстановяване"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Разрешава на приложението да взаимодейства със системата за възстановяване и системните актуализации."</string>
+    <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Създаване на сесии за прожектиране на мултимедия"</string>
+    <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"Разрешава на приложението да създава сесии за прожектиране на мултимедия. Те могат да предоставят на приложенията възможността да заснемат екрана и да записват аудиосъдържание. Нормалните приложения би трябвало никога да не се нуждаят от това."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Докоснете двукратно за управление на промяната на мащаба"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Приспособлението не можа да бъде добавено."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Старт"</string>
@@ -1521,20 +1516,14 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Редактиране"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Предупрежд. за ползване на данни"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"Ползване и настройки: Докоснете"</string>
-    <!-- no translation found for data_usage_3g_limit_title (4462365924791862301) -->
-    <skip />
-    <!-- no translation found for data_usage_4g_limit_title (7476424187522765328) -->
-    <skip />
-    <!-- no translation found for data_usage_mobile_limit_title (3393439305227911006) -->
-    <skip />
-    <!-- no translation found for data_usage_wifi_limit_title (3461968509557554571) -->
-    <skip />
-    <!-- no translation found for data_usage_limit_body (6131350187562939365) -->
-    <skip />
+    <string name="data_usage_3g_limit_title" msgid="4462365924791862301">"Данните от 2G – 3G са изключени"</string>
+    <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"Данните от 4G са изключени"</string>
+    <string name="data_usage_mobile_limit_title" msgid="3393439305227911006">"Мобилните данни са изключени"</string>
+    <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"Данните от Wi-Fi са изключени"</string>
+    <string name="data_usage_limit_body" msgid="6131350187562939365">"Ограничението е достигнато"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Превишен лимит на 2G–3G данните"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Лимит за 4G данните – превишен"</string>
-    <!-- no translation found for data_usage_mobile_limit_snoozed_title (4941346653729943789) -->
-    <skip />
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Лимитът за моб. данни е превишен"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Превишен лимит на Wi-Fi данните"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> над определения лимит."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Ограничени данни на заден план"</string>
@@ -1755,25 +1744,16 @@
     <string name="item_is_selected" msgid="949687401682476608">"Избрахте <xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"Изтрихте <xliff:g id="KEY">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> за работа"</string>
-    <!-- no translation found for lock_to_app_toast (2126866321272822564) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="2126866321272822564">"Режимът на заключване в приложението е включен. За изход докоснете и задръжте бутона „Скорошни“"</string>
     <string name="lock_to_app_toast_locked" msgid="4229650395479263497">"Режимът на заключване в приложението е включен."</string>
     <string name="lock_to_app_title" msgid="5895142291937470019">"Да се използва ли „Заключване в приложението“?"</string>
-    <!-- no translation found for lock_to_app_description (2800403592608529611) -->
-    <skip />
-    <!-- no translation found for lock_to_app_negative (2259143719362732728) -->
-    <skip />
+    <string name="lock_to_app_description" msgid="2800403592608529611">"Със „Заключване в приложението“ екранът се заключва в едно приложение.\n\nЗа изход докоснете и задръжте бутона „Скорошни“."</string>
+    <string name="lock_to_app_negative" msgid="2259143719362732728">"НЕ, БЛАГОДАРЯ"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"СТАРТИРАНЕ"</string>
-    <!-- no translation found for lock_to_app_start (3074665051586318340) -->
-    <skip />
-    <!-- no translation found for lock_to_app_exit (8967089657201849300) -->
-    <skip />
-    <!-- no translation found for lock_to_app_use_screen_lock (1434584309048590886) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_pin (7908385370846820001) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_pattern (7763071104790758405) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_password (795224196583495868) -->
-    <skip />
+    <string name="lock_to_app_start" msgid="3074665051586318340">"Заключването в приложението е активно"</string>
+    <string name="lock_to_app_exit" msgid="8967089657201849300">"Заключването в приложението вече не е активно"</string>
+    <string name="lock_to_app_use_screen_lock" msgid="1434584309048590886">"Изискване на %1$s преди изход"</string>
+    <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"ПИН код"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"фигура за отключване"</string>
+    <string name="lock_to_app_unlock_password" msgid="795224196583495868">"парола"</string>
 </resources>

@@ -719,10 +719,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Foydalanuvchiga bildirishnomani eshituvchi xizmat yuqori darajali interfeysini bog‘lash imkonini beradi. Oddiy dasturlar uchun hech qachon kerak bo‘lmaydi."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"shartlarni taqdim etuvchilarning serveriga ulanish"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Ilova shartlarni taqdim etuvchining yuqori darajali interfeysiga ulanishi mumkin. Oddiy ilovalar uchun talab qilinmaydi."</string>
-    <!-- no translation found for permlab_bindMediaRouteService (6637740382272686835) -->
-    <skip />
-    <!-- no translation found for permdesc_bindMediaRouteService (6436655024972496687) -->
-    <skip />
+    <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"media fayllarni uzatish vositasiga bog‘lab qo‘yish"</string>
+    <string name="permdesc_bindMediaRouteService" msgid="6436655024972496687">"Media fayllarni uzatishning yuqori darajali vositasiga bog‘lab qo‘yish. Oddiy ilovalar uchun talab qilinmaydi."</string>
     <string name="permlab_bindDreamService" msgid="4153646965978563462">"Ekran lavhalari xizmatiga ulanish"</string>
     <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Ekran lavhalari xizmatining yuqori darajali interfeysiga ulanish. Oddiy ilovalar tomonidan ishlatilmaydi."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"aloqa operatorining sozlash dasturini so‘rash"</string>
@@ -1008,12 +1006,16 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Ilovaga telefoningizga zaxiralangan brauzer tarixi yoki xatcho‘plarini o‘zgartirish uchun ruxsat beradi. Bu ilovaga brauzer ma’lumotlarini o‘zgartirish yoki o‘chirishga ruxsat berishi mumkin. Diqqat qiling: ushbu ruxsat uchinchi taraf brauzerlari yoki internetni ko‘rsatish qobiliyatiga ega boshqa ilovalardan talab qilinmasligi mumkin."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"signal o‘rnatish"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Ilova uyg‘otkichni sozlashi mumkin. Ba’zi soat ilovalari ushbu funksiyani qo‘llab-quvvatlamasligi mumkin."</string>
-    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"ovozli pochtalarni boshqarish"</string>
-    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"Ilovaga ovozli pochta kirish qutingizdan xabarlarni o\'zgartirish va olib tashlash imkoniyatini beradi."</string>
+    <!-- no translation found for permlab_writeVoicemail (7309899891683938100) -->
+    <skip />
+    <!-- no translation found for permdesc_writeVoicemail (6592572839715924830) -->
+    <skip />
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"ovozli xat qo‘shish"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Ilova xabarlarni ovozli pochta qutingizga qo‘shishi mumkin."</string>
-    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"barcha ovozli xabarlarni o‘qish"</string>
-    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"Ilova barcha ovozli xabarlaringizni o‘qishi mumkin."</string>
+    <!-- no translation found for permlab_readVoicemail (8415201752589140137) -->
+    <skip />
+    <!-- no translation found for permdesc_readVoicemail (8926534735321616550) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"brauzerdagi geolokatsiya ma’lumotlariga kirish huquqini o‘zgartirish"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Ilova brauzerdagi geolokatsiya ma’lumotlariga kirish sozlamalarini o‘zgartirishi mumkin. Zararli dasturlar uning yordamida joylashuv to‘g‘risidagi ma’lumotlarni boshqa istalgan veb-saytga yuborishi mumkin."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"paketlarni tekshirish"</string>
@@ -1181,20 +1183,13 @@
     <string name="capital_on" msgid="1544682755514494298">"YONIQ"</string>
     <string name="capital_off" msgid="6815870386972805832">"O‘CHIQ"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Ushbudan foydalanib amalni tugatish:"</string>
-    <!-- no translation found for whichApplicationNamed (8260158865936942783) -->
-    <skip />
-    <!-- no translation found for whichViewApplication (3272778576700572102) -->
-    <skip />
-    <!-- no translation found for whichViewApplicationNamed (2286418824011249620) -->
-    <skip />
-    <!-- no translation found for whichEditApplication (144727838241402655) -->
-    <skip />
-    <!-- no translation found for whichEditApplicationNamed (1775815530156447790) -->
-    <skip />
-    <!-- no translation found for whichSendApplication (6902512414057341668) -->
-    <skip />
-    <!-- no translation found for whichSendApplicationNamed (2799370240005424391) -->
-    <skip />
+    <string name="whichApplicationNamed" msgid="8260158865936942783">"“%1$s” ilovasi yordamida bajarish"</string>
+    <string name="whichViewApplication" msgid="3272778576700572102">"Ochish…"</string>
+    <string name="whichViewApplicationNamed" msgid="2286418824011249620">"“%1$s” yordamida ochish"</string>
+    <string name="whichEditApplication" msgid="144727838241402655">"Tahrirlash…"</string>
+    <string name="whichEditApplicationNamed" msgid="1775815530156447790">"“%1$s” yordamida tahrirlash"</string>
+    <string name="whichSendApplication" msgid="6902512414057341668">"Ulashish…"</string>
+    <string name="whichSendApplicationNamed" msgid="2799370240005424391">"“%1$s” orqali ulashish"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"Uy dasturini tanlang"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Ushbu amaldan standart sifatida foydalanish"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Birlamchi sozlamalarni Tizim sozlamalari &gt; Ilovalar &gt; Yuklab olingan menyusidan tozalang."</string>
@@ -1297,12 +1292,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Doimo ruxsat berilsin"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Hech qachon ruxsat berilmasin"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM karta olib tashlandi"</string>
-    <!-- no translation found for sim_removed_message (5450336489923274918) -->
-    <skip />
+    <string name="sim_removed_message" msgid="5450336489923274918">"Mobil tarmoqqa ulanish uchun faol SIM kartani joylang va qurilmani o‘chirib yoqing."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Tayyor"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIM karta qo‘shildi"</string>
-    <!-- no translation found for sim_added_message (7797975656153714319) -->
-    <skip />
+    <string name="sim_added_message" msgid="7797975656153714319">"Mobil tarmoqqa ulanish uchun qurilmangizni o‘chirib yoqing."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"O‘chirib-yoqish"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Vaqtni o‘rnatish"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Sanani kiritish"</string>
@@ -1397,6 +1390,10 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Ilova ishonchli agentlar xizmatiga ulanishi mumkin."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Tizimni yangilash va tiklashni birgalikda amalga oshirish"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Dasturga tizimni tiklash va yangilash imkoniyatlari bilan ishlash uchun ruxsat beradi."</string>
+    <!-- no translation found for permlab_createMediaProjection (4941338725487978112) -->
+    <skip />
+    <!-- no translation found for permdesc_createMediaProjection (1284530992706219702) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Masshtabni o‘zgartirish uchun ikki marta bosing"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Vidjet qo‘shilmadi."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"O‘tish"</string>
@@ -1755,25 +1752,16 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> tanlandi"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> o‘chirildi"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Ish <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (2126866321272822564) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="2126866321272822564">"Siz yagona ilova rejimidasiz. Chiqish uchun So‘nggi foydalanilgan ilovalar tugmasini biroz bosib turing"</string>
     <string name="lock_to_app_toast_locked" msgid="4229650395479263497">"Siz Yagona ilova rejimidasiz."</string>
     <string name="lock_to_app_title" msgid="5895142291937470019">"Yagona ilova rejimi yoqilsinmi?"</string>
-    <!-- no translation found for lock_to_app_description (2800403592608529611) -->
-    <skip />
-    <!-- no translation found for lock_to_app_negative (2259143719362732728) -->
-    <skip />
+    <string name="lock_to_app_description" msgid="2800403592608529611">"Yagona ilova rejimi ekranni qulflab, faqat bitta ilovadan foydalanishga ruxsat beradi.\n\nUshbu rejimdan chiqish uchun Sso‘nggi foydalanilgan ilovalar tugmasini biroz bosib turing."</string>
+    <string name="lock_to_app_negative" msgid="2259143719362732728">"YO‘Q, KERAK EMAS"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"ISHGA TUSHIRISH"</string>
-    <!-- no translation found for lock_to_app_start (3074665051586318340) -->
-    <skip />
-    <!-- no translation found for lock_to_app_exit (8967089657201849300) -->
-    <skip />
-    <!-- no translation found for lock_to_app_use_screen_lock (1434584309048590886) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_pin (7908385370846820001) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_pattern (7763071104790758405) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_password (795224196583495868) -->
-    <skip />
+    <string name="lock_to_app_start" msgid="3074665051586318340">"Yagona ilova rejimi faollashtirildi"</string>
+    <string name="lock_to_app_exit" msgid="8967089657201849300">"Yagona ilova rejimidan chiqildi"</string>
+    <string name="lock_to_app_use_screen_lock" msgid="1434584309048590886">"Chiqishdan oldin “%1$s” so‘ralsin"</string>
+    <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN kod"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"qulfdan chiqarish chizmasi"</string>
+    <string name="lock_to_app_unlock_password" msgid="795224196583495868">"parol"</string>
 </resources>

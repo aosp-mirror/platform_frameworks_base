@@ -719,10 +719,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Permite ao propietario vincularse á interface de nivel superior dun servizo axente de escoita de notificacións.  Non debería ser nunca necesario para as aplicacións normais."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"vincular a un servizo de provedor de condicións"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Permite ao propietario vincularse á interface de nivel superior dun servizo provedor de condicións. As aplicacións normais non deberían necesitar este permiso."</string>
-    <!-- no translation found for permlab_bindMediaRouteService (6637740382272686835) -->
-    <skip />
-    <!-- no translation found for permdesc_bindMediaRouteService (6436655024972496687) -->
-    <skip />
+    <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"vincular a un servizo de ruta de medios"</string>
+    <string name="permdesc_bindMediaRouteService" msgid="6436655024972496687">"Permite ao propietario vincularse á interface de nivel superior dun servizo de ruta de medio. As aplicacións normais non deberían necesitar este permiso."</string>
     <string name="permlab_bindDreamService" msgid="4153646965978563462">"vincular a un servizo de soños"</string>
     <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Permite ao propietario vincularse á interface de nivel superior dun servizo de soños. As aplicacións normais non deberían necesitar este permiso."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"invocar a aplicación de configuración fornecida polo operador"</string>
@@ -1008,12 +1006,16 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Permite á aplicación modificar o historial ou os favoritos do navegador que están almacenados no teu teléfono. É posible que esta acción permita á aplicación borrar ou modificar os datos do navegador. Nota: É posible que este permiso non sexa executado por navegadores de terceiros ou outras aplicacións con funcionalidades de navegación web."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"definir unha alarma"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Permite á aplicación definir unha alarma nunha aplicación de espertador instalada. É posible que algunhas aplicacións de espertador non implementen esta función."</string>
-    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"xestionar correos de voz"</string>
-    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"Permite á aplicación modificar e eliminar mensaxes da caixa de entrada do teu correo de voz."</string>
+    <!-- no translation found for permlab_writeVoicemail (7309899891683938100) -->
+    <skip />
+    <!-- no translation found for permdesc_writeVoicemail (6592572839715924830) -->
+    <skip />
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"engadir correo de voz"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Permite á aplicación engadir mensaxes á caixa de entrada do teu correo de voz."</string>
-    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"ler todo o correo de voz"</string>
-    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"Permite que a aplicación lea todos os correos de voz."</string>
+    <!-- no translation found for permlab_readVoicemail (8415201752589140137) -->
+    <skip />
+    <!-- no translation found for permdesc_readVoicemail (8926534735321616550) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"modificar os permisos de xeolocalización do navegador"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Permite á aplicación modificar os permisos de xeolocalización do navegador. É posible que as aplicacións maliciosas utilicen esta opción para permitir o envío de información de localización a sitios web arbitrarios."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"verificar paquetes"</string>
@@ -1181,20 +1183,13 @@
     <string name="capital_on" msgid="1544682755514494298">"SI"</string>
     <string name="capital_off" msgid="6815870386972805832">"NON"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Completar a acción usando"</string>
-    <!-- no translation found for whichApplicationNamed (8260158865936942783) -->
-    <skip />
-    <!-- no translation found for whichViewApplication (3272778576700572102) -->
-    <skip />
-    <!-- no translation found for whichViewApplicationNamed (2286418824011249620) -->
-    <skip />
-    <!-- no translation found for whichEditApplication (144727838241402655) -->
-    <skip />
-    <!-- no translation found for whichEditApplicationNamed (1775815530156447790) -->
-    <skip />
-    <!-- no translation found for whichSendApplication (6902512414057341668) -->
-    <skip />
-    <!-- no translation found for whichSendApplicationNamed (2799370240005424391) -->
-    <skip />
+    <string name="whichApplicationNamed" msgid="8260158865936942783">"Completar a acción usando %1$s"</string>
+    <string name="whichViewApplication" msgid="3272778576700572102">"Abrir con"</string>
+    <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Abrir con %1$s"</string>
+    <string name="whichEditApplication" msgid="144727838241402655">"Editar con"</string>
+    <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Editar con %1$s"</string>
+    <string name="whichSendApplication" msgid="6902512414057341668">"Compartir con"</string>
+    <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Compartir con %1$s"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"Selecciona unha aplicación de inicio"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Usar de forma predeterminada para esta acción."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Borra a configuración predeterminada en Configuración do sistema &gt; Aplicacións &gt; Descargadas."</string>
@@ -1297,12 +1292,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Permitir sempre"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Non permitir nunca"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"Extraeuse a tarxeta SIM"</string>
-    <!-- no translation found for sim_removed_message (5450336489923274918) -->
-    <skip />
+    <string name="sim_removed_message" msgid="5450336489923274918">"A rede móbil non estará dispoñible hasta que reinicies o móbil cunha tarxeta SIM válida introducida."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Feito"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"Engadiuse unha tarxeta SIM"</string>
-    <!-- no translation found for sim_added_message (7797975656153714319) -->
-    <skip />
+    <string name="sim_added_message" msgid="7797975656153714319">"Reinicia o teu dispositivo para acceder á rede móbil."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Reiniciar"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Configurar hora"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Establecer data"</string>
@@ -1397,6 +1390,8 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Permite a unha aplicación vincularse cun servizo de axente de confianza."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Interactuar co sistema de actualización e recuperación"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Permite a unha aplicación interactuar co sistema de recuperación e as actualizacións do sistema."</string>
+    <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Crear sesións de proxeccións multimedia"</string>
+    <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"Permite que unha aplicación cree sesións de proxeccións multimedia. Estas sesións poden proporcionarlles ás aplicacións a capacidade de capturar a pantalla e contidos de audio. Nunca debería ser necesario para as aplicacións normais."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Toca dúas veces para controlar o zoom"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Non se puido engadir o widget."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Ir"</string>
@@ -1521,20 +1516,14 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Editar"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Aviso de uso de datos"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"Toca para uso e configuración"</string>
-    <!-- no translation found for data_usage_3g_limit_title (4462365924791862301) -->
-    <skip />
-    <!-- no translation found for data_usage_4g_limit_title (7476424187522765328) -->
-    <skip />
-    <!-- no translation found for data_usage_mobile_limit_title (3393439305227911006) -->
-    <skip />
-    <!-- no translation found for data_usage_wifi_limit_title (3461968509557554571) -->
-    <skip />
-    <!-- no translation found for data_usage_limit_body (6131350187562939365) -->
-    <skip />
+    <string name="data_usage_3g_limit_title" msgid="4462365924791862301">"Datos 2G-3G desactivados"</string>
+    <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"Os datos 4G están desactivados"</string>
+    <string name="data_usage_mobile_limit_title" msgid="3393439305227911006">"Datos móbiles desactivados"</string>
+    <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"Os datos wifi están desactivados"</string>
+    <string name="data_usage_limit_body" msgid="6131350187562939365">"Límite alcanzado"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Límite de datos 2G-3G superado"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Límite de datos 4G superado"</string>
-    <!-- no translation found for data_usage_mobile_limit_snoozed_title (4941346653729943789) -->
-    <skip />
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Límite de datos móbiles superado"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Límite de datos Wi-Fi superado"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> supera o límite especificado."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Datos en segundo plano limitados"</string>

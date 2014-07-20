@@ -127,7 +127,7 @@
     <string name="fcError" msgid="3327560126588500777">"Problém s pripojením alebo neplatný kód funkcie."</string>
     <string name="httpErrorOk" msgid="1191919378083472204">"OK"</string>
     <string name="httpError" msgid="7956392511146698522">"Vyskytla sa chyba siete."</string>
-    <string name="httpErrorLookup" msgid="4711687456111963163">"Adresu URL sa nepodarilo nájsť."</string>
+    <string name="httpErrorLookup" msgid="4711687456111963163">"Webovú adresu sa nepodarilo nájsť."</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="6299980280442076799">"Schéma overenia webových stránok nie je podporovaná."</string>
     <string name="httpErrorAuth" msgid="1435065629438044534">"Nepodarilo sa overiť totožnosť."</string>
     <string name="httpErrorProxyAuth" msgid="1788207010559081331">"Overenie pomocou servera proxy bolo neúspešné."</string>
@@ -137,7 +137,7 @@
     <string name="httpErrorRedirectLoop" msgid="8679596090392779516">"Stránka obsahuje príliš veľa presmerovaní servera."</string>
     <string name="httpErrorUnsupportedScheme" msgid="5015730812906192208">"Protokol nie je podporovaný."</string>
     <string name="httpErrorFailedSslHandshake" msgid="96549606000658641">"Zabezpečené spojenie sa nepodarilo nadviazať."</string>
-    <string name="httpErrorBadUrl" msgid="3636929722728881972">"Stránku sa nepodarilo otvoriť pretože adresa URL je neplatná."</string>
+    <string name="httpErrorBadUrl" msgid="3636929722728881972">"Stránku sa nepodarilo otvoriť pretože webová adresa je neplatná."</string>
     <string name="httpErrorFile" msgid="2170788515052558676">"Prístup k súboru sa nepodarilo získať."</string>
     <string name="httpErrorFileNotFound" msgid="6203856612042655084">"Požadovaný súbor sa nepodarilo nájsť."</string>
     <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"Je spracovávaných príliš veľa žiadostí. Opakujte akciu neskôr."</string>
@@ -719,10 +719,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Umožňuje držiteľovi naviazať sa na najvyššiu úroveň služby na počúvanie upozornení. Bežné aplikácie by toto nastavenie nemali nikdy požadovať."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"viazanie na službu poskytovateľa podmienky"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Umožňuje držiteľovi viazať sa na najvyššiu úroveň rozhrania služby poskytovateľa podmienky. Bežné aplikácie by toto povolenie nemali nikdy potrebovať."</string>
-    <!-- no translation found for permlab_bindMediaRouteService (6637740382272686835) -->
-    <skip />
-    <!-- no translation found for permdesc_bindMediaRouteService (6436655024972496687) -->
-    <skip />
+    <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"viazanie na službu smerovania médií"</string>
+    <string name="permdesc_bindMediaRouteService" msgid="6436655024972496687">"Umožňuje držiteľovi viazať sa na najvyššiu úroveň rozhrania služby smerovania médií. Bežné aplikácie by toto povolenie nemali nikdy potrebovať."</string>
     <string name="permlab_bindDreamService" msgid="4153646965978563462">"viazať sa so službou Dream service"</string>
     <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Umožňuje držiteľovi viazať sa na najvyššiu úroveň rozhrania služby Dream service. Bežné aplikácie by toto povolenie nemali nikdy potrebovať."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"vyvolanie aplikácie pre konfiguráciu poskytnutú operátorom"</string>
@@ -1002,18 +1000,22 @@
     <string name="autofill_area" msgid="3547409050889952423">"Oblasť"</string>
     <string name="autofill_emirate" msgid="2893880978835698818">"Emirát"</string>
     <string name="permlab_readHistoryBookmarks" msgid="3775265775405106983">"čítať webové záložky a históriu"</string>
-    <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Umožňuje aplikácii čítať všetky adresy URL navštívené prehliadačom a všetky záložky prehliadača. Poznámka: Toto povolenie nemôžu vynucovať prehliadače tretej strany ani iné aplikácie umožňujúce prehliadanie webu."</string>
+    <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Umožňuje aplikácii čítať všetky webové adresy navštívené prehliadačom a všetky záložky prehliadača. Poznámka: Toto povolenie nemôžu vynucovať prehliadače tretej strany ani iné aplikácie umožňujúce prehliadanie webu."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"zapisovať webové záložky a históriu"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Umožňuje aplikácii upraviť históriu prehliadača alebo záložky uložené v tablete. Aplikácia s týmto povolením môže vymazať alebo upraviť údaje prehliadača. Poznámka: Toto povolenie nemôžu vynucovať prehliadače tretích strán ani žiadne ďalšie aplikácie umožňujúce prehliadanie webu."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Umožňuje aplikácii upraviť históriu prehliadača alebo záložky uložené v telefóne. Aplikácia s týmto povolením môže vymazať alebo upraviť údaje prehliadača. Poznámka: Toto povolenie nemôžu vynucovať prehliadače tretích strán ani žiadne ďalšie aplikácie umožňujúce prehliadanie webu."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"nastaviť budík"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Umožňuje aplikácii nastaviť budík v nainštalovanej aplikácii budík. Niektoré aplikácie budíka nemusia túto funkciu implementovať."</string>
-    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"správa hlasových správ"</string>
-    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"Povoľuje aplikácii upravovať a odstraňovať správy z hlasovej schránky."</string>
+    <!-- no translation found for permlab_writeVoicemail (7309899891683938100) -->
+    <skip />
+    <!-- no translation found for permdesc_writeVoicemail (6592572839715924830) -->
+    <skip />
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"pridať hlasovú schránku"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Umožní aplikácii pridávať správy do doručenej pošty hlasovej schránky."</string>
-    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"čítanie všetkých hlasových schránok"</string>
-    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"Umožňuje aplikácii čítať všetky vaše hlasové schránky."</string>
+    <!-- no translation found for permlab_readVoicemail (8415201752589140137) -->
+    <skip />
+    <!-- no translation found for permdesc_readVoicemail (8926534735321616550) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"zmeniť povolenia prehliadača poskytovať informácie o zemepisnej polohe"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Umožňuje aplikácii zmeniť povolenia prehliadača na poskytovanie údajov o zemepisnej polohe. Škodlivé aplikácie to môžu použiť na odosielanie informácií o polohe ľubovoľným webovým stránkam."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"overiť balíky"</string>
@@ -1161,7 +1163,7 @@
     <string name="paste" msgid="5629880836805036433">"Prilepiť"</string>
     <string name="replace" msgid="5781686059063148930">"Nahradiť•"</string>
     <string name="delete" msgid="6098684844021697789">"Odstrániť"</string>
-    <string name="copyUrl" msgid="2538211579596067402">"Skopírovať adresu URL"</string>
+    <string name="copyUrl" msgid="2538211579596067402">"Skopírovať webovú adresu"</string>
     <string name="selectTextMode" msgid="1018691815143165326">"Vybrať text"</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Výber textu"</string>
     <string name="addToDictionary" msgid="4352161534510057874">"Pridať do slovníka"</string>
@@ -1181,20 +1183,13 @@
     <string name="capital_on" msgid="1544682755514494298">"I"</string>
     <string name="capital_off" msgid="6815870386972805832">"O"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Dokončiť akciu pomocou aplikácie"</string>
-    <!-- no translation found for whichApplicationNamed (8260158865936942783) -->
-    <skip />
-    <!-- no translation found for whichViewApplication (3272778576700572102) -->
-    <skip />
-    <!-- no translation found for whichViewApplicationNamed (2286418824011249620) -->
-    <skip />
-    <!-- no translation found for whichEditApplication (144727838241402655) -->
-    <skip />
-    <!-- no translation found for whichEditApplicationNamed (1775815530156447790) -->
-    <skip />
-    <!-- no translation found for whichSendApplication (6902512414057341668) -->
-    <skip />
-    <!-- no translation found for whichSendApplicationNamed (2799370240005424391) -->
-    <skip />
+    <string name="whichApplicationNamed" msgid="8260158865936942783">"Dokončiť akciu pomocou aplikácie %1$s"</string>
+    <string name="whichViewApplication" msgid="3272778576700572102">"Otvoriť v aplikácii"</string>
+    <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Otvoriť v aplikácii %1$s"</string>
+    <string name="whichEditApplication" msgid="144727838241402655">"Upraviť pomocou"</string>
+    <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Upraviť v aplikácii %1$s"</string>
+    <string name="whichSendApplication" msgid="6902512414057341668">"Zdieľať v aplikácii"</string>
+    <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Zdieľať v aplikácii %1$s"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"Vyberte domovskú aplikáciu"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Použiť ako predvolené nastavenie pre túto akciu."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Vymazať predvolené nastavenia v sekcii Nastavenia systému &gt; Aplikácie &gt; Stiahnuté položky."</string>
@@ -1297,12 +1292,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Vždy povoliť"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Nikdy nepovoliť"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"Karta SIM bola odobraná"</string>
-    <!-- no translation found for sim_removed_message (5450336489923274918) -->
-    <skip />
+    <string name="sim_removed_message" msgid="5450336489923274918">"Mobilná sieť nebude k dispozícii, kým nevložíte platnú SIM kartu a zariadenie nereštartujete."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Hotovo"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"Bola pridaná karta SIM"</string>
-    <!-- no translation found for sim_added_message (7797975656153714319) -->
-    <skip />
+    <string name="sim_added_message" msgid="7797975656153714319">"Ak chcete získať prístup k mobilnej sieti, reštartujte svoje zariadenie."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Reštartovať"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Nastaviť čas"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Nastaviť dátum"</string>
@@ -1397,6 +1390,10 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Umožňuje aplikácii viazať sa na službu zástupcu dôveryhodnosti."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Interakcia so systémom aktualizácií a obnovenia"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Umožňuje aplikácii interakciu so systémom obnovenia a s aktualizáciami systému."</string>
+    <!-- no translation found for permlab_createMediaProjection (4941338725487978112) -->
+    <skip />
+    <!-- no translation found for permdesc_createMediaProjection (1284530992706219702) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Ovládacie prvky lupy zobrazíte dvojitým dotknutím"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Miniaplikáciu sa nepodarilo pridať."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Hľadať"</string>
@@ -1755,25 +1752,16 @@
     <string name="item_is_selected" msgid="949687401682476608">"Bola vybratá položka <xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"Číslo <xliff:g id="KEY">%1$s</xliff:g> bolo odstránené"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Práca – <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (2126866321272822564) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="2126866321272822564">"Nachádzate sa v režime uzamknutia v aplikácii. Tento režim ukončíte stlačením a podržaním tlačidla nedávnych aplikácií."</string>
     <string name="lock_to_app_toast_locked" msgid="4229650395479263497">"Nachádzate sa v režime Uzamknutie v aplikácii."</string>
     <string name="lock_to_app_title" msgid="5895142291937470019">"Použiť Uzamknutie v aplikácii?"</string>
-    <!-- no translation found for lock_to_app_description (2800403592608529611) -->
-    <skip />
-    <!-- no translation found for lock_to_app_negative (2259143719362732728) -->
-    <skip />
+    <string name="lock_to_app_description" msgid="2800403592608529611">"Uzamknutie v aplikácii uzamkne displej na zobrazovanie jednej aplikácie.\n\nTento režim ukončíte stlačením a podržaním tlačidla nedávnych aplikácií."</string>
+    <string name="lock_to_app_negative" msgid="2259143719362732728">"NIE, ĎAKUJEM"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"SPUSTIŤ"</string>
-    <!-- no translation found for lock_to_app_start (3074665051586318340) -->
-    <skip />
-    <!-- no translation found for lock_to_app_exit (8967089657201849300) -->
-    <skip />
-    <!-- no translation found for lock_to_app_use_screen_lock (1434584309048590886) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_pin (7908385370846820001) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_pattern (7763071104790758405) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_password (795224196583495868) -->
-    <skip />
+    <string name="lock_to_app_start" msgid="3074665051586318340">"Uzamknutie v aplikácii"</string>
+    <string name="lock_to_app_exit" msgid="8967089657201849300">"Uzamknutie v aplikácii bolo ukončené"</string>
+    <string name="lock_to_app_use_screen_lock" msgid="1434584309048590886">"Pred ukončením požiadať o %1$s"</string>
+    <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"Číslo PIN"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"bezpečnostný vzor"</string>
+    <string name="lock_to_app_unlock_password" msgid="795224196583495868">"heslo"</string>
 </resources>

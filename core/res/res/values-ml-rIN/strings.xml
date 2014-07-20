@@ -1006,12 +1006,16 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"നിങ്ങളുടെ ഫോണിൽ സംഭരിച്ചിരിക്കുന്ന ബ്രൗസറിന്റെ ചരിത്രമോ ബുക്ക്‌മാർക്കുകളോ പരിഷ്‌ക്കരിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഇത് ബ്രൗസർ ഡാറ്റ മായ്‌ക്കാനോ പരിഷ്‌ക്കരിക്കാനോ അപ്ലിക്കേഷനെ അനുവദിക്കാനിടയുണ്ട്. ശ്രദ്ധിക്കുക: ഈ അനുമതി മൂന്നാം കക്ഷി ബ്രൗസറുകളോ വെബ് ബ്രൗസിംഗ് കഴിവുകളുള്ള മറ്റ് അപ്ലിക്കേഷനുകളോ നടപ്പിലാക്കാനിടയില്ല."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"ഒരു അലാറം സജ്ജീകരിക്കുക"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"ഒരു ഇൻസ്റ്റാളുചെയ്‌ത അലാറം ക്ലോക്ക് അപ്ലിക്കേഷനിൽ അലാറം സജ്ജീകരിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ചില അലാറം ക്ലോക്ക് അപ്ലിക്കേഷനുകൾ ഈ സവിശേഷത നടപ്പിലാക്കാതിരുന്നേക്കാം."</string>
-    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"വോയ്‌സ്മെയിലുകൾ നിയന്ത്രിക്കുക"</string>
-    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"നിങ്ങളുടെ വോയ്‌സ്മെയിൽ ഇൻബോക്‌സിൽ നിന്നും സന്ദേശങ്ങൾ പരിഷ്ക്കരിക്കാനും നീക്കംചെയ്യാനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
+    <!-- no translation found for permlab_writeVoicemail (7309899891683938100) -->
+    <skip />
+    <!-- no translation found for permdesc_writeVoicemail (6592572839715924830) -->
+    <skip />
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"വോയ്‌സ് മെയിൽ ചേർക്കുക"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"നിങ്ങളുടെ വോയ്‌സ്മെയിൽ ഇൻബോക്‌സിലേക്ക് സന്ദേശങ്ങൾ ചേർക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"എല്ലാ വോയ്സ്മെയിലും വായിക്കുക"</string>
-    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"നിങ്ങളുടെ എല്ലാ വോയ്‌സ്‌മെയിലുകളും വായിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
+    <!-- no translation found for permlab_readVoicemail (8415201752589140137) -->
+    <skip />
+    <!-- no translation found for permdesc_readVoicemail (8926534735321616550) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"ബ്രൗസർ ജിയോലൊക്കേഷൻ അനുമതികൾ പരിഷ്‌ക്കരിക്കുക"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"ബ്രൗസറിന്റെ ജിയോലൊക്കേഷൻ അനുമതികളെ പരിഷ്‌ക്കരിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. അനിയന്ത്രിതമായ വെബ്‌സൈറ്റുകളിലേക്ക് ലൊക്കേഷൻ വിവരം അയയ്ക്കാൻ അനുവദിക്കുന്നതിന് ദോഷകരമായ അപ്ലിക്കേഷനുകൾ ഇത് ഉപയോഗിച്ചേക്കാം."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"പാക്കേജുകൾ പരിശോധിച്ചുറപ്പിക്കുക"</string>
@@ -1386,6 +1390,8 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"ഒരു വിശ്വസ്‌ത ഏജന്റ് സേവനത്തിലേക്ക് ബന്ധിപ്പിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"അപ്‌ഡേറ്റ്, വീണ്ടെടുക്കൽ സിസ്റ്റവുമായി സംവദിക്കുക"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"വീണ്ടെടുക്കൽ സിസ്റ്റവുമായും സിസ്റ്റം അപ്‌ഡേറ്റുകളുമായും സംവദിക്കാൻ ഒരു അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
+    <string name="permlab_createMediaProjection" msgid="4941338725487978112">"മീഡിയ പ്രൊജക്ഷൻ സെഷനുകൾ സൃഷ്‌ടിക്കുക"</string>
+    <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"മീഡിയ പ്രൊജക്ഷൻ സെഷനുകൾ സൃഷ്‌ടിക്കുന്നതിന് ഒരു അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. അപ്ലിക്കേഷനുകൾക്ക് ഡിസ്‌പ്ലേയും ഓഡിയോ ഉള്ളടക്കങ്ങളും ക്യാപ്‌ചർചെയ്യുന്നതിനുള്ള കഴിവ് നൽകാൻ ഈ സെഷനുകൾക്കാവും. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"സൂം ചെയ്യൽ നിയന്ത്രണങ്ങൾക്ക് രണ്ട് തവണ സ്‌പർശിക്കുക"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"വിജറ്റ് ചേർക്കാനായില്ല."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"പോവുക"</string>
@@ -1510,20 +1516,14 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"എഡിറ്റുചെയ്യുക"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"ഡാറ്റ ഉപയോഗ മുന്നറിയിപ്പ്"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"ഉപയോഗവും ക്രമീകരണങ്ങളും കാണാൻ സ്‌പർശിക്കുക."</string>
-    <!-- no translation found for data_usage_3g_limit_title (4462365924791862301) -->
-    <skip />
-    <!-- no translation found for data_usage_4g_limit_title (7476424187522765328) -->
-    <skip />
-    <!-- no translation found for data_usage_mobile_limit_title (3393439305227911006) -->
-    <skip />
-    <!-- no translation found for data_usage_wifi_limit_title (3461968509557554571) -->
-    <skip />
-    <!-- no translation found for data_usage_limit_body (6131350187562939365) -->
-    <skip />
+    <string name="data_usage_3g_limit_title" msgid="4462365924791862301">"2G-3G ഡാറ്റ ഓഫാണ്"</string>
+    <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"4G ഡാറ്റ ഓഫാണ്"</string>
+    <string name="data_usage_mobile_limit_title" msgid="3393439305227911006">"സെല്ലുലാർ ഡാറ്റ ഓഫാണ്"</string>
+    <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"Wi-Fi ഡാറ്റ ഓഫാണ്"</string>
+    <string name="data_usage_limit_body" msgid="6131350187562939365">"പരിധിയെത്തി"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G ഡാറ്റ പരിധി കവിഞ്ഞു"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G ഡാറ്റ പരിധി കവിഞ്ഞു"</string>
-    <!-- no translation found for data_usage_mobile_limit_snoozed_title (4941346653729943789) -->
-    <skip />
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"സെല്ലുലാർ ഡാറ്റ പരിധി കവിഞ്ഞു"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Wi-Fi ഡാറ്റ പരിധി കവിഞ്ഞു"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"നിശ്ചിത പരിധിയിലും <xliff:g id="SIZE">%s</xliff:g> കൂടുതലാണ്."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"പശ്ചാത്തല ഡാറ്റ പരിമിതപ്പെടുത്തി"</string>
@@ -1744,25 +1744,16 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> തിരഞ്ഞെടുത്തു"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> ഇല്ലാതാക്കി"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"ഔദ്യോഗികം <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (2126866321272822564) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="2126866321272822564">"നിങ്ങൾ \'അപ്ലിക്കേഷനിലേക്ക് ലോക്കുചെയ്യൽ\' എന്ന മോഡിലാണ്. പുറത്തുകടക്കുന്നതിന് അടുത്തിടെയുള്ളത് എന്ന ബട്ടൺ സ്‌പർശിച്ച് പിടിക്കുക"</string>
     <string name="lock_to_app_toast_locked" msgid="4229650395479263497">"നിങ്ങൾ \'ലോക്ക്-ടു-അപ്ലിക്കേഷൻ\' മോഡിലാണ്."</string>
     <string name="lock_to_app_title" msgid="5895142291937470019">"ലോക്ക്-ടു-അപ്ലിക്കേഷൻ ഉപയോഗിക്കണോ?"</string>
-    <!-- no translation found for lock_to_app_description (2800403592608529611) -->
-    <skip />
-    <!-- no translation found for lock_to_app_negative (2259143719362732728) -->
-    <skip />
+    <string name="lock_to_app_description" msgid="2800403592608529611">"\'അപ്ലിക്കേഷനിലേക്ക് ലോക്കുചെയ്യൽ\' ഒരു അപ്ലിക്കേഷനിലെ ഡിസ്‌പ്ലേയെ ലോക്കുചെയ്യുന്നു.\n\nപുറത്തുകടക്കുന്നതിന്, അടുത്തിടെയുള്ളത് എന്ന ബട്ടൺ സ്‌പർശിച്ച് പിടിക്കുക."</string>
+    <string name="lock_to_app_negative" msgid="2259143719362732728">"വേണ്ട, നന്ദി"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"ആരംഭിക്കുക"</string>
-    <!-- no translation found for lock_to_app_start (3074665051586318340) -->
-    <skip />
-    <!-- no translation found for lock_to_app_exit (8967089657201849300) -->
-    <skip />
-    <!-- no translation found for lock_to_app_use_screen_lock (1434584309048590886) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_pin (7908385370846820001) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_pattern (7763071104790758405) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_password (795224196583495868) -->
-    <skip />
+    <string name="lock_to_app_start" msgid="3074665051586318340">"അപ്ലിക്കേഷനിലേക്ക് ലോക്കുചെയ്‌തു"</string>
+    <string name="lock_to_app_exit" msgid="8967089657201849300">"അപ്ലിക്കേഷനിലേക്ക് ഇനി ലോക്കുചെയ്യില്ല"</string>
+    <string name="lock_to_app_use_screen_lock" msgid="1434584309048590886">"പുറത്തുകടക്കുന്നതിന് മുമ്പ് %1$s ആവശ്യപ്പെടുക"</string>
+    <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"പിൻ"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"അൺലോക്ക് പാറ്റേൺ"</string>
+    <string name="lock_to_app_unlock_password" msgid="795224196583495868">"പാസ്‌വേഡ്"</string>
 </resources>
