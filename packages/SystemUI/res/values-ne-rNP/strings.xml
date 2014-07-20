@@ -197,8 +197,7 @@
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"ब्लुटुथ"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"ब्लुटुथ (<xliff:g id="NUMBER">%d</xliff:g> उपकरणहरू)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"ब्लुटुथ बन्द"</string>
-    <!-- no translation found for quick_settings_bluetooth_detail_empty_text (4910015762433302860) -->
-    <skip />
+    <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"जोडी उपकरणहरू उपलब्ध छैन"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"चमक"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"स्वतःघुम्ने"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"परिक्रमण लक गरिएको छ"</string>
@@ -213,26 +212,18 @@
     <string name="quick_settings_settings_label" msgid="5326556592578065401">"सेटिङहरू"</string>
     <string name="quick_settings_time_label" msgid="4635969182239736408">"समय"</string>
     <string name="quick_settings_user_label" msgid="5238995632130897840">"मलाई"</string>
-    <!-- no translation found for quick_settings_user_title (4467690427642392403) -->
-    <skip />
-    <!-- no translation found for quick_settings_user_new_user (9030521362023479778) -->
-    <skip />
+    <string name="quick_settings_user_title" msgid="4467690427642392403">"प्रयोगकर्ता"</string>
+    <string name="quick_settings_user_new_user" msgid="9030521362023479778">"नयाँ प्रयोगकर्ता"</string>
     <string name="quick_settings_wifi_label" msgid="9135344704899546041">"वाइफाइ"</string>
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"जोडिएको छैन"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"नेटवर्क छैन"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"वाइफाइ बन्द"</string>
-    <!-- no translation found for quick_settings_wifi_detail_empty_text (2831702993995222755) -->
-    <skip />
-    <!-- no translation found for quick_settings_cast_title (1893629685050355115) -->
-    <skip />
-    <!-- no translation found for quick_settings_casting (6601710681033353316) -->
-    <skip />
-    <!-- no translation found for quick_settings_cast_device_default_name (5367253104742382945) -->
-    <skip />
-    <!-- no translation found for quick_settings_cast_device_default_description (2484573682378634413) -->
-    <skip />
-    <!-- no translation found for quick_settings_cast_detail_empty_text (311785821261640623) -->
-    <skip />
+    <string name="quick_settings_wifi_detail_empty_text" msgid="2831702993995222755">"उपलब्ध सञ्जाल सुरक्षित गरिएन"</string>
+    <string name="quick_settings_cast_title" msgid="1893629685050355115">"स्क्रिन प्रसारण गर्नुहोस्"</string>
+    <string name="quick_settings_casting" msgid="6601710681033353316">"प्रसारण गर्दै"</string>
+    <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"बेनाम उपकरण"</string>
+    <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"प्रसारण गर्न तयार"</string>
+    <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"कुनै उपकरणहरू उपलब्ध छैन"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"उज्यालपन"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"स्वतः"</string>
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"रंग उल्टाउनुहोस्"</string>
@@ -240,8 +231,7 @@
     <string name="quick_settings_more_settings" msgid="326112621462813682">"थप सेटिङहरू"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"भयो"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"जोडिएको"</string>
-    <!-- no translation found for quick_settings_connecting (47623027419264404) -->
-    <skip />
+    <string name="quick_settings_connecting" msgid="47623027419264404">"जडान हुँदै..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"टेदर गर्दै"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"हटस्पट"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"अधिसूचनाहरू"</string>
@@ -252,8 +242,7 @@
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"सीमाभन्दा बढी"</string>
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> प्रयोग गरियो"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"<xliff:g id="DATA_LIMIT">%s</xliff:g> सीमा"</string>
-    <!-- no translation found for quick_settings_cellular_detail_data_warning (2440098045692399009) -->
-    <skip />
+    <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> चेतावनी दिँदै"</string>
     <string name="recents_empty_message" msgid="7883614615463619450">"कुनै वर्तमान अनुप्रयोगहरू छैनन्"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"अनुप्रयोग जानकारी"</string>
     <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"अनुप्रयोग बन्द गर्न"</string>
@@ -304,5 +293,11 @@
     <!-- no translation found for notification_hidden_text (1135169301897151909) -->
     <skip />
     <!-- no translation found for guest_exit_guest (1619100760451149682) -->
+    <skip />
+    <!-- no translation found for media_projection_dialog_text (3071431025448218928) -->
+    <skip />
+    <!-- no translation found for media_projection_remember_text (3103510882172746752) -->
+    <skip />
+    <!-- no translation found for media_projection_action_text (8470872969457985954) -->
     <skip />
 </resources>
