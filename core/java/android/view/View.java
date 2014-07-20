@@ -10724,8 +10724,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public final ValueAnimator createClearCircleAnimator(int centerX,  int centerY,
             float startRadius, float endRadius) {
-        return RevealAnimator.ofRevealCircle(this, centerX, centerY,
-                startRadius, endRadius, true);
+        return new RevealAnimator(this, centerX, centerY, startRadius, endRadius, true);
     }
 
     /**
@@ -10867,8 +10866,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public void setRevealClip(boolean shouldClip, boolean inverseClip,
             float x, float y, float radius) {
         mRenderNode.setRevealClip(shouldClip, inverseClip, x, y, radius);
-        // TODO: Handle this invalidate in a better way, or purely in native.
-        invalidate();
+        invalidateViewProperty(false, false);
     }
 
     /**

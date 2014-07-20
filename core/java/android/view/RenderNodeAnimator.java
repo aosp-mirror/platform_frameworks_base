@@ -125,6 +125,12 @@ public class RenderNodeAnimator extends Animator {
                 property.getNativeContainer(), paintField, finalValue));
     }
 
+    public RenderNodeAnimator(int x, int y, boolean inverseClip,
+            float startRadius, float endRadius) {
+        init(nCreateRevealAnimator(new WeakReference<>(this),
+                x, y, inverseClip, startRadius, endRadius));
+    }
+
     private void init(long ptr) {
         mNativePtr = new VirtualRefBasePtr(ptr);
     }
@@ -190,7 +196,7 @@ public class RenderNodeAnimator extends Animator {
     @Override
     public void cancel() {
         if (!mFinished) {
-            nCancel(mNativePtr.get());
+            nEnd(mNativePtr.get());
 
             final ArrayList<AnimatorListener> listeners = getListeners();
             final int numListeners = listeners == null ? 0 : listeners.size();
@@ -202,7 +208,9 @@ public class RenderNodeAnimator extends Animator {
 
     @Override
     public void end() {
-        throw new UnsupportedOperationException();
+        if (!mFinished) {
+            nEnd(mNativePtr.get());
+        }
     }
 
     @Override
@@ -281,6 +289,11 @@ public class RenderNodeAnimator extends Animator {
     }
 
     @Override
+    public boolean isStarted() {
+        return mStarted;
+    }
+
+    @Override
     public void setInterpolator(TimeInterpolator interpolator) {
         checkMutable();
         mInterpolator = interpolator;
@@ -319,6 +332,8 @@ public class RenderNodeAnimator extends Animator {
             long canvasProperty, float finalValue);
     private static native long nCreateCanvasPropertyPaintAnimator(WeakReference<RenderNodeAnimator> weakThis,
             long canvasProperty, int paintField, float finalValue);
+    private static native long nCreateRevealAnimator(WeakReference<RenderNodeAnimator> weakThis,
+            int x, int y, boolean inverseClip, float startRadius, float endRadius);
 
     private static native void nSetStartValue(long nativePtr, float startValue);
     private static native void nSetDuration(long nativePtr, long duration);
@@ -328,5 +343,5 @@ public class RenderNodeAnimator extends Animator {
     private static native void nSetInterpolator(long animPtr, long interpolatorPtr);
 
     private static native void nStart(long animPtr);
-    private static native void nCancel(long animPtr);
+    private static native void nEnd(long animPtr);
 }

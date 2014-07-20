@@ -51,7 +51,7 @@ public:
         mListener = listener;
     }
     ANDROID_API void start() { mStagingPlayState = RUNNING; onStagingPlayStateChanged(); }
-    ANDROID_API void cancel() { mStagingPlayState = FINISHED; onStagingPlayStateChanged(); }
+    ANDROID_API void end() { mStagingPlayState = FINISHED; onStagingPlayStateChanged(); }
 
     void attach(RenderNode* target);
     virtual void onAttached() {}
@@ -167,6 +167,19 @@ protected:
 private:
     sp<CanvasPropertyPaint> mProperty;
     PaintField mField;
+};
+
+class RevealAnimator : public BaseRenderNodeAnimator {
+public:
+    ANDROID_API RevealAnimator(int centerX, int centerY, bool inverseClip,
+            float startValue, float finalValue);
+protected:
+    virtual float getValue(RenderNode* target) const;
+    virtual void setValue(RenderNode* target, float value);
+
+private:
+    int mCenterX, mCenterY;
+    bool mInverseClip;
 };
 
 } /* namespace uirenderer */

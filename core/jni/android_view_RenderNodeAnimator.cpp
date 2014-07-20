@@ -116,6 +116,14 @@ static jlong createCanvasPropertyPaintAnimator(JNIEnv* env, jobject clazz,
     return reinterpret_cast<jlong>( animator );
 }
 
+static jlong createRevealAnimator(JNIEnv* env, jobject clazz, jobject weakThis,
+        jint centerX, jint centerY, jboolean inverseClip, jfloat startRadius, jfloat endRadius) {
+    BaseRenderNodeAnimator* animator = new RevealAnimator(centerX, centerY, inverseClip,
+            startRadius, endRadius);
+    animator->setListener(new AnimationListenerBridge(env, weakThis));
+    return reinterpret_cast<jlong>( animator );
+}
+
 static void setStartValue(JNIEnv* env, jobject clazz, jlong animatorPtr, jfloat startValue) {
     BaseRenderNodeAnimator* animator = reinterpret_cast<BaseRenderNodeAnimator*>(animatorPtr);
     animator->setStartValue(startValue);
@@ -154,9 +162,9 @@ static void start(JNIEnv* env, jobject clazz, jlong animatorPtr) {
     animator->start();
 }
 
-static void cancel(JNIEnv* env, jobject clazz, jlong animatorPtr) {
+static void end(JNIEnv* env, jobject clazz, jlong animatorPtr) {
     BaseRenderNodeAnimator* animator = reinterpret_cast<BaseRenderNodeAnimator*>(animatorPtr);
-    animator->cancel();
+    animator->end();
 }
 
 #endif
@@ -172,6 +180,7 @@ static JNINativeMethod gMethods[] = {
     { "nCreateAnimator", "(Ljava/lang/ref/WeakReference;IF)J", (void*) createAnimator },
     { "nCreateCanvasPropertyFloatAnimator", "(Ljava/lang/ref/WeakReference;JF)J", (void*) createCanvasPropertyFloatAnimator },
     { "nCreateCanvasPropertyPaintAnimator", "(Ljava/lang/ref/WeakReference;JIF)J", (void*) createCanvasPropertyPaintAnimator },
+    { "nCreateRevealAnimator", "(Ljava/lang/ref/WeakReference;IIZFF)J", (void*) createRevealAnimator },
     { "nSetStartValue", "(JF)V", (void*) setStartValue },
     { "nSetDuration", "(JJ)V", (void*) setDuration },
     { "nGetDuration", "(J)J", (void*) getDuration },
@@ -179,7 +188,7 @@ static JNINativeMethod gMethods[] = {
     { "nGetStartDelay", "(J)J", (void*) getStartDelay },
     { "nSetInterpolator", "(JJ)V", (void*) setInterpolator },
     { "nStart", "(J)V", (void*) start },
-    { "nCancel", "(J)V", (void*) cancel },
+    { "nEnd", "(J)V", (void*) end },
 #endif
 };
 

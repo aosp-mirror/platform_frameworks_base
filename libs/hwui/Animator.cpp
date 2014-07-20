@@ -288,5 +288,23 @@ void CanvasPropertyPaintAnimator::setValue(RenderNode* target, float value) {
     LOG_ALWAYS_FATAL("Unknown field %d", (int) mField);
 }
 
+RevealAnimator::RevealAnimator(int centerX, int centerY, bool inverseClip,
+        float startValue, float finalValue)
+        : BaseRenderNodeAnimator(finalValue)
+        , mCenterX(centerX)
+        , mCenterY(centerY)
+        , mInverseClip(inverseClip) {
+    setStartValue(startValue);
+}
+
+float RevealAnimator::getValue(RenderNode* target) const {
+    return target->properties().getRevealClip().radius();
+}
+
+void RevealAnimator::setValue(RenderNode* target, float value) {
+    target->animatorProperties().mutableRevealClip().set(true, mInverseClip,
+            mCenterX, mCenterY, value);
+}
+
 } /* namespace uirenderer */
 } /* namespace android */

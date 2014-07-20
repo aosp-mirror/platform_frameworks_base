@@ -31,6 +31,7 @@ public class RenderNodeAnimatorCompat extends RenderNodeAnimator {
     private long mStartDelay = 0;
     private long mStartTime;
     private boolean mCanceled;
+    private boolean mStarted;
 
     public RenderNodeAnimatorCompat(int property, float finalValue) {
         super(property, finalValue);
@@ -49,11 +50,17 @@ public class RenderNodeAnimatorCompat extends RenderNodeAnimator {
 
     @Override
     public void start() {
+        mStarted = true;
         if (mStartDelay <= 0) {
             doStart();
         } else {
             getHelper().addDelayedAnimation(this);
         }
+    }
+
+    @Override
+    public boolean isStarted() {
+        return mStarted;
     }
 
     private void doStart() {
