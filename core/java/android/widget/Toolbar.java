@@ -1344,7 +1344,7 @@ public class Toolbar extends ViewGroup {
                     subtitleRight = subtitleRight - mTitleMarginEnd;
                     titleTop = subtitleBottom + lp.bottomMargin;
                 }
-                right = Math.max(titleRight, subtitleRight);
+                right = Math.min(titleRight, subtitleRight);
             } else {
                 final int ld = mTitleMarginStart - collapsingMargins[0];
                 left += Math.max(0, ld);
