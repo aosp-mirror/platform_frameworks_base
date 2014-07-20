@@ -93,6 +93,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/app/backup/IFullBackupRestoreObserver.aidl \
 	core/java/android/app/backup/IRestoreObserver.aidl \
 	core/java/android/app/backup/IRestoreSession.aidl \
+	core/java/android/app/usage/IUsageStatsManager.aidl \
 	core/java/android/bluetooth/IBluetooth.aidl \
 	core/java/android/bluetooth/IBluetoothA2dp.aidl \
 	core/java/android/bluetooth/IBluetoothA2dpSink.aidl \
@@ -251,7 +252,6 @@ LOCAL_SRC_FILES += \
 	core/java/com/android/internal/app/IAppOpsService.aidl \
 	core/java/com/android/internal/app/IBatteryStats.aidl \
 	core/java/com/android/internal/app/IProcessStats.aidl \
-	core/java/com/android/internal/app/IUsageStats.aidl \
 	core/java/com/android/internal/app/IVoiceInteractionManagerService.aidl \
 	core/java/com/android/internal/app/IVoiceInteractor.aidl \
 	core/java/com/android/internal/app/IVoiceInteractorCallback.aidl \

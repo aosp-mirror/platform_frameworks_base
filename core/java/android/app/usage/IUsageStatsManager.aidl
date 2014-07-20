@@ -14,7 +14,17 @@
  * limitations under the License.
  */
 
-package android.app;
+package android.app.usage;
 
-parcelable UsageStats;
-parcelable UsageStats.PackageStats;
+import android.app.usage.UsageStats;
+import android.content.ComponentName;
+
+/**
+ * System private API for talking with the UsageStatsManagerService.
+ *
+ * {@hide}
+ */
+interface IUsageStatsManager {
+    UsageStats[] getStatsSince(int bucketType, long time, String callingPackage);
+    UsageStats.Event[] getEventsSince(long time, String callingPackage);
+}
