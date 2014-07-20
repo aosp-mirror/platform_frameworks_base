@@ -1561,6 +1561,11 @@ public class DevicePolicyManager {
     public static final int KEYGUARD_DISABLE_TRUST_AGENTS = 1 << 4;
 
     /**
+     * Disable fingerprint sensor on keyguard secure screens (e.g. PIN/Pattern/Password).
+     */
+    public static final int KEYGUARD_DISABLE_FINGERPRINT = 1 << 5;
+
+    /**
      * Disable all current and future keyguard customizations.
      */
     public static final int KEYGUARD_DISABLE_FEATURES_ALL = 0x7fffffff;
