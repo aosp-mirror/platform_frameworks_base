@@ -77,8 +77,8 @@
     <item msgid="3199660090246166812">"Լանդշաֆտ"</item>
   </string-array>
     <string name="print_write_error_message" msgid="5787642615179572543">"Հնարավոր չէ գրել ֆայլում"</string>
-    <string name="print_error_default_message" msgid="8602678405502922346">"Չստացվեց: Նորից փորձեք:"</string>
+    <string name="print_error_default_message" msgid="8602678405502922346">"Չհաջողվեց: Նորից փորձեք:"</string>
     <string name="print_error_retry" msgid="1426421728784259538">"Կրկնել"</string>
-    <string name="print_error_printer_unavailable" msgid="8985614415253203381">"Տվյալ տպիչն այս պահին հասանելի չէ:"</string>
+    <string name="print_error_printer_unavailable" msgid="8985614415253203381">"Տպիչն այս պահին հասանելի չէ:"</string>
     <string name="print_preparing_preview" msgid="3939930735671364712">"Նախադիտումը պատրաստվում է…"</string>
 </resources>
