@@ -71,7 +71,7 @@ application can create View and ViewGroup objects (and manipulate their properti
 interested in instantiating View objects at runtime, refer to the {@link android.view.ViewGroup} and 
 {@link android.view.View} class references.</p>
 
-<p>In general, the XML vocabulary for declaring UI elements closely follows the structure and naming of the classes and methods, where element names correspond to class names and attribute names correspond to methods. In fact, the correspondence is often so direct that you can guess what XML attribute corresponds to a class method, or guess what class corresponds to a given xml element. However, note that not all vocabulary is identical. In some cases, there are slight naming differences. For
+<p>In general, the XML vocabulary for declaring UI elements closely follows the structure and naming of the classes and methods, where element names correspond to class names and attribute names correspond to methods. In fact, the correspondence is often so direct that you can guess what XML attribute corresponds to a class method, or guess what class corresponds to a given XML element. However, note that not all vocabulary is identical. In some cases, there are slight naming differences. For
 example, the EditText element has a <code>text</code> attribute that corresponds to
 <code>EditText.setText()</code>. </p>
 
@@ -115,7 +115,7 @@ href="{@docRoot}guide/topics/resources/layout-resource.html">Layout Resources</a
 {@link android.app.Activity#onCreate(android.os.Bundle) Activity.onCreate()} callback implementation.
 Do so by calling <code>{@link android.app.Activity#setContentView(int) setContentView()}</code>, 
 passing it the reference to your layout resource in the form of: 
-<code>R.layout.<em>layout_file_name</em></code>  
+<code>R.layout.<em>layout_file_name</em></code>. 
 For example, if your XML layout is saved as <code>main_layout.xml</code>, you would load it
 for your Activity like so:</p>
 <pre>
@@ -214,7 +214,7 @@ set the width or height: </p>
 
 <ul>
   <li><var>wrap_content</var> tells your view to size itself to the dimensions
-required by its content</li>
+required by its content.</li>
   <li><var>match_parent</var> (named <var>fill_parent</var> before API Level 8)
 tells your view to become as big as its parent view group will allow.</li>
 </ul>
@@ -243,7 +243,7 @@ Available Resources</a> document.</p>
    coordinate of the rectangle representing the view. The latter returns the
    top, or Y, coordinate of the rectangle representing the view. These methods
    both return the location of the view relative to its parent. For instance,
-   when getLeft() returns 20, that means the view is located 20 pixels to the
+   when <code>getLeft()</code> returns 20, that means the view is located 20 pixels to the
    right of the left edge of its direct parent.
    </p>
   
@@ -282,7 +282,7 @@ Available Resources</a> document.</p>
    <p>
    To measure its dimensions, a view takes into account its padding. The padding
    is expressed in pixels for the left, top, right and bottom parts of the view.
-   Padding can be used to offset the content of the view by a specific amount of
+   Padding can be used to offset the content of the view by a specific number of
    pixels. For instance, a left padding of 2 will push the view's content by
    2 pixels to the right of the left edge. Padding can be set using the
    {@link android.view.View#setPadding(int, int, int, int)} method and queried by calling
@@ -375,7 +375,7 @@ alt="" /></a>
 <p>When the content for your layout is dynamic or not pre-determined, you can use a layout that
 subclasses {@link android.widget.AdapterView} to populate the layout with views at runtime. A
 subclass of the {@link android.widget.AdapterView} class uses an {@link android.widget.Adapter} to
-bind data to its layout. The {@link android.widget.Adapter} behaves as a middle-man between the data
+bind data to its layout. The {@link android.widget.Adapter} behaves as a middleman between the data
 source and the {@link android.widget.AdapterView} layout&mdash;the {@link android.widget.Adapter}
 retrieves the data (from a source such as an array or a database query) and converts each entry
 into a view that can be added into the {@link android.widget.AdapterView} layout.</p>
