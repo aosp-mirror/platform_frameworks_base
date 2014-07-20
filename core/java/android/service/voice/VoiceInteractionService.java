@@ -22,7 +22,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.soundtrigger.KeyphraseEnrollmentInfo;
-import android.hardware.soundtrigger.SoundTriggerHelper;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -78,7 +77,6 @@ public class VoiceInteractionService extends Service {
     IVoiceInteractionManagerService mSystemService;
 
     private KeyphraseEnrollmentInfo mKeyphraseEnrollmentInfo;
-    private SoundTriggerHelper mSoundTriggerHelper;
 
     static final int MSG_READY = 1;
 
@@ -150,7 +148,6 @@ public class VoiceInteractionService extends Service {
         mSystemService = IVoiceInteractionManagerService.Stub.asInterface(
                 ServiceManager.getService(Context.VOICE_INTERACTION_MANAGER_SERVICE));
         mKeyphraseEnrollmentInfo = new KeyphraseEnrollmentInfo(getPackageManager());
-        mSoundTriggerHelper = new SoundTriggerHelper();
     }
 
     /**
@@ -168,7 +165,7 @@ public class VoiceInteractionService extends Service {
         // TODO: Cache instances and return the same one instead of creating a new interactor
         // for the same keyphrase/locale combination.
         return new AlwaysOnHotwordDetector(keyphrase, locale, callback,
-                mKeyphraseEnrollmentInfo, mSoundTriggerHelper, mInterface, mSystemService);
+                mKeyphraseEnrollmentInfo, mInterface, mSystemService);
     }
 
     /**

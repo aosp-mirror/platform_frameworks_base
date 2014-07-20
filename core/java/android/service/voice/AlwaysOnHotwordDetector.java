@@ -17,14 +17,15 @@
 package android.service.voice;
 
 import android.content.Intent;
-import android.hardware.soundtrigger.Keyphrase;
+import android.hardware.soundtrigger.IRecognitionStatusCallback;
 import android.hardware.soundtrigger.KeyphraseEnrollmentInfo;
 import android.hardware.soundtrigger.KeyphraseMetadata;
-import android.hardware.soundtrigger.KeyphraseSoundModel;
 import android.hardware.soundtrigger.SoundTrigger;
 import android.hardware.soundtrigger.SoundTrigger.ConfidenceLevel;
+import android.hardware.soundtrigger.SoundTrigger.Keyphrase;
 import android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra;
-import android.hardware.soundtrigger.SoundTriggerHelper;
+import android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel;
+import android.hardware.soundtrigger.SoundTrigger.ModuleProperties;
 import android.hardware.soundtrigger.SoundTrigger.RecognitionConfig;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -68,8 +69,8 @@ public class AlwaysOnHotwordDetector {
     /**
      * Return codes for {@link #startRecognition(int)}, {@link #stopRecognition()}
      */
-    public static final int STATUS_ERROR = Integer.MIN_VALUE;
-    public static final int STATUS_OK = 1;
+    public static final int STATUS_ERROR = SoundTrigger.STATUS_ERROR;
+    public static final int STATUS_OK = SoundTrigger.STATUS_OK;
 
     //---- Keyphrase recognition status ----//
     /** Indicates that recognition is not available. */
@@ -117,11 +118,10 @@ public class AlwaysOnHotwordDetector {
      */
     private final KeyphraseSoundModel mEnrolledSoundModel;
     private final KeyphraseEnrollmentInfo mKeyphraseEnrollmentInfo;
-    private final SoundTriggerHelper mSoundTriggerHelper;
-    private final SoundTriggerHelper.Listener mListener;
     private final int mAvailability;
     private final IVoiceInteractionService mVoiceInteractionService;
     private final IVoiceInteractionManagerService mModelManagementService;
+    private final SoundTriggerListener mInternalCallback;
 
     private int mRecognitionState;
 
@@ -157,15 +157,13 @@ public class AlwaysOnHotwordDetector {
      */
     public AlwaysOnHotwordDetector(String text, String locale, Callback callback,
             KeyphraseEnrollmentInfo keyphraseEnrollmentInfo,
-            SoundTriggerHelper soundTriggerHelper,
             IVoiceInteractionService voiceInteractionService,
             IVoiceInteractionManagerService modelManagementService) {
         mText = text;
         mLocale = locale;
         mKeyphraseEnrollmentInfo = keyphraseEnrollmentInfo;
         mKeyphraseMetadata = mKeyphraseEnrollmentInfo.getKeyphraseMetadata(text, locale);
-        mListener = new SoundTriggerListener(callback);
-        mSoundTriggerHelper = soundTriggerHelper;
+        mInternalCallback = new SoundTriggerListener(callback);
         mVoiceInteractionService = voiceInteractionService;
         mModelManagementService = modelManagementService;
         if (mKeyphraseMetadata != null) {
@@ -225,7 +223,7 @@ public class AlwaysOnHotwordDetector {
      * @param recognitionFlags The flags to control the recognition properties.
      *        The allowed flags are {@link #RECOGNITION_FLAG_NONE} and
      *        {@link #RECOGNITION_FLAG_CAPTURE_TRIGGER_AUDIO}.
-     * @return One of {@link #STATUS_ERROR} or {@link #STATUS_OK}.
+     * @return {@link #STATUS_OK} if the call succeeds, an error code otherwise.
      * @throws UnsupportedOperationException if the recognition isn't supported.
      *         Callers should check the availability by calling {@link #getAvailability()}
      *         before calling this method to avoid this exception.
@@ -245,22 +243,25 @@ public class AlwaysOnHotwordDetector {
                 mKeyphraseMetadata.recognitionModeFlags, new ConfidenceLevel[0]);
         boolean captureTriggerAudio =
                 (recognitionFlags & RECOGNITION_FLAG_CAPTURE_TRIGGER_AUDIO) != 0;
-        int code = mSoundTriggerHelper.startRecognition(mKeyphraseMetadata.id,
-                mEnrolledSoundModel.convertToSoundTriggerKeyphraseSoundModel(), mListener,
-                new RecognitionConfig(
-                        captureTriggerAudio, recognitionExtra,null /* additional data */));
-        if (code != SoundTriggerHelper.STATUS_OK) {
-            Slog.w(TAG, "startRecognition() failed with error code " + code);
-            return STATUS_ERROR;
-        } else {
-            return STATUS_OK;
+        int code = STATUS_ERROR;
+        try {
+            code = mModelManagementService.startRecognition(mVoiceInteractionService,
+                    mKeyphraseMetadata.id, mEnrolledSoundModel, mInternalCallback,
+                    new RecognitionConfig(
+                            captureTriggerAudio, recognitionExtra, null /* additional data */));
+        } catch (RemoteException e) {
+            Slog.w(TAG, "RemoteException in startRecognition!");
         }
+        if (code != STATUS_OK) {
+            Slog.w(TAG, "startRecognition() failed with error code " + code);
+        }
+        return code;
     }
 
     /**
      * Stops recognition for the associated keyphrase.
      *
-     * @return One of {@link #STATUS_ERROR} or {@link #STATUS_OK}.
+     * @return {@link #STATUS_OK} if the call succeeds, an error code otherwise.
      * @throws UnsupportedOperationException if the recognition isn't supported.
      *         Callers should check the availability by calling {@link #getAvailability()}
      *         before calling this method to avoid this exception.
@@ -272,14 +273,18 @@ public class AlwaysOnHotwordDetector {
         }
 
         mRecognitionState &= ~RECOGNITION_STATUS_NOT_REQUESTED;
-        int code = mSoundTriggerHelper.stopRecognition(mKeyphraseMetadata.id, mListener);
-
-        if (code != SoundTriggerHelper.STATUS_OK) {
-            Slog.w(TAG, "stopRecognition() failed with error code " + code);
-            return STATUS_ERROR;
-        } else {
-            return STATUS_OK;
+        int code = STATUS_ERROR;
+        try {
+            code = mModelManagementService.stopRecognition(
+                    mVoiceInteractionService, mKeyphraseMetadata.id, mInternalCallback);
+        } catch (RemoteException e) {
+            Slog.w(TAG, "RemoteException in stopRecognition!");
         }
+
+        if (code != STATUS_OK) {
+            Slog.w(TAG, "stopRecognition() failed with error code " + code);
+        }
+        return code;
     }
 
     /**
@@ -309,8 +314,15 @@ public class AlwaysOnHotwordDetector {
     }
 
     private int internalGetAvailability() {
+        ModuleProperties dspModuleProperties = null;
+        try {
+            dspModuleProperties =
+                    mModelManagementService.getDspModuleProperties(mVoiceInteractionService);
+        } catch (RemoteException e) {
+            Slog.w(TAG, "RemoteException in getDspProperties!");
+        }
         // No DSP available
-        if (mSoundTriggerHelper.dspInfo == null) {
+        if (dspModuleProperties == null) {
             mRecognitionState = RECOGNITION_STATUS_NOT_AVAILABLE;
             return KEYPHRASE_HARDWARE_UNAVAILABLE;
         }
@@ -359,7 +371,7 @@ public class AlwaysOnHotwordDetector {
     }
 
     /** @hide */
-    static final class SoundTriggerListener implements SoundTriggerHelper.Listener {
+    static final class SoundTriggerListener extends IRecognitionStatusCallback.Stub {
         private final Callback mCallback;
 
         public SoundTriggerListener(Callback callback) {
@@ -367,20 +379,21 @@ public class AlwaysOnHotwordDetector {
         }
 
         @Override
-        public void onKeyphraseSpoken(byte[] data) {
+        public void onDetected(byte[] data) {
             Slog.i(TAG, "onKeyphraseSpoken");
             mCallback.onDetected(data);
         }
 
         @Override
-        public void onListeningStateChanged(int state) {
-            Slog.i(TAG, "onListeningStateChanged: state=" + state);
-            // TODO: Set/unset the RECOGNITION_STATUS_ACTIVE flag here.
-            if (state == SoundTriggerHelper.STATE_STARTED) {
-                mCallback.onDetectionStarted();
-            } else if (state == SoundTriggerHelper.STATE_STOPPED) {
-                mCallback.onDetectionStopped();
-            }
+        public void onDetectionStarted() {
+            // TODO: Set the RECOGNITION_STATUS_ACTIVE flag here.
+            mCallback.onDetectionStarted();
+        }
+
+        @Override
+        public void onDetectionStopped() {
+            // TODO: Unset the RECOGNITION_STATUS_ACTIVE flag here.
+            mCallback.onDetectionStopped();
         }
     }
 }

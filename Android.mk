@@ -167,6 +167,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/hardware/location/IGeofenceHardware.aidl \
 	core/java/android/hardware/location/IGeofenceHardwareCallback.aidl \
 	core/java/android/hardware/location/IGeofenceHardwareMonitorCallback.aidl \
+	core/java/android/hardware/soundtrigger/IRecognitionStatusCallback.aidl \
 	core/java/android/hardware/usb/IUsbManager.aidl \
 	core/java/android/net/IConnectivityManager.aidl \
 	core/java/android/net/IEthernetManager.aidl \
