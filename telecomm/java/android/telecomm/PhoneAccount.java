@@ -70,8 +70,8 @@ public class PhoneAccount implements Parcelable {
     private final String mSubscriptionNumber;
     private final int mCapabilities;
     private final int mIconResId;
-    private final CharSequence mLabel;
-    private final CharSequence mShortDescription;
+    private final String mLabel;
+    private final String mShortDescription;
     private boolean mVideoCallingSupported;
 
     public PhoneAccount(
@@ -80,8 +80,8 @@ public class PhoneAccount implements Parcelable {
             String subscriptionNumber,
             int capabilities,
             int iconResId,
-            CharSequence label,
-            CharSequence shortDescription,
+            String label,
+            String shortDescription,
             boolean supportsVideoCalling) {
         mAccountHandle = account;
         mHandle = handle;
@@ -135,11 +135,11 @@ public class PhoneAccount implements Parcelable {
     }
 
     /**
-     * A short label describing a {@code PhoneAccount}.
+     * A short string label describing a {@code PhoneAccount}.
      *
      * @return A label for this {@code PhoneAccount}.
      */
-    public CharSequence getLabel() {
+    public String getLabel() {
         return mLabel;
     }
 
@@ -148,7 +148,7 @@ public class PhoneAccount implements Parcelable {
      *
      * @return A description for this {@code PhoneAccount}.
      */
-    public CharSequence getShortDescription() {
+    public String getShortDescription() {
         return mShortDescription;
     }
 
@@ -213,8 +213,8 @@ public class PhoneAccount implements Parcelable {
         out.writeString(mSubscriptionNumber);
         out.writeInt(mCapabilities);
         out.writeInt(mIconResId);
-        out.writeCharSequence(mLabel);
-        out.writeCharSequence(mShortDescription);
+        out.writeString(mLabel);
+        out.writeString(mShortDescription);
         out.writeInt(mVideoCallingSupported ? 1 : 0);
     }
 
@@ -237,8 +237,8 @@ public class PhoneAccount implements Parcelable {
         mSubscriptionNumber = in.readString();
         mCapabilities = in.readInt();
         mIconResId = in.readInt();
-        mLabel = in.readCharSequence();
-        mShortDescription = in.readCharSequence();
+        mLabel = in.readString();
+        mShortDescription = in.readString();
         mVideoCallingSupported = in.readInt() == 1;
     }
 }
