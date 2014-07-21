@@ -135,7 +135,10 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     void deviceSelect(int targetAddress, IHdmiControlCallback callback) {
         assertRunOnServiceThread();
         if (targetAddress == Constants.ADDR_INTERNAL) {
-            handleSelectInternalSource(callback);
+            handleSelectInternalSource();
+            // Switching to internal source is always successful even when CEC control is disabled.
+            setActiveSource(targetAddress);
+            invokeCallback(callback, HdmiControlManager.RESULT_SUCCESS);
             return;
         }
         if (!mService.isControlEnabled()) {
@@ -153,7 +156,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     }
 
     @ServiceThreadOnly
-    private void handleSelectInternalSource(IHdmiControlCallback callback) {
+    private void handleSelectInternalSource() {
         assertRunOnServiceThread();
         // Seq #18
         if (mService.isControlEnabled() && getActiveSource() != mAddress) {
