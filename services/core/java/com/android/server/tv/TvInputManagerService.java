@@ -1035,7 +1035,8 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
-        public void unblockContent(IBinder sessionToken, String unblockedRating, int userId) {
+        public void requestUnblockContent(
+                IBinder sessionToken, String unblockedRating, int userId) {
             final int callingUid = Binder.getCallingUid();
             final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
                     userId, "unblockContent");
@@ -1044,7 +1045,7 @@ public final class TvInputManagerService extends SystemService {
                 synchronized (mLock) {
                     try {
                         getSessionLocked(sessionToken, callingUid, resolvedUserId)
-                                .unblockContent(unblockedRating);
+                                .requestUnblockContent(unblockedRating);
                     } catch (RemoteException e) {
                         Slog.e(TAG, "error in unblockContent", e);
                     }
