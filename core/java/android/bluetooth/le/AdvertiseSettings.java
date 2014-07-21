@@ -139,6 +139,9 @@ public final class AdvertiseSettings implements Parcelable {
         dest.writeInt(mAdvertiseTimeoutSeconds);
     }
 
+    /**
+     * @hide
+     */
     public static final Parcelable.Creator<AdvertiseSettings> CREATOR =
             new Creator<AdvertiseSettings>() {
             @Override

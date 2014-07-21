@@ -21,7 +21,6 @@ import android.bluetooth.BluetoothDevice;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -32,7 +31,8 @@ public final class ScanResult implements Parcelable {
     private BluetoothDevice mDevice;
 
     // Scan record, including advertising data and scan response data.
-    private byte[] mScanRecord;
+    @Nullable
+    private ScanRecord mScanRecord;
 
     // Received signal strength.
     private int mRssi;
@@ -43,9 +43,12 @@ public final class ScanResult implements Parcelable {
     /**
      * Constructor of scan result.
      *
-     * @hide
+     * @param device Remote bluetooth device that is found.
+     * @param scanRecord Scan record including both advertising data and scan response data.
+     * @param rssi Received signal strength.
+     * @param timestampNanos Device timestamp when the scan result was observed.
      */
-    public ScanResult(BluetoothDevice device, byte[] scanRecord, int rssi,
+    public ScanResult(BluetoothDevice device, ScanRecord scanRecord, int rssi,
             long timestampNanos) {
         mDevice = device;
         mScanRecord = scanRecord;
@@ -66,8 +69,8 @@ public final class ScanResult implements Parcelable {
             dest.writeInt(0);
         }
         if (mScanRecord != null) {
-            dest.writeInt(1);
-            dest.writeByteArray(mScanRecord);
+            dest.writeInt(mScanRecord.getBytes().length);
+            dest.writeByteArray(mScanRecord.getBytes());
         } else {
             dest.writeInt(0);
         }
@@ -80,7 +83,7 @@ public final class ScanResult implements Parcelable {
             mDevice = BluetoothDevice.CREATOR.createFromParcel(in);
         }
         if (in.readInt() == 1) {
-            mScanRecord = in.createByteArray();
+            mScanRecord = ScanRecord.parseFromBytes(in.createByteArray());
         }
         mRssi = in.readInt();
         mTimestampNanos = in.readLong();
@@ -94,16 +97,15 @@ public final class ScanResult implements Parcelable {
     /**
      * Returns the remote bluetooth device identified by the bluetooth device address.
      */
-    @Nullable
     public BluetoothDevice getDevice() {
         return mDevice;
     }
 
     /**
-     * Returns the scan record, which can be a combination of advertisement and scan response.
+     * Returns the scan record, which is a combination of advertisement and scan response.
      */
     @Nullable
-    public byte[] getScanRecord() {
+    public ScanRecord getScanRecord() {
         return mScanRecord;
     }
 
@@ -136,17 +138,20 @@ public final class ScanResult implements Parcelable {
         }
         ScanResult other = (ScanResult) obj;
         return Objects.equals(mDevice, other.mDevice) && (mRssi == other.mRssi) &&
-                Objects.deepEquals(mScanRecord, other.mScanRecord)
+                Objects.equals(mScanRecord, other.mScanRecord)
                 && (mTimestampNanos == other.mTimestampNanos);
     }
 
     @Override
     public String toString() {
         return "ScanResult{" + "mDevice=" + mDevice + ", mScanRecord="
-                + Arrays.toString(mScanRecord) + ", mRssi=" + mRssi + ", mTimestampNanos="
+                + mScanRecord.toString() + ", mRssi=" + mRssi + ", mTimestampNanos="
                 + mTimestampNanos + '}';
     }
 
+    /**
+     * @hide
+     */
     public static final Parcelable.Creator<ScanResult> CREATOR = new Creator<ScanResult>() {
             @Override
         public ScanResult createFromParcel(Parcel source) {

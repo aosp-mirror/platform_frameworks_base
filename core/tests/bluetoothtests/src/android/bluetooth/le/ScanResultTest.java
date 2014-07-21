@@ -43,7 +43,8 @@ public class ScanResultTest extends TestCase {
         int rssi = -10;
         long timestampMicros = 10000L;
 
-        ScanResult result = new ScanResult(device, scanRecord, rssi, timestampMicros);
+        ScanResult result = new ScanResult(device, ScanRecord.parseFromBytes(scanRecord), rssi,
+                timestampMicros);
         Parcel parcel = Parcel.obtain();
         result.writeToParcel(parcel, 0);
         // Need to reset parcel data position to the beginning.

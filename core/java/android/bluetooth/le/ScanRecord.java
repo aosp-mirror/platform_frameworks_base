@@ -68,6 +68,9 @@ public final class ScanRecord {
     // Local name of the Bluetooth LE device.
     private final String mDeviceName;
 
+    // Raw bytes of scan record.
+    private final byte[] mBytes;
+
     /**
      * Returns the advertising flags indicating the discoverable mode and capability of the device.
      * Returns -1 if the flag field is not set.
@@ -133,11 +136,18 @@ public final class ScanRecord {
         return mDeviceName;
     }
 
+    /**
+     * Returns raw bytes of scan record.
+     */
+    public byte[] getBytes() {
+        return mBytes;
+    }
+
     private ScanRecord(List<ParcelUuid> serviceUuids,
             ParcelUuid serviceDataUuid, byte[] serviceData,
             int manufacturerId,
             byte[] manufacturerSpecificData, int advertiseFlags, int txPowerLevel,
-            String localName) {
+            String localName, byte[] bytes) {
         mServiceUuids = serviceUuids;
         mManufacturerId = manufacturerId;
         mManufacturerSpecificData = manufacturerSpecificData;
@@ -146,15 +156,7 @@ public final class ScanRecord {
         mDeviceName = localName;
         mAdvertiseFlags = advertiseFlags;
         mTxPowerLevel = txPowerLevel;
-    }
-
-    @Override
-    public String toString() {
-        return "ScanRecord [mAdvertiseFlags=" + mAdvertiseFlags + ", mServiceUuids=" + mServiceUuids
-                + ", mManufacturerId=" + mManufacturerId + ", mManufacturerSpecificData="
-                + Arrays.toString(mManufacturerSpecificData) + ", mServiceDataUuid="
-                + mServiceDataUuid + ", mServiceData=" + Arrays.toString(mServiceData)
-                + ", mTxPowerLevel=" + mTxPowerLevel + ", mDeviceName=" + mDeviceName + "]";
+        mBytes = bytes;
     }
 
     /**
@@ -166,6 +168,8 @@ public final class ScanRecord {
      * order.
      *
      * @param scanRecord The scan record of Bluetooth LE advertisement and/or scan response.
+     *
+     * @hide
      */
     public static ScanRecord parseFromBytes(byte[] scanRecord) {
         if (scanRecord == null) {
@@ -248,12 +252,22 @@ public final class ScanRecord {
             }
             return new ScanRecord(serviceUuids, serviceDataUuid, serviceData,
                     manufacturerId, manufacturerSpecificData, advertiseFlag, txPowerLevel,
-                    localName);
+                    localName, scanRecord);
         } catch (IndexOutOfBoundsException e) {
             Log.e(TAG, "unable to parse scan record: " + Arrays.toString(scanRecord));
             return null;
         }
     }
+
+    @Override
+    public String toString() {
+        return "ScanRecord [mAdvertiseFlags=" + mAdvertiseFlags + ", mServiceUuids=" + mServiceUuids
+                + ", mManufacturerId=" + mManufacturerId + ", mManufacturerSpecificData="
+                + Arrays.toString(mManufacturerSpecificData) + ", mServiceDataUuid="
+                + mServiceDataUuid + ", mServiceData=" + Arrays.toString(mServiceData)
+                + ", mTxPowerLevel=" + mTxPowerLevel + ", mDeviceName=" + mDeviceName + "]";
+    }
+
 
     // Parse service UUIDs.
     private static int parseServiceUuid(byte[] scanRecord, int currentPos, int dataLength,
