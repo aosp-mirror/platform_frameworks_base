@@ -244,7 +244,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         int widthHalf = mBackgroundNormal.getWidth()/2;
         int heightHalf = mBackgroundNormal.getActualHeight()/2;
         float radius = (float) Math.sqrt(widthHalf*widthHalf + heightHalf*heightHalf);
-        ValueAnimator animator =
+        Animator animator =
                 ViewAnimationUtils.createCircularReveal(mBackgroundNormal,
                         widthHalf, heightHalf, 0, radius);
         mBackgroundNormal.setVisibility(View.VISIBLE);
