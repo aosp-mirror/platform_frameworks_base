@@ -235,14 +235,23 @@ class TvInputHardwareManager implements TvInputHal.Callback {
         }
     }
 
+    private static <T> int indexOfEqualValue(SparseArray<T> map, T value) {
+        for (int i = 0; i < map.size(); ++i) {
+            if (map.valueAt(i).equals(value)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     public void addHdmiCecTvInput(int logicalAddress, TvInputInfo info) {
         if (info.getType() != TvInputInfo.TYPE_HDMI) {
             throw new IllegalArgumentException("info (" + info + ") has non-HDMI type.");
         }
         synchronized (mLock) {
             String parentId = info.getParentId();
-            int parentIndex = mHardwareInputIdMap.indexOfValue(parentId);
-            if (parentIndex < 0 || !parentId.equals(mHardwareInputIdMap.valueAt(parentIndex))) {
+            int parentIndex = indexOfEqualValue(mHardwareInputIdMap, parentId);
+            if (parentIndex < 0) {
                 throw new IllegalArgumentException("info (" + info + ") has invalid parentId.");
             }
             String oldInputId = mHdmiCecInputIdMap.get(logicalAddress);
@@ -259,11 +268,11 @@ class TvInputHardwareManager implements TvInputHal.Callback {
     public void removeTvInput(String inputId) {
         synchronized (mLock) {
             mInputMap.remove(inputId);
-            int hardwareIndex = mHardwareInputIdMap.indexOfValue(inputId);
+            int hardwareIndex = indexOfEqualValue(mHardwareInputIdMap, inputId);
             if (hardwareIndex >= 0) {
                 mHardwareInputIdMap.removeAt(hardwareIndex);
             }
-            int cecIndex = mHdmiCecInputIdMap.indexOfValue(inputId);
+            int cecIndex = indexOfEqualValue(mHdmiCecInputIdMap, inputId);
             if (cecIndex >= 0) {
                 mHdmiCecInputIdMap.removeAt(cecIndex);
             }
