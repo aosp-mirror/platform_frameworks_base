@@ -28,6 +28,8 @@ import android.util.Log;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
 
+import java.util.Arrays;
+
 /**
  * StaticLayout is a Layout for text that will not be edited after it
  * is laid out.  Use {@link DynamicLayout} for text that may change.
@@ -161,7 +163,12 @@ public class StaticLayout extends Layout {
                         float spacingadd, boolean includepad,
                         boolean trackpad, float ellipsizedWidth,
                         TextUtils.TruncateAt ellipsize) {
-        int[] breakOpp = null;
+        LineBreaks lineBreaks = new LineBreaks();
+        // store span end locations
+        int[] spanEndCache = new int[4];
+        // store fontMetrics per span range
+        // must be a multiple of 4 (and > 0) (store top, bottom, ascent, and descent per range)
+        int[] fmCache = new int[4 * 4];
         final String localeLanguageTag = paint.getTextLocale().toLanguageTag();
 
         mLineCount = 0;
@@ -186,7 +193,7 @@ public class StaticLayout extends Layout {
             else
                 paraEnd++;
 
-            int firstWidthLineLimit = mLineCount + 1;
+            int firstWidthLineCount = 1;
             int firstWidth = outerWidth;
             int restWidth = outerWidth;
 
@@ -204,9 +211,8 @@ public class StaticLayout extends Layout {
                     // leading margin spans, not just this particular one
                     if (lms instanceof LeadingMarginSpan2) {
                         LeadingMarginSpan2 lms2 = (LeadingMarginSpan2) lms;
-                        int lmsFirstLine = getLineForOffset(spanned.getSpanStart(lms2));
-                        firstWidthLineLimit = Math.max(firstWidthLineLimit,
-                                lmsFirstLine + lms2.getLeadingMarginLineCount());
+                        firstWidthLineCount = Math.max(firstWidthLineCount,
+                                lms2.getLeadingMarginLineCount());
                     }
                 }
 
@@ -242,32 +248,23 @@ public class StaticLayout extends Layout {
             int dir = measured.mDir;
             boolean easy = measured.mEasy;
 
-            breakOpp = nLineBreakOpportunities(localeLanguageTag, chs, paraEnd - paraStart, breakOpp);
-            int breakOppIndex = 0;
-
-            int width = firstWidth;
-
-            float w = 0;
-            // here is the offset of the starting character of the line we are currently measuring
-            int here = paraStart;
-
-            // ok is a character offset located after a word separator (space, tab, number...) where
-            // we would prefer to cut the current line. Equals to here when no such break was found.
-            int ok = paraStart;
-            float okWidth = w;
-            int okAscent = 0, okDescent = 0, okTop = 0, okBottom = 0;
-
-            // fit is a character offset such that the [here, fit[ range fits in the allowed width.
-            // We will cut the line there if no ok position is found.
-            int fit = paraStart;
-            float fitWidth = w;
-            int fitAscent = 0, fitDescent = 0, fitTop = 0, fitBottom = 0;
-
-            boolean hasTabOrEmoji = false;
-            boolean hasTab = false;
-            TabStops tabStops = null;
-
+            // measurement has to be done before performing line breaking
+            // but we don't want to recompute fontmetrics or span ranges the
+            // second time, so we cache those and then use those stored values
+            int fmCacheCount = 0;
+            int spanEndCacheCount = 0;
             for (int spanStart = paraStart, spanEnd; spanStart < paraEnd; spanStart = spanEnd) {
+                if (fmCacheCount * 4 >= fmCache.length) {
+                    int[] grow = new int[fmCacheCount * 4 * 2];
+                    System.arraycopy(fmCache, 0, grow, 0, fmCacheCount * 4);
+                    fmCache = grow;
+                }
+
+                if (spanEndCacheCount >= spanEndCache.length) {
+                    int[] grow = new int[spanEndCacheCount * 2];
+                    System.arraycopy(spanEndCache, 0, grow, 0, spanEndCacheCount);
+                    spanEndCache = grow;
+                }
 
                 if (spanned == null) {
                     spanEnd = paraEnd;
@@ -283,196 +280,108 @@ public class StaticLayout extends Layout {
                     measured.addStyleRun(paint, spans, spanLen, fm);
                 }
 
-                int fmTop = fm.top;
-                int fmBottom = fm.bottom;
-                int fmAscent = fm.ascent;
-                int fmDescent = fm.descent;
+                // the order of storage here (top, bottom, ascent, descent) has to match the code below
+                // where these values are retrieved
+                fmCache[fmCacheCount * 4 + 0] = fm.top;
+                fmCache[fmCacheCount * 4 + 1] = fm.bottom;
+                fmCache[fmCacheCount * 4 + 2] = fm.ascent;
+                fmCache[fmCacheCount * 4 + 3] = fm.descent;
+                fmCacheCount++;
 
-                for (int j = spanStart; j < spanEnd; j++) {
-                    char c = chs[j - paraStart];
+                spanEndCache[spanEndCacheCount] = spanEnd;
+                spanEndCacheCount++;
+            }
 
-                    if (c == CHAR_NEW_LINE) {
-                        // intentionally left empty
-                    } else if (c == CHAR_TAB) {
-                        if (hasTab == false) {
-                            hasTab = true;
-                            hasTabOrEmoji = true;
-                            if (spanned != null) {
-                                // First tab this para, check for tabstops
-                                TabStopSpan[] spans = getParagraphSpans(spanned, paraStart,
-                                        paraEnd, TabStopSpan.class);
-                                if (spans.length > 0) {
-                                    tabStops = new TabStops(TAB_INCREMENT, spans);
-                                }
-                            }
-                        }
-                        if (tabStops != null) {
-                            w = tabStops.nextTab(w);
-                        } else {
-                            w = TabStops.nextDefaultStop(w, TAB_INCREMENT);
-                        }
-                    } else if (c >= CHAR_FIRST_HIGH_SURROGATE && c <= CHAR_LAST_LOW_SURROGATE
-                            && j + 1 < spanEnd) {
-                        int emoji = Character.codePointAt(chs, j - paraStart);
-
-                        if (emoji >= MIN_EMOJI && emoji <= MAX_EMOJI) {
-                            Bitmap bm = EMOJI_FACTORY.getBitmapFromAndroidPua(emoji);
-
-                            if (bm != null) {
-                                Paint whichPaint;
-
-                                if (spanned == null) {
-                                    whichPaint = paint;
-                                } else {
-                                    whichPaint = mWorkPaint;
-                                }
-
-                                float wid = bm.getWidth() * -whichPaint.ascent() / bm.getHeight();
-
-                                w += wid;
-                                hasTabOrEmoji = true;
-                                j++;
-                            } else {
-                                w += widths[j - paraStart];
-                            }
-                        } else {
-                            w += widths[j - paraStart];
-                        }
-                    } else {
-                        w += widths[j - paraStart];
+            // tab stop locations
+            int[] variableTabStops = null;
+            if (spanned != null) {
+                TabStopSpan[] spans = getParagraphSpans(spanned, paraStart,
+                        paraEnd, TabStopSpan.class);
+                if (spans.length > 0) {
+                    int[] stops = new int[spans.length];
+                    for (int i = 0; i < spans.length; i++) {
+                        stops[i] = spans[i].getTabStop();
                     }
-
-                    boolean isSpaceOrTab = c == CHAR_SPACE || c == CHAR_TAB || c == CHAR_ZWSP;
-
-                    if (w <= width || isSpaceOrTab) {
-                        fitWidth = w;
-                        fit = j + 1;
-
-                        if (fmTop < fitTop)
-                            fitTop = fmTop;
-                        if (fmAscent < fitAscent)
-                            fitAscent = fmAscent;
-                        if (fmDescent > fitDescent)
-                            fitDescent = fmDescent;
-                        if (fmBottom > fitBottom)
-                            fitBottom = fmBottom;
-
-                        while (breakOpp[breakOppIndex] != -1
-                                && breakOpp[breakOppIndex] < j - paraStart + 1) {
-                            breakOppIndex++;
-                        }
-                        boolean isLineBreak = breakOppIndex < breakOpp.length &&
-                                breakOpp[breakOppIndex] == j - paraStart + 1;
-
-                        if (isLineBreak) {
-                            okWidth = w;
-                            ok = j + 1;
-
-                            if (fitTop < okTop)
-                                okTop = fitTop;
-                            if (fitAscent < okAscent)
-                                okAscent = fitAscent;
-                            if (fitDescent > okDescent)
-                                okDescent = fitDescent;
-                            if (fitBottom > okBottom)
-                                okBottom = fitBottom;
-                        }
-                    } else {
-                        final boolean moreChars;
-                        int endPos;
-                        int above, below, top, bottom;
-                        float currentTextWidth;
-
-                        if (ok != here) {
-                            endPos = ok;
-                            above = okAscent;
-                            below = okDescent;
-                            top = okTop;
-                            bottom = okBottom;
-                            currentTextWidth = okWidth;
-                            moreChars = (j + 1 < spanEnd);
-                        } else if (fit != here) {
-                            endPos = fit;
-                            above = fitAscent;
-                            below = fitDescent;
-                            top = fitTop;
-                            bottom = fitBottom;
-                            currentTextWidth = fitWidth;
-                            moreChars = (j + 1 < spanEnd);
-                        } else {
-                            // must make progress, so take next character
-                            endPos = here + 1;
-                            // but to deal properly with clusters
-                            // take all zero width characters following that
-                            while (endPos < spanEnd && widths[endPos - paraStart] == 0) {
-                                endPos++;
-                            }
-                            above = fmAscent;
-                            below = fmDescent;
-                            top = fmTop;
-                            bottom = fmBottom;
-                            currentTextWidth = widths[here - paraStart];
-                            moreChars = (endPos < spanEnd);
-                        }
-
-                        v = out(source, here, endPos,
-                                above, below, top, bottom,
-                                v, spacingmult, spacingadd, chooseHt,chooseHtv, fm, hasTabOrEmoji,
-                                needMultiply, chdirs, dir, easy, bufEnd, includepad, trackpad,
-                                chs, widths, paraStart, ellipsize, ellipsizedWidth,
-                                currentTextWidth, paint, moreChars);
-
-                        here = endPos;
-                        j = here - 1; // restart j-span loop from here, compensating for the j++
-                        ok = fit = here;
-                        w = 0;
-                        fitAscent = fitDescent = fitTop = fitBottom = 0;
-                        okAscent = okDescent = okTop = okBottom = 0;
-
-                        if (--firstWidthLineLimit <= 0) {
-                            width = restWidth;
-                        }
-
-                        if (here < spanStart) {
-                            // The text was cut before the beginning of the current span range.
-                            // Exit the span loop, and get spanStart to start over from here.
-                            measured.setPos(here);
-                            spanEnd = here;
-                            break;
-                        }
-
-                        if (mLineCount >= mMaximumVisibleLineCount) {
-                            return;
-                        }
-                    }
+                    Arrays.sort(stops, 0, stops.length);
+                    variableTabStops = stops;
                 }
             }
 
-            if (paraEnd != here && mLineCount < mMaximumVisibleLineCount) {
-                if ((fitTop | fitBottom | fitDescent | fitAscent) == 0) {
-                    paint.getFontMetricsInt(fm);
+            int breakCount = nComputeLineBreaks(localeLanguageTag, chs, widths, paraEnd - paraStart, firstWidth,
+                    firstWidthLineCount, restWidth, variableTabStops, TAB_INCREMENT, lineBreaks,
+                    lineBreaks.breaks, lineBreaks.widths, lineBreaks.flags, lineBreaks.breaks.length);
 
-                    fitTop = fm.top;
-                    fitBottom = fm.bottom;
-                    fitAscent = fm.ascent;
-                    fitDescent = fm.descent;
+            int[] breaks = lineBreaks.breaks;
+            float[] lineWidths = lineBreaks.widths;
+            boolean[] flags = lineBreaks.flags;
+
+
+            // here is the offset of the starting character of the line we are currently measuring
+            int here = paraStart;
+
+            int fmTop = 0, fmBottom = 0, fmAscent = 0, fmDescent = 0;
+            int fmCacheIndex = 0;
+            int spanEndCacheIndex = 0;
+            int breakIndex = 0;
+            for (int spanStart = paraStart, spanEnd; spanStart < paraEnd; spanStart = spanEnd) {
+                // retrieve end of span
+                spanEnd = spanEndCache[spanEndCacheIndex++];
+
+                // retrieve cached metrics, order matches above
+                fm.top = fmCache[fmCacheIndex * 4 + 0];
+                fm.bottom = fmCache[fmCacheIndex * 4 + 1];
+                fm.ascent = fmCache[fmCacheIndex * 4 + 2];
+                fm.descent = fmCache[fmCacheIndex * 4 + 3];
+                fmCacheIndex++;
+
+                if (fm.top < fmTop) {
+                    fmTop = fm.top;
+                }
+                if (fm.ascent < fmAscent) {
+                    fmAscent = fm.ascent;
+                }
+                if (fm.descent > fmDescent) {
+                    fmDescent = fm.descent;
+                }
+                if (fm.bottom > fmBottom) {
+                    fmBottom = fm.bottom;
                 }
 
-                // Log.e("text", "output rest " + here + " to " + end);
+                // skip breaks ending before current span range
+                while (breakIndex < breakCount && paraStart + breaks[breakIndex] < spanStart) {
+                    breakIndex++;
+                }
 
-                v = out(source,
-                        here, paraEnd, fitAscent, fitDescent,
-                        fitTop, fitBottom,
-                        v,
-                        spacingmult, spacingadd, chooseHt,
-                        chooseHtv, fm, hasTabOrEmoji,
-                        needMultiply, chdirs, dir, easy, bufEnd,
-                        includepad, trackpad, chs,
-                        widths, paraStart, ellipsize,
-                        ellipsizedWidth, w, paint, paraEnd != bufEnd);
+                while (breakIndex < breakCount && paraStart + breaks[breakIndex] <= spanEnd) {
+                    int endPos = paraStart + breaks[breakIndex];
+
+                    boolean moreChars = (endPos < paraEnd); // XXX is this the right way to calculate this?
+
+                    v = out(source, here, endPos,
+                            fmAscent, fmDescent, fmTop, fmBottom,
+                            v, spacingmult, spacingadd, chooseHt,chooseHtv, fm, flags[breakIndex],
+                            needMultiply, chdirs, dir, easy, bufEnd, includepad, trackpad,
+                            chs, widths, paraStart, ellipsize, ellipsizedWidth,
+                            lineWidths[breakIndex], paint, moreChars);
+
+                    if (endPos < spanEnd) {
+                        // preserve metrics for current span
+                        fmTop = fm.top;
+                        fmBottom = fm.bottom;
+                        fmAscent = fm.ascent;
+                        fmDescent = fm.descent;
+                    } else {
+                        fmTop = fmBottom = fmAscent = fmDescent = 0;
+                    }
+
+                    here = endPos;
+                    breakIndex++;
+
+                    if (mLineCount >= mMaximumVisibleLineCount) {
+                        return;
+                    }
+                }
             }
-
-            paraStart = paraEnd;
 
             if (paraEnd == bufEnd)
                 break;
@@ -847,10 +756,15 @@ public class StaticLayout extends Layout {
         mMeasured = MeasuredText.recycle(mMeasured);
     }
 
-    // returns an array with terminal sentinel value -1 to indicate end
-    // this is so that arrays can be recycled instead of allocating new arrays
-    // every time
-    private static native int[] nLineBreakOpportunities(String locale, char[] text, int length, int[] recycle);
+    // populates LineBreaks and returns the number of breaks found
+    //
+    // the arrays inside the LineBreaks objects are passed in as well
+    // to reduce the number of JNI calls in the common case where the
+    // arrays do not have to be resized
+    private static native int nComputeLineBreaks(String locale, char[] text, float[] widths,
+            int length, float firstWidth, int firstWidthLineCount, float restWidth,
+            int[] variableTabStops, int defaultTabStop, LineBreaks recycle,
+            int[] recycleBreaks, float[] recycleWidths, boolean[] recycleFlags, int recycleLength);
 
     private int mLineCount;
     private int mTopPadding, mBottomPadding;
@@ -878,18 +792,23 @@ public class StaticLayout extends Layout {
     private static final int TAB_INCREMENT = 20; // same as Layout, but that's private
 
     private static final char CHAR_NEW_LINE = '\n';
-    private static final char CHAR_TAB = '\t';
-    private static final char CHAR_SPACE = ' ';
-    private static final char CHAR_ZWSP = '\u200B';
 
     private static final double EXTRA_ROUNDING = 0.5;
-
-    private static final int CHAR_FIRST_HIGH_SURROGATE = 0xD800;
-    private static final int CHAR_LAST_LOW_SURROGATE = 0xDFFF;
 
     /*
      * This is reused across calls to generate()
      */
     private MeasuredText mMeasured;
     private Paint.FontMetricsInt mFontMetricsInt = new Paint.FontMetricsInt();
+
+    // This is used to return three arrays from a single JNI call when
+    // performing line breaking
+    private static class LineBreaks {
+        private static final int INITIAL_SIZE = 16;
+        public int[] breaks = new int[INITIAL_SIZE];
+        public float[] widths = new float[INITIAL_SIZE];
+        public boolean[] flags = new boolean[INITIAL_SIZE]; // hasTabOrEmoji
+        // breaks, widths, and flags should all have the same length
+    }
+
 }
