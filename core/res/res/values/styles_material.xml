@@ -1039,7 +1039,6 @@ please see styles_device_defaults.xml.
         <item name="background">@null</item>
         <item name="backgroundStacked">@null</item>
         <item name="backgroundSplit">@null</item>
-        <item name="homeAsUpIndicator">@drawable/ic_ab_back_material</item>
         <item name="progressBarStyle">@style/Widget.Material.Light.ProgressBar.Horizontal</item>
         <item name="indeterminateProgressStyle">@style/Widget.Material.Light.ProgressBar</item>
     </style>
