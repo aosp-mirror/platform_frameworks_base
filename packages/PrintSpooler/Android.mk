@@ -22,8 +22,6 @@ LOCAL_SRC_FILES := $(call all-java-files-under, src)
 
 LOCAL_PACKAGE_NAME := PrintSpooler
 
-LOCAL_JAVA_LIBRARIES := framework-base
-
 LOCAL_STATIC_JAVA_LIBRARIES := android-support-v4 android-support-v7-recyclerview
 
 include $(BUILD_PACKAGE)
