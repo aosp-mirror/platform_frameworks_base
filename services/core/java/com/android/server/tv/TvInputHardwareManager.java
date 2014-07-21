@@ -21,9 +21,11 @@ import static android.media.tv.TvInputManager.INPUT_STATE_DISCONNECTED;
 
 import android.content.Context;
 import android.hardware.hdmi.HdmiCecDeviceInfo;
-import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiHotplugEvent;
+import android.hardware.hdmi.IHdmiControlService;
 import android.hardware.hdmi.IHdmiDeviceEventListener;
+import android.hardware.hdmi.IHdmiHotplugEventListener;
+import android.hardware.hdmi.IHdmiInputChangeListener;
 import android.media.AudioDevicePort;
 import android.media.AudioManager;
 import android.media.AudioPatch;
@@ -39,6 +41,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -60,8 +63,7 @@ import java.util.Set;
  *
  * @hide
  */
-class TvInputHardwareManager
-        implements TvInputHal.Callback, HdmiControlManager.HotplugEventListener {
+class TvInputHardwareManager implements TvInputHal.Callback {
     private static final String TAG = TvInputHardwareManager.class.getSimpleName();
     private final TvInputHal mHal = new TvInputHal(this);
     private final SparseArray<Connection> mConnections = new SparseArray<Connection>();
@@ -74,6 +76,9 @@ class TvInputHardwareManager
     // TODO: Should handle INACTIVE case.
     private final SparseArray<TvInputInfo> mTvInputInfoMap = new SparseArray<TvInputInfo>();
     private final IHdmiDeviceEventListener mHdmiDeviceEventListener = new HdmiDeviceEventListener();
+    private final IHdmiHotplugEventListener mHdmiHotplugEventListener =
+            new HdmiHotplugEventListener();
+    private final IHdmiInputChangeListener mHdmiInputChangeListener = new HdmiInputChangeListener();
 
     // Calls to mListener should happen here.
     private final Handler mHandler = new ListenerHandler();
@@ -89,9 +94,17 @@ class TvInputHardwareManager
 
     public void onBootPhase(int phase) {
         if (phase == SystemService.PHASE_SYSTEM_SERVICES_READY) {
-            HdmiControlManager hdmiControlManager =
-                    (HdmiControlManager) mContext.getSystemService(Context.HDMI_CONTROL_SERVICE);
-            hdmiControlManager.addHotplugEventListener(this);
+            IHdmiControlService hdmiControlService = IHdmiControlService.Stub.asInterface(
+                    ServiceManager.getService(Context.HDMI_CONTROL_SERVICE));
+            if (hdmiControlService != null) {
+                try {
+                    hdmiControlService.addHotplugEventListener(mHdmiHotplugEventListener);
+                    hdmiControlService.addDeviceEventListener(mHdmiDeviceEventListener);
+                    hdmiControlService.setInputChangeListener(mHdmiInputChangeListener);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Error registering listeners to HdmiControlService:" + e);
+                }
+            }
         }
     }
 
@@ -259,23 +272,6 @@ class TvInputHardwareManager
             }
         }
         return null;
-    }
-
-    // HdmiControlManager.HotplugEventListener implementation.
-
-    @Override
-    public void onReceived(HdmiHotplugEvent event) {
-        String inputId = null;
-
-        synchronized (mLock) {
-            mHdmiStateMap.put(event.getPort(), event.isConnected());
-            inputId = findInputIdForHdmiPortLocked(event.getPort());
-            if (inputId == null) {
-                return;
-            }
-            mHandler.obtainMessage(ListenerHandler.STATE_CHANGED,
-                    convertConnectedToState(event.isConnected()), 0, inputId).sendToTarget();
-        }
     }
 
     private class Connection implements IBinder.DeathRecipient {
@@ -554,6 +550,23 @@ class TvInputHardwareManager
         }
     }
 
+    // Listener implementations for HdmiControlService
+
+    private final class HdmiHotplugEventListener extends IHdmiHotplugEventListener.Stub {
+        @Override
+        public void onReceived(HdmiHotplugEvent event) {
+            synchronized (mLock) {
+                mHdmiStateMap.put(event.getPort(), event.isConnected());
+                String inputId = findInputIdForHdmiPortLocked(event.getPort());
+                if (inputId == null) {
+                    return;
+                }
+                mHandler.obtainMessage(ListenerHandler.STATE_CHANGED,
+                        convertConnectedToState(event.isConnected()), 0, inputId).sendToTarget();
+            }
+        }
+    }
+
     private final class HdmiDeviceEventListener extends IHdmiDeviceEventListener.Stub {
         @Override
         public void onStatusChanged(HdmiCecDeviceInfo deviceInfo, boolean activated) {
@@ -561,6 +574,14 @@ class TvInputHardwareManager
                     activated ? ListenerHandler.CEC_DEVICE_ADDED
                     : ListenerHandler.CEC_DEVICE_REMOVED,
                     0, 0, deviceInfo).sendToTarget();
+        }
+    }
+
+    private final class HdmiInputChangeListener extends IHdmiInputChangeListener.Stub {
+        @Override
+        public void onChanged(HdmiCecDeviceInfo device) throws RemoteException {
+            // TODO: Build a channel Uri for the TvInputInfo associated with the logical device
+            //       and send an intent to TV app
         }
     }
 }
