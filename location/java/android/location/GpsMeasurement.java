@@ -28,143 +28,175 @@ import android.util.Log;
 public class GpsMeasurement implements Parcelable {
     private static final String TAG = "GpsMeasurement";
 
-    // mandatory parameters
+    private int mFlags;
     private byte mPrn;
-    private long mLocalTimeInNs;
+    private double mTimeOffsetInNs;
+    private short mState;
     private long mReceivedGpsTowInNs;
     private double mCn0InDbHz;
     private double mPseudorangeRateInMetersPerSec;
     private double mPseudorangeRateUncertaintyInMetersPerSec;
+    private short mAccumulatedDeltaRangeState;
     private double mAccumulatedDeltaRangeInMeters;
     private double mAccumulatedDeltaRangeUncertaintyInMeters;
-
-    // optional parameters
-    private boolean mHasPseudorangeInMeters;
     private double mPseudorangeInMeters;
-    private boolean mHasPseudorangeUncertaintyInMeters;
     private double mPseudorangeUncertaintyInMeters;
-    private boolean mHasCodePhaseInChips;
     private double mCodePhaseInChips;
-    private boolean mHasCodePhaseUncertaintyInChips;
     private double mCodePhaseUncertaintyInChips;
-    private boolean mHasCarrierFrequencyInHz;
     private float mCarrierFrequencyInHz;
-    private boolean mHasCarrierCycles;
     private long mCarrierCycles;
-    private boolean mHasCarrierPhase;
     private double mCarrierPhase;
-    private boolean mHasCarrierPhaseUncertainty;
     private double mCarrierPhaseUncertainty;
-    private short mLossOfLock;
-    private boolean mHasBitNumber;
+    private byte mLossOfLock;
     private short mBitNumber;
-    private boolean mHasTimeFromLastBitInNs;
-    private long mTimeFromLastBitInNs;
-    private boolean mHasDopplerShiftInHz;
+    private short mTimeFromLastBitInMs;
     private double mDopplerShiftInHz;
-    private boolean mHasDopplerShiftUncertaintyInHz;
     private double mDopplerShiftUncertaintyInHz;
-    private short mMultipathIndicator;
-    private boolean mHasSnrInDb;
+    private byte mMultipathIndicator;
     private double mSnrInDb;
-    private boolean mHasElevationInDeg;
     private double mElevationInDeg;
-    private boolean mHasElevationUncertaintyInDeg;
     private double mElevationUncertaintyInDeg;
-    private boolean mHasAzimuthInDeg;
     private double mAzimuthInDeg;
-    private boolean mHasAzimuthUncertaintyInDeg;
     private double mAzimuthUncertaintyInDeg;
     private boolean mUsedInFix;
 
     // The following enumerations must be in sync with the values declared in gps.h
 
+    private static final int HAS_NO_FLAGS = 0;
+    private static final int HAS_SNR = (1<<0);
+    private static final int HAS_ELEVATION = (1<<1);
+    private static final int HAS_ELEVATION_UNCERTAINTY = (1<<2);
+    private static final int HAS_AZIMUTH = (1<<3);
+    private static final int HAS_AZIMUTH_UNCERTAINTY = (1<<4);
+    private static final int HAS_PSEUDORANGE = (1<<5);
+    private static final int HAS_PSEUDORANGE_UNCERTAINTY = (1<<6);
+    private static final int HAS_CODE_PHASE = (1<<7);
+    private static final int HAS_CODE_PHASE_UNCERTAINTY = (1<<8);
+    private static final int HAS_CARRIER_FREQUENCY = (1<<9);
+    private static final int HAS_CARRIER_CYCLES = (1<<10);
+    private static final int HAS_CARRIER_PHASE = (1<<11);
+    private static final int HAS_CARRIER_PHASE_UNCERTAINTY = (1<<12);
+    private static final int HAS_BIT_NUMBER = (1<<13);
+    private static final int HAS_TIME_FROM_LAST_BIT = (1<<14);
+    private static final int HAS_DOPPLER_SHIFT = (1<<15);
+    private static final int HAS_DOPPLER_SHIFT_UNCERTAINTY = (1<<16);
+
     /**
      * The indicator is not available or it is unknown.
      */
-    public static final short LOSS_OF_LOCK_UNKNOWN = 0;
+    public static final byte LOSS_OF_LOCK_UNKNOWN = 0;
 
     /**
      * The measurement does not present any indication of 'loss of lock'.
      */
-    public static final short LOSS_OF_LOCK_OK = 1;
+    public static final byte LOSS_OF_LOCK_OK = 1;
 
     /**
      * 'Loss of lock' detected between the previous and current observation: cycle slip possible.
      */
-    public static final short LOSS_OF_LOCK_CYCLE_SLIP = 2;
+    public static final byte LOSS_OF_LOCK_CYCLE_SLIP = 2;
 
     /**
      * The indicator is not available or it is unknown.
      */
-    public static final short MULTIPATH_INDICATOR_UNKNOWN = 0;
+    public static final byte MULTIPATH_INDICATOR_UNKNOWN = 0;
 
     /**
      * The measurement has been indicated to use multi-path.
      */
-    public static final short MULTIPATH_INDICATOR_DETECTED = 1;
+    public static final byte MULTIPATH_INDICATOR_DETECTED = 1;
 
     /**
      * The measurement has been indicated not tu use multi-path.
      */
-    public static final short MULTIPATH_INDICATOR_NOT_USED = 2;
+    public static final byte MULTIPATH_INDICATOR_NOT_USED = 2;
+
+    /**
+     * The state of GPS receiver the measurement is invalid or unknown.
+     */
+    public static final short STATE_UNKNOWN = 0;
+
+    /**
+     * The state of the GPS receiver is ranging code lock.
+     */
+    public static final short STATE_CODE_LOCK = (1<<0);
+
+    /**
+     * The state of the GPS receiver is in bit sync.
+     */
+    public static final short STATE_BIT_SYNC = (1<<1);
+
+    /**
+     *The state of the GPS receiver is in sub-frame sync.
+     */
+    public static final short STATE_SUBFRAME_SYNC = (1<<2);
+
+    /**
+     * The state of the GPS receiver has TOW decoded.
+     */
+    public static final short STATE_TOW_DECODED = (1<<3);
+
+    /**
+     * The state of the 'Accumulated Delta Range' is invalid or unknown.
+     */
+    public static final short ADR_STATE_UNKNOWN = 0;
+
+    /**
+     * The state of the 'Accumulated Delta Range' is valid.
+     */
+    public static final short ADR_STATE_VALID = (1<<0);
+
+    /**
+     * The state of the 'Accumulated Delta Range' has detected a reset.
+     */
+    public static final short ADR_STATE_RESET = (1<<1);
+
+    /**
+     * The state of the 'Accumulated Delta Range' has a cycle slip detected.
+     */
+    public static final short ADR_STATE_CYCLE_SLIP = (1<<2);
 
     // End enumerations in sync with gps.h
 
     GpsMeasurement() {
-        reset();
+        initialize();
     }
 
     /**
      * Sets all contents to the values stored in the provided object.
      */
     public void set(GpsMeasurement measurement) {
+        mFlags = measurement.mFlags;
         mPrn = measurement.mPrn;
-        mLocalTimeInNs = measurement.mLocalTimeInNs;
+        mTimeOffsetInNs = measurement.mTimeOffsetInNs;
+        mState = measurement.mState;
         mReceivedGpsTowInNs = measurement.mReceivedGpsTowInNs;
         mCn0InDbHz = measurement.mCn0InDbHz;
         mPseudorangeRateInMetersPerSec = measurement.mPseudorangeRateInMetersPerSec;
         mPseudorangeRateUncertaintyInMetersPerSec =
                 measurement.mPseudorangeRateUncertaintyInMetersPerSec;
+        mAccumulatedDeltaRangeState = measurement.mAccumulatedDeltaRangeState;
         mAccumulatedDeltaRangeInMeters = measurement.mAccumulatedDeltaRangeInMeters;
         mAccumulatedDeltaRangeUncertaintyInMeters =
                 measurement.mAccumulatedDeltaRangeUncertaintyInMeters;
-
-        mHasPseudorangeInMeters = measurement.mHasPseudorangeInMeters;
         mPseudorangeInMeters = measurement.mPseudorangeInMeters;
-        mHasPseudorangeUncertaintyInMeters = measurement.mHasPseudorangeUncertaintyInMeters;
         mPseudorangeUncertaintyInMeters = measurement.mPseudorangeUncertaintyInMeters;
-        mHasCodePhaseInChips = measurement.mHasCodePhaseInChips;
         mCodePhaseInChips = measurement.mCodePhaseInChips;
-        mHasCodePhaseUncertaintyInChips = measurement.mHasCodePhaseUncertaintyInChips;
         mCodePhaseUncertaintyInChips = measurement.mCodePhaseUncertaintyInChips;
-        mHasCarrierFrequencyInHz = measurement.mHasCarrierFrequencyInHz;
         mCarrierFrequencyInHz = measurement.mCarrierFrequencyInHz;
-        mHasCarrierCycles = measurement.mHasCarrierCycles;
         mCarrierCycles = measurement.mCarrierCycles;
-        mHasCarrierPhase = measurement.mHasCarrierPhase;
         mCarrierPhase = measurement.mCarrierPhase;
-        mHasCarrierPhaseUncertainty = measurement.mHasCarrierPhaseUncertainty;
         mCarrierPhaseUncertainty = measurement.mCarrierPhaseUncertainty;
         mLossOfLock = measurement.mLossOfLock;
-        mHasBitNumber = measurement.mHasBitNumber;
         mBitNumber = measurement.mBitNumber;
-        mHasTimeFromLastBitInNs = measurement.mHasTimeFromLastBitInNs;
-        mTimeFromLastBitInNs = measurement.mTimeFromLastBitInNs;
-        mHasDopplerShiftInHz = measurement.mHasDopplerShiftInHz;
+        mTimeFromLastBitInMs = measurement.mTimeFromLastBitInMs;
         mDopplerShiftInHz = measurement.mDopplerShiftInHz;
-        mHasDopplerShiftUncertaintyInHz = measurement.mHasDopplerShiftUncertaintyInHz;
         mDopplerShiftUncertaintyInHz = measurement.mDopplerShiftUncertaintyInHz;
         mMultipathIndicator = measurement.mMultipathIndicator;
-        mHasSnrInDb = measurement.mHasSnrInDb;
         mSnrInDb = measurement.mSnrInDb;
-        mHasElevationInDeg = measurement.mHasElevationInDeg;
         mElevationInDeg = measurement.mElevationInDeg;
-        mHasElevationUncertaintyInDeg = measurement.mHasElevationUncertaintyInDeg;
         mElevationUncertaintyInDeg = measurement.mElevationUncertaintyInDeg;
-        mHasAzimuthInDeg = measurement.mHasAzimuthInDeg;
         mAzimuthInDeg = measurement.mAzimuthInDeg;
-        mHasAzimuthUncertaintyInDeg = measurement.mHasAzimuthUncertaintyInDeg;
         mAzimuthUncertaintyInDeg = measurement.mAzimuthUncertaintyInDeg;
         mUsedInFix = measurement.mUsedInFix;
     }
@@ -173,35 +205,7 @@ public class GpsMeasurement implements Parcelable {
      * Resets all the contents to its original state.
      */
     public void reset() {
-        mPrn = Byte.MIN_VALUE;
-        mLocalTimeInNs = Long.MIN_VALUE;
-        mReceivedGpsTowInNs = Long.MIN_VALUE;
-        mCn0InDbHz = Double.MIN_VALUE;
-        mPseudorangeRateInMetersPerSec = Double.MIN_VALUE;
-        mPseudorangeRateUncertaintyInMetersPerSec = Double.MIN_VALUE;
-        mAccumulatedDeltaRangeInMeters = Double.MIN_VALUE;
-        mAccumulatedDeltaRangeUncertaintyInMeters = Double.MIN_VALUE;
-
-        resetPseudorangeInMeters();
-        resetPseudorangeUncertaintyInMeters();
-        resetCodePhaseInChips();
-        resetCodePhaseUncertaintyInChips();
-        resetCarrierFrequencyInHz();
-        resetCarrierCycles();
-        resetCarrierPhase();
-        resetCarrierPhaseUncertainty();
-        setLossOfLock(LOSS_OF_LOCK_UNKNOWN);
-        resetBitNumber();
-        resetTimeFromLastBitInNs();
-        resetDopplerShiftInHz();
-        resetDopplerShiftUncertaintyInHz();
-        setMultipathIndicator(MULTIPATH_INDICATOR_UNKNOWN);
-        resetSnrInDb();
-        resetElevationInDeg();
-        resetElevationUncertaintyInDeg();
-        resetAzimuthInDeg();
-        resetAzimuthUncertaintyInDeg();
-        setUsedInFix(false);
+        initialize();
     }
 
     /**
@@ -220,22 +224,87 @@ public class GpsMeasurement implements Parcelable {
     }
 
     /**
-     * Gets the local (hardware) time at which the measurement was taken in nanoseconds.
+     * Gets the time offset at which the measurement was taken in nanoseconds.
+     * The reference receiver's time is specified by {@link GpsClock#getTimeInNs()} and should be
+     * interpreted in the same way as indicated by {@link GpsClock#getType()}.
+     *
+     * The sign of this value is given by the following equation:
+     *      measurement time = time_ns + time_offset_ns
+     *
+     * The value provides an individual time-stamp for the measurement, and allows sub-nanosecond
+     * accuracy.
      */
-    public long getLocalTimeInNs() {
-        return mLocalTimeInNs;
+    public double getTimeOffsetInNs() {
+        return mTimeOffsetInNs;
     }
 
     /**
-     * Sets the measurement's local (hardware) time in nanoseconds.
+     * Sets the time offset at which the measurement was taken in nanoseconds.
      */
-    public void setLocalTimeInNs(long value) {
-        mLocalTimeInNs = value;
+    public void setTimeOffsetInNs(double value) {
+        mTimeOffsetInNs = value;
     }
 
     /**
-     * Gets the received GPS Time-of-Week in nanoseconds.
+     * Gets per-satellite sync state.
+     * It represents the current sync state for the associated satellite.
+     *
+     * This value helps interpret {@link #getReceivedGpsTowInNs()}.
+     */
+    public short getState() {
+        return mState;
+    }
+
+    /**
+     * Sets the sync state.
+     */
+    public void setState(short value) {
+        switch (value) {
+            case STATE_UNKNOWN:
+            case STATE_BIT_SYNC:
+            case STATE_CODE_LOCK:
+            case STATE_SUBFRAME_SYNC:
+            case STATE_TOW_DECODED:
+                mState = value;
+                break;
+            default:
+                Log.d(TAG, "Sanitizing invalid 'sync state': " + value);
+                mState = STATE_UNKNOWN;
+                break;
+        }
+    }
+
+    /**
+     * Gets a string representation of the 'sync state'.
+     * For internal and logging use only.
+     */
+    private String getStateString() {
+        switch (mState) {
+            case STATE_UNKNOWN:
+                return "Unknown";
+            case STATE_BIT_SYNC:
+                return "BitSync";
+            case STATE_CODE_LOCK:
+                return "CodeLock";
+            case STATE_SUBFRAME_SYNC:
+                return "SubframeSync";
+            case STATE_TOW_DECODED:
+                return "TowDecoded";
+            default:
+                return "<Invalid>";
+        }
+    }
+
+    /**
+     * Gets the received GPS Time-of-Week at the measurement time, in nanoseconds.
      * The value is relative to the beginning of the current GPS week.
+     *
+     * Given {@link #getState()} of the GPS receiver, the range of this field can be:
+     *      Searching           : [ 0           ]   : {@link #STATE_UNKNOWN} is set
+     *      Ranging code lock   : [ 0    1 ms   ]   : {@link #STATE_CODE_LOCK} is set
+     *      Bit sync            : [ 0   20 ms   ]   : {@link #STATE_BIT_SYNC} is set
+     *      Subframe sync       : [ 0    6 ms   ]   : {@link #STATE_SUBFRAME_SYNC} is set
+     *      TOW decoded         : [ 0    1 week ]   : {@link #STATE_TOW_DECODED} is set
      */
     public long getReceivedGpsTowInNs() {
         return mReceivedGpsTowInNs;
@@ -296,8 +365,56 @@ public class GpsMeasurement implements Parcelable {
     }
 
     /**
+     * Gets 'Accumulated Delta Range' state.
+     * It indicates whether {@link #getAccumulatedDeltaRangeInMeters()} is reset or there is a
+     * cycle slip (indicating 'loss of lock').
+     */
+    public short getAccumulatedDeltaRangeState() {
+        return mAccumulatedDeltaRangeState;
+    }
+
+    /**
+     * Sets the 'Accumulated Delta Range' state.
+     */
+    public void setAccumulatedDeltaRangeState(short value) {
+        switch (value) {
+            case ADR_STATE_UNKNOWN:
+            case ADR_STATE_VALID:
+            case ADR_STATE_RESET:
+            case ADR_STATE_CYCLE_SLIP:
+                mAccumulatedDeltaRangeState = value;
+                break;
+            default:
+                Log.d(TAG, "Sanitizing invalid 'Accumulated Delta Range state': " + value);
+                mAccumulatedDeltaRangeState = ADR_STATE_UNKNOWN;
+                break;
+        }
+    }
+
+    /**
+     * Gets a string representation of the 'Accumulated Delta Range state'.
+     * For internal and logging use only.
+     */
+    private String getAccumulatedDeltaRangeStateString() {
+        switch (mAccumulatedDeltaRangeState) {
+            case ADR_STATE_UNKNOWN:
+                return "Unknown";
+            case ADR_STATE_VALID:
+                return "Valid";
+            case ADR_STATE_RESET:
+                return "Reset";
+            case ADR_STATE_CYCLE_SLIP:
+                return "CycleSlip";
+            default:
+                return "<Invalid>";
+        }
+    }
+
+    /**
      * Gets the accumulated delta range since the last channel reset, in meters.
      * The reported value includes {@link #getAccumulatedDeltaRangeUncertaintyInMeters()}.
+     *
+     * The availability of the value is represented by {@link #getAccumulatedDeltaRangeState()}.
      */
     public double getAccumulatedDeltaRangeInMeters() {
         return mAccumulatedDeltaRangeInMeters;
@@ -320,6 +437,8 @@ public class GpsMeasurement implements Parcelable {
 
     /**
      * Sets the accumulated delta range's uncertainty (1-sigma) in meters.
+     *
+     * The availability of the value is represented by {@link #getAccumulatedDeltaRangeState()}.
      */
     public void setAccumulatedDeltaRangeUncertaintyInMeters(double value) {
         mAccumulatedDeltaRangeUncertaintyInMeters = value;
@@ -329,7 +448,7 @@ public class GpsMeasurement implements Parcelable {
      * Returns true if {@link #getPseudorangeInMeters()} is available, false otherwise.
      */
     public boolean hasPseudorangeInMeters() {
-        return mHasPseudorangeInMeters;
+        return isFlagSet(HAS_PSEUDORANGE);
     }
 
     /**
@@ -346,7 +465,7 @@ public class GpsMeasurement implements Parcelable {
      * Sets the Pseudo-range in meters.
      */
     public void setPseudorangeInMeters(double value) {
-        mHasPseudorangeInMeters = true;
+        setFlag(HAS_PSEUDORANGE);
         mPseudorangeInMeters = value;
     }
 
@@ -354,7 +473,7 @@ public class GpsMeasurement implements Parcelable {
      * Resets the Pseudo-range in meters.
      */
     public void resetPseudorangeInMeters() {
-        mHasPseudorangeInMeters = false;
+        resetFlag(HAS_PSEUDORANGE);
         mPseudorangeInMeters = Double.NaN;
     }
 
@@ -362,7 +481,7 @@ public class GpsMeasurement implements Parcelable {
      * Returns true if {@link #getPseudorangeUncertaintyInMeters()} is available, false otherwise.
      */
     public boolean hasPseudorangeUncertaintyInMeters() {
-        return mHasPseudorangeUncertaintyInMeters;
+        return isFlagSet(HAS_PSEUDORANGE_UNCERTAINTY);
     }
 
     /**
@@ -380,7 +499,7 @@ public class GpsMeasurement implements Parcelable {
      * Sets the pseudo-range's uncertainty (1-Sigma) in meters.
      */
     public void setPseudorangeUncertaintyInMeters(double value) {
-        mHasPseudorangeUncertaintyInMeters = true;
+        setFlag(HAS_PSEUDORANGE_UNCERTAINTY);
         mPseudorangeUncertaintyInMeters = value;
     }
 
@@ -388,7 +507,7 @@ public class GpsMeasurement implements Parcelable {
      * Resets the pseudo-range's uncertainty (1-Sigma) in meters.
      */
     public void resetPseudorangeUncertaintyInMeters() {
-        mHasPseudorangeUncertaintyInMeters = false;
+        resetFlag(HAS_PSEUDORANGE_UNCERTAINTY);
         mPseudorangeUncertaintyInMeters = Double.NaN;
     }
 
@@ -396,7 +515,7 @@ public class GpsMeasurement implements Parcelable {
      * Returns true if {@link #getCodePhaseInChips()} is available, false otherwise.
      */
     public boolean hasCodePhaseInChips() {
-        return mHasCodePhaseInChips;
+        return isFlagSet(HAS_CODE_PHASE);
     }
 
     /**
@@ -415,7 +534,7 @@ public class GpsMeasurement implements Parcelable {
      * Sets the Code-phase in chips.
      */
     public void setCodePhaseInChips(double value) {
-        mHasCodePhaseInChips = true;
+        setFlag(HAS_CODE_PHASE);
         mCodePhaseInChips = value;
     }
 
@@ -423,7 +542,7 @@ public class GpsMeasurement implements Parcelable {
      * Resets the Code-phase in chips.
      */
     public void resetCodePhaseInChips() {
-        mHasCodePhaseInChips = false;
+        resetFlag(HAS_CODE_PHASE);
         mCodePhaseInChips = Double.NaN;
     }
 
@@ -431,7 +550,7 @@ public class GpsMeasurement implements Parcelable {
      * Returns true if {@link #getCodePhaseUncertaintyInChips()} is available, false otherwise.
      */
     public boolean hasCodePhaseUncertaintyInChips() {
-        return mHasCodePhaseUncertaintyInChips;
+        return isFlagSet(HAS_CODE_PHASE_UNCERTAINTY);
     }
 
     /**
@@ -448,7 +567,7 @@ public class GpsMeasurement implements Parcelable {
      * Sets the Code-phase's uncertainty (1-Sigma) in fractions of chips.
      */
     public void setCodePhaseUncertaintyInChips(double value) {
-        mHasCodePhaseUncertaintyInChips = true;
+        setFlag(HAS_CODE_PHASE_UNCERTAINTY);
         mCodePhaseUncertaintyInChips = value;
     }
 
@@ -456,7 +575,7 @@ public class GpsMeasurement implements Parcelable {
      * Resets the Code-phase's uncertainty (1-Sigma) in fractions of chips.
      */
     public void resetCodePhaseUncertaintyInChips() {
-        mHasCodePhaseUncertaintyInChips = false;
+        resetFlag(HAS_CODE_PHASE_UNCERTAINTY);
         mCodePhaseUncertaintyInChips = Double.NaN;
     }
 
@@ -464,7 +583,7 @@ public class GpsMeasurement implements Parcelable {
      * Returns true if {@link #getCarrierFrequencyInHz()} is available, false otherwise.
      */
     public boolean hasCarrierFrequencyInHz() {
-        return mHasCarrierFrequencyInHz;
+        return isFlagSet(HAS_CARRIER_FREQUENCY);
     }
 
     /**
@@ -481,7 +600,7 @@ public class GpsMeasurement implements Parcelable {
      * Sets the Carrier frequency (L1 or L2) in Hz.
      */
     public void setCarrierFrequencyInHz(float carrierFrequencyInHz) {
-        mHasCarrierFrequencyInHz = true;
+        setFlag(HAS_CARRIER_FREQUENCY);
         mCarrierFrequencyInHz = carrierFrequencyInHz;
     }
 
@@ -489,7 +608,7 @@ public class GpsMeasurement implements Parcelable {
      * Resets the Carrier frequency (L1 or L2) in Hz.
      */
     public void resetCarrierFrequencyInHz() {
-        mHasCarrierFrequencyInHz = false;
+        resetFlag(HAS_CARRIER_FREQUENCY);
         mCarrierFrequencyInHz = Float.NaN;
     }
 
@@ -497,7 +616,7 @@ public class GpsMeasurement implements Parcelable {
      * Returns true if {@link #getCarrierCycles()} is available, false otherwise.
      */
     public boolean hasCarrierCycles() {
-        return mHasCarrierCycles;
+        return isFlagSet(HAS_CARRIER_CYCLES);
     }
 
     /**
@@ -514,7 +633,7 @@ public class GpsMeasurement implements Parcelable {
      * Sets the number of full carrier cycles between the satellite and the receiver.
      */
     public void setCarrierCycles(long value) {
-        mHasCarrierCycles = true;
+        setFlag(HAS_CARRIER_CYCLES);
         mCarrierCycles = value;
     }
 
@@ -522,7 +641,7 @@ public class GpsMeasurement implements Parcelable {
      * Resets the number of full carrier cycles between the satellite and the receiver.
      */
     public void resetCarrierCycles() {
-        mHasCarrierCycles = false;
+        resetFlag(HAS_CARRIER_CYCLES);
         mCarrierCycles = Long.MIN_VALUE;
     }
 
@@ -530,7 +649,7 @@ public class GpsMeasurement implements Parcelable {
      * Returns true if {@link #getCarrierPhase()} is available, false otherwise.
      */
     public boolean hasCarrierPhase() {
-        return mHasCarrierPhase;
+        return isFlagSet(HAS_CARRIER_PHASE);
     }
 
     /**
@@ -551,7 +670,7 @@ public class GpsMeasurement implements Parcelable {
      * Sets the RF phase detected by the receiver.
      */
     public void setCarrierPhase(double value) {
-        mHasCarrierPhase = true;
+        setFlag(HAS_CARRIER_PHASE);
         mCarrierPhase = value;
     }
 
@@ -559,7 +678,7 @@ public class GpsMeasurement implements Parcelable {
      * Resets the RF phase detected by the receiver.
      */
     public void resetCarrierPhase() {
-        mHasCarrierPhase = false;
+        resetFlag(HAS_CARRIER_PHASE);
         mCarrierPhase = Double.NaN;
     }
 
@@ -567,7 +686,7 @@ public class GpsMeasurement implements Parcelable {
      * Returns true if {@link #getCarrierPhaseUncertainty()} is available, false otherwise.
      */
     public boolean hasCarrierPhaseUncertainty() {
-        return mHasCarrierPhaseUncertainty;
+        return isFlagSet(HAS_CARRIER_PHASE_UNCERTAINTY);
     }
 
     /**
@@ -584,7 +703,7 @@ public class GpsMeasurement implements Parcelable {
      * Sets the Carrier-phase's uncertainty (1-Sigma) in cycles.
      */
     public void setCarrierPhaseUncertainty(double value) {
-        mHasCarrierPhaseUncertainty = true;
+        setFlag(HAS_CARRIER_PHASE_UNCERTAINTY);
         mCarrierPhaseUncertainty = value;
     }
 
@@ -592,21 +711,21 @@ public class GpsMeasurement implements Parcelable {
      * Resets the Carrier-phase's uncertainty (1-Sigma) in cycles.
      */
     public void resetCarrierPhaseUncertainty() {
-        mHasCarrierPhaseUncertainty = false;
+        resetFlag(HAS_CARRIER_PHASE_UNCERTAINTY);
         mCarrierPhaseUncertainty = Double.NaN;
     }
 
     /**
      * Gets a value indicating the 'loss of lock' state of the event.
      */
-    public short getLossOfLock() {
+    public byte getLossOfLock() {
         return mLossOfLock;
     }
 
     /**
      * Sets the 'loss of lock' status.
      */
-    public void setLossOfLock(short value) {
+    public void setLossOfLock(byte value) {
         switch (value) {
             case LOSS_OF_LOCK_UNKNOWN:
             case LOSS_OF_LOCK_OK:
@@ -633,7 +752,7 @@ public class GpsMeasurement implements Parcelable {
             case LOSS_OF_LOCK_CYCLE_SLIP:
                 return "CycleSlip";
             default:
-                return "Invalid";
+                return "<Invalid>";
         }
     }
 
@@ -641,7 +760,7 @@ public class GpsMeasurement implements Parcelable {
      * Returns true if {@link #getBitNumber()} is available, false otherwise.
      */
     public boolean hasBitNumber() {
-        return mHasBitNumber;
+        return isFlagSet(HAS_BIT_NUMBER);
     }
 
     /**
@@ -657,7 +776,7 @@ public class GpsMeasurement implements Parcelable {
      * Sets the bit number within the broadcast frame.
      */
     public void setBitNumber(short bitNumber) {
-        mHasBitNumber = true;
+        setFlag(HAS_BIT_NUMBER);
         mBitNumber = bitNumber;
     }
 
@@ -665,48 +784,48 @@ public class GpsMeasurement implements Parcelable {
      * Resets the bit number within the broadcast frame.
      */
     public void resetBitNumber() {
-        mHasBitNumber = false;
+        resetFlag(HAS_BIT_NUMBER);
         mBitNumber = Short.MIN_VALUE;
     }
 
     /**
-     * Returns true if {@link #getTimeFromLastBitInNs()} is available, false otherwise.
+     * Returns true if {@link #getTimeFromLastBitInMs()} is available, false otherwise.
      */
-    public boolean hasTimeFromLastBitInNs() {
-        return mHasTimeFromLastBitInNs;
+    public boolean hasTimeFromLastBitInMs() {
+        return isFlagSet(HAS_TIME_FROM_LAST_BIT);
     }
 
     /**
-     * Gets the elapsed time since the last received bit in nanoseconds.
-     * Range: [0, 20000000].
+     * Gets the elapsed time since the last received bit in milliseconds.
+     * Range: [0, 20].
      *
-     * The value is only available if {@link #hasTimeFromLastBitInNs()} is true.
+     * The value is only available if {@link #hasTimeFromLastBitInMs()} is true.
      */
-    public long getTimeFromLastBitInNs() {
-        return mTimeFromLastBitInNs;
+    public short getTimeFromLastBitInMs() {
+        return mTimeFromLastBitInMs;
     }
 
     /**
-     * Sets the elapsed time since the last received bit in nanoseconds.
+     * Sets the elapsed time since the last received bit in milliseconds.
      */
-    public void setTimeFromLastBitInNs(long value) {
-        mHasTimeFromLastBitInNs = true;
-        mTimeFromLastBitInNs = value;
+    public void setTimeFromLastBitInMs(short value) {
+        setFlag(HAS_TIME_FROM_LAST_BIT);
+        mTimeFromLastBitInMs = value;
     }
 
     /**
-     * Resets the elapsed time since the last received bit in nanoseconds.
+     * Resets the elapsed time since the last received bit in milliseconds.
      */
-    public void resetTimeFromLastBitInNs() {
-        mHasTimeFromLastBitInNs = false;
-        mTimeFromLastBitInNs = Long.MIN_VALUE;
+    public void resetTimeFromLastBitInMs() {
+        resetFlag(HAS_TIME_FROM_LAST_BIT);
+        mTimeFromLastBitInMs = Short.MIN_VALUE;
     }
 
     /**
      * Returns true if {@link #getDopplerShiftInHz()} is available, false otherwise.
      */
     public boolean hasDopplerShiftInHz() {
-        return mHasDopplerShiftInHz;
+        return isFlagSet(HAS_DOPPLER_SHIFT);
     }
 
     /**
@@ -726,7 +845,7 @@ public class GpsMeasurement implements Parcelable {
      * Sets the Doppler shift in Hz.
      */
     public void setDopplerShiftInHz(double value) {
-        mHasDopplerShiftInHz = true;
+        setFlag(HAS_DOPPLER_SHIFT);
         mDopplerShiftInHz = value;
     }
 
@@ -734,7 +853,7 @@ public class GpsMeasurement implements Parcelable {
      * Resets the Doppler shift in Hz.
      */
     public void resetDopplerShiftInHz() {
-        mHasDopplerShiftInHz = false;
+        resetFlag(HAS_DOPPLER_SHIFT);
         mDopplerShiftInHz = Double.NaN;
     }
 
@@ -742,7 +861,7 @@ public class GpsMeasurement implements Parcelable {
      * Returns true if {@link #getDopplerShiftUncertaintyInHz()} is available, false otherwise.
      */
     public boolean hasDopplerShiftUncertaintyInHz() {
-        return mHasDopplerShiftUncertaintyInHz;
+        return isFlagSet(HAS_DOPPLER_SHIFT_UNCERTAINTY);
     }
 
     /**
@@ -759,7 +878,7 @@ public class GpsMeasurement implements Parcelable {
      * Sets the Doppler's shift uncertainty (1-Sigma) in Hz.
      */
     public void setDopplerShiftUncertaintyInHz(double value) {
-        mHasDopplerShiftUncertaintyInHz = true;
+        setFlag(HAS_DOPPLER_SHIFT_UNCERTAINTY);
         mDopplerShiftUncertaintyInHz = value;
     }
 
@@ -767,21 +886,21 @@ public class GpsMeasurement implements Parcelable {
      * Resets the Doppler's shift uncertainty (1-Sigma) in Hz.
      */
     public void resetDopplerShiftUncertaintyInHz() {
-        mHasDopplerShiftUncertaintyInHz = false;
+        resetFlag(HAS_DOPPLER_SHIFT_UNCERTAINTY);
         mDopplerShiftUncertaintyInHz = Double.NaN;
     }
 
     /**
      * Gets a value indicating the 'multipath' state of the event.
      */
-    public short getMultipathIndicator() {
+    public byte getMultipathIndicator() {
         return mMultipathIndicator;
     }
 
     /**
      * Sets the 'multi-path' indicator.
      */
-    public void setMultipathIndicator(short value) {
+    public void setMultipathIndicator(byte value) {
         switch (value) {
             case MULTIPATH_INDICATOR_UNKNOWN:
             case MULTIPATH_INDICATOR_DETECTED:
@@ -806,9 +925,9 @@ public class GpsMeasurement implements Parcelable {
             case MULTIPATH_INDICATOR_DETECTED:
                 return "Detected";
             case MULTIPATH_INDICATOR_NOT_USED:
-                return "NotDetected";
+                return "NotUsed";
             default:
-                return "Invalid";
+                return "<Invalid>";
         }
     }
 
@@ -816,7 +935,7 @@ public class GpsMeasurement implements Parcelable {
      * Returns true if {@link #getSnrInDb()} is available, false otherwise.
      */
     public boolean hasSnrInDb() {
-        return mHasSnrInDb;
+        return isFlagSet(HAS_SNR);
     }
 
     /**
@@ -832,7 +951,7 @@ public class GpsMeasurement implements Parcelable {
      * Sets the Signal-to-noise ratio (SNR) in dB.
      */
     public void setSnrInDb(double snrInDb) {
-        mHasSnrInDb = true;
+        setFlag(HAS_SNR);
         mSnrInDb = snrInDb;
     }
 
@@ -840,7 +959,7 @@ public class GpsMeasurement implements Parcelable {
      * Resets the Signal-to-noise ratio (SNR) in dB.
      */
     public void resetSnrInDb() {
-        mHasSnrInDb = false;
+        resetFlag(HAS_SNR);
         mSnrInDb = Double.NaN;
     }
 
@@ -848,7 +967,7 @@ public class GpsMeasurement implements Parcelable {
      * Returns true if {@link #getElevationInDeg()} is available, false otherwise.
      */
     public boolean hasElevationInDeg() {
-        return mHasElevationInDeg;
+        return isFlagSet(HAS_ELEVATION);
     }
 
     /**
@@ -866,7 +985,7 @@ public class GpsMeasurement implements Parcelable {
      * Sets the Elevation in degrees.
      */
     public void setElevationInDeg(double elevationInDeg) {
-        mHasElevationInDeg = true;
+        setFlag(HAS_ELEVATION);
         mElevationInDeg = elevationInDeg;
     }
 
@@ -874,7 +993,7 @@ public class GpsMeasurement implements Parcelable {
      * Resets the Elevation in degrees.
      */
     public void resetElevationInDeg() {
-        mHasElevationInDeg = false;
+        resetFlag(HAS_ELEVATION);
         mElevationInDeg = Double.NaN;
     }
 
@@ -882,7 +1001,7 @@ public class GpsMeasurement implements Parcelable {
      * Returns true if {@link #getElevationUncertaintyInDeg()} is available, false otherwise.
      */
     public boolean hasElevationUncertaintyInDeg() {
-        return mHasElevationUncertaintyInDeg;
+        return isFlagSet(HAS_ELEVATION_UNCERTAINTY);
     }
 
     /**
@@ -901,7 +1020,7 @@ public class GpsMeasurement implements Parcelable {
      * Sets the elevation's uncertainty (1-Sigma) in degrees.
      */
     public void setElevationUncertaintyInDeg(double value) {
-        mHasElevationUncertaintyInDeg = true;
+        setFlag(HAS_ELEVATION_UNCERTAINTY);
         mElevationUncertaintyInDeg = value;
     }
 
@@ -909,7 +1028,7 @@ public class GpsMeasurement implements Parcelable {
      * Resets the elevation's uncertainty (1-Sigma) in degrees.
      */
     public void resetElevationUncertaintyInDeg() {
-        mHasElevationUncertaintyInDeg = false;
+        resetFlag(HAS_ELEVATION_UNCERTAINTY);
         mElevationUncertaintyInDeg = Double.NaN;
     }
 
@@ -917,7 +1036,7 @@ public class GpsMeasurement implements Parcelable {
      * Returns true if {@link #getAzimuthInDeg()} is available, false otherwise.
      */
     public boolean hasAzimuthInDeg() {
-        return mHasAzimuthInDeg;
+        return isFlagSet(HAS_AZIMUTH);
     }
 
     /**
@@ -936,7 +1055,7 @@ public class GpsMeasurement implements Parcelable {
      * Sets the Azimuth in degrees.
      */
     public void setAzimuthInDeg(double value) {
-        mHasAzimuthInDeg = true;
+        setFlag(HAS_AZIMUTH);
         mAzimuthInDeg = value;
     }
 
@@ -944,7 +1063,7 @@ public class GpsMeasurement implements Parcelable {
      * Resets the Azimuth in degrees.
      */
     public void resetAzimuthInDeg() {
-        mHasAzimuthInDeg = false;
+        resetFlag(HAS_AZIMUTH);
         mAzimuthInDeg = Double.NaN;
     }
 
@@ -952,7 +1071,7 @@ public class GpsMeasurement implements Parcelable {
      * Returns true if {@link #getAzimuthUncertaintyInDeg()} is available, false otherwise.
      */
     public boolean hasAzimuthUncertaintyInDeg() {
-        return mHasAzimuthUncertaintyInDeg;
+        return isFlagSet(HAS_AZIMUTH_UNCERTAINTY);
     }
 
     /**
@@ -971,7 +1090,7 @@ public class GpsMeasurement implements Parcelable {
      * Sets the Azimuth's uncertainty (1-Sigma) in degrees.
      */
     public void setAzimuthUncertaintyInDeg(double value) {
-        mHasAzimuthUncertaintyInDeg = true;
+        setFlag(HAS_AZIMUTH_UNCERTAINTY);
         mAzimuthUncertaintyInDeg = value;
     }
 
@@ -979,7 +1098,7 @@ public class GpsMeasurement implements Parcelable {
      * Resets the Azimuth's uncertainty (1-Sigma) in degrees.
      */
     public void resetAzimuthUncertaintyInDeg() {
-        mHasAzimuthUncertaintyInDeg = false;
+        resetFlag(HAS_AZIMUTH_UNCERTAINTY);
         mAzimuthUncertaintyInDeg = Double.NaN;
     }
 
@@ -989,7 +1108,7 @@ public class GpsMeasurement implements Parcelable {
      *
      * @return A non-null value if the data is available, null otherwise.
      */
-    public Boolean isUsedInFix() {
+    public boolean isUsedInFix() {
         return mUsedInFix;
     }
 
@@ -1005,50 +1124,35 @@ public class GpsMeasurement implements Parcelable {
         public GpsMeasurement createFromParcel(Parcel parcel) {
             GpsMeasurement gpsMeasurement = new GpsMeasurement();
 
+            gpsMeasurement.mFlags = parcel.readInt();
             gpsMeasurement.mPrn = parcel.readByte();
-            gpsMeasurement.mLocalTimeInNs = parcel.readLong();
+            gpsMeasurement.mTimeOffsetInNs = parcel.readDouble();
+            gpsMeasurement.mState = (short) parcel.readInt();
             gpsMeasurement.mReceivedGpsTowInNs = parcel.readLong();
             gpsMeasurement.mCn0InDbHz = parcel.readDouble();
             gpsMeasurement.mPseudorangeRateInMetersPerSec = parcel.readDouble();
             gpsMeasurement.mPseudorangeRateUncertaintyInMetersPerSec = parcel.readDouble();
+            gpsMeasurement.mAccumulatedDeltaRangeState = (short) parcel.readInt();
             gpsMeasurement.mAccumulatedDeltaRangeInMeters = parcel.readDouble();
             gpsMeasurement.mAccumulatedDeltaRangeUncertaintyInMeters = parcel.readDouble();
-
-            gpsMeasurement.mHasPseudorangeInMeters = parcel.readInt() != 0;
             gpsMeasurement.mPseudorangeInMeters = parcel.readDouble();
-            gpsMeasurement.mHasPseudorangeUncertaintyInMeters = parcel.readInt() != 0;
             gpsMeasurement.mPseudorangeUncertaintyInMeters = parcel.readDouble();
-            gpsMeasurement.mHasCodePhaseInChips = parcel.readInt() != 0;
             gpsMeasurement.mCodePhaseInChips = parcel.readDouble();
-            gpsMeasurement.mHasCodePhaseUncertaintyInChips = parcel.readInt() != 0;
             gpsMeasurement.mCodePhaseUncertaintyInChips = parcel.readDouble();
-            gpsMeasurement.mHasCarrierFrequencyInHz = parcel.readInt() != 0;
             gpsMeasurement.mCarrierFrequencyInHz = parcel.readFloat();
-            gpsMeasurement.mHasCarrierCycles = parcel.readInt() != 0;
             gpsMeasurement.mCarrierCycles = parcel.readLong();
-            gpsMeasurement.mHasCarrierPhase = parcel.readInt() != 0;
             gpsMeasurement.mCarrierPhase = parcel.readDouble();
-            gpsMeasurement.mHasCarrierPhaseUncertainty = parcel.readInt() != 0;
             gpsMeasurement.mCarrierPhaseUncertainty = parcel.readDouble();
-            gpsMeasurement.mLossOfLock = (short) parcel.readInt();
-            gpsMeasurement.mHasBitNumber = parcel.readInt() != 0;
+            gpsMeasurement.mLossOfLock = parcel.readByte();
             gpsMeasurement.mBitNumber = (short) parcel.readInt();
-            gpsMeasurement.mHasTimeFromLastBitInNs = parcel.readInt() != 0;
-            gpsMeasurement.mTimeFromLastBitInNs = parcel.readLong();
-            gpsMeasurement.mHasDopplerShiftInHz = parcel.readInt() != 0;
+            gpsMeasurement.mTimeFromLastBitInMs = (short) parcel.readInt();
             gpsMeasurement.mDopplerShiftInHz = parcel.readDouble();
-            gpsMeasurement.mHasDopplerShiftUncertaintyInHz = parcel.readInt() != 0;
             gpsMeasurement.mDopplerShiftUncertaintyInHz = parcel.readDouble();
-            gpsMeasurement.mMultipathIndicator = (short) parcel.readInt();
-            gpsMeasurement.mHasSnrInDb = parcel.readInt() != 0;
+            gpsMeasurement.mMultipathIndicator = parcel.readByte();
             gpsMeasurement.mSnrInDb = parcel.readDouble();
-            gpsMeasurement.mHasElevationInDeg = parcel.readInt() != 0;
             gpsMeasurement.mElevationInDeg = parcel.readDouble();
-            gpsMeasurement.mHasElevationUncertaintyInDeg = parcel.readInt() != 0;
             gpsMeasurement.mElevationUncertaintyInDeg = parcel.readDouble();
-            gpsMeasurement.mHasAzimuthInDeg = parcel.readInt() != 0;
             gpsMeasurement.mAzimuthInDeg = parcel.readDouble();
-            gpsMeasurement.mHasAzimuthUncertaintyInDeg = parcel.readInt() != 0;
             gpsMeasurement.mAzimuthUncertaintyInDeg = parcel.readDouble();
             gpsMeasurement.mUsedInFix = parcel.readInt() != 0;
 
@@ -1062,50 +1166,35 @@ public class GpsMeasurement implements Parcelable {
     };
 
     public void writeToParcel(Parcel parcel, int flags) {
+        parcel.writeInt(mFlags);
         parcel.writeByte(mPrn);
-        parcel.writeLong(mLocalTimeInNs);
+        parcel.writeDouble(mTimeOffsetInNs);
+        parcel.writeInt(mState);
         parcel.writeLong(mReceivedGpsTowInNs);
         parcel.writeDouble(mCn0InDbHz);
         parcel.writeDouble(mPseudorangeRateInMetersPerSec);
         parcel.writeDouble(mPseudorangeRateUncertaintyInMetersPerSec);
+        parcel.writeInt(mAccumulatedDeltaRangeState);
         parcel.writeDouble(mAccumulatedDeltaRangeInMeters);
         parcel.writeDouble(mAccumulatedDeltaRangeUncertaintyInMeters);
-
-        parcel.writeInt(mHasPseudorangeInMeters ? 1 : 0);
         parcel.writeDouble(mPseudorangeInMeters);
-        parcel.writeInt(mHasPseudorangeUncertaintyInMeters ? 1 : 0);
         parcel.writeDouble(mPseudorangeUncertaintyInMeters);
-        parcel.writeInt(mHasCodePhaseInChips ? 1 : 0);
         parcel.writeDouble(mCodePhaseInChips);
-        parcel.writeInt(mHasCodePhaseUncertaintyInChips ? 1 : 0);
         parcel.writeDouble(mCodePhaseUncertaintyInChips);
-        parcel.writeInt(mHasCarrierFrequencyInHz ? 1 : 0);
         parcel.writeFloat(mCarrierFrequencyInHz);
-        parcel.writeInt(mHasCarrierCycles ? 1 : 0);
         parcel.writeLong(mCarrierCycles);
-        parcel.writeInt(mHasCarrierPhase ? 1 : 0);
         parcel.writeDouble(mCarrierPhase);
-        parcel.writeInt(mHasCarrierPhaseUncertainty ? 1 : 0);
         parcel.writeDouble(mCarrierPhaseUncertainty);
-        parcel.writeInt(mLossOfLock);
-        parcel.writeInt(mHasBitNumber ? 1 : 0);
+        parcel.writeByte(mLossOfLock);
         parcel.writeInt(mBitNumber);
-        parcel.writeInt(mHasTimeFromLastBitInNs ? 1 : 0);
-        parcel.writeLong(mTimeFromLastBitInNs);
-        parcel.writeInt(mHasDopplerShiftInHz ? 1 : 0);
+        parcel.writeInt(mTimeFromLastBitInMs);
         parcel.writeDouble(mDopplerShiftInHz);
-        parcel.writeInt(mHasDopplerShiftUncertaintyInHz ? 1 : 0);
         parcel.writeDouble(mDopplerShiftUncertaintyInHz);
-        parcel.writeInt(mMultipathIndicator);
-        parcel.writeInt(mHasSnrInDb ? 1 : 0);
+        parcel.writeByte(mMultipathIndicator);
         parcel.writeDouble(mSnrInDb);
-        parcel.writeInt(mHasElevationInDeg ? 1 : 0);
         parcel.writeDouble(mElevationInDeg);
-        parcel.writeInt(mHasElevationUncertaintyInDeg ? 1 : 0);
         parcel.writeDouble(mElevationUncertaintyInDeg);
-        parcel.writeInt(mHasAzimuthInDeg ? 1 : 0);
         parcel.writeDouble(mAzimuthInDeg);
-        parcel.writeInt(mHasAzimuthUncertaintyInDeg ? 1 : 0);
         parcel.writeDouble(mAzimuthUncertaintyInDeg);
         parcel.writeInt(mUsedInFix ? 1 : 0);
     }
@@ -1123,7 +1212,9 @@ public class GpsMeasurement implements Parcelable {
 
         builder.append(String.format(format, "Prn", mPrn));
 
-        builder.append(String.format(format, "LocalTimeInNs", mLocalTimeInNs));
+        builder.append(String.format(format, "TimeOffsetInNs", mTimeOffsetInNs));
+
+        builder.append(String.format(format, "State", getStateString()));
 
         builder.append(String.format(format, "ReceivedGpsTowInNs", mReceivedGpsTowInNs));
 
@@ -1137,86 +1228,136 @@ public class GpsMeasurement implements Parcelable {
                 mPseudorangeRateUncertaintyInMetersPerSec));
 
         builder.append(String.format(
+                format,
+                "AccumulatedDeltaRangeState",
+                getAccumulatedDeltaRangeStateString()));
+
+        builder.append(String.format(
                 formatWithUncertainty,
                 "AccumulatedDeltaRangeInMeters",
                 mAccumulatedDeltaRangeInMeters,
                 "AccumulatedDeltaRangeUncertaintyInMeters",
                 mAccumulatedDeltaRangeUncertaintyInMeters));
 
-
         builder.append(String.format(
                 formatWithUncertainty,
                 "PseudorangeInMeters",
-                mHasPseudorangeInMeters ? mPseudorangeInMeters : null,
+                hasPseudorangeInMeters() ? mPseudorangeInMeters : null,
                 "PseudorangeUncertaintyInMeters",
-                mHasPseudorangeUncertaintyInMeters ? mPseudorangeUncertaintyInMeters : null));
+                hasPseudorangeUncertaintyInMeters() ? mPseudorangeUncertaintyInMeters : null));
 
         builder.append(String.format(
                 formatWithUncertainty,
                 "CodePhaseInChips",
-                mHasCodePhaseInChips ? mCodePhaseInChips : null,
+                hasCodePhaseInChips() ? mCodePhaseInChips : null,
                 "CodePhaseUncertaintyInChips",
-                mHasCodePhaseUncertaintyInChips ? mCodePhaseUncertaintyInChips : null));
+                hasCodePhaseUncertaintyInChips() ? mCodePhaseUncertaintyInChips : null));
 
         builder.append(String.format(
                 format,
                 "CarrierFrequencyInHz",
-                mHasCarrierFrequencyInHz ? mCarrierFrequencyInHz : null));
+                hasCarrierFrequencyInHz() ? mCarrierFrequencyInHz : null));
 
         builder.append(String.format(
                 format,
                 "CarrierCycles",
-                mHasCarrierCycles ? mCarrierCycles : null));
+                hasCarrierCycles() ? mCarrierCycles : null));
 
         builder.append(String.format(
                 formatWithUncertainty,
                 "CarrierPhase",
-                mHasCarrierPhase ? mCarrierPhase : null,
+                hasCarrierPhase() ? mCarrierPhase : null,
                 "CarrierPhaseUncertainty",
-                mHasCarrierPhaseUncertainty ? mCarrierPhaseUncertainty : null));
+                hasCarrierPhaseUncertainty() ? mCarrierPhaseUncertainty : null));
 
         builder.append(String.format(format, "LossOfLock", getLossOfLockString()));
 
         builder.append(String.format(
                 format,
                 "BitNumber",
-                mHasBitNumber ? mBitNumber : null));
+                hasBitNumber() ? mBitNumber : null));
 
         builder.append(String.format(
                 format,
-                "TimeFromLastBitInNs",
-                mHasTimeFromLastBitInNs ? mTimeFromLastBitInNs : null));
+                "TimeFromLastBitInMs",
+                hasTimeFromLastBitInMs() ? mTimeFromLastBitInMs : null));
 
         builder.append(String.format(
                 formatWithUncertainty,
                 "DopplerShiftInHz",
-                mHasDopplerShiftInHz ? mDopplerShiftInHz : null,
+                hasDopplerShiftInHz() ? mDopplerShiftInHz : null,
                 "DopplerShiftUncertaintyInHz",
-                mHasDopplerShiftUncertaintyInHz ? mDopplerShiftUncertaintyInHz : null));
+                hasDopplerShiftUncertaintyInHz() ? mDopplerShiftUncertaintyInHz : null));
 
         builder.append(String.format(format, "MultipathIndicator", getMultipathIndicatorString()));
 
         builder.append(String.format(
                 format,
                 "SnrInDb",
-                mHasSnrInDb ? mSnrInDb : null));
+                hasSnrInDb() ? mSnrInDb : null));
 
         builder.append(String.format(
                 formatWithUncertainty,
                 "ElevationInDeg",
-                mHasElevationInDeg ? mElevationInDeg : null,
+                hasElevationInDeg() ? mElevationInDeg : null,
                 "ElevationUncertaintyInDeg",
-                mHasElevationUncertaintyInDeg ? mElevationUncertaintyInDeg : null));
+                hasElevationUncertaintyInDeg() ? mElevationUncertaintyInDeg : null));
 
         builder.append(String.format(
                 formatWithUncertainty,
                 "AzimuthInDeg",
-                mHasAzimuthInDeg ? mAzimuthInDeg : null,
+                hasAzimuthInDeg() ? mAzimuthInDeg : null,
                 "AzimuthUncertaintyInDeg",
-                mHasAzimuthUncertaintyInDeg ? mAzimuthUncertaintyInDeg : null));
+                hasAzimuthUncertaintyInDeg() ? mAzimuthUncertaintyInDeg : null));
 
         builder.append(String.format(format, "UsedInFix", mUsedInFix));
 
         return builder.toString();
+    }
+
+    private void initialize() {
+        mFlags = HAS_NO_FLAGS;
+        setPrn(Byte.MIN_VALUE);
+        setTimeOffsetInNs(Long.MIN_VALUE);
+        setState(STATE_UNKNOWN);
+        setReceivedGpsTowInNs(Long.MIN_VALUE);
+        setCn0InDbHz(Double.MIN_VALUE);
+        setPseudorangeRateInMetersPerSec(Double.MIN_VALUE);
+        setPseudorangeRateUncertaintyInMetersPerSec(Double.MIN_VALUE);
+        setAccumulatedDeltaRangeState(ADR_STATE_UNKNOWN);
+        setAccumulatedDeltaRangeInMeters(Double.MIN_VALUE);
+        setAccumulatedDeltaRangeUncertaintyInMeters(Double.MIN_VALUE);
+        resetPseudorangeInMeters();
+        resetPseudorangeUncertaintyInMeters();
+        resetCodePhaseInChips();
+        resetCodePhaseUncertaintyInChips();
+        resetCarrierFrequencyInHz();
+        resetCarrierCycles();
+        resetCarrierPhase();
+        resetCarrierPhaseUncertainty();
+        setLossOfLock(LOSS_OF_LOCK_UNKNOWN);
+        resetBitNumber();
+        resetTimeFromLastBitInMs();
+        resetDopplerShiftInHz();
+        resetDopplerShiftUncertaintyInHz();
+        setMultipathIndicator(MULTIPATH_INDICATOR_UNKNOWN);
+        resetSnrInDb();
+        resetElevationInDeg();
+        resetElevationUncertaintyInDeg();
+        resetAzimuthInDeg();
+        resetAzimuthUncertaintyInDeg();
+        setUsedInFix(false);
+    }
+
+    private void setFlag(int flag) {
+        mFlags |= flag;
+    }
+
+    private void resetFlag(int flag) {
+        mFlags &= ~flag;
+    }
+
+    private boolean isFlagSet(int flag) {
+        return (mFlags & flag) == flag;
     }
 }

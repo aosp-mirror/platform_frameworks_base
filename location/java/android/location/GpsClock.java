@@ -18,6 +18,7 @@ package android.location;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 /**
  * A class containing a GPS clock timestamp.
@@ -26,44 +27,65 @@ import android.os.Parcelable;
  * @hide
  */
 public class GpsClock implements Parcelable {
-    // mandatory parameters
-    private long mTimeInNs;
+    private static final String TAG = "GpsClock";
 
-    // optional parameters
-    private boolean mHasLeapSecond;
+    // The following enumerations must be in sync with the values declared in gps.h
+
+    /**
+     * The type of the time stored is not available or it is unknown.
+     */
+    public static final byte TYPE_UNKNOWN = 0;
+
+    /**
+     * The source of the time value reported by this class is the 'Local Hardware Clock'.
+     */
+    public static final byte TYPE_LOCAL_HW_TIME = 1;
+
+    /**
+     * The source of the time value reported by this class is the 'GPS time' derived from
+     * satellites (epoch = Jan 6, 1980).
+     */
+    public static final byte TYPE_GPS_TIME = 2;
+
+    private static final short HAS_NO_FLAGS = 0;
+    private static final short HAS_LEAP_SECOND = (1<<0);
+    private static final short HAS_TIME_UNCERTAINTY = (1<<1);
+    private static final short HAS_FULL_BIAS = (1<<2);
+    private static final short HAS_BIAS = (1<<3);
+    private static final short HAS_BIAS_UNCERTAINTY = (1<<4);
+    private static final short HAS_DRIFT = (1<<5);
+    private static final short HAS_DRIFT_UNCERTAINTY = (1<<6);
+
+    // End enumerations in sync with gps.h
+
+    private short mFlags;
     private short mLeapSecond;
-    private boolean mHasTimeUncertaintyInNs;
+    private byte mType;
+    private long mTimeInNs;
     private double mTimeUncertaintyInNs;
-    private boolean mHasBiasInNs;
+    private long mFullBiasInNs;
     private double mBiasInNs;
-    private boolean mHasBiasUncertaintyInNs;
     private double mBiasUncertaintyInNs;
-    private boolean mHasDriftInNsPerSec;
     private double mDriftInNsPerSec;
-    private boolean mHasDriftUncertaintyInNsPerSec;
     private double mDriftUncertaintyInNsPerSec;
 
     GpsClock() {
-        reset();
+        initialize();
     }
 
     /**
      * Sets all contents to the values stored in the provided object.
      */
     public void set(GpsClock clock) {
-        mTimeInNs = clock.mTimeInNs;
-
-        mHasLeapSecond = clock.mHasLeapSecond;
+        mFlags = clock.mFlags;
         mLeapSecond = clock.mLeapSecond;
-        mHasTimeUncertaintyInNs = clock.mHasTimeUncertaintyInNs;
+        mType = clock.mType;
+        mTimeInNs = clock.mTimeInNs;
         mTimeUncertaintyInNs = clock.mTimeUncertaintyInNs;
-        mHasBiasInNs = clock.mHasBiasInNs;
+        mFullBiasInNs = clock.mFullBiasInNs;
         mBiasInNs = clock.mBiasInNs;
-        mHasBiasUncertaintyInNs = clock.mHasBiasUncertaintyInNs;
         mBiasUncertaintyInNs = clock.mBiasUncertaintyInNs;
-        mHasDriftInNsPerSec = clock.mHasDriftInNsPerSec;
         mDriftInNsPerSec = clock.mDriftInNsPerSec;
-        mHasDriftUncertaintyInNsPerSec = clock.mHasDriftUncertaintyInNsPerSec;
         mDriftUncertaintyInNsPerSec = clock.mDriftUncertaintyInNsPerSec;
     }
 
@@ -71,25 +93,61 @@ public class GpsClock implements Parcelable {
      * Resets all the contents to its original state.
      */
     public void reset() {
-        mTimeInNs = Long.MIN_VALUE;
+        initialize();
+    }
 
-        resetLeapSecond();
-        resetTimeUncertaintyInNs();
-        resetBiasInNs();
-        resetBiasUncertaintyInNs();
-        resetDriftInNsPerSec();
-        resetDriftUncertaintyInNsPerSec();
+    /**
+     * Gets the type of time reported by {@link #getTimeInNs()}.
+     */
+    public byte getType() {
+        return mType;
+    }
+
+    /**
+     * Sets the type of time reported.
+     */
+    public void setType(byte value) {
+        switch (value) {
+            case TYPE_UNKNOWN:
+            case TYPE_GPS_TIME:
+            case TYPE_LOCAL_HW_TIME:
+                mType = value;
+                break;
+            default:
+                Log.d(TAG, "Sanitizing invalid 'type': " + value);
+                mType = TYPE_UNKNOWN;
+                break;
+        }
+    }
+
+    /**
+     * Gets a string representation of the 'type'.
+     * For internal and logging use only.
+     */
+    private String getTypeString() {
+        switch (mType) {
+            case TYPE_UNKNOWN:
+                return "Unknown";
+            case TYPE_GPS_TIME:
+                return "GpsTime";
+            case TYPE_LOCAL_HW_TIME:
+                return "LocalHwClock";
+            default:
+                return "<Invalid>";
+        }
     }
 
     /**
      * Returns true if {@link #getLeapSecond()} is available, false otherwise.
      */
     public boolean hasLeapSecond() {
-        return mHasLeapSecond;
+        return isFlagSet(HAS_LEAP_SECOND);
     }
 
     /**
      * Gets the leap second associated with the clock's time.
+     * The sign of the value is defined by the following equation:
+     *      utc_time_ns = time_ns + (full_bias_ns + bias_ns) - leap_second * 1,000,000,000
      *
      * The value is only available if {@link #hasLeapSecond()} is true.
      */
@@ -101,7 +159,7 @@ public class GpsClock implements Parcelable {
      * Sets the leap second associated with the clock's time.
      */
     public void setLeapSecond(short leapSecond) {
-        mHasLeapSecond = true;
+        setFlag(HAS_LEAP_SECOND);
         mLeapSecond = leapSecond;
     }
 
@@ -109,13 +167,25 @@ public class GpsClock implements Parcelable {
      * Resets the leap second associated with the clock's time.
      */
     public void resetLeapSecond() {
-        mHasLeapSecond = false;
+        resetFlag(HAS_LEAP_SECOND);
         mLeapSecond = Short.MIN_VALUE;
     }
 
     /**
-     * Gets the GPS clock Time in nanoseconds; it represents the uncorrected receiver's GPS time
-     * since 0000Z, January 6, 1980; this is, including {@link #getBiasInNs()}.
+     * Gets the GPS receiver internal clock value in nanoseconds.
+     * This can be either the 'local hardware clock' value ({@link #TYPE_LOCAL_HW_TIME}), or the
+     * current GPS time derived inside GPS receiver ({@link #TYPE_GPS_TIME}).
+     * {@link #getType()} defines the time reported.
+     *
+     * For 'local hardware clock' this value is expected to be monotonically increasing during the
+     * reporting session. The real GPS time can be derived by compensating
+     * {@link #getFullBiasInNs()} (when it is available) from this value.
+     *
+     * For 'GPS time' this value is expected to be the best estimation of current GPS time that GPS
+     * receiver can achieve. {@link #getTimeUncertaintyInNs()} should be available when GPS time is
+     * specified.
+     *
+     * Sub-nanosecond accuracy can be provided by means of {@link #getBiasInNs()}.
      * The reported time includes {@link #getTimeUncertaintyInNs()}.
      */
     public long getTimeInNs() {
@@ -123,7 +193,7 @@ public class GpsClock implements Parcelable {
     }
 
     /**
-     * Sets the GPS clock Time in nanoseconds.
+     * Sets the GPS receiver internal clock in nanoseconds.
      */
     public void setTimeInNs(long timeInNs) {
         mTimeInNs = timeInNs;
@@ -133,11 +203,12 @@ public class GpsClock implements Parcelable {
      * Returns true if {@link #getTimeUncertaintyInNs()} is available, false otherwise.
      */
     public boolean hasTimeUncertaintyInNs() {
-        return mHasTimeUncertaintyInNs;
+        return isFlagSet(HAS_TIME_UNCERTAINTY);
     }
 
     /**
      * Gets the clock's time Uncertainty (1-Sigma) in nanoseconds.
+     * The uncertainty is represented as an absolute (single sided) value.
      *
      * The value is only available if {@link #hasTimeUncertaintyInNs()} is true.
      */
@@ -149,7 +220,7 @@ public class GpsClock implements Parcelable {
      * Sets the clock's Time Uncertainty (1-Sigma) in nanoseconds.
      */
     public void setTimeUncertaintyInNs(double timeUncertaintyInNs) {
-        mHasTimeUncertaintyInNs = true;
+        setFlag(HAS_TIME_UNCERTAINTY);
         mTimeUncertaintyInNs = timeUncertaintyInNs;
     }
 
@@ -157,34 +228,73 @@ public class GpsClock implements Parcelable {
      * Resets the clock's Time Uncertainty (1-Sigma) in nanoseconds.
      */
     public void resetTimeUncertaintyInNs() {
-        mHasTimeUncertaintyInNs = false;
+        resetFlag(HAS_TIME_UNCERTAINTY);
         mTimeUncertaintyInNs = Double.NaN;
+    }
+
+    /**
+     * Returns true if {@link @getFullBiasInNs()} is available, false otherwise.
+     */
+    public boolean hasFullBiasInNs() {
+        return isFlagSet(HAS_FULL_BIAS);
+    }
+
+    /**
+     * Gets the difference between hardware clock ({@link #getTimeInNs()}) inside GPS receiver and
+     * the true GPS time since 0000Z, January 6, 1980, in nanoseconds.
+     *
+     * This value is available if {@link #TYPE_LOCAL_HW_TIME} is set, and GPS receiver has solved
+     * the clock for GPS time.
+     * {@link #getBiasUncertaintyInNs()} should be used for quality check.
+     *
+     * The sign of the value is defined by the following equation:
+     *      true time (GPS time) = time_ns + (full_bias_ns + bias_ns)
+     *
+     * The reported full bias includes {@link #getBiasUncertaintyInNs()}.
+     * The value is onl available if {@link #hasFullBiasInNs()} is true.
+     */
+    public long getFullBiasInNs() {
+        return mFullBiasInNs;
+    }
+
+    /**
+     * Sets the full bias in nanoseconds.
+     */
+    public void setFullBiasInNs(long value) {
+        setFlag(HAS_FULL_BIAS);
+        mFullBiasInNs = value;
+    }
+
+    /**
+     * Resets the full bias in nanoseconds.
+     */
+    public void resetFullBiasInNs() {
+        resetFlag(HAS_FULL_BIAS);
+        mFullBiasInNs = Long.MIN_VALUE;
     }
 
     /**
      * Returns true if {@link #getBiasInNs()} is available, false otherwise.
      */
     public boolean hasBiasInNs() {
-        return mHasBiasInNs;
+        return isFlagSet(HAS_BIAS);
     }
 
     /**
-     * Gets the clock's Bias in nanoseconds.
-     * The sign of the value (if available), is defined by the following equation:
-     *      true time = time - bias.
+     * Gets the clock's sub-nanosecond bias.
      * The reported bias includes {@link #getBiasUncertaintyInNs()}.
      *
      * The value is only available if {@link #hasBiasInNs()} is true.
      */
-    public Double getBiasInNs() {
+    public double getBiasInNs() {
         return mBiasInNs;
     }
 
     /**
-     * Sets the clock's Bias in nanoseconds.
+     * Sets the sub-nanosecond bias.
      */
     public void setBiasInNs(double biasInNs) {
-        mHasBiasInNs = true;
+        setFlag(HAS_BIAS);
         mBiasInNs = biasInNs;
     }
 
@@ -192,7 +302,7 @@ public class GpsClock implements Parcelable {
      * Resets the clock's Bias in nanoseconds.
      */
     public void resetBiasInNs() {
-        mHasBiasInNs = false;
+        resetFlag(HAS_BIAS);
         mBiasInNs = Double.NaN;
     }
 
@@ -200,7 +310,7 @@ public class GpsClock implements Parcelable {
      * Returns true if {@link #getBiasUncertaintyInNs()} is available, false otherwise.
      */
     public boolean hasBiasUncertaintyInNs() {
-        return mHasBiasUncertaintyInNs;
+        return isFlagSet(HAS_BIAS_UNCERTAINTY);
     }
 
     /**
@@ -216,7 +326,7 @@ public class GpsClock implements Parcelable {
      * Sets the clock's Bias Uncertainty (1-Sigma) in nanoseconds.
      */
     public void setBiasUncertaintyInNs(double biasUncertaintyInNs) {
-        mHasBiasUncertaintyInNs = true;
+        setFlag(HAS_BIAS_UNCERTAINTY);
         mBiasUncertaintyInNs = biasUncertaintyInNs;
     }
 
@@ -224,7 +334,7 @@ public class GpsClock implements Parcelable {
      * Resets the clock's Bias Uncertainty (1-Sigma) in nanoseconds.
      */
     public void resetBiasUncertaintyInNs() {
-        mHasBiasUncertaintyInNs = false;
+        resetFlag(HAS_BIAS_UNCERTAINTY);
         mBiasUncertaintyInNs = Double.NaN;
     }
 
@@ -232,7 +342,7 @@ public class GpsClock implements Parcelable {
      * Returns true if {@link #getDriftInNsPerSec()} is available, false otherwise.
      */
     public boolean hasDriftInNsPerSec() {
-        return mHasDriftInNsPerSec;
+        return isFlagSet(HAS_DRIFT);
     }
 
     /**
@@ -250,7 +360,7 @@ public class GpsClock implements Parcelable {
      * Sets the clock's Drift in nanoseconds per second.
      */
     public void setDriftInNsPerSec(double driftInNsPerSec) {
-        mHasDriftInNsPerSec = true;
+        setFlag(HAS_DRIFT);
         mDriftInNsPerSec = driftInNsPerSec;
     }
 
@@ -258,7 +368,7 @@ public class GpsClock implements Parcelable {
      * Resets the clock's Drift in nanoseconds per second.
      */
     public void resetDriftInNsPerSec() {
-        mHasDriftInNsPerSec = false;
+        resetFlag(HAS_DRIFT);
         mDriftInNsPerSec = Double.NaN;
     }
 
@@ -266,7 +376,7 @@ public class GpsClock implements Parcelable {
      * Returns true if {@link #getDriftUncertaintyInNsPerSec()} is available, false otherwise.
      */
     public boolean hasDriftUncertaintyInNsPerSec() {
-        return mHasDriftUncertaintyInNsPerSec;
+        return isFlagSet(HAS_DRIFT_UNCERTAINTY);
     }
 
     /**
@@ -282,7 +392,7 @@ public class GpsClock implements Parcelable {
      * Sets the clock's Drift Uncertainty (1-Sigma) in nanoseconds per second.
      */
     public void setDriftUncertaintyInNsPerSec(double driftUncertaintyInNsPerSec) {
-        mHasDriftUncertaintyInNsPerSec = true;
+        setFlag(HAS_DRIFT_UNCERTAINTY);
         mDriftUncertaintyInNsPerSec = driftUncertaintyInNsPerSec;
     }
 
@@ -290,7 +400,7 @@ public class GpsClock implements Parcelable {
      * Resets the clock's Drift Uncertainty (1-Sigma) in nanoseconds per second.
      */
     public void resetDriftUncertaintyInNsPerSec() {
-        mHasDriftUncertaintyInNsPerSec = false;
+        resetFlag(HAS_DRIFT_UNCERTAINTY);
         mDriftUncertaintyInNsPerSec = Double.NaN;
     }
 
@@ -298,19 +408,16 @@ public class GpsClock implements Parcelable {
         @Override
         public GpsClock createFromParcel(Parcel parcel) {
             GpsClock gpsClock = new GpsClock();
-            gpsClock.mTimeInNs = parcel.readLong();
 
-            gpsClock.mHasLeapSecond = parcel.readInt() != 0;
+            gpsClock.mFlags = (short) parcel.readInt();
             gpsClock.mLeapSecond = (short) parcel.readInt();
-            gpsClock.mHasTimeUncertaintyInNs = parcel.readInt() != 0;
+            gpsClock.mType = parcel.readByte();
+            gpsClock.mTimeInNs = parcel.readLong();
             gpsClock.mTimeUncertaintyInNs = parcel.readDouble();
-            gpsClock.mHasBiasInNs = parcel.readInt() != 0;
+            gpsClock.mFullBiasInNs = parcel.readLong();
             gpsClock.mBiasInNs = parcel.readDouble();
-            gpsClock.mHasBiasUncertaintyInNs = parcel.readInt() != 0;
             gpsClock.mBiasUncertaintyInNs = parcel.readDouble();
-            gpsClock.mHasDriftInNsPerSec = parcel.readInt() != 0;
             gpsClock.mDriftInNsPerSec = parcel.readDouble();
-            gpsClock.mHasDriftUncertaintyInNsPerSec = parcel.readInt() != 0;
             gpsClock.mDriftUncertaintyInNsPerSec = parcel.readDouble();
 
             return gpsClock;
@@ -323,19 +430,15 @@ public class GpsClock implements Parcelable {
     };
 
     public void writeToParcel(Parcel parcel, int flags) {
-        parcel.writeLong(mTimeInNs);
-
-        parcel.writeInt(mHasLeapSecond ? 1 : 0);
+        parcel.writeInt(mFlags);
         parcel.writeInt(mLeapSecond);
-        parcel.writeInt(mHasTimeUncertaintyInNs ? 1 : 0);
+        parcel.writeByte(mType);
+        parcel.writeLong(mTimeInNs);
         parcel.writeDouble(mTimeUncertaintyInNs);
-        parcel.writeInt(mHasBiasInNs ? 1 : 0);
+        parcel.writeLong(mFullBiasInNs);
         parcel.writeDouble(mBiasInNs);
-        parcel.writeInt(mHasBiasUncertaintyInNs ? 1 : 0);
         parcel.writeDouble(mBiasUncertaintyInNs);
-        parcel.writeInt(mHasDriftInNsPerSec ? 1 : 0);
         parcel.writeDouble(mDriftInNsPerSec);
-        parcel.writeInt(mHasDriftUncertaintyInNsPerSec ? 1 : 0);
         parcel.writeDouble(mDriftUncertaintyInNsPerSec);
     }
 
@@ -346,37 +449,64 @@ public class GpsClock implements Parcelable {
 
     @Override
     public String toString() {
-        final String format = "   %-15s = %-25s   %-26s = %s\n";
+        final String format = "   %-15s = %s\n";
+        final String formatWithUncertainty = "   %-15s = %-25s   %-26s = %s\n";
         StringBuilder builder = new StringBuilder("GpsClock:\n");
 
-        builder.append(String.format(
-                format,
-                "LeapSecond",
-                mHasLeapSecond ? mLeapSecond : null,
-                "",
-                ""));
+        builder.append(String.format(format, "Type", getTypeString()));
+
+        builder.append(String.format(format, "LeapSecond", hasLeapSecond() ? mLeapSecond : null));
 
         builder.append(String.format(
-                format,
+                formatWithUncertainty,
                 "TimeInNs",
                 mTimeInNs,
                 "TimeUncertaintyInNs",
-                mHasTimeUncertaintyInNs ? mTimeUncertaintyInNs : null));
+                hasTimeUncertaintyInNs() ? mTimeUncertaintyInNs : null));
 
         builder.append(String.format(
                 format,
+                "FullBiasInNs",
+                hasFullBiasInNs() ? mFullBiasInNs : null));
+
+        builder.append(String.format(
+                formatWithUncertainty,
                 "BiasInNs",
-                mHasBiasInNs ? mBiasInNs : null,
+                hasBiasInNs() ? mBiasInNs : null,
                 "BiasUncertaintyInNs",
-                mHasBiasUncertaintyInNs ? mBiasUncertaintyInNs : null));
+                hasBiasUncertaintyInNs() ? mBiasUncertaintyInNs : null));
 
         builder.append(String.format(
-                format,
+                formatWithUncertainty,
                 "DriftInNsPerSec",
-                mHasDriftInNsPerSec ? mDriftInNsPerSec : null,
+                hasDriftInNsPerSec() ? mDriftInNsPerSec : null,
                 "DriftUncertaintyInNsPerSec",
-                mHasDriftUncertaintyInNsPerSec ? mDriftUncertaintyInNsPerSec : null));
+                hasDriftUncertaintyInNsPerSec() ? mDriftUncertaintyInNsPerSec : null));
 
         return builder.toString();
+    }
+
+    private void initialize() {
+        mFlags = HAS_NO_FLAGS;
+        resetLeapSecond();
+        setType(TYPE_UNKNOWN);
+        setTimeInNs(Long.MIN_VALUE);
+        resetTimeUncertaintyInNs();
+        resetBiasInNs();
+        resetBiasUncertaintyInNs();
+        resetDriftInNsPerSec();
+        resetDriftUncertaintyInNsPerSec();
+    }
+
+    private void setFlag(short flag) {
+        mFlags |= flag;
+    }
+
+    private void resetFlag(short flag) {
+        mFlags &= ~flag;
+    }
+
+    private boolean isFlagSet(short flag) {
+        return (mFlags & flag) == flag;
     }
 }
