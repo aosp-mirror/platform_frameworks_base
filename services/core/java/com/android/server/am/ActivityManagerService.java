@@ -8060,8 +8060,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         boolean checkedGrants = false;
         if (checkUser) {
             // Looking for cross-user grants before enforcing the typical cross-users permissions
-            int tmpTargetUserId = unsafeConvertIncomingUser(UserHandle.getUserId(callingUid));
-            if (tmpTargetUserId != userId) {
+            int tmpTargetUserId = unsafeConvertIncomingUser(userId);
+            if (tmpTargetUserId != UserHandle.getUserId(callingUid)) {
                 if (checkAuthorityGrants(callingUid, cpi, tmpTargetUserId, checkUser)) {
                     return null;
                 }
