@@ -20,7 +20,8 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import com.android.internal.app.IVoiceInteractor;
-import android.hardware.soundtrigger.KeyphraseSoundModel;
+import android.hardware.soundtrigger.IRecognitionStatusCallback;
+import android.hardware.soundtrigger.SoundTrigger;
 import android.service.voice.IVoiceInteractionService;
 import android.service.voice.IVoiceInteractionSession;
 
@@ -37,9 +38,26 @@ interface IVoiceInteractionManagerService {
      *
      * @param service The current voice interaction service.
      */
-    List<KeyphraseSoundModel> listRegisteredKeyphraseSoundModels(in IVoiceInteractionService service);
+    List<SoundTrigger.KeyphraseSoundModel> listRegisteredKeyphraseSoundModels(
+            in IVoiceInteractionService service);
     /**
      * Updates the given keyphrase sound model. Adds the model if it doesn't exist currently.
      */
-    int updateKeyphraseSoundModel(in KeyphraseSoundModel model);
+    int updateKeyphraseSoundModel(in SoundTrigger.KeyphraseSoundModel model);
+
+    /**
+     * Gets the properties of the DSP hardware on this device, null if not present.
+     */
+    SoundTrigger.ModuleProperties getDspModuleProperties(in IVoiceInteractionService service);
+    /**
+     * Starts a recognition for the given keyphrase.
+     */
+    int startRecognition(in IVoiceInteractionService service, int keyphraseId,
+            in SoundTrigger.KeyphraseSoundModel soundModel, in IRecognitionStatusCallback callback,
+            in SoundTrigger.RecognitionConfig recognitionConfig);
+    /**
+     * Stops a recognition for the given keyphrase.
+     */
+    int stopRecognition(in IVoiceInteractionService service, int keyphraseId,
+            in IRecognitionStatusCallback callback);
 }

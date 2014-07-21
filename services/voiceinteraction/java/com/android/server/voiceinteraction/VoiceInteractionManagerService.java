@@ -24,7 +24,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.ContentObserver;
-import android.hardware.soundtrigger.KeyphraseSoundModel;
+import android.hardware.soundtrigger.IRecognitionStatusCallback;
+import android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel;
+import android.hardware.soundtrigger.SoundTrigger.ModuleProperties;
+import android.hardware.soundtrigger.SoundTrigger.RecognitionConfig;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -56,19 +59,17 @@ public class VoiceInteractionManagerService extends SystemService {
 
     static final String TAG = "VoiceInteractionManagerService";
 
-    // TODO: Add descriptive error codes.
-    public static final int STATUS_ERROR = -1;
-    public static final int STATUS_OK = 1;
-
     final Context mContext;
     final ContentResolver mResolver;
     final DatabaseHelper mDbHelper;
+    final SoundTriggerHelper mSoundTriggerHelper;
 
     public VoiceInteractionManagerService(Context context) {
         super(context);
         mContext = context;
         mResolver = context.getContentResolver();
         mDbHelper = new DatabaseHelper(context);
+        mSoundTriggerHelper = new SoundTriggerHelper();
     }
 
     @Override
@@ -239,6 +240,8 @@ public class VoiceInteractionManagerService extends SystemService {
             }
         }
 
+        //----------------- Model management APIs --------------------------------//
+
         @Override
         public List<KeyphraseSoundModel> listRegisteredKeyphraseSoundModels(
                 IVoiceInteractionService service) {
@@ -290,17 +293,79 @@ public class VoiceInteractionManagerService extends SystemService {
                     // If the keyphrases are not present in the model, delete the model.
                     if (model.keyphrases == null) {
                         if (mDbHelper.deleteKeyphraseSoundModel(model.uuid)) {
-                            return STATUS_OK;
+                            return SoundTriggerHelper.STATUS_OK;
                         } else {
-                            return STATUS_ERROR;
+                            return SoundTriggerHelper.STATUS_ERROR;
                         }
                     } else {
                         if (mDbHelper.addOrUpdateKeyphraseSoundModel(model)) {
-                            return STATUS_OK;
+                            return SoundTriggerHelper.STATUS_OK;
                         } else {
-                            return STATUS_ERROR;
+                            return SoundTriggerHelper.STATUS_ERROR;
                         }
                     }
+                } finally {
+                    Binder.restoreCallingIdentity(caller);
+                }
+            }
+        }
+
+        //----------------- SoundTrigger APIs --------------------------------//
+        @Override
+        public ModuleProperties getDspModuleProperties(IVoiceInteractionService service) {
+            // Allow the call if this is the current voice interaction service.
+            synchronized (this) {
+                if (mImpl == null || mImpl.mService == null
+                        || service == null || service.asBinder() != mImpl.mService.asBinder()) {
+                    throw new SecurityException(
+                            "Caller is not the current voice interaction service");
+                }
+
+                final long caller = Binder.clearCallingIdentity();
+                try {
+                    return mSoundTriggerHelper.moduleProperties;
+                } finally {
+                    Binder.restoreCallingIdentity(caller);
+                }
+            }
+        }
+
+        @Override
+        public int startRecognition(IVoiceInteractionService service, int keyphraseId,
+                KeyphraseSoundModel soundModel, IRecognitionStatusCallback callback,
+                RecognitionConfig recognitionConfig) {
+            // Allow the call if this is the current voice interaction service.
+            synchronized (this) {
+                if (mImpl == null || mImpl.mService == null
+                        || service == null || service.asBinder() != mImpl.mService.asBinder()) {
+                    throw new SecurityException(
+                            "Caller is not the current voice interaction service");
+                }
+
+                final long caller = Binder.clearCallingIdentity();
+                try {
+                    return mSoundTriggerHelper.startRecognition(
+                            keyphraseId, soundModel, callback, recognitionConfig);
+                } finally {
+                    Binder.restoreCallingIdentity(caller);
+                }
+            }
+        }
+
+        @Override
+        public int stopRecognition(IVoiceInteractionService service, int keyphraseId,
+                IRecognitionStatusCallback callback) {
+            // Allow the call if this is the current voice interaction service.
+            synchronized (this) {
+                if (mImpl == null || mImpl.mService == null
+                        || service == null || service.asBinder() != mImpl.mService.asBinder()) {
+                    throw new SecurityException(
+                            "Caller is not the current voice interaction service");
+                }
+
+                final long caller = Binder.clearCallingIdentity();
+                try {
+                    return mSoundTriggerHelper.stopRecognition(keyphraseId, callback);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
