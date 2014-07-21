@@ -558,7 +558,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
                 if (mPowerRequest.screenState == DisplayPowerRequest.SCREEN_STATE_DOZE) {
                     if (!mScreenBrightnessRampAnimator.isAnimating()) {
-                        setScreenState(Display.STATE_DOZING);
+                        setScreenState(Display.STATE_DOZE);
                     }
                 } else {
                     setScreenState(Display.STATE_ON);
