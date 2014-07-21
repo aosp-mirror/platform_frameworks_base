@@ -49,12 +49,6 @@ public class TelecommManager {
     public static final String ACTION_INCOMING_CALL = "android.intent.action.INCOMING_CALL";
 
     /**
-     * The service action used to bind to {@link android.telecomm.ConnectionService}
-     * implementations.
-     */
-    public static final String ACTION_CONNECTION_SERVICE = ConnectionService.class.getName();
-
-    /**
      * The {@link android.content.Intent} action used to configure a
      * {@link android.telecomm.ConnectionService}.
      */
