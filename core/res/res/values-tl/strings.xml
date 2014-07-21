@@ -294,10 +294,8 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Pinapayagan ang app na magsulat sa mga mensaheng SMS na nakaimbak sa iyong telepono o SIM card. Maaaring tanggalin ng nakakahamak na apps ang iyong mga mensahe."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"tumanggap ng mga text message (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Pinapayagan ang app na tumanggap at magproseso ng mga mensaheng WAP. Kabilang sa pahintulot na ito ang kakayahang sumubaybay o magtanggal ang app ng mga mensaheng ipinapadala sa iyo nang hindi ipinapakita ang mga ito sa iyo."</string>
-    <!-- no translation found for permlab_receiveBluetoothMap (7593811487142360528) -->
-    <skip />
-    <!-- no translation found for permdesc_receiveBluetoothMap (8656755936919466345) -->
-    <skip />
+    <string name="permlab_receiveBluetoothMap" msgid="7593811487142360528">"Tumanggap ng mga mensahe sa Bluetooth (MAP)"</string>
+    <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Pinapayagan ang app na makatanggap at makapagproseso ng mga mensahe ng Bluetooth MAP. Nangangahulugan ito na maaaring subaybayan o i-delete ng app ang mga mensaheng ipinapadala sa iyong device nang hindi ipinapakita ang mga ito sa iyo."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"bawiin ang tumatakbong apps"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Pinapayagan ang app na kumuha ng impormasyon tungkol sa mga kasalukuyan at kamakailang gumaganang gawain. Maaari nitong payagan ang app na tumuklas ng impormasyon tungkol sa kung aling mga application ang ginagamit sa device."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"makipag-ugnayan sa kabuuan ng mga user"</string>
@@ -506,7 +504,7 @@
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"gayahin ang mga pinagmumulan ng lokasyon para sa pagsusuri"</string>
     <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"Lumikha ng mga mock na pinagmulan ng lokasyon para sa pagsubok o mag-install ng bagong provider ng lokasyon. Pinapayagan nito ang app na i-override ang lokasyon at/o katayuan na ibinabalik ng iba pang mga pinagmulan ng lokasyon gaya ng GPS o mga provider ng lokasyon."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"i-access ang mga dagdag na command ng provider ng lokasyon"</string>
-    <string name="permdesc_accessLocationExtraCommands" msgid="5945166642335800763">"Pinapayagan ang app na mag-access ng mga dagdag na command ng provider ng lokasyon. Maaari nitong payagan ang app na gambalain ang pagpapatakbo ng GPS o ng iba pang mga pinagmulan ng lokasyon."</string>
+    <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Nagbibigay-daan sa app na mag-access ng mga karagdagang command ng provider ng lokasyon. Maaari nitong bigyang-daan ang app na gambalain ang pagpapatakbo ng GPS o ng iba pang mga pinagmulan ng lokasyon."</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"pahintulot na mag-install ng provider ng lokasyon"</string>
     <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"Lumikha ng mga mock na pinagmulan ng lokasyon o mag-install ng bagong provider ng lokasyon. Pinapayagan nito ang app na i-override ang lokasyon at/o katayuan na ibinabalik ng iba pang mga pinagmulan ng lokasyon gaya ng GPS o mga provider ng lokasyon."</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"tumpak na lokasyon (batay  sa GPS at network)"</string>
@@ -715,14 +713,14 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Pinapayagan ang app na pamahalaan ang mga patakaran ng network at ilarawan ang mga patakarang tukoy sa app."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"baguhin ang pagkukuwenta sa paggamit ng network"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Pinapayagan ang app na baguhin kung paano isinasaalang-alang ang paggamit ng network laban sa apps. Hindi para sa paggamit ng normal na apps."</string>
-    <string name="permlab_markNetworkSocket" msgid="3658527214914959749">"baguhin ang mga socket mark"</string>
-    <string name="permdesc_markNetworkSocket" msgid="7655568433696356578">"Nagbibigay-daan sa app na baguhin ang mga socket mark para sa pagruruta"</string>
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"i-access ang mga notification"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Pinapayagan ang app na kumuha, sumuri, at mag-clear ng mga notification, kabilang ang mga na-post ng iba pang apps."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"mapailalim sa isang serbisyo ng notification listener"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Nagbibigay-daan sa may-ari na mapailalim sa interface sa tuktok na antas ng isang serbisyo ng notification listener. Hindi dapat kailanganin para sa karaniwang apps kahit kailan."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"i-bind sa isang serbisyo sa pagbibigay ng kundisyon"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Nagbibigay-daan sa naghahawak na i-bind ang top-level na interface ng isang serbisyo sa pagbibigay ng kundisyon. Hindi kailanman dapat kailanganin ng mga normal na app."</string>
+    <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"mag-bind sa isang serbisyo ng media route"</string>
+    <string name="permdesc_bindMediaRouteService" msgid="6436655024972496687">"Nagbibigay-daan sa may-hawak na mag-bind sa top-level na interface ng isang serbisyo ng media route. Hindi kailanman dapat kailanganin ng mga normal na app."</string>
     <string name="permlab_bindDreamService" msgid="4153646965978563462">"sumailalim sa isang serbisyo ng dream"</string>
     <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Pinapayagan ang may-ari na sumailalim sa interface ng serbisyo ng dream na nasa nangungunang antas. Hindi kailanman dapat na kailanganin para sa mga normal na app."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"paganahin ang app ng configuration na ibinigay ng carrier"</string>
@@ -733,8 +731,8 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Pinapayagan ang app na baguhin ang mga parameter sa pag-calibrate ng touch screen. Hindi dapat kailanganin sa normal na apps."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"access sa Mga DRM certificate"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Nagbibigay-daan sa isang application na makapagbigay at gumamit ng mga DRM certficate. Hindi dapat kailanman kailanganin para sa mga normal na app."</string>
-    <string name="permlab_handoverStatus" msgid="4558616203830448763">"Makatanggap ng mga broadcast ng paglilipat ng handover."</string>
-    <string name="permdesc_handoverStatus" msgid="5738446261941364055">"Pinapayagan ang pagtanggap ng impormasyon sa status ng paglilipat ng handover."</string>
+    <string name="permlab_handoverStatus" msgid="1159132046126626731">"Tanggapin ang status ng paglilipat ng Android Beam"</string>
+    <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Pinapayagan ang application na ito na tumanggap ng impormasyon tungkol sa mga kasalukuyang paglilipat ng Android Beam"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Magtakda ng mga panuntunan sa password"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Kontrolin ang haba at mga character na pinapayagan sa mga password sa pag-unlock ng screen."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Subaybayan ang mga pagsubok sa pag-unlock ng screen"</string>
@@ -1008,8 +1006,8 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Pinapayagan ang app na baguhin ang kasaysayan o mga bookmark ng Browser na naka-imbak sa iyong telepono. Maaari nitong payagan ang app na burahin o baguhin ang data ng Browser. Tandaan: hindi maaaring ipatupad ang pahintulot na ito ng mga third-party na browser o iba pang mga application na may mga kakayahan sa pagba-browse sa web."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"magtakda ng alarm"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Pinapayagan ang app na magtakda ng alarm sa isang naka-install na app ng alarm clock. Maaaring hindi ipatupad ng ilang apps ng alarm clock ang tampok na ito."</string>
-    <string name="permlab_removeVoicemail" msgid="6328485960478155867">"alisin ang mga voicemail"</string>
-    <string name="permdesc_removeVoicemail" msgid="8113704917331103065">"Pinapayagan ang app na mag-alis ng mga mensahe mula sa iyong inbox ng voicemail."</string>
+    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"pamahalaan ang mga voicemail"</string>
+    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"Pinapayagan ang app na magbago at mag-alis ng mga mensahe mula sa iyong inbox ng voicemail."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"magdagdag ng voicemail"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Pinapayagan ang app na magdagdag ng mga mensahe sa iyong inbox ng voicemail."</string>
     <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"basahin ang lahat ng voicemail"</string>
@@ -1181,6 +1179,13 @@
     <string name="capital_on" msgid="1544682755514494298">"I-ON"</string>
     <string name="capital_off" msgid="6815870386972805832">"I-OFF"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Kumpletuhin ang pagkilos gamit ang"</string>
+    <string name="whichApplicationNamed" msgid="8260158865936942783">"Tapusin ang pagkilos gamit ang %1$s"</string>
+    <string name="whichViewApplication" msgid="3272778576700572102">"Buksan gamit ang"</string>
+    <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Buksan gamit ang %1$s"</string>
+    <string name="whichEditApplication" msgid="144727838241402655">"I-edit gamit ang"</string>
+    <string name="whichEditApplicationNamed" msgid="1775815530156447790">"I-edit gamit ang %1$s"</string>
+    <string name="whichSendApplication" msgid="6902512414057341668">"Ibahagi gamit ang"</string>
+    <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Ibahagi gamit ang %1$s"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"Pumili ng home app"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Gamitin bilang default para sa pagkilos na ito."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"I-clear ang default sa mga setting ng System &gt; Apps &gt; Na-download."</string>
@@ -1283,10 +1288,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Palaging Payagan"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Huwag kailanman Payagan"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"Naalis ang SIM card"</string>
-    <string name="sim_removed_message" msgid="2333164559970958645">"Hindi magiging available ang mobile network hanggang mag-restart ka gamit ang isang may-bisang SIM card"</string>
+    <string name="sim_removed_message" msgid="5450336489923274918">"Magiging unavailable ang cellular network hanggang mag-restart ka nang may nakalagay na wastong SIM card."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Tapos na"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"Idinagdag ang SIM card"</string>
-    <string name="sim_added_message" msgid="6599945301141050216">"I-restart ang iyong device upang ma-access ang mobile network."</string>
+    <string name="sim_added_message" msgid="7797975656153714319">"I-restart ang iyong device upang ma-access ang cellular network."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"I-restart"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Magtakda ng oras"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Itakda ang petsa"</string>
@@ -1381,6 +1386,8 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Pinapayagan ang isang application na sumailalim sa isang serbisyo ng trust agent."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Makipag-ugnay sa system ng pag-update at pagbawi"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Binibigyang-daan ang isang application na makipag-ugnay sa system ng pagbawi at mga pag-update ng system."</string>
+    <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Gumawa ng mga media projection session"</string>
+    <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"Nagbibigay-daan sa isang application upang gumawa ng mga media projection session. Makakapagbigay ang mga session na ito ng kakayahan sa mga application na ma-capture ang mga nilalaman ng display at audio. Hindi kailanman dapat kailanganin ng mga normal na app."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Pindutin nang dalawang beses para sa pagkontrol ng zoom"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Hindi maidagdag ang widget."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Pumunta"</string>
@@ -1425,10 +1432,6 @@
     <string name="back_button_label" msgid="2300470004503343439">"Bumalik"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Susunod"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"Laktawan"</string>
-    <string name="throttle_warning_notification_title" msgid="4890894267454867276">"Mataas na paggamit ng data ng mobile"</string>
-    <string name="throttle_warning_notification_message" msgid="3340822228599337743">"Pindutin upang matuto nang higit pa tungkol sa paggamit ng mobile data."</string>
-    <string name="throttled_notification_title" msgid="6269541897729781332">"Lumagpas na sa limitasyon ng data ng mobile"</string>
-    <string name="throttled_notification_message" msgid="5443457321354907181">"Pindutin upang matuto nang higit pa tungkol sa paggamit ng mobile data."</string>
     <string name="no_matches" msgid="8129421908915840737">"Walang mga tugma"</string>
     <string name="find_on_page" msgid="1946799233822820384">"Maghanap sa pahina"</string>
   <plurals name="matches_found">
@@ -1509,14 +1512,14 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"I-edit"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Babala sa paggamit ng data"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"Pindutin upang tingnan ang paggamit at mga setting."</string>
-    <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"Di pinagana ang data ng 2G-3G"</string>
-    <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"Di pinagana ang data ng 4G"</string>
-    <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Di pinagana ang data ng mobile"</string>
-    <string name="data_usage_wifi_limit_title" msgid="8992154736441284865">"Hindi pinagana ang data ng Wi-Fi"</string>
-    <string name="data_usage_limit_body" msgid="3317964706973601386">"Pindutin upang paganahin."</string>
+    <string name="data_usage_3g_limit_title" msgid="4462365924791862301">"Naka-off ang 2G-3G data"</string>
+    <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"Naka-off ang 4G data"</string>
+    <string name="data_usage_mobile_limit_title" msgid="3393439305227911006">"Naka-off ang cellular data"</string>
+    <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"Naka-off ang Wi-Fi data"</string>
+    <string name="data_usage_limit_body" msgid="6131350187562939365">"Naabot na ang limitasyon"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"lumampas sa 2G-3G na limitasyon ng data"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Lumampas sa 4G na limitasyon ng data"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Lumampas sa limitasyon ng data sa mobile"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Lampas na sa cellular data limit"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Lumampas sa limitasyon ng data ng Wi-Fi"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"Lampas ng <xliff:g id="SIZE">%s</xliff:g> sa tinukoy na limitasyon."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Pinaghihigpitan ang data ng background"</string>
@@ -1737,10 +1740,16 @@
     <string name="item_is_selected" msgid="949687401682476608">"Napili ang <xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"Tinanggal ang <xliff:g id="KEY">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> sa Trabaho"</string>
+    <string name="lock_to_app_toast" msgid="2126866321272822564">"Ikaw ay nasa lock-to-app mode. Upang lumabas, pindutin nang matagal ang button na Mga Kamakailang Ginamit."</string>
+    <string name="lock_to_app_toast_locked" msgid="4229650395479263497">"Ikaw ay nasa Lock-to-App mode."</string>
     <string name="lock_to_app_title" msgid="5895142291937470019">"Gagamitin ang lock-to-app?"</string>
-    <string name="lock_to_app_description" msgid="8597199033462406175">"Nila-lock ng Lock-to-app ang display sa iisang app.\n\nUpang lumabas pindutin nang matagal ang button ng mga kamakailang app $"</string>
-    <string name="lock_to_app_negative" msgid="8522854387366288195">"HINDI"</string>
+    <string name="lock_to_app_description" msgid="2800403592608529611">"Nila-lock ng lock-to-app ang display sa iisang app.\n\nUpang lumabas, pindutin nang matagal ang button na Mga Kamakailang Ginamit."</string>
+    <string name="lock_to_app_negative" msgid="2259143719362732728">"HINDI, SALAMAT NA LANG"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"SIMULAN"</string>
-    <string name="lock_to_app_start" msgid="8889002974248178076">"Simulan ang Lock-to-app"</string>
-    <string name="lock_to_app_exit" msgid="7033017307788432861">"Lumabas sa Lock-to-app"</string>
+    <string name="lock_to_app_start" msgid="3074665051586318340">"Naka-lock sa app"</string>
+    <string name="lock_to_app_exit" msgid="8967089657201849300">"Hindi na naka-lock sa app"</string>
+    <string name="lock_to_app_use_screen_lock" msgid="1434584309048590886">"Humingi ng %1$s bago lumabas"</string>
+    <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"pattern sa pag-unlock"</string>
+    <string name="lock_to_app_unlock_password" msgid="795224196583495868">"password"</string>
 </resources>

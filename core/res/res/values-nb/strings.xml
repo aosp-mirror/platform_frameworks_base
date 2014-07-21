@@ -294,10 +294,8 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Lar appen skrive til SMS-meldinger som er lagret på telefonen eller SIM-kortet ditt. Ondsinnede apper kan komme til å slette meldingene dine."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"motta tekstmeldinger (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Lar appen motta og behandle WAP-meldinger. Dette betyr at appen kan overvåke eller slette meldinger som er sendt til deg uten at du har sett dem."</string>
-    <!-- no translation found for permlab_receiveBluetoothMap (7593811487142360528) -->
-    <skip />
-    <!-- no translation found for permdesc_receiveBluetoothMap (8656755936919466345) -->
-    <skip />
+    <string name="permlab_receiveBluetoothMap" msgid="7593811487142360528">"motta Bluetooth-meldinger (MAP)"</string>
+    <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Appen gis tillatelse til å motta og behandle Bluetooth MAP-meldinger. Dette betyr at appen kan overvåke eller slette meldinger som er sendt til enheten din, uten at du får se dem."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"hente apper som kjører"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Lar appen hente informasjon om oppgaver som kjører og som nylig har kjørt. Dette kan tillate appen å oppdage informasjon om hvilke apper som brukes på enheten."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"samhandling på tvers av brukere"</string>
@@ -506,7 +504,7 @@
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"lage simulerte posisjonskilder for testing"</string>
     <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"Opprette fiktive posisjonskilder for testing eller installere en ny posisjonsangiver. Dette gjør at appen kan overstyre posisjonen eller statusen som rapporteres av ekte posisjonskilder, som for eksempel GPS eller posisjonsangivere."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"bruke ekstra posisjonskommandoer"</string>
-    <string name="permdesc_accessLocationExtraCommands" msgid="5945166642335800763">"Lar appen få tilgang til flere kommandoer fra posisjonsangivere. Dette kan gjøre at appen forstyrrer GPS-funksjonen eller andre posisjonskilder."</string>
+    <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Appen gis tillatelse til å bruke ekstra kommandoer fra posisjonsleverandører. Dette kan gi appen tillatelse til å påvirke bruken av GPS eller andre posisjonskilder."</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"installere posisjonskilder"</string>
     <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"Opprette fiktive posisjonskilder for testing eller installere en ny posisjonsangiver. Dette gjør at appen kan overstyre posisjonen eller statusen som rapporteres av ekte posisjonskilder, som for eksempel GPS eller posisjonsangivere."</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"presis posisjon (GPS- og nettverksbasert)"</string>
@@ -715,14 +713,14 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Lar appen administrere retningslinjene for nettverket og definere appspesifikke regler."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"Modifisering av regnskapsføring av nettverksbruk"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Lar appen endre hvordan nettverksbruk regnes ut for apper. Ikke beregnet på vanlige apper."</string>
-    <string name="permlab_markNetworkSocket" msgid="3658527214914959749">"endring av kontaktmerker"</string>
-    <string name="permdesc_markNetworkSocket" msgid="7655568433696356578">"Gir appen tillatelse til å endre kontaktmerker for ruting"</string>
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"tilgang til varsler"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Lar appen hente, gjennomgå og fjerne varsler, inkludert de som sendes fra andre apper."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"binding til en varsellyttertjeneste"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Lar innehaveren binde seg til det øverste grensesnittnivået for en varsellyttertjeneste. Skal aldri være nødvendig for vanlige apper."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"binde seg til en leverandørtjeneste for betingelser"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Gir innehaveren tillatelse til å binde til toppnivået av brukergrensesnittet for en leverandørtjeneste for betingelser. Dette skal ikke være nødvendig for vanlige apper."</string>
+    <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"binde seg til en mediarutingstjeneste"</string>
+    <string name="permdesc_bindMediaRouteService" msgid="6436655024972496687">"Gir innehaveren tillatelse til å binde til øverste nivå av grensesnittet for en tjeneste som bruker mediaruting. Dette skal ikke være nødvendig for vanlige apper."</string>
     <string name="permlab_bindDreamService" msgid="4153646965978563462">"binde til en drømmetjeneste"</string>
     <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Tillater eieren å binde seg til det øverste nivået av grensesnittet til en drømmetjeneste. Kreves aldri for vanlige apper."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"starte konfigurasjonsappen som ble levert av operatøren"</string>
@@ -733,8 +731,8 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Lar appen endre kalibrasjonsparametrene for berøringsskjermen. Denne tillatelsen bør aldri være nødvendig for vanlige apper."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"tilgang til DRM-sertifikater"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Tillater at en app klargjøre og bruke DRM-sertifikater. Denne tillatelsen bør aldri være nødvendig for vanlige apper."</string>
-    <string name="permlab_handoverStatus" msgid="4558616203830448763">"motta kunngjøringer om kringkastninger."</string>
-    <string name="permdesc_handoverStatus" msgid="5738446261941364055">"Gjør det mulig å motta statusinformasjon om overføring."</string>
+    <string name="permlab_handoverStatus" msgid="1159132046126626731">"Motta overføringsstatus for Android Beam"</string>
+    <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Lar appen motta informasjon om aktuelle Android Beam-overføringer"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Angi passordregler"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Kontroller tillatt lengde og tillatte tegn i passord for opplåsing av skjerm."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Overvåk forsøk på opplåsing av skjerm"</string>
@@ -1008,8 +1006,8 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Lar appen endre nettleserens logg eller bokmerker lagret på telefonen din. Dette kan føre til at appen sletter eller endrer nettleserdata. Vær oppmerksom på at denne tillatelsen kanskje ikke benyttes av tredjepartsnettlesere eller andre apper med mulighet for nettsurfing."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"stille alarm"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Lar appen stille inn alarmen for en installert alarmklokke-app. Enkelte alarmklokke-apper implementerer kanskje ikke denne funksjonen."</string>
-    <string name="permlab_removeVoicemail" msgid="6328485960478155867">"fjerne talepostmeldinger"</string>
-    <string name="permdesc_removeVoicemail" msgid="8113704917331103065">"Appen kan fjerne meldinger fra talepostkassen."</string>
+    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"administrere talepostkassen"</string>
+    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"Lar appen endre og fjerne meldinger fra talepostkassen."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"legge til talepost"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Lar appen legge til meldinger i talepostkassen din."</string>
     <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"lese alle meldingene i talepostkassen"</string>
@@ -1181,6 +1179,13 @@
     <string name="capital_on" msgid="1544682755514494298">"På"</string>
     <string name="capital_off" msgid="6815870386972805832">"Av"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Fullfør med"</string>
+    <string name="whichApplicationNamed" msgid="8260158865936942783">"Fullfør handlingen med %1$s"</string>
+    <string name="whichViewApplication" msgid="3272778576700572102">"Åpne med"</string>
+    <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Åpne med %1$s"</string>
+    <string name="whichEditApplication" msgid="144727838241402655">"Rediger med"</string>
+    <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Rediger med %1$s"</string>
+    <string name="whichSendApplication" msgid="6902512414057341668">"Del med"</string>
+    <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Del med %1$s"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"Velg en startside-app"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Bruk som standardvalg."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Fjern app angitt som standard i systeminnstillingene &gt; Apper &gt; Nedlastet."</string>
@@ -1283,10 +1288,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Alltid tillat"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Aldri tillat"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM-kort er fjernet"</string>
-    <string name="sim_removed_message" msgid="2333164559970958645">"Det mobile nettverket forblir utilgjengelig inntil du starter på nytt med et gyldig SIM-kort."</string>
+    <string name="sim_removed_message" msgid="5450336489923274918">"Mobilnettverket er utilgjengelig til du starter på nytt med et gyldig SIM-kort."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Ferdig"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIM-kort er lagt til"</string>
-    <string name="sim_added_message" msgid="6599945301141050216">"Start enheten på nytt for å få tilgang til det mobile nettverket."</string>
+    <string name="sim_added_message" msgid="7797975656153714319">"Start enheten på nytt for å få tilgang til mobilnettverket."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Start på nytt"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Stille klokken"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Angi dato"</string>
@@ -1381,6 +1386,8 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Gir appen tillatelse til å knyttes til en tillitsagent-tjeneste."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Samhandling med oppdateringer og gjenopprettingssystem"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Tillater en app å samhandle med gjenopprettingsssystemet og systemoppdateringer."</string>
+    <string name="permlab_createMediaProjection" msgid="4941338725487978112">"opprette økter for mediaprojisering"</string>
+    <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"Tillater at en app oppretter økter for mediaprojisering. Disse øktene kan la appene ta opp skjerm- og lydinnhold. Skal aldri være nødvendig for normale apper."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Trykk to ganger for zoomkontroll"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Kunne ikke legge til modulen."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Utfør"</string>
@@ -1425,10 +1432,6 @@
     <string name="back_button_label" msgid="2300470004503343439">"Tilbake"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Neste"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"Hopp over"</string>
-    <string name="throttle_warning_notification_title" msgid="4890894267454867276">"Høy mobildatabruk"</string>
-    <string name="throttle_warning_notification_message" msgid="3340822228599337743">"Trykk for å lese mer om bruk av mobildata."</string>
-    <string name="throttled_notification_title" msgid="6269541897729781332">"Grensen for mobildatabruk er overskredet"</string>
-    <string name="throttled_notification_message" msgid="5443457321354907181">"Trykk for å lese mer om bruk av mobildata."</string>
     <string name="no_matches" msgid="8129421908915840737">"Ingen treff"</string>
     <string name="find_on_page" msgid="1946799233822820384">"Finn på side"</string>
   <plurals name="matches_found">
@@ -1509,14 +1512,14 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Rediger"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Advarsel for høyt dataforbruk"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"Trykk for å se bruk og innst."</string>
-    <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"2G–3G-data er deaktivert"</string>
-    <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"4G-data er deaktivert"</string>
-    <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Mobildata er deaktivert"</string>
-    <string name="data_usage_wifi_limit_title" msgid="8992154736441284865">"Wi-Fi-data deaktivert"</string>
-    <string name="data_usage_limit_body" msgid="3317964706973601386">"Trykk for å aktivere."</string>
+    <string name="data_usage_3g_limit_title" msgid="4462365924791862301">"2G- og 3G-data er slått av"</string>
+    <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"4G-datatrafikk er slått av"</string>
+    <string name="data_usage_mobile_limit_title" msgid="3393439305227911006">"Mobildatatrafikk er slått av"</string>
+    <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"Wi-Fi-datatrafikk er slått av"</string>
+    <string name="data_usage_limit_body" msgid="6131350187562939365">"Grensen er nådd"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Grense på 2G-3G data overskredet"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Grensen på 4G data er overskredet"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Grensen for mobildatabruk er overskredet"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Mobildatagrensen er overskredet"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Wi-Fi-datagrense overskredet"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> over angitt grense."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Bakgrunnsdata er begrenset"</string>
@@ -1737,10 +1740,16 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> er valgt"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> er slettet"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Jobb-<xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="lock_to_app_toast" msgid="2126866321272822564">"Du er i lås-til-appen-modus. For å avslutte, trykker og holder du på Sist brukt-knappen"</string>
+    <string name="lock_to_app_toast_locked" msgid="4229650395479263497">"Lås til app-modusen er aktivert."</string>
     <string name="lock_to_app_title" msgid="5895142291937470019">"Vil du bruke lås-til-app?"</string>
-    <string name="lock_to_app_description" msgid="8597199033462406175">"Lås-til-app låser skjermen i en enkelt app.\n\nFor å avslutte trykker du på og holder nede nylige apper-knappen $"</string>
-    <string name="lock_to_app_negative" msgid="8522854387366288195">"NEI"</string>
+    <string name="lock_to_app_description" msgid="2800403592608529611">"Lås-til-appen låser skjermen i en enkelt app.\n\nFor å avslutte, trykker og holder du på Sist brukt-knappen."</string>
+    <string name="lock_to_app_negative" msgid="2259143719362732728">"NEI, TAKK"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"START"</string>
-    <string name="lock_to_app_start" msgid="8889002974248178076">"Start lås-til-app"</string>
-    <string name="lock_to_app_exit" msgid="7033017307788432861">"Avslutt lås-til-app"</string>
+    <string name="lock_to_app_start" msgid="3074665051586318340">"Låst til appen"</string>
+    <string name="lock_to_app_exit" msgid="8967089657201849300">"Ikke lenger låst til app"</string>
+    <string name="lock_to_app_use_screen_lock" msgid="1434584309048590886">"Spør etter %1$s før du avslutter"</string>
+    <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN-kode"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"opplåsingsmønster"</string>
+    <string name="lock_to_app_unlock_password" msgid="795224196583495868">"passord"</string>
 </resources>

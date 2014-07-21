@@ -294,10 +294,8 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"携帯端末やSIMカードに保存されているSMSメッセージへの書き込みをアプリに許可します。この許可を悪意のあるアプリに利用されると、メッセージが削除される恐れがあります。"</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"テキストメッセージ（WAP）の受信"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"WAPメッセージの受信と処理をアプリに許可します。これにより、アプリが端末に届いたメッセージを表示することなく監視または削除できるようになります。"</string>
-    <!-- no translation found for permlab_receiveBluetoothMap (7593811487142360528) -->
-    <skip />
-    <!-- no translation found for permdesc_receiveBluetoothMap (8656755936919466345) -->
-    <skip />
+    <string name="permlab_receiveBluetoothMap" msgid="7593811487142360528">"Bluetoothメッセージの受信（MAP）"</string>
+    <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Bluetooth MAPメッセージの受信と処理をアプリに許可します。これにより、端末に届いたメッセージをアプリが表示することなく監視または削除するおそれがあります。"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"実行中のアプリの取得"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"現在実行中または最近実行したタスクに関する情報の取得をアプリに許可します。これにより、その端末でどのアプリを使用しているかをアプリから識別できるようになる可能性があります。"</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"ユーザー間の交流"</string>
@@ -506,7 +504,7 @@
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"仮の位置情報でテスト"</string>
     <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"テスト用に仮の位置情報源を作成するか、新しい位置情報提供元をインストールします。これにより、他の位置情報源（GPS、位置情報提供元など）から返された位置情報やステータスの上書きをアプリに許可することになります。"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"位置情報提供者の追加コマンドアクセス"</string>
-    <string name="permdesc_accessLocationExtraCommands" msgid="5945166642335800763">"位置情報提供元の追加のコマンドにアクセスすることをアプリに許可します。許可すると、アプリがGPSなどの位置情報源の動作を妨害する恐れがあります。"</string>
+    <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"位置情報提供元の追加のコマンドにアクセスすることをアプリに許可します。許可すると、アプリがGPSなどの位置情報源の動作を妨害する恐れがあります。"</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"位置情報提供元のインストールを許可する"</string>
     <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"テスト用に仮の位置情報源を作成するか、新しい位置情報提供元をインストールします。これにより、他の位置情報源（GPS、位置情報提供元など）から返された位置情報やステータスをアプリが上書きできるようになる可能性があります。"</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"正確な位置情報（GPSとネットワーク基地局）"</string>
@@ -715,14 +713,14 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"ネットワークポリシーを管理しアプリ固有のルールを定義することをアプリに許可します。"</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"ネットワークの課金の変更"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"アプリに対するネットワーク利用の計算方法を変更することをアプリに許可します。通常のアプリでは使用しません。"</string>
-    <string name="permlab_markNetworkSocket" msgid="3658527214914959749">"ソケットマークの変更"</string>
-    <string name="permdesc_markNetworkSocket" msgid="7655568433696356578">"ルーティングのソケットマークを変更することをアプリに許可します。"</string>
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"通知にアクセス"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"通知（他のアプリから投稿されたものも含む）を取得、調査、クリアすることをアプリに許可します。"</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"通知リスナーサービスにバインド"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"通知リスナーサービスのトップレベルインターフェースにバインドすることを所有者に許可します。通常のアプリでは不要です。"</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"コンディションプロバイダサービスへのバインド"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"コンディションプロバイダサービスのトップレベルインターフェースにバインドすることを所有者に許可します。通常のアプリでは不要です。"</string>
+    <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"メディアルートサービスへのバインド"</string>
+    <string name="permdesc_bindMediaRouteService" msgid="6436655024972496687">"メディアルートサービスのトップレベルインターフェースにバインドすることを所有者に許可します。通常のアプリでは不要です。"</string>
     <string name="permlab_bindDreamService" msgid="4153646965978563462">"ドリームサービスにバインド"</string>
     <string name="permdesc_bindDreamService" msgid="7325825272223347863">"ドリームサービスのトップレベルインターフェースにバインドすることを所有者に許可します。通常のアプリでは不要です。"</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"携帯通信会社が提供する設定アプリの呼び出し"</string>
@@ -733,8 +731,8 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"タッチスクリーンの調整パラメータの変更をアプリに許可します。通常のアプリでは必要ありません。"</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"DRM証明書へのアクセス権"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"DRM証明書のプロビジョニングと使用をアプリに許可します。通常のアプリでは不要です。"</string>
-    <string name="permlab_handoverStatus" msgid="4558616203830448763">"ハンドオーバー転送ブロードキャストの受信"</string>
-    <string name="permdesc_handoverStatus" msgid="5738446261941364055">"ハンドオーバー転送ステータス情報を受信できるようにします。"</string>
+    <string name="permlab_handoverStatus" msgid="1159132046126626731">"Androidビーム転送のステータスを受信"</string>
+    <string name="permdesc_handoverStatus" msgid="4788144087245714948">"現在のAndroidビーム転送に関する情報を受信することをこのアプリに許可します。"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"パスワードルールの設定"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"画面ロック解除パスワードの長さと使用できる文字を制御します。"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"画面ロック解除試行の監視"</string>
@@ -1008,8 +1006,8 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"携帯端末に保存されているブラウザの履歴やブックマークの変更をアプリに許可します。これにより、アプリがブラウザデータを消去または変更できるようになる可能性があります。注: この許可は、サードパーティブラウザまたはウェブブラウジング機能を備えたその他のアプリでは適用されない場合があります。"</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"アラームの設定"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"インストール済みアラームアプリのアラームを設定することをアプリに許可します。この機能が実装されていないアラームアプリもあります。"</string>
-    <string name="permlab_removeVoicemail" msgid="6328485960478155867">"ボイスメールの削除"</string>
-    <string name="permdesc_removeVoicemail" msgid="8113704917331103065">"ボイスメール受信トレイからメッセージを削除することをアプリに許可します。"</string>
+    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"ボイスメールの管理"</string>
+    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"ボイスメール受信トレイからメッセージを修正、削除することをアプリに許可します。"</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"ボイスメールの追加"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"ボイスメール受信トレイにメッセージを追加することをアプリに許可します｡"</string>
     <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"すべてのボイスメールの読み取り"</string>
@@ -1181,6 +1179,13 @@
     <string name="capital_on" msgid="1544682755514494298">"ON"</string>
     <string name="capital_off" msgid="6815870386972805832">"OFF"</string>
     <string name="whichApplication" msgid="4533185947064773386">"アプリケーションを選択"</string>
+    <string name="whichApplicationNamed" msgid="8260158865936942783">"%1$sを使用してアクションを完了"</string>
+    <string name="whichViewApplication" msgid="3272778576700572102">"アプリで開く"</string>
+    <string name="whichViewApplicationNamed" msgid="2286418824011249620">"%1$sで開く"</string>
+    <string name="whichEditApplication" msgid="144727838241402655">"編集に使用"</string>
+    <string name="whichEditApplicationNamed" msgid="1775815530156447790">"%1$sで編集"</string>
+    <string name="whichSendApplication" msgid="6902512414057341668">"共有"</string>
+    <string name="whichSendApplicationNamed" msgid="2799370240005424391">"%1$sで共有"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"ホームアプリを選択"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"常にこの操作で使用する"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"[システム設定]&gt;[アプリ]&gt;[ダウンロード済み]でデフォルト設定をクリアします。"</string>
@@ -1283,10 +1288,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"常に許可する"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"許可しない"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIMカードが取り外されました"</string>
-    <string name="sim_removed_message" msgid="2333164559970958645">"有効なSIMカードを挿入して再起動するまでは、モバイルネットワークは利用できません。"</string>
+    <string name="sim_removed_message" msgid="5450336489923274918">"有効なSIMカードを挿入して再起動するまでは、モバイルネットワークは利用できません。"</string>
     <string name="sim_done_button" msgid="827949989369963775">"完了"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIMカードが追加されました"</string>
-    <string name="sim_added_message" msgid="6599945301141050216">"モバイルネットワークにアクセスするには端末を再起動してください。"</string>
+    <string name="sim_added_message" msgid="7797975656153714319">"モバイルネットワークにアクセスするには端末を再起動してください。"</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"再起動"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"時刻設定"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"日付設定"</string>
@@ -1381,6 +1386,8 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"信頼できるエージェントサービスにバインドすることをアプリに許可します。"</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"アップデートと回復システムへのアクセス"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"回復システムとシステムアップデートへのアクセスをアプリに許可します。"</string>
+    <string name="permlab_createMediaProjection" msgid="4941338725487978112">"メディアプロジェクションセッションの作成"</string>
+    <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"メディアプロジェクションセッションの作成をアプリに許可します。これらのセッションでは、アプリがディスプレイ/オーディオコンテンツをキャプチャできます。通常のアプリでは不要です。"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"ダブルタップでズームコントロール"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"ウィジェットを追加できませんでした。"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"移動"</string>
@@ -1425,10 +1432,6 @@
     <string name="back_button_label" msgid="2300470004503343439">"戻る"</string>
     <string name="next_button_label" msgid="1080555104677992408">"次へ"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"スキップ"</string>
-    <string name="throttle_warning_notification_title" msgid="4890894267454867276">"モバイルデータの使用量が増えています"</string>
-    <string name="throttle_warning_notification_message" msgid="3340822228599337743">"タップしてモバイルデータ利用の詳細を表示します。"</string>
-    <string name="throttled_notification_title" msgid="6269541897729781332">"モバイルデータの制限を超えました"</string>
-    <string name="throttled_notification_message" msgid="5443457321354907181">"タップしてモバイルデータ利用の詳細を表示します。"</string>
     <string name="no_matches" msgid="8129421908915840737">"該当なし"</string>
     <string name="find_on_page" msgid="1946799233822820384">"ページ内を検索"</string>
   <plurals name="matches_found">
@@ -1509,14 +1512,14 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"編集"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"データ使用の警告"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"タップして使用状況と設定を表示します。"</string>
-    <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"2G～3Gデータが無効になりました"</string>
-    <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"4Gデータが無効になりました"</string>
-    <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"モバイルデータが無効になりました"</string>
-    <string name="data_usage_wifi_limit_title" msgid="8992154736441284865">"Wi-Fiデータが無効になりました"</string>
-    <string name="data_usage_limit_body" msgid="3317964706973601386">"タップして有効にします。"</string>
+    <string name="data_usage_3g_limit_title" msgid="4462365924791862301">"2G～3Gデータが無効になりました"</string>
+    <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"4Gデータが無効になりました"</string>
+    <string name="data_usage_mobile_limit_title" msgid="3393439305227911006">"モバイルデータが無効になりました"</string>
+    <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"Wi-Fiデータが無効になりました"</string>
+    <string name="data_usage_limit_body" msgid="6131350187562939365">"上限に達しました"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G～3Gデータの上限を超えました"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4Gデータの上限を超えました"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"モバイルデータの上限を超えました"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"モバイルデータの上限を超えました"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Wi-Fiデータの上限を超えました"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"指定した上限を<xliff:g id="SIZE">%s</xliff:g>超えました。"</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"バックグラウンドデータに上限あり"</string>
@@ -1737,10 +1740,16 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g>を選択しました"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g>を削除しました"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"仕事の<xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="lock_to_app_toast" msgid="2126866321272822564">"アプリロックモードです。終了するには、[最近]ボタンを押し続けます。"</string>
+    <string name="lock_to_app_toast_locked" msgid="4229650395479263497">"現在アプリロックモードです。"</string>
     <string name="lock_to_app_title" msgid="5895142291937470019">"アプリロックの使用"</string>
-    <string name="lock_to_app_description" msgid="8597199033462406175">"アプリロックでは表示を単一のアプリにロックします。\n\n終了するには[最近使ったアプリ]ボタン（$）を押し続けます"</string>
-    <string name="lock_to_app_negative" msgid="8522854387366288195">"開始しない"</string>
+    <string name="lock_to_app_description" msgid="2800403592608529611">"アプリロックでは表示を単一のアプリにロックします。\n\n終了するには、[最近]ボタンを押し続けます。"</string>
+    <string name="lock_to_app_negative" msgid="2259143719362732728">"いいえ"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"開始する"</string>
-    <string name="lock_to_app_start" msgid="8889002974248178076">"アプリロックを開始"</string>
-    <string name="lock_to_app_exit" msgid="7033017307788432861">"アプリロックを終了"</string>
+    <string name="lock_to_app_start" msgid="3074665051586318340">"アプリにロックされています"</string>
+    <string name="lock_to_app_exit" msgid="8967089657201849300">"アプリにロックされていません"</string>
+    <string name="lock_to_app_use_screen_lock" msgid="1434584309048590886">"終了する前に%1$sを求める"</string>
+    <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"ロック解除パターン"</string>
+    <string name="lock_to_app_unlock_password" msgid="795224196583495868">"パスワード"</string>
 </resources>

@@ -504,7 +504,7 @@
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"imitoi sijaintilähteitä testaustarkoituksissa"</string>
     <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"Luo imitoituja sijaintilähteitä testaustarkoituksessa tai asenna uusi sijaintipalvelu. Sovellus voi ohittaa muiden sijaintilähteiden kuten GPS:n ja sijaintipalveluiden palauttaman sijainnin ja/tai tilan."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"käytä lisää sijainnintarjoajakomentoja"</string>
-    <string name="permdesc_accessLocationExtraCommands" msgid="5945166642335800763">"Antaa sovelluksen käyttää ylimääräisiä sijaintipalvelukomentoja. Sovellus voi käyttää tätä GPS:n tai muun sijaintilähteen toiminnan häiritsemiseen."</string>
+    <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Antaa sovelluksen käyttää ylimääräisiä sijaintipalvelukomentoja. Sovellus saattaa tällöin häiritä GPS:n tai muiden sijaintilähteiden toimintaa."</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"asenna sijainnintarjoaja"</string>
     <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"Luo imitoituja sijaintilähteitä testaustarkoituksessa tai asenna uusi sijaintipalvelu. Sovellus voi ohittaa muiden sijaintilähteiden kuten GPS:n ja sijaintipalveluiden palauttaman sijainnin ja/tai tilan."</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"tarkka sijainti (GPS- ja verkkopohjainen)"</string>
@@ -713,14 +713,14 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Sallii sovelluksen hallinnoida verkkokäytäntöjä ja määritellä sovelluskohtaisia sääntöjä."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"verkon käytön seurannan muokkaaminen"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Antaa sovelluksen muokata, miten sovellusten verkonkäyttöä lasketaan. Ei tavallisten sovellusten käyttöön."</string>
-    <string name="permlab_markNetworkSocket" msgid="3658527214914959749">"Pistokemerkkien muokkaaminen"</string>
-    <string name="permdesc_markNetworkSocket" msgid="7655568433696356578">"Antaa sovelluksen muokata reitityksen pistokemerkkejä"</string>
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"käytä ilmoituksia"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Antaa sovelluksen noutaa, tutkia ja tyhjentää ilmoituksia (myös muiden sovelluksien lähettämiä)."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"sido ilmoituskuuntelijapalveluun"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Antaa sovelluksen sitoutua ilmoituskuuntelijan ylimmän tason käyttöliittymään. Ei tavallisten sovelluksien käyttöön."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"ehtojen toimituspalveluun sitominen"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Antaa sovelluksen luoda sidoksen ehtojen toimituspalvelun ylätason rajapintaan. Ei tavallisten sovelluksien käyttöön."</string>
+    <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"median reitityspalveluun sitoutuminen"</string>
+    <string name="permdesc_bindMediaRouteService" msgid="6436655024972496687">"Antaa sovelluksen sitoutua median reitityspalvelun ylätason liittymään. Ei tavallisten sovellusten käyttöön."</string>
     <string name="permlab_bindDreamService" msgid="4153646965978563462">"sitoudu Unelma-palveluun"</string>
     <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Antaa sovelluksen sitoutua Unelma-palvelun ylemmän tason käyttöliittymään. Ei tavallisten sovelluksien käyttöön."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"Palveluntarjoajan määrityssovelluksen käynnistäminen"</string>
@@ -731,8 +731,8 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Antaa sovelluksen muokata kosketusnäytön kalibrointiparametreja. Ei tavallisten sovellusten käyttöön."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"DRM-varmenteiden käyttö"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Antaa sovelluksen käyttää DRM-varmenteita ja hallita niiden käyttäjiä. Ei tavallisten sovellusten käyttöön."</string>
-    <string name="permlab_handoverStatus" msgid="4558616203830448763">"Vastaanota handover-siirtolähetyksiä."</string>
-    <string name="permdesc_handoverStatus" msgid="5738446261941364055">"Sallii handover-siirtotietojen vastaanottamisen."</string>
+    <string name="permlab_handoverStatus" msgid="1159132046126626731">"Vastaanota Android Beam -siirron tilatietoja"</string>
+    <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Antaa sovelluksen vastaanottaa tietoja nykyisistä Android Beam -siirroista"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Aseta salasanasäännöt"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Hallinnoi ruudun lukituksenpoistosalasanoissa sallittuja merkkejä ja salasanan pituutta."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Tarkkaile ruudun lukituksen poistoyrityksiä"</string>
@@ -1006,8 +1006,8 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Antaa sovelluksen muokata selaimen historiaa ja puhelimeen tallennettuja kirjanmerkkejä. Sovellus voi poistaa tai muokata selaimen tietoja. Huomaa: kolmannen osapuolen selaimet tai muut sovellukset, jotka pystyvät selaamaan verkkoa, eivät saa käyttää tätä lupaa."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"aseta herätys"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Antaa sovelluksen asettaa hälytyksen sisäiseen herätyskellosovellukseen. Jotkin herätyskellosovellukset eivät välttämättä käytä tätä ominaisuutta."</string>
-    <string name="permlab_removeVoicemail" msgid="6328485960478155867">"vastaajaviestien poistaminen"</string>
-    <string name="permdesc_removeVoicemail" msgid="8113704917331103065">"Antaa sovelluksen poistaa viestejä saapuneista vastaajaviesteistä."</string>
+    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"vastaajaviestien hallinta"</string>
+    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"Antaa sovelluksen muokata ja poistaa puhelinvastaajaan saapuneita viestejä."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"lisää vastaajaviesti"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Antaa sovelluksen lisätä viestejä saapuneisiin vastaajaviesteihin."</string>
     <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"kaikkien vastaajaviestien luku"</string>
@@ -1179,6 +1179,13 @@
     <string name="capital_on" msgid="1544682755514494298">"PÄÄLLÄ"</string>
     <string name="capital_off" msgid="6815870386972805832">"POIS"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Tee toiminto käyttäen sovellusta"</string>
+    <string name="whichApplicationNamed" msgid="8260158865936942783">"Suorita sovelluksella %1$s"</string>
+    <string name="whichViewApplication" msgid="3272778576700572102">"Avaa sovelluksessa"</string>
+    <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Avaa sovelluksessa %1$s"</string>
+    <string name="whichEditApplication" msgid="144727838241402655">"Muokkaa sovelluksessa"</string>
+    <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Muokkaa sovelluksessa %1$s"</string>
+    <string name="whichSendApplication" msgid="6902512414057341668">"Jaa sovelluksessa"</string>
+    <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Jaa sovelluksessa %1$s"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"Valitse aloitusruutusovellus"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Käytä oletuksena tälle toiminnolle."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Poista oletusasetus kohdassa Järjestelmäasetukset &gt; Sovellukset &gt; Ladattu."</string>
@@ -1281,10 +1288,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Salli aina"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Älä koskaan salli"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM-kortti poistettu"</string>
-    <string name="sim_removed_message" msgid="2333164559970958645">"Mobiiliverkko ei ole käytettävissä, ennen kuin käynnistät uudelleen kelvollisella laitteeseen kytketyllä SIM-kortilla."</string>
+    <string name="sim_removed_message" msgid="5450336489923274918">"Matkapuhelinverkko on käytettävissä vasta kun asetat kelvollisen SIM-kortin ja käynnistät laitteen uudelleen."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Valmis"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIM-kortti lisätty"</string>
-    <string name="sim_added_message" msgid="6599945301141050216">"Muodosta mobiiliverkkoyhteys käynnistämällä laite uudelleen."</string>
+    <string name="sim_added_message" msgid="7797975656153714319">"Käynnistä laite uudelleen, niin pääset käyttämään matkapuhelinverkkoa."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Käynnistä uudelleen"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Aseta aika"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Aseta päivämäärä"</string>
@@ -1373,14 +1380,14 @@
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Antaa sovelluksen seurata luottamuksen tilamuutoksia."</string>
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Luotettavan tahon tarjoaminen"</string>
     <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Antaa sovelluksen tarjota luotettavan tahon."</string>
-    <!-- no translation found for permlab_launch_trust_agent_settings (5859430082240410200) -->
-    <skip />
-    <!-- no translation found for permdesc_launch_trust_agent_settings (8185142708644913381) -->
-    <skip />
+    <string name="permlab_launch_trust_agent_settings" msgid="5859430082240410200">"Luotettavan tahon asetusvalikon käynnistäminen"</string>
+    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"Antaa sovelluksen käynnistää toiminnon, joka muuttaa luotettavan tahon käyttäytymistä."</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Luotettavaan tahoon sitoutuminen"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Antaa sovelluksen sitoutua luotettavaan tahoon."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Vuorovaikutus päivitys- ja palautusjärjestelmän kanssa"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Sallii sovelluksen vuorovaikutuksen palautusjärjestelmän ja järjestelmäpäivitysten kanssa."</string>
+    <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Medialähetysistuntojen luominen"</string>
+    <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"Antaa sovelluksen luoda medialähetysistuntoja. Nämä istunnot antavat sovellusten tallentaa näyttö- ja äänisisältöä. Ei tavallisten sovellusten käyttöön."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Ohjaa zoomausta napauttamalla kahdesti"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Widgetin lisääminen epäonnistui."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Siirry"</string>
@@ -1425,10 +1432,6 @@
     <string name="back_button_label" msgid="2300470004503343439">"Takaisin"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Seuraava"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"Ohita"</string>
-    <string name="throttle_warning_notification_title" msgid="4890894267454867276">"Paljon mobiilitiedonsiirtoa"</string>
-    <string name="throttle_warning_notification_message" msgid="3340822228599337743">"Saat lisätietoja mobiilitiedonsiirrosta koskettamalla."</string>
-    <string name="throttled_notification_title" msgid="6269541897729781332">"Mobiilitiedonsiirtoraja ylitetty"</string>
-    <string name="throttled_notification_message" msgid="5443457321354907181">"Saat lisätietoja mobiilitiedonsiirrosta koskettamalla."</string>
     <string name="no_matches" msgid="8129421908915840737">"Ei tuloksia"</string>
     <string name="find_on_page" msgid="1946799233822820384">"Etsi sivulta"</string>
   <plurals name="matches_found">
@@ -1509,14 +1512,14 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Muokkaa"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Tiedonsiirtovaroitus"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"Näytä käyttö ja aset. koskettam."</string>
-    <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"2G-3G-tiedonsiirto pois käytöstä"</string>
-    <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"4G-tiedonsiirto pois käytöstä"</string>
-    <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Mobiilitiedonsiirto pois käytöstä"</string>
-    <string name="data_usage_wifi_limit_title" msgid="8992154736441284865">"Wi-Fi-tiedonsiirto pois käytöstä"</string>
-    <string name="data_usage_limit_body" msgid="3317964706973601386">"Ota käyttöön koskettamalla."</string>
+    <string name="data_usage_3g_limit_title" msgid="4462365924791862301">"2G–3G-tiedonsiirto ei käytössä"</string>
+    <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"4G-tiedonsiirto ei käytössä"</string>
+    <string name="data_usage_mobile_limit_title" msgid="3393439305227911006">"Mobiilitiedonsiirto ei käytössä"</string>
+    <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"Wi-Fi-tiedonsiirto ei käytössä"</string>
+    <string name="data_usage_limit_body" msgid="6131350187562939365">"Raja saavutettu"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G-tiedonsiirtoraja ylitetty"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G-tiedonsiirtoraja ylitetty"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Mobiilitiedonsiirtoraja ylitetty"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Mobiilitiedonsiirtoraja ylitetty"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Wi-Fi-tiedonsiirtoraja ylitetty"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> yli asetetun rajan"</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Rajoitettu taustatietojen käyttö"</string>
@@ -1737,10 +1740,16 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> on valittu"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> poistettiin"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> (työ)"</string>
+    <string name="lock_to_app_toast" msgid="2126866321272822564">"Olet Lukitse sovellukseen -tilassa, poistu painamalla pitkään Viimeaikaiset-painiketta"</string>
+    <string name="lock_to_app_toast_locked" msgid="4229650395479263497">"Olet Sovellukseen lukitus -tilassa."</string>
     <string name="lock_to_app_title" msgid="5895142291937470019">"Käytetäänkö sovellukseen lukitusta?"</string>
-    <string name="lock_to_app_description" msgid="8597199033462406175">"Sovellukseen lukitus lukitsee näytön yhteen sovellukseen.\n\nPoistu pitämällä viimeaikaisten sovellusten painiketta $ painettuna."</string>
-    <string name="lock_to_app_negative" msgid="8522854387366288195">"EI"</string>
+    <string name="lock_to_app_description" msgid="2800403592608529611">"Sovellukseen lukitus lukitsee näytön yhteen sovellukseen.\n\nPoistu pitämällä Viimeaikaiset-painiketta painettuna."</string>
+    <string name="lock_to_app_negative" msgid="2259143719362732728">"EI KIITOS"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"ALOITA"</string>
-    <string name="lock_to_app_start" msgid="8889002974248178076">"Aloita sovellukseen lukitus"</string>
-    <string name="lock_to_app_exit" msgid="7033017307788432861">"Lopeta sovellukseen lukitus"</string>
+    <string name="lock_to_app_start" msgid="3074665051586318340">"Lukittu sovellukseen"</string>
+    <string name="lock_to_app_exit" msgid="8967089657201849300">"Ei enää lukittu sovellukseen"</string>
+    <string name="lock_to_app_use_screen_lock" msgid="1434584309048590886">"Kysy %1$s ennen lopettamista"</string>
+    <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN-koodi"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"lukituksenpoistokuvio"</string>
+    <string name="lock_to_app_unlock_password" msgid="795224196583495868">"salasana"</string>
 </resources>
