@@ -772,13 +772,22 @@ public class UserManager {
      * @return A label that combines the original label and a badge as
      *         determined by the system.
      */
-    public String getBadgedLabelForUser(String label, UserHandle user) {
+    public CharSequence getBadgedLabelForUser(CharSequence label, UserHandle user) {
         UserInfo userInfo = getUserIfProfile(user.getIdentifier());
         if (userInfo != null && userInfo.isManagedProfile()) {
             return Resources.getSystem().getString(
                     R.string.managed_profile_label_badge, label);
         }
         return label;
+    }
+
+    /**
+     * Kept during L development to simplify updating unbundled apps.
+     * TODO: Remove after 2014-08-04
+     * @hide
+     */
+    public String getBadgedLabelForUser(String label, UserHandle user) {
+        return (String) getBadgedLabelForUser((CharSequence) label, user);
     }
 
     /**
