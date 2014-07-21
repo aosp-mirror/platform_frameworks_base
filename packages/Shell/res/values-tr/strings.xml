@@ -18,7 +18,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Kabuk"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"Hata raporu kaydedildi"</string>
-    <string name="bugreport_finished_text" msgid="3559904746859400732">"Hata raporunuzu paylaşmak için dokunun"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Hata raporunuzu paylaşmak için hızlıca sola kaydırın"</string>
+    <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Hata raporunuzu paylaşmak için dokunun"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"Hata raporları, kişisel ve özel bilgiler dahil olmak üzere sistemin çeşitli günlük dosyalarından veriler içerir. Hata raporlarını sadece güvendiğiniz uygulamalar ve kişilerle paylaşın."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Bir dahaki sefere bu mesajı göster"</string>
 </resources>

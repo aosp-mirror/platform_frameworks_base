@@ -18,7 +18,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Shell"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"Fejlrapporten er registreret"</string>
-    <string name="bugreport_finished_text" msgid="3559904746859400732">"Tryk for at dele din fejlrapport"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Stryg til venstre for at dele din fejlrapport"</string>
+    <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Tryk for at dele din fejlrapport"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"Fejlrapporter indeholder data fra systemets forskellige logfiler, f.eks. personlige og private oplysninger. Del kun fejlrapporter med apps og personer, du har tillid til."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Vis denne underretning næste gang"</string>
 </resources>

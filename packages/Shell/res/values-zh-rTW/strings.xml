@@ -18,7 +18,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"殼層"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"已擷取錯誤報告"</string>
-    <string name="bugreport_finished_text" msgid="3559904746859400732">"輕觸即可分享您的錯誤報告"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"向左滑動即可分享錯誤報告"</string>
+    <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"輕觸即可分享您的錯誤報告"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"錯誤報告的資料來自系統各個紀錄檔，包括個人和私密資訊。請務必只與您信任的應用程式和使用者分享錯誤報告。"</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"下次仍顯示這則訊息"</string>
 </resources>

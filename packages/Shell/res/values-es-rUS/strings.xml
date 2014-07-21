@@ -18,7 +18,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Shell"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"Informe de errores capturado"</string>
-    <string name="bugreport_finished_text" msgid="3559904746859400732">"Toca para compartir tu informe de errores."</string>
+    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Desliza el dedo hacia la izquierda para compartir el informe de errores."</string>
+    <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Toca para compartir tu informe de errores."</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"Los informes de errores contienen datos de los distintos archivos de registro del sistema, incluida la información personal y privada. Comparte los informes de errores únicamente con aplicaciones y personas en las que confíes."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Mostrar este mensaje la próxima vez"</string>
 </resources>
