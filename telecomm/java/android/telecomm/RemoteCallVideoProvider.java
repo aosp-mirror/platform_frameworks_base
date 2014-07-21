@@ -59,8 +59,11 @@ public class RemoteCallVideoProvider {
      *
      * @param cameraId The id of the camera.
      */
-    public void setCamera(String cameraId) throws RemoteException {
-        mCallVideoProvider.setCamera(cameraId);
+    public void setCamera(String cameraId) {
+        try {
+            mCallVideoProvider.setCamera(cameraId);
+        } catch (RemoteException e) {
+        }
     }
 
     /**
@@ -107,8 +110,11 @@ public class RemoteCallVideoProvider {
      *
      * @param value The camera zoom ratio.
      */
-    public void setZoom(float value) throws RemoteException {
-        mCallVideoProvider.setZoom(value);
+    public void setZoom(float value) {
+        try {
+            mCallVideoProvider.setZoom(value);
+        } catch (RemoteException e) {
+        }
     }
 
     /**
