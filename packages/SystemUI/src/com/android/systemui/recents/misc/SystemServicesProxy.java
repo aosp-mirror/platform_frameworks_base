@@ -467,4 +467,13 @@ public class SystemServicesProxy {
     public Bitmap takeAppScreenshot() {
         return takeScreenshot();
     }
+
+    public void startActivityFromRecents(int taskId, ActivityOptions options) {
+        if (mIam != null) {
+            try {
+                mIam.startActivityFromRecents(taskId, options == null ? null : options.toBundle());
+            } catch (RemoteException e) {
+            }
+        }
+    }
 }

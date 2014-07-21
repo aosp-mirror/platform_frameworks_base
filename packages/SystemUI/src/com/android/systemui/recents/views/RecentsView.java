@@ -27,7 +27,6 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.net.Uri;
-import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -452,8 +451,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             public void run() {
                 if (task.isActive) {
                     // Bring an active task to the foreground
-                    RecentsTaskLoader.getInstance().getSystemServicesProxy()
-                            .moveTaskToFront(task.key.id, launchOpts);
+                    ssp.moveTaskToFront(task.key.id, launchOpts);
                 } else {
                     // Launch the activity anew with the desired animation
                     Intent i = new Intent(task.key.baseIntent);
@@ -463,15 +461,9 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                         i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     }
                     try {
-                        UserHandle taskUser = new UserHandle(task.userId);
-                        if (launchOpts != null) {
-                            getContext().startActivityAsUser(i, launchOpts.toBundle(), taskUser);
-
-                        } else {
-                            getContext().startActivityAsUser(i, taskUser);
-                            if (lockToTask) {
-                                ssp.lockCurrentTask();
-                            }
+                        ssp.startActivityFromRecents(task.key.id, launchOpts);
+                        if (launchOpts == null && lockToTask) {
+                            ssp.lockCurrentTask();
                         }
                     } catch (ActivityNotFoundException anfe) {
                         Console.logError(getContext(), "Could not start Activity");
