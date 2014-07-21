@@ -340,7 +340,7 @@ public class TrustManagerService extends SystemService {
     private void removeListener(ITrustListener listener) {
         for (int i = 0; i < mTrustListeners.size(); i++) {
             if (mTrustListeners.get(i).asBinder() == listener.asBinder()) {
-                mTrustListeners.get(i);
+                mTrustListeners.remove(i);
                 return;
             }
         }
