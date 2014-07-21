@@ -247,7 +247,7 @@ public class SoundTrigger {
             String text = in.readString();
             int[] users = null;
             int numUsers = in.readInt();
-            if (numUsers > 0) {
+            if (numUsers >= 0) {
                 users = new int[numUsers];
                 in.readIntArray(users);
             }
@@ -264,7 +264,7 @@ public class SoundTrigger {
                 dest.writeInt(users.length);
                 dest.writeIntArray(users);
             } else {
-                dest.writeInt(0);
+                dest.writeInt(-1);
             }
         }
 
@@ -349,7 +349,7 @@ public class SoundTrigger {
             UUID uuid = UUID.fromString(in.readString());
             byte[] data = null;
             int dataLength = in.readInt();
-            if (dataLength > 0) {
+            if (dataLength >= 0) {
                 data = new byte[dataLength];
                 in.readByteArray(data);
             }
@@ -369,9 +369,15 @@ public class SoundTrigger {
                 dest.writeInt(data.length);
                 dest.writeByteArray(data);
             } else {
-                dest.writeInt(0);
+                dest.writeInt(-1);
             }
             dest.writeTypedArray(keyphrases, 0);
+        }
+
+        @Override
+        public String toString() {
+            return "KeyphraseSoundModel [keyphrases=" + Arrays.toString(keyphrases) + ", uuid="
+                    + uuid + ", type=" + type + ", data? " + (data != null) + "]";
         }
     }
 
@@ -471,7 +477,7 @@ public class SoundTrigger {
                     in.createTypedArray(KeyphraseRecognitionExtra.CREATOR);
             byte[] data = null;
             int dataLength = in.readInt();
-            if (dataLength > 0) {
+            if (dataLength >= 0) {
                 data = new byte[dataLength];
                 in.readByteArray(data);
             }
@@ -486,13 +492,19 @@ public class SoundTrigger {
                 dest.writeInt(data.length);
                 dest.writeByteArray(data);
             } else {
-                dest.writeInt(0);
+                dest.writeInt(-1);
             }
         }
 
         @Override
         public int describeContents() {
             return 0;
+        }
+
+        @Override
+        public String toString() {
+            return "RecognitionConfig [captureRequested=" + captureRequested + ", keyphrases="
+                    + Arrays.toString(keyphrases) + ", data? " + (data != null) + "]";
         }
     }
 
