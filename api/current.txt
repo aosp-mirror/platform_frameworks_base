@@ -31356,7 +31356,7 @@ package android.text.style {
     field public static final java.lang.String ARG_MONTH = "android.arg.month";
     field public static final java.lang.String ARG_MULTIPLICITY = "android.arg.multiplicity";
     field public static final java.lang.String ARG_NUMBER = "android.arg.number";
-    field public static final java.lang.String ARG_NUMBER_PART = "android.arg.number_part";
+    field public static final java.lang.String ARG_NUMBER_PARTS = "android.arg.number_parts";
     field public static final java.lang.String ARG_NUMERATOR = "android.arg.numerator";
     field public static final java.lang.String ARG_PASSWORD = "android.arg.password";
     field public static final java.lang.String ARG_PATH = "android.arg.path";
@@ -31459,6 +31459,19 @@ package android.text.style {
     method public android.text.style.TtsSpan.DigitsBuilder setDigits(java.lang.String);
   }
 
+  public static class TtsSpan.ElectronicBuilder extends android.text.style.TtsSpan.SemioticClassBuilder {
+    ctor public TtsSpan.ElectronicBuilder();
+    method public android.text.style.TtsSpan.ElectronicBuilder setDomain(java.lang.String);
+    method public android.text.style.TtsSpan.ElectronicBuilder setEmailArguments(java.lang.String, java.lang.String);
+    method public android.text.style.TtsSpan.ElectronicBuilder setFragmentId(java.lang.String);
+    method public android.text.style.TtsSpan.ElectronicBuilder setPassword(java.lang.String);
+    method public android.text.style.TtsSpan.ElectronicBuilder setPath(java.lang.String);
+    method public android.text.style.TtsSpan.ElectronicBuilder setPort(int);
+    method public android.text.style.TtsSpan.ElectronicBuilder setProtocol(java.lang.String);
+    method public android.text.style.TtsSpan.ElectronicBuilder setQueryString(java.lang.String);
+    method public android.text.style.TtsSpan.ElectronicBuilder setUsername(java.lang.String);
+  }
+
   public static class TtsSpan.FractionBuilder extends android.text.style.TtsSpan.SemioticClassBuilder {
     ctor public TtsSpan.FractionBuilder();
     ctor public TtsSpan.FractionBuilder(long, long, long);
@@ -31484,6 +31497,15 @@ package android.text.style {
     method public android.text.style.TtsSpan.MeasureBuilder setUnit(java.lang.String);
   }
 
+  public static class TtsSpan.MoneyBuilder extends android.text.style.TtsSpan.SemioticClassBuilder {
+    ctor public TtsSpan.MoneyBuilder();
+    method public android.text.style.TtsSpan.MoneyBuilder setCurrency(java.lang.String);
+    method public android.text.style.TtsSpan.MoneyBuilder setFractionalPart(java.lang.String);
+    method public android.text.style.TtsSpan.MoneyBuilder setIntegerPart(long);
+    method public android.text.style.TtsSpan.MoneyBuilder setIntegerPart(java.lang.String);
+    method public android.text.style.TtsSpan.MoneyBuilder setQuantity(java.lang.String);
+  }
+
   public static class TtsSpan.OrdinalBuilder extends android.text.style.TtsSpan.SemioticClassBuilder {
     ctor public TtsSpan.OrdinalBuilder();
     ctor public TtsSpan.OrdinalBuilder(long);
@@ -31498,6 +31520,14 @@ package android.text.style {
     method public C setCase(java.lang.String);
     method public C setGender(java.lang.String);
     method public C setMultiplicity(java.lang.String);
+  }
+
+  public static class TtsSpan.TelephoneBuilder extends android.text.style.TtsSpan.SemioticClassBuilder {
+    ctor public TtsSpan.TelephoneBuilder();
+    ctor public TtsSpan.TelephoneBuilder(java.lang.String);
+    method public android.text.style.TtsSpan.TelephoneBuilder setCountryCode(java.lang.String);
+    method public android.text.style.TtsSpan.TelephoneBuilder setExtension(java.lang.String);
+    method public android.text.style.TtsSpan.TelephoneBuilder setNumberParts(java.lang.String);
   }
 
   public static class TtsSpan.TextBuilder extends android.text.style.TtsSpan.SemioticClassBuilder {

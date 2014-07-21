@@ -119,7 +119,7 @@ public class TtsSpan implements ParcelableSpan {
 
     /**
      * The text associated with this span is a telephone number. The argument
-     * {@link #ARG_NUMBER_PART} is required. {@link #ARG_COUNTRY_CODE} and
+     * {@link #ARG_NUMBER_PARTS} is required. {@link #ARG_COUNTRY_CODE} and
      * {@link #ARG_EXTENSION} are optional.
      * Also accepts the arguments {@link #ARG_GENDER},
      * {@link #ARG_ANIMACY}, {@link #ARG_MULTIPLICITY} and
@@ -371,7 +371,7 @@ public class TtsSpan implements ParcelableSpan {
 
     /**
      * Argument used to specify the country code of a telephone number. Can be
-     * a string of digits.
+     * a string of digits optionally prefixed with a "+".
      * Can be used with {@link #TYPE_TELEPHONE}.
      */
     public static final String ARG_COUNTRY_CODE = "android.arg.country_code";
@@ -382,7 +382,7 @@ public class TtsSpan implements ParcelableSpan {
      * can be separated with a space, '-', '/' or '.'.
      * Can be used with {@link #TYPE_TELEPHONE}.
      */
-    public static final String ARG_NUMBER_PART = "android.arg.number_part";
+    public static final String ARG_NUMBER_PARTS = "android.arg.number_parts";
 
     /**
      * Argument used to specify the extension part of a telephone number. Can be
@@ -1220,6 +1220,214 @@ public class TtsSpan implements ParcelableSpan {
          */
         public DateBuilder setYear(int year) {
             return setIntArgument(TtsSpan.ARG_YEAR, year);
+        }
+    }
+
+    /**
+     * A builder for TtsSpans of type {@link TtsSpan #TYPE_MONEY}.
+     */
+    public static class MoneyBuilder
+            extends SemioticClassBuilder<MoneyBuilder> {
+
+        /**
+         * Creates a TtsSpan of type {@link TtsSpan#TYPE_MONEY}.
+         */
+        public MoneyBuilder() {
+            super(TtsSpan.TYPE_MONEY);
+        }
+
+        /**
+         * Convenience method that converts the number to a String and set it to
+         * the value for {@link TtsSpan#ARG_INTEGER_PART}.
+         * @param integerPart The integer part of the amount.
+         * @return This instance.
+         */
+        public MoneyBuilder setIntegerPart(long integerPart) {
+            return setIntegerPart(String.valueOf(integerPart));
+        }
+
+        /**
+         * Sets the {@link TtsSpan#ARG_INTEGER_PART} argument.
+         * @param integerPart A non-empty string of digits with an optional
+         *     leading + or -.
+         * @return This instance.
+         */
+        public MoneyBuilder setIntegerPart(String integerPart) {
+            return setStringArgument(TtsSpan.ARG_INTEGER_PART, integerPart);
+        }
+
+        /**
+         * Sets the {@link TtsSpan#ARG_FRACTIONAL_PART} argument.
+         * @param fractionalPart Can be a string of digits of any size.
+         * @return This instance.
+         */
+        public MoneyBuilder setFractionalPart(String fractionalPart) {
+            return setStringArgument(TtsSpan.ARG_FRACTIONAL_PART, fractionalPart);
+        }
+
+        /**
+         * Sets the {@link TtsSpan#ARG_CURRENCY} argument.
+         * @param currency Should be a ISO4217 currency code, e.g. "USD".
+         * @return This instance.
+         */
+        public MoneyBuilder setCurrency(String currency) {
+            return setStringArgument(TtsSpan.ARG_CURRENCY, currency);
+        }
+
+        /**
+         * Sets the {@link TtsSpan#ARG_QUANTITY} argument.
+         * @param quantity
+         * @return This instance.
+         */
+        public MoneyBuilder setQuantity(String quantity) {
+            return setStringArgument(TtsSpan.ARG_QUANTITY, quantity);
+        }
+    }
+
+    /**
+     * A builder for TtsSpans of type {@link TtsSpan #TYPE_TELEPHONE}.
+     */
+    public static class TelephoneBuilder
+            extends SemioticClassBuilder<TelephoneBuilder> {
+
+        /**
+         * Creates a TtsSpan of type {@link TtsSpan#TYPE_TELEPHONE}.
+         */
+        public TelephoneBuilder() {
+            super(TtsSpan.TYPE_TELEPHONE);
+        }
+
+        /**
+         * Creates a TtsSpan of type {@link TtsSpan#TYPE_TELEPHONE} and sets the
+         * {@link TtsSpan#ARG_NUMBER_PARTS} argument.
+         */
+        public TelephoneBuilder(String numberParts) {
+            this();
+            setNumberParts(numberParts);
+        }
+
+        /**
+         * Sets the {@link TtsSpan#ARG_COUNTRY_CODE} argument.
+         * @param countryCode The country code can be a series of digits
+         * optionally prefixed with a "+".
+         * @return This instance.
+         */
+        public TelephoneBuilder setCountryCode(String countryCode) {
+            return setStringArgument(TtsSpan.ARG_COUNTRY_CODE, countryCode);
+        }
+
+        /**
+         * Sets the {@link TtsSpan#ARG_NUMBER_PARTS} argument.
+         * @param numberParts The main telephone number. Can be a series of
+         *     digits and letters separated by spaces, "/", "-" or ".".
+         * @return This instance.
+         */
+        public TelephoneBuilder setNumberParts(String numberParts) {
+            return setStringArgument(TtsSpan.ARG_NUMBER_PARTS, numberParts);
+        }
+
+        /**
+         * Sets the {@link TtsSpan#ARG_EXTENSION} argument.
+         * @param extension The extension can be a series of digits.
+         * @return This instance.
+         */
+        public TelephoneBuilder setExtension(String extension) {
+            return setStringArgument(TtsSpan.ARG_EXTENSION, extension);
+        }
+    }
+
+    /**
+     * A builder for TtsSpans of type {@link TtsSpan #TYPE_ELECTRONIC}.
+     */
+    public static class ElectronicBuilder
+            extends SemioticClassBuilder<ElectronicBuilder> {
+
+        /**
+         * Creates a TtsSpan of type {@link TtsSpan#TYPE_ELECTRONIC}.
+         */
+        public ElectronicBuilder() {
+            super(TtsSpan.TYPE_ELECTRONIC);
+        }
+
+        /**
+         * Sets the {@link TtsSpan#ARG_USERNAME} and {@link TtsSpan#ARG_DOMAIN}
+         *     arguments, representing an email address.
+         * @param username The part before the @ in the email address.
+         * @param domain The part after the @ in the email address.
+         * @return This instance.
+         */
+        public ElectronicBuilder setEmailArguments(String username,
+                                                   String domain) {
+            return setDomain(domain).setUsername(username);
+        }
+
+        /**
+         * Sets the {@link TtsSpan#ARG_PROTOCOL} argument.
+         * @param protocol The protocol of the URI. Examples are "http" and
+         *     "ftp".
+         * @return This instance.
+         */
+        public ElectronicBuilder setProtocol(String protocol) {
+            return setStringArgument(TtsSpan.ARG_PROTOCOL, protocol);
+        }
+
+        /**
+         * Sets the {@link TtsSpan#ARG_USERNAME} argument.
+         * @return This instance.
+         */
+        public ElectronicBuilder setUsername(String username) {
+            return setStringArgument(TtsSpan.ARG_USERNAME, username);
+        }
+
+        /**
+         * Sets the {@link TtsSpan#ARG_PASSWORD} argument.
+         * @return This instance.
+         */
+        public ElectronicBuilder setPassword(String password) {
+            return setStringArgument(TtsSpan.ARG_PASSWORD, password);
+        }
+
+        /**
+         * Sets the {@link TtsSpan#ARG_DOMAIN} argument.
+         * @param domain The domain, for example "source.android.com".
+         * @return This instance.
+         */
+        public ElectronicBuilder setDomain(String domain) {
+            return setStringArgument(TtsSpan.ARG_DOMAIN, domain);
+        }
+
+        /**
+         * Sets the {@link TtsSpan#ARG_PORT} argument.
+         * @return This instance.
+         */
+        public ElectronicBuilder setPort(int port) {
+            return setIntArgument(TtsSpan.ARG_PORT, port);
+        }
+
+        /**
+         * Sets the {@link TtsSpan#ARG_PATH} argument.
+         * @param path For example "source/index.html".
+         * @return This instance.
+         */
+        public ElectronicBuilder setPath(String path) {
+            return setStringArgument(TtsSpan.ARG_PATH, path);
+        }
+
+        /**
+         * Sets the {@link TtsSpan#ARG_QUERY_STRING} argument.
+         * @param queryString For example "arg=value&argtwo=value".
+         * @return This instance.
+         */
+        public ElectronicBuilder setQueryString(String queryString) {
+            return setStringArgument(TtsSpan.ARG_QUERY_STRING, queryString);
+        }
+
+        /**
+         * Sets the {@link TtsSpan#ARG_FRAGMENT_ID} argument.
+         * @return This instance.
+         */
+        public ElectronicBuilder setFragmentId(String fragmentId) {
+            return setStringArgument(TtsSpan.ARG_FRAGMENT_ID, fragmentId);
         }
     }
 
