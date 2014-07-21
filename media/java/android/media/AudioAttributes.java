@@ -91,7 +91,12 @@ public final class AudioAttributes implements Parcelable {
     /**
      * Usage value to use when the usage is telephony ringtone.
      */
-    public final static int USAGE_NOTIFICATION_TELEPHONY_RINGTONE = 6;
+    public final static int USAGE_NOTIFICATION_RINGTONE = 6;
+    /**
+     * @hide
+     * TEMPORARY TO PREVENT BUILD BREAKAGES DURING RENAME - DO NOT SHIP
+     */
+    public final static int USAGE_NOTIFICATION_TELEPHONY_RINGTONE = USAGE_NOTIFICATION_RINGTONE;
     /**
      * Usage value to use when the usage is a request to enter/end a
      * communication, such as a VoIP communication or video-conference.
@@ -260,7 +265,7 @@ public final class AudioAttributes implements Parcelable {
          *     {@link AudioAttributes#USAGE_VOICE_COMMUNICATION},
          *     {@link AudioAttributes#USAGE_VOICE_COMMUNICATION_SIGNALLING},
          *     {@link AudioAttributes#USAGE_ALARM}, {@link AudioAttributes#USAGE_NOTIFICATION},
-         *     {@link AudioAttributes#USAGE_NOTIFICATION_TELEPHONY_RINGTONE},
+         *     {@link AudioAttributes#USAGE_NOTIFICATION_RINGTONE},
          *     {@link AudioAttributes#USAGE_NOTIFICATION_COMMUNICATION_REQUEST},
          *     {@link AudioAttributes#USAGE_NOTIFICATION_COMMUNICATION_INSTANT},
          *     {@link AudioAttributes#USAGE_NOTIFICATION_COMMUNICATION_DELAYED},
@@ -279,7 +284,7 @@ public final class AudioAttributes implements Parcelable {
                 case USAGE_VOICE_COMMUNICATION_SIGNALLING:
                 case USAGE_ALARM:
                 case USAGE_NOTIFICATION:
-                case USAGE_NOTIFICATION_TELEPHONY_RINGTONE:
+                case USAGE_NOTIFICATION_RINGTONE:
                 case USAGE_NOTIFICATION_COMMUNICATION_REQUEST:
                 case USAGE_NOTIFICATION_COMMUNICATION_INSTANT:
                 case USAGE_NOTIFICATION_COMMUNICATION_DELAYED:
@@ -498,7 +503,7 @@ public final class AudioAttributes implements Parcelable {
                 return new String("USAGE_ALARM");
             case USAGE_NOTIFICATION:
                 return new String("USAGE_NOTIFICATION");
-            case USAGE_NOTIFICATION_TELEPHONY_RINGTONE:
+            case USAGE_NOTIFICATION_RINGTONE:
                 return new String("USAGE_NOTIFICATION");
             case USAGE_NOTIFICATION_COMMUNICATION_REQUEST:
                 return new String("USAGE_NOTIFICATION");
@@ -530,7 +535,7 @@ public final class AudioAttributes implements Parcelable {
             case AudioSystem.STREAM_SYSTEM:
                 return USAGE_ASSISTANCE_SONIFICATION;
             case AudioSystem.STREAM_RING:
-                return USAGE_NOTIFICATION_TELEPHONY_RINGTONE;
+                return USAGE_NOTIFICATION_RINGTONE;
             case AudioSystem.STREAM_MUSIC:
                 return USAGE_MEDIA;
             case AudioSystem.STREAM_ALARM:
@@ -573,7 +578,7 @@ public final class AudioAttributes implements Parcelable {
                 return AudioSystem.STREAM_DTMF;
             case USAGE_ALARM:
                 return AudioSystem.STREAM_ALARM;
-            case USAGE_NOTIFICATION_TELEPHONY_RINGTONE:
+            case USAGE_NOTIFICATION_RINGTONE:
                 return AudioSystem.STREAM_RING;
             case USAGE_NOTIFICATION:
             case USAGE_NOTIFICATION_COMMUNICATION_REQUEST:
@@ -595,7 +600,7 @@ public final class AudioAttributes implements Parcelable {
         USAGE_VOICE_COMMUNICATION_SIGNALLING,
         USAGE_ALARM,
         USAGE_NOTIFICATION,
-        USAGE_NOTIFICATION_TELEPHONY_RINGTONE,
+        USAGE_NOTIFICATION_RINGTONE,
         USAGE_NOTIFICATION_COMMUNICATION_REQUEST,
         USAGE_NOTIFICATION_COMMUNICATION_INSTANT,
         USAGE_NOTIFICATION_COMMUNICATION_DELAYED,
