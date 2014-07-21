@@ -647,7 +647,7 @@ public abstract class ConnectionService extends Service {
      * @param request Details about the incoming call.
      * @param callback A callback for providing the result.
      */
-    protected void onCreateIncomingConnection(
+    public void onCreateIncomingConnection(
             ConnectionRequest request,
             CreateConnectionResponse<Connection> callback) {}
 
@@ -657,7 +657,7 @@ public abstract class ConnectionService extends Service {
      * @param request Details about the outgoing call.
      * @param callback A callback for providing the result.
      */
-    protected void onCreateOutgoingConnection(
+    public void onCreateOutgoingConnection(
             ConnectionRequest request,
             CreateConnectionResponse<Connection> callback) {}
 
@@ -671,7 +671,7 @@ public abstract class ConnectionService extends Service {
      * @param token The token to be passed into the response callback.
      * @param callback The callback for providing the potentially-new conference connection.
      */
-    protected void onCreateConferenceConnection(
+    public void onCreateConferenceConnection(
             String token,
             Connection connection,
             Response<String, Connection> callback) {}
@@ -681,14 +681,14 @@ public abstract class ConnectionService extends Service {
      *
      * @param connection The connection which was added.
      */
-    protected void onConnectionAdded(Connection connection) {}
+    public void onConnectionAdded(Connection connection) {}
 
     /**
      * Notified that a connection has been removed from this connection service.
      *
      * @param connection The connection which was removed.
      */
-    protected void onConnectionRemoved(Connection connection) {}
+    public void onConnectionRemoved(Connection connection) {}
 
     static String toLogSafePhoneNumber(String number) {
         // For unknown number, log empty string.

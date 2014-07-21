@@ -146,7 +146,7 @@ public abstract class CallVideoProvider {
     private final CallVideoProviderHandler mMessageHandler = new CallVideoProviderHandler();
     private final CallVideoProviderBinder mBinder;
 
-    protected CallVideoProvider() {
+    public CallVideoProvider() {
         mBinder = new CallVideoProviderBinder();
     }
 
