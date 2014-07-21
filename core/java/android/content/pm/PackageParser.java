@@ -382,23 +382,23 @@ public class PackageParser {
     }
 
     /**
-     * Returns true if the package is installed and not blocked, or if the caller
-     * explicitly wanted all uninstalled and blocked packages as well.
+     * Returns true if the package is installed and not hidden, or if the caller
+     * explicitly wanted all uninstalled and hidden packages as well.
      */
-    private static boolean checkUseInstalledOrBlocked(int flags, PackageUserState state) {
-        return (state.installed && !state.blocked)
+    private static boolean checkUseInstalledOrHidden(int flags, PackageUserState state) {
+        return (state.installed && !state.hidden)
                 || (flags & PackageManager.GET_UNINSTALLED_PACKAGES) != 0;
     }
 
     public static boolean isAvailable(PackageUserState state) {
-        return checkUseInstalledOrBlocked(0, state);
+        return checkUseInstalledOrHidden(0, state);
     }
 
     public static PackageInfo generatePackageInfo(PackageParser.Package p,
             int gids[], int flags, long firstInstallTime, long lastUpdateTime,
             HashSet<String> grantedPermissions, PackageUserState state, int userId) {
 
-        if (!checkUseInstalledOrBlocked(flags, state)) {
+        if (!checkUseInstalledOrHidden(flags, state)) {
             return null;
         }
         PackageInfo pi = new PackageInfo();
@@ -4533,7 +4533,7 @@ public class PackageParser {
                 return true;
             }
         }
-        if (!state.installed || state.blocked) {
+        if (!state.installed || state.hidden) {
             return true;
         }
         if (state.stopped) {
@@ -4566,10 +4566,10 @@ public class PackageParser {
         } else {
             ai.flags &= ~ApplicationInfo.FLAG_INSTALLED;
         }
-        if (state.blocked) {
-            ai.flags |= ApplicationInfo.FLAG_BLOCKED;
+        if (state.hidden) {
+            ai.flags |= ApplicationInfo.FLAG_HIDDEN;
         } else {
-            ai.flags &= ~ApplicationInfo.FLAG_BLOCKED;
+            ai.flags &= ~ApplicationInfo.FLAG_HIDDEN;
         }
         if (state.enabled == PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
             ai.enabled = true;
@@ -4585,7 +4585,7 @@ public class PackageParser {
     public static ApplicationInfo generateApplicationInfo(Package p, int flags,
             PackageUserState state, int userId) {
         if (p == null) return null;
-        if (!checkUseInstalledOrBlocked(flags, state)) {
+        if (!checkUseInstalledOrHidden(flags, state)) {
             return null;
         }
         if (!copyNeeded(flags, p, state, null, userId)
@@ -4673,7 +4673,7 @@ public class PackageParser {
     public static final ActivityInfo generateActivityInfo(Activity a, int flags,
             PackageUserState state, int userId) {
         if (a == null) return null;
-        if (!checkUseInstalledOrBlocked(flags, state)) {
+        if (!checkUseInstalledOrHidden(flags, state)) {
             return null;
         }
         if (!copyNeeded(flags, a.owner, state, a.metaData, userId)) {
@@ -4714,7 +4714,7 @@ public class PackageParser {
     public static final ServiceInfo generateServiceInfo(Service s, int flags,
             PackageUserState state, int userId) {
         if (s == null) return null;
-        if (!checkUseInstalledOrBlocked(flags, state)) {
+        if (!checkUseInstalledOrHidden(flags, state)) {
             return null;
         }
         if (!copyNeeded(flags, s.owner, state, s.metaData, userId)) {
@@ -4763,7 +4763,7 @@ public class PackageParser {
     public static final ProviderInfo generateProviderInfo(Provider p, int flags,
             PackageUserState state, int userId) {
         if (p == null) return null;
-        if (!checkUseInstalledOrBlocked(flags, state)) {
+        if (!checkUseInstalledOrHidden(flags, state)) {
             return null;
         }
         if (!copyNeeded(flags, p.owner, state, p.metaData, userId)

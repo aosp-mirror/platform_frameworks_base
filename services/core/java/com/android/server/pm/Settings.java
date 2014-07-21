@@ -153,7 +153,10 @@ final class Settings {
     private static final String ATTR_ENABLED = "enabled";
     private static final String ATTR_ENABLED_CALLER = "enabledCaller";
     private static final String ATTR_STOPPED = "stopped";
+    // Legacy, here for reading older versions of the package-restrictions.
     private static final String ATTR_BLOCKED = "blocked";
+    // New name for the above attribute.
+    private static final String ATTR_HIDDEN = "hidden";
     private static final String ATTR_INSTALLED = "inst";
     private static final String ATTR_BLOCK_UNINSTALL = "blockUninstall";
 
@@ -606,7 +609,7 @@ final class Settings {
                                     installed,
                                     true, // stopped,
                                     true, // notLaunched
-                                    false, // blocked
+                                    false, // hidden
                                     null, null, null,
                                     false // blockUninstall
                                     );
@@ -1177,7 +1180,7 @@ final class Settings {
                                 true,   // installed
                                 false,  // stopped
                                 false,  // notLaunched
-                                false,  // blocked
+                                false,  // hidden
                                 null, null, null,
                                 false // blockUninstall
                                 );
@@ -1233,9 +1236,14 @@ final class Settings {
                     final String stoppedStr = parser.getAttributeValue(null, ATTR_STOPPED);
                     final boolean stopped = stoppedStr == null
                             ? false : Boolean.parseBoolean(stoppedStr);
+                    // For backwards compatibility with the previous name of "blocked", which
+                    // now means hidden, read the old attribute as well.
                     final String blockedStr = parser.getAttributeValue(null, ATTR_BLOCKED);
-                    final boolean blocked = blockedStr == null
+                    boolean hidden = blockedStr == null
                             ? false : Boolean.parseBoolean(blockedStr);
+                    final String hiddenStr = parser.getAttributeValue(null, ATTR_HIDDEN);
+                    hidden = hiddenStr == null
+                            ? hidden : Boolean.parseBoolean(hiddenStr);
                     final String notLaunchedStr = parser.getAttributeValue(null, ATTR_NOT_LAUNCHED);
                     final boolean notLaunched = stoppedStr == null
                             ? false : Boolean.parseBoolean(notLaunchedStr);
@@ -1263,7 +1271,7 @@ final class Settings {
                         }
                     }
 
-                    ps.setUserState(userId, enabled, installed, stopped, notLaunched, blocked,
+                    ps.setUserState(userId, enabled, installed, stopped, notLaunched, hidden,
                             enabledCaller, enabledComponents, disabledComponents, blockUninstall);
                 } else if (tagName.equals("preferred-activities")) {
                     readPreferredActivitiesLPw(parser, userId);
@@ -1432,7 +1440,7 @@ final class Settings {
                 PackageUserState ustate = pkg.readUserState(userId);
                 if (ustate.stopped || ustate.notLaunched || !ustate.installed
                         || ustate.enabled != COMPONENT_ENABLED_STATE_DEFAULT
-                        || ustate.blocked
+                        || ustate.hidden
                         || (ustate.enabledComponents != null
                                 && ustate.enabledComponents.size() > 0)
                         || (ustate.disabledComponents != null
@@ -1451,8 +1459,8 @@ final class Settings {
                     if (ustate.notLaunched) {
                         serializer.attribute(null, ATTR_NOT_LAUNCHED, "true");
                     }
-                    if (ustate.blocked) {
-                        serializer.attribute(null, ATTR_BLOCKED, "true");
+                    if (ustate.hidden) {
+                        serializer.attribute(null, ATTR_HIDDEN, "true");
                     }
                     if (ustate.blockUninstall) {
                         serializer.attribute(null, ATTR_BLOCK_UNINSTALL, "true");
@@ -3443,7 +3451,7 @@ final class Settings {
                 pw.print(user.id);
                 pw.print(",");
                 pw.print(ps.getInstalled(user.id) ? "I" : "i");
-                pw.print(ps.getBlocked(user.id) ? "B" : "b");
+                pw.print(ps.getHidden(user.id) ? "B" : "b");
                 pw.print(ps.getStopped(user.id) ? "S" : "s");
                 pw.print(ps.getNotLaunched(user.id) ? "l" : "L");
                 pw.print(",");
@@ -3583,8 +3591,8 @@ final class Settings {
             pw.print(prefix); pw.print("  User "); pw.print(user.id); pw.print(": ");
             pw.print(" installed=");
             pw.print(ps.getInstalled(user.id));
-            pw.print(" blocked=");
-            pw.print(ps.getBlocked(user.id));
+            pw.print(" hidden=");
+            pw.print(ps.getHidden(user.id));
             pw.print(" stopped=");
             pw.print(ps.getStopped(user.id));
             pw.print(" notLaunched=");
