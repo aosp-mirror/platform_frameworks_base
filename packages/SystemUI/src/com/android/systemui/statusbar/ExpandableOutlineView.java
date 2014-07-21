@@ -38,7 +38,7 @@ public abstract class ExpandableOutlineView extends ExpandableView {
         mDensity = getResources().getDisplayMetrics().density;
         setOutlineProvider(new ViewOutlineProvider() {
             @Override
-            public boolean getOutline(View view, Outline outline) {
+            public void getOutline(View view, Outline outline) {
                 if (!mCustomOutline) {
                     outline.setRect(0,
                             mClipTopAmount,
@@ -47,7 +47,6 @@ public abstract class ExpandableOutlineView extends ExpandableView {
                 } else {
                     outline.setRect(mOutlineRect);
                 }
-                return true;
             }
         });
     }

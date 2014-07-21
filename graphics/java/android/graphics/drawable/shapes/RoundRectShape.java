@@ -80,8 +80,8 @@ public class RoundRectShape extends RectShape {
     }
 
     @Override
-    public boolean getOutline(Outline outline) {
-        if (mInnerRect != null) return false; // have a hole, can't produce valid outline
+    public void getOutline(Outline outline) {
+        if (mInnerRect != null) return; // have a hole, can't produce valid outline
 
         float radius = 0;
         if (mOuterRadii != null) {
@@ -90,7 +90,7 @@ public class RoundRectShape extends RectShape {
                 if (mOuterRadii[i] != radius) {
                     // can't call simple constructors, use path
                     outline.setConvexPath(mPath);
-                    return true;
+                    return;
                 }
             }
         }
@@ -99,7 +99,6 @@ public class RoundRectShape extends RectShape {
         outline.setRoundRect((int) Math.ceil(rect.left), (int) Math.ceil(rect.top),
                 (int) Math.floor(rect.right), (int) Math.floor(rect.bottom),
                 radius);
-        return true;
     }
 
     @Override

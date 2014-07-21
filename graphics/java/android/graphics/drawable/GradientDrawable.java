@@ -1410,7 +1410,7 @@ public class GradientDrawable extends Drawable {
     }
 
     @Override
-    public boolean getOutline(Outline outline) {
+    public void getOutline(Outline outline) {
         final GradientState st = mGradientState;
         final Rect bounds = getBounds();
 
@@ -1419,7 +1419,7 @@ public class GradientDrawable extends Drawable {
                 if (st.mRadiusArray != null) {
                     buildPathIfDirty();
                     outline.setConvexPath(mPath);
-                    return true;
+                    return;
                 }
 
                 float rad = 0;
@@ -1429,10 +1429,10 @@ public class GradientDrawable extends Drawable {
                             Math.min(bounds.width(), bounds.height()) * 0.5f);
                 }
                 outline.setRoundRect(bounds, rad);
-                return true;
+                return;
             case OVAL:
                 outline.setOval(bounds);
-                return true;
+                return;
             case LINE:
                 // Hairlines (0-width stroke) must have a non-empty outline for
                 // shadows to draw correctly, so we'll use a very small width.
@@ -1443,10 +1443,9 @@ public class GradientDrawable extends Drawable {
                 final int bottom = (int) Math.ceil(centerY + halfStrokeWidth);
 
                 outline.setRect(bounds.left, top, bounds.right, bottom);
-                return true;
+                return;
             default:
-                // TODO: investigate
-                return false;
+                // TODO: support more complex shapes
         }
     }
 
