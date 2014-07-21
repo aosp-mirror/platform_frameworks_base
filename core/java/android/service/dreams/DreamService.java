@@ -171,6 +171,7 @@ public class DreamService extends Service implements Window.Callback {
     private boolean mFullscreen;
     private boolean mScreenBright = true;
     private boolean mStarted;
+    private boolean mWaking;
     private boolean mFinished;
     private boolean mCanDoze;
     private boolean mDozing;
@@ -196,12 +197,12 @@ public class DreamService extends Service implements Window.Callback {
     public boolean dispatchKeyEvent(KeyEvent event) {
         // TODO: create more flexible version of mInteractive that allows use of KEYCODE_BACK
         if (!mInteractive) {
-            if (mDebug) Slog.v(TAG, "Finishing on keyEvent");
-            safelyFinish();
+            if (mDebug) Slog.v(TAG, "Waking up on keyEvent");
+            wakeUp();
             return true;
         } else if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
-            if (mDebug) Slog.v(TAG, "Finishing on back key");
-            safelyFinish();
+            if (mDebug) Slog.v(TAG, "Waking up on back key");
+            wakeUp();
             return true;
         }
         return mWindow.superDispatchKeyEvent(event);
@@ -211,8 +212,8 @@ public class DreamService extends Service implements Window.Callback {
     @Override
     public boolean dispatchKeyShortcutEvent(KeyEvent event) {
         if (!mInteractive) {
-            if (mDebug) Slog.v(TAG, "Finishing on keyShortcutEvent");
-            safelyFinish();
+            if (mDebug) Slog.v(TAG, "Waking up on keyShortcutEvent");
+            wakeUp();
             return true;
         }
         return mWindow.superDispatchKeyShortcutEvent(event);
@@ -224,8 +225,8 @@ public class DreamService extends Service implements Window.Callback {
         // TODO: create more flexible version of mInteractive that allows clicks
         // but finish()es on any other kind of activity
         if (!mInteractive) {
-            if (mDebug) Slog.v(TAG, "Finishing on touchEvent");
-            safelyFinish();
+            if (mDebug) Slog.v(TAG, "Waking up on touchEvent");
+            wakeUp();
             return true;
         }
         return mWindow.superDispatchTouchEvent(event);
@@ -235,8 +236,8 @@ public class DreamService extends Service implements Window.Callback {
     @Override
     public boolean dispatchTrackballEvent(MotionEvent event) {
         if (!mInteractive) {
-            if (mDebug) Slog.v(TAG, "Finishing on trackballEvent");
-            safelyFinish();
+            if (mDebug) Slog.v(TAG, "Waking up on trackballEvent");
+            wakeUp();
             return true;
         }
         return mWindow.superDispatchTrackballEvent(event);
@@ -246,8 +247,8 @@ public class DreamService extends Service implements Window.Callback {
     @Override
     public boolean dispatchGenericMotionEvent(MotionEvent event) {
         if (!mInteractive) {
-            if (mDebug) Slog.v(TAG, "Finishing on genericMotionEvent");
-            safelyFinish();
+            if (mDebug) Slog.v(TAG, "Waking up on genericMotionEvent");
+            wakeUp();
             return true;
         }
         return mWindow.superDispatchGenericMotionEvent(event);
@@ -690,6 +691,22 @@ public class DreamService extends Service implements Window.Callback {
         // hook for subclasses
     }
 
+    /**
+     * Called when the dream is being asked to stop itself and wake.
+     * <p>
+     * The default implementation simply calls {@link #finish} which ends the dream
+     * immediately.  Subclasses may override this function to perform a smooth exit
+     * transition then call {@link #finish} afterwards.
+     * </p><p>
+     * Note that the dream will only be given a short period of time (currently about
+     * five seconds) to wake up.  If the dream does not finish itself in a timely manner
+     * then the system will forcibly finish it once the time allowance is up.
+     * </p>
+     */
+    public void onWakeUp() {
+        finish();
+    }
+
     /** {@inheritDoc} */
     @Override
     public final IBinder onBind(Intent intent) {
@@ -705,8 +722,62 @@ public class DreamService extends Service implements Window.Callback {
      * </p>
      */
     public final void finish() {
-        if (mDebug) Slog.v(TAG, "finish()");
-        finishInternal();
+        if (mDebug) Slog.v(TAG, "finish(): mFinished=" + mFinished);
+
+        if (!mFinished) {
+            mFinished = true;
+
+            if (mWindowToken == null) {
+                Slog.w(TAG, "Finish was called before the dream was attached.");
+            } else {
+                try {
+                    mSandman.finishSelf(mWindowToken, true /*immediate*/);
+                } catch (RemoteException ex) {
+                    // system server died
+                }
+            }
+
+            stopSelf(); // if launched via any other means
+        }
+    }
+
+    /**
+     * Wakes the dream up gently.
+     * <p>
+     * Calls {@link #onWakeUp} to give the dream a chance to perform an exit transition.
+     * When the transition is over, the dream should call {@link #finish}.
+     * </p>
+     */
+    public final void wakeUp() {
+        wakeUp(false);
+    }
+
+    private void wakeUp(boolean fromSystem) {
+        if (mDebug) Slog.v(TAG, "wakeUp(): fromSystem=" + fromSystem
+                + ", mWaking=" + mWaking + ", mFinished=" + mFinished);
+
+        if (!mWaking && !mFinished) {
+            mWaking = true;
+
+            // As a minor optimization, invoke the callback first in case it simply
+            // calls finish() immediately so there wouldn't be much point in telling
+            // the system that we are finishing the dream gently.
+            onWakeUp();
+
+            // Now tell the system we are waking gently, unless we already told
+            // it we were finishing immediately.
+            if (!fromSystem && !mFinished) {
+                if (mWindowToken == null) {
+                    Slog.w(TAG, "WakeUp was called before the dream was attached.");
+                } else {
+                    try {
+                        mSandman.finishSelf(mWindowToken, false /*immediate*/);
+                    } catch (RemoteException ex) {
+                        // system server died
+                    }
+                }
+            }
+        }
     }
 
     /** {@inheritDoc} */
@@ -763,10 +834,10 @@ public class DreamService extends Service implements Window.Callback {
             Slog.e(TAG, "attach() called when already attached with token=" + mWindowToken);
             return;
         }
-        if (mFinished) {
+        if (mFinished || mWaking) {
             Slog.w(TAG, "attach() called after dream already finished");
             try {
-                mSandman.finishSelf(windowToken);
+                mSandman.finishSelf(windowToken, true /*immediate*/);
             } catch (RemoteException ex) {
                 // system server died
             }
@@ -835,37 +906,6 @@ public class DreamService extends Service implements Window.Callback {
                 }
             }
         });
-    }
-
-    private void safelyFinish() {
-        if (mDebug) Slog.v(TAG, "safelyFinish()");
-
-        finish();
-
-        if (!mFinished) {
-            Slog.w(TAG, "Bad dream, did not call super.finish()");
-            finishInternal();
-        }
-    }
-
-    private void finishInternal() {
-        if (mDebug) Slog.v(TAG, "finishInternal() mFinished = " + mFinished);
-
-        if (!mFinished) {
-            mFinished = true;
-
-            if (mWindowToken == null) {
-                Slog.w(TAG, "Finish was called before the dream was attached.");
-            } else {
-                try {
-                    mSandman.finishSelf(mWindowToken);
-                } catch (RemoteException ex) {
-                    // system server died
-                }
-            }
-
-            stopSelf(); // if launched via any other means
-        }
     }
 
     private boolean getWindowFlagValue(int flag, boolean defaultValue) {
@@ -946,6 +986,15 @@ public class DreamService extends Service implements Window.Callback {
                 }
             });
         }
-    }
 
+        @Override
+        public void wakeUp() {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    DreamService.this.wakeUp(true /*fromSystem*/);
+                }
+            });
+        }
+    }
 }
