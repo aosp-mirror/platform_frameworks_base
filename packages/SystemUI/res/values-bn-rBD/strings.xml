@@ -166,12 +166,12 @@
     <string name="accessibility_quick_settings_close" msgid="2571790856136835943">"প্যানেল বন্ধ করুন"</string>
     <string name="accessibility_quick_settings_more_time" msgid="5778794273488176726">"বেশি সময়"</string>
     <string name="accessibility_quick_settings_less_time" msgid="101026945195230084">"কম সময়"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"2G-3G ডেটা অক্ষম করা হয়েছে"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"4G ডেটা অক্ষম করা হয়েছে"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"মোবাইল ডেটা অক্ষম করা হয়েছে"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"ডেটা অক্ষম করা হয়েছে"</string>
-    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"আপনি নির্দিষ্ট ডেটা ব্যবহারের সীমায় পৌঁছে গেছেন৷\n\nযদি আপনি ডেটা পুনরায় সক্ষম করেন, তবে অপারেটর আপনাকে তার জন্য চার্জ করতে পারে৷"</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"পুনঃ-সক্ষমিত ডেটা"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"2G-3G ডেটা বন্ধ"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"4G ডেটা বন্ধ"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"সেলুলার ডেটা বন্ধ"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"ডেটা বন্ধ"</string>
+    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"আপনার সেট করা ডেটা সীমায় পৌঁছে যাওয়ায় আপনার ডিভাইসটি ডেটা বন্ধ করে দিয়েছে।\n\nএটি চালু করে দিলে আপনাকে পরিষেবা প্রদানকারীর করা চার্জ বহন করতে হতে পারে।"</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"ডেটা চালু করুন"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"কোনো ইন্টারনেট সংযোগ নেই"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi সংযুক্ত হয়েছে"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"GPS এর জন্য অনুসন্ধান করা হচ্ছে"</string>
@@ -191,6 +191,7 @@
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> টি ডিভাইস)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth বন্ধ"</string>
+    <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"যুক্ত করা কোন ডিভাইস উপলব্ধ নয়"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"উজ্জ্বলতা"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"স্বতঃ ঘূর্ণায়মান"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"ঘূর্ণন লক করা হয়েছে"</string>
@@ -205,11 +206,18 @@
     <string name="quick_settings_settings_label" msgid="5326556592578065401">"সেটিংস"</string>
     <string name="quick_settings_time_label" msgid="4635969182239736408">"সময়"</string>
     <string name="quick_settings_user_label" msgid="5238995632130897840">"আমাকে"</string>
+    <string name="quick_settings_user_title" msgid="4467690427642392403">"ব্যবহারকারী"</string>
+    <string name="quick_settings_user_new_user" msgid="9030521362023479778">"নতুন ব্যবহারকারী"</string>
     <string name="quick_settings_wifi_label" msgid="9135344704899546041">"Wi-Fi"</string>
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"সংযুক্ত নয়"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"কোনো নেটওয়ার্ক নেই"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi বন্ধ"</string>
-    <string name="quick_settings_remote_display_no_connection_label" msgid="7482103121002965053">"স্ক্রীন কাস্ট করুন"</string>
+    <string name="quick_settings_wifi_detail_empty_text" msgid="2831702993995222755">"কোন সংরক্ষিত নেটওয়ার্ক উপলব্ধ নেই"</string>
+    <string name="quick_settings_cast_title" msgid="1893629685050355115">"স্ক্রীন কাস্ট করুন"</string>
+    <string name="quick_settings_casting" msgid="6601710681033353316">"কাস্ট করা হচ্ছে"</string>
+    <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"নামবিহীন ডিভাইস"</string>
+    <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"কাস্ট করার জন্য প্রস্তুত"</string>
+    <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"কোনো ডিভাইস উপলব্ধ নয়"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"উজ্জ্বলতা"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"স্বয়ং"</string>
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"বিপরীত কোনো রং দিন"</string>
@@ -217,12 +225,21 @@
     <string name="quick_settings_more_settings" msgid="326112621462813682">"আরো সেটিংস"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"সম্পন্ন হয়েছে"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"সংযুক্ত হয়েছে"</string>
+    <string name="quick_settings_connecting" msgid="47623027419264404">"সংযুক্ত হচ্ছে..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"টেদারিং"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"হটস্পট"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"বিজ্ঞপ্তিগুলি"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"ফ্ল্যাশলাইট"</string>
+    <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"সেলুলার ডেটা"</string>
+    <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"ডেটার ব্যবহার"</string>
+    <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"অবশিষ্ট ডেটা"</string>
+    <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"সীমার উর্ধ্বে"</string>
+    <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> ব্যবহৃত হয়েছে"</string>
+    <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"সীমা <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
+    <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> সতর্কতা"</string>
     <string name="recents_empty_message" msgid="7883614615463619450">"কোনো সাম্প্রতিক অ্যাপ্লিকেশান নেই"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"অ্যাপ্লিকেশানের তথ্য"</string>
+    <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"অ্যাপ্লিকেশানে লক করুন"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"অনুসন্ধান"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"চার্জ হয়েছে"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"চার্জ হচ্ছে"</string>
@@ -232,14 +249,22 @@
     <string name="description_target_search" msgid="3091587249776033139">"অনুসন্ধান করুন"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> এর জন্য উপরের দিকে স্লাইড করুন৷"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> এর জন্য বাম দিকে স্লাইড করুন৷"</string>
-    <string name="zen_mode_title" msgid="8793432092004749188">"বিরক্ত করবেন না"</string>
+    <string name="zen_no_interruptions_with_warning" msgid="2522931836819051293">"ব্যাঘাত ছাড়াই, অ্যালার্মও নেই"</string>
+    <string name="zen_no_interruptions" msgid="7970973750143632592">"কোনো বাধা নয়"</string>
+    <string name="zen_important_interruptions" msgid="3477041776609757628">"শুধুমাত্র প্রাধান্য বাধাগুলি"</string>
+    <string name="zen_alarm_information_time" msgid="5235772206174372272">"আপনার পরবর্তী অ্যালার্মের সময় <xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
+    <string name="zen_alarm_information_day_time" msgid="8422733576255047893">"আপনার পরবর্তী অ্যালার্মের সময় <xliff:g id="ALARM_DAY_AND_TIME">%s</xliff:g>"</string>
+    <string name="zen_alarm_warning" msgid="6873910860111498041">"<xliff:g id="ALARM_TIME">%s</xliff:g> বাজলে আপনার অ্যালার্ম শুনতে পাবেন না"</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"নিচে অপেক্ষাকৃত কম জরুরী বিজ্ঞপ্তিগুলি"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"খোলার জন্য আবার আলতো চাপুন"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"আনলক করতে উপরের দিকে সোয়াইপ করুন"</string>
     <string name="phone_hint" msgid="3101468054914424646">"ফোনের জন্য ডানদিকে সোয়াইপ করুন"</string>
     <string name="camera_hint" msgid="5241441720959174226">"ক্যামেরার জন্য ডানদিকে সোয়াইপ করুন"</string>
-    <string name="zen_mode_forever" msgid="7420011936770086993">"আপনার দ্বারা এটি বন্ধ করা পর্যন্ত"</string>
+    <string name="zen_mode_forever" msgid="4316804956488785559">"অনির্দিষ্টভাবে"</string>
+    <string name="interruption_level_none" msgid="3831278883136066646">"কোনো কিছুই নয়"</string>
+    <string name="interruption_level_priority" msgid="6517366750688942030">"অগ্রাধিকার"</string>
+    <string name="interruption_level_all" msgid="1330581184930945764">"সমস্ত"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"চার্জ হচ্ছে (পূর্ণ হতে <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> সময় বাকি)"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"অতিথি"</string>
     <string name="guest_new_guest" msgid="4259024453643879653">"+ অতিথি"</string>
@@ -254,4 +279,10 @@
     <string name="battery_saver_notification_title" msgid="237918726750955859">"ব্যাটারি সেভার চালু রয়েছে"</string>
     <string name="battery_saver_notification_text" msgid="7796554871101546872">"ডিভাইসের কর্মক্ষমতা কমে যাবে।"</string>
     <string name="battery_saver_notification_action_text" msgid="7546297220816993504">"ব্যাটারি সেভার সেটিংস খুলুন"</string>
+    <string name="battery_level_template" msgid="1609636980292580020">"<xliff:g id="LEVEL">%d</xliff:g>%%"</string>
+    <string name="notification_hidden_text" msgid="1135169301897151909">"লুকানো বিষয়বস্তু"</string>
+    <string name="guest_exit_guest" msgid="1619100760451149682">"অতিথির প্রস্থান"</string>
+    <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> আপনার স্ক্রীনে দেখানো সব কিছু ক্যাপচার করা শুরু করবে।"</string>
+    <string name="media_projection_remember_text" msgid="3103510882172746752">"আর দেখাবেন না"</string>
+    <string name="media_projection_action_text" msgid="8470872969457985954">"এখন শুরু করুন"</string>
 </resources>

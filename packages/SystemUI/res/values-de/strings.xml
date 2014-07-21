@@ -168,12 +168,12 @@
     <string name="accessibility_quick_settings_close" msgid="2571790856136835943">"Fenster schließen"</string>
     <string name="accessibility_quick_settings_more_time" msgid="5778794273488176726">"Mehr Zeit"</string>
     <string name="accessibility_quick_settings_less_time" msgid="101026945195230084">"Weniger Zeit"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"2G-/3G-Daten deaktiviert"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"4G-Daten deaktiviert"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Mobilfunk Daten deaktiviert"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Daten deaktiviert"</string>
-    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"Sie haben die angegebenen Grenze für den Datenverbrauch erreicht.\n\nWenn Sie die Datennutzung erneut aktivieren, berechnet Ihr Mobilfunkanbieter unter Umständen zusätzliche Gebühren."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Daten erneut aktivieren"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"2G/3G-Daten sind deaktiviert"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"4G-Daten sind deaktiviert"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"Mobilfunkdaten sind deaktiviert"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"Daten sind deaktiviert"</string>
+    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"Die Daten wurden auf Ihrem Gerät deaktiviert, da das von Ihnen festgelegte Limit erreicht wurde.\n\nWenn Sie die Daten erneut aktivieren, berechnet Ihr Mobilfunkanbieter möglicherweise Gebühren."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"Daten aktivieren"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Keine Internetverbindung"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"WLAN verbunden"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"GPS wird gesucht..."</string>
@@ -193,6 +193,7 @@
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> Geräte)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth aus"</string>
+    <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"Keine Pairing-Geräte verfügbar"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Helligkeit"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Automatisch drehen"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"Drehung gesperrt"</string>
@@ -207,11 +208,18 @@
     <string name="quick_settings_settings_label" msgid="5326556592578065401">"Einstellungen"</string>
     <string name="quick_settings_time_label" msgid="4635969182239736408">"Uhrzeit"</string>
     <string name="quick_settings_user_label" msgid="5238995632130897840">"Ich"</string>
+    <string name="quick_settings_user_title" msgid="4467690427642392403">"Nutzer"</string>
+    <string name="quick_settings_user_new_user" msgid="9030521362023479778">"Neuer Nutzer"</string>
     <string name="quick_settings_wifi_label" msgid="9135344704899546041">"WLAN"</string>
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Nicht verbunden"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Kein Netz"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"WLAN aus"</string>
-    <string name="quick_settings_remote_display_no_connection_label" msgid="7482103121002965053">"Bildschirmübertragung"</string>
+    <string name="quick_settings_wifi_detail_empty_text" msgid="2831702993995222755">"Keine gespeicherten Netzwerke verfügbar"</string>
+    <string name="quick_settings_cast_title" msgid="1893629685050355115">"Bildschirm übertragen"</string>
+    <string name="quick_settings_casting" msgid="6601710681033353316">"Wird übertragen"</string>
+    <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Unbenanntes Gerät"</string>
+    <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Startklar"</string>
+    <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"Keine Geräte verfügbar"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Helligkeit"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTO"</string>
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Farben umkehren"</string>
@@ -219,12 +227,21 @@
     <string name="quick_settings_more_settings" msgid="326112621462813682">"Weitere Einstellungen"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"Fertig"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"Verbunden"</string>
+    <string name="quick_settings_connecting" msgid="47623027419264404">"Verbindung wird hergestellt…"</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Tethering"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Hotspot"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Benachrichtigungen"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Taschenlampe"</string>
+    <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Mobilfunkdaten"</string>
+    <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Datennutzung"</string>
+    <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Verbleibende Daten"</string>
+    <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"Limit überschritten"</string>
+    <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> verwendet"</string>
+    <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"<xliff:g id="DATA_LIMIT">%s</xliff:g> Datenlimit"</string>
+    <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Warnung für <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="recents_empty_message" msgid="7883614615463619450">"Keine neuen Apps"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"App-Info"</string>
+    <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"App-Verriegelung"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"Suche"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Aufgeladen"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"Wird aufgeladen"</string>
@@ -234,14 +251,22 @@
     <string name="description_target_search" msgid="3091587249776033139">"Suche"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Zum <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> nach oben schieben"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Zum <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> nach links schieben"</string>
-    <string name="zen_mode_title" msgid="8793432092004749188">"Nicht stören"</string>
+    <string name="zen_no_interruptions_with_warning" msgid="2522931836819051293">"Unterbrechungsfrei, gilt auch für Alarme"</string>
+    <string name="zen_no_interruptions" msgid="7970973750143632592">"Keine Unterbrechungen"</string>
+    <string name="zen_important_interruptions" msgid="3477041776609757628">"Nur wichtige Unterbrechungen"</string>
+    <string name="zen_alarm_information_time" msgid="5235772206174372272">"Nächster Alarm: <xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
+    <string name="zen_alarm_information_day_time" msgid="8422733576255047893">"Nächster Alarm: <xliff:g id="ALARM_DAY_AND_TIME">%s</xliff:g>"</string>
+    <string name="zen_alarm_warning" msgid="6873910860111498041">"Kein Ton für Alarm um <xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Weniger dringende Benachrichtigungen unten"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Erneut tippen, um Benachrichtigung zu öffnen"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Zum Entsperren nach oben wischen"</string>
     <string name="phone_hint" msgid="3101468054914424646">"Zum Öffnen des Telefons nach rechts wischen"</string>
     <string name="camera_hint" msgid="5241441720959174226">"Zum Öffnen der Kamera nach links wischen"</string>
-    <string name="zen_mode_forever" msgid="7420011936770086993">"Bis zur Deaktivierung"</string>
+    <string name="zen_mode_forever" msgid="4316804956488785559">"Unbegrenzt"</string>
+    <string name="interruption_level_none" msgid="3831278883136066646">"Keine"</string>
+    <string name="interruption_level_priority" msgid="6517366750688942030">"Wichtig"</string>
+    <string name="interruption_level_all" msgid="1330581184930945764">"Alle"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Wird aufgeladen (voll in <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"Gast"</string>
     <string name="guest_new_guest" msgid="4259024453643879653">"+ Gast"</string>
@@ -256,4 +281,10 @@
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Energiesparmodus ist aktiviert"</string>
     <string name="battery_saver_notification_text" msgid="7796554871101546872">"Die Geräteleistung wurde herabgesetzt."</string>
     <string name="battery_saver_notification_action_text" msgid="7546297220816993504">"Einstellungen für den Energiesparmodus öffnen"</string>
+    <string name="battery_level_template" msgid="1609636980292580020">"<xliff:g id="LEVEL">%d</xliff:g> %%"</string>
+    <string name="notification_hidden_text" msgid="1135169301897151909">"Inhalte ausgeblendet"</string>
+    <string name="guest_exit_guest" msgid="1619100760451149682">"Gastmodus beenden"</string>
+    <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> nimmt alle auf Ihrem Bildschirm angezeigten Aktivitäten auf."</string>
+    <string name="media_projection_remember_text" msgid="3103510882172746752">"Nicht erneut anzeigen"</string>
+    <string name="media_projection_action_text" msgid="8470872969457985954">"Jetzt starten"</string>
 </resources>

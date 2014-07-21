@@ -166,12 +166,12 @@
     <string name="accessibility_quick_settings_close" msgid="2571790856136835943">"Затворите таблу"</string>
     <string name="accessibility_quick_settings_more_time" msgid="5778794273488176726">"Више времена"</string>
     <string name="accessibility_quick_settings_less_time" msgid="101026945195230084">"Мање времена"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"2G–3G подаци су онемогућени"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"4G подаци су онемогућени"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Подаци мобилне мреже су онемогућени"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Подаци су онемогућени"</string>
-    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"Достигли сте наведено ограничење за коришћење података.\n\nАко поново омогућите податке, мобилни оператер ће вам можда наплатити."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Поново омогући податке"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"2G–3G подаци су искључени"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"4G подаци су искључени"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"Мобилни пренос података је искључен"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"Пренос података је искључен"</string>
+    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"Уређај је искључио пренос података јер је достигао ограничење које сте поставили.\n\nАко га поново укључите, можда ће вам мобилни оператер наплатити трошкове."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"Укључи пренос података"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Нема интернет везе"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi је повезан"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Тражи се GPS"</string>
@@ -191,6 +191,7 @@
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> уређаја)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth искључен"</string>
+    <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"Није доступан ниједан упарени уређај"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Осветљеност"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Аутоматска ротација"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"Ротација је закључана"</string>
@@ -205,26 +206,40 @@
     <string name="quick_settings_settings_label" msgid="5326556592578065401">"Подешавања"</string>
     <string name="quick_settings_time_label" msgid="4635969182239736408">"Време"</string>
     <string name="quick_settings_user_label" msgid="5238995632130897840">"Ја"</string>
+    <string name="quick_settings_user_title" msgid="4467690427642392403">"Корисник"</string>
+    <string name="quick_settings_user_new_user" msgid="9030521362023479778">"Нови корисник"</string>
     <string name="quick_settings_wifi_label" msgid="9135344704899546041">"Wi-Fi"</string>
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Веза није успостављена"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Нема мреже"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi је искључен"</string>
-    <string name="quick_settings_remote_display_no_connection_label" msgid="7482103121002965053">"Пребацивање екрана"</string>
+    <string name="quick_settings_wifi_detail_empty_text" msgid="2831702993995222755">"Није доступна ниједна сачувана мрежа"</string>
+    <string name="quick_settings_cast_title" msgid="1893629685050355115">"Пребацивање екрана"</string>
+    <string name="quick_settings_casting" msgid="6601710681033353316">"Пребацивање"</string>
+    <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Неименовани уређај"</string>
+    <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Спремно за пребацивање"</string>
+    <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"Није доступан ниједан уређај"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Осветљеност"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"АУТОМАТСКА"</string>
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Обрни боје"</string>
     <string name="quick_settings_color_space_label" msgid="853443689745584770">"Режим корекције боје"</string>
     <string name="quick_settings_more_settings" msgid="326112621462813682">"Још подешавања"</string>
-    <!-- no translation found for quick_settings_done (3402999958839153376) -->
-    <skip />
-    <!-- no translation found for quick_settings_connected (1722253542984847487) -->
-    <skip />
+    <string name="quick_settings_done" msgid="3402999958839153376">"Готово"</string>
+    <string name="quick_settings_connected" msgid="1722253542984847487">"Повезан"</string>
+    <string name="quick_settings_connecting" msgid="47623027419264404">"Повезивање..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Повезивање"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Хотспот"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Обавештења"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Лампа"</string>
+    <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Подаци за мобилне уређаје"</string>
+    <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Потрошња података"</string>
+    <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Преостала количина података"</string>
+    <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"Преко ограничења"</string>
+    <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"Искористили сте <xliff:g id="DATA_USED">%s</xliff:g>"</string>
+    <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"Ограничење од <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
+    <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Упозорење за <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="recents_empty_message" msgid="7883614615463619450">"Нема недавних апликација"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Информације о апликацији"</string>
+    <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"закључај апликацију"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"претражи"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Напуњена је"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"Пуњење"</string>
@@ -234,14 +249,22 @@
     <string name="description_target_search" msgid="3091587249776033139">"Претрага"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Превуците нагоре за <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Превуците улево за <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_mode_title" msgid="8793432092004749188">"Не узнемиравај"</string>
+    <string name="zen_no_interruptions_with_warning" msgid="2522931836819051293">"Без прекида, укључујући аларме"</string>
+    <string name="zen_no_interruptions" msgid="7970973750143632592">"Без прекида"</string>
+    <string name="zen_important_interruptions" msgid="3477041776609757628">"Само приоритетни прекиди"</string>
+    <string name="zen_alarm_information_time" msgid="5235772206174372272">"Следећи аларм је у <xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
+    <string name="zen_alarm_information_day_time" msgid="8422733576255047893">"Следећи аларм: <xliff:g id="ALARM_DAY_AND_TIME">%s</xliff:g>"</string>
+    <string name="zen_alarm_warning" msgid="6873910860111498041">"Нећете чути аларм у <xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Мање хитна обавештења су у наставку"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Додирните поново да бисте отворили"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Превуците нагоре да бисте откључали"</string>
     <string name="phone_hint" msgid="3101468054914424646">"Превуците удесно за телефон"</string>
     <string name="camera_hint" msgid="5241441720959174226">"Превуците улево за камеру"</string>
-    <string name="zen_mode_forever" msgid="7420011936770086993">"Док не искључите"</string>
+    <string name="zen_mode_forever" msgid="4316804956488785559">"Бесконачно"</string>
+    <string name="interruption_level_none" msgid="3831278883136066646">"Ниједан"</string>
+    <string name="interruption_level_priority" msgid="6517366750688942030">"Приоритет"</string>
+    <string name="interruption_level_all" msgid="1330581184930945764">"Све"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Пуњење (пун је за <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"Гост"</string>
     <string name="guest_new_guest" msgid="4259024453643879653">"+ Гост"</string>
@@ -256,4 +279,10 @@
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Штедња батерије је укључена"</string>
     <string name="battery_saver_notification_text" msgid="7796554871101546872">"Перформансе уређаја су умањене."</string>
     <string name="battery_saver_notification_action_text" msgid="7546297220816993504">"Отворите подешавања Штедње батерије"</string>
+    <string name="battery_level_template" msgid="1609636980292580020">"<xliff:g id="LEVEL">%d</xliff:g>%%"</string>
+    <string name="notification_hidden_text" msgid="1135169301897151909">"Садржај је сакривен"</string>
+    <string name="guest_exit_guest" msgid="1619100760451149682">"Изађи из режима госта"</string>
+    <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ће почети да снима све што се приказује на екрану."</string>
+    <string name="media_projection_remember_text" msgid="3103510882172746752">"Не приказуј поново"</string>
+    <string name="media_projection_action_text" msgid="8470872969457985954">"Започни одмах"</string>
 </resources>
