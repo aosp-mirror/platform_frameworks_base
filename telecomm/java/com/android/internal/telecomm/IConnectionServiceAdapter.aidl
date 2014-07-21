@@ -19,6 +19,7 @@ package com.android.internal.telecomm;
 import android.app.PendingIntent;
 import android.net.Uri;
 import android.telecomm.ConnectionRequest;
+import android.telecomm.ParcelableConnection;
 import android.telecomm.StatusHints;
 
 import com.android.internal.telecomm.ICallVideoProvider;
@@ -32,7 +33,8 @@ import com.android.internal.telecomm.RemoteServiceCallback;
  * {@hide}
  */
 oneway interface IConnectionServiceAdapter {
-    void handleCreateConnectionSuccessful(in ConnectionRequest request);
+    void handleCreateConnectionSuccessful(
+            in ConnectionRequest request, in ParcelableConnection connection);
 
     void handleCreateConnectionFailed(
             in ConnectionRequest request, int errorCode, String errorMessage);

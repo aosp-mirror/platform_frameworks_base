@@ -18,6 +18,7 @@ package android.telecomm;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.res.Resources.NotFoundException;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Parcel;
@@ -181,7 +182,7 @@ public class PhoneAccount implements Parcelable {
         }
         try {
             return packageContext.getResources().getDrawable(resId);
-        } catch (MissingResourceException e) {
+        } catch (NotFoundException|MissingResourceException e) {
             Log.e(this, e, "Cannot find icon %d in package %s",
                     resId, mAccountHandle.getComponentName().getPackageName());
             return null;
