@@ -3708,8 +3708,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public boolean setApplicationBlocked(ComponentName who, String packageName,
-            boolean blocked) {
+    public boolean setApplicationHidden(ComponentName who, String packageName,
+            boolean hidden) {
         int callingUserId = UserHandle.getCallingUserId();
         synchronized (this) {
             if (who == null) {
@@ -3720,10 +3720,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             long id = Binder.clearCallingIdentity();
             try {
                 IPackageManager pm = AppGlobals.getPackageManager();
-                return pm.setApplicationBlockedSettingAsUser(packageName, blocked, callingUserId);
+                return pm.setApplicationHiddenSettingAsUser(packageName, hidden, callingUserId);
             } catch (RemoteException re) {
                 // shouldn't happen
-                Slog.e(LOG_TAG, "Failed to setApplicationBlockedSetting", re);
+                Slog.e(LOG_TAG, "Failed to setApplicationHiddenSetting", re);
             } finally {
                 restoreCallingIdentity(id);
             }
@@ -3732,7 +3732,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public int setApplicationsBlocked(ComponentName who, Intent intent, boolean blocked) {
+    public int setApplicationsHidden(ComponentName who, Intent intent, boolean hidden) {
         int callingUserId = UserHandle.getCallingUserId();
         synchronized (this) {
             if (who == null) {
@@ -3750,20 +3750,20 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         callingUserId);
 
                 if (DBG) Slog.d(LOG_TAG, "Enabling activities: " + activitiesToEnable);
-                int numberOfAppsUnblocked = 0;
+                int numberOfAppsUnhidden = 0;
                 if (activitiesToEnable != null) {
                     for (ResolveInfo info : activitiesToEnable) {
                         if (info.activityInfo != null) {
-                            numberOfAppsUnblocked++;
-                            pm.setApplicationBlockedSettingAsUser(info.activityInfo.packageName,
-                                    blocked, callingUserId);
+                            numberOfAppsUnhidden++;
+                            pm.setApplicationHiddenSettingAsUser(info.activityInfo.packageName,
+                                    hidden, callingUserId);
                         }
                     }
                 }
-                return numberOfAppsUnblocked;
+                return numberOfAppsUnhidden;
             } catch (RemoteException re) {
                 // shouldn't happen
-                Slog.e(LOG_TAG, "Failed to setApplicationsBlockedSettingsWithIntent", re);
+                Slog.e(LOG_TAG, "Failed to setApplicationsHiddenSettingsWithIntent", re);
             } finally {
                 restoreCallingIdentity(id);
             }
@@ -3772,7 +3772,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public boolean isApplicationBlocked(ComponentName who, String packageName) {
+    public boolean isApplicationHidden(ComponentName who, String packageName) {
         int callingUserId = UserHandle.getCallingUserId();
         synchronized (this) {
             if (who == null) {
@@ -3783,10 +3783,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             long id = Binder.clearCallingIdentity();
             try {
                 IPackageManager pm = AppGlobals.getPackageManager();
-                return pm.getApplicationBlockedSettingAsUser(packageName, callingUserId);
+                return pm.getApplicationHiddenSettingAsUser(packageName, callingUserId);
             } catch (RemoteException re) {
                 // shouldn't happen
-                Slog.e(LOG_TAG, "Failed to getApplicationBlockedSettingAsUser", re);
+                Slog.e(LOG_TAG, "Failed to getApplicationHiddenSettingAsUser", re);
             } finally {
                 restoreCallingIdentity(id);
             }

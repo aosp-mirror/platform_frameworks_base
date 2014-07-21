@@ -7882,7 +7882,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     @Override
-    public boolean setApplicationBlockedSettingAsUser(String packageName, boolean blocked,
+    public boolean setApplicationHiddenSettingAsUser(String packageName, boolean hidden,
             int userId) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USERS, null);
         PackageSetting pkgSetting;
@@ -7890,11 +7890,11 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (UserHandle.getUserId(uid) != userId) {
             mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
-                    "setApplicationBlockedSetting for user " + userId);
+                    "setApplicationHiddenSetting for user " + userId);
         }
 
-        if (blocked && isPackageDeviceAdmin(packageName, userId)) {
-            Slog.w(TAG, "Not blocking package " + packageName + ": has active device admin");
+        if (hidden && isPackageDeviceAdmin(packageName, userId)) {
+            Slog.w(TAG, "Not hiding package " + packageName + ": has active device admin");
             return false;
         }
 
@@ -7908,10 +7908,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                 if (pkgSetting == null) {
                     return false;
                 }
-                if (pkgSetting.getBlocked(userId) != blocked) {
-                    pkgSetting.setBlocked(blocked, userId);
+                if (pkgSetting.getHidden(userId) != hidden) {
+                    pkgSetting.setHidden(hidden, userId);
                     mSettings.writePackageRestrictionsLPr(userId);
-                    if (blocked) {
+                    if (hidden) {
                         sendRemoved = true;
                     } else {
                         sendAdded = true;
@@ -7924,8 +7924,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
             if (sendRemoved) {
                 killApplication(packageName, UserHandle.getUid(userId, pkgSetting.appId),
-                        "blocking pkg");
-                sendPackageBlockedForUser(packageName, pkgSetting, userId);
+                        "hiding pkg");
+                sendApplicationHiddenForUser(packageName, pkgSetting, userId);
             }
         } finally {
             Binder.restoreCallingIdentity(callingId);
@@ -7933,7 +7933,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         return false;
     }
 
-    private void sendPackageBlockedForUser(String packageName, PackageSetting pkgSetting,
+    private void sendApplicationHiddenForUser(String packageName, PackageSetting pkgSetting,
             int userId) {
         final PackageRemovedInfo info = new PackageRemovedInfo();
         info.removedPackage = packageName;
@@ -7944,13 +7944,13 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     /**
      * Returns true if application is not found or there was an error. Otherwise it returns
-     * the blocked state of the package for the given user.
+     * the hidden state of the package for the given user.
      */
     @Override
-    public boolean getApplicationBlockedSettingAsUser(String packageName, int userId) {
+    public boolean getApplicationHiddenSettingAsUser(String packageName, int userId) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USERS, null);
         enforceCrossUserPermission(Binder.getCallingUid(), userId, true,
-                "getApplicationBlocked for user " + userId);
+                "getApplicationHidden for user " + userId);
         PackageSetting pkgSetting;
         long callingId = Binder.clearCallingIdentity();
         try {
@@ -7960,7 +7960,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 if (pkgSetting == null) {
                     return true;
                 }
-                return pkgSetting.getBlocked(userId);
+                return pkgSetting.getHidden(userId);
             }
         } finally {
             Binder.restoreCallingIdentity(callingId);
@@ -7994,7 +7994,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
                 if (!pkgSetting.getInstalled(userId)) {
                     pkgSetting.setInstalled(true, userId);
-                    pkgSetting.setBlocked(false, userId);
+                    pkgSetting.setHidden(false, userId);
                     mSettings.writePackageRestrictionsLPr(userId);
                     sendAdded = true;
                 }
@@ -10593,19 +10593,19 @@ public class PackageManagerService extends IPackageManager.Stub {
             return;
         }
 
-        boolean blocked = false;
+        boolean uninstallBlocked = false;
         if ((flags & PackageManager.DELETE_ALL_USERS) != 0) {
             int[] users = sUserManager.getUserIds();
             for (int i = 0; i < users.length; ++i) {
                 if (getBlockUninstallForUser(packageName, users[i])) {
-                    blocked = true;
+                    uninstallBlocked = true;
                     break;
                 }
             }
         } else {
-            blocked = getBlockUninstallForUser(packageName, userId);
+            uninstallBlocked = getBlockUninstallForUser(packageName, userId);
         }
-        if (blocked) {
+        if (uninstallBlocked) {
             try {
                 observer.packageDeleted(packageName, PackageManager.DELETE_FAILED_OWNER_BLOCKED);
             } catch (RemoteException re) {
@@ -10613,7 +10613,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             return;
         }
 
-        if (DEBUG_REMOVE) Slog.d(TAG, "deletePackageAsUser: pkg=" + packageName + " user=" + userId);
+        if (DEBUG_REMOVE) {
+            Slog.d(TAG, "deletePackageAsUser: pkg=" + packageName + " user=" + userId);
+        }
         // Queue up an async operation since the package deletion may take a little while.
         mHandler.post(new Runnable() {
             public void run() {
@@ -11032,7 +11034,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         false, //installed
                         true,  //stopped
                         true,  //notLaunched
-                        false, //blocked
+                        false, //hidden
                         null, null, null,
                         false // blockUninstall
                         );

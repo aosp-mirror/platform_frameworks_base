@@ -334,11 +334,11 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int FLAG_FULL_BACKUP_ONLY = 1<<26;
 
     /**
-     * Value for {@link #flags}: true if the application is blocked via restrictions and for
+     * Value for {@link #flags}: true if the application is hidden via restrictions and for
      * most purposes is considered as not installed.
      * {@hide}
      */
-    public static final int FLAG_BLOCKED = 1<<27;
+    public static final int FLAG_HIDDEN = 1<<27;
 
     /**
      * Value for {@link #flags}: set to <code>true</code> if the application
