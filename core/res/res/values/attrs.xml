@@ -7197,12 +7197,17 @@
 
             <!-- Virtual input (default) -->
             <enum name="virtual" value="0" />
-            <!-- HDMI -->
-            <enum name="hdmi" value="1" />
-            <!-- Built-in tuner -->
+
+            <enum name="otherHardware" value="1" />
             <enum name="tuner" value="2" />
-            <!-- Pass-through -->
-            <enum name="passthrough" value="3" />
+            <enum name="composite" value="3" />
+            <enum name="svideo" value="4" />
+            <enum name="scart" value="5" />
+            <enum name="component" value="6" />
+            <enum name="vga" value="7" />
+            <enum name="dvi" value="8" />
+            <enum name="hdmi" value="9" />
+            <enum name="displayPort" value="10" />
         </attr>
     </declare-styleable>
 
