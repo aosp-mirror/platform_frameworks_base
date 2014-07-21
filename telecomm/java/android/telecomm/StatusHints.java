@@ -34,11 +34,11 @@ import java.util.MissingResourceException;
 public final class StatusHints implements Parcelable {
 
     private final ComponentName mComponentName;
-    private final CharSequence mLabel;
+    private final String mLabel;
     private final int mIconId;
     private final Bundle mExtras;
 
-    public StatusHints(ComponentName componentName, CharSequence label, int iconId, Bundle extras) {
+    public StatusHints(ComponentName componentName, String label, int iconId, Bundle extras) {
         mComponentName = componentName;
         mLabel = label;
         mIconId = iconId;
@@ -55,7 +55,7 @@ public final class StatusHints implements Parcelable {
     /**
      * @return The label displayed in the in-call UI.
      */
-    public CharSequence getLabel() {
+    public String getLabel() {
         return mLabel;
     }
 
@@ -88,7 +88,7 @@ public final class StatusHints implements Parcelable {
     @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeParcelable(mComponentName, flags);
-        out.writeCharSequence(mLabel);
+        out.writeString(mLabel);
         out.writeInt(mIconId);
         out.writeParcelable(mExtras, 0);
     }
@@ -106,7 +106,7 @@ public final class StatusHints implements Parcelable {
 
     private StatusHints(Parcel in) {
         mComponentName = in.readParcelable(getClass().getClassLoader());
-        mLabel = in.readCharSequence();
+        mLabel = in.readString();
         mIconId = in.readInt();
         mExtras = (Bundle) in.readParcelable(getClass().getClassLoader());
     }
