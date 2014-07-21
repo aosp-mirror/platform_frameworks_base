@@ -17,6 +17,8 @@
 package android.telecomm;
 
 import android.app.PendingIntent;
+import android.app.Service;
+import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -28,12 +30,11 @@ import com.android.internal.telecomm.IInCallService;
 
 /**
  * This service is implemented by any app that wishes to provide the user-interface for managing
- * phone calls. Telecomm binds to this service while there exists a live (active or incoming)
- * call, and uses it to notify the in-call app of any live and and recently disconnected calls.
- *
+ * phone calls. Telecomm binds to this service while there exists a live (active or incoming) call,
+ * and uses it to notify the in-call app of any live and and recently disconnected calls.
  * TODO(santoscordon): What happens if two or more apps on a given device implement this interface?
  */
-public abstract class InCallService {
+public abstract class InCallService extends Service {
     private static final int MSG_SET_IN_CALL_ADAPTER = 1;
     private static final int MSG_ADD_CALL = 2;
     private static final int MSG_UPDATE_CALL = 3;
@@ -103,19 +104,16 @@ public abstract class InCallService {
 
     /** Manages the binder calls so that the implementor does not need to deal with it. */
     private final class InCallServiceBinder extends IInCallService.Stub {
-        /** {@inheritDoc} */
         @Override
         public void setInCallAdapter(IInCallAdapter inCallAdapter) {
             mHandler.obtainMessage(MSG_SET_IN_CALL_ADAPTER, inCallAdapter).sendToTarget();
         }
 
-        /** {@inheritDoc} */
         @Override
         public void addCall(InCallCall call) {
             mHandler.obtainMessage(MSG_ADD_CALL, call).sendToTarget();
         }
 
-        /** {@inheritDoc} */
         @Override
         public void updateCall(InCallCall call) {
             mHandler.obtainMessage(MSG_UPDATE_CALL, call).sendToTarget();
@@ -137,19 +135,16 @@ public abstract class InCallService {
             mHandler.obtainMessage(MSG_SET_POST_DIAL_WAIT, args).sendToTarget();
         }
 
-        /** {@inheritDoc} */
         @Override
         public void onAudioStateChanged(CallAudioState audioState) {
             mHandler.obtainMessage(MSG_ON_AUDIO_STATE_CHANGED, audioState).sendToTarget();
         }
 
-        /** {@inheritDoc} */
         @Override
         public void bringToForeground(boolean showDialpad) {
             mHandler.obtainMessage(MSG_BRING_TO_FOREGROUND, showDialpad ? 1 : 0, 0).sendToTarget();
         }
 
-        /** {@inheritDoc} */
         @Override
         public void startActivity(String callId, PendingIntent intent) {
             SomeArgs args = SomeArgs.obtain();
@@ -161,9 +156,11 @@ public abstract class InCallService {
 
     private Phone mPhone;
 
-    protected InCallService() {}
+    public InCallService() {
+    }
 
-    public final IBinder getBinder() {
+    @Override
+    public IBinder onBind(Intent intent) {
         return new InCallServiceBinder();
     }
 
@@ -171,7 +168,8 @@ public abstract class InCallService {
      * Obtain the {@code Phone} associated with this {@code InCallService}.
      *
      * @return The {@code Phone} object associated with this {@code InCallService}, or {@code null}
-     * if the {@code InCallService} is not in a state where it has an associated {@code Phone}.
+     *         if the {@code InCallService} is not in a state where it has an associated
+     *         {@code Phone}.
      */
     public Phone getPhone() {
         return mPhone;
@@ -180,12 +178,13 @@ public abstract class InCallService {
     /**
      * Invoked when the {@code Phone} has been created. This is a signal to the in-call experience
      * to start displaying in-call information to the user. Each instance of {@code InCallService}
-     * will have only one {@code Phone}, and this method will be called exactly once in the
-     * lifetime of the {@code InCallService}.
+     * will have only one {@code Phone}, and this method will be called exactly once in the lifetime
+     * of the {@code InCallService}.
      *
      * @param phone The {@code Phone} object associated with this {@code InCallService}.
      */
-    public void onPhoneCreated(Phone phone) { }
+    public void onPhoneCreated(Phone phone) {
+    }
 
     /**
      * Invoked when a {@code Phone} has been destroyed. This is a signal to the in-call experience
@@ -195,5 +194,6 @@ public abstract class InCallService {
      *
      * @param phone The {@code Phone} object associated with this {@code InCallService}.
      */
-    public void onPhoneDestroyed(Phone phone) { }
+    public void onPhoneDestroyed(Phone phone) {
+    }
 }
