@@ -40,6 +40,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="14sp"
-            android:textColor="@color/qs_user_detail_name" />
+            android:textColor="@color/qs_user_detail_name"
+            android:gravity="center_horizontal" />
 
 </com.android.systemui.qs.tiles.UserDetailItemView>

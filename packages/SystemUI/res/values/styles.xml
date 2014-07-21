@@ -275,4 +275,7 @@
         <item name="android:textStyle">italic</item>
         <item name="android:textColor">#60000000</item>
     </style>
+
+    <style name="Theme.SystemUI.Dialog" parent="@android:style/Theme.DeviceDefault.Light.Dialog">
+    </style>
 </resources>
