@@ -28715,6 +28715,7 @@ package android.telecomm {
   }
 
   public class VideoCallProfile implements android.os.Parcelable {
+    ctor public VideoCallProfile(int);
     ctor public VideoCallProfile(int, int);
     method public int describeContents();
     method public int getQuality();

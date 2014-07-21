@@ -77,6 +77,15 @@ public class VideoCallProfile implements Parcelable {
      * Creates an instance of the VideoCallProfile
      *
      * @param videoState The video state.
+     */
+    public VideoCallProfile(int videoState) {
+        this(videoState, QUALITY_DEFAULT);
+    }
+
+    /**
+     * Creates an instance of the VideoCallProfile
+     *
+     * @param videoState The video state.
      * @param quality The video quality.
      */
     public VideoCallProfile(int videoState, int quality) {
