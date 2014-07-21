@@ -16,10 +16,12 @@
 
 package android.telecomm;
 
+import android.annotation.SdkConstant;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.Intent;
 import android.content.ComponentName;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -42,6 +44,12 @@ import java.util.Map;
  * Android device.
  */
 public abstract class ConnectionService extends Service {
+    /**
+     * The {@link Intent} that must be declared as handled by the service.
+     */
+    @SdkConstant(SdkConstantType.SERVICE_ACTION)
+    public static final String SERVICE_INTERFACE = "android.telecomm.ConnectionService";
+
     // Flag controlling whether PII is emitted into the logs
     private static final boolean PII_DEBUG = Log.isLoggable(android.util.Log.DEBUG);
     private static final Connection NULL_CONNECTION = new Connection() {};
