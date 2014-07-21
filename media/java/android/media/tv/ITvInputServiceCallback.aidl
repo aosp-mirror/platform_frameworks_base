@@ -24,6 +24,7 @@ import android.media.tv.TvInputInfo;
  * @hide
  */
 oneway interface ITvInputServiceCallback {
-    void addTvInput(in TvInputInfo inputInfo);
+    void addHardwareTvInput(in int deviceID, in TvInputInfo inputInfo);
+    void addHdmiCecTvInput(in int logicalAddress, in TvInputInfo inputInfo);
     void removeTvInput(in String inputId);
 }

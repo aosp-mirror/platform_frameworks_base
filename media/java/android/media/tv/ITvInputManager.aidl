@@ -64,11 +64,6 @@ interface ITvInputManager {
 
     // For TV input hardware binding
     List<TvInputHardwareInfo> getHardwareList();
-    /*
-     * All TvInputServices which want to use hardware must call this method on
-     * BOOT_COMPLETE.
-     */
-    void registerTvInputInfo(in TvInputInfo info, int deviceId);
     ITvInputHardware acquireTvInputHardware(int deviceId, in ITvInputHardwareCallback callback,
             in TvInputInfo info, int userId);
     void releaseTvInputHardware(int deviceId, in ITvInputHardware hardware, int userId);
