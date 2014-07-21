@@ -126,6 +126,8 @@ public class SoundPool {
      * @param srcQuality the sample-rate converter quality. Currently has no
      *                   effect. Use 0 for the default.
      * @return a SoundPool object, or null if creation failed
+     * @deprecated use {@link SoundPool.Builder} instead to create and configure a
+     *     SoundPool instance
      */
     public SoundPool(int maxStreams, int streamType, int srcQuality) {
         this(maxStreams,
@@ -141,8 +143,6 @@ public class SoundPool {
     }
 
     /**
-     * @hide
-     * CANDIDATE FOR PUBLIC API
      * Builder class for {@link SoundPool} objects.
      */
     public static class Builder {
@@ -164,7 +164,7 @@ public class SoundPool {
         public Builder setMaxStreams(int maxStreams) throws IllegalArgumentException {
             if (maxStreams <= 0) {
                 throw new IllegalArgumentException(
-                        "Strictly position value required for the maximum number of streams");
+                        "Strictly positive value required for the maximum number of streams");
             }
             mMaxStreams = maxStreams;
             return this;
