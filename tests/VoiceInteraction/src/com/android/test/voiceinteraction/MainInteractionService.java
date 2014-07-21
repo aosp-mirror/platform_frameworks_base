@@ -35,11 +35,6 @@ public class MainInteractionService extends VoiceInteractionService {
         }
 
         @Override
-        public void onDetectionStarted() {
-            Log.i(TAG, "onDetectionStarted");
-        }
-
-        @Override
         public void onDetectionStopped() {
             Log.i(TAG, "onDetectionStopped");
         }

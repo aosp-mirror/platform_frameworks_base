@@ -24,6 +24,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.hardware.soundtrigger.SoundTrigger;
 import android.hardware.soundtrigger.SoundTrigger.Keyphrase;
 import android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel;
+import android.os.UserManager;
 import android.text.TextUtils;
 import android.util.Slog;
 
@@ -38,6 +39,7 @@ import java.util.UUID;
  */
 public class DatabaseHelper extends SQLiteOpenHelper {
     static final String TAG = "SoundModelDBHelper";
+    static final boolean DBG = false;
 
     private static final String NAME = "sound_model.db";
     private static final int VERSION = 2;
@@ -75,8 +77,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + SoundModelContract.KEY_TYPE + " INTEGER,"
             + SoundModelContract.KEY_DATA + " BLOB" + ")";
 
+    private final UserManager mUserManager;
+
     public DatabaseHelper(Context context) {
         super(context, NAME, null, VERSION);
+        mUserManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
     }
 
     @Override
@@ -175,8 +180,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 String id = c.getString(c.getColumnIndex(SoundModelContract.KEY_ID));
                 byte[] data = c.getBlob(c.getColumnIndex(SoundModelContract.KEY_DATA));
                 // Get all the keyphrases for this this sound model.
-                models.add(new KeyphraseSoundModel(
-                        UUID.fromString(id), data, getKeyphrasesForSoundModel(db, id)));
+                // Validate the sound model.
+                if (id == null) {
+                    Slog.w(TAG, "Ignoring sound model since it doesn't specify an ID");
+                    continue;
+                }
+                KeyphraseSoundModel model = new KeyphraseSoundModel(
+                        UUID.fromString(id), data, getKeyphrasesForSoundModel(db, id));
+                if (DBG) {
+                    Slog.d(TAG, "Adding model: " + model);
+                }
+                models.add(model);
             } while (c.moveToNext());
         }
         c.close();
@@ -199,6 +213,25 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         c.getString(c.getColumnIndex(KeyphraseContract.KEY_USERS)));
                 String locale = c.getString(c.getColumnIndex(KeyphraseContract.KEY_LOCALE));
                 String hintText = c.getString(c.getColumnIndex(KeyphraseContract.KEY_HINT_TEXT));
+
+                // Only add keyphrases meant for the current user.
+                if (users == null) {
+                    // No users present in the keyphrase.
+                    Slog.w(TAG, "Ignoring keyphrase since it doesn't specify users");
+                    continue;
+                }
+                boolean isAvailableForCurrentUser = false;
+                int currentUser = mUserManager.getUserHandle();
+                for (int user : users) {
+                    if (currentUser == user) {
+                        isAvailableForCurrentUser = true;
+                        break;
+                    }
+                }
+                if (!isAvailableForCurrentUser) {
+                    Slog.w(TAG, "Ignoring keyphrase since it's not for the current user");
+                    continue;
+                }
 
                 keyphrases.add(new Keyphrase(id, modes, locale, hintText, users));
             } while (c.moveToNext());

@@ -38,8 +38,9 @@ import java.util.ArrayList;
  */
 public class SoundTriggerHelper implements SoundTrigger.StatusListener {
     static final String TAG = "SoundTriggerHelper";
+    static final boolean DBG = false;
     // TODO: Remove this.
-    static final int TEMP_KEYPHRASE_ID = 1;
+    static final int TEMP_KEYPHRASE_ID = 100;
 
     /**
      * Return codes for {@link #startRecognition(int, KeyphraseSoundModel,
@@ -101,20 +102,32 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             KeyphraseSoundModel soundModel,
             IRecognitionStatusCallback listener,
             RecognitionConfig recognitionConfig) {
+        if (DBG) {
+            Slog.d(TAG, "startRecognition for keyphraseId=" + keyphraseId
+                    + " soundModel=" + soundModel + ", listener=" + listener
+                    + ", recognitionConfig=" + recognitionConfig);
+            Slog.d(TAG, "moduleProperties=" + moduleProperties);
+            Slog.d(TAG, "# of current listeners=" + mActiveListeners.size());
+            Slog.d(TAG, "mCurrentSoundModelHandle=" + mCurrentSoundModelHandle);
+        }
         if (moduleProperties == null || mModule == null) {
             Slog.w(TAG, "Attempting startRecognition without the capability");
             return STATUS_ERROR;
         }
 
+        if (mCurrentSoundModelHandle != INVALID_SOUND_MODEL_HANDLE) {
+            Slog.w(TAG, "Canceling previous recognition");
+            // TODO: Inspect the return codes here.
+            mModule.unloadSoundModel(mCurrentSoundModelHandle);
+            mCurrentSoundModelHandle = INVALID_SOUND_MODEL_HANDLE;
+        }
+
+        // If the previous recognition was by a different listener,
+        // Notify them that it was stopped.
         IRecognitionStatusCallback oldListener = mActiveListeners.get(keyphraseId);
-        if (oldListener != null && oldListener != listener) {
-            if (mCurrentSoundModelHandle != INVALID_SOUND_MODEL_HANDLE) {
-                Slog.w(TAG, "Canceling previous recognition");
-                // TODO: Inspect the return codes here.
-                mModule.unloadSoundModel(mCurrentSoundModelHandle);
-            }
+        if (oldListener != null && oldListener.asBinder() != listener.asBinder()) {
             try {
-                mActiveListeners.get(keyphraseId).onDetectionStopped();
+                oldListener.onDetectionStopped();
             } catch (RemoteException e) {
                 Slog.w(TAG, "RemoteException in onDetectionStopped");
             }
@@ -159,17 +172,26 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
      * @return One of {@link #STATUS_ERROR} or {@link #STATUS_OK}.
      */
     synchronized int stopRecognition(int keyphraseId, IRecognitionStatusCallback listener) {
+        if (DBG) {
+            Slog.d(TAG, "stopRecognition for keyphraseId=" + keyphraseId
+                    + ", listener=" + listener);
+            Slog.d(TAG, "# of current listeners = " + mActiveListeners.size());
+        }
+
         if (moduleProperties == null || mModule == null) {
             Slog.w(TAG, "Attempting stopRecognition without the capability");
             return STATUS_ERROR;
         }
 
         IRecognitionStatusCallback currentListener = mActiveListeners.get(keyphraseId);
-        if (currentListener == null) {
+        if (listener == null) {
+            Slog.w(TAG, "Attempting stopRecognition without a valid listener");
+            return STATUS_ERROR;
+        } if (currentListener == null) {
             // startRecognition hasn't been called or it failed.
             Slog.w(TAG, "Attempting stopRecognition without a successful startRecognition");
             return STATUS_ERROR;
-        } else if (currentListener != listener) {
+        } else if (currentListener.asBinder() != listener.asBinder()) {
             // TODO: Figure out if this should match the listener that was passed in during
             // startRecognition, or should we allow a different listener to stop the recognition,
             // in which case we don't need to pass in a listener here.

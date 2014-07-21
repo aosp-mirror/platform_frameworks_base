@@ -27,6 +27,8 @@ import android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra;
 import android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel;
 import android.hardware.soundtrigger.SoundTrigger.ModuleProperties;
 import android.hardware.soundtrigger.SoundTrigger.RecognitionConfig;
+import android.os.Handler;
+import android.os.Message;
 import android.os.RemoteException;
 import android.util.Slog;
 
@@ -72,18 +74,6 @@ public class AlwaysOnHotwordDetector {
     public static final int STATUS_ERROR = SoundTrigger.STATUS_ERROR;
     public static final int STATUS_OK = SoundTrigger.STATUS_OK;
 
-    //---- Keyphrase recognition status ----//
-    /** Indicates that recognition is not available. */
-    public static final int RECOGNITION_STATUS_NOT_AVAILABLE = 0x01;
-    /** Indicates that recognition has not been requested. */
-    public static final int RECOGNITION_STATUS_NOT_REQUESTED = 0x02;
-    /** Indicates that recognition has been requested. */
-    public static final int RECOGNITION_STATUS_REQUESTED = 0x04;
-    /** Indicates that recognition has been temporarily disabled. */
-    public static final int RECOGNITION_STATUS_DISABLED_TEMPORARILY = 0x08;
-    /** Indicates that recognition is currently active . */
-    public static final int RECOGNITION_STATUS_ACTIVE = 0x10;
-
     //-- Flags for startRecogntion    ----//
     /** Empty flag for {@link #startRecognition(int)}. */
     public static final int RECOGNITION_FLAG_NONE = 0;
@@ -96,14 +86,21 @@ public class AlwaysOnHotwordDetector {
     //---- Recognition mode flags ----//
     // Must be kept in sync with the related attribute defined as searchKeyphraseRecognitionFlags.
 
-    /** Simple recognition of the key phrase. Returned by {@link #getRecognitionStatus()} */
+    /**
+     * Simple recognition of the key phrase. Returned by {@link #getSupportedRecognitionModes()}
+     */
     public static final int RECOGNITION_MODE_VOICE_TRIGGER
             = SoundTrigger.RECOGNITION_MODE_VOICE_TRIGGER;
-    /** Trigger only if one user is identified. Returned by {@link #getRecognitionStatus()} */
+    /**
+     * Trigger only if one user is identified. Returned by {@link #getSupportedRecognitionModes()}
+     */
     public static final int RECOGNITION_MODE_USER_IDENTIFICATION
             = SoundTrigger.RECOGNITION_MODE_USER_IDENTIFICATION;
 
     static final String TAG = "AlwaysOnHotwordDetector";
+
+    private static final int MSG_HOTWORD_DETECTED = 1;
+    private static final int MSG_DETECTION_STOPPED = 2;
 
     private final String mText;
     private final String mLocale;
@@ -118,12 +115,11 @@ public class AlwaysOnHotwordDetector {
      */
     private final KeyphraseSoundModel mEnrolledSoundModel;
     private final KeyphraseEnrollmentInfo mKeyphraseEnrollmentInfo;
-    private final int mAvailability;
     private final IVoiceInteractionService mVoiceInteractionService;
     private final IVoiceInteractionManagerService mModelManagementService;
     private final SoundTriggerListener mInternalCallback;
-
-    private int mRecognitionState;
+    private final Callback mExternalCallback;
+    private final boolean mDisabled;
 
     /**
      * Callbacks for always-on hotword detection.
@@ -136,10 +132,6 @@ public class AlwaysOnHotwordDetector {
          *        {@link AlwaysOnHotwordDetector#startRecognition(int)}.
          */
         void onDetected(byte[] data);
-        /**
-         * Called when the detection for the associated keyphrase starts.
-         */
-        void onDetectionStarted();
         /**
          * Called when the detection for the associated keyphrase stops.
          */
@@ -163,7 +155,8 @@ public class AlwaysOnHotwordDetector {
         mLocale = locale;
         mKeyphraseEnrollmentInfo = keyphraseEnrollmentInfo;
         mKeyphraseMetadata = mKeyphraseEnrollmentInfo.getKeyphraseMetadata(text, locale);
-        mInternalCallback = new SoundTriggerListener(callback);
+        mExternalCallback = callback;
+        mInternalCallback = new SoundTriggerListener(new MyHandler());
         mVoiceInteractionService = voiceInteractionService;
         mModelManagementService = modelManagementService;
         if (mKeyphraseMetadata != null) {
@@ -171,7 +164,9 @@ public class AlwaysOnHotwordDetector {
         } else {
             mEnrolledSoundModel = null;
         }
-        mAvailability = internalGetAvailability();
+        int initialAvailability = internalGetAvailabilityLocked();
+        mDisabled = (initialAvailability == KEYPHRASE_HARDWARE_UNAVAILABLE)
+                || (initialAvailability == KEYPHRASE_UNSUPPORTED);
     }
 
     /**
@@ -186,7 +181,9 @@ public class AlwaysOnHotwordDetector {
      *         {@link #KEYPHRASE_ENROLLED}.
      */
     public int getAvailability() {
-        return mAvailability;
+        synchronized (this) {
+            return internalGetAvailabilityLocked();
+        }
     }
 
     /**
@@ -197,24 +194,18 @@ public class AlwaysOnHotwordDetector {
      *         before calling this method to avoid this exception.
      */
     public int getSupportedRecognitionModes() {
-        if (mAvailability == KEYPHRASE_HARDWARE_UNAVAILABLE
-                || mAvailability == KEYPHRASE_UNSUPPORTED) {
+        synchronized (this) {
+            return getSupportedRecognitionModesLocked();
+        }
+    }
+
+    private int getSupportedRecognitionModesLocked() {
+        if (mDisabled) {
             throw new UnsupportedOperationException(
                     "Getting supported recognition modes for the keyphrase is not supported");
         }
 
         return mKeyphraseMetadata.recognitionModeFlags;
-    }
-
-    /**
-     * Gets the status of the recognition.
-     * @return A flag comprised of {@link #RECOGNITION_STATUS_NOT_AVAILABLE},
-     *         {@link #RECOGNITION_STATUS_NOT_REQUESTED}, {@link #RECOGNITION_STATUS_REQUESTED},
-     *         {@link #RECOGNITION_STATUS_DISABLED_TEMPORARILY} and
-     *         {@link #RECOGNITION_STATUS_ACTIVE}.
-     */
-    public int getRecognitionStatus() {
-        return mRecognitionState;
     }
 
     /**
@@ -229,16 +220,19 @@ public class AlwaysOnHotwordDetector {
      *         before calling this method to avoid this exception.
      */
     public int startRecognition(int recognitionFlags) {
-        if (mAvailability != KEYPHRASE_ENROLLED
-                || (mRecognitionState&RECOGNITION_STATUS_NOT_AVAILABLE) != 0) {
+        synchronized (this) {
+            return startRecognitionLocked(recognitionFlags);
+        }
+    }
+
+    private int startRecognitionLocked(int recognitionFlags) {
+        if (internalGetAvailabilityLocked() != KEYPHRASE_ENROLLED) {
             throw new UnsupportedOperationException(
                     "Recognition for the given keyphrase is not supported");
         }
 
-        mRecognitionState &= RECOGNITION_STATUS_REQUESTED;
         KeyphraseRecognitionExtra[] recognitionExtra = new KeyphraseRecognitionExtra[1];
         // TODO: Do we need to do something about the confidence level here?
-        // TODO: Take in captureTriggerAudio as a method param here.
         recognitionExtra[0] = new KeyphraseRecognitionExtra(mKeyphraseMetadata.id,
                 mKeyphraseMetadata.recognitionModeFlags, new ConfidenceLevel[0]);
         boolean captureTriggerAudio =
@@ -267,12 +261,17 @@ public class AlwaysOnHotwordDetector {
      *         before calling this method to avoid this exception.
      */
     public int stopRecognition() {
-        if (mAvailability != KEYPHRASE_ENROLLED) {
+        synchronized (this) {
+            return stopRecognitionLocked();
+        }
+    }
+
+    private synchronized int stopRecognitionLocked() {
+        if (internalGetAvailabilityLocked() != KEYPHRASE_ENROLLED) {
             throw new UnsupportedOperationException(
                     "Recognition for the given keyphrase is not supported");
         }
 
-        mRecognitionState &= ~RECOGNITION_STATUS_NOT_REQUESTED;
         int code = STATUS_ERROR;
         try {
             code = mModelManagementService.stopRecognition(
@@ -299,8 +298,7 @@ public class AlwaysOnHotwordDetector {
      *         before calling this method to avoid this exception.
      */
     public Intent getManageIntent(int action) {
-        if (mAvailability == KEYPHRASE_HARDWARE_UNAVAILABLE
-                || mAvailability == KEYPHRASE_UNSUPPORTED) {
+        if (mDisabled) {
             throw new UnsupportedOperationException(
                     "Managing the given keyphrase is not supported");
         }
@@ -313,7 +311,7 @@ public class AlwaysOnHotwordDetector {
         return mKeyphraseEnrollmentInfo.getManageKeyphraseIntent(action, mText, mLocale);
     }
 
-    private int internalGetAvailability() {
+    private int internalGetAvailabilityLocked() {
         ModuleProperties dspModuleProperties = null;
         try {
             dspModuleProperties =
@@ -323,21 +321,16 @@ public class AlwaysOnHotwordDetector {
         }
         // No DSP available
         if (dspModuleProperties == null) {
-            mRecognitionState = RECOGNITION_STATUS_NOT_AVAILABLE;
             return KEYPHRASE_HARDWARE_UNAVAILABLE;
         }
         // No enrollment application supports this keyphrase/locale
         if (mKeyphraseMetadata == null) {
-            mRecognitionState = RECOGNITION_STATUS_NOT_AVAILABLE;
             return KEYPHRASE_UNSUPPORTED;
         }
         // This keyphrase hasn't been enrolled.
         if (mEnrolledSoundModel == null) {
-            mRecognitionState = RECOGNITION_STATUS_NOT_AVAILABLE;
             return KEYPHRASE_UNENROLLED;
         }
-        // Mark recognition as available
-        mRecognitionState &= ~RECOGNITION_STATUS_NOT_AVAILABLE;
         return KEYPHRASE_ENROLLED;
     }
 
@@ -358,7 +351,6 @@ public class AlwaysOnHotwordDetector {
                     continue;
                 }
                 for (Keyphrase keyphrase : soundModel.keyphrases) {
-                    // TODO: Check the user handle here to only load a model for the current user.
                     if (keyphrase.id == keyphraseId) {
                         return soundModel;
                     }
@@ -372,28 +364,39 @@ public class AlwaysOnHotwordDetector {
 
     /** @hide */
     static final class SoundTriggerListener extends IRecognitionStatusCallback.Stub {
-        private final Callback mCallback;
+        private final Handler mHandler;
 
-        public SoundTriggerListener(Callback callback) {
-            this.mCallback = callback;
+        public SoundTriggerListener(Handler handler) {
+            mHandler = handler;
         }
 
         @Override
         public void onDetected(byte[] data) {
-            Slog.i(TAG, "onKeyphraseSpoken");
-            mCallback.onDetected(data);
-        }
-
-        @Override
-        public void onDetectionStarted() {
-            // TODO: Set the RECOGNITION_STATUS_ACTIVE flag here.
-            mCallback.onDetectionStarted();
+            Slog.i(TAG, "onDetected");
+            Message message = Message.obtain(mHandler, MSG_HOTWORD_DETECTED);
+            message.obj = data;
+            message.sendToTarget();
         }
 
         @Override
         public void onDetectionStopped() {
-            // TODO: Unset the RECOGNITION_STATUS_ACTIVE flag here.
-            mCallback.onDetectionStopped();
+            Slog.i(TAG, "onDetectionStopped");
+            mHandler.sendEmptyMessage(MSG_DETECTION_STOPPED);
+        }
+    }
+
+    class MyHandler extends Handler {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_HOTWORD_DETECTED:
+                    mExternalCallback.onDetected((byte[]) msg.obj);
+                    break;
+                case MSG_DETECTION_STOPPED:
+                    mExternalCallback.onDetectionStopped();
+                default:
+                    super.handleMessage(msg);
+            }
         }
     }
 }
