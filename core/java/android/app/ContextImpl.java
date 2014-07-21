@@ -762,9 +762,16 @@ class ContextImpl extends Context {
         registerService(PERSISTENT_DATA_BLOCK_SERVICE, new ServiceFetcher() {
             public Object createService(ContextImpl ctx) {
                 IBinder b = ServiceManager.getService(PERSISTENT_DATA_BLOCK_SERVICE);
-                return new PersistentDataBlockManager(
-                        IPersistentDataBlockService.Stub.asInterface(b));
-        }});
+                IPersistentDataBlockService persistentDataBlockService =
+                        IPersistentDataBlockService.Stub.asInterface(b);
+                if (persistentDataBlockService != null) {
+                    return new PersistentDataBlockManager(persistentDataBlockService);
+                } else {
+                    // not supported
+                    return null;
+                }
+            }
+        });
 
         registerService(MEDIA_PROJECTION_SERVICE, new ServiceFetcher() {
                 public Object createService(ContextImpl ctx) {
