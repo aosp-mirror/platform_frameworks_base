@@ -306,6 +306,9 @@ href="http://developer.android.com/sdk/index.html">developer.android.com/sdk/</a
   <p>
   Android Studio is a new IDE powered by IntelliJ that provides new features and improvements
   over ADT. It's currently in beta but will be the official Android IDE once it's ready.</p>
+  <p>
+  If you're a new Android developer, you should consider starting with Android Studio, because the
+  ADT plugin for Eclipse is no longer in active development.</p>
   <p style="margin: 0;">
   <a href="/sdk/installing/studio.html">Learn more about Android Studio</a></p>
   </div>
