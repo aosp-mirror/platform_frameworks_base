@@ -122,7 +122,8 @@ public final class TvInputInfo implements Parcelable {
     public static TvInputInfo createTvInputInfo(Context context, ResolveInfo service)
             throws XmlPullParserException, IOException {
         return createTvInputInfo(context, service, generateInputIdForComponentName(
-                new ComponentName(service.serviceInfo.packageName, service.serviceInfo.name)));
+                new ComponentName(service.serviceInfo.packageName, service.serviceInfo.name)),
+                null);
     }
 
     /**
@@ -134,10 +135,10 @@ public final class TvInputInfo implements Parcelable {
      * @hide
      */
     public static TvInputInfo createTvInputInfo(Context context, ResolveInfo service,
-            HdmiCecDeviceInfo cecInfo) throws XmlPullParserException, IOException {
+            HdmiCecDeviceInfo cecInfo, String parentId) throws XmlPullParserException, IOException {
         return createTvInputInfo(context, service, generateInputIdForHdmiCec(
                 new ComponentName(service.serviceInfo.packageName, service.serviceInfo.name),
-                cecInfo));
+                cecInfo), parentId);
     }
 
     /**
@@ -152,11 +153,11 @@ public final class TvInputInfo implements Parcelable {
             TvInputHardwareInfo hardwareInfo) throws XmlPullParserException, IOException {
         return createTvInputInfo(context, service, generateInputIdForHardware(
                 new ComponentName(service.serviceInfo.packageName, service.serviceInfo.name),
-                hardwareInfo));
+                hardwareInfo), null);
     }
 
     private static TvInputInfo createTvInputInfo(Context context, ResolveInfo service,
-            String id) throws XmlPullParserException, IOException {
+            String id, String parentId) throws XmlPullParserException, IOException {
         ServiceInfo si = service.serviceInfo;
         PackageManager pm = context.getPackageManager();
         XmlResourceParser parser = null;
@@ -181,7 +182,7 @@ public final class TvInputInfo implements Parcelable {
                         "Meta-data does not start with tv-input-service tag in " + si.name);
             }
 
-            TvInputInfo input = new TvInputInfo(context, service, id, null);
+            TvInputInfo input = new TvInputInfo(service, id, parentId);
             TypedArray sa = res.obtainAttributes(attrs,
                     com.android.internal.R.styleable.TvInputService);
             input.mSetupActivity = sa.getString(
@@ -222,9 +223,8 @@ public final class TvInputInfo implements Parcelable {
      * @param id ID of this TV input. Should be generated via generateInputId*().
      * @param parentId ID of this TV input's parent input. {@code null} if none exists.
      */
-    private TvInputInfo(Context context, ResolveInfo service, String id, String parentId) {
+    private TvInputInfo(ResolveInfo service, String id, String parentId) {
         mService = service;
-        ServiceInfo si = service.serviceInfo;
         mId = id;
         mParentId = parentId;
     }
@@ -429,7 +429,6 @@ public final class TvInputInfo implements Parcelable {
 
     /**
      * Used to make this class parcelable.
-     *
      * @hide
      */
     public static final Parcelable.Creator<TvInputInfo> CREATOR =
