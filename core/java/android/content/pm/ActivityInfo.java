@@ -112,7 +112,7 @@ public class ActivityInfo extends ComponentInfo
      * Constant corresponding to <code>doNotPersist</code> in
      * the {@link android.R.attr#persistableMode} attribute.
      */
-    public static final int DO_NOT_PERSIST = 1;
+    public static final int PERSIST_NEVER = 1;
     /**
      * Constant corresponding to <code>persistAcrossReboots</code> in
      * the {@link android.R.attr#persistableMode} attribute.
@@ -667,7 +667,7 @@ public class ActivityInfo extends ComponentInfo
     private String persistableModeToString() {
         switch(persistableMode) {
             case PERSIST_ROOT_ONLY: return "PERSIST_ROOT_ONLY";
-            case DO_NOT_PERSIST: return "DO_NOT_PERSIST";
+            case PERSIST_NEVER: return "PERSIST_NEVER";
             case PERSIST_ACROSS_REBOOTS: return "PERSIST_ACROSS_REBOOTS";
             default: return "UNKNOWN=" + persistableMode;
         }

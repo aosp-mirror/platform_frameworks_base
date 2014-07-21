@@ -905,7 +905,7 @@
         <enum name="persistRootOnly" value="0" />
         <!-- If this activity forms the root of a task then that task will not be persisted
              across reboots -->
-        <enum name="doNotPersist" value="1" />
+        <enum name="persistNever" value="1" />
         <!-- If this activity forms the root of a task then the task and this activity will
              be persisted across reboots. If the activity above this activity is also
              tagged with the attribute <code>"persist"</code> then it will be persisted as well.
