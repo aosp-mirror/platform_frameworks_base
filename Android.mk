@@ -391,40 +391,11 @@ LOCAL_INTERMEDIATE_SOURCES := \
 LOCAL_NO_STANDARD_LIBRARIES := true
 LOCAL_JAVA_LIBRARIES := core-libart conscrypt okhttp core-junit bouncycastle ext
 
-LOCAL_MODULE := framework-base
+LOCAL_MODULE := framework
+
+LOCAL_DX_FLAGS := --core-library --multi-dex
 
 LOCAL_RMTYPEDEFS := true
-
-include $(BUILD_STATIC_JAVA_LIBRARY)
-
-# Make sure that R.java and Manifest.java are built before we build
-# the source for this library.
-framework_res_R_stamp := \
-	$(call intermediates-dir-for,APPS,framework-res,,COMMON)/src/R.stamp
-$(full_classes_compiled_jar): $(framework_res_R_stamp)
-
-# Build part 1 of the framework library.
-# ============================================================
-include $(CLEAR_VARS)
-
-LOCAL_MODULE := framework
-LOCAL_MODULE_CLASS := JAVA_LIBRARIES
-LOCAL_NO_STANDARD_LIBRARIES := true
-LOCAL_STATIC_JAVA_LIBRARIES := framework-base
-LOCAL_DX_FLAGS := --core-library
-
-# List of packages to include along with their descendants.
-LOCAL_JAR_PACKAGES := \
-    android
-
-# List of packages to exclude along with their descendants.
-# Overrides inclusion.
-LOCAL_JAR_EXCLUDE_PACKAGES := \
-    android.bluetooth \
-    android.filterfw \
-    android.filterpacks \
-    android.hardware \
-    android.telephony
 
 # List of classes and interfaces which should be loaded by the Zygote.
 LOCAL_JAVA_RESOURCE_FILES += $(LOCAL_PATH)/preloaded-classes
@@ -432,35 +403,15 @@ LOCAL_JAVA_RESOURCE_FILES += $(LOCAL_PATH)/preloaded-classes
 include $(BUILD_JAVA_LIBRARY)
 framework_module := $(LOCAL_INSTALLED_MODULE)
 
-# Build part 2 of the framework library.
-# ============================================================
-include $(CLEAR_VARS)
+# Make sure that R.java and Manifest.java are built before we build
+# the source for this library.
+framework_res_R_stamp := \
+	$(call intermediates-dir-for,APPS,framework-res,,COMMON)/src/R.stamp
+$(full_classes_compiled_jar): $(framework_res_R_stamp)
 
-LOCAL_MODULE := framework2
-LOCAL_MODULE_CLASS := JAVA_LIBRARIES
-LOCAL_NO_STANDARD_LIBRARIES := true
-LOCAL_STATIC_JAVA_LIBRARIES := framework-base
-LOCAL_DX_FLAGS := --core-library
-
-# List of packages to include along with their descendants.
-LOCAL_JAR_PACKAGES := \
-    android.bluetooth \
-    android.filterfw \
-    android.filterpacks \
-    android.hardware \
-    android.telephony \
-    com \
-    javax
-
-include $(BUILD_JAVA_LIBRARY)
-framework2_module := $(LOCAL_INSTALLED_MODULE)
-
-# Make sure that all framework modules are installed when framework is.
-# ============================================================
 $(framework_module): | $(dir $(framework_module))framework-res.apk
-$(framework_module): | $(dir $(framework_module))framework2.jar
 
-framework_built := $(call java-lib-deps,framework framework2)
+framework_built := $(call java-lib-deps,framework)
 
 # Copy AIDL files to be preprocessed and included in the SDK,
 # specified relative to the root of the build tree.
@@ -636,7 +587,6 @@ framework_docs_LOCAL_API_CHECK_JAVA_LIBRARIES := \
 	okhttp \
 	ext \
 	framework \
-	framework2 \
 	telephony-common \
 	voip-common
 
@@ -678,7 +628,7 @@ framework_docs_LOCAL_DROIDDOC_OPTIONS := \
 		-overview $(LOCAL_PATH)/core/java/overview.html
 
 framework_docs_LOCAL_API_CHECK_ADDITIONAL_JAVA_DIR:= \
-	$(call intermediates-dir-for,JAVA_LIBRARIES,framework-base,,COMMON)
+	$(call intermediates-dir-for,JAVA_LIBRARIES,framework,,COMMON)
 
 framework_docs_LOCAL_ADDITIONAL_JAVA_DIR:= \
 	$(framework_docs_LOCAL_API_CHECK_ADDITIONAL_JAVA_DIR) \
