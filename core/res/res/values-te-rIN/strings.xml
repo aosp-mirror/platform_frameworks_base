@@ -1006,16 +1006,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"మీ ఫోన్‌లో నిల్వ చేయబడిన బ్రౌజర్ చరిత్రను లేదా బుక్‌మార్క్‌లను సవరించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఇది బ్రౌజర్ డేటాను ఎరేజ్ చేయడానికి లేదా సవరించడానికి అనువర్తనాన్ని అనుమతించవచ్చు. గమనిక: ఈ అనుమతి మూడవ పక్షం బ్రౌజర్‌లు లేదా వెబ్ బ్రౌజింగ్ సామర్థ్యాలు గల ఇతర అనువర్తనాల ద్వారా అమలు చేయబడకపోవచ్చు."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"అలారం సెట్ చేయడం"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"ఇన్‌స్టాల్ చేయబడిన అలారం గడియారం అనువర్తనంలో అలారంను సెట్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. కొన్ని అలారం గల గడియారం అనువర్తనాలు ఈ లక్షణాన్ని అమలు చేయకపోవచ్చు."</string>
-    <!-- no translation found for permlab_writeVoicemail (7309899891683938100) -->
-    <skip />
-    <!-- no translation found for permdesc_writeVoicemail (6592572839715924830) -->
-    <skip />
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"వాయిస్ మెయిల్‌లను వ్రాయడం"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"మీ వాయిస్ మెయిల్ ఇన్‌బాక్స్ నుండి సందేశాలను సవరించడానికి మరియు తీసివేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"వాయిస్ మెయిల్‌ను జోడించడం"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"మీ వాయిస్ మెయిల్ ఇన్‌బాక్స్‌కి సందేశాలను జోడించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <!-- no translation found for permlab_readVoicemail (8415201752589140137) -->
-    <skip />
-    <!-- no translation found for permdesc_readVoicemail (8926534735321616550) -->
-    <skip />
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"వాయిస్ మెయిల్‌లను చదవడం"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"మీ వాయిస్ మెయిల్‌లను చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"బ్రౌజర్ భౌగోళిక స్థానం అనుమతులను సవరించడం"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"బ్రౌజర్ యొక్క భౌగోళిక స్థానం అనుమతులను సవరించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. హానికరమైన అనువర్తనాలు ఏకపక్ష వెబ్ సైట్‌లకు స్థాన సమాచారాన్ని అనుమతించడానికి దీన్ని ఉపయోగించవచ్చు."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"ప్యాకేజీలను ధృవీకరించడం"</string>

@@ -1006,16 +1006,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Lehetővé teszi az alkalmazás számára, hogy módosítsa a böngésző előzményeit vagy a telefonon tárolt könyvjelzőket. Az engedéllyel rendelkező alkalmazás törölheti vagy módosíthatja a böngésző adatait. Megjegyzés: előfordulhat, hogy ezt az engedélyt harmadik felek által üzemeltetett böngészők vagy egyéb böngészésre képes alkalmazások nem léptetik életbe."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"ébresztés beállítása"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Lehetővé teszi az alkalmazás számára, hogy ébresztőt állítson be egy telepített ébresztőóra alkalmazásban. Egyes ilyen alkalmazásokban lehet, hogy nem működik ez a funkció."</string>
-    <!-- no translation found for permlab_writeVoicemail (7309899891683938100) -->
-    <skip />
-    <!-- no translation found for permdesc_writeVoicemail (6592572839715924830) -->
-    <skip />
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"a hangüzenetek módosítása"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"Lehetővé teszi az alkalmazás számára, hogy üzeneteket módosítson vagy távolítson el a bejövő hangpostafiókból."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"hangposta hozzáadása"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Lehetővé teszi az alkalmazás számára, hogy üzeneteket adjon hozzá bejövő hangpostájához."</string>
-    <!-- no translation found for permlab_readVoicemail (8415201752589140137) -->
-    <skip />
-    <!-- no translation found for permdesc_readVoicemail (8926534735321616550) -->
-    <skip />
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"a hangüzenetek olvasása"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"Engedélyezi az alkalmazásnak a hangüzenetek olvasását."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"a böngésző helymeghatározási engedélyeinek módosítása"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Lehetővé teszi az alkalmazás számára, hogy módosítsa a böngésző helymeghatározási engedélyeit. Rosszindulatú alkalmazások ezt arra használhatják, hogy a helyére vonatkozó információkat küldjenek tetszőleges webhelyeknek."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"csomagok ellenőrzése"</string>

@@ -1006,16 +1006,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"အပလီကေးရှင်းအား ဘရောင်ဇာမှ မှတ်တမ်း သို့ မှတ်သားမှု အမှတ်များအား ပြင်ဆင်ခွင့် ပေးခြင်း။ အပလီကေးရှင်းမှ ဘရောင်ဇာ မှတ်တမ်းများကို ဖျက်ပစ်ခွင့် သို့ ပြင်ဆင်ခွင့် ရှိပါမည်။ မှတ်ချက်။ ဒီခွင့်ပြုချက်ကို တတိယပါတီ ဘရောင်ဇာများ၊ တခြား အပလီကေးရှင်းများမှ သုံးမည် မဟုတ်ပါ။"</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"နှိုးစက်သတ်မှတ်ရန်"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"appအား တပ်ဆင်ထားသည့် နှိုးစက်နာရီ app ထဲတွင် နှိုးစက်ကို သတ်မှတ်ခွင့် ပြုသည်။ အချို့ နှိုးစက် appများက ထိုအင်္ဂါရပ်ကို ပြီးမြောက်အောင် မလုပ်နိုင်ကြပါ။"</string>
-    <!-- no translation found for permlab_writeVoicemail (7309899891683938100) -->
-    <skip />
-    <!-- no translation found for permdesc_writeVoicemail (6592572839715924830) -->
-    <skip />
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"အသံမေးလ်ကို ရေးရန်"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"appအား သင်၏ အသံမေးလ် ဝင်စာများကို မွမ်းမံခွင့် နှင့် ဖယ်ရှားခွင့် ပြုသည်။"</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"အသံစာပို့စနစ်အားထည့်ရန်"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"appအား သင့် အသံမေးလ် ဝင်စာသို့ စာများကို ထည့်ခွင့် ပြုသည်။"</string>
-    <!-- no translation found for permlab_readVoicemail (8415201752589140137) -->
-    <skip />
-    <!-- no translation found for permdesc_readVoicemail (8926534735321616550) -->
-    <skip />
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"အသံမေးလ်ကို  ဖတ်ရန်"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"appအား သင်၏ အသံမေးလ်များကို ဖတ်ခွင့် ပြုရန်"</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"ဘရောင်ဇာ ဘူမိဇုန်သတ်မှတ်မှု ခွင့်ပြုချက်များကို မွမ်းမံခြင်း"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"appအား ဘရောင်ဇာ၏ ဘူမိဇုန်သတ်မှတ်ရေး ခွင့်ပြုချက်များကို မွမ်းမံခွင့် ပြုသည်။ ကြံဖန် appများက ၎င်းကို အသုံးချပြီး လိုရာ ဝက်ဘ်ဆိုက်များသို့ တည်နေရာ အချက်အလက် ပို့မှုကို လုပ်နိုင်သည်။"</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"packages များကိုအတည်ပြုစိစစ်ခြင်း"</string>

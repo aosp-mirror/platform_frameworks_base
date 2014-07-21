@@ -1006,16 +1006,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Arakatzailearen historia edo telefonoan gordetako laster-markak aldatzeko baimena ematen die aplikazioei. Horrela, aplikazioak agian arakatzaile-datuak ezabatu edo aldatu ahal izango ditu. Oharra: baimen hori hirugarrenen arakatzaileek edo sarea arakatzeko gaitasuna eskaintzen duten bestelako aplikazioek aplika dezakete."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"alarmak ezartzea"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Instalatutako alarma batean alarmak ezartzea baimentzen die aplikazioei. Alarma-aplikazio batzuek agian ez dute eginbide hori inplementatuko."</string>
-    <!-- no translation found for permlab_writeVoicemail (7309899891683938100) -->
-    <skip />
-    <!-- no translation found for permdesc_writeVoicemail (6592572839715924830) -->
-    <skip />
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"Idatzi ahots-mezuak"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"Erantzungailuko sarrera-ontziko mezuak aldatzea eta kentzea baimentzen die aplikazioei."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"gehitu erantzungailua"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Erantzungailuko sarrera-ontzian mezuak gehitzea baimentzen die aplikazioei."</string>
-    <!-- no translation found for permlab_readVoicemail (8415201752589140137) -->
-    <skip />
-    <!-- no translation found for permdesc_readVoicemail (8926534735321616550) -->
-    <skip />
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"Irakurri ahots-mezuak"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"Erantzungailuko mezuak irakurtzea baimentzen die aplikazioei."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"Aldatu arakatzailearen geokokapenaren baimenak"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Arakatzailearen geokokapenaren baimenak aldatzea baimentzen die aplikazioei. Aplikazio gaiztoek hori erabil dezakete kokapenari buruzko informazioa haiek hautatutako web-orrietara bidaltzeko."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"Egiaztatu paketeak"</string>

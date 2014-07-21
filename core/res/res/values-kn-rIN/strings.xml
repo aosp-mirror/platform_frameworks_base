@@ -1006,16 +1006,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"ನಿಮ್ಮ ಫೋನ್‍‍‍ನಲ್ಲಿ ಸಂಗ್ರಹಿಸಲಾಗಿರುವ ಬ್ರೌಸರ್‍‍ನ ಇತಿಹಾಸ ಅಥವಾ ಬುಕ್‌ಮಾರ್ಕ್ಗಳನ್ನು ಮಾರ್ಪಡಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅನುಮತಿಸುತ್ತದೆ. ಇದು ಬ್ರೌಸರ್‍‍ನ ಡೇಟಾವನ್ನು ಅಳಿಸಲು ಅಥವಾ ಮಾರ್ಪಡಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ಕಲ್ಪಿಸಿಕೊಡಬಹುದು. ಗಮನಿಸಿ: ಈ ಅನುಮತಿಯನ್ನು ವೆಬ್ ಬ್ರೌಸಿಂಗ್ ಸಾಮರ್ಥ್ಯಗಳನ್ನು ಹೊಂದಿರುವ ಮೂರನೇ-ವ್ಯಕ್ತಿ ಬ್ರೌಸರ್‍‍ಗಳು ಅಥವಾ ಅಪ್ಲಿಕೇಶನ್‍‍ಗಳ ಮೂಲಕ ಜಾರಿಗೊಳಿಸಲಾಗುವುದಿಲ್ಲ."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"ಅಲಾರಮ್ ಹೊಂದಿಸಿ"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"ಸ್ಥಾಪಿಸಲಾದ ಅಲಾರಾಂ ಗಡಿಯಾರ ಅಪ್ಲಿಕೇಶನ್‌ನಲ್ಲಿ ಅಲಾರಾಂ ಹೊಂದಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ. ಕೆಲವು ಅಲಾರಾಂ ಗಡಿಯಾರ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಈ ವೈಶಿಷ್ಟ್ಯವನ್ನು ಕಾರ್ಯಗತಗೊಳಿಸದಿರಬಹುದು."</string>
-    <!-- no translation found for permlab_writeVoicemail (7309899891683938100) -->
-    <skip />
-    <!-- no translation found for permdesc_writeVoicemail (6592572839715924830) -->
-    <skip />
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"ಧ್ವನಿಮೇಲ್‌ಗಳನ್ನು ಬರೆಯಿರಿ"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"ನಿಮ್ಮ ಧ್ವನಿಮೇಲ್ ಇನ್‌ಬಾಕ್ಸ್‌ನಿಂದ ಸಂದೇಶಗಳನ್ನು ತೆಗೆದುಹಾಕಲು ಮತ್ತು ಮಾರ್ಪಡಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"ಧ್ವನಿಮೇಲ್ ಸೇರಿಸಿ"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"ನಿಮ್ಮ ದ್ವನಿಮೇಲ್‌ ಇನ್‌‌ಬಾಕ್ಸ್‌‌ಗೆ ಸಂದೇಶಗಳನ್ನು ಸೇರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
-    <!-- no translation found for permlab_readVoicemail (8415201752589140137) -->
-    <skip />
-    <!-- no translation found for permdesc_readVoicemail (8926534735321616550) -->
-    <skip />
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"ಧ್ವನಿಮೇಲ್ ಓದಿ"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"ನಿಮ್ಮ ಎಲ್ಲಾ ಧ್ವನಿಮೇಲ್‌ಗಳನ್ನು ಓದಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"ಬ್ರೌಸರ್‌ ಜಿಯೋಲೊಕೇಶನ್‌‌ ಅನುಮತಿಗಳನ್ನು ಮಾರ್ಪಡಿಸಿ"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"ಬ್ರೌಸರ್‌ನ ಜಿಯೋಲೊಕೇಶನ್ ಅನುಮತಿಗಳನ್ನು ಮಾರ್ಪಡಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ. ದುರುದ್ದೇಶಪೂರಿತ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಅನಿರ್ಬಂಧಿತ ವೆಬ್ ಸೈಟ್‌ಗಳಿಗೆ ಸ್ಥಳ ಮಾಹಿತಿ ಕಳುಹಿಸುವುದನ್ನು ಅನುಮತಿಸಲು ಇದನ್ನು ಬಳಸಬಹುದು."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"ಪ್ಯಾಕೇಜ್‌ಗಳನ್ನು ಪರಿಶೀಲಿಸಿ"</string>

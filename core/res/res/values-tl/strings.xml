@@ -719,10 +719,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Nagbibigay-daan sa may-ari na mapailalim sa interface sa tuktok na antas ng isang serbisyo ng notification listener. Hindi dapat kailanganin para sa karaniwang apps kahit kailan."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"i-bind sa isang serbisyo sa pagbibigay ng kundisyon"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Nagbibigay-daan sa naghahawak na i-bind ang top-level na interface ng isang serbisyo sa pagbibigay ng kundisyon. Hindi kailanman dapat kailanganin ng mga normal na app."</string>
-    <!-- no translation found for permlab_bindMediaRouteService (6637740382272686835) -->
-    <skip />
-    <!-- no translation found for permdesc_bindMediaRouteService (6436655024972496687) -->
-    <skip />
+    <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"mag-bind sa isang serbisyo ng media route"</string>
+    <string name="permdesc_bindMediaRouteService" msgid="6436655024972496687">"Nagbibigay-daan sa may-hawak na mag-bind sa top-level na interface ng isang serbisyo ng media route. Hindi kailanman dapat kailanganin ng mga normal na app."</string>
     <string name="permlab_bindDreamService" msgid="4153646965978563462">"sumailalim sa isang serbisyo ng dream"</string>
     <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Pinapayagan ang may-ari na sumailalim sa interface ng serbisyo ng dream na nasa nangungunang antas. Hindi kailanman dapat na kailanganin para sa mga normal na app."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"paganahin ang app ng configuration na ibinigay ng carrier"</string>
@@ -1008,16 +1006,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Pinapayagan ang app na baguhin ang kasaysayan o mga bookmark ng Browser na naka-imbak sa iyong telepono. Maaari nitong payagan ang app na burahin o baguhin ang data ng Browser. Tandaan: hindi maaaring ipatupad ang pahintulot na ito ng mga third-party na browser o iba pang mga application na may mga kakayahan sa pagba-browse sa web."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"magtakda ng alarm"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Pinapayagan ang app na magtakda ng alarm sa isang naka-install na app ng alarm clock. Maaaring hindi ipatupad ng ilang apps ng alarm clock ang tampok na ito."</string>
-    <!-- no translation found for permlab_writeVoicemail (7309899891683938100) -->
-    <skip />
-    <!-- no translation found for permdesc_writeVoicemail (6592572839715924830) -->
-    <skip />
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"sumulat ng mga voicemail"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"Pinapayagan ang app na magbago at mag-alis ng mga mensahe sa iyong inbox ng voicemail."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"magdagdag ng voicemail"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Pinapayagan ang app na magdagdag ng mga mensahe sa iyong inbox ng voicemail."</string>
-    <!-- no translation found for permlab_readVoicemail (8415201752589140137) -->
-    <skip />
-    <!-- no translation found for permdesc_readVoicemail (8926534735321616550) -->
-    <skip />
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"basahin ang voicemail"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"Pinapayagan ang app na basahin ang iyong mga voicemail."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"baguhin ang mga pahintulot ng geolocation ng Browser"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Pinapayagan ang app na baguhin ang mga pahintulot sa geolocation ng Browser. Maaari itong gamitin ng nakakahamak na apps upang payagan ang pagpapadala ng impormasyon ng lokasyon sa mga hindi tukoy na web site."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"i-verify ang mga package"</string>
@@ -1185,20 +1179,13 @@
     <string name="capital_on" msgid="1544682755514494298">"I-ON"</string>
     <string name="capital_off" msgid="6815870386972805832">"I-OFF"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Kumpletuhin ang pagkilos gamit ang"</string>
-    <!-- no translation found for whichApplicationNamed (8260158865936942783) -->
-    <skip />
-    <!-- no translation found for whichViewApplication (3272778576700572102) -->
-    <skip />
-    <!-- no translation found for whichViewApplicationNamed (2286418824011249620) -->
-    <skip />
-    <!-- no translation found for whichEditApplication (144727838241402655) -->
-    <skip />
-    <!-- no translation found for whichEditApplicationNamed (1775815530156447790) -->
-    <skip />
-    <!-- no translation found for whichSendApplication (6902512414057341668) -->
-    <skip />
-    <!-- no translation found for whichSendApplicationNamed (2799370240005424391) -->
-    <skip />
+    <string name="whichApplicationNamed" msgid="8260158865936942783">"Tapusin ang pagkilos gamit ang %1$s"</string>
+    <string name="whichViewApplication" msgid="3272778576700572102">"Buksan gamit ang"</string>
+    <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Buksan gamit ang %1$s"</string>
+    <string name="whichEditApplication" msgid="144727838241402655">"I-edit gamit ang"</string>
+    <string name="whichEditApplicationNamed" msgid="1775815530156447790">"I-edit gamit ang %1$s"</string>
+    <string name="whichSendApplication" msgid="6902512414057341668">"Ibahagi gamit ang"</string>
+    <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Ibahagi gamit ang %1$s"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"Pumili ng home app"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Gamitin bilang default para sa pagkilos na ito."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"I-clear ang default sa mga setting ng System &gt; Apps &gt; Na-download."</string>
@@ -1301,12 +1288,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Palaging Payagan"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Huwag kailanman Payagan"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"Naalis ang SIM card"</string>
-    <!-- no translation found for sim_removed_message (5450336489923274918) -->
-    <skip />
+    <string name="sim_removed_message" msgid="5450336489923274918">"Magiging unavailable ang cellular network hanggang mag-restart ka nang may nakalagay na wastong SIM card."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Tapos na"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"Idinagdag ang SIM card"</string>
-    <!-- no translation found for sim_added_message (7797975656153714319) -->
-    <skip />
+    <string name="sim_added_message" msgid="7797975656153714319">"I-restart ang iyong device upang ma-access ang cellular network."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"I-restart"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Magtakda ng oras"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Itakda ang petsa"</string>
@@ -1401,10 +1386,8 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Pinapayagan ang isang application na sumailalim sa isang serbisyo ng trust agent."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Makipag-ugnay sa system ng pag-update at pagbawi"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Binibigyang-daan ang isang application na makipag-ugnay sa system ng pagbawi at mga pag-update ng system."</string>
-    <!-- no translation found for permlab_createMediaProjection (4941338725487978112) -->
-    <skip />
-    <!-- no translation found for permdesc_createMediaProjection (1284530992706219702) -->
-    <skip />
+    <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Gumawa ng mga media projection session"</string>
+    <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"Nagbibigay-daan sa isang application upang gumawa ng mga media projection session. Makakapagbigay ang mga session na ito ng kakayahan sa mga application na ma-capture ang mga nilalaman ng display at audio. Hindi kailanman dapat kailanganin ng mga normal na app."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Pindutin nang dalawang beses para sa pagkontrol ng zoom"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Hindi maidagdag ang widget."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Pumunta"</string>
@@ -1529,20 +1512,14 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"I-edit"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Babala sa paggamit ng data"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"Pindutin upang tingnan ang paggamit at mga setting."</string>
-    <!-- no translation found for data_usage_3g_limit_title (4462365924791862301) -->
-    <skip />
-    <!-- no translation found for data_usage_4g_limit_title (7476424187522765328) -->
-    <skip />
-    <!-- no translation found for data_usage_mobile_limit_title (3393439305227911006) -->
-    <skip />
-    <!-- no translation found for data_usage_wifi_limit_title (3461968509557554571) -->
-    <skip />
-    <!-- no translation found for data_usage_limit_body (6131350187562939365) -->
-    <skip />
+    <string name="data_usage_3g_limit_title" msgid="4462365924791862301">"Naka-off ang 2G-3G data"</string>
+    <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"Naka-off ang 4G data"</string>
+    <string name="data_usage_mobile_limit_title" msgid="3393439305227911006">"Naka-off ang cellular data"</string>
+    <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"Naka-off ang Wi-Fi data"</string>
+    <string name="data_usage_limit_body" msgid="6131350187562939365">"Naabot na ang limitasyon"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"lumampas sa 2G-3G na limitasyon ng data"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Lumampas sa 4G na limitasyon ng data"</string>
-    <!-- no translation found for data_usage_mobile_limit_snoozed_title (4941346653729943789) -->
-    <skip />
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Lampas na sa cellular data limit"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Lumampas sa limitasyon ng data ng Wi-Fi"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"Lampas ng <xliff:g id="SIZE">%s</xliff:g> sa tinukoy na limitasyon."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Pinaghihigpitan ang data ng background"</string>

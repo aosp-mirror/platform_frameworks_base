@@ -120,7 +120,7 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"正在搜索服务"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>：无法转接"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>：<xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
-    <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>：<xliff:g id="TIME_DELAY">{2}</xliff:g> 秒后<xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
+    <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>：<xliff:g id="TIME_DELAY">{2}</xliff:g>秒后<xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateRegistered" msgid="5073237827620166285">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>：无法转接"</string>
     <string name="cfTemplateRegisteredTime" msgid="6781621964320635172">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>：无法转接"</string>
     <string name="fcComplete" msgid="3118848230966886575">"功能代码已拨完。"</string>
@@ -188,7 +188,7 @@
     <string name="global_action_lockdown" msgid="8751542514724332873">"立即锁定"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"安全模式"</string>
-    <string name="android_system_label" msgid="6577375335728551336">"Android 系统"</string>
+    <string name="android_system_label" msgid="6577375335728551336">"Android系统"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"个人应用"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"工作"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"需要您付费的服务"</string>
@@ -643,8 +643,8 @@
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"允许应用更改网络连接的状态。"</string>
     <string name="permlab_changeTetherState" msgid="5952584964373017960">"更改网络共享连接"</string>
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"允许应用更改绑定网络连接的状态。"</string>
-    <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"更改后台数据使用设置"</string>
-    <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"允许应用更改后台数据使用设置。"</string>
+    <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"更改后台流量设置"</string>
+    <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"允许应用更改后台流量设置。"</string>
     <string name="permlab_accessWifiState" msgid="5202012949247040011">"查看 WLAN 连接"</string>
     <string name="permdesc_accessWifiState" msgid="5002798077387803726">"允许该应用查看 WLAN 网络的相关信息，例如是否启用了 WLAN 以及连接的 WLAN 设备的名称。"</string>
     <string name="permlab_changeWifiState" msgid="6550641188749128035">"连接 WLAN 和断开连接"</string>
@@ -921,7 +921,7 @@
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"您已经 <xliff:g id="NUMBER_0">%d</xliff:g> 次错误地尝试解锁手机。如果再尝试 <xliff:g id="NUMBER_1">%d</xliff:g> 次后仍不成功，手机将重置为出厂默认设置，所有用户数据将会丢失。"</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"您已经 <xliff:g id="NUMBER">%d</xliff:g> 次错误地尝试解锁平板电脑。平板电脑现在将重置为出厂默认设置。"</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"您已经 <xliff:g id="NUMBER">%d</xliff:g> 次错误地尝试解锁手机。手机现在将重置为出厂默认设置。"</string>
-    <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"<xliff:g id="NUMBER">%d</xliff:g> 秒后重试。"</string>
+    <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"<xliff:g id="NUMBER">%d</xliff:g>秒后重试。"</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"忘记了图案？"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"帐户解锁"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"图案尝试次数过多"</string>
@@ -1051,69 +1051,69 @@
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1 个月前"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"1 个月前"</string>
   <plurals name="num_seconds_ago">
-    <item quantity="one" msgid="4869870056547896011">"1 秒前"</item>
-    <item quantity="other" msgid="3903706804349556379">"<xliff:g id="COUNT">%d</xliff:g> 秒前"</item>
+    <item quantity="one" msgid="4869870056547896011">"1秒前"</item>
+    <item quantity="other" msgid="3903706804349556379">"<xliff:g id="COUNT">%d</xliff:g>秒前"</item>
   </plurals>
   <plurals name="num_minutes_ago">
-    <item quantity="one" msgid="3306787433088810191">"1 分钟前"</item>
-    <item quantity="other" msgid="2176942008915455116">"<xliff:g id="COUNT">%d</xliff:g> 分钟前"</item>
+    <item quantity="one" msgid="3306787433088810191">"1分钟前"</item>
+    <item quantity="other" msgid="2176942008915455116">"<xliff:g id="COUNT">%d</xliff:g>分钟前"</item>
   </plurals>
   <plurals name="num_hours_ago">
-    <item quantity="one" msgid="9150797944610821849">"1 小时前"</item>
-    <item quantity="other" msgid="2467273239587587569">"<xliff:g id="COUNT">%d</xliff:g> 小时前"</item>
+    <item quantity="one" msgid="9150797944610821849">"1小时前"</item>
+    <item quantity="other" msgid="2467273239587587569">"<xliff:g id="COUNT">%d</xliff:g>小时前"</item>
   </plurals>
   <plurals name="last_num_days">
-    <item quantity="other" msgid="3069992808164318268">"过去 <xliff:g id="COUNT">%d</xliff:g> 天"</item>
+    <item quantity="other" msgid="3069992808164318268">"过去<xliff:g id="COUNT">%d</xliff:g>天"</item>
   </plurals>
-    <string name="last_month" msgid="3959346739979055432">"上月"</string>
+    <string name="last_month" msgid="3959346739979055432">"上个月"</string>
     <string name="older" msgid="5211975022815554840">"往前"</string>
   <plurals name="num_days_ago">
     <item quantity="one" msgid="861358534398115820">"昨天"</item>
-    <item quantity="other" msgid="2479586466153314633">"<xliff:g id="COUNT">%d</xliff:g> 天前"</item>
+    <item quantity="other" msgid="2479586466153314633">"<xliff:g id="COUNT">%d</xliff:g>天前"</item>
   </plurals>
   <plurals name="in_num_seconds">
-    <item quantity="one" msgid="2729745560954905102">"1 秒后"</item>
-    <item quantity="other" msgid="1241926116443974687">"<xliff:g id="COUNT">%d</xliff:g> 秒后"</item>
+    <item quantity="one" msgid="2729745560954905102">"1秒后"</item>
+    <item quantity="other" msgid="1241926116443974687">"<xliff:g id="COUNT">%d</xliff:g>秒后"</item>
   </plurals>
   <plurals name="in_num_minutes">
-    <item quantity="one" msgid="8793095251325200395">"1 分钟后"</item>
-    <item quantity="other" msgid="3330713936399448749">"<xliff:g id="COUNT">%d</xliff:g> 分钟后"</item>
+    <item quantity="one" msgid="8793095251325200395">"1分钟后"</item>
+    <item quantity="other" msgid="3330713936399448749">"<xliff:g id="COUNT">%d</xliff:g>分钟后"</item>
   </plurals>
   <plurals name="in_num_hours">
-    <item quantity="one" msgid="7164353342477769999">"1 小时后"</item>
-    <item quantity="other" msgid="547290677353727389">"<xliff:g id="COUNT">%d</xliff:g> 小时后"</item>
+    <item quantity="one" msgid="7164353342477769999">"1小时后"</item>
+    <item quantity="other" msgid="547290677353727389">"<xliff:g id="COUNT">%d</xliff:g>小时后"</item>
   </plurals>
   <plurals name="in_num_days">
     <item quantity="one" msgid="5413088743009839518">"明天"</item>
     <item quantity="other" msgid="5109449375100953247">"<xliff:g id="COUNT">%d</xliff:g> 天后"</item>
   </plurals>
   <plurals name="abbrev_num_seconds_ago">
-    <item quantity="one" msgid="1849036840200069118">"1 秒前"</item>
-    <item quantity="other" msgid="3699169366650930415">"<xliff:g id="COUNT">%d</xliff:g> 秒前"</item>
+    <item quantity="one" msgid="1849036840200069118">"1秒前"</item>
+    <item quantity="other" msgid="3699169366650930415">"<xliff:g id="COUNT">%d</xliff:g>秒前"</item>
   </plurals>
   <plurals name="abbrev_num_minutes_ago">
-    <item quantity="one" msgid="6361490147113871545">"1 分钟前"</item>
-    <item quantity="other" msgid="851164968597150710">"<xliff:g id="COUNT">%d</xliff:g> 分钟前"</item>
+    <item quantity="one" msgid="6361490147113871545">"1分钟前"</item>
+    <item quantity="other" msgid="851164968597150710">"<xliff:g id="COUNT">%d</xliff:g>分钟前"</item>
   </plurals>
   <plurals name="abbrev_num_hours_ago">
-    <item quantity="one" msgid="4796212039724722116">"1 小时前"</item>
-    <item quantity="other" msgid="6889970745748538901">"<xliff:g id="COUNT">%d</xliff:g> 小时前"</item>
+    <item quantity="one" msgid="4796212039724722116">"1小时前"</item>
+    <item quantity="other" msgid="6889970745748538901">"<xliff:g id="COUNT">%d</xliff:g>小时前"</item>
   </plurals>
   <plurals name="abbrev_num_days_ago">
     <item quantity="one" msgid="8463161711492680309">"昨天"</item>
-    <item quantity="other" msgid="3453342639616481191">"<xliff:g id="COUNT">%d</xliff:g> 天前"</item>
+    <item quantity="other" msgid="3453342639616481191">"<xliff:g id="COUNT">%d</xliff:g>天前"</item>
   </plurals>
   <plurals name="abbrev_in_num_seconds">
-    <item quantity="one" msgid="5842225370795066299">"1 秒后"</item>
-    <item quantity="other" msgid="5495880108825805108">"<xliff:g id="COUNT">%d</xliff:g> 秒后"</item>
+    <item quantity="one" msgid="5842225370795066299">"1秒后"</item>
+    <item quantity="other" msgid="5495880108825805108">"<xliff:g id="COUNT">%d</xliff:g>秒后"</item>
   </plurals>
   <plurals name="abbrev_in_num_minutes">
-    <item quantity="one" msgid="562786149928284878">"1 分钟后"</item>
-    <item quantity="other" msgid="4216113292706568726">"<xliff:g id="COUNT">%d</xliff:g> 分钟后"</item>
+    <item quantity="one" msgid="562786149928284878">"1分钟后"</item>
+    <item quantity="other" msgid="4216113292706568726">"<xliff:g id="COUNT">%d</xliff:g>分钟后"</item>
   </plurals>
   <plurals name="abbrev_in_num_hours">
-    <item quantity="one" msgid="3274708118124045246">"1 小时后"</item>
-    <item quantity="other" msgid="3705373766798013406">"<xliff:g id="COUNT">%d</xliff:g> 小时后"</item>
+    <item quantity="one" msgid="3274708118124045246">"1小时后"</item>
+    <item quantity="other" msgid="3705373766798013406">"<xliff:g id="COUNT">%d</xliff:g>小时后"</item>
   </plurals>
   <plurals name="abbrev_in_num_days">
     <item quantity="one" msgid="2178576254385739855">"明天"</item>
@@ -1135,16 +1135,16 @@
     <string name="year" msgid="4001118221013892076">"年"</string>
     <string name="years" msgid="6881577717993213522">"年"</string>
   <plurals name="duration_seconds">
-    <item quantity="one" msgid="6962015528372969481">"1 秒"</item>
-    <item quantity="other" msgid="1886107766577166786">"<xliff:g id="COUNT">%d</xliff:g> 秒"</item>
+    <item quantity="one" msgid="6962015528372969481">"1秒"</item>
+    <item quantity="other" msgid="1886107766577166786">"<xliff:g id="COUNT">%d</xliff:g>秒"</item>
   </plurals>
   <plurals name="duration_minutes">
-    <item quantity="one" msgid="4915414002546085617">"1 分钟"</item>
-    <item quantity="other" msgid="3165187169224908775">"<xliff:g id="COUNT">%d</xliff:g> 分钟"</item>
+    <item quantity="one" msgid="4915414002546085617">"1分钟"</item>
+    <item quantity="other" msgid="3165187169224908775">"<xliff:g id="COUNT">%d</xliff:g>分钟"</item>
   </plurals>
   <plurals name="duration_hours">
-    <item quantity="one" msgid="8917467491248809972">"1 小时"</item>
-    <item quantity="other" msgid="3863962854246773930">"<xliff:g id="COUNT">%d</xliff:g> 小时"</item>
+    <item quantity="one" msgid="8917467491248809972">"1小时"</item>
+    <item quantity="other" msgid="3863962854246773930">"<xliff:g id="COUNT">%d</xliff:g>小时"</item>
   </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"视频问题"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"抱歉，该视频不适合在此设备上播放。"</string>
@@ -1183,7 +1183,7 @@
     <string name="capital_on" msgid="1544682755514494298">"开启"</string>
     <string name="capital_off" msgid="6815870386972805832">"关闭"</string>
     <string name="whichApplication" msgid="4533185947064773386">"选择要使用的应用："</string>
-    <string name="whichApplicationNamed" msgid="8260158865936942783">"需使用%1$s完成操作"</string>
+    <string name="whichApplicationNamed" msgid="8260158865936942783">"使用%1$s完成操作"</string>
     <string name="whichViewApplication" msgid="3272778576700572102">"打开方式"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"使用%1$s打开"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"编辑方式"</string>
@@ -1292,10 +1292,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"始终允许"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"永不允许"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"已移除 SIM 卡"</string>
-    <string name="sim_removed_message" msgid="5450336489923274918">"您必须先插入有效的SIM卡再重新开机，然后才能使用移动数据网络。"</string>
+    <string name="sim_removed_message" msgid="5450336489923274918">"您需要先插入有效的SIM卡再重新开机，然后才能使用移动网络。"</string>
     <string name="sim_done_button" msgid="827949989369963775">"完成"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"已添加 SIM 卡"</string>
-    <string name="sim_added_message" msgid="7797975656153714319">"请重新启动您的设备，以便访问移动数据网络。"</string>
+    <string name="sim_added_message" msgid="7797975656153714319">"请重新启动您的设备，以便使用移动网络。"</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"重新启动"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"设置时间"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"设置日期"</string>
@@ -1516,7 +1516,7 @@
     <string name="storage_sd_card" msgid="3282948861378286745">"SD 卡"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB 存储器"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"修改"</string>
-    <string name="data_usage_warning_title" msgid="1955638862122232342">"流量使用警告"</string>
+    <string name="data_usage_warning_title" msgid="1955638862122232342">"流量警告"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"触摸可查看使用情况和设置。"</string>
     <!-- no translation found for data_usage_3g_limit_title (4462365924791862301) -->
     <skip />
@@ -1534,7 +1534,7 @@
     <skip />
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"超出了 WLAN 数据流量上限"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"超出规定上限 <xliff:g id="SIZE">%s</xliff:g>。"</string>
-    <string name="data_usage_restricted_title" msgid="5965157361036321914">"后台数据受限制"</string>
+    <string name="data_usage_restricted_title" msgid="5965157361036321914">"后台流量受限制"</string>
     <string name="data_usage_restricted_body" msgid="6741521330997452990">"触摸可去除限制。"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"安全证书"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"该证书有效。"</string>
@@ -1752,25 +1752,16 @@
     <string name="item_is_selected" msgid="949687401682476608">"已选择<xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"已删除<xliff:g id="KEY">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"工作<xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (2126866321272822564) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="2126866321272822564">"您目前处于单应用模式。要退出，请触摸并按住“最近用过的应用”按钮"</string>
     <string name="lock_to_app_toast_locked" msgid="4229650395479263497">"您目前处于单应用模式。"</string>
     <string name="lock_to_app_title" msgid="5895142291937470019">"要使用“单应用模式”吗？"</string>
-    <!-- no translation found for lock_to_app_description (2800403592608529611) -->
-    <skip />
-    <!-- no translation found for lock_to_app_negative (2259143719362732728) -->
-    <skip />
+    <string name="lock_to_app_description" msgid="2800403592608529611">"“单应用模式”功能会锁定屏幕，使其只显示一个应用。{\n\n要退出，请触摸并按住“最近用过的应用”按钮。"</string>
+    <string name="lock_to_app_negative" msgid="2259143719362732728">"不用了"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"启动"</string>
-    <!-- no translation found for lock_to_app_start (3074665051586318340) -->
-    <skip />
-    <!-- no translation found for lock_to_app_exit (8967089657201849300) -->
-    <skip />
-    <!-- no translation found for lock_to_app_use_screen_lock (1434584309048590886) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_pin (7908385370846820001) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_pattern (7763071104790758405) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_password (795224196583495868) -->
-    <skip />
+    <string name="lock_to_app_start" msgid="3074665051586318340">"开启单应用模式"</string>
+    <string name="lock_to_app_exit" msgid="8967089657201849300">"不再使用单应用模式"</string>
+    <string name="lock_to_app_use_screen_lock" msgid="1434584309048590886">"退出前要求%1$s"</string>
+    <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN码"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"解锁图案"</string>
+    <string name="lock_to_app_unlock_password" msgid="795224196583495868">"密码"</string>
 </resources>

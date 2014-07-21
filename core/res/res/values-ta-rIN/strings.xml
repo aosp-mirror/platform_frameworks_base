@@ -1006,16 +1006,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"உங்கள் மொபைலில் சேமிக்கப்பட்ட உலாவியின் வரலாறு அல்லது புத்தகக்குறிகளைத் திருத்த பயன்பாட்டை அனுமதிக்கிறது. இது உலாவியின் தரவை அழிக்கவோ, திருத்தவோ பயன்பாட்டை அனுமதிக்கலாம். குறிப்பு: இணைய உலாவல் செயல்திறன்கள் மூலம் மூன்றாம் தரப்பு உலாவிகள் அல்லது பிற பயன்பாடுகள் இந்த அனுமதியைச் செயற்படுத்த முடியாது."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"அலாரத்தை அமைத்தல்"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"நிறுவிய அலார கடிகாரப் பயன்பாட்டில் அலாரத்தை அமைக்க, பயன்பாட்டை அனுமதிக்கிறது. சில அலார கடிகார பயன்பாடுகளில் இந்த அம்சம் இல்லாமல் இருக்கலாம்."</string>
-    <!-- no translation found for permlab_writeVoicemail (7309899891683938100) -->
-    <skip />
-    <!-- no translation found for permdesc_writeVoicemail (6592572839715924830) -->
-    <skip />
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"குரலஞ்சல்களை எழுது"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"குரலஞ்சல் இன்பாக்ஸிலிருந்து செய்திகளைத் திருத்தவும் அகற்றவும், பயன்பாட்டை அனுமதிக்கிறது."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"குரலஞ்சலைச் சேர்த்தல்"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"குரலஞ்சல் இன்பாக்ஸில் செய்திகளைச் சேர்க்க, பயன்பாட்டை அனுமதிக்கிறது."</string>
-    <!-- no translation found for permlab_readVoicemail (8415201752589140137) -->
-    <skip />
-    <!-- no translation found for permdesc_readVoicemail (8926534735321616550) -->
-    <skip />
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"குரலஞ்சலைப் படி"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"குரலஞ்சல்களைப் படிக்கப் பயன்பாட்டை அனுமதிக்கிறது."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"உலாவியின் புவியியல் இருப்பிடம் சார்ந்த அனுமதிகளைத் திருத்துதல்"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"உலாவியின் புவியியல் இருப்பிடம் சார்ந்த அனுமதிகளைத் திருத்த, பயன்பாட்டை அனுமதிக்கிறது. இடத் தகவலை தன்னிச்சையான இணையதளங்களுக்கு அனுப்புவதை அனுமதிக்க, தீங்குவிளைவிக்கும் பயன்பாடுகள் இதைப் பயன்படுத்தலாம்."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"தொகுப்புகளைச் சரிபார்த்தல்"</string>

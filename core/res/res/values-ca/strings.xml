@@ -1006,16 +1006,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Permet que l\'aplicació modifiqui l\'historial del navegador o els marcadors del telèfon. Això pot permetre que l\'aplicació esborri o modifiqui les dades del navegador. Nota: És possible que aquest permís no s\'apliqui a navegadors de tercers o a altres aplicacions amb capacitats de navegació web."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"configuració d\'una alarma"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Permet que l\'aplicació defineixi una alarma en una aplicació de despertador instal·lada. És possible que algunes aplicacions de despertador no incorporin aquesta funció."</string>
-    <!-- no translation found for permlab_writeVoicemail (7309899891683938100) -->
-    <skip />
-    <!-- no translation found for permdesc_writeVoicemail (6592572839715924830) -->
-    <skip />
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"modificar correus de veu"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"Permet que l\'aplicació modifiqui i suprimeixi missatges de la safata d\'entrada de la bústia de veu."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"afegeix bústia de veu"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Permet que l\'aplicació afegeixi missatges a la safata d\'entrada de la bústia de veu."</string>
-    <!-- no translation found for permlab_readVoicemail (8415201752589140137) -->
-    <skip />
-    <!-- no translation found for permdesc_readVoicemail (8926534735321616550) -->
-    <skip />
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"accedir a la bústia de veu"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"Permet que l\'aplicació accedeixi als correus de veu."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"Modifica els permisos d\'ubicació geogràfica del navegador"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Permet que l\'aplicació modifiqui els permisos d\'ubicació geogràfica del navegador. Les aplicacions malicioses poden utilitzar-ho per enviar la informació d\'ubicació a llocs web arbitraris."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"verifica paquets"</string>
@@ -1745,7 +1741,7 @@
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> suprimit"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> de la feina"</string>
     <string name="lock_to_app_toast" msgid="2126866321272822564">"Estàs en mode de bloqueig d\'aplicació. Per sortir-ne, toca i mantén premut el botó Recents."</string>
-    <string name="lock_to_app_toast_locked" msgid="4229650395479263497">"Estàs en el mode de bloqueig d\'aplicació."</string>
+    <string name="lock_to_app_toast_locked" msgid="4229650395479263497">"Estàs en el mode de Bloqueig d\'aplicació."</string>
     <string name="lock_to_app_title" msgid="5895142291937470019">"Vols fer servir la funció Bloqueig d\'aplicació?"</string>
     <string name="lock_to_app_description" msgid="2800403592608529611">"Amb Bloqueig d\'aplicació es bloqueja la pantalla en una única aplicació.\n\nPer sortir-ne, toca i mantén premut el botó Recents."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"NO, GRÀCIES"</string>

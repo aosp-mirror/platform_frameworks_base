@@ -1755,25 +1755,16 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> තෝරාගෙන ඇත"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> මකා දමන ලදි"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"වැඩ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (2126866321272822564) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="2126866321272822564">"යෙදුමට-අඟුළු දැමීමේ ආකාරය තුළ ඔබ සිටි. පිටවීමට, මෑත යෙදුම් බොත්තම ඔබා අල්ලා ගෙන සිටින්න"</string>
     <string name="lock_to_app_toast_locked" msgid="4229650395479263497">"යෙදුමට-අඟුළු දැමීමේ ආකාරය තුළ ඔබ සිටි."</string>
     <string name="lock_to_app_title" msgid="5895142291937470019">"අගුළු-යෙදුම භාවිතා කරන්නද?"</string>
-    <!-- no translation found for lock_to_app_description (2800403592608529611) -->
-    <skip />
-    <!-- no translation found for lock_to_app_negative (2259143719362732728) -->
-    <skip />
+    <string name="lock_to_app_description" msgid="2800403592608529611">"අගුළු-යෙදුම තනි යෙදුමක පෙනුම අගුළු දමයි.\n\nඉවත්ව යාමට මෑත යෙදුම් බොත්තම ඔබා රඳවා ගන්න"</string>
+    <string name="lock_to_app_negative" msgid="2259143719362732728">"නැත, ස්තූතියි"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"ආරම්භය"</string>
-    <!-- no translation found for lock_to_app_start (3074665051586318340) -->
-    <skip />
-    <!-- no translation found for lock_to_app_exit (8967089657201849300) -->
-    <skip />
-    <!-- no translation found for lock_to_app_use_screen_lock (1434584309048590886) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_pin (7908385370846820001) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_pattern (7763071104790758405) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_password (795224196583495868) -->
-    <skip />
+    <string name="lock_to_app_start" msgid="3074665051586318340">"යෙදුමට-අඟුළු දැමීම"</string>
+    <string name="lock_to_app_exit" msgid="8967089657201849300">"යෙදුමට අඟුළු දැමීම තවදුරටත් නැත"</string>
+    <string name="lock_to_app_use_screen_lock" msgid="1434584309048590886">"පිටවීමට පෙර %1$s සඳහා ආසන්න"</string>
+    <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"අඟුළු ඇරීමේ රටාව"</string>
+    <string name="lock_to_app_unlock_password" msgid="795224196583495868">"මුරපදය"</string>
 </resources>

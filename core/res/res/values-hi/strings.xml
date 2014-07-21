@@ -1006,16 +1006,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"ऐप्स  को आपके फ़ोन में संग्रहीत ब्राउज़र के इतिहास या बुकमार्क को संशोधित करने देता है. इससे ऐप्स  ब्राउज़र डेटा को मिटा सकता है या संशोधित कर सकता है. ध्‍यान दें: यह अनुमति तृतीय-पक्ष ब्राउज़र या वेब ब्राउज़िंग क्षमताओं वाले अन्‍य ऐप्स  द्वारा लागू नहीं की जा सकती."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"अलार्म सेट करें"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"ऐप्स को इंस्‍टॉल किए गए अलार्म घड़ी ऐप्स में अलार्म सेट करने देता है. हो सकता है कुछ अलार्म घड़ी ऐप्स में यह सुविधा न हो."</string>
-    <!-- no translation found for permlab_writeVoicemail (7309899891683938100) -->
-    <skip />
-    <!-- no translation found for permdesc_writeVoicemail (6592572839715924830) -->
-    <skip />
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"ध्वनिमेल लिखें"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"ऐप्स को आपके ध्वनिमेल इनबॉक्स के संदेशों को बदलने और निकालने देती है."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"ध्‍वनिमेल जोड़ें"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"ऐप्स  को आपके ध्‍वनिमेल इनबॉक्‍स में संदेश जोड़ने देता है."</string>
-    <!-- no translation found for permlab_readVoicemail (8415201752589140137) -->
-    <skip />
-    <!-- no translation found for permdesc_readVoicemail (8926534735321616550) -->
-    <skip />
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"ध्वनिमेल पढ़ें"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"ऐप्स को आपका ध्वनिमेल पढ़ने देती है."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"ब्राउज़र भौगोलिक-स्थान अनुमतियों को बदलें"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"ऐप्स को ब्राउज़र के भौगोलिक-स्‍थान की अनुमतियां संशोधित करने देता है. दुर्भावनापूर्ण ऐप्स इसका उपयोग एकपक्षीय वेबसाइट को स्‍थान जानकारी भेजने में कर सकते हैं."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"पैकेज सत्‍यापि‍त करें"</string>
@@ -1752,7 +1748,7 @@
     <string name="lock_to_app_positive" msgid="7085139175671313864">"प्रारंभ करें"</string>
     <string name="lock_to_app_start" msgid="3074665051586318340">"ऐप्स-पर-लॉक किया गया"</string>
     <string name="lock_to_app_exit" msgid="8967089657201849300">"अब ऐप्स-पर-लॉक नहीं है"</string>
-    <string name="lock_to_app_use_screen_lock" msgid="1434584309048590886">"बाहर निकलने से पहले %1$s से पूछें"</string>
+    <string name="lock_to_app_use_screen_lock" msgid="1434584309048590886">"बाहर निकलने से पहले %1$s के लिए पूछें"</string>
     <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"पिन"</string>
     <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"पैटर्न अनलॉक करें"</string>
     <string name="lock_to_app_unlock_password" msgid="795224196583495868">"पासवर्ड"</string>

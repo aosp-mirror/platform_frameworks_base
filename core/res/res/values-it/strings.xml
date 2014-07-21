@@ -1006,16 +1006,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Consente all\'applicazione di modificare la cronologia o i segnalibri del Browser memorizzati sul telefono. Ciò potrebbe consentire all\'applicazione di cancellare o modificare i dati del Browser. Nota. È possibile che questa autorizzazione non sia applicabile da browser di terze parti o altre applicazioni con funzionalità di navigazione web."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"impostazione sveglia"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Consente all\'applicazione di impostare una sveglia in un\'applicazione sveglia installata. È possibile che alcune applicazioni sveglia non possano implementare questa funzione."</string>
-    <!-- no translation found for permlab_writeVoicemail (7309899891683938100) -->
-    <skip />
-    <!-- no translation found for permdesc_writeVoicemail (6592572839715924830) -->
-    <skip />
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"scrivi messaggi vocali"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"Consente all\'app di modificare e rimuovere messaggi dalla segreteria."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"aggiunta di un messaggio vocale"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Consente all\'applicazione di aggiungere messaggi alla casella della segreteria."</string>
-    <!-- no translation found for permlab_readVoicemail (8415201752589140137) -->
-    <skip />
-    <!-- no translation found for permdesc_readVoicemail (8926534735321616550) -->
-    <skip />
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"leggi messaggi vocali"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"Consente all\'app di leggere i messaggi vocali."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"modifica delle autorizzazioni di localizzazione geografica del browser"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Consente all\'applicazione di modificare le autorizzazioni di geolocalizzazione del Browser. Le applicazioni dannose potrebbero farne uso per consentire l\'invio di informazioni sulla posizione a siti web arbitrari."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"verifica dei pacchetti"</string>

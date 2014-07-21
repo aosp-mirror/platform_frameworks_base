@@ -1748,7 +1748,7 @@
     <string name="lock_to_app_toast_locked" msgid="4229650395479263497">"আপনি অ্যাপ-এ-লক করুন মোডে রয়েছেন৷"</string>
     <string name="lock_to_app_title" msgid="5895142291937470019">"অ্যাপ-এ-লক ব্যবহার করতে চান?"</string>
     <string name="lock_to_app_description" msgid="2800403592608529611">"লক-টু-অ্যাপ কোনো একক অ্যাপ্লিকেশানে প্রদর্শন লক করে।\n \nএটি থেকে বেরিয়ে যেতে ‘সাম্প্রতিকগুলি’ বোতাম স্পর্শ করে ধরে রাখুন।"</string>
-    <string name="lock_to_app_negative" msgid="2259143719362732728">"না, ধন্যবাদ"</string>
+    <string name="lock_to_app_negative" msgid="2259143719362732728">"না, থাক"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"চালু করুন"</string>
     <string name="lock_to_app_start" msgid="3074665051586318340">"অ্যাপ্লিকেশানে লক করা আছে"</string>
     <string name="lock_to_app_exit" msgid="8967089657201849300">"আর অ্যাপ্লিকেশানে লক করা নেই"</string>
