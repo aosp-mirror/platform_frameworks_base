@@ -17,6 +17,8 @@ package android.telecomm;
 import android.annotation.SystemApi;
 import android.content.ComponentName;
 import android.content.Context;
+
+import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
@@ -27,23 +29,22 @@ import java.util.List;
 
 /**
  * Provides access to Telecomm-related functionality.
- * TODO(santoscordon): Move this all into PhoneManager.
+ * TODO: Move this all into PhoneManager.
  */
 public class TelecommManager {
 
     /**
-     * <p>Activity action: Starts the UI for handing an incoming call. This intent starts the
-     * in-call UI by notifying the Telecomm system that an incoming call exists for a specific call
-     * service (see {@link ConnectionService}). Telecomm reads the Intent extras
-     * to find and bind to the appropriate {@link ConnectionService} which
-     * Telecomm will ultimately use to control and get information about the call.</p>
-     *
-     * <p>Input: get*Extra field {@link #EXTRA_PHONE_ACCOUNT_HANDLE} contains the component name of the
-     * {@link ConnectionService} that Telecomm should bind to. Telecomm will then
+     * Activity action: Starts the UI for handing an incoming call. This intent starts the in-call
+     * UI by notifying the Telecomm system that an incoming call exists for a specific call service
+     * (see {@link android.telecomm.ConnectionService}). Telecomm reads the Intent extras to find
+     * and bind to the appropriate {@link android.telecomm.ConnectionService} which Telecomm will
+     * ultimately use to control and get information about the call.
+     * <p>
+     * Input: get*Extra field {@link #EXTRA_PHONE_ACCOUNT_HANDLE} contains the component name of the
+     * {@link android.telecomm.ConnectionService} that Telecomm should bind to. Telecomm will then
      * ask the connection service for more information about the call prior to showing any UI.
      *
-     * TODO(santoscordon): Needs permissions.
-     * TODO(santoscordon): Consider moving this into a simple method call on a system service.
+     * @hide
      */
     public static final String ACTION_INCOMING_CALL = "android.intent.action.INCOMING_CALL";
 
@@ -70,7 +71,8 @@ public class TelecommManager {
     /**
      * Optional extra for {@link android.content.Intent#ACTION_CALL} containing an integer that
      * determines the desired video state for an outgoing call.
-     * Valid options: {@link android.telecomm.VideoCallProfile#VIDEO_STATE_AUDIO_ONLY},
+     * Valid options:
+     * {@link android.telecomm.VideoCallProfile#VIDEO_STATE_AUDIO_ONLY},
      * {@link android.telecomm.VideoCallProfile#VIDEO_STATE_BIDIRECTIONAL},
      * {@link android.telecomm.VideoCallProfile#VIDEO_STATE_RX_ENABLED},
      * {@link android.telecomm.VideoCallProfile#VIDEO_STATE_TX_ENABLED}.
@@ -79,21 +81,21 @@ public class TelecommManager {
             "android.intent.extra.START_CALL_WITH_VIDEO_STATE";
 
     /**
-     * The extra used with an {@link android.content.Intent#ACTION_CALL},
-     * {@link #ACTION_INCOMING_CALL}, {@link android.content.Intent#ACTION_DIAL} {@code Intent} to
-     * specify a {@link PhoneAccountHandle} to use when making the call.
-     *
+     * The extra used with an {@link android.content.Intent#ACTION_CALL} and
+     * {@link android.content.Intent#ACTION_DIAL} {@code Intent} to specify a
+     * {@link PhoneAccountHandle} to use when making the call.
      * <p class="note">
-     * Retrieve with
-     * {@link android.content.Intent#getParcelableExtra(String)}.
+     * Retrieve with {@link android.content.Intent#getParcelableExtra(String)}.
      */
     public static final String EXTRA_PHONE_ACCOUNT_HANDLE =
             "android.intent.extra.PHONE_ACCOUNT_HANDLE";
 
     /**
-     * Optional extra for {@link #ACTION_INCOMING_CALL} containing a {@link android.os.Bundle}
-     * which contains metadata about the call. This {@link android.os.Bundle} will be returned to
-     * the {@link android.telecomm.ConnectionService}.
+     * Optional extra for {@link #ACTION_INCOMING_CALL} containing a {@link Bundle} which contains
+     * metadata about the call. This {@link Bundle} will be returned to the
+     * {@link ConnectionService}.
+     *
+     * @hide
      */
     public static final String EXTRA_INCOMING_CALL_EXTRAS =
             "android.intent.extra.INCOMING_CALL_EXTRAS";
@@ -123,10 +125,9 @@ public class TelecommManager {
      * The number which the party on the other side of the line will see (and use to return the
      * call).
      * <p>
-     * {@link ConnectionService}s which interact with
-     * {@link RemoteConnection}s should only populate this if the
-     * {@link android.telephony.TelephonyManager#getLine1Number()} value, as that is the user's
-     * expected caller ID.
+     * {@link ConnectionService}s which interact with {@link RemoteConnection}s should only populate
+     * this if the {@link android.telephony.TelephonyManager#getLine1Number()} value, as that is the
+     * user's expected caller ID.
      */
     public static final String EXTRA_CALL_BACK_NUMBER = "android.telecomm.extra.CALL_BACK_NUMBER";
 
@@ -178,8 +179,8 @@ public class TelecommManager {
     /**
      * Broadcast intent action indicating that the current TTY mode has changed. An intent extra
      * provides this state as an int.
-     * @see #EXTRA_CURRENT_TTY_MODE
      *
+     * @see #EXTRA_CURRENT_TTY_MODE
      * @hide
      */
     public static final String ACTION_CURRENT_TTY_MODE_CHANGED =
@@ -199,22 +200,19 @@ public class TelecommManager {
             "android.telecomm.intent.extra.CURRENT_TTY_MODE";
 
     /**
-     * Broadcast intent action indicating that the TTY preferred operating mode
-     * has changed. An intent extra provides the new mode as an int.
-     * @see #EXTRA_TTY_PREFERRED_MODE
+     * Broadcast intent action indicating that the TTY preferred operating mode has changed. An
+     * intent extra provides the new mode as an int.
      *
+     * @see #EXTRA_TTY_PREFERRED_MODE
      * @hide
      */
     public static final String ACTION_TTY_PREFERRED_MODE_CHANGED =
             "android.telecomm.intent.action.TTY_PREFERRED_MODE_CHANGED";
 
     /**
-     * The lookup key for an int that indicates preferred TTY mode.
-     * Valid modes are:
-     * - {@link #TTY_MODE_OFF}
-     * - {@link #TTY_MODE_FULL}
-     * - {@link #TTY_MODE_HCO}
-     * - {@link #TTY_MODE_VCO}
+     * The lookup key for an int that indicates preferred TTY mode. Valid modes are: -
+     * {@link #TTY_MODE_OFF} - {@link #TTY_MODE_FULL} - {@link #TTY_MODE_HCO} -
+     * {@link #TTY_MODE_VCO}
      *
      * @hide
      */
@@ -222,7 +220,7 @@ public class TelecommManager {
             "android.telecomm.intent.extra.TTY_PREFERRED";
 
     private static final String TAG = "TelecommManager";
-    
+
     private static final String TELECOMM_SERVICE_NAME = "telecomm";
 
     private final Context mContext;
@@ -247,16 +245,16 @@ public class TelecommManager {
     }
 
     /**
-     * Return the {@link PhoneAccount} which is the user-chosen default for making outgoing
-     * phone calls. This {@code PhoneAccount} will always be a member of the list which is
-     * returned from calling {@link #getEnabledPhoneAccounts()}.
+     * Return the {@link PhoneAccount} which is the user-chosen default for making outgoing phone
+     * calls. This {@code PhoneAccount} will always be a member of the list which is returned from
+     * calling {@link #getEnabledPhoneAccounts()}.
      * <p>
-     * Apps must be prepared for this method to return {@code null}, indicating that there
-     * currently exists no user-chosen default {@code PhoneAccount}. In this case, apps
-     * wishing to initiate a phone call must either create their {@link android.content
-     * .Intent#ACTION_CALL} or {@link android.content.Intent#ACTION_DIAL} {@code Intent} with no
-     * {@link TelecommManager#EXTRA_PHONE_ACCOUNT_HANDLE}, or present the user with an affordance
-     * to select one of the elements of {@link #getEnabledPhoneAccounts()}.
+     * Apps must be prepared for this method to return {@code null}, indicating that there currently
+     * exists no user-chosen default {@code PhoneAccount}. In this case, apps wishing to initiate a
+     * phone call must either create their {@link android.content .Intent#ACTION_CALL} or
+     * {@link android.content.Intent#ACTION_DIAL} {@code Intent} with no
+     * {@link TelecommManager#EXTRA_PHONE_ACCOUNT_HANDLE}, or present the user with an affordance to
+     * select one of the elements of {@link #getEnabledPhoneAccounts()}.
      * <p>
      * An {@link android.content.Intent#ACTION_CALL} or {@link android.content.Intent#ACTION_DIAL}
      * {@code Intent} with no {@link TelecommManager#EXTRA_PHONE_ACCOUNT_HANDLE} is valid, and
@@ -297,7 +295,6 @@ public class TelecommManager {
      * resources which can be used in a user interface.
      *
      * @param account The {@link PhoneAccountHandle}.
-     *
      * @return The {@link PhoneAccount} object.
      */
     public PhoneAccount getPhoneAccount(PhoneAccountHandle account) {
@@ -408,9 +405,9 @@ public class TelecommManager {
     }
 
     /**
-     * Ends an ongoing call. TODO(santoscordon): L-release - need to convert all invocations of
-     * ITelecommService#endCall to use this method (clockwork & gearhead).
-     *
+     * Ends an ongoing call.
+     * TODO: L-release - need to convert all invocations of ITelecommService#endCall to use this
+     * method (clockwork & gearhead).
      * @hide
      */
     @SystemApi
@@ -427,8 +424,8 @@ public class TelecommManager {
 
     /**
      * If there is a ringing incoming call, this method accepts the call on behalf of the user.
-     * TODO(santoscordon): L-release - need to convert all invocation of
-     * ITelecommService#answerRingingCall to use this method (clockwork & gearhead).
+     * TODO: L-release - need to convert all invocation of ITelecommService#answerRingingCall to use
+     * this method (clockwork & gearhead).
      *
      * @hide
      */
@@ -478,12 +475,12 @@ public class TelecommManager {
 
     /**
      * Returns the current TTY mode of the device. For TTY to be on the user must enable it in
-     * settings and have a wired headset plugged in. Valid modes are:
+     * settings and have a wired headset plugged in.
+     * Valid modes are:
      * - {@link TelecommManager#TTY_MODE_OFF}
      * - {@link TelecommManager#TTY_MODE_FULL}
      * - {@link TelecommManager#TTY_MODE_HCO}
      * - {@link TelecommManager#TTY_MODE_VCO}
-     *
      * @hide
      */
     public int getCurrentTtyMode() {
@@ -495,6 +492,31 @@ public class TelecommManager {
             Log.e(TAG, "RemoteException attempting to get the current TTY mode.", e);
         }
         return TTY_MODE_OFF;
+    }
+
+    /**
+     * Registers a new incoming call. A {@link ConnectionService} should invoke this method when it
+     * has an incoming call. The specified {@link PhoneAccountHandle} must have been registered
+     * with {@link #registerPhoneAccount} and subsequently enabled by the user within the phone's
+     * settings. Once invoked, this method will cause the system to bind to the
+     * {@link ConnectionService} associated with the {@link PhoneAccountHandle} and request
+     * additional information about the call (See
+     * {@link ConnectionService#onCreateIncomingConnection}) before starting the incoming call UI.
+     *
+     * @param phoneAccount A {@link PhoneAccountHandle} registered with
+     *            {@link #registerPhoneAccount}.
+     * @param extras A bundle that will be passed through to
+     *            {@link ConnectionService#onCreateIncomingConnection}.
+     */
+    public void addNewIncomingCall(PhoneAccountHandle phoneAccount, Bundle extras) {
+        try {
+            if (isServiceConnected()) {
+                getTelecommService().addNewIncomingCall(
+                        phoneAccount, extras == null ? new Bundle() : extras);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException adding a new incoming call: " + phoneAccount, e);
+        }
     }
 
     private ITelecommService getTelecommService() {
