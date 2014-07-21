@@ -38,7 +38,7 @@ public class TelecommManager {
      * to find and bind to the appropriate {@link ConnectionService} which
      * Telecomm will ultimately use to control and get information about the call.</p>
      *
-     * <p>Input: get*Extra field {@link #EXTRA_PHONE_ACCOUNT} contains the component name of the
+     * <p>Input: get*Extra field {@link #EXTRA_PHONE_ACCOUNT_HANDLE} contains the component name of the
      * {@link ConnectionService} that Telecomm should bind to. Telecomm will then
      * ask the connection service for more information about the call prior to showing any UI.
      *
@@ -48,26 +48,28 @@ public class TelecommManager {
     public static final String ACTION_INCOMING_CALL = "android.intent.action.INCOMING_CALL";
 
     /**
-     * The service action used to bind to {@link android.telecomm.ConnectionService} implementations.
+     * The service action used to bind to {@link android.telecomm.ConnectionService}
+     * implementations.
      */
     public static final String ACTION_CONNECTION_SERVICE = ConnectionService.class.getName();
 
     /**
-     * The {@link android.content.Intent} action used to configure a {@link android.telecomm.ConnectionService}.
+     * The {@link android.content.Intent} action used to configure a
+     * {@link android.telecomm.ConnectionService}.
      */
     public static final String ACTION_CONNECTION_SERVICE_CONFIGURE =
             "android.intent.action.CONNECTION_SERVICE_CONFIGURE";
 
     /**
-     * Optional extra for {@link android.content.Intent#ACTION_CALL} containing a boolean that determines whether
-     * the speakerphone should be automatically turned on for an outgoing call.
+     * Optional extra for {@link android.content.Intent#ACTION_CALL} containing a boolean that
+     * determines whether the speakerphone should be automatically turned on for an outgoing call.
      */
     public static final String EXTRA_START_CALL_WITH_SPEAKERPHONE =
             "android.intent.extra.START_CALL_WITH_SPEAKERPHONE";
 
     /**
-     * Optional extra for {@link android.content.Intent#ACTION_CALL} containing an integer that determines the
-     * desired video state for an outgoing call.
+     * Optional extra for {@link android.content.Intent#ACTION_CALL} containing an integer that
+     * determines the desired video state for an outgoing call.
      * Valid options: {@link android.telecomm.VideoCallProfile#VIDEO_STATE_AUDIO_ONLY},
      * {@link android.telecomm.VideoCallProfile#VIDEO_STATE_BIDIRECTIONAL},
      * {@link android.telecomm.VideoCallProfile#VIDEO_STATE_RX_ENABLED},
@@ -79,39 +81,40 @@ public class TelecommManager {
     /**
      * The extra used with an {@link android.content.Intent#ACTION_CALL},
      * {@link #ACTION_INCOMING_CALL}, {@link android.content.Intent#ACTION_DIAL} {@code Intent} to
-     * specify a {@link android.telecomm.PhoneAccount} to use when making the call.
+     * specify a {@link PhoneAccountHandle} to use when making the call.
      *
      * <p class="note">
      * Retrieve with
      * {@link android.content.Intent#getParcelableExtra(String)}.
      */
-    public static final String EXTRA_PHONE_ACCOUNT = "android.intent.extra.PHONE_ACCOUNT";
+    public static final String EXTRA_PHONE_ACCOUNT_HANDLE =
+            "android.intent.extra.PHONE_ACCOUNT_HANDLE";
 
     /**
-     * Optional extra for {@link #ACTION_INCOMING_CALL} containing a {@link android.os.Bundle} which contains
-     * metadata about the call. This {@link android.os.Bundle} will be returned to the
-     * {@link android.telecomm.ConnectionService}.
+     * Optional extra for {@link #ACTION_INCOMING_CALL} containing a {@link android.os.Bundle}
+     * which contains metadata about the call. This {@link android.os.Bundle} will be returned to
+     * the {@link android.telecomm.ConnectionService}.
      */
     public static final String EXTRA_INCOMING_CALL_EXTRAS =
             "android.intent.extra.INCOMING_CALL_EXTRAS";
 
     /**
-     * Optional extra for {@link android.telephony.TelephonyManager#ACTION_PHONE_STATE_CHANGED} containing the
-     * disconnect code.
+     * Optional extra for {@link android.telephony.TelephonyManager#ACTION_PHONE_STATE_CHANGED}
+     * containing the disconnect code.
      */
     public static final String EXTRA_CALL_DISCONNECT_CAUSE =
             "android.telecomm.extra.CALL_DISCONNECT_CAUSE";
 
     /**
-     * Optional extra for {@link android.telephony.TelephonyManager#ACTION_PHONE_STATE_CHANGED} containing the
-     * disconnect message.
+     * Optional extra for {@link android.telephony.TelephonyManager#ACTION_PHONE_STATE_CHANGED}
+     * containing the disconnect message.
      */
     public static final String EXTRA_CALL_DISCONNECT_MESSAGE =
             "android.telecomm.extra.CALL_DISCONNECT_MESSAGE";
 
     /**
-     * Optional extra for {@link android.telephony.TelephonyManager#ACTION_PHONE_STATE_CHANGED} containing the
-     * component name of the associated connection service.
+     * Optional extra for {@link android.telephony.TelephonyManager#ACTION_PHONE_STATE_CHANGED}
+     * containing the component name of the associated connection service.
      */
     public static final String EXTRA_CONNECTION_SERVICE =
             "android.telecomm.extra.CONNECTION_SERVICE";
@@ -244,23 +247,23 @@ public class TelecommManager {
     }
 
     /**
-     * Return the {@link PhoneAccount} which is the user-chosen default for making outgoing
-     * phone calls. This {@code PhoneAccount} will always be a member of the list which is
+     * Return the {@link PhoneAccountHandle} which is the user-chosen default for making outgoing
+     * phone calls. This {@code PhoneAccountHandle} will always be a member of the list which is
      * returned from calling {@link #getEnabledPhoneAccounts()}.
      * <p>
      * Apps must be prepared for this method to return {@code null}, indicating that there
-     * currently exists no user-chosen default {@code PhoneAccount}. In this case, apps wishing to
-     * initiate a phone call must either create their {@link android.content.Intent#ACTION_CALL} or
-     * {@link android.content.Intent#ACTION_DIAL} {@code Intent} with no
-     * {@link TelecommManager#EXTRA_PHONE_ACCOUNT}, or present the user with an affordance
+     * currently exists no user-chosen default {@code PhoneAccountHandle}. In this case, apps
+     * wishing to initiate a phone call must either create their {@link android.content
+     * .Intent#ACTION_CALL} or {@link android.content.Intent#ACTION_DIAL} {@code Intent} with no
+     * {@link TelecommManager#EXTRA_PHONE_ACCOUNT_HANDLE}, or present the user with an affordance
      * to select one of the elements of {@link #getEnabledPhoneAccounts()}.
      * <p>
      * An {@link android.content.Intent#ACTION_CALL} or {@link android.content.Intent#ACTION_DIAL}
-     * {@code Intent} with no {@link TelecommManager#EXTRA_PHONE_ACCOUNT} is valid, and subsequent
-     * steps in the phone call flow are responsible for presenting the user with an affordance, if
-     * necessary, to choose a {@code PhoneAccount}.
+     * {@code Intent} with no {@link TelecommManager#EXTRA_PHONE_ACCOUNT_HANDLE} is valid, and
+     * subsequent steps in the phone call flow are responsible for presenting the user with an
+     * affordance, if necessary, to choose a {@code PhoneAccountHandle}.
      */
-    public PhoneAccount getDefaultOutgoingPhoneAccount() {
+    public PhoneAccountHandle getDefaultOutgoingPhoneAccount() {
         try {
             if (isServiceConnected()) {
                 return getTelecommService().getDefaultOutgoingPhoneAccount();
@@ -272,12 +275,13 @@ public class TelecommManager {
     }
 
     /**
-     * Return a list of {@link PhoneAccount}s which can be used to make and receive phone calls.
+     * Return a list of {@link PhoneAccountHandle}s which can be used to make and receive phone
+     * calls.
      *
-     * @see #EXTRA_PHONE_ACCOUNT
-     * @return A list of {@code PhoneAccount} objects.
+     * @see #EXTRA_PHONE_ACCOUNT_HANDLE
+     * @return A list of {@code PhoneAccountHandle} objects.
      */
-    public List<PhoneAccount> getEnabledPhoneAccounts() {
+    public List<PhoneAccountHandle> getEnabledPhoneAccounts() {
         try {
             if (isServiceConnected()) {
                 return getTelecommService().getEnabledPhoneAccounts();
@@ -289,14 +293,14 @@ public class TelecommManager {
     }
 
     /**
-     * Return the metadata for a specified {@link PhoneAccount}. Metadata includes resources which
-     * can be used in a user interface.
+     * Return the metadata for a specified {@link PhoneAccountHandle}. Metadata includes resources
+     * which can be used in a user interface.
      *
-     * @param account The {@link PhoneAccount}.
+     * @param account The {@link PhoneAccountHandle}.
      *
      * @return The metadata for the account.
      */
-    public PhoneAccountMetadata getPhoneAccountMetadata(PhoneAccount account) {
+    public PhoneAccountMetadata getPhoneAccountMetadata(PhoneAccountHandle account) {
         try {
             if (isServiceConnected()) {
                 return getTelecommService().getPhoneAccountMetadata(account);
@@ -308,7 +312,7 @@ public class TelecommManager {
     }
 
     /**
-     * Register a {@link PhoneAccount} for use by the system.
+     * Register a {@link PhoneAccountHandle} for use by the system.
      *
      * @param metadata The complete {@link PhoneAccountMetadata}.
      */
@@ -323,11 +327,11 @@ public class TelecommManager {
     }
 
     /**
-     * Remove a {@link PhoneAccount} registration from the system.
+     * Remove a {@link PhoneAccountHandle} registration from the system.
      *
      * @param account An Account.
      */
-    public void unregisterPhoneAccount(PhoneAccount account) {
+    public void unregisterPhoneAccount(PhoneAccountHandle account) {
         try {
             if (isServiceConnected()) {
                 getTelecommService().unregisterPhoneAccount(account);

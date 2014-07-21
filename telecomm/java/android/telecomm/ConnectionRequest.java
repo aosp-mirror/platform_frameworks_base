@@ -30,7 +30,7 @@ public final class ConnectionRequest implements Parcelable {
     // TODO: Token to limit recursive invocations
     // TODO: Consider upgrading "mHandle" to ordered list of handles, indicating a set of phone
     //         numbers that would satisfy the client's needs, in order of preference
-    private final PhoneAccount mAccount;
+    private final PhoneAccountHandle mAccount;
     private final String mCallId;
     private final Uri mHandle;
     private final int mHandlePresentation;
@@ -47,7 +47,7 @@ public final class ConnectionRequest implements Parcelable {
      * @param videoState Determines the video state for the connection.
      */
     public ConnectionRequest(
-            PhoneAccount account,
+            PhoneAccountHandle account,
             String callId,
             Uri handle,
             int handlePresentation,
@@ -73,7 +73,7 @@ public final class ConnectionRequest implements Parcelable {
     /**
      * The account which should be used to place the call.
      */
-    public PhoneAccount getAccount() { return mAccount; }
+    public PhoneAccountHandle getAccount() { return mAccount; }
 
     /**
      * An identifier for this call.

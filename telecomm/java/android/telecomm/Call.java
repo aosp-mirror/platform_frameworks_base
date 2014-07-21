@@ -73,7 +73,7 @@ public final class Call {
         private final int mHandlePresentation;
         private final String mCallerDisplayName;
         private final int mCallerDisplayNamePresentation;
-        private final PhoneAccount mAccount;
+        private final PhoneAccountHandle mAccount;
         private final int mCapabilities;
         private final int mDisconnectCauseCode;
         private final String mDisconnectCauseMsg;
@@ -114,9 +114,10 @@ public final class Call {
         }
 
         /**
-         * @return The {@code PhoneAccount} whereby the {@code Call} is currently being routed.
+         * @return The {@code PhoneAccountHandle} whereby the {@code Call} is currently being
+         * routed.
          */
-        public PhoneAccount getAccount() {
+        public PhoneAccountHandle getAccount() {
             return mAccount;
         }
 
@@ -219,7 +220,7 @@ public final class Call {
                 int handlePresentation,
                 String callerDisplayName,
                 int callerDisplayNamePresentation,
-                PhoneAccount account,
+                PhoneAccountHandle account,
                 int capabilities,
                 int disconnectCauseCode,
                 String disconnectCauseMsg,
@@ -457,10 +458,10 @@ public final class Call {
     }
 
     /**
-     * Notifies this {@code Call} the a {@code PhoneAccount} has been selected and to proceed
+     * Notifies this {@code Call} the a {@code PhoneAccountHandle} has been selected and to proceed
      * with placing an outgoing call.
      */
-    public void phoneAccountSelected(PhoneAccount account) {
+    public void phoneAccountSelected(PhoneAccountHandle account) {
         mInCallAdapter.phoneAccountSelected(mTelecommCallId, account);
 
     }

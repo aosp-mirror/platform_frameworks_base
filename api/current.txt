@@ -28296,7 +28296,7 @@ package android.telecomm {
     method public int getState();
     method public void hold();
     method public void phoneAccountClicked();
-    method public void phoneAccountSelected(android.telecomm.PhoneAccount);
+    method public void phoneAccountSelected(android.telecomm.PhoneAccountHandle);
     method public void playDtmfTone(char);
     method public void postDialContinue(boolean);
     method public void reject(boolean, java.lang.String);
@@ -28315,7 +28315,7 @@ package android.telecomm {
   }
 
   public static class Call.Details {
-    method public android.telecomm.PhoneAccount getAccount();
+    method public android.telecomm.PhoneAccountHandle getAccount();
     method public java.lang.String getCallerDisplayName();
     method public int getCallerDisplayNamePresentation();
     method public int getCapabilities();
@@ -28499,9 +28499,9 @@ package android.telecomm {
   }
 
   public final class ConnectionRequest implements android.os.Parcelable {
-    ctor public ConnectionRequest(android.telecomm.PhoneAccount, java.lang.String, android.net.Uri, int, android.os.Bundle, int);
+    ctor public ConnectionRequest(android.telecomm.PhoneAccountHandle, java.lang.String, android.net.Uri, int, android.os.Bundle, int);
     method public int describeContents();
-    method public android.telecomm.PhoneAccount getAccount();
+    method public android.telecomm.PhoneAccountHandle getAccount();
     method public java.lang.String getCallId();
     method public android.os.Bundle getExtras();
     method public android.net.Uri getHandle();
@@ -28516,7 +28516,7 @@ package android.telecomm {
     method public final void createRemoteIncomingConnection(android.telecomm.ConnectionRequest, android.telecomm.ConnectionService.CreateConnectionResponse<android.telecomm.RemoteConnection>);
     method public final void createRemoteOutgoingConnection(android.telecomm.ConnectionRequest, android.telecomm.ConnectionService.CreateConnectionResponse<android.telecomm.RemoteConnection>);
     method public final java.util.Collection<android.telecomm.Connection> getAllConnections();
-    method public final void lookupRemoteAccounts(android.net.Uri, android.telecomm.SimpleResponse<android.net.Uri, java.util.List<android.telecomm.PhoneAccount>>);
+    method public final void lookupRemoteAccounts(android.net.Uri, android.telecomm.SimpleResponse<android.net.Uri, java.util.List<android.telecomm.PhoneAccountHandle>>);
     method public final void maybeRespondToAccountLookup();
     method public final android.os.IBinder onBind(android.content.Intent);
     method protected void onConnectionAdded(android.telecomm.Connection);
@@ -28548,7 +28548,7 @@ package android.telecomm {
     method public void holdCall(java.lang.String);
     method public void mute(boolean);
     method public void phoneAccountClicked(java.lang.String);
-    method public void phoneAccountSelected(java.lang.String, android.telecomm.PhoneAccount);
+    method public void phoneAccountSelected(java.lang.String, android.telecomm.PhoneAccountHandle);
     method public void playDtmfTone(java.lang.String, char);
     method public void postDialContinue(java.lang.String, boolean);
     method public void rejectCall(java.lang.String, boolean, java.lang.String);
@@ -28560,7 +28560,7 @@ package android.telecomm {
 
   public final class InCallCall implements android.os.Parcelable {
     method public int describeContents();
-    method public android.telecomm.PhoneAccount getAccount();
+    method public android.telecomm.PhoneAccountHandle getAccount();
     method public android.telecomm.RemoteCallVideoProvider getCallVideoProvider() throws android.os.RemoteException;
     method public java.lang.String getCallerDisplayName();
     method public int getCallerDisplayNamePresentation();
@@ -28605,8 +28605,8 @@ package android.telecomm {
     method public void onCallRemoved(android.telecomm.Phone, android.telecomm.Call);
   }
 
-  public class PhoneAccount implements android.os.Parcelable {
-    ctor public PhoneAccount(android.content.ComponentName, java.lang.String);
+  public class PhoneAccountHandle implements android.os.Parcelable {
+    ctor public PhoneAccountHandle(android.content.ComponentName, java.lang.String);
     method public int describeContents();
     method public android.content.ComponentName getComponentName();
     method public java.lang.String getId();
@@ -28615,9 +28615,9 @@ package android.telecomm {
   }
 
   public class PhoneAccountMetadata implements android.os.Parcelable {
-    ctor public PhoneAccountMetadata(android.telecomm.PhoneAccount, android.net.Uri, java.lang.String, int, int, java.lang.String, java.lang.String, boolean);
+    ctor public PhoneAccountMetadata(android.telecomm.PhoneAccountHandle, android.net.Uri, java.lang.String, int, int, java.lang.String, java.lang.String, boolean);
     method public int describeContents();
-    method public android.telecomm.PhoneAccount getAccount();
+    method public android.telecomm.PhoneAccountHandle getAccount();
     method public int getCapabilities();
     method public android.net.Uri getHandle();
     method public android.graphics.drawable.Drawable getIcon(android.content.Context);
@@ -28723,11 +28723,11 @@ package android.telecomm {
 
   public class TelecommManager {
     method public void clearAccounts(java.lang.String);
-    method public android.telecomm.PhoneAccount getDefaultOutgoingPhoneAccount();
-    method public java.util.List<android.telecomm.PhoneAccount> getEnabledPhoneAccounts();
-    method public android.telecomm.PhoneAccountMetadata getPhoneAccountMetadata(android.telecomm.PhoneAccount);
+    method public android.telecomm.PhoneAccountHandle getDefaultOutgoingPhoneAccount();
+    method public java.util.List<android.telecomm.PhoneAccountHandle> getEnabledPhoneAccounts();
+    method public android.telecomm.PhoneAccountMetadata getPhoneAccountMetadata(android.telecomm.PhoneAccountHandle);
     method public void registerPhoneAccount(android.telecomm.PhoneAccountMetadata);
-    method public void unregisterPhoneAccount(android.telecomm.PhoneAccount);
+    method public void unregisterPhoneAccount(android.telecomm.PhoneAccountHandle);
     field public static final java.lang.String ACTION_CONNECTION_SERVICE;
     field public static final java.lang.String ACTION_CONNECTION_SERVICE_CONFIGURE = "android.intent.action.CONNECTION_SERVICE_CONFIGURE";
     field public static final java.lang.String ACTION_INCOMING_CALL = "android.intent.action.INCOMING_CALL";
@@ -28738,7 +28738,7 @@ package android.telecomm {
     field public static final java.lang.String EXTRA_CALL_DISCONNECT_MESSAGE = "android.telecomm.extra.CALL_DISCONNECT_MESSAGE";
     field public static final java.lang.String EXTRA_CONNECTION_SERVICE = "android.telecomm.extra.CONNECTION_SERVICE";
     field public static final java.lang.String EXTRA_INCOMING_CALL_EXTRAS = "android.intent.extra.INCOMING_CALL_EXTRAS";
-    field public static final java.lang.String EXTRA_PHONE_ACCOUNT = "android.intent.extra.PHONE_ACCOUNT";
+    field public static final java.lang.String EXTRA_PHONE_ACCOUNT_HANDLE = "android.intent.extra.PHONE_ACCOUNT_HANDLE";
     field public static final java.lang.String EXTRA_START_CALL_WITH_SPEAKERPHONE = "android.intent.extra.START_CALL_WITH_SPEAKERPHONE";
     field public static final java.lang.String EXTRA_START_CALL_WITH_VIDEO_STATE = "android.intent.extra.START_CALL_WITH_VIDEO_STATE";
   }

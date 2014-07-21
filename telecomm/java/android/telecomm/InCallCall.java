@@ -25,7 +25,6 @@ import android.telephony.DisconnectCause;
 import com.android.internal.telecomm.ICallVideoProvider;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -44,7 +43,7 @@ public final class InCallCall implements Parcelable {
     private final String mCallerDisplayName;
     private final int mCallerDisplayNamePresentation;
     private final GatewayInfo mGatewayInfo;
-    private final PhoneAccount mAccount;
+    private final PhoneAccountHandle mAccount;
     private final ICallVideoProvider mCallVideoProvider;
     private RemoteCallVideoProvider mRemoteCallVideoProvider;
     private final String mParentCallId;
@@ -66,7 +65,7 @@ public final class InCallCall implements Parcelable {
             String callerDisplayName,
             int callerDisplayNamePresentation,
             GatewayInfo gatewayInfo,
-            PhoneAccount account,
+            PhoneAccountHandle account,
             ICallVideoProvider callVideoProvider,
             String parentCallId,
             List<String> childCallIds,
@@ -160,8 +159,8 @@ public final class InCallCall implements Parcelable {
         return mGatewayInfo;
     }
 
-    /** PhoneAccount information for the call. */
-    public PhoneAccount getAccount() {
+    /** PhoneAccountHandle information for the call. */
+    public PhoneAccountHandle getAccount() {
         return mAccount;
     }
 
@@ -234,7 +233,7 @@ public final class InCallCall implements Parcelable {
             String callerDisplayName = source.readString();
             int callerDisplayNamePresentation = source.readInt();
             GatewayInfo gatewayInfo = source.readParcelable(classLoader);
-            PhoneAccount account = source.readParcelable(classLoader);
+            PhoneAccountHandle account = source.readParcelable(classLoader);
             ICallVideoProvider callVideoProvider =
                     ICallVideoProvider.Stub.asInterface(source.readStrongBinder());
             String parentCallId = source.readString();
