@@ -28316,7 +28316,7 @@ package android.telecomm {
   }
 
   public static class Call.Details {
-    method public android.telecomm.PhoneAccountHandle getAccount();
+    method public android.telecomm.PhoneAccountHandle getAccountHandle();
     method public java.lang.String getCallerDisplayName();
     method public int getCallerDisplayNamePresentation();
     method public int getCapabilities();
@@ -28502,7 +28502,7 @@ package android.telecomm {
   public final class ConnectionRequest implements android.os.Parcelable {
     ctor public ConnectionRequest(android.telecomm.PhoneAccountHandle, java.lang.String, android.net.Uri, int, android.os.Bundle, int);
     method public int describeContents();
-    method public android.telecomm.PhoneAccountHandle getAccount();
+    method public android.telecomm.PhoneAccountHandle getAccountHandle();
     method public java.lang.String getCallId();
     method public android.os.Bundle getExtras();
     method public android.net.Uri getHandle();
@@ -28561,7 +28561,7 @@ package android.telecomm {
 
   public final class InCallCall implements android.os.Parcelable {
     method public int describeContents();
-    method public android.telecomm.PhoneAccountHandle getAccount();
+    method public android.telecomm.PhoneAccountHandle getAccountHandle();
     method public android.telecomm.RemoteCallVideoProvider getCallVideoProvider() throws android.os.RemoteException;
     method public java.lang.String getCallerDisplayName();
     method public int getCallerDisplayNamePresentation();
@@ -28606,19 +28606,10 @@ package android.telecomm {
     method public void onCallRemoved(android.telecomm.Phone, android.telecomm.Call);
   }
 
-  public class PhoneAccountHandle implements android.os.Parcelable {
-    ctor public PhoneAccountHandle(android.content.ComponentName, java.lang.String);
+  public class PhoneAccount implements android.os.Parcelable {
+    ctor public PhoneAccount(android.telecomm.PhoneAccountHandle, android.net.Uri, java.lang.String, int, int, java.lang.String, java.lang.String, boolean);
     method public int describeContents();
-    method public android.content.ComponentName getComponentName();
-    method public java.lang.String getId();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
-  }
-
-  public class PhoneAccountMetadata implements android.os.Parcelable {
-    ctor public PhoneAccountMetadata(android.telecomm.PhoneAccountHandle, android.net.Uri, java.lang.String, int, int, java.lang.String, java.lang.String, boolean);
-    method public int describeContents();
-    method public android.telecomm.PhoneAccountHandle getAccount();
+    method public android.telecomm.PhoneAccountHandle getAccountHandle();
     method public int getCapabilities();
     method public android.net.Uri getHandle();
     method public android.graphics.drawable.Drawable getIcon(android.content.Context);
@@ -28631,6 +28622,15 @@ package android.telecomm {
     field public static final int CAPABILITY_CALL_PROVIDER = 2; // 0x2
     field public static final int CAPABILITY_SIM_CALL_MANAGER = 1; // 0x1
     field public static final int CAPABILITY_SIM_SUBSCRIPTION = 4; // 0x4
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
+  public class PhoneAccountHandle implements android.os.Parcelable {
+    ctor public PhoneAccountHandle(android.content.ComponentName, java.lang.String);
+    method public int describeContents();
+    method public android.content.ComponentName getComponentName();
+    method public java.lang.String getId();
+    method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
   }
 
@@ -28726,8 +28726,8 @@ package android.telecomm {
     method public void clearAccounts(java.lang.String);
     method public android.telecomm.PhoneAccountHandle getDefaultOutgoingPhoneAccount();
     method public java.util.List<android.telecomm.PhoneAccountHandle> getEnabledPhoneAccounts();
-    method public android.telecomm.PhoneAccountMetadata getPhoneAccountMetadata(android.telecomm.PhoneAccountHandle);
-    method public void registerPhoneAccount(android.telecomm.PhoneAccountMetadata);
+    method public android.telecomm.PhoneAccount getPhoneAccount(android.telecomm.PhoneAccountHandle);
+    method public void registerPhoneAccount(android.telecomm.PhoneAccount);
     method public void unregisterPhoneAccount(android.telecomm.PhoneAccountHandle);
     field public static final java.lang.String ACTION_CONNECTION_SERVICE;
     field public static final java.lang.String ACTION_CONNECTION_SERVICE_CONFIGURE = "android.intent.action.CONNECTION_SERVICE_CONFIGURE";

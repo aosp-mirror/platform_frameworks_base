@@ -30,7 +30,7 @@ public final class ConnectionRequest implements Parcelable {
     // TODO: Token to limit recursive invocations
     // TODO: Consider upgrading "mHandle" to ordered list of handles, indicating a set of phone
     //         numbers that would satisfy the client's needs, in order of preference
-    private final PhoneAccountHandle mAccount;
+    private final PhoneAccountHandle mAccountHandle;
     private final String mCallId;
     private final Uri mHandle;
     private final int mHandlePresentation;
@@ -38,7 +38,7 @@ public final class ConnectionRequest implements Parcelable {
     private final int mVideoState;
 
     /**
-     * @param account The account which should be used to place the call.
+     * @param accountHandle The accountHandle which should be used to place the call.
      * @param callId An identifier for this call.
      * @param handle The handle (e.g., phone number) to which the {@link Connection} is to connect.
      * @param handlePresentation The {@link CallPropertyPresentation} which controls how the handle
@@ -47,13 +47,13 @@ public final class ConnectionRequest implements Parcelable {
      * @param videoState Determines the video state for the connection.
      */
     public ConnectionRequest(
-            PhoneAccountHandle account,
+            PhoneAccountHandle accountHandle,
             String callId,
             Uri handle,
             int handlePresentation,
             Bundle extras,
             int videoState) {
-        mAccount = account;
+        mAccountHandle = accountHandle;
         mCallId = callId;
         mHandle = handle;
         mHandlePresentation = handlePresentation;
@@ -62,7 +62,7 @@ public final class ConnectionRequest implements Parcelable {
     }
 
     private ConnectionRequest(Parcel in) {
-        mAccount = in.readParcelable(getClass().getClassLoader());
+        mAccountHandle = in.readParcelable(getClass().getClassLoader());
         mCallId = in.readString();
         mHandle = in.readParcelable(getClass().getClassLoader());
         mHandlePresentation = in.readInt();
@@ -73,7 +73,7 @@ public final class ConnectionRequest implements Parcelable {
     /**
      * The account which should be used to place the call.
      */
-    public PhoneAccountHandle getAccount() { return mAccount; }
+    public PhoneAccountHandle getAccountHandle() { return mAccountHandle; }
 
     /**
      * An identifier for this call.
@@ -140,7 +140,7 @@ public final class ConnectionRequest implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel destination, int flags) {
-        destination.writeParcelable(mAccount, 0);
+        destination.writeParcelable(mAccountHandle, 0);
         destination.writeString(mCallId);
         destination.writeParcelable(mHandle, 0);
         destination.writeInt(mHandlePresentation);

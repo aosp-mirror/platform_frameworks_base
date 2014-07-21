@@ -73,7 +73,7 @@ public final class Call {
         private final int mHandlePresentation;
         private final String mCallerDisplayName;
         private final int mCallerDisplayNamePresentation;
-        private final PhoneAccountHandle mAccount;
+        private final PhoneAccountHandle mAccountHandle;
         private final int mCapabilities;
         private final int mDisconnectCauseCode;
         private final String mDisconnectCauseMsg;
@@ -117,8 +117,8 @@ public final class Call {
          * @return The {@code PhoneAccountHandle} whereby the {@code Call} is currently being
          * routed.
          */
-        public PhoneAccountHandle getAccount() {
-            return mAccount;
+        public PhoneAccountHandle getAccountHandle() {
+            return mAccountHandle;
         }
 
         /**
@@ -185,7 +185,7 @@ public final class Call {
                         Objects.equals(mCallerDisplayName, d.mCallerDisplayName) &&
                         Objects.equals(mCallerDisplayNamePresentation,
                                 d.mCallerDisplayNamePresentation) &&
-                        Objects.equals(mAccount, d.mAccount) &&
+                        Objects.equals(mAccountHandle, d.mAccountHandle) &&
                         Objects.equals(mCapabilities, d.mCapabilities) &&
                         Objects.equals(mDisconnectCauseCode, d.mDisconnectCauseCode) &&
                         Objects.equals(mDisconnectCauseMsg, d.mDisconnectCauseMsg) &&
@@ -204,7 +204,7 @@ public final class Call {
                     Objects.hashCode(mHandlePresentation) +
                     Objects.hashCode(mCallerDisplayName) +
                     Objects.hashCode(mCallerDisplayNamePresentation) +
-                    Objects.hashCode(mAccount) +
+                    Objects.hashCode(mAccountHandle) +
                     Objects.hashCode(mCapabilities) +
                     Objects.hashCode(mDisconnectCauseCode) +
                     Objects.hashCode(mDisconnectCauseMsg) +
@@ -220,7 +220,7 @@ public final class Call {
                 int handlePresentation,
                 String callerDisplayName,
                 int callerDisplayNamePresentation,
-                PhoneAccountHandle account,
+                PhoneAccountHandle accountHandle,
                 int capabilities,
                 int disconnectCauseCode,
                 String disconnectCauseMsg,
@@ -232,7 +232,7 @@ public final class Call {
             mHandlePresentation = handlePresentation;
             mCallerDisplayName = callerDisplayName;
             mCallerDisplayNamePresentation = callerDisplayNamePresentation;
-            mAccount = account;
+            mAccountHandle = accountHandle;
             mCapabilities = capabilities;
             mDisconnectCauseCode = disconnectCauseCode;
             mDisconnectCauseMsg = disconnectCauseMsg;
@@ -458,11 +458,11 @@ public final class Call {
     }
 
     /**
-     * Notifies this {@code Call} the a {@code PhoneAccountHandle} has been selected and to proceed
-     * with placing an outgoing call.
+     * Notifies this {@code Call} that an account has been selected and to proceed with placing
+     * an outgoing call.
      */
-    public void phoneAccountSelected(PhoneAccountHandle account) {
-        mInCallAdapter.phoneAccountSelected(mTelecommCallId, account);
+    public void phoneAccountSelected(PhoneAccountHandle accountHandle) {
+        mInCallAdapter.phoneAccountSelected(mTelecommCallId, accountHandle);
 
     }
 
@@ -589,7 +589,7 @@ public final class Call {
                 inCallCall.getHandlePresentation(),
                 inCallCall.getCallerDisplayName(),
                 inCallCall.getCallerDisplayNamePresentation(),
-                inCallCall.getAccount(),
+                inCallCall.getAccountHandle(),
                 inCallCall.getCapabilities(),
                 inCallCall.getDisconnectCauseCode(),
                 inCallCall.getDisconnectCauseMsg(),
