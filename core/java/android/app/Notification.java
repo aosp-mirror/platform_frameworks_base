@@ -26,6 +26,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.session.MediaSession;
 import android.net.Uri;
@@ -274,6 +275,8 @@ public class Notification implements Parcelable
      * Use this constant as the value for audioStreamType to request that
      * the default stream type for notifications be used.  Currently the
      * default stream type is {@link AudioManager#STREAM_NOTIFICATION}.
+     *
+     * @deprecated Use {@link #audioAttributes} instead.
      */
     public static final int STREAM_DEFAULT = -1;
 
@@ -281,8 +284,23 @@ public class Notification implements Parcelable
      * The audio stream type to use when playing the sound.
      * Should be one of the STREAM_ constants from
      * {@link android.media.AudioManager}.
+     *
+     * @deprecated Use {@link #audioAttributes} instead.
      */
     public int audioStreamType = STREAM_DEFAULT;
+
+    /**
+     * The default value of {@link #audioAttributes}.
+     */
+    public static final AudioAttributes AUDIO_ATTRIBUTES_DEFAULT = new AudioAttributes.Builder()
+            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+            .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+            .build();
+
+    /**
+     * The {@link AudioAttributes audio attributes} to use when playing the sound.
+     */
+    public AudioAttributes audioAttributes = AUDIO_ATTRIBUTES_DEFAULT;
 
     /**
      * The pattern with which to vibrate.
@@ -1221,6 +1239,9 @@ public class Notification implements Parcelable
         }
 
         audioStreamType = parcel.readInt();
+        if (parcel.readInt() != 0) {
+            audioAttributes = AudioAttributes.CREATOR.createFromParcel(parcel);
+        }
         vibrate = parcel.createLongArray();
         ledARGB = parcel.readInt();
         ledOnMS = parcel.readInt();
@@ -1297,6 +1318,9 @@ public class Notification implements Parcelable
         that.iconLevel = this.iconLevel;
         that.sound = this.sound; // android.net.Uri is immutable
         that.audioStreamType = this.audioStreamType;
+        if (this.audioAttributes != null) {
+            that.audioAttributes = new AudioAttributes.Builder(this.audioAttributes).build();
+        }
 
         final long[] vibrate = this.vibrate;
         if (vibrate != null) {
@@ -1454,6 +1478,14 @@ public class Notification implements Parcelable
             parcel.writeInt(0);
         }
         parcel.writeInt(audioStreamType);
+
+        if (audioAttributes != null) {
+            parcel.writeInt(1);
+            audioAttributes.writeToParcel(parcel, 0);
+        } else {
+            parcel.writeInt(0);
+        }
+
         parcel.writeLongArray(vibrate);
         parcel.writeInt(ledARGB);
         parcel.writeInt(ledOnMS);
@@ -1715,6 +1747,7 @@ public class Notification implements Parcelable
         private Bitmap mLargeIcon;
         private Uri mSound;
         private int mAudioStreamType;
+        private AudioAttributes mAudioAttributes;
         private long[] mVibrate;
         private int mLedArgb;
         private int mLedOnMs;
@@ -1773,6 +1806,7 @@ public class Notification implements Parcelable
             // Set defaults to match the defaults of a Notification
             mWhen = System.currentTimeMillis();
             mAudioStreamType = STREAM_DEFAULT;
+            mAudioAttributes = AUDIO_ATTRIBUTES_DEFAULT;
             mPriority = PRIORITY_DEFAULT;
             mPeople = new ArrayList<String>();
 
@@ -2010,7 +2044,8 @@ public class Notification implements Parcelable
         /**
          * Set the sound to play.
          *
-         * It will be played on the {@link #STREAM_DEFAULT default stream} for notifications.
+         * It will be played using the {@link #AUDIO_ATTRIBUTES_DEFAULT default audio attributes}
+         * for notifications.
          *
          * <p>
          * A notification that is noisy is more likely to be presented as a heads-up notification.
@@ -2020,7 +2055,7 @@ public class Notification implements Parcelable
          */
         public Builder setSound(Uri sound) {
             mSound = sound;
-            mAudioStreamType = STREAM_DEFAULT;
+            mAudioAttributes = AUDIO_ATTRIBUTES_DEFAULT;
             return this;
         }
 
@@ -2032,12 +2067,28 @@ public class Notification implements Parcelable
          * <p>
          * A notification that is noisy is more likely to be presented as a heads-up notification.
          * </p>
-         *
+         * @deprecated use {@link #setSound(Uri, AudioAttributes)} instead.
          * @see Notification#sound
          */
         public Builder setSound(Uri sound, int streamType) {
             mSound = sound;
             mAudioStreamType = streamType;
+            return this;
+        }
+
+        /**
+         * Set the sound to play, along with specific {@link AudioAttributes audio attributes} to
+         * use during playback.
+         *
+         * <p>
+         * A notification that is noisy is more likely to be presented as a heads-up notification.
+         * </p>
+         *
+         * @see Notification#sound
+         */
+        public Builder setSound(Uri sound, AudioAttributes audioAttributes) {
+            mSound = sound;
+            mAudioAttributes = audioAttributes;
             return this;
         }
 
@@ -2692,6 +2743,7 @@ public class Notification implements Parcelable
             n.largeIcon = mLargeIcon;
             n.sound = mSound;
             n.audioStreamType = mAudioStreamType;
+            n.audioAttributes = mAudioAttributes;
             n.vibrate = mVibrate;
             n.ledARGB = mLedArgb;
             n.ledOnMS = mLedOnMs;

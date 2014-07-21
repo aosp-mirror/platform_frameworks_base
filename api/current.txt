@@ -4559,6 +4559,7 @@ package android.app {
     method public java.lang.String getSortKey();
     method public deprecated void setLatestEventInfo(android.content.Context, java.lang.CharSequence, java.lang.CharSequence, android.app.PendingIntent);
     method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.media.AudioAttributes AUDIO_ATTRIBUTES_DEFAULT;
     field public static final java.lang.String CATEGORY_ALARM = "alarm";
     field public static final java.lang.String CATEGORY_CALL = "call";
     field public static final java.lang.String CATEGORY_EMAIL = "email";
@@ -4615,12 +4616,13 @@ package android.app {
     field public static final int PRIORITY_LOW = -1; // 0xffffffff
     field public static final int PRIORITY_MAX = 2; // 0x2
     field public static final int PRIORITY_MIN = -2; // 0xfffffffe
-    field public static final int STREAM_DEFAULT = -1; // 0xffffffff
+    field public static final deprecated int STREAM_DEFAULT = -1; // 0xffffffff
     field public static final int VISIBILITY_PRIVATE = 0; // 0x0
     field public static final int VISIBILITY_PUBLIC = 1; // 0x1
     field public static final int VISIBILITY_SECRET = -1; // 0xffffffff
     field public android.app.Notification.Action[] actions;
-    field public int audioStreamType;
+    field public android.media.AudioAttributes audioAttributes;
+    field public deprecated int audioStreamType;
     field public android.widget.RemoteViews bigContentView;
     field public java.lang.String category;
     field public int color;
@@ -4739,7 +4741,8 @@ package android.app {
     method public android.app.Notification.Builder setSmallIcon(int, int);
     method public android.app.Notification.Builder setSortKey(java.lang.String);
     method public android.app.Notification.Builder setSound(android.net.Uri);
-    method public android.app.Notification.Builder setSound(android.net.Uri, int);
+    method public deprecated android.app.Notification.Builder setSound(android.net.Uri, int);
+    method public android.app.Notification.Builder setSound(android.net.Uri, android.media.AudioAttributes);
     method public android.app.Notification.Builder setStyle(android.app.Notification.Style);
     method public android.app.Notification.Builder setSubText(java.lang.CharSequence);
     method public android.app.Notification.Builder setTicker(java.lang.CharSequence);
