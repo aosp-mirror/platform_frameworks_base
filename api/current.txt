@@ -28396,7 +28396,7 @@ package android.telecomm {
   }
 
   public abstract class CallVideoClient {
-    ctor protected CallVideoClient();
+    ctor public CallVideoClient();
     method public abstract void onHandleCallSessionEvent(int);
     method public abstract void onHandleCameraCapabilitiesChange(android.telecomm.CallCameraCapabilities);
     method public abstract void onReceiveSessionModifyRequest(android.telecomm.VideoCallProfile);
@@ -28413,7 +28413,7 @@ package android.telecomm {
   }
 
   public abstract class CallVideoProvider {
-    ctor protected CallVideoProvider();
+    ctor public CallVideoProvider();
     method public abstract void onRequestCallDataUsage();
     method public abstract void onRequestCameraCapabilities();
     method public abstract void onSendSessionModifyRequest(android.telecomm.VideoCallProfile);
@@ -28428,7 +28428,7 @@ package android.telecomm {
   }
 
   public abstract class Connection {
-    ctor protected Connection();
+    ctor public Connection();
     method public final void destroy();
     method public final boolean getAudioModeIsVoip();
     method public final android.telecomm.CallAudioState getCallAudioState();
@@ -28445,21 +28445,21 @@ package android.telecomm {
     method public final int getVideoState();
     method public final boolean isConferenceConnection();
     method public final boolean isRequestingRingback();
-    method protected void onAbort();
-    method protected void onAnswer(int);
-    method protected void onChildrenChanged(java.util.List<android.telecomm.Connection>);
-    method protected void onDisconnect();
-    method protected void onHold();
-    method protected void onPhoneAccountClicked();
-    method protected void onPlayDtmfTone(char);
-    method protected void onPostDialContinue(boolean);
-    method protected void onReject();
-    method protected void onSeparate();
-    method protected void onSetAudioState(android.telecomm.CallAudioState);
-    method protected void onSetState(int);
-    method protected void onStopDtmfTone();
-    method protected void onSwapWithBackgroundCall();
-    method protected void onUnhold();
+    method public void onAbort();
+    method public void onAnswer(int);
+    method public void onChildrenChanged(java.util.List<android.telecomm.Connection>);
+    method public void onDisconnect();
+    method public void onHold();
+    method public void onPhoneAccountClicked();
+    method public void onPlayDtmfTone(char);
+    method public void onPostDialContinue(boolean);
+    method public void onReject();
+    method public void onSeparate();
+    method public void onSetAudioState(android.telecomm.CallAudioState);
+    method public void onSetState(int);
+    method public void onStopDtmfTone();
+    method public void onSwapWithBackgroundCall();
+    method public void onUnhold();
     method public final void setActive();
     method public final void setAudioModeIsVoip(boolean);
     method public final void setCallCapabilities(int);
@@ -28510,11 +28510,11 @@ package android.telecomm {
     method public final void lookupRemoteAccounts(android.net.Uri, android.telecomm.SimpleResponse<android.net.Uri, java.util.List<android.telecomm.PhoneAccountHandle>>);
     method public final void maybeRespondToAccountLookup();
     method public final android.os.IBinder onBind(android.content.Intent);
-    method protected void onConnectionAdded(android.telecomm.Connection);
-    method protected void onConnectionRemoved(android.telecomm.Connection);
-    method protected void onCreateConferenceConnection(java.lang.String, android.telecomm.Connection, android.telecomm.Response<java.lang.String, android.telecomm.Connection>);
-    method protected void onCreateIncomingConnection(android.telecomm.ConnectionRequest, android.telecomm.ConnectionService.CreateConnectionResponse<android.telecomm.Connection>);
-    method protected void onCreateOutgoingConnection(android.telecomm.ConnectionRequest, android.telecomm.ConnectionService.CreateConnectionResponse<android.telecomm.Connection>);
+    method public void onConnectionAdded(android.telecomm.Connection);
+    method public void onConnectionRemoved(android.telecomm.Connection);
+    method public void onCreateConferenceConnection(java.lang.String, android.telecomm.Connection, android.telecomm.Response<java.lang.String, android.telecomm.Connection>);
+    method public void onCreateIncomingConnection(android.telecomm.ConnectionRequest, android.telecomm.ConnectionService.CreateConnectionResponse<android.telecomm.Connection>);
+    method public void onCreateOutgoingConnection(android.telecomm.ConnectionRequest, android.telecomm.ConnectionService.CreateConnectionResponse<android.telecomm.Connection>);
     field public static final java.lang.String SERVICE_INTERFACE = "android.telecomm.ConnectionService";
   }
 
