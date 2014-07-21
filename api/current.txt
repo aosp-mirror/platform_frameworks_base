@@ -28518,6 +28518,7 @@ package android.telecomm {
     method protected void onCreateConferenceConnection(java.lang.String, android.telecomm.Connection, android.telecomm.Response<java.lang.String, android.telecomm.Connection>);
     method protected void onCreateIncomingConnection(android.telecomm.ConnectionRequest, android.telecomm.ConnectionService.CreateConnectionResponse<android.telecomm.Connection>);
     method protected void onCreateOutgoingConnection(android.telecomm.ConnectionRequest, android.telecomm.ConnectionService.CreateConnectionResponse<android.telecomm.Connection>);
+    field public static final java.lang.String SERVICE_INTERFACE = "android.telecomm.ConnectionService";
   }
 
   public static abstract interface ConnectionService.CreateConnectionResponse {
@@ -28700,7 +28701,6 @@ package android.telecomm {
     method public android.telecomm.PhoneAccount getPhoneAccount(android.telecomm.PhoneAccountHandle);
     method public void registerPhoneAccount(android.telecomm.PhoneAccount);
     method public void unregisterPhoneAccount(android.telecomm.PhoneAccountHandle);
-    field public static final java.lang.String ACTION_CONNECTION_SERVICE;
     field public static final java.lang.String ACTION_CONNECTION_SERVICE_CONFIGURE = "android.intent.action.CONNECTION_SERVICE_CONFIGURE";
     field public static final char DTMF_CHARACTER_PAUSE = 44; // 0x002c ','
     field public static final char DTMF_CHARACTER_WAIT = 59; // 0x003b ';'
