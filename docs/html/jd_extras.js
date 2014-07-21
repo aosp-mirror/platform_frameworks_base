@@ -57,9 +57,9 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "type":"video"
   },
   {
-    "title":"5 Tips for Succeeding",
+    "title":"Plan for Success",
     "titleFriendly":"",
-    "summary":"See inspirational ways of using technology in the classroom.",
+    "summary":"5 tips from developers on creating great EDU apps.",
     "url":"https://www.youtube.com/watch?v=Eh2adsAyTKc",
     "group":"",
     "keywords": [],
