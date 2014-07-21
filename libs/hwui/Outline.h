@@ -49,13 +49,18 @@ public:
         mBounds.set(outline->getBounds());
     }
 
-    bool isEmpty() const {
-        return mType == kOutlineType_None;
+    void setEmpty() {
+        mType = kOutlineType_Empty;
+        mPath.reset();
     }
 
-    void setEmpty() {
+    void setNone() {
         mType = kOutlineType_None;
         mPath.reset();
+    }
+
+    bool isEmpty() const {
+        return mType == kOutlineType_Empty;
     }
 
     void setShouldClip(bool clip) {
@@ -81,7 +86,7 @@ public:
     }
 
     const SkPath* getPath() const {
-        if (mType == kOutlineType_None) return NULL;
+        if (mType == kOutlineType_None || mType == kOutlineType_Empty) return NULL;
 
         return &mPath;
     }
@@ -89,8 +94,9 @@ public:
 private:
     enum OutlineType {
         kOutlineType_None = 0,
-        kOutlineType_ConvexPath = 1,
-        kOutlineType_RoundRect = 2
+        kOutlineType_Empty = 1,
+        kOutlineType_ConvexPath = 2,
+        kOutlineType_RoundRect = 3
     };
 
     bool mShouldClip;

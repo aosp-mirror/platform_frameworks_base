@@ -581,7 +581,7 @@ void RenderNode::buildZSortedChildList(Vector<ZDrawRenderNodeOpPair>& zTranslate
 
 template <class T>
 void RenderNode::issueDrawShadowOperation(const Matrix4& transformFromParent, T& handler) {
-    if (properties().getAlpha() <= 0.0f || properties().getOutline().isEmpty()) return;
+    if (properties().getAlpha() <= 0.0f || !properties().getOutline().getPath()) return;
 
     mat4 shadowMatrixXY(transformFromParent);
     applyViewPropertyTransforms(shadowMatrixXY);
@@ -776,16 +776,23 @@ void RenderNode::issueOperationsOfProjectedChildren(OpenGLRenderer& renderer, T&
  */
 template <class T>
 void RenderNode::issueOperations(OpenGLRenderer& renderer, T& handler) {
+    const int level = handler.level();
+    if (mDisplayListData->isEmpty()) {
+        DISPLAY_LIST_LOGD("%*sEmpty display list (%p, %s)", level * 2, "", this, getName());
+        return;
+    }
+
     const bool drawLayer = (mLayer && (&renderer != mLayer->renderer));
     // If we are updating the contents of mLayer, we don't want to apply any of
     // the RenderNode's properties to this issueOperations pass. Those will all
     // be applied when the layer is drawn, aka when this is true.
     const bool useViewProperties = (!mLayer || drawLayer);
-
-    const int level = handler.level();
-    if (mDisplayListData->isEmpty() || (useViewProperties && properties().getAlpha() <= 0)) {
-        DISPLAY_LIST_LOGD("%*sEmpty display list (%p, %s)", level * 2, "", this, getName());
-        return;
+    if (useViewProperties) {
+        const Outline& outline = properties().getOutline();
+        if (properties().getAlpha() <= 0 || (outline.getShouldClip() && outline.isEmpty())) {
+            DISPLAY_LIST_LOGD("%*sRejected display list (%p, %s)", level * 2, "", this, getName());
+            return;
+        }
     }
 
     handler.startMark(getName());
