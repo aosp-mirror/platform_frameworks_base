@@ -16,6 +16,7 @@
 
 package com.android.server.usage;
 
+import android.Manifest;
 import android.app.AppOpsManager;
 import android.app.usage.IUsageStatsManager;
 import android.app.usage.PackageUsageStats;
@@ -25,6 +26,7 @@ import android.app.usage.UsageStatsManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.Handler;
@@ -381,10 +383,21 @@ public class UsageStatsService extends SystemService {
 
     private class BinderService extends IUsageStatsManager.Stub {
 
+        private boolean hasPermission(String callingPackage) {
+            final int mode = mAppOps.checkOp(AppOpsManager.OP_GET_USAGE_STATS,
+                    Binder.getCallingUid(), callingPackage);
+            if (mode == AppOpsManager.MODE_IGNORED) {
+                // If AppOpsManager ignores this, still allow if we have the system level
+                // permission.
+                return getContext().checkCallingPermission(Manifest.permission.PACKAGE_USAGE_STATS)
+                        == PackageManager.PERMISSION_GRANTED;
+            }
+            return mode == AppOpsManager.MODE_ALLOWED;
+        }
+
         @Override
         public UsageStats[] getStatsSince(int bucketType, long time, String callingPackage) {
-            if (mAppOps.checkOp(AppOpsManager.OP_GET_USAGE_STATS, Binder.getCallingUid(),
-                    callingPackage) != AppOpsManager.MODE_ALLOWED) {
+            if (!hasPermission(callingPackage)) {
                 return UsageStats.EMPTY_STATS;
             }
 
@@ -398,8 +411,7 @@ public class UsageStatsService extends SystemService {
 
         @Override
         public UsageStats.Event[] getEventsSince(long time, String callingPackage) {
-            if (mAppOps.checkOp(AppOpsManager.OP_GET_USAGE_STATS, Binder.getCallingUid(),
-                    callingPackage) != AppOpsManager.MODE_ALLOWED) {
+            if (!hasPermission(callingPackage)) {
                 return UsageStats.Event.EMPTY_EVENTS;
             }
 
