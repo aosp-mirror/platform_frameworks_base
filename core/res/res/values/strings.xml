@@ -2983,11 +2983,11 @@
     <!-- Title of an application permission, listed so the user can choose whether
         they want to allow the application to modify and remove voicemails in the user's voicemail
         inbox. [CHAR LIMIT=NONE] -->
-    <string name="permlab_manageVoicemail">manage voicemails</string>
+    <string name="permlab_writeVoicemail">write voicemails</string>
     <!-- Description of an application permission, listed so the user can choose whether
         they want to allow the application to modify and remove voicemails in the user's voicemail
         inbox. [CHAR LIMIT=NONE] -->
-    <string name="permdesc_manageVoicemail">Allows the app to modify and remove messages from your voicemail inbox.</string>
+    <string name="permdesc_writeVoicemail">Allows the app to modify and remove messages from your voicemail inbox.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether
         they want to allow the application to do this. [CHAR LIMIT=NONE] -->
@@ -2999,10 +2999,10 @@
 
     <!-- Title of an application permission, listed so the user can choose whether
         they want to allow the application to do this. [CHAR LIMIT=NONE] -->
-    <string name="permlab_readAllVoicemail">read all voicemail</string>
+    <string name="permlab_readVoicemail">read voicemail</string>
     <!-- Description of an application permission, listed so the user can choose whether
         they want to allow the application to do this. [CHAR LIMIT=NONE] -->
-    <string name="permdesc_readAllVoicemail">Allows the app to read all your voicemails.</string>
+    <string name="permdesc_readVoicemail">Allows the app to read your voicemails.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether
         they want to allow the application to do this. -->
