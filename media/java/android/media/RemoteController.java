@@ -57,8 +57,10 @@ import java.util.List;
  * <p>
  * Registration requires the {@link OnClientUpdateListener} listener to be one of the enabled
  * notification listeners (see {@link android.service.notification.NotificationListenerService}).
+ *
+ * @deprecated Use {@link MediaController} instead.
  */
-public final class RemoteController
+@Deprecated public final class RemoteController
 {
     private final static int MAX_BITMAP_DIMENSION = 512;
     private final static int TRANSPORT_UNKNOWN = 0;
