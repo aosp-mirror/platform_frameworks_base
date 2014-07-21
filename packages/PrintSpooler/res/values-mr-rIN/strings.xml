@@ -25,16 +25,18 @@
     <string name="label_paper_size_summary" msgid="5668204981332138168">"कागद आकार:"</string>
     <string name="label_color" msgid="1108690305218188969">"रंग"</string>
     <string name="label_orientation" msgid="2853142581990496477">"अभिमुखता"</string>
-    <string name="label_pages" msgid="6300874667546617333">"पृष्‍ठे (<xliff:g id="PAGE_COUNT">%1$s</xliff:g>)"</string>
+    <string name="label_pages" msgid="7768589729282182230">"पृष्ठे"</string>
+    <string name="template_all_pages" msgid="3322235982020148762">"सर्व <xliff:g id="PAGE_COUNT">%1$s</xliff:g>"</string>
+    <string name="template_page_range" msgid="428638530038286328">"<xliff:g id="PAGE_COUNT">%1$s</xliff:g> ची श्रेणी"</string>
     <string name="pages_range_example" msgid="8558694453556945172">"उदा. 1—5,8,11—13"</string>
     <string name="print_preview" msgid="8010217796057763343">"मुद्रण पूर्वावलोकन"</string>
     <string name="install_for_print_preview" msgid="6366303997385509332">"पूर्वावलोकनासाठी PDF दर्शक स्‍थापित करा"</string>
     <string name="printing_app_crashed" msgid="854477616686566398">"मुद्रण करण्याचा अ‍ॅप क्रॅश झाला"</string>
-    <string name="page_count_unknown" msgid="6058852665954511124">"पृष्ठे"</string>
     <string name="generating_print_job" msgid="3119608742651698916">"मुद्रण कार्य व्‍युत्‍पन्न करीत आहे"</string>
     <string name="save_as_pdf" msgid="5718454119847596853">"PDF म्‍हणून जतन करा"</string>
     <string name="all_printers" msgid="5018829726861876202">"सर्व प्रिंटर..."</string>
     <string name="print_dialog" msgid="32628687461331979">"मुद्रण संवाद"</string>
+    <string name="current_page_template" msgid="1386638343571771292">"<xliff:g id="CURRENT_PAGE">%1$d</xliff:g> /<xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
     <string name="search" msgid="5421724265322228497">"शोध"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"सर्व प्रिंटर"</string>
     <string name="add_print_service_label" msgid="5356702546188981940">"सेवा जोडा"</string>
@@ -71,13 +73,9 @@
     <item msgid="4061931020926489228">"पोट्रेट"</item>
     <item msgid="3199660090246166812">"भूदृश्य"</item>
   </string-array>
-  <string-array name="page_options_labels">
-    <item msgid="7421377442011699994">"सर्व"</item>
-    <item msgid="6812869625222503603">"परिक्षेत्र"</item>
-  </string-array>
     <string name="print_write_error_message" msgid="5787642615179572543">"फायलीवर लिहू शकलो नाही"</string>
-    <string name="print_error_default_message" msgid="8568506918983980567">"मुद्रण कार्य व्‍युत्‍पन्न करू शकले नाही"</string>
+    <string name="print_error_default_message" msgid="8602678405502922346">"क्षमस्व, त्याने कार्य केले नाही. पुन्हा प्रयत्न करा."</string>
     <string name="print_error_retry" msgid="1426421728784259538">"पुन्हा प्रयत्न करा"</string>
-    <string name="print_error_printer_unavailable" msgid="6653128543854282851">"प्रिंटर अनुपलब्ध"</string>
-    <string name="print_operation_canceling" msgid="5274571823242489160">"रद्द करत आहे..."</string>
+    <string name="print_error_printer_unavailable" msgid="8985614415253203381">"हा प्रिंटर आत्ता उपलब्ध नाही."</string>
+    <string name="print_preparing_preview" msgid="3939930735671364712">"पूर्वावलोकनाची तयारी करत आहे..."</string>
 </resources>

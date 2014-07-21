@@ -25,16 +25,18 @@
     <string name="label_paper_size_summary" msgid="5668204981332138168">"용지 크기:"</string>
     <string name="label_color" msgid="1108690305218188969">"색상"</string>
     <string name="label_orientation" msgid="2853142581990496477">"방향"</string>
-    <string name="label_pages" msgid="6300874667546617333">"페이지 수(<xliff:g id="PAGE_COUNT">%1$s</xliff:g>)"</string>
+    <string name="label_pages" msgid="7768589729282182230">"페이지"</string>
+    <string name="template_all_pages" msgid="3322235982020148762">"<xliff:g id="PAGE_COUNT">%1$s</xliff:g>페이지 모두"</string>
+    <string name="template_page_range" msgid="428638530038286328">"<xliff:g id="PAGE_COUNT">%1$s</xliff:g>페이지 범위"</string>
     <string name="pages_range_example" msgid="8558694453556945172">"예: 1-5, 8, 11-13"</string>
     <string name="print_preview" msgid="8010217796057763343">"인쇄 미리보기"</string>
     <string name="install_for_print_preview" msgid="6366303997385509332">"미리보기용 PDF 뷰어 설치"</string>
     <string name="printing_app_crashed" msgid="854477616686566398">"인쇄 앱에 오류 발생"</string>
-    <string name="page_count_unknown" msgid="6058852665954511124">"페이지"</string>
     <string name="generating_print_job" msgid="3119608742651698916">"인쇄 작업 생성 중"</string>
     <string name="save_as_pdf" msgid="5718454119847596853">"PDF로 저장"</string>
     <string name="all_printers" msgid="5018829726861876202">"모든 프린터…"</string>
     <string name="print_dialog" msgid="32628687461331979">"인쇄 대화상자"</string>
+    <string name="current_page_template" msgid="1386638343571771292">"<xliff:g id="CURRENT_PAGE">%1$d</xliff:g>/<xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
     <string name="search" msgid="5421724265322228497">"검색"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"모든 프린터"</string>
     <string name="add_print_service_label" msgid="5356702546188981940">"서비스 추가"</string>
@@ -71,13 +73,9 @@
     <item msgid="4061931020926489228">"세로"</item>
     <item msgid="3199660090246166812">"가로"</item>
   </string-array>
-  <string-array name="page_options_labels">
-    <item msgid="7421377442011699994">"모두"</item>
-    <item msgid="6812869625222503603">"범위"</item>
-  </string-array>
     <string name="print_write_error_message" msgid="5787642615179572543">"PDF 파일을 생성하지 못했습니다."</string>
-    <string name="print_error_default_message" msgid="8568506918983980567">"인쇄 작업을 생성할 수 없습니다."</string>
+    <string name="print_error_default_message" msgid="8602678405502922346">"죄송합니다. 오류가 발생했습니다. 다시 시도해 보세요."</string>
     <string name="print_error_retry" msgid="1426421728784259538">"다시 시도"</string>
-    <string name="print_error_printer_unavailable" msgid="6653128543854282851">"선택한 프린터를 사용할 수 없음"</string>
-    <string name="print_operation_canceling" msgid="5274571823242489160">"취소 중..."</string>
+    <string name="print_error_printer_unavailable" msgid="8985614415253203381">"현재 이 프린터를 사용할 수 없습니다."</string>
+    <string name="print_preparing_preview" msgid="3939930735671364712">"미리보기 준비 중…"</string>
 </resources>

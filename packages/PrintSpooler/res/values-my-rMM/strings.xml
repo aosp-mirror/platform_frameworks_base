@@ -25,16 +25,18 @@
     <string name="label_paper_size_summary" msgid="5668204981332138168">"စက္ကူ  ဆိုက်:"</string>
     <string name="label_color" msgid="1108690305218188969">"ရောင်စုံ"</string>
     <string name="label_orientation" msgid="2853142581990496477">"အနေအထား"</string>
-    <string name="label_pages" msgid="6300874667546617333">"စာမျက်နှာပေါင်း (<xliff:g id="PAGE_COUNT">%1$s</xliff:g>)"</string>
+    <string name="label_pages" msgid="7768589729282182230">"စာမျက်နှာများ"</string>
+    <string name="template_all_pages" msgid="3322235982020148762">"အားလုံး <xliff:g id="PAGE_COUNT">%1$s</xliff:g>"</string>
+    <string name="template_page_range" msgid="428638530038286328">"<xliff:g id="PAGE_COUNT">%1$s</xliff:g>ဘောင် ထဲမှာ"</string>
     <string name="pages_range_example" msgid="8558694453556945172">"ဥပမာ ၁-၅၊ ၈၊ ၁၁-၁၃"</string>
     <string name="print_preview" msgid="8010217796057763343">"အစမ်းကြည့်ရှုရန်"</string>
     <string name="install_for_print_preview" msgid="6366303997385509332">"အစမ်းကြည့်ရန် ပီဒီအက်ဖ် ဖတ်ရှုစရာ ထည့်သွင်းပါ"</string>
     <string name="printing_app_crashed" msgid="854477616686566398">"စာထုတ်လုပ်သော အပလီကေးရှင်း ခဏ ပျက်သွားပါသည်"</string>
-    <string name="page_count_unknown" msgid="6058852665954511124">"စာမျက်နှာများ"</string>
     <string name="generating_print_job" msgid="3119608742651698916">"စာထုတ်အလုပ်ကို လုပ်နေပါသည်"</string>
     <string name="save_as_pdf" msgid="5718454119847596853">"ပီဒီအက်ဖ် အဖြစ်သိမ်းဆည်းရန်"</string>
     <string name="all_printers" msgid="5018829726861876202">"စာထုတ်စက် အားလုံး"</string>
     <string name="print_dialog" msgid="32628687461331979">"စာထုတ်ရန် အချက်ပြခြင်း"</string>
+    <string name="current_page_template" msgid="1386638343571771292">"<xliff:g id="CURRENT_PAGE">%1$d</xliff:g> /<xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
     <string name="search" msgid="5421724265322228497">"ရှာဖွေခြင်း"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"စာထုတ်စက် အားလုံး"</string>
     <string name="add_print_service_label" msgid="5356702546188981940">"ဆားဗစ် အသစ်ထည့်ရန်"</string>
@@ -71,13 +73,9 @@
     <item msgid="4061931020926489228">"ထောင်လိုက်"</item>
     <item msgid="3199660090246166812">"အလျားလိုက်"</item>
   </string-array>
-  <string-array name="page_options_labels">
-    <item msgid="7421377442011699994">"အားလုံး"</item>
-    <item msgid="6812869625222503603">"စာမျက်နှာ အစ နဲ့ အဆုံး"</item>
-  </string-array>
     <string name="print_write_error_message" msgid="5787642615179572543">"ဖိုင်သို့ မရေးနိုင်ခဲ့"</string>
-    <string name="print_error_default_message" msgid="8568506918983980567">"စာထုတ်အလုပ်ကို မပြုလုပ်နိုင်ပါ"</string>
+    <string name="print_error_default_message" msgid="8602678405502922346">"ဆော်ရီး၊ အဲဒါ အလုပ်မဖြစ်ခဲ့ပါ။ ထပ် စမ်းပါ။"</string>
     <string name="print_error_retry" msgid="1426421728784259538">"ထပ်စမ်း"</string>
-    <string name="print_error_printer_unavailable" msgid="6653128543854282851">"ပရင်တာ မရှိ"</string>
-    <string name="print_operation_canceling" msgid="5274571823242489160">"ပယ်ဖျက်နေ…"</string>
+    <string name="print_error_printer_unavailable" msgid="8985614415253203381">"ဒီပရင်တာမှာ ယခုအချိန်မှာ မရနိုင်ပါ။"</string>
+    <string name="print_preparing_preview" msgid="3939930735671364712">"အစမ်းကြည့်ရန် ပြင်ဆင်နေ…"</string>
 </resources>
