@@ -100,7 +100,7 @@
         </activity>
         <activity
             android:name="VectorDrawableStaticPerf"
-            android:label="Performance of vector images" >
+            android:label="System icons" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
