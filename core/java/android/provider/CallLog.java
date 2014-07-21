@@ -17,12 +17,16 @@
 
 package android.provider;
 
+import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.UserInfo;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.ContactsContract.CommonDataKinds.Callable;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.DataUsageFeedback;
@@ -31,6 +35,8 @@ import android.text.TextUtils;
 
 import com.android.internal.telephony.CallerInfo;
 import com.android.internal.telephony.PhoneConstants;
+
+import java.util.List;
 
 /**
  * The CallLog provider contains information about placed and received calls.
@@ -348,12 +354,44 @@ public class CallLog {
          * @param duration call duration in seconds
          * @param dataUsage data usage for the call in bytes, null if data usage was not tracked for
          *                  the call.
-         *
+         * @result The URI of the call log entry belonging to the user that made or received this
+         *        call.
          * {@hide}
          */
         public static Uri addCall(CallerInfo ci, Context context, String number,
                 int presentation, int callType, int features, PhoneAccountHandle accountHandle,
                 long start, int duration, Long dataUsage) {
+            return addCall(ci, context, number, presentation, callType, features, accountHandle,
+                    start, duration, dataUsage, false);
+        }
+
+        /**
+         * Adds a call to the call log.
+         *
+         * @param ci the CallerInfo object to get the target contact from.  Can be null
+         * if the contact is unknown.
+         * @param context the context used to get the ContentResolver
+         * @param number the phone number to be added to the calls db
+         * @param presentation enum value from PhoneConstants.PRESENTATION_xxx, which
+         *        is set by the network and denotes the number presenting rules for
+         *        "allowed", "payphone", "restricted" or "unknown"
+         * @param callType enumerated values for "incoming", "outgoing", or "missed"
+         * @param features features of the call (e.g. Video).
+         * @param accountHandle The accountHandle object identifying the provider of the call
+         * @param start time stamp for the call in milliseconds
+         * @param duration call duration in seconds
+         * @param dataUsage data usage for the call in bytes, null if data usage was not tracked for
+         *                  the call.
+         * @param addForAllUsers If true, the call is added to the call log of all currently
+         *        running users. The caller must have the MANAGE_USERS permission if this is true.
+         *
+         * @result The URI of the call log entry belonging to the user that made or received this
+         *        call.
+         * {@hide}
+         */
+        public static Uri addCall(CallerInfo ci, Context context, String number,
+                int presentation, int callType, int features, PhoneAccountHandle accountHandle,
+                long start, int duration, Long dataUsage, boolean addForAllUsers) {
             final ContentResolver resolver = context.getContentResolver();
             int numberPresentation = PRESENTATION_ALLOWED;
 
@@ -452,9 +490,32 @@ public class CallLog {
                 }
             }
 
-            Uri result = resolver.insert(CONTENT_URI, values);
+            Uri result = null;
 
-            removeExpiredEntries(context);
+            if (addForAllUsers) {
+                // Insert the entry for all currently running users, in order to trigger any
+                // ContentObservers currently set on the call log.
+                final UserManager userManager = (UserManager) context.getSystemService(
+                        Context.USER_SERVICE);
+                List<UserInfo> users = userManager.getUsers(true);
+                final int currentUserId = userManager.getUserHandle();
+                final int count = users.size();
+                for (int i = 0; i < count; i++) {
+                    final UserInfo user = users.get(i);
+                    final UserHandle userHandle = user.getUserHandle();
+                    if (userManager.isUserRunning(userHandle) &&
+                            !userManager.hasUserRestriction(UserManager.DISALLOW_OUTGOING_CALLS,
+                                    userHandle)) {
+                        Uri uri = addEntryAndRemoveExpiredEntries(context,
+                                ContentProvider.maybeAddUserId(CONTENT_URI, user.id), values);
+                        if (user.id == currentUserId) {
+                            result = uri;
+                        }
+                    }
+                }
+            } else {
+                result = addEntryAndRemoveExpiredEntries(context, CONTENT_URI, values);
+            }
 
             return result;
         }
@@ -484,11 +545,14 @@ public class CallLog {
             }
         }
 
-        private static void removeExpiredEntries(Context context) {
+        private static Uri addEntryAndRemoveExpiredEntries(Context context, Uri uri,
+                ContentValues values) {
             final ContentResolver resolver = context.getContentResolver();
-            resolver.delete(CONTENT_URI, "_id IN " +
+            Uri result = resolver.insert(uri, values);
+            resolver.delete(uri, "_id IN " +
                     "(SELECT _id FROM calls ORDER BY " + DEFAULT_SORT_ORDER
                     + " LIMIT -1 OFFSET 500)", null);
+            return result;
         }
     }
 }
