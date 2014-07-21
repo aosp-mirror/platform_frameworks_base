@@ -322,7 +322,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private GpsStatusListenerHelper mListenerHelper = new GpsStatusListenerHelper() {
         @Override
         protected boolean isSupported() {
-            return native_is_measurement_supported();
+            return GpsLocationProvider.isSupported();
         }
     };
 
