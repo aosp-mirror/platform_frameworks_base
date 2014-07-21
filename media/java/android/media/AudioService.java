@@ -3500,7 +3500,13 @@ public class AudioService extends IAudioService.Stub {
 
                 loadTouchSoundAssets();
 
-                mSoundPool = new SoundPool(NUM_SOUNDPOOL_CHANNELS, AudioSystem.STREAM_SYSTEM, 0);
+                mSoundPool = new SoundPool.Builder()
+                        .setMaxStreams(NUM_SOUNDPOOL_CHANNELS)
+                        .setAudioAttributes(new AudioAttributes.Builder()
+                            .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
+                            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                            .build())
+                        .build();
                 mSoundPoolCallBack = null;
                 mSoundPoolListenerThread = new SoundPoolListenerThread();
                 mSoundPoolListenerThread.start();
