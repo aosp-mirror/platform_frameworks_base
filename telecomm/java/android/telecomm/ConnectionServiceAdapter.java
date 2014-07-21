@@ -74,10 +74,11 @@ final class ConnectionServiceAdapter implements DeathRecipient {
         }
     }
 
-    void handleCreateConnectionSuccessful(ConnectionRequest request) {
+    void handleCreateConnectionSuccessful(
+            ConnectionRequest request, ParcelableConnection connection) {
         for (IConnectionServiceAdapter adapter : mAdapters) {
             try {
-                adapter.handleCreateConnectionSuccessful(request);
+                adapter.handleCreateConnectionSuccessful(request, connection);
             } catch (RemoteException e) {
             }
         }
@@ -277,7 +278,9 @@ final class ConnectionServiceAdapter implements DeathRecipient {
     void setCallVideoProvider(String callId, CallVideoProvider callVideoProvider) {
         for (IConnectionServiceAdapter adapter : mAdapters) {
             try {
-                adapter.setCallVideoProvider(callId, callVideoProvider.getInterface());
+                adapter.setCallVideoProvider(
+                        callId,
+                        callVideoProvider == null ? null : callVideoProvider.getInterface());
             } catch (RemoteException e) {
             }
         }

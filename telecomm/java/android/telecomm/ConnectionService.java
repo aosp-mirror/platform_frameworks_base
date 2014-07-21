@@ -432,14 +432,20 @@ public abstract class ConnectionService extends Service {
             public void onSuccess(ConnectionRequest request, Connection connection) {
                 Log.d(this, "adapter handleCreateConnectionSuccessful %s",
                         request.getCallId());
-                mAdapter.handleCreateConnectionSuccessful(request);
                 addConnection(request.getCallId(), connection);
-
-                // TODO: onSuccess should pass through the entire state of the connection instead of
-                // having to set it like this afterwards.  Also, it would eliminate the hack of
-                // having to change the request object that we pass back.
-                mConnectionListener.onCallCapabilitiesChanged(
-                        connection, connection.getCallCapabilities());
+                mAdapter.handleCreateConnectionSuccessful(
+                        request,
+                        new ParcelableConnection(
+                                request.getAccountHandle(),
+                                connection.getState(),
+                                connection.getCallCapabilities(),
+                                connection.getHandle(),
+                                connection.getHandlePresentation(),
+                                connection.getCallerDisplayName(),
+                                connection.getCallerDisplayNamePresentation(),
+                                connection.getCallVideoProvider() == null ?
+                                        null : connection.getCallVideoProvider().getInterface(),
+                                connection.getVideoState()));
             }
 
             @Override
@@ -720,12 +726,6 @@ public abstract class ConnectionService extends Service {
         mIdByConnection.put(connection, callId);
         connection.addConnectionListener(mConnectionListener);
         onConnectionAdded(connection);
-
-        // Trigger listeners for properties set before connection listener was added.
-        CallVideoProvider callVideoProvider = connection.getCallVideoProvider();
-        if (callVideoProvider != null) {
-            connection.setCallVideoProvider(callVideoProvider);
-        }
     }
 
     private void removeConnection(Connection connection) {
