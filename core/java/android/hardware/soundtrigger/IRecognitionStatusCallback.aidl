@@ -29,10 +29,6 @@ oneway interface IRecognitionStatusCallback {
      */
     void onDetected(in byte[] data);
     /**
-     * Called when the detection for the associated keyphrase starts.
-     */
-    void onDetectionStarted();
-    /**
      * Called when the detection for the associated keyphrase stops.
      */
     void onDetectionStopped();
