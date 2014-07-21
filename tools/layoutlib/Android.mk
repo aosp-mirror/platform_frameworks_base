@@ -27,8 +27,8 @@ LOCAL_JAVACFLAGS := -source 6 -target 6
 # We need to process the framework classes.jar file, but we can't
 # depend directly on it (private vars won't be inherited correctly).
 # So, we depend on framework's BUILT file.
-built_framework_dep := $(call java-lib-deps,framework-base)
-built_framework_classes := $(call java-lib-files,framework-base)
+built_framework_dep := $(call java-lib-deps,framework)
+built_framework_classes := $(call java-lib-files,framework)
 
 built_core_dep := $(call java-lib-deps,core-libart)
 built_core_classes := $(call java-lib-files,core-libart)
