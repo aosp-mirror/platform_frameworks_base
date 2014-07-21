@@ -18,7 +18,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"გარეკანი"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"ანგარიში ხარვეზების შესახებ შექმნილია"</string>
-    <string name="bugreport_finished_text" msgid="3559904746859400732">"შეეხეთ თქვენი ხარვეზების ანგარიშის გასაზიარებლად"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"გაასრიალეთ მარცხნივ თქვენი ხარვეზის შეტყობინების გასაზიარებლად"</string>
+    <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"შეეხეთ თქვენი ხარვეზების ანგარიშის გასაზიარებლად"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"ხარვეზის ანგარიშები მოიცავს მონაცემებს სხვადასხვა სისტემური ჟურნალის ფაილებიდან, მათ შორის პირად და კონფიდენციალურ ინფორმაციას."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"შემდგომში აჩვენე ეს შეტყობინება"</string>
 </resources>

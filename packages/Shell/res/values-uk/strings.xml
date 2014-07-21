@@ -18,7 +18,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Оболонка"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"Звіт про помилки створено"</string>
-    <string name="bugreport_finished_text" msgid="3559904746859400732">"Торкніться, щоб надіслати звіт про помилки"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Проведіть пальцем ліворуч, щоб надіслати звіт про помилки"</string>
+    <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Торкніться, щоб надіслати звіт про помилки"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"Звіти про помилки містять дані з різних файлів журналу системи, зокрема особисті та конфіденційні. Надсилайте звіт про помилки лише тим, кому довіряєте."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Показати це повідомлення наступного разу"</string>
 </resources>

@@ -18,7 +18,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Shell"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"Na-capture ang ulat ng bug"</string>
-    <string name="bugreport_finished_text" msgid="3559904746859400732">"Pindutin upang ibahagi ang iyong ulat ng bug"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Mag-swipe pakaliwa upang ibahagi ang iyong ulat ng bug"</string>
+    <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Pindutin upang ibahagi ang iyong ulat ng bug"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"Naglalaman ang mga ulat ng bug ng data mula sa iba\'t ibang file ng log ng system, kabilang ang personal at pribadong impormasyon. Magbahagi lang ng mga ulat ng bug sa apps at mga tao na pinagkakatiwalaan mo."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Ipakita ang mensaheng ito sa susunod"</string>
 </resources>

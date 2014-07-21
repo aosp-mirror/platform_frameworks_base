@@ -18,7 +18,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Шел"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"Алдааны мэдээлэл хүлээн авав"</string>
-    <string name="bugreport_finished_text" msgid="3559904746859400732">"Та алдааны мэдэгдлийг хуваалцах бол хүрнэ үү"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Өөрийн согог репортыг хуваалцахын тулд зүүн шудрана уу"</string>
+    <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Та алдааны мэдэгдлийг хуваалцах бол хүрнэ үү"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"Алдааны репорт нь хувийн болон нууц мэдээлэл зэргийг агуулсан системийн төрөл бүрийн лог файлын датаг агуулна. Алдааны репортыг зөвхөн итгэлтэй апп болон хүмүүст хуваалцана уу."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Энэ мессежийг дараагийн удаа харуулах"</string>
 </resources>
