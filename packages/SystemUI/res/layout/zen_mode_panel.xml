@@ -26,6 +26,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:minHeight="12dp"
+        android:elevation="4dp"
         android:background="@drawable/qs_background_secondary" >
 
         <com.android.systemui.volume.SegmentedButtons
@@ -53,6 +54,7 @@
             android:layout_gravity="center_vertical"
             android:gravity="center_vertical"
             android:paddingLeft="8dp"
+            android:paddingRight="4dp"
             android:background="@drawable/btn_borderless_rect"
             android:clickable="true"
             android:drawableEnd="@drawable/qs_subhead_caret"
