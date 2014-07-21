@@ -21,6 +21,8 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.android.systemui.R;
+import com.android.systemui.statusbar.DismissView;
 import com.android.systemui.statusbar.ExpandableView;
 import com.android.systemui.statusbar.SpeedBumpView;
 
@@ -38,10 +40,13 @@ public class StackScrollState {
     private final ViewGroup mHostView;
     private Map<ExpandableView, ViewState> mStateMap;
     private final Rect mClipRect = new Rect();
+    private final int mClearAllTopPadding;
 
     public StackScrollState(ViewGroup hostView) {
         mHostView = hostView;
         mStateMap = new HashMap<ExpandableView, ViewState>();
+        mClearAllTopPadding = hostView.getContext().getResources().getDimensionPixelSize(
+                R.dimen.clear_all_padding_top);
     }
 
     public ViewGroup getHostView() {
@@ -90,6 +95,7 @@ public class StackScrollState {
             if (!state.gone) {
                 float alpha = child.getAlpha();
                 float yTranslation = child.getTranslationY();
+                float xTranslation = child.getTranslationX();
                 float zTranslation = child.getTranslationZ();
                 float scale = child.getScaleX();
                 int height = child.getActualHeight();
@@ -99,7 +105,7 @@ public class StackScrollState {
                 float newScale = state.scale;
                 int newHeight = state.height;
                 boolean becomesInvisible = newAlpha == 0.0f;
-                if (alpha != newAlpha) {
+                if (alpha != newAlpha && xTranslation == 0) {
                     // apply layer type
                     boolean becomesFullyVisible = newAlpha == 1.0f;
                     boolean newLayerTypeIsHardware = !becomesInvisible && !becomesFullyVisible;
@@ -167,6 +173,10 @@ public class StackScrollState {
                 if(child instanceof SpeedBumpView) {
                     float lineEnd = newYTranslation + newHeight / 2;
                     performSpeedBumpAnimation(i, (SpeedBumpView) child, lineEnd);
+                } else if (child instanceof DismissView) {
+                    DismissView dismissView = (DismissView) child;
+                    boolean visible = state.topOverLap < mClearAllTopPadding;
+                    dismissView.performVisibilityAnimation(visible);
                 }
             }
         }

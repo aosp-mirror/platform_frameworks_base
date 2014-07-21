@@ -56,9 +56,7 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
 
     public RecentsHorizontalScrollView(Context context, AttributeSet attrs) {
         super(context, attrs, 0);
-        float densityScale = getResources().getDisplayMetrics().density;
-        float pagingTouchSlop = ViewConfiguration.get(getContext()).getScaledPagingTouchSlop();
-        mSwipeHelper = new SwipeHelper(SwipeHelper.Y, this, densityScale, pagingTouchSlop);
+        mSwipeHelper = new SwipeHelper(SwipeHelper.Y, this, context);
         mFadedEdgeDrawHelper = FadedEdgeDrawHelper.create(context, attrs, this, false);
         mRecycledViews = new HashSet<View>();
     }
