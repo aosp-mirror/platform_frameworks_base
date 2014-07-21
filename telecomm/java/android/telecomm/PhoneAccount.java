@@ -52,6 +52,8 @@ public class PhoneAccount implements Parcelable {
      * calls from or use the built-in telephony stack to place its calls.
      * <p>
      * See {@link #getCapabilities}
+     *
+     * {@hide}
      */
     public static final int CAPABILITY_CALL_PROVIDER = 0x2;
 
