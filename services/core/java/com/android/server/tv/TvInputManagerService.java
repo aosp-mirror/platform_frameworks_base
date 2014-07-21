@@ -371,10 +371,14 @@ public final class TvInputManagerService extends SystemService {
     }
 
     private ITvInputSession getSessionLocked(IBinder sessionToken, int callingUid, int userId) {
-        SessionState sessionState = getSessionStateLocked(sessionToken, callingUid, userId);
+        return getSessionLocked(getSessionStateLocked(sessionToken, callingUid, userId));
+    }
+
+    private ITvInputSession getSessionLocked(SessionState sessionState) {
         ITvInputSession session = sessionState.mSession;
         if (session == null) {
-            throw new IllegalStateException("Session not yet created for token " + sessionToken);
+            throw new IllegalStateException("Session not yet created for token "
+                    + sessionState.mSessionToken);
         }
         return session;
     }
@@ -913,6 +917,54 @@ public final class TvInputManagerService extends SystemService {
             try {
                 synchronized (mLock) {
                     releaseSessionLocked(sessionToken, callingUid, resolvedUserId);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void setMainSession(IBinder sessionToken, int userId) {
+            final int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
+                    userId, "setMainSession");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    UserState userState = getUserStateLocked(callingUid);
+                    if (sessionToken == userState.mainSessionToken) {
+                        return;
+                    }
+
+                    SessionState prevMainSessionState = getSessionStateLocked(
+                            userState.mainSessionToken, Process.SYSTEM_UID, resolvedUserId);
+                    ServiceState prevMainServiceState = getServiceStateLocked(
+                            prevMainSessionState.mInfo.getComponent(), resolvedUserId);
+                    ITvInputSession prevMainSession = getSessionLocked(prevMainSessionState);
+
+                    SessionState sessionState = getSessionStateLocked(sessionToken, callingUid,
+                            resolvedUserId);
+                    ServiceState serviceState = getServiceStateLocked(
+                            sessionState.mInfo.getComponent(), resolvedUserId);
+                    ITvInputSession session = getSessionLocked(sessionState);
+
+                    userState.mainSessionToken = sessionToken;
+
+                    // Inform the new main session first. See {@link TvInputService#onSetMain}.
+                    if (serviceState.mIsHardware) {
+                        try {
+                            session.setMainSession(true);
+                        } catch (RemoteException e) {
+                            Slog.e(TAG, "error in setMainSession", e);
+                        }
+                    }
+                    if (prevMainServiceState.mIsHardware) {
+                        try {
+                            prevMainSession.setMainSession(false);
+                        } catch (RemoteException e) {
+                            Slog.e(TAG, "error in setMainSession", e);
+                        }
+                    }
                 }
             } finally {
                 Binder.restoreCallingIdentity(identity);
@@ -1479,6 +1531,9 @@ public final class TvInputManagerService extends SystemService {
 
         // A mapping from the TV input id to wrapped input id.
         private final Map<String, String> wrappedInputMap = new HashMap<String, String>();
+
+        // The token of a "main" TV input session.
+        private IBinder mainSessionToken = null;
     }
 
     private final class ClientState implements IBinder.DeathRecipient {

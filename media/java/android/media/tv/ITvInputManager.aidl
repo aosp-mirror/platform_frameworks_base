@@ -44,6 +44,7 @@ interface ITvInputManager {
     void createSession(in ITvInputClient client, in String inputId, int seq, int userId);
     void releaseSession(in IBinder sessionToken, int userId);
 
+    void setMainSession(in IBinder sessionToken, int userId);
     void setSurface(in IBinder sessionToken, in Surface surface, int userId);
     void dispatchSurfaceChanged(in IBinder sessionToken, int format, int width, int height,
             int userId);

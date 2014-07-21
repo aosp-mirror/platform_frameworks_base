@@ -42,18 +42,19 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     private static final String TAG = "TvInputSessionWrapper";
 
     private static final int DO_RELEASE = 1;
-    private static final int DO_SET_SURFACE = 2;
-    private static final int DO_DISPATCH_SURFACE_CHANGED = 3;
-    private static final int DO_SET_STREAM_VOLUME = 4;
-    private static final int DO_TUNE = 5;
-    private static final int DO_SET_CAPTION_ENABLED = 6;
-    private static final int DO_SELECT_TRACK = 7;
-    private static final int DO_UNSELECT_TRACK = 8;
-    private static final int DO_APP_PRIVATE_COMMAND = 9;
-    private static final int DO_CREATE_OVERLAY_VIEW = 10;
-    private static final int DO_RELAYOUT_OVERLAY_VIEW = 11;
-    private static final int DO_REMOVE_OVERLAY_VIEW = 12;
-    private static final int DO_REQUEST_UNBLOCK_CONTENT = 13;
+    private static final int DO_SET_MAIN_SESSION = 2;
+    private static final int DO_SET_SURFACE = 3;
+    private static final int DO_DISPATCH_SURFACE_CHANGED = 4;
+    private static final int DO_SET_STREAM_VOLUME = 5;
+    private static final int DO_TUNE = 6;
+    private static final int DO_SET_CAPTION_ENABLED = 7;
+    private static final int DO_SELECT_TRACK = 8;
+    private static final int DO_UNSELECT_TRACK = 9;
+    private static final int DO_APP_PRIVATE_COMMAND = 10;
+    private static final int DO_CREATE_OVERLAY_VIEW = 11;
+    private static final int DO_RELAYOUT_OVERLAY_VIEW = 12;
+    private static final int DO_REMOVE_OVERLAY_VIEW = 13;
+    private static final int DO_REQUEST_UNBLOCK_CONTENT = 14;
 
     private final HandlerCaller mCaller;
 
@@ -89,6 +90,10 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
                     mChannel.dispose();
                     mChannel = null;
                 }
+                return;
+            }
+            case DO_SET_MAIN_SESSION: {
+                mTvInputSessionImpl.setMainSession((Boolean) msg.obj);
                 return;
             }
             case DO_SET_SURFACE: {
@@ -155,6 +160,11 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     @Override
     public void release() {
         mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_RELEASE));
+    }
+
+    @Override
+    public void setMainSession(boolean isMain) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_SET_MAIN_SESSION, isMain));
     }
 
     @Override
