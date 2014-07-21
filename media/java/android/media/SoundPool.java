@@ -128,10 +128,69 @@ public class SoundPool {
      * @return a SoundPool object, or null if creation failed
      */
     public SoundPool(int maxStreams, int streamType, int srcQuality) {
+        this(maxStreams,
+                new AudioAttributes.Builder().setInternalLegacyStreamType(streamType).build());
+    }
+
+    private SoundPool(int maxStreams, AudioAttributes attributes) {
         if (SystemProperties.getBoolean("config.disable_media", false)) {
             mImpl = new SoundPoolStub();
         } else {
-            mImpl = new SoundPoolImpl(this, maxStreams, streamType, srcQuality);
+            mImpl = new SoundPoolImpl(this, maxStreams, attributes);
+        }
+    }
+
+    /**
+     * @hide
+     * CANDIDATE FOR PUBLIC API
+     * Builder class for {@link SoundPool} objects.
+     */
+    public static class Builder {
+        private int mMaxStreams = 1;
+        private AudioAttributes mAudioAttributes;
+
+        /**
+         * Constructs a new Builder with the defaults format values.
+         */
+        public Builder() {
+        }
+
+        /**
+         * Sets the maximum of number of simultaneous streams that can be played simultaneously.
+         * @param maxStreams a value equal to 1 or greater.
+         * @return the same Builder instance
+         * @throws IllegalArgumentException
+         */
+        public Builder setMaxStreams(int maxStreams) throws IllegalArgumentException {
+            if (maxStreams <= 0) {
+                throw new IllegalArgumentException(
+                        "Strictly position value required for the maximum number of streams");
+            }
+            mMaxStreams = maxStreams;
+            return this;
+        }
+
+        /**
+         * Sets the {@link AudioAttributes}. For examples, game applications will use attributes
+         * built with usage information set to {@link AudioAttributes#USAGE_GAME}.
+         * @param attributes a non-null
+         * @return
+         */
+        public Builder setAudioAttributes(AudioAttributes attributes)
+                throws IllegalArgumentException {
+            if (attributes == null) {
+                throw new IllegalArgumentException("Invalid null AudioAttributes");
+            }
+            mAudioAttributes = attributes;
+            return this;
+        }
+
+        public SoundPool build() {
+            if (mAudioAttributes == null) {
+                mAudioAttributes = new AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_MEDIA).build();
+            }
+            return new SoundPool(mMaxStreams, mAudioAttributes);
         }
     }
 
@@ -457,7 +516,7 @@ public class SoundPool {
         private SoundPool mProxy;
 
         private final Object mLock;
-        private final int mStreamType;
+        private final AudioAttributes mAttributes;
         private final IAppOpsService mAppOps;
 
         // SoundPool messages
@@ -465,15 +524,15 @@ public class SoundPool {
         // must match SoundPool.h
         private static final int SAMPLE_LOADED = 1;
 
-        public SoundPoolImpl(SoundPool proxy, int maxStreams, int streamType, int srcQuality) {
+        public SoundPoolImpl(SoundPool proxy, int maxStreams, AudioAttributes attr) {
 
             // do native setup
-            if (native_setup(new WeakReference(this), maxStreams, streamType, srcQuality) != 0) {
+            if (native_setup(new WeakReference(this), maxStreams, attr) != 0) {
                 throw new RuntimeException("Native setup failed");
             }
             mLock = new Object();
             mProxy = proxy;
-            mStreamType = streamType;
+            mAttributes = attr;
             IBinder b = ServiceManager.getService(Context.APP_OPS_SERVICE);
             mAppOps = IAppOpsService.Stub.asInterface(b);
         }
@@ -548,9 +607,9 @@ public class SoundPool {
 
         private boolean isRestricted() {
             try {
-                final int usage = AudioAttributes.usageForLegacyStreamType(mStreamType);
                 final int mode = mAppOps.checkAudioOperation(AppOpsManager.OP_PLAY_AUDIO,
-                        usage, Process.myUid(), ActivityThread.currentPackageName());
+                        mAttributes.getUsage(),
+                        Process.myUid(), ActivityThread.currentPackageName());
                 return mode != AppOpsManager.MODE_ALLOWED;
             } catch (RemoteException e) {
                 return false;
@@ -648,7 +707,8 @@ public class SoundPool {
 
         public native final void release();
 
-        private native final int native_setup(Object weakRef, int maxStreams, int streamType, int srcQuality);
+        private native final int native_setup(Object weakRef, int maxStreams,
+                Object/*AudioAttributes*/ attributes);
 
         protected void finalize() { release(); }
     }
