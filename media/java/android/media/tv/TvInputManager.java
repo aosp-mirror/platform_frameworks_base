@@ -187,7 +187,17 @@ public final class TvInputManager {
         }
 
         /**
-         * This is called when the current program content is blocked by parental controls.
+         * This is called when the current program content turns out to be allowed to watch since
+         * its content rating is not blocked by parental controls.
+         *
+         * @param session A {@link TvInputManager.Session} associated with this callback
+         */
+        public void onContentAllowed(Session session) {
+        }
+
+        /**
+         * This is called when the current program content turns out to be not allowed to watch
+         * since its content rating is blocked by parental controls.
          *
          * @param session A {@link TvInputManager.Session} associated with this callback
          * @param rating The content ration of the blocked program.
@@ -270,6 +280,15 @@ public final class TvInputManager {
                 @Override
                 public void run() {
                     mSessionCallback.onVideoUnavailable(mSession, reason);
+                }
+            });
+        }
+
+        public void postContentAllowed() {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onContentAllowed(mSession);
                 }
             });
         }
@@ -453,6 +472,18 @@ public final class TvInputManager {
                         return;
                     }
                     record.postVideoUnavailable(reason);
+                }
+            }
+
+            @Override
+            public void onContentAllowed(int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postContentAllowed();
                 }
             }
 
