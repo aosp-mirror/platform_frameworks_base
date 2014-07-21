@@ -63,8 +63,10 @@ import java.util.Iterator;
  * // create and register the remote control client
  * RemoteControlClient myRemoteControlClient = new RemoteControlClient(mediaPendingIntent);
  * myAudioManager.registerRemoteControlClient(myRemoteControlClient);</pre>
+ *
+ * @deprecated Use {@link MediaSession} instead.
  */
-public class RemoteControlClient
+@Deprecated public class RemoteControlClient
 {
     private final static String TAG = "RemoteControlClient";
     private final static boolean DEBUG = false;
@@ -425,8 +427,10 @@ public class RemoteControlClient
      * has been set, use {@link #apply()} to make it the new metadata that should be displayed
      * for the associated client. Once the metadata has been "applied", you cannot reuse this
      * instance of the MetadataEditor.
+     *
+     * @deprecated Use {@link MediaMetadata} and {@link MediaSession} instead.
      */
-    public class MetadataEditor extends MediaMetadataEditor {
+    @Deprecated public class MetadataEditor extends MediaMetadataEditor {
 
         // only use RemoteControlClient.editMetadata() to get a MetadataEditor instance
         private MetadataEditor() { }

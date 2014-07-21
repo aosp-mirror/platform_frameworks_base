@@ -17,6 +17,7 @@
 package android.media;
 
 import android.graphics.Bitmap;
+import android.media.session.MediaSession;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;
@@ -26,8 +27,10 @@ import android.util.SparseIntArray;
  * An abstract class for editing and storing metadata that can be published by
  * {@link RemoteControlClient}. See the {@link RemoteControlClient#editMetadata(boolean)}
  * method to instantiate a {@link RemoteControlClient.MetadataEditor} object.
+ *
+ * @deprecated Use {@link MediaMetadata} instead together with {@link MediaSession}.
  */
-public abstract class MediaMetadataEditor {
+@Deprecated public abstract class MediaMetadataEditor {
 
     private final static String TAG = "MediaMetadataEditor";
     /**
