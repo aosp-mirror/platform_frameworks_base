@@ -59,6 +59,8 @@ interface INotificationManager
     void cancelNotificationsFromListener(in INotificationListener token, in String[] keys);
 
     ParceledListSlice getActiveNotificationsFromListener(in INotificationListener token);
+    void requestFlagsFromListener(in INotificationListener token, int flags);
+    int getFlagsFromListener(in INotificationListener token);
 
     ZenModeConfig getZenModeConfig();
     boolean setZenModeConfig(in ZenModeConfig config);
