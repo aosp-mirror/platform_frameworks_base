@@ -19,18 +19,17 @@ package android.telecomm;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.net.Uri;
-import android.os.IBinder.DeathRecipient;
 import android.os.Handler;
+import android.os.IBinder.DeathRecipient;
 import android.os.Message;
 import android.os.RemoteException;
 import android.telephony.DisconnectCause;
-
 import android.text.TextUtils;
 
 import com.android.internal.os.SomeArgs;
+import com.android.internal.telecomm.ICallVideoProvider;
 import com.android.internal.telecomm.IConnectionService;
 import com.android.internal.telecomm.IConnectionServiceAdapter;
-import com.android.internal.telecomm.ICallVideoProvider;
 import com.android.internal.telecomm.RemoteServiceCallback;
 
 import java.util.LinkedList;
@@ -80,11 +79,27 @@ final class RemoteConnectionService implements DeathRecipient {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_HANDLE_CREATE_CONNECTION_SUCCESSFUL: {
-                    ConnectionRequest request = (ConnectionRequest) msg.obj;
-                    if (isPendingConnection(request.getCallId())) {
-                        mConnection = new RemoteConnection(mConnectionService, request.getCallId());
-                        mPendingResponse.onSuccess(request, mConnection);
-                        clearPendingInformation();
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    try {
+                        ConnectionRequest request = (ConnectionRequest) args.arg1;
+                        if (isPendingConnection(request.getCallId())) {
+                            ParcelableConnection parcel = (ParcelableConnection) args.arg2;
+                            mConnection = new RemoteConnection(
+                                    mConnectionService, request.getCallId());
+                            mConnection.setState(parcel.getState());
+                            mConnection.setCallCapabilities(parcel.getCapabilities());
+                            mConnection.setHandle(
+                                    parcel.getHandle(), parcel.getHandlePresentation());
+                            mConnection.setCallerDisplayName(
+                                    parcel.getCallerDisplayName(),
+                                    parcel.getCallerDisplayNamePresentation());
+                            // TODO: Do we need to support video providers for remote connections?
+
+                            mPendingResponse.onSuccess(request, mConnection);
+                            clearPendingInformation();
+                        }
+                    } finally {
+                        args.recycle();
                     }
                     break;
                 }
@@ -242,8 +257,12 @@ final class RemoteConnectionService implements DeathRecipient {
 
     private final IConnectionServiceAdapter mAdapter = new IConnectionServiceAdapter.Stub() {
         @Override
-        public void handleCreateConnectionSuccessful(ConnectionRequest request) {
-            mHandler.obtainMessage(MSG_HANDLE_CREATE_CONNECTION_SUCCESSFUL, request).sendToTarget();
+        public void handleCreateConnectionSuccessful(
+                ConnectionRequest request, ParcelableConnection connection) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = request;
+            args.arg2 = connection;
+            mHandler.obtainMessage(MSG_HANDLE_CREATE_CONNECTION_SUCCESSFUL, args).sendToTarget();
         }
 
         @Override
