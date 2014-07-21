@@ -6312,10 +6312,32 @@ public class PackageManagerService extends IPackageManager.Stub {
      * @param apkName the name of the installed package.
      */
     private static void setBundledAppAbi(PackageParser.Package pkg, String apkRoot, String apkName) {
-        // This is of the form "/system/lib64/<packagename>", "/vendor/lib64/<packagename>"
-        // or similar.
-        final boolean has64BitLibs = (new File(apkRoot, new File(LIB64_DIR_NAME, apkName).getPath())).exists();
-        final boolean has32BitLibs = (new File(apkRoot, new File(LIB_DIR_NAME, apkName).getPath())).exists();
+        final File codeFile = new File(pkg.codePath);
+
+        final boolean has64BitLibs;
+        final boolean has32BitLibs;
+        if (isApkFile(codeFile)) {
+            // Monolithic install
+            has64BitLibs = (new File(apkRoot, new File(LIB64_DIR_NAME, apkName).getPath())).exists();
+            has32BitLibs = (new File(apkRoot, new File(LIB_DIR_NAME, apkName).getPath())).exists();
+        } else {
+            // Cluster install
+            final File rootDir = new File(codeFile, LIB_DIR_NAME);
+            if (!ArrayUtils.isEmpty(Build.SUPPORTED_64_BIT_ABIS)
+                    && !TextUtils.isEmpty(Build.SUPPORTED_64_BIT_ABIS[0])) {
+                final String isa = VMRuntime.getInstructionSet(Build.SUPPORTED_64_BIT_ABIS[0]);
+                has64BitLibs = (new File(rootDir, isa)).exists();
+            } else {
+                has64BitLibs = false;
+            }
+            if (!ArrayUtils.isEmpty(Build.SUPPORTED_32_BIT_ABIS)
+                    && !TextUtils.isEmpty(Build.SUPPORTED_32_BIT_ABIS[0])) {
+                final String isa = VMRuntime.getInstructionSet(Build.SUPPORTED_32_BIT_ABIS[0]);
+                has32BitLibs = (new File(rootDir, isa)).exists();
+            } else {
+                has32BitLibs = false;
+            }
+        }
 
         if (has64BitLibs && !has32BitLibs) {
             // The package has 64 bit libs, but not 32 bit libs. Its primary
