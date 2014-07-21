@@ -169,7 +169,7 @@ public abstract class CallVideoClient {
 
     private final CallVideoClientBinder mBinder;
 
-    protected CallVideoClient() {
+    public CallVideoClient() {
         mBinder = new CallVideoClientBinder();
     }
 
