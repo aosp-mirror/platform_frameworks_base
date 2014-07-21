@@ -16,6 +16,7 @@
 
 package android.net;
 
+import com.android.org.conscrypt.PSKKeyManager;
 import java.net.Socket;
 import javax.crypto.SecretKey;
 import javax.net.ssl.SSLEngine;
@@ -40,10 +41,10 @@ import javax.net.ssl.SSLEngine;
  *
  * <h3>Supporting multiple keys</h3>
  *
- * <p>A peer may have multiple keys to choose from. To help choose the right key, during the handshake
- * the server can provide a <em>PSK identity hint</em> to the client, and the client can provide a
- * <em>PSK identity</em> to the server. The contents of these two pieces of information are specific
- * to application-level protocols.</p>
+ * <p>A peer may have multiple keys to choose from. To help choose the right key, during the
+ * handshake the server can provide a <em>PSK identity hint</em> to the client, and the client can
+ * provide a <em>PSK identity</em> to the server. The contents of these two pieces of information
+ * are specific to application-level protocols.</p>
  *
  * <p><em>NOTE: Both the PSK identity hint and the PSK identity are transmitted in cleartext.
  * Moreover, these data are received and processed prior to peer having been authenticated. Thus,
@@ -76,16 +77,20 @@ import javax.net.ssl.SSLEngine;
  * {@link #MAX_IDENTITY_LENGTH_BYTES} and {@link #MAX_IDENTITY_HINT_LENGTH_BYTES}).</li>
  * </ul></p>
  *
+ * <h3>Subclassing</h3>
+ * Subclasses should normally provide their own implementation of {@code getKey} because the default
+ * implementation returns no key, which aborts the handshake.
+ *
  * <h3>Example</h3>
  * The following example illustrates how to create an {@code SSLContext} which enables the use of
  * TLS-PSK in {@code SSLSocket}, {@code SSLServerSocket} and {@code SSLEngine} instances obtained
  * from it.
  * <pre> {@code
- * PSKKeyManager myPskKeyManager = ...;
+ * PskKeyManager pskKeyManager = ...;
  *
  * SSLContext sslContext = SSLContext.getInstance("TLS");
  * sslContext.init(
- *         new KeyManager[] &#123;myPskKeyManager&#125;,
+ *         new KeyManager[] &#123;pskKeyManager&#125;,
  *         new TrustManager[0], // No TrustManagers needed for TLS-PSK
  *         null // Use the default source of entropy
  *         );
@@ -93,7 +98,7 @@ import javax.net.ssl.SSLEngine;
  * SSLSocket sslSocket = (SSLSocket) sslContext.getSocketFactory().createSocket(...);
  * }</pre>
  */
-public interface PSKKeyManager extends com.android.org.conscrypt.PSKKeyManager {
+public abstract class PskKeyManager implements PSKKeyManager {
     // IMPLEMENTATION DETAILS: This class exists only because the default implemenetation of the
     // TLS/SSL JSSE provider (currently Conscrypt) cannot depend on Android framework classes.
     // As a result, this framework class simply extends the PSKKeyManager interface from Conscrypt
@@ -103,37 +108,49 @@ public interface PSKKeyManager extends com.android.org.conscrypt.PSKKeyManager {
     /**
      * Maximum supported length (in bytes) for PSK identity hint (in modified UTF-8 representation).
      */
-    int MAX_IDENTITY_HINT_LENGTH_BYTES =
-            com.android.org.conscrypt.PSKKeyManager.MAX_IDENTITY_HINT_LENGTH_BYTES;
+    public static final int MAX_IDENTITY_HINT_LENGTH_BYTES =
+            PSKKeyManager.MAX_IDENTITY_HINT_LENGTH_BYTES;
 
     /** Maximum supported length (in bytes) for PSK identity (in modified UTF-8 representation). */
-    int MAX_IDENTITY_LENGTH_BYTES =
-            com.android.org.conscrypt.PSKKeyManager.MAX_IDENTITY_LENGTH_BYTES;
+    public static final int MAX_IDENTITY_LENGTH_BYTES = PSKKeyManager.MAX_IDENTITY_LENGTH_BYTES;
 
     /** Maximum supported length (in bytes) for PSK. */
-    int MAX_KEY_LENGTH_BYTES = com.android.org.conscrypt.PSKKeyManager.MAX_KEY_LENGTH_BYTES;
+    public static final int MAX_KEY_LENGTH_BYTES = PSKKeyManager.MAX_KEY_LENGTH_BYTES;
 
     /**
      * Gets the PSK identity hint to report to the client to help agree on the PSK for the provided
      * socket.
      *
+     * <p>
+     * The default implementation returns {@code null}.
+     *
      * @return PSK identity hint to be provided to the client or {@code null} to provide no hint.
      */
     @Override
-    String chooseServerKeyIdentityHint(Socket socket);
+    public String chooseServerKeyIdentityHint(Socket socket) {
+        return null;
+    }
 
     /**
      * Gets the PSK identity hint to report to the client to help agree on the PSK for the provided
      * engine.
      *
+     * <p>
+     * The default implementation returns {@code null}.
+     *
      * @return PSK identity hint to be provided to the client or {@code null} to provide no hint.
      */
     @Override
-    String chooseServerKeyIdentityHint(SSLEngine engine);
+    public String chooseServerKeyIdentityHint(SSLEngine engine) {
+        return null;
+    }
 
     /**
      * Gets the PSK identity to report to the server to help agree on the PSK for the provided
      * socket.
+     *
+     * <p>
+     * The default implementation returns an empty string.
      *
      * @param identityHint identity hint provided by the server or {@code null} if none provided.
      *
@@ -141,11 +158,16 @@ public interface PSKKeyManager extends com.android.org.conscrypt.PSKKeyManager {
      *         converted into an empty string.
      */
     @Override
-    String chooseClientKeyIdentity(String identityHint, Socket socket);
+    public String chooseClientKeyIdentity(String identityHint, Socket socket) {
+        return "";
+    }
 
     /**
      * Gets the PSK identity to report to the server to help agree on the PSK for the provided
      * engine.
+     *
+     * <p>
+     * The default implementation returns an empty string.
      *
      * @param identityHint identity hint provided by the server or {@code null} if none provided.
      *
@@ -153,11 +175,16 @@ public interface PSKKeyManager extends com.android.org.conscrypt.PSKKeyManager {
      *         converted into an empty string.
      */
     @Override
-    String chooseClientKeyIdentity(String identityHint, SSLEngine engine);
+    public String chooseClientKeyIdentity(String identityHint, SSLEngine engine) {
+        return "";
+    }
 
     /**
      * Gets the PSK to use for the provided socket.
      *
+     * <p>
+     * The default implementation returns {@code null}.
+     *
      * @param identityHint identity hint provided by the server to help select the key or
      *        {@code null} if none provided.
      * @param identity identity provided by the client to help select the key.
@@ -166,11 +193,16 @@ public interface PSKKeyManager extends com.android.org.conscrypt.PSKKeyManager {
      *         the handshake.
      */
     @Override
-    SecretKey getKey(String identityHint, String identity, Socket socket);
+    public SecretKey getKey(String identityHint, String identity, Socket socket) {
+        return null;
+    }
 
     /**
      * Gets the PSK to use for the provided engine.
      *
+     * <p>
+     * The default implementation returns {@code null}.
+     *
      * @param identityHint identity hint provided by the server to help select the key or
      *        {@code null} if none provided.
      * @param identity identity provided by the client to help select the key.
@@ -179,5 +211,7 @@ public interface PSKKeyManager extends com.android.org.conscrypt.PSKKeyManager {
      *         the handshake.
      */
     @Override
-    SecretKey getKey(String identityHint, String identity, SSLEngine engine);
+    public SecretKey getKey(String identityHint, String identity, SSLEngine engine) {
+        return null;
+    }
 }
