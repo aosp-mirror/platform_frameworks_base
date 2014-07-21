@@ -19,6 +19,7 @@ package android.media.tv;
 import android.content.Context;
 import android.graphics.Rect;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
@@ -48,10 +49,11 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     private static final int DO_SET_CAPTION_ENABLED = 6;
     private static final int DO_SELECT_TRACK = 7;
     private static final int DO_UNSELECT_TRACK = 8;
-    private static final int DO_CREATE_OVERLAY_VIEW = 9;
-    private static final int DO_RELAYOUT_OVERLAY_VIEW = 10;
-    private static final int DO_REMOVE_OVERLAY_VIEW = 11;
-    private static final int DO_REQUEST_UNBLOCK_CONTENT = 12;
+    private static final int DO_APP_PRIVATE_COMMAND = 9;
+    private static final int DO_CREATE_OVERLAY_VIEW = 10;
+    private static final int DO_RELAYOUT_OVERLAY_VIEW = 11;
+    private static final int DO_REMOVE_OVERLAY_VIEW = 12;
+    private static final int DO_REQUEST_UNBLOCK_CONTENT = 13;
 
     private final HandlerCaller mCaller;
 
@@ -119,6 +121,12 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
                 mTvInputSessionImpl.unselectTrack((TvTrackInfo) msg.obj);
                 return;
             }
+            case DO_APP_PRIVATE_COMMAND: {
+                SomeArgs args = (SomeArgs) msg.obj;
+                mTvInputSessionImpl.appPrivateCommand((String) args.arg1, (Bundle) args.arg2);
+                args.recycle();
+                return;
+            }
             case DO_CREATE_OVERLAY_VIEW: {
                 SomeArgs args = (SomeArgs) msg.obj;
                 mTvInputSessionImpl.createOverlayView((IBinder) args.arg1, (Rect) args.arg2);
@@ -183,6 +191,12 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     @Override
     public void unselectTrack(TvTrackInfo track) {
         mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_UNSELECT_TRACK, track));
+    }
+
+    @Override
+    public void appPrivateCommand(String action, Bundle data) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageOO(DO_APP_PRIVATE_COMMAND, action,
+                data));
     }
 
     @Override
