@@ -83,7 +83,7 @@ public abstract class Connection {
     /**
      * Create a new Connection.
      */
-    protected Connection() {}
+    public Connection() {}
 
     /**
      * @return The handle (e.g., phone number) to which this Connection is currently communicating.
@@ -484,7 +484,7 @@ public abstract class Connection {
      *
      * @param state The new call audio state.
      */
-    protected void onSetAudioState(CallAudioState state) {}
+    public void onSetAudioState(CallAudioState state) {}
 
     /**
      * Notifies this Connection of an internal state change. This method is called before the
@@ -492,44 +492,44 @@ public abstract class Connection {
      *
      * @param state The new state, a {@link Connection.State} member.
      */
-    protected void onSetState(int state) {}
+    public void onSetState(int state) {}
 
     /**
      * Notifies this Connection of a request to play a DTMF tone.
      *
      * @param c A DTMF character.
      */
-    protected void onPlayDtmfTone(char c) {}
+    public void onPlayDtmfTone(char c) {}
 
     /**
      * Notifies this Connection of a request to stop any currently playing DTMF tones.
      */
-    protected void onStopDtmfTone() {}
+    public void onStopDtmfTone() {}
 
     /**
      * Notifies this Connection of a request to disconnect.
      */
-    protected void onDisconnect() {}
+    public void onDisconnect() {}
 
     /**
      * Notifies this Connection of a request to disconnect.
      */
-    protected void onSeparate() {}
+    public void onSeparate() {}
 
     /**
      * Notifies this Connection of a request to abort.
      */
-    protected void onAbort() {}
+    public void onAbort() {}
 
     /**
      * Notifies this Connection of a request to hold.
      */
-    protected void onHold() {}
+    public void onHold() {}
 
     /**
      * Notifies this Connection of a request to exit a hold state.
      */
-    protected void onUnhold() {}
+    public void onUnhold() {}
 
     /**
      * Notifies this Connection, which is in {@link State#RINGING}, of
@@ -537,34 +537,34 @@ public abstract class Connection {
      *
      * @param videoState The video state in which to answer the call.
      */
-    protected void onAnswer(int videoState) {}
+    public void onAnswer(int videoState) {}
 
     /**
      * Notifies this Connection, which is in {@link State#RINGING}, of
      * a request to reject.
      */
-    protected void onReject() {}
+    public void onReject() {}
 
     /**
      * Notifies this Connection whether the user wishes to proceed with the post-dial DTMF codes.
      */
-    protected void onPostDialContinue(boolean proceed) {}
+    public void onPostDialContinue(boolean proceed) {}
 
     /**
      * Swap this call with a background call. This is used for calls that don't support hold,
      * e.g. CDMA.
      */
-    protected void onSwapWithBackgroundCall() {}
+    public void onSwapWithBackgroundCall() {}
 
     /**
      * TODO(santoscordon): Needs documentation.
      */
-    protected void onChildrenChanged(List<Connection> children) {}
+    public void onChildrenChanged(List<Connection> children) {}
 
     /**
      * Called when the phone account UI was clicked.
      */
-    protected void onPhoneAccountClicked() {}
+    public void onPhoneAccountClicked() {}
 
     private void addChild(Connection connection) {
         Log.d(this, "adding child %s", connection);
