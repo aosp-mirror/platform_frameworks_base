@@ -568,6 +568,20 @@ public class VpnService extends Service {
         }
 
         /**
+         * Sets the VPN interface's file descriptor to be in blocking/non-blocking mode.
+         *
+         * By default, the file descriptor returned by {@link #establish} is non-blocking.
+         *
+         * @param blocking True to put the descriptor into blocking mode; false for non-blocking.
+         *
+         * @return this {@link Builder} object to facilitate chaining method calls.
+         */
+        public Builder setBlocking(boolean blocking) {
+            // TODO
+            return this;
+        }
+
+        /**
          * Create a VPN interface using the parameters supplied to this
          * builder. The interface works on IP packets, and a file descriptor
          * is returned for the application to access them. Each read
