@@ -20,6 +20,7 @@ import static android.media.tv.TvInputManager.INPUT_STATE_CONNECTED;
 import static android.media.tv.TvInputManager.INPUT_STATE_DISCONNECTED;
 
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.hdmi.HdmiCecDeviceInfo;
 import android.hardware.hdmi.HdmiHotplugEvent;
 import android.hardware.hdmi.IHdmiControlService;
@@ -34,6 +35,7 @@ import android.media.AudioPortConfig;
 import android.media.tv.ITvInputHardware;
 import android.media.tv.ITvInputHardwareCallback;
 import android.media.tv.TvInputHardwareInfo;
+import android.media.tv.TvContract;
 import android.media.tv.TvInputInfo;
 import android.media.tv.TvStreamConfig;
 import android.os.Handler;
@@ -646,8 +648,12 @@ class TvInputHardwareManager implements TvInputHal.Callback {
     private final class HdmiInputChangeListener extends IHdmiInputChangeListener.Stub {
         @Override
         public void onChanged(HdmiCecDeviceInfo device) throws RemoteException {
-            // TODO: Build a channel Uri for the TvInputInfo associated with the logical device
-            //       and send an intent to TV app
+            String inputId = mHdmiCecInputMap.get(device.getLogicalAddress());
+            if (inputId != null) {
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setData(TvContract.buildChannelUriForPassthroughTvInput(inputId));
+                mContext.startActivity(intent);
+            }
         }
     }
 }
