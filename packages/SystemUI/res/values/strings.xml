@@ -671,11 +671,33 @@
     <string name="keyguard_indication_charging_time">Charging (<xliff:g id="charging_time_left" example="4 hours and 2 minutes">%s</xliff:g> until full)</string>
 
     <!-- Related to user switcher --><skip/>
-    <!-- Name for the guest user -->
+    <!-- Name for the guest user [CHAR LIMIT=35] -->
     <string name="guest_nickname">Guest</string>
 
-    <!-- Label for adding a new guest -->
+    <!-- Label for adding a new guest in the user switcher [CHAR LIMIT=35] -->
     <string name="guest_new_guest">+ Guest</string>
+
+    <!-- Label for exiting guest session in the user switcher [CHAR LIMIT=35] -->
+    <string name="guest_exit_guest">Exit guest</string>
+
+    <!-- Title of the confirmation dialog when exiting guest session [CHAR LIMIT=NONE] -->
+    <string name="guest_exit_guest_dialog_title">Exiting guest session?</string>
+
+    <!-- Message of the confirmation dialog when exiting guest session [CHAR LIMIT=NONE] -->
+    <string name="guest_exit_guest_dialog_message">Exiting the guest session will remove local data.</string>
+
+    <!-- Title of the notification when resuming an existing guest session [CHAR LIMIT=NONE] -->
+    <string name="guest_wipe_session_title">Welcome back, guest!</string>
+
+    <!-- Message of the notification when resuming an existing guest session [CHAR LIMIT=NONE] -->
+    <string name="guest_wipe_session_message">Do you want to start a new session?</string>
+
+    <!-- Notification when resuming an existing guest session: Action that starts a new session [CHAR LIMIT=35] -->
+    <string name="guest_wipe_session_wipe">Yes</string>
+
+    <!-- Notification when resuming an existing guest session: Action that continues with the current session [CHAR LIMIT=35] -->
+    <string name="guest_wipe_session_dontwipe">No, thanks</string>
+
 
     <!-- Zen mode condition: time duration in minutes. [CHAR LIMIT=NONE] -->
     <plurals name="zen_mode_duration_minutes">
@@ -703,8 +725,6 @@
 
     <!-- Text shown in place of notification contents when the notification is hidden on a secure lockscreen -->
     <string name="notification_hidden_text">Contents hidden</string>
-
-    <string name="guest_exit_guest">Exit guest</string>
 
     <!-- Media projection permission dialog warning text. [CHAR LIMIT=NONE] -->
     <string name="media_projection_dialog_text"><xliff:g id="app_seeking_permission" example="Hangouts">%s</xliff:g> will start capturing everything that\'s displayed on your screen.</string>

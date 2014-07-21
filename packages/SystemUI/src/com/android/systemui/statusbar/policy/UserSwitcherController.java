@@ -17,14 +17,18 @@
 package com.android.systemui.statusbar.policy;
 
 import com.android.systemui.BitmapHelper;
+import com.android.systemui.GuestResumeSessionReceiver;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.qs.tiles.UserDetailView;
+import com.android.systemui.statusbar.phone.SystemUIDialog;
 
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
+import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.UserInfo;
@@ -52,15 +56,20 @@ import java.util.List;
 public class UserSwitcherController {
 
     private static final String TAG = "UserSwitcherController";
+    private static final boolean DEBUG = false;
 
     private final Context mContext;
     private final UserManager mUserManager;
     private final ArrayList<WeakReference<BaseUserAdapter>> mAdapters = new ArrayList<>();
+    private final GuestResumeSessionReceiver mGuestResumeSessionReceiver
+            = new GuestResumeSessionReceiver();
 
     private ArrayList<UserRecord> mUsers = new ArrayList<>();
+    private Dialog mExitGuestDialog;
 
     public UserSwitcherController(Context context) {
         mContext = context;
+        mGuestResumeSessionReceiver.register(context);
         mUserManager = UserManager.get(context);
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_ADDED);
@@ -169,7 +178,7 @@ public class UserSwitcherController {
 
         if (ActivityManager.getCurrentUser() == id) {
             if (record.isGuest) {
-                exitGuest(id);
+                showExitGuestDialog(id);
             }
             return;
         }
@@ -186,8 +195,15 @@ public class UserSwitcherController {
         }
     }
 
+    private void showExitGuestDialog(int id) {
+        if (mExitGuestDialog != null && mExitGuestDialog.isShowing()) {
+            mExitGuestDialog.cancel();
+        }
+        mExitGuestDialog = new ExitGuestDialog(mContext, id);
+        mExitGuestDialog.show();
+    }
+
     private void exitGuest(int id) {
-        // TODO: show confirmation dialog
         switchToUserId(UserHandle.USER_OWNER);
         mUserManager.removeUser(id);
     }
@@ -195,7 +211,16 @@ public class UserSwitcherController {
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            if (DEBUG) {
+                Log.v(TAG, "Broadcast: a=" + intent.getAction()
+                       + " user=" + intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1));
+            }
             if (Intent.ACTION_USER_SWITCHED.equals(intent.getAction())) {
+                if (mExitGuestDialog != null && mExitGuestDialog.isShowing()) {
+                    mExitGuestDialog.cancel();
+                    mExitGuestDialog = null;
+                }
+
                 final int currentId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
                 final int N = mUsers.size();
                 for (int i = 0; i < N; i++) {
@@ -341,4 +366,32 @@ public class UserSwitcherController {
         public void setToggleState(boolean state) {
         }
     };
+
+    private final class ExitGuestDialog extends SystemUIDialog implements
+            DialogInterface.OnClickListener {
+
+        private final int mGuestId;
+
+        public ExitGuestDialog(Context context, int guestId) {
+            super(context);
+            setTitle(R.string.guest_exit_guest_dialog_title);
+            setMessage(context.getString(R.string.guest_exit_guest_dialog_message));
+            setButton(DialogInterface.BUTTON_NEGATIVE,
+                    context.getString(android.R.string.no), this);
+            setButton(DialogInterface.BUTTON_POSITIVE,
+                    context.getString(android.R.string.yes), this);
+            setCanceledOnTouchOutside(false);
+            mGuestId = guestId;
+        }
+
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            if (which == BUTTON_NEGATIVE) {
+                cancel();
+            } else {
+                dismiss();
+                exitGuest(mGuestId);
+            }
+        }
+    }
 }
