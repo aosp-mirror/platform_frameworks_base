@@ -186,12 +186,11 @@
 
     <style name="TextAppearance.QS.Subhead">
         <item name="android:textSize">14sp</item>
-        <item name="android:fontFamily">sans-serif-medium</item>
         <item name="android:textColor">@color/qs_subhead</item>
     </style>
 
     <style name="TextAppearance.QS.SegmentedButton">
-        <item name="android:textSize">12sp</item>
+        <item name="android:textSize">14sp</item>
         <item name="android:textAllCaps">true</item>
         <item name="android:fontFamily">sans-serif-medium</item>
     </style>

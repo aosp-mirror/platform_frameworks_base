@@ -17,17 +17,21 @@
 package com.android.systemui.volume;
 
 import android.content.Context;
+import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.android.systemui.R;
 
 import java.util.Objects;
 
 public class SegmentedButtons extends LinearLayout {
+    private static final Typeface MEDIUM = Typeface.create("sans-serif-medium", Typeface.NORMAL);
+    private static final Typeface BOLD = Typeface.create("sans-serif", Typeface.BOLD);
 
     private final Context mContext;
     private final LayoutInflater mInflater;
@@ -54,9 +58,11 @@ public class SegmentedButtons extends LinearLayout {
         if (Objects.equals(value, mSelectedValue)) return;
         mSelectedValue = value;
         for (int i = 0; i < getChildCount(); i++) {
-            final View c = getChildAt(i);
+            final TextView c = (TextView) getChildAt(i);
             final Object tag = c.getTag();
-            c.setSelected(Objects.equals(mSelectedValue, tag));
+            final boolean selected = Objects.equals(mSelectedValue, tag);
+            c.setSelected(selected);
+            c.setTypeface(selected ? BOLD : MEDIUM);
         }
         fireOnSelected();
     }

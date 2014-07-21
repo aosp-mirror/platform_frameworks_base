@@ -84,8 +84,7 @@ public class ZenModePanel extends LinearLayout {
     private final int mHardWarningColor;
     private final int mSoftWarningColor;
 
-    private char mLogTag = '?';
-    private String mTag;
+    private String mTag = TAG + "/" + Integer.toHexString(System.identityHashCode(this));
 
     private SegmentedButtons mZenButtons;
     private View mZenSubhead;
@@ -95,13 +94,13 @@ public class ZenModePanel extends LinearLayout {
     private LinearLayout mZenConditions;
     private TextView mAlarmWarning;
 
-    private int mBottomPadding;
     private Callback mCallback;
     private ZenModeController mController;
     private boolean mRequestingConditions;
     private Uri mExitConditionId;
     private int mBucketIndex = -1;
     private boolean mExpanded;
+    private boolean mHidden = false;
     private int mSessionZen;
     private Uri mSessionExitConditionId;
     private String mExitConditionText;
@@ -115,21 +114,14 @@ public class ZenModePanel extends LinearLayout {
         mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(mContext,
                 android.R.interpolator.fast_out_slow_in);
         final Resources res = mContext.getResources();
-        mHardWarningColor = res.getColor(R.color.qs_text);
-        mSoftWarningColor = res.getColor(R.color.zen_alarm_soft_warning_text);
-        updateTag();
+        mHardWarningColor = res.getColor(R.color.system_warning_color);
+        mSoftWarningColor = res.getColor(R.color.qs_subhead);
         if (DEBUG) Log.d(mTag, "new ZenModePanel");
-    }
-
-    private void updateTag() {
-        mTag = TAG + "/" + mLogTag + "/" + Integer.toHexString(System.identityHashCode(this));
     }
 
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-
-        mBottomPadding = getPaddingBottom();
 
         mZenButtons = (SegmentedButtons) findViewById(R.id.zen_buttons);
         mZenButtons.addButton(R.string.interruption_level_none, Global.ZEN_MODE_NO_INTERRUPTIONS);
@@ -184,6 +176,12 @@ public class ZenModePanel extends LinearLayout {
         setExpanded(false);
     }
 
+    public void setHidden(boolean hidden) {
+        if (mHidden == hidden) return;
+        mHidden = hidden;
+        updateWidgets();
+    }
+
     private void setExpanded(boolean expanded) {
         if (expanded == mExpanded) return;
         mExpanded = expanded;
@@ -217,10 +215,8 @@ public class ZenModePanel extends LinearLayout {
         }
     }
 
-    public void init(ZenModeController controller, char logTag) {
+    public void init(ZenModeController controller) {
         mController = controller;
-        mLogTag = logTag;
-        updateTag();
         setExitConditionId(mController.getExitConditionId());
         refreshExitConditionText();
         mSessionZen = getSelectedZen(-1);
@@ -290,15 +286,17 @@ public class ZenModePanel extends LinearLayout {
         final boolean zenNone = zen == Global.ZEN_MODE_NO_INTERRUPTIONS;
         final boolean foreverSelected = mExitConditionId == null;
         final boolean hasNextAlarm = mNextAlarm != 0;
-        final boolean showAlarmWarning = zenNone && mExpanded && hasNextAlarm;
+        final boolean expanded = !mHidden && mExpanded;
+        final boolean showAlarmWarning = zenNone && expanded && hasNextAlarm;
 
-        mZenSubhead.setVisibility(!zenOff && (mExpanded || !foreverSelected) ? VISIBLE : GONE);
-        mZenSubheadExpanded.setVisibility(mExpanded ? VISIBLE : GONE);
-        mZenSubheadCollapsed.setVisibility(!mExpanded ? VISIBLE : GONE);
-        mMoreSettings.setVisibility(zenImportant && mExpanded ? VISIBLE : GONE);
-        mZenConditions.setVisibility(!zenOff && mExpanded ? VISIBLE : GONE);
-        mAlarmWarning.setVisibility(zenNone && mExpanded && hasNextAlarm ? VISIBLE : GONE);
-        setPadding(0, 0, 0, showAlarmWarning ? 0 : mBottomPadding);
+        mZenButtons.setVisibility(mHidden ? GONE : VISIBLE);
+        mZenSubhead.setVisibility(!mHidden && !zenOff && (expanded || !foreverSelected) ? VISIBLE
+                : GONE);
+        mZenSubheadExpanded.setVisibility(expanded ? VISIBLE : GONE);
+        mZenSubheadCollapsed.setVisibility(!expanded ? VISIBLE : GONE);
+        mMoreSettings.setVisibility(zenImportant && expanded ? VISIBLE : GONE);
+        mZenConditions.setVisibility(!zenOff && expanded ? VISIBLE : GONE);
+        mAlarmWarning.setVisibility(zenNone && expanded && hasNextAlarm ? VISIBLE : GONE);
         if (showAlarmWarning) {
             final long exitTime = ZenModeConfig.tryParseCountdownConditionId(mExitConditionId);
             final long now = System.currentTimeMillis();
@@ -311,13 +309,11 @@ public class ZenModePanel extends LinearLayout {
             if (isWarning) {
                 mAlarmWarning.setText(mContext.getString(R.string.zen_alarm_warning, alarm));
                 mAlarmWarning.setTextColor(mHardWarningColor);
-                mAlarmWarning.setBackgroundResource(R.drawable.zen_alarm_hard_background);
             } else {
                 mAlarmWarning.setText(mContext.getString(alarmToday
                         ? R.string.zen_alarm_information_time
                         : R.string.zen_alarm_information_day_time, alarm));
                 mAlarmWarning.setTextColor(mSoftWarningColor);
-                mAlarmWarning.setBackgroundResource(R.drawable.zen_alarm_soft_background);
             }
         }
 

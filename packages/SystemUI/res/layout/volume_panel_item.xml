@@ -23,22 +23,20 @@
 
     <ImageView
         android:id="@+id/stream_icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:contentDescription="@null"
-        android:paddingBottom="10dip"
-        android:paddingLeft="16dip"
-        android:paddingRight="16dip"
-        android:paddingTop="10dip" />
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:scaleType="center"
+        android:background="@drawable/btn_borderless_rect"
+        android:contentDescription="@null" />
 
     <SeekBar
         android:id="@+id/seekbar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:paddingBottom="0dip"
-        android:paddingEnd="17dip"
-        android:paddingStart="0dip"
+        android:paddingBottom="0dp"
+        android:paddingEnd="16dp"
+        android:paddingStart="8dp"
         android:paddingTop="0dip" />
 
 </LinearLayout>

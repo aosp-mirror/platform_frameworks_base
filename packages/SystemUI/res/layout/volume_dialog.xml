@@ -17,7 +17,7 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="@dimen/volume_panel_width"
     android:layout_height="wrap_content"
-    android:background="@drawable/qs_panel_background"
+    android:background="@drawable/qs_background_primary"
     android:translationZ="@dimen/volume_panel_z"
     android:layout_marginBottom="@dimen/volume_panel_z">
 
