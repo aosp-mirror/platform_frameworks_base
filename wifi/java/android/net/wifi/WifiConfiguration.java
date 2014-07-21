@@ -223,9 +223,8 @@ public class WifiConfiguration implements Parcelable {
      */
     public String BSSID;
     /**
-     * Fully qualified domain name (FQDN), for Passpoint credential.
+     * Fully qualified domain name (FQDN) of AAA server or RADIUS server
      * e.g. {@code "mail.example.com"}.
-     * @hide
      */
     public String FQDN;
     /**
