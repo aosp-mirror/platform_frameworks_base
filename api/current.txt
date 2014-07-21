@@ -15072,7 +15072,7 @@ package android.media {
     method public android.media.MediaMetadata.Builder putString(java.lang.String, java.lang.String);
   }
 
-  public abstract class MediaMetadataEditor {
+  public abstract deprecated class MediaMetadataEditor {
     method public synchronized void addEditableKey(int);
     method public abstract void apply();
     method public synchronized void clear();
@@ -15542,7 +15542,7 @@ package android.media {
     field public static final int RATING_THUMB_UP_DOWN = 2; // 0x2
   }
 
-  public class RemoteControlClient {
+  public deprecated class RemoteControlClient {
     ctor public RemoteControlClient(android.app.PendingIntent);
     ctor public RemoteControlClient(android.app.PendingIntent, android.os.Looper);
     method public android.media.RemoteControlClient.MetadataEditor editMetadata(boolean);
@@ -15574,7 +15574,7 @@ package android.media {
     field public static final int PLAYSTATE_STOPPED = 1; // 0x1
   }
 
-  public class RemoteControlClient.MetadataEditor extends android.media.MediaMetadataEditor {
+  public deprecated class RemoteControlClient.MetadataEditor extends android.media.MediaMetadataEditor {
     method public synchronized void apply();
     field public static final int BITMAP_KEY_ARTWORK = 100; // 0x64
   }
@@ -15591,7 +15591,7 @@ package android.media {
     method public abstract void onPlaybackPositionUpdate(long);
   }
 
-  public final class RemoteController {
+  public final deprecated class RemoteController {
     ctor public RemoteController(android.content.Context, android.media.RemoteController.OnClientUpdateListener) throws java.lang.IllegalArgumentException;
     ctor public RemoteController(android.content.Context, android.media.RemoteController.OnClientUpdateListener, android.os.Looper) throws java.lang.IllegalArgumentException;
     method public boolean clearArtworkConfiguration();
