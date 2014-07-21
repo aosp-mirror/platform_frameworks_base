@@ -453,13 +453,29 @@ Similarly, a new instance of a "{@code singleTop}" activity may also be
 created to handle a new intent.  However, if the target task already has an
 existing instance of the activity at the top of its stack, that instance
 will receive the new intent (in an
-<code>{@link android.app.Activity#onNewIntent onNewIntent()}</code> call);
+{@link android.app.Activity#onNewIntent onNewIntent()} call);
 a new instance is not created.
 In other circumstances &mdash; for example, if an existing instance of the
 "{@code singleTop}" activity is in the target task, but not at the top of
 the stack, or if it's at the top of a stack, but not in the target task
 &mdash; a new instance would be created and pushed on the stack.
 </p>
+
+<p>Similarly, if you
+<a href="{@docRoot}training/implementing-navigation/ancestral.html">navigate
+up</a> to an activity on the current stack, the behavior is determined by the
+parent activity's launch mode. If the parent activity has launch mode {@code
+singleTop} (or the <code>up</code> intent contains {@link
+android.content.Intent#FLAG_ACTIVITY_CLEAR_TOP}), the parent is brought to the
+top of the stack, and its state is preserved. The navigation intent is received
+by the parent activity's {@link android.app.Activity#onNewIntent onNewIntent()}
+method.  If the parent activity has launch mode {@code standard} (and the
+<code>up</code> intent does not contain {@link
+android.content.Intent#FLAG_ACTIVITY_CLEAR_TOP}), the current activity and its
+parent are both popped off the stack, and a new instance of the parent activity
+is created to receive the navigation intent.
+</p>
+
 
 <p>
 The "{@code singleTask}" and "{@code singleInstance}" modes also differ from
