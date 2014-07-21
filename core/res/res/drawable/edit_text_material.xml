@@ -14,20 +14,25 @@
      limitations under the License.
 -->
 
-<ripple xmlns:android="http://schemas.android.com/apk/res/android"
-    android:color="?attr/colorControlActivated">
-    <item>
-        <selector>
-            <item android:state_enabled="false">
-                <nine-patch android:src="@drawable/textfield_default_mtrl_alpha"
-                    android:tint="?attr/colorControlNormal"
-                    android:alpha="?attr/disabledAlpha" />
-            </item>
-            <item>
-                <nine-patch android:src="@drawable/textfield_default_mtrl_alpha"
-                    android:tint="?attr/colorControlNormal" />
-            </item>
-        </selector>
-    </item>
-    <item android:id="@+id/mask" android:drawable="@drawable/textfield_activated_mtrl_alpha" />
-</ripple>
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:insetLeft="@dimen/control_inset_material"
+    android:insetTop="@dimen/control_inset_material"
+    android:insetBottom="@dimen/control_inset_material"
+    android:insetRight="@dimen/control_inset_material">
+    <ripple android:color="?attr/colorControlActivated">
+        <item>
+            <selector>
+                <item android:state_enabled="false">
+                    <nine-patch android:src="@drawable/textfield_default_mtrl_alpha"
+                        android:tint="?attr/colorControlNormal"
+                        android:alpha="?attr/disabledAlpha" />
+                </item>
+                <item>
+                    <nine-patch android:src="@drawable/textfield_default_mtrl_alpha"
+                        android:tint="?attr/colorControlNormal" />
+                </item>
+            </selector>
+        </item>
+        <item android:id="@+id/mask" android:drawable="@drawable/textfield_activated_mtrl_alpha" />
+    </ripple>
+</inset>
