@@ -43,6 +43,7 @@
         <!-- Activity name -->
         <TextView android:id="@android:id/text1"
                   android:textAppearance="?android:attr/textAppearanceSmall"
+                  android:fontFamily="sans-serif-condensed"
                   android:layout_width="wrap_content"
                   android:layout_height="wrap_content"
                   android:gravity="center"
@@ -51,6 +52,7 @@
         <!-- Extended activity info to distinguish between duplicate activity names -->
         <TextView android:id="@android:id/text2"
                   android:textAppearance="?android:attr/textAppearanceSmall"
+                  android:fontFamily="sans-serif-condensed"
                   android:layout_width="wrap_content"
                   android:layout_height="wrap_content"
                   android:gravity="center"
