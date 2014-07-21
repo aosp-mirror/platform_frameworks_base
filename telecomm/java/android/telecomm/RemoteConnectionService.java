@@ -69,8 +69,6 @@ final class RemoteConnectionService implements DeathRecipient {
     private final ComponentName mComponentName;
 
     private String mConnectionId;
-    private ConnectionRequest mPendingRequest;
-    private ConnectionService.CreateConnectionResponse<RemoteConnection> mPendingResponse;
     // Remote connection services only support a single connection.
     private RemoteConnection mConnection;
 
@@ -84,8 +82,6 @@ final class RemoteConnectionService implements DeathRecipient {
                         ConnectionRequest request = (ConnectionRequest) args.arg1;
                         if (isPendingConnection(request.getCallId())) {
                             ParcelableConnection parcel = (ParcelableConnection) args.arg2;
-                            mConnection = new RemoteConnection(
-                                    mConnectionService, request.getCallId());
                             mConnection.setState(parcel.getState());
                             mConnection.setCallCapabilities(parcel.getCapabilities());
                             mConnection.setHandle(
@@ -94,9 +90,6 @@ final class RemoteConnectionService implements DeathRecipient {
                                     parcel.getCallerDisplayName(),
                                     parcel.getCallerDisplayNamePresentation());
                             // TODO: Do we need to support video providers for remote connections?
-
-                            mPendingResponse.onSuccess(request, mConnection);
-                            clearPendingInformation();
                         }
                     } finally {
                         args.recycle();
@@ -108,9 +101,8 @@ final class RemoteConnectionService implements DeathRecipient {
                     try {
                         ConnectionRequest request = (ConnectionRequest) args.arg1;
                         if (isPendingConnection(request.getCallId())) {
-                            mPendingResponse.onFailure(request, args.argi1, (String) args.arg2);
-                            mConnectionId = null;
-                            clearPendingInformation();
+                            // TODO: How do we propogate the failure codes?
+                            destroyConnection();
                         }
                     } finally {
                         args.recycle();
@@ -120,9 +112,7 @@ final class RemoteConnectionService implements DeathRecipient {
                 case MSG_HANDLE_CREATE_CONNECTION_CANCELLED: {
                     ConnectionRequest request = (ConnectionRequest) msg.obj;
                     if (isPendingConnection(request.getCallId())) {
-                        mPendingResponse.onCancel(request);
-                        mConnectionId = null;
-                        clearPendingInformation();
+                        destroyConnection();
                     }
                     break;
                 }
@@ -431,11 +421,7 @@ final class RemoteConnectionService implements DeathRecipient {
         release();
     }
 
-    final void createRemoteConnection(
-            ConnectionRequest request,
-            ConnectionService.CreateConnectionResponse<RemoteConnection> response,
-            boolean isIncoming) {
-
+    final RemoteConnection createRemoteConnection(ConnectionRequest request, boolean isIncoming) {
         if (mConnectionId == null) {
             String id = UUID.randomUUID().toString();
             ConnectionRequest newRequest = new ConnectionRequest(
@@ -445,27 +431,18 @@ final class RemoteConnectionService implements DeathRecipient {
                     request.getHandlePresentation(),
                     request.getExtras(),
                     request.getVideoState());
+            mConnection = new RemoteConnection(mConnectionService, request, isIncoming);
             try {
                 mConnectionService.createConnection(newRequest, isIncoming);
                 mConnectionId = id;
-                mPendingResponse = response;
-                mPendingRequest = request;
             } catch (RemoteException e) {
-                response.onFailure(request, DisconnectCause.ERROR_UNSPECIFIED, e.toString());
+                mConnection = RemoteConnection.failure(DisconnectCause.ERROR_UNSPECIFIED,
+                        e.toString());
             }
+            return mConnection;
         } else {
-            response.onFailure(request, DisconnectCause.ERROR_UNSPECIFIED, null);
+            return RemoteConnection.failure(DisconnectCause.ERROR_UNSPECIFIED, null);
         }
-    }
-
-    final List<PhoneAccountHandle> lookupAccounts(Uri handle) {
-        // TODO(santoscordon): Update this so that is actually calls into the RemoteConnection
-        // each time.
-        List<PhoneAccountHandle> accounts = new LinkedList<>();
-        accounts.add(new PhoneAccountHandle(
-                mComponentName,
-                null /* id */));
-        return accounts;
     }
 
     /**
@@ -477,17 +454,12 @@ final class RemoteConnectionService implements DeathRecipient {
     }
 
     private boolean isPendingConnection(String id) {
-        return TextUtils.equals(mConnectionId, id) && mPendingResponse != null;
+        return TextUtils.equals(mConnectionId, id);
     }
 
     private boolean isCurrentConnection(Object obj) {
         return obj instanceof String && mConnection != null &&
                 TextUtils.equals(mConnectionId, (String) obj);
-    }
-
-    private void clearPendingInformation() {
-        mPendingRequest = null;
-        mPendingResponse = null;
     }
 
     private void destroyConnection() {

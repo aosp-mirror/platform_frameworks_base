@@ -28,7 +28,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-
+import android.telephony.DisconnectCause;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.telecomm.IConnectionService;
 import com.android.internal.telecomm.IConnectionServiceAdapter;
@@ -132,7 +132,7 @@ public abstract class ConnectionService extends Service {
         public void answer(String callId, int videoState) {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = callId;
-            args.arg2 = videoState;
+            args.argi1 = videoState;
             mHandler.obtainMessage(MSG_ANSWER, args).sendToTarget();
         }
 
@@ -224,7 +224,7 @@ public abstract class ConnectionService extends Service {
                     SomeArgs args = (SomeArgs) msg.obj;
                     try {
                         String callId = (String) args.arg1;
-                        int videoState = (int) args.arg2;
+                        int videoState = args.argi1;
                         answer(callId, videoState);
                     } finally {
                         args.recycle();
@@ -425,46 +425,74 @@ public abstract class ConnectionService extends Service {
      * incoming call. In either case, telecomm will cycle through a set of services and call
      * createConnection util a connection service cancels the process or completes it successfully.
      */
-    private void createConnection(ConnectionRequest originalRequest, boolean isIncoming) {
-        Log.d(this, "call %s", originalRequest);
-        CreateConnectionResponse response = new CreateConnectionResponse<Connection>() {
-            @Override
-            public void onSuccess(ConnectionRequest request, Connection connection) {
-                Log.d(this, "adapter handleCreateConnectionSuccessful %s",
-                        request.getCallId());
-                addConnection(request.getCallId(), connection);
-                mAdapter.handleCreateConnectionSuccessful(
-                        request,
-                        new ParcelableConnection(
-                                request.getAccountHandle(),
-                                connection.getState(),
-                                connection.getCallCapabilities(),
-                                connection.getHandle(),
-                                connection.getHandlePresentation(),
-                                connection.getCallerDisplayName(),
-                                connection.getCallerDisplayNamePresentation(),
-                                connection.getVideoCallProvider() == null ?
-                                        null : connection.getVideoCallProvider().getInterface(),
-                                connection.getVideoState()));
-            }
+    private void createConnection(final ConnectionRequest request, boolean isIncoming) {
+        Log.d(this, "call %s", request);
 
-            @Override
-            public void onFailure(ConnectionRequest request, int code, String msg) {
-                // Tell telecomm to try a different service.
-                mAdapter.handleCreateConnectionFailed(request, code, msg);
-            }
+        final Connection createdConnection;
+        if (isIncoming) {
+            createdConnection = onCreateIncomingConnection(request);
+        } else {
+            createdConnection = onCreateOutgoingConnection(request);
+        }
 
-            @Override
-            public void onCancel(ConnectionRequest request) {
+        if (createdConnection != null) {
+            Log.d(this, "adapter handleCreateConnectionSuccessful %s",
+                    request.getCallId());
+            if (createdConnection.getState() == Connection.State.INITIALIZING) {
+                // Wait for the connection to become initialized.
+                createdConnection.addConnectionListener(new Connection.Listener() {
+                    @Override
+                    public void onStateChanged(Connection c, int state) {
+                        switch (state) {
+                            case Connection.State.FAILED:
+                                Log.d(this, "Connection (%s) failed (%d: %s)", request,
+                                        c.getFailureCode(), c.getFailureMessage());
+                                mAdapter.handleCreateConnectionFailed(request, c.getFailureCode(),
+                                        c.getFailureMessage());
+                                break;
+                            case Connection.State.CANCELED:
+                                Log.d(this, "Connection (%s) canceled", request);
+                                mAdapter.handleCreateConnectionCancelled(request);
+                                break;
+                            case Connection.State.INITIALIZING:
+                                Log.d(this, "State changed to INITIALIZING; ignoring");
+                                return; // Don't want to stop listening on this state transition.
+                            default:
+                                Log.d(this, "Connection created in state %s",
+                                        Connection.stateToString(state));
+                                connectionCreated(request, createdConnection);
+                                break;
+                        }
+                        c.removeConnectionListener(this);
+                    }
+                });
+            } else if (createdConnection.getState() == Connection.State.CANCELED) {
                 // Tell telecomm not to attempt any more services.
                 mAdapter.handleCreateConnectionCancelled(request);
+            } else {
+                connectionCreated(request, createdConnection);
             }
-        };
-        if (isIncoming) {
-            onCreateIncomingConnection(originalRequest, response);
         } else {
-            onCreateOutgoingConnection(originalRequest, response);
+            // Tell telecomm to try a different service.
+            mAdapter.handleCreateConnectionFailed(request, DisconnectCause.ERROR_UNSPECIFIED, null);
         }
+    }
+
+    private void connectionCreated(ConnectionRequest request, Connection connection) {
+        addConnection(request.getCallId(), connection);
+        mAdapter.handleCreateConnectionSuccessful(
+                request,
+                new ParcelableConnection(
+                        request.getAccountHandle(),
+                        connection.getState(),
+                        connection.getCallCapabilities(),
+                        connection.getHandle(),
+                        connection.getHandlePresentation(),
+                        connection.getCallerDisplayName(),
+                        connection.getCallerDisplayNamePresentation(),
+                        connection.getVideoCallProvider() == null ?
+                                null : connection.getVideoCallProvider().getInterface(),
+                        connection.getVideoState()));
     }
 
     private void abort(String callId) {
@@ -609,13 +637,6 @@ public abstract class ConnectionService extends Service {
         });
     }
 
-    public final void lookupRemoteAccounts(
-            Uri handle, SimpleResponse<Uri, List<PhoneAccountHandle>> response) {
-        mAccountLookupResponse = response;
-        mAccountLookupHandle = handle;
-        maybeRespondToAccountLookup();
-    }
-
     public final void maybeRespondToAccountLookup() {
         if (mAreAccountsInitialized && mAccountLookupResponse != null) {
             mAccountLookupResponse.onResult(
@@ -627,16 +648,12 @@ public abstract class ConnectionService extends Service {
         }
     }
 
-    public final void createRemoteIncomingConnection(
-            ConnectionRequest request,
-            CreateConnectionResponse<RemoteConnection> response) {
-        mRemoteConnectionManager.createRemoteConnection(request, response, true);
+    public final RemoteConnection createRemoteIncomingConnection(ConnectionRequest request) {
+        return mRemoteConnectionManager.createRemoteConnection(request, true);
     }
 
-    public final void createRemoteOutgoingConnection(
-            ConnectionRequest request,
-            CreateConnectionResponse<RemoteConnection> response) {
-        mRemoteConnectionManager.createRemoteConnection(request, response, false);
+    public final RemoteConnection createRemoteOutgoingConnection(ConnectionRequest request) {
+        return mRemoteConnectionManager.createRemoteConnection(request, false);
     }
 
     /**
@@ -649,23 +666,22 @@ public abstract class ConnectionService extends Service {
     /**
      * Create a Connection given an incoming request. This is used to attach to existing incoming
      * calls.
-     *
      * @param request Details about the incoming call.
-     * @param callback A callback for providing the result.
+     *
+     * @return The {@link Connection} object to satisfy this call, or {@code null} to not handle
+     * the call.
      */
-    public void onCreateIncomingConnection(
-            ConnectionRequest request,
-            CreateConnectionResponse<Connection> callback) {}
+    public Connection onCreateIncomingConnection(ConnectionRequest request) { return null; }
 
     /**
      * Create a Connection given an outgoing request. This is used to initiate new outgoing calls.
+     *  @param request Details about the outgoing call.
      *
-     * @param request Details about the outgoing call.
-     * @param callback A callback for providing the result.
+     * @return The {@link Connection} object to satisfy this request,
+     * or null to not handle the call.
+     *
      */
-    public void onCreateOutgoingConnection(
-            ConnectionRequest request,
-            CreateConnectionResponse<Connection> callback) {}
+    public Connection onCreateOutgoingConnection(ConnectionRequest request) { return null; }
 
     /**
      * Returns a new or existing conference connection when the the user elects to convert the
