@@ -134,6 +134,7 @@ public final class UsageStats implements Parcelable {
         mLastTimeSaved = stats.mLastTimeSaved;
 
         final int pkgCount = stats.mPackageStats.size();
+        mPackageStats.ensureCapacity(pkgCount);
         for (int i = 0; i < pkgCount; i++) {
             PackageUsageStats pkgStats = stats.mPackageStats.valueAt(i);
             mPackageStats.append(stats.mPackageStats.keyAt(i), new PackageUsageStats(pkgStats));
