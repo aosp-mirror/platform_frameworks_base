@@ -148,7 +148,7 @@ public class PhoneStatusBarPolicy {
         mService.setIconVisibility(SLOT_ZEN, false);
 
         // volume
-        mService.setIcon(SLOT_VOLUME, R.drawable.stat_sys_ringer_silent, 0, null);
+        mService.setIcon(SLOT_VOLUME, R.drawable.stat_sys_ringer_vibrate, 0, null);
         mService.setIconVisibility(SLOT_VOLUME, false);
         updateVolumeZen();
     }

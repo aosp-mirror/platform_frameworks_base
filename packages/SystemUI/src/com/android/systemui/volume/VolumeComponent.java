@@ -20,5 +20,4 @@ import com.android.systemui.statusbar.policy.ZenModeController;
 
 public interface VolumeComponent {
     ZenModeController getZenController();
-    void setVolumePanel(VolumePanel panel);
 }
