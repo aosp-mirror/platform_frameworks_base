@@ -179,10 +179,11 @@ final class Constants {
     static final int INVALID_PORT_ID = -1;
     static final int INVALID_PHYSICAL_ADDRESS = 0xFFFF;
 
-    // Send result codes.
+    // Send result codes. It should be consistent with hdmi_cec.h's send_message error code.
     static final int SEND_RESULT_SUCCESS = 0;
-    static final int SEND_RESULT_NAK = -1;
-    static final int SEND_RESULT_FAILURE = -2;
+    static final int SEND_RESULT_NAK = 1;
+    static final int SEND_RESULT_BUSY = 2;
+    static final int SEND_RESULT_FAILURE = 3;
 
     // Strategy for device polling.
     // Should use "OR(|) operation of POLL_STRATEGY_XXX and POLL_ITERATION_XXX.
