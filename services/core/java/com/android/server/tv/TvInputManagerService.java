@@ -220,7 +220,7 @@ public final class TvInputManagerService extends SystemService {
         List<ResolveInfo> services = pm.queryIntentServices(
                 new Intent(TvInputService.SERVICE_INTERFACE),
                 PackageManager.GET_SERVICES | PackageManager.GET_META_DATA);
-        List<TvInputInfo> infoList = new ArrayList<TvInputInfo>();
+        List<TvInputInfo> inputList = new ArrayList<TvInputInfo>();
         for (ResolveInfo ri : services) {
             ServiceInfo si = ri.serviceInfo;
             if (!android.Manifest.permission.BIND_TV_INPUT.equals(si.permission)) {
@@ -229,7 +229,7 @@ public final class TvInputManagerService extends SystemService {
                 continue;
             }
             try {
-                infoList.clear();
+                inputList.clear();
                 ComponentName service = new ComponentName(si.packageName, si.name);
                 if (hasHardwarePermission(pm, service)) {
                     ServiceState serviceState = userState.serviceStateMap.get(service);
@@ -240,13 +240,13 @@ public final class TvInputManagerService extends SystemService {
                         serviceState = new ServiceState(service, userId);
                         userState.serviceStateMap.put(service, serviceState);
                     } else {
-                        infoList.addAll(serviceState.mInputList);
+                        inputList.addAll(serviceState.mInputList);
                     }
                 } else {
-                    infoList.add(TvInputInfo.createTvInputInfo(mContext, ri));
+                    inputList.add(TvInputInfo.createTvInputInfo(mContext, ri));
                 }
 
-                for (TvInputInfo info : infoList) {
+                for (TvInputInfo info : inputList) {
                     if (DEBUG) Slog.d(TAG, "add " + info.getId());
                     TvInputState state = userState.inputMap.get(info.getId());
                     if (state == null) {
@@ -1213,22 +1213,6 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
-        public void registerTvInputInfo(TvInputInfo info, int deviceId) {
-            // TODO: Revisit to sort out deviceId ownership.
-            if (mContext.checkCallingPermission(android.Manifest.permission.TV_INPUT_HARDWARE)
-                    != PackageManager.PERMISSION_GRANTED) {
-                return;
-            }
-
-            final long identity = Binder.clearCallingIdentity();
-            try {
-                mTvInputHardwareManager.registerTvInputInfo(info, deviceId);
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
-        }
-
-        @Override
         public ITvInputHardware acquireTvInputHardware(int deviceId,
                 ITvInputHardwareCallback callback, TvInputInfo info, int userId)
                 throws RemoteException {
@@ -1550,8 +1534,6 @@ public final class TvInputManagerService extends SystemService {
                 Slog.d(TAG, "onServiceConnected(name=" + name + ")");
             }
             synchronized (mLock) {
-                List<TvInputHardwareInfo> hardwareInfoList =
-                        mTvInputHardwareManager.getHardwareList();
                 UserState userState = getUserStateLocked(mUserId);
                 ServiceState serviceState = userState.serviceStateMap.get(mName);
                 serviceState.mService = ITvInputService.Stub.asInterface(service);
@@ -1580,6 +1562,8 @@ public final class TvInputManagerService extends SystemService {
                 }
 
                 if (serviceState.mIsHardware) {
+                    List<TvInputHardwareInfo> hardwareInfoList =
+                            mTvInputHardwareManager.getHardwareList();
                     for (TvInputHardwareInfo hardwareInfo : hardwareInfoList) {
                         try {
                             serviceState.mService.notifyHardwareAdded(hardwareInfo);
@@ -1588,7 +1572,15 @@ public final class TvInputManagerService extends SystemService {
                         }
                     }
 
-                    // TODO: Grab CEC devices and notify them to the service.
+                    List<HdmiCecDeviceInfo> cecDeviceInfoList =
+                            mTvInputHardwareManager.getHdmiCecInputDeviceList();
+                    for (HdmiCecDeviceInfo cecDeviceInfo : cecDeviceInfoList) {
+                        try {
+                            serviceState.mService.notifyHdmiCecDeviceAdded(cecDeviceInfo);
+                        } catch (RemoteException e) {
+                            Slog.e(TAG, "error in notifyHdmiCecDeviceAdded", e);
+                        }
+                    }
                 }
             }
         }
@@ -1642,32 +1634,49 @@ public final class TvInputManagerService extends SystemService {
             mUserId = userId;
         }
 
-        @Override
-        public void addTvInput(TvInputInfo inputInfo) {
-            synchronized (mLock) {
-                if (mContext.checkCallingPermission(android.Manifest.permission.TV_INPUT_HARDWARE)
-                        != PackageManager.PERMISSION_GRANTED) {
-                    Slog.w(TAG, "The caller does not have permission to add a TV input ("
-                            + inputInfo + ").");
-                    return;
-                }
+        private void ensureHardwarePermission() {
+            if (mContext.checkCallingPermission(android.Manifest.permission.TV_INPUT_HARDWARE)
+                    != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException("The caller does not have hardware permission");
+            }
+        }
 
-                ServiceState serviceState = getServiceStateLocked(mName, mUserId);
-                serviceState.mInputList.add(inputInfo);
-                buildTvInputListLocked(mUserId);
+        private void ensureValidInput(TvInputInfo inputInfo) {
+            if (inputInfo.getId() == null || !mName.equals(inputInfo.getComponent())) {
+                throw new IllegalArgumentException("Invalid TvInputInfo");
+            }
+        }
+
+        private void addTvInputLocked(TvInputInfo inputInfo) {
+            ServiceState serviceState = getServiceStateLocked(mName, mUserId);
+            serviceState.mInputList.add(inputInfo);
+            buildTvInputListLocked(mUserId);
+        }
+
+        @Override
+        public void addHardwareTvInput(int deviceId, TvInputInfo inputInfo) {
+            ensureHardwarePermission();
+            ensureValidInput(inputInfo);
+            synchronized (mLock) {
+                mTvInputHardwareManager.addHardwareTvInput(deviceId, inputInfo);
+                addTvInputLocked(inputInfo);
+            }
+        }
+
+        @Override
+        public void addHdmiCecTvInput(int logicalAddress, TvInputInfo inputInfo) {
+            ensureHardwarePermission();
+            ensureValidInput(inputInfo);
+            synchronized (mLock) {
+                mTvInputHardwareManager.addHdmiCecTvInput(logicalAddress, inputInfo);
+                addTvInputLocked(inputInfo);
             }
         }
 
         @Override
         public void removeTvInput(String inputId) {
+            ensureHardwarePermission();
             synchronized (mLock) {
-                if (mContext.checkCallingPermission(android.Manifest.permission.TV_INPUT_HARDWARE)
-                        != PackageManager.PERMISSION_GRANTED) {
-                    Slog.w(TAG, "The caller does not have permission to remove a TV input ("
-                            + inputId + ").");
-                    return;
-                }
-
                 ServiceState serviceState = getServiceStateLocked(mName, mUserId);
                 boolean removed = false;
                 for (Iterator<TvInputInfo> it = serviceState.mInputList.iterator();
@@ -1680,6 +1689,7 @@ public final class TvInputManagerService extends SystemService {
                 }
                 if (removed) {
                     buildTvInputListLocked(mUserId);
+                    mTvInputHardwareManager.removeTvInput(inputId);
                 } else {
                     Slog.e(TAG, "TvInputInfo with inputId=" + inputId + " not found.");
                 }
@@ -1856,14 +1866,14 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
-        public void onHardwareDeviceRemoved(int deviceId) {
+        public void onHardwareDeviceRemoved(TvInputHardwareInfo info) {
             synchronized (mLock) {
                 UserState userState = getUserStateLocked(mCurrentUserId);
                 // Broadcast the event to all hardware inputs.
                 for (ServiceState serviceState : userState.serviceStateMap.values()) {
                     if (!serviceState.mIsHardware || serviceState.mService == null) continue;
                     try {
-                        serviceState.mService.notifyHardwareRemoved(deviceId);
+                        serviceState.mService.notifyHardwareRemoved(info);
                     } catch (RemoteException e) {
                         Slog.e(TAG, "error in notifyHardwareRemoved", e);
                     }
@@ -1872,16 +1882,34 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
-        public void onHdmiCecDeviceAdded(HdmiCecDeviceInfo cecDevice) {
+        public void onHdmiCecDeviceAdded(HdmiCecDeviceInfo cecDeviceInfo) {
             synchronized (mLock) {
-                // TODO
+                UserState userState = getUserStateLocked(mCurrentUserId);
+                // Broadcast the event to all hardware inputs.
+                for (ServiceState serviceState : userState.serviceStateMap.values()) {
+                    if (!serviceState.mIsHardware || serviceState.mService == null) continue;
+                    try {
+                        serviceState.mService.notifyHdmiCecDeviceAdded(cecDeviceInfo);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "error in notifyHdmiCecDeviceAdded", e);
+                    }
+                }
             }
         }
 
         @Override
-        public void onHdmiCecDeviceRemoved(HdmiCecDeviceInfo cecDevice) {
+        public void onHdmiCecDeviceRemoved(HdmiCecDeviceInfo cecDeviceInfo) {
             synchronized (mLock) {
-                // TODO
+                UserState userState = getUserStateLocked(mCurrentUserId);
+                // Broadcast the event to all hardware inputs.
+                for (ServiceState serviceState : userState.serviceStateMap.values()) {
+                    if (!serviceState.mIsHardware || serviceState.mService == null) continue;
+                    try {
+                        serviceState.mService.notifyHdmiCecDeviceRemoved(cecDeviceInfo);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "error in notifyHdmiCecDeviceRemoved", e);
+                    }
+                }
             }
         }
     }
