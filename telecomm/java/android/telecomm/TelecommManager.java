@@ -56,6 +56,12 @@ public class TelecommManager {
             "android.intent.action.CONNECTION_SERVICE_CONFIGURE";
 
     /**
+     * The {@link android.content.Intent} action used to show the call settings page.
+     */
+    public static final String ACTION_SHOW_CALL_SETTINGS =
+            "android.telecomm.intent.action.SHOW_CALL_SETTINGS";
+
+    /**
      * Optional extra for {@link android.content.Intent#ACTION_CALL} containing a boolean that
      * determines whether the speakerphone should be automatically turned on for an outgoing call.
      */
