@@ -3937,28 +3937,10 @@ public final class Settings {
                 "accessibility_captioning_font_scale";
 
         /**
-         * Setting that specifies whether the quick setting tile for display
-         * color inversion is enabled.
-         *
-         * @hide
-         */
-        public static final String ACCESSIBILITY_DISPLAY_INVERSION_QUICK_SETTING_ENABLED =
-                "accessibility_display_inversion_quick_setting_enabled";
-
-        /**
          * Setting that specifies whether display color inversion is enabled.
          */
         public static final String ACCESSIBILITY_DISPLAY_INVERSION_ENABLED =
                 "accessibility_display_inversion_enabled";
-
-        /**
-         * Setting that specifies whether the quick setting tile for display
-         * color space adjustment is enabled.
-         *
-         * @hide
-         */
-        public static final String ACCESSIBILITY_DISPLAY_DALTONIZER_QUICK_SETTING_ENABLED =
-                "accessibility_display_daltonizer_quick_setting_enabled";
 
         /**
          * Setting that specifies whether display color space adjustment is
