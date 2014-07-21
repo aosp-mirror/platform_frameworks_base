@@ -19,11 +19,13 @@
 #include <utils/Log.h>
 
 #include <media/stagefright/foundation/ADebug.h>
+#include <media/stagefright/foundation/AMessage.h>
 #include <media/stagefright/MediaCodecList.h>
 
 #include "android_runtime/AndroidRuntime.h"
 #include "jni.h"
 #include "JNIHelp.h"
+#include "android_media_Utils.h"
 
 using namespace android;
 
@@ -111,10 +113,19 @@ static jobject android_media_MediaCodecList_getCodecCapabilities(
     Vector<MediaCodecList::ProfileLevel> profileLevels;
     Vector<uint32_t> colorFormats;
     uint32_t flags;
+    sp<AMessage> capabilities;
+
+    sp<AMessage> defaultFormat = new AMessage();
+    defaultFormat->setString("mime", typeStr);
+
+    // TODO query default-format also from codec/codec list
 
     status_t err =
         MediaCodecList::getInstance()->getCodecCapabilities(
-                index, typeStr, &profileLevels, &colorFormats, &flags);
+                index, typeStr, &profileLevels, &colorFormats, &flags,
+                &capabilities);
+
+    bool isEncoder = MediaCodecList::getInstance()->isEncoder(index);
 
     env->ReleaseStringUTFChars(type, typeStr);
     typeStr = NULL;
@@ -124,14 +135,20 @@ static jobject android_media_MediaCodecList_getCodecCapabilities(
         return NULL;
     }
 
+    jobject defaultFormatObj = NULL;
+    if (ConvertMessageToMap(env, defaultFormat, &defaultFormatObj)) {
+        return NULL;
+    }
+
+    jobject infoObj = NULL;
+    if (ConvertMessageToMap(env, capabilities, &infoObj)) {
+        env->DeleteLocalRef(defaultFormatObj);
+        return NULL;
+    }
+
     jclass capsClazz =
         env->FindClass("android/media/MediaCodecInfo$CodecCapabilities");
     CHECK(capsClazz != NULL);
-
-    jfieldID flagsField =
-        env->GetFieldID(capsClazz, "flags", "I");
-
-    jobject caps = env->AllocObject(capsClazz);
 
     jclass profileLevelClazz =
         env->FindClass("android/media/MediaCodecInfo$CodecProfileLevel");
@@ -160,18 +177,6 @@ static jobject android_media_MediaCodecList_getCodecCapabilities(
         profileLevelObj = NULL;
     }
 
-    jfieldID profileLevelsField = env->GetFieldID(
-            capsClazz,
-            "profileLevels",
-            "[Landroid/media/MediaCodecInfo$CodecProfileLevel;");
-
-    env->SetObjectField(caps, profileLevelsField, profileLevelArray);
-
-    env->SetIntField(caps, flagsField, flags);
-
-    env->DeleteLocalRef(profileLevelArray);
-    profileLevelArray = NULL;
-
     jintArray colorFormatsArray = env->NewIntArray(colorFormats.size());
 
     for (size_t i = 0; i < colorFormats.size(); ++i) {
@@ -179,13 +184,45 @@ static jobject android_media_MediaCodecList_getCodecCapabilities(
         env->SetIntArrayRegion(colorFormatsArray, i, 1, &val);
     }
 
+    jmethodID capsConstructID = env->GetMethodID(capsClazz, "<init>",
+            "([Landroid/media/MediaCodecInfo$CodecProfileLevel;[IZI"
+            "Ljava/util/Map;Ljava/util/Map;)V");
+
+    jobject caps = env->NewObject(capsClazz, capsConstructID,
+            profileLevelArray, colorFormatsArray, isEncoder, flags,
+            defaultFormatObj, infoObj);
+
+#if 0
+    jfieldID profileLevelsField = env->GetFieldID(
+            capsClazz,
+            "profileLevels",
+            "[Landroid/media/MediaCodecInfo$CodecProfileLevel;");
+
+    env->SetObjectField(caps, profileLevelsField, profileLevelArray);
+
+    jfieldID flagsField =
+        env->GetFieldID(capsClazz, "mFlagsVerified", "I");
+
+    env->SetIntField(caps, flagsField, flags);
+
     jfieldID colorFormatsField = env->GetFieldID(
             capsClazz, "colorFormats", "[I");
 
     env->SetObjectField(caps, colorFormatsField, colorFormatsArray);
 
+#endif
+
+    env->DeleteLocalRef(profileLevelArray);
+    profileLevelArray = NULL;
+
     env->DeleteLocalRef(colorFormatsArray);
     colorFormatsArray = NULL;
+
+    env->DeleteLocalRef(defaultFormatObj);
+    defaultFormatObj = NULL;
+
+    env->DeleteLocalRef(infoObj);
+    infoObj = NULL;
 
     return caps;
 }
@@ -194,7 +231,7 @@ static void android_media_MediaCodecList_native_init(JNIEnv *env) {
 }
 
 static JNINativeMethod gMethods[] = {
-    { "getCodecCount", "()I", (void *)android_media_MediaCodecList_getCodecCount },
+    { "native_getCodecCount", "()I", (void *)android_media_MediaCodecList_getCodecCount },
     { "getCodecName", "(I)Ljava/lang/String;",
       (void *)android_media_MediaCodecList_getCodecName },
     { "isEncoder", "(I)Z", (void *)android_media_MediaCodecList_isEncoder },

@@ -14626,7 +14626,15 @@ package android.media {
 
   public static final class MediaCodecInfo.CodecCapabilities {
     ctor public MediaCodecInfo.CodecCapabilities();
+    method public static final android.media.MediaCodecInfo.CodecCapabilities CreateFromProfileLevel(java.lang.String, int, int);
+    method public final android.media.MediaCodecInfo.CodecCapabilities.AudioCapabilities getAudioCapabilities();
+    method public final android.media.MediaFormat getDefaultFormat();
+    method public final android.media.MediaCodecInfo.CodecCapabilities.EncoderCapabilities getEncoderCapabilities();
+    method public final java.lang.String getMime();
+    method public final android.media.MediaCodecInfo.CodecCapabilities.VideoCapabilities getVideoCapabilities();
+    method public final boolean isFeatureRequired(java.lang.String);
     method public final boolean isFeatureSupported(java.lang.String);
+    method public final boolean isFormatSupported(android.media.MediaFormat);
     field public static final int COLOR_Format12bitRGB444 = 3; // 0x3
     field public static final int COLOR_Format16bitARGB1555 = 5; // 0x5
     field public static final int COLOR_Format16bitARGB4444 = 4; // 0x4
@@ -14662,6 +14670,7 @@ package android.media {
     field public static final int COLOR_FormatYCrYCb = 26; // 0x1a
     field public static final int COLOR_FormatYUV411PackedPlanar = 18; // 0x12
     field public static final int COLOR_FormatYUV411Planar = 17; // 0x11
+    field public static final int COLOR_FormatYUV420Flexible = 2135033992; // 0x7f420888
     field public static final int COLOR_FormatYUV420PackedPlanar = 20; // 0x14
     field public static final int COLOR_FormatYUV420PackedSemiPlanar = 39; // 0x27
     field public static final int COLOR_FormatYUV420Planar = 19; // 0x13
@@ -14674,8 +14683,43 @@ package android.media {
     field public static final int COLOR_QCOM_FormatYUV420SemiPlanar = 2141391872; // 0x7fa30c00
     field public static final int COLOR_TI_FormatYUV420PackedSemiPlanar = 2130706688; // 0x7f000100
     field public static final java.lang.String FEATURE_AdaptivePlayback = "adaptive-playback";
+    field public static final java.lang.String FEATURE_SecurePlayback = "secure-playback";
+    field public static final java.lang.String FEATURE_TunneledPlayback = "tunneled-playback";
     field public int[] colorFormats;
     field public android.media.MediaCodecInfo.CodecProfileLevel[] profileLevels;
+  }
+
+  public static final class MediaCodecInfo.CodecCapabilities.AudioCapabilities extends android.media.MediaCodecInfo.CodecCapabilities.BaseCapabilities {
+    method public final int getMaxInputChannelCount();
+    method public final android.util.Range<java.lang.Integer>[] getSupportedSampleRateRanges();
+    method public final int[] getSupportedSampleRates();
+    method public final boolean isSampleRateSupported(int);
+  }
+
+  public static class MediaCodecInfo.CodecCapabilities.BaseCapabilities {
+    method public final android.util.Range<java.lang.Integer> getBitrateRange();
+  }
+
+  public static final class MediaCodecInfo.CodecCapabilities.EncoderCapabilities {
+    method public final android.util.Range<java.lang.Integer> getComplexityRange();
+    method public final android.util.Range<java.lang.Integer> getQualityRange();
+    method public final boolean isBitrateModeSupported(int);
+    field public static final int BITRATE_MODE_CBR = 2; // 0x2
+    field public static final int BITRATE_MODE_CQ = 0; // 0x0
+    field public static final int BITRATE_MODE_VBR = 1; // 0x1
+  }
+
+  public static final class MediaCodecInfo.CodecCapabilities.VideoCapabilities extends android.media.MediaCodecInfo.CodecCapabilities.BaseCapabilities {
+    method public final boolean areSizeAndRateSupported(int, int, double);
+    method public final int getHeightAlignment();
+    method public final android.util.Range<java.lang.Integer> getSupportedFrameRates();
+    method public final android.util.Range<java.lang.Double> getSupportedFrameRatesFor(int, int);
+    method public final android.util.Range<java.lang.Integer> getSupportedHeights();
+    method public final android.util.Range<java.lang.Integer> getSupportedHeightsFor(int);
+    method public final android.util.Range<java.lang.Integer> getSupportedWidths();
+    method public final android.util.Range<java.lang.Integer> getSupportedWidthsFor(int);
+    method public final int getWidthAlignment();
+    method public final boolean isSizeSupported(int, int);
   }
 
   public static final class MediaCodecInfo.CodecProfileLevel {
@@ -14706,6 +14750,7 @@ package android.media {
     field public static final int AVCLevel42 = 8192; // 0x2000
     field public static final int AVCLevel5 = 16384; // 0x4000
     field public static final int AVCLevel51 = 32768; // 0x8000
+    field public static final int AVCLevel52 = 65536; // 0x10000
     field public static final int AVCProfileBaseline = 1; // 0x1
     field public static final int AVCProfileExtended = 4; // 0x4
     field public static final int AVCProfileHigh = 8; // 0x8
@@ -14792,8 +14837,14 @@ package android.media {
   }
 
   public final class MediaCodecList {
+    ctor public MediaCodecList(int);
+    method public final java.lang.String findDecoderForFormat(android.media.MediaFormat);
+    method public final java.lang.String findEncoderForFormat(android.media.MediaFormat);
     method public static final int getCodecCount();
     method public static final android.media.MediaCodecInfo getCodecInfoAt(int);
+    method public final android.media.MediaCodecInfo[] getCodecInfos();
+    field public static final int ALL_CODECS = 1; // 0x1
+    field public static final int REGULAR_CODECS = 0; // 0x0
   }
 
   public final class MediaCrypto {
@@ -14919,11 +14970,14 @@ package android.media {
     method public final void setLong(java.lang.String, long);
     method public final void setString(java.lang.String, java.lang.String);
     field public static final java.lang.String KEY_AAC_PROFILE = "aac-profile";
+    field public static final java.lang.String KEY_BITRATE_MODE = "bitrate-mode";
     field public static final java.lang.String KEY_BIT_RATE = "bitrate";
     field public static final java.lang.String KEY_CHANNEL_COUNT = "channel-count";
     field public static final java.lang.String KEY_CHANNEL_MASK = "channel-mask";
     field public static final java.lang.String KEY_COLOR_FORMAT = "color-format";
+    field public static final java.lang.String KEY_COMPLEXITY = "complexity";
     field public static final java.lang.String KEY_DURATION = "durationUs";
+    field public static final java.lang.String KEY_FEATURE_ = "feature-";
     field public static final java.lang.String KEY_FLAC_COMPRESSION_LEVEL = "flac-compression-level";
     field public static final java.lang.String KEY_FRAME_RATE = "frame-rate";
     field public static final java.lang.String KEY_HEIGHT = "height";
@@ -14937,10 +14991,36 @@ package android.media {
     field public static final java.lang.String KEY_MAX_INPUT_SIZE = "max-input-size";
     field public static final java.lang.String KEY_MAX_WIDTH = "max-width";
     field public static final java.lang.String KEY_MIME = "mime";
+    field public static final java.lang.String KEY_PROFILE = "profile";
     field public static final java.lang.String KEY_PUSH_BLANK_BUFFERS_ON_STOP = "push-blank-buffers-on-shutdown";
+    field public static final java.lang.String KEY_QUALITY = "quality";
+    field public static final java.lang.String KEY_REFERENCE_CLOCK_ID = "reference-clock-id";
     field public static final java.lang.String KEY_REPEAT_PREVIOUS_FRAME_AFTER = "repeat-previous-frame-after";
     field public static final java.lang.String KEY_SAMPLE_RATE = "sample-rate";
     field public static final java.lang.String KEY_WIDTH = "width";
+    field public static final java.lang.String MIMETYPE_AUDIO_AAC = "audio/mp4a-latm";
+    field public static final java.lang.String MIMETYPE_AUDIO_AC3 = "audio/ac3";
+    field public static final java.lang.String MIMETYPE_AUDIO_AMR_NB = "audio/3gpp";
+    field public static final java.lang.String MIMETYPE_AUDIO_AMR_WB = "audio/amr-wb";
+    field public static final java.lang.String MIMETYPE_AUDIO_FLAC = "audio/flac";
+    field public static final java.lang.String MIMETYPE_AUDIO_G711_ALAW = "audio/g711-alaw";
+    field public static final java.lang.String MIMETYPE_AUDIO_G711_MLAW = "audio/g711-mlaw";
+    field public static final java.lang.String MIMETYPE_AUDIO_MPEG = "audio/mpeg";
+    field public static final java.lang.String MIMETYPE_AUDIO_MSGSM = "audio/gsm";
+    field public static final java.lang.String MIMETYPE_AUDIO_OPUS = "audio/opus";
+    field public static final java.lang.String MIMETYPE_AUDIO_QCELP = "audio/qcelp";
+    field public static final java.lang.String MIMETYPE_AUDIO_RAW = "audio/raw";
+    field public static final java.lang.String MIMETYPE_AUDIO_VORBIS = "audio/vorbis";
+    field public static final java.lang.String MIMETYPE_TEXT_CEA_608 = "text/cea-608";
+    field public static final java.lang.String MIMETYPE_TEXT_VTT = "text/vtt";
+    field public static final java.lang.String MIMETYPE_VIDEO_AVC = "video/avc";
+    field public static final java.lang.String MIMETYPE_VIDEO_H263 = "video/3gpp";
+    field public static final java.lang.String MIMETYPE_VIDEO_HEVC = "video/hevc";
+    field public static final java.lang.String MIMETYPE_VIDEO_MPEG2 = "video/mpeg2";
+    field public static final java.lang.String MIMETYPE_VIDEO_MPEG4 = "video/mp4v-es";
+    field public static final java.lang.String MIMETYPE_VIDEO_RAW = "video/raw";
+    field public static final java.lang.String MIMETYPE_VIDEO_VP8 = "video/x-vnd.on2.vp8";
+    field public static final java.lang.String MIMETYPE_VIDEO_VP9 = "video/x-vnd.on2.vp9";
   }
 
   public final class MediaMetadata implements android.os.Parcelable {
