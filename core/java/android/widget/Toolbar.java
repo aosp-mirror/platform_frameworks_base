@@ -1593,7 +1593,7 @@ public class Toolbar extends ViewGroup {
     /** @hide */
     public DecorToolbar getWrapper() {
         if (mWrapper == null) {
-            mWrapper = new ToolbarWidgetWrapper(this);
+            mWrapper = new ToolbarWidgetWrapper(this, true);
         }
         return mWrapper;
     }
