@@ -471,22 +471,30 @@ public final class DisplayManagerGlobal {
         private VirtualDisplayCallbacksDelegate mDelegate;
 
         public VirtualDisplayCallbacks(VirtualDisplay.Callbacks callbacks, Handler handler) {
-            mDelegate = new VirtualDisplayCallbacksDelegate(callbacks, handler);
+            if (callbacks != null) {
+                mDelegate = new VirtualDisplayCallbacksDelegate(callbacks, handler);
+            }
         }
 
         @Override // Binder call
         public void onDisplayPaused() {
-            mDelegate.sendEmptyMessage(VirtualDisplayCallbacksDelegate.MSG_DISPLAY_PAUSED);
+            if (mDelegate != null) {
+                mDelegate.sendEmptyMessage(VirtualDisplayCallbacksDelegate.MSG_DISPLAY_PAUSED);
+            }
         }
 
         @Override // Binder call
         public void onDisplayResumed() {
-            mDelegate.sendEmptyMessage(VirtualDisplayCallbacksDelegate.MSG_DISPLAY_RESUMED);
+            if (mDelegate != null) {
+                mDelegate.sendEmptyMessage(VirtualDisplayCallbacksDelegate.MSG_DISPLAY_RESUMED);
+            }
         }
 
         @Override // Binder call
         public void onDisplayStopped() {
-            mDelegate.sendEmptyMessage(VirtualDisplayCallbacksDelegate.MSG_DISPLAY_STOPPED);
+            if (mDelegate != null) {
+                mDelegate.sendEmptyMessage(VirtualDisplayCallbacksDelegate.MSG_DISPLAY_STOPPED);
+            }
         }
     }
 
@@ -505,9 +513,6 @@ public final class DisplayManagerGlobal {
 
         @Override
         public void handleMessage(Message msg) {
-            if (mCallbacks == null) {
-                return;
-            }
             switch (msg.what) {
                 case MSG_DISPLAY_PAUSED:
                     mCallbacks.onDisplayPaused();
