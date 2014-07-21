@@ -3642,20 +3642,21 @@ public abstract class PackageManager {
     public abstract int getApplicationEnabledSetting(String packageName);
 
     /**
-     * Puts the package in a blocked state, which is almost like an uninstalled state,
+     * Puts the package in a hidden state, which is almost like an uninstalled state,
      * making the package unavailable, but it doesn't remove the data or the actual
-     * package file.
+     * package file. Application can be unhidden by either resetting the hidden state
+     * or by installing it, such as with {@link #installExistingPackage(String)}
      * @hide
      */
-    public abstract boolean setApplicationBlockedSettingAsUser(String packageName, boolean blocked,
+    public abstract boolean setApplicationHiddenSettingAsUser(String packageName, boolean hidden,
             UserHandle userHandle);
 
     /**
-     * Returns the blocked state of a package.
-     * @see #setApplicationBlockedSettingAsUser(String, boolean, UserHandle)
+     * Returns the hidden state of a package.
+     * @see #setApplicationHiddenSettingAsUser(String, boolean, UserHandle)
      * @hide
      */
-    public abstract boolean getApplicationBlockedSettingAsUser(String packageName,
+    public abstract boolean getApplicationHiddenSettingAsUser(String packageName,
             UserHandle userHandle);
 
     /**

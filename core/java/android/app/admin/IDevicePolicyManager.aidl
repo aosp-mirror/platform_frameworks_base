@@ -132,9 +132,9 @@ interface IDevicePolicyManager {
     void addCrossProfileIntentFilter(in ComponentName admin, in IntentFilter filter, int flags);
     void clearCrossProfileIntentFilters(in ComponentName admin);
 
-    boolean setApplicationBlocked(in ComponentName admin, in String packageName, boolean blocked);
-    int setApplicationsBlocked(in ComponentName admin, in Intent intent, boolean blocked);
-    boolean isApplicationBlocked(in ComponentName admin, in String packageName);
+    boolean setApplicationHidden(in ComponentName admin, in String packageName, boolean hidden);
+    int setApplicationsHidden(in ComponentName admin, in Intent intent, boolean hidden);
+    boolean isApplicationHidden(in ComponentName admin, in String packageName);
 
     UserHandle createUser(in ComponentName who, in String name);
     UserHandle createAndInitializeUser(in ComponentName who, in String name, in String profileOwnerName, in ComponentName profileOwnerComponent, in Bundle adminExtras);

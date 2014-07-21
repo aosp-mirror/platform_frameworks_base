@@ -1428,7 +1428,7 @@ public class UserManagerService extends IUserManager.Stub {
         removeRestrictionsForUser(userHandle, true);
     }
 
-    private void removeRestrictionsForUser(final int userHandle, boolean unblockApps) {
+    private void removeRestrictionsForUser(final int userHandle, boolean unhideApps) {
         synchronized (mPackagesLock) {
             // Remove all user restrictions
             setUserRestrictions(new Bundle(), userHandle);
@@ -1437,12 +1437,12 @@ public class UserManagerService extends IUserManager.Stub {
             // Remove any app restrictions
             cleanAppRestrictions(userHandle);
         }
-        if (unblockApps) {
-            unblockAllAppsForUser(userHandle);
+        if (unhideApps) {
+            unhideAllInstalledAppsForUser(userHandle);
         }
     }
 
-    private void unblockAllAppsForUser(final int userHandle) {
+    private void unhideAllInstalledAppsForUser(final int userHandle) {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
@@ -1453,8 +1453,8 @@ public class UserManagerService extends IUserManager.Stub {
                 try {
                     for (ApplicationInfo appInfo : apps) {
                         if ((appInfo.flags & ApplicationInfo.FLAG_INSTALLED) != 0
-                                && (appInfo.flags & ApplicationInfo.FLAG_BLOCKED) != 0) {
-                            mPm.setApplicationBlockedSettingAsUser(appInfo.packageName, false,
+                                && (appInfo.flags & ApplicationInfo.FLAG_HIDDEN) != 0) {
+                            mPm.setApplicationHiddenSettingAsUser(appInfo.packageName, false,
                                     userHandle);
                         }
                     }

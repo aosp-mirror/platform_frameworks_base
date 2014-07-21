@@ -1452,10 +1452,10 @@ final class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    public boolean setApplicationBlockedSettingAsUser(String packageName, boolean blocked,
+    public boolean setApplicationHiddenSettingAsUser(String packageName, boolean hidden,
             UserHandle user) {
         try {
-            return mPM.setApplicationBlockedSettingAsUser(packageName, blocked,
+            return mPM.setApplicationHiddenSettingAsUser(packageName, hidden,
                     user.getIdentifier());
         } catch (RemoteException re) {
             // Should never happen!
@@ -1464,9 +1464,9 @@ final class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    public boolean getApplicationBlockedSettingAsUser(String packageName, UserHandle user) {
+    public boolean getApplicationHiddenSettingAsUser(String packageName, UserHandle user) {
         try {
-            return mPM.getApplicationBlockedSettingAsUser(packageName, user.getIdentifier());
+            return mPM.getApplicationHiddenSettingAsUser(packageName, user.getIdentifier());
         } catch (RemoteException re) {
             // Should never happen!
         }

@@ -661,7 +661,7 @@ public class MockPackageManager extends PackageManager {
      * @hide
      */
     @Override
-    public boolean setApplicationBlockedSettingAsUser(String packageName, boolean blocked,
+    public boolean setApplicationHiddenSettingAsUser(String packageName, boolean hidden,
             UserHandle user) {
         return false;
     }
@@ -670,7 +670,7 @@ public class MockPackageManager extends PackageManager {
      * @hide
      */
     @Override
-    public boolean getApplicationBlockedSettingAsUser(String packageName, UserHandle user) {
+    public boolean getApplicationHiddenSettingAsUser(String packageName, UserHandle user) {
         return false;
     }
 
