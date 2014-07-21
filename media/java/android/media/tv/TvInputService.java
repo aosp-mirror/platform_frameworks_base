@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.hardware.hdmi.HdmiCecDeviceInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -121,21 +122,32 @@ public abstract class TvInputService extends Service {
 
             @Override
             public void notifyHardwareAdded(TvInputHardwareInfo hardwareInfo) {
-                mHandler.obtainMessage(ServiceHandler.DO_ADD_TV_INPUT_FROM_HARDWARE,
+                mHandler.obtainMessage(ServiceHandler.DO_ADD_HARDWARE_TV_INPUT,
                         hardwareInfo).sendToTarget();
             }
 
             @Override
-            public void notifyHardwareRemoved(int deviceId) {
-                mHandler.obtainMessage(ServiceHandler.DO_REMOVE_TV_INPUT_FROM_HARDWARE,
-                        deviceId, 0).sendToTarget();
+            public void notifyHardwareRemoved(TvInputHardwareInfo hardwareInfo) {
+                mHandler.obtainMessage(ServiceHandler.DO_REMOVE_HARDWARE_TV_INPUT,
+                        hardwareInfo).sendToTarget();
+            }
+
+            @Override
+            public void notifyHdmiCecDeviceAdded(HdmiCecDeviceInfo cecDeviceInfo) {
+                mHandler.obtainMessage(ServiceHandler.DO_ADD_HDMI_CEC_TV_INPUT,
+                        cecDeviceInfo).sendToTarget();
+            }
+
+            @Override
+            public void notifyHdmiCecDeviceRemoved(HdmiCecDeviceInfo cecDeviceInfo) {
+                mHandler.obtainMessage(ServiceHandler.DO_REMOVE_HDMI_CEC_TV_INPUT,
+                        cecDeviceInfo).sendToTarget();
             }
         };
     }
 
     /**
      * Get the number of callbacks that are registered.
-     *
      * @hide
      */
     @VisibleForTesting
@@ -153,11 +165,11 @@ public abstract class TvInputService extends Service {
     public abstract Session onCreateSession(String inputId);
 
     /**
-     * Returns a new TvInputInfo object if this service is responsible for {@code hardwareInfo};
-     * otherwise, return {@code null}. Override to modify default behavior of ignoring all input.
+     * Returns a new {@link TvInputInfo} object if this service is responsible for
+     * {@code hardwareInfo}; otherwise, return {@code null}. Override to modify default behavior of
+     * ignoring all hardware input.
      *
-     * @param hardwareInfo TvInputHardwareInfo object just added.
-     *
+     * @param hardwareInfo {@link TvInputHardwareInfo} object just added.
      * @hide
      */
     @SystemApi
@@ -167,12 +179,40 @@ public abstract class TvInputService extends Service {
 
     /**
      * Returns the input ID for {@code deviceId} if it is handled by this service;
-     * otherwise, return {@code null}. Override to modify default behavior of ignoring all input.
+     * otherwise, return {@code null}. Override to modify default behavior of ignoring all hardware
+     * input.
      *
+     * @param hardwareInfo {@link TvInputHardwareInfo} object just removed.
      * @hide
      */
     @SystemApi
-    public String onHardwareRemoved(int deviceId) {
+    public String onHardwareRemoved(TvInputHardwareInfo hardwareInfo) {
+        return null;
+    }
+
+    /**
+     * Returns a new {@link TvInputInfo} object if this service is responsible for
+     * {@code cecDeviceInfo}; otherwise, return {@code null}. Override to modify default behavior
+     * of ignoring all HDMI CEC logical input device.
+     *
+     * @param cecDeviceInfo {@link HdmiCecDeviceInfo} object just added.
+     * @hide
+     */
+    @SystemApi
+    public TvInputInfo onHdmiCecDeviceAdded(HdmiCecDeviceInfo cecDeviceInfo) {
+        return null;
+    }
+
+    /**
+     * Returns the input ID for {@code logicalAddress} if it is handled by this service;
+     * otherwise, return {@code null}. Override to modify default behavior of ignoring all HDMI CEC
+     * logical input device.
+     *
+     * @param cecDeviceInfo {@link HdmiCecDeviceInfo} object just removed.
+     * @hide
+     */
+    @SystemApi
+    public String onHdmiCecDeviceRemoved(HdmiCecDeviceInfo cecDeviceInfo) {
         return null;
     }
 
@@ -899,14 +939,29 @@ public abstract class TvInputService extends Service {
     @SuppressLint("HandlerLeak")
     private final class ServiceHandler extends Handler {
         private static final int DO_CREATE_SESSION = 1;
-        private static final int DO_ADD_TV_INPUT_FROM_HARDWARE = 2;
-        private static final int DO_REMOVE_TV_INPUT_FROM_HARDWARE = 3;
+        private static final int DO_ADD_HARDWARE_TV_INPUT = 2;
+        private static final int DO_REMOVE_HARDWARE_TV_INPUT = 3;
+        private static final int DO_ADD_HDMI_CEC_TV_INPUT = 4;
+        private static final int DO_REMOVE_HDMI_CEC_TV_INPUT = 5;
 
-        private void broadcastAddTvInput(TvInputInfo inputInfo) {
+        private void broadcastAddHardwareTvInput(int deviceId, TvInputInfo inputInfo) {
             int n = mCallbacks.beginBroadcast();
             for (int i = 0; i < n; ++i) {
                 try {
-                    mCallbacks.getBroadcastItem(i).addTvInput(inputInfo);
+                    mCallbacks.getBroadcastItem(i).addHardwareTvInput(deviceId, inputInfo);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Error while broadcasting: " + e);
+                }
+            }
+            mCallbacks.finishBroadcast();
+        }
+
+        private void broadcastAddHdmiCecTvInput(
+                int logicalAddress, TvInputInfo inputInfo) {
+            int n = mCallbacks.beginBroadcast();
+            for (int i = 0; i < n; ++i) {
+                try {
+                    mCallbacks.getBroadcastItem(i).addHdmiCecTvInput(logicalAddress, inputInfo);
                 } catch (RemoteException e) {
                     Log.e(TAG, "Error while broadcasting: " + e);
                 }
@@ -951,17 +1006,33 @@ public abstract class TvInputService extends Service {
                     args.recycle();
                     return;
                 }
-                case DO_ADD_TV_INPUT_FROM_HARDWARE: {
+                case DO_ADD_HARDWARE_TV_INPUT: {
                     TvInputHardwareInfo hardwareInfo = (TvInputHardwareInfo) msg.obj;
                     TvInputInfo inputInfo = onHardwareAdded(hardwareInfo);
                     if (inputInfo != null) {
-                        broadcastAddTvInput(inputInfo);
+                        broadcastAddHardwareTvInput(hardwareInfo.getDeviceId(), inputInfo);
                     }
                     return;
                 }
-                case DO_REMOVE_TV_INPUT_FROM_HARDWARE: {
-                    int deviceId = msg.arg1;
-                    String inputId = onHardwareRemoved(deviceId);
+                case DO_REMOVE_HARDWARE_TV_INPUT: {
+                    TvInputHardwareInfo hardwareInfo = (TvInputHardwareInfo) msg.obj;
+                    String inputId = onHardwareRemoved(hardwareInfo);
+                    if (inputId != null) {
+                        broadcastRemoveTvInput(inputId);
+                    }
+                    return;
+                }
+                case DO_ADD_HDMI_CEC_TV_INPUT: {
+                    HdmiCecDeviceInfo cecDeviceInfo = (HdmiCecDeviceInfo) msg.obj;
+                    TvInputInfo inputInfo = onHdmiCecDeviceAdded(cecDeviceInfo);
+                    if (inputInfo != null) {
+                        broadcastAddHdmiCecTvInput(cecDeviceInfo.getLogicalAddress(), inputInfo);
+                    }
+                    return;
+                }
+                case DO_REMOVE_HDMI_CEC_TV_INPUT: {
+                    HdmiCecDeviceInfo cecDeviceInfo = (HdmiCecDeviceInfo) msg.obj;
+                    String inputId = onHdmiCecDeviceRemoved(cecDeviceInfo);
                     if (inputId != null) {
                         broadcastRemoveTvInput(inputId);
                     }
