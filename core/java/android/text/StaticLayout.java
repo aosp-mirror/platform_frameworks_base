@@ -308,7 +308,7 @@ public class StaticLayout extends Layout {
             }
 
             int breakCount = nComputeLineBreaks(localeLanguageTag, chs, widths, paraEnd - paraStart, firstWidth,
-                    firstWidthLineCount, restWidth, variableTabStops, TAB_INCREMENT, lineBreaks,
+                    firstWidthLineCount, restWidth, variableTabStops, TAB_INCREMENT, false, lineBreaks,
                     lineBreaks.breaks, lineBreaks.widths, lineBreaks.flags, lineBreaks.breaks.length);
 
             int[] breaks = lineBreaks.breaks;
@@ -763,7 +763,7 @@ public class StaticLayout extends Layout {
     // arrays do not have to be resized
     private static native int nComputeLineBreaks(String locale, char[] text, float[] widths,
             int length, float firstWidth, int firstWidthLineCount, float restWidth,
-            int[] variableTabStops, int defaultTabStop, LineBreaks recycle,
+            int[] variableTabStops, int defaultTabStop, boolean optimize, LineBreaks recycle,
             int[] recycleBreaks, float[] recycleWidths, boolean[] recycleFlags, int recycleLength);
 
     private int mLineCount;
