@@ -290,19 +290,22 @@ public class VoiceInteractionManagerService extends SystemService {
 
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    // If the keyphrases are not present in the model, delete the model.
+                    boolean success = false;
                     if (model.keyphrases == null) {
-                        if (mDbHelper.deleteKeyphraseSoundModel(model.uuid)) {
-                            return SoundTriggerHelper.STATUS_OK;
-                        } else {
-                            return SoundTriggerHelper.STATUS_ERROR;
-                        }
+                        // If the keyphrases are not present in the model, delete the model.
+                        success = mDbHelper.deleteKeyphraseSoundModel(model.uuid);
                     } else {
-                        if (mDbHelper.addOrUpdateKeyphraseSoundModel(model)) {
-                            return SoundTriggerHelper.STATUS_OK;
-                        } else {
-                            return SoundTriggerHelper.STATUS_ERROR;
+                        // Else update the model.
+                        success = mDbHelper.addOrUpdateKeyphraseSoundModel(model);
+                    }
+                    if (success) {
+                        // Notify the voice interaction service of a change in sound models.
+                        if (mImpl != null && mImpl.mService != null) {
+                            mImpl.notifySoundModelsChangedLocked();
                         }
+                        return SoundTriggerHelper.STATUS_OK;
+                    } else {
+                        return SoundTriggerHelper.STATUS_ERROR;
                     }
                 } finally {
                     Binder.restoreCallingIdentity(caller);
