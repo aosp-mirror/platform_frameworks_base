@@ -170,10 +170,10 @@ public final class InCallAdapter {
      * While these tones are playing, Telecomm will notify the {@link InCallService} that the call
      * is in the post dial state.
      *
-     * If the DTMF string contains a {@link TelecommConstants#DTMF_CHARACTER_PAUSE} symbol, Telecomm
+     * If the DTMF string contains a {@link TelecommManager#DTMF_CHARACTER_PAUSE} symbol, Telecomm
      * will temporarily pause playing the tones for a pre-defined period of time.
      *
-     * If the DTMF string contains a {@link TelecommConstants#DTMF_CHARACTER_WAIT} symbol, Telecomm
+     * If the DTMF string contains a {@link TelecommManager#DTMF_CHARACTER_WAIT} symbol, Telecomm
      * will pause playing the tones and notify the {@link InCallService} that the call is in the
      * post dial wait state. When the user decides to continue the postdial sequence, the
      * {@link InCallService} should invoke the {@link #postDialContinue(String,boolean)} method.
