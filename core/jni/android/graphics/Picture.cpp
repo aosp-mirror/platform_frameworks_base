@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+#include "Canvas.h"
 #include "Picture.h"
 
-#include "SkCanvas.h"
 #include "SkStream.h"
 
 namespace android {
@@ -36,12 +36,13 @@ Picture::Picture(const Picture* src) {
     }
 }
 
-SkCanvas* Picture::beginRecording(int width, int height) {
+Canvas* Picture::beginRecording(int width, int height) {
     mPicture.reset(NULL);
     mRecorder.reset(new SkPictureRecorder);
     mWidth = width;
     mHeight = height;
-    return mRecorder->beginRecording(width, height, NULL, 0);
+    SkCanvas* canvas = mRecorder->beginRecording(width, height, NULL, 0);
+    return Canvas::create_canvas(canvas);
 }
 
 void Picture::endRecording() {
@@ -93,14 +94,14 @@ void Picture::serialize(SkWStream* stream) const {
     }
 }
 
-void Picture::draw(SkCanvas* canvas) {
+void Picture::draw(Canvas* canvas) {
     if (NULL != mRecorder.get()) {
         this->endRecording();
         SkASSERT(NULL != mPicture.get());
     }
     if (NULL != mPicture.get()) {
         // TODO: remove this const_cast once pictures are immutable
-        const_cast<SkPicture*>(mPicture.get())->draw(canvas);
+        const_cast<SkPicture*>(mPicture.get())->draw(canvas->getSkCanvas());
     }
 }
 
