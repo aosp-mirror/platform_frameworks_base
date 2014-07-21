@@ -591,6 +591,7 @@ public class MediaPlayer implements SubtitleController.Listener
     private boolean mStayAwake;
     private final IAppOpsService mAppOps;
     private int mStreamType = AudioManager.USE_DEFAULT_STREAM_TYPE;
+    private int mUsage = -1;
 
     /**
      * Default constructor. Consider using one of the create() methods for
@@ -1141,8 +1142,10 @@ public class MediaPlayer implements SubtitleController.Listener
 
     private boolean isRestricted() {
         try {
-            final int mode = mAppOps.checkAudioOperation(AppOpsManager.OP_PLAY_AUDIO,
-                    getAudioStreamType(), Process.myUid(), ActivityThread.currentPackageName());
+            final int usage = mUsage != -1 ? mUsage
+                    : AudioAttributes.usageForLegacyStreamType(getAudioStreamType());
+            final int mode = mAppOps.checkAudioOperation(AppOpsManager.OP_PLAY_AUDIO, usage,
+                    Process.myUid(), ActivityThread.currentPackageName());
             return mode != AppOpsManager.MODE_ALLOWED;
         } catch (RemoteException e) {
             return false;
@@ -1528,6 +1531,7 @@ public class MediaPlayer implements SubtitleController.Listener
             final String msg = "Cannot set AudioAttributes to null";
             throw new IllegalArgumentException(msg);
         }
+        mUsage = attributes.getUsage();
         Parcel pattributes = Parcel.obtain();
         attributes.writeToParcel(pattributes, AudioAttributes.FLATTEN_TAGS);
         setParameter(KEY_PARAMETER_AUDIO_ATTRIBUTES, pattributes);

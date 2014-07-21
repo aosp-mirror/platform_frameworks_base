@@ -367,47 +367,39 @@ public final class AudioAttributes implements Parcelable {
             switch(streamType) {
                 case AudioSystem.STREAM_VOICE_CALL:
                     mContentType = CONTENT_TYPE_SPEECH;
-                    mUsage = USAGE_VOICE_COMMUNICATION;
                     break;
                 case AudioSystem.STREAM_SYSTEM_ENFORCED:
                     mFlags |= FLAG_AUDIBILITY_ENFORCED;
                     // intended fall through, attributes in common with STREAM_SYSTEM
                 case AudioSystem.STREAM_SYSTEM:
                     mContentType = CONTENT_TYPE_SONIFICATION;
-                    mUsage = USAGE_ASSISTANCE_SONIFICATION;
                     break;
                 case AudioSystem.STREAM_RING:
                     mContentType = CONTENT_TYPE_SONIFICATION;
-                    mUsage = USAGE_NOTIFICATION_TELEPHONY_RINGTONE;
                     break;
                 case AudioSystem.STREAM_MUSIC:
                     mContentType = CONTENT_TYPE_MUSIC;
-                    mUsage = USAGE_MEDIA;
                     break;
                 case AudioSystem.STREAM_ALARM:
                     mContentType = CONTENT_TYPE_SONIFICATION;
-                    mUsage = USAGE_ALARM;
                     break;
                 case AudioSystem.STREAM_NOTIFICATION:
                     mContentType = CONTENT_TYPE_SONIFICATION;
-                    mUsage = USAGE_NOTIFICATION;
                     break;
                 case AudioSystem.STREAM_BLUETOOTH_SCO:
                     mContentType = CONTENT_TYPE_SPEECH;
-                    mUsage = USAGE_VOICE_COMMUNICATION;
                     mFlags |= FLAG_SCO;
                     break;
                 case AudioSystem.STREAM_DTMF:
                     mContentType = CONTENT_TYPE_SONIFICATION;
-                    mUsage = USAGE_VOICE_COMMUNICATION_SIGNALLING;
                     break;
                 case AudioSystem.STREAM_TTS:
                     mContentType = CONTENT_TYPE_SPEECH;
-                    mUsage = USAGE_ASSISTANCE_ACCESSIBILITY;
                     break;
                 default:
                     Log.e(TAG, "Invalid stream type " + streamType + " in for AudioAttributes");
             }
+            mUsage = usageForLegacyStreamType(streamType);
             return this;
         }
     };
@@ -488,7 +480,12 @@ public final class AudioAttributes implements Parcelable {
 
     /** @hide */
     public String usageToString() {
-        switch(mUsage) {
+        return usageToString(mUsage);
+    }
+
+    /** @hide */
+    public static String usageToString(int usage) {
+        switch(usage) {
             case USAGE_UNKNOWN:
                 return new String("USAGE_UNKNOWN");
             case USAGE_MEDIA:
@@ -520,7 +517,34 @@ public final class AudioAttributes implements Parcelable {
             case USAGE_GAME:
                 return new String("USAGE_GAME");
             default:
-                return new String("unknown usage " + mUsage);
+                return new String("unknown usage " + usage);
+        }
+    }
+
+    /** @hide */
+    public static int usageForLegacyStreamType(int streamType) {
+        switch(streamType) {
+            case AudioSystem.STREAM_VOICE_CALL:
+                return USAGE_VOICE_COMMUNICATION;
+            case AudioSystem.STREAM_SYSTEM_ENFORCED:
+            case AudioSystem.STREAM_SYSTEM:
+                return USAGE_ASSISTANCE_SONIFICATION;
+            case AudioSystem.STREAM_RING:
+                return USAGE_NOTIFICATION_TELEPHONY_RINGTONE;
+            case AudioSystem.STREAM_MUSIC:
+                return USAGE_MEDIA;
+            case AudioSystem.STREAM_ALARM:
+                return USAGE_ALARM;
+            case AudioSystem.STREAM_NOTIFICATION:
+                return USAGE_NOTIFICATION;
+            case AudioSystem.STREAM_BLUETOOTH_SCO:
+                return USAGE_VOICE_COMMUNICATION;
+            case AudioSystem.STREAM_DTMF:
+                return USAGE_VOICE_COMMUNICATION_SIGNALLING;
+            case AudioSystem.STREAM_TTS:
+                return USAGE_ASSISTANCE_ACCESSIBILITY;
+            default:
+                return USAGE_UNKNOWN;
         }
     }
 

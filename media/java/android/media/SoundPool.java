@@ -548,8 +548,9 @@ public class SoundPool {
 
         private boolean isRestricted() {
             try {
+                final int usage = AudioAttributes.usageForLegacyStreamType(mStreamType);
                 final int mode = mAppOps.checkAudioOperation(AppOpsManager.OP_PLAY_AUDIO,
-                        mStreamType, Process.myUid(), ActivityThread.currentPackageName());
+                        usage, Process.myUid(), ActivityThread.currentPackageName());
                 return mode != AppOpsManager.MODE_ALLOWED;
             } catch (RemoteException e) {
                 return false;

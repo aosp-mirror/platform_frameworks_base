@@ -43,6 +43,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ParceledListSlice;
 import android.content.res.Resources;
 import android.database.ContentObserver;
+import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.IRingtonePlayer;
 import android.net.Uri;
@@ -1716,7 +1717,7 @@ public class NotificationManagerService extends SystemService {
                             useDefaultVibrate ? mDefaultVibrationPattern
                                 : mFallbackVibrationPattern,
                             ((notification.flags & Notification.FLAG_INSISTENT) != 0)
-                                    ? 0: -1, notification.audioStreamType);
+                                ? 0: -1, audioAttributesForNotification(notification));
                     } finally {
                         Binder.restoreCallingIdentity(identity);
                     }
@@ -1726,7 +1727,7 @@ public class NotificationManagerService extends SystemService {
                     mVibrator.vibrate(record.sbn.getUid(), record.sbn.getOpPkg(),
                             notification.vibrate,
                         ((notification.flags & Notification.FLAG_INSISTENT) != 0)
-                                ? 0: -1, notification.audioStreamType);
+                                ? 0: -1, audioAttributesForNotification(notification));
                 }
             }
         }
@@ -1746,6 +1747,10 @@ public class NotificationManagerService extends SystemService {
         } else if (wasShowLights) {
             updateLightsLocked();
         }
+    }
+
+    private static AudioAttributes audioAttributesForNotification(Notification n) {
+        return new AudioAttributes.Builder().setLegacyStreamType(n.audioStreamType).build();
     }
 
     void showNextToastLocked() {
