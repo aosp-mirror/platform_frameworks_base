@@ -468,13 +468,8 @@ public final class ViewRootImpl implements ViewParent,
 
                 // Compute surface insets required to draw at specified Z value.
                 // TODO: Use real shadow insets for a constant max Z.
-                if (view.isHardwareAccelerated()) {
-                    final int surfaceInset = (int) Math.ceil(view.getZ() * 2);
-                    attrs.surfaceInsets.set(surfaceInset, surfaceInset, surfaceInset, surfaceInset);
-                } else {
-                    // Software accelerated windows can't use insets.
-                    attrs.surfaceInsets.setEmpty();
-                }
+                final int surfaceInset = (int) Math.ceil(view.getZ() * 2);
+                attrs.surfaceInsets.set(surfaceInset, surfaceInset, surfaceInset, surfaceInset);
 
                 CompatibilityInfo compatibilityInfo = mDisplayAdjustments.getCompatibilityInfo();
                 mTranslator = compatibilityInfo.getTranslator();
