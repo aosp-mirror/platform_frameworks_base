@@ -28,7 +28,7 @@ final class UsageStatsUtils {
 
     /**
      * Truncates the date to the given UsageStats bucket. For example, if the bucket is
-     * {@link UsageStatsManager#YEARLY_BUCKET}, the date is truncated to the 1st day of the year,
+     * {@link UsageStatsManager#INTERVAL_YEARLY}, the date is truncated to the 1st day of the year,
      * with the time set to 00:00:00.
      *
      * @param bucket The UsageStats bucket to truncate to.
@@ -41,19 +41,19 @@ final class UsageStatsUtils {
         cal.set(Calendar.MILLISECOND, 0);
 
         switch (bucket) {
-            case UsageStatsManager.YEARLY_BUCKET:
+            case UsageStatsManager.INTERVAL_YEARLY:
                 cal.set(Calendar.DAY_OF_YEAR, 0);
                 break;
 
-            case UsageStatsManager.MONTHLY_BUCKET:
+            case UsageStatsManager.INTERVAL_MONTHLY:
                 cal.set(Calendar.DAY_OF_MONTH, 0);
                 break;
 
-            case UsageStatsManager.WEEKLY_BUCKET:
+            case UsageStatsManager.INTERVAL_WEEKLY:
                 cal.set(Calendar.DAY_OF_WEEK, 0);
                 break;
 
-            case UsageStatsManager.DAILY_BUCKET:
+            case UsageStatsManager.INTERVAL_DAILY:
                 break;
 
             default:

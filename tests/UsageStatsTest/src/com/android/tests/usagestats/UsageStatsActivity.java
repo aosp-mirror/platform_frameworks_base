@@ -17,31 +17,34 @@
 package com.android.tests.usagestats;
 
 import android.app.ListActivity;
-import android.app.usage.PackageUsageStats;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.format.DateUtils;
+import android.util.ArrayMap;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 
 public class UsageStatsActivity extends ListActivity {
-
+    private static final long USAGE_STATS_PERIOD = 1000 * 60 * 60 * 24 * 14;
     private UsageStatsManager mUsageStatsManager;
     private Adapter mAdapter;
-    private Comparator<PackageUsageStats> mComparator = new Comparator<PackageUsageStats>() {
+    private Comparator<UsageStats> mComparator = new Comparator<UsageStats>() {
         @Override
-        public int compare(PackageUsageStats o1, PackageUsageStats o2) {
-            return Long.compare(o2.getTotalTimeSpent(), o1.getTotalTimeSpent());
+        public int compare(UsageStats o1, UsageStats o2) {
+            return Long.compare(o2.getTotalTimeInForeground(), o1.getTotalTimeInForeground());
         }
     };
 
@@ -50,8 +53,26 @@ public class UsageStatsActivity extends ListActivity {
         super.onCreate(savedInstanceState);
         mUsageStatsManager = (UsageStatsManager) getSystemService(Context.USAGE_STATS_SERVICE);
         mAdapter = new Adapter();
-        updateAdapter();
         setListAdapter(mAdapter);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.log:
+                startActivity(new Intent(this, UsageLogActivity.class));
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override
@@ -61,24 +82,25 @@ public class UsageStatsActivity extends ListActivity {
     }
 
     private void updateAdapter() {
-        Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.DAY_OF_YEAR, -14);
-        UsageStats stats = mUsageStatsManager.getRecentStatsSince(cal.getTimeInMillis());
+        long now = System.currentTimeMillis();
+        long beginTime = now - USAGE_STATS_PERIOD;
+        ArrayMap<String, UsageStats> stats = mUsageStatsManager.queryAndAggregateUsageStats(
+                beginTime, now);
         mAdapter.update(stats);
     }
 
     private class Adapter extends BaseAdapter {
-        private ArrayList<PackageUsageStats> mStats = new ArrayList<>();
+        private ArrayList<UsageStats> mStats = new ArrayList<>();
 
-        public void update(UsageStats stats) {
+        public void update(ArrayMap<String, UsageStats> stats) {
             mStats.clear();
             if (stats == null) {
                 return;
             }
 
-            final int packageCount = stats.getPackageCount();
+            final int packageCount = stats.size();
             for (int i = 0; i < packageCount; i++) {
-                mStats.add(stats.getPackage(i));
+                mStats.add(stats.valueAt(i));
             }
 
             Collections.sort(mStats, mComparator);
@@ -116,7 +138,7 @@ public class UsageStatsActivity extends ListActivity {
 
             holder.packageName.setText(mStats.get(position).getPackageName());
             holder.usageTime.setText(DateUtils.formatDuration(
-                    mStats.get(position).getTotalTimeSpent()));
+                    mStats.get(position).getTotalTimeInForeground()));
             return convertView;
         }
     }

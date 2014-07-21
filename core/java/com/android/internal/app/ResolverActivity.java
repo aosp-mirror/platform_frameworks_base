@@ -17,10 +17,10 @@
 package com.android.internal.app;
 
 import android.app.Activity;
-import android.app.usage.PackageUsageStats;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.os.AsyncTask;
+import android.util.ArrayMap;
 import android.widget.AbsListView;
 import android.widget.GridView;
 import com.android.internal.R;
@@ -95,7 +95,7 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
     private boolean mResolvingHome = false;
 
     private UsageStatsManager mUsm;
-    private UsageStats mStats;
+    private ArrayMap<String, UsageStats> mStats;
     private static final long USAGE_STATS_PERIOD = 1000 * 60 * 60 * 24 * 14;
 
     private boolean mRegistered;
@@ -205,7 +205,7 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
         mUsm = (UsageStatsManager) getSystemService(Context.USAGE_STATS_SERVICE);
 
         final long sinceTime = System.currentTimeMillis() - USAGE_STATS_PERIOD;
-        mStats = mUsm.getRecentStatsSince(sinceTime);
+        mStats = mUsm.queryAndAggregateUsageStats(sinceTime, System.currentTimeMillis());
         Log.d(TAG, "sinceTime=" + sinceTime);
 
         mMaxColumns = getResources().getInteger(R.integer.config_maxResolverActivityColumns);
@@ -1018,9 +1018,6 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
             if (lhs.targetUserId != UserHandle.USER_CURRENT) {
                 return 1;
             }
-            if (lhs.targetUserId != UserHandle.USER_CURRENT) {
-                return -1;
-            }
 
             if (mStats != null) {
                 final long timeDiff =
@@ -1042,9 +1039,9 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
 
         private long getPackageTimeSpent(String packageName) {
             if (mStats != null) {
-                final PackageUsageStats stats = mStats.getPackage(packageName);
+                final UsageStats stats = mStats.get(packageName);
                 if (stats != null) {
-                    return stats.getTotalTimeSpent();
+                    return stats.getTotalTimeInForeground();
                 }
 
             }
