@@ -419,7 +419,7 @@ public abstract class Connection {
     /**
      * TODO(santoscordon): Needs documentation.
      */
-    public final void setDestroyed() {
+    public final void destroy() {
         // It is possible that onDestroy() will trigger the listener to remove itself which will
         // result in a concurrent modification exception. To counteract this we make a copy of the
         // listeners and iterate on that.
