@@ -2462,6 +2462,7 @@
         android:label="@string/permlab_pkgUsageStats"
         android:description="@string/permdesc_pkgUsageStats"
         android:protectionLevel="signature|system" />
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
 
     <!-- @SystemApi Allows an application to collect battery statistics -->
     <permission android:name="android.permission.BATTERY_STATS"
@@ -2796,12 +2797,12 @@
                  android:icon="@drawable/ic_launcher_android"
                  android:supportsRtl="true">
         <activity android:name="com.android.internal.app.ChooserActivity"
-                android:theme="@style/Theme.Holo.Dialog.Alert"
+                android:theme="@style/Theme.DeviceDefault.Resolver"
                 android:finishOnCloseSystemDialogs="true"
                 android:excludeFromRecents="true"
-                android:multiprocess="true"
                 android:documentLaunchMode="never"
-                android:relinquishTaskIdentity="true">
+                android:relinquishTaskIdentity="true"
+                android:process=":ui">
             <intent-filter>
                 <action android:name="android.intent.action.CHOOSER" />
                 <category android:name="android.intent.category.DEFAULT" />

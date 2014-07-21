@@ -17,6 +17,9 @@
 package com.android.internal.app;
 
 import android.app.Activity;
+import android.app.usage.PackageUsageStats;
+import android.app.usage.UsageStats;
+import android.app.usage.UsageStatsManager;
 import android.os.AsyncTask;
 import android.widget.AbsListView;
 import android.widget.GridView;
@@ -54,12 +57,13 @@ import android.widget.ListView;
 import android.widget.TextView;
 import com.android.internal.widget.ResolverDrawerLayout;
 
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -69,7 +73,7 @@ import java.util.Set;
  */
 public class ResolverActivity extends Activity implements AdapterView.OnItemClickListener {
     private static final String TAG = "ResolverActivity";
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     private int mLaunchedFromUid;
     private ResolveListAdapter mAdapter;
@@ -83,6 +87,10 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
     private int mIconSize;
     private int mMaxColumns;
     private int mLastSelected = ListView.INVALID_POSITION;
+
+    private UsageStatsManager mUsm;
+    private UsageStats mStats;
+    private static final long USAGE_STATS_PERIOD = 1000 * 60 * 60 * 24 * 14;
 
     private boolean mRegistered;
     private final PackageMonitor mPackageMonitor = new PackageMonitor() {
@@ -170,7 +178,7 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
     protected void onCreate(Bundle savedInstanceState, Intent intent,
             CharSequence title, Intent[] initialIntents,
             List<ResolveInfo> rList, boolean alwaysUseOption) {
-        onCreate(savedInstanceState, intent, title, initialIntents, rList, alwaysUseOption);
+        onCreate(savedInstanceState, intent, title, 0, initialIntents, rList, alwaysUseOption);
     }
 
     protected void onCreate(Bundle savedInstanceState, Intent intent,
@@ -185,6 +193,12 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
             mLaunchedFromUid = -1;
         }
         mPm = getPackageManager();
+        mUsm = (UsageStatsManager) getSystemService(Context.USAGE_STATS_SERVICE);
+
+        final long sinceTime = System.currentTimeMillis() - USAGE_STATS_PERIOD;
+        mStats = mUsm.getRecentStatsSince(sinceTime);
+        Log.d(TAG, "sinceTime=" + sinceTime);
+
         mMaxColumns = getResources().getInteger(R.integer.config_maxResolverActivityColumns);
 
         mPackageMonitor.register(this, getMainLooper(), false);
@@ -672,7 +686,7 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
                 for (int i=1; i<N; i++) {
                     ResolveInfo ri = currentResolveList.get(i);
                     if (DEBUG) Log.v(
-                        "ResolveListActivity",
+                        TAG,
                         r0.activityInfo.name + "=" +
                         r0.priority + "/" + r0.isDefault + " vs " +
                         ri.activityInfo.name + "=" +
@@ -689,8 +703,8 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
                     }
                 }
                 if (N > 1) {
-                    ResolveInfo.DisplayNameComparator rComparator =
-                            new ResolveInfo.DisplayNameComparator(mPm);
+                    Comparator<ResolveInfo> rComparator =
+                            new ResolverComparator(ResolverActivity.this);
                     Collections.sort(currentResolveList, rComparator);
                 }
                 // First put the initial items at the top.
@@ -703,8 +717,7 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
                         ActivityInfo ai = ii.resolveActivityInfo(
                                 getPackageManager(), 0);
                         if (ai == null) {
-                            Log.w("ResolverActivity", "No activity found for "
-                                    + ii);
+                            Log.w(TAG, "No activity found for " + ii);
                             continue;
                         }
                         ResolveInfo ri = new ResolveInfo();
@@ -937,6 +950,53 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
         @Override
         protected void onPostExecute(DisplayResolveInfo info) {
             mTargetView.setImageDrawable(info.displayIcon);
+        }
+    }
+
+    class ResolverComparator implements Comparator<ResolveInfo> {
+        private final Collator mCollator;
+
+        public ResolverComparator(Context context) {
+            mCollator = Collator.getInstance(context.getResources().getConfiguration().locale);
+        }
+
+        @Override
+        public int compare(ResolveInfo lhs, ResolveInfo rhs) {
+            // We want to put the one targeted to another user at the end of the dialog.
+            if (lhs.targetUserId != UserHandle.USER_CURRENT) {
+                return 1;
+            }
+            if (lhs.targetUserId != UserHandle.USER_CURRENT) {
+                return -1;
+            }
+
+            if (mStats != null) {
+                final long timeDiff =
+                        getPackageTimeSpent(rhs.activityInfo.packageName) -
+                        getPackageTimeSpent(lhs.activityInfo.packageName);
+
+                if (timeDiff != 0) {
+                    return timeDiff > 0 ? 1 : -1;
+                }
+            }
+
+            CharSequence  sa = lhs.loadLabel(mPm);
+            if (sa == null) sa = lhs.activityInfo.name;
+            CharSequence  sb = rhs.loadLabel(mPm);
+            if (sb == null) sb = rhs.activityInfo.name;
+
+            return mCollator.compare(sa.toString(), sb.toString());
+        }
+
+        private long getPackageTimeSpent(String packageName) {
+            if (mStats != null) {
+                final PackageUsageStats stats = mStats.getPackage(packageName);
+                if (stats != null) {
+                    return stats.getTotalTimeSpent();
+                }
+
+            }
+            return 0;
         }
     }
 }
