@@ -32,6 +32,7 @@ import android.hardware.hdmi.IHdmiControlService;
 import android.hardware.hdmi.IHdmiDeviceEventListener;
 import android.hardware.hdmi.IHdmiHotplugEventListener;
 import android.hardware.hdmi.IHdmiInputChangeListener;
+import android.hardware.hdmi.IHdmiRecordRequestListener;
 import android.hardware.hdmi.IHdmiSystemAudioModeChangeListener;
 import android.hardware.hdmi.IHdmiVendorCommandListener;
 import android.media.AudioManager;
@@ -1010,6 +1011,16 @@ public final class HdmiControlService extends SystemService {
                 }
             });
          }
+
+        @Override
+        public void setRecordRequestListener(IHdmiRecordRequestListener listener) {
+            // TODO: implement this.
+        }
+
+        @Override
+        public void startRecord(int recorderAddress, byte[] recordSource) {
+            // TODO: implement this.
+        }
     }
 
     @ServiceThreadOnly

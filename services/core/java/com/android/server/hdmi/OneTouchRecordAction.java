@@ -16,21 +16,42 @@
 
 package com.android.server.hdmi;
 
+import static com.android.server.hdmi.Constants.RECORDING_TYPE_ANALOGUE_RF;
+import static com.android.server.hdmi.Constants.RECORDING_TYPE_DIGITAL_RF;
+import static com.android.server.hdmi.Constants.RECORDING_TYPE_EXTERNAL_PHYSICAL_ADDRESS;
+import static com.android.server.hdmi.Constants.RECORDING_TYPE_OWN_SOURCE;
+
 /**
- * Feature action that performs one touch record.
- * This class only provides a skeleton of one touch play and has no detail implementaion.
+ * Feature action that performs one touch record. This class only provides a skeleton of one touch
+ * play and has no detail implementation.
  */
 public class OneTouchRecordAction extends FeatureAction {
     private final int mRecorderAddress;
+    private final int mRecordingType;
 
-    OneTouchRecordAction(HdmiCecLocalDevice source, int recorderAddress) {
+    OneTouchRecordAction(HdmiCecLocalDevice source, int recorderAddress, int recordingType) {
         super(source);
         mRecorderAddress = recorderAddress;
+        mRecordingType = recordingType;
     }
 
     @Override
     boolean start() {
         return false;
+    }
+
+    private void sendRecordOn(int recordingType) {
+        switch (recordingType) {
+            case RECORDING_TYPE_DIGITAL_RF:
+                break;
+            case RECORDING_TYPE_ANALOGUE_RF:
+                break;
+            case RECORDING_TYPE_EXTERNAL_PHYSICAL_ADDRESS:
+                break;
+            case RECORDING_TYPE_OWN_SOURCE:
+                break;
+            // TODO: implement this.
+        }
     }
 
     @Override
