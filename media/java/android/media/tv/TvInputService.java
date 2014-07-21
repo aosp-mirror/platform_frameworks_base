@@ -217,6 +217,21 @@ public abstract class TvInputService extends Service {
     }
 
     /**
+     * Notify wrapped TV input ID of current input to TV input framework manager
+     *
+     * @param inputId The TV input ID of {@link TvInputPassthroughWrapperService}
+     * @param wrappedInputId The ID of the wrapped TV input such as external pass-though TV input
+     * @hide
+     */
+    public final void notifyWrappedInputId(String inputId, String wrappedInputId) {
+        SomeArgs args = SomeArgs.obtain();
+        args.arg1 = inputId;
+        args.arg2 = wrappedInputId;
+        mHandler.obtainMessage(TvInputService.ServiceHandler.DO_SET_WRAPPED_TV_INPUT_ID,
+                args).sendToTarget();
+    }
+
+    /**
      * Base class for derived classes to implement to provide a TV input session.
      */
     public abstract class Session implements KeyEvent.Callback {
@@ -943,6 +958,7 @@ public abstract class TvInputService extends Service {
         private static final int DO_REMOVE_HARDWARE_TV_INPUT = 3;
         private static final int DO_ADD_HDMI_CEC_TV_INPUT = 4;
         private static final int DO_REMOVE_HDMI_CEC_TV_INPUT = 5;
+        private static final int DO_SET_WRAPPED_TV_INPUT_ID = 6;
 
         private void broadcastAddHardwareTvInput(int deviceId, TvInputInfo inputInfo) {
             int n = mCallbacks.beginBroadcast();
@@ -950,7 +966,7 @@ public abstract class TvInputService extends Service {
                 try {
                     mCallbacks.getBroadcastItem(i).addHardwareTvInput(deviceId, inputInfo);
                 } catch (RemoteException e) {
-                    Log.e(TAG, "Error while broadcasting: " + e);
+                    Log.e(TAG, "Error while broadcasting.", e);
                 }
             }
             mCallbacks.finishBroadcast();
@@ -963,7 +979,7 @@ public abstract class TvInputService extends Service {
                 try {
                     mCallbacks.getBroadcastItem(i).addHdmiCecTvInput(logicalAddress, inputInfo);
                 } catch (RemoteException e) {
-                    Log.e(TAG, "Error while broadcasting: " + e);
+                    Log.e(TAG, "Error while broadcasting.", e);
                 }
             }
             mCallbacks.finishBroadcast();
@@ -975,7 +991,19 @@ public abstract class TvInputService extends Service {
                 try {
                     mCallbacks.getBroadcastItem(i).removeTvInput(inputId);
                 } catch (RemoteException e) {
-                    Log.e(TAG, "Error while broadcasting: " + e);
+                    Log.e(TAG, "Error while broadcasting.", e);
+                }
+            }
+            mCallbacks.finishBroadcast();
+        }
+
+        private void broadcastSetWrappedTvInputId(String inputId, String wrappedInputId) {
+            int n = mCallbacks.beginBroadcast();
+            for (int i = 0; i < n; ++i) {
+                try {
+                    mCallbacks.getBroadcastItem(i).setWrappedInputId(inputId, wrappedInputId);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Error while broadcasting.", e);
                 }
             }
             mCallbacks.finishBroadcast();
@@ -1036,6 +1064,13 @@ public abstract class TvInputService extends Service {
                     if (inputId != null) {
                         broadcastRemoveTvInput(inputId);
                     }
+                    return;
+                }
+                case DO_SET_WRAPPED_TV_INPUT_ID: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    String inputId = (String) args.arg1;
+                    String wrappedInputId = (String) args.arg2;
+                    broadcastSetWrappedTvInputId(inputId, wrappedInputId);
                     return;
                 }
                 default: {
