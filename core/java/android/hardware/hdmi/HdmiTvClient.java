@@ -16,10 +16,10 @@
 package android.hardware.hdmi;
 
 import android.annotation.SystemApi;
-import android.hardware.hdmi.HdmiControlManager.VendorCommandListener;
-import android.hardware.hdmi.IHdmiVendorCommandListener;
 import android.os.RemoteException;
 import android.util.Log;
+
+import libcore.util.EmptyArray;
 
 /**
  * HdmiTvClient represents HDMI-CEC logical device of type TV in the Android system
@@ -91,6 +91,7 @@ public final class HdmiTvClient extends HdmiClient {
         return new HdmiTvClient(service);
     }
 
+    @Override
     public int getDeviceType() {
         return HdmiCecDeviceInfo.DEVICE_TV;
     }
@@ -150,11 +151,73 @@ public final class HdmiTvClient extends HdmiClient {
         }
     }
 
+    /**
+     * Callback interface to used to get notified when a record request from recorder device.
+     */
+    public interface RecordRequestListener {
+        /**
+         * Called when tv receives request request from recorder device. When it's called,
+         * it should return record source in byte array so that hdmi control service
+         * can start recording with the given source info.
+         *
+         * @return {@link HdmiRecordSources} to be used to set recording info
+         */
+        HdmiRecordSources.RecordSource onRecordRequestReceived(int recorderAddress);
+    }
+
+    /**
+     * Set {@link RecordRequestListener} to hdmi control service.
+     */
+    public void setRecordRequestListener(RecordRequestListener listener) {
+        try {
+            mService.setRecordRequestListener(getCallbackWrapper(listener));
+        } catch (RemoteException e) {
+            Log.e(TAG, "failed to set record request listener: ", e);
+        }
+    }
+
+    /**
+     * Start recording with the given recorder address and recorder source.
+     * <p>Usage
+     * <pre>
+     * HdmiTvClient tvClient = ....;
+     * // for own source.
+     * OwnSource ownSource = ownHdmiRecordSources.ownSource();
+     * tvClient.startRecord(recorderAddress, ownSource);
+     * </pre>
+     */
+    public void startRecord(int recorderAddress, HdmiRecordSources.RecordSource source) {
+        try {
+            byte[] data = new byte[source.getDataSize(true)];
+            source.toByteArray(true, data, 0);
+            mService.startRecord(recorderAddress, data);
+        } catch (RemoteException e) {
+            Log.e(TAG, "failed to start record: ", e);
+        }
+    }
+
     private static IHdmiControlCallback getCallbackWrapper(final SelectCallback callback) {
         return new IHdmiControlCallback.Stub() {
             @Override
             public void onComplete(int result) {
                 callback.onComplete(result);
+            }
+        };
+    }
+
+    private static IHdmiRecordRequestListener getCallbackWrapper(
+            final RecordRequestListener listener) {
+        return new IHdmiRecordRequestListener.Stub() {
+            @Override
+            public byte[] onRecordRequestReceived(int recorderAddress) throws RemoteException {
+                HdmiRecordSources.RecordSource source =
+                        listener.onRecordRequestReceived(recorderAddress);
+                if (source == null) {
+                    return EmptyArray.BYTE;
+                }
+                byte[] data = new byte[source.getDataSize(true)];
+                source.toByteArray(true, data, 0);
+                return data;
             }
         };
     }
