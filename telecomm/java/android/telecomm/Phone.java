@@ -95,12 +95,12 @@ public final class Phone {
     }
 
     /** {@hide} */
-    final void internalAddCall(InCallCall inCallCall) {
-        Call call = new Call(this, inCallCall.getId(), mInCallAdapter);
-        mCallByTelecommCallId.put(inCallCall.getId(), call);
+    final void internalAddCall(ParcelableCall parcelableCall) {
+        Call call = new Call(this, parcelableCall.getId(), mInCallAdapter);
+        mCallByTelecommCallId.put(parcelableCall.getId(), call);
         mCalls.add(call);
-        checkCallTree(inCallCall);
-        call.internalUpdate(inCallCall);
+        checkCallTree(parcelableCall);
+        call.internalUpdate(parcelableCall);
         fireCallAdded(call);
      }
 
@@ -112,11 +112,11 @@ public final class Phone {
     }
 
     /** {@hide} */
-    final void internalUpdateCall(InCallCall inCallCall) {
-         Call call = mCallByTelecommCallId.get(inCallCall.getId());
+    final void internalUpdateCall(ParcelableCall parcelableCall) {
+         Call call = mCallByTelecommCallId.get(parcelableCall.getId());
          if (call != null) {
-             checkCallTree(inCallCall);
-             call.internalUpdate(inCallCall);
+             checkCallTree(parcelableCall);
+             call.internalUpdate(parcelableCall);
          }
      }
 
@@ -246,17 +246,17 @@ public final class Phone {
         }
     }
 
-    private void checkCallTree(InCallCall inCallCall) {
-        if (inCallCall.getParentCallId() != null &&
-                !mCallByTelecommCallId.containsKey(inCallCall.getParentCallId())) {
-            Log.wtf(this, "InCallCall %s has nonexistent parent %s",
-                    inCallCall.getId(), inCallCall.getParentCallId());
+    private void checkCallTree(ParcelableCall parcelableCall) {
+        if (parcelableCall.getParentCallId() != null &&
+                !mCallByTelecommCallId.containsKey(parcelableCall.getParentCallId())) {
+            Log.wtf(this, "ParcelableCall %s has nonexistent parent %s",
+                    parcelableCall.getId(), parcelableCall.getParentCallId());
         }
-        if (inCallCall.getChildCallIds() != null) {
-            for (int i = 0; i < inCallCall.getChildCallIds().size(); i++) {
-                if (!mCallByTelecommCallId.containsKey(inCallCall.getChildCallIds().get(i))) {
-                    Log.wtf(this, "InCallCall %s has nonexistent child %s",
-                            inCallCall.getId(), inCallCall.getChildCallIds().get(i));
+        if (parcelableCall.getChildCallIds() != null) {
+            for (int i = 0; i < parcelableCall.getChildCallIds().size(); i++) {
+                if (!mCallByTelecommCallId.containsKey(parcelableCall.getChildCallIds().get(i))) {
+                    Log.wtf(this, "ParcelableCall %s has nonexistent child %s",
+                            parcelableCall.getId(), parcelableCall.getChildCallIds().get(i));
                 }
             }
         }

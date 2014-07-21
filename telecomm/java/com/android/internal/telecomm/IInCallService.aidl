@@ -18,7 +18,7 @@ package com.android.internal.telecomm;
 
 import android.app.PendingIntent;
 import android.telecomm.CallAudioState;
-import android.telecomm.InCallCall;
+import android.telecomm.ParcelableCall;
 
 import com.android.internal.telecomm.IInCallAdapter;
 
@@ -32,9 +32,9 @@ import com.android.internal.telecomm.IInCallAdapter;
 oneway interface IInCallService {
     void setInCallAdapter(in IInCallAdapter inCallAdapter);
 
-    void addCall(in InCallCall call);
+    void addCall(in ParcelableCall call);
 
-    void updateCall(in InCallCall call);
+    void updateCall(in ParcelableCall call);
 
     void setPostDial(String callId, String remaining);
 

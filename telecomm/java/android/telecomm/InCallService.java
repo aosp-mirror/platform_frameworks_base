@@ -54,10 +54,10 @@ public abstract class InCallService extends Service {
                     onPhoneCreated(mPhone);
                     break;
                 case MSG_ADD_CALL:
-                    mPhone.internalAddCall((InCallCall) msg.obj);
+                    mPhone.internalAddCall((ParcelableCall) msg.obj);
                     break;
                 case MSG_UPDATE_CALL:
-                    mPhone.internalUpdateCall((InCallCall) msg.obj);
+                    mPhone.internalUpdateCall((ParcelableCall) msg.obj);
                     break;
                 case MSG_SET_POST_DIAL: {
                     SomeArgs args = (SomeArgs) msg.obj;
@@ -110,12 +110,12 @@ public abstract class InCallService extends Service {
         }
 
         @Override
-        public void addCall(InCallCall call) {
+        public void addCall(ParcelableCall call) {
             mHandler.obtainMessage(MSG_ADD_CALL, call).sendToTarget();
         }
 
         @Override
-        public void updateCall(InCallCall call) {
+        public void updateCall(ParcelableCall call) {
             mHandler.obtainMessage(MSG_UPDATE_CALL, call).sendToTarget();
         }
 
