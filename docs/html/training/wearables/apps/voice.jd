@@ -263,7 +263,7 @@ private void displaySpeechRecognizer() {
 &#64;Override
 protected void onActivityResult(int requestCode, int resultCode,
         Intent data) {
-    if (requestCode == SPEECH_REQUEST && resultCode == RESULT_OK) {
+    if (requestCode == SPEECH_REQUEST_CODE && resultCode == RESULT_OK) {
         List&lt;String&gt; results = data.getStringArrayListExtra(
                 RecognizerIntent.EXTRA_RESULTS);
         String spokenText = results.get(0);
