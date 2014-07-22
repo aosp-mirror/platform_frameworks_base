@@ -57,7 +57,13 @@ public final class HdmiCecDeviceInfo implements Parcelable {
     // Value indicating the device is not an active source.
     public static final int DEVICE_INACTIVE = -1;
 
-    // Logical address, phsical address, device type, vendor id and display name
+    /**
+     * Logical address used to indicate the source comes from internal device.
+     * The logical address of TV(0) is used.
+     */
+    public static final int ADDR_INTERNAL = 0;
+
+    // Logical address, physical address, device type, vendor id and display name
     // are immutable value.
     private final int mLogicalAddress;
     private final int mPhysicalAddress;
