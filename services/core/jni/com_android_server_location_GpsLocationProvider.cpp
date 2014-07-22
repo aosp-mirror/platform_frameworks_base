@@ -53,6 +53,7 @@ static jmethodID method_reportGeofenceRemoveStatus;
 static jmethodID method_reportGeofencePauseStatus;
 static jmethodID method_reportGeofenceResumeStatus;
 static jmethodID method_reportMeasurementData;
+static jmethodID method_reportNavigationMessages;
 
 static const GpsInterface* sGpsInterface = NULL;
 static const GpsXtraInterface* sGpsXtraInterface = NULL;
@@ -62,6 +63,7 @@ static const GpsDebugInterface* sGpsDebugInterface = NULL;
 static const AGpsRilInterface* sAGpsRilInterface = NULL;
 static const GpsGeofencingInterface* sGpsGeofencingInterface = NULL;
 static const GpsMeasurementInterface* sGpsMeasurementInterface = NULL;
+static const GpsNavigationMessageInterface* sGpsNavigationMessageInterface = NULL;
 
 // temporary storage for GPS callbacks
 static GpsSvStatus  sGpsSvStatus;
@@ -447,6 +449,10 @@ static void android_location_GpsLocationProvider_class_init_native(JNIEnv* env, 
             clazz,
             "reportMeasurementData",
             "(Landroid/location/GpsMeasurementsEvent;)V");
+    method_reportNavigationMessages = env->GetMethodID(
+            clazz,
+            "reportNavigationMessage",
+            "(Landroid/location/GpsNavigationMessageEvent;)V");
 
     err = hw_get_module(GPS_HARDWARE_MODULE_ID, (hw_module_t const**)&module);
     if (err == 0) {
@@ -472,6 +478,9 @@ static void android_location_GpsLocationProvider_class_init_native(JNIEnv* env, 
             (const GpsGeofencingInterface*)sGpsInterface->get_extension(GPS_GEOFENCING_INTERFACE);
         sGpsMeasurementInterface =
             (const GpsMeasurementInterface*)sGpsInterface->get_extension(GPS_MEASUREMENT_INTERFACE);
+        sGpsNavigationMessageInterface =
+            (const GpsNavigationMessageInterface*)sGpsInterface->get_extension(
+                    GPS_NAVIGATION_MESSAGE_INTERFACE);
     }
 }
 
@@ -1212,7 +1221,6 @@ static void measurement_callback(GpsData* data) {
         checkAndClearExceptionFromCallback(env, __FUNCTION__);
     } else {
         ALOGE("Invalid GpsData size found in gps_measurement_callback, size=%d", data->size);
-        return;
     }
 }
 
@@ -1223,7 +1231,7 @@ GpsMeasurementCallbacks sGpsMeasurementCallbacks = {
 
 static jboolean android_location_GpsLocationProvider_is_measurement_supported(
         JNIEnv* env,
-        jobject obj) {
+        jclass clazz) {
     if (sGpsMeasurementInterface != NULL) {
         return JNI_TRUE;
     }
@@ -1256,6 +1264,110 @@ static jboolean android_location_GpsLocationProvider_stop_measurement_collection
     }
 
     sGpsMeasurementInterface->close();
+    return JNI_TRUE;
+}
+
+static jobject translate_gps_navigation_message(JNIEnv* env, GpsNavigationMessage* message) {
+    size_t dataLength = message->data_length;
+    uint8_t* data = message->data;
+    if (dataLength == 0 || data == NULL) {
+        ALOGE("Invalid Navigation Message found: data=%p, length=%d", data, dataLength);
+        return NULL;
+    }
+
+    jclass navigationMessageClass = env->FindClass("android/location/GpsNavigationMessage");
+    jmethodID navigationMessageCtor = env->GetMethodID(navigationMessageClass, "<init>", "()V");
+    jobject navigationMessageObject = env->NewObject(navigationMessageClass, navigationMessageCtor);
+
+    jmethodID setTypeMethod = env->GetMethodID(navigationMessageClass, "setType", "(B)V");
+    env->CallVoidMethod(navigationMessageObject, setTypeMethod, message->type);
+
+    jmethodID setPrnMethod = env->GetMethodID(navigationMessageClass, "setPrn", "(B)V");
+    env->CallVoidMethod(navigationMessageObject, setPrnMethod, message->prn);
+
+    jmethodID setMessageIdMethod = env->GetMethodID(navigationMessageClass, "setMessageId", "(S)V");
+    env->CallVoidMethod(navigationMessageObject, setMessageIdMethod, message->message_id);
+
+    jmethodID setSubmessageIdMethod =
+            env->GetMethodID(navigationMessageClass, "setSubmessageId", "(S)V");
+    env->CallVoidMethod(navigationMessageObject, setSubmessageIdMethod, message->submessage_id);
+
+    jbyteArray dataArray = env->NewByteArray(dataLength);
+    env->SetByteArrayRegion(dataArray, 0, dataLength, (jbyte*) data);
+    jmethodID setDataMethod = env->GetMethodID(navigationMessageClass, "setData", "([B)V");
+    env->CallVoidMethod(navigationMessageObject, setDataMethod, dataArray);
+
+    return navigationMessageObject;
+}
+
+static void navigation_message_callback(GpsNavigationMessage* message) {
+    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    if (message == NULL) {
+        ALOGE("Invalid Navigation Message provided to callback");
+        return;
+    }
+
+    if (message->size == sizeof(GpsNavigationMessage)) {
+        jobject navigationMessage = translate_gps_navigation_message(env, message);
+
+        jclass navigationMessageEventClass =
+                env->FindClass("android/location/GpsNavigationMessageEvent");
+        jmethodID navigationMessageEventCtor = env->GetMethodID(
+                navigationMessageEventClass,
+                "<init>",
+                "(Landroid/location/GpsNavigationMessage;)V");
+        jobject navigationMessageEvent = env->NewObject(
+                navigationMessageEventClass,
+                navigationMessageEventCtor,
+                navigationMessage);
+
+        env->CallVoidMethod(mCallbacksObj, method_reportNavigationMessages, navigationMessageEvent);
+        checkAndClearExceptionFromCallback(env, __FUNCTION__);
+    } else {
+        ALOGE("Invalid GpsNavigationMessage size found: %d", message->size);
+    }
+}
+
+GpsNavigationMessageCallbacks sGpsNavigationMessageCallbacks = {
+    sizeof(GpsNavigationMessageCallbacks),
+    navigation_message_callback,
+};
+
+static jboolean android_location_GpsLocationProvider_is_navigation_message_supported(
+        JNIEnv* env,
+        jclass clazz) {
+    if(sGpsNavigationMessageInterface != NULL) {
+        return JNI_TRUE;
+    }
+    return JNI_FALSE;
+}
+
+static jboolean android_location_GpsLocationProvider_start_navigation_message_collection(
+        JNIEnv* env,
+        jobject obj) {
+    if (sGpsNavigationMessageInterface == NULL) {
+        ALOGE("Navigation Message interface is not available.");
+        return JNI_FALSE;
+    }
+
+    int result = sGpsNavigationMessageInterface->init(&sGpsNavigationMessageCallbacks);
+    if (result != GPS_NAVIGATION_MESSAGE_OPERATION_SUCCESS) {
+        ALOGE("An error has been found in %s: %d", __FUNCTION__, result);
+        return JNI_FALSE;
+    }
+
+    return JNI_TRUE;
+}
+
+static jboolean android_location_GpsLocationProvider_stop_navigation_message_collection(
+        JNIEnv* env,
+        jobject obj) {
+    if (sGpsNavigationMessageInterface == NULL) {
+        ALOGE("Navigation Message interface is not available.");
+        return JNI_FALSE;
+    }
+
+    sGpsNavigationMessageInterface->close();
     return JNI_TRUE;
 }
 
@@ -1336,7 +1448,16 @@ static JNINativeMethod sMethods[] = {
             (void*) android_location_GpsLocationProvider_start_measurement_collection},
     {"native_stop_measurement_collection",
             "()Z",
-            (void*) android_location_GpsLocationProvider_stop_measurement_collection}
+            (void*) android_location_GpsLocationProvider_stop_measurement_collection},
+    {"native_is_navigation_message_supported",
+            "()Z",
+            (void*) android_location_GpsLocationProvider_is_navigation_message_supported},
+    {"native_start_navigation_message_collection",
+            "()Z",
+            (void*) android_location_GpsLocationProvider_start_navigation_message_collection},
+    {"native_stop_navigation_message_collection",
+            "()Z",
+            (void*) android_location_GpsLocationProvider_stop_navigation_message_collection},
 };
 
 int register_android_server_location_GpsLocationProvider(JNIEnv* env)

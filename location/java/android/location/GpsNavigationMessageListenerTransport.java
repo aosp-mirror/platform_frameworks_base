@@ -20,43 +20,46 @@ import android.content.Context;
 import android.os.RemoteException;
 
 /**
- * A handler class to manage transport listeners for {@link GpsMeasurementsEvent.Listener}.
+ * A handler class to manage transport listeners for {@link GpsNavigationMessageEvent.Listener}.
  *
  * @hide
  */
-class GpsMeasurementListenerTransport
-        extends LocalListenerHelper<GpsMeasurementsEvent.Listener> {
+class GpsNavigationMessageListenerTransport
+        extends LocalListenerHelper<GpsNavigationMessageEvent.Listener> {
     private final Context mContext;
     private final ILocationManager mLocationManager;
 
-    private final IGpsMeasurementsListener mListenerTransport = new ListenerTransport();
+    private final IGpsNavigationMessageListener mListenerTransport = new ListenerTransport();
 
-    public GpsMeasurementListenerTransport(Context context, ILocationManager locationManager) {
-        super("GpsMeasurementListenerTransport");
+    public GpsNavigationMessageListenerTransport(
+            Context context,
+            ILocationManager locationManager) {
+        super("GpsNavigationMessageListenerTransport");
         mContext = context;
         mLocationManager = locationManager;
     }
 
     @Override
     protected boolean registerWithServer() throws RemoteException {
-        return mLocationManager.addGpsMeasurementsListener(
+        return mLocationManager.addGpsNavigationMessageListener(
                 mListenerTransport,
                 mContext.getPackageName());
     }
 
     @Override
     protected void unregisterFromServer() throws RemoteException {
-        mLocationManager.removeGpsMeasurementsListener(mListenerTransport);
+        mLocationManager.removeGpsNavigationMessageListener(mListenerTransport);
     }
 
-    private class ListenerTransport extends IGpsMeasurementsListener.Stub {
+    private class ListenerTransport extends IGpsNavigationMessageListener.Stub {
         @Override
-        public void onGpsMeasurementsReceived(final GpsMeasurementsEvent event) {
-            ListenerOperation<GpsMeasurementsEvent.Listener> operation =
-                    new ListenerOperation<GpsMeasurementsEvent.Listener>() {
+        public void onGpsNavigationMessageReceived(final GpsNavigationMessageEvent event) {
+            ListenerOperation<GpsNavigationMessageEvent.Listener> operation =
+                    new ListenerOperation<GpsNavigationMessageEvent.Listener>() {
                 @Override
-                public void execute(GpsMeasurementsEvent.Listener listener) throws RemoteException {
-                    listener.onGpsMeasurementsReceived(event);
+                public void execute(GpsNavigationMessageEvent.Listener listener)
+                        throws RemoteException {
+                    listener.onGpsNavigationMessageReceived(event);
                 }
             };
 
