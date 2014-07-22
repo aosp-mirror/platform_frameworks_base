@@ -1103,6 +1103,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             type = parser.next();
             int outerDepth = parser.getDepth();
             policy.mLockTaskPackages.clear();
+            policy.mAdminList.clear();
+            policy.mAdminMap.clear();
             while ((type=parser.next()) != XmlPullParser.END_DOCUMENT
                    && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
                 if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
@@ -1124,7 +1126,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                             ActiveAdmin ap = new ActiveAdmin(dai);
                             ap.readFromXml(parser);
                             policy.mAdminMap.put(ap.info.getComponent(), ap);
-                            policy.mAdminList.add(ap);
                         }
                     } catch (RuntimeException e) {
                         Slog.w(LOG_TAG, "Failed loading admin " + name, e);
@@ -1183,6 +1184,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         } catch (IOException e) {
             // Ignore
         }
+
+        // Generate a list of admins from the admin map
+        policy.mAdminList.addAll(policy.mAdminMap.values());
 
         // Validate that what we stored for the password quality matches
         // sufficiently what is currently set.  Note that this is only
@@ -1268,10 +1272,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return;
         }
-        synchronized (this) {
-            loadSettingsLocked(getUserData(UserHandle.USER_OWNER), UserHandle.USER_OWNER);
-            loadDeviceOwner();
-        }
+        getUserData(UserHandle.USER_OWNER);
+        loadDeviceOwner();
         cleanUpOldUsers();
         mAppOpsService = IAppOpsService.Stub.asInterface(
                 ServiceManager.getService(Context.APP_OPS_SERVICE));
@@ -1436,14 +1438,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 ActiveAdmin newAdmin = new ActiveAdmin(info);
                 policy.mAdminMap.put(adminReceiver, newAdmin);
                 int replaceIndex = -1;
-                if (refreshing) {
-                    final int N = policy.mAdminList.size();
-                    for (int i=0; i < N; i++) {
-                        ActiveAdmin oldAdmin = policy.mAdminList.get(i);
-                        if (oldAdmin.info.getComponent().equals(adminReceiver)) {
-                            replaceIndex = i;
-                            break;
-                        }
+                final int N = policy.mAdminList.size();
+                for (int i=0; i < N; i++) {
+                    ActiveAdmin oldAdmin = policy.mAdminList.get(i);
+                    if (oldAdmin.info.getComponent().equals(adminReceiver)) {
+                        replaceIndex = i;
+                        break;
                     }
                 }
                 if (replaceIndex == -1) {
