@@ -66,6 +66,7 @@ public class UserSwitcherController {
 
     private ArrayList<UserRecord> mUsers = new ArrayList<>();
     private Dialog mExitGuestDialog;
+    private int mLastNonGuestUser = UserHandle.USER_OWNER;
 
     public UserSwitcherController(Context context) {
         mContext = context;
@@ -204,7 +205,14 @@ public class UserSwitcherController {
     }
 
     private void exitGuest(int id) {
-        switchToUserId(UserHandle.USER_OWNER);
+        int newId = UserHandle.USER_OWNER;
+        if (mLastNonGuestUser != UserHandle.USER_OWNER) {
+            UserInfo info = mUserManager.getUserInfo(mLastNonGuestUser);
+            if (info != null && info.isEnabled() && info.supportsSwitchTo()) {
+                newId = info.id;
+            }
+        }
+        switchToUserId(newId);
         mUserManager.removeUser(id);
     }
 
@@ -230,6 +238,9 @@ public class UserSwitcherController {
                     if (record.isCurrent != shouldBeCurrent) {
                         mUsers.set(i, record.copyWithIsCurrent(shouldBeCurrent));
                     }
+                    if (shouldBeCurrent && !record.isGuest) {
+                        mLastNonGuestUser = record.info.id;
+                    }
                 }
                 notifyAdapters();
             }
@@ -244,6 +255,7 @@ public class UserSwitcherController {
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("UserSwitcherController state:");
+        pw.println("  mLastNonGuestUser=" + mLastNonGuestUser);
         pw.print("  mUsers.size="); pw.println(mUsers.size());
         for (int i = 0; i < mUsers.size(); i++) {
             final UserRecord u = mUsers.get(i);
