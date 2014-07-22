@@ -25,6 +25,7 @@ import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
+import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.params.StreamConfiguration;
 import android.hardware.camera2.params.StreamConfigurationDuration;
@@ -444,6 +445,120 @@ public class LegacyMetadataMapper {
         m.set(REQUEST_AVAILABLE_CAPABILITIES, capabilities);
 
         /*
+         * request.availableCharacteristicsKeys
+         */
+        {
+            // TODO: check if the underlying key is supported before listing a key as available
+
+            // Note: We only list public keys. Native HALs should list ALL keys regardless of visibility.
+
+            Key<?> availableKeys[] = new Key<?>[] {
+                    CameraCharacteristics.CONTROL_AE_AVAILABLE_ANTIBANDING_MODES          ,
+                    CameraCharacteristics.CONTROL_AE_AVAILABLE_MODES                      ,
+                    CameraCharacteristics.CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES          ,
+                    CameraCharacteristics.CONTROL_AE_COMPENSATION_RANGE                   ,
+                    CameraCharacteristics.CONTROL_AE_COMPENSATION_STEP                    ,
+                    CameraCharacteristics.CONTROL_AF_AVAILABLE_MODES                      ,
+                    CameraCharacteristics.CONTROL_AVAILABLE_EFFECTS                       ,
+                    CameraCharacteristics.CONTROL_AVAILABLE_SCENE_MODES                   ,
+                    CameraCharacteristics.CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES     ,
+                    CameraCharacteristics.CONTROL_AWB_AVAILABLE_MODES                     ,
+                    CameraCharacteristics.CONTROL_MAX_REGIONS                             ,
+                    CameraCharacteristics.FLASH_INFO_AVAILABLE                            ,
+                    CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL                   ,
+                    CameraCharacteristics.JPEG_AVAILABLE_THUMBNAIL_SIZES                  ,
+                    CameraCharacteristics.LENS_FACING                                     ,
+                    CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS               ,
+                    CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES                  ,
+                    CameraCharacteristics.REQUEST_MAX_NUM_OUTPUT_STREAMS                  ,
+                    CameraCharacteristics.REQUEST_PARTIAL_RESULT_COUNT                    ,
+                    CameraCharacteristics.REQUEST_PIPELINE_MAX_DEPTH                      ,
+                    CameraCharacteristics.SCALER_AVAILABLE_MAX_DIGITAL_ZOOM               ,
+//                    CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP                 ,
+                    CameraCharacteristics.SCALER_CROPPING_TYPE                            ,
+                    CameraCharacteristics.SENSOR_AVAILABLE_TEST_PATTERN_MODES             ,
+                    CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE                   ,
+                    CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE                       ,
+                    CameraCharacteristics.SENSOR_INFO_PIXEL_ARRAY_SIZE                    ,
+                    CameraCharacteristics.SENSOR_ORIENTATION                              ,
+                    CameraCharacteristics.STATISTICS_INFO_AVAILABLE_FACE_DETECT_MODES     ,
+                    CameraCharacteristics.STATISTICS_INFO_MAX_FACE_COUNT                  ,
+                    CameraCharacteristics.SYNC_MAX_LATENCY                                ,
+            };
+            m.set(REQUEST_AVAILABLE_CHARACTERISTICS_KEYS, getTagsForKeys(availableKeys));
+        }
+
+        /*
+         * request.availableRequestKeys
+         */
+        {
+            CaptureRequest.Key<?> availableKeys[] = new CaptureRequest.Key<?>[] {
+                    CaptureRequest.CONTROL_AE_ANTIBANDING_MODE,
+                    CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION,
+                    CaptureRequest.CONTROL_AE_LOCK,
+                    CaptureRequest.CONTROL_AE_MODE,
+                    CaptureRequest.CONTROL_AE_REGIONS,
+                    CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE,
+                    CaptureRequest.CONTROL_AF_MODE,
+                    CaptureRequest.CONTROL_AF_REGIONS,
+                    CaptureRequest.CONTROL_AF_TRIGGER,
+                    CaptureRequest.CONTROL_AWB_LOCK,
+                    CaptureRequest.CONTROL_AWB_MODE,
+                    CaptureRequest.CONTROL_CAPTURE_INTENT,
+                    CaptureRequest.CONTROL_EFFECT_MODE,
+                    CaptureRequest.CONTROL_MODE,
+                    CaptureRequest.CONTROL_SCENE_MODE,
+                    CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE,
+                    CaptureRequest.FLASH_MODE,
+                    CaptureRequest.JPEG_GPS_COORDINATES,
+                    CaptureRequest.JPEG_GPS_PROCESSING_METHOD,
+                    CaptureRequest.JPEG_GPS_TIMESTAMP,
+                    CaptureRequest.JPEG_ORIENTATION,
+                    CaptureRequest.JPEG_QUALITY,
+                    CaptureRequest.JPEG_THUMBNAIL_QUALITY,
+                    CaptureRequest.JPEG_THUMBNAIL_SIZE,
+                    CaptureRequest.LENS_FOCAL_LENGTH,
+                    CaptureRequest.SCALER_CROP_REGION,
+                    CaptureRequest.STATISTICS_FACE_DETECT_MODE,
+            };
+            m.set(REQUEST_AVAILABLE_REQUEST_KEYS, getTagsForKeys(availableKeys));
+        }
+
+        /*
+         * request.availableResultKeys
+         */
+        {
+            CaptureResult.Key<?> availableKeys[] = new CaptureResult.Key<?>[] {
+                    CaptureResult.CONTROL_AE_ANTIBANDING_MODE                      ,
+                    CaptureResult.CONTROL_AE_EXPOSURE_COMPENSATION                 ,
+                    CaptureResult.CONTROL_AE_LOCK                                  ,
+                    CaptureResult.CONTROL_AE_MODE                                  ,
+                    CaptureResult.CONTROL_AE_REGIONS                               ,
+                    CaptureResult.CONTROL_AF_MODE                                  ,
+                    CaptureResult.CONTROL_AF_REGIONS                               ,
+                    CaptureResult.CONTROL_AF_STATE                                 ,
+                    CaptureResult.CONTROL_AWB_MODE                                 ,
+                    CaptureResult.CONTROL_AWB_LOCK                                 ,
+                    CaptureResult.CONTROL_MODE                                     ,
+                    CaptureResult.FLASH_MODE                                       ,
+                    CaptureResult.JPEG_GPS_COORDINATES                             ,
+                    CaptureResult.JPEG_GPS_PROCESSING_METHOD                       ,
+                    CaptureResult.JPEG_GPS_TIMESTAMP                               ,
+                    CaptureResult.JPEG_ORIENTATION                                 ,
+                    CaptureResult.JPEG_QUALITY                                     ,
+                    CaptureResult.JPEG_THUMBNAIL_QUALITY                           ,
+                    CaptureResult.LENS_FOCAL_LENGTH                                ,
+                    CaptureResult.REQUEST_FRAME_COUNT                              ,
+                    CaptureResult.REQUEST_PIPELINE_DEPTH                           ,
+                    CaptureResult.SCALER_CROP_REGION                               ,
+                    CaptureResult.SENSOR_TIMESTAMP                                 ,
+                    CaptureResult.STATISTICS_FACE_DETECT_MODE                      ,
+//                    CaptureResult.STATISTICS_FACES                                 ,
+            };
+            m.set(REQUEST_AVAILABLE_RESULT_KEYS, getTagsForKeys(availableKeys));
+        }
+
+        /*
          * request.maxNumOutputStreams
          */
         int[] outputStreams = {
@@ -648,5 +763,35 @@ public class LegacyMetadataMapper {
 
         // TODO: map other request template values
         return m;
+    }
+
+    private static int[] getTagsForKeys(Key<?>[] keys) {
+        int[] tags = new int[keys.length];
+
+        for (int i = 0; i < keys.length; ++i) {
+            tags[i] = keys[i].getNativeKey().getTag();
+        }
+
+        return tags;
+    }
+
+    private static int[] getTagsForKeys(CaptureRequest.Key<?>[] keys) {
+        int[] tags = new int[keys.length];
+
+        for (int i = 0; i < keys.length; ++i) {
+            tags[i] = keys[i].getNativeKey().getTag();
+        }
+
+        return tags;
+    }
+
+    private static int[] getTagsForKeys(CaptureResult.Key<?>[] keys) {
+        int[] tags = new int[keys.length];
+
+        for (int i = 0; i < keys.length; ++i) {
+            tags[i] = keys[i].getNativeKey().getTag();
+        }
+
+        return tags;
     }
 }
