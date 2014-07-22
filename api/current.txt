@@ -28706,13 +28706,14 @@ package android.telecomm {
     field public static final android.os.Parcelable.Creator CREATOR;
   }
 
-  public class RemoteCallVideoClient {
-    method public void handleCallSessionEvent(int);
-    method public void handleCameraCapabilitiesChange(android.telecomm.CallCameraCapabilities);
-    method public void receiveSessionModifyRequest(android.telecomm.VideoCallProfile);
-    method public void receiveSessionModifyResponse(int, android.telecomm.VideoCallProfile, android.telecomm.VideoCallProfile);
-    method public void updateCallDataUsage(int);
-    method public void updatePeerDimensions(int, int);
+  public class RemoteCallVideoClient implements android.os.IBinder.DeathRecipient {
+    method public void binderDied();
+    method public void handleCallSessionEvent(int) throws android.os.RemoteException;
+    method public void handleCameraCapabilitiesChange(android.telecomm.CallCameraCapabilities) throws android.os.RemoteException;
+    method public void receiveSessionModifyRequest(android.telecomm.VideoCallProfile) throws android.os.RemoteException;
+    method public void receiveSessionModifyResponse(int, android.telecomm.VideoCallProfile, android.telecomm.VideoCallProfile) throws android.os.RemoteException;
+    method public void updateCallDataUsage(int) throws android.os.RemoteException;
+    method public void updatePeerDimensions(int, int) throws android.os.RemoteException;
   }
 
   public class RemoteCallVideoProvider {
