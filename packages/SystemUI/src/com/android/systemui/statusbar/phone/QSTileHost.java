@@ -95,10 +95,10 @@ public class QSTileHost implements QSTile.Host {
         mTiles.add(new CellularTile(this));
         mTiles.add(new AirplaneModeTile(this));
         mTiles.add(new RotationLockTile(this));
+        mTiles.add(new FlashlightTile(this));
         mTiles.add(new LocationTile(this));
         mTiles.add(new CastTile(this));
         mTiles.add(new HotspotTile(this));
-        mTiles.add(new FlashlightTile(this));
 
         mUserTracker = new CurrentUserTracker(mContext) {
             @Override
