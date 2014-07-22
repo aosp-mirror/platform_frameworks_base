@@ -6409,54 +6409,61 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
             mIsSystemRestore = isFullSystemRestore;
             mFinished = false;
 
-            if (filterSet == null) {
-                // We want everything and a pony
-                List<PackageInfo> apps
-                        = PackageManagerBackupAgent.getStorableApplications(mPackageManager);
-                filterSet = packagesToNames(apps);
-                if (DEBUG) {
-                    Slog.i(TAG, "Full restore; asking for " + filterSet.length + " apps");
-                }
-            }
-
-            mAcceptSet = new ArrayList<PackageInfo>(filterSet.length);
-
-            // Pro tem, we insist on moving the settings provider package to last place.
-            // Keep track of whether it's in the list, and bump it down if so.  We also
-            // want to do the system package itself first if it's called for.
-            boolean hasSystem = false;
-            boolean hasSettings = false;
-            for (int i = 0; i < filterSet.length; i++) {
-                try {
-                    PackageInfo info = mPackageManager.getPackageInfo(filterSet[i], 0);
-                    if ("android".equals(info.packageName)) {
-                        hasSystem = true;
-                        continue;
+            if (targetPackage != null) {
+                // Single package restore
+                mAcceptSet = new ArrayList<PackageInfo>();
+                mAcceptSet.add(targetPackage);
+            } else {
+                // Everything possible, or a target set
+                if (filterSet == null) {
+                    // We want everything and a pony
+                    List<PackageInfo> apps =
+                            PackageManagerBackupAgent.getStorableApplications(mPackageManager);
+                    filterSet = packagesToNames(apps);
+                    if (DEBUG) {
+                        Slog.i(TAG, "Full restore; asking for " + filterSet.length + " apps");
                     }
-                    if (SETTINGS_PACKAGE.equals(info.packageName)) {
-                        hasSettings = true;
-                        continue;
-                    }
+                }
 
-                    if (appIsEligibleForBackup(info.applicationInfo)) {
-                        mAcceptSet.add(info);
+                mAcceptSet = new ArrayList<PackageInfo>(filterSet.length);
+
+                // Pro tem, we insist on moving the settings provider package to last place.
+                // Keep track of whether it's in the list, and bump it down if so.  We also
+                // want to do the system package itself first if it's called for.
+                boolean hasSystem = false;
+                boolean hasSettings = false;
+                for (int i = 0; i < filterSet.length; i++) {
+                    try {
+                        PackageInfo info = mPackageManager.getPackageInfo(filterSet[i], 0);
+                        if ("android".equals(info.packageName)) {
+                            hasSystem = true;
+                            continue;
+                        }
+                        if (SETTINGS_PACKAGE.equals(info.packageName)) {
+                            hasSettings = true;
+                            continue;
+                        }
+
+                        if (appIsEligibleForBackup(info.applicationInfo)) {
+                            mAcceptSet.add(info);
+                        }
+                    } catch (NameNotFoundException e) {
+                        // requested package name doesn't exist; ignore it
                     }
-                } catch (NameNotFoundException e) {
-                    // requested package name doesn't exist; ignore it
                 }
-            }
-            if (hasSystem) {
-                try {
-                    mAcceptSet.add(0, mPackageManager.getPackageInfo("android", 0));
-                } catch (NameNotFoundException e) {
-                    // won't happen; we know a priori that it's valid
+                if (hasSystem) {
+                    try {
+                        mAcceptSet.add(0, mPackageManager.getPackageInfo("android", 0));
+                    } catch (NameNotFoundException e) {
+                        // won't happen; we know a priori that it's valid
+                    }
                 }
-            }
-            if (hasSettings) {
-                try {
-                    mAcceptSet.add(mPackageManager.getPackageInfo(SETTINGS_PACKAGE, 0));
-                } catch (NameNotFoundException e) {
-                    // this one is always valid too
+                if (hasSettings) {
+                    try {
+                        mAcceptSet.add(mPackageManager.getPackageInfo(SETTINGS_PACKAGE, 0));
+                    } catch (NameNotFoundException e) {
+                        // this one is always valid too
+                    }
                 }
             }
 
