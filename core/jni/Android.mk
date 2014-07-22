@@ -111,6 +111,7 @@ LOCAL_SRC_FILES:= \
 	android/graphics/NinePatchImpl.cpp \
 	android/graphics/NinePatchPeeker.cpp \
 	android/graphics/Paint.cpp \
+	android/graphics/PaintImpl.cpp \
 	android/graphics/Path.cpp \
 	android/graphics/PathMeasure.cpp \
 	android/graphics/PathEffect.cpp \

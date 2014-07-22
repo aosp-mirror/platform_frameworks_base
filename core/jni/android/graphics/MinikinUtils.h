@@ -16,13 +16,15 @@
 
 /**
  * Utilities for making Minikin work, especially from existing objects like
- * SkPaint and so on.
+ * Paint and so on.
  **/
 
  // TODO: does this really need to be separate from MinikinSkia?
 
 #ifndef ANDROID_MINIKIN_UTILS_H
 #define ANDROID_MINIKIN_UTILS_H
+
+#include "Paint.h"
 
 namespace android {
 
@@ -43,15 +45,15 @@ class TypefaceImpl;
 
 class MinikinUtils {
 public:
-    static std::string setLayoutProperties(Layout* layout, const SkPaint* paint, int bidiFlags,
+    static std::string setLayoutProperties(Layout* layout, const Paint* paint, int bidiFlags,
             TypefaceImpl* typeface);
 
-    static float xOffsetForTextAlign(SkPaint* paint, const Layout& layout);
+    static float xOffsetForTextAlign(Paint* paint, const Layout& layout);
 
-    static float hOffsetForTextAlign(SkPaint* paint, const Layout& layout, const SkPath& path);
+    static float hOffsetForTextAlign(Paint* paint, const Layout& layout, const SkPath& path);
     // f is a functor of type void f(size_t start, size_t end);
     template <typename F>
-    static void forFontRun(const Layout& layout, SkPaint* paint, F& f) {
+    static void forFontRun(const Layout& layout, Paint* paint, F& f) {
         float saveSkewX = paint->getTextSkewX();
         bool savefakeBold = paint->isFakeBoldText();
         MinikinFont* curFont = NULL;

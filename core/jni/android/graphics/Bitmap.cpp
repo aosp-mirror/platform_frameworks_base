@@ -1,3 +1,4 @@
+#include "Paint.h"
 #include "SkBitmap.h"
 #include "SkPixelRef.h"
 #include "SkImageEncoder.h"
@@ -676,7 +677,7 @@ static jobject Bitmap_extractAlpha(JNIEnv* env, jobject clazz,
                                    jlong srcHandle, jlong paintHandle,
                                    jintArray offsetXY) {
     const SkBitmap* src = reinterpret_cast<SkBitmap*>(srcHandle);
-    const SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
+    const android::Paint* paint = reinterpret_cast<android::Paint*>(paintHandle);
     SkIPoint  offset;
     SkBitmap* dst = new SkBitmap;
     JavaPixelAllocator allocator(env);
