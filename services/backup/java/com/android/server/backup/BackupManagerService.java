@@ -6558,117 +6558,77 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         private  void startRestore() {
             sendStartRestore(mAcceptSet.size());
 
-            UnifiedRestoreState nextState = UnifiedRestoreState.RESTORE_FINISHED;
             try {
-                // If we don't yet have PM metadata for this token, synthesize an
-                // entry for the PM pseudopackage and make it the first to be
-                // restored.
                 String transportDir = mTransport.transportDirName();
                 mStateDir = new File(mBaseStateDir, transportDir);
-                File metadataDir = new File(mStateDir, "_metadata");
-                metadataDir.mkdirs();
-                File metadataFile = new File(metadataDir, Long.toHexString(mToken));
-                try {
-                    // PM info is cached in $BASE/transport/_metadata/$TOKEN
-                    mPmAgent = new PackageManagerBackupAgent(metadataFile);
-                } catch (IOException e) {
-                    // Nope, we need to get it via restore
-                    if (MORE_DEBUG) Slog.v(TAG, "Need to restore @pm@");
-                    PackageInfo pmPackage = new PackageInfo();
-                    pmPackage.packageName = PACKAGE_MANAGER_SENTINEL;
-                    mAcceptSet.add(0, pmPackage);
-                }
+
+                // Fetch the current metadata from the dataset first
+                PackageInfo pmPackage = new PackageInfo();
+                pmPackage.packageName = PACKAGE_MANAGER_SENTINEL;
+                mAcceptSet.add(0, pmPackage);
 
                 PackageInfo[] packages = mAcceptSet.toArray(new PackageInfo[0]);
                 mStatus = mTransport.startRestore(mToken, packages);
                 if (mStatus != BackupTransport.TRANSPORT_OK) {
                     Slog.e(TAG, "Transport error " + mStatus + "; no restore possible");
                     mStatus = BackupTransport.TRANSPORT_ERROR;
-                    nextState = UnifiedRestoreState.FINAL;
+                    executeNextState(UnifiedRestoreState.FINAL);
                     return;
                 }
 
-                if (mPmAgent == null) {
-                    if (DEBUG) {
-                        Slog.v(TAG, "Need to fetch metadata for token "
-                                + Long.toHexString(mToken));
-                    }
-                    RestoreDescription desc = mTransport.nextRestorePackage();
-                    if (desc == null) {
-                        Slog.e(TAG, "No restore metadata available; halting");
-                        mStatus = BackupTransport.TRANSPORT_ERROR;
-                        nextState = UnifiedRestoreState.FINAL;
-                        return;
-                    }
-                    if (!PACKAGE_MANAGER_SENTINEL.equals(desc.getPackageName())) {
-                        Slog.e(TAG, "Required metadata but got " + desc.getPackageName());
-                        mStatus = BackupTransport.TRANSPORT_ERROR;
-                        nextState = UnifiedRestoreState.FINAL;
-                        return;
-                    }
-
-                    // Pull the Package Manager metadata from the restore set first
-                    mCurrentPackage = new PackageInfo();
-                    mCurrentPackage.packageName = PACKAGE_MANAGER_SENTINEL;
-                    mPmAgent = new PackageManagerBackupAgent(mPackageManager, null);
-                    mAgent = IBackupAgent.Stub.asInterface(mPmAgent.onBind());
-                    if (MORE_DEBUG) {
-                        Slog.v(TAG, "initiating restore for PMBA");
-                    }
-                    initiateOneRestore(mCurrentPackage, 0);
-                    // The PM agent called operationComplete() already, because our invocation
-                    // of it is process-local and therefore synchronous.  That means that a
-                    // RUNNING_QUEUE message is already enqueued.  Only if we're unable to
-                    // proceed with running the queue do we remove that pending message and
-                    // jump straight to the FINAL state.
-
-                    // Verify that the backup set includes metadata.  If not, we can't do
-                    // signature/version verification etc, so we simply do not proceed with
-                    // the restore operation.
-                    if (!mPmAgent.hasMetadata()) {
-                        Slog.e(TAG, "No restore metadata available, so not restoring settings");
-                        EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE,
-                                PACKAGE_MANAGER_SENTINEL,
-                                "Package manager restore metadata missing");
-                        mStatus = BackupTransport.TRANSPORT_ERROR;
-                        mBackupHandler.removeMessages(MSG_BACKUP_RESTORE_STEP, this);
-                        nextState = UnifiedRestoreState.FINAL;
-                        return;
-                    }
-
-                    // Success; cache the metadata and continue as expected with the
-                    // RUNNING_QUEUE step already enqueued.
-                    if (DEBUG) {
-                        Slog.v(TAG, "Got metadata; caching and proceeding to restore");
-                    }
-                    try {
-                        mPmAgent.saveToDisk(metadataFile);
-                    } catch (IOException e) {
-                        // Something bad; we need to abort
-                        Slog.e(TAG, "Unable to write restored metadata");
-                        EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE,
-                                PACKAGE_MANAGER_SENTINEL,
-                                "Unable to write restored metadata");
-                        mStatus = BackupTransport.TRANSPORT_ERROR;
-                        mBackupHandler.removeMessages(MSG_BACKUP_RESTORE_STEP, this);
-                        nextState = UnifiedRestoreState.FINAL;
-                        return;
-                    }
-                } else {
-                    // We have the PMBA already, so we can proceed directly to
-                    // the RUNNING_QUEUE state ourselves.
-                    if (MORE_DEBUG) Slog.v(TAG, "PMBA from cache; proceeding to run queue");
-                    nextState = UnifiedRestoreState.RUNNING_QUEUE;
+                RestoreDescription desc = mTransport.nextRestorePackage();
+                if (desc == null) {
+                    Slog.e(TAG, "No restore metadata available; halting");
+                    mStatus = BackupTransport.TRANSPORT_ERROR;
+                    executeNextState(UnifiedRestoreState.FINAL);
+                    return;
                 }
+                if (!PACKAGE_MANAGER_SENTINEL.equals(desc.getPackageName())) {
+                    Slog.e(TAG, "Required metadata but got " + desc.getPackageName());
+                    mStatus = BackupTransport.TRANSPORT_ERROR;
+                    executeNextState(UnifiedRestoreState.FINAL);
+                    return;
+                }
+
+                // Pull the Package Manager metadata from the restore set first
+                mCurrentPackage = new PackageInfo();
+                mCurrentPackage.packageName = PACKAGE_MANAGER_SENTINEL;
+                mPmAgent = new PackageManagerBackupAgent(mPackageManager, null);
+                mAgent = IBackupAgent.Stub.asInterface(mPmAgent.onBind());
+                if (MORE_DEBUG) {
+                    Slog.v(TAG, "initiating restore for PMBA");
+                }
+                initiateOneRestore(mCurrentPackage, 0);
+                // The PM agent called operationComplete() already, because our invocation
+                // of it is process-local and therefore synchronous.  That means that the
+                // next-state message (RUNNING_QUEUE) is already enqueued.  Only if we're
+                // unable to proceed with running the queue do we remove that pending
+                // message and jump straight to the FINAL state.
+
+                // Verify that the backup set includes metadata.  If not, we can't do
+                // signature/version verification etc, so we simply do not proceed with
+                // the restore operation.
+                if (!mPmAgent.hasMetadata()) {
+                    Slog.e(TAG, "No restore metadata available, so not restoring");
+                    EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE,
+                            PACKAGE_MANAGER_SENTINEL,
+                            "Package manager restore metadata missing");
+                    mStatus = BackupTransport.TRANSPORT_ERROR;
+                    mBackupHandler.removeMessages(MSG_BACKUP_RESTORE_STEP, this);
+                    executeNextState(UnifiedRestoreState.FINAL);
+                    return;
+                }
+
+                // Success; cache the metadata and continue as expected with the
+                // next state already enqueued
+
             } catch (RemoteException e) {
                 // If we lost the transport at any time, halt
                 Slog.e(TAG, "Unable to contact transport for restore");
                 mStatus = BackupTransport.TRANSPORT_ERROR;
                 mBackupHandler.removeMessages(MSG_BACKUP_RESTORE_STEP, this);
-                nextState = UnifiedRestoreState.FINAL;
+                executeNextState(UnifiedRestoreState.FINAL);
                 return;
-            } finally {
-                executeNextState(nextState);
             }
         }
 
@@ -7267,6 +7227,13 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
 
             final UnifiedRestoreState nextState;
             switch (mState) {
+                case INITIAL:
+                    // We've just (manually) restored the PMBA.  It doesn't need the
+                    // additional restore-finished callback so we bypass that and go
+                    // directly to running the queue.
+                    nextState = UnifiedRestoreState.RUNNING_QUEUE;
+                    break;
+
                 case RESTORE_KEYVALUE:
                 case RESTORE_FULL: {
                     // Okay, we've just heard back from the agent that it's done with
@@ -8187,6 +8154,9 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                 pkg.packageName = packageName;
 
                 mWakelock.acquire();
+                if (MORE_DEBUG) {
+                    Slog.d(TAG, "Restore at install of " + packageName);
+                }
                 Message msg = mBackupHandler.obtainMessage(MSG_RUN_RESTORE);
                 msg.obj = new RestoreParams(transport, dirName, null,
                         restoreSet, pkg, token);
@@ -8368,6 +8338,9 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                     if (token == mRestoreSets[i].token) {
                         long oldId = Binder.clearCallingIdentity();
                         mWakelock.acquire();
+                        if (MORE_DEBUG) {
+                            Slog.d(TAG, "restoreAll() kicking off");
+                        }
                         Message msg = mBackupHandler.obtainMessage(MSG_RUN_RESTORE);
                         msg.obj = new RestoreParams(mRestoreTransport, dirName,
                                 observer, token);
@@ -8439,6 +8412,9 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                     if (token == mRestoreSets[i].token) {
                         long oldId = Binder.clearCallingIdentity();
                         mWakelock.acquire();
+                        if (MORE_DEBUG) {
+                            Slog.d(TAG, "restoreSome() of " + packages.length + " packages");
+                        }
                         Message msg = mBackupHandler.obtainMessage(MSG_RUN_RESTORE);
                         msg.obj = new RestoreParams(mRestoreTransport, dirName, observer, token,
                                 packages, packages.length > 1);
@@ -8518,6 +8494,9 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
             // Ready to go:  enqueue the restore request and claim success
             long oldId = Binder.clearCallingIdentity();
             mWakelock.acquire();
+            if (MORE_DEBUG) {
+                Slog.d(TAG, "restorePackage() : " + packageName);
+            }
             Message msg = mBackupHandler.obtainMessage(MSG_RUN_RESTORE);
             msg.obj = new RestoreParams(mRestoreTransport, dirName,
                     observer, token, app, 0);
