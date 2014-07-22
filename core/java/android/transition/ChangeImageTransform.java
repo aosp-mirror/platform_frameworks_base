@@ -16,7 +16,6 @@
 package android.transition;
 
 import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.TypeEvaluator;
 import android.content.Context;
@@ -196,28 +195,6 @@ public class ChangeImageTransform extends Transition {
     private ObjectAnimator createMatrixAnimator(final ImageView imageView, Matrix startMatrix,
             final Matrix endMatrix) {
         return ObjectAnimator.ofObject(imageView, ANIMATED_TRANSFORM_PROPERTY,
-                new MatrixEvaluator(), startMatrix, endMatrix);
+                new TransitionUtils.MatrixEvaluator(), startMatrix, endMatrix);
     }
-
-    private static class MatrixEvaluator implements TypeEvaluator<Matrix> {
-
-        float[] mTempStartValues = new float[9];
-
-        float[] mTempEndValues = new float[9];
-
-        Matrix mTempMatrix = new Matrix();
-
-        @Override
-        public Matrix evaluate(float fraction, Matrix startValue, Matrix endValue) {
-            startValue.getValues(mTempStartValues);
-            endValue.getValues(mTempEndValues);
-            for (int i = 0; i < 9; i++) {
-                float diff = mTempEndValues[i] - mTempStartValues[i];
-                mTempEndValues[i] = mTempStartValues[i] + (fraction * diff);
-            }
-            mTempMatrix.setValues(mTempEndValues);
-            return mTempMatrix;
-        }
-    }
-
 }

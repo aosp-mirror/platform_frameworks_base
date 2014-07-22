@@ -2276,6 +2276,8 @@
   <public type="attr" name="ageHint" />
   <public type="attr" name="country" />
   <public type="attr" name="windowSharedElementsUseOverlay" />
+  <public type="attr" name="reparent" />
+  <public type="attr" name="reparentWithOverlay" />
 
   <public-padding type="dimen" name="l_resource_pad" end="0x01050010" />
 

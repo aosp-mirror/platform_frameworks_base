@@ -10793,6 +10793,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
     }
 
+    /** @hide */
+    public void setAnimationMatrix(Matrix matrix) {
+        invalidateViewProperty(true, false);
+        mRenderNode.setAnimationMatrix(matrix);
+        invalidateViewProperty(false, true);
+
+        invalidateParentIfNeededAndWasQuickRejected();
+    }
+
     /**
      * Returns the current StateListAnimator if exists.
      *
