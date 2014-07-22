@@ -556,6 +556,9 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     private void clearDeviceInfoList() {
         assertRunOnServiceThread();
+        for (HdmiCecDeviceInfo info : mSafeExternalInputs) {
+            mService.invokeDeviceEventListeners(info, false);
+        }
         mDeviceInfos.clear();
         updateSafeDeviceInfoList();
     }
@@ -1129,6 +1132,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
 
         disableSystemAudioIfExist();
         disableArcIfExist();
+        clearDeviceInfoList();
         checkIfPendingActionsCleared();
     }
 
