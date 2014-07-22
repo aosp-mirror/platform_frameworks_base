@@ -948,6 +948,7 @@ package android {
     field public static final int popupKeyboard = 16843331; // 0x1010243
     field public static final int popupLayout = 16843323; // 0x101023b
     field public static final int popupMenuStyle = 16843520; // 0x1010300
+    field public static final int popupTheme = 16843951; // 0x10104af
     field public static final int popupWindowStyle = 16842870; // 0x1010076
     field public static final int port = 16842793; // 0x1010029
     field public static final int positiveButtonText = 16843253; // 0x10101f5
