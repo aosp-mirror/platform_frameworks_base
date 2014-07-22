@@ -185,8 +185,8 @@ import javax.net.ssl.SSLSession;
 public class ConnectivityService extends IConnectivityManager.Stub {
     private static final String TAG = "ConnectivityService";
 
-    private static final boolean DBG = true;
-    private static final boolean VDBG = true; // STOPSHIP
+    private static final boolean DBG = false;
+    private static final boolean VDBG = false; // STOPSHIP
 
     // network sampling debugging
     private static final boolean SAMPLE_DBG = false;

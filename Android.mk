@@ -322,15 +322,17 @@ LOCAL_SRC_FILES += \
 	media/java/android/media/IRemoteVolumeObserver.aidl \
 	media/java/android/media/IRingtonePlayer.aidl \
 	media/java/android/media/IVolumeController.aidl \
+	media/java/android/media/browse/IMediaBrowserService.aidl \
+	media/java/android/media/browse/IMediaBrowserServiceCallbacks.aidl \
+	media/java/android/media/projection/IMediaProjection.aidl \
+	media/java/android/media/projection/IMediaProjectionCallback.aidl \
+	media/java/android/media/projection/IMediaProjectionManager.aidl \
 	media/java/android/media/routing/IMediaRouteService.aidl \
 	media/java/android/media/routing/IMediaRouteClientCallback.aidl \
 	media/java/android/media/routing/IMediaRouter.aidl \
 	media/java/android/media/routing/IMediaRouterDelegate.aidl \
 	media/java/android/media/routing/IMediaRouterRoutingCallback.aidl \
 	media/java/android/media/routing/IMediaRouterStateCallback.aidl \
-	media/java/android/media/projection/IMediaProjection.aidl \
-	media/java/android/media/projection/IMediaProjectionCallback.aidl \
-	media/java/android/media/projection/IMediaProjectionManager.aidl \
 	media/java/android/media/session/IActiveSessionsListener.aidl \
 	media/java/android/media/session/ISessionController.aidl \
 	media/java/android/media/session/ISessionControllerCallback.aidl \
