@@ -21,7 +21,6 @@ import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -55,6 +54,8 @@ public class AsmGenerator {
     private Map<String, ClassReader> mDeps;
     /** All files that are to be copied as-is. */
     private Map<String, InputStream> mCopyFiles;
+    /** All classes where certain method calls need to be rewritten. */
+    private Set<String> mReplaceMethodCallsClasses;
     /** Counter of number of classes renamed during transform. */
     private int mRenameCount;
     /** FQCN Names of the classes to rename: map old-FQCN => new-FQCN */
@@ -133,7 +134,7 @@ public class AsmGenerator {
             assert i + 1 < n;
             String oldFqcn = binaryToInternalClassName(refactorClasses[i]);
             String newFqcn = binaryToInternalClassName(refactorClasses[i + 1]);
-            mRefactorClasses.put(oldFqcn, newFqcn);;
+            mRefactorClasses.put(oldFqcn, newFqcn);
         }
 
         // create the map of renamed class -> return type of method to delete.
@@ -203,23 +204,12 @@ public class AsmGenerator {
         mCopyFiles = copyFiles;
     }
 
-    /** Gets the map of classes to output as-is, except if they have native methods */
-    public Map<String, ClassReader> getKeep() {
-        return mKeep;
-    }
-
-    /** Gets the map of dependencies that must be completely stubbed */
-    public Map<String, ClassReader> getDeps() {
-        return mDeps;
-    }
-
-    /** Gets the map of files to output as-is. */
-    public Map<String, InputStream> getCopyFiles() {
-        return mCopyFiles;
+    public void setRewriteMethodCallClasses(Set<String> rewriteMethodCallClasses) {
+        mReplaceMethodCallsClasses = rewriteMethodCallClasses;
     }
 
     /** Generates the final JAR */
-    public void generate() throws FileNotFoundException, IOException {
+    public void generate() throws IOException {
         TreeMap<String, byte[]> all = new TreeMap<String, byte[]>();
 
         for (Class<?> clazz : mInjectClasses) {
@@ -329,14 +319,14 @@ public class AsmGenerator {
 
         String newName = transformName(className);
         // transformName returns its input argument if there's no need to rename the class
-        if (newName != className) {
+        if (!newName.equals(className)) {
             mRenameCount++;
             // This class is being renamed, so remove it from the list of classes not renamed.
             mClassesNotRenamed.remove(className);
         }
 
         mLog.debug("Transform %s%s%s%s", className,
-                newName == className ? "" : " (renamed to " + newName + ")",
+                newName.equals(className) ? "" : " (renamed to " + newName + ")",
                 hasNativeMethods ? " -- has natives" : "",
                 stubNativesOnly ? " -- stub natives only" : "");
 
@@ -344,8 +334,14 @@ public class AsmGenerator {
         // original class reader.
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
 
-        ClassVisitor cv = new RefactorClassAdapter(cw, mRefactorClasses);
-        if (newName != className) {
+        ClassVisitor cv = cw;
+
+        if (mReplaceMethodCallsClasses.contains(className)) {
+            cv = new ReplaceMethodCallsAdapter(cv);
+        }
+
+        cv = new RefactorClassAdapter(cv, mRefactorClasses);
+        if (!newName.equals(className)) {
             cv = new RenameClassAdapter(cv, className, newName);
         }
 
