@@ -28,7 +28,7 @@ import android.os.RemoteException;
 import java.lang.reflect.Method;
 
 /**
- * Translate camera service status_t return values into exceptions.
+ * Translate camera device status_t return values into exceptions.
  *
  * @see android.hardware.camera2.utils.CameraBinderDecorator#newInstance
  * @hide
@@ -57,7 +57,7 @@ public class CameraBinderDecorator {
     public static final int EUSERS = -87;
 
 
-    private static class CameraBinderDecoratorListener implements Decorator.DecoratorListener {
+    static class CameraBinderDecoratorListener implements Decorator.DecoratorListener {
 
         @Override
         public void onBeforeInvocation(Method m, Object[] args) {
@@ -76,10 +76,9 @@ public class CameraBinderDecorator {
         public boolean onCatchException(Method m, Object[] args, Throwable t) {
 
             if (t instanceof DeadObjectException) {
-                UncheckedThrow.throwAnyException(new CameraRuntimeException(
-                        CAMERA_DISCONNECTED,
+                throw new CameraRuntimeException(CAMERA_DISCONNECTED,
                         "Process hosting the camera service has died unexpectedly",
-                        t));
+                        t);
             } else if (t instanceof RemoteException) {
                 throw new UnsupportedOperationException("An unknown RemoteException was thrown" +
                         " which should never happen.", t);
@@ -112,26 +111,20 @@ public class CameraBinderDecorator {
             case BAD_VALUE:
                 throw new IllegalArgumentException("Bad argument passed to camera service");
             case DEAD_OBJECT:
-                UncheckedThrow.throwAnyException(new CameraRuntimeException(
-                        CAMERA_DISCONNECTED));
+                throw new CameraRuntimeException(CAMERA_DISCONNECTED);
             case EACCES:
-                UncheckedThrow.throwAnyException(new CameraRuntimeException(
-                        CAMERA_DISABLED));
+                throw new CameraRuntimeException(CAMERA_DISABLED);
             case EBUSY:
-                UncheckedThrow.throwAnyException(new CameraRuntimeException(
-                        CAMERA_IN_USE));
+                throw new CameraRuntimeException(CAMERA_IN_USE);
             case EUSERS:
-                UncheckedThrow.throwAnyException(new CameraRuntimeException(
-                        MAX_CAMERAS_IN_USE));
+                throw new CameraRuntimeException(MAX_CAMERAS_IN_USE);
             case ENODEV:
-                UncheckedThrow.throwAnyException(new CameraRuntimeException(
-                        CAMERA_DISCONNECTED));
+                throw new CameraRuntimeException(CAMERA_DISCONNECTED);
             case EOPNOTSUPP:
-                UncheckedThrow.throwAnyException(new CameraRuntimeException(
-                        CAMERA_DEPRECATED_HAL));
+                throw new CameraRuntimeException(CAMERA_DEPRECATED_HAL);
             case INVALID_OPERATION:
-                UncheckedThrow.throwAnyException(new IllegalStateException(
-                        "Illegal state encountered in camera service."));
+                throw new IllegalStateException(
+                        "Illegal state encountered in camera service.");
         }
 
         /**
