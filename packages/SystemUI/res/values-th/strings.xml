@@ -166,18 +166,12 @@
     <string name="accessibility_quick_settings_close" msgid="2571790856136835943">"ปิดแผงควบคุม"</string>
     <string name="accessibility_quick_settings_more_time" msgid="5778794273488176726">"เวลามากขึ้น"</string>
     <string name="accessibility_quick_settings_less_time" msgid="101026945195230084">"เวลาน้อยลง"</string>
-    <!-- no translation found for data_usage_disabled_dialog_3g_title (2626865386971800302) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_4g_title (4629078114195977196) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_mobile_title (5793456071535876132) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_title (8723412000355709802) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog (6468718338038876604) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_enable (5538068036107372895) -->
-    <skip />
+    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"ข้อมูล 2G-3G ปิดอยู่"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"ข้อมูล 4G ปิดอยู่"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"ข้อมูลมือถือปิดอยู่"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"ข้อมูลปิดอยู่"</string>
+    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"อุปกรณ์ของคุณปิดการใช้ข้อมูลเนื่องจากถึงขีดจำกัดที่คุณตั้งค่าไว้\n\nผู้ให้บริการอาจเรียกเก็บเงินหากเปิดใช้อีกครั้ง"</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"เปิดใช้ข้อมูล"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"ไม่มีอินเทอร์เน็ต"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"เชื่อมต่อ WiFi แล้ว"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"กำลังค้นหา GPS"</string>
@@ -255,16 +249,12 @@
     <string name="description_target_search" msgid="3091587249776033139">"ค้นหา"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"เลื่อนขึ้นเพื่อ <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"เลื่อนไปทางซ้ายเพื่อ <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>"</string>
-    <!-- no translation found for zen_no_interruptions_with_warning (2522931836819051293) -->
-    <skip />
+    <string name="zen_no_interruptions_with_warning" msgid="2522931836819051293">"ไม่มีการรบกวนรวมถึงเสียงปลุก"</string>
     <string name="zen_no_interruptions" msgid="7970973750143632592">"ไม่มีการรบกวน"</string>
     <string name="zen_important_interruptions" msgid="3477041776609757628">"เฉพาะเรื่องสำคัญเท่านั้น"</string>
-    <!-- no translation found for zen_alarm_information_time (5235772206174372272) -->
-    <skip />
-    <!-- no translation found for zen_alarm_information_day_time (8422733576255047893) -->
-    <skip />
-    <!-- no translation found for zen_alarm_warning (6873910860111498041) -->
-    <skip />
+    <string name="zen_alarm_information_time" msgid="5235772206174372272">"การปลุกครั้งถัดไปของคุณคือเวลา <xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
+    <string name="zen_alarm_information_day_time" msgid="8422733576255047893">"การปลุกครั้งถัดไปของคุณคือ <xliff:g id="ALARM_DAY_AND_TIME">%s</xliff:g>"</string>
+    <string name="zen_alarm_warning" msgid="6873910860111498041">"คุณจะไม่ได้ยินเสียงปลุกในเวลา <xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"การแจ้งเตือนที่เร่งด่วนน้อยด้านล่าง"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"แตะอีกครั้งเพื่อเปิด"</string>
@@ -291,12 +281,8 @@
     <string name="battery_saver_notification_action_text" msgid="7546297220816993504">"เปิดการตั้งค่าโหมดประหยัดแบตเตอรี่"</string>
     <string name="battery_level_template" msgid="1609636980292580020">"<xliff:g id="LEVEL">%d</xliff:g>%%"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"เนื้อหาที่ซ่อน"</string>
-    <!-- no translation found for guest_exit_guest (1619100760451149682) -->
-    <skip />
-    <!-- no translation found for media_projection_dialog_text (3071431025448218928) -->
-    <skip />
-    <!-- no translation found for media_projection_remember_text (3103510882172746752) -->
-    <skip />
-    <!-- no translation found for media_projection_action_text (8470872969457985954) -->
-    <skip />
+    <string name="guest_exit_guest" msgid="1619100760451149682">"ออกจากโหมดผู้เยี่ยมชม"</string>
+    <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> จะเริ่มจับภาพทุกอย่างที่แสดงบนหน้าจอ"</string>
+    <string name="media_projection_remember_text" msgid="3103510882172746752">"ไม่ต้องแสดงข้อความนี้อีก"</string>
+    <string name="media_projection_action_text" msgid="8470872969457985954">"เริ่มเลย"</string>
 </resources>
