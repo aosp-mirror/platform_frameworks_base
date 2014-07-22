@@ -1924,7 +1924,9 @@ status_t OpenGLRenderer::drawRenderNode(RenderNode* renderNode, Rect& dirty, int
         return deferredList.flush(*this, dirty) | status;
     }
 
-    return DrawGlInfo::kStatusDone;
+    // Even if there is no drawing command(Ex: invisible),
+    // it still needs startFrame to clear buffer and start tiling.
+    return startFrame();
 }
 
 void OpenGLRenderer::drawAlphaBitmap(Texture* texture, float left, float top, const SkPaint* paint) {
