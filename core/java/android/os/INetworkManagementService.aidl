@@ -419,4 +419,7 @@ interface INetworkManagementService
      * Deny UID from calling protect().
      */
     void denyProtect(int uid);
+
+    void addInterfaceToLocalNetwork(String iface, in List<RouteInfo> routes);
+    void removeInterfaceFromLocalNetwork(String iface);
 }
