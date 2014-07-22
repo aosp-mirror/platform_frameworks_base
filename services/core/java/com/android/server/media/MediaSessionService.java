@@ -776,8 +776,8 @@ public class MediaSessionService extends SystemService implements Monitor {
                 if ((flags & AudioManager.FLAG_ACTIVE_MEDIA_ONLY) != 0) {
                     if (DEBUG) {
                         Log.d(TAG, "No active session to adjust, skipping media only volume event");
-                        return;
                     }
+                    return;
                 }
                 try {
                     mAudioService.adjustSuggestedStreamVolume(direction, suggestedStream, flags,
