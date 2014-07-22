@@ -16,7 +16,12 @@
 
 package com.android.systemui.recents.views;
 
+import android.animation.ValueAnimator;
 import android.graphics.Rect;
+import android.view.View;
+import android.view.ViewPropertyAnimator;
+import android.view.animation.Interpolator;
+import com.android.systemui.recents.Constants;
 
 
 /* The transform state for a task view */
@@ -75,6 +80,73 @@ public class TaskViewTransform {
     }
     public boolean hasTranslationZChangedFrom(float v) {
         return (Float.compare(translationZ, v) != 0);
+    }
+
+    /** Applies this transform to a view. */
+    public void applyToTaskView(View v, int duration, Interpolator interp,
+                                ValueAnimator.AnimatorUpdateListener scaleUpdateListener) {
+        // Check to see if any properties have changed, and update the task view
+        if (duration > 0) {
+            ViewPropertyAnimator anim = v.animate();
+            boolean useLayers = false;
+
+            // Animate to the final state
+            if (hasTranslationYChangedFrom(v.getTranslationY())) {
+                anim.translationY(translationY);
+            }
+            if (Constants.DebugFlags.App.EnableShadows &&
+                    hasTranslationZChangedFrom(v.getTranslationZ())) {
+                anim.translationZ(translationZ);
+            }
+            if (hasScaleChangedFrom(v.getScaleX())) {
+                anim.scaleX(scale)
+                    .scaleY(scale)
+                    .setUpdateListener(scaleUpdateListener);
+                useLayers = true;
+            }
+            if (hasAlphaChangedFrom(v.getAlpha())) {
+                // Use layers if we animate alpha
+                anim.alpha(alpha);
+                useLayers = true;
+            }
+            if (useLayers) {
+                anim.withLayer();
+            }
+            anim.setStartDelay(startDelay)
+                    .setDuration(duration)
+                    .setInterpolator(interp)
+                    .start();
+        } else {
+            // Set the changed properties
+            if (hasTranslationYChangedFrom(v.getTranslationY())) {
+                v.setTranslationY(translationY);
+            }
+            if (Constants.DebugFlags.App.EnableShadows &&
+                    hasTranslationZChangedFrom(v.getTranslationZ())) {
+                v.setTranslationZ(translationZ);
+            }
+            if (hasScaleChangedFrom(v.getScaleX())) {
+                v.setScaleX(scale);
+                v.setScaleY(scale);
+                scaleUpdateListener.onAnimationUpdate(null);
+            }
+            if (hasAlphaChangedFrom(v.getAlpha())) {
+                v.setAlpha(alpha);
+            }
+        }
+    }
+
+    /** Reset the transform on a view. */
+    public static void reset(View v) {
+        v.setTranslationX(0f);
+        v.setTranslationY(0f);
+        if (Constants.DebugFlags.App.EnableShadows) {
+            v.setTranslationZ(0f);
+        }
+        v.setScaleX(1f);
+        v.setScaleY(1f);
+        v.setAlpha(1f);
+        v.invalidate();
     }
 
     @Override

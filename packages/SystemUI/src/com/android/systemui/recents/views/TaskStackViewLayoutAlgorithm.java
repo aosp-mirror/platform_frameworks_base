@@ -17,7 +17,6 @@
 package com.android.systemui.recents.views;
 
 import android.graphics.Rect;
-import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.Task;
@@ -30,14 +29,14 @@ public class TaskStackViewLayoutAlgorithm {
 
     // These are all going to change
     static final float StackOverlapPct = 0.65f; // The overlap height relative to the task height
-    static final float StackPeekHeightPct = 0.1f; // The height of the peek space relative to the stack height
+    static final float StackPeekHeightPct = 0.075f; // The height of the peek space relative to the stack height
     static final float StackPeekMinScale = 0.8f; // The min scale of the last card in the peek area
     static final int StackPeekNumCards = 3; // The number of cards we see in the peek space
 
     RecentsConfiguration mConfig;
 
     // The various rects that define the stack view
-    Rect mRect = new Rect();
+    Rect mViewRect = new Rect();
     Rect mStackRect = new Rect();
     Rect mStackRectSansPeek = new Rect();
     Rect mTaskRect = new Rect();
@@ -53,29 +52,21 @@ public class TaskStackViewLayoutAlgorithm {
     }
 
     /** Computes the stack and task rects */
-    public void computeRects(ArrayList<Task> tasks, int width, int height, int insetLeft, int insetBottom) {
+    public void computeRects(ArrayList<Task> tasks, int windowWidth, int windowHeight,
+                             Rect taskStackBounds) {
         // Note: We let the stack view be the full height because we want the cards to go under the
         //       navigation bar if possible.  However, the stack rects which we use to calculate
         //       max scroll, etc. need to take the nav bar into account
 
         // Compute the stack rects
-        mRect.set(0, 0, width, height);
-        mStackRect.set(mRect);
-        mStackRect.left += insetLeft;
-        mStackRect.bottom -= insetBottom;
+        mViewRect.set(0, 0, windowWidth, windowHeight);
+        mStackRect.set(taskStackBounds);
 
         int widthPadding = (int) (mConfig.taskStackWidthPaddingPct * mStackRect.width());
         int heightPadding = mConfig.taskStackTopPaddingPx;
-        if (Constants.DebugFlags.App.EnableSearchLayout) {
-            mStackRect.top += heightPadding;
-            mStackRect.left += widthPadding;
-            mStackRect.right -= widthPadding;
-            mStackRect.bottom -= heightPadding;
-        } else {
-            mStackRect.inset(widthPadding, heightPadding);
-        }
+        mStackRect.inset(widthPadding, heightPadding);
         mStackRectSansPeek.set(mStackRect);
-        mStackRectSansPeek.top += StackPeekHeightPct * mStackRect.height();
+        mStackRectSansPeek.top += StackPeekHeightPct * windowHeight;
 
         // Compute the task rect
         int size = mStackRect.width();
@@ -91,7 +82,7 @@ public class TaskStackViewLayoutAlgorithm {
         // Compute the min and max scroll values
         int numTasks = Math.max(1, tasks.size());
         int taskHeight = mTaskRect.height();
-        int stackHeight = mStackRectSansPeek.height();
+        int stackHeight = mStackRect.height();
 
         if (numTasks <= 1) {
             // If there is only one task, then center the task in the stack rect (sans peek)
@@ -156,7 +147,7 @@ public class TaskStackViewLayoutAlgorithm {
         } else {
             transformOut.rect.offset(0, transformOut.translationY);
             Utilities.scaleRectAboutCenter(transformOut.rect, transformOut.scale);
-            transformOut.visible = Rect.intersects(mRect, transformOut.rect);
+            transformOut.visible = Rect.intersects(mViewRect, transformOut.rect);
         }
         transformOut.t = t;
         return transformOut;

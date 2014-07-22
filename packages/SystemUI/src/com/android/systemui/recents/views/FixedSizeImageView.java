@@ -17,6 +17,7 @@
 package com.android.systemui.recents.views;
 
 import android.content.Context;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.widget.ImageView;
@@ -27,8 +28,6 @@ import android.widget.ImageView;
  */
 public class FixedSizeImageView extends ImageView {
 
-    int mFixedWidth;
-    int mFixedHeight;
     boolean mAllowRelayout = true;
     boolean mAllowInvalidate = true;
 
@@ -49,13 +48,6 @@ public class FixedSizeImageView extends ImageView {
     }
 
     @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        mFixedWidth = getMeasuredWidth();
-        mFixedHeight = getMeasuredHeight();
-    }
-
-    @Override
     public void requestLayout() {
         if (mAllowRelayout) {
             super.requestLayout();
@@ -71,7 +63,9 @@ public class FixedSizeImageView extends ImageView {
 
     @Override
     public void setImageDrawable(Drawable drawable) {
-        if (drawable == null || (mFixedWidth > 0 && mFixedHeight > 0)) {
+        boolean isNullBitmapDrawable = (drawable instanceof BitmapDrawable) &&
+                (((BitmapDrawable) drawable).getBitmap() == null);
+        if (drawable == null || isNullBitmapDrawable) {
             mAllowRelayout = false;
             mAllowInvalidate = false;
         }

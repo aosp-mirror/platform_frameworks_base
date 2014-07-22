@@ -38,6 +38,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
@@ -437,7 +438,9 @@ public class SystemServicesProxy {
         Rect windowRect = new Rect();
         if (mWm == null) return windowRect;
 
-        mWm.getDefaultDisplay().getRectSize(windowRect);
+        Point p = new Point();
+        mWm.getDefaultDisplay().getRealSize(p);
+        windowRect.set(0, 0, p.x, p.y);
         return windowRect;
     }
 
