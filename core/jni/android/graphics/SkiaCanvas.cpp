@@ -34,6 +34,7 @@
 #include "MinikinSkia.h"
 #include "MinikinUtils.h"
 
+#include "Paint.h"
 #include "TypefaceImpl.h"
 
 #include "unicode/ubidi.h"
@@ -68,7 +69,7 @@ public:
     virtual void restoreToCount(int saveCount);
 
     virtual int saveLayer(float left, float top, float right, float bottom,
-                const SkPaint* paint, SkCanvas::SaveFlags flags);
+                const Paint* paint, SkCanvas::SaveFlags flags);
     virtual int saveLayerAlpha(float left, float top, float right, float bottom,
             int alpha, SkCanvas::SaveFlags flags);
 
@@ -90,39 +91,39 @@ public:
     virtual void setDrawFilter(SkDrawFilter* drawFilter);
 
     virtual void drawColor(int color, SkXfermode::Mode mode);
-    virtual void drawPaint(const SkPaint& paint);
+    virtual void drawPaint(const Paint& paint);
 
-    virtual void drawPoint(float x, float y, const SkPaint& paint);
-    virtual void drawPoints(const float* points, int count, const SkPaint& paint);
+    virtual void drawPoint(float x, float y, const Paint& paint);
+    virtual void drawPoints(const float* points, int count, const Paint& paint);
     virtual void drawLine(float startX, float startY, float stopX, float stopY,
-            const SkPaint& paint);
-    virtual void drawLines(const float* points, int count, const SkPaint& paint);
-    virtual void drawRect(float left, float top, float right, float bottom, const SkPaint& paint);
+            const Paint& paint);
+    virtual void drawLines(const float* points, int count, const Paint& paint);
+    virtual void drawRect(float left, float top, float right, float bottom, const Paint& paint);
     virtual void drawRoundRect(float left, float top, float right, float bottom,
-            float rx, float ry, const SkPaint& paint);
-    virtual void drawCircle(float x, float y, float radius, const SkPaint& paint);
-    virtual void drawOval(float left, float top, float right, float bottom, const SkPaint& paint);
+            float rx, float ry, const Paint& paint);
+    virtual void drawCircle(float x, float y, float radius, const Paint& paint);
+    virtual void drawOval(float left, float top, float right, float bottom, const Paint& paint);
     virtual void drawArc(float left, float top, float right, float bottom,
-            float startAngle, float sweepAngle, bool useCenter, const SkPaint& paint);
-    virtual void drawPath(const SkPath& path, const SkPaint& paint);
+            float startAngle, float sweepAngle, bool useCenter, const Paint& paint);
+    virtual void drawPath(const SkPath& path, const Paint& paint);
     virtual void drawVertices(SkCanvas::VertexMode vertexMode, int vertexCount,
             const float* verts, const float* tex, const int* colors,
-            const uint16_t* indices, int indexCount, const SkPaint& paint);
+            const uint16_t* indices, int indexCount, const Paint& paint);
 
-    virtual void drawBitmap(const SkBitmap& bitmap, float left, float top, const SkPaint* paint);
-    virtual void drawBitmap(const SkBitmap& bitmap, const SkMatrix& matrix, const SkPaint* paint);
+    virtual void drawBitmap(const SkBitmap& bitmap, float left, float top, const Paint* paint);
+    virtual void drawBitmap(const SkBitmap& bitmap, const SkMatrix& matrix, const Paint* paint);
     virtual void drawBitmap(const SkBitmap& bitmap, float srcLeft, float srcTop,
             float srcRight, float srcBottom, float dstLeft, float dstTop,
-            float dstRight, float dstBottom, const SkPaint* paint);
+            float dstRight, float dstBottom, const Paint* paint);
     virtual void drawBitmapMesh(const SkBitmap& bitmap, int meshWidth, int meshHeight,
-            const float* vertices, const int* colors, const SkPaint* paint);
+            const float* vertices, const int* colors, const Paint* paint);
 
     virtual void drawText(const uint16_t* text, int start, int count, int contextCount,
-            float x, float y, int bidiFlags, const SkPaint& paint, TypefaceImpl* typeface);
+            float x, float y, int bidiFlags, const Paint& paint, TypefaceImpl* typeface);
     virtual void drawPosText(const uint16_t* text, const float* positions, int count,
-            int posCount, const SkPaint& paint);
+            int posCount, const Paint& paint);
     virtual void drawTextOnPath(const uint16_t* glyphs, int count, const SkPath& path,
-            float hOffset, float vOffset, const SkPaint& paint);
+            float hOffset, float vOffset, const Paint& paint);
 
 private:
     struct SaveRec {
@@ -134,9 +135,9 @@ private:
     void saveClipsForFrame(SkTArray<SkClipStack::Element>& clips, int frameSaveCount);
     void applyClips(const SkTArray<SkClipStack::Element>& clips);
 
-    void drawPoints(const float* points, int count, const SkPaint& paint,
+    void drawPoints(const float* points, int count, const Paint& paint,
                     SkCanvas::PointMode mode);
-    void drawTextDecorations(float x, float y, float length, const SkPaint& paint);
+    void drawTextDecorations(float x, float y, float length, const Paint& paint);
 
     SkAutoTUnref<SkCanvas> mCanvas;
     SkAutoTDelete<SkDeque> mSaveStack; // lazily allocated, tracks partial saves.
@@ -284,7 +285,7 @@ void SkiaCanvas::restoreToCount(int restoreCount) {
 }
 
 int SkiaCanvas::saveLayer(float left, float top, float right, float bottom,
-            const SkPaint* paint, SkCanvas::SaveFlags flags) {
+            const Paint* paint, SkCanvas::SaveFlags flags) {
     SkRect bounds = SkRect::MakeLTRB(left, top, right, bottom);
     int count = mCanvas->saveLayer(&bounds, paint, flags | SkCanvas::kMatrixClip_SaveFlag);
     recordPartialSave(flags);
@@ -466,7 +467,7 @@ void SkiaCanvas::drawColor(int color, SkXfermode::Mode mode) {
     mCanvas->drawColor(color, mode);
 }
 
-void SkiaCanvas::drawPaint(const SkPaint& paint) {
+void SkiaCanvas::drawPaint(const Paint& paint) {
     mCanvas->drawPaint(paint);
 }
 
@@ -474,7 +475,7 @@ void SkiaCanvas::drawPaint(const SkPaint& paint) {
 // Canvas draw operations: Geometry
 // ----------------------------------------------------------------------------
 
-void SkiaCanvas::drawPoints(const float* points, int count, const SkPaint& paint,
+void SkiaCanvas::drawPoints(const float* points, int count, const Paint& paint,
                             SkCanvas::PointMode mode) {
     // convert the floats into SkPoints
     count >>= 1;    // now it is the number of points
@@ -488,57 +489,57 @@ void SkiaCanvas::drawPoints(const float* points, int count, const SkPaint& paint
 }
 
 
-void SkiaCanvas::drawPoint(float x, float y, const SkPaint& paint) {
+void SkiaCanvas::drawPoint(float x, float y, const Paint& paint) {
     mCanvas->drawPoint(x, y, paint);
 }
 
-void SkiaCanvas::drawPoints(const float* points, int count, const SkPaint& paint) {
+void SkiaCanvas::drawPoints(const float* points, int count, const Paint& paint) {
     this->drawPoints(points, count, paint, SkCanvas::kPoints_PointMode);
 }
 
 void SkiaCanvas::drawLine(float startX, float startY, float stopX, float stopY,
-                          const SkPaint& paint) {
+                          const Paint& paint) {
     mCanvas->drawLine(startX, startY, stopX, stopY, paint);
 }
 
-void SkiaCanvas::drawLines(const float* points, int count, const SkPaint& paint) {
+void SkiaCanvas::drawLines(const float* points, int count, const Paint& paint) {
     this->drawPoints(points, count, paint, SkCanvas::kLines_PointMode);
 }
 
 void SkiaCanvas::drawRect(float left, float top, float right, float bottom,
-        const SkPaint& paint) {
+        const Paint& paint) {
     mCanvas->drawRectCoords(left, top, right, bottom, paint);
 
 }
 
 void SkiaCanvas::drawRoundRect(float left, float top, float right, float bottom,
-        float rx, float ry, const SkPaint& paint) {
+        float rx, float ry, const Paint& paint) {
     SkRect rect = SkRect::MakeLTRB(left, top, right, bottom);
     mCanvas->drawRoundRect(rect, rx, ry, paint);
 }
 
-void SkiaCanvas::drawCircle(float x, float y, float radius, const SkPaint& paint) {
+void SkiaCanvas::drawCircle(float x, float y, float radius, const Paint& paint) {
     mCanvas->drawCircle(x, y, radius, paint);
 }
 
-void SkiaCanvas::drawOval(float left, float top, float right, float bottom, const SkPaint& paint) {
+void SkiaCanvas::drawOval(float left, float top, float right, float bottom, const Paint& paint) {
     SkRect oval = SkRect::MakeLTRB(left, top, right, bottom);
     mCanvas->drawOval(oval, paint);
 }
 
 void SkiaCanvas::drawArc(float left, float top, float right, float bottom,
-        float startAngle, float sweepAngle, bool useCenter, const SkPaint& paint) {
+        float startAngle, float sweepAngle, bool useCenter, const Paint& paint) {
     SkRect arc = SkRect::MakeLTRB(left, top, right, bottom);
     mCanvas->drawArc(arc, startAngle, sweepAngle, useCenter, paint);
 }
 
-void SkiaCanvas::drawPath(const SkPath& path, const SkPaint& paint) {
+void SkiaCanvas::drawPath(const SkPath& path, const Paint& paint) {
     mCanvas->drawPath(path, paint);
 }
 
 void SkiaCanvas::drawVertices(SkCanvas::VertexMode vertexMode, int vertexCount,
                               const float* verts, const float* texs, const int* colors,
-                              const uint16_t* indices, int indexCount, const SkPaint& paint) {
+                              const uint16_t* indices, int indexCount, const Paint& paint) {
 #ifndef SK_SCALAR_IS_FLOAT
     SkDEBUGFAIL("SkScalar must be a float for these conversions to be valid");
 #endif
@@ -551,24 +552,24 @@ void SkiaCanvas::drawVertices(SkCanvas::VertexMode vertexMode, int vertexCount,
 // Canvas draw operations: Bitmaps
 // ----------------------------------------------------------------------------
 
-void SkiaCanvas::drawBitmap(const SkBitmap& bitmap, float left, float top, const SkPaint* paint) {
+void SkiaCanvas::drawBitmap(const SkBitmap& bitmap, float left, float top, const Paint* paint) {
     mCanvas->drawBitmap(bitmap, left, top, paint);
 }
 
-void SkiaCanvas::drawBitmap(const SkBitmap& bitmap, const SkMatrix& matrix, const SkPaint* paint) {
+void SkiaCanvas::drawBitmap(const SkBitmap& bitmap, const SkMatrix& matrix, const Paint* paint) {
     mCanvas->drawBitmapMatrix(bitmap, matrix, paint);
 }
 
 void SkiaCanvas::drawBitmap(const SkBitmap& bitmap, float srcLeft, float srcTop,
                             float srcRight, float srcBottom, float dstLeft, float dstTop,
-                            float dstRight, float dstBottom, const SkPaint* paint) {
+                            float dstRight, float dstBottom, const Paint* paint) {
     SkRect srcRect = SkRect::MakeLTRB(srcLeft, srcTop, srcRight, srcBottom);
     SkRect dstRect = SkRect::MakeLTRB(dstLeft, dstTop, dstRight, dstBottom);
     mCanvas->drawBitmapRectToRect(bitmap, &srcRect, dstRect, paint);
 }
 
 void SkiaCanvas::drawBitmapMesh(const SkBitmap& bitmap, int meshWidth, int meshHeight,
-        const float* vertices, const int* colors, const SkPaint* paint) {
+        const float* vertices, const int* colors, const Paint* paint) {
 
     const int ptCount = (meshWidth + 1) * (meshHeight + 1);
     const int indexCount = meshWidth * meshHeight * 6;
@@ -650,7 +651,7 @@ void SkiaCanvas::drawBitmapMesh(const SkBitmap& bitmap, int meshWidth, int meshH
 #endif
 
     // cons-up a shader for the bitmap
-    SkPaint tmpPaint;
+    Paint tmpPaint;
     if (paint) {
         tmpPaint = *paint;
     }
@@ -670,7 +671,7 @@ void SkiaCanvas::drawBitmapMesh(const SkBitmap& bitmap, int meshWidth, int meshH
 
 class DrawTextFunctor {
 public:
-    DrawTextFunctor(const Layout& layout, SkCanvas* canvas, float x, float y, SkPaint* paint,
+    DrawTextFunctor(const Layout& layout, SkCanvas* canvas, float x, float y, Paint* paint,
                 uint16_t* glyphs, SkPoint* pos)
             : layout(layout), canvas(canvas), x(x), y(y), paint(paint), glyphs(glyphs),
                 pos(pos) { }
@@ -688,13 +689,13 @@ private:
     SkCanvas* canvas;
     float x;
     float y;
-    SkPaint* paint;
+    Paint* paint;
     uint16_t* glyphs;
     SkPoint* pos;
 };
 
 void SkiaCanvas::drawText(const uint16_t* text, int start, int count, int contextCount,
-        float x, float y, int bidiFlags, const SkPaint& paint, TypefaceImpl* typeface) {
+        float x, float y, int bidiFlags, const Paint& paint, TypefaceImpl* typeface) {
     Layout layout;
     std::string css = MinikinUtils::setLayoutProperties(&layout, &paint, bidiFlags, typeface);
     layout.doLayout(text, start, count, contextCount, css);
@@ -703,10 +704,10 @@ void SkiaCanvas::drawText(const uint16_t* text, int start, int count, int contex
     uint16_t* glyphs = new uint16_t[nGlyphs];
     SkPoint* pos = new SkPoint[nGlyphs];
 
-    SkPaint paintCopy(paint);
+    Paint paintCopy(paint);
     x += MinikinUtils::xOffsetForTextAlign(&paintCopy, layout);
-    paintCopy.setTextAlign(SkPaint::kLeft_Align);
-    paintCopy.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
+    paintCopy.setTextAlign(Paint::kLeft_Align);
+    paintCopy.setTextEncoding(Paint::kGlyphID_TextEncoding);
 
     DrawTextFunctor f(layout, mCanvas, x, y, &paintCopy, glyphs, pos);
     MinikinUtils::forFontRun(layout, &paintCopy, f);
@@ -721,27 +722,27 @@ void SkiaCanvas::drawText(const uint16_t* text, int start, int count, int contex
 #define kStdUnderline_Offset    (1.0f / 9.0f)
 #define kStdUnderline_Thickness (1.0f / 18.0f)
 
-void SkiaCanvas::drawTextDecorations(float x, float y, float length, const SkPaint& paint) {
+void SkiaCanvas::drawTextDecorations(float x, float y, float length, const Paint& paint) {
     uint32_t flags;
     SkDrawFilter* drawFilter = mCanvas->getDrawFilter();
     if (drawFilter) {
-        SkPaint paintCopy(paint);
+        Paint paintCopy(paint);
         drawFilter->filter(&paintCopy, SkDrawFilter::kText_Type);
         flags = paintCopy.getFlags();
     } else {
         flags = paint.getFlags();
     }
-    if (flags & (SkPaint::kUnderlineText_Flag | SkPaint::kStrikeThruText_Flag)) {
+    if (flags & (Paint::kUnderlineText_Flag | Paint::kStrikeThruText_Flag)) {
         SkScalar left = x;
         SkScalar right = x + length;
         float textSize = paint.getTextSize();
         float strokeWidth = fmax(textSize * kStdUnderline_Thickness, 1.0f);
-        if (flags & SkPaint::kUnderlineText_Flag) {
+        if (flags & Paint::kUnderlineText_Flag) {
             SkScalar top = y + textSize * kStdUnderline_Offset - 0.5f * strokeWidth;
             SkScalar bottom = y + textSize * kStdUnderline_Offset + 0.5f * strokeWidth;
             mCanvas->drawRectCoords(left, top, right, bottom, paint);
         }
-        if (flags & SkPaint::kStrikeThruText_Flag) {
+        if (flags & Paint::kStrikeThruText_Flag) {
             SkScalar top = y + textSize * kStdStrikeThru_Offset - 0.5f * strokeWidth;
             SkScalar bottom = y + textSize * kStdStrikeThru_Offset + 0.5f * strokeWidth;
             mCanvas->drawRectCoords(left, top, right, bottom, paint);
@@ -750,7 +751,7 @@ void SkiaCanvas::drawTextDecorations(float x, float y, float length, const SkPai
 }
 
 void SkiaCanvas::drawPosText(const uint16_t* text, const float* positions, int count, int posCount,
-        const SkPaint& paint) {
+        const Paint& paint) {
     SkPoint* posPtr = posCount > 0 ? new SkPoint[posCount] : NULL;
     int indx;
     for (indx = 0; indx < posCount; indx++) {
@@ -758,15 +759,15 @@ void SkiaCanvas::drawPosText(const uint16_t* text, const float* positions, int c
         posPtr[indx].fY = positions[(indx << 1) + 1];
     }
 
-    SkPaint paintCopy(paint);
-    paintCopy.setTextEncoding(SkPaint::kUTF16_TextEncoding);
+    Paint paintCopy(paint);
+    paintCopy.setTextEncoding(Paint::kUTF16_TextEncoding);
     mCanvas->drawPosText(text, count, posPtr, paintCopy);
 
     delete[] posPtr;
 }
 
 void SkiaCanvas::drawTextOnPath(const uint16_t* glyphs, int count, const SkPath& path,
-        float hOffset, float vOffset, const SkPaint& paint) {
+        float hOffset, float vOffset, const Paint& paint) {
     mCanvas->drawTextOnPathHV(glyphs, count, path, hOffset, vOffset, paint);
 }
 

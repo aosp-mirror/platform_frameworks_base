@@ -26,6 +26,7 @@
 #include <Animator.h>
 #include <DisplayListRenderer.h>
 #include <RenderNode.h>
+#include <Paint.h>
 
 namespace android {
 
@@ -95,7 +96,7 @@ static jboolean android_view_RenderNode_setLayerType(JNIEnv* env,
 
 static jboolean android_view_RenderNode_setLayerPaint(JNIEnv* env,
         jobject clazz, jlong renderNodePtr, jlong paintPtr) {
-    SkPaint* paint = reinterpret_cast<SkPaint*>(paintPtr);
+    Paint* paint = reinterpret_cast<Paint*>(paintPtr);
     return SET_AND_DIRTY(mutateLayerProperties().setFromPaint, paint, RenderNode::GENERIC);
 }
 

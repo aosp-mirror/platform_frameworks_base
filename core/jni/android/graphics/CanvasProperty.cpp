@@ -16,6 +16,7 @@
 
 #include "jni.h"
 #include "GraphicsJNI.h"
+#include "Paint.h"
 #include <android_runtime/AndroidRuntime.h>
 
 #include <utils/RefBase.h>
@@ -32,7 +33,7 @@ static jlong createFloat(JNIEnv* env, jobject clazz, jfloat initialValue) {
 }
 
 static jlong createPaint(JNIEnv* env, jobject clazz, jlong paintPtr) {
-    const SkPaint* paint = reinterpret_cast<const SkPaint*>(paintPtr);
+    const Paint* paint = reinterpret_cast<const Paint*>(paintPtr);
     return reinterpret_cast<jlong>(new CanvasPropertyPaint(*paint));
 }
 

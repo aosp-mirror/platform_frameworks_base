@@ -370,12 +370,12 @@ SkCanvas* GraphicsJNI::getNativeCanvas(JNIEnv* env, jobject canvas) {
     return c;
 }
 
-SkPaint* GraphicsJNI::getNativePaint(JNIEnv* env, jobject paint) {
+android::Paint* GraphicsJNI::getNativePaint(JNIEnv* env, jobject paint) {
     SkASSERT(env);
     SkASSERT(paint);
     SkASSERT(env->IsInstanceOf(paint, gPaint_class));
     jlong paintHandle = env->GetLongField(paint, gPaint_nativeInstanceID);
-    SkPaint* p = reinterpret_cast<SkPaint*>(paintHandle);
+    android::Paint* p = reinterpret_cast<android::Paint*>(paintHandle);
     SkASSERT(p);
     return p;
 }
