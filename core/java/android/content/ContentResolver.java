@@ -2153,8 +2153,16 @@ public abstract class ContentResolver {
      * @param sync the master auto-sync setting that applies to all the providers and accounts
      */
     public static void setMasterSyncAutomatically(boolean sync) {
+        setMasterSyncAutomaticallyAsUser(sync, UserHandle.getCallingUserId());
+    }
+
+    /**
+     * @see #setMasterSyncAutomatically(boolean)
+     * @hide
+     */
+    public static void setMasterSyncAutomaticallyAsUser(boolean sync, int userId) {
         try {
-            getContentService().setMasterSyncAutomatically(sync);
+            getContentService().setMasterSyncAutomaticallyAsUser(sync, userId);
         } catch (RemoteException e) {
             // exception ignored; if this is thrown then it means the runtime is in the midst of
             // being restarted

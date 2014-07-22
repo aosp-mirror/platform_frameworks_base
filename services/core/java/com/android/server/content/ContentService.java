@@ -719,10 +719,16 @@ public final class ContentService extends IContentService.Stub {
 
     @Override
     public void setMasterSyncAutomatically(boolean flag) {
+        setMasterSyncAutomaticallyAsUser(flag, UserHandle.getCallingUserId());
+    }
+
+    @Override
+    public void setMasterSyncAutomaticallyAsUser(boolean flag, int userId) {
+        enforceCrossUserPermission(userId,
+                "no permission to set the sync status for user " + userId);
         mContext.enforceCallingOrSelfPermission(Manifest.permission.WRITE_SYNC_SETTINGS,
                 "no permission to write the sync settings");
 
-        int userId = UserHandle.getCallingUserId();
         long identityToken = clearCallingIdentity();
         try {
             SyncManager syncManager = getSyncManager();
