@@ -125,7 +125,7 @@
     <string name="cfTemplateRegisteredTime" msgid="6781621964320635172">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ထပ်ဆင့်မပို့နိုင်ပါ"</string>
     <string name="fcComplete" msgid="3118848230966886575">"ပုံစံကုတ်ပြီးဆုံးသည်"</string>
     <string name="fcError" msgid="3327560126588500777">"ဆက်သွယ်မှုဆိုင်ရာပြသနာ သို့မဟုတ် တရားမဝင်သောပုံစံကုတ်"</string>
-    <string name="httpErrorOk" msgid="1191919378083472204">"သဘောတူသည်"</string>
+    <string name="httpErrorOk" msgid="1191919378083472204">"ကောင်းပြီ"</string>
     <string name="httpError" msgid="7956392511146698522">"ကွန်ရက်အမှားအယွင်း ရှိပါသည်"</string>
     <string name="httpErrorLookup" msgid="4711687456111963163">"URL ကို ရှာဖွေ့ မတွေ့ရှိပါ"</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="6299980280442076799">"ဆိုက် မှန်ကန်မှု စိစစ်ရေး စနစ်ကို ပံ့ပိုး မပေးပါ။"</string>
@@ -294,10 +294,8 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"appအား သင်၏ ဖုန်း သို့မဟုတ် ဆင်းမ်ကဒ်ထဲမှာ သိုလှောင်ထားသည့် စာတိုများသို့ ရေးခွင့် ပြုသည်။ ကြံဖန် appများက သင်၏ စာတိုမျာကို ဖျက်ပစ်နိုင်သည်။"</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"စာပို့ခြင်းအား လက်ခံရယူခြင်း (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"အပလီကေးရှင်းအား WAP စာများ လက်ခံခြင်း၊ ဆောင်ရွက်ခြင်း ခွင့်ပြုပါ။ ဤခွင့်ပြုချက်တွင် အပလီကေးရှင်းအနေဖြင့် သင် လက်ခံရရှိသော စာများအား သင့်အား မပြပဲစောင့်ကြည့်ခွင့်နှင့် ဖျက်ပစ်ခွင့်များ ပါဝင်ပါသည်။"</string>
-    <!-- no translation found for permlab_receiveBluetoothMap (7593811487142360528) -->
-    <skip />
-    <!-- no translation found for permdesc_receiveBluetoothMap (8656755936919466345) -->
-    <skip />
+    <string name="permlab_receiveBluetoothMap" msgid="7593811487142360528">"Bluetooth စာများလက်ခံမည် (MAP)"</string>
+    <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Bluetooth MAP စာများကို app မှလက်ခံကာ အလုပ်လုပ်ရန် ခွင့်ပြင်မည်။ ဆိုလိုသည်မှာ app သည်သင့်အား မပြသဘဲ သင့်ကိရိယာသို့ပို့လိုက်သည့် စာများကို ထိန်းချုပ်နိုင် သို့မဟုတ် ဖျက်နိုင်ပါသည်။"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"အလုပ်လုပ်နေကြသည့် appများကို ရယူခြင်း"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"အပလီကေးရှင်းအား လက်ရှိနဲ့ လတ်တလော လုပ်ဆောင်ခဲ့သော သတင်းအချက်အလက် အသေးစိတ်အား ထုတ်ယူခွင့်ပြုရန်။ အပလီကေးရှင်းမှ သင် ဘယ် အပလီကေးရှင်းများသုံးရှိကြောင့် တွေ့ရှိနိုင်ပါသည်"</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"အသုံးပြုသူများအကြား ဆက်ဆံခြင်း"</string>
@@ -506,7 +504,7 @@
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"စမ်းသပ်ရန်အတွက် တည်နေရာပုံစံတုမူရင်း"</string>
     <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"စမ်းသပ်ရန် သို့ နေရာပြပံ့ပို့းမှု အသစ်သွင်းရန် တည်နေရာဇစ်မြစ်အတုကို ဖန်တီးပါ။ ဤသို့လုပ်ခြင်းအားဖြင့် အပလီကေးရှင်းမှ တည်နေရာကို ကျော်ဖြတ်ပြင်ဆင်ခြင်းနှင်ူ ဂျီပီအက်စ် သို့ နေရာပြပံ့ပိုးမှုကဲ့သို့သော အခြား တည်နေရာဇစ်မြစ်များ၏ အခြေအနေကို ပြန်ပို့ပေးနိုင်မည်ဖြစ်သည်။"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"တည်နေရာပံ့ပိုးမှုညွှန်ကြားချက်အပိုအား ဝင်ရောက်ကြည့်ခြင်း"</string>
-    <string name="permdesc_accessLocationExtraCommands" msgid="5945166642335800763">"အပလီကေးရှင်းကို နေရာပြ ဝန်ဆောင်မှု ပေးသော ထပ်လောင်း အမိန့်များ သုံးဖွင့်ပြုပါ။ ဒီလိုခွင့်ပြုခြင်းဖြင့် အပလီကေးရှင်းမှ ဂျီပီအက်စ် သို့ နေရာပြမှုများကို အနှောင့်အယှက် ပေးနိုင်ပါသည်။"</string>
+    <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"appအား တည်နေရာ စီမံပေးရေး ညွှန်ကြားချက် အပိုများကို ရယူခွင့်ပြုသည်။ သို့ဖြစ်၍ appသည် GPS သို့မဟုတ် အခြား တည်နေရာ ရင်းမြစ်ကို သုံးကြသူတို့၏ လုပ်ငန်းများကို ဝင်စွက်ခွင့် ပြုနိုင်သည်။"</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"တည်နေရာဝန်ဆောင်မှုပေးသူအားထည့်သွင်းရန်ခွင့်ပြုခြင်း"</string>
     <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"စမ်းသပ်ရန် သို့ နေရာပြပံ့ပို့းမှု အသစ်သွင်းရန် တည်နေရာဇစ်မြစ်အတုကို ဖန်တီးပါ။ ဤသို့လုပ်ခြင်းအားဖြင့် အပလီကေးရှင်းမှ တည်နေရာကို ကျော်ဖြတ်ပြင်ဆင်ခြင်းနှင်ူ ဂျီပီအက်စ် သို့ နေရာပြပံ့ပိုးမှုကဲ့သို့သော အခြား တည်နေရာဇစ်မြစ်များ၏ အခြေအနေကို ပြန်ပို့ပေးနိုင်မည်ဖြစ်သည်။"</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"တည်နေရာ အတိအကျ (ဂျီပီအက်စ် နှင့် ကွန်ရက်အခြေခံ)"</string>
@@ -715,14 +713,14 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"appအား ကွန်ရက် မူဝါဒများကို စီမံခန့်ခွဲခွင့် နှင့် app-ဆိုင်ရာ စည်းကမ်းချက်များကို ပြဌာန်းခွင့် ပြုသည်။"</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"ကွန်ယက်အသုံးပြုမှုစာရင်းအား မွမ်းမံခြင်း"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"အပလီကေးရှင်းအား တခြားအပလီကေးရှင်းများမှ ကွန်ရက်အသုံးပြုမှု တွက်ချက်ခြင်းအား ပြင်ဆင်ခွင့် ပြုပါ။ ပုံမှန် အပလီကေးရှင်းများအတွက် မလိုအပ်ပါ။"</string>
-    <string name="permlab_markNetworkSocket" msgid="3658527214914959749">"ဆော့ကတ်မတ်စ် များအား ပြင်ဆင်ခြင်း"</string>
-    <string name="permdesc_markNetworkSocket" msgid="7655568433696356578">"အပလီကေးရှင်းအား routing အတွက် ဆော့ကတ် များ ပြောင်းလဲခွင့် ပြုခြင်း"</string>
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"သတိပေးချက်များအား အသုံးပြုခွင့်"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"အပလီကေးရှင်းကို အကြောင်းကြားချက်များအား ထုတ်လုပ်ရန်၊ လေ့လာရန်၊ ဖျက်ပစ်ရန် ခွင့်ပြုခြင်း။ တခြား အပလီကေးရှင်းများမှ သတိပေးချက်များလည်း ပါဝင်ပါသည်"</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"သတိပေးချက် နားထောင်ခြင်း ဆားဗစ် နှင့် ပူးပေါင်းခြင်း"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"ဖုန်းကိုင်ထားသူနှင့် အကြောင်းကြားချက် နားစွင့်သော ဆားဗစ်မှ ထိပ်ပိုင်းအင်တာဖေ့စ် ကို ပူးပေါင်းခွင့်ပေးခြင်း။ ပုံမှန် အပလီကေးရှင်းများမှာ မလိုအပ်ပါ"</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"အခြေအနေ စီမံပေးရေး ဝန်ဆောင်မှု တစ်ခုဆီသို့ ချိတ်တွဲခြင်း"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"စွဲကိုင်ထားသူအား အခြေအနေကို စီမံပေးသူ၏ ထိပ်သီး အဆင့် အင်တာဖေ့စ်သို့ ချိတ်တွဲခွင့်ကို ပေးသည်။ သာမန် appများ အတွက် ဘယ်တော့မှ မလိုအပ်နိုင်ပါ။"</string>
+    <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"မီဒီယာ လမ်းကြောင်း ဝန်ဆောင်မှုသို့ တွဲချည်ရန်"</string>
+    <string name="permdesc_bindMediaRouteService" msgid="6436655024972496687">"ကိုင်ထားသူအား မီဒီယာ လမ်းကြောင်း ဝန်ဆောင်မှု၏ ထိပ်သီး အဆင့် အင်တာဖေ့စ်သို့ တွဲချည်ခွင့် ပြုသည်။ သာမန် appများ ဘယ်တော့မှ မလိုအပ်နိုင်ပါ။"</string>
     <string name="permlab_bindDreamService" msgid="4153646965978563462">"အိပ်မက် ဝန်ဆောင်မှုသို့ ပေါင်းစည်းမည်"</string>
     <string name="permdesc_bindDreamService" msgid="7325825272223347863">"အိမ်မက်ဝန်ဆောင်မှု၏ ထိပ်တန်းအဆင့် မျက်နှာပြင်အား ကိုင်ဆောင်သူမှ ပေါင်းစည်းရန် ခွင့်ပြုမည်။ သာမန် အပလီကေးရှင်းများတွင် မလိုအပ်ပါ။"</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"မိုဘိုင်းဆက်သွယ်ရေးဝန်ဆောင်မှုဌာန မှ ထည့်သွင်းပေးသော အခြေအနေများအား ပယ်ဖျက်ခြင်း"</string>
@@ -733,8 +731,8 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"appအား တို့ထိရေး မျက်နှာပြင် တိုင်းထွာစံညှိမှုကို မွမ်းမံခွင့် ပြုသည်။ သာမန် appများ  ဘယ်တော့မှ မလိုအပ်နိုင်ပါ။"</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"DRM လက်မှတ်များကို ရယူသုံးခြင်း"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"အပလီကေးရှင်း တစ်ခုအား စီမံလုပ်ကိုင်ခွင့် DRM လက်မှတ်များ သုံးခွင့် ပြုသည်။ သာမန် appများ အတွက် ဘယ်တော့မှ မလိုအပ်နိုင်ပါ။"</string>
-    <string name="permlab_handoverStatus" msgid="4558616203830448763">"ထုတ်လွှင့်မှုများ လွှဲပို့ခြင်းကို လက်ခံသည်။"</string>
-    <string name="permdesc_handoverStatus" msgid="5738446261941364055">"အခြေအနေဆိုင်ရာ အချက်အလက်များ လွှဲပို့ခြင်းကို လက်ခံခွင့်ပြုသည်။"</string>
+    <string name="permlab_handoverStatus" msgid="1159132046126626731">"အန်ဒရွိုက်၏ အလင်းတန်းထိုး လွှဲပြောင်းမှု အခြေအနေကို ရယူရန်"</string>
+    <string name="permdesc_handoverStatus" msgid="4788144087245714948">"ဒီအပလီကေးရှင်းအား အန်ဒရွိုက်၏ လက်ရှိ အလင်းတန်းထိုး လွှဲပြောင်းမှု အကြောင်း အချက်အလက်ကို ရယူခွင့် ပြုသည်"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"စကားဝှက်စည်းမျဥ်းကိုသတ်မှတ်ရန်"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"မျက်နှာပြင် သော့ဖွင့်ရန် လိုအပ်သော စကားလုံးအရေအတွက်နှင့် အမျိုးအစားအား ထိန်းချုပ်ရန်"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"မော်နီတာမျက်နှာပြင်ဖွင့်ရန် ကြိုးစားခွင့်များ"</string>
@@ -1008,8 +1006,8 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"အပလီကေးရှင်းအား ဘရောင်ဇာမှ မှတ်တမ်း သို့ မှတ်သားမှု အမှတ်များအား ပြင်ဆင်ခွင့် ပေးခြင်း။ အပလီကေးရှင်းမှ ဘရောင်ဇာ မှတ်တမ်းများကို ဖျက်ပစ်ခွင့် သို့ ပြင်ဆင်ခွင့် ရှိပါမည်။ မှတ်ချက်။ ဒီခွင့်ပြုချက်ကို တတိယပါတီ ဘရောင်ဇာများ၊ တခြား အပလီကေးရှင်းများမှ သုံးမည် မဟုတ်ပါ။"</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"နှိုးစက်သတ်မှတ်ရန်"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"appအား တပ်ဆင်ထားသည့် နှိုးစက်နာရီ app ထဲတွင် နှိုးစက်ကို သတ်မှတ်ခွင့် ပြုသည်။ အချို့ နှိုးစက် appများက ထိုအင်္ဂါရပ်ကို ပြီးမြောက်အောင် မလုပ်နိုင်ကြပါ။"</string>
-    <string name="permlab_removeVoicemail" msgid="6328485960478155867">"အသံမေးလ်များကို ဖယ်ရှားရန်"</string>
-    <string name="permdesc_removeVoicemail" msgid="8113704917331103065">"appအား သင်၏ အသံမေးလ် ဝင်စာထဲက စာများကို ဖယ်ရှားခွင့်ပြုသည်။"</string>
+    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"အသံစာများကို စီမံကွပ်ကဲရန်"</string>
+    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"appအား သင့် ဝင်ထားသည့် အသံစာများကို မွမ်းမံခွင့် နှင့် ဖယ်ရှားခွင့် ပြုသည်။"</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"အသံစာပို့စနစ်အားထည့်ရန်"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"appအား သင့် အသံမေးလ် ဝင်စာသို့ စာများကို ထည့်ခွင့် ပြုသည်။"</string>
     <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"အသံမေးလ် အားလုံး ဖတ်ရန်"</string>
@@ -1147,7 +1145,7 @@
     <string name="VideoView_error_title" msgid="3534509135438353077">"ဗီဒီယို ပြဿနာ"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"ဒီဗိဒီယိုမှာ ဒီကိရိယာ ပေါ်မှာ ဖွင့်ကြည့်၍ မရနိုင်ပါ။"</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"ဒီဗီဒီယိုကို ပြသလို့ မရပါ"</string>
-    <string name="VideoView_error_button" msgid="2822238215100679592">"သဘောတူသည်"</string>
+    <string name="VideoView_error_button" msgid="2822238215100679592">"ကောင်းပြီ"</string>
     <string name="relative_time" msgid="1818557177829411417">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="noon" msgid="7245353528818587908">"မွန်းတည့်"</string>
     <string name="Noon" msgid="3342127745230013127">"မွန်းတည့်"</string>
@@ -1172,15 +1170,22 @@
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"တချို့ စနစ်လုပ်ငန်းများ အလုပ် မလုပ်ခြင်း ဖြစ်နိုင်ပါသည်"</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> က အလုပ်လုပ်နေသည်။"</string>
     <string name="app_running_notification_text" msgid="4653586947747330058">"အချက်အလက်များ ပိုသိရန် သို့မဟုတ် အပလီကေးရှင်းကို ရပ်ရန် တို့ထိလိုက်ပါ။"</string>
-    <string name="ok" msgid="5970060430562524910">"သဘောတူသည်"</string>
+    <string name="ok" msgid="5970060430562524910">"ကောင်းပြီ"</string>
     <string name="cancel" msgid="6442560571259935130">"ပယ်ဖျက်ရန်"</string>
-    <string name="yes" msgid="5362982303337969312">"သဘောတူသည်"</string>
+    <string name="yes" msgid="5362982303337969312">"ကောင်းပြီ"</string>
     <string name="no" msgid="5141531044935541497">"ပယ်ဖျက်သည်"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"သတိပြုရန်"</string>
     <string name="loading" msgid="7933681260296021180">"တင်နေ…"</string>
     <string name="capital_on" msgid="1544682755514494298">"ဖွင့်ရန်"</string>
     <string name="capital_off" msgid="6815870386972805832">"ပိတ်ရန်"</string>
     <string name="whichApplication" msgid="4533185947064773386">"အသုံးပြု၍ ဆောင်ရွက်မှုအားပြီးဆုံးစေခြင်း"</string>
+    <string name="whichApplicationNamed" msgid="8260158865936942783">"%1$s ကို သုံးပြီး လုပ်ဆောင်ချက် ပြီးဆုံးပါစေ"</string>
+    <string name="whichViewApplication" msgid="3272778576700572102">"...ဖြင့် ဖွင့်မည်"</string>
+    <string name="whichViewApplicationNamed" msgid="2286418824011249620">"%1$s ဖြင့် ဖွင့်မည်"</string>
+    <string name="whichEditApplication" msgid="144727838241402655">"...နှင့် တည်းဖြတ်ရန်"</string>
+    <string name="whichEditApplicationNamed" msgid="1775815530156447790">"%1$s နှင့် တည်းဖြတ်ရန်"</string>
+    <string name="whichSendApplication" msgid="6902512414057341668">"...နှင့် မျှဝေရန်"</string>
+    <string name="whichSendApplicationNamed" msgid="2799370240005424391">"%1$sနှင့် မျှဝေရန်"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"ပင်မ အပလီကေးရှင်း ရွေးချယ်ပါ"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"ဤလှုပ်ရှားမှုအတွက် မူရင်းအတိုင်း အသုံးပြုပါ။"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"စနစ် ဆက်တင် ထဲမှာ ပုံသေကို ရှင်းလိုက်ပါ &gt; Appများ &gt; ဒေါင်းလုဒ် လုပ်ပြီး။"</string>
@@ -1195,7 +1200,7 @@
     <string name="anr_activity_process" msgid="5776209883299089767">"လှုပ်ရှားမှု <xliff:g id="ACTIVITY">%1$s</xliff:g>က မတုံ့ပြန်ပါ။\n\n၎င်းကို သင် ပိတ်လိုပါသလား?"</string>
     <string name="anr_application_process" msgid="8941757607340481057">"<xliff:g id="APPLICATION">%1$s</xliff:g> က မတုံ့ပြန်ပါ။ ၎င်းကို သင် ပိတ်လိုပါသလား?"</string>
     <string name="anr_process" msgid="6513209874880517125">"ဖြစ်စဉ်<xliff:g id="PROCESS">%1$s</xliff:g> က မတုံ့ပြန်ပါ။ \n\n၎င်းကို သင် ပိတ် ချင်သလား?"</string>
-    <string name="force_close" msgid="8346072094521265605">"သဘောတူသည်"</string>
+    <string name="force_close" msgid="8346072094521265605">"ကောင်းပြီ"</string>
     <string name="report" msgid="4060218260984795706">"သတင်းပို့ခြင်း"</string>
     <string name="wait" msgid="7147118217226317732">"စောင့်ဆိုင်းရန်"</string>
     <string name="webpage_unresponsive" msgid="3272758351138122503">"စာမျက်နှာမှာ ပြန်လည် တုံ့ပြန်မှု မရှိတော့ပါ။\n\nပိတ်လိုက်ချင်ပါသလား?"</string>
@@ -1283,10 +1288,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"အမြဲခွင့်ပြုရန်"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"ဘယ်တော့မှခွင့်မပြုပါ"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIMကဒ်ဖယ်ရှားခြင်း"</string>
-    <string name="sim_removed_message" msgid="2333164559970958645">"သတ်မှတ်ထားသောဆင်းမ်ကဒ်ဖြင့် ပြန်လည်ဖွင့်သည့်အထိ မိုဘိုင်းကွန်ယက်ရရှိမည်မဟုတ်ပါ"</string>
+    <string name="sim_removed_message" msgid="5450336489923274918">"သင်က မှန်ကန်သည့် ဆင်းမ် ကဒ် တစ်ခုနှင့် ပြန်မစမချင်း ဆယ်လူလာ ကွန်ရက်ကို ရှာတွေ့မည် မဟုတ်ပါ။"</string>
     <string name="sim_done_button" msgid="827949989369963775">"ပြီးပါပြီ"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"ဆင်းမ်ကဒ် ထည့်ပါသည်"</string>
-    <string name="sim_added_message" msgid="6599945301141050216">"မိုးဘိုင်းကွန်ရက်ကို ဆက်သွယ်ရန် စက်ကို ပြန် စ ပါ"</string>
+    <string name="sim_added_message" msgid="7797975656153714319">"ဆယ်လူလာ ကွန်ရက်ကို ရယူသုံးရန် သင့် ကိရိယာကို ပြန်ဖွင့်ပေးပါ။"</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"အစက ပြန်စရန်"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"အချိန်သတ်မှတ်ရန်"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"ရက်စွဲ အတည်ပြုရန်"</string>
@@ -1315,7 +1320,7 @@
     <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"USBသိမ်းဆည်းခြင်းကိုဖွင့်ရန်"</string>
     <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"သင် ယူအက်စ်ဘီ နဲ့ သိမ်းဆည်းမှုကို ဖွင့်လိုက်ပါက တချို့ အပလီကေးရှင်းများ က ယူအက်စ်ဘီ နဲ့ သိမ်းဆည်းမှု ပြန်ပိတ်သည်အထိ အလုပ်မလုပ် သို့ သုံးစွဲရန် ရှိနေမည် မဟုတ်ပါ"</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"USBဆောင်ရွက်မှုမအောင်မြင်ပါ"</string>
-    <string name="dlg_ok" msgid="7376953167039865701">"သဘောတူသည်"</string>
+    <string name="dlg_ok" msgid="7376953167039865701">"ကောင်းပြီ"</string>
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"မီဒီယာစက်အနေဖြင့် ချိတ်ဆက်သည်"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"ကင်မရာအနေဖြင့်ဆက်သွယ်ခြင်း"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"installerအနေဖြင့် ချိတ်ဆက်သည်"</string>
@@ -1381,6 +1386,8 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"စွဲကိုင်ထားသူအား ယုံကြည်မှု အေဂျင့် ဝန်ဆောင်မှုသို့ ချိတ်တွဲခွင့်ကို ပေးသည်။"</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"အဆင့်မြှင့်ခြင်းနဲ့ ပြန်လည် ထိန်းသိမ်းခြင်း များနှင့် ဆက်ဆံစေခြင်း"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"အပလီကေးရှင်းအား စစ်စတန်အား ပြန်လည် ကယ်ဆယ်မှု နဲ့ အဆင့်မြှင့်ခြင်းများအား လုပ်ဆောင်ခွင့် ပေးခြင်း"</string>
+    <string name="permlab_createMediaProjection" msgid="4941338725487978112">"မီဒီယာ အနာဂတ် ချိတ်ဆက်မှုများကို ဖန်တီးရန်"</string>
+    <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"အပလီကေးရှင်း တစ်ခုအား မီဒီယာ အနာဂတ် ချိတ်ဆက်မှုများကို ဖန်တီးခွင့် ပြုသည်။ ယင်း ချိတ်ဆက်မှုများ ထဲမှာ အပလီကေးရှင်းအား ပြသမှု နှင့် အသံ အကြောင်းအရာများကို ဖမ်းယူခွင့် ပေးနိုင်သည်။ သာမန် appများ အတွက် ဘယ်တော့မှ မလိုအပ်နိုင်ပါ။."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"ချုံ့ချဲ့မှုကို ထိန်းချုပ်ရန် အတွက် နှစ်ကြိမ် ထိပါ"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"ဝဒ်ဂျက်ထည့်လို့ မရပါ"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"သွားပါ"</string>
@@ -1424,11 +1431,7 @@
     <string name="tethered_notification_message" msgid="6857031760103062982">"အပြင်အဆင်ပြုလုပ်ရန် ပိုမိုသိနားလည်စေရန် တို့ထိပါ။"</string>
     <string name="back_button_label" msgid="2300470004503343439">"နောက်သို့"</string>
     <string name="next_button_label" msgid="1080555104677992408">"နောက်"</string>
-    <string name="skip_button_label" msgid="1275362299471631819">"ကျော်ရန်"</string>
-    <string name="throttle_warning_notification_title" msgid="4890894267454867276">"မိုဘိုင်းဒေတများစွာအသုံးပြုမှု"</string>
-    <string name="throttle_warning_notification_message" msgid="3340822228599337743">"မိုဘိုင်းဒေတာ အသုံးပြုမှုကို ပိုမိုသိနားလည်စေရန် တို့ထိပါ။"</string>
-    <string name="throttled_notification_title" msgid="6269541897729781332">"သတ်မှတ်ထားသောမိုဘိုင်းဒေတာအားကျော်လွန်နေသည်"</string>
-    <string name="throttled_notification_message" msgid="5443457321354907181">"မိုဘိုင်းဒေတာ အသုံးပြုမှုအကြောင်း ပိုမိုသိနားလည်စေရန် တို့ထိပါ။"</string>
+    <string name="skip_button_label" msgid="1275362299471631819">"ကျော်"</string>
     <string name="no_matches" msgid="8129421908915840737">"ထပ်တူမတွေ့ရှိပါ"</string>
     <string name="find_on_page" msgid="1946799233822820384">"စာမျက်နှာတွင်ရှာဖွေရန်"</string>
   <plurals name="matches_found">
@@ -1509,14 +1512,14 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"ပြင်ဆင်ရန်"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"ဒေတာအသုံးပြုမှုသတိပေးချက်"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"ဆက်တင်နှင့်သုံးစွဲမှုကြည့်ရန်ထိပါ"</string>
-    <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"2G-3Gဒေတာမရနိုင်ပါ"</string>
-    <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"4Gဒေတာမရနိုင်ပါ"</string>
-    <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"မိုဘိုင်းဒေတာမရနိုင်ပါ"</string>
-    <string name="data_usage_wifi_limit_title" msgid="8992154736441284865">"ဝိုင်ဖိုင်ဒေတာမရနိုင်ပါ"</string>
-    <string name="data_usage_limit_body" msgid="3317964706973601386">"ဖွင့်ရန် ထိလိုက်ပါ"</string>
+    <string name="data_usage_3g_limit_title" msgid="4462365924791862301">"2G-3G ဒေတာ ပိတ်ထား"</string>
+    <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"4G ဒေတာ ပိတ်ထား"</string>
+    <string name="data_usage_mobile_limit_title" msgid="3393439305227911006">"ဆယ်လူလာ ဒေတာ ပိတ်ထား"</string>
+    <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"ကြိုးမဲ့ ဒေတာ ပိတ်ထား"</string>
+    <string name="data_usage_limit_body" msgid="6131350187562939365">"ကန့်သတ်ချက် ပြည့်မီသွားပြီ"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"သတ်မှတ်ထားသော2G-3Gဒေတာအားကျော်လွန်နေသည်"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"သတ်မှတ်ထားသော4Gဒေတာအားကျော်လွန်နေသည်"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"သတ်မှတ်မိုဘိုင်းဒေတာထက်ကျော်နေ"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"ဆယ်လူလာ ကန့်သတ်ချက် ကျော်လွန်သွားပြီ"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"သတ်မှတ်ဝိုင်ဖိုင်ဒေတာထက်ကျော်နေ"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"သက်မှတ်နှုန်းထက် <xliff:g id="SIZE">%s</xliff:g> ကျော်နေပါသည်"</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"နောက်ခံဒေတာ ကန့်သတ်ထားသည်"</string>
@@ -1737,10 +1740,16 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> ခုရွေးချယ်ထားပြီး"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> ကို ဖျက်ပြီးပါပြီ"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"အလုပ် <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="lock_to_app_toast" msgid="2126866321272822564">"သင်သည် app-သို့ သော့ခတ် မုဒ်ထဲမှာ ရှိနေသည်။ ၎င်းထဲမှ ထွက်ရန် အတွက်၊ မကြာမီတုန်းက ခလုတ်ကို ထိလျက် ကိုင်ထားပါ"</string>
+    <string name="lock_to_app_toast_locked" msgid="4229650395479263497">"သင်သည် ကိရိယာဖြင့်သော့ခတ် မုဒ်ထဲမှာ ရှိ​နေသည်။"</string>
     <string name="lock_to_app_title" msgid="5895142291937470019">"lock-to-app ကို သုံးမလား?"</string>
-    <string name="lock_to_app_description" msgid="8597199033462406175">"Lock-to-app သည် ပြသမှုကို app တစ်ခုတည်းနှင့် ချိတ်ထားသည်။\n\nထွက်ရန် မကြာမီက appများ၏ ခလုတ် $ ကို နှိပ်ပြီး ကိုင်ထားပါ"</string>
-    <string name="lock_to_app_negative" msgid="8522854387366288195">"မဟုတ်"</string>
+    <string name="lock_to_app_description" msgid="2800403592608529611">"app-သို့ သော့ခတ်မှုသည် ပြကွက်ကို app တစ်ခုတည်း ထဲတွင် သော့ခတ်ပေးသည်။\n\n ၎င်းထဲမှ ထွက်ရန် အတွက်၊ မကြာမီတုန်းက ခလုတ်ကို ထိလျက် ကိုင်ထားပါ။"</string>
+    <string name="lock_to_app_negative" msgid="2259143719362732728">"မလို၊ ကျေးဇူးပါပဲ"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"စတင်ရန်"</string>
-    <string name="lock_to_app_start" msgid="8889002974248178076">"Lock-to-app စတင်ရန်"</string>
-    <string name="lock_to_app_exit" msgid="7033017307788432861">"Lock-to-app မှထွက်ရန်"</string>
+    <string name="lock_to_app_start" msgid="3074665051586318340">"appသို့ သော့ခတ်ထား"</string>
+    <string name="lock_to_app_exit" msgid="8967089657201849300">"appသို့ ချိတ်ဆက် မထားတော့ပါ"</string>
+    <string name="lock_to_app_use_screen_lock" msgid="1434584309048590886">"မထွက်ခင် %1$s ကို မေးရန်"</string>
+    <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"သော့ဖွင့် ပုံစံဒီဇိုင်း"</string>
+    <string name="lock_to_app_unlock_password" msgid="795224196583495868">"စကားဝှက်"</string>
 </resources>
