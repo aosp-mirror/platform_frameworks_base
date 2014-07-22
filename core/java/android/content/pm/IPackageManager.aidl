@@ -110,6 +110,8 @@ interface IPackageManager {
 
     int getFlagsForUid(int uid);
 
+    String[] getAppOpPermissionPackages(String permissionName);
+
     ResolveInfo resolveIntent(in Intent intent, String resolvedType, int flags, int userId);
 
     boolean canForwardTo(in Intent intent, String resolvedType, int sourceUserId, int targetUserId);

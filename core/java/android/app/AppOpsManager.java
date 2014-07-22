@@ -94,6 +94,13 @@ public class AppOpsManager {
      */
     public static final int MODE_ERRORED = 2;
 
+    /**
+     * Result from {@link #checkOp}, {@link #noteOp}, {@link #startOp}: the given caller should
+     * use its default security check.  This mode is not normally used; it should only be used
+     * with appop permissions, and callers must explicitly check for it and deal with it.
+     */
+    public static final int MODE_DEFAULT = 3;
+
     // when adding one of these:
     //  - increment _NUM_OP
     //  - add rows to sOpToSwitch, sOpToString, sOpNames, sOpPerms, sOpDefaultMode
@@ -588,7 +595,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED,
             AppOpsManager.MODE_ALLOWED,
             AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_IGNORED, // OP_GET_USAGE_STATS
+            AppOpsManager.MODE_DEFAULT, // OP_GET_USAGE_STATS
             AppOpsManager.MODE_ALLOWED,
             AppOpsManager.MODE_ALLOWED,
             AppOpsManager.MODE_IGNORED, // OP_PROJECT_MEDIA

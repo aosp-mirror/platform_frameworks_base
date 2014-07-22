@@ -212,6 +212,9 @@
         <!-- Additional flag from base permission type: this permission can also
              (optionally) be granted to development applications. -->
         <flag name="development" value="0x20" />
+        <!-- Additional flag from base permission type: this permission is closely
+             associated with an app op for controlling access. -->
+        <flag name="appop" value="0x40" />
     </attr>
 
     <!-- Flags indicating more context for a permission group. -->

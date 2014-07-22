@@ -1,6 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
         package="com.android.test.voiceinteraction">
 
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
+
     <application>
         <activity android:name="VoiceInteractionMain" android:label="Voice Interaction"
                 android:theme="@android:style/Theme.Material">
