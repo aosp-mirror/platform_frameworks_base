@@ -30,6 +30,7 @@ import com.android.systemui.qs.QSDetailItems.Item;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.CastController.CastDevice;
+import com.android.systemui.statusbar.policy.KeyguardMonitor;
 
 import java.util.LinkedHashMap;
 import java.util.Set;
@@ -41,11 +42,14 @@ public class CastTile extends QSTile<QSTile.BooleanState> {
 
     private final CastController mController;
     private final CastDetailAdapter mDetailAdapter;
+    private final KeyguardMonitor mKeyguard;
+    private final Callback mCallback = new Callback();
 
     public CastTile(Host host) {
         super(host);
         mController = host.getCastController();
         mDetailAdapter = new CastDetailAdapter();
+        mKeyguard = host.getKeyguardMonitor();
     }
 
     @Override
@@ -64,9 +68,11 @@ public class CastTile extends QSTile<QSTile.BooleanState> {
         if (DEBUG) Log.d(TAG, "setListening " + listening);
         if (listening) {
             mController.addCallback(mCallback);
+            mKeyguard.addCallback(mCallback);
         } else {
             mController.setDiscovering(false);
             mController.removeCallback(mCallback);
+            mKeyguard.removeCallback(mCallback);
         }
     }
 
@@ -84,7 +90,7 @@ public class CastTile extends QSTile<QSTile.BooleanState> {
 
     @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
-        state.visible = true;
+        state.visible = !(mKeyguard.isSecure() && mKeyguard.isShowing());
         state.label = mContext.getString(R.string.quick_settings_cast_title);
         state.value = false;
         final Set<CastDevice> devices = mController.getCastDevices();
@@ -109,9 +115,14 @@ public class CastTile extends QSTile<QSTile.BooleanState> {
                 : mContext.getString(R.string.quick_settings_cast_device_default_name);
     }
 
-    private final CastController.Callback mCallback = new CastController.Callback() {
+    private final class Callback implements CastController.Callback, KeyguardMonitor.Callback {
         @Override
         public void onCastDevicesChanged() {
+            refreshState();
+        }
+
+        @Override
+        public void onKeyguardChanged() {
             refreshState();
         }
     };

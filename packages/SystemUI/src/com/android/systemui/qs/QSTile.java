@@ -30,6 +30,7 @@ import com.android.systemui.qs.QSTile.State;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.FlashlightController;
+import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.statusbar.policy.Listenable;
 import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.NetworkController;
@@ -244,16 +245,16 @@ public abstract class QSTile<TState extends State> implements Listenable {
         void collapsePanels();
         Looper getLooper();
         Context getContext();
+        List<QSTile<?>> getTiles();
         BluetoothController getBluetoothController();
         LocationController getLocationController();
         RotationLockController getRotationLockController();
-        List<QSTile<?>> getTiles();
         NetworkController getNetworkController();
         ZenModeController getZenModeController();
         TetheringController getTetheringController();
         CastController getCastController();
-        VolumeComponent getVolumeComponent();
         FlashlightController getFlashlightController();
+        KeyguardMonitor getKeyguardMonitor();
     }
 
     public static class State {

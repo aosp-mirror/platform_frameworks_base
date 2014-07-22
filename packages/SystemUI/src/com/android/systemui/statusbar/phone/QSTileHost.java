@@ -36,13 +36,13 @@ import com.android.systemui.settings.CurrentUserTracker;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.FlashlightController;
+import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.RotationLockController;
 import com.android.systemui.statusbar.policy.TetheringController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.policy.ZenModeController;
-import com.android.systemui.volume.VolumeComponent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,17 +61,17 @@ public class QSTileHost implements QSTile.Host {
     private final CastController mCast;
     private final Looper mLooper;
     private final CurrentUserTracker mUserTracker;
-    private final VolumeComponent mVolume;
     private final ArrayList<QSTile<?>> mTiles = new ArrayList<QSTile<?>>();
     private final FlashlightController mFlashlight;
     private final UserSwitcherController mUserSwitcherController;
+    private final KeyguardMonitor mKeyguard;
 
     public QSTileHost(Context context, PhoneStatusBar statusBar,
             BluetoothController bluetooth, LocationController location,
             RotationLockController rotation, NetworkController network,
             ZenModeController zen, TetheringController tethering,
-            CastController cast, VolumeComponent volume, FlashlightController flashlight,
-            UserSwitcherController userSwitcher) {
+            CastController cast, FlashlightController flashlight,
+            UserSwitcherController userSwitcher, KeyguardMonitor keyguard) {
         mContext = context;
         mStatusBar = statusBar;
         mBluetooth = bluetooth;
@@ -81,9 +81,9 @@ public class QSTileHost implements QSTile.Host {
         mZen = zen;
         mTethering = tethering;
         mCast = cast;
-        mVolume = volume;
         mFlashlight = flashlight;
         mUserSwitcherController = userSwitcher;
+        mKeyguard = keyguard;
 
         final HandlerThread ht = new HandlerThread(QSTileHost.class.getSimpleName());
         ht.start();
@@ -177,13 +177,13 @@ public class QSTileHost implements QSTile.Host {
     }
 
     @Override
-    public VolumeComponent getVolumeComponent() {
-        return mVolume;
+    public FlashlightController getFlashlightController() {
+        return mFlashlight;
     }
 
     @Override
-    public FlashlightController getFlashlightController() {
-        return mFlashlight;
+    public KeyguardMonitor getKeyguardMonitor() {
+        return mKeyguard;
     }
 
     public UserSwitcherController getUserSwitcherController() {
