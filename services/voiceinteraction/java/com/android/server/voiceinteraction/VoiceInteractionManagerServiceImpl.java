@@ -96,6 +96,13 @@ class VoiceInteractionManagerServiceImpl {
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
+            try {
+                if (mService != null) {
+                    mService.shutdown();
+                }
+            } catch (RemoteException e) {
+                Slog.w(TAG, "RemoteException in shutdown", e);
+            }
             mService = null;
         }
     };
@@ -306,6 +313,17 @@ class VoiceInteractionManagerServiceImpl {
         }
         if (mValid) {
             mContext.unregisterReceiver(mBroadcastReceiver);
+        }
+    }
+
+    void notifySoundModelsChangedLocked() {
+        if (mService == null) {
+            Slog.w(TAG, "Not bound to voice interaction service " + mComponent);
+        }
+        try {
+            mService.soundModelsChanged();
+        } catch (RemoteException e) {
+            Slog.w(TAG, "RemoteException while calling soundModelsChanged", e);
         }
     }
 }

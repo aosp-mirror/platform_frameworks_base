@@ -50,30 +50,18 @@ public class MainInteractionService extends VoiceInteractionService {
         Log.i(TAG, "Keyphrase enrollment meta-data: "
                 + Arrays.toString(getKeyphraseEnrollmentInfo().listKeyphraseMetadata()));
 
-        mHotwordDetector = getAlwaysOnHotwordDetector("Hello There", "en-US", mHotwordCallback);
+        mHotwordDetector = createAlwaysOnHotwordDetector("Hello There", "en-US", mHotwordCallback);
+        testHotwordAvailabilityStates();
+    }
+
+    @Override
+    public void onSoundModelsChanged() {
         int availability = mHotwordDetector.getAvailability();
         Log.i(TAG, "Hotword availability = " + availability);
-
-        switch (availability) {
-            case AlwaysOnHotwordDetector.KEYPHRASE_HARDWARE_UNAVAILABLE:
-                Log.i(TAG, "KEYPHRASE_HARDWARE_UNAVAILABLE");
-                break;
-            case AlwaysOnHotwordDetector.KEYPHRASE_UNSUPPORTED:
-                Log.i(TAG, "KEYPHRASE_UNSUPPORTED");
-                break;
-            case AlwaysOnHotwordDetector.KEYPHRASE_UNENROLLED:
-                Log.i(TAG, "KEYPHRASE_UNENROLLED");
-                Intent enroll = mHotwordDetector.getManageIntent(
-                        AlwaysOnHotwordDetector.MANAGE_ACTION_ENROLL);
-                Log.i(TAG, "Need to enroll with " + enroll);
-                break;
-            case AlwaysOnHotwordDetector.KEYPHRASE_ENROLLED:
-                Log.i(TAG, "KEYPHRASE_ENROLLED");
-                int status = mHotwordDetector.startRecognition(
-                        AlwaysOnHotwordDetector.RECOGNITION_FLAG_NONE);
-                Log.i(TAG, "startRecognition status = " + status);
-                break;
+        if (availability == AlwaysOnHotwordDetector.STATE_INVALID) {
+            mHotwordDetector = createAlwaysOnHotwordDetector("Hello There", "en-US", mHotwordCallback);
         }
+        testHotwordAvailabilityStates();
     }
 
     @Override
@@ -83,5 +71,33 @@ public class MainInteractionService extends VoiceInteractionService {
         startSession(args);
         stopSelf(startId);
         return START_NOT_STICKY;
+    }
+
+    private void testHotwordAvailabilityStates() {
+        int availability = mHotwordDetector.getAvailability();
+        Log.i(TAG, "Hotword availability = " + availability);
+        switch (availability) {
+            case AlwaysOnHotwordDetector.STATE_INVALID:
+                Log.i(TAG, "STATE_INVALID");
+                break;
+            case AlwaysOnHotwordDetector.STATE_HARDWARE_UNAVAILABLE:
+                Log.i(TAG, "STATE_HARDWARE_UNAVAILABLE");
+                break;
+            case AlwaysOnHotwordDetector.STATE_KEYPHRASE_UNSUPPORTED:
+                Log.i(TAG, "STATE_KEYPHRASE_UNSUPPORTED");
+                break;
+            case AlwaysOnHotwordDetector.STATE_KEYPHRASE_UNENROLLED:
+                Log.i(TAG, "STATE_KEYPHRASE_UNENROLLED");
+                Intent enroll = mHotwordDetector.getManageIntent(
+                        AlwaysOnHotwordDetector.MANAGE_ACTION_ENROLL);
+                Log.i(TAG, "Need to enroll with " + enroll);
+                break;
+            case AlwaysOnHotwordDetector.STATE_KEYPHRASE_ENROLLED:
+                Log.i(TAG, "STATE_KEYPHRASE_ENROLLED");
+                int status = mHotwordDetector.startRecognition(
+                        AlwaysOnHotwordDetector.RECOGNITION_FLAG_NONE);
+                Log.i(TAG, "startRecognition status = " + status);
+                break;
+        }
     }
 }
