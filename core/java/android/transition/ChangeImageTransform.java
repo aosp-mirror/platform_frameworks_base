@@ -32,10 +32,12 @@ import android.widget.ImageView;
 import java.util.Map;
 
 /**
- * Transitions changes in ImageView {@link ImageView#setScaleType(ImageView.ScaleType)} as
- * well as image scaling due to ImageView size changes. When combined with
- * {@link android.transition.ChangeBounds}, an ImageView that changes size will
- * scale smoothly.
+ * This Transition captures an ImageView's matrix before and after the
+ * scene change and animates it during the transition.
+ *
+ * <p>In combination with ChangeBounds, ChangeImageTransform allows ImageViews
+ * that change size, shape, or {@link android.widget.ImageView.ScaleType} to animate contents
+ * smoothly.</p>
  */
 public class ChangeImageTransform extends Transition {
 
@@ -192,30 +194,8 @@ public class ChangeImageTransform extends Transition {
 
     private ObjectAnimator createMatrixAnimator(final ImageView imageView, Matrix startMatrix,
             final Matrix endMatrix) {
-        ObjectAnimator animator = ObjectAnimator.ofObject(imageView, ANIMATED_TRANSFORM_PROPERTY,
+        return ObjectAnimator.ofObject(imageView, ANIMATED_TRANSFORM_PROPERTY,
                 new MatrixEvaluator(), startMatrix, endMatrix);
-        /*
-        AnimatorListenerAdapter listener = new AnimatorListenerAdapter() {
-            private Matrix mPausedMatrix;
-
-            @Override
-            public void onAnimationPause(Animator animation) {
-                if (mPausedMatrix == null) {
-                    mPausedMatrix = new Matrix();
-                }
-                Matrix imageMatrix = imageView.getImageMatrix();
-                mPausedMatrix.set(imageMatrix);
-                imageView.animateTransform(endMatrix);
-            }
-
-            @Override
-            public void onAnimationResume(Animator animation) {
-                imageView.animateTransform(mPausedMatrix);
-            }
-        };
-        animator.addPauseListener(listener);
-        */
-        return animator;
     }
 
     private static class MatrixEvaluator implements TypeEvaluator<Matrix> {

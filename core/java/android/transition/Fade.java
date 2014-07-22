@@ -69,17 +69,17 @@ public class Fade extends Visibility {
      * Fading mode used in {@link #Fade(int)} to make the transition
      * operate on targets that are appearing. Maybe be combined with
      * {@link #OUT} to fade both in and out. Equivalent to
-     * {@link Visibility#IN}.
+     * {@link Visibility#MODE_IN}.
      */
-    public static final int IN = Visibility.IN;
+    public static final int IN = Visibility.MODE_IN;
 
     /**
      * Fading mode used in {@link #Fade(int)} to make the transition
      * operate on targets that are disappearing. Maybe be combined with
      * {@link #IN} to fade both in and out. Equivalent to
-     * {@link Visibility#OUT}.
+     * {@link Visibility#MODE_OUT}.
      */
-    public static final int OUT = Visibility.OUT;
+    public static final int OUT = Visibility.MODE_OUT;
 
     /**
      * Constructs a Fade transition that will fade targets in and out.

@@ -31979,8 +31979,8 @@ package android.transition {
     method public android.animation.Animator onDisappear(android.view.ViewGroup, android.transition.TransitionValues, int, android.transition.TransitionValues, int);
     method public android.animation.Animator onDisappear(android.view.ViewGroup, android.view.View, android.transition.TransitionValues, android.transition.TransitionValues);
     method public void setMode(int);
-    field public static final int IN = 1; // 0x1
-    field public static final int OUT = 2; // 0x2
+    field public static final int MODE_IN = 1; // 0x1
+    field public static final int MODE_OUT = 2; // 0x2
   }
 
   public abstract class VisibilityPropagation extends android.transition.TransitionPropagation {
