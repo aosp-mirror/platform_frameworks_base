@@ -59,6 +59,11 @@ header.hide=1
       <h4>Flexible and powerful tools </h4>
       <p>Filters and controls help you manage your ads. If you want to use multiple ad
       networks, you can do that too, with free ad network mediation.</p>
+
+      <h4>Ad Policy Compliant</h4>
+      <p>The Google Mobile Ads SDK available in Google Play services is compliant with
+      Google Play Ad Poilcy regarding the usage of
+      <a href="{@docRoot}google/play-services/id.html">advertising ID</a>.</p>
   </div>
 
   <div class="col-6 normal-links">
