@@ -17,7 +17,7 @@
 package com.android.systemui.recents.views;
 
 import android.content.Context;
-import android.graphics.Canvas;
+import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.View;
@@ -27,11 +27,8 @@ import com.android.systemui.recents.model.Task;
 /** The task thumbnail view */
 public class TaskThumbnailView extends FixedSizeImageView {
 
-    Task mTask;
-
     // Task bar clipping
-    Rect mClipRect;
-    boolean mClipTaskBar = true;
+    Rect mClipRect = new Rect();
 
     public TaskThumbnailView(Context context) {
         this(context, null);
@@ -50,40 +47,51 @@ public class TaskThumbnailView extends FixedSizeImageView {
         setScaleType(ScaleType.FIT_XY);
     }
 
-    @Override
-    public void draw(Canvas canvas) {
-        if (mClipTaskBar && (mClipRect != null)) {
-            int restoreCount = canvas.save(Canvas.CLIP_SAVE_FLAG | Canvas.CLIP_TO_LAYER_SAVE_FLAG);
-            canvas.clipRect(mClipRect);
-            super.draw(canvas);
-            canvas.restoreToCount(restoreCount);
-        } else {
-            super.draw(canvas);
-        }
+    /** Updates the clip rect based on the given task bar. */
+    void enableTaskBarClip(View taskBar) {
+        int top = (int) Math.max(0, taskBar.getTranslationY() +
+                taskBar.getMeasuredHeight() - 1);
+        mClipRect.set(0, top, getMeasuredWidth(), getMeasuredHeight());
+        setClipBounds(mClipRect);
     }
 
-    /** Updates the clip rect based on the given task bar. */
-    void updateTaskBarClip(View taskBar) {
-        // If mClipTaskBar is unset first, then we don't bother setting mTaskBar
-        if (mClipTaskBar) {
-            int top = (int) Math.max(0, taskBar.getTranslationY() +
-                    taskBar.getMeasuredHeight() - 1);
-            mClipRect = new Rect(0, top, getMeasuredWidth(), getMeasuredHeight());
-            invalidate(0, 0, taskBar.getMeasuredWidth(), taskBar.getMeasuredHeight() + 1);
-        }
+    /** Convenience method to enable task bar clipping as a runnable. */
+    Runnable enableTaskBarClipAsRunnable(final View taskBar) {
+        return new Runnable() {
+            @Override
+            public void run() {
+                enableTaskBarClip(taskBar);
+            }
+        };
     }
 
     /** Disables the task bar clipping. */
-    void disableClipTaskBarView() {
-        mClipTaskBar = false;
-        if (mClipRect != null) {
-            invalidate(0, 0, mClipRect.width(), mClipRect.top);
+    Runnable disableTaskBarClipAsRunnable() {
+        return new Runnable() {
+            @Override
+            public void run() {
+                mClipRect.set(0, 0, getMeasuredWidth(), getMeasuredHeight());
+                setClipBounds(mClipRect);
+            }
+        };
+    }
+
+    /** Binds the thumbnail view to the screenshot. */
+    boolean bindToScreenshot(Bitmap ss) {
+        if (ss != null) {
+            setImageBitmap(ss);
+            return true;
         }
+        return false;
+    }
+
+    /** Unbinds the thumbnail view from the screenshot. */
+    void unbindFromScreenshot() {
+        setImageBitmap(null);
     }
 
     /** Binds the thumbnail view to the task */
     void rebindToTask(Task t) {
-        mTask = t;
         if (t.thumbnail != null) {
             setImageBitmap(t.thumbnail);
         }
@@ -91,7 +99,6 @@ public class TaskThumbnailView extends FixedSizeImageView {
 
     /** Unbinds the thumbnail view from the task */
     void unbindFromTask() {
-        mTask = null;
         setImageDrawable(null);
     }
 }

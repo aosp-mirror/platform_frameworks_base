@@ -32,18 +32,20 @@ import android.os.UserHandle;
 import android.util.Pair;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewStub;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 import com.android.systemui.R;
-import com.android.systemui.recents.misc.Console;
 import com.android.systemui.recents.misc.DebugTrigger;
 import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.SpaceNode;
+import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
-import com.android.systemui.recents.views.FullscreenTransitionOverlayView;
+import com.android.systemui.recents.views.DebugOverlayView;
 import com.android.systemui.recents.views.RecentsView;
 import com.android.systemui.recents.views.SystemBarScrimViews;
 import com.android.systemui.recents.views.ViewAnimation;
@@ -56,8 +58,7 @@ import java.util.ArrayList;
  * The main Recents activity that is started from AlternateRecentsComponent.
  */
 public class RecentsActivity extends Activity implements RecentsView.RecentsViewCallbacks,
-        RecentsAppWidgetHost.RecentsAppWidgetHostCallbacks,
-        FullscreenTransitionOverlayView.FullScreenTransitionViewCallbacks {
+        RecentsAppWidgetHost.RecentsAppWidgetHostCallbacks {
 
     // Actions and Extras sent from AlternateRecentsComponent
     final static String EXTRA_TRIGGERED_FROM_ALT_TAB = "extra_triggered_from_alt_tab";
@@ -73,17 +74,14 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     SystemBarScrimViews mScrimViews;
     ViewStub mEmptyViewStub;
     View mEmptyView;
-    ViewStub mFullscreenOverlayStub;
-    FullscreenTransitionOverlayView mFullScreenOverlayView;
+    DebugOverlayView mDebugOverlay;
 
     // Search AppWidget
     RecentsAppWidgetHost mAppWidgetHost;
     AppWidgetProviderInfo mSearchAppWidgetInfo;
     AppWidgetHostView mSearchAppWidgetHostView;
 
-
     // Runnables to finish the Recents activity
-    FinishRecentsRunnable mFinishRunnable = new FinishRecentsRunnable();
     FinishRecentsRunnable mFinishLaunchHomeRunnable;
 
     /**
@@ -96,10 +94,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     class FinishRecentsRunnable implements Runnable {
         Intent mLaunchIntent;
         ActivityOptions mLaunchOpts;
-
-        public FinishRecentsRunnable() {
-            // Do nothing
-        }
 
         /**
          * Creates a finish runnable that starts the specified intent, using the given
@@ -151,8 +145,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
             } else if (action.equals(ACTION_START_ENTER_ANIMATION)) {
                 // Try and start the enter animation (or restart it on configuration changed)
                 ReferenceCountedTrigger t = new ReferenceCountedTrigger(context, null, null, null);
-                mRecentsView.startEnterRecentsAnimation(new ViewAnimation.TaskViewEnterContext(
-                        mFullScreenOverlayView, t));
+                mRecentsView.startEnterRecentsAnimation(new ViewAnimation.TaskViewEnterContext(t));
                 onEnterAnimationTriggered();
             }
         }
@@ -187,11 +180,12 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
     /** Updates the set of recent tasks */
     void updateRecentsTasks(Intent launchIntent) {
+        // Load all the tasks
         RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
         SpaceNode root = loader.reload(this, Constants.Values.RecentsTaskLoader.PreloadFirstTasksCount);
         ArrayList<TaskStack> stacks = root.getStacks();
         if (!stacks.isEmpty()) {
-            mRecentsView.setBSP(root);
+            mRecentsView.setTaskStacks(root.getStacks());
         }
 
         // Update the configuration based on the launch intent
@@ -206,6 +200,23 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         mConfig.launchedWithNoRecentTasks = !root.hasTasks();
         mConfig.launchedToTaskId = launchIntent.getIntExtra(
                 AlternateRecentsComponent.EXTRA_TRIGGERED_FROM_TASK_ID, -1);
+
+        // Mark the task that is the launch target
+        int taskStackCount = stacks.size();
+        if (mConfig.launchedToTaskId != -1) {
+            for (int i = 0; i < taskStackCount; i++) {
+                TaskStack stack = stacks.get(i);
+                ArrayList<Task> tasks = stack.getTasks();
+                int taskCount = tasks.size();
+                for (int j = 0; j < taskCount; j++) {
+                    Task t = tasks.get(j);
+                    if (t.key.id == mConfig.launchedToTaskId) {
+                        t.isLaunchTarget = true;
+                        break;
+                    }
+                }
+            }
+        }
 
         // Update the top level view's visibilities
         if (mConfig.launchedWithNoRecentTasks) {
@@ -286,9 +297,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     /** Dismisses recents if we are already visible and the intent is to toggle the recents view */
     boolean dismissRecentsToFocusedTaskOrHome(boolean checkFilteredStackState) {
         if (mVisible) {
-            // If we are mid-animation into Recents, reverse the animation now
-            if (mFullScreenOverlayView != null &&
-                mFullScreenOverlayView.cancelAnimateOnEnterRecents(mFinishRunnable)) return true;
             // If we currently have filtered stacks, then unfilter those first
             if (checkFilteredStackState &&
                 mRecentsView.unfilterFilteredStacks()) return true;
@@ -299,8 +307,8 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                 dismissRecentsToHomeRaw(true);
                 return true;
             }
-            // Otherwise, try and return to the first Task in the stack
-            if (mRecentsView.launchFirstTask()) return true;
+            // Otherwise, try and return to the Task that Recents was launched from
+            if (mRecentsView.launchPreviousTask()) return true;
             // If none of the other cases apply, then just go Home
             dismissRecentsToHomeRaw(true);
             return true;
@@ -323,9 +331,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     /** Dismisses Recents directly to Home if we currently aren't transitioning. */
     boolean dismissRecentsToHome(boolean animated) {
         if (mVisible) {
-            // If we are mid-animation into Recents, reverse the animation now
-            if (mFullScreenOverlayView != null &&
-                mFullScreenOverlayView.cancelAnimateOnEnterRecents(mFinishRunnable)) return true;
             // Return to Home
             dismissRecentsToHomeRaw(animated);
             return true;
@@ -363,8 +368,8 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                 View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
                 View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
         mEmptyViewStub = (ViewStub) findViewById(R.id.empty_view_stub);
-        mFullscreenOverlayStub = (ViewStub) findViewById(R.id.fullscreen_overlay_stub);
         mScrimViews = new SystemBarScrimViews(this, mConfig);
+        inflateDebugOverlay();
 
         // Bind the search app widget when we first start up
         bindSearchBarAppWidget();
@@ -390,17 +395,23 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
             e.printStackTrace();
         }
 
-        // Prepare the screenshot transition if necessary
-        if (Constants.DebugFlags.App.EnableScreenshotAppTransition) {
-            mFullScreenOverlayView = (FullscreenTransitionOverlayView) mFullscreenOverlayStub.inflate();
-            mFullScreenOverlayView.setCallbacks(this);
-            mFullScreenOverlayView.prepareAnimateOnEnterRecents(AlternateRecentsComponent.getLastScreenshot());
-        }
-
         // Update if we are getting a configuration change
         if (savedInstanceState != null) {
             mConfig.updateOnConfigurationChange();
             onConfigurationChange();
+        }
+    }
+
+    /** Inflates the debug overlay if debug mode is enabled. */
+    void inflateDebugOverlay() {
+        if (mConfig.debugModeEnabled && mDebugOverlay == null) {
+            ViewGroup parent = (ViewGroup) findViewById(android.R.id.content).getRootView();
+            mDebugOverlay = new DebugOverlayView(this);
+            FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.MATCH_PARENT);
+            parent.addView(mDebugOverlay, lp);
+            mRecentsView.setDebugOverlay(mDebugOverlay);
         }
     }
 
@@ -411,8 +422,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
         // Try and start the enter animation (or restart it on configuration changed)
         ReferenceCountedTrigger t = new ReferenceCountedTrigger(this, null, null, null);
-        mRecentsView.startEnterRecentsAnimation(new ViewAnimation.TaskViewEnterContext(
-                mFullScreenOverlayView, t));
+        mRecentsView.startEnterRecentsAnimation(new ViewAnimation.TaskViewEnterContext(t));
         onEnterAnimationTriggered();
     }
 
@@ -421,13 +431,13 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         super.onNewIntent(intent);
         setIntent(intent);
 
+        // Clear any debug rects
+        if (mDebugOverlay != null) {
+            mDebugOverlay.clear();
+        }
+
         // Update the recent tasks
         updateRecentsTasks(intent);
-
-        // Prepare the screenshot transition if necessary
-        if (Constants.DebugFlags.App.EnableScreenshotAppTransition) {
-            mFullScreenOverlayView.prepareAnimateOnEnterRecents(AlternateRecentsComponent.getLastScreenshot());
-        }
     }
 
     @Override
@@ -531,17 +541,25 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
     /** Called when debug mode is triggered */
     public void onDebugModeTriggered() {
+
         if (mConfig.developerOptionsEnabled) {
             SharedPreferences settings = getSharedPreferences(getPackageName(), 0);
             if (settings.getBoolean(Constants.Values.App.Key_DebugModeEnabled, false)) {
                 // Disable the debug mode
                 settings.edit().remove(Constants.Values.App.Key_DebugModeEnabled).apply();
+                mConfig.debugModeEnabled = false;
+                inflateDebugOverlay();
+                mDebugOverlay.disable();
             } else {
                 // Enable the debug mode
                 settings.edit().putBoolean(Constants.Values.App.Key_DebugModeEnabled, true).apply();
+                mConfig.debugModeEnabled = true;
+                inflateDebugOverlay();
+                mDebugOverlay.enable();
             }
-            Toast.makeText(this, "Debug mode (" + Constants.Values.App.DebugModeVersion +
-                    ") toggled, please restart Recents now", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Debug mode (" + Constants.Values.App.DebugModeVersion + ") " +
+                (mConfig.debugModeEnabled ? "Enabled" : "Disabled") + ", please restart Recents now",
+                Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -549,19 +567,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     public void onEnterAnimationTriggered() {
         // Animate the SystemUI scrim views
         mScrimViews.startEnterRecentsAnimation();
-    }
-
-    /**** FullscreenTransitionOverlayView.FullScreenTransitionViewCallbacks Implementation ****/
-
-    @Override
-    public void onEnterAnimationComplete() {
-        // Reset the full screenshot transition view
-        if (Constants.DebugFlags.App.EnableScreenshotAppTransition) {
-            mFullScreenOverlayView.reset();
-
-            // Recycle the full screen screenshot
-            AlternateRecentsComponent.consumeLastScreenshot();
-        }
     }
 
     /**** RecentsView.RecentsViewCallbacks Implementation ****/

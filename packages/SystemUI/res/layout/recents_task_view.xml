@@ -62,7 +62,7 @@
             android:visibility="invisible"
             android:src="@drawable/recents_dismiss_light" />
     </com.android.systemui.recents.views.TaskBarView>
-    <FrameLayout
+    <com.android.systemui.recents.views.TaskFooterView
         android:id="@+id/lock_to_app"
         android:layout_width="match_parent"
         android:layout_height="@dimen/recents_task_view_lock_to_app_button_height"
@@ -82,7 +82,7 @@
             android:fontFamily="sans-serif-medium"
             android:singleLine="true"
             android:textAllCaps="true" />
-    </FrameLayout>
+    </com.android.systemui.recents.views.TaskFooterView>
 </com.android.systemui.recents.views.TaskView>
 
 
