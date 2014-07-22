@@ -62,7 +62,9 @@ public class FlashlightTile extends QSTile<QSTile.BooleanState> implements
         if (arg instanceof Boolean) {
             state.value = (Boolean) arg;
         }
-        state.visible = mFlashlightController.isAvailable();
+        // Always show the tile when the flashlight is on. This is needed because
+        // the camera is not available while it is being used for the flashlight.
+        state.visible = state.value || mFlashlightController.isAvailable();
         state.label = mHost.getContext().getString(R.string.quick_settings_flashlight_label);
         state.iconId = state.value
                 ? R.drawable.ic_qs_flashlight_on : R.drawable.ic_qs_flashlight_off;
@@ -76,5 +78,10 @@ public class FlashlightTile extends QSTile<QSTile.BooleanState> implements
     @Override
     public void onFlashlightError() {
         refreshState(false);
+    }
+
+    @Override
+    public void onFlashlightAvailabilityChanged(boolean available) {
+        refreshState();
     }
 }
