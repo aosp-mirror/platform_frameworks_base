@@ -43,7 +43,7 @@ public class BitmapShader extends Shader {
         mTileX = tileX;
         mTileY = tileY;
         final long b = bitmap.ni();
-        native_instance = nativeCreate(b, tileX.nativeInt, tileY.nativeInt);
+        init(nativeCreate(b, tileX.nativeInt, tileY.nativeInt));
     }
 
     /**

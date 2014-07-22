@@ -53,8 +53,8 @@ public class ComposeShader extends Shader {
         mShaderA = shaderA;
         mShaderB = shaderB;
         mXferMode = mode;
-        native_instance = nativeCreate1(shaderA.native_instance, shaderB.native_instance,
-                (mode != null) ? mode.native_instance : 0);
+        init(nativeCreate1(shaderA.getNativeInstance(), shaderB.getNativeInstance(),
+                (mode != null) ? mode.native_instance : 0));
     }
 
     /** Create a new compose shader, given shaders A, B, and a combining PorterDuff mode.
@@ -69,8 +69,8 @@ public class ComposeShader extends Shader {
         mShaderA = shaderA;
         mShaderB = shaderB;
         mPorterDuffMode = mode;
-        native_instance = nativeCreate2(shaderA.native_instance, shaderB.native_instance,
-                mode.nativeInt);
+        init(nativeCreate2(shaderA.getNativeInstance(), shaderB.getNativeInstance(),
+                mode.nativeInt));
     }
 
     /**
