@@ -266,13 +266,13 @@ public class VoiceInteractionManagerService extends SystemService {
                                 + Manifest.permission.MANAGE_VOICE_KEYPHRASES);
                     }
                 }
+            }
 
-                final long caller = Binder.clearCallingIdentity();
-                try {
-                    return mDbHelper.getKephraseSoundModels();
-                } finally {
-                    Binder.restoreCallingIdentity(caller);
-                }
+            final long caller = Binder.clearCallingIdentity();
+            try {
+                return mDbHelper.getKephraseSoundModels();
+            } finally {
+                Binder.restoreCallingIdentity(caller);
             }
         }
 
@@ -287,29 +287,31 @@ public class VoiceInteractionManagerService extends SystemService {
                 if (model == null) {
                     throw new IllegalArgumentException("Model must not be null");
                 }
+            }
 
-                final long caller = Binder.clearCallingIdentity();
-                try {
-                    boolean success = false;
-                    if (model.keyphrases == null) {
-                        // If the keyphrases are not present in the model, delete the model.
-                        success = mDbHelper.deleteKeyphraseSoundModel(model.uuid);
-                    } else {
-                        // Else update the model.
-                        success = mDbHelper.addOrUpdateKeyphraseSoundModel(model);
-                    }
-                    if (success) {
+            final long caller = Binder.clearCallingIdentity();
+            try {
+                boolean success = false;
+                if (model.keyphrases == null) {
+                    // If the keyphrases are not present in the model, delete the model.
+                    success = mDbHelper.deleteKeyphraseSoundModel(model.uuid);
+                } else {
+                    // Else update the model.
+                    success = mDbHelper.addOrUpdateKeyphraseSoundModel(model);
+                }
+                if (success) {
+                    synchronized (this) {
                         // Notify the voice interaction service of a change in sound models.
                         if (mImpl != null && mImpl.mService != null) {
                             mImpl.notifySoundModelsChangedLocked();
                         }
-                        return SoundTriggerHelper.STATUS_OK;
-                    } else {
-                        return SoundTriggerHelper.STATUS_ERROR;
                     }
-                } finally {
-                    Binder.restoreCallingIdentity(caller);
+                    return SoundTriggerHelper.STATUS_OK;
+                } else {
+                    return SoundTriggerHelper.STATUS_ERROR;
                 }
+            } finally {
+                Binder.restoreCallingIdentity(caller);
             }
         }
 

@@ -30,6 +30,12 @@ public class MainInteractionService extends VoiceInteractionService {
 
     private final Callback mHotwordCallback = new Callback() {
         @Override
+        public void onAvailabilityChanged(int status) {
+            Log.i(TAG, "onAvailabilityChanged(" + status + ")");
+            hotwordAvailabilityChangeHelper(status);
+        }
+
+        @Override
         public void onDetected(byte[] data) {
             Log.i(TAG, "onDetected");
         }
@@ -51,17 +57,6 @@ public class MainInteractionService extends VoiceInteractionService {
                 + Arrays.toString(getKeyphraseEnrollmentInfo().listKeyphraseMetadata()));
 
         mHotwordDetector = createAlwaysOnHotwordDetector("Hello There", "en-US", mHotwordCallback);
-        testHotwordAvailabilityStates();
-    }
-
-    @Override
-    public void onSoundModelsChanged() {
-        int availability = mHotwordDetector.getAvailability();
-        Log.i(TAG, "Hotword availability = " + availability);
-        if (availability == AlwaysOnHotwordDetector.STATE_INVALID) {
-            mHotwordDetector = createAlwaysOnHotwordDetector("Hello There", "en-US", mHotwordCallback);
-        }
-        testHotwordAvailabilityStates();
     }
 
     @Override
@@ -73,12 +68,13 @@ public class MainInteractionService extends VoiceInteractionService {
         return START_NOT_STICKY;
     }
 
-    private void testHotwordAvailabilityStates() {
-        int availability = mHotwordDetector.getAvailability();
+    private void hotwordAvailabilityChangeHelper(int availability) {
         Log.i(TAG, "Hotword availability = " + availability);
         switch (availability) {
             case AlwaysOnHotwordDetector.STATE_INVALID:
                 Log.i(TAG, "STATE_INVALID");
+                mHotwordDetector =
+                        createAlwaysOnHotwordDetector("Hello There", "en-US", mHotwordCallback);
                 break;
             case AlwaysOnHotwordDetector.STATE_HARDWARE_UNAVAILABLE:
                 Log.i(TAG, "STATE_HARDWARE_UNAVAILABLE");

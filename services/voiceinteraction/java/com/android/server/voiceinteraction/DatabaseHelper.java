@@ -100,29 +100,32 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public boolean addOrUpdateKeyphraseSoundModel(KeyphraseSoundModel soundModel) {
-        SQLiteDatabase db = getWritableDatabase();
-        ContentValues values = new ContentValues();
-        // Generate a random ID for the model.
-        values.put(SoundModelContract.KEY_ID, soundModel.uuid.toString());
-        values.put(SoundModelContract.KEY_DATA, soundModel.data);
-        values.put(SoundModelContract.KEY_TYPE, SoundTrigger.SoundModel.TYPE_KEYPHRASE);
-
-        boolean status = true;
-        if (db.insertWithOnConflict(
-                SoundModelContract.TABLE, null, values, SQLiteDatabase.CONFLICT_REPLACE) != -1) {
-            for (Keyphrase keyphrase : soundModel.keyphrases) {
-                status &= addOrUpdateKeyphrase(db, soundModel.uuid, keyphrase);
+        synchronized(this) {
+            SQLiteDatabase db = getWritableDatabase();
+            ContentValues values = new ContentValues();
+            // Generate a random ID for the model.
+            values.put(SoundModelContract.KEY_ID, soundModel.uuid.toString());
+            values.put(SoundModelContract.KEY_DATA, soundModel.data);
+            values.put(SoundModelContract.KEY_TYPE, SoundTrigger.SoundModel.TYPE_KEYPHRASE);
+    
+            boolean status = true;
+            if (db.insertWithOnConflict(SoundModelContract.TABLE, null, values,
+                    SQLiteDatabase.CONFLICT_REPLACE) != -1) {
+                for (Keyphrase keyphrase : soundModel.keyphrases) {
+                    status &= addOrUpdateKeyphraseLocked(db, soundModel.uuid, keyphrase);
+                }
+                db.close();
+                return status;
+            } else {
+                Slog.w(TAG, "Failed to persist sound model to database");
+                db.close();
+                return false;
             }
-            db.close();
-            return status;
-        } else {
-            Slog.w(TAG, "Failed to persist sound model to database");
-            db.close();
-            return false;
         }
     }
 
-    private boolean addOrUpdateKeyphrase(SQLiteDatabase db, UUID modelId, Keyphrase keyphrase) {
+    private boolean addOrUpdateKeyphraseLocked(
+            SQLiteDatabase db, UUID modelId, Keyphrase keyphrase) {
         ContentValues values = new ContentValues();
         values.put(KeyphraseContract.KEY_ID, keyphrase.id);
         values.put(KeyphraseContract.KEY_RECOGNITION_MODES, keyphrase.recognitionModes);
@@ -143,62 +146,66 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      * Deletes the sound model and associated keyphrases.
      */
     public boolean deleteKeyphraseSoundModel(UUID uuid) {
-        SQLiteDatabase db = getWritableDatabase();
-        String modelId = uuid.toString();
-        String soundModelClause = SoundModelContract.KEY_ID + "=" + modelId;
-        boolean status = true;
-        if (db.delete(SoundModelContract.TABLE, soundModelClause, null) == 0) {
-            Slog.w(TAG, "No sound models deleted from the database");
-            status = false;
+        synchronized(this) {
+            SQLiteDatabase db = getWritableDatabase();
+            String modelId = uuid.toString();
+            String soundModelClause = SoundModelContract.KEY_ID + "=" + modelId;
+            boolean status = true;
+            if (db.delete(SoundModelContract.TABLE, soundModelClause, null) == 0) {
+                Slog.w(TAG, "No sound models deleted from the database");
+                status = false;
+            }
+            String keyphraseClause = KeyphraseContract.KEY_SOUND_MODEL_ID + "=" + modelId;
+            if (db.delete(KeyphraseContract.TABLE, keyphraseClause, null) == 0) {
+                Slog.w(TAG, "No keyphrases deleted from the database");
+                status = false;
+            }
+            db.close();
+            return status;
         }
-        String keyphraseClause = KeyphraseContract.KEY_SOUND_MODEL_ID + "=" + modelId;
-        if (db.delete(KeyphraseContract.TABLE, keyphraseClause, null) == 0) {
-            Slog.w(TAG, "No keyphrases deleted from the database");
-            status = false;
-        }
-        db.close();
-        return status;
     }
 
     /**
      * Lists all the keyphrase sound models currently registered with the system.
      */
     public List<KeyphraseSoundModel> getKephraseSoundModels() {
-        List<KeyphraseSoundModel> models = new ArrayList<>();
-        String selectQuery = "SELECT  * FROM " + SoundModelContract.TABLE;
-        SQLiteDatabase db = getReadableDatabase();
-        Cursor c = db.rawQuery(selectQuery, null);
-
-        // looping through all rows and adding to list
-        if (c.moveToFirst()) {
-            do {
-                int type = c.getInt(c.getColumnIndex(SoundModelContract.KEY_TYPE));
-                if (type != SoundTrigger.SoundModel.TYPE_KEYPHRASE) {
-                    // Ignore non-keyphrase sound models.
-                    continue;
-                }
-                String id = c.getString(c.getColumnIndex(SoundModelContract.KEY_ID));
-                byte[] data = c.getBlob(c.getColumnIndex(SoundModelContract.KEY_DATA));
-                // Get all the keyphrases for this this sound model.
-                // Validate the sound model.
-                if (id == null) {
-                    Slog.w(TAG, "Ignoring sound model since it doesn't specify an ID");
-                    continue;
-                }
-                KeyphraseSoundModel model = new KeyphraseSoundModel(
-                        UUID.fromString(id), data, getKeyphrasesForSoundModel(db, id));
-                if (DBG) {
-                    Slog.d(TAG, "Adding model: " + model);
-                }
-                models.add(model);
-            } while (c.moveToNext());
+        synchronized(this) {
+            List<KeyphraseSoundModel> models = new ArrayList<>();
+            String selectQuery = "SELECT  * FROM " + SoundModelContract.TABLE;
+            SQLiteDatabase db = getReadableDatabase();
+            Cursor c = db.rawQuery(selectQuery, null);
+    
+            // looping through all rows and adding to list
+            if (c.moveToFirst()) {
+                do {
+                    int type = c.getInt(c.getColumnIndex(SoundModelContract.KEY_TYPE));
+                    if (type != SoundTrigger.SoundModel.TYPE_KEYPHRASE) {
+                        // Ignore non-keyphrase sound models.
+                        continue;
+                    }
+                    String id = c.getString(c.getColumnIndex(SoundModelContract.KEY_ID));
+                    byte[] data = c.getBlob(c.getColumnIndex(SoundModelContract.KEY_DATA));
+                    // Get all the keyphrases for this this sound model.
+                    // Validate the sound model.
+                    if (id == null) {
+                        Slog.w(TAG, "Ignoring sound model since it doesn't specify an ID");
+                        continue;
+                    }
+                    KeyphraseSoundModel model = new KeyphraseSoundModel(
+                            UUID.fromString(id), data, getKeyphrasesForSoundModelLocked(db, id));
+                    if (DBG) {
+                        Slog.d(TAG, "Adding model: " + model);
+                    }
+                    models.add(model);
+                } while (c.moveToNext());
+            }
+            c.close();
+            db.close();
+            return models;
         }
-        c.close();
-        db.close();
-        return models;
     }
 
-    private Keyphrase[] getKeyphrasesForSoundModel(SQLiteDatabase db, String modelId) {
+    private Keyphrase[] getKeyphrasesForSoundModelLocked(SQLiteDatabase db, String modelId) {
         List<Keyphrase> keyphrases = new ArrayList<>();
         String selectQuery = "SELECT  * FROM " + KeyphraseContract.TABLE
                 + " WHERE " + KeyphraseContract.KEY_SOUND_MODEL_ID + " = '" + modelId + "'";
@@ -243,7 +250,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
 
-    private String getCommaSeparatedString(int[] users) {
+    private static String getCommaSeparatedString(int[] users) {
         if (users == null || users.length == 0) {
             return "";
         }
@@ -255,7 +262,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return csv.substring(0, csv.length() - 1);
     }
 
-    private int[] getArrayForCommaSeparatedString(String text) {
+    private static int[] getArrayForCommaSeparatedString(String text) {
         if (TextUtils.isEmpty(text)) {
             return null;
         }
