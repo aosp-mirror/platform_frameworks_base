@@ -23,8 +23,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.media.IRemoteControlDisplay;
-import android.media.MediaMetadataEditor;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.MediaSessionLegacyHelper;
@@ -1025,8 +1023,8 @@ import java.util.List;
                         state.getPosition(), state.getPlaybackSpeed());
             }
             if (state != null) {
-                l.onClientTransportControlUpdate(PlaybackState.getRccControlFlagsFromActions(state
-                        .getActions()));
+                l.onClientTransportControlUpdate(
+                        PlaybackState.getRccControlFlagsFromActions(state.getActions()));
             }
         }
     }

@@ -18,28 +18,20 @@ package android.media;
 
 import android.app.PendingIntent;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.RectF;
 import android.media.session.MediaSessionLegacyHelper;
 import android.media.session.PlaybackState;
 import android.media.session.MediaSession;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.util.Log;
 
 import java.lang.IllegalArgumentException;
-import java.util.ArrayList;
-import java.util.Iterator;
 
 /**
  * RemoteControlClient enables exposing information meant to be consumed by remote controls
@@ -754,7 +746,8 @@ import java.util.Iterator;
             // USE_SESSIONS
             if (mSession != null) {
                 PlaybackState.Builder bob = new PlaybackState.Builder(mSessionPlaybackState);
-                bob.setActions(PlaybackState.getActionsFromRccControlFlags(transportControlFlags));
+                bob.setActions(
+                        PlaybackState.getActionsFromRccControlFlags(transportControlFlags));
                 mSessionPlaybackState = bob.build();
                 mSession.setPlaybackState(mSessionPlaybackState);
             }

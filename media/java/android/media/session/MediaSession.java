@@ -503,8 +503,8 @@ public final class MediaSession {
     }
 
     /**
-     * Set some extras that can be associated with the {@link MediaSession}. No assumptions should be made
-     * as to how a {@link MediaController} will handle these extras.
+     * Set some extras that can be associated with the {@link MediaSession}. No assumptions should
+     * be made as to how a {@link MediaController} will handle these extras.
      * Keys should be fully qualified (e.g. com.example.MY_EXTRA) to avoid conflicts.
      *
      * @param extras The extras associated with the {@link MediaSession}.
@@ -583,6 +583,10 @@ public final class MediaSession {
         postToTransportCallbacks(TransportMessageHandler.MSG_RATE, rating);
     }
 
+    private void dispatchCustomAction(String action, Bundle args) {
+        postToTransportCallbacks(TransportMessageHandler.MSG_CUSTOM_ACTION, action, args);
+    }
+
     private TransportMessageHandler getTransportControlsHandlerForCallbackLocked(
             TransportControlsCallback callback) {
         for (int i = mTransportCallbacks.size() - 1; i >= 0; i--) {
@@ -651,8 +655,8 @@ public final class MediaSession {
         return false;
     }
 
-    private void postCommand(String command, Bundle extras, ResultReceiver resultCb) {
-        Command cmd = new Command(command, extras, resultCb);
+    private void postCommand(String command, Bundle args, ResultReceiver resultCb) {
+        Command cmd = new Command(command, args, resultCb);
         synchronized (mLock) {
             for (int i = mCallbacks.size() - 1; i >= 0; i--) {
                 mCallbacks.get(i).post(CallbackMessageHandler.MSG_COMMAND, cmd);
@@ -755,15 +759,15 @@ public final class MediaSession {
         }
 
         /**
-         * Called when a controller has sent a custom command to this session.
+         * Called when a controller has sent a command to this session.
          * The owner of the session may handle custom commands but is not
          * required to.
          *
          * @param command The command name.
-         * @param extras Optional parameters for the command, may be null.
+         * @param args Optional parameters for the command, may be null.
          * @param cb A result receiver to which a result may be sent by the command, may be null.
          */
-        public void onCommand(@NonNull String command, @Nullable Bundle extras,
+        public void onCommand(@NonNull String command, @Nullable Bundle args,
                 @Nullable ResultReceiver cb) {
         }
     }
@@ -849,6 +853,17 @@ public final class MediaSession {
          */
         public void onSetRating(@NonNull Rating rating) {
         }
+
+        /**
+         * Called when a {@link MediaController} wants a {@link PlaybackState.CustomAction} to be
+         * performed.
+         *
+         * @param action The action that was originally sent in the
+         *               {@link PlaybackState.CustomAction}.
+         * @param extras Optional extras specified by the {@link MediaController}.
+         */
+        public void onCustomAction(@NonNull String action, @Nullable Bundle extras) {
+        }
     }
 
     /**
@@ -862,10 +877,10 @@ public final class MediaSession {
         }
 
         @Override
-        public void onCommand(String command, Bundle extras, ResultReceiver cb) {
+        public void onCommand(String command, Bundle args, ResultReceiver cb) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
-                session.postCommand(command, extras, cb);
+                session.postCommand(command, args, cb);
             }
         }
 
@@ -977,6 +992,14 @@ public final class MediaSession {
             MediaSession session = mMediaSession.get();
             if (session != null) {
                 session.dispatchRate(rating);
+            }
+        }
+
+        @Override
+        public void onCustomAction(String action, Bundle args) {
+            MediaSession session = mMediaSession.get();
+            if (session != null) {
+                session.dispatchCustomAction(action, args);
             }
         }
 
@@ -1216,6 +1239,7 @@ public final class MediaSession {
         private static final int MSG_REWIND = 10;
         private static final int MSG_SEEK_TO = 11;
         private static final int MSG_RATE = 12;
+        private static final int MSG_CUSTOM_ACTION = 13;
 
         private TransportControlsCallback mCallback;
 
@@ -1275,6 +1299,9 @@ public final class MediaSession {
                     break;
                 case MSG_RATE:
                     mCallback.onSetRating((Rating) msg.obj);
+                    break;
+                case MSG_CUSTOM_ACTION:
+                    mCallback.onCustomAction((String) msg.obj, msg.getData());
                     break;
             }
         }

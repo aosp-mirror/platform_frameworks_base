@@ -329,16 +329,16 @@ public final class MediaController {
      * commands should only be sent to sessions that the controller owns.
      *
      * @param command The command to send
-     * @param params Any parameters to include with the command
+     * @param args Any parameters to include with the command
      * @param cb The callback to receive the result on
      */
-    public void sendCommand(@NonNull String command, @Nullable Bundle params,
+    public void sendCommand(@NonNull String command, @Nullable Bundle args,
             @Nullable ResultReceiver cb) {
         if (TextUtils.isEmpty(command)) {
             throw new IllegalArgumentException("command cannot be null or empty");
         }
         try {
-            mSessionBinder.sendCommand(command, params, cb);
+            mSessionBinder.sendCommand(command, args, cb);
         } catch (RemoteException e) {
             Log.d(TAG, "Dead object in sendCommand.", e);
         }
@@ -661,6 +661,41 @@ public final class MediaController {
                 mSessionBinder.rate(rating);
             } catch (RemoteException e) {
                 Log.wtf(TAG, "Error calling rate.", e);
+            }
+        }
+
+        /**
+         * Send a custom action back for the {@link MediaSession} to perform.
+         *
+         * @param customAction The action to perform.
+         * @param args Optional arguments to supply to the {@link MediaSession} for this
+         *             custom action.
+         */
+        public void sendCustomAction(@NonNull PlaybackState.CustomAction customAction,
+                    @Nullable Bundle args) {
+            if (customAction == null) {
+                throw new IllegalArgumentException("CustomAction cannot be null.");
+            }
+            sendCustomAction(customAction.getAction(), args);
+        }
+
+        /**
+         * Send the id and args from a custom action back for the {@link MediaSession} to perform.
+         *
+         * @see #sendCustomAction(PlaybackState.CustomAction action, Bundle args)
+         * @param action The action identifier of the {@link PlaybackState.CustomAction} as
+         *               specified by the {@link MediaSession}.
+         * @param args Optional arguments to supply to the {@link MediaSession} for this
+         *             custom action.
+         */
+        public void sendCustomAction(@NonNull String action, @Nullable Bundle args) {
+            if (TextUtils.isEmpty(action)) {
+                throw new IllegalArgumentException("CustomAction cannot be null.");
+            }
+            try {
+                mSessionBinder.sendCustomAction(action, args);
+            } catch (RemoteException e) {
+                Log.d(TAG, "Dead object in sendCustomAction.", e);
             }
         }
     }

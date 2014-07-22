@@ -748,11 +748,19 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
             return false;
         }
 
-        public void sendCommand(String command, Bundle extras, ResultReceiver cb) {
+        public void sendCommand(String command, Bundle args, ResultReceiver cb) {
             try {
-                mCb.onCommand(command, extras, cb);
+                mCb.onCommand(command, args, cb);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in sendCommand.", e);
+            }
+        }
+
+        public void sendCustomAction(String action, Bundle args) {
+            try {
+                mCb.onCustomAction(action, args);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Remote failure in sendCustomAction.", e);
             }
         }
 
@@ -871,9 +879,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
 
     class ControllerStub extends ISessionController.Stub {
         @Override
-        public void sendCommand(String command, Bundle extras, ResultReceiver cb)
+        public void sendCommand(String command, Bundle args, ResultReceiver cb)
                 throws RemoteException {
-            mSessionCb.sendCommand(command, extras, cb);
+            mSessionCb.sendCommand(command, args, cb);
         }
 
         @Override
@@ -1017,6 +1025,12 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         @Override
         public void rate(Rating rating) throws RemoteException {
             mSessionCb.rate(rating);
+        }
+
+        @Override
+        public void sendCustomAction(String action, Bundle args)
+                throws RemoteException {
+            mSessionCb.sendCustomAction(action, args);
         }
 
 

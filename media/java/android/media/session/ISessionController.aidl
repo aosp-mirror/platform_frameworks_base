@@ -38,7 +38,7 @@ import java.util.List;
  * @hide
  */
 interface ISessionController {
-    void sendCommand(String command, in Bundle extras, in ResultReceiver cb);
+    void sendCommand(String command, in Bundle args, in ResultReceiver cb);
     boolean sendMediaButton(in KeyEvent mediaButton);
     void registerCallbackListener(in ISessionControllerCallback cb);
     void unregisterCallbackListener(in ISessionControllerCallback cb);
@@ -64,6 +64,7 @@ interface ISessionController {
     void rewind();
     void seekTo(long pos);
     void rate(in Rating rating);
+    void sendCustomAction(String action, in Bundle args);
     MediaMetadata getMetadata();
     PlaybackState getPlaybackState();
     ParceledListSlice getQueue();
