@@ -90,10 +90,10 @@ modify to match your theme, plus source files.</p>
   </div>
   <div class="layout-content-col span-4">
   <a class="download-button"  onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Wear Toolkit AI']);"
-    href="{@docRoot}downloads/design/Android_Wear_Toolkit_20140626.ai">Adobe&reg; Illustrator&reg; Toolkit</a>
+    href="{@docRoot}downloads/design/Android_Wear_Toolkit_20140722.ai">Adobe&reg; Illustrator&reg; Toolkit</a>
 
   <a class="download-button"  onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Wear Toolkit PDF']);"
-    href="{@docRoot}downloads/design/Android_Wear_Toolkit_20140626.pdf">PDF Toolkit</a>
+    href="{@docRoot}downloads/design/Android_Wear_Toolkit_20140722.pdf">PDF Toolkit</a>
   </div>
 </div>
 
@@ -111,9 +111,9 @@ modify to match your theme, plus source files.</p>
   </div>
   <div class="layout-content-col span-4">
   <a class="download-button"  onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Wear App Patterns AI']);"
-    href="{@docRoot}downloads/design/Android_Wear_Patterns_20140626.ai">Adobe&reg; Illustrator&reg; App Patterns</a>
+    href="{@docRoot}downloads/design/Android_Wear_Patterns_20140722.ai">Adobe&reg; Illustrator&reg; App Patterns</a>
   <a class="download-button"  onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Wear App Patterns PDF']);"
-    href="{@docRoot}downloads/design/Android_Wear_Patterns_20140626.pdf">PDF App Patterns</a>
+    href="{@docRoot}downloads/design/Android_Wear_Patterns_20140722.pdf">PDF App Patterns</a>
   </div>
 </div>
 
