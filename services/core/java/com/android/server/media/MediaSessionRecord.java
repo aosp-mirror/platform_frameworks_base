@@ -19,23 +19,29 @@ package com.android.server.media;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ParceledListSlice;
+import android.media.AudioManager;
+import android.media.MediaMetadata;
+import android.media.Rating;
+import android.media.VolumeProvider;
 import android.media.routing.IMediaRouter;
 import android.media.routing.IMediaRouterDelegate;
 import android.media.routing.IMediaRouterStateCallback;
-import android.media.session.ISessionController;
-import android.media.session.ISessionControllerCallback;
 import android.media.session.ISession;
 import android.media.session.ISessionCallback;
+import android.media.session.ISessionController;
+import android.media.session.ISessionControllerCallback;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.MediaSessionInfo;
-import android.media.session.PlaybackState;
 import android.media.session.ParcelableVolumeInfo;
+import android.media.session.PlaybackState;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.MediaMetadata;
 import android.media.Rating;
 import android.media.VolumeProvider;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.DeadObjectException;
@@ -46,15 +52,12 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.SystemClock;
-import android.text.TextUtils;
 import android.util.Log;
-import android.util.Pair;
 import android.util.Slog;
 import android.view.KeyEvent;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -99,8 +102,11 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
 
     // TransportPerformer fields
 
+    private Bundle mExtras;
     private MediaMetadata mMetadata;
     private PlaybackState mPlaybackState;
+    private ParceledListSlice mQueue;
+    private CharSequence mQueueTitle;
     private int mRatingType;
     private long mLastActiveTime;
     // End TransportPerformer fields
@@ -452,6 +458,63 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
     }
 
+    private void pushQueueUpdate() {
+        synchronized (mLock) {
+            if (mDestroyed) {
+                return;
+            }
+            for (int i = mControllerCallbacks.size() - 1; i >= 0; i--) {
+                ISessionControllerCallback cb = mControllerCallbacks.get(i);
+                try {
+                    cb.onQueueChanged(mQueue);
+                } catch (DeadObjectException e) {
+                    mControllerCallbacks.remove(i);
+                    Log.w(TAG, "Removed dead callback in pushQueueUpdate.", e);
+                } catch (RemoteException e) {
+                    Log.w(TAG, "unexpected exception in pushQueueUpdate.", e);
+                }
+            }
+        }
+    }
+
+    private void pushQueueTitleUpdate() {
+        synchronized (mLock) {
+            if (mDestroyed) {
+                return;
+            }
+            for (int i = mControllerCallbacks.size() - 1; i >= 0; i--) {
+                ISessionControllerCallback cb = mControllerCallbacks.get(i);
+                try {
+                    cb.onQueueTitleChanged(mQueueTitle);
+                } catch (DeadObjectException e) {
+                    mControllerCallbacks.remove(i);
+                    Log.w(TAG, "Removed dead callback in pushQueueTitleUpdate.", e);
+                } catch (RemoteException e) {
+                    Log.w(TAG, "unexpected exception in pushQueueTitleUpdate.", e);
+                }
+            }
+        }
+    }
+
+    private void pushExtrasUpdate() {
+        synchronized (mLock) {
+            if (mDestroyed) {
+                return;
+            }
+            for (int i = mControllerCallbacks.size() - 1; i >= 0; i--) {
+                ISessionControllerCallback cb = mControllerCallbacks.get(i);
+                try {
+                    cb.onExtrasChanged(mExtras);
+                } catch (DeadObjectException e) {
+                    mControllerCallbacks.remove(i);
+                    Log.w(TAG, "Removed dead callback in pushExtrasUpdate.", e);
+                } catch (RemoteException e) {
+                    Log.w(TAG, "unexpected exception in pushExtrasUpdate.", e);
+                }
+            }
+        }
+    }
+
     private void pushVolumeUpdate() {
         synchronized (mLock) {
             if (mDestroyed) {
@@ -606,6 +669,24 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
 
         @Override
+        public void setQueue(ParceledListSlice queue) {
+            mQueue = queue;
+            mHandler.post(MessageHandler.MSG_UPDATE_QUEUE);
+        }
+
+        @Override
+        public void setQueueTitle(CharSequence title) {
+            mQueueTitle = title;
+            mHandler.post(MessageHandler.MSG_UPDATE_QUEUE_TITLE);
+        }
+
+        @Override
+        public void setExtras(Bundle extras) {
+            mExtras = extras;
+            mHandler.post(MessageHandler.MSG_UPDATE_EXTRAS);
+        }
+
+        @Override
         public void setRatingType(int type) {
             mRatingType = type;
         }
@@ -680,6 +761,30 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                 mCb.onPlay();
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in play.", e);
+            }
+        }
+
+        public void playUri(Uri uri, Bundle extras) {
+            try {
+                mCb.onPlayUri(uri, extras);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Remote failure in playUri.", e);
+            }
+        }
+
+        public void playFromSearch(String query, Bundle extras) {
+            try {
+                mCb.onPlayFromSearch(query, extras);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Remote failure in playFromSearch.", e);
+            }
+        }
+
+        public void skipToTrack(long id) {
+            try {
+                mCb.onSkipToTrack(id);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Remote failure in skipToTrack", e);
             }
         }
 
@@ -859,6 +964,22 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
 
         @Override
+        public void playUri(Uri uri, Bundle extras) throws RemoteException {
+            mSessionCb.playUri(uri, extras);
+        }
+
+        @Override
+        public void playFromSearch(String query, Bundle extras) throws RemoteException {
+            mSessionCb.playFromSearch(query, extras);
+        }
+
+        @Override
+        public void skipToTrack(long id) {
+            mSessionCb.skipToTrack(id);
+        }
+
+
+        @Override
         public void pause() throws RemoteException {
             mSessionCb.pause();
         }
@@ -910,6 +1031,21 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
 
         @Override
+        public ParceledListSlice getQueue() {
+            return mQueue;
+        }
+
+        @Override
+        public CharSequence getQueueTitle() {
+            return mQueueTitle;
+        }
+
+        @Override
+        public Bundle getExtras() {
+            return mExtras;
+        }
+
+        @Override
         public int getRatingType() {
             return mRatingType;
         }
@@ -930,9 +1066,12 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     private class MessageHandler extends Handler {
         private static final int MSG_UPDATE_METADATA = 1;
         private static final int MSG_UPDATE_PLAYBACK_STATE = 2;
-        private static final int MSG_SEND_EVENT = 3;
-        private static final int MSG_UPDATE_SESSION_STATE = 4;
-        private static final int MSG_UPDATE_VOLUME = 5;
+        private static final int MSG_UPDATE_QUEUE = 3;
+        private static final int MSG_UPDATE_QUEUE_TITLE = 4;
+        private static final int MSG_UPDATE_EXTRAS = 5;
+        private static final int MSG_SEND_EVENT = 6;
+        private static final int MSG_UPDATE_SESSION_STATE = 7;
+        private static final int MSG_UPDATE_VOLUME = 8;
 
         public MessageHandler(Looper looper) {
             super(looper);
@@ -945,6 +1084,15 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                     break;
                 case MSG_UPDATE_PLAYBACK_STATE:
                     pushPlaybackStateUpdate();
+                    break;
+                case MSG_UPDATE_QUEUE:
+                    pushQueueUpdate();
+                    break;
+                case MSG_UPDATE_QUEUE_TITLE:
+                    pushQueueTitleUpdate();
+                    break;
+                case MSG_UPDATE_EXTRAS:
+                    pushExtrasUpdate();
                     break;
                 case MSG_SEND_EVENT:
                     pushEvent((String) msg.obj, msg.getData());

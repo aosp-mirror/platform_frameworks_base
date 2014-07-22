@@ -22,15 +22,14 @@ import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ParceledListSlice;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.MediaMetadata;
 import android.media.Rating;
 import android.media.VolumeProvider;
 import android.media.routing.MediaRouter;
-import android.media.session.ISessionController;
-import android.media.session.ISession;
-import android.media.session.ISessionCallback;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -41,10 +40,7 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.UserHandle;
 import android.text.TextUtils;
-import android.util.ArrayMap;
 import android.util.Log;
-
-import com.android.internal.telephony.DctConstants.Activity;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -474,6 +470,54 @@ public final class MediaSession {
     }
 
     /**
+     * Update the list of tracks in the play queue. It is an ordered list and should contain the
+     * current track, and previous or upcoming tracks if they exist.
+     * Specify null if there is no current play queue.
+     * <p>
+     * The queue should be of reasonable size. If the play queue is unbounded within your
+     * app, it is better to send a reasonable amount in a sliding window instead.
+     *
+     * @param queue A list of tracks in the play queue.
+     */
+    public void setQueue(@Nullable List<Track> queue) {
+        try {
+            mBinder.setQueue(new ParceledListSlice<Track>(queue));
+        } catch (RemoteException e) {
+            Log.wtf("Dead object in setQueue.", e);
+        }
+    }
+
+    /**
+     * Set the title of the play queue. The UI should display this title along
+     * with the play queue itself.
+     * e.g. "Play Queue", "Now Playing", or an album name.
+     *
+     * @param title The title of the play queue.
+     */
+    public void setQueueTitle(@Nullable CharSequence title) {
+        try {
+            mBinder.setQueueTitle(title);
+        } catch (RemoteException e) {
+            Log.wtf("Dead object in setQueueTitle.", e);
+        }
+    }
+
+    /**
+     * Set some extras that can be associated with the {@link MediaSession}. No assumptions should be made
+     * as to how a {@link MediaController} will handle these extras.
+     * Keys should be fully qualified (e.g. com.example.MY_EXTRA) to avoid conflicts.
+     *
+     * @param extras The extras associated with the {@link MediaSession}.
+     */
+    public void setExtras(@Nullable Bundle extras) {
+        try {
+            mBinder.setExtras(extras);
+        } catch (RemoteException e) {
+            Log.wtf("Dead object in setExtras.", e);
+        }
+    }
+
+    /**
      * Notify the system that the remote volume changed.
      *
      * @param provider The provider that is handling volume changes.
@@ -493,6 +537,18 @@ public final class MediaSession {
 
     private void dispatchPlay() {
         postToTransportCallbacks(TransportMessageHandler.MSG_PLAY);
+    }
+
+    private void dispatchPlayUri(Uri uri, Bundle extras) {
+        postToTransportCallbacks(TransportMessageHandler.MSG_PLAY_URI, uri, extras);
+    }
+
+    private void dispatchPlayFromSearch(String query, Bundle extras) {
+        postToTransportCallbacks(TransportMessageHandler.MSG_PLAY_SEARCH, query, extras);
+    }
+
+    private void dispatchSkipToTrack(long id) {
+        postToTransportCallbacks(TransportMessageHandler.MSG_SKIP_TO_TRACK, id);
     }
 
     private void dispatchPause() {
@@ -552,6 +608,14 @@ public final class MediaSession {
         synchronized (mLock) {
             for (int i = mTransportCallbacks.size() - 1; i >= 0; i--) {
                 mTransportCallbacks.get(i).post(what, obj);
+            }
+        }
+    }
+
+    private void postToTransportCallbacks(int what, Object obj, Bundle args) {
+        synchronized (mLock) {
+            for (int i = mTransportCallbacks.size() - 1; i >= 0; i--) {
+                mTransportCallbacks.get(i).post(what, obj, args);
             }
         }
     }
@@ -699,7 +763,7 @@ public final class MediaSession {
          * @param extras Optional parameters for the command, may be null.
          * @param cb A result receiver to which a result may be sent by the command, may be null.
          */
-        public void onControlCommand(@NonNull String command, @Nullable Bundle extras,
+        public void onCommand(@NonNull String command, @Nullable Bundle extras,
                 @Nullable ResultReceiver cb) {
         }
     }
@@ -714,6 +778,24 @@ public final class MediaSession {
          * Override to handle requests to begin playback.
          */
         public void onPlay() {
+        }
+
+        /**
+         * Override to handle requests to play a specific {@link Uri}.
+         */
+        public void onPlayUri(Uri uri, Bundle extras) {
+        }
+
+        /**
+         * Override to handle requests to begin playback from a search query.
+         */
+        public void onPlayFromSearch(String query, Bundle extras) {
+        }
+
+        /**
+         * Override to handle requests to play a track with a given id from the play queue.
+         */
+        public void onSkipToTrack(long id) {
         }
 
         /**
@@ -811,6 +893,30 @@ public final class MediaSession {
         }
 
         @Override
+        public void onPlayUri(Uri uri, Bundle extras) {
+            MediaSession session = mMediaSession.get();
+            if (session != null) {
+                session.dispatchPlayUri(uri, extras);
+            }
+        }
+
+        @Override
+        public void onPlayFromSearch(String query, Bundle extras) {
+            MediaSession session = mMediaSession.get();
+            if (session != null) {
+                session.dispatchPlayFromSearch(query, extras);
+            }
+        }
+
+        @Override
+        public void onSkipToTrack(long id) {
+            MediaSession session = mMediaSession.get();
+            if (session != null) {
+                session.dispatchSkipToTrack(id);
+            }
+        }
+
+        @Override
         public void onPause() {
             MediaSession session = mMediaSession.get();
             if (session != null) {
@@ -896,6 +1002,157 @@ public final class MediaSession {
 
     }
 
+    /**
+     * A single track that is part of the play queue. It contains information necessary to display
+     * a single track in the queue.
+     */
+    public static final class Track implements Parcelable {
+        /**
+         * This id is reserved. No tracks can be explicitly asigned this id.
+         */
+        public static final int UNKNOWN_ID = -1;
+
+        private final MediaMetadata mMetadata;
+        private final long mId;
+        private final Uri mUri;
+        private final Bundle mExtras;
+
+        /**
+         * Create a new {@link MediaSession.Track}.
+         *
+         * @param metadata The metadata for this track.
+         * @param id An identifier for this track. It must be unique within the play queue.
+         * @param uri The uri for this track.
+         * @param extras A bundle of extras that can be used to add extra information about the
+         *               track.
+         */
+        private Track(MediaMetadata metadata, long id, Uri uri, Bundle extras) {
+            mMetadata = metadata;
+            mId = id;
+            mUri = uri;
+            mExtras = extras;
+        }
+
+        private Track(Parcel in) {
+            mMetadata = MediaMetadata.CREATOR.createFromParcel(in);
+            mId = in.readLong();
+            mUri = Uri.CREATOR.createFromParcel(in);
+            mExtras = in.readBundle();
+        }
+
+        /**
+         * Get the metadata for this track.
+         */
+        public MediaMetadata getMetadata() {
+            return mMetadata;
+        }
+
+        /**
+         * Get the id for this track.
+         */
+        public long getId() {
+            return mId;
+        }
+
+        /**
+         * Get the Uri for this track.
+         */
+        public Uri getUri() {
+            return mUri;
+        }
+
+        /**
+         * Get the extras for this track.
+         */
+        public Bundle getExtras() {
+            return mExtras;
+        }
+
+        /**
+         * Builder for {@link MediaSession.Track} objects.
+         */
+        public static final class Builder {
+            private final MediaMetadata mMetadata;
+            private final long mId;
+            private final Uri mUri;
+
+            private Bundle mExtras;
+
+            /**
+             * Create a builder with the metadata, id, and uri already set.
+             */
+            public Builder(MediaMetadata metadata, long id, Uri uri) {
+                if (metadata == null) {
+                    throw new IllegalArgumentException(
+                            "You must specify a non-null MediaMetadata to build a Track.");
+                }
+                if (uri == null) {
+                    throw new IllegalArgumentException(
+                            "You must specify a non-null Uri to build a Track.");
+                }
+                if (id == UNKNOWN_ID) {
+                    throw new IllegalArgumentException(
+                            "You must specify an id other than UNKNOWN_ID to build a Track.");
+                }
+                mMetadata = metadata;
+                mId = id;
+                mUri = uri;
+            }
+
+            /**
+             * Set optional extras for the track.
+             */
+            public MediaSession.Track.Builder setExtras(Bundle extras) {
+                mExtras = extras;
+                return this;
+            }
+
+            /**
+             * Create the {@link Track}.
+             */
+            public MediaSession.Track build() {
+                return new MediaSession.Track(mMetadata, mId, mUri, mExtras);
+            }
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            mMetadata.writeToParcel(dest, flags);
+            dest.writeLong(mId);
+            mUri.writeToParcel(dest, flags);
+            dest.writeBundle(mExtras);
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        public static final Creator<MediaSession.Track> CREATOR
+                = new Creator<MediaSession.Track>() {
+
+            @Override
+            public MediaSession.Track createFromParcel(Parcel p) {
+                return new MediaSession.Track(p);
+            }
+
+            @Override
+            public MediaSession.Track[] newArray(int size) {
+                return new MediaSession.Track[size];
+            }
+        };
+
+        @Override
+        public String toString() {
+            return "MediaSession.Track {" +
+                    "Metadata=" + mMetadata +
+                    ", Id=" + mId +
+                    ", Uri=" + mUri +
+                    ", Extras=" + mExtras +
+                    " }";
+        }
+    }
+
     private class CallbackMessageHandler extends Handler {
         private static final int MSG_MEDIA_BUTTON = 1;
         private static final int MSG_COMMAND = 2;
@@ -919,7 +1176,7 @@ public final class MediaSession {
                         break;
                     case MSG_COMMAND:
                         Command cmd = (Command) msg.obj;
-                        mCallback.onControlCommand(cmd.command, cmd.extras, cmd.stub);
+                        mCallback.onCommand(cmd.command, cmd.extras, cmd.stub);
                         break;
                 }
             }
@@ -948,20 +1205,29 @@ public final class MediaSession {
 
     private class TransportMessageHandler extends Handler {
         private static final int MSG_PLAY = 1;
-        private static final int MSG_PAUSE = 2;
-        private static final int MSG_STOP = 3;
-        private static final int MSG_NEXT = 4;
-        private static final int MSG_PREVIOUS = 5;
-        private static final int MSG_FAST_FORWARD = 6;
-        private static final int MSG_REWIND = 7;
-        private static final int MSG_SEEK_TO = 8;
-        private static final int MSG_RATE = 9;
+        private static final int MSG_PLAY_URI = 2;
+        private static final int MSG_PLAY_SEARCH = 3;
+        private static final int MSG_SKIP_TO_TRACK = 4;
+        private static final int MSG_PAUSE = 5;
+        private static final int MSG_STOP = 6;
+        private static final int MSG_NEXT = 7;
+        private static final int MSG_PREVIOUS = 8;
+        private static final int MSG_FAST_FORWARD = 9;
+        private static final int MSG_REWIND = 10;
+        private static final int MSG_SEEK_TO = 11;
+        private static final int MSG_RATE = 12;
 
         private TransportControlsCallback mCallback;
 
         public TransportMessageHandler(Looper looper, TransportControlsCallback cb) {
             super(looper);
             mCallback = cb;
+        }
+
+        public void post(int what, Object obj, Bundle bundle) {
+            Message msg = obtainMessage(what, obj);
+            msg.setData(bundle);
+            msg.sendToTarget();
         }
 
         public void post(int what, Object obj) {
@@ -978,6 +1244,14 @@ public final class MediaSession {
                 case MSG_PLAY:
                     mCallback.onPlay();
                     break;
+                case MSG_PLAY_URI:
+                    mCallback.onPlayUri((Uri) msg.obj, msg.getData());
+                    break;
+                case MSG_PLAY_SEARCH:
+                    mCallback.onPlayFromSearch((String) msg.obj, msg.getData());
+                    break;
+                case MSG_SKIP_TO_TRACK:
+                    mCallback.onSkipToTrack((Long) msg.obj);
                 case MSG_PAUSE:
                     mCallback.onPause();
                     break;

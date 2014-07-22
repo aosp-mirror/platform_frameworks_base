@@ -19,6 +19,7 @@ import android.media.RemoteControlClient;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
+import android.util.Log;
 
 /**
  * Playback state for a {@link MediaSession}. This includes a state like
@@ -26,6 +27,8 @@ import android.os.SystemClock;
  * and the current control capabilities.
  */
 public final class PlaybackState implements Parcelable {
+    private static final String TAG = "PlaybackState";
+
     /**
      * Indicates this performer supports the stop command.
      *
@@ -95,6 +98,27 @@ public final class PlaybackState implements Parcelable {
      * @see #setActions
      */
     public static final long ACTION_PLAY_PAUSE = 1 << 9;
+
+    /**
+     * Indicates this performer supports the play from uri command.
+     *
+     * @see Builder#setActions(long)
+     */
+    public static final long ACTION_PLAY_URI = 1 << 10;
+
+    /**
+     * Indicates this performer supports the play from search command.
+     *
+     * @see Builder#setActions(long)
+     */
+    public static final long ACTION_PLAY_FROM_SEARCH = 1 << 11;
+
+    /**
+     * Indicates this performer supports the skip to track command.
+     *
+     * @see Builder#setActions(long)
+     */
+    public static final long ACTION_SKIP_TO_TRACK = 1 << 12;
 
     /**
      * This is the default playback state and indicates that no media has been
@@ -191,15 +215,17 @@ public final class PlaybackState implements Parcelable {
     private final long mActions;
     private final CharSequence mErrorMessage;
     private final long mUpdateTime;
+    private final long mActiveTrackId;
 
     private PlaybackState(int state, long position, long updateTime, float speed,
-            long bufferPosition, long actions, CharSequence error) {
+            long bufferPosition, long actions, long activeTrackId, CharSequence error) {
         mState = state;
         mPosition = position;
         mSpeed = speed;
         mUpdateTime = updateTime;
         mBufferPosition = bufferPosition;
         mActions = actions;
+        mActiveTrackId = activeTrackId;
         mErrorMessage = error;
     }
 
@@ -210,6 +236,7 @@ public final class PlaybackState implements Parcelable {
         mUpdateTime = in.readLong();
         mBufferPosition = in.readLong();
         mActions = in.readLong();
+        mActiveTrackId = in.readLong();
         mErrorMessage = in.readCharSequence();
 
     }
@@ -223,6 +250,7 @@ public final class PlaybackState implements Parcelable {
         bob.append(", speed=").append(mSpeed);
         bob.append(", updated=").append(mUpdateTime);
         bob.append(", actions=").append(mActions);
+        bob.append(", active track id=").append(mActiveTrackId);
         bob.append(", error=").append(mErrorMessage);
         bob.append("}");
         return bob.toString();
@@ -241,6 +269,7 @@ public final class PlaybackState implements Parcelable {
         dest.writeLong(mUpdateTime);
         dest.writeLong(mBufferPosition);
         dest.writeLong(mActions);
+        dest.writeLong(mActiveTrackId);
         dest.writeCharSequence(mErrorMessage);
     }
 
@@ -502,6 +531,7 @@ public final class PlaybackState implements Parcelable {
         private long mActions;
         private CharSequence mErrorMessage;
         private long mUpdateTime;
+        private long mActiveTrackId = MediaSession.Track.UNKNOWN_ID;
 
         /**
          * Creates an initially empty state builder.
@@ -526,6 +556,7 @@ public final class PlaybackState implements Parcelable {
             mActions = from.mActions;
             mErrorMessage = from.mErrorMessage;
             mUpdateTime = from.mUpdateTime;
+            mActiveTrackId = from.mActiveTrackId;
         }
 
         /**
@@ -640,6 +671,18 @@ public final class PlaybackState implements Parcelable {
         }
 
         /**
+         * Set the active track in the play queue by specifying its id.
+         * The default value is {@link MediaSession.Track#UNKNOWN_ID}
+         *
+         * @param id The id of the active track.
+         * @return this
+         */
+        public Builder setActiveTrack(long id) {
+            mActiveTrackId = id;
+            return this;
+        }
+
+        /**
          * Set a user readable error message. This should be set when the state
          * is {@link PlaybackState#STATE_ERROR}.
          *
@@ -658,7 +701,7 @@ public final class PlaybackState implements Parcelable {
          */
         public PlaybackState build() {
             return new PlaybackState(mState, mPosition, mUpdateTime, mSpeed, mBufferPosition,
-                    mActions, mErrorMessage);
+                    mActions, mActiveTrackId, mErrorMessage);
         }
     }
 }
