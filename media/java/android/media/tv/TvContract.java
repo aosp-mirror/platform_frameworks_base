@@ -809,6 +809,10 @@ public final class TvContract {
         /**
          * The title of this TV program.
          * <p>
+         * If this program is an episodic TV show, it is recommended that the title is the series
+         * title and its related fields ({@link #COLUMN_SEASON_NUMBER},
+         * {@link #COLUMN_EPISODE_NUMBER}, and {@link #COLUMN_EPISODE_TITLE}) are filled in.
+         * </p><p>
          * Type: TEXT
          * </p>
          **/
