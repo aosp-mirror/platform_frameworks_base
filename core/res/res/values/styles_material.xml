@@ -863,14 +863,15 @@ please see styles_device_defaults.xml.
         <item name="divider">?attr/dividerVertical</item>
         <item name="titleTextStyle">@style/TextAppearance.Material.Widget.ActionBar.Title</item>
         <item name="subtitleTextStyle">@style/TextAppearance.Material.Widget.ActionBar.Subtitle</item>
-        <item name="progressBarStyle">@style/Widget.Material.ProgressBar.Horizontal</item>
-        <item name="indeterminateProgressStyle">@style/Widget.Material.ProgressBar</item>
+        <item name="progressBarStyle">?attr/progressBarStyleHorizontal</item>
+        <item name="indeterminateProgressStyle">?attr/progressBarStyle</item>
         <item name="progressBarPadding">32dip</item>
         <item name="itemPadding">8dip</item>
         <item name="homeLayout">@layout/action_bar_home_material</item>
         <item name="gravity">center_vertical</item>
         <item name="contentInsetStart">16dp</item>
         <item name="elevation">8dp</item>
+        <item name="popupTheme">?attr/actionBarPopupTheme</item>
     </style>
 
     <style name="Widget.Material.ActionBar.Solid">
@@ -1032,23 +1033,8 @@ please see styles_device_defaults.xml.
     <style name="Widget.Material.Light.ActionBar.TabText" parent="Widget.Material.ActionBar.TabText"/>
     <style name="Widget.Material.Light.ActionMode" parent="Widget.Material.ActionMode" />
     <style name="Widget.Material.Light.ActionButton.CloseMode" parent="Widget.Material.ActionButton.CloseMode" />
-
-    <style name="Widget.Material.Light.ActionBar" parent="Widget.Material.ActionBar">
-        <item name="titleTextStyle">@style/TextAppearance.Material.Widget.ActionBar.Title</item>
-        <item name="subtitleTextStyle">@style/TextAppearance.Material.Widget.ActionBar.Subtitle</item>
-        <item name="background">@null</item>
-        <item name="backgroundStacked">@null</item>
-        <item name="backgroundSplit">@null</item>
-        <item name="progressBarStyle">@style/Widget.Material.Light.ProgressBar.Horizontal</item>
-        <item name="indeterminateProgressStyle">@style/Widget.Material.Light.ProgressBar</item>
-    </style>
-
-    <style name="Widget.Material.Light.ActionBar.Solid">
-        <item name="background">?attr/colorPrimary</item>
-        <item name="backgroundStacked">?attr/colorPrimary</item>
-        <item name="backgroundSplit">?attr/colorPrimary</item>
-    </style>
-
+    <style name="Widget.Material.Light.ActionBar" parent="Widget.Material.ActionBar" />
+    <style name="Widget.Material.Light.ActionBar.Solid" parent="Widget.Material.ActionBar.Solid" />
     <style name="Widget.Material.Light.FastScroll" parent="Widget.Material.FastScroll"/>
     <style name="Widget.Material.Light.MediaRouteButton" parent="Widget.Material.MediaRouteButton" />
 
