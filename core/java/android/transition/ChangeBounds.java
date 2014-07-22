@@ -193,7 +193,8 @@ public class ChangeBounds extends Transition {
                         bottomRightAnimator = ObjectAnimator.ofInt(view, "right", "bottom",
                                 bottomRightPath);
                     }
-                    Animator anim = mergeAnimators(topLeftAnimator, bottomRightAnimator);
+                    Animator anim = TransitionUtils.mergeAnimators(topLeftAnimator,
+                            bottomRightAnimator);
                     if (view.getParent() instanceof ViewGroup) {
                         final ViewGroup parent = (ViewGroup) view.getParent();
                         parent.suppressLayout(true);
@@ -256,7 +257,8 @@ public class ChangeBounds extends Transition {
                         clipAnimator = ObjectAnimator.ofObject(view, "clipBounds", sRectEvaluator,
                                 tempStartBounds, tempEndBounds);
                     }
-                    Animator anim = mergeAnimators(translationAnimator, clipAnimator);
+                    Animator anim = TransitionUtils.mergeAnimators(translationAnimator,
+                            clipAnimator);
                     if (view.getParent() instanceof ViewGroup) {
                         final ViewGroup parent = (ViewGroup) view.getParent();
                         parent.suppressLayout(true);
@@ -329,17 +331,5 @@ public class ChangeBounds extends Transition {
             }
         }
         return null;
-    }
-
-    private static Animator mergeAnimators(Animator animator1, Animator animator2) {
-        if (animator1 == null) {
-            return animator2;
-        } else if (animator2 == null) {
-            return animator1;
-        } else {
-            AnimatorSet animatorSet = new AnimatorSet();
-            animatorSet.playTogether(animator1, animator2);
-            return animatorSet;
-        }
     }
 }
