@@ -37,7 +37,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.EOFException;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -48,9 +47,6 @@ import java.util.List;
 import java.util.Set;
 
 import java.util.Objects;
-import java.util.Map.Entry;
-
-import libcore.io.IoUtils;
 
 /**
  * We back up the signatures of each package so that during a system restore,
@@ -130,93 +126,6 @@ public class PackageManagerBackupAgent extends BackupAgent {
 
         mStoredSdkVersion = Build.VERSION.SDK_INT;
         mStoredIncrementalVersion = Build.VERSION.INCREMENTAL;
-    }
-
-    /**
-     * Reconstitute a PMBA from its on-disk format.  This is used for persistence
-     * of the ancestral dataset's metadata.  See {@link #saveToDisk()} for
-     * details of the file format.
-     */
-    PackageManagerBackupAgent(File cache) throws IOException {
-        FileInputStream fin = new FileInputStream(cache);
-        BufferedInputStream bin = new BufferedInputStream(fin, 32 * 1024);
-        DataInputStream in = new DataInputStream(bin);
-
-        int version = in.readInt();
-        // We can currently only handle the initial version format
-        if (version == ANCESTRAL_RECORD_VERSION) {
-            mStoredSdkVersion = in.readInt();
-            mStoredIncrementalVersion = in.readUTF();
-
-            int nPackages = in.readInt();
-            if (nPackages > 0) {
-                HashMap<String, Metadata> restoredMetadata =
-                        new HashMap<String, Metadata>(nPackages);
-                ArrayList<byte[]> hashes = null;
-                for (int pack = 0; pack < nPackages; pack++) {
-                    final String name = in.readUTF();
-                    final int versionCode = in.readInt();
-                    final int nHashes = in.readInt();
-                    if (nHashes > 0) {
-                        hashes = new ArrayList<byte[]>(nHashes);
-                        for (int i = 0; i < nHashes; i++) {
-                            int len = in.readInt();
-                            byte[] hash = new byte[len];
-                            in.read(hash);
-                            hashes.add(hash);
-                        }
-                    }
-                    restoredMetadata.put(name, new Metadata(versionCode, hashes));
-                }
-                mRestoredSignatures = restoredMetadata;
-            }
-        }
-    }
-
-    public void saveToDisk(File cache) throws IOException {
-        // On disk format is very similar to the key/value format:
-        //
-        // Int: disk format version, currently 1
-        // Int: VERSION.SDK_INT of source device
-        // UTF: VERSION.INCREMENTAL string, for reference
-        //
-        // Int: number of packages represented in this file
-        //
-        // Per package if number > 0:
-        //     UTF: package name
-        //     Int: versionCode of the package
-        //     Int: number of signature hash blocks for this package
-        //     Per signature hash block:
-        //         Int: size of block
-        //         byte[]: block itself if size of block > 0
-        FileOutputStream of = new FileOutputStream(cache);
-        BufferedOutputStream bout = new BufferedOutputStream(of, 32*1024);
-        DataOutputStream out = new DataOutputStream(bout);
-
-        out.writeInt(ANCESTRAL_RECORD_VERSION);
-        out.writeInt(mStoredSdkVersion);
-        out.writeUTF(mStoredIncrementalVersion);
-
-        out.writeInt(mRestoredSignatures.size());
-        if (mRestoredSignatures.size() > 0) {
-            Set<Entry<String, Metadata>> entries = mRestoredSignatures.entrySet();
-            for (Entry<String, Metadata> i : entries) {
-                final Metadata m = i.getValue();
-                final int nHashes = (m.sigHashes != null) ? m.sigHashes.size() : 0;
-                out.writeUTF(i.getKey());
-                out.writeInt(m.versionCode);
-                out.writeInt(nHashes);
-                for (int h = 0; h < nHashes; h++) {
-                    byte[] hash = m.sigHashes.get(h);
-                    out.writeInt(hash.length);
-                    if (hash.length > 0) {
-                        out.write(hash);
-                    }
-                }
-            }
-        }
-        out.flush();
-        IoUtils.closeQuietly(out);
     }
 
     // We will need to refresh our understanding of what is eligible for
