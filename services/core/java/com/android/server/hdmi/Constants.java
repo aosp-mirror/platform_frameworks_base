@@ -16,6 +16,8 @@
 
 package com.android.server.hdmi;
 
+import android.hardware.hdmi.HdmiCecDeviceInfo;
+
 /**
  * Defines constants related to HDMI-CEC protocol internal implementation.
  * If a constant will be used in the public api, it should be located in
@@ -78,7 +80,7 @@ final class Constants {
     public static final int ADDR_INVALID = -1;
 
     /** Logical address used to indicate the source comes from internal device. */
-    public static final int ADDR_INTERNAL = 0xFFFF;
+    public static final int ADDR_INTERNAL = HdmiCecDeviceInfo.ADDR_INTERNAL;
 
     static final int MESSAGE_FEATURE_ABORT = 0x00;
     static final int MESSAGE_IMAGE_VIEW_ON = 0x04;
