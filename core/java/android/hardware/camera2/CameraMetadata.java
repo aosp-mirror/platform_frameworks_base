@@ -17,6 +17,8 @@
 package android.hardware.camera2;
 
 import android.hardware.camera2.impl.CameraMetadataNative;
+import android.hardware.camera2.impl.PublicKey;
+import android.hardware.camera2.impl.SyntheticKey;
 import android.util.Log;
 
 import java.lang.reflect.Field;
@@ -151,7 +153,7 @@ public abstract class CameraMetadata<TKey> {
                 }
 
                 if (instance == null || instance.getProtected(key) != null) {
-                    if (shouldKeyBeAdded(key, filterTags)) {
+                    if (shouldKeyBeAdded(key, field, filterTags)) {
                         keyList.add(key);
 
                         if (VERBOSE) {
@@ -168,7 +170,7 @@ public abstract class CameraMetadata<TKey> {
     }
 
     @SuppressWarnings("rawtypes")
-    private static <TKey> boolean shouldKeyBeAdded(TKey key, int[] filterTags) {
+    private static <TKey> boolean shouldKeyBeAdded(TKey key, Field field, int[] filterTags) {
         if (key == null) {
             throw new NullPointerException("key must not be null");
         }
@@ -189,10 +191,26 @@ public abstract class CameraMetadata<TKey> {
             throw new IllegalArgumentException("key type must be that of a metadata key");
         }
 
+        if (field.getAnnotation(PublicKey.class) == null) {
+            // Never expose @hide keys up to the API user
+            return false;
+        }
+
         // No filtering necessary
         if (filterTags == null) {
             return true;
         }
+
+        if (field.getAnnotation(SyntheticKey.class) != null) {
+            // This key is synthetic, so calling #getTag will throw IAE
+
+            // TODO: don't just assume all public+synthetic keys are always available
+            return true;
+        }
+
+        /*
+         * Regular key: look up it's native tag and see if it's in filterTags
+         */
 
         int keyTag = nativeKey.getTag();
 

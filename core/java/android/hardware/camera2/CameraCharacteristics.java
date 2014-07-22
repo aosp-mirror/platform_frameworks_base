@@ -16,8 +16,9 @@
 
 package android.hardware.camera2;
 
-import android.hardware.camera2.CaptureResult.Key;
 import android.hardware.camera2.impl.CameraMetadataNative;
+import android.hardware.camera2.impl.PublicKey;
+import android.hardware.camera2.impl.SyntheticKey;
 import android.hardware.camera2.utils.TypeReference;
 import android.util.Rational;
 
@@ -321,6 +322,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CaptureRequest#COLOR_CORRECTION_ABERRATION_CORRECTION_MODE
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      */
+    @PublicKey
     public static final Key<int[]> COLOR_CORRECTION_AVAILABLE_ABERRATION_CORRECTION_MODES =
             new Key<int[]>("android.colorCorrection.availableAberrationCorrectionModes", int[].class);
 
@@ -332,6 +334,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * valid anti-banding modes that the application may request
      * for this camera device; they must include AUTO.</p>
      */
+    @PublicKey
     public static final Key<int[]> CONTROL_AE_AVAILABLE_ANTIBANDING_MODES =
             new Key<int[]>("android.control.aeAvailableAntibandingModes", int[].class);
 
@@ -351,6 +354,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CaptureRequest#CONTROL_AE_MODE
      */
+    @PublicKey
     public static final Key<int[]> CONTROL_AE_AVAILABLE_MODES =
             new Key<int[]>("android.control.aeAvailableModes", int[].class);
 
@@ -358,6 +362,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>List of frame rate ranges supported by the
      * auto-exposure (AE) algorithm/hardware</p>
      */
+    @PublicKey
     public static final Key<android.util.Range<Integer>[]> CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES =
             new Key<android.util.Range<Integer>[]>("android.control.aeAvailableTargetFpsRanges", new TypeReference<android.util.Range<Integer>[]>() {{ }});
 
@@ -368,6 +373,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CameraCharacteristics#CONTROL_AE_COMPENSATION_STEP
      */
+    @PublicKey
     public static final Key<android.util.Range<Integer>> CONTROL_AE_COMPENSATION_RANGE =
             new Key<android.util.Range<Integer>>("android.control.aeCompensationRange", new TypeReference<android.util.Range<Integer>>() {{ }});
 
@@ -375,6 +381,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>Smallest step by which exposure compensation
      * can be changed</p>
      */
+    @PublicKey
     public static final Key<Rational> CONTROL_AE_COMPENSATION_STEP =
             new Key<Rational>("android.control.aeCompensationStep", Rational.class);
 
@@ -391,6 +398,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CaptureRequest#CONTROL_AF_MODE
      * @see CameraCharacteristics#LENS_INFO_MINIMUM_FOCUS_DISTANCE
      */
+    @PublicKey
     public static final Key<int[]> CONTROL_AF_AVAILABLE_MODES =
             new Key<int[]>("android.control.afAvailableModes", int[].class);
 
@@ -410,6 +418,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CaptureRequest#CONTROL_EFFECT_MODE
      * @see CaptureRequest#CONTROL_MODE
      */
+    @PublicKey
     public static final Key<int[]> CONTROL_AVAILABLE_EFFECTS =
             new Key<int[]>("android.control.availableEffects", int[].class);
 
@@ -424,6 +433,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CaptureRequest#CONTROL_SCENE_MODE
      */
+    @PublicKey
     public static final Key<int[]> CONTROL_AVAILABLE_SCENE_MODES =
             new Key<int[]>("android.control.availableSceneModes", int[].class);
 
@@ -431,6 +441,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>List of video stabilization modes that can
      * be supported</p>
      */
+    @PublicKey
     public static final Key<int[]> CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES =
             new Key<int[]>("android.control.availableVideoStabilizationModes", int[].class);
 
@@ -450,6 +461,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CaptureRequest#COLOR_CORRECTION_TRANSFORM
      * @see CaptureRequest#CONTROL_AWB_MODE
      */
+    @PublicKey
     public static final Key<int[]> CONTROL_AWB_AVAILABLE_MODES =
             new Key<int[]>("android.control.awbAvailableModes", int[].class);
 
@@ -476,6 +488,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CaptureRequest#CONTROL_AE_REGIONS
      */
+    @PublicKey
+    @SyntheticKey
     public static final Key<Integer> CONTROL_MAX_REGIONS_AE =
             new Key<Integer>("android.control.maxRegionsAe", int.class);
 
@@ -487,6 +501,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CaptureRequest#CONTROL_AWB_REGIONS
      */
+    @PublicKey
+    @SyntheticKey
     public static final Key<Integer> CONTROL_MAX_REGIONS_AWB =
             new Key<Integer>("android.control.maxRegionsAwb", int.class);
 
@@ -498,6 +514,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CaptureRequest#CONTROL_AF_REGIONS
      */
+    @PublicKey
+    @SyntheticKey
     public static final Key<Integer> CONTROL_MAX_REGIONS_AF =
             new Key<Integer>("android.control.maxRegionsAf", int.class);
 
@@ -538,6 +556,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CaptureRequest#EDGE_MODE
      */
+    @PublicKey
     public static final Key<int[]> EDGE_AVAILABLE_EDGE_MODES =
             new Key<int[]>("android.edge.availableEdgeModes", int[].class);
 
@@ -547,6 +566,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>If no flash, none of the flash controls do
      * anything. All other metadata should return 0.</p>
      */
+    @PublicKey
     public static final Key<Boolean> FLASH_INFO_AVAILABLE =
             new Key<Boolean>("android.flash.info.available", boolean.class);
 
@@ -558,6 +578,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CaptureRequest#HOT_PIXEL_MODE
      */
+    @PublicKey
     public static final Key<int[]> HOT_PIXEL_AVAILABLE_HOT_PIXEL_MODES =
             new Key<int[]>("android.hotPixel.availableHotPixelModes", int[].class);
 
@@ -577,6 +598,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <li>All non (0, 0) sizes will have non-zero widths and heights.</li>
      * </ul>
      */
+    @PublicKey
     public static final Key<android.util.Size[]> JPEG_AVAILABLE_THUMBNAIL_SIZES =
             new Key<android.util.Size[]>("android.jpeg.availableThumbnailSizes", android.util.Size[].class);
 
@@ -588,6 +610,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>If the camera device supports variable apertures, the aperture value
      * in this list will be sorted in ascending order.</p>
      */
+    @PublicKey
     public static final Key<float[]> LENS_INFO_AVAILABLE_APERTURES =
             new Key<float[]>("android.lens.info.availableApertures", float[].class);
 
@@ -601,6 +624,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CaptureRequest#LENS_FILTER_DENSITY
      */
+    @PublicKey
     public static final Key<float[]> LENS_INFO_AVAILABLE_FILTER_DENSITIES =
             new Key<float[]>("android.lens.info.availableFilterDensities", float[].class);
 
@@ -614,6 +638,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CaptureRequest#LENS_FOCAL_LENGTH
      */
+    @PublicKey
     public static final Key<float[]> LENS_INFO_AVAILABLE_FOCAL_LENGTHS =
             new Key<float[]>("android.lens.info.availableFocalLengths", float[].class);
 
@@ -626,6 +651,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CaptureRequest#LENS_OPTICAL_STABILIZATION_MODE
      */
+    @PublicKey
     public static final Key<int[]> LENS_INFO_AVAILABLE_OPTICAL_STABILIZATION =
             new Key<int[]>("android.lens.info.availableOpticalStabilization", int[].class);
 
@@ -637,6 +663,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CameraCharacteristics#LENS_INFO_FOCUS_DISTANCE_CALIBRATION
      */
+    @PublicKey
     public static final Key<Float> LENS_INFO_HYPERFOCAL_DISTANCE =
             new Key<Float>("android.lens.info.hyperfocalDistance", float.class);
 
@@ -647,6 +674,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * 0.</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      */
+    @PublicKey
     public static final Key<Float> LENS_INFO_MINIMUM_FOCUS_DISTANCE =
             new Key<Float>("android.lens.info.minimumFocusDistance", float.class);
 
@@ -674,6 +702,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see #LENS_INFO_FOCUS_DISTANCE_CALIBRATION_APPROXIMATE
      * @see #LENS_INFO_FOCUS_DISTANCE_CALIBRATION_CALIBRATED
      */
+    @PublicKey
     public static final Key<Integer> LENS_INFO_FOCUS_DISTANCE_CALIBRATION =
             new Key<Integer>("android.lens.info.focusDistanceCalibration", int.class);
 
@@ -683,6 +712,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see #LENS_FACING_FRONT
      * @see #LENS_FACING_BACK
      */
+    @PublicKey
     public static final Key<Integer> LENS_FACING =
             new Key<Integer>("android.lens.facing", int.class);
 
@@ -693,6 +723,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CaptureRequest#NOISE_REDUCTION_MODE
      */
+    @PublicKey
     public static final Key<int[]> NOISE_REDUCTION_AVAILABLE_NOISE_REDUCTION_MODES =
             new Key<int[]>("android.noiseReduction.availableNoiseReductionModes", int[].class);
 
@@ -758,6 +789,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP
      */
+    @PublicKey
+    @SyntheticKey
     public static final Key<Integer> REQUEST_MAX_NUM_OUTPUT_RAW =
             new Key<Integer>("android.request.maxNumOutputRaw", int.class);
 
@@ -784,6 +817,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP
      */
+    @PublicKey
+    @SyntheticKey
     public static final Key<Integer> REQUEST_MAX_NUM_OUTPUT_PROC =
             new Key<Integer>("android.request.maxNumOutputProc", int.class);
 
@@ -804,6 +839,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP
      */
+    @PublicKey
+    @SyntheticKey
     public static final Key<Integer> REQUEST_MAX_NUM_OUTPUT_PROC_STALLING =
             new Key<Integer>("android.request.maxNumOutputProcStalling", int.class);
 
@@ -842,6 +879,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CaptureResult#REQUEST_PIPELINE_DEPTH
      */
+    @PublicKey
     public static final Key<Byte> REQUEST_PIPELINE_MAX_DEPTH =
             new Key<Byte>("android.request.pipelineMaxDepth", byte.class);
 
@@ -862,6 +900,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * partial results.</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      */
+    @PublicKey
     public static final Key<Integer> REQUEST_PARTIAL_RESULT_COUNT =
             new Key<Integer>("android.request.partialResultCount", int.class);
 
@@ -892,6 +931,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see #REQUEST_AVAILABLE_CAPABILITIES_MANUAL_POST_PROCESSING
      * @see #REQUEST_AVAILABLE_CAPABILITIES_RAW
      */
+    @PublicKey
     public static final Key<int[]> REQUEST_AVAILABLE_CAPABILITIES =
             new Key<int[]>("android.request.availableCapabilities", int[].class);
 
@@ -1001,6 +1041,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * than this ratio allows will be rounded up to the minimum
      * allowed size by the camera device.</p>
      */
+    @PublicKey
     public static final Key<Float> SCALER_AVAILABLE_MAX_DIGITAL_ZOOM =
             new Key<Float>("android.scaler.availableMaxDigitalZoom", float.class);
 
@@ -1360,6 +1401,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
      * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
      */
+    @PublicKey
+    @SyntheticKey
     public static final Key<android.hardware.camera2.params.StreamConfigurationMap> SCALER_STREAM_CONFIGURATION_MAP =
             new Key<android.hardware.camera2.params.StreamConfigurationMap>("android.scaler.streamConfigurationMap", android.hardware.camera2.params.StreamConfigurationMap.class);
 
@@ -1382,6 +1425,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see #SCALER_CROPPING_TYPE_CENTER_ONLY
      * @see #SCALER_CROPPING_TYPE_FREEFORM
      */
+    @PublicKey
     public static final Key<Integer> SCALER_CROPPING_TYPE =
             new Key<Integer>("android.scaler.croppingType", int.class);
 
@@ -1391,6 +1435,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>It is smaller or equal to
      * sensor full pixel array, which could include the black calibration pixels.</p>
      */
+    @PublicKey
     public static final Key<android.graphics.Rect> SENSOR_INFO_ACTIVE_ARRAY_SIZE =
             new Key<android.graphics.Rect>("android.sensor.info.activeArraySize", android.graphics.Rect.class);
 
@@ -1403,6 +1448,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CaptureRequest#SENSOR_SENSITIVITY
      */
+    @PublicKey
     public static final Key<android.util.Range<Integer>> SENSOR_INFO_SENSITIVITY_RANGE =
             new Key<android.util.Range<Integer>>("android.sensor.info.sensitivityRange", new TypeReference<android.util.Range<Integer>>() {{ }});
 
@@ -1416,6 +1462,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see #SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_BGGR
      * @see #SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_RGB
      */
+    @PublicKey
     public static final Key<Integer> SENSOR_INFO_COLOR_FILTER_ARRANGEMENT =
             new Key<Integer>("android.sensor.info.colorFilterArrangement", int.class);
 
@@ -1429,6 +1476,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @see CaptureRequest#SENSOR_EXPOSURE_TIME
      */
+    @PublicKey
     public static final Key<android.util.Range<Long>> SENSOR_INFO_EXPOSURE_TIME_RANGE =
             new Key<android.util.Range<Long>>("android.sensor.info.exposureTimeRange", new TypeReference<android.util.Range<Long>>() {{ }});
 
@@ -1449,6 +1497,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @see CaptureRequest#SENSOR_FRAME_DURATION
      */
+    @PublicKey
     public static final Key<Long> SENSOR_INFO_MAX_FRAME_DURATION =
             new Key<Long>("android.sensor.info.maxFrameDuration", long.class);
 
@@ -1460,6 +1509,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE
      */
+    @PublicKey
     public static final Key<android.util.SizeF> SENSOR_INFO_PHYSICAL_SIZE =
             new Key<android.util.SizeF>("android.sensor.info.physicalSize", android.util.SizeF.class);
 
@@ -1478,6 +1528,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
      * @see CameraCharacteristics#SENSOR_INFO_PHYSICAL_SIZE
      */
+    @PublicKey
     public static final Key<android.util.Size> SENSOR_INFO_PIXEL_ARRAY_SIZE =
             new Key<android.util.Size>("android.sensor.info.pixelArraySize", android.util.Size.class);
 
@@ -1495,6 +1546,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CameraCharacteristics#SENSOR_BLACK_LEVEL_PATTERN
      */
+    @PublicKey
     public static final Key<Integer> SENSOR_INFO_WHITE_LEVEL =
             new Key<Integer>("android.sensor.info.whiteLevel", int.class);
 
@@ -1507,6 +1559,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see #SENSOR_INFO_TIMESTAMP_CALIBRATION_UNCALIBRATED
      * @see #SENSOR_INFO_TIMESTAMP_CALIBRATION_CALIBRATED
      */
+    @PublicKey
     public static final Key<Integer> SENSOR_INFO_TIMESTAMP_CALIBRATION =
             new Key<Integer>("android.sensor.info.timestampCalibration", int.class);
 
@@ -1549,6 +1602,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see #SENSOR_REFERENCE_ILLUMINANT1_D50
      * @see #SENSOR_REFERENCE_ILLUMINANT1_ISO_STUDIO_TUNGSTEN
      */
+    @PublicKey
     public static final Key<Integer> SENSOR_REFERENCE_ILLUMINANT1 =
             new Key<Integer>("android.sensor.referenceIlluminant1", int.class);
 
@@ -1569,6 +1623,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CameraCharacteristics#SENSOR_FORWARD_MATRIX2
      * @see CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT1
      */
+    @PublicKey
     public static final Key<Byte> SENSOR_REFERENCE_ILLUMINANT2 =
             new Key<Byte>("android.sensor.referenceIlluminant2", byte.class);
 
@@ -1587,6 +1642,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT1
      */
+    @PublicKey
     public static final Key<android.hardware.camera2.params.ColorSpaceTransform> SENSOR_CALIBRATION_TRANSFORM1 =
             new Key<android.hardware.camera2.params.ColorSpaceTransform>("android.sensor.calibrationTransform1", android.hardware.camera2.params.ColorSpaceTransform.class);
 
@@ -1608,6 +1664,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT2
      */
+    @PublicKey
     public static final Key<android.hardware.camera2.params.ColorSpaceTransform> SENSOR_CALIBRATION_TRANSFORM2 =
             new Key<android.hardware.camera2.params.ColorSpaceTransform>("android.sensor.calibrationTransform2", android.hardware.camera2.params.ColorSpaceTransform.class);
 
@@ -1630,6 +1687,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT1
      */
+    @PublicKey
     public static final Key<android.hardware.camera2.params.ColorSpaceTransform> SENSOR_COLOR_TRANSFORM1 =
             new Key<android.hardware.camera2.params.ColorSpaceTransform>("android.sensor.colorTransform1", android.hardware.camera2.params.ColorSpaceTransform.class);
 
@@ -1654,6 +1712,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT2
      */
+    @PublicKey
     public static final Key<android.hardware.camera2.params.ColorSpaceTransform> SENSOR_COLOR_TRANSFORM2 =
             new Key<android.hardware.camera2.params.ColorSpaceTransform>("android.sensor.colorTransform2", android.hardware.camera2.params.ColorSpaceTransform.class);
 
@@ -1674,6 +1733,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT1
      */
+    @PublicKey
     public static final Key<android.hardware.camera2.params.ColorSpaceTransform> SENSOR_FORWARD_MATRIX1 =
             new Key<android.hardware.camera2.params.ColorSpaceTransform>("android.sensor.forwardMatrix1", android.hardware.camera2.params.ColorSpaceTransform.class);
 
@@ -1696,6 +1756,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT2
      */
+    @PublicKey
     public static final Key<android.hardware.camera2.params.ColorSpaceTransform> SENSOR_FORWARD_MATRIX2 =
             new Key<android.hardware.camera2.params.ColorSpaceTransform>("android.sensor.forwardMatrix2", android.hardware.camera2.params.ColorSpaceTransform.class);
 
@@ -1714,6 +1775,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CameraCharacteristics#SENSOR_INFO_COLOR_FILTER_ARRANGEMENT
      * @see CameraCharacteristics#SENSOR_INFO_WHITE_LEVEL
      */
+    @PublicKey
     public static final Key<android.hardware.camera2.params.BlackLevelPattern> SENSOR_BLACK_LEVEL_PATTERN =
             new Key<android.hardware.camera2.params.BlackLevelPattern>("android.sensor.blackLevelPattern", android.hardware.camera2.params.BlackLevelPattern.class);
 
@@ -1732,6 +1794,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @see CaptureRequest#SENSOR_SENSITIVITY
      */
+    @PublicKey
     public static final Key<Integer> SENSOR_MAX_ANALOG_SENSITIVITY =
             new Key<Integer>("android.sensor.maxAnalogSensitivity", int.class);
 
@@ -1742,6 +1805,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * direction of rolling shutter readout, which is from top
      * to bottom in the sensor's coordinate system</p>
      */
+    @PublicKey
     public static final Key<Integer> SENSOR_ORIENTATION =
             new Key<Integer>("android.sensor.orientation", int.class);
 
@@ -1768,6 +1832,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CameraCharacteristics#SENSOR_INFO_COLOR_FILTER_ARRANGEMENT
      */
+    @PublicKey
     public static final Key<android.util.Pair<Double,Double>[]> SENSOR_NOISE_PROFILE =
             new Key<android.util.Pair<Double,Double>[]>("android.sensor.noiseProfile", new TypeReference<android.util.Pair<Double,Double>[]>() {{ }});
 
@@ -1778,6 +1843,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CaptureRequest#SENSOR_TEST_PATTERN_MODE
      */
+    @PublicKey
     public static final Key<int[]> SENSOR_AVAILABLE_TEST_PATTERN_MODES =
             new Key<int[]>("android.sensor.availableTestPatternModes", int[].class);
 
@@ -1792,6 +1858,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * android.statistics.faceIds and
      * android.statistics.faceLandmarks outputs.</p>
      */
+    @PublicKey
     public static final Key<int[]> STATISTICS_INFO_AVAILABLE_FACE_DETECT_MODES =
             new Key<int[]>("android.statistics.info.availableFaceDetectModes", int[].class);
 
@@ -1799,6 +1866,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>The maximum number of simultaneously detectable
      * faces.</p>
      */
+    @PublicKey
     public static final Key<Integer> STATISTICS_INFO_MAX_FACE_COUNT =
             new Key<Integer>("android.statistics.info.maxFaceCount", int.class);
 
@@ -1811,6 +1879,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CaptureRequest#STATISTICS_HOT_PIXEL_MAP_MODE
      */
+    @PublicKey
     public static final Key<boolean[]> STATISTICS_INFO_AVAILABLE_HOT_PIXEL_MAP_MODES =
             new Key<boolean[]>("android.statistics.info.availableHotPixelMapModes", boolean[].class);
 
@@ -1827,6 +1896,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CaptureRequest#TONEMAP_CURVE
      */
+    @PublicKey
     public static final Key<Integer> TONEMAP_MAX_CURVE_POINTS =
             new Key<Integer>("android.tonemap.maxCurvePoints", int.class);
 
@@ -1838,6 +1908,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @see CaptureRequest#TONEMAP_MODE
      */
+    @PublicKey
     public static final Key<int[]> TONEMAP_AVAILABLE_TONE_MAP_MODES =
             new Key<int[]>("android.tonemap.availableToneMapModes", int[].class);
 
@@ -1879,6 +1950,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see #INFO_SUPPORTED_HARDWARE_LEVEL_FULL
      * @see #INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY
      */
+    @PublicKey
     public static final Key<Integer> INFO_SUPPORTED_HARDWARE_LEVEL =
             new Key<Integer>("android.info.supportedHardwareLevel", int.class);
 
@@ -1917,10 +1989,12 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see #SYNC_MAX_LATENCY_PER_FRAME_CONTROL
      * @see #SYNC_MAX_LATENCY_UNKNOWN
      */
+    @PublicKey
     public static final Key<Integer> SYNC_MAX_LATENCY =
             new Key<Integer>("android.sync.maxLatency", int.class);
 
     /*~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~
      * End generated code
      *~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~O@*/
+
 }
