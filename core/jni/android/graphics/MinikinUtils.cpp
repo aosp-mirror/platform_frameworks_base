@@ -18,9 +18,9 @@
 #include <cutils/log.h>
 #include <string>
 
-#include "SkPaint.h"
 #include "SkPathMeasure.h"
 #include "minikin/Layout.h"
+#include "Paint.h"
 #include "TypefaceImpl.h"
 #include "MinikinSkia.h"
 
@@ -38,7 +38,7 @@ static int snprintfcat(char* buf, int off, int size, const char* format, ...) {
     return off + n;
 }
 
-std::string MinikinUtils::setLayoutProperties(Layout* layout, const SkPaint* paint, int bidiFlags,
+std::string MinikinUtils::setLayoutProperties(Layout* layout, const Paint* paint, int bidiFlags,
         TypefaceImpl* typeface) {
     TypefaceImpl* resolvedFace = TypefaceImpl_resolveDefault(typeface);
     layout->setFontCollection(resolvedFace->fFontCollection);
@@ -62,12 +62,12 @@ std::string MinikinUtils::setLayoutProperties(Layout* layout, const SkPaint* pai
     return std::string(css);
 }
 
-float MinikinUtils::xOffsetForTextAlign(SkPaint* paint, const Layout& layout) {
+float MinikinUtils::xOffsetForTextAlign(Paint* paint, const Layout& layout) {
     switch (paint->getTextAlign()) {
-        case SkPaint::kCenter_Align:
+        case Paint::kCenter_Align:
             return layout.getAdvance() * -0.5f;
             break;
-        case SkPaint::kRight_Align:
+        case Paint::kRight_Align:
             return -layout.getAdvance();
             break;
         default:
@@ -76,13 +76,13 @@ float MinikinUtils::xOffsetForTextAlign(SkPaint* paint, const Layout& layout) {
     return 0;
 }
 
-float MinikinUtils::hOffsetForTextAlign(SkPaint* paint, const Layout& layout, const SkPath& path) {
+float MinikinUtils::hOffsetForTextAlign(Paint* paint, const Layout& layout, const SkPath& path) {
     float align = 0;
     switch (paint->getTextAlign()) {
-        case SkPaint::kCenter_Align:
+        case Paint::kCenter_Align:
             align = -0.5f;
             break;
-        case SkPaint::kRight_Align:
+        case Paint::kRight_Align:
             align = -1;
             break;
         default:

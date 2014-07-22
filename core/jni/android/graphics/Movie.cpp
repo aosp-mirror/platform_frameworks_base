@@ -7,6 +7,7 @@
 #include "SkUtils.h"
 #include "Utils.h"
 #include "CreateJavaOutputStreamAdaptor.h"
+#include "Paint.h"
 
 #include <androidfw/Asset.h>
 #include <androidfw/ResourceTypes.h>

@@ -23,6 +23,7 @@
 
 #include <Caches.h>
 
+#include "Paint.h"
 #include "Canvas.h"
 #include "SkCanvas.h"
 #include "SkRegion.h"
@@ -123,7 +124,7 @@ public:
         SkCanvas* canvas       = reinterpret_cast<Canvas*>(canvasHandle)->getSkCanvas();
         const SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
         Res_png_9patch* chunk  = reinterpret_cast<Res_png_9patch*>(chunkHandle);
-        const SkPaint* paint   = reinterpret_cast<SkPaint*>(paintHandle);
+        const Paint* paint     = reinterpret_cast<Paint*>(paintHandle);
         SkASSERT(canvas);
         SkASSERT(boundsRectF);
         SkASSERT(bitmap);
@@ -142,7 +143,7 @@ public:
         SkCanvas* canvas       = reinterpret_cast<Canvas*>(canvasHandle)->getSkCanvas();
         const SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
         Res_png_9patch* chunk  = reinterpret_cast<Res_png_9patch*>(chunkHandle);
-        const SkPaint* paint   = reinterpret_cast<SkPaint*>(paintHandle);
+        const Paint* paint     = reinterpret_cast<Paint*>(paintHandle);
         SkASSERT(canvas);
         SkASSERT(boundsRect);
         SkASSERT(bitmap);
