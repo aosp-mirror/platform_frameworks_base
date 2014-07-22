@@ -28,6 +28,8 @@ import static com.android.systemui.statusbar.phone.BarTransitions.MODE_OPAQUE;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_SEMI_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSLUCENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
+import static com.android.systemui.statusbar.phone.BarTransitions.MODE_WARNING;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.TimeInterpolator;
@@ -125,6 +127,7 @@ import com.android.systemui.statusbar.SpeedBumpView;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.policy.BatteryController;
+import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
 import com.android.systemui.statusbar.policy.BluetoothControllerImpl;
 import com.android.systemui.statusbar.policy.CastControllerImpl;
 import com.android.systemui.statusbar.policy.FlashlightController;
@@ -705,6 +708,16 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         // Other icons
         mLocationController = new LocationControllerImpl(mContext); // will post a notification
         mBatteryController = new BatteryController(mContext);
+        mBatteryController.addStateChangedCallback(new BatteryStateChangeCallback() {
+            @Override
+            public void onPowerSaveChanged() {
+                mHandler.post(mCheckBarModes);
+            }
+            @Override
+            public void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging) {
+                // noop
+            }
+        });
         mNetworkController = new NetworkControllerImpl(mContext);
         mHotspotController = new HotspotControllerImpl(mContext);
         mBluetoothController = new BluetoothControllerImpl(mContext);
@@ -2310,7 +2323,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     private void checkBarMode(int mode, int windowState, BarTransitions transitions) {
-        final boolean anim = (mScreenOn == null || mScreenOn) && windowState != WINDOW_STATE_HIDDEN;
+        final boolean powerSave = mBatteryController.isPowerSave();
+        final boolean anim = (mScreenOn == null || mScreenOn) && windowState != WINDOW_STATE_HIDDEN
+                && !powerSave;
+        if (powerSave && getBarState() != StatusBarState.KEYGUARD) {
+            mode = MODE_WARNING;
+        }
         transitions.transitionTo(mode, anim);
     }
 
@@ -2325,7 +2343,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         @Override
         public void run() {
             checkBarModes();
-        }};
+        }
+    };
 
     @Override
     public void setInteracting(int barWindow, boolean interacting) {
@@ -2643,6 +2662,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
         if (mUserSwitcherController != null) {
             mUserSwitcherController.dump(fd, pw, args);
+        }
+        if (mBatteryController != null) {
+            mBatteryController.dump(fd, pw, args);
         }
     }
 
@@ -3111,6 +3133,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             int barMode = "opaque".equals(mode) ? MODE_OPAQUE :
                     "translucent".equals(mode) ? MODE_TRANSLUCENT :
                     "semi-transparent".equals(mode) ? MODE_SEMI_TRANSPARENT :
+                    "transparent".equals(mode) ? MODE_TRANSPARENT :
+                    "warning".equals(mode) ? MODE_WARNING :
                     -1;
             if (barMode != -1) {
                 boolean animate = true;
