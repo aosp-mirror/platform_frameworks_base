@@ -16156,6 +16156,77 @@ package android.media.audiofx {
 
 }
 
+package android.media.browse {
+
+  public final class MediaBrowser {
+    ctor public MediaBrowser(android.content.Context, android.content.ComponentName, android.media.browse.MediaBrowser.ConnectionCallback, android.os.Bundle);
+    method public void connect();
+    method public void disconnect();
+    method public android.net.Uri getRoot();
+    method public android.media.session.MediaSession.Token getSessionToken();
+    method public boolean isConnected();
+    method public void loadThumbnail(android.net.Uri, int, int, int, android.media.browse.MediaBrowser.ThumbnailCallback);
+    method public void subscribe(android.net.Uri, android.media.browse.MediaBrowser.SubscriptionCallback);
+    method public void unsubscribe(android.net.Uri);
+  }
+
+  public static class MediaBrowser.ConnectionCallback {
+    ctor public MediaBrowser.ConnectionCallback();
+    method public void onConnected();
+    method public void onConnectionFailed();
+    method public void onConnectionSuspended();
+  }
+
+  public static abstract class MediaBrowser.SubscriptionCallback {
+    ctor public MediaBrowser.SubscriptionCallback();
+    method public void onChildrenLoaded(android.net.Uri, java.util.List<android.media.browse.MediaBrowserItem>);
+    method public void onError(android.net.Uri);
+  }
+
+  public static abstract class MediaBrowser.ThumbnailCallback {
+    ctor public MediaBrowser.ThumbnailCallback();
+    method public void onError(android.net.Uri);
+    method public void onThumbnailLoaded(android.net.Uri, android.graphics.Bitmap);
+  }
+
+  public final class MediaBrowserItem implements android.os.Parcelable {
+    method public int describeContents();
+    method public android.os.Bundle getExtras();
+    method public int getFlags();
+    method public java.lang.CharSequence getSummary();
+    method public java.lang.CharSequence getTitle();
+    method public android.net.Uri getUri();
+    method public boolean isBrowsable();
+    method public boolean isPlayable();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final int FLAG_BROWSABLE = 1; // 0x1
+    field public static final int FLAG_PLAYABLE = 2; // 0x2
+  }
+
+  public static final class MediaBrowserItem.Builder {
+    ctor public MediaBrowserItem.Builder(android.net.Uri, int, java.lang.CharSequence);
+    method public android.media.browse.MediaBrowserItem build();
+    method public android.media.browse.MediaBrowserItem.Builder setExtras(android.os.Bundle);
+    method public android.media.browse.MediaBrowserItem.Builder setSummary(java.lang.CharSequence);
+  }
+
+  public abstract class MediaBrowserService extends android.app.Service {
+    ctor public MediaBrowserService();
+    method public void dump(java.io.FileDescriptor, java.io.PrintWriter, java.lang.String[]);
+    method public android.media.session.MediaSession.Token getSessionToken();
+    method public void notifyChange();
+    method public void notifyChildrenChanged(android.net.Uri);
+    method public android.os.IBinder onBind(android.content.Intent);
+    method public abstract android.net.Uri onGetRoot(java.lang.String, int, android.os.Bundle);
+    method public abstract android.graphics.Bitmap onGetThumbnail(android.net.Uri, int, int, int);
+    method public abstract java.util.List<android.media.browse.MediaBrowserItem> onLoadChildren(android.net.Uri);
+    method public void setSessionToken(android.media.session.MediaSession.Token);
+    field public static final java.lang.String SERVICE_ACTION = "android.media.browse.MediaBrowserService";
+  }
+
+}
+
 package android.media.effect {
 
   public abstract class Effect {
