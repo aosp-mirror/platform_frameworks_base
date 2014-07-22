@@ -168,10 +168,11 @@ public class ImageView extends View {
             setScaleType(sScaleTypeArray[index]);
         }
 
+        mDrawableTintMode = Drawable.parseTintMode(a.getInt(
+                R.styleable.ImageView_tintMode, -1), mDrawableTintMode);
+
         if (a.hasValue(R.styleable.ImageView_tint)) {
             mDrawableTint = a.getColorStateList(R.styleable.ImageView_tint);
-            mDrawableTintMode = Drawable.parseTintMode(a.getInt(
-                    R.styleable.ImageView_tintMode, -1), mDrawableTintMode);
             mHasDrawableTint = true;
 
             applyDrawableTint();
@@ -448,30 +449,6 @@ public class ImageView extends View {
     }
 
     /**
-     * Applies a tint to the image drawable.
-     * <p>
-     * Subsequent calls to {@link #setImageDrawable(Drawable)} will automatically
-     * mutate the drawable and apply the specified tint and tint mode using
-     * {@link Drawable#setTint(ColorStateList, PorterDuff.Mode)}.
-     *
-     * @param tint the tint to apply, may be {@code null} to clear tint
-     * @param tintMode the blending mode used to apply the tint, may be
-     *                 {@code null} to clear tint
-     *
-     * @attr ref android.R.styleable#ImageView_tint
-     * @attr ref android.R.styleable#ImageView_tintMode
-     * @see Drawable#setTint(ColorStateList, PorterDuff.Mode)
-     */
-    private void setTint(@Nullable ColorStateList tint,
-            @Nullable PorterDuff.Mode tintMode) {
-        mDrawableTint = tint;
-        mDrawableTintMode = tintMode;
-        mHasDrawableTint = true;
-
-        applyDrawableTint();
-    }
-
-    /**
      * Applies a tint to the image drawable. Does not modify the current tint
      * mode, which is {@link PorterDuff.Mode#SRC_ATOP} by default.
      * <p>
@@ -482,16 +459,20 @@ public class ImageView extends View {
      * @param tint the tint to apply, may be {@code null} to clear tint
      *
      * @attr ref android.R.styleable#ImageView_tint
+     * @see #getTint()
      * @see Drawable#setTint(ColorStateList, PorterDuff.Mode)
      */
     public void setTint(@Nullable ColorStateList tint) {
-        setTint(tint, mDrawableTintMode);
+        mDrawableTint = tint;
+        mHasDrawableTint = true;
+
+        applyDrawableTint();
     }
 
     /**
      * @return the tint applied to the image drawable
      * @attr ref android.R.styleable#ImageView_tint
-     * @see #setTint(ColorStateList, PorterDuff.Mode)
+     * @see #setTint(ColorStateList)
      */
     @Nullable
     public ColorStateList getTint() {
@@ -506,16 +487,19 @@ public class ImageView extends View {
      * @param tintMode the blending mode used to apply the tint, may be
      *                 {@code null} to clear tint
      * @attr ref android.R.styleable#ImageView_tintMode
-     * @see #setTint(ColorStateList)
+     * @see #getTintMode()
+     * @see Drawable#setTint(ColorStateList, PorterDuff.Mode)
      */
     public void setTintMode(@Nullable PorterDuff.Mode tintMode) {
-        setTint(mDrawableTint, tintMode);
+        mDrawableTintMode = tintMode;
+
+        applyDrawableTint();
     }
 
     /**
      * @return the blending mode used to apply the tint to the image drawable
      * @attr ref android.R.styleable#ImageView_tintMode
-     * @see #setTint(ColorStateList, PorterDuff.Mode)
+     * @see #setTintMode(PorterDuff.Mode)
      */
     @Nullable
     public PorterDuff.Mode getTintMode() {

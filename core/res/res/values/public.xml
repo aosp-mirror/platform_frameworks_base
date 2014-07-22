@@ -2240,7 +2240,7 @@
   <public type="attr" name="launchTaskBehindSourceAnimation" />
   <!-- Attribute specified in a restriction entry to denote the type of restriction. -->
   <public type="attr" name="restrictionType" />
-
+  <!-- For the DatePicker -->
   <public type="attr" name="dateSelectorDayOfWeekBackgroundColor" />
   <public type="attr" name="dateSelectorDayOfWeekTextAppearance" />
   <public type="attr" name="dateSelectorBackgroundColor" />
@@ -2251,7 +2251,6 @@
   <public type="attr" name="dateSelectorYearListSelectedCircleColor" />
   <public type="attr" name="calendarTextColor" />
   <public type="attr" name="recognitionService" />
-
   <!-- For the TimePicker -->
   <public type="attr" name="timePickerStyle" />
   <public type="attr" name="timePickerDialogTheme" />
@@ -2265,8 +2264,9 @@
   <public type="attr" name="amPmTextColor" />
   <public type="attr" name="amPmUnselectedBackgroundColor" />
   <public type="attr" name="amPmSelectedBackgroundColor" />
-
   <public type="attr" name="searchKeyphraseRecognitionFlags" />
+  <public type="attr" name="checkMarkTint" />
+  <public type="attr" name="checkMarkTintMode" />
 
   <public-padding type="dimen" name="l_resource_pad" end="0x01050010" />
 

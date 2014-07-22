@@ -3114,6 +3114,28 @@
         <attr name="checked" />
         <!-- Drawable used for the check mark graphic. -->
         <attr name="checkMark" format="reference"/>
+        <!-- Tint to apply to the check mark. -->
+        <attr name="checkMarkTint" format="color" />
+        <!-- Blending mode used to apply the check mark tint. -->
+        <attr name="checkMarkTintMode">
+            <!-- The tint is drawn on top of the drawable.
+                 [Sa + (1 - Sa)*Da, Rc = Sc + (1 - Sa)*Dc] -->
+            <enum name="src_over" value="3" />
+            <!-- The tint is masked by the alpha channel of the drawable. The drawable’s
+                 color channels are thrown out. [Sa * Da, Sc * Da] -->
+            <enum name="src_in" value="5" />
+            <!-- The tint is drawn above the drawable, but with the drawable’s alpha
+                 channel masking the result. [Da, Sc * Da + (1 - Sa) * Dc] -->
+            <enum name="src_atop" value="9" />
+            <!-- Multiplies the color and alpha channels of the drawable with those of
+                 the tint. [Sa * Da, Sc * Dc] -->
+            <enum name="multiply" value="14" />
+            <!-- [Sa + Da - Sa * Da, Sc + Dc - Sc * Dc] -->
+            <enum name="screen" value="15" />
+            <!-- Combines the tint and drawable color and alpha channels, clamping the
+                 result to valid color values. Saturate(S + D) -->
+            <enum name="add" value="16" />
+        </attr>
     </declare-styleable>
     <declare-styleable name="EditText">
     </declare-styleable>
@@ -3579,7 +3601,7 @@
                  result to valid color values. Saturate(S + D) -->
             <enum name="add" value="16" />
         </attr>
-        <!-- Tint to apply to the indepterminate progress indicator. -->
+        <!-- Tint to apply to the indeterminate progress indicator. -->
         <attr name="indeterminateTint" format="color" />
         <!-- Blending mode used to apply the indeterminate progress indicator tint. -->
         <attr name="indeterminateTintMode">
@@ -4887,9 +4909,9 @@
             <enum name="disabled" value="-1" />
             <!-- Replicates the edge color. -->
             <enum name="clamp" value="0" />
-            <!-- Repeats the bitmap in both direction. -->
+            <!-- Repeats the bitmap horizontally. -->
             <enum name="repeat" value="1" />
-            <!-- Repeats the shader's image horizontally and vertically, alternating
+            <!-- Repeats the shader's image horizontally, alternating
                  mirror images so that adjacent images always seam. -->
             <enum name="mirror" value="2" />
         </attr>
@@ -4900,9 +4922,9 @@
             <enum name="disabled" value="-1" />
             <!-- Replicates the edge color. -->
             <enum name="clamp" value="0" />
-            <!-- Repeats the bitmap in both direction. -->
+            <!-- Repeats the bitmap vertically. -->
             <enum name="repeat" value="1" />
-            <!-- Repeats the shader's image horizontally and vertically, alternating
+            <!-- Repeats the shader's image vertically, alternating
                  mirror images so that adjacent images always seam. -->
             <enum name="mirror" value="2" />
         </attr>

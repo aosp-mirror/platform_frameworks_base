@@ -386,6 +386,7 @@ public class BitmapDrawable extends Drawable {
      *
      * @see #setTileModeY(android.graphics.Shader.TileMode)
      * @see #setTileModeXY(android.graphics.Shader.TileMode, android.graphics.Shader.TileMode)
+     * @attr ref android.R.styleable#BitmapDrawable_tileModeX
      */
     public void setTileModeX(Shader.TileMode mode) {
         setTileModeXY(mode, mBitmapState.mTileModeY);
@@ -401,6 +402,7 @@ public class BitmapDrawable extends Drawable {
      *
      * @see #setTileModeX(android.graphics.Shader.TileMode)
      * @see #setTileModeXY(android.graphics.Shader.TileMode, android.graphics.Shader.TileMode)
+     * @attr ref android.R.styleable#BitmapDrawable_tileModeY
      */
     public final void setTileModeY(Shader.TileMode mode) {
         setTileModeXY(mBitmapState.mTileModeX, mode);
