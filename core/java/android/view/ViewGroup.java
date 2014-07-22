@@ -669,7 +669,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 // shortcut: don't report a new focusable view if we block our descendants from
                 // getting focus
                 && (getDescendantFocusability() != FOCUS_BLOCK_DESCENDANTS)
-                && !shouldBlockFocusForTouchscreen()
+                && (isFocusableInTouchMode() || !shouldBlockFocusForTouchscreen())
                 // shortcut: don't report a new focusable view if we already are focused
                 // (and we don't prefer our descendants)
                 //
@@ -865,6 +865,17 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return mFocused;
     }
 
+    View getDeepestFocusedChild() {
+        View v = this;
+        while (v != null) {
+            if (v.isFocused()) {
+                return v;
+            }
+            v = v instanceof ViewGroup ? ((ViewGroup) v).getFocusedChild() : null;
+        }
+        return null;
+    }
+
     /**
      * Returns true if this view has or contains focus
      *
@@ -911,8 +922,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
 
         final int descendantFocusability = getDescendantFocusability();
-        if (descendantFocusability != FOCUS_BLOCK_DESCENDANTS &&
-                !shouldBlockFocusForTouchscreen()) {
+        if (descendantFocusability != FOCUS_BLOCK_DESCENDANTS) {
             final int count = mChildrenCount;
             final View[] children = mChildren;
 
@@ -936,8 +946,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         final int descendantFocusability = getDescendantFocusability();
 
-        if (descendantFocusability != FOCUS_BLOCK_DESCENDANTS &&
-                !shouldBlockFocusForTouchscreen()) {
+        if (descendantFocusability != FOCUS_BLOCK_DESCENDANTS) {
+            if (shouldBlockFocusForTouchscreen()) {
+                focusableMode |= FOCUSABLES_TOUCH_MODE;
+            }
+
             final int count = mChildrenCount;
             final View[] children = mChildren;
 
@@ -955,7 +968,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         // among the focusable children would be more interesting.
         if ((descendantFocusability != FOCUS_AFTER_DESCENDANTS
                 // No focusable descendants
-                || (focusableCount == views.size())) && !shouldBlockFocusForTouchscreen()) {
+                || (focusableCount == views.size())) &&
+                (isFocusableInTouchMode() || !shouldBlockFocusForTouchscreen())) {
             super.addFocusables(views, direction, focusableMode);
         }
     }
@@ -971,9 +985,12 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         if (touchscreenBlocksFocus) {
             mGroupFlags |= FLAG_TOUCHSCREEN_BLOCKS_FOCUS;
             if (hasFocus()) {
-                final View newFocus = focusSearch(FOCUS_FORWARD);
-                if (newFocus != null) {
-                    newFocus.requestFocus();
+                final View focusedChild = getDeepestFocusedChild();
+                if (!focusedChild.isFocusableInTouchMode()) {
+                    final View newFocus = focusSearch(FOCUS_FORWARD);
+                    if (newFocus != null) {
+                        newFocus.requestFocus();
+                    }
                 }
             }
         } else {
@@ -2484,10 +2501,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     + direction);
         }
         int descendantFocusability = getDescendantFocusability();
-
-        if (shouldBlockFocusForTouchscreen()) {
-            return false;
-        }
 
         switch (descendantFocusability) {
             case FOCUS_BLOCK_DESCENDANTS:
