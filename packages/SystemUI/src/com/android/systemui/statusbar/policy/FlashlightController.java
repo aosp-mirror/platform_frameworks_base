@@ -94,6 +94,16 @@ public class FlashlightController {
         }
     }
 
+    public void killFlashlight() {
+        boolean enabled;
+        synchronized (this) {
+            enabled = mFlashlightEnabled;
+        }
+        if (enabled) {
+            mHandler.post(mKillFlashlightRunnable);
+        }
+    }
+
     public synchronized boolean isAvailable() {
         return ENFORCE_AVAILABILITY_LISTENER ? mCameraAvailable : (mCameraId != null);
     }
@@ -317,6 +327,17 @@ public class FlashlightController {
         @Override
         public void run() {
             updateFlashlight(false /* forceDisable */);
+        }
+    };
+
+    private final Runnable mKillFlashlightRunnable = new Runnable() {
+        @Override
+        public void run() {
+            synchronized (this) {
+                mFlashlightEnabled = false;
+            }
+            updateFlashlight(true /* forceDisable */);
+            dispatchOff();
         }
     };
 
