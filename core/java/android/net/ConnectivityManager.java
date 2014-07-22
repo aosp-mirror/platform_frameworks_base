@@ -543,8 +543,6 @@ public class ConnectivityManager {
 
     private final IConnectivityManager mService;
 
-    private final String mPackageName;
-
     private INetworkManagementService mNMService;
 
     /**
@@ -639,23 +637,6 @@ public class ConnectivityManager {
         switch (networkType) {
             case TYPE_WIFI:
             case TYPE_WIFI_P2P:
-                return true;
-            default:
-                return false;
-        }
-    }
-
-    /**
-     * Checks if the given network type should be exempt from VPN routing rules
-     *
-     * @hide
-     */
-    public static boolean isNetworkTypeExempt(int networkType) {
-        switch (networkType) {
-            case TYPE_MOBILE_MMS:
-            case TYPE_MOBILE_SUPL:
-            case TYPE_MOBILE_HIPRI:
-            case TYPE_MOBILE_IA:
                 return true;
             default:
                 return false;
@@ -1236,13 +1217,7 @@ public class ConnectivityManager {
      *             {@link #setProcessDefaultNetwork} and {@link Network#getSocketFactory} api.
      */
     public boolean requestRouteToHost(int networkType, int hostAddress) {
-        InetAddress inetAddress = NetworkUtils.intToInetAddress(hostAddress);
-
-        if (inetAddress == null) {
-            return false;
-        }
-
-        return requestRouteToHostAddress(networkType, inetAddress);
+        return requestRouteToHostAddress(networkType, NetworkUtils.intToInetAddress(hostAddress));
     }
 
     /**
@@ -1260,9 +1235,8 @@ public class ConnectivityManager {
      *             {@link #setProcessDefaultNetwork} api.
      */
     public boolean requestRouteToHostAddress(int networkType, InetAddress hostAddress) {
-        byte[] address = hostAddress.getAddress();
         try {
-            return mService.requestRouteToHostAddress(networkType, address, mPackageName);
+            return mService.requestRouteToHostAddress(networkType, hostAddress.getAddress());
         } catch (RemoteException e) {
             return false;
         }
@@ -1433,9 +1407,8 @@ public class ConnectivityManager {
     /**
      * {@hide}
      */
-    public ConnectivityManager(IConnectivityManager service, String packageName) {
+    public ConnectivityManager(IConnectivityManager service) {
         mService = checkNotNull(service, "missing IConnectivityManager");
-        mPackageName = checkNotNull(packageName, "missing package name");
     }
 
     /** {@hide} */
