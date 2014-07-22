@@ -199,14 +199,14 @@ final class TaskRecord {
     }
 
     void touchActiveTime() {
-        lastActiveTime = android.os.SystemClock.elapsedRealtime();
+        lastActiveTime = System.currentTimeMillis();
         if (firstActiveTime == 0) {
             firstActiveTime = lastActiveTime;
         }
     }
 
     long getInactiveDuration() {
-        return android.os.SystemClock.elapsedRealtime() - lastActiveTime;
+        return System.currentTimeMillis() - lastActiveTime;
     }
 
     void setIntent(Intent _intent, ActivityInfo info) {
