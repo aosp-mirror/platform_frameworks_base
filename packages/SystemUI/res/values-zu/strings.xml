@@ -166,12 +166,12 @@
     <string name="accessibility_quick_settings_close" msgid="2571790856136835943">"Vala iphaneli"</string>
     <string name="accessibility_quick_settings_more_time" msgid="5778794273488176726">"Isikhathi esiningi"</string>
     <string name="accessibility_quick_settings_less_time" msgid="101026945195230084">"Isikhathi esingaphansi"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"idatha ye-2G-3G ivimbelwe"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Idatha ye-4G ivimbelwe"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Idatha yefoni ivimbelwe"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Idatha ivimbelwe"</string>
-    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"Usufike emkhawulweni wokusebenzisa i-ata. \n\nUma uqla kabusha ukusebenza kwe-ata, kungenzek umhlinzeki akukhokhise."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Vumela futhi idatha"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"Idatha ye-2G-3G ivaliwe"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"Idatha ye-4G ivaliwe"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"Idatha yeselula ivaliwe"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"Idatha ivaliwe"</string>
+    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"Idivayisi yakho ivale idatha ngoba ifinyelele umkhawulo owubekile.\n\nUkuyivula futhi kungaholela ezindlekweni kusuka kunkampani yakho yenethiwekhi."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"Vula idatha"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Alukho uxhumano lwe-Inthanethi"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"I-Wi-Fi ixhunyiwe"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Isesha i-GPS"</string>
@@ -191,6 +191,7 @@
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"I-Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"I-Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> amadivayisi)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"I-Bluetooth ivaliwe"</string>
+    <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"Awekho amadivayisi abhanqiwe atholakalayo"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Ukugqama"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Ukuphenduka okuzenzakalelayo"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"Ukuphenduka kukhiyiwe"</string>
@@ -205,11 +206,18 @@
     <string name="quick_settings_settings_label" msgid="5326556592578065401">"Izilungiselelo"</string>
     <string name="quick_settings_time_label" msgid="4635969182239736408">"Isikhathi"</string>
     <string name="quick_settings_user_label" msgid="5238995632130897840">"Mina"</string>
+    <string name="quick_settings_user_title" msgid="4467690427642392403">"Umsebenzisi"</string>
+    <string name="quick_settings_user_new_user" msgid="9030521362023479778">"Umsebenzisi omusha"</string>
     <string name="quick_settings_wifi_label" msgid="9135344704899546041">"I-Wi-Fi"</string>
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Akuxhunyiwe"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Ayikho inethiwekhi"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"I-Wi-Fi icimile"</string>
-    <string name="quick_settings_remote_display_no_connection_label" msgid="7482103121002965053">"Isikrini sabadlali"</string>
+    <string name="quick_settings_wifi_detail_empty_text" msgid="2831702993995222755">"Awekho amanethiwekhi alondoloziwe atholakalayo"</string>
+    <string name="quick_settings_cast_title" msgid="1893629685050355115">"Isikrini sabadlali"</string>
+    <string name="quick_settings_casting" msgid="6601710681033353316">"Ukusakaza"</string>
+    <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Idivayisi engenalo igama"</string>
+    <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Ilungele ukusakaza"</string>
+    <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"Ayikho idivayisi etholakalayo"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Ukugqama"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"OKUZENZAKALELAYO"</string>
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Faka imibala"</string>
@@ -217,12 +225,21 @@
     <string name="quick_settings_more_settings" msgid="326112621462813682">"Izilungiselelo eziningi"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"Kwenziwe"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"Ixhunyiwe"</string>
+    <string name="quick_settings_connecting" msgid="47623027419264404">"Iyaxhuma..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Ukusebenzisa njengemodemu"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"I-Hotspot"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Izaziso"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"I-Flashlight"</string>
+    <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Idatha yeselula"</string>
+    <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Ukusetshenziswa kwedatha"</string>
+    <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Idatha esele"</string>
+    <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"Ingaphezulu komkhawulo"</string>
+    <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> isetshenzisiwe"</string>
+    <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"<xliff:g id="DATA_LIMIT">%s</xliff:g> umkhawulo"</string>
+    <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> isexwayiso"</string>
     <string name="recents_empty_message" msgid="7883614615463619450">"Azikho izinhlelo zokusebenza zakamuva"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Ulwazi lohlelo lokusebenza"</string>
+    <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"ukukhiya kuhlelo lokusebenza"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"sesha"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Kushajiwe"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"Iyashaja"</string>
@@ -232,14 +249,22 @@
     <string name="description_target_search" msgid="3091587249776033139">"Sesha"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Shelelisela ngenhla ku-<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Shelelisela ngakwesokunxele ku-<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_mode_title" msgid="8793432092004749188">"Ungaphazamisi"</string>
+    <string name="zen_no_interruptions_with_warning" msgid="2522931836819051293">"Akukho ukuphazamisa, kufaka phakathi ama-alamu"</string>
+    <string name="zen_no_interruptions" msgid="7970973750143632592">"Azikho iziphazamiso"</string>
+    <string name="zen_important_interruptions" msgid="3477041776609757628">"Iziphazamiso ezibalulekile kuphela"</string>
+    <string name="zen_alarm_information_time" msgid="5235772206174372272">"I-alamu yakho elandelayo ingo<xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
+    <string name="zen_alarm_information_day_time" msgid="8422733576255047893">"I-alamu yakho elandelayo ingo-<xliff:g id="ALARM_DAY_AND_TIME">%s</xliff:g>"</string>
+    <string name="zen_alarm_warning" msgid="6873910860111498041">"Ngeke uzwe i-alamu yakho ngo-<xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Izaziso ezingasheshi kakhulu ezingezansi"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Thepha futhi ukuze uvule"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Swayiphela phezulu ukuze uvule"</string>
     <string name="phone_hint" msgid="3101468054914424646">"Swayiphela ngakwesokudla ukuze uthole ifoni"</string>
     <string name="camera_hint" msgid="5241441720959174226">"Swayiphela ngakwesokunxele ukuze uthole ikhamela"</string>
-    <string name="zen_mode_forever" msgid="7420011936770086993">"Uze uvale lokhu"</string>
+    <string name="zen_mode_forever" msgid="4316804956488785559">"Unaphakade"</string>
+    <string name="interruption_level_none" msgid="3831278883136066646">"Lutho"</string>
+    <string name="interruption_level_priority" msgid="6517366750688942030">"Okubalulekile"</string>
+    <string name="interruption_level_all" msgid="1330581184930945764">"Konke"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Iyashaja (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> ize igcwale)"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"Isihambeli"</string>
     <string name="guest_new_guest" msgid="4259024453643879653">"+ Isihambeli"</string>
@@ -254,4 +279,10 @@
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Isilondolozi sebhethri sivuliwe"</string>
     <string name="battery_saver_notification_text" msgid="7796554871101546872">"Ukusebenza kwedivayisi kwehlisiwe."</string>
     <string name="battery_saver_notification_action_text" msgid="7546297220816993504">"Vula izilungiselelo zesilondolozi sebhethri"</string>
+    <string name="battery_level_template" msgid="1609636980292580020">"<xliff:g id="LEVEL">%d</xliff:g>%%"</string>
+    <string name="notification_hidden_text" msgid="1135169301897151909">"Okuqukethwe kufihliwe"</string>
+    <string name="guest_exit_guest" msgid="1619100760451149682">"Phuma kusivakashi"</string>
+    <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> izoqala ukuthwebula yonke into eboniswa kusikrini sakho."</string>
+    <string name="media_projection_remember_text" msgid="3103510882172746752">"Ungabonisi futhi"</string>
+    <string name="media_projection_action_text" msgid="8470872969457985954">"Qala manje"</string>
 </resources>

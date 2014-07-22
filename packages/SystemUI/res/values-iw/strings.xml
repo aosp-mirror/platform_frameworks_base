@@ -166,12 +166,12 @@
     <string name="accessibility_quick_settings_close" msgid="2571790856136835943">"סגור חלונית"</string>
     <string name="accessibility_quick_settings_more_time" msgid="5778794273488176726">"יותר זמן"</string>
     <string name="accessibility_quick_settings_less_time" msgid="101026945195230084">"פחות זמן"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"‏נתוני 2G-3G מושבתים"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"‏נתוני 4G מושבתים"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"נתונים לנייד מושבתים"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"הנתונים מושבתים"</string>
-    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"הגעת לגבול המוגדר של שימוש בנתונים.\n\nאם תפעיל מחדש נתונים, ייתכן שתחויב על ידי הספק שלך."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"הפעל מחדש את הנתונים"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"‏נתונים בחיבור 2G-3G כובו"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"‏נתונים בחיבור 4G כובו"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"נתונים בחיבור סלולרי כובו"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"חיבור הנתונים כובה"</string>
+    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"המכשיר שלך כיבה את חיבור הנתונים מפני שהוא הגיע למגבלה שהגדרת.\n\nהפעלה מחדש עשויה להוביל לחיובים על ידי הספק."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"הפעל חיבור נתונים"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"אין חיבור לאינטרנט"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"‏Wi-Fi מחובר"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"‏מחפש GPS"</string>
@@ -191,6 +191,7 @@
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"‏Bluetooth ‏(<xliff:g id="NUMBER">%d</xliff:g> מכשירים)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"‏Bluetooth מופסק"</string>
+    <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"אין מכשירים מותאמים זמינים"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"בהירות"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"סיבוב אוטומטי"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"סיבוב נעול"</string>
@@ -205,11 +206,18 @@
     <string name="quick_settings_settings_label" msgid="5326556592578065401">"הגדרות"</string>
     <string name="quick_settings_time_label" msgid="4635969182239736408">"שעה"</string>
     <string name="quick_settings_user_label" msgid="5238995632130897840">"אני"</string>
+    <string name="quick_settings_user_title" msgid="4467690427642392403">"משתמש"</string>
+    <string name="quick_settings_user_new_user" msgid="9030521362023479778">"משתמש חדש"</string>
     <string name="quick_settings_wifi_label" msgid="9135344704899546041">"Wi-Fi"</string>
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"לא מחובר"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"אין רשת"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"‏Wi-Fi כבוי"</string>
-    <string name="quick_settings_remote_display_no_connection_label" msgid="7482103121002965053">"העבר מסך"</string>
+    <string name="quick_settings_wifi_detail_empty_text" msgid="2831702993995222755">"אין רשתות שמורות זמינות"</string>
+    <string name="quick_settings_cast_title" msgid="1893629685050355115">"העבר מסך"</string>
+    <string name="quick_settings_casting" msgid="6601710681033353316">"מעביר"</string>
+    <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"מכשיר ללא שם"</string>
+    <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"מוכן להעביר"</string>
+    <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"אין מכשירים זמינים"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"בהירות"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"אוטומטי"</string>
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"הפוך צבעים"</string>
@@ -217,12 +225,21 @@
     <string name="quick_settings_more_settings" msgid="326112621462813682">"הגדרות נוספות"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"בוצע"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"מחובר"</string>
+    <string name="quick_settings_connecting" msgid="47623027419264404">"מתחבר..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"שיתוף אינטרנט בין ניידים"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"נקודה לשיתוף אינטרנט"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"הודעות"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"פנס"</string>
+    <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"נתונים סלולריים"</string>
+    <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"שימוש בנתונים"</string>
+    <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"מכסת נתונים נותרת"</string>
+    <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"חריגה מההגבלה"</string>
+    <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> בשימוש"</string>
+    <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"הגבלה של <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
+    <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"אזהרה - <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="recents_empty_message" msgid="7883614615463619450">"אין אפליקציות אחרונות"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"מידע על האפליקציה"</string>
+    <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"נעל לאפליקציה"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"חפש"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"טעון"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"טוען"</string>
@@ -232,14 +249,22 @@
     <string name="description_target_search" msgid="3091587249776033139">"חיפוש"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"הסט למעלה כדי להציג <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"הסט שמאלה כדי להציג <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_mode_title" msgid="8793432092004749188">"נא לא להפריע"</string>
+    <string name="zen_no_interruptions_with_warning" msgid="2522931836819051293">"ללא הפרעות, כולל התראות"</string>
+    <string name="zen_no_interruptions" msgid="7970973750143632592">"ללא הפרעות"</string>
+    <string name="zen_important_interruptions" msgid="3477041776609757628">"רק הפרעות בעדיפות גבוהה"</string>
+    <string name="zen_alarm_information_time" msgid="5235772206174372272">"ההתראה הבאה שלך היא ב-<xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
+    <string name="zen_alarm_information_day_time" msgid="8422733576255047893">"ההתראה הבאה שלך היא ב<xliff:g id="ALARM_DAY_AND_TIME">%s</xliff:g>"</string>
+    <string name="zen_alarm_warning" msgid="6873910860111498041">"לא תשמע את ההתראה שלך ב-<xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"הודעות בדחיפות נמוכה יותר בהמשך"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"הקש שוב כדי לפתוח"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"החלק מעלה כדי לבטל את הנעילה"</string>
     <string name="phone_hint" msgid="3101468054914424646">"החלק ימינה להפעלת הטלפון"</string>
     <string name="camera_hint" msgid="5241441720959174226">"החלק שמאלה להפעלת המצלמה"</string>
-    <string name="zen_mode_forever" msgid="7420011936770086993">"עד שתכבה"</string>
+    <string name="zen_mode_forever" msgid="4316804956488785559">"ללא הגבלה"</string>
+    <string name="interruption_level_none" msgid="3831278883136066646">"ללא"</string>
+    <string name="interruption_level_priority" msgid="6517366750688942030">"עדיפות"</string>
+    <string name="interruption_level_all" msgid="1330581184930945764">"הכל"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"טוען (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> עד לסיום)"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"אורח"</string>
     <string name="guest_new_guest" msgid="4259024453643879653">"+ אורח"</string>
@@ -254,4 +279,10 @@
     <string name="battery_saver_notification_title" msgid="237918726750955859">"תכונת \'חיסכון בסוללה\' פועלת"</string>
     <string name="battery_saver_notification_text" msgid="7796554871101546872">"פעילות המכשיר צומצמה."</string>
     <string name="battery_saver_notification_action_text" msgid="7546297220816993504">"פתח את ההגדרות של \'חיסכון בסוללה\'"</string>
+    <string name="battery_level_template" msgid="1609636980292580020">"<xliff:g id="LEVEL">%d</xliff:g>%%"</string>
+    <string name="notification_hidden_text" msgid="1135169301897151909">"התוכן מוסתר"</string>
+    <string name="guest_exit_guest" msgid="1619100760451149682">"צא ממצב אורח"</string>
+    <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> יתחיל להקליט את כל התוכן המוצג במסך שלך."</string>
+    <string name="media_projection_remember_text" msgid="3103510882172746752">"אל תציג שוב"</string>
+    <string name="media_projection_action_text" msgid="8470872969457985954">"התחל כעת"</string>
 </resources>

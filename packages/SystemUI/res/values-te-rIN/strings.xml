@@ -166,12 +166,12 @@
     <string name="accessibility_quick_settings_close" msgid="2571790856136835943">"ప్యానెల్‌ని మూసివేయి"</string>
     <string name="accessibility_quick_settings_more_time" msgid="5778794273488176726">"ఎక్కువ సమయం"</string>
     <string name="accessibility_quick_settings_less_time" msgid="101026945195230084">"తక్కువ సమయం"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"2G-3G డేటా నిలిపివేయబడింది"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"4G డేటా నిలిపివేయబడింది"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"మొబైల్ డేటా నిలిపివేయబడింది"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"డేటా నిలిపివేయబడింది"</string>
-    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"మీరు నిర్దిష్ట డేటా వినియోగ పరిమితిని చేరుకున్నారు.\n\nమీరు డేటాను మళ్లీ ప్రారంభిస్తే, మీకు ఆపరేటర్ ఛార్జీ విధించవచ్చు."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"డేటాను మళ్లీ ప్రారంభించండి"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"2G-3G డేటా ఆఫ్‌లో ఉంది"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"4G డేటా ఆఫ్‌లో ఉంది"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"సెల్యూలార్ డేటా ఆఫ్‌లో ఉంది"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"డేటా ఆఫ్‌లో ఉంది"</string>
+    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"మీ పరికరం మీరు సెట్ చేసిన పరిమితిని చేరుకున్నందున డేటాను ఆఫ్ చేసింది.\n\nదీన్ని తిరిగి ఆన్ చేయడం వలన మీ క్యారియర్‌ను బట్టి ఛార్జీలు పడవచ్చు."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"డేటాను ఆన్ చేయి"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"ఇంటర్నెట్ కనెక్షన్ లేదు"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi కనెక్ట్ చేయబడింది"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"GPS కోసం శోధిస్తోంది"</string>
@@ -191,6 +191,7 @@
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"బ్లూటూత్"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"బ్లూటూత్ (<xliff:g id="NUMBER">%d</xliff:g> పరికరాలు)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"బ్లూటూత్ ఆఫ్‌లో ఉంది"</string>
+    <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"జత చేసిన పరికరాలు ఏవీ అందుబాటులో లేవు"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"ప్రకాశం"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"స్వయంచాలకంగా తిప్పడం"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"తిప్పడం లాక్ చేయబడింది"</string>
@@ -205,11 +206,18 @@
     <string name="quick_settings_settings_label" msgid="5326556592578065401">"సెట్టింగ్‌లు"</string>
     <string name="quick_settings_time_label" msgid="4635969182239736408">"సమయం"</string>
     <string name="quick_settings_user_label" msgid="5238995632130897840">"నేను"</string>
+    <string name="quick_settings_user_title" msgid="4467690427642392403">"వినియోగదారు"</string>
+    <string name="quick_settings_user_new_user" msgid="9030521362023479778">"కొత్త వినియోగదారు"</string>
     <string name="quick_settings_wifi_label" msgid="9135344704899546041">"Wi-Fi"</string>
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"కనెక్ట్ చేయబడలేదు"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"నెట్‌వర్క్ లేదు"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi ఆఫ్‌లో ఉంది"</string>
-    <string name="quick_settings_remote_display_no_connection_label" msgid="7482103121002965053">"ప్రసార స్క్రీన్"</string>
+    <string name="quick_settings_wifi_detail_empty_text" msgid="2831702993995222755">"సేవ్ చేసిన నెట్‌వర్క్‌లు ఏవీ అందుబాటులో లేవు"</string>
+    <string name="quick_settings_cast_title" msgid="1893629685050355115">"ప్రసార స్క్రీన్"</string>
+    <string name="quick_settings_casting" msgid="6601710681033353316">"ప్రసారం చేస్తోంది"</string>
+    <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"పేరులేని పరికరం"</string>
+    <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"ప్రసారం చేయడానికి సిద్ధంగా ఉంది"</string>
+    <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"పరికరాలు ఏవీ అందుబాటులో లేవు"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"ప్రకాశం"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"స్వయంచాలకం"</string>
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"రంగులను తారుమారు చేయి"</string>
@@ -217,12 +225,21 @@
     <string name="quick_settings_more_settings" msgid="326112621462813682">"మరిన్ని సెట్టింగ్‌లు"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"పూర్తయింది"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"కనెక్ట్ చేయబడినది"</string>
+    <string name="quick_settings_connecting" msgid="47623027419264404">"కనెక్ట్ అవుతోంది..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"టీథరింగ్"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"హాట్‌స్పాట్"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"నోటిఫికేషన్‌లు"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"ఫ్లాష్‌లైట్"</string>
+    <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"సెల్యులార్ డేటా"</string>
+    <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"డేటా వినియోగం"</string>
+    <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"మిగిలిన డేటా"</string>
+    <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"పరిమితి మించిపోయింది"</string>
+    <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> వినియోగించబడింది"</string>
+    <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"<xliff:g id="DATA_LIMIT">%s</xliff:g> పరిమితి"</string>
+    <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> హెచ్చరిక"</string>
     <string name="recents_empty_message" msgid="7883614615463619450">"ఇటీవలి అనువర్తనాలు ఏవీ లేవు"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"అనువర్తన సమాచారం"</string>
+    <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"లాక్ టు యాప్"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"శోధించు"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"ఛార్జ్ చేయబడింది"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"ఛార్జ్ అవుతోంది"</string>
@@ -232,14 +249,22 @@
     <string name="description_target_search" msgid="3091587249776033139">"శోధించండి"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> కోసం పైకి స్లైడ్ చేయండి."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> కోసం ఎడమవైపుకు స్లైడ్ చేయండి."</string>
-    <string name="zen_mode_title" msgid="8793432092004749188">"అంతరాయం కలిగించవద్దు"</string>
+    <string name="zen_no_interruptions_with_warning" msgid="2522931836819051293">"అలారాలతో సహా ఎటువంటి అంతరాయాలు ఉండవు"</string>
+    <string name="zen_no_interruptions" msgid="7970973750143632592">"అంతరాయాలు లేకుండా"</string>
+    <string name="zen_important_interruptions" msgid="3477041776609757628">"ప్రాధాన్య అంతరాయాలు మాత్రమే"</string>
+    <string name="zen_alarm_information_time" msgid="5235772206174372272">"మీ తదుపరి అలారం <xliff:g id="ALARM_TIME">%s</xliff:g>కి ఉంది"</string>
+    <string name="zen_alarm_information_day_time" msgid="8422733576255047893">"మీ తదుపరి అలారం <xliff:g id="ALARM_DAY_AND_TIME">%s</xliff:g>"</string>
+    <string name="zen_alarm_warning" msgid="6873910860111498041">"మీరు <xliff:g id="ALARM_TIME">%s</xliff:g>కి సెట్ చేసిన అలారం మీకు వినిపించదు"</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"తక్కువ అత్యవసర నోటిఫికేషన్‌లు దిగువన"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"తెరవడానికి మళ్లీ నొక్కండి"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"అన్‌లాక్ చేయడానికి ఎగువకు స్వైప్ చేయండి"</string>
     <string name="phone_hint" msgid="3101468054914424646">"ఫోన్ కోసం కుడివైపుకి స్వైప్ చేయండి"</string>
     <string name="camera_hint" msgid="5241441720959174226">"కెమెరా కోసం ఎడమవైపుకి స్వైప్ చేయండి"</string>
-    <string name="zen_mode_forever" msgid="7420011936770086993">"మీరు దీన్ని ఆఫ్ చేసే వరకు"</string>
+    <string name="zen_mode_forever" msgid="4316804956488785559">"నిరవధికంగా"</string>
+    <string name="interruption_level_none" msgid="3831278883136066646">"వేటికీ వద్దు"</string>
+    <string name="interruption_level_priority" msgid="6517366750688942030">"ప్రాధాన్యత"</string>
+    <string name="interruption_level_all" msgid="1330581184930945764">"అన్నిటికీ"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"ఛార్జ్ అవుతోంది (పూర్తిగా నిండటానికి <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"అతిథి"</string>
     <string name="guest_new_guest" msgid="4259024453643879653">"+ అతిథి"</string>
@@ -254,4 +279,10 @@
     <string name="battery_saver_notification_title" msgid="237918726750955859">"బ్యాటర్ సేవర్ ఆన్ చేయబడింది"</string>
     <string name="battery_saver_notification_text" msgid="7796554871101546872">"పరికరం పనితీరు తగ్గించబడింది."</string>
     <string name="battery_saver_notification_action_text" msgid="7546297220816993504">"బ్యాటరీ సేవర్ సెట్టింగ్‌లను తెరువు"</string>
+    <string name="battery_level_template" msgid="1609636980292580020">"<xliff:g id="LEVEL">%d</xliff:g>%%"</string>
+    <string name="notification_hidden_text" msgid="1135169301897151909">"కంటెంట్‌లు దాచబడ్డాయి"</string>
+    <string name="guest_exit_guest" msgid="1619100760451149682">"అతిథి మోడ్ నుండి నిష్క్రమించండి"</string>
+    <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> మీ స్క్రీన్‌పై కనిపించే ప్రతిదాన్ని క్యాప్చర్ చేయడం ప్రారంభిస్తుంది."</string>
+    <string name="media_projection_remember_text" msgid="3103510882172746752">"మళ్లీ చూపవద్దు"</string>
+    <string name="media_projection_action_text" msgid="8470872969457985954">"ఇప్పుడే ప్రారంభించు"</string>
 </resources>
