@@ -17,13 +17,9 @@ the steps in each exercise to gradually build and refine your
 application. The exercises explain each step in detail and provide all the 
 sample code you need to complete the application. </p>
 
-<p>When you are finished with the tutorial, you will have created a functioning
+<p><p>When you are finished with the tutorial, you will have created a functioning
 Android application and will have learned many of the most important
-concepts in Android development. If you want to add more complex features to
-your application, you can examine the code in an alternative implementation
-of a Note Pad application, in the 
-<a href="{@docRoot}resources/samples/index.html">Sample Code</a> section. </p>
-
+concepts in Android development.</p>
 
 <a name="who"></a>
 <h2>Who Should Use this Tutorial</h2>
@@ -122,17 +118,13 @@ highly recommended.</td>
 <li>For a lighter but broader introduction to concepts not covered in the
 tutorial,
 take a look at <a href="{@docRoot}resources/faq/commontasks.html">Common Android Tasks</a>.</li>
-<li>The Android SDK includes a variety of fully functioning sample applications
-that make excellent opportunities for further learning. You can find the sample
-applications in the <code>samples/</code> directory of your downloaded SDK, or browser them
-here, in the <a href="{@docRoot}resources/samples/index.html">Sample Code</a> section.</li>
+
 <li>This tutorial draws from the full Notepad application included in the
-<code>samples/</code> directory of the SDK, though it does not match it exactly. 
-When you are done with the tutorial,
-it is highly recommended that you take a closer look at this version of the Notepad
-application, 
-as it demonstrates a variety of interesting additions for your application, 
-such as:</li>
+<code>samples/legacy/NotePad</code> directory of the SDK, though it does not
+match it exactly. When you are done with the tutorial, it is highly recommended
+that you take a closer look at this version of the Notepad application, as it
+demonstrates a variety of interesting additions for your application, such
+as:</li>
   <ul>
     <li>Setting up a custom striped list for the list of notes.</li>
     <li>Creating a custom text edit view that overrides the <code>draw()</code>
