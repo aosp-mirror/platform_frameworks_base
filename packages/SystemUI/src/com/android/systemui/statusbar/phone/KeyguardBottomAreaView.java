@@ -38,6 +38,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.policy.FlashlightController;
 
 /**
  * Implementation for the bottom area of the Keyguard, including camera/phone affordance and status
@@ -63,6 +64,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private ActivityStarter mActivityStarter;
     private UnlockMethodCache mUnlockMethodCache;
     private LockPatternUtils mLockPatternUtils;
+    private FlashlightController mFlashlightController;
 
     public KeyguardBottomAreaView(Context context) {
         super(context);
@@ -100,6 +102,10 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
 
     public void setActivityStarter(ActivityStarter activityStarter) {
         mActivityStarter = activityStarter;
+    }
+
+    public void setFlashlightController(FlashlightController flashlightController) {
+        mFlashlightController = flashlightController;
     }
 
     private Intent getCameraIntent() {
@@ -189,6 +195,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     }
 
     public void launchCamera() {
+        mFlashlightController.killFlashlight();
         Intent intent = getCameraIntent();
         if (intent == SECURE_CAMERA_INTENT) {
             mContext.startActivityAsUser(intent, UserHandle.CURRENT);

@@ -752,6 +752,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
 
         mFlashlightController = new FlashlightController(mContext);
+        mKeyguardBottomArea.setFlashlightController(mFlashlightController);
         mUserSwitcherController = new UserSwitcherController(mContext);
         mKeyguardMonitor = new KeyguardMonitor();
 
