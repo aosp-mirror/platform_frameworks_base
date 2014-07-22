@@ -233,10 +233,9 @@ public class Toolbar extends ViewGroup {
         if (!TextUtils.isEmpty(subtitle)) {
             setSubtitle(subtitle);
         }
-        a.recycle();
 
-        mPopupContext = context;
-        mPopupTheme = 0;
+        setPopupTheme(a.getResourceId(R.styleable.Toolbar_popupTheme, 0));
+        a.recycle();
     }
 
     /**
