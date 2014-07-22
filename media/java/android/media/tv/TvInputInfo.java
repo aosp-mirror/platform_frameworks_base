@@ -33,6 +33,7 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.SparseIntArray;
 import android.util.Xml;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -47,59 +48,54 @@ public final class TvInputInfo implements Parcelable {
     private static final boolean DEBUG = false;
     private static final String TAG = "TvInputInfo";
 
+    // Should be in sync with frameworks/base/core/res/res/values/attrs.xml
     /**
-     * TV input type: the TV input service is not handling input from hardware. For example,
-     * services showing streaming from the internet falls into this type.
+     * TV input type: the TV input service is a tuner which provides channels.
      */
-    public static final int TYPE_VIRTUAL = 0;
-
-    // Should be in sync with TvInputHardwareInfo.
-
+    public static final int TYPE_TUNER = 0;
     /**
      * TV input type: a generic hardware TV input type.
      */
-    public static final int TYPE_OTHER_HARDWARE = TvInputHardwareInfo.TV_INPUT_TYPE_OTHER_HARDWARE;
-    /**
-     * TV input type: the TV input service is a tuner. (e.g. terrestrial tuner)
-     */
-    public static final int TYPE_TUNER = TvInputHardwareInfo.TV_INPUT_TYPE_TUNER;
+    public static final int TYPE_OTHER = 1000;
     /**
      * TV input type: the TV input service represents a composite port.
      */
-    public static final int TYPE_COMPOSITE = TvInputHardwareInfo.TV_INPUT_TYPE_COMPOSITE;
+    public static final int TYPE_COMPOSITE = 1001;
     /**
      * TV input type: the TV input service represents a SVIDEO port.
      */
-    public static final int TYPE_SVIDEO = TvInputHardwareInfo.TV_INPUT_TYPE_SVIDEO;
+    public static final int TYPE_SVIDEO = 1002;
     /**
      * TV input type: the TV input service represents a SCART port.
      */
-    public static final int TYPE_SCART = TvInputHardwareInfo.TV_INPUT_TYPE_SCART;
+    public static final int TYPE_SCART = 1003;
     /**
      * TV input type: the TV input service represents a component port.
      */
-    public static final int TYPE_COMPONENT = TvInputHardwareInfo.TV_INPUT_TYPE_COMPONENT;
+    public static final int TYPE_COMPONENT = 1004;
     /**
      * TV input type: the TV input service represents a VGA port.
      */
-    public static final int TYPE_VGA = TvInputHardwareInfo.TV_INPUT_TYPE_VGA;
+    public static final int TYPE_VGA = 1005;
     /**
      * TV input type: the TV input service represents a DVI port.
      */
-    public static final int TYPE_DVI = TvInputHardwareInfo.TV_INPUT_TYPE_DVI;
+    public static final int TYPE_DVI = 1006;
     /**
      * TV input type: the TV input service is HDMI. (e.g. HDMI 1)
      */
-    public static final int TYPE_HDMI = TvInputHardwareInfo.TV_INPUT_TYPE_HDMI;
+    public static final int TYPE_HDMI = 1007;
     /**
      * TV input type: the TV input service represents a display port.
      */
-    public static final int TYPE_DISPLAY_PORT = TvInputHardwareInfo.TV_INPUT_TYPE_DISPLAY_PORT;
+    public static final int TYPE_DISPLAY_PORT = 1008;
 
     /**
      * The ID of the TV input to provide to the setup activity and settings activity.
      */
     public static final String EXTRA_INPUT_ID = "inputId";
+
+    private static SparseIntArray sHardwareTypeToTvInputType = new SparseIntArray();
 
     private static final String XML_START_TAG_NAME = "tv-input";
 
@@ -110,7 +106,22 @@ public final class TvInputInfo implements Parcelable {
     // Attributes from XML meta data.
     private String mSetupActivity;
     private String mSettingsActivity;
-    private int mType = TYPE_VIRTUAL;
+    private int mType = TYPE_TUNER;
+
+    static {
+        sHardwareTypeToTvInputType.put(TvInputHardwareInfo.TV_INPUT_TYPE_OTHER_HARDWARE,
+                TYPE_OTHER);
+        sHardwareTypeToTvInputType.put(TvInputHardwareInfo.TV_INPUT_TYPE_TUNER, TYPE_TUNER);
+        sHardwareTypeToTvInputType.put(TvInputHardwareInfo.TV_INPUT_TYPE_COMPOSITE, TYPE_COMPOSITE);
+        sHardwareTypeToTvInputType.put(TvInputHardwareInfo.TV_INPUT_TYPE_SVIDEO, TYPE_SVIDEO);
+        sHardwareTypeToTvInputType.put(TvInputHardwareInfo.TV_INPUT_TYPE_SCART, TYPE_SCART);
+        sHardwareTypeToTvInputType.put(TvInputHardwareInfo.TV_INPUT_TYPE_COMPONENT, TYPE_COMPONENT);
+        sHardwareTypeToTvInputType.put(TvInputHardwareInfo.TV_INPUT_TYPE_VGA, TYPE_VGA);
+        sHardwareTypeToTvInputType.put(TvInputHardwareInfo.TV_INPUT_TYPE_DVI, TYPE_DVI);
+        sHardwareTypeToTvInputType.put(TvInputHardwareInfo.TV_INPUT_TYPE_HDMI, TYPE_HDMI);
+        sHardwareTypeToTvInputType.put(TvInputHardwareInfo.TV_INPUT_TYPE_DISPLAY_PORT,
+                TYPE_DISPLAY_PORT);
+    }
 
     /**
      * Create a new instance of the TvInputInfo class,
@@ -123,7 +134,7 @@ public final class TvInputInfo implements Parcelable {
             throws XmlPullParserException, IOException {
         return createTvInputInfo(context, service, generateInputIdForComponentName(
                 new ComponentName(service.serviceInfo.packageName, service.serviceInfo.name)),
-                null);
+                null, TYPE_TUNER);
     }
 
     /**
@@ -138,7 +149,7 @@ public final class TvInputInfo implements Parcelable {
             HdmiCecDeviceInfo cecInfo, String parentId) throws XmlPullParserException, IOException {
         return createTvInputInfo(context, service, generateInputIdForHdmiCec(
                 new ComponentName(service.serviceInfo.packageName, service.serviceInfo.name),
-                cecInfo), parentId);
+                cecInfo), parentId, TYPE_HDMI);
     }
 
     /**
@@ -151,13 +162,14 @@ public final class TvInputInfo implements Parcelable {
      */
     public static TvInputInfo createTvInputInfo(Context context, ResolveInfo service,
             TvInputHardwareInfo hardwareInfo) throws XmlPullParserException, IOException {
+        int inputType = sHardwareTypeToTvInputType.get(hardwareInfo.getType(), TYPE_TUNER);
         return createTvInputInfo(context, service, generateInputIdForHardware(
                 new ComponentName(service.serviceInfo.packageName, service.serviceInfo.name),
-                hardwareInfo), null);
+                hardwareInfo), null, inputType);
     }
 
     private static TvInputInfo createTvInputInfo(Context context, ResolveInfo service,
-            String id, String parentId) throws XmlPullParserException, IOException {
+            String id, String parentId, int inputType) throws XmlPullParserException, IOException {
         ServiceInfo si = service.serviceInfo;
         PackageManager pm = context.getPackageManager();
         XmlResourceParser parser = null;
@@ -182,7 +194,7 @@ public final class TvInputInfo implements Parcelable {
                         "Meta-data does not start with tv-input-service tag in " + si.name);
             }
 
-            TvInputInfo input = new TvInputInfo(service, id, parentId);
+            TvInputInfo input = new TvInputInfo(service, id, parentId, inputType);
             TypedArray sa = res.obtainAttributes(attrs,
                     com.android.internal.R.styleable.TvInputService);
             input.mSetupActivity = sa.getString(
@@ -195,14 +207,6 @@ public final class TvInputInfo implements Parcelable {
             if (DEBUG) {
                 Log.d(TAG, "Settings activity loaded. [" + input.mSettingsActivity + "] for "
                         + si.name);
-            }
-            if (pm.checkPermission(android.Manifest.permission.TV_INPUT_HARDWARE, si.packageName)
-                    == PackageManager.PERMISSION_GRANTED) {
-                input.mType = sa.getInt(
-                        com.android.internal.R.styleable.TvInputService_tvInputType, TYPE_VIRTUAL);
-                if (DEBUG) {
-                    Log.d(TAG, "Type loaded. [" + input.mType + "] for " + si.name);
-                }
             }
             sa.recycle();
 
@@ -222,11 +226,13 @@ public final class TvInputInfo implements Parcelable {
      * @param service The ResolveInfo returned from the package manager about this TV input service.
      * @param id ID of this TV input. Should be generated via generateInputId*().
      * @param parentId ID of this TV input's parent input. {@code null} if none exists.
+     * @param type The type of this TV input service.
      */
-    private TvInputInfo(ResolveInfo service, String id, String parentId) {
+    private TvInputInfo(ResolveInfo service, String id, String parentId, int type) {
         mService = service;
         mId = id;
         mParentId = parentId;
+        mType = type;
     }
 
     /**
@@ -314,12 +320,7 @@ public final class TvInputInfo implements Parcelable {
      * @see TvContract#buildChannelUriForPassthroughTvInput(String)
      */
     public boolean isPassthroughInputType() {
-        if (mType == TYPE_HDMI || mType == TYPE_DISPLAY_PORT || mType == TYPE_SCART
-                || mType == TYPE_DVI || mType == TYPE_VGA || mType == TYPE_COMPONENT
-                || mType == TYPE_COMPOSITE || mType == TYPE_SVIDEO) {
-            return true;
-        }
-        return false;
+        return mType != TYPE_TUNER;
     }
 
     /**
