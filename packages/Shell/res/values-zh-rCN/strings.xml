@@ -18,7 +18,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Shell"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"已抓取错误报告"</string>
-    <string name="bugreport_finished_text" msgid="3559904746859400732">"触摸即可分享您的错误报告"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"向左滑动即可分享错误报告"</string>
+    <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"触摸即可分享您的错误报告"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"错误报告包含的数据来自于系统的各个日志文件，其中包含个人信息和隐私信息。请务必只与您信任的应用和用户分享错误报告。"</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"下次再显示这条讯息"</string>
 </resources>

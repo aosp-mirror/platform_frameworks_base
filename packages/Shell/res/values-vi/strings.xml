@@ -18,7 +18,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Shell"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"Báo cáo lỗi đã được chụp"</string>
-    <string name="bugreport_finished_text" msgid="3559904746859400732">"Chạm để chia sẻ báo cáo lỗi của bạn"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Vuốt sang trái để chia sẻ báo cáo lỗi của bạn"</string>
+    <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Chạm để chia sẻ báo cáo lỗi của bạn"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"Các báo cáo lỗi chứa dữ liệu từ nhiều tệp nhật ký khác nhau của hệ thống, bao gồm cả thông tin cá nhân và riêng tư. Chỉ chia sẻ báo cáo lỗi với các ứng dụng và những người mà bạn tin tưởng."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Hiển thị thông báo này vào lần tới"</string>
 </resources>

@@ -18,7 +18,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Terminal"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"Xatolik hisobotini yozib olindi"</string>
-    <string name="bugreport_finished_text" msgid="3559904746859400732">"Xatolik hisobotini bo‘lishish uchun barmog‘ingizni tegizing."</string>
+    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Xatolik hisobotini yuborish uchun barmog‘ingiz bilan chapga suring"</string>
+    <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Xatolik hisobotini bo‘lishish uchun barmog‘ingizni tegizing."</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"Xatolik hisobotlari tizimdagi har xil jurnal fayllardagi ma’lumotlarni, shuningdek, shaxsiy hamda maxfiy ma’lumotlarni o‘z ichiga oladi. Xatolik hisobotlarini faqat ishonchli dasturlar va odamlar bilan bo‘lishing."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Ushbu xabar keyingi safar ko‘rsatilsin"</string>
 </resources>

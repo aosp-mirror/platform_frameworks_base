@@ -18,7 +18,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Komentotulkki"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"Virheraportti tallennettu"</string>
-    <string name="bugreport_finished_text" msgid="3559904746859400732">"Jaa virheraportti koskettamalla tätä"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Jaa virheraportti pyyhkäisemällä vasemmalle"</string>
+    <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Jaa virheraportti koskettamalla tätä"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"Virheraportit sisältävät järjestelmän lokitietoja, ja niihin voi sisältyä henkilökohtaisia ja yksityisiä tietoja. Jaa virheraportteja vain luotettaville sovelluksille ja käyttäjille."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Näytä tämä viesti seuraavalla kerralla"</string>
 </resources>
