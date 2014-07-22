@@ -17,6 +17,7 @@
 package android.webkit;
 
 import android.app.ActivityManagerInternal;
+import android.app.Application;
 import android.app.AppGlobals;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -104,10 +105,13 @@ public final class WebViewFactory {
     }
 
     private static Class<WebViewFactoryProvider> getFactoryClass() throws ClassNotFoundException {
+        Application initialApplication = AppGlobals.getInitialApplication();
         try {
-            Context webViewContext = AppGlobals.getInitialApplication().createPackageContext(
+            Context webViewContext = initialApplication.createPackageContext(
                     getWebViewPackageName(),
                     Context.CONTEXT_INCLUDE_CODE | Context.CONTEXT_IGNORE_SECURITY);
+            initialApplication.getAssets().addAssetPath(
+                    webViewContext.getApplicationInfo().sourceDir);
             ClassLoader clazzLoader = webViewContext.getClassLoader();
             return (Class<WebViewFactoryProvider>) Class.forName(CHROMIUM_WEBVIEW_FACTORY, true,
                                                                  clazzLoader);
