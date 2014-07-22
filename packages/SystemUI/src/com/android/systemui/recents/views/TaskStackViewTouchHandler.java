@@ -148,8 +148,6 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                     if (parent != null) {
                         parent.requestDisallowInterceptTouchEvent(true);
                     }
-                    // Enable HW layers
-                    mSv.addHwLayersRefCount("stackScroll");
                 }
 
                 mLastMotionX = x;
@@ -160,10 +158,6 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
             case MotionEvent.ACTION_UP: {
                 // Animate the scroll back if we've cancelled
                 mSv.animateBoundScroll();
-                // Disable HW layers
-                if (mIsScrolling) {
-                    mSv.decHwLayersRefCount("stackScroll");
-                }
                 // Reset the drag state and the velocity tracker
                 mIsScrolling = false;
                 mActivePointerId = INACTIVE_POINTER_ID;
@@ -241,8 +235,6 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                         if (parent != null) {
                             parent.requestDisallowInterceptTouchEvent(true);
                         }
-                        // Enable HW layers
-                        mSv.addHwLayersRefCount("stackScroll");
                     }
                 }
                 if (mIsScrolling) {
@@ -271,8 +263,6 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                 int velocity = (int) velocityTracker.getYVelocity(mActivePointerId);
 
                 if (mIsScrolling && (Math.abs(velocity) > mMinimumVelocity)) {
-                    // Enable HW layers on the stack
-                    mSv.addHwLayersRefCount("flingScroll");
                     // XXX: Make this animation a function of the velocity AND distance
                     int overscrollRange = (int) (Math.min(1f,
                             Math.abs((float) velocity / mMaximumVelocity)) *
@@ -291,10 +281,6 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                     mSv.animateBoundScroll();
                 }
 
-                if (mIsScrolling) {
-                    // Disable HW layers
-                    mSv.decHwLayersRefCount("stackScroll");
-                }
                 mActivePointerId = INACTIVE_POINTER_ID;
                 mIsScrolling = false;
                 mTotalScrollMotion = 0;
@@ -315,10 +301,6 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                 break;
             }
             case MotionEvent.ACTION_CANCEL: {
-                if (mIsScrolling) {
-                    // Disable HW layers
-                    mSv.decHwLayersRefCount("stackScroll");
-                }
                 if (mSv.isScrollOutOfBounds()) {
                     // Animate the scroll back into bounds
                     // XXX: Make this animation a function of the velocity OR distance
@@ -351,8 +333,6 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         TaskView tv = (TaskView) v;
         // Disable clipping with the stack while we are swiping
         tv.setClipViewInStack(false);
-        // Enable HW layers on that task
-        tv.enableHwLayers();
         // Disallow touch events from this task view
         tv.setTouchEnabled(false);
         // Hide the footer
@@ -372,10 +352,6 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
     @Override
     public void onChildDismissed(View v) {
         TaskView tv = (TaskView) v;
-        // Disable HW layers on that task
-        if (mSv.mHwLayersTrigger.getCount() == 0) {
-            tv.disableHwLayers();
-        }
         // Re-enable clipping with the stack (we will reuse this view)
         tv.setClipViewInStack(true);
         // Re-enable touch events from this task view
@@ -387,10 +363,6 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
     @Override
     public void onSnapBackCompleted(View v) {
         TaskView tv = (TaskView) v;
-        // Disable HW layers on that task
-        if (mSv.mHwLayersTrigger.getCount() == 0) {
-            tv.disableHwLayers();
-        }
         // Re-enable clipping with the stack
         tv.setClipViewInStack(true);
         // Re-enable touch events from this task view

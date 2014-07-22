@@ -22,7 +22,10 @@ import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.View;
@@ -33,8 +36,6 @@ import com.android.systemui.recents.AlternateRecentsComponent;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.model.Task;
-
-// XXX: In debug mode, we should override invalidate() and check the layout type (do this in TaskStackView as well)
 
 /* A task view */
 public class TaskView extends FrameLayout implements Task.TaskCallbacks,
@@ -53,6 +54,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     int mDim;
     int mMaxDim;
     AccelerateInterpolator mDimInterpolator = new AccelerateInterpolator();
+    PorterDuffColorFilter mDimColorFilter = new PorterDuffColorFilter(0, PorterDuff.Mode.MULTIPLY);
 
     Task mTask;
     boolean mTaskDataLoaded;
@@ -96,9 +98,8 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         mMaxDim = mConfig.taskStackMaxDim;
         mClipViewInStack = true;
         mViewBounds = new AnimateableViewBounds(this, mConfig.taskViewRoundedCornerRadiusPx);
-        setWillNotDraw(false);
-        setDim(getDim());
         setOutlineProvider(mViewBounds);
+        setDim(getDim());
     }
 
     /** Set callback */
@@ -164,7 +165,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         }
 
         // Apply the transform
-        toTransform.applyToTaskView(this, duration, mConfig.fastOutSlowInInterpolator,
+        toTransform.applyToTaskView(this, duration, mConfig.fastOutSlowInInterpolator, false,
                 mUpdateDimListener);
     }
 
@@ -262,7 +263,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                                 AlternateRecentsComponent.consumeLastScreenshot();
                             }
                         })
-                        .withLayer()
                         .start();
             } else {
                 // Otherwise, just enable the thumbnail clip
@@ -316,7 +316,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                     .setUpdateListener(null)
                     .setInterpolator(mConfig.quintOutInterpolator)
                     .setDuration(mConfig.taskViewEnterFromHomeDuration)
-                    .withLayer()
                     .withEndAction(new Runnable() {
                         @Override
                         public void run() {
@@ -348,7 +347,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                 .setUpdateListener(null)
                 .setInterpolator(mConfig.fastOutLinearInInterpolator)
                 .setDuration(mConfig.taskViewExitToHomeDuration)
-                .withLayer()
                 .withEndAction(ctx.postAnimationTrigger.decrementAsRunnable())
                 .start();
         ctx.postAnimationTrigger.increment();
@@ -384,7 +382,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
             .setUpdateListener(null)
             .setInterpolator(mConfig.fastOutSlowInInterpolator)
             .setDuration(mConfig.taskViewRemoveAnimDuration)
-            .withLayer()
             .withEndAction(new Runnable() {
                 @Override
                 public void run() {
@@ -466,7 +463,10 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     /** Returns the current dim. */
     public void setDim(int dim) {
         mDim = dim;
-        postInvalidateOnAnimation();
+        int inverse = 255 - mDim;
+        mDimColorFilter.setColor(Color.argb(0xFF, inverse, inverse, inverse));
+        mLayerPaint.setColorFilter(mDimColorFilter);
+        setLayerType(LAYER_TYPE_HARDWARE, mLayerPaint);
     }
 
     /** Returns the current dim. */
@@ -491,36 +491,12 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     /**** View drawing ****/
 
     @Override
-    public void draw(Canvas canvas) {
-        super.draw(canvas);
-
-        // Apply the dim if necessary
-        if (mDim > 0) {
-            canvas.drawColor(mDim << 24);
-        }
-    }
-
-    @Override
     protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
         if (mIsStub && (child != mBarView)) {
             // Skip the thumbnail view if we are in stub mode
             return false;
         }
         return super.drawChild(canvas, child, drawingTime);
-    }
-
-    /** Enable the hw layers on this task view */
-    void enableHwLayers() {
-        mThumbnailView.setLayerType(View.LAYER_TYPE_HARDWARE, mLayerPaint);
-        mBarView.enableHwLayers();
-        mFooterView.setLayerType(View.LAYER_TYPE_HARDWARE, mLayerPaint);
-    }
-
-    /** Disable the hw layers on this task view */
-    void disableHwLayers() {
-        mThumbnailView.setLayerType(View.LAYER_TYPE_NONE, mLayerPaint);
-        mBarView.disableHwLayers();
-        mFooterView.setLayerType(View.LAYER_TYPE_NONE, mLayerPaint);
     }
 
     /**** View focus state ****/
@@ -640,7 +616,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     /**** View.OnClickListener Implementation ****/
 
     @Override
-    public void onClick(final View v) {
+     public void onClick(final View v) {
         // We purposely post the handler delayed to allow for the touch feedback to draw
         final TaskView tv = this;
         postDelayed(new Runnable() {

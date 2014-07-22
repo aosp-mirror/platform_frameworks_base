@@ -22,6 +22,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.RippleDrawable;
 import android.util.AttributeSet;
@@ -52,7 +53,6 @@ class TaskBarView extends FrameLayout {
 
     boolean mIsFullscreen;
 
-    Paint mLayerPaint = new Paint();
     static Paint sHighlightPaint;
 
     public TaskBarView(Context context) {
@@ -167,7 +167,11 @@ class TaskBarView extends FrameLayout {
             mActivityDescription.setText(t.activityLabel);
         }
         // Try and apply the system ui tint
-        setBackgroundColor(t.colorPrimary);
+        int existingBgColor = (getBackground() instanceof ColorDrawable) ?
+                ((ColorDrawable) getBackground()).getColor() : 0;
+        if (existingBgColor != t.colorPrimary) {
+            setBackgroundColor(t.colorPrimary);
+        }
         mActivityDescription.setTextColor(t.useLightOnPrimaryColor ?
                 mConfig.taskBarViewLightTextColor : mConfig.taskBarViewDarkTextColor);
         mDismissButton.setImageDrawable(t.useLightOnPrimaryColor ?
@@ -251,15 +255,5 @@ class TaskBarView extends FrameLayout {
             mDismissButton.setVisibility(View.VISIBLE);
             mDismissButton.setAlpha(1f);
         }
-    }
-
-    /** Enable the hw layers on this task view */
-    void enableHwLayers() {
-        mDismissButton.setLayerType(View.LAYER_TYPE_HARDWARE, mLayerPaint);
-    }
-
-    /** Disable the hw layers on this task view */
-    void disableHwLayers() {
-        mDismissButton.setLayerType(View.LAYER_TYPE_NONE, mLayerPaint);
     }
 }
