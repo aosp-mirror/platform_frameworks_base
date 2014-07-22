@@ -340,85 +340,85 @@ public final class TvContract {
         public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/channel";
 
         /** A generic channel type. */
-        public static final int TYPE_OTHER = 0x0;
+        public static final String TYPE_OTHER = "TYPE_OTHER";
 
         /** The channel type for NTSC. */
-        public static final int TYPE_NTSC = 0x1;
+        public static final String TYPE_NTSC = "TYPE_NTSC";
 
         /** The channel type for PAL. */
-        public static final int TYPE_PAL = 0x2;
+        public static final String TYPE_PAL = "TYPE_PAL";
 
         /** The channel type for SECAM. */
-        public static final int TYPE_SECAM = 0x3;
+        public static final String TYPE_SECAM = "TYPE_SECAM";
 
         /** The channel type for DVB-T (terrestrial). */
-        public static final int TYPE_DVB_T = 0x00010000;
+        public static final String TYPE_DVB_T = "TYPE_DVB_T";
 
         /** The channel type for DVB-T2 (terrestrial). */
-        public static final int TYPE_DVB_T2 = 0x00010001;
+        public static final String TYPE_DVB_T2 = "TYPE_DVB_T2";
 
         /** The channel type for DVB-S (satellite). */
-        public static final int TYPE_DVB_S = 0x00010100;
+        public static final String TYPE_DVB_S = "TYPE_DVB_S";
 
         /** The channel type for DVB-S2 (satellite). */
-        public static final int TYPE_DVB_S2 = 0x00010101;
+        public static final String TYPE_DVB_S2 = "TYPE_DVB_S2";
 
         /** The channel type for DVB-C (cable). */
-        public static final int TYPE_DVB_C = 0x00010200;
+        public static final String TYPE_DVB_C = "TYPE_DVB_C";
 
         /** The channel type for DVB-C2 (cable). */
-        public static final int TYPE_DVB_C2 = 0x00010201;
+        public static final String TYPE_DVB_C2 = "TYPE_DVB_C2";
 
         /** The channel type for DVB-H (handheld). */
-        public static final int TYPE_DVB_H = 0x00010300;
+        public static final String TYPE_DVB_H = "TYPE_DVB_H";
 
         /** The channel type for DVB-SH (satellite). */
-        public static final int TYPE_DVB_SH = 0x00010400;
+        public static final String TYPE_DVB_SH = "TYPE_DVB_SH";
 
         /** The channel type for ATSC (terrestrial). */
-        public static final int TYPE_ATSC_T = 0x00020000;
+        public static final String TYPE_ATSC_T = "TYPE_ATSC_T";
 
         /** The channel type for ATSC (cable). */
-        public static final int TYPE_ATSC_C = 0x00020200;
+        public static final String TYPE_ATSC_C = "TYPE_ATSC_C";
 
         /** The channel type for ATSC-M/H (mobile/handheld). */
-        public static final int TYPE_ATSC_M_H = 0x00020300;
+        public static final String TYPE_ATSC_M_H = "TYPE_ATSC_M_H";
 
         /** The channel type for ISDB-T (terrestrial). */
-        public static final int TYPE_ISDB_T = 0x00030000;
+        public static final String TYPE_ISDB_T = "TYPE_ISDB_T";
 
         /** The channel type for ISDB-Tb (Brazil). */
-        public static final int TYPE_ISDB_TB = 0x00030100;
+        public static final String TYPE_ISDB_TB = "TYPE_ISDB_TB";
 
         /** The channel type for ISDB-S (satellite). */
-        public static final int TYPE_ISDB_S = 0x00030200;
+        public static final String TYPE_ISDB_S = "TYPE_ISDB_S";
 
         /** The channel type for ISDB-C (cable). */
-        public static final int TYPE_ISDB_C = 0x00030300;
+        public static final String TYPE_ISDB_C = "TYPE_ISDB_C";
 
         /** The channel type for 1seg (handheld). */
-        public static final int TYPE_1SEG = 0x00030400;
+        public static final String TYPE_1SEG = "TYPE_1SEG";
 
         /** The channel type for DTMB (terrestrial). */
-        public static final int TYPE_DTMB = 0x00040000;
+        public static final String TYPE_DTMB = "TYPE_DTMB";
 
         /** The channel type for CMMB (handheld). */
-        public static final int TYPE_CMMB = 0x00040100;
+        public static final String TYPE_CMMB = "TYPE_CMMB";
 
         /** The channel type for T-DMB (terrestrial). */
-        public static final int TYPE_T_DMB = 0x00050000;
+        public static final String TYPE_T_DMB = "TYPE_T_DMB";
 
         /** The channel type for S-DMB (satellite). */
-        public static final int TYPE_S_DMB = 0x00050100;
+        public static final String TYPE_S_DMB = "TYPE_S_DMB";
 
         /** A generic service type. */
-        public static final int SERVICE_TYPE_OTHER = 0x0;
+        public static final String SERVICE_TYPE_OTHER = "SERVICE_TYPE_OTHER";
 
         /** The service type for regular TV channels that have both audio and video. */
-        public static final int SERVICE_TYPE_AUDIO_VIDEO = 0x1;
+        public static final String SERVICE_TYPE_AUDIO_VIDEO = "SERVICE_TYPE_AUDIO_VIDEO";
 
         /** The service type for radio channels that have audio only. */
-        public static final int SERVICE_TYPE_AUDIO = 0x2;
+        public static final String SERVICE_TYPE_AUDIO = "SERVICE_TYPE_AUDIO";
 
         /** The video format for 240p. */
         public static final String VIDEO_FORMAT_240P = "VIDEO_FORMAT_240P";
@@ -521,7 +521,7 @@ public final class TvContract {
          * </p><p>
          * This is a required field.
          * </p><p>
-         * Type: INTEGER
+         * Type: TEXT
          * </p>
          */
         public static final String COLUMN_TYPE = "type";
@@ -537,7 +537,7 @@ public final class TvContract {
          * </p><p>
          * This is a required field.
          * </p><p>
-         * Type: INTEGER
+         * Type: TEXT
          * </p>
          */
         public static final String COLUMN_SERVICE_TYPE = "service_type";

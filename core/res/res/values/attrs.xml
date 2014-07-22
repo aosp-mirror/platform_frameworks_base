@@ -7213,24 +7213,6 @@
              the settings for this service. -->
         <attr name="settingsActivity" />
         <!-- Type of this service. -->
-        <attr name="tvInputType">
-            <!-- Should be in sync with constant values defined in
-                 {@link android.media.tv.TvInputInfo}. -->
-
-            <!-- Virtual input (default) -->
-            <enum name="virtual" value="0" />
-
-            <enum name="otherHardware" value="1" />
-            <enum name="tuner" value="2" />
-            <enum name="composite" value="3" />
-            <enum name="svideo" value="4" />
-            <enum name="scart" value="5" />
-            <enum name="component" value="6" />
-            <enum name="vga" value="7" />
-            <enum name="dvi" value="8" />
-            <enum name="hdmi" value="9" />
-            <enum name="displayPort" value="10" />
-        </attr>
     </declare-styleable>
 
     <declare-styleable name="ResolverDrawerLayout">
