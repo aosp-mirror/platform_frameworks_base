@@ -29,6 +29,7 @@ import android.app.IActivityManager;
 import android.app.INotificationManager;
 import android.app.ITransientNotification;
 import android.app.Notification;
+import android.app.Notification.Builder;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
@@ -1554,8 +1555,8 @@ public class NotificationManagerService extends SystemService {
                     + " id=" + id + " notification=" + notification);
         }
         if (notification.icon != 0) {
-            if (notification.contentView == null) {
-                throw new IllegalArgumentException("contentView required: pkg=" + pkg
+            if (!notification.isValid()) {
+                throw new IllegalArgumentException("Invalid notification (): pkg=" + pkg
                         + " id=" + id + " notification=" + notification);
             }
         }

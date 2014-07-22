@@ -19,6 +19,8 @@ package android.service.notification;
 import android.annotation.SystemApi;
 import android.annotation.SdkConstant;
 import android.app.INotificationManager;
+import android.app.Notification;
+import android.app.Notification.Builder;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
@@ -69,6 +71,11 @@ public abstract class NotificationListenerService extends Service {
 
     /** Only valid after a successful call to (@link registerAsService}. */
     private int mCurrentUser;
+
+
+    // This context is required for system services since NotificationListenerService isn't
+    // started as a real Service and hence no context is available.
+    private Context mSystemContext;
 
     /**
      * The {@link Intent} that must be declared as handled by the service.
@@ -290,7 +297,13 @@ public abstract class NotificationListenerService extends Service {
             ParceledListSlice<StatusBarNotification> parceledList =
                     getNotificationInterface().getActiveNotificationsFromListener(mWrapper);
             List<StatusBarNotification> list = parceledList.getList();
-            return list.toArray(new StatusBarNotification[list.size()]);
+
+            int N = list.size();
+            for (int i = 0; i < N; i++) {
+                Notification notification = list.get(i).getNotification();
+                Builder.rebuild(getContext(), notification);
+            }
+            return list.toArray(new StatusBarNotification[N]);
         } catch (android.os.RemoteException ex) {
             Log.v(TAG, "Unable to contact notification manager", ex);
         }
@@ -379,13 +392,16 @@ public abstract class NotificationListenerService extends Service {
      * <p>Only system services may use this call. It will fail for non-system callers.
      * Apps should ask the user to add their listener in Settings.
      *
+     * @param context Context required for accessing resources. Since this service isn't
+     *    launched as a real Service when using this method, a context has to be passed in.
      * @param componentName the component that will consume the notification information
      * @param currentUser the user to use as the stream filter
      * @hide
      */
     @SystemApi
-    public void registerAsSystemService(ComponentName componentName, int currentUser)
-            throws RemoteException {
+    public void registerAsSystemService(Context context, ComponentName componentName,
+            int currentUser) throws RemoteException {
+        mSystemContext = context;
         if (mWrapper == null) {
             mWrapper = new INotificationListenerWrapper();
         }
@@ -413,6 +429,8 @@ public abstract class NotificationListenerService extends Service {
         @Override
         public void onNotificationPosted(StatusBarNotification sbn,
                 NotificationRankingUpdate update) {
+            Notification.Builder.rebuild(getContext(), sbn.getNotification());
+
             // protect subclass from concurrent modifications of (@link mNotificationKeys}.
             synchronized (mWrapper) {
                 applyUpdate(update);
@@ -473,6 +491,13 @@ public abstract class NotificationListenerService extends Service {
 
     private void applyUpdate(NotificationRankingUpdate update) {
         mRankingMap = new RankingMap(update);
+    }
+
+    private Context getContext() {
+        if (mSystemContext != null) {
+            return mSystemContext;
+        }
+        return this;
     }
 
     /**
