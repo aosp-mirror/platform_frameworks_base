@@ -1189,7 +1189,8 @@ public abstract class CameraMetadata<TKey> {
      * image while recording video) use case.</p>
      * <p>The camera device should take the highest-quality image
      * possible (given the other settings) without disrupting the
-     * frame rate of video recording.  </p>
+     * frame rate of video recording.<br />
+     * </p>
      * @see CaptureRequest#CONTROL_CAPTURE_INTENT
      */
     public static final int CONTROL_CAPTURE_INTENT_VIDEO_SNAPSHOT = 4;
