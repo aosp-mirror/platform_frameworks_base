@@ -1006,16 +1006,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Tillåter att appen ändrar historiken för besökta sidor i webbläsaren eller bokmärken som sparats på telefonen. Det kan innebära att appen kan ta bort eller ändra webbläsarinformation. Observera att den här behörigheten kanske inte är tillämplig för webbläsare från tredje part eller andra appar med surffunktion."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"ställa in ett alarm"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Tillåter att appen ställer in ett alarm i en befintlig alarmapp. Vissa alarmappar har inte den här funktionen."</string>
-    <!-- no translation found for permlab_writeVoicemail (7309899891683938100) -->
-    <skip />
-    <!-- no translation found for permdesc_writeVoicemail (6592572839715924830) -->
-    <skip />
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"skriva röstmeddelanden"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"Tillåter att appen ändrar och tar bort meddelanden från röstbrevlådans inkorg."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"lägg till röstbrevlåda"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Gör att appen lägger till meddelanden i röstbrevlådans inkorg."</string>
-    <!-- no translation found for permlab_readVoicemail (8415201752589140137) -->
-    <skip />
-    <!-- no translation found for permdesc_readVoicemail (8926534735321616550) -->
-    <skip />
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"läsa röstmeddelanden"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"Tillåter att appen läser dina röstmeddelanden."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"Ändra geografisk plats för webbläsaren"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Tillåter att appen ändrar webbläsarens behörigheter för geografisk plats. Skadliga appar kan använda detta för att tillåta att platsinformation skickas till godtyckliga webbplatser."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"kontrollera paket"</string>

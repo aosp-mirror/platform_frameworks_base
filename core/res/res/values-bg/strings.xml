@@ -1006,16 +1006,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Разрешава на приложението да променя историята или отметките на браузъра, съхранени на телефона ви. Това може да му позволи да изтрива или променя данните на браузъра. Забележка: Възможно е браузъри на трети страни или други приложения с възможности за сърфиране в мрежата да не могат да наложат ограниченията на разрешението."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"навиване на будилника"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Разрешава на приложението да навие инсталирано приложение будилник. Някои будилници може да не изпълнят тази функция."</string>
-    <!-- no translation found for permlab_writeVoicemail (7309899891683938100) -->
-    <skip />
-    <!-- no translation found for permdesc_writeVoicemail (6592572839715924830) -->
-    <skip />
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"запис на гласови съобщения"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"Разрешава на приложението да променя и премахва съобщения от входящата ви гласова поща."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"добавяне на гласова поща"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Разрешава на приложението да добавя съобщения към входящата ви гласова поща."</string>
-    <!-- no translation found for permlab_readVoicemail (8415201752589140137) -->
-    <skip />
-    <!-- no translation found for permdesc_readVoicemail (8926534735321616550) -->
-    <skip />
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"четене на гласовата поща"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"Разрешава на приложението да чете гласовите ви съобщения."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"промяна на разрешенията за местоположение в браузъра"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Разрешава на приложението да променя разрешенията на браузъра за местоположение. Злонамерените приложения могат да използват това, за да изпращат информация за местоположението до произволни уебсайтове."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"проверка на пакетите"</string>

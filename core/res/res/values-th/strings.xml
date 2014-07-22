@@ -1006,16 +1006,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"อนุญาตให้แอปพลิเคชันเปลี่ยนแปลงประวัติหรือบุ๊กมาร์กของเบราว์เซอร์ที่จัดเก็บไว้ในโทรศัพท์ ซึ่งทำให้แอปพลิเคชันสามารถลบหรือเปลี่ยนข้อมูลเบราว์เซอร์ได้ หมายเหตุ: การอนุญาตนี้อาจไม่สามารถใช้งานได้กับเบราว์เซอร์ของบุคคลที่สามหรือแอปพลิเคชันอื่นๆ ที่มีความสามารถในการเรียกดูบนเว็บ"</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"ตั้งปลุก"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"อนุญาตให้แอปพลิเคชันตั้งเวลาปลุกในแอปพลิเคชันนาฬิกาปลุกที่ติดตั้ง แอปพลิเคชันนาฬิกาปลุกบางรายการอาจไม่ใช้คุณลักษณะนี้"</string>
-    <!-- no translation found for permlab_writeVoicemail (7309899891683938100) -->
-    <skip />
-    <!-- no translation found for permdesc_writeVoicemail (6592572839715924830) -->
-    <skip />
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"เขียนข้อความเสียง"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"อนุญาตให้แอปแก้ไขและนำข้อความออกจากกล่องข้อความเสียงของคุณ"</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"เพิ่มข้อวามเสียง"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"อนุญาตให้แอปพลิเคชันเพิ่มข้อความลงในกล่องข้อความเสียงของคุณ"</string>
-    <!-- no translation found for permlab_readVoicemail (8415201752589140137) -->
-    <skip />
-    <!-- no translation found for permdesc_readVoicemail (8926534735321616550) -->
-    <skip />
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"อ่านข้อความเสียง"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"อนุญาตให้แอปอ่านข้อความเสียงของคุณได้"</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"แก้ไขการอนุญาตเกี่ยวกับการระบุตำแหน่งทางภูมิศาสตร์ของเบราว์เซอร์"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"อนุญาตให้แอปพลิเคชันแก้ไขการอนุญาตตำแหน่งทางภูมิศาสตร์ของเบราว์เซอร์ แอปพลิเคชันที่เป็นอันตรายอาจใช้การอนุญาตนี้ในการส่งข้อมูลตำแหน่งไปยังเว็บไซต์ต่างๆ ได้ตามต้องการ"</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"ยืนยันแพ็กเกจ"</string>
@@ -1390,10 +1386,8 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"อนุญาตให้แอปพลิเคชันผูกกับบริการของตัวแทนที่เชื่อถือได้"</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"โต้ตอบกับการอัปเดตและระบบการกู้คืน"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"ช่วยให้แอปพลิเคชันสามารถโต้ตอบกับระบบการกู้คืนและการอัปเดตระบบ"</string>
-    <!-- no translation found for permlab_createMediaProjection (4941338725487978112) -->
-    <skip />
-    <!-- no translation found for permdesc_createMediaProjection (1284530992706219702) -->
-    <skip />
+    <string name="permlab_createMediaProjection" msgid="4941338725487978112">"สร้างเซสชันการฉายภาพสื่อ"</string>
+    <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"อนุญาตให้แอปพลิเคชันสร้างเซสชันการฉายภาพสื่อ เซสชันดังกล่าวช่วยให้แอปพลิเคชันสามารถจับภาพหน้าจอและเนื้อหาเสียงได้ แอปทั่วไปไม่จำเป็นต้องใช้"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"แตะสองครั้งเพื่อควบคุมการซูม"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"ไม่สามารถเพิ่มวิดเจ็ต"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"ไป"</string>
@@ -1518,20 +1512,14 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"แก้ไข"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"คำเตือนการใช้ข้อมูล"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"แตะเพื่อดูการใช้งานและการตั้งค่า"</string>
-    <!-- no translation found for data_usage_3g_limit_title (4462365924791862301) -->
-    <skip />
-    <!-- no translation found for data_usage_4g_limit_title (7476424187522765328) -->
-    <skip />
-    <!-- no translation found for data_usage_mobile_limit_title (3393439305227911006) -->
-    <skip />
-    <!-- no translation found for data_usage_wifi_limit_title (3461968509557554571) -->
-    <skip />
-    <!-- no translation found for data_usage_limit_body (6131350187562939365) -->
-    <skip />
+    <string name="data_usage_3g_limit_title" msgid="4462365924791862301">"ข้อมูล 2G-3G ปิดอยู่"</string>
+    <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"ข้อมูล 4G ปิดอยู่"</string>
+    <string name="data_usage_mobile_limit_title" msgid="3393439305227911006">"ข้อมูลมือถือปิดอยู่"</string>
+    <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"ข้อมูล Wi-Fi ปิดอยู่"</string>
+    <string name="data_usage_limit_body" msgid="6131350187562939365">"ถึงขีดจำกัดแล้ว"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"เกินขีดจำกัดข้อมูล 2G - 3G"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"เกินขีดจำกัดของข้อมูล 4G"</string>
-    <!-- no translation found for data_usage_mobile_limit_snoozed_title (4941346653729943789) -->
-    <skip />
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"ถึงขีดจำกัดข้อมูลมือถือแล้ว"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"เกินขีดจำกัดข้อมูล WiFi แล้ว"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> เกินขีดจำกัดที่ระบุไว้"</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"จำกัดข้อมูลแบ็กกราวด์"</string>

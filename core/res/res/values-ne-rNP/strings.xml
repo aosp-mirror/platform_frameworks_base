@@ -1398,10 +1398,8 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"विश्वस्त प्रतिनिधि सेवालाई बाँध्न अनुप्रयोगलाई अनुमति दिन्छ।"</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"अद्यावधिक र रिकभरी प्रणालीको साथ अन्तर्क्रिया"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"अनुप्रयोगलाई रिकभरी प्रणाली र प्रणाली अद्यावधिकहरूको साथ अन्तर्क्रिया गर्न अनुमति दिन्छ।"</string>
-    <!-- no translation found for permlab_createMediaProjection (4941338725487978112) -->
-    <skip />
-    <!-- no translation found for permdesc_createMediaProjection (1284530992706219702) -->
-    <skip />
+    <string name="permlab_createMediaProjection" msgid="4941338725487978112">"मिडिया प्रक्षेपण सत्रहरू सिर्जना गर्नुहोस्"</string>
+    <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"मिडिया प्रक्षेपण सत्र सिर्जना गर्न अनुप्रयोग लाई अनुमति दिन्छ। यी सत्रले प्रदर्शन र अडियो सामग्री खिच्ने क्षमताका अनुप्रयोगहरू प्रदान गर्न सक्छन्। सामान्य अनुप्रयोगहरूको कहिल्यै पनि आवश्यक पर्दैन।"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"जुम नियन्त्रणको लागि दुई चोटि टच गर्नुहोस्"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"विजेट थप गर्न सकिँदैन।"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"जानुहोस्"</string>
@@ -1526,20 +1524,14 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"सम्पादन गर्नुहोस्"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"डेटा प्रयोग चेतावनी"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"उपयोग र सेटिङहरू हेर्न छुनुहोस्।"</string>
-    <!-- no translation found for data_usage_3g_limit_title (4462365924791862301) -->
-    <skip />
-    <!-- no translation found for data_usage_4g_limit_title (7476424187522765328) -->
-    <skip />
-    <!-- no translation found for data_usage_mobile_limit_title (3393439305227911006) -->
-    <skip />
-    <!-- no translation found for data_usage_wifi_limit_title (3461968509557554571) -->
-    <skip />
-    <!-- no translation found for data_usage_limit_body (6131350187562939365) -->
-    <skip />
+    <string name="data_usage_3g_limit_title" msgid="4462365924791862301">"2G-3G डेटा बन्द छ"</string>
+    <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"4G डेटा बन्द छ"</string>
+    <string name="data_usage_mobile_limit_title" msgid="3393439305227911006">"सेलुलर डेटा बन्द छ"</string>
+    <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"वाइफाइ डेटा बन्द छ"</string>
+    <string name="data_usage_limit_body" msgid="6131350187562939365">"सिमा पुग्यो"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G डेटा सीमा भन्दा पार भएको छ"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G डेटा SIMा नाघ्यो"</string>
-    <!-- no translation found for data_usage_mobile_limit_snoozed_title (4941346653729943789) -->
-    <skip />
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"सेलुलर डेटा सीमा नाघ्यो"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"वाइफाइ डेटा SIMा नाघ्यो"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> उल्लेखित सीमा भन्दा बढी छ।"</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"पृष्ठभूमिका डेटा प्रतिबन्धित गरिएको छ"</string>
@@ -1760,25 +1752,18 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> चयन गरियो"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> हटाइयो"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"कार्य <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (2126866321272822564) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="2126866321272822564">"तपाईँ अनुप्रयोग बन्द गर्ने ढाँचामा हुनुहुन्छ। निस्कनका लागि हालैको अनुप्रयोगहरूका बटन थिच्नुहोस् र समाउनुहोस्।"</string>
     <string name="lock_to_app_toast_locked" msgid="4229650395479263497">"तपाईं Lock-to-App मोडमा हुनुहुन्छ।"</string>
     <string name="lock_to_app_title" msgid="5895142291937470019">"लक-देखि-अनुप्रयोग प्रयोग गर्ने?"</string>
-    <!-- no translation found for lock_to_app_description (2800403592608529611) -->
-    <skip />
-    <!-- no translation found for lock_to_app_negative (2259143719362732728) -->
-    <skip />
+    <string name="lock_to_app_description" msgid="2800403592608529611">"लक-गर्न अनुप्रयोगले एकल अनुप्रयोगमा प्रदर्शन बन्द गर्छ।\n\n,निस्कनका लागि हालैको अनुप्रयोगहरूका बटन थिच्नुहोस् र समाउनुहोस्।"</string>
+    <string name="lock_to_app_negative" msgid="2259143719362732728">"होइन, धन्यवाद"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"START"</string>
-    <!-- no translation found for lock_to_app_start (3074665051586318340) -->
-    <skip />
-    <!-- no translation found for lock_to_app_exit (8967089657201849300) -->
-    <skip />
+    <string name="lock_to_app_start" msgid="3074665051586318340">"अनुप्रयोग बन्द"</string>
+    <string name="lock_to_app_exit" msgid="8967089657201849300">"अनुप्रयोग अब बन्द छैन"</string>
+    <!-- String.format failed for translation -->
     <!-- no translation found for lock_to_app_use_screen_lock (1434584309048590886) -->
     <skip />
-    <!-- no translation found for lock_to_app_unlock_pin (7908385370846820001) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_pattern (7763071104790758405) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_password (795224196583495868) -->
-    <skip />
+    <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"शैली बन्द गर्नुहोस"</string>
+    <string name="lock_to_app_unlock_password" msgid="795224196583495868">"पासवर्ड"</string>
 </resources>

@@ -1006,16 +1006,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Tillader, at appen kan ændre browserens historik eller de bogmærker, der er gemt på din telefon. Dette kan give appen tilladelse til at slette eller ændre browserdata. Bemærk! Denne tilladelse håndhæves muligvis ikke af tredjepartsbrowsere eller andre applikationer med websøgningsfunktioner."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"indstille en alarm"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Tillader, at appen kan indstille en alarm i en installeret alarmapp. Nogle alarmapps har muligvis ikke denne funktion."</string>
-    <!-- no translation found for permlab_writeVoicemail (7309899891683938100) -->
-    <skip />
-    <!-- no translation found for permdesc_writeVoicemail (6592572839715924830) -->
-    <skip />
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"skriv talebeskeder"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"Tillader, at appen ændrer og fjerner beskeder fra indbakken for din telefonsvarer."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"tilføje telefonsvarer"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Tillader, at appen kan tilføje beskeder på din telefonsvarer."</string>
-    <!-- no translation found for permlab_readVoicemail (8415201752589140137) -->
-    <skip />
-    <!-- no translation found for permdesc_readVoicemail (8926534735321616550) -->
-    <skip />
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"læs talebeskeder"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"Tillader, at appen læser dine talebeskeder."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"skifte tilladelser til geografisk placering i Browser"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Tillader, at appen kan ændre browserens tilladelser angående geografisk placering. Ondsindede apps kan benytte dette til at sende oplysninger om placering til vilkårlige websites."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"bekræft pakker"</string>

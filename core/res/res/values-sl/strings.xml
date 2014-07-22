@@ -1186,9 +1186,9 @@
     <string name="whichApplicationNamed" msgid="8260158865936942783">"Dokončanje dejanja z aplikacijo %1$s"</string>
     <string name="whichViewApplication" msgid="3272778576700572102">"Odpiranje z aplikacijo"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Odpiranje z aplikacijo %1$s"</string>
-    <string name="whichEditApplication" msgid="144727838241402655">"Urejanje z"</string>
+    <string name="whichEditApplication" msgid="144727838241402655">"Urejanje z aplikacijo"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Urejanje z aplikacijo %1$s"</string>
-    <string name="whichSendApplication" msgid="6902512414057341668">"Skupna raba z"</string>
+    <string name="whichSendApplication" msgid="6902512414057341668">"Skupna raba z aplikacijo"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Skupna raba z aplikacijo %1$s"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"Izberite aplikacijo za začetno stran"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Privzeta uporaba za to dejanje."</string>

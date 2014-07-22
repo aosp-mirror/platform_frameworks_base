@@ -1752,25 +1752,16 @@
     <string name="item_is_selected" msgid="949687401682476608">"არჩეულია <xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> წაიშალა"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"სამსახური <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (2126866321272822564) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="2126866321272822564">"თქვენ იმყოფებით აპის ფიქსაციის რეჟიმში. გამოსასვლელად, დააჭირეთ და დააყოვნეთ ბოლო აპების ღილაკზე"</string>
     <string name="lock_to_app_toast_locked" msgid="4229650395479263497">"თქვენ იმყოფებით აპის ფიქსაციის რეჟიმში."</string>
     <string name="lock_to_app_title" msgid="5895142291937470019">"გსურთ „აპში ჩაკეტვის“ გამოყენება?"</string>
-    <!-- no translation found for lock_to_app_description (2800403592608529611) -->
-    <skip />
-    <!-- no translation found for lock_to_app_negative (2259143719362732728) -->
-    <skip />
+    <string name="lock_to_app_description" msgid="2800403592608529611">"„აპში ჩაკეტვა“ კეტავს ეკრანს ერთ აპში.\n\nგასასვლელად დააჭირეთ და არ აუშვათ ღილაკს „ბოლო აპები“."</string>
+    <string name="lock_to_app_negative" msgid="2259143719362732728">"არა, გმადლობთ"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"დაწყება"</string>
-    <!-- no translation found for lock_to_app_start (3074665051586318340) -->
-    <skip />
-    <!-- no translation found for lock_to_app_exit (8967089657201849300) -->
-    <skip />
-    <!-- no translation found for lock_to_app_use_screen_lock (1434584309048590886) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_pin (7908385370846820001) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_pattern (7763071104790758405) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_password (795224196583495868) -->
-    <skip />
+    <string name="lock_to_app_start" msgid="3074665051586318340">"აპზე დაფიქსირებული"</string>
+    <string name="lock_to_app_exit" msgid="8967089657201849300">"აპზე დაფიქსირებული აღარ არის"</string>
+    <string name="lock_to_app_use_screen_lock" msgid="1434584309048590886">"გასვლამდე %1$s-ის მოთხოვნა"</string>
+    <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN-კოდი"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"განბლოკვის ნიმუში"</string>
+    <string name="lock_to_app_unlock_password" msgid="795224196583495868">"პაროლი"</string>
 </resources>

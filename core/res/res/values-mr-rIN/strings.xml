@@ -1006,16 +1006,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"आपल्या फोनवर संचयित केलेला ब्राउझरचा इतिहास किंवा बुकमार्क सुधारित करण्यासाठी अॅप ला अनुमती देते. हे ब्राउझर डेटा मिटविण्यासाठी किंवा सुधारित करण्यासाठी अॅप ला अनुमती देते. टीप: ही परवानगी तृतीय पक्ष ब्राउझरद्वारे किंवा वेब ब्राउझिंग क्षमतांसह अन्य अनुप्रयोगांद्वारे अंमलबजावणी करण्याची टीप देऊ शकते."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"अलार्म सेट करा"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"स्थापित केलेल्या अलार्म घड्याळ अॅपमध्ये अलार्म सेट करण्यासाठी अॅप ला अनुमती देते. काही अलार्म घड्याळ अॅप्स हे वैशिष्ट्य लागू करू शकत नाहीत."</string>
-    <!-- no translation found for permlab_writeVoicemail (7309899891683938100) -->
-    <skip />
-    <!-- no translation found for permdesc_writeVoicemail (6592572839715924830) -->
-    <skip />
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"व्हॉइसमेल लिहा"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"आपल्या व्हॉइसमेल इनबॉक्समधील संदेश सुधारित करण्यासाठी आणि ते काढण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"व्हॉइसमेल जोडा"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"आपल्या व्हॉइसमेल इनबॉक्समध्ये संदेश जोडण्यासाठी अॅप ला अनुमती देते."</string>
-    <!-- no translation found for permlab_readVoicemail (8415201752589140137) -->
-    <skip />
-    <!-- no translation found for permdesc_readVoicemail (8926534735321616550) -->
-    <skip />
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"व्हॉइसमेल वाचा"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"आपले व्‍हॉइसमेल वाचण्‍याची अ‍ॅपला अनुमती देते."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"ब्राउझर भौगोलिक स्थान परवानग्या सुधारित करा"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"ब्राउझरच्या भौगोलिक स्थान परवानग्या सुधारित करण्यासाठी अॅप ला अनुमती देते. दुर्भावनापूर्ण अॅप्स यादृच्छिक वेबसाइटवर स्थान माहिती पाठविण्यास अनुमती देण्यासाठी याचा वापर करू शकतात."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"पॅकेज सत्‍यापित करा"</string>

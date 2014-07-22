@@ -1006,16 +1006,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Ermöglicht der App, den Browserverlauf und die Lesezeichen auf Ihrem Telefon zu ändern. Damit kann die App Browserdaten löschen und ändern. Hinweis: Diese Berechtigung kann nicht von Browsern von Drittanbietern oder anderen Apps mit Internetfunktionen erzwungen werden."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"Wecker stellen"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Ermöglicht der App, einen Alarm in einer installierten Wecker-App einzurichten. Einige Wecker-Apps implementieren diese Funktion möglicherweise nicht."</string>
-    <!-- no translation found for permlab_writeVoicemail (7309899891683938100) -->
-    <skip />
-    <!-- no translation found for permdesc_writeVoicemail (6592572839715924830) -->
-    <skip />
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"Mailboxnachrichten ändern und entfernen"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"Ermöglicht dieser App, Nachrichten im Posteingang Ihrer Mailbox zu ändern und zu entfernen"</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"Mailbox-Nachrichten hinzufügen"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Ermöglicht der App, Nachrichten zu Ihrem Mailbox-Posteingang hinzuzufügen"</string>
-    <!-- no translation found for permlab_readVoicemail (8415201752589140137) -->
-    <skip />
-    <!-- no translation found for permdesc_readVoicemail (8926534735321616550) -->
-    <skip />
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"Mailboxnachrichten abrufen"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"Ermöglicht der App das Abrufen Ihrer Mailboxnachrichten"</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"Geolokalisierungsberechtigungen des Browsers ändern"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Ermöglicht der App, die Geolokalisierungsberechtigungen des Browsers zu ändern. Schädliche Apps können so Standortinformationen an beliebige Websites senden."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"Pakete überprüfen"</string>

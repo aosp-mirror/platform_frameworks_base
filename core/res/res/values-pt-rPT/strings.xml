@@ -1006,16 +1006,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Permite que a aplicação modifique o histórico do Navegador ou marcadores guardados no telemóvel. Isto pode permitir que a aplicação apague ou modifique dados do Navegador. Nota: esta autorização pode não ser aplicada por navegadores de terceiros ou outras aplicações com capacidades de navegação na Web."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"definir um alarme"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Permite que a aplicação defina um alarme numa aplicação de despertador instalada. Algumas aplicações de despertador podem não integrar esta funcionalidade."</string>
-    <!-- no translation found for permlab_writeVoicemail (7309899891683938100) -->
-    <skip />
-    <!-- no translation found for permdesc_writeVoicemail (6592572839715924830) -->
-    <skip />
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"escrever mensagens de correio de voz"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"Permite que a aplicação modifique e remova mensagens da caixa de entrada de correio de voz."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"adicionar correio de voz"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Permite que a aplicação adicione mensagens à sua caixa de entrada de correio de voz."</string>
-    <!-- no translation found for permlab_readVoicemail (8415201752589140137) -->
-    <skip />
-    <!-- no translation found for permdesc_readVoicemail (8926534735321616550) -->
-    <skip />
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"ler correio de voz"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"Permite que a aplicação leia as mensagens de correio de voz."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"modificar permissões de geolocalização do Navegador"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Permite que a aplicação modifique as permissões de geolocalização do navegador. As aplicações maliciosas podem usar isto para permitir o envio de informações de localização para Web sites arbitrárias."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"verificar pacotes"</string>

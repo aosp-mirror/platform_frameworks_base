@@ -1006,16 +1006,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Leyfir forriti að breyta vafraferlinum eða bókamerkjum sem vistuð eru í símanum. Þetta getur gert forritinu kleift að eyða eða breyta vafragögnum. Athugaðu: Ekki er víst að þessi heimild sé virt í vöfrum frá þriðja aðila eða öðrum forritum með vafraeiginleika."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"stilla vekjara"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Leyfir forriti að stilla vekjara á uppsettri vekjaraklukku. Verið getur að sum vekjaraklukkuforrit séu ekki búin þessum eiginleika."</string>
-    <!-- no translation found for permlab_writeVoicemail (7309899891683938100) -->
-    <skip />
-    <!-- no translation found for permdesc_writeVoicemail (6592572839715924830) -->
-    <skip />
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"skrifa talhólfsskilaboð"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"Leyfir forritinu að breyta og fjarlægja skilaboð úr talhólfinu."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"bæta við talhólfi"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Leyfir forriti að bæta skilaboðum við talhólfið þitt."</string>
-    <!-- no translation found for permlab_readVoicemail (8415201752589140137) -->
-    <skip />
-    <!-- no translation found for permdesc_readVoicemail (8926534735321616550) -->
-    <skip />
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"lesa talhólfsskilaboð"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"Leyfir forritinu að lesa talhólfsskilaboðin þín."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"breyta staðsetningarheimildum vafrans"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Leyfir forriti að breyta heimildum vafrans fyrir landfræðilega staðsetningu. Spilliforrit geta notað þetta til að leyfa sendingu staðsetningarupplýsinga á vafasöm vefsvæði."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"staðfesta pakka"</string>

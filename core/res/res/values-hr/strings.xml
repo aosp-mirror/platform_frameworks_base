@@ -1006,16 +1006,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Aplikaciji omogućuje izmjenu povijesti i oznaka Preglednika pohranjenih na telefonu. To aplikaciji može omogućiti brisanje ili izmjenu podataka Preglednika. Napomena: tu dozvolu ne mogu primijeniti preglednici treće strane ili druge aplikacije s mogućnostima pregledavanja weba."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"postavljanje alarma"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Omogućuje aplikaciji postavljanje alarma na instaliranoj aplikaciji budilici. Neke aplikacije budilice možda neće primijeniti tu značajku."</string>
-    <!-- no translation found for permlab_writeVoicemail (7309899891683938100) -->
-    <skip />
-    <!-- no translation found for permdesc_writeVoicemail (6592572839715924830) -->
-    <skip />
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"pisanje govorne pošte"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"Omogućuje aplikaciji izmjenjivanje i uklanjanje poruka iz dolazne govorne pošte."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"dodaj govornu poštu"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Omogućuje aplikaciji da doda poruke u vašu govornu poštu."</string>
-    <!-- no translation found for permlab_readVoicemail (8415201752589140137) -->
-    <skip />
-    <!-- no translation found for permdesc_readVoicemail (8926534735321616550) -->
-    <skip />
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"čitanje govorne pošte"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"Omogućuje aplikaciji čitanje vaše govorne pošte."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"izmjena dozvola za geolociranje u pregledniku"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Omogućuje aplikaciji promjenu geolokacijskih dozvola preglednika. Zlonamjerne aplikacije mogu to upotrijebiti da bi dopustile slanje podataka o lokaciji nasumičnim web-lokacijama."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"provjeri pakete"</string>
@@ -1390,10 +1386,8 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Omogućuje aplikaciji povezivanje s uslugom pouzdanog predstavnika."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Interakcija s ažuriranjem i sustavom za oporavak"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Omogućuje aplikaciji interakciju sa sustavom za oporavak i ažuriranjima sustava."</string>
-    <!-- no translation found for permlab_createMediaProjection (4941338725487978112) -->
-    <skip />
-    <!-- no translation found for permdesc_createMediaProjection (1284530992706219702) -->
-    <skip />
+    <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Stvaranje sesija za projiciranje medija"</string>
+    <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"Omogućuje aplikaciji stvaranje sesija za projiciranje medija. Te sesije mogu omogućiti aplikaciji snimanje zaslona i audiosadržaja. Ne bi trebalo biti potrebno za uobičajene aplikacije."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Dodirnite dvaput za upravljanje zumiranjem"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Widget nije moguće dodati."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Idi"</string>
@@ -1518,20 +1512,14 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Uredi"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Upozorenje o upotrebi podataka"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"Dod. za prikaz upotrebe i post."</string>
-    <!-- no translation found for data_usage_3g_limit_title (4462365924791862301) -->
-    <skip />
-    <!-- no translation found for data_usage_4g_limit_title (7476424187522765328) -->
-    <skip />
-    <!-- no translation found for data_usage_mobile_limit_title (3393439305227911006) -->
-    <skip />
-    <!-- no translation found for data_usage_wifi_limit_title (3461968509557554571) -->
-    <skip />
-    <!-- no translation found for data_usage_limit_body (6131350187562939365) -->
-    <skip />
+    <string name="data_usage_3g_limit_title" msgid="4462365924791862301">"2G-3G podaci isključeni"</string>
+    <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"4G podaci isključeni"</string>
+    <string name="data_usage_mobile_limit_title" msgid="3393439305227911006">"Mobilni podaci isključeni"</string>
+    <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"Wi-Fi podaci isključeni"</string>
+    <string name="data_usage_limit_body" msgid="6131350187562939365">"Ograničenje dosegnuto"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Prekoračeno ograničenje 2G-3G"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Prekoračeno je ograničenje 4G podataka"</string>
-    <!-- no translation found for data_usage_mobile_limit_snoozed_title (4941346653729943789) -->
-    <skip />
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Limit mobilnih podataka premašen"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Prekorač. Wi-Fi ogranič. pod."</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"Veličina <xliff:g id="SIZE">%s</xliff:g> prelazi navedeno ograničenje."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Pozadinski podaci ograničeni"</string>

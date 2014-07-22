@@ -1390,10 +1390,8 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Antaa sovelluksen sitoutua luotettavaan tahoon."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Vuorovaikutus päivitys- ja palautusjärjestelmän kanssa"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Sallii sovelluksen vuorovaikutuksen palautusjärjestelmän ja järjestelmäpäivitysten kanssa."</string>
-    <!-- no translation found for permlab_createMediaProjection (4941338725487978112) -->
-    <skip />
-    <!-- no translation found for permdesc_createMediaProjection (1284530992706219702) -->
-    <skip />
+    <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Medialähetysistuntojen luominen"</string>
+    <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"Antaa sovelluksen luoda medialähetysistuntoja. Nämä istunnot antavat sovellusten tallentaa näyttö- ja äänisisältöä. Ei tavallisten sovellusten käyttöön."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Ohjaa zoomausta napauttamalla kahdesti"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Widgetin lisääminen epäonnistui."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Siirry"</string>
@@ -1518,20 +1516,14 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Muokkaa"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Tiedonsiirtovaroitus"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"Näytä käyttö ja aset. koskettam."</string>
-    <!-- no translation found for data_usage_3g_limit_title (4462365924791862301) -->
-    <skip />
-    <!-- no translation found for data_usage_4g_limit_title (7476424187522765328) -->
-    <skip />
-    <!-- no translation found for data_usage_mobile_limit_title (3393439305227911006) -->
-    <skip />
-    <!-- no translation found for data_usage_wifi_limit_title (3461968509557554571) -->
-    <skip />
-    <!-- no translation found for data_usage_limit_body (6131350187562939365) -->
-    <skip />
+    <string name="data_usage_3g_limit_title" msgid="4462365924791862301">"2G–3G-tiedonsiirto ei käytössä"</string>
+    <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"4G-tiedonsiirto ei käytössä"</string>
+    <string name="data_usage_mobile_limit_title" msgid="3393439305227911006">"Mobiilitiedonsiirto ei käytössä"</string>
+    <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"Wi-Fi-tiedonsiirto ei käytössä"</string>
+    <string name="data_usage_limit_body" msgid="6131350187562939365">"Raja saavutettu"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G-tiedonsiirtoraja ylitetty"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G-tiedonsiirtoraja ylitetty"</string>
-    <!-- no translation found for data_usage_mobile_limit_snoozed_title (4941346653729943789) -->
-    <skip />
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Mobiilitiedonsiirtoraja ylitetty"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Wi-Fi-tiedonsiirtoraja ylitetty"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> yli asetetun rajan"</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Rajoitettu taustatietojen käyttö"</string>

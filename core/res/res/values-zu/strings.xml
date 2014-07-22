@@ -1006,16 +1006,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Ivumela uhlelo lokusebenza ukushintsha umlando wamabhukhimakhi noma wesiphequluli alondolozwe efonini yakho. Lokhu kungavumela uhlelo lokusebenza ukususa noma ukushintsha idatha yesiphequluli. Qaphela: le mvume kungenzeka ingaphoqelelwa iziphequluli ezivela eceleni noma ezinye izinhlelo zokusebenza ezinamandla okuphequlula iwebhu."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"setha i-alamu"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Ivumela uhlelo lokusebenza ukuthi isethe i-alamu ensizeni efkiwe ye-alamu. Ezinye izinhlelo zokusebenza ze-alamu kungenzeka zingakusebenzisi lokho."</string>
-    <!-- no translation found for permlab_writeVoicemail (7309899891683938100) -->
-    <skip />
-    <!-- no translation found for permdesc_writeVoicemail (6592572839715924830) -->
-    <skip />
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"bhala ivoyisimeyili"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"Ivumela uhlelo lokusebenza ukuthi liguqule liphinde lisuse imilayezo esuka kubhokisi lakho lokungenayo lwe-voyisimeyili."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"engeza imeyili yezwi"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Ivumela uhlelo lokusebenza ukwengeza imiyalezo kwibhokisi lakho lemeyili yezwi."</string>
-    <!-- no translation found for permlab_readVoicemail (8415201752589140137) -->
-    <skip />
-    <!-- no translation found for permdesc_readVoicemail (8926534735321616550) -->
-    <skip />
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"funda ivoyisimeyili"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"Ivumela uhlelo lokusebenza ukufunda amavoyisimeyili wakho."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"Gugula izimvume zendawo Yesiphequluli"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Ivumela uhlelo lokusebenza ukuthi iguqule izimvume eziphathelene nezindawo Zesiphequluli. Izuhlelo lokusebenza eziyingozi zingasebenzisa lokhu ukuvumela ukuvumela imininingwane yendawo kunoma imaphi amawebusayithi."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"qinisekisa amaphakheji"</string>

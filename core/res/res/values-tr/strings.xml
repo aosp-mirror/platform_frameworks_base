@@ -1390,10 +1390,8 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Bir uygulamanın, güven aracı hizmetine bağlanmasına izin verir."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Güncelleme ve kurtarma sistemiyle etkileşim kur"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Bir uygulamaya, kurtarma sistemi ve sistem güncellemeriyle etkileşim kurma izni verir."</string>
-    <!-- no translation found for permlab_createMediaProjection (4941338725487978112) -->
-    <skip />
-    <!-- no translation found for permdesc_createMediaProjection (1284530992706219702) -->
-    <skip />
+    <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Medya yansıtma oturumları oluştur"</string>
+    <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"Bir uygulamanın medya yansıtma oturumları oluşturmasına izin verir. Bu oturumlar, uygulamaların görüntü ve ses içeriklerini kaydetmesine olanak sağlar. Normal uygulamalar için hiçbir zaman gerekli olmaz."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Yakınlaştırma denetimi için iki kez dokunun"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Widget eklenemedi."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Git"</string>
@@ -1518,20 +1516,14 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Düzenle"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Veri kullanım uyarısı"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"Kullanımı ve ayarları görmek için dokunun."</string>
-    <!-- no translation found for data_usage_3g_limit_title (4462365924791862301) -->
-    <skip />
-    <!-- no translation found for data_usage_4g_limit_title (7476424187522765328) -->
-    <skip />
-    <!-- no translation found for data_usage_mobile_limit_title (3393439305227911006) -->
-    <skip />
-    <!-- no translation found for data_usage_wifi_limit_title (3461968509557554571) -->
-    <skip />
-    <!-- no translation found for data_usage_limit_body (6131350187562939365) -->
-    <skip />
+    <string name="data_usage_3g_limit_title" msgid="4462365924791862301">"2G-3G veri kullanımı kapalı"</string>
+    <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"4G veri kullanımı kapalı"</string>
+    <string name="data_usage_mobile_limit_title" msgid="3393439305227911006">"Hücresel veri kapalı"</string>
+    <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"Kablosuz veri kapalı"</string>
+    <string name="data_usage_limit_body" msgid="6131350187562939365">"Sınıra ulaşıldı"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G veri limiti aşıldı"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G veri limiti aşıldı"</string>
-    <!-- no translation found for data_usage_mobile_limit_snoozed_title (4941346653729943789) -->
-    <skip />
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Hücresel veri sınırı aşıldı"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Kablosuz veri limiti aşıldı"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g>, belirlenen limiti aşıyor."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Arka plan verileri kısıtlı"</string>

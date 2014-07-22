@@ -1006,16 +1006,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"നിങ്ങളുടെ ഫോണിൽ സംഭരിച്ചിരിക്കുന്ന ബ്രൗസറിന്റെ ചരിത്രമോ ബുക്ക്‌മാർക്കുകളോ പരിഷ്‌ക്കരിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഇത് ബ്രൗസർ ഡാറ്റ മായ്‌ക്കാനോ പരിഷ്‌ക്കരിക്കാനോ അപ്ലിക്കേഷനെ അനുവദിക്കാനിടയുണ്ട്. ശ്രദ്ധിക്കുക: ഈ അനുമതി മൂന്നാം കക്ഷി ബ്രൗസറുകളോ വെബ് ബ്രൗസിംഗ് കഴിവുകളുള്ള മറ്റ് അപ്ലിക്കേഷനുകളോ നടപ്പിലാക്കാനിടയില്ല."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"ഒരു അലാറം സജ്ജീകരിക്കുക"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"ഒരു ഇൻസ്റ്റാളുചെയ്‌ത അലാറം ക്ലോക്ക് അപ്ലിക്കേഷനിൽ അലാറം സജ്ജീകരിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ചില അലാറം ക്ലോക്ക് അപ്ലിക്കേഷനുകൾ ഈ സവിശേഷത നടപ്പിലാക്കാതിരുന്നേക്കാം."</string>
-    <!-- no translation found for permlab_writeVoicemail (7309899891683938100) -->
-    <skip />
-    <!-- no translation found for permdesc_writeVoicemail (6592572839715924830) -->
-    <skip />
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"വോയ്‌സ്‌മെയിലുകൾ റൈറ്റുചെയ്യുക"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"നിങ്ങളുടെ വോയ്‌സ്മെയിൽ ഇൻബോക്‌സിൽ നിന്നും സന്ദേശങ്ങൾ പരിഷ്ക്കരിക്കാനും നീക്കംചെയ്യാനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"വോയ്‌സ് മെയിൽ ചേർക്കുക"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"നിങ്ങളുടെ വോയ്‌സ്മെയിൽ ഇൻബോക്‌സിലേക്ക് സന്ദേശങ്ങൾ ചേർക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <!-- no translation found for permlab_readVoicemail (8415201752589140137) -->
-    <skip />
-    <!-- no translation found for permdesc_readVoicemail (8926534735321616550) -->
-    <skip />
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"വോയ്‌സ്‌മെയിൽ റീഡുചെയ്യുക"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"നിങ്ങളുടെ വോയ്‌സ്‌മെയിലുകൾ റീഡുചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"ബ്രൗസർ ജിയോലൊക്കേഷൻ അനുമതികൾ പരിഷ്‌ക്കരിക്കുക"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"ബ്രൗസറിന്റെ ജിയോലൊക്കേഷൻ അനുമതികളെ പരിഷ്‌ക്കരിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. അനിയന്ത്രിതമായ വെബ്‌സൈറ്റുകളിലേക്ക് ലൊക്കേഷൻ വിവരം അയയ്ക്കാൻ അനുവദിക്കുന്നതിന് ദോഷകരമായ അപ്ലിക്കേഷനുകൾ ഇത് ഉപയോഗിച്ചേക്കാം."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"പാക്കേജുകൾ പരിശോധിച്ചുറപ്പിക്കുക"</string>
