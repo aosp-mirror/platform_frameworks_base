@@ -71,7 +71,6 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.provider.Settings.SettingNotFoundException;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
 import android.util.ArraySet;
@@ -1598,24 +1597,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         updateMediaMetaData(metaDataChanged);
     }
 
-    private void removeAndRecycleImageViewDrawable(ImageView iv) {
-        Bitmap oldBitmap = null;
-        final Drawable drawable = iv.getDrawable();
-        if (drawable != null && drawable instanceof BitmapDrawable) {
-            oldBitmap = ((BitmapDrawable) drawable).getBitmap();
-        }
-        iv.animate().cancel();
-        iv.setImageDrawable(null);
-        if (oldBitmap != null) {
-            if (DEBUG_MEDIA) {
-                Log.v(TAG, "DEBUG_MEDIA: recycling bitmap " + oldBitmap + " from ImageView " + iv);
-            }
-            oldBitmap.recycle();
-        }
-    }
-
     /**
-     * Hide the album artwork that is fading out and release its memory.
+     * Hide the album artwork that is fading out and release its bitmap.
      */
     private Runnable mHideBackdropFront = new Runnable() {
         @Override
@@ -1624,7 +1607,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 Log.v(TAG, "DEBUG_MEDIA: removing fade layer");
             }
             mBackdropFront.setVisibility(View.INVISIBLE);
-            removeAndRecycleImageViewDrawable(mBackdropFront);
+            mBackdropFront.animate().cancel();
+            mBackdropFront.setImageDrawable(null);
         }
     };
 
