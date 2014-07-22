@@ -28460,13 +28460,13 @@ package android.telecomm {
     method public void answer(int);
     method public void conference();
     method public void disconnect();
-    method public android.telecomm.RemoteCallVideoProvider getCallVideoProvider();
     method public java.util.List<java.lang.String> getCannedTextResponses();
     method public java.util.List<android.telecomm.Call> getChildren();
     method public android.telecomm.Call.Details getDetails();
     method public android.telecomm.Call getParent();
     method public java.lang.String getRemainingPostDialSequence();
     method public int getState();
+    method public android.telecomm.InCallService.VideoCall getVideoCall();
     method public void hold();
     method public void phoneAccountClicked();
     method public void phoneAccountSelected(android.telecomm.PhoneAccountHandle);
@@ -28505,7 +28505,6 @@ package android.telecomm {
   public static abstract class Call.Listener {
     ctor public Call.Listener();
     method public void onCallDestroyed(android.telecomm.Call);
-    method public void onCallVideoProviderChanged(android.telecomm.Call, android.telecomm.RemoteCallVideoProvider);
     method public void onCannedTextResponsesLoaded(android.telecomm.Call, java.util.List<java.lang.String>);
     method public void onChildrenChanged(android.telecomm.Call, java.util.List<android.telecomm.Call>);
     method public void onDetailsChanged(android.telecomm.Call, android.telecomm.Call.Details);
@@ -28514,6 +28513,7 @@ package android.telecomm {
     method public void onPostDialWait(android.telecomm.Call, java.lang.String);
     method public void onStartActivity(android.telecomm.Call, android.app.PendingIntent);
     method public void onStateChanged(android.telecomm.Call, int);
+    method public void onVideoCallChanged(android.telecomm.Call, android.telecomm.InCallService.VideoCall);
   }
 
   public final class CallAudioState implements android.os.Parcelable {
@@ -28577,45 +28577,12 @@ package android.telecomm {
     enum_constant public static final android.telecomm.CallState RINGING;
   }
 
-  public abstract class CallVideoClient {
-    ctor public CallVideoClient();
-    method public abstract void onHandleCallSessionEvent(int);
-    method public abstract void onHandleCameraCapabilitiesChange(android.telecomm.CallCameraCapabilities);
-    method public abstract void onReceiveSessionModifyRequest(android.telecomm.VideoCallProfile);
-    method public abstract void onReceiveSessionModifyResponse(int, android.telecomm.VideoCallProfile, android.telecomm.VideoCallProfile);
-    method public abstract void onUpdateCallDataUsage(int);
-    method public abstract void onUpdatePeerDimensions(int, int);
-    field public static final int SESSION_EVENT_RX_PAUSE = 1; // 0x1
-    field public static final int SESSION_EVENT_RX_RESUME = 2; // 0x2
-    field public static final int SESSION_EVENT_TX_START = 3; // 0x3
-    field public static final int SESSION_EVENT_TX_STOP = 4; // 0x4
-    field public static final int SESSION_MODIFY_REQUEST_FAIL = 2; // 0x2
-    field public static final int SESSION_MODIFY_REQUEST_INVALID = 3; // 0x3
-    field public static final int SESSION_MODIFY_REQUEST_SUCCESS = 1; // 0x1
-  }
-
-  public abstract class CallVideoProvider {
-    ctor public CallVideoProvider();
-    method public abstract void onRequestCallDataUsage();
-    method public abstract void onRequestCameraCapabilities();
-    method public abstract void onSendSessionModifyRequest(android.telecomm.VideoCallProfile);
-    method public abstract void onSendSessionModifyResponse(android.telecomm.VideoCallProfile);
-    method public abstract void onSetCallVideoClient(android.telecomm.RemoteCallVideoClient);
-    method public abstract void onSetCamera(java.lang.String);
-    method public abstract void onSetDeviceOrientation(int);
-    method public abstract void onSetDisplaySurface(android.view.Surface);
-    method public abstract void onSetPauseImage(java.lang.String);
-    method public abstract void onSetPreviewSurface(android.view.Surface);
-    method public abstract void onSetZoom(float);
-  }
-
   public abstract class Connection {
     ctor public Connection();
     method public final void destroy();
     method public final boolean getAudioModeIsVoip();
     method public final android.telecomm.CallAudioState getCallAudioState();
     method public final int getCallCapabilities();
-    method public final android.telecomm.CallVideoProvider getCallVideoProvider();
     method public final java.lang.String getCallerDisplayName();
     method public final int getCallerDisplayNamePresentation();
     method public final java.util.List<android.telecomm.Connection> getChildConnections();
@@ -28624,6 +28591,7 @@ package android.telecomm {
     method public final android.telecomm.Connection getParentConnection();
     method public final int getState();
     method public final android.telecomm.StatusHints getStatusHints();
+    method public final android.telecomm.VideoCallProvider getVideoCallProvider();
     method public final int getVideoState();
     method public final boolean isConferenceConnection();
     method public final boolean isRequestingRingback();
@@ -28645,7 +28613,6 @@ package android.telecomm {
     method public final void setActive();
     method public final void setAudioModeIsVoip(boolean);
     method public final void setCallCapabilities(int);
-    method public final void setCallVideoProvider(android.telecomm.CallVideoProvider);
     method public final void setCallerDisplayName(java.lang.String, int);
     method public final void setDialing();
     method public final void setDisconnected(int, java.lang.String);
@@ -28657,6 +28624,7 @@ package android.telecomm {
     method public final void setRinging();
     method public final void setSignal(android.os.Bundle);
     method public final void setStatusHints(android.telecomm.StatusHints);
+    method public final void setVideoCallProvider(android.telecomm.VideoCallProvider);
     method public final void setVideoState(int);
     method public final void startActivityFromInCall(android.app.PendingIntent);
     method public static java.lang.String stateToString(int);
@@ -28740,6 +28708,38 @@ package android.telecomm {
     method public void onPhoneDestroyed(android.telecomm.Phone);
   }
 
+  public static abstract class InCallService.VideoCall {
+    ctor public InCallService.VideoCall();
+    method public abstract void requestCallDataUsage();
+    method public abstract void requestCameraCapabilities();
+    method public abstract void sendSessionModifyRequest(android.telecomm.VideoCallProfile);
+    method public abstract void sendSessionModifyResponse(android.telecomm.VideoCallProfile);
+    method public abstract void setCamera(java.lang.String);
+    method public abstract void setDeviceOrientation(int);
+    method public abstract void setDisplaySurface(android.view.Surface);
+    method public abstract void setPauseImage(java.lang.String);
+    method public abstract void setPreviewSurface(android.view.Surface);
+    method public abstract void setVideoCallListener(android.telecomm.InCallService.VideoCall.Listener);
+    method public abstract void setZoom(float);
+    field public static final int SESSION_EVENT_RX_PAUSE = 1; // 0x1
+    field public static final int SESSION_EVENT_RX_RESUME = 2; // 0x2
+    field public static final int SESSION_EVENT_TX_START = 3; // 0x3
+    field public static final int SESSION_EVENT_TX_STOP = 4; // 0x4
+    field public static final int SESSION_MODIFY_REQUEST_FAIL = 2; // 0x2
+    field public static final int SESSION_MODIFY_REQUEST_INVALID = 3; // 0x3
+    field public static final int SESSION_MODIFY_REQUEST_SUCCESS = 1; // 0x1
+  }
+
+  public static abstract class InCallService.VideoCall.Listener {
+    ctor public InCallService.VideoCall.Listener();
+    method public abstract void onCallDataUsageChanged(int);
+    method public abstract void onCallSessionEvent(int);
+    method public abstract void onCameraCapabilitiesChanged(android.telecomm.CallCameraCapabilities);
+    method public abstract void onPeerDimensionsChanged(int, int);
+    method public abstract void onSessionModifyRequestReceived(android.telecomm.VideoCallProfile);
+    method public abstract void onSessionModifyResponseReceived(int, android.telecomm.VideoCallProfile, android.telecomm.VideoCallProfile);
+  }
+
   public final class Phone {
     method public final void addListener(android.telecomm.Phone.Listener);
     method public final android.telecomm.CallAudioState getAudioState();
@@ -28782,29 +28782,6 @@ package android.telecomm {
     method public java.lang.String getId();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
-  }
-
-  public class RemoteCallVideoClient {
-    method public void handleCallSessionEvent(int);
-    method public void handleCameraCapabilitiesChange(android.telecomm.CallCameraCapabilities);
-    method public void receiveSessionModifyRequest(android.telecomm.VideoCallProfile);
-    method public void receiveSessionModifyResponse(int, android.telecomm.VideoCallProfile, android.telecomm.VideoCallProfile);
-    method public void updateCallDataUsage(int);
-    method public void updatePeerDimensions(int, int);
-  }
-
-  public class RemoteCallVideoProvider {
-    method public void requestCallDataUsage();
-    method public void requestCameraCapabilities();
-    method public void sendSessionModifyRequest(android.telecomm.VideoCallProfile);
-    method public void sendSessionModifyResponse(android.telecomm.VideoCallProfile);
-    method public void setCallVideoClient(android.telecomm.CallVideoClient);
-    method public void setCamera(java.lang.String);
-    method public void setDeviceOrientation(int);
-    method public void setDisplaySurface(android.view.Surface);
-    method public void setPauseImage(java.lang.String);
-    method public void setPreviewSurface(android.view.Surface);
-    method public void setZoom(float);
   }
 
   public final class RemoteConnection {
@@ -28893,6 +28870,20 @@ package android.telecomm {
     field public static final java.lang.String EXTRA_START_CALL_WITH_VIDEO_STATE = "android.intent.extra.START_CALL_WITH_VIDEO_STATE";
   }
 
+  public class VideoCallImpl extends android.telecomm.InCallService.VideoCall {
+    method public void requestCallDataUsage();
+    method public void requestCameraCapabilities();
+    method public void sendSessionModifyRequest(android.telecomm.VideoCallProfile);
+    method public void sendSessionModifyResponse(android.telecomm.VideoCallProfile);
+    method public void setCamera(java.lang.String);
+    method public void setDeviceOrientation(int);
+    method public void setDisplaySurface(android.view.Surface);
+    method public void setPauseImage(java.lang.String);
+    method public void setPreviewSurface(android.view.Surface);
+    method public void setVideoCallListener(android.telecomm.InCallService.VideoCall.Listener);
+    method public void setZoom(float);
+  }
+
   public class VideoCallProfile implements android.os.Parcelable {
     ctor public VideoCallProfile(int);
     ctor public VideoCallProfile(int, int);
@@ -28910,6 +28901,26 @@ package android.telecomm {
     field public static final int VIDEO_STATE_PAUSED = 4; // 0x4
     field public static final int VIDEO_STATE_RX_ENABLED = 2; // 0x2
     field public static final int VIDEO_STATE_TX_ENABLED = 1; // 0x1
+  }
+
+  public abstract class VideoCallProvider {
+    ctor public VideoCallProvider();
+    method public void changeCallDataUsage(int);
+    method public void changeCameraCapabilities(android.telecomm.CallCameraCapabilities);
+    method public void changePeerDimensions(int, int);
+    method public void handleCallSessionEvent(int);
+    method public abstract void onRequestCallDataUsage();
+    method public abstract void onRequestCameraCapabilities();
+    method public abstract void onSendSessionModifyRequest(android.telecomm.VideoCallProfile);
+    method public abstract void onSendSessionModifyResponse(android.telecomm.VideoCallProfile);
+    method public abstract void onSetCamera(java.lang.String);
+    method public abstract void onSetDeviceOrientation(int);
+    method public abstract void onSetDisplaySurface(android.view.Surface);
+    method public abstract void onSetPauseImage(java.lang.String);
+    method public abstract void onSetPreviewSurface(android.view.Surface);
+    method public abstract void onSetZoom(float);
+    method public void receiveSessionModifyRequest(android.telecomm.VideoCallProfile);
+    method public void receiveSessionModifyResponse(int, android.telecomm.VideoCallProfile, android.telecomm.VideoCallProfile);
   }
 
 }

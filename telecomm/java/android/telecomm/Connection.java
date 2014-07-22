@@ -19,10 +19,8 @@ package android.telecomm;
 import android.app.PendingIntent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.telecomm.CallVideoProvider;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -46,7 +44,7 @@ public abstract class Connection {
         public void onDestroyed(Connection c) {}
         public void onCallCapabilitiesChanged(Connection c, int callCapabilities) {}
         public void onParentConnectionChanged(Connection c, Connection parent) {}
-        public void onCallVideoProviderChanged(Connection c, CallVideoProvider callVideoProvider) {}
+        public void onVideoCallProviderChanged(Connection c, VideoCallProvider videoCallProvider) {}
         public void onAudioModeIsVoipChanged(Connection c, boolean isVoip) {}
         public void onStatusHintsChanged(Connection c, StatusHints statusHints) {}
         public void onStartActivityFromInCall(Connection c, PendingIntent intent) {}
@@ -75,7 +73,7 @@ public abstract class Connection {
     private boolean mRequestingRingback = false;
     private int mCallCapabilities;
     private Connection mParentConnection;
-    private CallVideoProvider mCallVideoProvider;
+    private VideoCallProvider mVideoCallProvider;
     private boolean mAudioModeIsVoip;
     private StatusHints mStatusHints;
     private int mVideoState;
@@ -349,18 +347,18 @@ public abstract class Connection {
     }
 
     /**
-     * Sets the call video provider.
-     * @param callVideoProvider The call video provider.
+     * Sets the video call provider.
+     * @param videoCallProvider The video call provider.
      */
-    public final void setCallVideoProvider(CallVideoProvider callVideoProvider) {
-        mCallVideoProvider = callVideoProvider;
+    public final void setVideoCallProvider(VideoCallProvider videoCallProvider) {
+        mVideoCallProvider = videoCallProvider;
         for (Listener l : mListeners) {
-            l.onCallVideoProviderChanged(this, callVideoProvider);
+            l.onVideoCallProviderChanged(this, videoCallProvider);
         }
     }
 
-    public final CallVideoProvider getCallVideoProvider() {
-        return mCallVideoProvider;
+    public final VideoCallProvider getVideoCallProvider() {
+        return mVideoCallProvider;
     }
 
     /**
