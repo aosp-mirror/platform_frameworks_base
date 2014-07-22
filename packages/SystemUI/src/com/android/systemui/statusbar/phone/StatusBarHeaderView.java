@@ -363,6 +363,11 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         }
     }
 
+    @Override
+    public void onPowerSaveChanged() {
+        // could not care less
+    }
+
     private void updateClickTargets() {
         setClickable(!mKeyguardShowing || mExpanded);
         mDateTime.setClickable(mExpanded);
