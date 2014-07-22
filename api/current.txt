@@ -380,6 +380,8 @@ package android {
     field public static final int centerY = 16843171; // 0x10101a3
     field public static final int checkBoxPreferenceStyle = 16842895; // 0x101008f
     field public static final int checkMark = 16843016; // 0x1010108
+    field public static final int checkMarkTint = 16843949; // 0x10104ad
+    field public static final int checkMarkTintMode = 16843950; // 0x10104ae
     field public static final int checkable = 16843237; // 0x10101e5
     field public static final int checkableBehavior = 16843232; // 0x10101e0
     field public static final int checkboxStyle = 16842860; // 0x101006c
@@ -37638,9 +37640,13 @@ package android.widget {
     ctor public CheckedTextView(android.content.Context, android.util.AttributeSet, int);
     ctor public CheckedTextView(android.content.Context, android.util.AttributeSet, int, int);
     method public android.graphics.drawable.Drawable getCheckMarkDrawable();
+    method public android.content.res.ColorStateList getCheckMarkTint();
+    method public android.graphics.PorterDuff.Mode getCheckMarkTintMode();
     method public boolean isChecked();
     method public void setCheckMarkDrawable(int);
     method public void setCheckMarkDrawable(android.graphics.drawable.Drawable);
+    method public void setCheckMarkTint(android.content.res.ColorStateList);
+    method public void setCheckMarkTintMode(android.graphics.PorterDuff.Mode);
     method public void setChecked(boolean);
     method public void toggle();
   }

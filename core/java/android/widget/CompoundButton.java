@@ -87,10 +87,11 @@ public abstract class CompoundButton extends Button implements Checkable {
             setButtonDrawable(d);
         }
 
+        mButtonTintMode = Drawable.parseTintMode(a.getInt(
+                R.styleable.CompoundButton_buttonTintMode, -1), mButtonTintMode);
+
         if (a.hasValue(R.styleable.CompoundButton_buttonTint)) {
             mButtonTint = a.getColorStateList(R.styleable.CompoundButton_buttonTint);
-            mButtonTintMode = Drawable.parseTintMode(a.getInt(
-                    R.styleable.CompoundButton_buttonTintMode, -1), mButtonTintMode);
             mHasButtonTint = true;
 
             applyButtonTint();
@@ -238,52 +239,31 @@ public abstract class CompoundButton extends Button implements Checkable {
     }
 
     /**
-     * Applies a tint to the button drawable.
-     * <p>
-     * Subsequent calls to {@link #setButtonDrawable(Drawable)} will
-     * automatically mutate the drawable and apply the specified tint and tint
-     * mode using
-     * {@link Drawable#setTint(ColorStateList, android.graphics.PorterDuff.Mode)}.
-     *
-     * @param tint the tint to apply, may be {@code null} to clear tint
-     * @param tintMode the blending mode used to apply the tint, may be
-     *                 {@code null} to clear tint
-     *
-     * @attr ref android.R.styleable#CompoundButton_buttonTint
-     * @attr ref android.R.styleable#CompoundButton_buttonTintMode
-     * @see Drawable#setTint(ColorStateList, android.graphics.PorterDuff.Mode)
-     */
-    private void setButtonTint(@Nullable ColorStateList tint,
-            @Nullable PorterDuff.Mode tintMode) {
-        mButtonTint = tint;
-        mButtonTintMode = tintMode;
-        mHasButtonTint = true;
-
-        applyButtonTint();
-    }
-
-    /**
      * Applies a tint to the button drawable. Does not modify the current tint
      * mode, which is {@link PorterDuff.Mode#SRC_ATOP} by default.
      * <p>
      * Subsequent calls to {@link #setButtonDrawable(Drawable)} will
      * automatically mutate the drawable and apply the specified tint and tint
      * mode using
-     * {@link Drawable#setTint(ColorStateList, android.graphics.PorterDuff.Mode)}.
+     * {@link Drawable#setTint(ColorStateList, PorterDuff.Mode)}.
      *
      * @param tint the tint to apply, may be {@code null} to clear tint
      *
      * @attr ref android.R.styleable#CompoundButton_buttonTint
-     * @see #setButtonTint(ColorStateList, android.graphics.PorterDuff.Mode)
+     * @see #setButtonTint(ColorStateList)
+     * @see Drawable#setTint(ColorStateList, PorterDuff.Mode)
      */
     public void setButtonTint(@Nullable ColorStateList tint) {
-        setButtonTint(tint, mButtonTintMode);
+        mButtonTint = tint;
+        mHasButtonTint = true;
+
+        applyButtonTint();
     }
 
     /**
      * @return the tint applied to the button drawable
      * @attr ref android.R.styleable#CompoundButton_buttonTint
-     * @see #setButtonTint(ColorStateList, PorterDuff.Mode)
+     * @see #setButtonTint(ColorStateList)
      */
     @Nullable
     public ColorStateList getButtonTint() {
@@ -298,16 +278,19 @@ public abstract class CompoundButton extends Button implements Checkable {
      * @param tintMode the blending mode used to apply the tint, may be
      *                 {@code null} to clear tint
      * @attr ref android.R.styleable#CompoundButton_buttonTintMode
-     * @see #setButtonTint(ColorStateList)
+     * @see #getButtonTintMode()
+     * @see Drawable#setTint(ColorStateList, PorterDuff.Mode)
      */
     public void setButtonTintMode(@Nullable PorterDuff.Mode tintMode) {
-        setButtonTint(mButtonTint, tintMode);
+        mButtonTintMode = tintMode;
+
+        applyButtonTint();
     }
 
     /**
      * @return the blending mode used to apply the tint to the button drawable
      * @attr ref android.R.styleable#CompoundButton_buttonTintMode
-     * @see #setButtonTint(ColorStateList, PorterDuff.Mode)
+     * @see #setButtonTintMode(PorterDuff.Mode)
      */
     @Nullable
     public PorterDuff.Mode getButtonTintMode() {

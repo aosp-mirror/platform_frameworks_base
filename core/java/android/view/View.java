@@ -15546,7 +15546,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * This function is called whenever the drawable hotspot changes.
+     * This function is called whenever the view hotspot changes and needs to
+     * be propagated to drawables managed by the view.
      * <p>
      * Be sure to call through to the superclass when overriding this function.
      *
@@ -15888,30 +15889,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Applies a tint to the background drawable.
-     * <p>
-     * Subsequent calls to {@link #setBackground(Drawable)} will automatically
-     * mutate the drawable and apply the specified tint and tint mode using
-     * {@link Drawable#setTint(ColorStateList, PorterDuff.Mode)}.
-     *
-     * @param tint the tint to apply, may be {@code null} to clear tint
-     * @param tintMode the blending mode used to apply the tint, may be
-     *                 {@code null} to clear tint
-     *
-     * @attr ref android.R.styleable#View_backgroundTint
-     * @attr ref android.R.styleable#View_backgroundTintMode
-     * @see Drawable#setTint(ColorStateList, PorterDuff.Mode)
-     */
-    private void setBackgroundTint(@Nullable ColorStateList tint,
-            @Nullable PorterDuff.Mode tintMode) {
-        mBackgroundTint = tint;
-        mBackgroundTintMode = tintMode;
-        mHasBackgroundTint = true;
-
-        applyBackgroundTint();
-    }
-
-    /**
      * Applies a tint to the background drawable. Does not modify the current tint
      * mode, which is {@link PorterDuff.Mode#SRC_ATOP} by default.
      * <p>
@@ -15922,16 +15899,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param tint the tint to apply, may be {@code null} to clear tint
      *
      * @attr ref android.R.styleable#View_backgroundTint
-     * @see #setBackgroundTint(ColorStateList, PorterDuff.Mode)
+     * @see #getBackgroundTint()
+     * @see Drawable#setTint(ColorStateList, PorterDuff.Mode)
      */
     public void setBackgroundTint(@Nullable ColorStateList tint) {
-        setBackgroundTint(tint, mBackgroundTintMode);
+        mBackgroundTint = tint;
+        mHasBackgroundTint = true;
+
+        applyBackgroundTint();
     }
 
     /**
      * @return the tint applied to the background drawable
      * @attr ref android.R.styleable#View_backgroundTint
-     * @see #setBackgroundTint(ColorStateList, PorterDuff.Mode)
+     * @see #setBackgroundTint(ColorStateList)
      */
     @Nullable
     public ColorStateList getBackgroundTint() {
@@ -15946,16 +15927,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param tintMode the blending mode used to apply the tint, may be
      *                 {@code null} to clear tint
      * @attr ref android.R.styleable#View_backgroundTintMode
-     * @see #setBackgroundTint(ColorStateList)
+     * @see #getBackgroundTintMode()
+     * @see Drawable#setTint(ColorStateList, PorterDuff.Mode)
      */
     public void setBackgroundTintMode(@Nullable PorterDuff.Mode tintMode) {
-        setBackgroundTint(mBackgroundTint, tintMode);
+        mBackgroundTintMode = tintMode;
+
+        applyBackgroundTint();
     }
 
     /**
      * @return the blending mode used to apply the tint to the background drawable
      * @attr ref android.R.styleable#View_backgroundTintMode
-     * @see #setBackgroundTint(ColorStateList, PorterDuff.Mode)
+     * @see #setBackgroundTintMode(PorterDuff.Mode)
      */
     @Nullable
     public PorterDuff.Mode getBackgroundTintMode() {
