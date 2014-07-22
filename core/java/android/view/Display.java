@@ -831,4 +831,13 @@ public final class Display {
                 return Integer.toString(state);
         }
     }
+
+    /**
+     * Returns true if display updates may be suspended while in the specified
+     * display power state.
+     * @hide
+     */
+    public static boolean isSuspendedState(int state) {
+        return state == STATE_OFF || state == STATE_DOZE_SUSPEND;
+    }
 }

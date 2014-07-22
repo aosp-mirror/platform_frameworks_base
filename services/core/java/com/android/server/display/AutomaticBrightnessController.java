@@ -26,7 +26,6 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.hardware.display.DisplayManagerInternal;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -199,9 +198,10 @@ class AutomaticBrightnessController {
         return mScreenAutoBrightness;
     }
 
-    public void updatePowerState(DisplayManagerInternal.DisplayPowerRequest request) {
-        if (setScreenAutoBrightnessAdjustment(request.screenAutoBrightnessAdjustment)
-                | setLightSensorEnabled(request.wantLightSensorEnabled())) {
+    public void configure(boolean enable, float adjustment) {
+        boolean changed = setLightSensorEnabled(enable);
+        changed |= setScreenAutoBrightnessAdjustment(adjustment);
+        if (changed) {
             updateAutoBrightness(false /*sendUpdate*/);
         }
     }

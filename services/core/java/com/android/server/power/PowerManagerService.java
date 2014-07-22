@@ -404,6 +404,12 @@ public final class PowerManagerService extends com.android.server.SystemService
     // Use NaN to disable.
     private float mTemporaryScreenAutoBrightnessAdjustmentSettingOverride = Float.NaN;
 
+    // The screen state to use while dozing.
+    private int mDozeScreenStateOverrideFromDreamManager = Display.STATE_UNKNOWN;
+
+    // The screen brightness to use while dozing.
+    private int mDozeScreenBrightnessOverrideFromDreamManager = PowerManager.BRIGHTNESS_DEFAULT;
+
     // Time when we last logged a warning about calling userActivity() without permission.
     private long mLastWarningAboutUserActivityPermission = Long.MIN_VALUE;
 
@@ -1370,11 +1376,12 @@ public final class PowerManagerService extends com.android.server.SystemService
                 if (mUserActivitySummary == 0
                         && mLastUserActivityTimeNoChangeLights >= mLastWakeTime) {
                     nextTimeout = mLastUserActivityTimeNoChangeLights + screenOffTimeout;
-                    if (now < nextTimeout
-                            && mDisplayPowerRequest.wantScreenOnNormal()) {
-                        mUserActivitySummary = mDisplayPowerRequest.screenState
-                                == DisplayPowerRequest.SCREEN_STATE_BRIGHT ?
-                                USER_ACTIVITY_SCREEN_BRIGHT : USER_ACTIVITY_SCREEN_DIM;
+                    if (now < nextTimeout) {
+                        if (mDisplayPowerRequest.policy == DisplayPowerRequest.POLICY_BRIGHT) {
+                            mUserActivitySummary = USER_ACTIVITY_SCREEN_BRIGHT;
+                        } else if (mDisplayPowerRequest.policy == DisplayPowerRequest.POLICY_DIM) {
+                            mUserActivitySummary = USER_ACTIVITY_SCREEN_DIM;
+                        }
                     }
                 }
                 if (mUserActivitySummary != 0) {
@@ -1631,7 +1638,7 @@ public final class PowerManagerService extends com.android.server.SystemService
         if (mWakefulness != WAKEFULNESS_DREAMING
                 || !mDreamsSupportedConfig
                 || !mDreamsEnabledSetting
-                || !mDisplayPowerRequest.wantScreenOnNormal()
+                || !mDisplayPowerRequest.isBrightOrDim()
                 || !mBootCompleted) {
             return false;
         }
@@ -1672,8 +1679,7 @@ public final class PowerManagerService extends com.android.server.SystemService
         if ((dirty & (DIRTY_WAKE_LOCKS | DIRTY_USER_ACTIVITY | DIRTY_WAKEFULNESS
                 | DIRTY_ACTUAL_DISPLAY_POWER_STATE_UPDATED | DIRTY_BOOT_COMPLETED
                 | DIRTY_SETTINGS | DIRTY_SCREEN_ON_BLOCKER_RELEASED)) != 0) {
-            final int newScreenState = getDesiredScreenPowerStateLocked();
-            mDisplayPowerRequest.screenState = newScreenState;
+            mDisplayPowerRequest.policy = getDesiredScreenPolicyLocked();
 
             int screenBrightness = mScreenBrightnessSettingDefault;
             float screenAutoBrightnessAdjustment = 0.0f;
@@ -1713,13 +1719,22 @@ public final class PowerManagerService extends com.android.server.SystemService
 
             mDisplayPowerRequest.lowPowerMode = mLowPowerModeEnabled;
 
+            if (mDisplayPowerRequest.policy == DisplayPowerRequest.POLICY_DOZE) {
+                mDisplayPowerRequest.dozeScreenState = mDozeScreenStateOverrideFromDreamManager;
+                mDisplayPowerRequest.dozeScreenBrightness =
+                        mDozeScreenBrightnessOverrideFromDreamManager;
+            } else {
+                mDisplayPowerRequest.dozeScreenState = Display.STATE_UNKNOWN;
+                mDisplayPowerRequest.dozeScreenBrightness = PowerManager.BRIGHTNESS_DEFAULT;
+            }
+
             mDisplayReady = mDisplayManagerInternal.requestPowerState(mDisplayPowerRequest,
                     mRequestWaitForNegativeProximity);
             mRequestWaitForNegativeProximity = false;
 
             if (DEBUG_SPEW) {
                 Slog.d(TAG, "updateScreenStateLocked: mDisplayReady=" + mDisplayReady
-                        + ", newScreenState=" + newScreenState
+                        + ", policy=" + mDisplayPowerRequest.policy
                         + ", mWakefulness=" + mWakefulness
                         + ", mWakeLockSummary=0x" + Integer.toHexString(mWakeLockSummary)
                         + ", mUserActivitySummary=0x" + Integer.toHexString(mUserActivitySummary)
@@ -1737,22 +1752,22 @@ public final class PowerManagerService extends com.android.server.SystemService
         return value >= -1.0f && value <= 1.0f;
     }
 
-    private int getDesiredScreenPowerStateLocked() {
+    private int getDesiredScreenPolicyLocked() {
         if (mWakefulness == WAKEFULNESS_ASLEEP) {
-            return DisplayPowerRequest.SCREEN_STATE_OFF;
+            return DisplayPowerRequest.POLICY_OFF;
         }
 
         if ((mWakeLockSummary & WAKE_LOCK_DOZE) != 0) {
-            return DisplayPowerRequest.SCREEN_STATE_DOZE;
+            return DisplayPowerRequest.POLICY_DOZE;
         }
 
         if ((mWakeLockSummary & WAKE_LOCK_SCREEN_BRIGHT) != 0
                 || (mUserActivitySummary & USER_ACTIVITY_SCREEN_BRIGHT) != 0
                 || !mBootCompleted) {
-            return DisplayPowerRequest.SCREEN_STATE_BRIGHT;
+            return DisplayPowerRequest.POLICY_BRIGHT;
         }
 
-        return DisplayPowerRequest.SCREEN_STATE_DIM;
+        return DisplayPowerRequest.POLICY_DIM;
     }
 
     private final DisplayManagerInternal.DisplayPowerCallbacks mDisplayPowerCallbacks =
@@ -1895,7 +1910,7 @@ public final class PowerManagerService extends com.android.server.SystemService
         if (!mDisplayReady) {
             return true;
         }
-        if (mDisplayPowerRequest.wantScreenOnNormal()) {
+        if (mDisplayPowerRequest.isBrightOrDim()) {
             // If we asked for the screen to be on but it is off due to the proximity
             // sensor then we may suspend but only if the configuration allows it.
             // On some hardware it may not be safe to suspend because the proximity
@@ -2103,6 +2118,19 @@ public final class PowerManagerService extends com.android.server.SystemService
         }
     }
 
+    private void setDozeOverrideFromDreamManagerInternal(
+            int screenState, int screenBrightness) {
+        synchronized (mLock) {
+            if (mDozeScreenStateOverrideFromDreamManager != screenState
+                    || mDozeScreenBrightnessOverrideFromDreamManager != screenBrightness) {
+                mDozeScreenStateOverrideFromDreamManager = screenState;
+                mDozeScreenBrightnessOverrideFromDreamManager = screenBrightness;
+                mDirty |= DIRTY_SETTINGS;
+                updatePowerStateLocked();
+            }
+        }
+    }
+
     private void powerHintInternal(int hintId, int data) {
         nativeSendPowerHint(hintId, data);
     }
@@ -2257,6 +2285,10 @@ public final class PowerManagerService extends com.android.server.SystemService
                     + mTemporaryScreenBrightnessSettingOverride);
             pw.println("  mTemporaryScreenAutoBrightnessAdjustmentSettingOverride="
                     + mTemporaryScreenAutoBrightnessAdjustmentSettingOverride);
+            pw.println("  mDozeScreenStateOverrideFromDreamManager="
+                    + mDozeScreenStateOverrideFromDreamManager);
+            pw.println("  mDozeScreenBrightnessOverrideFromDreamManager="
+                    + mDozeScreenBrightnessOverrideFromDreamManager);
             pw.println("  mScreenBrightnessSettingMinimum=" + mScreenBrightnessSettingMinimum);
             pw.println("  mScreenBrightnessSettingMaximum=" + mScreenBrightnessSettingMaximum);
             pw.println("  mScreenBrightnessSettingDefault=" + mScreenBrightnessSettingDefault);
@@ -3026,63 +3058,44 @@ public final class PowerManagerService extends com.android.server.SystemService
     }
 
     private final class LocalService extends PowerManagerInternal {
-        /**
-         * Used by the window manager to override the screen brightness based on the
-         * current foreground activity.
-         *
-         * This method must only be called by the window manager.
-         *
-         * @param brightness The overridden brightness, or -1 to disable the override.
-         */
         @Override
-        public void setScreenBrightnessOverrideFromWindowManager(int brightness) {
-            mContext.enforceCallingOrSelfPermission(
-                    android.Manifest.permission.DEVICE_POWER, null);
-
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                setScreenBrightnessOverrideFromWindowManagerInternal(brightness);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
+        public void setScreenBrightnessOverrideFromWindowManager(int screenBrightness) {
+            if (screenBrightness < PowerManager.BRIGHTNESS_DEFAULT
+                    || screenBrightness > PowerManager.BRIGHTNESS_ON) {
+                screenBrightness = PowerManager.BRIGHTNESS_DEFAULT;
             }
+            setScreenBrightnessOverrideFromWindowManagerInternal(screenBrightness);
         }
 
-        /**
-         * Used by the window manager to override the button brightness based on the
-         * current foreground activity.
-         *
-         * This method must only be called by the window manager.
-         *
-         * @param brightness The overridden brightness, or -1 to disable the override.
-         */
         @Override
-        public void setButtonBrightnessOverrideFromWindowManager(int brightness) {
+        public void setButtonBrightnessOverrideFromWindowManager(int screenBrightness) {
             // Do nothing.
             // Button lights are not currently supported in the new implementation.
-            mContext.enforceCallingOrSelfPermission(
-                    android.Manifest.permission.DEVICE_POWER, null);
         }
 
-        /**
-         * Used by the window manager to override the user activity timeout based on the
-         * current foreground activity.  It can only be used to make the timeout shorter
-         * than usual, not longer.
-         *
-         * This method must only be called by the window manager.
-         *
-         * @param timeoutMillis The overridden timeout, or -1 to disable the override.
-         */
+        @Override
+        public void setDozeOverrideFromDreamManager(int screenState, int screenBrightness) {
+            switch (screenState) {
+                case Display.STATE_UNKNOWN:
+                case Display.STATE_OFF:
+                case Display.STATE_DOZE:
+                case Display.STATE_DOZE_SUSPEND:
+                case Display.STATE_ON:
+                    break;
+                default:
+                    screenState = Display.STATE_UNKNOWN;
+                    break;
+            }
+            if (screenBrightness < PowerManager.BRIGHTNESS_DEFAULT
+                    || screenBrightness > PowerManager.BRIGHTNESS_ON) {
+                screenBrightness = PowerManager.BRIGHTNESS_DEFAULT;
+            }
+            setDozeOverrideFromDreamManagerInternal(screenState, screenBrightness);
+        }
+
         @Override
         public void setUserActivityTimeoutOverrideFromWindowManager(long timeoutMillis) {
-            mContext.enforceCallingOrSelfPermission(
-                    android.Manifest.permission.DEVICE_POWER, null);
-
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                setUserActivityTimeoutOverrideFromWindowManagerInternal(timeoutMillis);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
+            setUserActivityTimeoutOverrideFromWindowManagerInternal(timeoutMillis);
         }
 
         @Override
