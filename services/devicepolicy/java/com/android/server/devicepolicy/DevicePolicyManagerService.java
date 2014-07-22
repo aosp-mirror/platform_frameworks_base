@@ -4030,7 +4030,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public boolean getCrossProfileCallerIdDisabledForUser(int userId) {
-        enforceSystemProcess("getCrossProfileCallerIdDisabled can only be called by system");
+        // TODO: Should there be a check to make sure this relationship is within a profile group?
+        //enforceSystemProcess("getCrossProfileCallerIdDisabled can only be called by system");
         synchronized (this) {
             ActiveAdmin admin = getProfileOwnerAdmin(userId);
             return (admin != null) ? admin.disableCallerId : false;
