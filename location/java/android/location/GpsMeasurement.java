@@ -33,6 +33,7 @@ public class GpsMeasurement implements Parcelable {
     private double mTimeOffsetInNs;
     private short mState;
     private long mReceivedGpsTowInNs;
+    private long mReceivedGpsTowUncertaintyInNs;
     private double mCn0InDbHz;
     private double mPseudorangeRateInMetersPerSec;
     private double mPseudorangeRateUncertaintyInMetersPerSec;
@@ -171,6 +172,7 @@ public class GpsMeasurement implements Parcelable {
         mTimeOffsetInNs = measurement.mTimeOffsetInNs;
         mState = measurement.mState;
         mReceivedGpsTowInNs = measurement.mReceivedGpsTowInNs;
+        mReceivedGpsTowUncertaintyInNs = measurement.mReceivedGpsTowUncertaintyInNs;
         mCn0InDbHz = measurement.mCn0InDbHz;
         mPseudorangeRateInMetersPerSec = measurement.mPseudorangeRateInMetersPerSec;
         mPseudorangeRateUncertaintyInMetersPerSec =
@@ -315,6 +317,20 @@ public class GpsMeasurement implements Parcelable {
      */
     public void setReceivedGpsTowInNs(long value) {
         mReceivedGpsTowInNs = value;
+    }
+
+    /**
+     * Gets the received GPS time-of-week's uncertainty (1-Sigma) in nanoseconds.
+     */
+    public long getReceivedGpsTowUncertaintyInNs() {
+        return mReceivedGpsTowUncertaintyInNs;
+    }
+
+    /**
+     * Sets the received GPS time-of-week's uncertainty (1-Sigma) in nanoseconds.
+     */
+    public void setReceivedGpsTowUncertaintyInNs(long value) {
+        mReceivedGpsTowUncertaintyInNs = value;
     }
 
     /**
@@ -1129,6 +1145,7 @@ public class GpsMeasurement implements Parcelable {
             gpsMeasurement.mTimeOffsetInNs = parcel.readDouble();
             gpsMeasurement.mState = (short) parcel.readInt();
             gpsMeasurement.mReceivedGpsTowInNs = parcel.readLong();
+            gpsMeasurement.mReceivedGpsTowUncertaintyInNs = parcel.readLong();
             gpsMeasurement.mCn0InDbHz = parcel.readDouble();
             gpsMeasurement.mPseudorangeRateInMetersPerSec = parcel.readDouble();
             gpsMeasurement.mPseudorangeRateUncertaintyInMetersPerSec = parcel.readDouble();
@@ -1171,6 +1188,7 @@ public class GpsMeasurement implements Parcelable {
         parcel.writeDouble(mTimeOffsetInNs);
         parcel.writeInt(mState);
         parcel.writeLong(mReceivedGpsTowInNs);
+        parcel.writeLong(mReceivedGpsTowUncertaintyInNs);
         parcel.writeDouble(mCn0InDbHz);
         parcel.writeDouble(mPseudorangeRateInMetersPerSec);
         parcel.writeDouble(mPseudorangeRateUncertaintyInMetersPerSec);
@@ -1216,7 +1234,12 @@ public class GpsMeasurement implements Parcelable {
 
         builder.append(String.format(format, "State", getStateString()));
 
-        builder.append(String.format(format, "ReceivedGpsTowInNs", mReceivedGpsTowInNs));
+        builder.append(String.format(
+                formatWithUncertainty,
+                "ReceivedGpsTowInNs",
+                mReceivedGpsTowInNs,
+                "ReceivedGpsTowUncertaintyInNs",
+                mReceivedGpsTowUncertaintyInNs));
 
         builder.append(String.format(format, "Cn0InDbHz", mCn0InDbHz));
 
@@ -1321,6 +1344,7 @@ public class GpsMeasurement implements Parcelable {
         setTimeOffsetInNs(Long.MIN_VALUE);
         setState(STATE_UNKNOWN);
         setReceivedGpsTowInNs(Long.MIN_VALUE);
+        setReceivedGpsTowUncertaintyInNs(Long.MAX_VALUE);
         setCn0InDbHz(Double.MIN_VALUE);
         setPseudorangeRateInMetersPerSec(Double.MIN_VALUE);
         setPseudorangeRateUncertaintyInMetersPerSec(Double.MIN_VALUE);
