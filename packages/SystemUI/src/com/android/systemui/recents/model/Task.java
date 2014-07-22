@@ -77,6 +77,7 @@ public class Task {
     public TaskKey key;
     public TaskGrouping group;
     public int taskAffiliation;
+    public boolean isLaunchTarget;
     public Drawable applicationIcon;
     public Drawable activityIcon;
     public String activityLabel;

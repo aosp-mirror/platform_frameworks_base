@@ -23,6 +23,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
@@ -70,10 +71,13 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
 
     // Task launching
     RecentsConfiguration mConfig;
-    Rect mWindowRect;
-    Rect mTaskStackBounds;
+    Rect mWindowRect = new Rect();
+    Rect mTaskStackBounds = new Rect();
+    Rect mSystemInsets = new Rect();
     TaskViewTransform mTmpTransform = new TaskViewTransform();
     int mStatusBarHeight;
+    int mNavBarHeight;
+    int mNavBarWidth;
 
     // Variables to keep track of if we need to start recents after binding
     View mStatusBarView;
@@ -81,15 +85,23 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
     long mLastToggleTime;
 
     public AlternateRecentsComponent(Context context) {
+        Resources res = context.getResources();
         mContext = context;
         mSystemServicesProxy = new SystemServicesProxy(context);
         mHandler = new Handler();
         mConfig = RecentsConfiguration.reinitialize(context, mSystemServicesProxy);
         mWindowRect = mSystemServicesProxy.getWindowRect();
         mTaskStackBounds = new Rect();
-        mConfig.getTaskStackBounds(mWindowRect.width(), mWindowRect.height(), mTaskStackBounds);
-        mStatusBarHeight = mContext.getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.status_bar_height);
+        mStatusBarHeight = res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
+        mNavBarHeight = res.getDimensionPixelSize(com.android.internal.R.dimen.navigation_bar_height);
+        mNavBarWidth = res.getDimensionPixelSize(com.android.internal.R.dimen.navigation_bar_width);
+        mConfig.getTaskStackBounds(mWindowRect.width(), mWindowRect.height(), mStatusBarHeight,
+                mNavBarWidth, mTaskStackBounds);
+        if (mConfig.isLandscape && mConfig.transposeRecentsLayoutWithOrientation) {
+            mSystemInsets.set(0, mStatusBarHeight, mNavBarWidth, 0);
+        } else {
+            mSystemInsets.set(0, mStatusBarHeight, 0, mNavBarHeight);
+        }
     }
 
     public void onStart() {
@@ -150,7 +162,13 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
         mConfig = RecentsConfiguration.reinitialize(mContext, mSystemServicesProxy);
         mConfig.updateOnConfigurationChange();
         mWindowRect = mSystemServicesProxy.getWindowRect();
-        mConfig.getTaskStackBounds(mWindowRect.width(), mWindowRect.height(), mTaskStackBounds);
+        mConfig.getTaskStackBounds(mWindowRect.width(), mWindowRect.height(), mStatusBarHeight,
+                mNavBarWidth, mTaskStackBounds);
+        if (mConfig.isLandscape && mConfig.transposeRecentsLayoutWithOrientation) {
+            mSystemInsets.set(0, mStatusBarHeight, mNavBarWidth, 0);
+        } else {
+            mSystemInsets.set(0, mStatusBarHeight, 0, mNavBarHeight);
+        }
         sLastScreenshot = null;
     }
 
@@ -301,7 +319,9 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
         // Get the stack
         TaskStackView tsv = new TaskStackView(mContext, stack);
         TaskStackViewLayoutAlgorithm algo = tsv.getStackAlgorithm();
-        tsv.computeRects(mTaskStackBounds.width(), mTaskStackBounds.height() - mStatusBarHeight, 0, 0);
+        Rect taskStackBounds = new Rect(mTaskStackBounds);
+        taskStackBounds.bottom -= mSystemInsets.bottom;
+        tsv.computeRects(mWindowRect.width(), mWindowRect.height(), taskStackBounds);
         tsv.setStackScrollToInitialState();
 
         // Find the running task in the TaskStack
@@ -325,8 +345,6 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
 
         // Get the transform for the running task
         mTmpTransform = algo.getStackTransform(task, tsv.getStackScroll(), mTmpTransform);
-        mTmpTransform.rect.offset(mTaskStackBounds.left, mTaskStackBounds.top);
-        mTmpTransform.rect.offset(0, mStatusBarHeight);
         return new Rect(mTmpTransform.rect);
     }
 

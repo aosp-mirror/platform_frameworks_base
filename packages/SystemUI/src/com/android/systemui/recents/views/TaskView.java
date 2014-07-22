@@ -22,24 +22,23 @@ import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.ViewOutlineProvider;
-import android.view.ViewPropertyAnimator;
 import android.view.animation.AccelerateInterpolator;
 import android.widget.FrameLayout;
 import com.android.systemui.R;
+import com.android.systemui.recents.AlternateRecentsComponent;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.model.Task;
 
+// XXX: In debug mode, we should override invalidate() and check the layout type (do this in TaskStackView as well)
 
 /* A task view */
-public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.OnClickListener,
-        View.OnLongClickListener {
+public class TaskView extends FrameLayout implements Task.TaskCallbacks,
+        TaskFooterView.TaskFooterViewCallbacks, View.OnClickListener, View.OnLongClickListener {
     /** The TaskView callbacks */
     interface TaskViewCallbacks {
         public void onTaskViewAppIconClicked(TaskView tv);
@@ -51,10 +50,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
 
     RecentsConfiguration mConfig;
 
-    int mFooterHeight;
-    int mMaxFooterHeight;
-    ObjectAnimator mFooterAnimator;
-
     int mDim;
     int mMaxDim;
     AccelerateInterpolator mDimInterpolator = new AccelerateInterpolator();
@@ -62,14 +57,15 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
     Task mTask;
     boolean mTaskDataLoaded;
     boolean mIsFocused;
+    boolean mIsFullScreenView;
     boolean mIsStub;
     boolean mClipViewInStack;
-    int mClipFromBottom;
+    AnimateableViewBounds mViewBounds;
     Paint mLayerPaint = new Paint();
 
     TaskThumbnailView mThumbnailView;
     TaskBarView mBarView;
-    View mLockToAppButtonView;
+    TaskFooterView mFooterView;
     TaskViewCallbacks mCb;
 
     // Optimizations
@@ -80,18 +76,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
                     updateDimOverlayFromScale();
                 }
             };
-    Runnable mEnableThumbnailClip = new Runnable() {
-        @Override
-        public void run() {
-            mThumbnailView.updateTaskBarClip(mBarView);
-        }
-    };
-    Runnable mDisableThumbnailClip = new Runnable() {
-        @Override
-        public void run() {
-            mThumbnailView.disableClipTaskBarView();
-        }
-    };
 
 
     public TaskView(Context context) {
@@ -109,55 +93,12 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
     public TaskView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         mConfig = RecentsConfiguration.getInstance();
-        mMaxFooterHeight = mConfig.taskViewLockToAppButtonHeight;
-        setWillNotDraw(false);
-        setClipToOutline(true);
-        setDim(getDim());
-        setFooterHeight(getFooterHeight());
-        setOutlineProvider(new ViewOutlineProvider() {
-            @Override
-            public void getOutline(View view, Outline outline) {
-                // The current height is measured with the footer, so account for the footer height
-                // and the current clip (in the stack)
-                int height = getMeasuredHeight() - mClipFromBottom - mMaxFooterHeight + mFooterHeight;
-                outline.setRoundRect(0, 0, getWidth(), height,
-                        mConfig.taskViewRoundedCornerRadiusPx);
-            }
-        });
-    }
-
-    @Override
-    protected void onFinishInflate() {
         mMaxDim = mConfig.taskStackMaxDim;
-
-        // By default, all views are clipped to other views in their stack
         mClipViewInStack = true;
-
-        // Bind the views
-        mBarView = (TaskBarView) findViewById(R.id.task_view_bar);
-        mThumbnailView = (TaskThumbnailView) findViewById(R.id.task_view_thumbnail);
-        mLockToAppButtonView = findViewById(R.id.lock_to_app);
-
-        if (mTaskDataLoaded) {
-            onTaskDataLoaded();
-        }
-    }
-
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int width = MeasureSpec.getSize(widthMeasureSpec);
-        int height = MeasureSpec.getSize(heightMeasureSpec);
-
-        // Measure the bar view, thumbnail, and lock-to-app buttons
-        mBarView.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
-                MeasureSpec.makeMeasureSpec(mConfig.taskBarHeight, MeasureSpec.EXACTLY));
-        mLockToAppButtonView.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
-                MeasureSpec.makeMeasureSpec(mConfig.taskViewLockToAppButtonHeight,
-                        MeasureSpec.EXACTLY));
-        // Measure the thumbnail height to be the same as the width
-        mThumbnailView.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
-                MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY));
-        setMeasuredDimension(width, height);
+        mViewBounds = new AnimateableViewBounds(this, mConfig.taskViewRoundedCornerRadiusPx);
+        setWillNotDraw(false);
+        setDim(getDim());
+        setOutlineProvider(mViewBounds);
     }
 
     /** Set callback */
@@ -170,74 +111,67 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         return mTask;
     }
 
+    /** Returns the view bounds. */
+    AnimateableViewBounds getViewBounds() {
+        return mViewBounds;
+    }
+
+    @Override
+    protected void onFinishInflate() {
+        // Bind the views
+        mBarView = (TaskBarView) findViewById(R.id.task_view_bar);
+        mThumbnailView = (TaskThumbnailView) findViewById(R.id.task_view_thumbnail);
+        mFooterView = (TaskFooterView) findViewById(R.id.lock_to_app);
+        mFooterView.setCallbacks(this);
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        int width = MeasureSpec.getSize(widthMeasureSpec);
+        int height = MeasureSpec.getSize(heightMeasureSpec);
+
+        // Measure the bar view, thumbnail, and footer
+        mBarView.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
+                MeasureSpec.makeMeasureSpec(mConfig.taskBarHeight, MeasureSpec.EXACTLY));
+        mFooterView.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
+                MeasureSpec.makeMeasureSpec(mConfig.taskViewLockToAppButtonHeight,
+                        MeasureSpec.EXACTLY));
+        if (mIsFullScreenView) {
+            // Measure the thumbnail height to be the full dimensions
+            mThumbnailView.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
+                    MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
+        } else {
+            // Measure the thumbnail to be square
+            mThumbnailView.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
+                    MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY));
+        }
+        setMeasuredDimension(width, height);
+    }
+
     /** Synchronizes this view's properties with the task's transform */
     void updateViewPropertiesToTaskTransform(TaskViewTransform toTransform, int duration) {
         // Update the bar view
         mBarView.updateViewPropertiesToTaskTransform(toTransform, duration);
 
-        // Check to see if any properties have changed, and update the task view
-        if (duration > 0) {
-            ViewPropertyAnimator anim = animate();
-            boolean useLayers = false;
-
-            // Animate to the final state
-            if (toTransform.hasTranslationYChangedFrom(getTranslationY())) {
-                anim.translationY(toTransform.translationY);
-            }
-            if (Constants.DebugFlags.App.EnableShadows &&
-                    toTransform.hasTranslationZChangedFrom(getTranslationZ())) {
-                anim.translationZ(toTransform.translationZ);
-            }
-            if (toTransform.hasScaleChangedFrom(getScaleX())) {
-                anim.scaleX(toTransform.scale)
-                    .scaleY(toTransform.scale)
-                    .setUpdateListener(mUpdateDimListener);
-                useLayers = true;
-            }
-            if (toTransform.hasAlphaChangedFrom(getAlpha())) {
-                // Use layers if we animate alpha
-                anim.alpha(toTransform.alpha);
-                useLayers = true;
-            }
-            if (useLayers) {
-                anim.withLayer();
-            }
-            anim.setStartDelay(toTransform.startDelay)
-                .setDuration(duration)
-                .setInterpolator(mConfig.fastOutSlowInInterpolator)
-                .start();
-        } else {
-            // Set the changed properties
-            if (toTransform.hasTranslationYChangedFrom(getTranslationY())) {
-                setTranslationY(toTransform.translationY);
-            }
+        // If we are a full screen view, then only update the Z to keep it in order
+        // XXX: Also update/animate the dim as well
+        if (mIsFullScreenView) {
             if (Constants.DebugFlags.App.EnableShadows &&
                     toTransform.hasTranslationZChangedFrom(getTranslationZ())) {
                 setTranslationZ(toTransform.translationZ);
             }
-            if (toTransform.hasScaleChangedFrom(getScaleX())) {
-                setScaleX(toTransform.scale);
-                setScaleY(toTransform.scale);
-                updateDimOverlayFromScale();
-            }
-            if (toTransform.hasAlphaChangedFrom(getAlpha())) {
-                setAlpha(toTransform.alpha);
-            }
+            return;
         }
+
+        // Apply the transform
+        toTransform.applyToTaskView(this, duration, mConfig.fastOutSlowInInterpolator,
+                mUpdateDimListener);
     }
 
     /** Resets this view's properties */
     void resetViewProperties() {
-        setTranslationX(0f);
-        setTranslationY(0f);
-        if (Constants.DebugFlags.App.EnableShadows) {
-            setTranslationZ(0f);
-        }
-        setScaleX(1f);
-        setScaleY(1f);
-        setAlpha(1f);
         setDim(0);
-        invalidate();
+        TaskViewTransform.reset(this);
     }
 
     /**
@@ -262,20 +196,13 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
 
     /** Prepares this task view for the enter-recents animations.  This is called earlier in the
      * first layout because the actual animation into recents may take a long time. */
-    public void prepareEnterRecentsAnimation(boolean isTaskViewLaunchTargetTask, int offsetY,
-                                             int offscreenY) {
+    public void prepareEnterRecentsAnimation(boolean isTaskViewLaunchTargetTask, int offscreenY) {
         if (mConfig.launchedFromAppWithScreenshot) {
             if (isTaskViewLaunchTargetTask) {
-                // Hide the task view as we are going to animate the full screenshot into view
-                // and then replace it with this view once we are done
-                setVisibility(View.INVISIBLE);
                 // Also hide the front most task bar view so we can animate it in
                 mBarView.prepareEnterRecentsAnimation();
             } else {
-                // Top align the task views
-                setTranslationY(offsetY);
-                setScaleX(1f);
-                setScaleY(1f);
+                // Don't do anything for the side views
             }
 
         } else if (mConfig.launchedFromAppWithThumbnail) {
@@ -300,49 +227,57 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
     /** Animates this task view as it enters recents */
     public void startEnterRecentsAnimation(final ViewAnimation.TaskViewEnterContext ctx) {
         TaskViewTransform transform = ctx.currentTaskTransform;
+        Rect taskRect = ctx.currentTaskRect;
 
         if (mConfig.launchedFromAppWithScreenshot) {
-            if (ctx.isCurrentTaskLaunchTarget) {
-                // Animate the full screenshot down first, before swapping with this task view
-                ctx.fullScreenshotView.animateOnEnterRecents(ctx, new Runnable() {
-                    @Override
-                    public void run() {
-                        // Animate the task bar of the first task view
-                        mBarView.startEnterRecentsAnimation(0, mEnableThumbnailClip);
-                        setVisibility(View.VISIBLE);
-                        // Animate the footer into view
-                        animateFooterVisibility(true, mConfig.taskBarEnterAnimDuration);
-                        // Decrement the post animation trigger
-                        ctx.postAnimationTrigger.decrement();
-                    }
-                });
-            } else {
-                // Animate the tasks down behind the full screenshot
-                animate()
-                        .scaleX(transform.scale)
-                        .scaleY(transform.scale)
-                        .translationY(transform.translationY)
-                        .setStartDelay(0)
-                        .setUpdateListener(null)
-                        .setInterpolator(mConfig.linearOutSlowInInterpolator)
-                        .setDuration(475)
-                        .withLayer()
+            if (mTask.isLaunchTarget) {
+                // XXX: We would have to animate the trasnlationY of the task view bar along with the clip and
+                // reset it at the bottom
+
+                // XXX: This should actually be the inset on the current app...
+                mViewBounds.animateClipTop(taskRect.top, mConfig.taskViewEnterFromHomeDuration * 5);
+                mViewBounds.animateClipBottom(getMeasuredHeight() - taskRect.bottom, mConfig.taskViewEnterFromHomeDuration * 5);
+
+                animate().scaleX(((float) taskRect.width() / getMeasuredWidth()) * transform.scale)
+                        .scaleY(((float) taskRect.width() / getMeasuredWidth()) * transform.scale)
+                        .translationY(taskRect.top + transform.translationY)
+                        .setDuration(mConfig.taskViewEnterFromHomeDuration * 5)
                         .withEndAction(new Runnable() {
                             @Override
                             public void run() {
-                                mEnableThumbnailClip.run();
+                                // Animate the task bar of the first task view
+                                mBarView.startEnterRecentsAnimation(0, mThumbnailView.enableTaskBarClipAsRunnable(mBarView));
+                                // Animate the footer into view (if it is the front most task)
+                                animateFooterVisibility(true, mConfig.taskBarEnterAnimDuration);
                                 // Decrement the post animation trigger
                                 ctx.postAnimationTrigger.decrement();
+
+                                // XXX Request layout and only start hte next animation after the next
+                                // layout
+
+                                setIsFullScreen(false);
+                                mThumbnailView.unbindFromScreenshot();
+
+                                // Recycle the full screen screenshot
+                                AlternateRecentsComponent.consumeLastScreenshot();
                             }
                         })
+                        .withLayer()
                         .start();
+            } else {
+                // Otherwise, just enable the thumbnail clip
+                mThumbnailView.enableTaskBarClip(mBarView);
+
+                // Animate the footer into view
+                animateFooterVisibility(true, 0);
             }
             ctx.postAnimationTrigger.increment();
 
         } else if (mConfig.launchedFromAppWithThumbnail) {
-            if (ctx.isCurrentTaskLaunchTarget) {
+            if (mTask.isLaunchTarget) {
                 // Animate the task bar of the first task view
-                mBarView.startEnterRecentsAnimation(mConfig.taskBarEnterAnimDelay, mEnableThumbnailClip);
+                mBarView.startEnterRecentsAnimation(mConfig.taskBarEnterAnimDelay,
+                        mThumbnailView.enableTaskBarClipAsRunnable(mBarView));
 
                 // Animate the dim into view as well
                 ObjectAnimator anim = ObjectAnimator.ofInt(this, "dim", getDimOverlayFromScale());
@@ -360,10 +295,9 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
                 ctx.postAnimationTrigger.increment();
 
                 // Animate the footer into view
-                animateFooterVisibility(true, mConfig.taskBarEnterAnimDuration
-                );
+                animateFooterVisibility(true, mConfig.taskBarEnterAnimDuration);
             } else {
-                mEnableThumbnailClip.run();
+                mThumbnailView.enableTaskBarClip(mBarView);
             }
 
         } else if (mConfig.launchedFromHome) {
@@ -386,7 +320,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
                     .withEndAction(new Runnable() {
                         @Override
                         public void run() {
-                            mEnableThumbnailClip.run();
+                            mThumbnailView.enableTaskBarClip(mBarView);
                             // Decrement the post animation trigger
                             ctx.postAnimationTrigger.decrement();
                         }
@@ -395,11 +329,11 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
             ctx.postAnimationTrigger.increment();
 
             // Animate the footer into view
-            animateFooterVisibility(true, mConfig.taskViewEnterFromHomeDuration
-            );
+            animateFooterVisibility(true, mConfig.taskViewEnterFromHomeDuration);
+
         } else {
             // Otherwise, just enable the thumbnail clip
-            mEnableThumbnailClip.run();
+            mThumbnailView.enableTaskBarClip(mBarView);
 
             // Animate the footer into view
             animateFooterVisibility(true, 0);
@@ -424,7 +358,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
     public void startLaunchTaskAnimation(final Runnable r, boolean isLaunchingTask) {
         if (isLaunchingTask) {
             // Disable the thumbnail clip and animate the bar out
-            mBarView.startLaunchTaskAnimation(mDisableThumbnailClip, r);
+            mBarView.startLaunchTaskAnimation(mThumbnailView.disableTaskBarClipAsRunnable(), r);
 
             // Animate the dim
             if (mDim > 0) {
@@ -478,32 +412,23 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         mBarView.setNoUserInteractionState();
     }
 
-    /** Enable the hw layers on this task view */
-    void enableHwLayers() {
-        mThumbnailView.setLayerType(View.LAYER_TYPE_HARDWARE, mLayerPaint);
-        mBarView.enableHwLayers();
-        mLockToAppButtonView.setLayerType(View.LAYER_TYPE_HARDWARE, mLayerPaint);
+    /** Sets whether this task view is full screen or not. */
+    void setIsFullScreen(boolean isFullscreen) {
+        mIsFullScreenView = isFullscreen;
+        mBarView.setIsFullscreen(isFullscreen);
+        if (isFullscreen) {
+            // If we are full screen, then disable the bottom outline clip for the footer
+            mViewBounds.setOutlineClipBottom(0);
+        }
     }
 
-    /** Disable the hw layers on this task view */
-    void disableHwLayers() {
-        mThumbnailView.setLayerType(View.LAYER_TYPE_NONE, mLayerPaint);
-        mBarView.disableHwLayers();
-        mLockToAppButtonView.setLayerType(View.LAYER_TYPE_NONE, mLayerPaint);
+    /** Returns whether this task view should currently be drawn as a full screen view. */
+    boolean isFullScreenView() {
+        return mIsFullScreenView;
     }
 
     /** Sets the stubbed state of this task view. */
     void setStubState(boolean isStub) {
-        if (!mIsStub && isStub) {
-            // This is now a stub task view, so clip to the bar height, hide the thumbnail
-            setClipBounds(new Rect(0, 0, getMeasuredWidth(), mBarView.getMeasuredHeight()));
-            mThumbnailView.setVisibility(View.INVISIBLE);
-            // Temporary
-            mBarView.mActivityDescription.setText("Stub");
-        } else if (mIsStub && !isStub) {
-            setClipBounds(null);
-            mThumbnailView.setVisibility(View.VISIBLE);
-        }
         mIsStub = isStub;
     }
 
@@ -512,7 +437,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
      * view.
      */
     boolean shouldClipViewInStack() {
-        return mClipViewInStack && (getVisibility() == View.VISIBLE);
+        return mClipViewInStack && !mIsFullScreenView && (getVisibility() == View.VISIBLE);
     }
 
     /** Sets whether this view should be clipped, or clipped against. */
@@ -523,75 +448,19 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         }
     }
 
-    void setClipFromBottom(int clipFromBottom) {
-        clipFromBottom = Math.max(0, Math.min(getMeasuredHeight(), clipFromBottom));
-        if (mClipFromBottom != clipFromBottom) {
-            mClipFromBottom = clipFromBottom;
-            invalidateOutline();
-        }
-    }
-
-    /** Sets the footer height. */
-    public void setFooterHeight(int footerHeight) {
-        if (footerHeight != mFooterHeight) {
-            mFooterHeight = footerHeight;
-            invalidateOutline();
-            invalidate(0, getMeasuredHeight() - mMaxFooterHeight, getMeasuredWidth(),
-                    getMeasuredHeight());
-        }
-    }
-
-    /** Gets the footer height. */
-    public int getFooterHeight() {
-        return mFooterHeight;
-    }
-
     /** Gets the max footer height. */
     public int getMaxFooterHeight() {
-        return mMaxFooterHeight;
+        return mFooterView.mMaxFooterHeight;
     }
 
     /** Animates the footer into and out of view. */
-    public void animateFooterVisibility(boolean visible, int duration) {
-        if (!mTask.lockToThisTask) {
-            if (mLockToAppButtonView.getVisibility() == View.VISIBLE) {
-                mLockToAppButtonView.setVisibility(View.INVISIBLE);
-            }
-            return;
-        }
-        if (mMaxFooterHeight <= 0) return;
-
-        if (mFooterAnimator != null) {
-            mFooterAnimator.removeAllListeners();
-            mFooterAnimator.cancel();
-        }
-        int height = visible ? mMaxFooterHeight : 0;
-        if (visible && mLockToAppButtonView.getVisibility() != View.VISIBLE) {
-            if (duration > 0) {
-                setFooterHeight(0);
-            } else {
-                setFooterHeight(mMaxFooterHeight);
-            }
-            mLockToAppButtonView.setVisibility(View.VISIBLE);
-        }
-        if (duration > 0) {
-            mFooterAnimator = ObjectAnimator.ofInt(this, "footerHeight", height);
-            mFooterAnimator.setDuration(duration);
-            mFooterAnimator.setInterpolator(mConfig.fastOutSlowInInterpolator);
-            if (!visible) {
-                mFooterAnimator.addListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        mLockToAppButtonView.setVisibility(View.INVISIBLE);
-                    }
-                });
-            }
-            mFooterAnimator.start();
-        } else {
-            if (!visible) {
-                mLockToAppButtonView.setVisibility(View.INVISIBLE);
-            }
-        }
+    void animateFooterVisibility(boolean visible, int duration) {
+        // Hide the footer if we are a full screen view
+        if (mIsFullScreenView) return;
+        // Hide the footer if the current task can not be locked to
+        if (!mTask.lockToTaskEnabled || !mTask.lockToThisTask) return;
+        // Otherwise, animate the visibility
+        mFooterView.animateFooterVisibility(visible, duration);
     }
 
     /** Returns the current dim. */
@@ -619,6 +488,8 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         setDim(getDimOverlayFromScale());
     }
 
+    /**** View drawing ****/
+
     @Override
     public void draw(Canvas canvas) {
         super.draw(canvas);
@@ -631,12 +502,28 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
 
     @Override
     protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
-        if (mIsStub && (child == mThumbnailView)) {
+        if (mIsStub && (child != mBarView)) {
             // Skip the thumbnail view if we are in stub mode
             return false;
         }
         return super.drawChild(canvas, child, drawingTime);
     }
+
+    /** Enable the hw layers on this task view */
+    void enableHwLayers() {
+        mThumbnailView.setLayerType(View.LAYER_TYPE_HARDWARE, mLayerPaint);
+        mBarView.enableHwLayers();
+        mFooterView.setLayerType(View.LAYER_TYPE_HARDWARE, mLayerPaint);
+    }
+
+    /** Disable the hw layers on this task view */
+    void disableHwLayers() {
+        mThumbnailView.setLayerType(View.LAYER_TYPE_NONE, mLayerPaint);
+        mBarView.disableHwLayers();
+        mFooterView.setLayerType(View.LAYER_TYPE_NONE, mLayerPaint);
+    }
+
+    /**** View focus state ****/
 
     /**
      * Sets the focused task explicitly. We need a separate flag because requestFocus() won't happen
@@ -691,14 +578,18 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
     public void onTaskDataLoaded() {
         if (mThumbnailView != null && mBarView != null) {
             // Bind each of the views to the new task data
-            mThumbnailView.rebindToTask(mTask);
+            if (mIsFullScreenView) {
+                mThumbnailView.bindToScreenshot(AlternateRecentsComponent.getLastScreenshot());
+            } else {
+                mThumbnailView.rebindToTask(mTask);
+            }
             mBarView.rebindToTask(mTask);
             // Rebind any listeners
             if (Constants.DebugFlags.App.EnableTaskFiltering) {
                 mBarView.mApplicationIcon.setOnClickListener(this);
             }
             mBarView.mDismissButton.setOnClickListener(this);
-            mLockToAppButtonView.setOnClickListener(this);
+            mFooterView.setOnClickListener(this);
             if (Constants.DebugFlags.App.EnableDevAppInfoOnLongPress) {
                 if (mConfig.developerOptionsEnabled) {
                     mBarView.mApplicationIcon.setOnLongClickListener(this);
@@ -720,7 +611,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
                 mBarView.mApplicationIcon.setOnClickListener(null);
             }
             mBarView.mDismissButton.setOnClickListener(null);
-            mLockToAppButtonView.setOnClickListener(null);
+            mFooterView.setOnClickListener(null);
             if (Constants.DebugFlags.App.EnableDevAppInfoOnLongPress) {
                 mBarView.mApplicationIcon.setOnLongClickListener(null);
             }
@@ -732,6 +623,21 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
     void setTouchEnabled(boolean enabled) {
         setOnClickListener(enabled ? this : null);
     }
+
+    /**** TaskFooterView.TaskFooterViewCallbacks ****/
+
+    @Override
+    public void onTaskFooterHeightChanged(int height, int maxHeight) {
+        if (mIsFullScreenView) {
+            // Disable the bottom outline clip when fullscreen
+            mViewBounds.setOutlineClipBottom(0);
+        } else {
+            // Update the bottom clip in our outline provider
+            mViewBounds.setOutlineClipBottom(maxHeight - height);
+        }
+    }
+
+    /**** View.OnClickListener Implementation ****/
 
     @Override
     public void onClick(final View v) {
@@ -752,12 +658,14 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
                     });
                     // Hide the footer
                     tv.animateFooterVisibility(false, mConfig.taskViewRemoveAnimDuration);
-                } else if (v == tv || v == mLockToAppButtonView) {
-                    mCb.onTaskViewClicked(tv, tv.getTask(), (v == mLockToAppButtonView));
+                } else if (v == tv || v == mFooterView) {
+                    mCb.onTaskViewClicked(tv, tv.getTask(), (v == mFooterView));
                 }
             }
         }, 125);
     }
+
+    /**** View.OnLongClickListener Implementation ****/
 
     @Override
     public boolean onLongClick(View v) {

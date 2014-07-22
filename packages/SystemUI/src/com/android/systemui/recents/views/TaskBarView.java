@@ -43,14 +43,14 @@ class TaskBarView extends FrameLayout {
 
     RecentsConfiguration mConfig;
 
-    Task mTask;
-
     ImageView mDismissButton;
     ImageView mApplicationIcon;
     TextView mActivityDescription;
 
     Drawable mLightDismissDrawable;
     Drawable mDarkDismissDrawable;
+
+    boolean mIsFullscreen;
 
     Paint mLayerPaint = new Paint();
     static Paint sHighlightPaint;
@@ -113,11 +113,18 @@ class TaskBarView extends FrameLayout {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        // Draw the highlight at the top edge (but put the bottom edge just out of view)
-        float offset = mConfig.taskViewHighlightPx / 2f;
-        float radius = mConfig.taskViewRoundedCornerRadiusPx;
-        canvas.drawRoundRect(-offset, 0f, (float) getMeasuredWidth() + offset,
-                getMeasuredHeight() + radius, radius, radius, sHighlightPaint);
+        if (!mIsFullscreen) {
+            // Draw the highlight at the top edge (but put the bottom edge just out of view)
+            float offset = mConfig.taskViewHighlightPx / 2f;
+            float radius = mConfig.taskViewRoundedCornerRadiusPx;
+            canvas.drawRoundRect(-offset, 0f, (float) getMeasuredWidth() + offset,
+                    getMeasuredHeight() + radius, radius, radius, sHighlightPaint);
+        }
+    }
+
+    /** Sets whether the current task is full screen or not. */
+    void setIsFullscreen(boolean isFullscreen) {
+        mIsFullscreen = isFullscreen;
     }
 
     /** Synchronizes this bar view's properties with the task's transform */
@@ -149,7 +156,6 @@ class TaskBarView extends FrameLayout {
 
     /** Binds the bar view to the task */
     void rebindToTask(Task t) {
-        mTask = t;
         // If an activity icon is defined, then we use that as the primary icon to show in the bar,
         // otherwise, we fall back to the application icon
         if (t.activityIcon != null) {
@@ -170,7 +176,6 @@ class TaskBarView extends FrameLayout {
 
     /** Unbinds the bar view from the task */
     void unbindFromTask() {
-        mTask = null;
         mApplicationIcon.setImageDrawable(null);
     }
 
