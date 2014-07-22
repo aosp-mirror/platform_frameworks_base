@@ -18,6 +18,7 @@ package com.android.server.am;
 
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static com.android.internal.util.XmlUtils.readBooleanAttribute;
 import static com.android.internal.util.XmlUtils.readIntAttribute;
@@ -3543,6 +3544,23 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             return true;
         }
+    }
+
+    @Override
+    public final int startActivityFromRecents(int taskId, Bundle options) {
+        if (checkCallingPermission(START_TASKS_FROM_RECENTS) != PackageManager.PERMISSION_GRANTED) {
+            String msg = "Permission Denial: startActivityFromRecents called without " +
+                    START_TASKS_FROM_RECENTS;
+            Slog.w(TAG, msg);
+            throw new SecurityException(msg);
+        }
+        final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId);
+        if (task == null) {
+            throw new ActivityNotFoundException("Task " + taskId + " not found.");
+        }
+        return startActivityInPackage(task.mCallingUid, task.mCallingPackage,
+                task.intent, null, null, null, 0, 0, options, task.userId,
+                null);
     }
 
     final int startActivityInPackage(int uid, String callingPackage,
