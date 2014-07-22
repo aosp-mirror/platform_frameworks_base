@@ -162,12 +162,10 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         mTrackerHandler.obtainMessage(EVENT_STATE_CHANGED, mMobile.info).sendToTarget();
         nextConnBroadcast.get();
 
-        // verify that both routes were added and DNS was flushed
+        // verify that both routes were added
         int mobileNetId = mMobile.tracker.getNetwork().netId;
         verify(mNetManager).addRoute(eq(mobileNetId), eq(MOBILE_ROUTE_V4));
         verify(mNetManager).addRoute(eq(mobileNetId), eq(MOBILE_ROUTE_V6));
-        verify(mNetManager).flushNetworkDnsCache(mobileNetId);
-
     }
 
     public void testMobileWifiHandoff() throws Exception {
@@ -204,7 +202,6 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         int wifiNetId = mWifi.tracker.getNetwork().netId;
         verify(mNetManager).addRoute(eq(wifiNetId), eq(WIFI_ROUTE_V4));
         verify(mNetManager).addRoute(eq(wifiNetId), eq(WIFI_ROUTE_V6));
-        verify(mNetManager).flushNetworkDnsCache(wifiNetId);
         verify(mMobile.tracker).teardown();
 
         int mobileNetId = mMobile.tracker.getNetwork().netId;

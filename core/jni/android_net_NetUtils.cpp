@@ -79,26 +79,6 @@ static struct fieldIds {
     jmethodID setVendorInfo;
 } dhcpResultsFieldIds;
 
-static jint android_net_utils_enableInterface(JNIEnv* env, jobject clazz, jstring ifname)
-{
-    int result;
-
-    const char *nameStr = env->GetStringUTFChars(ifname, NULL);
-    result = ::ifc_enable(nameStr);
-    env->ReleaseStringUTFChars(ifname, nameStr);
-    return (jint)result;
-}
-
-static jint android_net_utils_disableInterface(JNIEnv* env, jobject clazz, jstring ifname)
-{
-    int result;
-
-    const char *nameStr = env->GetStringUTFChars(ifname, NULL);
-    result = ::ifc_disable(nameStr);
-    env->ReleaseStringUTFChars(ifname, nameStr);
-    return (jint)result;
-}
-
 static jint android_net_utils_resetConnections(JNIEnv* env, jobject clazz,
       jstring ifname, jint mask)
 {
@@ -280,9 +260,6 @@ static jboolean android_net_utils_protectFromVpn(JNIEnv *env, jobject thiz, jint
  */
 static JNINativeMethod gNetworkUtilMethods[] = {
     /* name, signature, funcPtr */
-
-    { "enableInterface", "(Ljava/lang/String;)I",  (void *)android_net_utils_enableInterface },
-    { "disableInterface", "(Ljava/lang/String;)I",  (void *)android_net_utils_disableInterface },
     { "resetConnections", "(Ljava/lang/String;I)I",  (void *)android_net_utils_resetConnections },
     { "runDhcp", "(Ljava/lang/String;Landroid/net/DhcpResults;)Z",  (void *)android_net_utils_runDhcp },
     { "runDhcpRenew", "(Ljava/lang/String;Landroid/net/DhcpResults;)Z",  (void *)android_net_utils_runDhcpRenew },
