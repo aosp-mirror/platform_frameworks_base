@@ -16,13 +16,14 @@
 
 package com.android.systemui.statusbar.policy;
 
-public interface TetheringController {
+public interface HotspotController {
     void addCallback(Callback callback);
     void removeCallback(Callback callback);
     boolean isHotspotEnabled();
     boolean isHotspotSupported();
+    void setHotspotEnabled(boolean enabled);
 
     public interface Callback {
-        void onHotspotChanged(boolean hotspot);
+        void onHotspotChanged(boolean enabled);
     }
 }
