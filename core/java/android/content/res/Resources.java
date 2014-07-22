@@ -1680,15 +1680,7 @@ public class Resources {
             remainder = languageTag.substring(separator);
         }
 
-        if ("id".equals(language)) {
-            return "in" + remainder;
-        } else if ("yi".equals(language)) {
-            return "ji" + remainder;
-        } else if ("he".equals(language)) {
-            return "iw" + remainder;
-        } else {
-            return languageTag;
-        }
+        return Locale.adjustLanguageCode(language) + remainder;
     }
 
     /**
