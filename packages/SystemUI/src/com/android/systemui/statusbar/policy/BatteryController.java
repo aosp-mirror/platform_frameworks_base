@@ -16,41 +16,49 @@
 
 package com.android.systemui.statusbar.policy;
 
-import com.android.internal.app.IBatteryStats;
-import com.android.systemui.R;
-import com.android.systemui.statusbar.phone.StatusBarHeaderView;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.BatteryManager;
-import android.os.BatteryStats;
-import android.os.RemoteException;
-import android.os.ServiceManager;
-import android.text.format.Formatter;
+import android.os.PowerManager;
 import android.util.Log;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 public class BatteryController extends BroadcastReceiver {
-    private static final String TAG = "StatusBar.BatteryController";
+    private static final String TAG = "BatteryController";
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    private ArrayList<BatteryStateChangeCallback> mChangeCallbacks = new ArrayList<>();
+    private final ArrayList<BatteryStateChangeCallback> mChangeCallbacks = new ArrayList<>();
+    private final PowerManager mPowerManager;
 
     private int mLevel;
     private boolean mPluggedIn;
     private boolean mCharging;
     private boolean mCharged;
-
-    public interface BatteryStateChangeCallback {
-        public void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging);
-    }
+    private boolean mPowerSave;
 
     public BatteryController(Context context) {
+        mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_BATTERY_CHANGED);
+        filter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED);
         context.registerReceiver(this, filter);
+
+        updatePowerSave();
+    }
+
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("BatteryController state:");
+        pw.print("  mLevel="); pw.println(mLevel);
+        pw.print("  mPluggedIn="); pw.println(mPluggedIn);
+        pw.print("  mCharging="); pw.println(mCharging);
+        pw.print("  mCharged="); pw.println(mCharged);
+        pw.print("  mPowerSave="); pw.println(mPowerSave);
     }
 
     public void addStateChangedCallback(BatteryStateChangeCallback cb) {
@@ -75,9 +83,40 @@ public class BatteryController extends BroadcastReceiver {
             mCharged = status == BatteryManager.BATTERY_STATUS_FULL;
             mCharging = mCharged || status == BatteryManager.BATTERY_STATUS_CHARGING;
 
-            for (BatteryStateChangeCallback cb : mChangeCallbacks) {
-                cb.onBatteryLevelChanged(mLevel, mPluggedIn, mCharging);
-            }
+            fireBatteryLevelChanged();
+        } else if (action.equals(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED)) {
+            updatePowerSave();
         }
+    }
+
+    public boolean isPowerSave() {
+        return mPowerSave;
+    }
+
+    private void updatePowerSave() {
+        final boolean powerSave = mPowerManager.isPowerSaveMode();
+        if (powerSave == mPowerSave) return;
+        mPowerSave = powerSave;
+        if (DEBUG) Log.d(TAG, "Power save is " + (mPowerSave ? "on" : "off"));
+        firePowerSaveChanged();
+    }
+
+    private void fireBatteryLevelChanged() {
+        final int N = mChangeCallbacks.size();
+        for (int i = 0; i < N; i++) {
+            mChangeCallbacks.get(i).onBatteryLevelChanged(mLevel, mPluggedIn, mCharging);
+        }
+    }
+
+    private void firePowerSaveChanged() {
+        final int N = mChangeCallbacks.size();
+        for (int i = 0; i < N; i++) {
+            mChangeCallbacks.get(i).onPowerSaveChanged();
+        }
+    }
+
+    public interface BatteryStateChangeCallback {
+        void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging);
+        void onPowerSaveChanged();
     }
 }
