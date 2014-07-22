@@ -309,19 +309,16 @@ public class RecentsConfiguration {
      * Returns the task stack bounds in the current orientation. These bounds do not account for
      * the system insets.
      */
-    public void getTaskStackBounds(int width, int height, Rect taskStackBounds) {
-        if (hasSearchBarAppWidget()) {
-            Rect searchBarBounds = new Rect();
-            getSearchBarBounds(width, height, searchBarBounds);
-            if (isLandscape && transposeRecentsLayoutWithOrientation) {
-                // In landscape, the search bar appears on the left, so shift the task rect right
-                taskStackBounds.set(searchBarBounds.width(), 0, width, height);
-            } else {
-                // In portrait, the search bar appears on the top, so shift the task rect below
-                taskStackBounds.set(0, searchBarBounds.height(), width, height);
-            }
+    public void getTaskStackBounds(int windowWidth, int windowHeight, int topInset, int rightInset,
+                                   Rect taskStackBounds) {
+        Rect searchBarBounds = new Rect();
+        getSearchBarBounds(windowWidth, windowHeight, topInset, searchBarBounds);
+        if (isLandscape && transposeRecentsLayoutWithOrientation) {
+            // In landscape, the search bar appears on the left
+            taskStackBounds.set(searchBarBounds.right, topInset, windowWidth - rightInset, windowHeight);
         } else {
-            taskStackBounds.set(0, 0, width, height);
+            // In portrait, the search bar appears on the top (which already has the inset)
+            taskStackBounds.set(0, searchBarBounds.bottom, windowWidth, windowHeight);
         }
     }
 
@@ -329,19 +326,20 @@ public class RecentsConfiguration {
      * Returns the search bar bounds in the current orientation.  These bounds do not account for
      * the system insets.
      */
-    public void getSearchBarBounds(int width, int height, Rect searchBarSpaceBounds) {
+    public void getSearchBarBounds(int windowWidth, int windowHeight, int topInset,
+                                   Rect searchBarSpaceBounds) {
         // Return empty rects if search is not enabled
-        if (!Constants.DebugFlags.App.EnableSearchLayout) {
-            searchBarSpaceBounds.set(0, 0, 0, 0);
-            return;
+        int searchBarSize = searchBarSpaceHeightPx;
+        if (!Constants.DebugFlags.App.EnableSearchLayout || !hasSearchBarAppWidget()) {
+            searchBarSize = 0;
         }
 
         if (isLandscape && transposeRecentsLayoutWithOrientation) {
             // In landscape, the search bar appears on the left
-            searchBarSpaceBounds.set(0, 0, searchBarSpaceHeightPx, height);
+            searchBarSpaceBounds.set(0, topInset, searchBarSize, windowHeight);
         } else {
             // In portrait, the search bar appears on the top
-            searchBarSpaceBounds.set(0, 0, width, searchBarSpaceHeightPx);
+            searchBarSpaceBounds.set(0, topInset, windowWidth, topInset + searchBarSize);
         }
     }
 }
