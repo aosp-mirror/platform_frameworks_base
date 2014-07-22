@@ -193,8 +193,7 @@ public class Main {
     private static boolean processArgs(Log log, String[] args,
             ArrayList<String> osJarPath, String[] osDestJar) {
         boolean needs_dest = true;
-        for (int i = 0; i < args.length; i++) {
-            String s = args[i];
+        for (String s : args) {
             if (s.equals("-v")) {
                 log.setVerbose(true);
             } else if (s.equals("-p")) {
@@ -212,7 +211,7 @@ public class Main {
                     osJarPath.add(s);
                 }
             } else {
-                log.error("Unknow argument: %s", s);
+                log.error("Unknown argument: %s", s);
                 return false;
             }
         }
