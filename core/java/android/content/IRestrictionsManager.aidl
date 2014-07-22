@@ -16,7 +16,9 @@
 
 package android.content;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 
 /**
  * Interface used by the RestrictionsManager
@@ -25,6 +27,8 @@ import android.os.Bundle;
 interface IRestrictionsManager {
     Bundle getApplicationRestrictions(in String packageName);
     boolean hasRestrictionsProvider();
-    void requestPermission(in String packageName, in String requestTemplate, in Bundle requestData);
-    void notifyPermissionResponse(in String packageName, in Bundle response);
+    void requestPermission(in String packageName, in String requestType, in String requestId,
+            in PersistableBundle requestData);
+    void notifyPermissionResponse(in String packageName, in PersistableBundle response);
+    Intent getLocalApprovalIntent();
 }

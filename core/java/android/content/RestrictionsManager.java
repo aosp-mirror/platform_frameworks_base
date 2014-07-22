@@ -16,6 +16,7 @@
 
 package android.content;
 
+import android.app.Activity;
 import android.app.admin.DevicePolicyManager;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -23,6 +24,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -51,7 +53,7 @@ import java.util.List;
  * <p>
  * The RestrictionsManager forwards the dynamic requests to the active
  * Restrictions Provider. The Restrictions Provider can respond back to requests by calling
- * {@link #notifyPermissionResponse(String, Bundle)}, when
+ * {@link #notifyPermissionResponse(String, PersistableBundle)}, when
  * a response is received from the administrator of the device or user.
  * The response is relayed back to the application via a protected broadcast,
  * {@link #ACTION_PERMISSION_RESPONSE_RECEIVED}.
@@ -126,14 +128,15 @@ public class RestrictionsManager {
      * {@link #EXTRA_RESPONSE_BUNDLE}.
      */
     public static final String ACTION_PERMISSION_RESPONSE_RECEIVED =
-            "android.intent.action.PERMISSION_RESPONSE_RECEIVED";
+            "android.content.action.PERMISSION_RESPONSE_RECEIVED";
 
     /**
      * Broadcast intent sent to the Restrictions Provider to handle a permission request from
      * an app. It will have the following extras: {@link #EXTRA_PACKAGE_NAME},
-     * {@link #EXTRA_REQUEST_TYPE} and {@link #EXTRA_REQUEST_BUNDLE}. The Restrictions Provider
-     * will handle the request and respond back to the RestrictionsManager, when a response is
-     * available, by calling {@link #notifyPermissionResponse}.
+     * {@link #EXTRA_REQUEST_TYPE}, {@link #EXTRA_REQUEST_ID} and {@link #EXTRA_REQUEST_BUNDLE}.
+     * The Restrictions Provider will handle the request and respond back to the
+     * RestrictionsManager, when a response is available, by calling
+     * {@link #notifyPermissionResponse}.
      * <p>
      * The BroadcastReceiver must require the {@link android.Manifest.permission#BIND_DEVICE_ADMIN}
      * permission to ensure that only the system can send the broadcast.
@@ -142,17 +145,45 @@ public class RestrictionsManager {
             "android.content.action.REQUEST_PERMISSION";
 
     /**
+     * Activity intent that is optionally implemented by the Restrictions Provider package
+     * to challenge for an administrator PIN or password locally on the device. Apps will
+     * call this intent using {@link Activity#startActivityForResult}. On a successful
+     * response, {@link Activity#onActivityResult} will return a resultCode of
+     * {@link Activity#RESULT_OK}.
+     * <p>
+     * The intent must contain {@link #EXTRA_REQUEST_BUNDLE} as an extra and the bundle must
+     * contain at least {@link #REQUEST_KEY_MESSAGE} for the activity to display.
+     * <p>
+     * @see #getLocalApprovalIntent()
+     */
+    public static final String ACTION_REQUEST_LOCAL_APPROVAL =
+            "android.content.action.REQUEST_LOCAL_APPROVAL";
+
+    /**
      * The package name of the application making the request.
+     * <p>
+     * Type: String
      */
     public static final String EXTRA_PACKAGE_NAME = "android.content.extra.PACKAGE_NAME";
 
     /**
      * The request type passed in the {@link #ACTION_REQUEST_PERMISSION} broadcast.
+     * <p>
+     * Type: String
      */
     public static final String EXTRA_REQUEST_TYPE = "android.content.extra.REQUEST_TYPE";
 
     /**
+     * The request ID passed in the {@link #ACTION_REQUEST_PERMISSION} broadcast.
+     * <p>
+     * Type: String
+     */
+    public static final String EXTRA_REQUEST_ID = "android.content.extra.REQUEST_ID";
+
+    /**
      * The request bundle passed in the {@link #ACTION_REQUEST_PERMISSION} broadcast.
+     * <p>
+     * Type: {@link PersistableBundle}
      */
     public static final String EXTRA_REQUEST_BUNDLE = "android.content.extra.REQUEST_BUNDLE";
 
@@ -163,36 +194,21 @@ public class RestrictionsManager {
      * <li>{@link #REQUEST_KEY_ID}: The request ID.</li>
      * <li>{@link #RESPONSE_KEY_RESULT}: The response result.</li>
      * </ul>
+     * <p>
+     * Type: {@link PersistableBundle}
      */
     public static final String EXTRA_RESPONSE_BUNDLE = "android.content.extra.RESPONSE_BUNDLE";
 
     /**
      * Request type for a simple question, with a possible title and icon.
      * <p>
-     * Required keys are
-     * {@link #REQUEST_KEY_ID} and {@link #REQUEST_KEY_MESSAGE}.
+     * Required keys are: {@link #REQUEST_KEY_MESSAGE}
      * <p>
      * Optional keys are
      * {@link #REQUEST_KEY_DATA}, {@link #REQUEST_KEY_ICON}, {@link #REQUEST_KEY_TITLE},
      * {@link #REQUEST_KEY_APPROVE_LABEL} and {@link #REQUEST_KEY_DENY_LABEL}.
      */
     public static final String REQUEST_TYPE_APPROVAL = "android.request.type.approval";
-
-    /**
-     * Request type for a local password challenge. This is a way for an app to ask
-     * the administrator to override an operation that is restricted on the device, such
-     * as configuring Wi-Fi access points. It is most useful for situations where there
-     * is no network connectivity for a remote administrator's response. The normal user of the
-     * device is not expected to know the password. The challenge is meant for the administrator.
-     * <p>
-     * Required keys are
-     * {@link #REQUEST_KEY_ID} and {@link #REQUEST_KEY_MESSAGE}.
-     * <p>
-     * Optional keys are
-     * {@link #REQUEST_KEY_DATA}, {@link #REQUEST_KEY_ICON}, {@link #REQUEST_KEY_TITLE},
-     * {@link #REQUEST_KEY_APPROVE_LABEL} and {@link #REQUEST_KEY_DENY_LABEL}.
-     */
-    public static final String REQUEST_TYPE_LOCAL_APPROVAL = "android.request.type.local_approval";
 
     /**
      * Key for request ID contained in the request bundle.
@@ -240,9 +256,10 @@ public class RestrictionsManager {
      * Key for request icon contained in the request bundle.
      * <p>
      * Optional, shown alongside the request message presented to the administrator
-     * who approves the request.
+     * who approves the request. The content must be a compressed image such as a
+     * PNG or JPEG, as a byte array.
      * <p>
-     * Type: Bitmap
+     * Type: byte[]
      */
     public static final String REQUEST_KEY_ICON = "android.request.icon";
 
@@ -403,7 +420,7 @@ public class RestrictionsManager {
 
     /**
      * Called by an application to check if there is an active Restrictions Provider. If
-     * there isn't, {@link #requestPermission(String, Bundle)} is not available.
+     * there isn't, {@link #requestPermission(String, String, PersistableBundle)} is not available.
      *
      * @return whether there is an active Restrictions Provider.
      */
@@ -428,40 +445,54 @@ public class RestrictionsManager {
      * Restrictions Provider might understand. For custom types, the type name should be
      * namespaced to avoid collisions with predefined types and types specified by
      * other Restrictions Providers.
-     * @param request A Bundle containing the data corresponding to the specified request
+     * @param requestId A unique id generated by the app that contains sufficient information
+     * to identify the parameters of the request when it receives the id in the response.
+     * @param request A PersistableBundle containing the data corresponding to the specified request
      * type. The keys for the data in the bundle depend on the request type.
      *
      * @throws IllegalArgumentException if any of the required parameters are missing.
      */
-    public void requestPermission(String requestType, Bundle request) {
+    public void requestPermission(String requestType, String requestId, PersistableBundle request) {
         if (requestType == null) {
             throw new NullPointerException("requestType cannot be null");
+        }
+        if (requestId == null) {
+            throw new NullPointerException("requestId cannot be null");
         }
         if (request == null) {
             throw new NullPointerException("request cannot be null");
         }
-        if (!request.containsKey(REQUEST_KEY_ID)) {
-            throw new IllegalArgumentException("REQUEST_KEY_ID must be specified");
-        }
         try {
             if (mService != null) {
-                mService.requestPermission(mContext.getPackageName(), requestType, request);
+                mService.requestPermission(mContext.getPackageName(), requestType, requestId,
+                        request);
             }
         } catch (RemoteException re) {
             Log.w(TAG, "Couldn't reach service");
         }
     }
 
+    public Intent getLocalApprovalIntent() {
+        try {
+            if (mService != null) {
+                return mService.getLocalApprovalIntent();
+            }
+        } catch (RemoteException re) {
+            Log.w(TAG, "Couldn't reach service");
+        }
+        return null;
+    }
+
     /**
      * Called by the Restrictions Provider to deliver a response to an application.
      *
      * @param packageName the application to deliver the response to. Cannot be null.
-     * @param response the Bundle containing the response status, request ID and other information.
+     * @param response the bundle containing the response status, request ID and other information.
      *                 Cannot be null.
      *
      * @throws IllegalArgumentException if any of the required parameters are missing.
      */
-    public void notifyPermissionResponse(String packageName, Bundle response) {
+    public void notifyPermissionResponse(String packageName, PersistableBundle response) {
         if (packageName == null) {
             throw new NullPointerException("packageName cannot be null");
         }
