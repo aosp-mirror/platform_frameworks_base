@@ -26,17 +26,20 @@ import com.android.internal.telecomm.ICallVideoClient;
 /**
  * Remote class to invoke callbacks in InCallUI related to supporting video in calls.
  */
-public class RemoteCallVideoClient implements IBinder.DeathRecipient {
+public class RemoteCallVideoClient {
     private final ICallVideoClient mCallVideoClient;
 
+    private IBinder.DeathRecipient mDeathRecipient = new IBinder.DeathRecipient() {
+        @Override
+        public void binderDied() {
+            mCallVideoClient.asBinder().unlinkToDeath(this, 0);
+        }
+    };
+
+    /** {@hide} */
     RemoteCallVideoClient(ICallVideoClient callVideoProvider) throws RemoteException {
         mCallVideoClient = callVideoProvider;
-        mCallVideoClient.asBinder().linkToDeath(this, 0);
-    }
-
-    @Override
-    public void binderDied() {
-        mCallVideoClient.asBinder().unlinkToDeath(this, 0);
+        mCallVideoClient.asBinder().linkToDeath(mDeathRecipient, 0);
     }
 
     /**
@@ -49,9 +52,11 @@ public class RemoteCallVideoClient implements IBinder.DeathRecipient {
      *
      * @param videoCallProfile The requested video call profile.
      */
-    public void receiveSessionModifyRequest(VideoCallProfile videoCallProfile)
-            throws RemoteException {
-        mCallVideoClient.receiveSessionModifyRequest(videoCallProfile);
+    public void receiveSessionModifyRequest(VideoCallProfile videoCallProfile) {
+        try {
+            mCallVideoClient.receiveSessionModifyRequest(videoCallProfile);
+        } catch (RemoteException e) {
+        }
     }
 
     /**
@@ -66,9 +71,13 @@ public class RemoteCallVideoClient implements IBinder.DeathRecipient {
      * @param requestedProfile The original request which was sent to the remote device.
      * @param responseProfile The actual profile changes made by the remote device.
      */
-    public void receiveSessionModifyResponse(int status, VideoCallProfile requestedProfile,
-            VideoCallProfile responseProfile) throws RemoteException {
-        mCallVideoClient.receiveSessionModifyResponse(status, requestedProfile, responseProfile);
+    public void receiveSessionModifyResponse(
+            int status, VideoCallProfile requestedProfile, VideoCallProfile responseProfile) {
+        try {
+            mCallVideoClient.receiveSessionModifyResponse(
+                    status, requestedProfile, responseProfile);
+        } catch (RemoteException e) {
+        }
     }
 
     /**
@@ -81,8 +90,11 @@ public class RemoteCallVideoClient implements IBinder.DeathRecipient {
      *
      * @param event The event.
      */
-    public void handleCallSessionEvent(int event) throws RemoteException {
-        mCallVideoClient.handleCallSessionEvent(event);
+    public void handleCallSessionEvent(int event) {
+        try {
+            mCallVideoClient.handleCallSessionEvent(event);
+        } catch (RemoteException e) {
+        }
     }
 
     /**
@@ -92,8 +104,11 @@ public class RemoteCallVideoClient implements IBinder.DeathRecipient {
      * @param width  The updated peer video width.
      * @param height The updated peer video height.
      */
-    public void updatePeerDimensions(int width, int height) throws RemoteException {
-        mCallVideoClient.updatePeerDimensions(width, height);
+    public void updatePeerDimensions(int width, int height) {
+        try {
+            mCallVideoClient.updatePeerDimensions(width, height);
+        } catch (RemoteException e) {
+        }
     }
 
     /**
@@ -101,8 +116,11 @@ public class RemoteCallVideoClient implements IBinder.DeathRecipient {
      *
      * @param dataUsage The updated data usage.
      */
-    public void updateCallDataUsage(int dataUsage) throws RemoteException {
-        mCallVideoClient.updateCallDataUsage(dataUsage);
+    public void updateCallDataUsage(int dataUsage) {
+        try {
+            mCallVideoClient.updateCallDataUsage(dataUsage);
+        } catch (RemoteException e) {
+        }
     }
 
     /**
@@ -110,8 +128,10 @@ public class RemoteCallVideoClient implements IBinder.DeathRecipient {
      *
      * @param callCameraCapabilities The changed camera capabilities.
      */
-    public void handleCameraCapabilitiesChange(CallCameraCapabilities callCameraCapabilities)
-            throws RemoteException {
-        mCallVideoClient.handleCameraCapabilitiesChange(callCameraCapabilities);
+    public void handleCameraCapabilitiesChange(CallCameraCapabilities callCameraCapabilities) {
+        try {
+            mCallVideoClient.handleCameraCapabilitiesChange(callCameraCapabilities);
+        } catch (RemoteException e) {
+        }
     }
 }
