@@ -86,6 +86,7 @@ public interface IActivityManager extends IInterface {
             ParcelFileDescriptor profileFd, Bundle options, int userId) throws RemoteException;
     public boolean startNextMatchingActivity(IBinder callingActivity,
             Intent intent, Bundle options) throws RemoteException;
+    public int startActivityFromRecents(int taskId, Bundle options) throws RemoteException;
     public boolean finishActivity(IBinder token, int code, Intent data, boolean finishTask)
             throws RemoteException;
     public void finishSubActivity(IBinder token, String resultWho, int requestCode) throws RemoteException;
@@ -756,4 +757,5 @@ public interface IActivityManager extends IInterface {
     int IS_BG_MEDIA_PLAYING_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+226;
     int MEDIA_RESOURCES_RELEASED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+227;
     int NOTIFY_LAUNCH_TASK_BEHIND_COMPLETE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+228;
+    int START_ACTIVITY_FROM_RECENTS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 229;
 }

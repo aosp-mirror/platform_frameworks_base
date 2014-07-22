@@ -1364,6 +1364,14 @@
         android:label="@string/permlab_getTasks"
         android:description="@string/permdesc_getTasks" />
 
+    <!-- Allows an application to start a task from a ActivityManager#RecentTaskInfo.
+         @hide -->
+    <permission android:name="android.permission.START_TASKS_FROM_RECENTS"
+        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
+        android:protectionLevel="signature|system"
+        android:label="@string/permlab_startTasksFromRecents"
+        android:description="@string/permdesc_startTasksFromRecents" />
+
     <!-- @SystemApi @hide Allows an application to call APIs that allow it to do interactions
          across the users on the device, using singleton services and
          user-targeted broadcasts.  This permission is not available to

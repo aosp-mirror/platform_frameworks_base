@@ -284,6 +284,17 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case START_ACTIVITY_FROM_RECENTS_TRANSACTION:
+        {
+            data.enforceInterface(IActivityManager.descriptor);
+            int taskId = data.readInt();
+            Bundle options = data.readInt() == 0 ? null : Bundle.CREATOR.createFromParcel(data);
+            int result = startActivityFromRecents(taskId, options);
+            reply.writeNoException();
+            reply.writeInt(result);
+            return true;
+        }
+
         case FINISH_ACTIVITY_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder token = data.readStrongBinder();
@@ -2481,6 +2492,24 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
         data.recycle();
         return result != 0;
+    }
+    public int startActivityFromRecents(int taskId, Bundle options) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeInt(taskId);
+        if (options == null) {
+            data.writeInt(0);
+        } else {
+            data.writeInt(1);
+            options.writeToParcel(data, 0);
+        }
+        mRemote.transact(START_ACTIVITY_FROM_RECENTS_TRANSACTION, data, reply, 0);
+        reply.readException();
+        int result = reply.readInt();
+        reply.recycle();
+        data.recycle();
+        return result;
     }
     public boolean finishActivity(IBinder token, int resultCode, Intent resultData, boolean finishTask)
             throws RemoteException {

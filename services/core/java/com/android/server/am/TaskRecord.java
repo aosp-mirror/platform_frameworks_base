@@ -68,6 +68,8 @@ final class TaskRecord {
     private static final String ATTR_TASK_AFFILIATION = "task_affiliation";
     private static final String ATTR_PREV_AFFILIATION = "prev_affiliation";
     private static final String ATTR_NEXT_AFFILIATION = "next_affiliation";
+    private static final String ATTR_CALLING_UID = "calling_uid";
+    private static final String ATTR_CALLING_PACKAGE = "calling_package";
     private static final String LAST_ACTIVITY_ICON_SUFFIX = "_last_activity_icon_";
 
     private static final String TASK_THUMBNAIL_SUFFIX = "_task_thumbnail";
@@ -144,6 +146,10 @@ final class TaskRecord {
     TaskRecord mNextAffiliate; // next task in affiliated chain.
     int mNextAffiliateTaskId = -1; // next id for persistence.
 
+    // For relaunching the task from recents as though it was launched by the original launcher.
+    int mCallingUid;
+    String mCallingPackage;
+
     final ActivityManagerService mService;
 
     TaskRecord(ActivityManagerService service, int _taskId, ActivityInfo info, Intent _intent,
@@ -167,7 +173,7 @@ final class TaskRecord {
             String _lastDescription, ArrayList<ActivityRecord> activities, long _firstActiveTime,
             long _lastActiveTime, long lastTimeMoved, boolean neverRelinquishIdentity,
             ActivityManager.TaskDescription _lastTaskDescription, int taskAffiliation,
-            int prevTaskId, int nextTaskId) {
+            int prevTaskId, int nextTaskId, int callingUid, String callingPackage) {
         mService = service;
         mFilename = String.valueOf(_taskId) + TASK_THUMBNAIL_SUFFIX +
                 TaskPersister.IMAGE_EXTENSION;
@@ -196,6 +202,8 @@ final class TaskRecord {
         mAffiliatedTaskId = taskAffiliation;
         mPrevAffiliateTaskId = prevTaskId;
         mNextAffiliateTaskId = nextTaskId;
+        mCallingUid = callingUid;
+        mCallingPackage = callingPackage;
     }
 
     void touchActiveTime() {
@@ -458,6 +466,8 @@ final class TaskRecord {
         if (mActivities.isEmpty()) {
             taskType = r.mActivityType;
             isPersistable = r.isPersistable();
+            mCallingUid = r.launchedFromUid;
+            mCallingPackage = r.launchedFromPackage;
             // Clamp to [1, 100].
             maxRecents = Math.min(Math.max(r.info.maxRecents, 1), 100);
         } else {
@@ -765,6 +775,8 @@ final class TaskRecord {
         out.attribute(null, ATTR_TASK_AFFILIATION, String.valueOf(mAffiliatedTaskId));
         out.attribute(null, ATTR_PREV_AFFILIATION, String.valueOf(mPrevAffiliateTaskId));
         out.attribute(null, ATTR_NEXT_AFFILIATION, String.valueOf(mNextAffiliateTaskId));
+        out.attribute(null, ATTR_CALLING_UID, String.valueOf(mCallingUid));
+        out.attribute(null, ATTR_CALLING_PACKAGE, mCallingPackage == null ? "" : mCallingPackage);
 
         if (affinityIntent != null) {
             out.startTag(null, TAG_AFFINITYINTENT);
@@ -816,6 +828,8 @@ final class TaskRecord {
         int taskAffiliation = -1;
         int prevTaskId = -1;
         int nextTaskId = -1;
+        int callingUid = -1;
+        String callingPackage = "";
 
         for (int attrNdx = in.getAttributeCount() - 1; attrNdx >= 0; --attrNdx) {
             final String attrName = in.getAttributeName(attrNdx);
@@ -858,6 +872,10 @@ final class TaskRecord {
                 prevTaskId = Integer.valueOf(attrValue);
             } else if (ATTR_NEXT_AFFILIATION.equals(attrName)) {
                 nextTaskId = Integer.valueOf(attrValue);
+            } else if (ATTR_CALLING_UID.equals(attrName)) {
+                callingUid = Integer.valueOf(attrValue);
+            } else if (ATTR_CALLING_PACKAGE.equals(attrName)) {
+                callingPackage = attrValue;
             } else {
                 Slog.w(TAG, "TaskRecord: Unknown attribute=" + attrName);
             }
@@ -898,7 +916,8 @@ final class TaskRecord {
                 affinityIntent, affinity, realActivity, origActivity, rootHasReset,
                 autoRemoveRecents, askedCompatMode, taskType, userId, lastDescription, activities,
                 firstActiveTime, lastActiveTime, lastTimeOnTop, neverRelinquishIdentity,
-                taskDescription, taskAffiliation, prevTaskId, nextTaskId);
+                taskDescription, taskAffiliation, prevTaskId, nextTaskId, callingUid,
+                callingPackage);
 
         for (int activityNdx = activities.size() - 1; activityNdx >=0; --activityNdx) {
             activities.get(activityNdx).task = task;

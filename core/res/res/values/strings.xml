@@ -774,6 +774,12 @@
        about currently and recently running tasks.  This may allow the app to
        discover information about which applications are used on the device.</string>
 
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_startTasksFromRecents">start a task from recents</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_startTasksFromRecents">Allows the app to use an ActivityManager.RecentTaskInfo
+        object to launch a defunct task that was returned from ActivityManager.getRecentTaskList().</string>
+
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE] -->
     <string name="permlab_interactAcrossUsers">interact across users</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE] -->
