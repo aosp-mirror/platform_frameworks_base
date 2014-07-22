@@ -6896,6 +6896,9 @@
         <attr name="contentInsetRight" format="dimension" />
         <!-- Elevation for the action bar itself -->
         <attr name="elevation" />
+        <!-- Reference to a theme that should be used to inflate popups
+             shown by widgets in the action bar. -->
+        <attr name="popupTheme" />
     </declare-styleable>
 
     <declare-styleable name="ActionMode">
@@ -7184,6 +7187,9 @@
             <flag name="bottom" value="0x50" />
         </attr>
         <attr name="collapseIcon" format="reference" />
+        <!-- Reference to a theme that should be used to inflate popups
+             shown by widgets in the toolbar. -->
+        <attr name="popupTheme" format="reference" />
     </declare-styleable>
 
     <declare-styleable name="Toolbar_LayoutParams">
