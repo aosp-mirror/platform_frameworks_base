@@ -16747,9 +16747,12 @@ package android.media.tv {
     field public static final java.lang.String COLUMN_CHANNEL_ID = "channel_id";
     field public static final java.lang.String COLUMN_CONTENT_RATING = "content_rating";
     field public static final java.lang.String COLUMN_END_TIME_UTC_MILLIS = "end_time_utc_millis";
+    field public static final java.lang.String COLUMN_EPISODE_NUMBER = "episode_number";
+    field public static final java.lang.String COLUMN_EPISODE_TITLE = "episode_title";
     field public static final java.lang.String COLUMN_INTERNAL_PROVIDER_DATA = "internal_provider_data";
     field public static final java.lang.String COLUMN_LONG_DESCRIPTION = "long_description";
     field public static final java.lang.String COLUMN_POSTER_ART_URI = "poster_art_uri";
+    field public static final java.lang.String COLUMN_SEASON_NUMBER = "season_number";
     field public static final java.lang.String COLUMN_SHORT_DESCRIPTION = "short_description";
     field public static final java.lang.String COLUMN_START_TIME_UTC_MILLIS = "start_time_utc_millis";
     field public static final java.lang.String COLUMN_THUMBNAIL_URI = "thumbnail_uri";

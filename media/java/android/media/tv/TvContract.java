@@ -815,6 +815,36 @@ public final class TvContract {
         public static final String COLUMN_TITLE = "title";
 
         /**
+         * The season number of this TV program for episodic TV shows.
+         * <p>
+         * Can be empty.
+         * </p><p>
+         * Type: INTEGER
+         * </p>
+         **/
+        public static final String COLUMN_SEASON_NUMBER = "season_number";
+
+        /**
+         * The episode number of this TV program for episodic TV shows.
+         * <p>
+         * Can be empty.
+         * </p><p>
+         * Type: INTEGER
+         * </p>
+         **/
+        public static final String COLUMN_EPISODE_NUMBER = "episode_number";
+
+        /**
+         * The episode title of this TV program for episodic TV shows.
+         * <p>
+         * Can be empty.
+         * </p><p>
+         * Type: TEXT
+         * </p>
+         **/
+        public static final String COLUMN_EPISODE_TITLE = "episode_title";
+
+        /**
          * The start time of this TV program, in milliseconds since the epoch.
          * <p>
          * Type: INTEGER (long)
