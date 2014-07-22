@@ -488,18 +488,6 @@ public class Vpn {
         return tun;
     }
 
-    /**
-     * Check if a given address is covered by the VPN's routing rules.
-     */
-    public boolean isAddressCovered(InetAddress address) {
-        synchronized (Vpn.this) {
-            if (!isRunningLocked()) {
-                return false;
-            }
-            return RouteInfo.selectBestRoute(mConfig.routes, address) != null;
-        }
-    }
-
     private boolean isRunningLocked() {
         return mVpnUsers != null;
     }

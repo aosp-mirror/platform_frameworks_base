@@ -41,7 +41,6 @@ import static android.net.NetworkPolicyManager.RULE_ALLOW_ALL;
 import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
 
 import android.app.AlarmManager;
-import android.app.AppOpsManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -52,9 +51,7 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
@@ -224,10 +221,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     AlarmManager mAlarmManager;
 
-    // used in recursive route setting to add gateways for the host for which
-    // a host route was requested.
-    private static final int MAX_HOSTROUTE_CYCLE_COUNT = 10;
-
     private Tethering mTethering;
 
     private KeyStore mKeyStore;
@@ -261,11 +254,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private CaptivePortalTracker mCaptivePortalTracker;
 
     /**
-     * The link properties that define the current links
-     */
-    private LinkProperties mCurrentLinkProperties[];
-
-    /**
      * A per Net list of the PID's that requested access to the net
      * used both as a refcount and for per-PID DNS selection
      */
@@ -296,15 +284,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     private static final int ENABLED  = 1;
     private static final int DISABLED = 0;
-
-    private static final boolean ADD = true;
-    private static final boolean REMOVE = false;
-
-    private static final boolean TO_DEFAULT_TABLE = true;
-    private static final boolean TO_SECONDARY_TABLE = false;
-
-    private static final boolean EXEMPT = true;
-    private static final boolean UNEXEMPT = false;
 
     /**
      * used internally as a delayed event to make us switch back to the
@@ -450,19 +429,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     private InetAddress mDefaultDns;
 
-    // Lock for protecting access to mAddedRoutes and mExemptAddresses
-    private final Object mRoutesLock = new Object();
-
-    // this collection is used to refcount the added routes - if there are none left
-    // it's time to remove the route from the route table
-    @GuardedBy("mRoutesLock")
-    private Collection<RouteInfo> mAddedRoutes = new ArrayList<RouteInfo>();
-
-    // this collection corresponds to the entries of mAddedRoutes that have routing exemptions
-    // used to handle cleanup of exempt rules
-    @GuardedBy("mRoutesLock")
-    private Collection<LinkAddress> mExemptAddresses = new ArrayList<LinkAddress>();
-
     // used in DBG mode to track inet condition reports
     private static final int INET_CONDITION_LOG_MAX_SIZE = 15;
     private ArrayList mInetLog;
@@ -478,8 +444,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private PacManager mPacManager = null;
 
     private SettingsObserver mSettingsObserver;
-
-    private AppOpsManager mAppOpsManager;
 
     private UserManager mUserManager;
 
@@ -513,8 +477,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     // sequence number of NetworkRequests
     private int mNextNetworkRequestId = 1;
-
-    private static final int UID_UNUSED = -1;
 
     /**
      * Implements support for the legacy "one network per network type" model.
@@ -701,7 +663,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
         mNetTrackers = new NetworkStateTracker[
                 ConnectivityManager.MAX_NETWORK_TYPE+1];
-        mCurrentLinkProperties = new LinkProperties[ConnectivityManager.MAX_NETWORK_TYPE+1];
 
         mRadioAttributes = new RadioAttributes[ConnectivityManager.MAX_RADIO_TYPE+1];
         mNetConfigs = new NetworkConfig[ConnectivityManager.MAX_NETWORK_TYPE+1];
@@ -883,8 +844,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         filter = new IntentFilter();
         filter.addAction(CONNECTED_TO_PROVISIONING_NETWORK_ACTION);
         mContext.registerReceiver(mProvisioningReceiver, filter);
-
-        mAppOpsManager = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
 
         mUserManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
     }
@@ -1710,42 +1669,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     /**
-     * Check if the address falls into any of currently running VPN's route's.
-     */
-    private boolean isAddressUnderVpn(InetAddress address) {
-        synchronized (mVpns) {
-            synchronized (mRoutesLock) {
-                int uid = UserHandle.getCallingUserId();
-                Vpn vpn = mVpns.get(uid);
-                if (vpn == null) {
-                    return false;
-                }
-
-                // Check if an exemption exists for this address.
-                for (LinkAddress destination : mExemptAddresses) {
-                    if (!NetworkUtils.addressTypeMatches(address, destination.getAddress())) {
-                        continue;
-                    }
-
-                    int prefix = destination.getPrefixLength();
-                    InetAddress addrMasked = NetworkUtils.getNetworkPart(address, prefix);
-                    InetAddress destMasked = NetworkUtils.getNetworkPart(destination.getAddress(),
-                            prefix);
-
-                    if (addrMasked.equals(destMasked)) {
-                        return false;
-                    }
-                }
-
-                // Finally check if the address is covered by the VPN.
-                return vpn.isAddressCovered(address);
-            }
-        }
-    }
-
-    /**
-     * @deprecated use requestRouteToHostAddress instead
-     *
      * Ensure that a network route exists to deliver traffic to the specified
      * host via the specified network interface.
      * @param networkType the type of the network over which traffic to the
@@ -1754,57 +1677,17 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      * desired
      * @return {@code true} on success, {@code false} on failure
      */
-    public boolean requestRouteToHost(int networkType, int hostAddress, String packageName) {
-        InetAddress inetAddress = NetworkUtils.intToInetAddress(hostAddress);
-
-        if (inetAddress == null) {
-            return false;
-        }
-
-        return requestRouteToHostAddress(networkType, inetAddress.getAddress(), packageName);
-    }
-
-    /**
-     * Ensure that a network route exists to deliver traffic to the specified
-     * host via the specified network interface.
-     * @param networkType the type of the network over which traffic to the
-     * specified host is to be routed
-     * @param hostAddress the IP address of the host to which the route is
-     * desired
-     * @return {@code true} on success, {@code false} on failure
-     */
-    public boolean requestRouteToHostAddress(int networkType, byte[] hostAddress,
-            String packageName) {
+    public boolean requestRouteToHostAddress(int networkType, byte[] hostAddress) {
         enforceChangePermission();
         if (mProtectedNetworks.contains(networkType)) {
             enforceConnectivityInternalPermission();
         }
-        boolean exempt;
+
         InetAddress addr;
         try {
             addr = InetAddress.getByAddress(hostAddress);
         } catch (UnknownHostException e) {
             if (DBG) log("requestRouteToHostAddress got " + e.toString());
-            return false;
-        }
-        // System apps may request routes bypassing the VPN to keep other networks working.
-        if (Binder.getCallingUid() == Process.SYSTEM_UID) {
-            exempt = true;
-        } else {
-            mAppOpsManager.checkPackage(Binder.getCallingUid(), packageName);
-            try {
-                ApplicationInfo info = mContext.getPackageManager().getApplicationInfo(packageName,
-                        0);
-                exempt = (info.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
-            } catch (NameNotFoundException e) {
-                throw new IllegalArgumentException("Failed to find calling package details", e);
-            }
-        }
-
-        // Non-exempt routeToHost's can only be added if the host is not covered by the VPN.
-        // This can be either because the VPN's routes do not cover the destination or a
-        // system application added an exemption that covers this destination.
-        if (!exempt && isAddressUnderVpn(addr)) {
             return false;
         }
 
@@ -1822,13 +1705,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
             return false;
         }
+
         DetailedState netState;
         synchronized (nai) {
             netState = nai.networkInfo.getDetailedState();
         }
 
-        if ((netState != DetailedState.CONNECTED &&
-                netState != DetailedState.CAPTIVE_PORTAL_CHECK)) {
+        if (netState != DetailedState.CONNECTED && netState != DetailedState.CAPTIVE_PORTAL_CHECK) {
             if (VDBG) {
                 log("requestRouteToHostAddress on down network "
                         + "(" + networkType + ") - dropped"
@@ -1836,6 +1719,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
             return false;
         }
+
         final int uid = Binder.getCallingUid();
         final long token = Binder.clearCallingIdentity();
         try {
@@ -1845,7 +1729,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 lp = nai.linkProperties;
                 netId = nai.network.netId;
             }
-            boolean ok = modifyRouteToAddress(lp, addr, ADD, TO_DEFAULT_TABLE, exempt, netId, uid);
+            boolean ok = addLegacyRouteToHost(lp, addr, netId, uid);
             if (DBG) log("requestRouteToHostAddress ok=" + ok);
             return ok;
         } finally {
@@ -1853,17 +1737,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
     }
 
-    private boolean addRoute(LinkProperties p, RouteInfo r, boolean toDefaultTable,
-            boolean exempt, int netId) {
-        return modifyRoute(p, r, 0, ADD, toDefaultTable, exempt, netId, false, UID_UNUSED);
-    }
-
-    private boolean removeRoute(LinkProperties p, RouteInfo r, boolean toDefaultTable, int netId) {
-        return modifyRoute(p, r, 0, REMOVE, toDefaultTable, UNEXEMPT, netId, false, UID_UNUSED);
-    }
-
-    private boolean modifyRouteToAddress(LinkProperties lp, InetAddress addr, boolean doAdd,
-            boolean toDefaultTable, boolean exempt, int netId, int uid) {
+    private boolean addLegacyRouteToHost(LinkProperties lp, InetAddress addr, int netId, int uid) {
         RouteInfo bestRoute = RouteInfo.selectBestRoute(lp.getAllRoutes(), addr);
         if (bestRoute == null) {
             bestRoute = RouteInfo.makeHostRoute(addr, lp.getInterfaceName());
@@ -1878,124 +1752,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 bestRoute = RouteInfo.makeHostRoute(addr, bestRoute.getGateway(), iface);
             }
         }
-        return modifyRoute(lp, bestRoute, 0, doAdd, toDefaultTable, exempt, netId, true, uid);
-    }
-
-    /*
-     * TODO: Clean all this stuff up. Once we have UID-based routing, stuff will break due to
-     *       incorrect tracking of mAddedRoutes, so a cleanup becomes necessary and urgent. But at
-     *       the same time, there'll be no more need to track mAddedRoutes or mExemptAddresses,
-     *       or even have the concept of an exempt address, or do things like "selectBestRoute", or
-     *       determine "default" vs "secondary" table, etc., so the cleanup becomes possible.
-     */
-    private boolean modifyRoute(LinkProperties lp, RouteInfo r, int cycleCount, boolean doAdd,
-            boolean toDefaultTable, boolean exempt, int netId, boolean legacy, int uid) {
-        if ((lp == null) || (r == null)) {
-            if (DBG) log("modifyRoute got unexpected null: " + lp + ", " + r);
+        if (VDBG) log("Adding " + bestRoute + " for interface " + bestRoute.getInterface());
+        try {
+            mNetd.addLegacyRouteForNetId(netId, bestRoute, uid);
+        } catch (Exception e) {
+            // never crash - catch them all
+            if (DBG) loge("Exception trying to add a route: " + e);
             return false;
-        }
-
-        if (cycleCount > MAX_HOSTROUTE_CYCLE_COUNT) {
-            loge("Error modifying route - too much recursion");
-            return false;
-        }
-
-        String ifaceName = r.getInterface();
-        if(ifaceName == null) {
-            loge("Error modifying route - no interface name");
-            return false;
-        }
-        if (r.hasGateway()) {
-            RouteInfo bestRoute = RouteInfo.selectBestRoute(lp.getAllRoutes(), r.getGateway());
-            if (bestRoute != null) {
-                if (bestRoute.getGateway().equals(r.getGateway())) {
-                    // if there is no better route, add the implied hostroute for our gateway
-                    bestRoute = RouteInfo.makeHostRoute(r.getGateway(), ifaceName);
-                } else {
-                    // if we will connect to our gateway through another route, add a direct
-                    // route to it's gateway
-                    bestRoute = RouteInfo.makeHostRoute(r.getGateway(),
-                                                        bestRoute.getGateway(),
-                                                        ifaceName);
-                }
-                modifyRoute(lp, bestRoute, cycleCount+1, doAdd, toDefaultTable, exempt, netId,
-                        legacy, uid);
-            }
-        }
-        if (doAdd) {
-            if (VDBG) log("Adding " + r + " for interface " + ifaceName);
-            try {
-                if (toDefaultTable) {
-                    synchronized (mRoutesLock) {
-                        // only track default table - only one apps can effect
-                        mAddedRoutes.add(r);
-                        if (legacy) {
-                            mNetd.addLegacyRouteForNetId(netId, r, uid);
-                        } else {
-                            mNetd.addRoute(netId, r);
-                        }
-                        if (exempt) {
-                            LinkAddress dest = r.getDestinationLinkAddress();
-                            if (!mExemptAddresses.contains(dest)) {
-                                mNetd.setHostExemption(dest);
-                                mExemptAddresses.add(dest);
-                            }
-                        }
-                    }
-                } else {
-                    if (legacy) {
-                        mNetd.addLegacyRouteForNetId(netId, r, uid);
-                    } else {
-                        mNetd.addRoute(netId, r);
-                    }
-                }
-            } catch (Exception e) {
-                // never crash - catch them all
-                if (DBG) loge("Exception trying to add a route: " + e);
-                return false;
-            }
-        } else {
-            // if we remove this one and there are no more like it, then refcount==0 and
-            // we can remove it from the table
-            if (toDefaultTable) {
-                synchronized (mRoutesLock) {
-                    mAddedRoutes.remove(r);
-                    if (mAddedRoutes.contains(r) == false) {
-                        if (VDBG) log("Removing " + r + " for interface " + ifaceName);
-                        try {
-                            if (legacy) {
-                                mNetd.removeLegacyRouteForNetId(netId, r, uid);
-                            } else {
-                                mNetd.removeRoute(netId, r);
-                            }
-                            LinkAddress dest = r.getDestinationLinkAddress();
-                            if (mExemptAddresses.contains(dest)) {
-                                mNetd.clearHostExemption(dest);
-                                mExemptAddresses.remove(dest);
-                            }
-                        } catch (Exception e) {
-                            // never crash - catch them all
-                            if (VDBG) loge("Exception trying to remove a route: " + e);
-                            return false;
-                        }
-                    } else {
-                        if (VDBG) log("not removing " + r + " as it's still in use");
-                    }
-                }
-            } else {
-                if (VDBG) log("Removing " + r + " for interface " + ifaceName);
-                try {
-                    if (legacy) {
-                        mNetd.removeLegacyRouteForNetId(netId, r, uid);
-                    } else {
-                        mNetd.removeRoute(netId, r);
-                    }
-                } catch (Exception e) {
-                    // never crash - catch them all
-                    if (VDBG) loge("Exception trying to remove a route: " + e);
-                    return false;
-                }
-            }
         }
         return true;
     }
@@ -2607,6 +2370,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      *
      * TODO - delete when we're sure all this functionallity is captured.
      */
+    /*
     private void handleConnectivityChange(int netType, LinkProperties curLp, boolean doReset) {
         int resetMask = doReset ? NetworkUtils.RESET_ALL_ADDRESSES : 0;
         boolean exempt = ConnectivityManager.isNetworkTypeExempt(netType);
@@ -2615,10 +2379,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     + " resetMask=" + resetMask);
         }
 
-        /*
-         * If a non-default network is enabled, add the host routes that
-         * will allow it's DNS servers to be accessed.
-         */
+        // If a non-default network is enabled, add the host routes that
+        // will allow it's DNS servers to be accessed.
         handleDnsConfigurationChange(netType);
 
         LinkProperties newLp = null;
@@ -2719,7 +2481,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
         // TODO: Temporary notifying upstread change to Tethering.
         //       @see bug/4455071
-        /** Notify TetheringService if interface name has been changed. */
+        //  Notify TetheringService if interface name has been changed.
         if (TextUtils.equals(mNetTrackers[netType].getNetworkInfo().getReason(),
                              PhoneConstants.REASON_LINK_PROPERTIES_CHANGED)) {
             if (isTetheringSupported()) {
@@ -2727,6 +2489,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
         }
     }
+    */
 
     /**
      * Add and remove routes using the old properties (null if not previously connected),
@@ -2736,6 +2499,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      * host routes should be set to the dns servers
      * returns a boolean indicating the routes changed
      */
+    /*
     private boolean updateRoutes(LinkProperties newLp, LinkProperties curLp,
             boolean isLinkDefault, boolean exempt, int netId) {
         Collection<RouteInfo> routesToAdd = null;
@@ -2789,6 +2553,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
         return routesChanged;
     }
+    */
 
     /**
      * Reads the network specific MTU size from reources.
@@ -3264,10 +3029,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         // any activity by applications trying to use this
                         // connection will fail until the provisioning network
                         // is enabled.
+                        /*
                         for (RouteInfo r : lp.getRoutes()) {
                             removeRoute(lp, r, TO_DEFAULT_TABLE,
                                         mNetTrackers[info.getType()].getNetwork().netId);
                         }
+                        */
                     } else if (state == NetworkInfo.State.DISCONNECTED) {
                     } else if (state == NetworkInfo.State.SUSPENDED) {
                     } else if (state == NetworkInfo.State.CONNECTED) {
@@ -3283,8 +3050,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     // TODO: Temporary allowing network configuration
                     //       change not resetting sockets.
                     //       @see bug/4455071
+                    /*
                     handleConnectivityChange(info.getType(), mCurrentLinkProperties[info.getType()],
                             false);
+                    */
                     break;
                 }
                 case NetworkStateTracker.EVENT_NETWORK_SUBTYPE_CHANGED: {
@@ -4683,7 +4452,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
                             // Make a route to host so we check the specific interface.
                             if (mCs.requestRouteToHostAddress(ConnectivityManager.TYPE_MOBILE_HIPRI,
-                                    hostAddr.getAddress(), null)) {
+                                    hostAddr.getAddress())) {
                                 // Wait a short time to be sure the route is established ??
                                 log("isMobileOk:"
                                         + " wait to establish route to hostAddr=" + hostAddr);

@@ -19,7 +19,6 @@ package android.os;
 
 import android.net.InterfaceConfiguration;
 import android.net.INetworkManagementEventObserver;
-import android.net.LinkAddress;
 import android.net.NetworkStats;
 import android.net.RouteInfo;
 import android.net.UidRange;
@@ -313,11 +312,6 @@ interface INetworkManagementService
      */
     void setDnsServersForNetwork(int netId, in String[] servers, String domains);
 
-    /**
-     * Flush the DNS cache associated with the specified network.
-     */
-    void flushNetworkDnsCache(int netId);
-
     void setFirewallEnabled(boolean enabled);
     boolean isFirewallEnabled();
     void setFirewallInterfaceRule(String iface, boolean allow);
@@ -334,17 +328,6 @@ interface INetworkManagementService
      * Clears the special VPN rules for users in ranges and VPN specified by netId.
      */
     void removeVpnUidRanges(int netId, in UidRange[] ranges);
-
-    /**
-     * Exempts {@code host} from the routing set up by {@link setMarkedForwardingRoute}
-     * All connects to {@code host} will use the global routing table
-     */
-    void setHostExemption(in LinkAddress host);
-
-    /**
-     * Clears an exemption set by {@link setHostExemption}
-     */
-    void clearHostExemption(in LinkAddress host);
 
     /**
      * Start the clatd (464xlat) service
@@ -402,7 +385,6 @@ interface INetworkManagementService
     void removeInterfaceFromNetwork(String iface, int netId);
 
     void addLegacyRouteForNetId(int netId, in RouteInfo routeInfo, int uid);
-    void removeLegacyRouteForNetId(int netId, in RouteInfo routeInfo, int uid);
 
     void setDefaultNetId(int netId);
     void clearDefaultNetId();
