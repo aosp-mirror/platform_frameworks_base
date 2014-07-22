@@ -53,6 +53,12 @@ public abstract class NotificationListenerService extends Service {
     private final String TAG = NotificationListenerService.class.getSimpleName()
             + "[" + getClass().getSimpleName() + "]";
 
+    /** {@link #getCurrentListenerFlags() Listener flags} constant - default state. **/
+    public static final int FLAG_NONE = 0;
+    /** {@link #getCurrentListenerFlags() Listener flags} constant - the primary device UI
+     * should disable notification sound, vibrating and other visual or aural effects. **/
+    public static final int FLAG_DISABLE_HOST_ALERTS = 1;
+
     private INotificationListenerWrapper mWrapper = null;
     private RankingMap mRankingMap;
 
@@ -153,6 +159,16 @@ public abstract class NotificationListenerService extends Service {
      *                   for active notifications.
      */
     public void onNotificationRankingUpdate(RankingMap rankingMap) {
+        // optional
+    }
+
+    /**
+     * Implement this method to be notified when the
+     * {@link #getCurrentListenerFlags() listener flags} change.
+     *
+     * @param flags The current {@link #getCurrentListenerFlags() listener flags}.
+     */
+    public void onListenerFlagsChanged(int flags) {
         // optional
     }
 
@@ -279,6 +295,46 @@ public abstract class NotificationListenerService extends Service {
     }
 
     /**
+     * Gets the set of flags representing current state.
+     *
+     * <p>
+     * The current state may differ from the requested state if the flag represents state
+     * shared across all listeners or a feature the notification host does not support or refuses
+     * to grant.
+     *
+     * @return One or more of the FLAG_ constants.
+     */
+    public final int getCurrentListenerFlags() {
+        if (!isBound()) return FLAG_NONE;
+        try {
+            return getNotificationInterface().getFlagsFromListener(mWrapper);
+        } catch (android.os.RemoteException ex) {
+            Log.v(TAG, "Unable to contact notification manager", ex);
+            return FLAG_NONE;
+        }
+    }
+
+    /**
+     * Sets the desired {@link #getCurrentListenerFlags() listener flags}.
+     *
+     * <p>
+     * This is merely a request, the host may or not choose to take action depending
+     * on other listener requests or other global state.
+     * <p>
+     * Listen for updates using {@link #onListenerFlagsChanged(int)}.
+     *
+     * @param flags One or more of the FLAG_ constants.
+     */
+    public final void requestListenerFlags(int flags) {
+        if (!isBound()) return;
+        try {
+            getNotificationInterface().requestFlagsFromListener(mWrapper, flags);
+        } catch (android.os.RemoteException ex) {
+            Log.v(TAG, "Unable to contact notification manager", ex);
+        }
+    }
+
+    /**
      * Returns current ranking information.
      *
      * <p>
@@ -400,6 +456,14 @@ public abstract class NotificationListenerService extends Service {
                 } catch (Throwable t) {
                     Log.w(TAG, "Error running onNotificationRankingUpdate", t);
                 }
+            }
+        }
+        @Override
+        public void onListenerFlagsChanged(int flags) throws RemoteException {
+            try {
+                NotificationListenerService.this.onListenerFlagsChanged(flags);
+            } catch (Throwable t) {
+                Log.w(TAG, "Error running onListenerFlagsChanged", t);
             }
         }
     }
