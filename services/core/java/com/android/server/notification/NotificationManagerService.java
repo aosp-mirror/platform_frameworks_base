@@ -16,6 +16,7 @@
 
 package com.android.server.notification;
 
+import static android.service.notification.NotificationListenerService.FLAG_DISABLE_HOST_ALERTS;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.END_TAG;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
@@ -71,6 +72,7 @@ import android.service.notification.ZenModeConfig;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.Log;
 import android.util.Slog;
@@ -121,6 +123,7 @@ public class NotificationManagerService extends SystemService {
     static final int MESSAGE_RECONSIDER_RANKING = 4;
     static final int MESSAGE_RANKING_CONFIG_CHANGE = 5;
     static final int MESSAGE_SEND_RANKING_UPDATE = 6;
+    static final int MESSAGE_LISTENER_FLAGS_CHANGED = 7;
 
     static final int LONG_DELAY = 3500; // 3.5 seconds
     static final int SHORT_DELAY = 2000; // 2 seconds
@@ -168,6 +171,9 @@ public class NotificationManagerService extends SystemService {
     private boolean mDisableNotificationAlerts;
     NotificationRecord mSoundNotification;
     NotificationRecord mVibrateNotification;
+
+    private final ArraySet<ManagedServiceInfo> mListenersDisablingAlerts = new ArraySet<>();
+    private int mListenerFlags;  // right now, all flags are global
 
     // for enabling and disabling notification pulse behavior
     private boolean mScreenOn = true;
@@ -463,7 +469,7 @@ public class NotificationManagerService extends SystemService {
         public void onSetDisabled(int status) {
             synchronized (mNotificationList) {
                 mDisableNotificationAlerts = (status & StatusBarManager.DISABLE_NOTIFICATION_ALERTS) != 0;
-                if (mDisableNotificationAlerts) {
+                if (disableNotificationAlerts()) {
                     // cancel whatever's going on
                     long identity = Binder.clearCallingIdentity();
                     try {
@@ -904,6 +910,13 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
+    private void updateListenerFlagsLocked() {
+        final int flags = mListenersDisablingAlerts.isEmpty() ? 0 : FLAG_DISABLE_HOST_ALERTS;
+        if (flags == mListenerFlags) return;
+        mListenerFlags = flags;
+        scheduleListenerFlagsChanged(flags);
+    }
+
     private final IBinder mService = new INotificationManager.Stub() {
         // Toasts
         // ============================================================================
@@ -1249,6 +1262,27 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
+        public void requestFlagsFromListener(INotificationListener token, int flags) {
+            synchronized (mNotificationList) {
+                final ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
+                final boolean disableAlerts = (flags & FLAG_DISABLE_HOST_ALERTS) != 0;
+                if (disableAlerts) {
+                    mListenersDisablingAlerts.add(info);
+                } else {
+                    mListenersDisablingAlerts.remove(info);
+                }
+                updateListenerFlagsLocked();
+            }
+        }
+
+        @Override
+        public int getFlagsFromListener(INotificationListener token) {
+            synchronized (mNotificationList) {
+                return mListenerFlags;
+            }
+        }
+
+        @Override
         public ZenModeConfig getZenModeConfig() {
             enforceSystemOrSystemUI("INotificationManager.getZenModeConfig");
             return mZenModeHelper.getConfig();
@@ -1339,6 +1373,10 @@ public class NotificationManagerService extends SystemService {
         return keys.toArray(new String[keys.size()]);
     }
 
+    private boolean disableNotificationAlerts() {
+        return mDisableNotificationAlerts || (mListenerFlags & FLAG_DISABLE_HOST_ALERTS) != 0;
+    }
+
     void dumpImpl(PrintWriter pw, DumpFilter filter) {
         pw.print("Current Notification Manager state");
         if (filter != null) {
@@ -1422,6 +1460,15 @@ public class NotificationManagerService extends SystemService {
 
                 pw.println("\n  Notification listeners:");
                 mListeners.dump(pw, filter);
+                pw.print("    mListenerFlags: "); pw.println(mListenerFlags);
+                pw.print("    mListenersDisablingAlerts: (");
+                N = mListenersDisablingAlerts.size();
+                for (int i = 0; i < N; i++) {
+                    final ManagedServiceInfo listener = mListenersDisablingAlerts.valueAt(i);
+                    if (i > 0) pw.print(',');
+                    pw.print(listener.component);
+                }
+                pw.println(')');
             }
 
             pw.println("\n  Condition providers:");
@@ -1618,7 +1665,7 @@ public class NotificationManagerService extends SystemService {
         }
 
         // If we're not supposed to beep, vibrate, etc. then don't.
-        if (!mDisableNotificationAlerts
+        if (!disableNotificationAlerts()
                 && (!(record.isUpdate
                     && (notification.flags & Notification.FLAG_ONLY_ALERT_ONCE) != 0 ))
                 && (record.getUserId() == UserHandle.USER_ALL ||
@@ -1920,6 +1967,17 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
+    private void scheduleListenerFlagsChanged(int state) {
+        mHandler.removeMessages(MESSAGE_LISTENER_FLAGS_CHANGED);
+        mHandler.obtainMessage(MESSAGE_LISTENER_FLAGS_CHANGED, state, 0).sendToTarget();
+    }
+
+    private void handleListenerFlagsChanged(int state) {
+        synchronized (mNotificationList) {
+            mListeners.notifyListenerFlagsChangedLocked(state);
+        }
+    }
+
     private final class WorkerHandler extends Handler
     {
         @Override
@@ -1935,6 +1993,9 @@ public class NotificationManagerService extends SystemService {
                     break;
                 case MESSAGE_SEND_RANKING_UPDATE:
                     handleSendRankingUpdate();
+                    break;
+                case MESSAGE_LISTENER_FLAGS_CHANGED:
+                    handleListenerFlagsChanged(msg.arg1);
                     break;
             }
         }
@@ -2445,6 +2506,13 @@ public class NotificationManagerService extends SystemService {
             }
         }
 
+        @Override
+        protected void onServiceRemovedLocked(ManagedServiceInfo removed) {
+            if (mListenersDisablingAlerts.remove(removed)) {
+                updateListenerFlagsLocked();
+            }
+        }
+
         /**
          * asynchronously notify all listeners about a new notification
          */
@@ -2509,6 +2577,20 @@ public class NotificationManagerService extends SystemService {
             }
         }
 
+        public void notifyListenerFlagsChangedLocked(final int flags) {
+            for (final ManagedServiceInfo serviceInfo : mServices) {
+                if (!serviceInfo.isEnabledForCurrentProfiles()) {
+                    continue;
+                }
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        notifyListenerFlagsChanged(serviceInfo, flags);
+                    }
+                });
+            }
+        }
+
         private void notifyPostedIfUserMatch(final ManagedServiceInfo info,
                 final StatusBarNotification sbn, NotificationRankingUpdate rankingUpdate) {
             if (!info.enabledAndUserMatches(sbn.getUserId())) {
@@ -2542,6 +2624,15 @@ public class NotificationManagerService extends SystemService {
                 listener.onNotificationRankingUpdate(rankingUpdate);
             } catch (RemoteException ex) {
                 Log.e(TAG, "unable to notify listener (ranking update): " + listener, ex);
+            }
+        }
+
+        private void notifyListenerFlagsChanged(ManagedServiceInfo info, int state) {
+            final INotificationListener listener = (INotificationListener) info.service;
+            try {
+                listener.onListenerFlagsChanged(state);
+            } catch (RemoteException ex) {
+                Log.e(TAG, "unable to notify listener (listener flags): " + listener, ex);
             }
         }
     }
