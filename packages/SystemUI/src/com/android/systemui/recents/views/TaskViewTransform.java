@@ -83,12 +83,12 @@ public class TaskViewTransform {
     }
 
     /** Applies this transform to a view. */
-    public void applyToTaskView(View v, int duration, Interpolator interp,
+    public void applyToTaskView(View v, int duration, Interpolator interp, boolean allowLayers,
                                 ValueAnimator.AnimatorUpdateListener scaleUpdateListener) {
         // Check to see if any properties have changed, and update the task view
         if (duration > 0) {
             ViewPropertyAnimator anim = v.animate();
-            boolean useLayers = false;
+            boolean requiresLayers = false;
 
             // Animate to the final state
             if (hasTranslationYChangedFrom(v.getTranslationY())) {
@@ -102,14 +102,14 @@ public class TaskViewTransform {
                 anim.scaleX(scale)
                     .scaleY(scale)
                     .setUpdateListener(scaleUpdateListener);
-                useLayers = true;
+                requiresLayers = true;
             }
             if (hasAlphaChangedFrom(v.getAlpha())) {
                 // Use layers if we animate alpha
                 anim.alpha(alpha);
-                useLayers = true;
+                requiresLayers = true;
             }
-            if (useLayers) {
+            if (requiresLayers && allowLayers) {
                 anim.withLayer();
             }
             anim.setStartDelay(startDelay)
@@ -146,7 +146,6 @@ public class TaskViewTransform {
         v.setScaleX(1f);
         v.setScaleY(1f);
         v.setAlpha(1f);
-        v.invalidate();
     }
 
     @Override

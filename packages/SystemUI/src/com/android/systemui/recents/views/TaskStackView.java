@@ -100,13 +100,15 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     LayoutInflater mInflater;
 
     // A convenience runnable to return all views to the pool
-    // XXX: After this is set, we should mark this task stack view as disabled and check that in synchronize model
     Runnable mReturnAllViewsToPoolRunnable = new Runnable() {
         @Override
         public void run() {
             int childCount = getChildCount();
             for (int i = childCount - 1; i >= 0; i--) {
-                mViewPool.returnViewToPool((TaskView) getChildAt(i));
+                TaskView tv = (TaskView) getChildAt(i);
+                mViewPool.returnViewToPool(tv);
+                // Also hide the view since we don't need it anymore
+                tv.setVisibility(View.INVISIBLE);
             }
         }
     };
@@ -131,33 +133,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                     TaskView tv = (TaskView) getChildAt(i);
                     tv.startNoUserInteractionAnimation();
                 }
-            }
-        });
-        mHwLayersTrigger = new ReferenceCountedTrigger(getContext(), new Runnable() {
-            @Override
-            public void run() {
-                // Enable hw layers on each of the children
-                int childCount = getChildCount();
-                for (int i = 0; i < childCount; i++) {
-                    TaskView tv = (TaskView) getChildAt(i);
-                    tv.enableHwLayers();
-                }
-            }
-        }, new Runnable() {
-            @Override
-            public void run() {
-                // Disable hw layers on each of the children
-                int childCount = getChildCount();
-                for (int i = 0; i < childCount; i++) {
-                    TaskView tv = (TaskView) getChildAt(i);
-                    tv.disableHwLayers();
-                }
-            }
-        }, new Runnable() {
-            @Override
-            public void run() {
-                new Throwable("Invalid hw layers ref count").printStackTrace();
-                Console.logError(getContext(), "Invalid HW layers ref count");
             }
         });
     }
@@ -435,17 +410,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         int curScroll = getStackScroll();
         int newScroll = Math.max(mMinScroll, Math.min(mMaxScroll, curScroll));
         if (newScroll != curScroll) {
-            // Enable hw layers on the stack
-            addHwLayersRefCount("animateBoundScroll");
-
             // Start a new scroll animation
-            animateScroll(curScroll, newScroll, new Runnable() {
-                @Override
-                public void run() {
-                    // Disable hw layers on the stack
-                    decHwLayersRefCount("animateBoundScroll");
-                }
-            });
+            animateScroll(curScroll, newScroll, null);
         }
         return mScrollAnimator;
     }
@@ -490,8 +456,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         if (!mScroller.isFinished()) {
             // Abort the scroller
             mScroller.abortAnimation();
-            // And disable hw layers on the stack
-            decHwLayersRefCount("flingScroll");
         }
     }
 
@@ -615,17 +579,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         focusTask(mFocusedTaskIndex, true);
     }
 
-    /** Enables the hw layers and increments the hw layer requirement ref count */
-    void addHwLayersRefCount(String reason) {
-        mHwLayersTrigger.increment();
-    }
-
-    /** Decrements the hw layer requirement ref count and disables the hw layers when we don't
-        need them anymore. */
-    void decHwLayersRefCount(String reason) {
-        mHwLayersTrigger.decrement();
-    }
-
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         return mTouchHandler.onInterceptTouchEvent(ev);
@@ -641,11 +594,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         if (mScroller.computeScrollOffset()) {
             setStackScroll(mScroller.getCurrY());
             invalidate();
-
-            // If we just finished scrolling, then disable the hw layers
-            if (mScroller.isFinished()) {
-                decHwLayersRefCount("finishedFlingScroll");
-            }
         }
     }
 
@@ -969,9 +917,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // Detach the view from the hierarchy
         detachViewFromParent(tv);
 
-        // Disable HW layers
-        tv.disableHwLayers();
-
         // Reset the view properties
         tv.resetViewProperties();
     }
@@ -1014,11 +959,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             tv.setCallbacks(this);
         } else {
             attachViewToParent(tv, insertIndex, tv.getLayoutParams());
-        }
-
-        // Enable hw layers on this view if hw layers are enabled on the stack
-        if (mHwLayersTrigger.getCount() > 0) {
-            tv.enableHwLayers();
         }
     }
 
