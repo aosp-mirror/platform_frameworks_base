@@ -164,5 +164,8 @@
 
     <!-- Volume: time to delay dismissing the volume panel after a click is performed -->
     <integer name="volume_panel_dismiss_delay">200</integer>
+
+    <!-- Hotspot tile: number of days to show after feature is used. -->
+    <integer name="days_to_show_hotspot">30</integer>
 </resources>
 

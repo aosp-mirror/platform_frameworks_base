@@ -35,7 +35,7 @@ import com.android.systemui.statusbar.policy.Listenable;
 import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.RotationLockController;
-import com.android.systemui.statusbar.policy.TetheringController;
+import com.android.systemui.statusbar.policy.HotspotController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.volume.VolumeComponent;
 
@@ -251,7 +251,7 @@ public abstract class QSTile<TState extends State> implements Listenable {
         RotationLockController getRotationLockController();
         NetworkController getNetworkController();
         ZenModeController getZenModeController();
-        TetheringController getTetheringController();
+        HotspotController getHotspotController();
         CastController getCastController();
         FlashlightController getFlashlightController();
         KeyguardMonitor getKeyguardMonitor();

@@ -28,7 +28,6 @@ import static com.android.systemui.statusbar.phone.BarTransitions.MODE_OPAQUE;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_SEMI_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSLUCENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
-
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.TimeInterpolator;
@@ -132,6 +131,7 @@ import com.android.systemui.statusbar.policy.FlashlightController;
 import com.android.systemui.statusbar.policy.HeadsUpNotificationView;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
+import com.android.systemui.statusbar.policy.HotspotControllerImpl;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.LocationControllerImpl;
 import com.android.systemui.statusbar.policy.NetworkControllerImpl;
@@ -205,6 +205,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     BatteryController mBatteryController;
     LocationControllerImpl mLocationController;
     NetworkControllerImpl mNetworkController;
+    HotspotControllerImpl mHotspotController;
     RotationLockControllerImpl mRotationLockController;
     UserInfoController mUserInfoController;
     ZenModeController mZenModeController;
@@ -705,6 +706,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mLocationController = new LocationControllerImpl(mContext); // will post a notification
         mBatteryController = new BatteryController(mContext);
         mNetworkController = new NetworkControllerImpl(mContext);
+        mHotspotController = new HotspotControllerImpl(mContext);
         mBluetoothController = new BluetoothControllerImpl(mContext);
         if (mContext.getResources().getBoolean(R.bool.config_showRotationLock)) {
             mRotationLockController = new RotationLockControllerImpl(mContext);
@@ -758,7 +760,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         if (mQSPanel != null) {
             final QSTileHost qsh = new QSTileHost(mContext, this,
                     mBluetoothController, mLocationController, mRotationLockController,
-                    mNetworkController, mZenModeController, null /*tethering*/,
+                    mNetworkController, mZenModeController, mHotspotController,
                     mCastController, mFlashlightController,
                     mUserSwitcherController, mKeyguardMonitor);
             mQSPanel.setHost(qsh);
