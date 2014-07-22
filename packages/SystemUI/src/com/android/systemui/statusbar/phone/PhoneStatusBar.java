@@ -130,6 +130,7 @@ import com.android.systemui.statusbar.policy.BluetoothControllerImpl;
 import com.android.systemui.statusbar.policy.CastControllerImpl;
 import com.android.systemui.statusbar.policy.FlashlightController;
 import com.android.systemui.statusbar.policy.HeadsUpNotificationView;
+import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.LocationControllerImpl;
@@ -212,6 +213,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     KeyguardUserSwitcher mKeyguardUserSwitcher;
     FlashlightController mFlashlightController;
     UserSwitcherController mUserSwitcherController;
+    KeyguardMonitor mKeyguardMonitor;
 
     int mNaturalBarHeight = -1;
     int mIconSize = -1;
@@ -749,6 +751,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         mFlashlightController = new FlashlightController(mContext);
         mUserSwitcherController = new UserSwitcherController(mContext);
+        mKeyguardMonitor = new KeyguardMonitor();
 
         // Set up the quick settings tile panel
         mQSPanel = (QSPanel) mStatusBarWindow.findViewById(R.id.quick_settings_panel);
@@ -756,8 +759,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             final QSTileHost qsh = new QSTileHost(mContext, this,
                     mBluetoothController, mLocationController, mRotationLockController,
                     mNetworkController, mZenModeController, null /*tethering*/,
-                    mCastController, mVolumeComponent, mFlashlightController,
-                    mUserSwitcherController);
+                    mCastController, mFlashlightController,
+                    mUserSwitcherController, mKeyguardMonitor);
             mQSPanel.setHost(qsh);
             for (QSTile<?> tile : qsh.getTiles()) {
                 mQSPanel.addTile(tile);
@@ -3205,6 +3208,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         checkBarModes();
         updateCarrierLabelVisibility(false);
         updateMediaMetaData(false);
+        mKeyguardMonitor.notifyKeyguardState(mStatusBarKeyguardViewManager.isShowing(),
+                mStatusBarKeyguardViewManager.isSecure());
     }
 
     private void updateDozingState() {

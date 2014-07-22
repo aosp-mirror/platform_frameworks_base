@@ -18,6 +18,7 @@ package com.android.systemui.qs.tiles;
 
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
+import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.LocationController.LocationSettingsChangeCallback;
 
@@ -25,10 +26,13 @@ import com.android.systemui.statusbar.policy.LocationController.LocationSettings
 public class LocationTile extends QSTile<QSTile.BooleanState> {
 
     private final LocationController mController;
+    private final KeyguardMonitor mKeyguard;
+    private final Callback mCallback = new Callback();
 
     public LocationTile(Host host) {
         super(host);
         mController = host.getLocationController();
+        mKeyguard = host.getKeyguardMonitor();
     }
 
     @Override
@@ -40,8 +44,10 @@ public class LocationTile extends QSTile<QSTile.BooleanState> {
     public void setListening(boolean listening) {
         if (listening) {
             mController.addSettingsChangedCallback(mCallback);
+            mKeyguard.addCallback(mCallback);
         } else {
             mController.removeSettingsChangedCallback(mCallback);
+            mKeyguard.removeCallback(mCallback);
         }
     }
 
@@ -59,7 +65,7 @@ public class LocationTile extends QSTile<QSTile.BooleanState> {
     @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
         final boolean locationEnabled =  mController.isLocationEnabled();
-        state.visible = true;
+        state.visible = !(mKeyguard.isSecure() && mKeyguard.isShowing());
         state.value = locationEnabled;
         if (locationEnabled) {
             state.iconId = R.drawable.ic_qs_location_on;
@@ -76,9 +82,15 @@ public class LocationTile extends QSTile<QSTile.BooleanState> {
         }
     }
 
-    private final LocationSettingsChangeCallback mCallback = new LocationSettingsChangeCallback() {
+    private final class Callback implements LocationSettingsChangeCallback,
+            KeyguardMonitor.Callback {
         @Override
         public void onLocationSettingsChanged(boolean enabled) {
+            refreshState();
+        }
+
+        @Override
+        public void onKeyguardChanged() {
             refreshState();
         }
     };
