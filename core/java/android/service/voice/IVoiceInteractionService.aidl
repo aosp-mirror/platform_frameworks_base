@@ -21,4 +21,6 @@ package android.service.voice;
  */
 oneway interface IVoiceInteractionService {
     void ready();
+    void soundModelsChanged();
+    void shutdown();
 }

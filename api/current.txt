@@ -27328,10 +27328,6 @@ package android.service.voice {
     method public int getSupportedRecognitionModes();
     method public int startRecognition(int);
     method public int stopRecognition();
-    field public static final int KEYPHRASE_ENROLLED = 2; // 0x2
-    field public static final int KEYPHRASE_HARDWARE_UNAVAILABLE = -2; // 0xfffffffe
-    field public static final int KEYPHRASE_UNENROLLED = 1; // 0x1
-    field public static final int KEYPHRASE_UNSUPPORTED = -1; // 0xffffffff
     field public static final int MANAGE_ACTION_ENROLL = 0; // 0x0
     field public static final int MANAGE_ACTION_RE_ENROLL = 1; // 0x1
     field public static final int MANAGE_ACTION_UN_ENROLL = 2; // 0x2
@@ -27339,6 +27335,11 @@ package android.service.voice {
     field public static final int RECOGNITION_FLAG_NONE = 0; // 0x0
     field public static final int RECOGNITION_MODE_USER_IDENTIFICATION = 2; // 0x2
     field public static final int RECOGNITION_MODE_VOICE_TRIGGER = 1; // 0x1
+    field public static final int STATE_HARDWARE_UNAVAILABLE = -2; // 0xfffffffe
+    field public static final int STATE_INVALID = -3; // 0xfffffffd
+    field public static final int STATE_KEYPHRASE_ENROLLED = 2; // 0x2
+    field public static final int STATE_KEYPHRASE_UNENROLLED = 1; // 0x1
+    field public static final int STATE_KEYPHRASE_UNSUPPORTED = -1; // 0xffffffff
     field public static final int STATUS_ERROR = -2147483648; // 0x80000000
     field public static final int STATUS_OK = 0; // 0x0
   }
@@ -27350,10 +27351,12 @@ package android.service.voice {
 
   public class VoiceInteractionService extends android.app.Service {
     ctor public VoiceInteractionService();
-    method public final android.service.voice.AlwaysOnHotwordDetector getAlwaysOnHotwordDetector(java.lang.String, java.lang.String, android.service.voice.AlwaysOnHotwordDetector.Callback);
+    method public final android.service.voice.AlwaysOnHotwordDetector createAlwaysOnHotwordDetector(java.lang.String, java.lang.String, android.service.voice.AlwaysOnHotwordDetector.Callback);
     method public static boolean isActiveService(android.content.Context, android.content.ComponentName);
     method public android.os.IBinder onBind(android.content.Intent);
     method public void onReady();
+    method public void onShutdown();
+    method public void onSoundModelsChanged();
     method public void startSession(android.os.Bundle);
     field public static final java.lang.String SERVICE_INTERFACE = "android.service.voice.VoiceInteractionService";
     field public static final java.lang.String SERVICE_META_DATA = "android.voice_interaction";

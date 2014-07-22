@@ -41,26 +41,32 @@ import java.util.List;
  * always-on keyphrase detection APIs.
  */
 public class AlwaysOnHotwordDetector {
-    //---- States of Keyphrase availability ----//
+    //---- States of Keyphrase availability. Return codes for getAvailability() ----//
     /**
-     * Indicates that the given keyphrase is not available on the system because of the
-     * hardware configuration.
+     * Indicates that this hotword detector is no longer valid for any recognition
+     * and should not be used anymore.
      */
-    public static final int KEYPHRASE_HARDWARE_UNAVAILABLE = -2;
+    public static final int STATE_INVALID = -3;
     /**
-     * Indicates that the given keyphrase is not supported.
+     * Indicates that recognition for the given keyphrase is not available on the system
+     * because of the hardware configuration.
      */
-    public static final int KEYPHRASE_UNSUPPORTED = -1;
+    public static final int STATE_HARDWARE_UNAVAILABLE = -2;
+    /**
+     * Indicates that recognition for the given keyphrase is not supported.
+     */
+    public static final int STATE_KEYPHRASE_UNSUPPORTED = -1;
     /**
      * Indicates that the given keyphrase is not enrolled.
      */
-    public static final int KEYPHRASE_UNENROLLED = 1;
+    public static final int STATE_KEYPHRASE_UNENROLLED = 1;
     /**
-     * Indicates that the given keyphrase is currently enrolled but not being actively listened for.
+     * Indicates that the given keyphrase is currently enrolled and it's possible to start
+     * recognition for it.
      */
-    public static final int KEYPHRASE_ENROLLED = 2;
+    public static final int STATE_KEYPHRASE_ENROLLED = 2;
 
-    // Keyphrase management actions ----//
+    // Keyphrase management actions. Used in getManageIntent() ----//
     /** Indicates that we need to enroll. */
     public static final int MANAGE_ACTION_ENROLL = 0;
     /** Indicates that we need to re-enroll. */
@@ -83,7 +89,7 @@ public class AlwaysOnHotwordDetector {
      */
     public static final int RECOGNITION_FLAG_CAPTURE_TRIGGER_AUDIO = 0x1;
 
-    //---- Recognition mode flags ----//
+    //---- Recognition mode flags. Return codes for getSupportedRecognitionModes() ----//
     // Must be kept in sync with the related attribute defined as searchKeyphraseRecognitionFlags.
 
     /**
@@ -109,17 +115,20 @@ public class AlwaysOnHotwordDetector {
      * This may be null if this keyphrase isn't supported by the enrollment application.
      */
     private final KeyphraseMetadata mKeyphraseMetadata;
-    /**
-     * The sound model for the keyphrase, derived from the model management service
-     * (IVoiceInteractionManagerService). May be null if the keyphrase isn't enrolled yet.
-     */
-    private final KeyphraseSoundModel mEnrolledSoundModel;
     private final KeyphraseEnrollmentInfo mKeyphraseEnrollmentInfo;
     private final IVoiceInteractionService mVoiceInteractionService;
     private final IVoiceInteractionManagerService mModelManagementService;
     private final SoundTriggerListener mInternalCallback;
     private final Callback mExternalCallback;
     private final boolean mDisabled;
+    private final Object mLock = new Object();
+
+    /**
+     * The sound model for the keyphrase, derived from the model management service
+     * (IVoiceInteractionManagerService). May be null if the keyphrase isn't enrolled yet.
+     */
+    private KeyphraseSoundModel mEnrolledSoundModel;
+    private boolean mInvalidated;
 
     /**
      * Callbacks for always-on hotword detection.
@@ -151,6 +160,7 @@ public class AlwaysOnHotwordDetector {
             KeyphraseEnrollmentInfo keyphraseEnrollmentInfo,
             IVoiceInteractionService voiceInteractionService,
             IVoiceInteractionManagerService modelManagementService) {
+        mInvalidated = false;
         mText = text;
         mLocale = locale;
         mKeyphraseEnrollmentInfo = keyphraseEnrollmentInfo;
@@ -160,28 +170,34 @@ public class AlwaysOnHotwordDetector {
         mVoiceInteractionService = voiceInteractionService;
         mModelManagementService = modelManagementService;
         if (mKeyphraseMetadata != null) {
-            mEnrolledSoundModel = internalGetKeyphraseSoundModel(mKeyphraseMetadata.id);
-        } else {
-            mEnrolledSoundModel = null;
+            mEnrolledSoundModel = internalGetKeyphraseSoundModelLocked(mKeyphraseMetadata.id);
         }
         int initialAvailability = internalGetAvailabilityLocked();
-        mDisabled = (initialAvailability == KEYPHRASE_HARDWARE_UNAVAILABLE)
-                || (initialAvailability == KEYPHRASE_UNSUPPORTED);
+        mDisabled = (initialAvailability == STATE_HARDWARE_UNAVAILABLE)
+                || (initialAvailability == STATE_KEYPHRASE_UNSUPPORTED);
     }
 
     /**
      * Gets the state of always-on hotword detection for the given keyphrase and locale
      * on this system.
      * Availability implies that the hardware on this system is capable of listening for
-     * the given keyphrase or not.
+     * the given keyphrase or not. <p/>
+     * If the return code is one of {@link #STATE_HARDWARE_UNAVAILABLE} or
+     * {@link #STATE_KEYPHRASE_UNSUPPORTED}, no further interaction should be performed with this
+     * detector. <br/>
+     * If the state is {@link #STATE_KEYPHRASE_UNENROLLED} the caller may choose to begin
+     * an enrollment flow for the keyphrase. <br/>
+     * For {@value #STATE_KEYPHRASE_ENROLLED} a recognition can be started as desired. <br/>
+     * If the return code is {@link #STATE_INVALID}, this detector is stale and must not be used.
+     * A new detector should be obtained and used.
      *
      * @return Indicates if always-on hotword detection is available for the given keyphrase.
-     *         The return code is one of {@link #KEYPHRASE_HARDWARE_UNAVAILABLE},
-     *         {@link #KEYPHRASE_UNSUPPORTED}, {@link #KEYPHRASE_UNENROLLED} or
-     *         {@link #KEYPHRASE_ENROLLED}.
+     *         The return code is one of {@link #STATE_HARDWARE_UNAVAILABLE},
+     *         {@link #STATE_KEYPHRASE_UNSUPPORTED}, {@link #STATE_KEYPHRASE_UNENROLLED},
+     *         {@link #STATE_KEYPHRASE_ENROLLED}, or {@link #STATE_INVALID}.
      */
     public int getAvailability() {
-        synchronized (this) {
+        synchronized (mLock) {
             return internalGetAvailabilityLocked();
         }
     }
@@ -194,7 +210,7 @@ public class AlwaysOnHotwordDetector {
      *         before calling this method to avoid this exception.
      */
     public int getSupportedRecognitionModes() {
-        synchronized (this) {
+        synchronized (mLock) {
             return getSupportedRecognitionModesLocked();
         }
     }
@@ -220,13 +236,13 @@ public class AlwaysOnHotwordDetector {
      *         before calling this method to avoid this exception.
      */
     public int startRecognition(int recognitionFlags) {
-        synchronized (this) {
+        synchronized (mLock) {
             return startRecognitionLocked(recognitionFlags);
         }
     }
 
     private int startRecognitionLocked(int recognitionFlags) {
-        if (internalGetAvailabilityLocked() != KEYPHRASE_ENROLLED) {
+        if (internalGetAvailabilityLocked() != STATE_KEYPHRASE_ENROLLED) {
             throw new UnsupportedOperationException(
                     "Recognition for the given keyphrase is not supported");
         }
@@ -261,13 +277,13 @@ public class AlwaysOnHotwordDetector {
      *         before calling this method to avoid this exception.
      */
     public int stopRecognition() {
-        synchronized (this) {
+        synchronized (mLock) {
             return stopRecognitionLocked();
         }
     }
 
-    private synchronized int stopRecognitionLocked() {
-        if (internalGetAvailabilityLocked() != KEYPHRASE_ENROLLED) {
+    private int stopRecognitionLocked() {
+        if (internalGetAvailabilityLocked() != STATE_KEYPHRASE_ENROLLED) {
             throw new UnsupportedOperationException(
                     "Recognition for the given keyphrase is not supported");
         }
@@ -312,6 +328,10 @@ public class AlwaysOnHotwordDetector {
     }
 
     private int internalGetAvailabilityLocked() {
+        if (mInvalidated) {
+            return STATE_INVALID;
+        }
+
         ModuleProperties dspModuleProperties = null;
         try {
             dspModuleProperties =
@@ -321,23 +341,51 @@ public class AlwaysOnHotwordDetector {
         }
         // No DSP available
         if (dspModuleProperties == null) {
-            return KEYPHRASE_HARDWARE_UNAVAILABLE;
+            return STATE_HARDWARE_UNAVAILABLE;
         }
         // No enrollment application supports this keyphrase/locale
         if (mKeyphraseMetadata == null) {
-            return KEYPHRASE_UNSUPPORTED;
+            return STATE_KEYPHRASE_UNSUPPORTED;
         }
+
         // This keyphrase hasn't been enrolled.
         if (mEnrolledSoundModel == null) {
-            return KEYPHRASE_UNENROLLED;
+            return STATE_KEYPHRASE_UNENROLLED;
         }
-        return KEYPHRASE_ENROLLED;
+        return STATE_KEYPHRASE_ENROLLED;
+    }
+
+    /**
+     * Invalidates this hotword detector so that any future calls to this result
+     * in an IllegalStateException.
+     *
+     * @hide
+     */
+    void invalidate() {
+        synchronized (mLock) {
+            mInvalidated = true;
+        }
+    }
+
+    /**
+     * Reloads the sound models from the service.
+     *
+     * @hide
+     */
+    void onSoundModelsChanged() {
+        synchronized (mLock) {
+            // TODO: This should stop the recognition if it was using an enrolled sound model
+            // that's no longer available.
+            if (mKeyphraseMetadata != null) {
+                mEnrolledSoundModel = internalGetKeyphraseSoundModelLocked(mKeyphraseMetadata.id);
+            }
+        }
     }
 
     /**
      * @return The corresponding {@link KeyphraseSoundModel} or null if none is found.
      */
-    private KeyphraseSoundModel internalGetKeyphraseSoundModel(int keyphraseId) {
+    private KeyphraseSoundModel internalGetKeyphraseSoundModelLocked(int keyphraseId) {
         List<KeyphraseSoundModel> soundModels;
         try {
             soundModels = mModelManagementService
