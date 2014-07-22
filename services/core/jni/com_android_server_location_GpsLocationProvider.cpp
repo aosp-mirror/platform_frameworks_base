@@ -950,6 +950,15 @@ static jobject translate_gps_measurement(JNIEnv* env, GpsMeasurement* measuremen
             receivedGpsTowSetterMethod,
             measurement->received_gps_tow_ns);
 
+    jmethodID receivedGpsTowUncertaintySetterMethod = env->GetMethodID(
+            gpsMeasurementClass,
+            "setReceivedGpsTowUncertaintyInNs",
+            longSignature);
+    env->CallVoidMethod(
+            gpsMeasurementObject,
+            receivedGpsTowUncertaintySetterMethod,
+            measurement->received_gps_tow_uncertainty_ns);
+
     jmethodID cn0SetterMethod =
             env->GetMethodID(gpsMeasurementClass, "setCn0InDbHz", doubleSignature);
     env->CallObjectMethod(gpsMeasurementObject, cn0SetterMethod, measurement->c_n0_dbhz);
