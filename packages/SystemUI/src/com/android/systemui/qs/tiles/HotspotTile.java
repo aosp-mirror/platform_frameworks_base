@@ -16,45 +16,98 @@
 
 package com.android.systemui.qs.tiles;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
-import com.android.systemui.statusbar.policy.TetheringController;
+import com.android.systemui.statusbar.policy.HotspotController;
+import com.android.systemui.statusbar.policy.KeyguardMonitor;
 
 /** Quick settings tile: Hotspot **/
-public class HotspotTile extends QSTile<QSTile.State> {
-    private static final Intent TETHER_SETTINGS = new Intent()
-            .setClassName("com.android.settings", "com.android.settings.TetherSettings");
+public class HotspotTile extends QSTile<QSTile.BooleanState> {
+    private static final String KEY_LAST_USED_DATE = "lastUsedDate";
+    private static final long MILLIS_PER_DAY = 1000 * 60 * 60 * 24;
 
-    // TODO: implement. see com.android.settings.TetherSettings
-
-    private final TetheringController mController;
+    private final HotspotController mController;
+    private final KeyguardMonitor mKeyguard;
+    private final Callback mCallback = new Callback();
+    private final long mTimeToShowTile;
 
     public HotspotTile(Host host) {
         super(host);
-        mController = host.getTetheringController();
+        mController = host.getHotspotController();
+        mKeyguard = host.getKeyguardMonitor();
+
+        mTimeToShowTile = MILLIS_PER_DAY
+                * mContext.getResources().getInteger(R.integer.days_to_show_hotspot);
     }
 
     @Override
-    protected State newTileState() {
-        return new State();
+    protected BooleanState newTileState() {
+        return new BooleanState();
     }
 
     @Override
     public void setListening(boolean listening) {
-
+        if (listening) {
+            mController.addCallback(mCallback);
+            mKeyguard.addCallback(mCallback);
+        } else {
+            mController.removeCallback(mCallback);
+            mKeyguard.removeCallback(mCallback);
+        }
     }
 
     @Override
     protected void handleClick() {
-        mHost.startSettingsActivity(TETHER_SETTINGS);
+        final boolean isEnabled = (Boolean) mState.value;
+        mController.setHotspotEnabled(!isEnabled);
     }
 
     @Override
-    protected void handleUpdateState(State state, Object arg) {
-        state.visible = mController != null;
+    protected void handleUpdateState(BooleanState state, Object arg) {
+        state.visible = !(mKeyguard.isSecure() && mKeyguard.isShowing())
+                && mController.isHotspotSupported() && isHotspotRecentlyUsed();
         state.label = mContext.getString(R.string.quick_settings_hotspot_label);
-        state.iconId = R.drawable.ic_qs_hotspot_off;
+
+        state.value = mController.isHotspotEnabled();
+        state.iconId = state.visible && state.value ? R.drawable.ic_qs_hotspot_on
+                : R.drawable.ic_qs_hotspot_off;
+    }
+
+    private boolean isHotspotRecentlyUsed() {
+        long lastDay = getSharedPrefs(mContext).getLong(KEY_LAST_USED_DATE, 0);
+        return (System.currentTimeMillis() - lastDay) < mTimeToShowTile;
+    }
+
+    private static SharedPreferences getSharedPrefs(Context context) {
+        return context.getSharedPreferences(context.getPackageName(), 0);
+    }
+
+    private final class Callback implements HotspotController.Callback, KeyguardMonitor.Callback {
+        @Override
+        public void onHotspotChanged(boolean enabled) {
+            refreshState();
+        }
+
+        @Override
+        public void onKeyguardChanged() {
+            refreshState();
+        }
+    };
+
+    /**
+     * This will catch broadcasts for changes in hotspot state so we can show
+     * the hotspot tile for a number of days after use.
+     */
+    public static class APChangedReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            long currentTime = System.currentTimeMillis();
+            getSharedPrefs(context).edit().putLong(KEY_LAST_USED_DATE, currentTime).commit();
+        }
     }
 }

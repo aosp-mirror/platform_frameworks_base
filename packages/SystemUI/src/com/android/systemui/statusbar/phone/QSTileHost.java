@@ -40,7 +40,7 @@ import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.RotationLockController;
-import com.android.systemui.statusbar.policy.TetheringController;
+import com.android.systemui.statusbar.policy.HotspotController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 
@@ -57,7 +57,7 @@ public class QSTileHost implements QSTile.Host {
     private final RotationLockController mRotation;
     private final NetworkController mNetwork;
     private final ZenModeController mZen;
-    private final TetheringController mTethering;
+    private final HotspotController mHotspot;
     private final CastController mCast;
     private final Looper mLooper;
     private final CurrentUserTracker mUserTracker;
@@ -69,7 +69,7 @@ public class QSTileHost implements QSTile.Host {
     public QSTileHost(Context context, PhoneStatusBar statusBar,
             BluetoothController bluetooth, LocationController location,
             RotationLockController rotation, NetworkController network,
-            ZenModeController zen, TetheringController tethering,
+            ZenModeController zen, HotspotController hotspot,
             CastController cast, FlashlightController flashlight,
             UserSwitcherController userSwitcher, KeyguardMonitor keyguard) {
         mContext = context;
@@ -79,7 +79,7 @@ public class QSTileHost implements QSTile.Host {
         mRotation = rotation;
         mNetwork = network;
         mZen = zen;
-        mTethering = tethering;
+        mHotspot = hotspot;
         mCast = cast;
         mFlashlight = flashlight;
         mUserSwitcherController = userSwitcher;
@@ -167,8 +167,8 @@ public class QSTileHost implements QSTile.Host {
     }
 
     @Override
-    public TetheringController getTetheringController() {
-        return mTethering;
+    public HotspotController getHotspotController() {
+        return mHotspot;
     }
 
     @Override

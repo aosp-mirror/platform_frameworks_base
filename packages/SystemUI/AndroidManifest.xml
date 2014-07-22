@@ -155,6 +155,13 @@
             </intent-filter>
         </receiver>
 
+        <receiver android:name=".qs.tiles.HotspotTile$APChangedReceiver"
+                androidprv:primaryUserOnly="true">
+            <intent-filter>
+                <action android:name="android.net.wifi.WIFI_AP_STATE_CHANGED" />
+            </intent-filter>
+        </receiver>
+
         <activity android:name=".usb.UsbStorageActivity"
                   android:label="@*android:string/usb_storage_activity_title"
                   android:excludeFromRecents="true">
