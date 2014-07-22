@@ -27,6 +27,8 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
+import android.util.TypedValue;
+import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -152,6 +154,11 @@ public class ToolbarWidgetWrapper implements DecorToolbar {
                     R.styleable.ActionBar_subtitleTextStyle, 0);
             if (subtitleTextStyle != 0) {
                 mToolbar.setSubtitleTextAppearance(mToolbar.getContext(), subtitleTextStyle);
+            }
+
+            final int popupTheme = a.getResourceId(R.styleable.ActionBar_popupTheme, 0);
+            if (popupTheme != 0) {
+                mToolbar.setPopupTheme(popupTheme);
             }
 
             a.recycle();
