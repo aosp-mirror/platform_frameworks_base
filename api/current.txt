@@ -6660,7 +6660,7 @@ package android.content {
   public abstract class AbstractRestrictionsProvider extends android.content.BroadcastReceiver {
     ctor public AbstractRestrictionsProvider();
     method public void onReceive(android.content.Context, android.content.Intent);
-    method public abstract void requestPermission(android.content.Context, java.lang.String, java.lang.String, android.os.Bundle);
+    method public abstract void requestPermission(android.content.Context, java.lang.String, java.lang.String, java.lang.String, android.os.PersistableBundle);
   }
 
   public abstract class AbstractThreadedSyncAdapter {
@@ -8050,14 +8050,17 @@ package android.content {
 
   public class RestrictionsManager {
     method public android.os.Bundle getApplicationRestrictions();
+    method public android.content.Intent getLocalApprovalIntent();
     method public java.util.List<android.content.RestrictionEntry> getManifestRestrictions(java.lang.String);
     method public boolean hasRestrictionsProvider();
-    method public void notifyPermissionResponse(java.lang.String, android.os.Bundle);
-    method public void requestPermission(java.lang.String, android.os.Bundle);
-    field public static final java.lang.String ACTION_PERMISSION_RESPONSE_RECEIVED = "android.intent.action.PERMISSION_RESPONSE_RECEIVED";
+    method public void notifyPermissionResponse(java.lang.String, android.os.PersistableBundle);
+    method public void requestPermission(java.lang.String, java.lang.String, android.os.PersistableBundle);
+    field public static final java.lang.String ACTION_PERMISSION_RESPONSE_RECEIVED = "android.content.action.PERMISSION_RESPONSE_RECEIVED";
+    field public static final java.lang.String ACTION_REQUEST_LOCAL_APPROVAL = "android.content.action.REQUEST_LOCAL_APPROVAL";
     field public static final java.lang.String ACTION_REQUEST_PERMISSION = "android.content.action.REQUEST_PERMISSION";
     field public static final java.lang.String EXTRA_PACKAGE_NAME = "android.content.extra.PACKAGE_NAME";
     field public static final java.lang.String EXTRA_REQUEST_BUNDLE = "android.content.extra.REQUEST_BUNDLE";
+    field public static final java.lang.String EXTRA_REQUEST_ID = "android.content.extra.REQUEST_ID";
     field public static final java.lang.String EXTRA_REQUEST_TYPE = "android.content.extra.REQUEST_TYPE";
     field public static final java.lang.String EXTRA_RESPONSE_BUNDLE = "android.content.extra.RESPONSE_BUNDLE";
     field public static final java.lang.String META_DATA_APP_RESTRICTIONS = "android.content.APP_RESTRICTIONS";
@@ -8070,7 +8073,6 @@ package android.content {
     field public static final java.lang.String REQUEST_KEY_NEW_REQUEST = "android.request.new_request";
     field public static final java.lang.String REQUEST_KEY_TITLE = "android.request.title";
     field public static final java.lang.String REQUEST_TYPE_APPROVAL = "android.request.type.approval";
-    field public static final java.lang.String REQUEST_TYPE_LOCAL_APPROVAL = "android.request.type.local_approval";
     field public static final java.lang.String RESPONSE_KEY_ERROR_CODE = "android.response.errorcode";
     field public static final java.lang.String RESPONSE_KEY_MESSAGE = "android.response.msg";
     field public static final java.lang.String RESPONSE_KEY_RESPONSE_TIMESTAMP = "android.response.timestamp";
