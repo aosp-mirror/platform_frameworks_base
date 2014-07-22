@@ -28,6 +28,7 @@ import android.hardware.camera2.CaptureRequest;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
+import android.os.SystemProperties;
 import android.util.Log;
 import android.util.Size;
 import android.view.Surface;
@@ -41,6 +42,14 @@ import java.util.ArrayList;
 public class FlashlightController {
 
     private static final String TAG = "FlashlightController";
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+
+    private static final boolean ENFORCE_AVAILABILITY_LISTENER =
+            SystemProperties.getBoolean("persist.sysui.flash.listener", false);
+
+    private static final int DISPATCH_ERROR = 0;
+    private static final int DISPATCH_OFF = 1;
+    private static final int DISPATCH_AVAILABILITY_CHANGED = 2;
 
     private final CameraManager mCameraManager;
     /** Call {@link #ensureHandler()} before using */
@@ -52,6 +61,8 @@ public class FlashlightController {
     /** Lock on {@code this} when accessing */
     private boolean mFlashlightEnabled;
 
+    private String mCameraId;
+    private boolean mCameraAvailable;
     private CameraDevice mCameraDevice;
     private CaptureRequest mFlashlightRequest;
     private CameraCaptureSession mSession;
@@ -60,6 +71,20 @@ public class FlashlightController {
 
     public FlashlightController(Context mContext) {
         mCameraManager = (CameraManager) mContext.getSystemService(Context.CAMERA_SERVICE);
+        initialize();
+    }
+
+    public void initialize() {
+        try {
+            mCameraId = getCameraId();
+        } catch (CameraAccessException e) {
+            Log.e(TAG, "Couldn't initialize.", e);
+            return;
+        }
+
+        ensureHandler();
+        mCameraAvailable = true;
+        mCameraManager.addAvailabilityListener(mAvailabilityListener, mHandler);
     }
 
     public synchronized void setFlashlight(boolean enabled) {
@@ -69,12 +94,8 @@ public class FlashlightController {
         }
     }
 
-    public boolean isAvailable() {
-        try {
-            return getCameraId() != null;
-        } catch (CameraAccessException e) {
-            return false;
-        }
+    public synchronized boolean isAvailable() {
+        return ENFORCE_AVAILABILITY_LISTENER ? mCameraAvailable : (mCameraId != null);
     }
 
     public void addListener(FlashlightListener l) {
@@ -207,24 +228,30 @@ public class FlashlightController {
     }
 
     private void dispatchOff() {
-        dispatchListeners(false, true /* off */);
+        dispatchListeners(DISPATCH_OFF, false /* argument (ignored) */);
     }
 
     private void dispatchError() {
-        dispatchListeners(true /* error */, false);
+        dispatchListeners(DISPATCH_ERROR, false /* argument (ignored) */);
     }
 
-    private void dispatchListeners(boolean error, boolean off) {
+    private void dispatchAvailabilityChanged(boolean available) {
+        dispatchListeners(DISPATCH_AVAILABILITY_CHANGED, available);
+    }
+
+    private void dispatchListeners(int message, boolean argument) {
         synchronized (mListeners) {
             final int N = mListeners.size();
             boolean cleanup = false;
             for (int i = 0; i < N; i++) {
                 FlashlightListener l = mListeners.get(i).get();
                 if (l != null) {
-                    if (error) {
+                    if (message == DISPATCH_ERROR) {
                         l.onFlashlightError();
-                    } else if (off) {
+                    } else if (message == DISPATCH_OFF) {
                         l.onFlashlightOff();
+                    } else if (message == DISPATCH_AVAILABILITY_CHANGED) {
+                        l.onFlashlightAvailabilityChanged(argument);
                     }
                 } else {
                     cleanup = true;
@@ -293,6 +320,37 @@ public class FlashlightController {
         }
     };
 
+    private final CameraManager.AvailabilityListener mAvailabilityListener =
+            new CameraManager.AvailabilityListener() {
+        @Override
+        public void onCameraAvailable(String cameraId) {
+            if (DEBUG) Log.d(TAG, "onCameraAvailable(" + cameraId + ")");
+            if (cameraId.equals(mCameraId)) {
+                setCameraAvailable(true);
+            }
+        }
+
+        @Override
+        public void onCameraUnavailable(String cameraId) {
+            if (DEBUG) Log.d(TAG, "onCameraUnavailable(" + cameraId + ")");
+            if (cameraId.equals(mCameraId)) {
+                setCameraAvailable(false);
+            }
+        }
+
+        private void setCameraAvailable(boolean available) {
+            boolean changed;
+            synchronized (FlashlightController.this) {
+                changed = mCameraAvailable != available;
+                mCameraAvailable = available;
+            }
+            if (changed) {
+                if (DEBUG) Log.d(TAG, "dispatchAvailabilityChanged(" + available + ")");
+                dispatchAvailabilityChanged(available);
+            }
+        }
+    };
+
     public interface FlashlightListener {
 
         /**
@@ -304,5 +362,11 @@ public class FlashlightController {
          * Called when there is an error that turns the flashlight off.
          */
         void onFlashlightError();
+
+        /**
+         * Called when there is a change in availability of the flashlight functionality
+         * @param available true if the flashlight is currently available.
+         */
+        void onFlashlightAvailabilityChanged(boolean available);
     }
 }
