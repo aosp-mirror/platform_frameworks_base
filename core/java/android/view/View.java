@@ -5048,8 +5048,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *         View, false otherwise.
      *
      * @see ViewGroup#FOCUS_BLOCK_DESCENDANTS
+     * @see ViewGroup#getTouchscreenBlocksFocus()
      */
     public boolean hasFocusable() {
+        if (!isFocusableInTouchMode()) {
+            for (ViewParent p = mParent; p instanceof ViewGroup; p = p.getParent()) {
+                final ViewGroup g = (ViewGroup) p;
+                if (g.shouldBlockFocusForTouchscreen()) {
+                    return false;
+                }
+            }
+        }
         return (mViewFlags & VISIBILITY_MASK) == VISIBLE && isFocusable();
     }
 
@@ -7439,11 +7448,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return Whether any ancestor of this view blocks descendant focus.
      */
     private boolean hasAncestorThatBlocksDescendantFocus() {
+        final boolean focusableInTouchMode = isFocusableInTouchMode();
         ViewParent ancestor = mParent;
         while (ancestor instanceof ViewGroup) {
             final ViewGroup vgAncestor = (ViewGroup) ancestor;
             if (vgAncestor.getDescendantFocusability() == ViewGroup.FOCUS_BLOCK_DESCENDANTS
-                    || vgAncestor.shouldBlockFocusForTouchscreen()) {
+                    || (!focusableInTouchMode && vgAncestor.shouldBlockFocusForTouchscreen())) {
                 return true;
             } else {
                 ancestor = vgAncestor.getParent();
