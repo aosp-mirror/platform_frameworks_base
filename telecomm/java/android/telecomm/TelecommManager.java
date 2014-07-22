@@ -291,6 +291,16 @@ public class TelecommManager {
     }
 
     /**
+     * Determine whether the device has more than one account registered and enabled.
+     *
+     * @return {@code true} if the device has more than one account registered and enabled and
+     * {@code false} otherwise.
+     */
+    public boolean hasMultipleEnabledAccounts() {
+        return getEnabledPhoneAccounts().size() > 1;
+    }
+
+    /**
      * Return the {@link PhoneAccount} for a specified {@link PhoneAccountHandle}. Object includes
      * resources which can be used in a user interface.
      *
