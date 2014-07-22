@@ -31,6 +31,7 @@ import android.media.MediaPlayer.OnErrorListener;
 import android.media.MediaPlayer.OnPreparedListener;
 import android.media.browse.MediaBrowserItem;
 import android.media.browse.MediaBrowserService;
+import android.media.browse.MediaBrowserService.BrowserRoot;
 import android.media.session.MediaSession;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
@@ -115,24 +116,27 @@ public class BrowserService extends MediaBrowserService {
     }
 
     @Override
-    public Uri onGetRoot(String clientPackageName, int clientUid, Bundle rootHints) {
-        return BROWSE_URI;
+    protected BrowserRoot onGetRoot(String clientPackageName, int clientUid, Bundle rootHints) {
+        return new BrowserRoot(BROWSE_URI, null);
     }
 
     @Override
-    public List<MediaBrowserItem> onLoadChildren(Uri parentUri) {
+    protected List<MediaBrowserItem> onLoadChildren(Uri parentUri) {
         final ArrayList<MediaBrowserItem> results = new ArrayList();
 
         for (int i=0; i<10; i++) {
-            results.add(new MediaBrowserItem.Builder(Uri.withAppendedPath(BASE_URI, Integer.toString(i)),
-                    MediaBrowserItem.FLAG_BROWSABLE, "Title " + i).setSummary("Summary " + i).build());
+            results.add(new MediaBrowserItem.Builder(
+                    Uri.withAppendedPath(BASE_URI, Integer.toString(i)),
+                    MediaBrowserItem.FLAG_BROWSABLE, "Title " + i)
+                    .setSummary("Summary " + i)
+                    .build());
         }
 
         return results;
     }
 
     @Override
-    public Bitmap onGetThumbnail(Uri uri, int width, int height, int density) {
+    protected Bitmap onGetThumbnail(Uri uri, int width, int height) {
         return null;
     }
 
