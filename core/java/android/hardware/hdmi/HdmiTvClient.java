@@ -168,29 +168,56 @@ public final class HdmiTvClient extends HdmiClient {
     /**
      * Set {@link RecordRequestListener} to hdmi control service.
      */
-    public void setRecordRequestListener(RecordRequestListener listener) {
+    public void setOneTouchRecordRequestListener(RecordRequestListener listener) {
         try {
-            mService.setRecordRequestListener(getCallbackWrapper(listener));
+            mService.setOneTouchRecordRequestListener(getCallbackWrapper(listener));
         } catch (RemoteException e) {
             Log.e(TAG, "failed to set record request listener: ", e);
         }
     }
 
     /**
-     * Start recording with the given recorder address and recorder source.
-     * <p>Usage
+     * Start one touch recording with the given recorder address and recorder source.
+     * <p>
+     * Usage
      * <pre>
      * HdmiTvClient tvClient = ....;
      * // for own source.
      * OwnSource ownSource = ownHdmiRecordSources.ownSource();
-     * tvClient.startRecord(recorderAddress, ownSource);
+     * tvClient.startOneTouchRecord(recorderAddress, ownSource);
      * </pre>
      */
-    public void startRecord(int recorderAddress, HdmiRecordSources.RecordSource source) {
+    public void startOneTouchRecord(int recorderAddress, HdmiRecordSources.RecordSource source) {
         try {
             byte[] data = new byte[source.getDataSize(true)];
             source.toByteArray(true, data, 0);
-            mService.startRecord(recorderAddress, data);
+            mService.startOneTouchRecord(recorderAddress, data);
+        } catch (RemoteException e) {
+            Log.e(TAG, "failed to start record: ", e);
+        }
+    }
+
+    /**
+     * Start timer recording with the given recoder address and recorder source.
+     * <p>
+     * Usage
+     * <pre>
+     * HdmiTvClient tvClient = ....;
+     * // create timer info
+     * TimerInfo timerInfo = HdmiTimerRecourdSources.timerInfoOf(...);
+     * // for digital source.
+     * DigitalServiceSource recordSource = HdmiRecordSources.ofDigitalService(...);
+     * // create timer recording source.
+     * TimerRecordSource source = HdmiTimerRecourdSources.ofDigitalSource(timerInfo, recordSource);
+     * tvClient.startTimerRecording(recorderAddress, source);
+     * </pre>
+     */
+    public void startTimerRecording(int recorderAddress,
+            HdmiTimerRecordSources.TimerRecordSource source) {
+        try {
+            byte[] data = new byte[source.getDataSize()];
+            source.toByteArray(data, 0);
+            mService.startTimerRecording(recorderAddress, data);
         } catch (RemoteException e) {
             Log.e(TAG, "failed to start record: ", e);
         }
