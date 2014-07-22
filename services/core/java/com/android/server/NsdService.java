@@ -603,7 +603,7 @@ public class NsdService extends INsdManager.Stub {
         return mUniqueId;
     }
 
-    /* These should be in sync with system/netd/mDnsResponseCode.h */
+    /* These should be in sync with system/netd/server/ResponseCode.h */
     class NativeResponseCode {
         public static final int SERVICE_DISCOVERY_FAILED    =   602;
         public static final int SERVICE_FOUND               =   603;

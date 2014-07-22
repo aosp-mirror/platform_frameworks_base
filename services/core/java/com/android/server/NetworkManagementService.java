@@ -117,7 +117,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     public static final String LIMIT_GLOBAL_ALERT = "globalAlert";
 
     class NetdResponseCode {
-        /* Keep in sync with system/netd/ResponseCode.h */
+        /* Keep in sync with system/netd/server/ResponseCode.h */
         public static final int InterfaceListResult       = 110;
         public static final int TetherInterfaceListResult = 111;
         public static final int TetherDnsFwdTgtListResult = 112;
@@ -1745,36 +1745,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     @Override
-    public void setHostExemption(LinkAddress host) {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-        try {
-            mConnector.execute("interface", "fwmark", "exempt", "add", host);
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
-        }
-    }
-
-    @Override
-    public void clearHostExemption(LinkAddress host) {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-        try {
-            mConnector.execute("interface", "fwmark", "exempt", "remove", host);
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
-        }
-    }
-
-    @Override
-    public void flushNetworkDnsCache(int netId) {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-        try {
-            mConnector.execute("resolver", "flushnet", netId);
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
-        }
-    }
-
-    @Override
     public void setFirewallEnabled(boolean enabled) {
         enforceSystemUid();
         try {
@@ -2019,18 +1989,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public void addLegacyRouteForNetId(int netId, RouteInfo routeInfo, int uid) {
-        modifyLegacyRouteForNetId("add", netId, routeInfo, uid);
-    }
-
-    @Override
-    public void removeLegacyRouteForNetId(int netId, RouteInfo routeInfo, int uid) {
-        modifyLegacyRouteForNetId("remove", netId, routeInfo, uid);
-    }
-
-    private void modifyLegacyRouteForNetId(String action, int netId, RouteInfo routeInfo, int uid) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
-        final Command cmd = new Command("network", "route", "legacy", uid, action, netId);
+        final Command cmd = new Command("network", "route", "legacy", uid, "add", netId);
 
         // create triplet: interface dest-ip-addr/prefixlength gateway-ip-addr
         final LinkAddress la = routeInfo.getDestinationLinkAddress();
