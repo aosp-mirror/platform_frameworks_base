@@ -5468,11 +5468,9 @@
              Corresponds to {@link android.transition.Visibility#setMode(int)}. -->
         <attr name="visibilityMode">
             <!-- Only appearing Views will be supported. -->
-            <enum name="mode_in" value="1" />
+            <flag name="mode_in" value="1" />
             <!-- Only disappearing Views will be supported. -->
-            <enum name="mode_out" value="2" />
-            <!-- Both appearing and disappearing views will be supported. -->
-            <enum name="mode_in_out" value="3" />
+            <flag name="mode_out" value="2" />
         </attr>
     </declare-styleable>
     <!-- Use <code>target</code> as the root tag of the XML resource that
