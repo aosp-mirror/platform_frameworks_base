@@ -211,9 +211,6 @@ class TvInputHardwareManager implements TvInputHal.Callback {
     }
 
     public void addHardwareTvInput(int deviceId, TvInputInfo info) {
-        if (info.getType() == TvInputInfo.TYPE_VIRTUAL) {
-            throw new IllegalArgumentException("info (" + info + ") has virtual type.");
-        }
         synchronized (mLock) {
             String oldInputId = mHardwareInputIdMap.get(deviceId);
             if (oldInputId != null) {
