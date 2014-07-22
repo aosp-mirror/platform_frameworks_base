@@ -40,6 +40,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.IUserManager;
+import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -103,7 +104,8 @@ public final class RestrictionsManagerService extends SystemService {
 
         @Override
         public void requestPermission(final String packageName, final String requestType,
-                final Bundle requestData) throws RemoteException {
+                final String requestId,
+                final PersistableBundle requestData) throws RemoteException {
             if (DEBUG) {
                 Log.i(LOG_TAG, "requestPermission");
             }
@@ -127,6 +129,7 @@ public final class RestrictionsManagerService extends SystemService {
                     intent.setComponent(restrictionsProvider);
                     intent.putExtra(RestrictionsManager.EXTRA_PACKAGE_NAME, packageName);
                     intent.putExtra(RestrictionsManager.EXTRA_REQUEST_TYPE, requestType);
+                    intent.putExtra(RestrictionsManager.EXTRA_REQUEST_ID, requestId);
                     intent.putExtra(RestrictionsManager.EXTRA_REQUEST_BUNDLE, requestData);
                     mContext.sendBroadcastAsUser(intent, new UserHandle(userHandle));
                 } finally {
@@ -136,7 +139,40 @@ public final class RestrictionsManagerService extends SystemService {
         }
 
         @Override
-        public void notifyPermissionResponse(String packageName, Bundle response)
+        public Intent getLocalApprovalIntent() throws RemoteException {
+            if (DEBUG) {
+                Log.i(LOG_TAG, "requestPermission");
+            }
+            final int userHandle = UserHandle.getCallingUserId();
+            if (mDpm != null) {
+                long ident = Binder.clearCallingIdentity();
+                try {
+                    ComponentName restrictionsProvider =
+                            mDpm.getRestrictionsProvider(userHandle);
+                    // Check if there is a restrictions provider
+                    if (restrictionsProvider == null) {
+                        throw new IllegalStateException(
+                            "Cannot request permission without a restrictions provider registered");
+                    }
+                    String providerPackageName = restrictionsProvider.getPackageName();
+                    Intent intent = new Intent(RestrictionsManager.ACTION_REQUEST_LOCAL_APPROVAL);
+                    intent.setPackage(providerPackageName);
+                    ResolveInfo ri = AppGlobals.getPackageManager().resolveIntent(intent,
+                            null /* resolvedType */, 0 /* flags */, userHandle);
+                    if (ri != null && ri.activityInfo != null && ri.activityInfo.exported) {
+                        intent.setComponent(new ComponentName(ri.activityInfo.packageName,
+                                ri.activityInfo.name));
+                        return intent;
+                    }
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
+                }
+            }
+            return null;
+        }
+
+        @Override
+        public void notifyPermissionResponse(String packageName, PersistableBundle response)
                 throws RemoteException {
             // Check caller
             int callingUid = Binder.getCallingUid();
