@@ -159,6 +159,8 @@ public class TransitionInflater {
                 transition = new AutoTransition(mContext, attrs);
             } else if ("recolor".equals(name)) {
                 transition = new Recolor(mContext, attrs);
+            } else if ("changeScroll".equals(name)) {
+                transition = new ChangeScroll(mContext, attrs);
             } else if ("transitionSet".equals(name)) {
                 transition = new TransitionSet(mContext, attrs);
             } else if ("transition".equals(name)) {
