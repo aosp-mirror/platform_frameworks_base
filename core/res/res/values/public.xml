@@ -2267,6 +2267,7 @@
   <public type="attr" name="checkMarkTint" />
   <public type="attr" name="checkMarkTintMode" />
   <public type="attr" name="popupTheme" />
+  <public type="attr" name="toolbarStyle" />
 
   <public-padding type="dimen" name="l_resource_pad" end="0x01050010" />
 
