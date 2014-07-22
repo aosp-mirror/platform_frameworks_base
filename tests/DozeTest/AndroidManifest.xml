@@ -22,7 +22,8 @@
             android:name="DozeTestDream"
             android:exported="true"
             android:icon="@drawable/ic_app"
-            android:label="@string/doze_dream_name">
+            android:label="@string/doze_dream_name"
+            android:permission="android.permission.BIND_DREAM_SERVICE">
             <!-- Commented out to prevent this dream from appearing in the list of
                  dreams that the user can select via the Settings application.
             <intent-filter>

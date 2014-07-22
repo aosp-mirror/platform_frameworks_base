@@ -402,13 +402,14 @@ final class DisplayPowerState {
                         Slog.d(TAG, "Updating screen state: state="
                                 + Display.stateToString(state) + ", backlight=" + backlight);
                     }
-                    if (stateChanged && state != Display.STATE_OFF) {
+                    boolean suspending = Display.isSuspendedState(state);
+                    if (stateChanged && !suspending) {
                         mBlanker.requestDisplayState(state);
                     }
                     if (backlightChanged) {
                         mBacklight.setBrightness(backlight);
                     }
-                    if (stateChanged && state == Display.STATE_OFF) {
+                    if (stateChanged && suspending) {
                         mBlanker.requestDisplayState(state);
                     }
                 }

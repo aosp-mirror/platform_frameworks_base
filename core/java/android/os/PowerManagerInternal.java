@@ -16,6 +16,8 @@
 
 package android.os;
 
+import android.view.Display;
+
 /**
  * Power manager local system service interface.
  *
@@ -52,6 +54,17 @@ public abstract class PowerManagerInternal {
      * @param timeoutMillis The overridden timeout, or -1 to disable the override.
      */
     public abstract void setUserActivityTimeoutOverrideFromWindowManager(long timeoutMillis);
+
+    /**
+     * Used by the dream manager to override certain properties while dozing.
+     *
+     * @param screenState The overridden screen state, or {@link Display.STATE_UNKNOWN}
+     * to disable the override.
+     * @param screenBrightness The overridden screen brightness, or
+     * {@link PowerManager#BRIGHTNESS_DEFAULT} to disable the override.
+     */
+    public abstract void setDozeOverrideFromDreamManager(
+            int screenState, int screenBrightness);
 
     public abstract boolean getLowPowerModeEnabled();
 
