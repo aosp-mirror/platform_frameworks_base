@@ -15677,7 +15677,7 @@ package android.media {
   }
 
   public class SoundPool {
-    ctor public SoundPool(int, int, int);
+    ctor public deprecated SoundPool(int, int, int);
     method public final void autoPause();
     method public final void autoResume();
     method public int load(java.lang.String, int);
@@ -15695,6 +15695,13 @@ package android.media {
     method public final void setVolume(int, float, float);
     method public final void stop(int);
     method public final boolean unload(int);
+  }
+
+  public static class SoundPool.Builder {
+    ctor public SoundPool.Builder();
+    method public android.media.SoundPool build();
+    method public android.media.SoundPool.Builder setAudioAttributes(android.media.AudioAttributes) throws java.lang.IllegalArgumentException;
+    method public android.media.SoundPool.Builder setMaxStreams(int) throws java.lang.IllegalArgumentException;
   }
 
   public static abstract interface SoundPool.OnLoadCompleteListener {
