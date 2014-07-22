@@ -4,6 +4,30 @@ page.tags=ime,keyboard,inputmethodservice
 
 <div id="qv-wrapper">
 <div id="qv">
+<h2>In This Document</h2>
+<ol>
+    <li>
+        <a href="#InputMethodLifecycle">The IME Lifecycle</a>
+    </li>
+    <li>
+        <a href="#DefiningIME">Declaring IME Components in the Manifest</a>
+    </li>
+    <li>
+        <a href="#IMEAPI">The Input Method API</a>
+    </li>
+    <li>
+        <a href="#IMEUI">Designing the Input Method UI</a>
+    </li>
+    <li>
+        <a href="#SendText">Sending Text to the Application</a>
+    </li>
+    <li>
+        <a href="#IMESubTypes">Creating an IME Subtype</a>
+    </li>
+    <li>
+        <a href="#GeneralDesign">General IME Considerations</a>
+    </li>
+</ol>
 <h2>See also</h2>
 <ol>
     <li>
@@ -16,29 +40,20 @@ page.tags=ime,keyboard,inputmethodservice
 </div>
 </div>
 <p>
-    An input method editor (IME) is a user control that enables users to enter text. Android 
-    provides an extensible input method framework that allows applications to provide users 
-    alternative input methods, such as on-screen keyboards or even speech input. Once installed, 
-    users can select which IME they want to use from the system settings and use it across the 
+    An input method editor (IME) is a user control that enables users to enter text. Android
+    provides an extensible input method framework that allows applications to provide users
+    alternative input methods, such as on-screen keyboards or even speech input. Once installed,
+    users can select which IME they want to use from the system settings and use it across the
     entire system; only one IME may be enabled at a time.
 </p>
 <p>
     To add an IME to the Android system, you create an Android application
-    containing a class that extends {@link android.inputmethodservice.InputMethodService}. In 
+    containing a class that extends {@link android.inputmethodservice.InputMethodService}. In
     addition, you usually create a "settings" activity that passes options to the IME
     service. You can also define a settings UI that's displayed as part of the system settings.
 </p>
-<p>This article covers the following:</p>
-<ul>
-    <li>The IME lifecycle.</li>
-    <li>Declaring IME components in the application manifest.</li>
-    <li>The IME API.</li>
-    <li>Designing an IME UI.</li>
-    <li>Sending text from an IME to an application.</li>
-    <li>Working with IME subtypes.</li>
-</ul>
 <p>
-    If you haven't worked with IMEs before, you should read the introductory article 
+    If you haven't worked with IMEs before, you should read the introductory article
     <a href="http://android-developers.blogspot.com/2009/04/updating-applications-for-on-screen.html">Onscreen Input Methods</a> first.
     Also, the Soft Keyboard sample app included in the SDK contains sample code that you can modify
     to start building your own IME.
@@ -59,16 +74,16 @@ page.tags=ime,keyboard,inputmethodservice
 <h2 id="DefiningIME">Declaring IME Components in the Manifest</h2>
 <p>
     In the Android system, an IME is an Android application that contains a special IME service.
-    The application's manifest file must declare the service, request the necessary permissions, 
-    provide an intent filter that matches the action <code>action.view.InputMethod</code>, and 
+    The application's manifest file must declare the service, request the necessary permissions,
+    provide an intent filter that matches the action <code>action.view.InputMethod</code>, and
     provide metadata that defines characteristics of the IME. In addition, to provide a settings
     interface that allows the user to modify the behavior of the IME, you can define a "settings"
     activity that can be launched from System Settings.
 </p>
 <p>
     The following snippet declares IME service. It requests the permission {@link
-    android.Manifest.permission#BIND_INPUT_METHOD} to allow the service to connect the IME to 
-    the system, sets up an intent filter that matches the action 
+    android.Manifest.permission#BIND_INPUT_METHOD} to allow the service to connect the IME to
+    the system, sets up an intent filter that matches the action
     <code>android.view.InputMethod</code>, and defines metadata for the IME:
 </p>
 <pre>
@@ -88,7 +103,7 @@ page.tags=ime,keyboard,inputmethodservice
     for the IME application:</p>
 <pre>
     &lt;!-- Optional: an activity for controlling the IME settings --&gt;
-    &lt;activity android:name="FastInputIMESettings" 
+    &lt;activity android:name="FastInputIMESettings"
         android:label="&#64;string/fast_input_settings"&gt;
         &lt;intent-filter&gt;
             &lt;action android:name="android.intent.action.MAIN"/&gt;
@@ -105,12 +120,12 @@ page.tags=ime,keyboard,inputmethodservice
     handling keyboard characters.
 </p>
 <p>
-    The central part of an IME is a service component, a class that extends 
-    {@link android.inputmethodservice.InputMethodService}. In addition to implementing the 
-    normal service lifecycle, this class has callbacks for providing your IME's UI, handling user 
+    The central part of an IME is a service component, a class that extends
+    {@link android.inputmethodservice.InputMethodService}. In addition to implementing the
+    normal service lifecycle, this class has callbacks for providing your IME's UI, handling user
     input, and delivering text to the field that currently has focus. By default, the
-    {@link android.inputmethodservice.InputMethodService} class provides most of the implementation 
-    for managing the state and visibility of the IME and communicating with the current 
+    {@link android.inputmethodservice.InputMethodService} class provides most of the implementation
+    for managing the state and visibility of the IME and communicating with the current
     input field.
 </p>
 <p>
@@ -122,13 +137,13 @@ page.tags=ime,keyboard,inputmethodservice
         Defines the communication channel from an {@link android.view.inputmethod.InputMethod}
         back to the application that is receiving its input. You use it to read text around the
         cursor, commit text to the text box, and send raw key events to the application.
-        Applications should extend this class rather than implementing the base interface 
+        Applications should extend this class rather than implementing the base interface
         {@link android.view.inputmethod.InputConnection}.
     </dd>
     <dt>{@link android.inputmethodservice.KeyboardView}</dt>
     <dd>
         An extension of {@link android.view.View} that renders a keyboard and responds to user
-        input events. The keyboard layout is specified by an instance of 
+        input events. The keyboard layout is specified by an instance of
         {@link android.inputmethodservice.Keyboard}, which you can define in an XML file.
     </dd>
 </dl>
@@ -141,40 +156,40 @@ page.tags=ime,keyboard,inputmethodservice
 <h3 id="InputView">Input view</h3>
 <p>
     The input view is the UI where the user inputs text, in the form of keyclicks, handwriting or
-    gestures. When the iIME is displayed for the first time, the system calls the 
+    gestures. When the iIME is displayed for the first time, the system calls the
     {@link android.inputmethodservice.InputMethodService#onCreateInputView()} callback. In your
     implementation of this method, you create the layout you want to display in the IME
     window and return the layout to the system. This snippet is an example of implementing the
     {@link android.inputmethodservice.InputMethodService#onCreateInputView()} method:
 <pre>
-    &#64;Override 
-    public View onCreateInputView() { 
-        MyKeyboardView inputView = 
+    &#64;Override
+    public View onCreateInputView() {
+        MyKeyboardView inputView =
             (MyKeyboardView) getLayoutInflater().inflate( R.layout.input, null);
-    
-        inputView.setOnKeyboardActionListener(this); inputView.setKeyboard(mLatinKeyboard); 
-        
-        return mInputView; 
-    } 
+
+        inputView.setOnKeyboardActionListener(this); inputView.setKeyboard(mLatinKeyboard);
+
+        return mInputView;
+    }
 </pre>
 <p>
-    In this example, {@code MyKeyboardView} is an instance of a custom implementation of 
-    {@link android.inputmethodservice.KeyboardView} that renders a 
-    {@link android.inputmethodservice.Keyboard}. If you’re building a traditional QWERTY keyboard, 
-    see the  Soft Keyboard <a href="{@docRoot}tools/samples/index.html">sample 
+    In this example, {@code MyKeyboardView} is an instance of a custom implementation of
+    {@link android.inputmethodservice.KeyboardView} that renders a
+    {@link android.inputmethodservice.Keyboard}. If you’re building a traditional QWERTY keyboard,
+    see the  Soft Keyboard <a href="{@docRoot}tools/samples/index.html">sample
     app</a> for an example of how to extend the {@link android.inputmethodservice.KeyboardView} class.
 </p>
 <h3 id="CandidateView">Candidates view</h3>
 <p>
     The candidates view is the UI where the IME displays potential word corrections or
-    suggestions for the user to select. In the IME lifecycle, the system calls 
-    {@link android.inputmethodservice.InputMethodService#onCreateCandidatesView()} when it's ready 
+    suggestions for the user to select. In the IME lifecycle, the system calls
+    {@link android.inputmethodservice.InputMethodService#onCreateCandidatesView()} when it's ready
     to display the candidate view. In your implementation of this method, return a layout that shows
     word suggestions, or return null if you don’t want to show anything (a null response is the
     default behavior, so you don’t have to implement this if you don’t provide suggestions).</p>
 <p>
-    For an example implementation that provides user suggestions, see the 
-    Soft Keyboard <a href="{@docRoot}tools/samples/index.html">sample 
+    For an example implementation that provides user suggestions, see the
+    Soft Keyboard <a href="{@docRoot}tools/samples/index.html">sample
     app</a>.
 </p>
 <h3 id="DesignConsiderations">UI design considerations</h3>
@@ -209,10 +224,10 @@ page.tags=ime,keyboard,inputmethodservice
     <strong>Figure 2.</strong> Latin IME input types.
 </p>
 <p>
-    When an input field receives focus and your IME starts, the system calls 
+    When an input field receives focus and your IME starts, the system calls
     {@link android.inputmethodservice.InputMethodService#onStartInputView(EditorInfo, boolean)
-    onStartInputView()}, passing in an {@link android.view.inputmethod.EditorInfo} object that 
-    contains details about the input type and other attributes of the text field. In this object, 
+    onStartInputView()}, passing in an {@link android.view.inputmethod.EditorInfo} object that
+    contains details about the input type and other attributes of the text field. In this object,
     the {@link android.view.inputmethod.EditorInfo#inputType} field contains the text field's input
     type.
 </p>
@@ -223,7 +238,7 @@ page.tags=ime,keyboard,inputmethodservice
     this:
 </p>
 <pre>
-inputType &amp; InputType.TYPE_MASK_CLASS 
+inputType &amp; InputType.TYPE_MASK_CLASS
 </pre>
 <p>
 The input type bit pattern can have one of several values, including:
@@ -248,7 +263,7 @@ The input type bit pattern can have one of several values, including:
     </dd>
 </dl>
 <p>
-    These constants are described in more detail in the reference documentation for 
+    These constants are described in more detail in the reference documentation for
     {@link android.text.InputType}.
 </p>
 <p>
@@ -287,8 +302,8 @@ The input type bit pattern can have one of several values, including:
 <p>
     As the user inputs text with your IME, you can send text to the application by
     sending individual key events or by editing the text around the cursor in the application's text
-    field. In either case, you use an instance of {@link android.view.inputmethod.InputConnection} 
-    to deliver the text. To get this instance, call 
+    field. In either case, you use an instance of {@link android.view.inputmethod.InputConnection}
+    to deliver the text. To get this instance, call
     {@link android.inputmethodservice.InputMethodService#getCurrentInputConnection
     InputMethodService.getCurrentInputConnection()}.
 </p>
@@ -336,18 +351,18 @@ The input type bit pattern can have one of several values, including:
 </p>
 <pre>
     InputConnection ic = getCurrentInputConnection();
-    
+
     ic.deleteSurroundingText(4, 0);
-    
+
     ic.commitText("Hello", 1);
-    
+
     ic.commitText("!", 1);
 </pre>
 <h3 id="ComposeThenCommit">Composing text before committing</h3>
 <p>
     If your IME does text prediction or requires multiple steps to compose a glyph or
     word, you can show the progress in the text field until the user commits the word, and then you
-    can replace the partial composition with the completed text. You may give special treatment to 
+    can replace the partial composition with the completed text. You may give special treatment to
     the text by adding a "span" to it when you pass it to InputConnection#setComposingText().
 </p>
 <p>
@@ -385,10 +400,10 @@ The input type bit pattern can have one of several values, including:
     selection during composition. You may also want to trap the back key to dismiss any popups
     originating from the input method window.</p>
 <p>
-    To intercept hardware keys, override 
+    To intercept hardware keys, override
     {@link android.inputmethodservice.InputMethodService#onKeyDown(int, KeyEvent) onKeyDown()}
-    and {@link android.inputmethodservice.InputMethodService#onKeyUp(int, KeyEvent) onKeyUp()}. 
-    See the Soft Keyboard <a href="{@docRoot}tools/samples/index.html">sample 
+    and {@link android.inputmethodservice.InputMethodService#onKeyUp(int, KeyEvent) onKeyUp()}.
+    See the Soft Keyboard <a href="{@docRoot}tools/samples/index.html">sample
     app</a> for an example.
 </p>
 <p>
@@ -396,7 +411,7 @@ The input type bit pattern can have one of several values, including:
 </p>
 <h2 id="IMESubTypes">Creating an IME Subtype</h2>
 <p>
-    Subtypes allow the IME to expose multiple input modes and languages supported by an IME. A 
+    Subtypes allow the IME to expose multiple input modes and languages supported by an IME. A
     subtype can represent:
 </p>
 <ul>
@@ -414,13 +429,13 @@ The input type bit pattern can have one of several values, including:
 <p>
     Subtype information is used for an IME switcher dialog that's available from the notification
     bar and also for IME settings. The information also allows the framework to bring up a
-    specific subtype of an IME directly. When you build an IME, use the subtype facility, because 
+    specific subtype of an IME directly. When you build an IME, use the subtype facility, because
     it helps the user identify and switch between different IME languages and modes.
 </p>
 <p>
     You define subtypes in one of the input method's XML resource files, using the
-    <code>&lt;subtype&gt;</code> element. The following snippet defines an IME with two 
-    subtypes: a keyboard subtype for the US English locale, and another keyboard subtype for the 
+    <code>&lt;subtype&gt;</code> element. The following snippet defines an IME with two
+    subtypes: a keyboard subtype for the US English locale, and another keyboard subtype for the
     French language locale for France:
 </p>
 <pre>
@@ -457,8 +472,8 @@ The input type bit pattern can have one of several values, including:
         android:imeSubtypeMode="keyboard" /&gt;
 </pre>
 <p>
-    The next snippet is part of the IME's <code>strings.xml</code> file. The string 
-    resource <code>label_subtype_generic</code>, which is used by the input method UI definition to 
+    The next snippet is part of the IME's <code>strings.xml</code> file. The string
+    resource <code>label_subtype_generic</code>, which is used by the input method UI definition to
     set the subtype's label, is defined as:
 </p>
 <pre>
@@ -487,9 +502,9 @@ The input type bit pattern can have one of several values, including:
 <h3 id="SubtypeSettings">Choosing IME subtypes from System Settings</h3>
 <p>
     A user can control how subtypes are used in the “Language &amp; input” settings panel in the
-    System Settings area. In the Soft Keyboard sample, the file 
-    <code>InputMethodSettingsFragment.java</code> contains an implementation that 
-    facilitates a subtype enabler in the IME settings. Please refer to the SoftKeyboard sample in 
+    System Settings area. In the Soft Keyboard sample, the file
+    <code>InputMethodSettingsFragment.java</code> contains an implementation that
+    facilitates a subtype enabler in the IME settings. Please refer to the SoftKeyboard sample in
     the Android SDK for more information about how to support Input Method Subtypes in your IME.
 </p>
 <img src="{@docRoot}resources/articles/images/inputmethod_subtype_settings.png" alt=""
@@ -497,6 +512,7 @@ The input type bit pattern can have one of several values, including:
 <p class="img-caption">
     <strong>Figure 6.</strong> Choosing a language for the IME.
 </p>
+
 <h2 id="GeneralDesign">General IME Considerations</h2>
 <p>
     Here are some other things to consider as you're implementing your IME:
@@ -506,22 +522,22 @@ The input type bit pattern can have one of several values, including:
     Provide a way for users to set options directly from the IME's UI.
 </li>
 <li>
-    Because multiple IMEs may be installed on the device, provide a way for the user to switch to a 
+    Because multiple IMEs may be installed on the device, provide a way for the user to switch to a
     different IME directly from the input method UI.
 </li>
 <li>
-    Bring up the IME's UI quickly. Preload or load on demand any large resources so that users 
-    see the IME as soon as they tap on a text field. Cache resources and views for subsequent 
+    Bring up the IME's UI quickly. Preload or load on demand any large resources so that users
+    see the IME as soon as they tap on a text field. Cache resources and views for subsequent
     invocations of the input method.
 </li>
 <li>
-    Conversely, you should release large memory allocations soon after the input method window is 
+    Conversely, you should release large memory allocations soon after the input method window is
     hidden, so that applications can have sufficient memory to run. Consider using a delayed message
     to release resources if the IME is in a hidden state for a few seconds.
-</li>    
+</li>
 <li>
-    Make sure that users can enter as many characters as possible for the language or locale 
-    associated with the IME. Remember that users may use punctuation in passwords or user 
+    Make sure that users can enter as many characters as possible for the language or locale
+    associated with the IME. Remember that users may use punctuation in passwords or user
     names, so your IME has to provide many different characters to allow users to enter a
     password and get access to the device.
 </li>
