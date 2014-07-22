@@ -474,6 +474,9 @@ public class PackageManagerService extends IPackageManager.Stub {
     final SparseArray<PackageVerificationState> mPendingVerification
             = new SparseArray<PackageVerificationState>();
 
+    /** Set of packages associated with each app op permission. */
+    final ArrayMap<String, ArraySet<String>> mAppOpPermissionPackages = new ArrayMap<>();
+
     final PackageInstallerService mInstallerService;
 
     HashSet<PackageParser.Package> mDeferredDexOpt = null;
@@ -2914,6 +2917,17 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
         }
         return 0;
+    }
+
+    @Override
+    public String[] getAppOpPermissionPackages(String permissionName) {
+        synchronized (mPackages) {
+            ArraySet<String> pkgs = mAppOpPermissionPackages.get(permissionName);
+            if (pkgs == null) {
+                return null;
+            }
+            return pkgs.toArray(new String[pkgs.size()]);
+        }
     }
 
     @Override
@@ -6591,6 +6605,31 @@ public class PackageManagerService extends IPackageManager.Stub {
                     r.append(p.info.name);
                 }
             }
+            if ((p.info.protectionLevel&PermissionInfo.PROTECTION_FLAG_APPOP) != 0) {
+                ArraySet<String> appOpPerms = mAppOpPermissionPackages.get(p.info.name);
+                if (appOpPerms != null) {
+                    appOpPerms.remove(pkg.packageName);
+                }
+            }
+        }
+        if (r != null) {
+            if (DEBUG_REMOVE) Log.d(TAG, "  Permissions: " + r);
+        }
+
+        N = pkg.requestedPermissions.size();
+        r = null;
+        for (i=0; i<N; i++) {
+            String perm = pkg.requestedPermissions.get(i);
+            BasePermission bp = mSettings.mPermissions.get(perm);
+            if (bp != null && (bp.protectionLevel&PermissionInfo.PROTECTION_FLAG_APPOP) != 0) {
+                ArraySet<String> appOpPerms = mAppOpPermissionPackages.get(perm);
+                if (appOpPerms != null) {
+                    appOpPerms.remove(pkg.packageName);
+                    if (appOpPerms.isEmpty()) {
+                        mAppOpPermissionPackages.remove(perm);
+                    }
+                }
+            }
         }
         if (r != null) {
             if (DEBUG_REMOVE) Log.d(TAG, "  Permissions: " + r);
@@ -6775,6 +6814,15 @@ public class PackageManagerService extends IPackageManager.Stub {
             final String perm = bp.name;
             boolean allowed;
             boolean allowedSig = false;
+            if ((bp.protectionLevel&PermissionInfo.PROTECTION_FLAG_APPOP) != 0) {
+                // Keep track of app op permissions.
+                ArraySet<String> pkgs = mAppOpPermissionPackages.get(bp.name);
+                if (pkgs == null) {
+                    pkgs = new ArraySet<>();
+                    mAppOpPermissionPackages.put(bp.name, pkgs);
+                }
+                pkgs.add(pkg.packageName);
+            }
             final int level = bp.protectionLevel & PermissionInfo.PROTECTION_MASK_BASE;
             if (level == PermissionInfo.PROTECTION_NORMAL
                     || level == PermissionInfo.PROTECTION_DANGEROUS) {
@@ -6837,7 +6885,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                             + " (protectionLevel=" + bp.protectionLevel
                             + " flags=0x" + Integer.toHexString(pkg.applicationInfo.flags)
                             + ")");
-                } else {
+                } else if ((bp.protectionLevel&PermissionInfo.PROTECTION_FLAG_APPOP) == 0) {
+                    // Don't print warning for app op permissions, since it is fine for them
+                    // not to be granted, there is a UI for the user to decide.
                     Slog.w(TAG, "Not granting permission " + perm
                             + " to package " + pkg.packageName
                             + " (protectionLevel=" + bp.protectionLevel
@@ -12426,6 +12476,22 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             if (!checkin && dumpState.isDumping(DumpState.DUMP_PERMISSIONS)) {
                 mSettings.dumpPermissionsLPr(pw, packageName, dumpState);
+                if (packageName == null) {
+                    for (int iperm=0; iperm<mAppOpPermissionPackages.size(); iperm++) {
+                        if (iperm == 0) {
+                            if (dumpState.onTitlePrinted())
+                                pw.println();
+                            pw.println("AppOp Permissions:");
+                        }
+                        pw.print("  AppOp Permission ");
+                        pw.print(mAppOpPermissionPackages.keyAt(iperm));
+                        pw.println(":");
+                        ArraySet<String> pkgs = mAppOpPermissionPackages.valueAt(iperm);
+                        for (int ipkg=0; ipkg<pkgs.size(); ipkg++) {
+                            pw.print("    "); pw.println(pkgs.valueAt(ipkg));
+                        }
+                    }
+                }
             }
 
             if (!checkin && dumpState.isDumping(DumpState.DUMP_PROVIDERS)) {
