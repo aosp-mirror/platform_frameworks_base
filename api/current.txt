@@ -1308,6 +1308,7 @@ package android {
     field public static final int toXScale = 16843203; // 0x10101c3
     field public static final int toYDelta = 16843209; // 0x10101c9
     field public static final int toYScale = 16843205; // 0x10101c5
+    field public static final int toolbarStyle = 16843952; // 0x10104b0
     field public static final int top = 16843182; // 0x10101ae
     field public static final int topBright = 16842955; // 0x10100cb
     field public static final int topDark = 16842951; // 0x10100c7
