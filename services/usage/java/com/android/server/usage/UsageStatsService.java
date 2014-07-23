@@ -386,8 +386,8 @@ public class UsageStatsService extends SystemService {
         private boolean hasPermission(String callingPackage) {
             final int mode = mAppOps.checkOp(AppOpsManager.OP_GET_USAGE_STATS,
                     Binder.getCallingUid(), callingPackage);
-            if (mode == AppOpsManager.MODE_IGNORED) {
-                // If AppOpsManager ignores this, still allow if we have the system level
+            if (mode == AppOpsManager.MODE_DEFAULT) {
+                // The default behavior here is to check if PackageManager has given the app
                 // permission.
                 return getContext().checkCallingPermission(Manifest.permission.PACKAGE_USAGE_STATS)
                         == PackageManager.PERMISSION_GRANTED;
