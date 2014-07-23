@@ -1,4 +1,4 @@
-package com.android.server.task;
+package com.android.server.job;
 
 
 import android.content.ComponentName;
@@ -9,40 +9,32 @@ import android.os.PersistableBundle;
 import android.test.AndroidTestCase;
 import android.test.RenamingDelegatingContext;
 import android.util.Log;
+import android.util.ArraySet;
 
-import com.android.server.job.JobMapReadFinishedListener;
-import com.android.server.job.JobStore;
 import com.android.server.job.controllers.JobStatus;
 
-import java.util.List;
+import java.util.Iterator;
 
 /**
  * Test reading and writing correctly from file.
  */
-public class TaskStoreTest extends AndroidTestCase {
+public class JobStoreTest extends AndroidTestCase {
     private static final String TAG = "TaskStoreTest";
     private static final String TEST_PREFIX = "_test_";
-    // private static final int USER_NON_0 = 3;
+
     private static final int SOME_UID = 34234;
     private ComponentName mComponent;
-    private static final long IO_WAIT = 600L;
+    private static final long IO_WAIT = 1000L;
 
     JobStore mTaskStoreUnderTest;
     Context mTestContext;
-    JobMapReadFinishedListener mTaskMapReadFinishedListenerStub =
-            new JobMapReadFinishedListener() {
-        @Override
-        public void onJobMapReadFinished(List<JobStatus> tasks) {
-            // do nothing.
-        }
-    };
 
     @Override
     public void setUp() throws Exception {
         mTestContext = new RenamingDelegatingContext(getContext(), TEST_PREFIX);
         Log.d(TAG, "Saving tasks to '" + mTestContext.getFilesDir() + "'");
-        mTaskStoreUnderTest = JobStore.initAndGetForTesting(mTestContext,
-                mTestContext.getFilesDir(), mTaskMapReadFinishedListenerStub);
+        mTaskStoreUnderTest =
+                JobStore.initAndGetForTesting(mTestContext, mTestContext.getFilesDir());
         mComponent = new ComponentName(getContext().getPackageName(), StubClass.class.getName());
     }
 
@@ -69,19 +61,17 @@ public class TaskStoreTest extends AndroidTestCase {
         mTaskStoreUnderTest.add(ts);
         Thread.sleep(IO_WAIT);
         // Manually load tasks from xml file.
-        mTaskStoreUnderTest.readJobMapFromDisk(new JobMapReadFinishedListener() {
-            @Override
-            public void onJobMapReadFinished(List<JobStatus> tasks) {
-                assertEquals("Didn't get expected number of persisted tasks.", 1, tasks.size());
-                JobStatus loadedTaskStatus = tasks.get(0);
-                assertTasksEqual(task, loadedTaskStatus.getJob());
-                assertEquals("Different uids.", SOME_UID, tasks.get(0).getUid());
-                compareTimestampsSubjectToIoLatency("Early run-times not the same after read.",
-                        ts.getEarliestRunTime(), loadedTaskStatus.getEarliestRunTime());
-                compareTimestampsSubjectToIoLatency("Late run-times not the same after read.",
-                        ts.getLatestRunTimeElapsed(), loadedTaskStatus.getLatestRunTimeElapsed());
-            }
-        });
+        final ArraySet<JobStatus> jobStatusSet = new ArraySet<JobStatus>();
+        mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet);
+
+        assertEquals("Didn't get expected number of persisted tasks.", 1, jobStatusSet.size());
+        final JobStatus loadedTaskStatus = jobStatusSet.iterator().next();
+        assertTasksEqual(task, loadedTaskStatus.getJob());
+        assertEquals("Different uids.", SOME_UID, loadedTaskStatus.getUid());
+        compareTimestampsSubjectToIoLatency("Early run-times not the same after read.",
+                ts.getEarliestRunTime(), loadedTaskStatus.getEarliestRunTime());
+        compareTimestampsSubjectToIoLatency("Late run-times not the same after read.",
+                ts.getLatestRunTimeElapsed(), loadedTaskStatus.getLatestRunTimeElapsed());
 
     }
 
@@ -104,26 +94,25 @@ public class TaskStoreTest extends AndroidTestCase {
         mTaskStoreUnderTest.add(taskStatus1);
         mTaskStoreUnderTest.add(taskStatus2);
         Thread.sleep(IO_WAIT);
-        mTaskStoreUnderTest.readJobMapFromDisk(new JobMapReadFinishedListener() {
-            @Override
-            public void onJobMapReadFinished(List<JobStatus> tasks) {
-                assertEquals("Incorrect # of persisted tasks.", 2, tasks.size());
-                JobStatus loaded1 = tasks.get(0);
-                JobStatus loaded2 = tasks.get(1);
-                assertTasksEqual(task1, loaded1.getJob());
-                assertTasksEqual(task2, loaded2.getJob());
 
-                // Check that the loaded task has the correct runtimes.
-                compareTimestampsSubjectToIoLatency("Early run-times not the same after read.",
-                        taskStatus1.getEarliestRunTime(), loaded1.getEarliestRunTime());
-                compareTimestampsSubjectToIoLatency("Late run-times not the same after read.",
-                        taskStatus1.getLatestRunTimeElapsed(), loaded1.getLatestRunTimeElapsed());
-                compareTimestampsSubjectToIoLatency("Early run-times not the same after read.",
-                        taskStatus2.getEarliestRunTime(), loaded2.getEarliestRunTime());
-                compareTimestampsSubjectToIoLatency("Late run-times not the same after read.",
-                        taskStatus2.getLatestRunTimeElapsed(), loaded2.getLatestRunTimeElapsed());
-            }
-        });
+        final ArraySet<JobStatus> jobStatusSet = new ArraySet<JobStatus>();
+        mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet);
+        assertEquals("Incorrect # of persisted tasks.", 2, jobStatusSet.size());
+        Iterator<JobStatus> it = jobStatusSet.iterator();
+        JobStatus loaded1 = it.next();
+        JobStatus loaded2 = it.next();
+        assertTasksEqual(task1, loaded1.getJob());
+        assertTasksEqual(task2, loaded2.getJob());
+
+        // Check that the loaded task has the correct runtimes.
+        compareTimestampsSubjectToIoLatency("Early run-times not the same after read.",
+                taskStatus1.getEarliestRunTime(), loaded1.getEarliestRunTime());
+        compareTimestampsSubjectToIoLatency("Late run-times not the same after read.",
+                taskStatus1.getLatestRunTimeElapsed(), loaded1.getLatestRunTimeElapsed());
+        compareTimestampsSubjectToIoLatency("Early run-times not the same after read.",
+                taskStatus2.getEarliestRunTime(), loaded2.getEarliestRunTime());
+        compareTimestampsSubjectToIoLatency("Late run-times not the same after read.",
+                taskStatus2.getLatestRunTimeElapsed(), loaded2.getLatestRunTimeElapsed());
 
     }
 
@@ -144,15 +133,12 @@ public class TaskStoreTest extends AndroidTestCase {
 
         mTaskStoreUnderTest.add(taskStatus);
         Thread.sleep(IO_WAIT);
-        mTaskStoreUnderTest.readJobMapFromDisk(new JobMapReadFinishedListener() {
-            @Override
-            public void onJobMapReadFinished(List<JobStatus> tasks) {
-                assertEquals("Incorrect # of persisted tasks.", 1, tasks.size());
-                JobStatus loaded = tasks.get(0);
-                assertTasksEqual(task, loaded.getJob());
-            }
-        });
 
+        final ArraySet<JobStatus> jobStatusSet = new ArraySet<JobStatus>();
+        mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet);
+        assertEquals("Incorrect # of persisted tasks.", 1, jobStatusSet.size());
+        JobStatus loaded = jobStatusSet.iterator().next();
+        assertTasksEqual(task, loaded.getJob());
     }
 
     /**
