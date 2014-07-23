@@ -16,12 +16,9 @@
 
 package com.android.systemui.recents.views;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.util.AttributeSet;
-import android.view.View;
 import android.widget.FrameLayout;
 import com.android.systemui.recents.RecentsConfiguration;
 
@@ -82,9 +79,6 @@ public class TaskFooterView extends FrameLayout {
     void animateFooterVisibility(final boolean visible, int duration) {
         // Return early if there is no footer
         if (mMaxFooterHeight <= 0) return;
-        // Return early if we are already in the final state
-        if (!visible && getVisibility() != View.VISIBLE) return;
-        if (visible && getVisibility() == View.VISIBLE) return;
 
         // Cancel the previous animation
         if (mFooterAnimator != null) {
@@ -93,25 +87,12 @@ public class TaskFooterView extends FrameLayout {
         }
         int finalHeight = visible ? mMaxFooterHeight : 0;
         if (duration > 0) {
-            // Make the view visible for the animation
-            if (visible && getVisibility() != View.VISIBLE) {
-                setVisibility(View.VISIBLE);
-            }
             mFooterAnimator = ObjectAnimator.ofInt(this, "footerHeight", finalHeight);
             mFooterAnimator.setDuration(duration);
             mFooterAnimator.setInterpolator(mConfig.fastOutSlowInInterpolator);
-            mFooterAnimator.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    if (!visible) {
-                        setVisibility(View.INVISIBLE);
-                    }
-                }
-            });
             mFooterAnimator.start();
         } else {
             setFooterHeight(finalHeight);
-            setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
         }
     }
 }

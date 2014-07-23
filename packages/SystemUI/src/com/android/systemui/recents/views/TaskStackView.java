@@ -83,7 +83,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     int mFocusedTaskIndex = -1;
     OverScroller mScroller;
     ObjectAnimator mScrollAnimator;
-    boolean mEnableStackClipping = true;
 
     // Optimizations
     ReferenceCountedTrigger mHwLayersTrigger;
@@ -93,8 +92,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     boolean mStartEnterAnimationRequestedAfterLayout;
     ViewAnimation.TaskViewEnterContext mStartEnterAnimationContext;
     int[] mTmpVisibleRange = new int[2];
-    Rect mTmpRect = new Rect();
-    Rect mTmpRect2 = new Rect();
     TaskViewTransform mTmpTransform = new TaskViewTransform();
     HashMap<Task, TaskView> mTmpTaskViewMap = new HashMap<Task, TaskView>();
     LayoutInflater mInflater;
@@ -189,7 +186,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                                        int stackScroll,
                                        int[] visibleRangeOut,
                                        boolean boundTranslationsToRect) {
-        // XXX: We should be intelligent about wheee to look for the visible stack range using the
+        // XXX: We should be intelligent about where to look for the visible stack range using the
         //      current stack scroll.
         // XXX: We should log extra cases like the ones below where we don't expect to hit very often
         // XXX: Print out approximately how many indices we have to go through to find the first visible transform
@@ -198,8 +195,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         int taskCount = tasks.size();
         int frontMostVisibleIndex = -1;
         int backMostVisibleIndex = -1;
-
-
 
         // We can reuse the task transforms where possible to reduce object allocation
         if (taskTransformCount < taskCount) {
@@ -290,6 +285,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
                 if (tv == null) {
                     tv = mViewPool.pickUpViewFromPool(task, task);
+
                     if (mStackViewsAnimationDuration > 0) {
                         // For items in the list, put them in start animating them from the
                         // approriate ends of the list where they are expected to appear
@@ -319,7 +315,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     /** Updates the clip for each of the task views. */
     void clipTaskViews() {
         // Update the clip on each task child
-        if (Constants.DebugFlags.App.EnableTaskStackClipping && mEnableStackClipping) {
+        if (Constants.DebugFlags.App.EnableTaskStackClipping) {
             int childCount = getChildCount();
             for (int i = 0; i < childCount - 1; i++) {
                 TaskView tv = (TaskView) getChildAt(i);
@@ -341,12 +337,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                     // stacked and we can make assumptions about the visibility of the this
                     // task relative to the ones in front of it.
                     if (nextTv != null) {
-                        // We calculate the bottom clip independent of the footer (since we animate
-                        // that)
-                        int scaledMaxFooterHeight = (int) (tv.getMaxFooterHeight() * tv.getScaleX());
-                        tv.getHitRect(mTmpRect);
-                        nextTv.getHitRect(mTmpRect2);
-                        clipBottom = (mTmpRect.bottom - scaledMaxFooterHeight - mTmpRect2.top);
+                        // We can reuse the current task transforms to find the task rects
+                        TaskViewTransform transform = mCurrentTaskTransforms.get(mStack.indexOfTask(tv.getTask()));
+                        TaskViewTransform nextTransform = mCurrentTaskTransforms.get(mStack.indexOfTask(nextTv.getTask()));
+                        clipBottom = transform.rect.bottom - nextTransform.rect.top - 200;
                     }
                 }
                 tv.getViewBounds().setClipBottom(clipBottom);
@@ -357,18 +351,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 tv.getViewBounds().setClipBottom(0);
             }
         }
-    }
-
-    /** Enables/Disables clipping of the tasks in the stack. */
-    void setStackClippingEnabled(boolean stackClippingEnabled) {
-        if (!stackClippingEnabled) {
-            int childCount = getChildCount();
-            for (int i = 0; i < childCount; i++) {
-                TaskView tv = (TaskView) getChildAt(i);
-                tv.getViewBounds().setClipBottom(0);
-            }
-        }
-        mEnableStackClipping = stackClippingEnabled;
     }
 
     /** The stack insets to apply to the stack contents */
@@ -634,18 +616,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             setStackScrollToInitialState();
             requestSynchronizeStackViewsWithModel();
             synchronizeStackViewsWithModel();
-
-            // Find the first task and mark it as full screen
-            if (mConfig.launchedFromAppWithScreenshot) {
-                int childCount = getChildCount();
-                for (int i = 0; i < childCount; i++) {
-                    TaskView tv = (TaskView) getChildAt(i);
-                    if (tv.getTask().isLaunchTarget) {
-                        tv.setIsFullScreen(true);
-                        break;
-                    }
-                }
-            }
         }
 
         // Measure each of the TaskViews
@@ -925,6 +895,15 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     public void prepareViewToLeavePool(TaskView tv, Task task, boolean isNewView) {
         // Rebind the task and request that this task's data be filled into the TaskView
         tv.onTaskBound(task);
+
+        // Mark the launch task as fullscreen
+        if (Constants.DebugFlags.App.EnableScreenshotAppTransition && mAwaitingFirstLayout) {
+            if (task.isLaunchTarget) {
+                tv.setIsFullScreen(true);
+            }
+        }
+
+        // Load the task data
         RecentsTaskLoader.getInstance().loadTaskData(task);
 
         // Sanity check, the task view should always be clipping against the stack at this point,
