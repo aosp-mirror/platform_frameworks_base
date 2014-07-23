@@ -2575,6 +2575,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 return;
             }
             Intent intent = new Intent(DeviceAdminReceiver.ACTION_DEVICE_ADMIN_DISABLE_REQUESTED);
+            intent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
             intent.setComponent(admin.info.getComponent());
             mContext.sendOrderedBroadcastAsUser(intent, new UserHandle(userHandle),
                     null, new BroadcastReceiver() {
