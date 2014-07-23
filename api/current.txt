@@ -15017,6 +15017,7 @@ package android.media {
     field public static final java.lang.String KEY_REFERENCE_CLOCK_ID = "reference-clock-id";
     field public static final java.lang.String KEY_REPEAT_PREVIOUS_FRAME_AFTER = "repeat-previous-frame-after";
     field public static final java.lang.String KEY_SAMPLE_RATE = "sample-rate";
+    field public static final java.lang.String KEY_TEMPORAL_LAYERING = "ts-schema";
     field public static final java.lang.String KEY_WIDTH = "width";
     field public static final java.lang.String MIMETYPE_AUDIO_AAC = "audio/mp4a-latm";
     field public static final java.lang.String MIMETYPE_AUDIO_AC3 = "audio/ac3";
