@@ -22,6 +22,7 @@ import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.MediaMetadata;
 import android.media.Rating;
@@ -268,18 +269,22 @@ public final class MediaSession {
     }
 
     /**
-     * Set the stream this session is playing on. This will affect the system's
-     * volume handling for this session. If {@link #setPlaybackToRemote} was
-     * previously called it will stop receiving volume commands and the system
-     * will begin sending volume changes to the appropriate stream.
+     * Set the attributes for this session's audio. This will affect the
+     * system's volume handling for this session. If
+     * {@link #setPlaybackToRemote} was previously called it will stop receiving
+     * volume commands and the system will begin sending volume changes to the
+     * appropriate stream.
      * <p>
-     * By default sessions are on {@link AudioManager#STREAM_MUSIC}.
+     * By default sessions use attributes for media.
      *
-     * @param stream The {@link AudioManager} stream this session is playing on.
+     * @param attributes The {@link AudioAttributes} for this session's audio.
      */
-    public void setPlaybackToLocal(int stream) {
+    public void setPlaybackToLocal(AudioAttributes attributes) {
+        if (attributes == null) {
+            throw new IllegalArgumentException("Attributes cannot be null for local playback.");
+        }
         try {
-            mBinder.configureVolumeHandling(PLAYBACK_TYPE_LOCAL, stream, 0);
+            mBinder.setPlaybackToLocal(attributes);
         } catch (RemoteException e) {
             Log.wtf(TAG, "Failure in setPlaybackToLocal.", e);
         }
@@ -288,9 +293,10 @@ public final class MediaSession {
     /**
      * Configure this session to use remote volume handling. This must be called
      * to receive volume button events, otherwise the system will adjust the
-     * current stream volume for this session. If {@link #setPlaybackToLocal}
-     * was previously called that stream will stop receiving volume changes for
-     * this session.
+     * appropriate stream volume for this session. If
+     * {@link #setPlaybackToLocal} was previously called the system will stop
+     * handling volume changes for this session and pass them to the volume
+     * provider instead.
      *
      * @param volumeProvider The provider that will handle volume changes. May
      *            not be null.
@@ -308,7 +314,7 @@ public final class MediaSession {
         });
 
         try {
-            mBinder.configureVolumeHandling(PLAYBACK_TYPE_REMOTE, volumeProvider.getVolumeControl(),
+            mBinder.setPlaybackToRemote(volumeProvider.getVolumeControl(),
                     volumeProvider.getMaxVolume());
         } catch (RemoteException e) {
             Log.wtf(TAG, "Failure in setPlaybackToRemote.", e);

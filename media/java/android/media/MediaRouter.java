@@ -2220,7 +2220,9 @@ public class MediaRouter {
                 }
             } else {
                 // We only know how to handle local and remote, fall back to local if not remote.
-                session.setPlaybackToLocal(mPlaybackStream);
+                AudioAttributes.Builder bob = new AudioAttributes.Builder();
+                bob.setLegacyStreamType(mPlaybackStream);
+                session.setPlaybackToLocal(bob.build());
                 mSvp = null;
             }
         }
