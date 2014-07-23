@@ -90,9 +90,6 @@ public class ZenModeHelper {
             "com.android.mms",
             "com.android.example.notificationshowcase"
             ));
-    private static final Set<String> ALARM_PACKAGES = new HashSet<String>(Arrays.asList(
-            "com.google.android.deskclock"
-            ));
     private static final Set<String> SYSTEM_PACKAGES = new HashSet<String>(Arrays.asList(
             "android",
             "com.android.systemui"
@@ -313,7 +310,8 @@ public class ZenModeHelper {
     }
 
     private boolean isAlarm(NotificationRecord record) {
-        return ALARM_PACKAGES.contains(record.sbn.getPackageName());
+        return record.isCategory(Notification.CATEGORY_ALARM)
+                || record.isCategory(Notification.CATEGORY_EVENT);
     }
 
     private boolean isCall(NotificationRecord record) {
