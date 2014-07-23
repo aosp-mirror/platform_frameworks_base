@@ -256,7 +256,7 @@ public abstract class MediaBrowserService extends Service {
      * for browsing, or null if none.  The contents of this bundle may affect
      * the information returned when browsing.
      */
-    protected abstract @Nullable BrowserRoot onGetRoot(@NonNull String clientPackageName,
+    public abstract @Nullable BrowserRoot onGetRoot(@NonNull String clientPackageName,
             int clientUid, @Nullable Bundle rootHints);
 
     /**
@@ -266,7 +266,7 @@ public abstract class MediaBrowserService extends Service {
      * children are to be queried.
      * @return The list of children, or null if the uri is invalid.
      */
-    protected abstract @Nullable List<MediaBrowserItem> onLoadChildren(@NonNull Uri parentUri);
+    public abstract @Nullable List<MediaBrowserItem> onLoadChildren(@NonNull Uri parentUri);
 
     /**
      * Called to get the thumbnail of a particular media item.
@@ -278,7 +278,7 @@ public abstract class MediaBrowserService extends Service {
      * @return The file descriptor of the thumbnail, which may then be loaded
      *          using a bitmap factory, or null if the item does not have a thumbnail.
      */
-    protected abstract @Nullable Bitmap onGetThumbnail(@NonNull Uri uri, int width, int height);
+    public abstract @Nullable Bitmap onGetThumbnail(@NonNull Uri uri, int width, int height);
 
     /**
      * Call to set the media session.
@@ -311,20 +311,21 @@ public abstract class MediaBrowserService extends Service {
      * @param parentUri The uri of the parent media item whose
      * children changed.
      */
-    public void notifyChildrenChanged(@NonNull Uri parentUri) {
+    public void notifyChildrenChanged(@NonNull final Uri parentUri) {
         if (parentUri == null) {
             throw new IllegalArgumentException("parentUri cannot be null in notifyChildrenChanged");
         }
-        for (IBinder binder : mConnections.keySet()) {
-            ConnectionRecord connection = mConnections.get(binder);
-            Set<Uri> uris = connection.subscriptions;
-            for (Uri uri : uris) {
-                if (uri.equals(parentUri)) {
-                    performLoadChildren(uri, connection);
-                    break;
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                for (IBinder binder : mConnections.keySet()) {
+                    ConnectionRecord connection = mConnections.get(binder);
+                    if (connection.subscriptions.contains(parentUri)) {
+                        performLoadChildren(parentUri, connection);
+                    }
                 }
             }
-        }
+        });
     }
 
     /**
@@ -380,9 +381,19 @@ public abstract class MediaBrowserService extends Service {
         }
     }
 
-    public static class BrowserRoot {
+    /**
+     * Contains information that the browser service needs to send to the client
+     * when first connected.
+     */
+    public static final class BrowserRoot {
         final private Uri mUri;
         final private Bundle mExtras;
+
+        /**
+         * Constructs a browser root.
+         * @param uri The root Uri for browsing.
+         * @param extras Any extras about the browser service.
+         */
         public BrowserRoot(@NonNull Uri uri, @Nullable Bundle extras) {
             if (uri == null) {
                 throw new IllegalArgumentException("The root uri in BrowserRoot cannot be null. " +
@@ -392,11 +403,17 @@ public abstract class MediaBrowserService extends Service {
             mExtras = extras;
         }
 
-        Uri getRootUri() {
+        /**
+         * Gets the root uri for browsing.
+         */
+        public Uri getRootUri() {
             return mUri;
         }
 
-        Bundle getExtras() {
+        /**
+         * Gets any extras about the brwoser service.
+         */
+        public Bundle getExtras() {
             return mExtras;
         }
     }
