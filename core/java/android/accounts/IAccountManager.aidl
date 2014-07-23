@@ -69,4 +69,10 @@ interface IAccountManager {
     boolean addSharedAccountAsUser(in Account account, int userId);
     Account[] getSharedAccountsAsUser(int userId);
     boolean removeSharedAccountAsUser(in Account account, int userId);
+
+    /* Account renaming. */
+    void renameAccount(in IAccountManagerResponse response, in Account accountToRename, String newName);
+    String getPreviousName(in Account account);
+    boolean renameSharedAccountAsUser(in Account accountToRename, String newName, int userId);
+
 }
