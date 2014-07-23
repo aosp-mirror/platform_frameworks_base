@@ -16,6 +16,7 @@
 
 package android.media.tv;
 
+import android.annotation.SystemApi;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.ContentUris;
@@ -117,6 +118,15 @@ public final class TvContract {
         return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(AUTHORITY)
                 .appendPath(PATH_INPUT).appendPath(inputId).appendPath(PATH_CHANNEL)
                 .appendPath(PATH_PASSTHROUGH).build();
+    }
+
+    /**
+     * Returns true, if {@code channelUri} is a channel URI for a passthrough TV input.
+     * @hide
+     */
+    @SystemApi
+    public static final boolean isChannelUriForPassthroughTvInput(Uri channelUri) {
+        return channelUri.toString().endsWith(PATH_PASSTHROUGH);
     }
 
     /**
