@@ -230,6 +230,7 @@ public class TvView extends ViewGroup {
      * @see TvInputService.Session#dispatchContentBlocked(TvContentRating)
      * @hide
      */
+    @SystemApi
     public void requestUnblockContent(TvContentRating unblockedRating) {
         if (mSession != null) {
             mSession.requestUnblockContent(unblockedRating);
@@ -622,6 +623,7 @@ public class TvView extends ViewGroup {
          * @param eventArgs Optional arguments of the event.
          * @hide
          */
+        @SystemApi
         public void onEvent(String inputId, String eventType, Bundle eventArgs) {
         }
     }

@@ -126,6 +126,7 @@ public final class TvInputManager {
      * Interface used to receive the created session.
      * @hide
      */
+    @SystemApi
     public abstract static class SessionCallback {
         /**
          * This is called after {@link TvInputManager#createSession} has been processed.
@@ -214,6 +215,7 @@ public final class TvInputManager {
          * @param eventArgs Optional arguments of the event.
          * @hide
          */
+        @SystemApi
         public void onSessionEvent(Session session, String eventType, Bundle eventArgs) {
         }
     }
@@ -656,6 +658,7 @@ public final class TvInputManager {
      * @throws IllegalArgumentException if any of the arguments is {@code null}.
      * @hide
      */
+    @SystemApi
     public void createSession(String inputId, final SessionCallback callback,
             Handler handler) {
         if (inputId == null) {
@@ -683,6 +686,7 @@ public final class TvInputManager {
      * The Session provides the per-session functionality of TV inputs.
      * @hide
      */
+    @SystemApi
     public static final class Session {
         static final int DISPATCH_IN_PROGRESS = -1;
         static final int DISPATCH_NOT_HANDLED = 0;
@@ -707,7 +711,6 @@ public final class TvInputManager {
         private InputChannel mChannel;
         private List<TvTrackInfo> mTracks;
 
-        /** @hide */
         private Session(IBinder token, InputChannel channel, ITvInputManager service, int userId,
                 int seq, SparseArray<SessionCallbackRecord> sessionCallbackRecordMap) {
             mToken = token;
@@ -739,7 +742,6 @@ public final class TvInputManager {
          * Sets the {@link android.view.Surface} for this session.
          *
          * @param surface A {@link android.view.Surface} used to render video.
-         * @hide
          */
         public void setSurface(Surface surface) {
             if (mToken == null) {
@@ -763,6 +765,7 @@ public final class TvInputManager {
          * @param height The new height of the {@link Surface}.
          * @hide
          */
+        @SystemApi
         public void dispatchSurfaceChanged(int format, int width, int height) {
             if (mToken == null) {
                 Log.w(TAG, "The session has been already released");
