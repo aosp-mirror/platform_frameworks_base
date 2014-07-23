@@ -103,12 +103,16 @@ public class TaskStackViewLayoutAlgorithm {
             transformOut.reset();
             return transformOut;
         }
+        return getStackTransform(getStackScrollForTaskIndex(task), stackScroll, transformOut);
+    }
 
+    /** Update/get the transform */
+    public TaskViewTransform getStackTransform(int taskStackScroll, int stackScroll, TaskViewTransform transformOut) {
         // Map the items to an continuous position relative to the specified scroll
         int numPeekCards = StackPeekNumCards;
         float overlapHeight = StackOverlapPct * mTaskRect.height();
         float peekHeight = StackPeekHeightPct * mStackRect.height();
-        float t = (getStackScrollForTaskIndex(task) - stackScroll) / overlapHeight;
+        float t = (taskStackScroll - stackScroll) / overlapHeight;
         float boundedT = Math.max(t, -(numPeekCards + 1));
 
         // Set the scale relative to its position
@@ -116,8 +120,8 @@ public class TaskStackViewLayoutAlgorithm {
         float minScale = StackPeekMinScale;
         float scaleRange = 1f - minScale;
         float scaleInc = scaleRange / (numPeekCards + numFrontScaledCards);
-        float scale = Math.max(minScale, Math.min(1f, minScale + 
-            ((boundedT + (numPeekCards + 1)) * scaleInc)));
+        float scale = Math.max(minScale, Math.min(1f, minScale +
+                ((boundedT + (numPeekCards + 1)) * scaleInc)));
         float scaleYOffset = ((1f - scale) * mTaskRect.height()) / 2;
         // Account for the bar offsets being scaled?
         float scaleBarYOffset = (1f - scale) * mConfig.taskBarHeight;
@@ -166,6 +170,14 @@ public class TaskStackViewLayoutAlgorithm {
      */
     int getStackScrollForTaskIndex(Task t) {
         return mTaskOffsetMap.get(t.key);
+    }
+
+    /**
+     * Returns the scroll to such that the task transform at that task + index will have t=0.
+     * (If the scroll is not bounded)
+     */
+    int getStackScrollForTaskIndex(Task t, int relativeIndexOffset) {
+        return mTaskOffsetMap.get(t.key) + (int) (relativeIndexOffset * getTaskOverlapHeight());
     }
 
     /**
