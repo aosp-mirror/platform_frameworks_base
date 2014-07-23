@@ -99,6 +99,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     private QSPanel mQSPanel;
 
     private final Rect mClipBounds = new Rect();
+    private final StatusIconClipper mStatusIconClipper = new StatusIconClipper();
 
     public StatusBarHeaderView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -231,6 +232,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
             updateAvatarScale();
             updateClockLp();
             updateBatteryLevelPaddingEnd();
+            mStatusIconClipper.update();
         }
     }
 
@@ -445,7 +447,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         mSystemIconsContainer.addView(systemIcons);
         mStatusIcons = systemIcons.findViewById(R.id.statusIcons);
         mSignalCluster = systemIcons.findViewById(R.id.signal_cluster);
-        mSignalCluster.addOnLayoutChangeListener(mSignalClusterChanged);
+        mSignalCluster.addOnLayoutChangeListener(mStatusIconClipper);
     }
 
     public void onSystemIconsDetached() {
@@ -453,7 +455,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
             mStatusIcons.setVisibility(View.VISIBLE);
         }
         if (mSignalCluster != null) {
-            mSignalCluster.removeOnLayoutChangeListener(mSignalClusterChanged);
+            mSignalCluster.removeOnLayoutChangeListener(mStatusIconClipper);
             mSignalCluster.setVisibility(View.VISIBLE);
         }
         mStatusIcons = null;
@@ -470,6 +472,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         updateMultiUserSwitch();
         updateClickTargets();
         updateBatteryLevelPaddingEnd();
+        mStatusIconClipper.update();
     }
 
     public void setUserInfoController(UserInfoController userInfoController) {
@@ -536,7 +539,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         // here.
     }
 
-    private final OnLayoutChangeListener mSignalClusterChanged = new OnLayoutChangeListener() {
+    private final class StatusIconClipper implements OnLayoutChangeListener {
         private final Rect mClipBounds = new Rect();
 
         @Override
@@ -546,9 +549,14 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
             // they are mirrored to the real status bar.
             mClipBounds.set(left, 0, mSystemIconsContainer.getWidth(),
                     mSystemIconsContainer.getHeight());
-            mSystemIconsContainer.setClipBounds(mClipBounds);
+            update();
         }
-    };
+
+        public void update() {
+            final boolean onKeyguardAndCollapsed = mKeyguardShowing && !mExpanded;
+            mSystemIconsContainer.setClipBounds(onKeyguardAndCollapsed ? null : mClipBounds);
+        }
+    }
 
     private final QSPanel.Callback mQsPanelCallback = new QSPanel.Callback() {
         @Override
