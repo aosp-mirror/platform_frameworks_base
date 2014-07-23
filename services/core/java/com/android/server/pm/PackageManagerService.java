@@ -4839,16 +4839,6 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private void updateSharedLibrariesLPw(PackageParser.Package pkg,
             PackageParser.Package changingLib) throws PackageManagerException {
-        // We might be upgrading from a version of the platform that did not
-        // provide per-package native library directories for system apps.
-        // Fix that up here.
-        if (isSystemApp(pkg)) {
-            PackageSetting ps = mSettings.mPackages.get(pkg.applicationInfo.packageName);
-            if (!isUpdatedSystemApp(pkg)) {
-                setBundledAppAbisAndRoots(pkg, ps);
-            }
-        }
-
         if (pkg.usesLibraries != null || pkg.usesOptionalLibraries != null) {
             final ArraySet<String> usesLibraryFiles = new ArraySet<>();
             int N = pkg.usesLibraries != null ? pkg.usesLibraries.size() : 0;
@@ -5370,6 +5360,26 @@ public class PackageManagerService extends IPackageManager.Stub {
             NativeLibraryHelper.removeNativeBinariesFromDirLI(
                     new File(codePath, LIB_DIR_NAME), false /* delete dirs */);
             setBundledAppAbisAndRoots(pkg, pkgSetting);
+
+            // If we haven't found any native libraries for the app, check if it has
+            // renderscript code. We'll need to force the app to 32 bit if it has
+            // renderscript bitcode.
+            if (pkg.applicationInfo.primaryCpuAbi == null
+                    && pkg.applicationInfo.secondaryCpuAbi == null
+                    && Build.SUPPORTED_64_BIT_ABIS.length >  0) {
+                NativeLibraryHelper.Handle handle = null;
+                try {
+                    handle = NativeLibraryHelper.Handle.create(scanFile);
+                    if (NativeLibraryHelper.hasRenderscriptBitcode(handle)) {
+                        pkg.applicationInfo.primaryCpuAbi = Build.SUPPORTED_32_BIT_ABIS[0];
+                    }
+                } catch (IOException ioe) {
+                    Slog.w(TAG, "Error scanning system app : " + ioe);
+                } finally {
+                    IoUtils.closeQuietly(handle);
+                }
+            }
+
             setNativeLibraryPaths(pkg);
         } else {
             // TODO: We can probably be smarter about this stuff. For installed apps,
@@ -5504,10 +5514,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                     }
                 }
             }
-
-            pkgSetting.primaryCpuAbiString = pkg.applicationInfo.primaryCpuAbi;
-            pkgSetting.secondaryCpuAbiString = pkg.applicationInfo.secondaryCpuAbi;
         }
+
+        pkgSetting.primaryCpuAbiString = pkg.applicationInfo.primaryCpuAbi;
+        pkgSetting.secondaryCpuAbiString = pkg.applicationInfo.secondaryCpuAbi;
 
         Slog.d(TAG, "Resolved nativeLibraryRoot for " + pkg.applicationInfo.packageName
                 + " to root=" + pkg.applicationInfo.nativeLibraryRootDir + ", isa="
@@ -10785,7 +10795,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         // writer
         synchronized (mPackages) {
             PackageSetting ps = mSettings.mPackages.get(newPkg.packageName);
-            setBundledAppAbisAndRoots(newPkg, ps);
             updatePermissionsLPw(newPkg.packageName, newPkg,
                     UPDATE_PERMISSIONS_ALL | UPDATE_PERMISSIONS_REPLACE_PKG);
             if (applyUserRestrictions) {
