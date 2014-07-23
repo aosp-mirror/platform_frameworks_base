@@ -77,6 +77,7 @@ import com.android.internal.R;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.FgThread;
+
 import com.google.android.collect.Lists;
 import com.google.android.collect.Sets;
 
@@ -109,7 +110,7 @@ public class AccountManagerService
 
     private static final int TIMEOUT_DELAY_MS = 1000 * 60;
     private static final String DATABASE_NAME = "accounts.db";
-    private static final int DATABASE_VERSION = 5;
+    private static final int DATABASE_VERSION = 6;
 
     private final Context mContext;
 
@@ -130,6 +131,7 @@ public class AccountManagerService
     private static final String ACCOUNTS_TYPE = "type";
     private static final String ACCOUNTS_TYPE_COUNT = "count(type)";
     private static final String ACCOUNTS_PASSWORD = "password";
+    private static final String ACCOUNTS_PREVIOUS_NAME = "previous_name";
 
     private static final String TABLE_AUTHTOKENS = "authtokens";
     private static final String AUTHTOKENS_ID = "_id";
@@ -196,6 +198,20 @@ public class AccountManagerService
         /** protected by the {@link #cacheLock} */
         private final HashMap<Account, HashMap<String, String>> authTokenCache =
                 new HashMap<Account, HashMap<String, String>>();
+        /**
+         * protected by the {@link #cacheLock}
+         *
+         * Caches the previous names associated with an account. Previous names
+         * should be cached because we expect that when an Account is renamed,
+         * many clients will receive a LOGIN_ACCOUNTS_CHANGED broadcast and
+         * want to know if the accounts they care about have been renamed.
+         *
+         * The previous names are wrapped in an {@link AtomicReference} so that
+         * we can distinguish between those accounts with no previous names and
+         * those whose previous names haven't been cached (yet).
+         */
+        private final HashMap<Account, AtomicReference<String>> previousNameCache =
+                new HashMap<Account, AtomicReference<String>>();
 
         UserAccounts(Context context, int userId) {
             this.userId = userId;
@@ -512,6 +528,57 @@ public class AccountManagerService
                 return null;
             } finally {
                 cursor.close();
+            }
+        }
+    }
+
+    @Override
+    public String getPreviousName(Account account) {
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "getPreviousName: " + account
+                    + ", caller's uid " + Binder.getCallingUid()
+                    + ", pid " + Binder.getCallingPid());
+        }
+        if (account == null) throw new IllegalArgumentException("account is null");
+        UserAccounts accounts = getUserAccountsForCaller();
+        long identityToken = clearCallingIdentity();
+        try {
+            return readPreviousNameInternal(accounts, account);
+        } finally {
+            restoreCallingIdentity(identityToken);
+        }
+    }
+
+    private String readPreviousNameInternal(UserAccounts accounts, Account account) {
+        if  (account == null) {
+            return null;
+        }
+        synchronized (accounts.cacheLock) {
+            AtomicReference<String> previousNameRef = accounts.previousNameCache.get(account);
+            if (previousNameRef == null) {
+                final SQLiteDatabase db = accounts.openHelper.getReadableDatabase();
+                Cursor cursor = db.query(
+                        TABLE_ACCOUNTS,
+                        new String[]{ ACCOUNTS_PREVIOUS_NAME },
+                        ACCOUNTS_NAME + "=? AND " + ACCOUNTS_TYPE+ "=?",
+                        new String[] { account.name, account.type },
+                        null,
+                        null,
+                        null);
+                try {
+                    if (cursor.moveToNext()) {
+                        String previousName = cursor.getString(0);
+                        previousNameRef = new AtomicReference<String>(previousName);
+                        accounts.previousNameCache.put(account, previousNameRef);
+                        return previousName;
+                    } else {
+                        return null;
+                    }
+                } finally {
+                    cursor.close();
+                }
+            } else {
+                return previousNameRef.get();
             }
         }
     }
@@ -856,6 +923,119 @@ public class AccountManagerService
                     + ", " + mAccount
                     + ", " + (mFeatures != null ? TextUtils.join(",", mFeatures) : null);
         }
+    }
+
+    @Override
+    public void renameAccount(
+            IAccountManagerResponse response, Account accountToRename, String newName) {
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "renameAccount: " + accountToRename + " -> " + newName
+                + ", caller's uid " + Binder.getCallingUid()
+                + ", pid " + Binder.getCallingPid());
+        }
+        if (accountToRename == null) throw new IllegalArgumentException("account is null");
+        checkAuthenticateAccountsPermission(accountToRename);
+        UserAccounts accounts = getUserAccountsForCaller();
+        long identityToken = clearCallingIdentity();
+        try {
+            Account resultingAccount = renameAccountInternal(accounts, accountToRename, newName);
+            Bundle result = new Bundle();
+            result.putString(AccountManager.KEY_ACCOUNT_NAME, resultingAccount.name);
+            result.putString(AccountManager.KEY_ACCOUNT_TYPE, resultingAccount.type);
+            try {
+                response.onResult(result);
+            } catch (RemoteException e) {
+                Log.w(TAG, e.getMessage());
+            }
+        } finally {
+            restoreCallingIdentity(identityToken);
+        }
+    }
+
+    private Account renameAccountInternal(
+            UserAccounts accounts, Account accountToRename, String newName) {
+        Account resultAccount = null;
+        /*
+         * Cancel existing notifications. Let authenticators
+         * re-post notifications as required. But we don't know if
+         * the authenticators have bound their notifications to
+         * now stale account name data.
+         *
+         * With a rename api, we might not need to do this anymore but it
+         * shouldn't hurt.
+         */
+        cancelNotification(
+                getSigninRequiredNotificationId(accounts, accountToRename),
+                 new UserHandle(accounts.userId));
+        synchronized(accounts.credentialsPermissionNotificationIds) {
+            for (Pair<Pair<Account, String>, Integer> pair:
+                    accounts.credentialsPermissionNotificationIds.keySet()) {
+                if (accountToRename.equals(pair.first.first)) {
+                    int id = accounts.credentialsPermissionNotificationIds.get(pair);
+                    cancelNotification(id, new UserHandle(accounts.userId));
+                }
+            }
+        }
+        synchronized (accounts.cacheLock) {
+            final SQLiteDatabase db = accounts.openHelper.getWritableDatabase();
+            db.beginTransaction();
+            boolean isSuccessful = false;
+            Account renamedAccount = new Account(newName, accountToRename.type);
+            try {
+                final ContentValues values = new ContentValues();
+                values.put(ACCOUNTS_NAME, newName);
+                values.put(ACCOUNTS_PREVIOUS_NAME, accountToRename.name);
+                final long accountId = getAccountIdLocked(db, accountToRename);
+                if (accountId >= 0) {
+                    final String[] argsAccountId = { String.valueOf(accountId) };
+                    db.update(TABLE_ACCOUNTS, values, ACCOUNTS_ID + "=?", argsAccountId);
+                    db.setTransactionSuccessful();
+                    isSuccessful = true;
+                }
+            } finally {
+                db.endTransaction();
+                if (isSuccessful) {
+                    /*
+                     * Database transaction was successful. Clean up cached
+                     * data associated with the account in the user profile.
+                     */
+                    insertAccountIntoCacheLocked(accounts, renamedAccount);
+                    /*
+                     * Extract the data and token caches before removing the
+                     * old account to preserve the user data associated with
+                     * the account.
+                     */
+                    HashMap<String, String> tmpData = accounts.userDataCache.get(accountToRename);
+                    HashMap<String, String> tmpTokens = accounts.authTokenCache.get(accountToRename);
+                    removeAccountFromCacheLocked(accounts, accountToRename);
+                    /*
+                     * Update the cached data associated with the renamed
+                     * account.
+                     */
+                    accounts.userDataCache.put(renamedAccount, tmpData);
+                    accounts.authTokenCache.put(renamedAccount, tmpTokens);
+                    accounts.previousNameCache.put(
+                          renamedAccount,
+                          new AtomicReference<String>(accountToRename.name));
+                    resultAccount = renamedAccount;
+
+                    if (accounts.userId == UserHandle.USER_OWNER) {
+                        /*
+                         * Owner's account was renamed, rename the account for
+                         * those users with which the account was shared.
+                         */
+                        List<UserInfo> users = mUserManager.getUsers(true);
+                        for (UserInfo user : users) {
+                            if (!user.isPrimary() && user.isRestricted()) {
+                                renameSharedAccountAsUser(accountToRename, newName, user.id);
+                            }
+                        }
+                    }
+                    sendAccountsChangedBroadcast(accounts.userId);
+                }
+            }
+        }
+        return resultAccount;
     }
 
     @Override
@@ -2061,6 +2241,26 @@ public class AccountManagerService
     }
 
     @Override
+    public boolean renameSharedAccountAsUser(Account account, String newName, int userId) {
+        userId = handleIncomingUser(userId);
+        UserAccounts accounts = getUserAccounts(userId);
+        SQLiteDatabase db = accounts.openHelper.getWritableDatabase();
+        final ContentValues values = new ContentValues();
+        values.put(ACCOUNTS_NAME, newName);
+        values.put(ACCOUNTS_PREVIOUS_NAME, account.name);
+        int r = db.update(
+                TABLE_SHARED_ACCOUNTS,
+                values,
+                ACCOUNTS_NAME + "=? AND " + ACCOUNTS_TYPE+ "=?",
+                new String[] { account.name, account.type });
+        if (r > 0) {
+            // Recursively rename the account.
+            renameAccountInternal(accounts, account, newName);
+        }
+        return r > 0;
+    }
+
+    @Override
     public boolean removeSharedAccountAsUser(Account account, int userId) {
         userId = handleIncomingUser(userId);
         UserAccounts accounts = getUserAccounts(userId);
@@ -2557,6 +2757,7 @@ public class AccountManagerService
                     + ACCOUNTS_NAME + " TEXT NOT NULL, "
                     + ACCOUNTS_TYPE + " TEXT NOT NULL, "
                     + ACCOUNTS_PASSWORD + " TEXT, "
+                    + ACCOUNTS_PREVIOUS_NAME + " TEXT, "
                     + "UNIQUE(" + ACCOUNTS_NAME + "," + ACCOUNTS_TYPE + "))");
 
             db.execSQL("CREATE TABLE " + TABLE_AUTHTOKENS + " (  "
@@ -2590,6 +2791,10 @@ public class AccountManagerService
                     + ACCOUNTS_NAME + " TEXT NOT NULL, "
                     + ACCOUNTS_TYPE + " TEXT NOT NULL, "
                     + "UNIQUE(" + ACCOUNTS_NAME + "," + ACCOUNTS_TYPE + "))");
+        }
+
+        private void addOldAccountNameColumn(SQLiteDatabase db) {
+            db.execSQL("ALTER TABLE " + TABLE_ACCOUNTS + " ADD COLUMN " + ACCOUNTS_PREVIOUS_NAME);
         }
 
         private void createAccountsDeletionTrigger(SQLiteDatabase db) {
@@ -2639,6 +2844,11 @@ public class AccountManagerService
 
             if (oldVersion == 4) {
                 createSharedAccountsTable(db);
+                oldVersion++;
+            }
+
+            if (oldVersion == 5) {
+                addOldAccountNameColumn(db);
                 oldVersion++;
             }
 
@@ -3050,6 +3260,7 @@ public class AccountManagerService
         }
         accounts.userDataCache.remove(account);
         accounts.authTokenCache.remove(account);
+        accounts.previousNameCache.remove(account);
     }
 
     /**
