@@ -44,12 +44,13 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
     private static final int TAG_KEY_ANIM = R.id.scrim;
 
     private static final int NUM_TEASES = 3;
-    private static final long TEASE_IN_ANIMATION_DURATION = 500;
-    private static final long TEASE_VISIBLE_DURATION = 3000;
+    private static final long TEASE_IN_ANIMATION_DURATION = 1000;
+    private static final long TEASE_VISIBLE_DURATION = 2000;
     private static final long TEASE_OUT_ANIMATION_DURATION = 1000;
     private static final long TEASE_INVISIBLE_DURATION = 1000;
     private static final long TEASE_DURATION = TEASE_IN_ANIMATION_DURATION
             + TEASE_VISIBLE_DURATION + TEASE_OUT_ANIMATION_DURATION + TEASE_INVISIBLE_DURATION;
+    private static final long PRE_TEASE_DELAY = 1000;
 
     private final View mScrimBehind;
     private final View mScrimInFront;
@@ -128,8 +129,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
     public long tease() {
         if (!mDozing) return 0;
         mTeasesRemaining = NUM_TEASES;
-        mScrimInFront.post(mTeaseIn);
-        return NUM_TEASES * TEASE_DURATION;
+        mScrimInFront.postDelayed(mTeaseIn, PRE_TEASE_DELAY);
+        return PRE_TEASE_DELAY + NUM_TEASES * TEASE_DURATION;
     }
 
     private void cancelTeasing() {
