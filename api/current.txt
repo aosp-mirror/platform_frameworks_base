@@ -27334,7 +27334,6 @@ package android.service.trust {
 package android.service.voice {
 
   public class AlwaysOnHotwordDetector {
-    method public int getAvailability();
     method public android.content.Intent getManageIntent(int);
     method public int getSupportedRecognitionModes();
     method public int startRecognition(int);
@@ -27356,6 +27355,7 @@ package android.service.voice {
   }
 
   public static abstract interface AlwaysOnHotwordDetector.Callback {
+    method public abstract void onAvailabilityChanged(int);
     method public abstract void onDetected(byte[]);
     method public abstract void onDetectionStopped();
   }
@@ -27367,7 +27367,6 @@ package android.service.voice {
     method public android.os.IBinder onBind(android.content.Intent);
     method public void onReady();
     method public void onShutdown();
-    method public void onSoundModelsChanged();
     method public void startSession(android.os.Bundle);
     field public static final java.lang.String SERVICE_INTERFACE = "android.service.voice.VoiceInteractionService";
     field public static final java.lang.String SERVICE_META_DATA = "android.voice_interaction";
