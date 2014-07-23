@@ -36715,15 +36715,15 @@ package android.webkit {
     method public boolean hasMimeType(java.lang.String);
   }
 
-  public abstract interface PermissionRequest {
+  public abstract class PermissionRequest {
+    ctor public PermissionRequest();
     method public abstract void deny();
     method public abstract android.net.Uri getOrigin();
-    method public abstract long getResources();
-    method public abstract void grant(long);
-    field public static final long RESOURCE_AUDIO_CAPTURE = 4L; // 0x4L
-    field public static final long RESOURCE_GEOLOCATION = 1L; // 0x1L
-    field public static final long RESOURCE_PROTECTED_MEDIA_ID = 8L; // 0x8L
-    field public static final long RESOURCE_VIDEO_CAPTURE = 2L; // 0x2L
+    method public abstract java.lang.String[] getResources();
+    method public abstract void grant(java.lang.String[]);
+    field public static final java.lang.String RESOURCE_AUDIO_CAPTURE = "android.webkit.resource.AUDIO_CAPTURE";
+    field public static final java.lang.String RESOURCE_PROTECTED_MEDIA_ID = "android.webkit.resource.PROTECTED_MEDIA_ID";
+    field public static final java.lang.String RESOURCE_VIDEO_CAPTURE = "android.webkit.resource.VIDEO_CAPTURE";
   }
 
   public abstract interface PluginStub {
@@ -37102,7 +37102,6 @@ package android.webkit {
     method public boolean pageUp(boolean);
     method public void pauseTimers();
     method public void postUrl(java.lang.String, byte[]);
-    method public void preauthorizePermission(android.net.Uri, long);
     method public void reload();
     method public void removeJavascriptInterface(java.lang.String);
     method public void requestFocusNodeHref(android.os.Message);

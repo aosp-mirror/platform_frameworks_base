@@ -298,7 +298,7 @@ public class WebChromeClient {
     /**
      * Notify the host application that web content is requesting permission to
      * access the specified resources and the permission currently isn't granted
-     * or denied. The host application must invoke {@link PermissionRequest#grant(long)}
+     * or denied. The host application must invoke {@link PermissionRequest#grant(String[])}
      * or {@link PermissionRequest#deny()}.
      *
      * If this method isn't overridden, the permission is denied.
