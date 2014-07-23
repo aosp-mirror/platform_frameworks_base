@@ -39,6 +39,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
 import android.os.Debug;
+import android.os.UserHandle;
 import android.util.Slog;
 import android.view.Display;
 import android.view.DisplayInfo;
@@ -687,6 +688,10 @@ class WindowStateAnimator {
             final WindowManager.LayoutParams attrs = w.mAttrs;
 
             if ((attrs.flags&WindowManager.LayoutParams.FLAG_SECURE) != 0) {
+                flags |= SurfaceControl.SECURE;
+            }
+
+            if (mService.isScreenCaptureDisabledLocked(UserHandle.getUserId(mWin.mOwnerUid))) {
                 flags |= SurfaceControl.SECURE;
             }
 

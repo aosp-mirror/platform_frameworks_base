@@ -258,6 +258,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         private static final String TAG_DISABLE_KEYGUARD_FEATURES = "disable-keyguard-features";
         private static final String TAG_DISABLE_CAMERA = "disable-camera";
         private static final String TAG_DISABLE_CALLER_ID = "disable-caller-id";
+        private static final String TAG_DISABLE_SCREEN_CAPTURE = "disable-screen-capture";
         private static final String TAG_DISABLE_ACCOUNT_MANAGEMENT = "disable-account-management";
         private static final String TAG_ACCOUNT_TYPE = "account-type";
         private static final String TAG_ENCRYPTION_REQUESTED = "encryption-requested";
@@ -326,6 +327,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         boolean encryptionRequested = false;
         boolean disableCamera = false;
         boolean disableCallerId = false;
+        boolean disableScreenCapture = false; // Can only be set by a device/profile owner.
+
         Set<String> accountTypesWithManagementDisabled = new HashSet<String>();
 
         // TODO: review implementation decisions with frameworks team
@@ -443,6 +446,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 out.attribute(null, ATTR_VALUE, Boolean.toString(disableCallerId));
                 out.endTag(null, TAG_DISABLE_CALLER_ID);
             }
+            if (disableScreenCapture) {
+                out.startTag(null, TAG_DISABLE_SCREEN_CAPTURE);
+                out.attribute(null, ATTR_VALUE, Boolean.toString(disableScreenCapture));
+                out.endTag(null, TAG_DISABLE_SCREEN_CAPTURE);
+            }
             if (disabledKeyguardFeatures != DEF_KEYGUARD_FEATURES_DISABLED) {
                 out.startTag(null, TAG_DISABLE_KEYGUARD_FEATURES);
                 out.attribute(null, ATTR_VALUE, Integer.toString(disabledKeyguardFeatures));
@@ -528,6 +536,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 } else if (TAG_DISABLE_CALLER_ID.equals(tag)) {
                     disableCallerId = Boolean.parseBoolean(
                             parser.getAttributeValue(null, ATTR_VALUE));
+                } else if (TAG_DISABLE_SCREEN_CAPTURE.equals(tag)) {
+                    disableScreenCapture = Boolean.parseBoolean(
+                            parser.getAttributeValue(null, ATTR_VALUE));
                 } else if (TAG_DISABLE_KEYGUARD_FEATURES.equals(tag)) {
                     disabledKeyguardFeatures = Integer.parseInt(
                             parser.getAttributeValue(null, ATTR_VALUE));
@@ -606,6 +617,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     pw.println(disableCamera);
             pw.print(prefix); pw.print("disableCallerId=");
                     pw.println(disableCallerId);
+            pw.print(prefix); pw.print("disableScreenCapture=");
+                    pw.println(disableScreenCapture);
             pw.print(prefix); pw.print("disabledKeyguardFeatures=");
                     pw.println(disabledKeyguardFeatures);
         }
@@ -2975,6 +2988,58 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * Hook to low-levels:  If needed, record the new admin setting for encryption.
      */
     private void setEncryptionRequested(boolean encrypt) {
+    }
+
+
+    /**
+     * Set whether the screen capture is disabled for the user managed by the specified admin.
+     */
+    public void setScreenCaptureDisabled(ComponentName who, int userHandle, boolean disabled) {
+        if (!mHasFeature) {
+            return;
+        }
+        synchronized (this) {
+            if (who == null) {
+                throw new NullPointerException("ComponentName is null");
+            }
+            ActiveAdmin ap = getActiveAdminForCallerLocked(who,
+                    DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            if (ap.disableScreenCapture != disabled) {
+                ap.disableScreenCapture = disabled;
+                saveSettingsLocked(userHandle);
+                try {
+                    getWindowManager().updateScreenCaptureDisabled(userHandle);
+                } catch (RemoteException e) {
+                    Log.w(LOG_TAG, "Unable to notify WindowManager.", e);
+                }
+            }
+        }
+    }
+
+    /**
+     * Returns whether or not screen capture is disabled for a given admin, or disabled for any
+     * active admin (if given admin is null).
+     */
+    public boolean getScreenCaptureDisabled(ComponentName who, int userHandle) {
+        if (!mHasFeature) {
+            return false;
+        }
+        synchronized (this) {
+            if (who != null) {
+                ActiveAdmin admin = getActiveAdminUncheckedLocked(who, userHandle);
+                return (admin != null) ? admin.disableScreenCapture : false;
+            }
+
+            DevicePolicyData policy = getUserData(userHandle);
+            final int N = policy.mAdminList.size();
+            for (int i = 0; i < N; i++) {
+                ActiveAdmin admin = policy.mAdminList.get(i);
+                if (admin.disableScreenCapture) {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 
     /**
