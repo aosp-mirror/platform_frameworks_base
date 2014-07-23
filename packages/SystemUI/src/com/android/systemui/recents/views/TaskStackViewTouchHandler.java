@@ -263,7 +263,6 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                 int velocity = (int) velocityTracker.getYVelocity(mActivePointerId);
 
                 if (mIsScrolling && (Math.abs(velocity) > mMinimumVelocity)) {
-                    // XXX: Make this animation a function of the velocity AND distance
                     int overscrollRange = (int) (Math.min(1f,
                             Math.abs((float) velocity / mMaximumVelocity)) *
                             Constants.Values.TaskStackView.TaskStackOverscrollRange);
@@ -277,7 +276,6 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                     mSv.invalidate(mSv.mStackAlgorithm.mStackRect);
                 } else if (mSv.isScrollOutOfBounds()) {
                     // Animate the scroll back into bounds
-                    // XXX: Make this animation a function of the velocity OR distance
                     mSv.animateBoundScroll();
                 }
 
@@ -303,7 +301,6 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
             case MotionEvent.ACTION_CANCEL: {
                 if (mSv.isScrollOutOfBounds()) {
                     // Animate the scroll back into bounds
-                    // XXX: Make this animation a function of the velocity OR distance
                     mSv.animateBoundScroll();
                 }
                 mActivePointerId = INACTIVE_POINTER_ID;

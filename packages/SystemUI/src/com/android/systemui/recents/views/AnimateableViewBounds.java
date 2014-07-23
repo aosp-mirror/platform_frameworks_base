@@ -17,6 +17,7 @@
 package com.android.systemui.recents.views;
 
 import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.graphics.Outline;
 import android.graphics.Rect;
 import android.view.View;
@@ -34,6 +35,7 @@ public class AnimateableViewBounds extends ViewOutlineProvider {
     int mCornerRadius;
 
     ObjectAnimator mClipTopAnimator;
+    ObjectAnimator mClipRightAnimator;
     ObjectAnimator mClipBottomAnimator;
 
     public AnimateableViewBounds(View source, int cornerRadius) {
@@ -42,6 +44,7 @@ public class AnimateableViewBounds extends ViewOutlineProvider {
         mCornerRadius = cornerRadius;
         mSourceView.setClipToOutline(true);
         setClipTop(getClipTop());
+        setClipRight(getClipRight());
         setClipBottom(getClipBottom());
         setOutlineClipBottom(getOutlineClipBottom());
     }
@@ -56,7 +59,7 @@ public class AnimateableViewBounds extends ViewOutlineProvider {
     }
 
     /** Animates the top clip. */
-    void animateClipTop(int top, int duration) {
+    void animateClipTop(int top, int duration, ValueAnimator.AnimatorUpdateListener updateListener) {
         if (mClipTopAnimator != null) {
             mClipTopAnimator.removeAllListeners();
             mClipTopAnimator.cancel();
@@ -64,6 +67,9 @@ public class AnimateableViewBounds extends ViewOutlineProvider {
         mClipTopAnimator = ObjectAnimator.ofInt(this, "clipTop", top);
         mClipTopAnimator.setDuration(duration);
         mClipTopAnimator.setInterpolator(mConfig.fastOutSlowInInterpolator);
+        if (updateListener != null) {
+            mClipTopAnimator.addUpdateListener(updateListener);
+        }
         mClipTopAnimator.start();
     }
 
@@ -80,16 +86,41 @@ public class AnimateableViewBounds extends ViewOutlineProvider {
         return mClipRect.top;
     }
 
+    /** Animates the right clip. */
+    void animateClipRight(int right, int duration) {
+        if (mClipRightAnimator != null) {
+            mClipRightAnimator.removeAllListeners();
+            mClipRightAnimator.cancel();
+        }
+        mClipRightAnimator = ObjectAnimator.ofInt(this, "clipRight", right);
+        mClipRightAnimator.setDuration(duration);
+        mClipRightAnimator.setInterpolator(mConfig.fastOutSlowInInterpolator);
+        mClipRightAnimator.start();
+    }
+
+    /** Sets the right clip. */
+    public void setClipRight(int right) {
+        if (right != mClipRect.right) {
+            mClipRect.right = right;
+            mSourceView.invalidateOutline();
+        }
+    }
+
+    /** Returns the right clip. */
+    public int getClipRight() {
+        return mClipRect.right;
+    }
+
     /** Animates the bottom clip. */
     void animateClipBottom(int bottom, int duration) {
-        if (mClipTopAnimator != null) {
-            mClipTopAnimator.removeAllListeners();
-            mClipTopAnimator.cancel();
+        if (mClipBottomAnimator != null) {
+            mClipBottomAnimator.removeAllListeners();
+            mClipBottomAnimator.cancel();
         }
-        mClipTopAnimator = ObjectAnimator.ofInt(this, "clipBottom", bottom);
-        mClipTopAnimator.setDuration(duration);
-        mClipTopAnimator.setInterpolator(mConfig.fastOutSlowInInterpolator);
-        mClipTopAnimator.start();
+        mClipBottomAnimator = ObjectAnimator.ofInt(this, "clipBottom", bottom);
+        mClipBottomAnimator.setDuration(duration);
+        mClipBottomAnimator.setInterpolator(mConfig.fastOutSlowInInterpolator);
+        mClipBottomAnimator.start();
     }
 
     /** Sets the bottom clip. */
@@ -105,6 +136,7 @@ public class AnimateableViewBounds extends ViewOutlineProvider {
         return mClipRect.bottom;
     }
 
+    /** Sets the outline bottom clip. */
     public void setOutlineClipBottom(int bottom) {
         if (bottom != mOutlineClipRect.bottom) {
             mOutlineClipRect.bottom = bottom;
@@ -112,6 +144,7 @@ public class AnimateableViewBounds extends ViewOutlineProvider {
         }
     }
 
+    /** Gets the outline bottom clip. */
     public int getOutlineClipBottom() {
         return mOutlineClipRect.bottom;
     }
