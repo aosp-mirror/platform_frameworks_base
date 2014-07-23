@@ -27278,6 +27278,7 @@ package android.service.notification {
     ctor public StatusBarNotification(android.os.Parcel);
     method public android.service.notification.StatusBarNotification clone();
     method public int describeContents();
+    method public java.lang.String getGroupKey();
     method public int getId();
     method public java.lang.String getKey();
     method public android.app.Notification getNotification();

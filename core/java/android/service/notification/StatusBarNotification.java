@@ -30,6 +30,7 @@ public class StatusBarNotification implements Parcelable {
     private final int id;
     private final String tag;
     private final String key;
+    private final String groupKey;
 
     private final int uid;
     private final String opPkg;
@@ -65,6 +66,7 @@ public class StatusBarNotification implements Parcelable {
         this.notification.setUser(user);
         this.postTime = postTime;
         this.key = key();
+        this.groupKey = groupKey();
     }
 
     public StatusBarNotification(Parcel in) {
@@ -84,10 +86,24 @@ public class StatusBarNotification implements Parcelable {
         this.notification.setUser(this.user);
         this.postTime = in.readLong();
         this.key = key();
+        this.groupKey = groupKey();
     }
 
     private String key() {
         return user.getIdentifier() + "|" + pkg + "|" + id + "|" + tag + "|" + uid;
+    }
+
+    private String groupKey() {
+        final String group = getNotification().getGroup();
+        final String sortKey = getNotification().getSortKey();
+        if (group == null && sortKey == null) {
+            // a group of one
+            return key;
+        }
+        return user.getIdentifier() + "|" + pkg + "|" +
+                (group == null
+                        ? "p:" + notification.priority
+                        : "g:" + group);
     }
 
     public void writeToParcel(Parcel out, int flags) {
@@ -239,5 +255,12 @@ public class StatusBarNotification implements Parcelable {
      */
     public String getKey() {
         return key;
+    }
+
+    /**
+     * A key that indicates the group with which this message ranks.
+     */
+    public String getGroupKey() {
+        return groupKey;
     }
 }

@@ -18,35 +18,35 @@ package com.android.server.notification;
 import java.util.Comparator;
 
 /**
- * Sorts notificaitons into attention-relelvant order.
+ * Sorts notifications individually into attention-relelvant order.
  */
 public class NotificationComparator
         implements Comparator<NotificationRecord> {
 
     @Override
-    public int compare(NotificationRecord lhs, NotificationRecord rhs) {
-        if (lhs.isRecentlyIntrusive() != rhs.isRecentlyIntrusive()) {
-            return lhs.isRecentlyIntrusive() ? -1 : 1;
-        }
-        final int leftPackagePriority = lhs.getPackagePriority();
-        final int rightPackagePriority = rhs.getPackagePriority();
+    public int compare(NotificationRecord left, NotificationRecord right) {
+        final int leftPackagePriority = left.getPackagePriority();
+        final int rightPackagePriority = right.getPackagePriority();
         if (leftPackagePriority != rightPackagePriority) {
             // by priority, high to low
             return -1 * Integer.compare(leftPackagePriority, rightPackagePriority);
         }
-        final int leftScore = lhs.sbn.getScore();
-        final int rightScore = rhs.sbn.getScore();
+
+        final int leftScore = left.sbn.getScore();
+        final int rightScore = right.sbn.getScore();
         if (leftScore != rightScore) {
             // by priority, high to low
             return -1 * Integer.compare(leftScore, rightScore);
         }
-        final float leftPeple = lhs.getContactAffinity();
-        final float rightPeople = rhs.getContactAffinity();
-        if (leftPeple != rightPeople) {
+
+        final float leftPeople = left.getContactAffinity();
+        final float rightPeople = right.getContactAffinity();
+        if (leftPeople != rightPeople) {
             // by contact proximity, close to far
-            return -1 * Float.compare(leftPeple, rightPeople);
+            return -1 * Float.compare(leftPeople, rightPeople);
         }
+
         // then break ties by time, most recent first
-        return -1 * Long.compare(lhs.getRankingTimeMs(), rhs.getRankingTimeMs());
+        return -1 * Long.compare(left.getRankingTimeMs(), right.getRankingTimeMs());
     }
 }

@@ -17,12 +17,12 @@ package com.android.server.notification;
 
 import android.app.Notification;
 import android.content.Context;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.ArrayMap;
-import android.util.Log;
 import android.util.Slog;
 import android.util.SparseIntArray;
 import org.xmlpull.v1.XmlPullParser;
@@ -49,13 +49,13 @@ public class RankingHelper implements RankingConfig {
     private static final String ATT_UID = "uid";
     private static final String ATT_PRIORITY = "priority";
 
-    private static final String VALUE_HIGH = "high";
-
     private final NotificationSignalExtractor[] mSignalExtractors;
-    private final NotificationComparator mRankingComparator = new NotificationComparator();
+    private final NotificationComparator mPreliminaryComparator = new NotificationComparator();
+    private final NotificationComparator mFinalComparator = new GroupedNotificationComparator();
 
     // Package name to uid, to priority. Would be better as Table<String, Int, Int>
     private final ArrayMap<String, SparseIntArray> mPackagePriorities;
+    private final ArrayMap<String, NotificationRecord> mProxyByGroupTmp;
 
     private final Context mContext;
     private final Handler mRankingHandler;
@@ -83,6 +83,7 @@ public class RankingHelper implements RankingConfig {
                 Slog.w(TAG, "Problem accessing extractor " + extractorNames[i] + ".", e);
             }
         }
+        mProxyByGroupTmp = new ArrayMap<String, NotificationRecord>();
     }
 
     public void extractSignals(NotificationRecord r) {
@@ -166,11 +167,39 @@ public class RankingHelper implements RankingConfig {
     }
 
     public void sort(ArrayList<NotificationRecord> notificationList) {
-        Collections.sort(notificationList, mRankingComparator);
+        final int N = notificationList.size();
+        // clear group proxies
+        for (int i = N - 1; i >= 0; i--) {
+            notificationList.get(i).setRankingProxy(null);
+        }
+
+        // rank each record individually
+        Collections.sort(notificationList, mPreliminaryComparator);
+
+        // record inidivdual ranking result and nominate proxies for each group
+        for (int i = N - 1; i >= 0; i--) {
+            final NotificationRecord record = notificationList.get(i);
+            record.setAuthoritativeRank(i);
+            final String groupKey = record.getGroupKey();
+            boolean isGroupSummary = record.getNotification().getGroup() != null
+                    && (record.getNotification().flags & Notification.FLAG_GROUP_SUMMARY) != 0;
+            if (isGroupSummary || mProxyByGroupTmp.get(groupKey) == null) {
+                mProxyByGroupTmp.put(groupKey, record);
+            }
+        }
+        // assign nominated proxies to each notification
+        for (int i = 0; i < N; i++) {
+            final NotificationRecord record = notificationList.get(i);
+            record.setRankingProxy(mProxyByGroupTmp.get(record.getGroupKey()));
+        }
+        // Do a second ranking pass, using group proxies
+        Collections.sort(notificationList, mFinalComparator);
+
+        mProxyByGroupTmp.clear();
     }
 
     public int indexOf(ArrayList<NotificationRecord> notificationList, NotificationRecord target) {
-        return Collections.binarySearch(notificationList, target, mRankingComparator);
+        return Collections.binarySearch(notificationList, target, mFinalComparator);
     }
 
     private static int safeInt(XmlPullParser parser, String att, int defValue) {
