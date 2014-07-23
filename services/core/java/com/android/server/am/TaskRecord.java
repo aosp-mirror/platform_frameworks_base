@@ -74,6 +74,8 @@ final class TaskRecord {
 
     private static final String TASK_THUMBNAIL_SUFFIX = "_task_thumbnail";
 
+    static final boolean IGNORE_RETURN_TO_RECENTS = true;
+
     final int taskId;       // Unique identifier for this task.
     String affinity;        // The affinity name for this task, or null.
     final IVoiceInteractionSession voiceSession;    // Voice interaction session driving task
@@ -292,6 +294,9 @@ final class TaskRecord {
     }
 
     void setTaskToReturnTo(int taskToReturnTo) {
+        if (IGNORE_RETURN_TO_RECENTS && taskToReturnTo == RECENTS_ACTIVITY_TYPE) {
+            taskToReturnTo = HOME_ACTIVITY_TYPE;
+        }
         mTaskToReturnTo = taskToReturnTo;
     }
 
