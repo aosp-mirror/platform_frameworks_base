@@ -54,9 +54,11 @@ public class PathParser {
         ArrayList<PathDataNode> list = new ArrayList<PathDataNode>();
         while (end < pathData.length()) {
             end = nextStart(pathData, end);
-            String s = pathData.substring(start, end);
-            float[] val = getFloats(s);
-            addNode(list, s.charAt(0), val);
+            String s = pathData.substring(start, end).trim();
+            if (s.length() > 0) {
+                float[] val = getFloats(s);
+                addNode(list, s.charAt(0), val);
+            }
 
             start = end;
             end++;
@@ -135,6 +137,12 @@ public class PathParser {
         list.add(new PathDataNode(cmd, val));
     }
 
+    private static class ExtractFloatResult {
+        // We need to return the position of the next separator and whether the
+        // next float starts with a '-'.
+        int mEndPosition;
+        boolean mEndWithNegSign;
+    }
 
     /**
      * Parse the floats in the string.
@@ -148,42 +156,73 @@ public class PathParser {
             return new float[0];
         }
         try {
-            float[] tmp = new float[s.length()];
+            float[] results = new float[s.length()];
             int count = 0;
-            int pos = 1, end;
-            while ((end = extract(s, pos)) >= 0) {
-                if (pos < end) {
-                    tmp[count++] = Float.parseFloat(s.substring(pos, end));
+            int startPosition = 1;
+            int endPosition = 0;
+
+            ExtractFloatResult result = new ExtractFloatResult();
+            int totalLength = s.length();
+
+            // The startPosition should always be the first character of the
+            // current number, and endPosition is the character after the current
+            // number.
+            while (startPosition < totalLength) {
+                extract(s, startPosition, result);
+                endPosition = result.mEndPosition;
+
+                if (startPosition < endPosition) {
+                    results[count++] = Float.parseFloat(
+                            s.substring(startPosition, endPosition));
                 }
-                pos = end + 1;
+
+                if (result.mEndWithNegSign) {
+                    // Keep the '-' sign with next number.
+                    startPosition = endPosition;
+                } else {
+                    startPosition = endPosition + 1;
+                }
             }
-            // handle the final float if there is one
-            if (pos < s.length()) {
-                tmp[count++] = Float.parseFloat(s.substring(pos, s.length()));
-            }
-            return Arrays.copyOf(tmp, count);
-        } catch (NumberFormatException e){
-            Log.e(LOGTAG,"error in parsing \""+s+"\"");
+            return Arrays.copyOf(results, count);
+        } catch (NumberFormatException e) {
+            Log.e(LOGTAG, "error in parsing \"" + s + "\"");
             throw e;
         }
     }
 
     /**
-     * Calculate the position of the next comma or space
+     * Calculate the position of the next comma or space or negative sign
      * @param s the string to search
      * @param start the position to start searching
-     * @return the position of the next comma or space or -1 if none found
+     * @param result the result of the extraction, including the position of the
+     * the starting position of next number, whether it is ending with a '-'.
      */
-    private static int extract(String s, int start) {
-        int space = s.indexOf(' ', start);
-        int comma = s.indexOf(',', start);
-        if (space == -1) {
-            return comma;
+    private static void extract(String s, int start, ExtractFloatResult result) {
+        // Now looking for ' ', ',' or '-' from the start.
+        int currentIndex = start;
+        boolean foundSeparator = false;
+        result.mEndWithNegSign = false;
+        for (; currentIndex < s.length(); currentIndex++) {
+            char currentChar = s.charAt(currentIndex);
+            switch (currentChar) {
+                case ' ':
+                case ',':
+                    foundSeparator = true;
+                    break;
+                case '-':
+                    if (currentIndex != start) {
+                        foundSeparator = true;
+                        result.mEndWithNegSign = true;
+                    }
+                    break;
+            }
+            if (foundSeparator) {
+                break;
+            }
         }
-        if (comma == -1) {
-            return space;
-        }
-        return (comma > space) ? space : comma;
+        // When there is nothing found, then we put the end position to the end
+        // of the string.
+        result.mEndPosition = currentIndex;
     }
 
     /**

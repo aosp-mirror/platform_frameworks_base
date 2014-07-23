@@ -23,9 +23,9 @@
     <group>
         <path
                 android:name="back"
-                android:pathData="M 20,55 l 35.3,-35.3 7.07,7.07 -35.3,35.3 z
-              M 27,50 l 97,0 0,10 -97,0 z
-              M 20,55 l 7.07,-7.07 35.3,35.3 -7.07,7.07 z"
+                android:pathData="M 20,55 l 35.3-35.3 7.07,7.07-35.3,35.3 z
+              M 27,50 l 97,0 0,10-97,0 z
+              M 20,55 l 7.07-7.07 35.3,35.3-7.07,7.07 z"
                 android:fill="#ffffffff"
                 />
     </group>
