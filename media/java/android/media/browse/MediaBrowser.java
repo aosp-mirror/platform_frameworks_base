@@ -17,11 +17,13 @@
 package android.media.browse;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.ParceledListSlice;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.media.session.MediaSession;
 import android.net.Uri;
@@ -36,7 +38,9 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Browses media content offered by a link MediaBrowserService.
@@ -61,6 +65,8 @@ public final class MediaBrowser {
     private final Handler mHandler = new Handler();
     private final ArrayMap<Uri,Subscription> mSubscriptions =
             new ArrayMap<Uri, MediaBrowser.Subscription>();
+    private final ArrayMap<ThumbnailRequest, HashSet<ThumbnailCallback>> mThumbnailCallbacks =
+            new ArrayMap<ThumbnailRequest, HashSet<ThumbnailCallback>>();
 
     private int mState = CONNECT_STATE_DISCONNECTED;
     private MediaServiceConnection mServiceConnection;
@@ -68,6 +74,7 @@ public final class MediaBrowser {
     private IMediaBrowserServiceCallbacks mServiceCallbacks;
     private Uri mRootUri;
     private MediaSession.Token mMediaSessionToken;
+    private Bundle mExtras;
 
     /**
      * Creates a media browser for the specified media browse service.
@@ -162,7 +169,6 @@ public final class MediaBrowser {
 
     /**
      * Disconnects from the media browse service.
-     * @more
      * After this, no more callbacks will be received.
      */
     public void disconnect() {
@@ -223,13 +229,26 @@ public final class MediaBrowser {
      * </p>
      *
      * @throws IllegalStateException if not connected.
-      */
+     */
     public @NonNull Uri getRoot() {
         if (mState != CONNECT_STATE_CONNECTED) {
             throw new IllegalStateException("getSessionToken() called while not connected (state="
                     + getStateLabel(mState) + ")");
         }
         return mRootUri;
+    }
+
+    /**
+     * Gets any extras for the media service.
+     *
+     * @throws IllegalStateException if not connected.
+     */
+    public @Nullable Bundle getExtras() {
+        if (mState != CONNECT_STATE_CONNECTED) {
+            throw new IllegalStateException("getExtras() called while not connected (state="
+                    + getStateLabel(mState) + ")");
+        }
+        return mExtras;
     }
 
     /**
@@ -332,18 +351,45 @@ public final class MediaBrowser {
     /**
      * Loads the thumbnail of a media item.
      *
-     * @param uri The uri of the media item.
+     * @param uri The uri of the thumbnail.
      * @param width The preferred width of the icon in dp.
      * @param height The preferred width of the icon in dp.
-     * @param density The preferred density of the icon. Must be one of the android
-     *      density buckets.
      * @param callback The callback to receive the thumbnail.
-     *
-     * @throws IllegalStateException if not connected. TODO: Is this restriction necessary?
      */
-    public void loadThumbnail(@NonNull Uri uri, int width, int height, int density,
-            @NonNull ThumbnailCallback callback) {
-        throw new RuntimeException("implement me");
+    public void loadThumbnail(final @NonNull Uri uri, final int width, final int height,
+            final @NonNull ThumbnailCallback callback) {
+        if (uri == null) {
+            throw new IllegalArgumentException("thumbnail uri cannot be null");
+        }
+        if (callback == null) {
+            throw new IllegalArgumentException("thumbnail callback cannot be null");
+        }
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                HashSet<ThumbnailCallback> callbackSet;
+                ThumbnailRequest request = new ThumbnailRequest(uri, width, height);
+                callbackSet = mThumbnailCallbacks.get(request);
+                if (callbackSet != null) {
+                    callbackSet.add(callback);
+                    mThumbnailCallbacks.put(request, callbackSet);
+                    // same request has been sent. we will wait for the callback.
+                    return;
+                }
+                callbackSet = new HashSet<ThumbnailCallback>();
+                callbackSet.add(callback);
+                mThumbnailCallbacks.put(request, callbackSet);
+                if (mState == CONNECT_STATE_CONNECTED) {
+                    try {
+                        mServiceBinder.loadThumbnail(uri, width, height, mServiceCallbacks);
+                    } catch (RemoteException e) {
+                        // Process is crashing.  We will disconnect, and upon reconnect we will
+                        // automatically reload the thumbnails. So nothing to do here.
+                        Log.d(TAG, "loadThumbnail failed with RemoteException uri=" + uri);
+                    }
+                }
+            }
+        });
     }
 
     /**
@@ -365,7 +411,7 @@ public final class MediaBrowser {
     }
 
     private final void onServiceConnected(final IMediaBrowserServiceCallbacks callback,
-            final Uri root, final MediaSession.Token session) {
+            final Uri root, final MediaSession.Token session, final Bundle extra) {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
@@ -382,6 +428,7 @@ public final class MediaBrowser {
                 }
                 mRootUri = root;
                 mMediaSessionToken = session;
+                mExtras = extra;
                 mState = CONNECT_STATE_CONNECTED;
 
                 if (DBG) {
@@ -399,6 +446,17 @@ public final class MediaBrowser {
                         // Process is crashing.  We will disconnect, and upon reconnect we will
                         // automatically reregister. So nothing to do here.
                         Log.d(TAG, "addSubscription failed with RemoteException parentUri=" + uri);
+                    }
+                }
+
+                for (ThumbnailRequest request : mThumbnailCallbacks.keySet()) {
+                    try {
+                        mServiceBinder.loadThumbnail(request.uri, request.width, request.height,
+                                mServiceCallbacks);
+                    } catch (RemoteException e) {
+                        // Process is crashing.  We will disconnect, and upon reconnect we will
+                        // automatically reload. So nothing to do here.
+                        Log.d(TAG, "loadThumbnail failed with RemoteException uri=" + request.uri);
                     }
                 }
 
@@ -464,6 +522,31 @@ public final class MediaBrowser {
 
                 // Tell the app.
                 subscription.callback.onChildrenLoaded(uri, data);
+            }
+        });
+    }
+
+    private final void onLoadThumbnail(final IMediaBrowserServiceCallbacks callback,
+            final ThumbnailRequest request, final Bitmap bitmap) {
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                // Check that there hasn't been a disconnect or a different
+                // ServiceConnection.
+                if (!isCurrent(callback, "onLoadThumbnail")) {
+                    return;
+                }
+
+                Set<ThumbnailCallback> callbackSet = mThumbnailCallbacks.get(request);
+                if (callbackSet == null) {
+                    Log.d(TAG, "onLoadThumbnail called for request=" + request +
+                            " but the callback is not registered");
+                    return;
+                }
+                for (ThumbnailCallback thumbnailCallback : callbackSet) {
+                    thumbnailCallback.onThumbnailLoaded(request.uri, bitmap);
+                }
+                mThumbnailCallbacks.remove(request);
             }
         });
     }
@@ -567,6 +650,51 @@ public final class MediaBrowser {
         }
     }
 
+    private static class ThumbnailRequest {
+        Uri uri;
+        int width;
+        int height;
+        ThumbnailRequest(@NonNull Uri uri, int width, int height) {
+            if (uri == null) {
+                throw new IllegalArgumentException("thumbnail uri cannot be null");
+            }
+            this.uri = uri;
+            this.width = width;
+            this.height = height;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof ThumbnailRequest)) return false;
+
+            ThumbnailRequest that = (ThumbnailRequest) o;
+
+            if (height != that.height) return false;
+            if (width != that.width) return false;
+            if (!uri.equals(that.uri)) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = uri.hashCode();
+            result = 31 * result + width;
+            result = 31 * result + height;
+            return result;
+        }
+
+        @Override
+        public String toString() {
+            return "ThumbnailRequest{" +
+                    "uri=" + uri +
+                    ", width=" + width +
+                    ", height=" + height +
+                    '}';
+        }
+    }
+
     /**
      * ServiceConnection to the other app.
      */
@@ -666,10 +794,11 @@ public final class MediaBrowser {
          * are the initial data as requested.
          */
         @Override
-        public void onConnect(final Uri root, final MediaSession.Token session) {
+        public void onConnect(final Uri root, final MediaSession.Token session,
+                final Bundle extras) {
             MediaBrowser mediaBrowser = mMediaBrowser.get();
             if (mediaBrowser != null) {
-                mediaBrowser.onServiceConnected(this, root, session);
+                mediaBrowser.onServiceConnected(this, root, session, extras);
             }
         }
 
@@ -689,6 +818,15 @@ public final class MediaBrowser {
             MediaBrowser mediaBrowser = mMediaBrowser.get();
             if (mediaBrowser != null) {
                 mediaBrowser.onLoadChildren(this, uri, list);
+            }
+        }
+
+        @Override
+        public void onLoadThumbnail(final Uri uri, int width, int height, final Bitmap bitmap) {
+            MediaBrowser mediaBrowser = mMediaBrowser.get();
+            if (mediaBrowser != null) {
+                ThumbnailRequest request = new ThumbnailRequest(uri, width, height);
+                mediaBrowser.onLoadThumbnail(this, request, bitmap);
             }
         }
     }

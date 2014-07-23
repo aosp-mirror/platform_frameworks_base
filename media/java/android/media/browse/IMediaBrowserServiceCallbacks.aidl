@@ -3,8 +3,10 @@
 package android.media.browse;
 
 import android.content.pm.ParceledListSlice;
+import android.graphics.Bitmap;
 import android.media.session.MediaSession;
 import android.net.Uri;
+import android.os.Bundle;
 
 /**
  * Media API allows clients to browse through hierarchy of a user’s media collection,
@@ -16,9 +18,11 @@ oneway interface IMediaBrowserServiceCallbacks {
      * Invoked when the connected has been established.
      * @param root The root Uri for browsing.
      * @param session The {@link MediaSession.Token media session token} that can be used to control
-     * the playback of the media app.
+     *         the playback of the media app.
+     * @param extra Extras returned by the media service.
      */
-    void onConnect(in Uri root, in MediaSession.Token session);
+    void onConnect(in Uri root, in MediaSession.Token session, in Bundle extras);
     void onConnectFailed();
     void onLoadChildren(in Uri uri, in ParceledListSlice list);
+    void onLoadThumbnail(in Uri uri, int width, int height, in Bitmap bitmap);
 }
