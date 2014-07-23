@@ -16164,10 +16164,11 @@ package android.media.browse {
     ctor public MediaBrowser(android.content.Context, android.content.ComponentName, android.media.browse.MediaBrowser.ConnectionCallback, android.os.Bundle);
     method public void connect();
     method public void disconnect();
+    method public android.os.Bundle getExtras();
     method public android.net.Uri getRoot();
     method public android.media.session.MediaSession.Token getSessionToken();
     method public boolean isConnected();
-    method public void loadThumbnail(android.net.Uri, int, int, int, android.media.browse.MediaBrowser.ThumbnailCallback);
+    method public void loadThumbnail(android.net.Uri, int, int, android.media.browse.MediaBrowser.ThumbnailCallback);
     method public void subscribe(android.net.Uri, android.media.browse.MediaBrowser.SubscriptionCallback);
     method public void unsubscribe(android.net.Uri);
   }
@@ -16195,6 +16196,8 @@ package android.media.browse {
     method public int describeContents();
     method public android.os.Bundle getExtras();
     method public int getFlags();
+    method public int getIconResId();
+    method public android.net.Uri getIconUri();
     method public java.lang.CharSequence getSummary();
     method public java.lang.CharSequence getTitle();
     method public android.net.Uri getUri();
@@ -16210,6 +16213,8 @@ package android.media.browse {
     ctor public MediaBrowserItem.Builder(android.net.Uri, int, java.lang.CharSequence);
     method public android.media.browse.MediaBrowserItem build();
     method public android.media.browse.MediaBrowserItem.Builder setExtras(android.os.Bundle);
+    method public android.media.browse.MediaBrowserItem.Builder setIconResId(int);
+    method public android.media.browse.MediaBrowserItem.Builder setIconUri(android.net.Uri);
     method public android.media.browse.MediaBrowserItem.Builder setSummary(java.lang.CharSequence);
   }
 
@@ -16217,14 +16222,17 @@ package android.media.browse {
     ctor public MediaBrowserService();
     method public void dump(java.io.FileDescriptor, java.io.PrintWriter, java.lang.String[]);
     method public android.media.session.MediaSession.Token getSessionToken();
-    method public void notifyChange();
     method public void notifyChildrenChanged(android.net.Uri);
     method public android.os.IBinder onBind(android.content.Intent);
-    method public abstract android.net.Uri onGetRoot(java.lang.String, int, android.os.Bundle);
-    method public abstract android.graphics.Bitmap onGetThumbnail(android.net.Uri, int, int, int);
-    method public abstract java.util.List<android.media.browse.MediaBrowserItem> onLoadChildren(android.net.Uri);
+    method protected abstract android.media.browse.MediaBrowserService.BrowserRoot onGetRoot(java.lang.String, int, android.os.Bundle);
+    method protected abstract android.graphics.Bitmap onGetThumbnail(android.net.Uri, int, int);
+    method protected abstract java.util.List<android.media.browse.MediaBrowserItem> onLoadChildren(android.net.Uri);
     method public void setSessionToken(android.media.session.MediaSession.Token);
     field public static final java.lang.String SERVICE_ACTION = "android.media.browse.MediaBrowserService";
+  }
+
+  public static class MediaBrowserService.BrowserRoot {
+    ctor public MediaBrowserService.BrowserRoot(android.net.Uri, android.os.Bundle);
   }
 
 }

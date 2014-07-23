@@ -25,6 +25,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.media.session.MediaSession;
 import android.net.Uri;
@@ -43,6 +44,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Base class for media browse services.
@@ -81,7 +83,7 @@ public abstract class MediaBrowserService extends Service {
         String pkg;
         Bundle rootHints;
         IMediaBrowserServiceCallbacks callbacks;
-        Uri root;
+        BrowserRoot root;
         HashSet<Uri> subscriptions = new HashSet();
     }
 
@@ -130,7 +132,8 @@ public abstract class MediaBrowserService extends Service {
                         } else {
                             try {
                                 mConnections.put(b, connection);
-                                callbacks.onConnect(connection.root, mSession);
+                                callbacks.onConnect(connection.root.getRootUri(),
+                                        mSession, connection.root.getExtras());
                             } catch (RemoteException ex) {
                                 Log.w(TAG, "Calling onConnect() failed. Dropping client. "
                                         + "pkg=" + pkg);
@@ -199,6 +202,22 @@ public abstract class MediaBrowserService extends Service {
                 }
             });
         }
+
+        @Override
+        public void loadThumbnail(final Uri uri, final int width, final int height,
+                final IMediaBrowserServiceCallbacks callbacks) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    Bitmap bitmap = onGetThumbnail(uri, width, height);
+                    try {
+                        callbacks.onLoadThumbnail(uri, width, height, bitmap);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "RemoteException in calling onLoadThumbnail", e);
+                    }
+                }
+            });
+        }
     }
 
     @Override
@@ -220,7 +239,7 @@ public abstract class MediaBrowserService extends Service {
     }
 
     /**
-     * Called to get the root uri for browsing by a particular client.
+     * Called to get the root information for browsing by a particular client.
      * <p>
      * The implementation should verify that the client package has
      * permission to access browse media information before returning
@@ -237,8 +256,8 @@ public abstract class MediaBrowserService extends Service {
      * for browsing, or null if none.  The contents of this bundle may affect
      * the information returned when browsing.
      */
-    public abstract @Nullable Uri onGetRoot(@NonNull String clientPackageName, int clientUid,
-            @Nullable Bundle rootHints);
+    protected abstract @Nullable BrowserRoot onGetRoot(@NonNull String clientPackageName,
+            int clientUid, @Nullable Bundle rootHints);
 
     /**
      * Called to get information about the children of a media item.
@@ -247,7 +266,7 @@ public abstract class MediaBrowserService extends Service {
      * children are to be queried.
      * @return The list of children, or null if the uri is invalid.
      */
-    public abstract @Nullable List<MediaBrowserItem> onLoadChildren(@NonNull Uri parentUri);
+    protected abstract @Nullable List<MediaBrowserItem> onLoadChildren(@NonNull Uri parentUri);
 
     /**
      * Called to get the thumbnail of a particular media item.
@@ -255,14 +274,11 @@ public abstract class MediaBrowserService extends Service {
      * @param uri The uri of the media item.
      * @param width The requested width of the icon in dp.
      * @param height The requested height of the icon in dp.
-     * @param density The requested density of the icon. This is the approximate density of the
-     *              screen on which the icon will be displayed.  This density will be one of
-     *              the android density buckets.
+     *
      * @return The file descriptor of the thumbnail, which may then be loaded
      *          using a bitmap factory, or null if the item does not have a thumbnail.
      */
-    public abstract @Nullable Bitmap onGetThumbnail(@NonNull Uri uri,
-            int width, int height, int density);
+    protected abstract @Nullable Bitmap onGetThumbnail(@NonNull Uri uri, int width, int height);
 
     /**
      * Call to set the media session.
@@ -288,15 +304,6 @@ public abstract class MediaBrowserService extends Service {
     }
 
     /**
-     * Notifies all connected media browsers that the content of
-     * the browse service has changed in some way.
-     * This will cause browsers to fetch subscribed content again.
-     */
-    public void notifyChange() {
-        throw new RuntimeException("implement me");
-    }
-
-    /**
      * Notifies all connected media browsers that the children of
      * the specified Uri have changed in some way.
      * This will cause browsers to fetch subscribed content again.
@@ -305,7 +312,19 @@ public abstract class MediaBrowserService extends Service {
      * children changed.
      */
     public void notifyChildrenChanged(@NonNull Uri parentUri) {
-        throw new RuntimeException("implement me");
+        if (parentUri == null) {
+            throw new IllegalArgumentException("parentUri cannot be null in notifyChildrenChanged");
+        }
+        for (IBinder binder : mConnections.keySet()) {
+            ConnectionRecord connection = mConnections.get(binder);
+            Set<Uri> uris = connection.subscriptions;
+            for (Uri uri : uris) {
+                if (uri.equals(parentUri)) {
+                    performLoadChildren(uri, connection);
+                    break;
+                }
+            }
+        }
     }
 
     /**
@@ -358,6 +377,27 @@ public abstract class MediaBrowserService extends Service {
             // The other side is in the process of crashing.
             Log.w(TAG, "Calling onLoadChildren() failed for uri=" + uri
                     + " package=" + connection.pkg);
+        }
+    }
+
+    public static class BrowserRoot {
+        final private Uri mUri;
+        final private Bundle mExtras;
+        public BrowserRoot(@NonNull Uri uri, @Nullable Bundle extras) {
+            if (uri == null) {
+                throw new IllegalArgumentException("The root uri in BrowserRoot cannot be null. " +
+                        "Use null for BrowserRoot instead.");
+            }
+            mUri = uri;
+            mExtras = extras;
+        }
+
+        Uri getRootUri() {
+            return mUri;
+        }
+
+        Bundle getExtras() {
+            return mExtras;
         }
     }
 }
