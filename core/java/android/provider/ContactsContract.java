@@ -8536,6 +8536,12 @@ public final class ContactsContract {
                     "com.android.contacts.action.LIST_FREQUENT";
 
             /**
+             * The action for the "Join Contact" picker.
+             */
+            public static final String PICK_JOIN_CONTACT_ACTION =
+                    "com.android.contacts.action.JOIN_CONTACT";
+
+            /**
              * The action for the "strequent" contacts list tab. It first lists the starred
              * contacts in alphabetical order and then the frequent contacts in descending
              * order of the number of times they have been contacted.
@@ -8567,6 +8573,15 @@ public final class ContactsContract {
              */
             public static final String FILTER_TEXT_EXTRA_KEY =
                     "com.android.contacts.extra.FILTER_TEXT";
+
+            /**
+             * Used with JOIN_CONTACT action to set the target for aggregation. This action type
+             * uses contact ids instead of contact uris for the sake of backwards compatibility.
+             * <p>
+             * Type: LONG
+             */
+            public static final String TARGET_CONTACT_ID_EXTRA_KEY
+                    = "com.android.contacts.action.CONTACT_ID";
         }
 
         /**
