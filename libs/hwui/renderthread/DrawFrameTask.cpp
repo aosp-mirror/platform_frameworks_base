@@ -85,8 +85,7 @@ int DrawFrameTask::drawFrame(nsecs_t frameTimeNanos, nsecs_t recordDurationNanos
 
 void DrawFrameTask::postAndWait() {
     AutoMutex _lock(mLock);
-    mRenderThread->queue(this);
-    mSignal.wait(mLock);
+    mRenderThread->queueAndWait(this, mSignal, mLock);
 }
 
 void DrawFrameTask::run() {
