@@ -1013,12 +1013,17 @@ public final class HdmiControlService extends SystemService {
          }
 
         @Override
-        public void setRecordRequestListener(IHdmiRecordRequestListener listener) {
+        public void setOneTouchRecordRequestListener(IHdmiRecordRequestListener listener) {
             // TODO: implement this.
         }
 
         @Override
-        public void startRecord(int recorderAddress, byte[] recordSource) {
+        public void startOneTouchRecord(int recorderAddress, byte[] recordSource) {
+            // TODO: implement this.
+        }
+
+        @Override
+        public void startTimerRecording(int recorderAddress, byte[] recordSource) {
             // TODO: implement this.
         }
     }
