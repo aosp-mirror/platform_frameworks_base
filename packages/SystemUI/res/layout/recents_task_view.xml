@@ -67,8 +67,7 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/recents_task_view_lock_to_app_button_height"
         android:layout_gravity="center_horizontal|bottom"
-        android:background="@drawable/recents_lock_to_task_button_bg"
-        android:visibility="invisible">
+        android:background="@drawable/recents_lock_to_task_button_bg">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="match_parent"

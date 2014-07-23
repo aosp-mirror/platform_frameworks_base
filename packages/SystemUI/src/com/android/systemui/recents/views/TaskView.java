@@ -21,7 +21,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
-import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
@@ -60,7 +59,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     boolean mTaskDataLoaded;
     boolean mIsFocused;
     boolean mIsFullScreenView;
-    boolean mIsStub;
     boolean mClipViewInStack;
     AnimateableViewBounds mViewBounds;
     Paint mLayerPaint = new Paint();
@@ -123,7 +121,11 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         mBarView = (TaskBarView) findViewById(R.id.task_view_bar);
         mThumbnailView = (TaskThumbnailView) findViewById(R.id.task_view_thumbnail);
         mFooterView = (TaskFooterView) findViewById(R.id.lock_to_app);
-        mFooterView.setCallbacks(this);
+        if (mConfig.lockToAppEnabled) {
+            mFooterView.setCallbacks(this);
+        } else {
+            mFooterView.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -147,6 +149,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                     MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY));
         }
         setMeasuredDimension(width, height);
+        invalidateOutline();
     }
 
     /** Synchronizes this view's properties with the task's transform */
@@ -201,9 +204,9 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         if (mConfig.launchedFromAppWithScreenshot) {
             if (isTaskViewLaunchTargetTask) {
                 // Also hide the front most task bar view so we can animate it in
-                mBarView.prepareEnterRecentsAnimation();
+                // mBarView.prepareEnterRecentsAnimation();
             } else {
-                // Don't do anything for the side views
+                // Don't do anything for the side views when animating in
             }
 
         } else if (mConfig.launchedFromAppWithThumbnail) {
@@ -232,17 +235,32 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
 
         if (mConfig.launchedFromAppWithScreenshot) {
             if (mTask.isLaunchTarget) {
-                // XXX: We would have to animate the trasnlationY of the task view bar along with the clip and
-                // reset it at the bottom
+                int duration = mConfig.taskViewEnterFromHomeDuration * 5;
+                int windowInsetTop = mConfig.systemInsets.top; // XXX: Should be for the window
+                float taskScale = ((float) taskRect.width() / getMeasuredWidth()) * transform.scale;
+                float taskTranslationY = taskRect.top + transform.translationY - windowInsetTop;
 
-                // XXX: This should actually be the inset on the current app...
-                mViewBounds.animateClipTop(taskRect.top, mConfig.taskViewEnterFromHomeDuration * 5);
-                mViewBounds.animateClipBottom(getMeasuredHeight() - taskRect.bottom, mConfig.taskViewEnterFromHomeDuration * 5);
-
-                animate().scaleX(((float) taskRect.width() / getMeasuredWidth()) * transform.scale)
-                        .scaleY(((float) taskRect.width() / getMeasuredWidth()) * transform.scale)
-                        .translationY(taskRect.top + transform.translationY)
-                        .setDuration(mConfig.taskViewEnterFromHomeDuration * 5)
+                // Animate the top clip
+                mViewBounds.animateClipTop(windowInsetTop, duration,
+                        new ValueAnimator.AnimatorUpdateListener() {
+                    @Override
+                    public void onAnimationUpdate(ValueAnimator animation) {
+                        int y = (Integer) animation.getAnimatedValue();
+                        mBarView.setTranslationY(y);
+                    }
+                });
+                // Animate the bottom or right clip
+                int size = Math.round((taskRect.width() / taskScale));
+                if (mConfig.hasHorizontalLayout()) {
+                    mViewBounds.animateClipRight(getMeasuredWidth() - size, duration);
+                } else {
+                    mViewBounds.animateClipBottom(getMeasuredHeight() - (windowInsetTop + size), duration);
+                }
+                animate()
+                        .scaleX(taskScale)
+                        .scaleY(taskScale)
+                        .translationY(taskTranslationY)
+                        .setDuration(duration)
                         .withEndAction(new Runnable() {
                             @Override
                             public void run() {
@@ -424,11 +442,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         return mIsFullScreenView;
     }
 
-    /** Sets the stubbed state of this task view. */
-    void setStubState(boolean isStub) {
-        mIsStub = isStub;
-    }
-
     /**
      * Returns whether this view should be clipped, or any views below should clip against this
      * view.
@@ -447,7 +460,11 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
 
     /** Gets the max footer height. */
     public int getMaxFooterHeight() {
-        return mFooterView.mMaxFooterHeight;
+        if (mConfig.lockToAppEnabled) {
+            return mFooterView.mMaxFooterHeight;
+        } else {
+            return 0;
+        }
     }
 
     /** Animates the footer into and out of view. */
@@ -486,17 +503,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     /** Update the dim as a function of the scale of this view. */
     void updateDimOverlayFromScale() {
         setDim(getDimOverlayFromScale());
-    }
-
-    /**** View drawing ****/
-
-    @Override
-    protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
-        if (mIsStub && (child != mBarView)) {
-            // Skip the thumbnail view if we are in stub mode
-            return false;
-        }
-        return super.drawChild(canvas, child, drawingTime);
     }
 
     /**** View focus state ****/

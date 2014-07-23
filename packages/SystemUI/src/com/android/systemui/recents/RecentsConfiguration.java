@@ -305,6 +305,11 @@ public class RecentsConfiguration {
                 (!transposeRecentsLayoutWithOrientation || !isLandscape);
     }
 
+    /** Returns whether the current layout is horizontal. */
+    public boolean hasHorizontalLayout() {
+        return isLandscape && transposeRecentsLayoutWithOrientation;
+    }
+
     /**
      * Returns the task stack bounds in the current orientation. These bounds do not account for
      * the system insets.
