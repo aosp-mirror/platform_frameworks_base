@@ -178,6 +178,7 @@ public class RippleDrawable extends LayerDrawable {
 
         setColor(color);
         ensurePadding();
+        initializeFromState();
     }
 
     @Override
