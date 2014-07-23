@@ -186,7 +186,6 @@ public class ScanFilterTest extends TestCase {
         parcel.setDataPosition(0);
         ScanFilter filterFromParcel =
                 ScanFilter.CREATOR.createFromParcel(parcel);
-        System.out.println(filterFromParcel);
         assertEquals(filter, filterFromParcel);
     }
 }
