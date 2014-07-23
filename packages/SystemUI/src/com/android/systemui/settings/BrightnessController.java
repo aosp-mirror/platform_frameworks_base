@@ -163,15 +163,17 @@ public class BrightnessController implements ToggleSlider.Listener {
         if (mListening) {
             return;
         }
+
         mBrightnessObserver.startObserving();
         mUserTracker.startTracking();
 
-        // Update the slider and mode before attaching the listener so we don't receive the
-        // onChanged notifications for the initial values.
+        // Update the slider and mode before attaching the listener so we don't
+        // receive the onChanged notifications for the initial values.
         updateMode();
         updateSlider();
 
         mControl.setOnChangedListener(this);
+        mListening = true;
     }
 
     /** Unregister all call backs, both to and from the controller */
@@ -179,10 +181,11 @@ public class BrightnessController implements ToggleSlider.Listener {
         if (!mListening) {
             return;
         }
+
         mBrightnessObserver.stopObserving();
-        mChangeCallbacks.clear();
         mUserTracker.stopTracking();
         mControl.setOnChangedListener(null);
+        mListening = false;
     }
 
     public void onChanged(ToggleSlider view, boolean tracking, boolean automatic, int value) {
