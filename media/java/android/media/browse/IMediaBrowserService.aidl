@@ -2,6 +2,7 @@
 
 package android.media.browse;
 
+import android.content.res.Configuration;
 import android.media.browse.IMediaBrowserServiceCallbacks;
 import android.net.Uri;
 import android.os.Bundle;
@@ -17,4 +18,5 @@ oneway interface IMediaBrowserService {
 
     void addSubscription(in Uri uri, IMediaBrowserServiceCallbacks callbacks);
     void removeSubscription(in Uri uri, IMediaBrowserServiceCallbacks callbacks);
+    void loadThumbnail(in Uri uri, int width, int height, IMediaBrowserServiceCallbacks callbacks);
 }

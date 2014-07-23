@@ -32,6 +32,8 @@ import java.lang.annotation.RetentionPolicy;
  */
 public final class MediaBrowserItem implements Parcelable {
     private final Uri mUri;
+    private final Uri mIconUri;
+    private final int mIconResId;
     private final int mFlags;
     private final CharSequence mTitle;
     private final CharSequence mSummary;
@@ -59,8 +61,8 @@ public final class MediaBrowserItem implements Parcelable {
     /**
      * Initialize a MediaBrowserItem object.
      */
-    private MediaBrowserItem(@NonNull Uri uri, int flags, @NonNull CharSequence title,
-            CharSequence summary, Bundle extras) {
+    private MediaBrowserItem(@NonNull Uri uri, @Nullable Uri iconUri, int iconResId, int flags,
+            @NonNull CharSequence title, CharSequence summary, Bundle extras) {
         if (uri == null) {
             throw new IllegalArgumentException("uri can not be null");
         }
@@ -68,6 +70,8 @@ public final class MediaBrowserItem implements Parcelable {
             throw new IllegalArgumentException("title can not be null");
         }
         mUri = uri;
+        mIconUri = iconUri;
+        mIconResId = iconResId;
         mFlags = flags;
         mTitle = title;
         mSummary = summary;
@@ -79,6 +83,8 @@ public final class MediaBrowserItem implements Parcelable {
      */
     private MediaBrowserItem(Parcel in) {
         mUri = Uri.CREATOR.createFromParcel(in);
+        mIconUri = Uri.CREATOR.createFromParcel(in);
+        mIconResId = in.readInt();
         mFlags = in.readInt();
         mTitle = in.readCharSequence();
         if (in.readInt() != 0) {
@@ -101,6 +107,8 @@ public final class MediaBrowserItem implements Parcelable {
     @Override
     public void writeToParcel(Parcel out, int flags) {
         mUri.writeToParcel(out, flags);
+        mIconUri.writeToParcel(out, flags);
+        out.writeInt(mIconResId);
         out.writeInt(mFlags);
         out.writeCharSequence(mTitle);
         if (mSummary != null) {
@@ -135,6 +143,20 @@ public final class MediaBrowserItem implements Parcelable {
      */
     public @NonNull Uri getUri() {
         return mUri;
+    }
+
+    /**
+     * Gets the Uri of the icon.
+     */
+    public @Nullable Uri getIconUri() {
+        return mIconUri;
+    }
+
+    /**
+     * Gets the resource id of the icon.
+     */
+    public int getIconResId() {
+        return mIconResId;
     }
 
     /**
@@ -195,6 +217,8 @@ public final class MediaBrowserItem implements Parcelable {
         private final Uri mUri;
         private final int mFlags;
         private final CharSequence mTitle;
+        private Uri mIconUri;
+        private int mIconResId;
         private CharSequence mSummary;
         private Bundle mExtras;
 
@@ -211,6 +235,26 @@ public final class MediaBrowserItem implements Parcelable {
             mUri = uri;
             mFlags = flags;
             mTitle = title;
+        }
+
+        /**
+         * Sets the uri of the icon.
+         * <p>
+         * If both {@link #setIconUri(Uri)} and {@link #setIconResId(int)} are called,
+         * the resource id will be used to load the icon.
+         * </p>
+         */
+        public @NonNull Builder setIconUri(@Nullable Uri iconUri) {
+            mIconUri = iconUri;
+            return this;
+        }
+
+        /**
+         * Sets the resource id of the icon.
+         */
+        public @NonNull Builder setIconResId(int resId) {
+            mIconResId = resId;
+            return this;
         }
 
         /**
@@ -234,7 +278,8 @@ public final class MediaBrowserItem implements Parcelable {
         * Builds the item.
         */
         public @NonNull MediaBrowserItem build() {
-            return new MediaBrowserItem(mUri, mFlags, mTitle, mSummary, mExtras);
+            return new MediaBrowserItem(mUri, mIconUri, mIconResId,
+                    mFlags, mTitle, mSummary, mExtras);
         }
     }
 }
