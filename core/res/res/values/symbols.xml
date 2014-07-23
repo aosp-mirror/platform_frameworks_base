@@ -1975,4 +1975,6 @@
   <java-symbol type="attr" name="lightRadius" />
   <java-symbol type="attr" name="ambientShadowAlpha" />
   <java-symbol type="attr" name="spotShadowAlpha" />
+
+  <java-symbol type="array" name="config_cdma_home_system" />
 </resources>
