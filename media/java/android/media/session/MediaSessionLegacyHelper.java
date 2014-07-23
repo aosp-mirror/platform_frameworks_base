@@ -21,6 +21,10 @@ import android.app.PendingIntent.CanceledException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.RectF;
 import android.media.AudioManager;
 import android.media.MediaMetadata;
 import android.media.MediaMetadataEditor;
@@ -73,19 +77,23 @@ public class MediaSessionLegacyHelper {
         return sInstance;
     }
 
-    public static Bundle getOldMetadata(MediaMetadata metadata) {
+    public static Bundle getOldMetadata(MediaMetadata metadata, int artworkWidth,
+            int artworkHeight) {
+        boolean includeArtwork = artworkWidth != -1 && artworkHeight != -1;
         Bundle oldMetadata = new Bundle();
         if (metadata.containsKey(MediaMetadata.METADATA_KEY_ALBUM)) {
             oldMetadata.putString(String.valueOf(MediaMetadataRetriever.METADATA_KEY_ALBUM),
                     metadata.getString(MediaMetadata.METADATA_KEY_ALBUM));
         }
-        if (metadata.containsKey(MediaMetadata.METADATA_KEY_ART)) {
+        if (includeArtwork && metadata.containsKey(MediaMetadata.METADATA_KEY_ART)) {
+            Bitmap art = metadata.getBitmap(MediaMetadata.METADATA_KEY_ART);
             oldMetadata.putParcelable(String.valueOf(MediaMetadataEditor.BITMAP_KEY_ARTWORK),
-                    metadata.getBitmap(MediaMetadata.METADATA_KEY_ART));
-        } else if (metadata.containsKey(MediaMetadata.METADATA_KEY_ALBUM_ART)) {
+                    scaleBitmapIfTooBig(art, artworkWidth, artworkHeight));
+        } else if (includeArtwork && metadata.containsKey(MediaMetadata.METADATA_KEY_ALBUM_ART)) {
             // Fall back to album art if the track art wasn't available
+            Bitmap art = metadata.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART);
             oldMetadata.putParcelable(String.valueOf(MediaMetadataEditor.BITMAP_KEY_ARTWORK),
-                    metadata.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART));
+                    scaleBitmapIfTooBig(art, artworkWidth, artworkHeight));
         }
         if (metadata.containsKey(MediaMetadata.METADATA_KEY_ALBUM_ARTIST)) {
             oldMetadata.putString(String.valueOf(MediaMetadataRetriever.METADATA_KEY_ALBUMARTIST),
@@ -320,6 +328,41 @@ public class MediaSessionLegacyHelper {
                 Log.d(TAG, "removeMediaButtonListener removed " + pi);
             }
         }
+    }
+
+    /**
+     * Scale a bitmap to fit the smallest dimension by uniformly scaling the
+     * incoming bitmap. If the bitmap fits, then do nothing and return the
+     * original.
+     *
+     * @param bitmap
+     * @param maxWidth
+     * @param maxHeight
+     * @return
+     */
+    private static Bitmap scaleBitmapIfTooBig(Bitmap bitmap, int maxWidth, int maxHeight) {
+        if (bitmap != null) {
+            final int width = bitmap.getWidth();
+            final int height = bitmap.getHeight();
+            if (width > maxWidth || height > maxHeight) {
+                float scale = Math.min((float) maxWidth / width, (float) maxHeight / height);
+                int newWidth = Math.round(scale * width);
+                int newHeight = Math.round(scale * height);
+                Bitmap.Config newConfig = bitmap.getConfig();
+                if (newConfig == null) {
+                    newConfig = Bitmap.Config.ARGB_8888;
+                }
+                Bitmap outBitmap = Bitmap.createBitmap(newWidth, newHeight, newConfig);
+                Canvas canvas = new Canvas(outBitmap);
+                Paint paint = new Paint();
+                paint.setAntiAlias(true);
+                paint.setFilterBitmap(true);
+                canvas.drawBitmap(bitmap, null,
+                        new RectF(0, 0, outBitmap.getWidth(), outBitmap.getHeight()), paint);
+                bitmap = outBitmap;
+            }
+        }
+        return bitmap;
     }
 
     private SessionHolder getHolder(PendingIntent pi, boolean createIfMissing) {

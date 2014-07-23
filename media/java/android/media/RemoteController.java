@@ -395,12 +395,6 @@ import java.util.List;
                 mArtworkWidth = -1;
                 mArtworkHeight = -1;
             }
-            if (mIsRegistered) {
-                mAudioManager.remoteControlDisplayUsesBitmapSize(mRcd,
-                        mArtworkWidth, mArtworkHeight);
-            } // else new values have been stored, and will be read by AudioManager with
-              //    RemoteController.getArtworkSize() when AudioManager.registerRemoteController()
-              //    is called.
         }
         return true;
     }
@@ -1042,7 +1036,8 @@ import java.util.List;
             boolean canRate = mCurrentSession != null
                     && mCurrentSession.getRatingType() != Rating.RATING_NONE;
             long editableKeys = canRate ? MediaMetadataEditor.RATING_KEY_BY_USER : 0;
-            Bundle legacyMetadata = MediaSessionLegacyHelper.getOldMetadata(metadata);
+            Bundle legacyMetadata = MediaSessionLegacyHelper.getOldMetadata(metadata,
+                    mArtworkWidth, mArtworkHeight);
             mMetadataEditor = new MetadataEditor(legacyMetadata, editableKeys);
             metadataEditor = mMetadataEditor;
         }
