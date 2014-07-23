@@ -234,6 +234,8 @@ public class Toolbar extends ViewGroup {
             setSubtitle(subtitle);
         }
 
+        // Set the default context, since setPopupTheme() may be a no-op.
+        mPopupContext = mContext;
         setPopupTheme(a.getResourceId(R.styleable.Toolbar_popupTheme, 0));
         a.recycle();
     }
