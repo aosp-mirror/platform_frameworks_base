@@ -108,6 +108,11 @@ public abstract class NetworkAgent extends Handler {
 
     public NetworkAgent(Looper looper, Context context, String logTag, NetworkInfo ni,
             NetworkCapabilities nc, LinkProperties lp, int score) {
+        this(looper, context, logTag, ni, nc, lp, score, null);
+    }
+
+    public NetworkAgent(Looper looper, Context context, String logTag, NetworkInfo ni,
+            NetworkCapabilities nc, LinkProperties lp, int score, NetworkMisc misc) {
         super(looper);
         LOG_TAG = logTag;
         mContext = context;
@@ -119,7 +124,7 @@ public abstract class NetworkAgent extends Handler {
         ConnectivityManager cm = (ConnectivityManager)mContext.getSystemService(
                 Context.CONNECTIVITY_SERVICE);
         cm.registerNetworkAgent(new Messenger(this), new NetworkInfo(ni),
-                new LinkProperties(lp), new NetworkCapabilities(nc), score);
+                new LinkProperties(lp), new NetworkCapabilities(nc), score, misc);
     }
 
     @Override

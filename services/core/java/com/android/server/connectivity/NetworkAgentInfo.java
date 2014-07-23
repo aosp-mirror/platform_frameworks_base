@@ -21,6 +21,7 @@ import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
+import android.net.NetworkMisc;
 import android.net.NetworkRequest;
 import android.os.Handler;
 import android.os.Messenger;
@@ -44,6 +45,7 @@ public class NetworkAgentInfo {
     public NetworkCapabilities networkCapabilities;
     public int currentScore;
     public final NetworkMonitor networkMonitor;
+    public final NetworkMisc networkMisc;
 
     // The list of NetworkRequests being satisfied by this Network.
     public final SparseArray<NetworkRequest> networkRequests = new SparseArray<NetworkRequest>();
@@ -53,8 +55,8 @@ public class NetworkAgentInfo {
     public final AsyncChannel asyncChannel;
 
     public NetworkAgentInfo(Messenger messenger, AsyncChannel ac, int netId, NetworkInfo info,
-            LinkProperties lp, NetworkCapabilities nc, int score, Context context,
-            Handler handler) {
+            LinkProperties lp, NetworkCapabilities nc, int score, Context context, Handler handler,
+            NetworkMisc misc) {
         this.messenger = messenger;
         asyncChannel = ac;
         network = new Network(netId);
@@ -63,6 +65,7 @@ public class NetworkAgentInfo {
         networkCapabilities = nc;
         currentScore = score;
         networkMonitor = new NetworkMonitor(context, handler, this);
+        networkMisc = misc;
     }
 
     public void addRequest(NetworkRequest networkRequest) {
