@@ -123,7 +123,7 @@ public class UserSwitcherController {
                     if (info.isGuest()) {
                         guestRecord = new UserRecord(info, null /* picture */,
                                 true /* isGuest */, isCurrent);
-                    } else if (!info.isManagedProfile()) {
+                    } else if (info.supportsSwitchTo()) {
                         Bitmap picture = bitmaps.get(info.id);
                         if (picture == null) {
                             picture = mUserManager.getUserIcon(info.id);
@@ -302,6 +302,18 @@ public class UserSwitcherController {
             } else {
                 return item.info.name;
             }
+        }
+
+        public int getSwitchableUsers() {
+            int result = 0;
+            ArrayList<UserRecord> users = mController.mUsers;
+            int N = users.size();
+            for (int i = 0; i < N; i++) {
+                if (users.get(i).info != null) {
+                    result++;
+                }
+            }
+            return result;
         }
     }
 

@@ -26,7 +26,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 
 import com.android.systemui.qs.QSPanel;
-import com.android.systemui.qs.tiles.UserDetailView;
+import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 
 /**
  * Container for image of the multi user switcher (tappable).
@@ -34,6 +34,8 @@ import com.android.systemui.qs.tiles.UserDetailView;
 public class MultiUserSwitch extends FrameLayout implements View.OnClickListener {
 
     private QSPanel mQsPanel;
+    private KeyguardUserSwitcher mKeyguardUserSwitcher;
+    private boolean mKeyguardMode;
 
     public MultiUserSwitch(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -49,12 +51,26 @@ public class MultiUserSwitch extends FrameLayout implements View.OnClickListener
         mQsPanel = qsPanel;
     }
 
+    public void setKeyguardUserSwitcher(KeyguardUserSwitcher keyguardUserSwitcher) {
+        mKeyguardUserSwitcher = keyguardUserSwitcher;
+    }
+
+    public void setKeyguardMode(boolean keyguardShowing) {
+        mKeyguardMode = keyguardShowing;
+    }
+
     @Override
     public void onClick(View v) {
         final UserManager um = UserManager.get(getContext());
         if (um.isUserSwitcherEnabled()) {
-            mQsPanel.showDetailAdapter(true,
-                    mQsPanel.getHost().getUserSwitcherController().userDetailAdapter);
+            if (mKeyguardMode) {
+                if (mKeyguardUserSwitcher != null) {
+                    mKeyguardUserSwitcher.show();
+                }
+            } else {
+                mQsPanel.showDetailAdapter(true,
+                        mQsPanel.getHost().getUserSwitcherController().userDetailAdapter);
+            }
         } else {
             Intent intent = ContactsContract.QuickContact.composeQuickContactsIntent(
                     getContext(), v, ContactsContract.Profile.CONTENT_URI,

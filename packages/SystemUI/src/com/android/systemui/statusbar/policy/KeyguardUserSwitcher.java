@@ -16,62 +16,56 @@
 
 package com.android.systemui.statusbar.policy;
 
-import com.android.systemui.BitmapHelper;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.StatusBarHeaderView;
 import com.android.systemui.statusbar.phone.UserAvatarView;
 
-import android.app.ActivityManagerNative;
 import android.content.Context;
-import android.content.pm.UserInfo;
-import android.graphics.Bitmap;
-import android.os.AsyncTask;
-import android.os.RemoteException;
-import android.os.UserManager;
-import android.util.Log;
+import android.database.DataSetObserver;
+import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewStub;
-import android.view.WindowManagerGlobal;
 import android.widget.TextView;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Manages the user switcher on the Keyguard.
  */
-public class KeyguardUserSwitcher implements View.OnClickListener {
+public class KeyguardUserSwitcher {
 
     private static final String TAG = "KeyguardUserSwitcher";
+    private static final boolean ALWAYS_ON = false;
+    private static final String SIMPLE_USER_SWITCHER_GLOBAL_SETTING =
+            "lockscreenSimpleUserSwitcher";
 
-    private final Context mContext;
     private final ViewGroup mUserSwitcher;
-    private final UserManager mUserManager;
     private final StatusBarHeaderView mHeader;
+    private final Adapter mAdapter;
+    private final boolean mSimpleUserSwitcher;
 
     public KeyguardUserSwitcher(Context context, ViewStub userSwitcher,
-            StatusBarHeaderView header) {
-        mContext = context;
-        if (context.getResources().getBoolean(R.bool.config_keyguardUserSwitcher)) {
+            StatusBarHeaderView header, UserSwitcherController userSwitcherController) {
+        if (context.getResources().getBoolean(R.bool.config_keyguardUserSwitcher) || ALWAYS_ON) {
             mUserSwitcher = (ViewGroup) userSwitcher.inflate();
-            mUserManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
             mHeader = header;
-            refresh();
+            mHeader.setKeyguarUserSwitcher(this);
+            mAdapter = new Adapter(context, userSwitcherController);
+            mAdapter.registerDataSetObserver(mDataSetObserver);
+            mSimpleUserSwitcher = Settings.Global.getInt(context.getContentResolver(),
+                    SIMPLE_USER_SWITCHER_GLOBAL_SETTING, 0) != 0;
         } else {
             mUserSwitcher = null;
-            mUserManager = null;
             mHeader = null;
+            mAdapter = null;
+            mSimpleUserSwitcher = false;
         }
     }
 
     public void setKeyguard(boolean keyguard) {
         if (mUserSwitcher != null) {
-            // TODO: Cache showUserSwitcherOnKeyguard().
-            if (keyguard && showUserSwitcherOnKeyguard()) {
+            if (keyguard && shouldExpandByDefault()) {
                 show();
-                refresh();
             } else {
                 hide();
             }
@@ -79,24 +73,11 @@ public class KeyguardUserSwitcher implements View.OnClickListener {
     }
 
     /**
-     * @return true if the user switcher should be shown on the lock screen.
+     * @return true if the user switcher should be expanded by default on the lock screen.
      * @see android.os.UserManager#isUserSwitcherEnabled()
      */
-    private boolean showUserSwitcherOnKeyguard() {
-        // TODO: Set isEdu. The edu provisioning process can add settings to Settings.Global.
-        boolean isEdu = false;
-        if (isEdu) {
-            return true;
-        }
-        List<UserInfo> users = mUserManager.getUsers(true /* excludeDying */);
-        int N = users.size();
-        int switchableUsers = 0;
-        for (int i = 0; i < N; i++) {
-            if (users.get(i).supportsSwitchTo()) {
-                switchableUsers++;
-            }
-        }
-        return switchableUsers > 1;
+    private boolean shouldExpandByDefault() {
+        return mSimpleUserSwitcher || mAdapter.getSwitchableUsers() > 1;
     }
 
     public void show() {
@@ -116,100 +97,76 @@ public class KeyguardUserSwitcher implements View.OnClickListener {
     }
 
     private void refresh() {
-        if (mUserSwitcher != null) {
-            new AsyncTask<Void, Void, ArrayList<UserData>>() {
-                @Override
-                protected ArrayList<UserData> doInBackground(Void... params) {
-                    return loadUsers();
-                }
-
-                @Override
-                protected void onPostExecute(ArrayList<UserData> userInfos) {
-                    bind(userInfos);
-                }
-            }.execute((Void[]) null);
-        }
-    }
-
-    private void bind(ArrayList<UserData> userList) {
-        mUserSwitcher.removeAllViews();
-        int N = userList.size();
+        final int childCount = mUserSwitcher.getChildCount();
+        final int adapterCount = mAdapter.getCount();
+        final int N = Math.max(childCount, adapterCount);
         for (int i = 0; i < N; i++) {
-            mUserSwitcher.addView(inflateUser(userList.get(i)));
-        }
-        // TODO: add Guest
-        // TODO: add (+) button
-    }
-
-    private View inflateUser(UserData user) {
-        View v = LayoutInflater.from(mUserSwitcher.getContext()).inflate(
-                R.layout.keyguard_user_switcher_item, mUserSwitcher, false);
-        TextView name = (TextView) v.findViewById(R.id.name);
-        UserAvatarView picture = (UserAvatarView) v.findViewById(R.id.picture);
-        name.setText(user.userInfo.name);
-        picture.setActivated(user.isCurrent);
-        if (user.userInfo.isGuest()) {
-            picture.setDrawable(mContext.getResources().getDrawable(R.drawable.ic_account_circle));
-        } else {
-            picture.setBitmap(user.userIcon);
-        }
-        v.setOnClickListener(this);
-        v.setTag(user.userInfo);
-        // TODO: mark which user is current for accessibility.
-        return v;
-    }
-
-    @Override
-    public void onClick(View v) {
-        switchUser(((UserInfo)v.getTag()).id);
-    }
-
-    // TODO: Factor out logic below and share with QS implementation.
-
-    private ArrayList<UserData> loadUsers() {
-        ArrayList<UserInfo> users = (ArrayList<UserInfo>) mUserManager
-                .getUsers(true /* excludeDying */);
-        int N = users.size();
-        ArrayList<UserData> result = new ArrayList<>(N);
-        int currentUser = -1;
-        try {
-            currentUser = ActivityManagerNative.getDefault().getCurrentUser().id;
-        } catch (RemoteException e) {
-            Log.e(TAG, "Couln't get current user.", e);
-        }
-        final int avatarSize
-                = mContext.getResources().getDimensionPixelSize(R.dimen.max_avatar_size);
-        for (int i = 0; i < N; i++) {
-            UserInfo user = users.get(i);
-            if (user.supportsSwitchTo()) {
-                boolean isCurrent = user.id == currentUser;
-                final Bitmap picture = BitmapHelper.createCircularClip(
-                        mUserManager.getUserIcon(user.id),
-                        avatarSize, avatarSize);
-                result.add(new UserData(user, picture, isCurrent));
+            if (i < adapterCount) {
+                View oldView = null;
+                if (i < childCount) {
+                    oldView = mUserSwitcher.getChildAt(i);
+                }
+                View newView = mAdapter.getView(i, oldView, mUserSwitcher);
+                if (oldView == null) {
+                    // We ran out of existing views. Add it at the end.
+                    mUserSwitcher.addView(newView);
+                } else if (oldView != newView) {
+                    // We couldn't rebind the view. Replace it.
+                    mUserSwitcher.removeViewAt(i);
+                    mUserSwitcher.addView(newView, i);
+                }
+            } else {
+                int lastIndex = mUserSwitcher.getChildCount() - 1;
+                mUserSwitcher.removeViewAt(lastIndex);
             }
         }
-        return result;
     }
 
-    private void switchUser(int userId) {
-        try {
-            WindowManagerGlobal.getWindowManagerService().lockNow(null);
-            ActivityManagerNative.getDefault().switchUser(userId);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Couldn't switch user.", e);
+    public final DataSetObserver mDataSetObserver = new DataSetObserver() {
+        @Override
+        public void onChanged() {
+            refresh();
         }
-    }
+    };
 
-    private static class UserData {
-        final UserInfo userInfo;
-        final Bitmap userIcon;
-        final boolean isCurrent;
+    public static class Adapter extends UserSwitcherController.BaseUserAdapter implements
+            View.OnClickListener {
 
-        UserData(UserInfo userInfo, Bitmap userIcon, boolean isCurrent) {
-            this.userInfo = userInfo;
-            this.userIcon = userIcon;
-            this.isCurrent = isCurrent;
+        private Context mContext;
+
+        public Adapter(Context context, UserSwitcherController controller) {
+            super(controller);
+            mContext = context;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            UserSwitcherController.UserRecord item = getItem(position);
+
+            if (convertView == null
+                    || !(convertView.getTag() instanceof UserSwitcherController.UserRecord)) {
+                convertView = LayoutInflater.from(mContext).inflate(
+                        R.layout.keyguard_user_switcher_item, parent, false);
+                convertView.setOnClickListener(this);
+            }
+
+            TextView nameView = (TextView) convertView.findViewById(R.id.name);
+            UserAvatarView pictureView = (UserAvatarView) convertView.findViewById(R.id.picture);
+
+            nameView.setText(getName(mContext, item));
+            if (item.picture == null) {
+                pictureView.setDrawable(mContext.getDrawable(R.drawable.ic_account_circle_qs));
+            } else {
+                pictureView.setBitmap(item.picture);
+            }
+            convertView.setActivated(item.isCurrent);
+            convertView.setTag(item);
+            return convertView;
+        }
+
+        @Override
+        public void onClick(View v) {
+            switchTo(((UserSwitcherController.UserRecord)v.getTag()));
         }
     }
 }
