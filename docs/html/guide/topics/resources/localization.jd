@@ -402,8 +402,7 @@ that Android makes available:</p>
 	resolution and density of the device screen may differ, which could affect 
 	the display of strings and drawables in your UI.</p>
 
-<p>To change the locale on a device, use  the Settings application  (Home &gt;
-Menu &gt; Settings &gt; Locale &amp; text &gt; Select locale). </p>
+<p>To change the locale or language on a device, use the Settings application.</p>
 
 <h3 id="emulator">Testing on an Emulator</h3>
 
