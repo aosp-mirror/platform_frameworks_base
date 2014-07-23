@@ -508,6 +508,7 @@ void SpotShadow::createSpotShadow(bool isCasterOpaque, const Vector3* poly,
     computeSpotShadow(isCasterOpaque, light, lightVertexCount, lightCenter, poly,
             polyLength, retStrips);
     retStrips.setMode(VertexBuffer::kTwoPolyRingShadow);
+    retStrips.computeBounds<AlphaVertex>();
 }
 
 /**

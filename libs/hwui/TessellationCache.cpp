@@ -273,8 +273,6 @@ static void tessellateShadows(
             isCasterOpaque, casterPolygon, casterVertexCount,
             *drawTransform, lightCenter, lightRadius, casterBounds, *localClip,
             spotBuffer);
-
-    // TODO: set ambientBuffer & spotBuffer's bounds for correct layer damage
 }
 
 class ShadowProcessor : public TaskProcessor<TessellationCache::vertexBuffer_pair_t*> {
