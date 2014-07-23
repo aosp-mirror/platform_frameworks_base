@@ -77,6 +77,7 @@ import com.android.internal.net.VpnProfile;
 import com.android.server.net.BaseNetworkObserver;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
@@ -469,6 +470,13 @@ public class Vpn {
             agentDisconnect(oldNetworkAgent);
             if (oldInterface != null && !oldInterface.equals(interfaze)) {
                 jniReset(oldInterface);
+            }
+
+            try {
+                IoUtils.setBlocking(tun.getFileDescriptor(), config.blocking);
+            } catch (IOException e) {
+                throw new IllegalStateException(
+                        "Cannot set tunnel's fd as blocking=" + config.blocking, e);
             }
         } catch (RuntimeException e) {
             IoUtils.closeQuietly(tun);
