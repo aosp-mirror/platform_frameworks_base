@@ -136,6 +136,7 @@ void AmbientShadow::createAmbientShadow(bool isCasterOpaque,
         }
     }
     shadowVertexBuffer.setMode(mode);
+    shadowVertexBuffer.computeBounds<AlphaVertex>();
 
 #if DEBUG_SHADOW
     for (int i = 0; i < SHADOW_VERTEX_COUNT; i++) {
