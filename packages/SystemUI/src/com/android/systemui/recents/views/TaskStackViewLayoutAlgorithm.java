@@ -82,7 +82,7 @@ public class TaskStackViewLayoutAlgorithm {
         // Compute the min and max scroll values
         int numTasks = Math.max(1, tasks.size());
         int taskHeight = mTaskRect.height();
-        int stackHeight = mStackRect.height();
+        int stackHeight = mStackRectSansPeek.height();
 
         if (numTasks <= 1) {
             // If there is only one task, then center the task in the stack rect (sans peek)
