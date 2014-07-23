@@ -16,6 +16,7 @@
 
 package android.media.browse;
 
+import android.annotation.DrawableRes;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -32,11 +33,11 @@ import java.lang.annotation.RetentionPolicy;
  */
 public final class MediaBrowserItem implements Parcelable {
     private final Uri mUri;
-    private final Uri mIconUri;
-    private final int mIconResId;
     private final int mFlags;
     private final CharSequence mTitle;
     private final CharSequence mSummary;
+    private final Uri mIconUri;
+    private final int mIconResourceId;
     private final Bundle mExtras;
 
     /** @hide */
@@ -61,8 +62,8 @@ public final class MediaBrowserItem implements Parcelable {
     /**
      * Initialize a MediaBrowserItem object.
      */
-    private MediaBrowserItem(@NonNull Uri uri, @Nullable Uri iconUri, int iconResId, int flags,
-            @NonNull CharSequence title, CharSequence summary, Bundle extras) {
+    private MediaBrowserItem(@NonNull Uri uri, int flags, @NonNull CharSequence title,
+            CharSequence summary, @Nullable Uri iconUri, int iconResourceId, Bundle extras) {
         if (uri == null) {
             throw new IllegalArgumentException("uri can not be null");
         }
@@ -70,11 +71,11 @@ public final class MediaBrowserItem implements Parcelable {
             throw new IllegalArgumentException("title can not be null");
         }
         mUri = uri;
-        mIconUri = iconUri;
-        mIconResId = iconResId;
         mFlags = flags;
         mTitle = title;
         mSummary = summary;
+        mIconUri = iconUri;
+        mIconResourceId = iconResourceId;
         mExtras = extras;
     }
 
@@ -83,8 +84,6 @@ public final class MediaBrowserItem implements Parcelable {
      */
     private MediaBrowserItem(Parcel in) {
         mUri = Uri.CREATOR.createFromParcel(in);
-        mIconUri = Uri.CREATOR.createFromParcel(in);
-        mIconResId = in.readInt();
         mFlags = in.readInt();
         mTitle = in.readCharSequence();
         if (in.readInt() != 0) {
@@ -92,6 +91,12 @@ public final class MediaBrowserItem implements Parcelable {
         } else {
             mSummary = null;
         }
+        if (in.readInt() != 0) {
+            mIconUri = Uri.CREATOR.createFromParcel(in);
+        } else {
+            mIconUri = null;
+        }
+        mIconResourceId = in.readInt();
         if (in.readInt() != 0) {
             mExtras = Bundle.CREATOR.createFromParcel(in);
         } else {
@@ -107,8 +112,6 @@ public final class MediaBrowserItem implements Parcelable {
     @Override
     public void writeToParcel(Parcel out, int flags) {
         mUri.writeToParcel(out, flags);
-        mIconUri.writeToParcel(out, flags);
-        out.writeInt(mIconResId);
         out.writeInt(mFlags);
         out.writeCharSequence(mTitle);
         if (mSummary != null) {
@@ -117,6 +120,13 @@ public final class MediaBrowserItem implements Parcelable {
         } else {
             out.writeInt(0);
         }
+        if (mIconUri != null) {
+            out.writeInt(1);
+            mIconUri.writeToParcel(out, flags);
+        } else {
+            out.writeInt(0);
+        }
+        out.writeInt(mIconResourceId);
         if (mExtras != null) {
             out.writeInt(1);
             mExtras.writeToParcel(out, flags);
@@ -127,36 +137,22 @@ public final class MediaBrowserItem implements Parcelable {
 
     public static final Parcelable.Creator<MediaBrowserItem> CREATOR =
             new Parcelable.Creator<MediaBrowserItem>() {
-        @Override
-        public MediaBrowserItem createFromParcel(Parcel in) {
-            return new MediaBrowserItem(in);
-        }
+                @Override
+                public MediaBrowserItem createFromParcel(Parcel in) {
+                    return new MediaBrowserItem(in);
+                }
 
-        @Override
-        public MediaBrowserItem[] newArray(int size) {
-            return new MediaBrowserItem[size];
-        }
-    };
+                @Override
+                public MediaBrowserItem[] newArray(int size) {
+                    return new MediaBrowserItem[size];
+                }
+            };
 
     /**
      * Gets the Uri of the item.
      */
     public @NonNull Uri getUri() {
         return mUri;
-    }
-
-    /**
-     * Gets the Uri of the icon.
-     */
-    public @Nullable Uri getIconUri() {
-        return mIconUri;
-    }
-
-    /**
-     * Gets the resource id of the icon.
-     */
-    public int getIconResId() {
-        return mIconResId;
     }
 
     /**
@@ -203,6 +199,20 @@ public final class MediaBrowserItem implements Parcelable {
     }
 
     /**
+     * Gets the Uri of the icon.
+     */
+    public @Nullable Uri getIconUri() {
+        return mIconUri;
+    }
+
+    /**
+     * Gets the resource id of the icon.
+     */
+    public @DrawableRes int getIconResourceId() {
+        return mIconResourceId;
+    }
+
+    /**
      * Gets additional service-specified extras about the
      * item or its content, or null if none.
      */
@@ -217,9 +227,9 @@ public final class MediaBrowserItem implements Parcelable {
         private final Uri mUri;
         private final int mFlags;
         private final CharSequence mTitle;
-        private Uri mIconUri;
-        private int mIconResId;
         private CharSequence mSummary;
+        private Uri mIconUri;
+        private int mIconResourceId;
         private Bundle mExtras;
 
         /**
@@ -238,10 +248,18 @@ public final class MediaBrowserItem implements Parcelable {
         }
 
         /**
+         * Sets summary of the item, or null if none.
+         */
+        public @NonNull Builder setSummary(@Nullable CharSequence summary) {
+            mSummary = summary;
+            return this;
+        }
+
+        /**
          * Sets the uri of the icon.
          * <p>
-         * If both {@link #setIconUri(Uri)} and {@link #setIconResId(int)} are called,
-         * the resource id will be used to load the icon.
+         * Either {@link #setIconUri(Uri)} or {@link #setIconResourceId(int)} should be called.
+         * If both are specified, the resource id will be used to load the icon.
          * </p>
          */
         public @NonNull Builder setIconUri(@Nullable Uri iconUri) {
@@ -251,35 +269,31 @@ public final class MediaBrowserItem implements Parcelable {
 
         /**
          * Sets the resource id of the icon.
+         * <p>
+         * Either {@link #setIconUri(Uri)} or {@link #setIconResourceId(int)} should be specified.
+         * If both are specified, the resource id will be used to load the icon.
+         * </p>
          */
-        public @NonNull Builder setIconResId(int resId) {
-            mIconResId = resId;
+        public @NonNull Builder setIconResourceId(@DrawableRes int ResourceId) {
+            mIconResourceId = ResourceId;
             return this;
         }
 
         /**
-         * Sets summary of the item, or null if none.
+         * Sets additional service-specified extras about the
+         * item or its content.
          */
-        public @NonNull Builder setSummary(@Nullable CharSequence summary) {
-            mSummary = summary;
-            return this;
-        }
-
-        /**
-        * Sets additional service-specified extras about the
-        * item or its content, or null if none.
-        */
         public @NonNull Builder setExtras(@Nullable Bundle extras) {
             mExtras = extras;
             return this;
         }
 
         /**
-        * Builds the item.
-        */
+         * Builds the item.
+         */
         public @NonNull MediaBrowserItem build() {
-            return new MediaBrowserItem(mUri, mIconUri, mIconResId,
-                    mFlags, mTitle, mSummary, mExtras);
+            return new MediaBrowserItem(mUri, mFlags, mTitle, mSummary, mIconUri,
+                    mIconResourceId, mExtras);
         }
     }
 }
