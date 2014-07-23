@@ -16598,7 +16598,7 @@ package android.media.session {
   }
 
   public static final class MediaController.VolumeInfo {
-    method public int getAudioStream();
+    method public android.media.AudioAttributes getAudioAttributes();
     method public int getCurrentVolume();
     method public int getMaxVolume();
     method public int getVolumeControl();
@@ -16623,7 +16623,7 @@ package android.media.session {
     method public void setMediaRouter(android.media.routing.MediaRouter);
     method public void setMetadata(android.media.MediaMetadata);
     method public void setPlaybackState(android.media.session.PlaybackState);
-    method public void setPlaybackToLocal(int);
+    method public void setPlaybackToLocal(android.media.AudioAttributes);
     method public void setPlaybackToRemote(android.media.VolumeProvider);
     field public static final int FLAG_HANDLES_MEDIA_BUTTONS = 1; // 0x1
     field public static final int FLAG_HANDLES_TRANSPORT_CONTROLS = 2; // 0x2

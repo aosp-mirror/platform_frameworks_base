@@ -16,6 +16,7 @@
 package android.media.session;
 
 import android.content.ComponentName;
+import android.media.AudioAttributes;
 import android.media.MediaMetadata;
 import android.media.routing.IMediaRouter;
 import android.media.session.ISessionController;
@@ -42,6 +43,7 @@ interface ISession {
     void setRatingType(int type);
 
     // These commands relate to volume handling
-    void configureVolumeHandling(int type, int arg1, int arg2);
+    void setPlaybackToLocal(in AudioAttributes attributes);
+    void setPlaybackToRemote(int control, int max);
     void setCurrentVolume(int currentVolume);
 }
