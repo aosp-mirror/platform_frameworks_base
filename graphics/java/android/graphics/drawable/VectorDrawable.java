@@ -740,9 +740,7 @@ public class VectorDrawable extends Drawable {
             final float minScale = Math.min(scaleX, scaleY);
 
             mFinalPathMatrix.set(vGroup.mStackedMatrix);
-            mFinalPathMatrix.postScale(scaleX, scaleY, mViewportWidth / 2f, mViewportHeight / 2f);
-            mFinalPathMatrix.postTranslate(
-                    w / 2f - mViewportWidth / 2f, h / 2f - mViewportHeight / 2f);
+            mFinalPathMatrix.postScale(scaleX, scaleY);
 
             vPath.toPath(mPath);
             final Path path = mPath;

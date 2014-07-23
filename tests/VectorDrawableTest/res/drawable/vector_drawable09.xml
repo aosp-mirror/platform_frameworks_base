@@ -30,7 +30,7 @@
         <path
             android:name="house"
             android:fill="#ffffffff"
-            android:pathData="M 100,20 l 0,0 0,140 -80,0 z M 100,20 l 0,0 80,140 -80,0 z"/>
+            android:pathData="M 100,20 l 0,0 0,140-80,0 z M 100,20 l 0,0 80,140-80,0 z"/>
     </group>
 
 </vector>
