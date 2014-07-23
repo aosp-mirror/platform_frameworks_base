@@ -155,6 +155,11 @@ public final class Outline {
      * Passing a zero radius is equivalent to calling {@link #setRect(int, int, int, int)}
      */
     public void setRoundRect(int left, int top, int right, int bottom, float radius) {
+        if (left >= right || top >= bottom) {
+            setEmpty();
+            return;
+        }
+
         if (mRect == null) mRect = new Rect();
         mRect.set(left, top, right, bottom);
         mRadius = radius;
@@ -173,11 +178,17 @@ public final class Outline {
      * Sets the outline to the oval defined by input rect.
      */
     public void setOval(int left, int top, int right, int bottom) {
+        if (left >= right || top >= bottom) {
+            setEmpty();
+            return;
+        }
+
         if ((bottom - top) == (right - left)) {
             // represent circle as round rect, for efficiency, and to enable clipping
             setRoundRect(left, top, right, bottom, (bottom - top) / 2.0f);
             return;
         }
+
         if (mPath == null) mPath = new Path();
         mPath.reset();
         mPath.addOval(left, top, right, bottom, Path.Direction.CW);
@@ -196,6 +207,11 @@ public final class Outline {
      * Sets the Constructs an Outline from a {@link android.graphics.Path#isConvex() convex path}.
      */
     public void setConvexPath(@NonNull Path convexPath) {
+        if (convexPath.isEmpty()) {
+            setEmpty();
+            return;
+        }
+
         if (!convexPath.isConvex()) {
             throw new IllegalArgumentException("path must be convex");
         }
