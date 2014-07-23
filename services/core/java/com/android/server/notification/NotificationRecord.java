@@ -21,7 +21,6 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.service.notification.StatusBarNotification;
-import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.PrintWriter;
 import java.lang.reflect.Array;
@@ -61,12 +60,7 @@ public final class NotificationRecord {
     public boolean isUpdate;
     private int mPackagePriority;
 
-    // The record that ranking should use for comparisons outside the group.
-    private NotificationRecord mRankingProxy;
-    private int mAuthoritativeRank;
-
-    @VisibleForTesting
-    public NotificationRecord(StatusBarNotification sbn, int score)
+    NotificationRecord(StatusBarNotification sbn, int score)
     {
         this.sbn = sbn;
         this.score = score;
@@ -79,9 +73,7 @@ public final class NotificationRecord {
         mRecentlyIntrusive = previous.mRecentlyIntrusive;
         mPackagePriority = previous.mPackagePriority;
         mIntercept = previous.mIntercept;
-        mRankingProxy = previous.mRankingProxy;
         mRankingTimeMs = calculateRankingTimeMs(previous.getRankingTimeMs());
-        // Don't copy mGroupKey, recompute it, in case it has changed
     }
 
     public Notification getNotification() { return sbn.getNotification(); }
@@ -97,7 +89,6 @@ public final class NotificationRecord {
                 + " / " + idDebugString(baseContext, sbn.getPackageName(), notification.icon));
         pw.println(prefix + "  pri=" + notification.priority + " score=" + sbn.getScore());
         pw.println(prefix + "  key=" + sbn.getKey());
-        pw.println(prefix + "  groupKey=" + getGroupKey());
         pw.println(prefix + "  contentIntent=" + notification.contentIntent);
         pw.println(prefix + "  deleteIntent=" + notification.deleteIntent);
         pw.println(prefix + "  tickerText=" + notification.tickerText);
@@ -154,7 +145,6 @@ public final class NotificationRecord {
         pw.println(prefix + "  mRecentlyIntrusive=" + mRecentlyIntrusive);
         pw.println(prefix + "  mPackagePriority=" + mPackagePriority);
         pw.println(prefix + "  mIntercept=" + mIntercept);
-        pw.println(prefix + "  mRankingProxy=" + getRankingProxy().getKey());
         pw.println(prefix + "  mRankingTimeMs=" + mRankingTimeMs);
     }
 
@@ -250,25 +240,5 @@ public final class NotificationRecord {
             return previousRankingTimeMs;
         }
         return sbn.getPostTime();
-    }
-
-    public NotificationRecord getRankingProxy() {
-        return mRankingProxy;
-    }
-
-    public void setRankingProxy(NotificationRecord proxy) {
-        mRankingProxy = proxy;
-    }
-
-    public void setAuthoritativeRank(int authoritativeRank) {
-        mAuthoritativeRank = authoritativeRank;
-    }
-
-    public int getAuthoritativeRank() {
-        return mAuthoritativeRank;
-    }
-
-    public String getGroupKey() {
-        return sbn.getGroupKey();
     }
 }
