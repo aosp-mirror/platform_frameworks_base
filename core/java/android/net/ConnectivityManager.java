@@ -1196,7 +1196,7 @@ public class ConnectivityManager {
         };
     }
 
-    private HashMap<NetworkCapabilities, LegacyRequest> sLegacyRequests =
+    private static HashMap<NetworkCapabilities, LegacyRequest> sLegacyRequests =
             new HashMap<NetworkCapabilities, LegacyRequest>();
 
     private NetworkRequest findRequestForFeature(NetworkCapabilities netCap) {
