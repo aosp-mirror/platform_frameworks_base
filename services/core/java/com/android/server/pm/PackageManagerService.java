@@ -138,7 +138,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Environment.UserEnvironment;
-import android.os.FileObserver;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IBinder;
@@ -235,7 +234,6 @@ public class PackageManagerService extends IPackageManager.Stub {
     private static final boolean DEBUG_PACKAGE_INFO = false;
     private static final boolean DEBUG_INTENT_MATCHING = false;
     private static final boolean DEBUG_PACKAGE_SCANNING = false;
-    private static final boolean DEBUG_APP_DIR_OBSERVER = false;
     private static final boolean DEBUG_VERIFY = false;
     private static final boolean DEBUG_DEXOPT = false;
     private static final boolean DEBUG_ABI_SELECTION = false;
@@ -249,12 +247,6 @@ public class PackageManagerService extends IPackageManager.Stub {
     // Cap the size of permission trees that 3rd party apps can define
     private static final int MAX_PERMISSION_TREE_FOOTPRINT = 32768;     // characters of text
 
-    private static final int REMOVE_EVENTS =
-        FileObserver.CLOSE_WRITE | FileObserver.DELETE | FileObserver.MOVED_FROM;
-    private static final int ADD_EVENTS =
-        FileObserver.CLOSE_WRITE /*| FileObserver.CREATE*/ | FileObserver.MOVED_TO;
-
-    private static final int OBSERVER_EVENTS = REMOVE_EVENTS | ADD_EVENTS;
     // Suffix used during package installation when copying/moving
     // package apks to install directory.
     private static final String INSTALL_PACKAGE_SUFFIX = "-";
@@ -341,30 +333,6 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     /** The location for ASEC container files on internal storage. */
     final String mAsecInternalPath;
-
-    // This is the object monitoring the framework dir.
-    final FileObserver mFrameworkInstallObserver;
-
-    // This is the object monitoring the system app dir.
-    final FileObserver mSystemInstallObserver;
-
-    // This is the object monitoring the privileged system app dir.
-    final FileObserver mPrivilegedInstallObserver;
-
-    // This is the object monitoring the vendor app dir.
-    final FileObserver mVendorInstallObserver;
-
-    // This is the object monitoring the vendor overlay package dir.
-    final FileObserver mVendorOverlayInstallObserver;
-
-    // This is the object monitoring the OEM app dir.
-    final FileObserver mOemInstallObserver;
-
-    // This is the object monitoring mAppInstallDir.
-    final FileObserver mAppInstallObserver;
-
-    // This is the object monitoring mDrmAppPrivateInstallDir.
-    final FileObserver mDrmAppInstallObserver;
 
     // Used for privilege escalation. MUST NOT BE CALLED WITH mPackages
     // LOCK HELD.  Can be called with mInstallLock held.
@@ -1542,16 +1510,10 @@ public class PackageManagerService extends IPackageManager.Stub {
             // For security and version matching reason, only consider
             // overlay packages if they reside in VENDOR_OVERLAY_DIR.
             File vendorOverlayDir = new File(VENDOR_OVERLAY_DIR);
-            mVendorOverlayInstallObserver = new AppDirObserver(
-                    vendorOverlayDir.getPath(), OBSERVER_EVENTS, true, false);
-            mVendorOverlayInstallObserver.startWatching();
             scanDirLI(vendorOverlayDir, PackageParser.PARSE_IS_SYSTEM
                     | PackageParser.PARSE_IS_SYSTEM_DIR, scanMode | SCAN_TRUSTED_OVERLAY, 0);
 
             // Find base frameworks (resource packages without code).
-            mFrameworkInstallObserver = new AppDirObserver(
-                    frameworkDir.getPath(), OBSERVER_EVENTS, true, false);
-            mFrameworkInstallObserver.startWatching();
             scanDirLI(frameworkDir, PackageParser.PARSE_IS_SYSTEM
                     | PackageParser.PARSE_IS_SYSTEM_DIR
                     | PackageParser.PARSE_IS_PRIVILEGED,
@@ -1559,18 +1521,12 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             // Collected privileged system packages.
             File privilegedAppDir = new File(Environment.getRootDirectory(), "priv-app");
-            mPrivilegedInstallObserver = new AppDirObserver(
-                    privilegedAppDir.getPath(), OBSERVER_EVENTS, true, true);
-            mPrivilegedInstallObserver.startWatching();
             scanDirLI(privilegedAppDir, PackageParser.PARSE_IS_SYSTEM
                     | PackageParser.PARSE_IS_SYSTEM_DIR
                     | PackageParser.PARSE_IS_PRIVILEGED, scanMode, 0);
 
             // Collect ordinary system packages.
             File systemAppDir = new File(Environment.getRootDirectory(), "app");
-            mSystemInstallObserver = new AppDirObserver(
-                    systemAppDir.getPath(), OBSERVER_EVENTS, true, false);
-            mSystemInstallObserver.startWatching();
             scanDirLI(systemAppDir, PackageParser.PARSE_IS_SYSTEM
                     | PackageParser.PARSE_IS_SYSTEM_DIR, scanMode, 0);
 
@@ -1581,17 +1537,11 @@ public class PackageManagerService extends IPackageManager.Stub {
             } catch (IOException e) {
                 // failed to look up canonical path, continue with original one
             }
-            mVendorInstallObserver = new AppDirObserver(
-                    vendorAppDir.getPath(), OBSERVER_EVENTS, true, false);
-            mVendorInstallObserver.startWatching();
             scanDirLI(vendorAppDir, PackageParser.PARSE_IS_SYSTEM
                     | PackageParser.PARSE_IS_SYSTEM_DIR, scanMode, 0);
 
             // Collect all OEM packages.
             File oemAppDir = new File(Environment.getOemDirectory(), "app");
-            mOemInstallObserver = new AppDirObserver(
-                    oemAppDir.getPath(), OBSERVER_EVENTS, true, false);
-            mOemInstallObserver.startWatching();
             scanDirLI(oemAppDir, PackageParser.PARSE_IS_SYSTEM
                     | PackageParser.PARSE_IS_SYSTEM_DIR, scanMode, 0);
 
@@ -1665,14 +1615,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (!mOnlyCore) {
                 EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_DATA_SCAN_START,
                         SystemClock.uptimeMillis());
-                mAppInstallObserver = new AppDirObserver(
-                    mAppInstallDir.getPath(), OBSERVER_EVENTS, false, false);
-                mAppInstallObserver.startWatching();
                 scanDirLI(mAppInstallDir, 0, scanMode, 0);
-    
-                mDrmAppInstallObserver = new AppDirObserver(
-                    mDrmAppPrivateInstallDir.getPath(), OBSERVER_EVENTS, false, false);
-                mDrmAppInstallObserver.startWatching();
+
                 scanDirLI(mDrmAppPrivateInstallDir, PackageParser.PARSE_FORWARD_LOCK,
                         scanMode, 0);
 
@@ -1703,9 +1647,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                     }
                     reportSettingsProblem(Log.WARN, msg);
                 }
-            } else {
-                mAppInstallObserver = null;
-                mDrmAppInstallObserver = null;
             }
 
             // Now that we know all of the shared libraries, update all clients to have
@@ -7722,131 +7663,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             } catch (RemoteException e) {
             }
         }
-    }
-    
-    private final class AppDirObserver extends FileObserver {
-        public AppDirObserver(String path, int mask, boolean isrom, boolean isPrivileged) {
-            super(path, mask);
-            mRootDir = path;
-            mIsRom = isrom;
-            mIsPrivileged = isPrivileged;
-        }
-
-        public void onEvent(int event, String path) {
-            String removedPackage = null;
-            int removedAppId = -1;
-            int[] removedUsers = null;
-            String addedPackage = null;
-            int addedAppId = -1;
-            int[] addedUsers = null;
-
-            // TODO post a message to the handler to obtain serial ordering
-            synchronized (mInstallLock) {
-                String fullPathStr = null;
-                File fullPath = null;
-                if (path != null) {
-                    fullPath = new File(mRootDir, path);
-                    fullPathStr = fullPath.getPath();
-                }
-
-                if (DEBUG_APP_DIR_OBSERVER)
-                    Log.v(TAG, "File " + fullPathStr + " changed: " + Integer.toHexString(event));
-
-                if (!isApkFile(fullPath)) {
-                    if (DEBUG_APP_DIR_OBSERVER)
-                        Log.v(TAG, "Ignoring change of non-package file: " + fullPathStr);
-                    return;
-                }
-
-                // Ignore packages that are being installed or
-                // have just been installed.
-                if (ignoreCodePath(fullPathStr)) {
-                    return;
-                }
-                PackageParser.Package p = null;
-                PackageSetting ps = null;
-                // reader
-                synchronized (mPackages) {
-                    p = mAppDirs.get(fullPathStr);
-                    if (p != null) {
-                        ps = mSettings.mPackages.get(p.applicationInfo.packageName);
-                        if (ps != null) {
-                            removedUsers = ps.queryInstalledUsers(sUserManager.getUserIds(), true);
-                        } else {
-                            removedUsers = sUserManager.getUserIds();
-                        }
-                    }
-                    addedUsers = sUserManager.getUserIds();
-                }
-                if ((event&REMOVE_EVENTS) != 0) {
-                    if (ps != null) {
-                        if (DEBUG_REMOVE) Slog.d(TAG, "Package disappeared: " + ps);
-                        removePackageLI(ps, true);
-                        removedPackage = ps.name;
-                        removedAppId = ps.appId;
-                    }
-                }
-
-                if ((event&ADD_EVENTS) != 0) {
-                    if (p == null) {
-                        if (DEBUG_INSTALL) Slog.d(TAG, "New file appeared: " + fullPath);
-                        int flags = PackageParser.PARSE_CHATTY | PackageParser.PARSE_MUST_BE_APK;
-                        if (mIsRom) {
-                            flags |= PackageParser.PARSE_IS_SYSTEM
-                                    | PackageParser.PARSE_IS_SYSTEM_DIR;
-                            if (mIsPrivileged) {
-                                flags |= PackageParser.PARSE_IS_PRIVILEGED;
-                            }
-                        }
-                        try {
-                            p = scanPackageLI(fullPath, flags,
-                                    SCAN_MONITOR | SCAN_NO_PATHS | SCAN_UPDATE_TIME,
-                                    System.currentTimeMillis(), UserHandle.ALL, null);
-                        } catch (PackageManagerException e) {
-                            Slog.w(TAG, "Failed to scan " + fullPath + ": " + e.getMessage());
-                            p = null;
-                        }
-                        if (p != null) {
-                            /*
-                             * TODO this seems dangerous as the package may have
-                             * changed since we last acquired the mPackages
-                             * lock.
-                             */
-                            // writer
-                            synchronized (mPackages) {
-                                updatePermissionsLPw(p.packageName, p,
-                                        p.permissions.size() > 0 ? UPDATE_PERMISSIONS_ALL : 0);
-                            }
-                            addedPackage = p.applicationInfo.packageName;
-                            addedAppId = UserHandle.getAppId(p.applicationInfo.uid);
-                        }
-                    }
-                }
-
-                // reader
-                synchronized (mPackages) {
-                    mSettings.writeLPr();
-                }
-            }
-
-            if (removedPackage != null) {
-                Bundle extras = new Bundle(1);
-                extras.putInt(Intent.EXTRA_UID, removedAppId);
-                extras.putBoolean(Intent.EXTRA_DATA_REMOVED, false);
-                sendPackageBroadcast(Intent.ACTION_PACKAGE_REMOVED, removedPackage,
-                        extras, null, null, removedUsers);
-            }
-            if (addedPackage != null) {
-                Bundle extras = new Bundle(1);
-                extras.putInt(Intent.EXTRA_UID, addedAppId);
-                sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, addedPackage,
-                        extras, null, null, addedUsers);
-            }
-        }
-
-        private final String mRootDir;
-        private final boolean mIsRom;
-        private final boolean mIsPrivileged;
     }
 
     @Override
