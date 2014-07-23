@@ -28,6 +28,7 @@ import com.android.server.location.GeofenceManager;
 import com.android.server.location.GeofenceProxy;
 import com.android.server.location.GpsLocationProvider;
 import com.android.server.location.GpsMeasurementsProvider;
+import com.android.server.location.GpsNavigationMessageProvider;
 import com.android.server.location.LocationBlacklist;
 import com.android.server.location.LocationFudger;
 import com.android.server.location.LocationProviderInterface;
@@ -60,6 +61,7 @@ import android.location.Criteria;
 import android.location.GeocoderParams;
 import android.location.Geofence;
 import android.location.IGpsMeasurementsListener;
+import android.location.IGpsNavigationMessageListener;
 import android.location.IGpsStatusListener;
 import android.location.IGpsStatusProvider;
 import android.location.ILocationListener;
@@ -159,6 +161,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     private PassiveProvider mPassiveProvider;  // track passive provider for special cases
     private LocationBlacklist mBlacklist;
     private GpsMeasurementsProvider mGpsMeasurementsProvider;
+    private GpsNavigationMessageProvider mGpsNavigationMessageProvider;
 
     // --- fields below are protected by mLock ---
     // Set of providers that are explicitly enabled
@@ -409,6 +412,7 @@ public class LocationManagerService extends ILocationManager.Stub {
             mRealProviders.put(LocationManager.GPS_PROVIDER, gpsProvider);
         }
         mGpsMeasurementsProvider = gpsProvider.getGpsMeasurementsProvider();
+        mGpsNavigationMessageProvider = gpsProvider.getGpsNavigationMessageProvider();
 
         /*
         Load package name(s) containing location provider support.
@@ -1847,13 +1851,41 @@ public class LocationManagerService extends ILocationManager.Stub {
         if (!hasLocationAccess) {
             return false;
         }
-
         return mGpsMeasurementsProvider.addListener(listener);
     }
 
     @Override
     public boolean removeGpsMeasurementsListener(IGpsMeasurementsListener listener) {
         return mGpsMeasurementsProvider.removeListener(listener);
+    }
+
+    @Override
+    public boolean addGpsNavigationMessageListener(
+            IGpsNavigationMessageListener listener,
+            String packageName) {
+        int allowedResolutionLevel = getCallerAllowedResolutionLevel();
+        checkResolutionLevelIsSufficientForProviderUse(
+                allowedResolutionLevel,
+                LocationManager.GPS_PROVIDER);
+
+        int uid = Binder.getCallingUid();
+        long identity = Binder.clearCallingIdentity();
+        boolean hasLocationAccess;
+        try {
+            hasLocationAccess = checkLocationAccess(uid, packageName, allowedResolutionLevel);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+
+        if (!hasLocationAccess) {
+            return false;
+        }
+        return mGpsNavigationMessageProvider.addListener(listener);
+    }
+
+    @Override
+    public boolean removeGpsNavigationMessageListener(IGpsNavigationMessageListener listener) {
+        return mGpsNavigationMessageProvider.removeListener(listener);
     }
 
     @Override
