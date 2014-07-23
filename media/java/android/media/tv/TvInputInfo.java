@@ -16,6 +16,7 @@
 
 package android.media.tv;
 
+import android.annotation.SystemApi;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -28,6 +29,7 @@ import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
 import android.hardware.hdmi.HdmiCecDeviceInfo;
+import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -40,6 +42,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * This class is used to specify meta information of a TV input.
@@ -107,6 +110,8 @@ public final class TvInputInfo implements Parcelable {
     private String mSetupActivity;
     private String mSettingsActivity;
     private int mType = TYPE_TUNER;
+    private String mLabel;
+    private Uri mIconUri;
 
     static {
         sHardwareTypeToTvInputType.put(TvInputHardwareInfo.TV_INPUT_TYPE_OTHER_HARDWARE,
@@ -134,7 +139,7 @@ public final class TvInputInfo implements Parcelable {
             throws XmlPullParserException, IOException {
         return createTvInputInfo(context, service, generateInputIdForComponentName(
                 new ComponentName(service.serviceInfo.packageName, service.serviceInfo.name)),
-                null, TYPE_TUNER);
+                null, TYPE_TUNER, null, null);
     }
 
     /**
@@ -143,13 +148,21 @@ public final class TvInputInfo implements Parcelable {
      *
      * @param service The ResolveInfo returned from the package manager about this TV input service.
      * @param cecInfo The HdmiCecDeviceInfo for a HDMI CEC logical device.
+     * @param parentId The ID of this TV input's parent input. {@code null} if none exists.
+     * @param iconUri The {@link android.net.Uri} to load the icon image.
+     *        {@see android.content.ContentResolver#openInputStream}. If it is null, the application
+     *        icon of {@code service} will be loaded.
+     * @param label The label of this TvInputInfo. If it is null or empty, {@code service} label
+     *        will be loaded.
      * @hide
      */
+    @SystemApi
     public static TvInputInfo createTvInputInfo(Context context, ResolveInfo service,
-            HdmiCecDeviceInfo cecInfo, String parentId) throws XmlPullParserException, IOException {
+            HdmiCecDeviceInfo cecInfo, String parentId, String label, Uri iconUri)
+                    throws XmlPullParserException, IOException {
         return createTvInputInfo(context, service, generateInputIdForHdmiCec(
                 new ComponentName(service.serviceInfo.packageName, service.serviceInfo.name),
-                cecInfo), parentId, TYPE_HDMI);
+                cecInfo), parentId, TYPE_HDMI, label, iconUri);
     }
 
     /**
@@ -158,18 +171,26 @@ public final class TvInputInfo implements Parcelable {
      *
      * @param service The ResolveInfo returned from the package manager about this TV input service.
      * @param hardwareInfo The TvInputHardwareInfo for a TV input hardware device.
+     * @param iconUri The {@link android.net.Uri} to load the icon image.
+     *        {@see android.content.ContentResolver#openInputStream}. If it is null, the application
+     *        icon of {@code service} will be loaded.
+     * @param label The label of this TvInputInfo. If it is null or empty, {@code service} label
+     *        will be loaded.
      * @hide
      */
+    @SystemApi
     public static TvInputInfo createTvInputInfo(Context context, ResolveInfo service,
-            TvInputHardwareInfo hardwareInfo) throws XmlPullParserException, IOException {
+            TvInputHardwareInfo hardwareInfo, String label, Uri iconUri)
+                    throws XmlPullParserException, IOException {
         int inputType = sHardwareTypeToTvInputType.get(hardwareInfo.getType(), TYPE_TUNER);
         return createTvInputInfo(context, service, generateInputIdForHardware(
                 new ComponentName(service.serviceInfo.packageName, service.serviceInfo.name),
-                hardwareInfo), null, inputType);
+                hardwareInfo), null, inputType, label, iconUri);
     }
 
     private static TvInputInfo createTvInputInfo(Context context, ResolveInfo service,
-            String id, String parentId, int inputType) throws XmlPullParserException, IOException {
+            String id, String parentId, int inputType, String label, Uri iconUri)
+                    throws XmlPullParserException, IOException {
         ServiceInfo si = service.serviceInfo;
         PackageManager pm = context.getPackageManager();
         XmlResourceParser parser = null;
@@ -210,6 +231,8 @@ public final class TvInputInfo implements Parcelable {
             }
             sa.recycle();
 
+            input.mLabel = label;
+            input.mIconUri = iconUri;
             return input;
         } catch (NameNotFoundException e) {
             throw new XmlPullParserException("Unable to create context for: " + si.packageName);
@@ -331,7 +354,11 @@ public final class TvInputInfo implements Parcelable {
      *         a label, its name is returned.
      */
     public CharSequence loadLabel(Context context) {
-        return mService.loadLabel(context.getPackageManager());
+        if (TextUtils.isEmpty(mLabel)) {
+            return mService.loadLabel(context.getPackageManager());
+        } else {
+            return mLabel;
+        }
     }
 
     /**
@@ -343,7 +370,19 @@ public final class TvInputInfo implements Parcelable {
      *         returned.
      */
     public Drawable loadIcon(Context context) {
-        return mService.serviceInfo.loadIcon(context.getPackageManager());
+        if (mIconUri == null) {
+            return loadDefaultIcon(context);
+        }
+        try (InputStream is = context.getContentResolver().openInputStream(mIconUri)) {
+            Drawable drawable = Drawable.createFromStream(is, null);
+            if (drawable == null) {
+                return loadDefaultIcon(context);
+            }
+            return drawable;
+        } catch (IOException e) {
+            Log.w(TAG, "Loading the default icon due to a failure on loading " + mIconUri, e);
+            return loadDefaultIcon(context);
+        }
     }
 
     @Override
@@ -391,6 +430,12 @@ public final class TvInputInfo implements Parcelable {
         dest.writeString(mSetupActivity);
         dest.writeString(mSettingsActivity);
         dest.writeInt(mType);
+        dest.writeString(mIconUri == null ? null : mIconUri.toString());
+        dest.writeString(mLabel);
+    }
+
+    private Drawable loadDefaultIcon(Context context) {
+        return mService.serviceInfo.loadIcon(context.getPackageManager());
     }
 
     /**
@@ -452,5 +497,10 @@ public final class TvInputInfo implements Parcelable {
         mSetupActivity = in.readString();
         mSettingsActivity = in.readString();
         mType = in.readInt();
+        String mIconUriString = in.readString();
+        if (mIconUriString != null) {
+            mIconUri = Uri.parse(mIconUriString);
+        }
+        mLabel = in.readString();
     }
 }
