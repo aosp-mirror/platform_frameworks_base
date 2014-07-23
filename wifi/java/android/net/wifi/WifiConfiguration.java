@@ -25,6 +25,7 @@ import android.net.LinkProperties;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.annotation.SystemApi;
 
 import java.util.HashMap;
 import java.util.BitSet;
@@ -430,8 +431,12 @@ public class WifiConfiguration implements Parcelable {
     public static int INITIAL_AUTO_JOIN_ATTEMPT_MIN_5 = -70;
 
     /** @hide
-     * 5GHz band is prefered over 2.4 if the 5GHz RSSI is higher than this threshold **/
-    public static int A_BAND_PREFERENCE_RSSI_THRESHOLD = -65;
+     * 5GHz band is prefered low over 2.4 if the 5GHz RSSI is higher than this threshold */
+    public static int A_BAND_PREFERENCE_RSSI_THRESHOLD_LOW = -65;
+
+    /** @hide
+     * 5GHz band is prefered hard over 2.4 if the 5GHz RSSI is higher than this threshold */
+    public static int A_BAND_PREFERENCE_RSSI_THRESHOLD = -55;
 
     /** @hide
      * 5GHz band is penalized if the 5GHz RSSI is lower than this threshold **/
@@ -582,21 +587,33 @@ public class WifiConfiguration implements Parcelable {
      */
     public int autoJoinStatus;
 
+    /**
+     * @hide
+     * Number of connection failures
+     */
+    public int numConnectionFailures;
 
     /**
      * @hide
+     * Last time we blacklisted the configuration
      */
     public long blackListTimestamp;
 
     /**
      * @hide
-     * last time the system was connected to this configuration.
+     * Last time the system was connected to this configuration.
      */
     public long lastConnected;
 
     /**
      * @hide
-     * last time the system was disconnected to this configuration.
+     * Last time the system tried to connect and failed.
+     */
+    public long lastConnectionFailure;
+
+    /**
+     * @hide
+     * Last time the system was disconnected to this configuration.
      */
     public long lastDisconnected;
 
@@ -619,7 +636,7 @@ public class WifiConfiguration implements Parcelable {
     public boolean didSelfAdd;
 
     /**
-     * peer WifiConfiguration this WifiConfiguration was added for
+     * Peer WifiConfiguration this WifiConfiguration was added for
      * @hide
      */
     public String peerWifiConfiguration;
@@ -630,6 +647,24 @@ public class WifiConfiguration implements Parcelable {
      * nor considered by AutoJoin.
      */
     public boolean ephemeral;
+
+    /**
+     * @hide
+     * Number of time the scorer overrode a the priority based choice, when comparing two
+     * WifiConfigurations, note that since comparing WifiConfiguration happens very often
+     * potentially at every scan, this number might become very large, even on an idle
+     * system.
+     */
+    @SystemApi
+    public int numScorerOverride;
+
+    /**
+     * @hide
+     * Number of time the scorer overrode a the priority based choice, and the comparison
+     * triggered a network switch
+     */
+    @SystemApi
+    public int numScorerOverrideAndSwitchedNetwork;
 
     /**
      * @hide
@@ -1148,6 +1183,10 @@ public class WifiConfiguration implements Parcelable {
             blackListTimestamp = source.blackListTimestamp;
             lastConnected = source.lastConnected;
             lastDisconnected = source.lastDisconnected;
+            lastConnectionFailure = source.lastConnectionFailure;
+            numConnectionFailures = source.numConnectionFailures;
+            numScorerOverride = source.numScorerOverride;
+            numScorerOverrideAndSwitchedNetwork = source.numScorerOverrideAndSwitchedNetwork;
         }
     }
 
@@ -1195,6 +1234,10 @@ public class WifiConfiguration implements Parcelable {
         dest.writeInt(lastUpdateUid);
         dest.writeInt(bssidOwnerUid);
         dest.writeLong(blackListTimestamp);
+        dest.writeLong(lastConnectionFailure);
+        dest.writeInt(numConnectionFailures);
+        dest.writeInt(numScorerOverride);
+        dest.writeInt(numScorerOverrideAndSwitchedNetwork);
     }
 
     /** Implement the Parcelable interface {@hide} */
@@ -1238,6 +1281,10 @@ public class WifiConfiguration implements Parcelable {
                 config.lastUpdateUid = in.readInt();
                 config.bssidOwnerUid = in.readInt();
                 config.blackListTimestamp = in.readLong();
+                config.lastConnectionFailure = in.readLong();
+                config.numConnectionFailures = in.readInt();
+                config.numScorerOverride = in.readInt();
+                config.numScorerOverrideAndSwitchedNetwork = in.readInt();
                 return config;
             }
 
