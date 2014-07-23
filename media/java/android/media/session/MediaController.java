@@ -18,12 +18,14 @@ package android.media.session;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.pm.ParceledListSlice;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.MediaMetadata;
 import android.media.Rating;
 import android.media.VolumeProvider;
 import android.media.routing.MediaRouter;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -36,6 +38,7 @@ import android.view.KeyEvent;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Allows an app to interact with an ongoing media session. Media buttons and
@@ -55,6 +58,9 @@ public final class MediaController {
     private static final int MSG_UPDATE_PLAYBACK_STATE = 2;
     private static final int MSG_UPDATE_METADATA = 3;
     private static final int MSG_UPDATE_VOLUME = 4;
+    private static final int MSG_UPDATE_QUEUE = 5;
+    private static final int MSG_UPDATE_QUEUE_TITLE = 6;
+    private static final int MSG_UPDATE_EXTRAS = 7;
 
     private final ISessionController mSessionBinder;
 
@@ -159,6 +165,23 @@ public final class MediaController {
             Log.wtf(TAG, "Error calling getMetadata.", e);
             return null;
         }
+    }
+
+    /**
+     * Get the current play queue for this session.
+     *
+     * @return The current play queue or null.
+     */
+    public @Nullable List<MediaSession.Track> getQueue() {
+        try {
+            ParceledListSlice queue = mSessionBinder.getQueue();
+            if (queue != null) {
+                return queue.getList();
+            }
+        } catch (RemoteException e) {
+            Log.wtf(TAG, "Error calling getQueue.", e);
+        }
+        return null;
     }
 
     /**
@@ -306,16 +329,16 @@ public final class MediaController {
      * commands should only be sent to sessions that the controller owns.
      *
      * @param command The command to send
-     * @param params Any parameters to include with the command
+     * @param args Any parameters to include with the command
      * @param cb The callback to receive the result on
      */
-    public void sendControlCommand(@NonNull String command, @Nullable Bundle params,
+    public void sendCommand(@NonNull String command, @Nullable Bundle args,
             @Nullable ResultReceiver cb) {
         if (TextUtils.isEmpty(command)) {
             throw new IllegalArgumentException("command cannot be null or empty");
         }
         try {
-            mSessionBinder.sendCommand(command, params, cb);
+            mSessionBinder.sendCommand(command, args, cb);
         } catch (RemoteException e) {
             Log.d(TAG, "Dead object in sendCommand.", e);
         }
@@ -438,6 +461,34 @@ public final class MediaController {
         }
 
         /**
+         * Override to handle changes to tracks in the queue.
+         *
+         * @param queue A list of tracks in the current play queue. It should include the currently
+         *              playing track as well as previous and upcoming tracks if applicable.
+         * @see MediaSession.Track
+         */
+        public void onQueueChanged(@Nullable List<MediaSession.Track> queue) {
+        }
+
+        /**
+         * Override to handle changes to the queue title.
+         *
+         * @param title The title that should be displayed along with the play queue such as
+         *              "Now Playing". May be null if there is no such title.
+         */
+        public void onQueueTitleChanged(@Nullable CharSequence title) {
+        }
+
+        /**
+         * Override to handle changes to the {@link MediaSession} extras.
+         *
+         * @param extras The extras that can include other information associated with the
+         *               {@link MediaSession}.
+         */
+        public void onExtrasChanged(@Nullable Bundle extras) {
+        }
+
+        /**
          * Override to handle changes to the volume info.
          *
          * @param info The current volume info for this session.
@@ -464,6 +515,54 @@ public final class MediaController {
                 mSessionBinder.play();
             } catch (RemoteException e) {
                 Log.wtf(TAG, "Error calling play.", e);
+            }
+        }
+
+        /**
+         * Request that the player start playback for a specific {@link Uri}.
+         *
+         * @param uri The uri of the requested media.
+         * @param extras Optional extras that can include extra information about the media item
+         *               to be played.
+         */
+        public void playUri(Uri uri, Bundle extras) {
+            if (uri == null) {
+                throw new IllegalArgumentException("You must specify a non-null Uri for playUri.");
+            }
+            try {
+                mSessionBinder.playUri(uri, extras);
+            } catch (RemoteException e) {
+                Log.wtf(TAG, "Error calling play(" + uri + ").", e);
+            }
+        }
+
+        /**
+         * Request that the player start playback for a specific search query.
+         *
+         * @param query The search query.
+         * @param extras Optional extras that can include extra information about the query.
+         */
+        public void playFromSearch(String query, Bundle extras) {
+            if (TextUtils.isEmpty(query)) {
+                throw new IllegalArgumentException(
+                        "You must specify a non-empty search query for playFromSearch.");
+            }
+            try {
+                mSessionBinder.playFromSearch(query, extras);
+            } catch (RemoteException e) {
+                Log.wtf(TAG, "Error calling play(" + query + ").", e);
+            }
+        }
+
+        /**
+         * Play a track with a specific id in the play queue.
+         * If you specify an id that is not in the play queue, the behavior is undefined.
+         */
+        public void skipToTrack(long id) {
+            try {
+                mSessionBinder.skipToTrack(id);
+            } catch (RemoteException e) {
+                Log.wtf(TAG, "Error calling skipToTrack(" + id + ").", e);
             }
         }
 
@@ -562,6 +661,41 @@ public final class MediaController {
                 mSessionBinder.rate(rating);
             } catch (RemoteException e) {
                 Log.wtf(TAG, "Error calling rate.", e);
+            }
+        }
+
+        /**
+         * Send a custom action back for the {@link MediaSession} to perform.
+         *
+         * @param customAction The action to perform.
+         * @param args Optional arguments to supply to the {@link MediaSession} for this
+         *             custom action.
+         */
+        public void sendCustomAction(@NonNull PlaybackState.CustomAction customAction,
+                    @Nullable Bundle args) {
+            if (customAction == null) {
+                throw new IllegalArgumentException("CustomAction cannot be null.");
+            }
+            sendCustomAction(customAction.getAction(), args);
+        }
+
+        /**
+         * Send the id and args from a custom action back for the {@link MediaSession} to perform.
+         *
+         * @see #sendCustomAction(PlaybackState.CustomAction action, Bundle args)
+         * @param action The action identifier of the {@link PlaybackState.CustomAction} as
+         *               specified by the {@link MediaSession}.
+         * @param args Optional arguments to supply to the {@link MediaSession} for this
+         *             custom action.
+         */
+        public void sendCustomAction(@NonNull String action, @Nullable Bundle args) {
+            if (TextUtils.isEmpty(action)) {
+                throw new IllegalArgumentException("CustomAction cannot be null.");
+            }
+            try {
+                mSessionBinder.sendCustomAction(action, args);
+            } catch (RemoteException e) {
+                Log.d(TAG, "Dead object in sendCustomAction.", e);
             }
         }
     }
@@ -678,6 +812,31 @@ public final class MediaController {
         }
 
         @Override
+        public void onQueueChanged(ParceledListSlice parceledQueue) {
+            List<MediaSession.Track> queue = parceledQueue.getList();
+            MediaController controller = mController.get();
+            if (controller != null) {
+                controller.postMessage(MSG_UPDATE_QUEUE, queue, null);
+            }
+        }
+
+        @Override
+        public void onQueueTitleChanged(CharSequence title) {
+            MediaController controller = mController.get();
+            if (controller != null) {
+                controller.postMessage(MSG_UPDATE_QUEUE_TITLE, title, null);
+            }
+        }
+
+        @Override
+        public void onExtrasChanged(Bundle extras) {
+            MediaController controller = mController.get();
+            if (controller != null) {
+                controller.postMessage(MSG_UPDATE_EXTRAS, extras, null);
+            }
+        }
+
+        @Override
         public void onVolumeInfoChanged(ParcelableVolumeInfo pvi) {
             MediaController controller = mController.get();
             if (controller != null) {
@@ -708,6 +867,15 @@ public final class MediaController {
                     break;
                 case MSG_UPDATE_METADATA:
                     mCallback.onMetadataChanged((MediaMetadata) msg.obj);
+                    break;
+                case MSG_UPDATE_QUEUE:
+                    mCallback.onQueueChanged((List<MediaSession.Track>) msg.obj);
+                    break;
+                case MSG_UPDATE_QUEUE_TITLE:
+                    mCallback.onQueueTitleChanged((CharSequence) msg.obj);
+                    break;
+                case MSG_UPDATE_EXTRAS:
+                    mCallback.onExtrasChanged((Bundle) msg.obj);
                     break;
                 case MSG_UPDATE_VOLUME:
                     mCallback.onVolumeInfoChanged((VolumeInfo) msg.obj);
