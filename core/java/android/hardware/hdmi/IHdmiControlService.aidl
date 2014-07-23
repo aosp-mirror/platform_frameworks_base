@@ -55,13 +55,14 @@ interface IHdmiControlService {
     void setArcMode(boolean enabled);
     void setOption(int option, int value);
     void setProhibitMode(boolean enabled);
-    oneway void setSystemAudioVolume(int oldIndex, int newIndex, int maxIndex);
-    oneway void setSystemAudioMute(boolean mute);
+    void setSystemAudioVolume(int oldIndex, int newIndex, int maxIndex);
+    void setSystemAudioMute(boolean mute);
     void setInputChangeListener(IHdmiInputChangeListener listener);
     List<HdmiCecDeviceInfo> getInputDevices();
     void sendVendorCommand(int deviceType, int targetAddress, in byte[] params,
             boolean hasVendorId);
     void addVendorCommandListener(IHdmiVendorCommandListener listener, int deviceType);
-    void setRecordRequestListener(IHdmiRecordRequestListener listener);
-    void startRecord(int recorderAddress, in byte[] recordSource);
+    void setOneTouchRecordRequestListener(IHdmiRecordRequestListener listener);
+    void startOneTouchRecord(int recorderAddress, in byte[] recordSource);
+    void startTimerRecording(int recorderAddress, in byte[] recordSource);
 }
