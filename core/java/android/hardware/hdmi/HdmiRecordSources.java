@@ -483,6 +483,7 @@ public final class HdmiRecordSources {
      * </ul>
      * @hide
      */
+    @SystemApi
     public static final class DigitalServiceSource extends RecordSource {
         /** Indicates that a service is identified by digital service IDs. */
         private static final int DIGITAL_SERVICE_IDENTIFIED_BY_DIGITAL_ID = 0;
@@ -604,6 +605,7 @@ public final class HdmiRecordSources {
      * </ul>
      * @hide
      */
+    @SystemApi
     public static final class AnalogueServiceSource extends RecordSource {
         private static final int EXTRA_DATA_SIZE = 4;
 
@@ -662,6 +664,7 @@ public final class HdmiRecordSources {
      * </ul>
      * @hide
      */
+    @SystemApi
     public static final class ExternalPlugData extends RecordSource {
         private static final int EXTRA_DATA_SIZE = 1;
 
@@ -706,6 +709,7 @@ public final class HdmiRecordSources {
      * </ul>
      * @hide
      */
+    @SystemApi
     public static final class ExternalPhysicalAddress extends RecordSource {
         private static final int EXTRA_DATA_SIZE = 2;
 
