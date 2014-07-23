@@ -153,6 +153,14 @@ static jboolean android_view_RenderNode_setOutlineEmpty(JNIEnv* env,
     return true;
 }
 
+static jboolean android_view_RenderNode_setOutlineNone(JNIEnv* env,
+        jobject clazz, jlong renderNodePtr) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    renderNode->mutateStagingProperties().mutableOutline().setNone();
+    renderNode->setPropertyFieldsDirty(RenderNode::GENERIC);
+    return true;
+}
+
 static jboolean android_view_RenderNode_setClipToOutline(JNIEnv* env,
         jobject clazz, jlong renderNodePtr, jboolean clipToOutline) {
     RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
@@ -486,6 +494,7 @@ static JNINativeMethod gMethods[] = {
     { "nSetOutlineRoundRect",  "(JIIIIF)Z", (void*) android_view_RenderNode_setOutlineRoundRect },
     { "nSetOutlineConvexPath", "(JJ)Z",  (void*) android_view_RenderNode_setOutlineConvexPath },
     { "nSetOutlineEmpty",      "(J)Z",   (void*) android_view_RenderNode_setOutlineEmpty },
+    { "nSetOutlineNone",       "(J)Z",   (void*) android_view_RenderNode_setOutlineNone },
     { "nSetClipToOutline",     "(JZ)Z",  (void*) android_view_RenderNode_setClipToOutline },
     { "nSetRevealClip",        "(JZZFFF)Z", (void*) android_view_RenderNode_setRevealClip },
 

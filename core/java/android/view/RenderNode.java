@@ -346,7 +346,9 @@ public class RenderNode {
      * Deep copies the data into native to simplify reference ownership.
      */
     public boolean setOutline(Outline outline) {
-        if (outline == null || outline.isEmpty()) {
+        if (outline == null) {
+            return nSetOutlineNone(mNativeRenderNode);
+        } else if (outline.isEmpty()) {
             return nSetOutlineEmpty(mNativeRenderNode);
         } else if (outline.mRect != null) {
             return nSetOutlineRoundRect(mNativeRenderNode, outline.mRect.left, outline.mRect.top,
@@ -878,6 +880,7 @@ public class RenderNode {
             int right, int bottom, float radius);
     private static native boolean nSetOutlineConvexPath(long renderNode, long nativePath);
     private static native boolean nSetOutlineEmpty(long renderNode);
+    private static native boolean nSetOutlineNone(long renderNode);
     private static native boolean nSetClipToOutline(long renderNode, boolean clipToOutline);
     private static native boolean nSetRevealClip(long renderNode,
             boolean shouldClip, boolean inverseClip, float x, float y, float radius);
