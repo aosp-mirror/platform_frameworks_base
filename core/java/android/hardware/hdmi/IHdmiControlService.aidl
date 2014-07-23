@@ -64,5 +64,7 @@ interface IHdmiControlService {
     void addVendorCommandListener(IHdmiVendorCommandListener listener, int deviceType);
     void setOneTouchRecordRequestListener(IHdmiRecordRequestListener listener);
     void startOneTouchRecord(int recorderAddress, in byte[] recordSource);
-    void startTimerRecording(int recorderAddress, in byte[] recordSource);
+    void stopOneTouchRecord(int recorderAddress);
+    void startTimerRecording(int recorderAddress, int sourceType, in byte[] recordSource);
+    void clearTimerRecording(int recorderAddress, int sourceType, in byte[] recordSource);
 }
