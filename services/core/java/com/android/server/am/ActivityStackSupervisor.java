@@ -3284,10 +3284,11 @@ public final class ActivityStackSupervisor implements DisplayListener {
                             mLockTaskNotify = new LockTaskNotify(mService.mContext);
                         }
                         mLockTaskNotify.show(true);
+                        mLockTaskIsLocked = msg.arg2 == 0;
                         if (getStatusBarService() != null) {
                             int flags =
                                     StatusBarManager.DISABLE_MASK ^ StatusBarManager.DISABLE_BACK;
-                            if (msg.arg2 != 0) {
+                            if (!mLockTaskIsLocked) {
                                 flags ^= StatusBarManager.DISABLE_HOME
                                         | StatusBarManager.DISABLE_RECENT;
                             }
@@ -3323,7 +3324,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                             boolean shouldLockKeyguard = Settings.System.getInt(
                                     mService.mContext.getContentResolver(),
                                     Settings.System.LOCK_TO_APP_EXIT_LOCKED) != 0;
-                            if (shouldLockKeyguard) {
+                            if (!mLockTaskIsLocked && shouldLockKeyguard) {
                                 mWindowManager.lockNow(null);
                                 mWindowManager.dismissKeyguard();
                             }
