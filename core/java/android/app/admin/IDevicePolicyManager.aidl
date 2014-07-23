@@ -88,6 +88,9 @@ interface IDevicePolicyManager {
     void setCameraDisabled(in ComponentName who, boolean disabled, int userHandle);
     boolean getCameraDisabled(in ComponentName who, int userHandle);
 
+    void setScreenCaptureDisabled(in ComponentName who, int userHandle, boolean disabled);
+    boolean getScreenCaptureDisabled(in ComponentName who, int userHandle);
+
     void setKeyguardDisabledFeatures(in ComponentName who, int which, int userHandle);
     int getKeyguardDisabledFeatures(in ComponentName who, int userHandle);
 
