@@ -213,6 +213,18 @@ public final class MediaFormat {
     public static final String KEY_I_FRAME_INTERVAL = "i-frame-interval";
 
     /**
+     * A key describing the temporal layering schema.  This is an optional parameter
+     * that applies only to video encoders.  Use {@link MediaCodec#getInputFormat}
+     * after {@link MediaCodec#configure configure} to query if the encoder supports
+     * the desired schema. Supported values are {@code webrtc.vp8.1-layer},
+     * {@code webrtc.vp8.2-layer}, {@code webrtc.vp8.3-layer}, and {@code none}.
+     * If the encoder does not support temporal layering, the input format will
+     * not have an entry with this key.
+     * The associated value is a string.
+     */
+    public static final String KEY_TEMPORAL_LAYERING = "ts-schema";
+
+    /**
      * @hide
      */
     public static final String KEY_STRIDE = "stride";
