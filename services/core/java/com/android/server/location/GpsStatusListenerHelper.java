@@ -23,6 +23,10 @@ import android.os.RemoteException;
  * Implementation of a handler for {@link IGpsStatusListener}.
  */
 abstract class GpsStatusListenerHelper extends RemoteListenerHelper<IGpsStatusListener> {
+    public GpsStatusListenerHelper() {
+        super("GpsStatusListenerHelper");
+    }
+
     public void onFirstFix(final int timeToFirstFix) {
         Operation operation = new Operation() {
             @Override

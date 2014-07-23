@@ -38,6 +38,7 @@ import android.hardware.location.GeofenceHardwareImpl;
 import android.location.Criteria;
 import android.location.FusedBatchOptions;
 import android.location.GpsMeasurementsEvent;
+import android.location.GpsNavigationMessageEvent;
 import android.location.IGpsGeofenceHardware;
 import android.location.IGpsStatusListener;
 import android.location.IGpsStatusProvider;
@@ -324,6 +325,14 @@ public class GpsLocationProvider implements LocationProviderInterface {
         protected boolean isSupported() {
             return GpsLocationProvider.isSupported();
         }
+
+        @Override
+        protected boolean registerWithService() {
+            return true;
+        }
+
+        @Override
+        protected void unregisterFromService() {}
     };
 
     // Handler for processing events
@@ -374,13 +383,31 @@ public class GpsLocationProvider implements LocationProviderInterface {
         }
 
         @Override
-        protected void onFirstListenerAdded() {
-            native_start_measurement_collection();
+        protected boolean registerWithService() {
+            return native_start_measurement_collection();
         }
 
         @Override
-        protected void onLastListenerRemoved() {
+        protected void unregisterFromService() {
             native_stop_measurement_collection();
+        }
+    };
+
+    private final GpsNavigationMessageProvider mGpsNavigationMessageProvider =
+            new GpsNavigationMessageProvider() {
+        @Override
+        protected boolean isSupported() {
+            return native_is_navigation_message_supported();
+        }
+
+        @Override
+        protected boolean registerWithService() {
+            return native_start_navigation_message_collection();
+        }
+
+        @Override
+        protected void unregisterFromService() {
+            native_stop_navigation_message_collection();
         }
     };
 
@@ -394,6 +421,10 @@ public class GpsLocationProvider implements LocationProviderInterface {
 
     public GpsMeasurementsProvider getGpsMeasurementsProvider() {
         return mGpsMeasurementsProvider;
+    }
+
+    public GpsNavigationMessageProvider getGpsNavigationMessageProvider() {
+        return mGpsNavigationMessageProvider;
     }
 
     private final BroadcastReceiver mBroadcastReciever = new BroadcastReceiver() {
@@ -1357,10 +1388,17 @@ public class GpsLocationProvider implements LocationProviderInterface {
     }
 
     /**
-     * called from native code - Gps Data callback
+     * called from native code - Gps measurements callback
      */
     private void reportMeasurementData(GpsMeasurementsEvent event) {
         mGpsMeasurementsProvider.onMeasurementsAvailable(event);
+    }
+
+    /**
+     * called from native code - GPS navigation message callback
+     */
+    private void reportNavigationMessage(GpsNavigationMessageEvent event) {
+        mGpsNavigationMessageProvider.onNavigationMessageAvailable(event);
     }
 
     /**
@@ -1954,6 +1992,11 @@ public class GpsLocationProvider implements LocationProviderInterface {
 
     // Gps Hal measurements support.
     private static native boolean native_is_measurement_supported();
-    private static native boolean native_start_measurement_collection();
-    private static native boolean native_stop_measurement_collection();
+    private native boolean native_start_measurement_collection();
+    private native boolean native_stop_measurement_collection();
+
+    // Gps Navigation message support.
+    private static native boolean native_is_navigation_message_supported();
+    private native boolean native_start_navigation_message_collection();
+    private native boolean native_stop_navigation_message_collection();
 }
