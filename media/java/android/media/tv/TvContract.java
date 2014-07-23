@@ -1109,6 +1109,7 @@ public final class TvContract {
              * @return {@code true} if the genre is canonical, otherwise {@code false}.
              * @hide
              */
+            @SystemApi
             public static boolean isCanonical(String genre) {
                 return CANONICAL_GENRES.contains(genre);
             }
