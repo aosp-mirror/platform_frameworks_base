@@ -27,7 +27,6 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.hardware.usb.UsbManager;
 import android.net.ConnectivityManager;
-import android.net.IConnectivityManager;
 import android.net.INetworkStatsService;
 import android.net.InterfaceConfiguration;
 import android.net.LinkAddress;
@@ -95,7 +94,7 @@ public class Tethering extends BaseNetworkObserver {
 
     private final INetworkManagementService mNMService;
     private final INetworkStatsService mStatsService;
-    private final IConnectivityManager mConnService;
+    private final ConnectivityManager mConnManager;
     private Looper mLooper;
 
     private HashMap<String, TetherInterfaceSM> mIfaces; // all tethered/tetherable ifaces
@@ -132,11 +131,11 @@ public class Tethering extends BaseNetworkObserver {
                                          // when RNDIS is enabled
 
     public Tethering(Context context, INetworkManagementService nmService,
-            INetworkStatsService statsService, IConnectivityManager connService, Looper looper) {
+            INetworkStatsService statsService, Looper looper) {
         mContext = context;
         mNMService = nmService;
         mStatsService = statsService;
-        mConnService = connService;
+        mConnManager = (ConnectivityManager)mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
         mLooper = looper;
 
         mPublicSync = new Object();
@@ -367,11 +366,7 @@ public class Tethering extends BaseNetworkObserver {
     // TODO - move all private methods used only by the state machine into the state machine
     // to clarify what needs synchronized protection.
     private void sendTetherStateChangedBroadcast() {
-        try {
-            if (!mConnService.isTetheringSupported()) return;
-        } catch (RemoteException e) {
-            return;
-        }
+        if (!mConnManager.isTetheringSupported()) return;
 
         ArrayList<String> availableList = new ArrayList<String>();
         ArrayList<String> activeList = new ArrayList<String>();
@@ -1188,11 +1183,8 @@ public class Tethering extends BaseNetworkObserver {
                 int result = PhoneConstants.APN_REQUEST_FAILED;
                 String enableString = enableString(apnType);
                 if (enableString == null) return false;
-                try {
-                    result = mConnService.startUsingNetworkFeature(ConnectivityManager.TYPE_MOBILE,
-                            enableString, new Binder());
-                } catch (Exception e) {
-                }
+                result = mConnManager.startUsingNetworkFeature(ConnectivityManager.TYPE_MOBILE,
+                        enableString);
                 switch (result) {
                 case PhoneConstants.APN_ALREADY_ACTIVE:
                 case PhoneConstants.APN_REQUEST_STARTED:
@@ -1213,12 +1205,8 @@ public class Tethering extends BaseNetworkObserver {
                 // ignore pending renewal requests
                 ++mCurrentConnectionSequence;
                 if (mMobileApnReserved != ConnectivityManager.TYPE_NONE) {
-                    try {
-                        mConnService.stopUsingNetworkFeature(ConnectivityManager.TYPE_MOBILE,
-                                enableString(mMobileApnReserved));
-                    } catch (Exception e) {
-                        return false;
-                    }
+                    mConnManager.stopUsingNetworkFeature(ConnectivityManager.TYPE_MOBILE,
+                            enableString(mMobileApnReserved));
                     mMobileApnReserved = ConnectivityManager.TYPE_NONE;
                 }
                 return true;
@@ -1281,10 +1269,7 @@ public class Tethering extends BaseNetworkObserver {
                     }
 
                     for (Integer netType : mUpstreamIfaceTypes) {
-                        NetworkInfo info = null;
-                        try {
-                            info = mConnService.getNetworkInfo(netType.intValue());
-                        } catch (RemoteException e) { }
+                        NetworkInfo info = mConnManager.getNetworkInfo(netType.intValue());
                         if ((info != null) && info.isConnected()) {
                             upType = netType.intValue();
                             break;
@@ -1322,10 +1307,7 @@ public class Tethering extends BaseNetworkObserver {
                         sendMessageDelayed(CMD_RETRY_UPSTREAM, UPSTREAM_SETTLE_TIME_MS);
                     }
                 } else {
-                    LinkProperties linkProperties = null;
-                    try {
-                        linkProperties = mConnService.getLinkPropertiesForType(upType);
-                    } catch (RemoteException e) { }
+                    LinkProperties linkProperties = mConnManager.getLinkProperties(upType);
                     if (linkProperties != null) {
                         // Find the interface with the default IPv4 route. It may be the
                         // interface described by linkProperties, or one of the interfaces
