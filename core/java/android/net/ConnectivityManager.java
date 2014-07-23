@@ -1084,6 +1084,65 @@ public class ConnectivityManager {
         return null;
     }
 
+    private int inferLegacyTypeForNetworkCapabilities(NetworkCapabilities netCap) {
+        if (netCap == null) {
+            return TYPE_NONE;
+        }
+        if (!netCap.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+            return TYPE_NONE;
+        }
+        if (netCap.hasCapability(NetworkCapabilities.NET_CAPABILITY_CBS)) {
+            if (netCap.equals(networkCapabilitiesForFeature(TYPE_MOBILE, "enableCBS"))) {
+                return TYPE_MOBILE_CBS;
+            } else {
+                return TYPE_NONE;
+            }
+        }
+        if (netCap.hasCapability(NetworkCapabilities.NET_CAPABILITY_IMS)) {
+            if (netCap.equals(networkCapabilitiesForFeature(TYPE_MOBILE, "enableIMS"))) {
+                return TYPE_MOBILE_IMS;
+            } else {
+                return TYPE_NONE;
+            }
+        }
+        if (netCap.hasCapability(NetworkCapabilities.NET_CAPABILITY_FOTA)) {
+            if (netCap.equals(networkCapabilitiesForFeature(TYPE_MOBILE, "enableFOTA"))) {
+                return TYPE_MOBILE_FOTA;
+            } else {
+                return TYPE_NONE;
+            }
+        }
+        if (netCap.hasCapability(NetworkCapabilities.NET_CAPABILITY_DUN)) {
+            if (netCap.equals(networkCapabilitiesForFeature(TYPE_MOBILE, "enableDUN"))) {
+                return TYPE_MOBILE_DUN;
+            } else {
+                return TYPE_NONE;
+            }
+        }
+        if (netCap.hasCapability(NetworkCapabilities.NET_CAPABILITY_SUPL)) {
+            if (netCap.equals(networkCapabilitiesForFeature(TYPE_MOBILE, "enableSUPL"))) {
+                return TYPE_MOBILE_SUPL;
+            } else {
+                return TYPE_NONE;
+            }
+        }
+        if (netCap.hasCapability(NetworkCapabilities.NET_CAPABILITY_MMS)) {
+            if (netCap.equals(networkCapabilitiesForFeature(TYPE_MOBILE, "enableMMS"))) {
+                return TYPE_MOBILE_MMS;
+            } else {
+                return TYPE_NONE;
+            }
+        }
+        if (netCap.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)) {
+            if (netCap.equals(networkCapabilitiesForFeature(TYPE_MOBILE, "enableHIPRI"))) {
+                return TYPE_MOBILE_HIPRI;
+            } else {
+                return TYPE_NONE;
+            }
+        }
+        return TYPE_NONE;
+    }
+
     private int legacyTypeForNetworkCapabilities(NetworkCapabilities netCap) {
         if (netCap == null) return TYPE_NONE;
         if (netCap.hasCapability(NetworkCapabilities.NET_CAPABILITY_CBS)) {
@@ -1694,7 +1753,7 @@ public class ConnectivityManager {
 
     /**
      * Report a problem network to the framework.  This provides a hint to the system
-     * that there might be connectivity problems on this network and may cause 
+     * that there might be connectivity problems on this network and may cause
      * the framework to re-evaluate network connectivity and/or switch to another
      * network.
      *
@@ -2344,7 +2403,7 @@ public class ConnectivityManager {
      */
     public void requestNetwork(NetworkRequest request, NetworkCallback networkCallback) {
         sendRequestForNetwork(request.networkCapabilities, networkCallback, 0,
-                REQUEST, TYPE_NONE);
+                REQUEST, inferLegacyTypeForNetworkCapabilities(request.networkCapabilities));
     }
 
     /**
@@ -2366,7 +2425,7 @@ public class ConnectivityManager {
     public void requestNetwork(NetworkRequest request, NetworkCallback networkCallback,
             int timeoutMs) {
         sendRequestForNetwork(request.networkCapabilities, networkCallback, timeoutMs,
-                REQUEST, TYPE_NONE);
+                REQUEST, inferLegacyTypeForNetworkCapabilities(request.networkCapabilities));
     }
 
     /**
