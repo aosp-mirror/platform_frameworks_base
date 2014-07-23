@@ -619,6 +619,8 @@ public class WindowManagerService extends IWindowManager.Stub
         // Only set while traversing the default display based on its content.
         // Affects the behavior of mirroring on secondary displays.
         boolean mObscureApplicationContentOnSecondaryDisplays = false;
+
+        float mPreferredRefreshRate = 0;
     }
     final LayoutFields mInnerFields = new LayoutFields();
 
@@ -9091,6 +9093,10 @@ public class WindowManagerService extends IWindowManager.Stub
                     // Allow full screen keyguard presentation dialogs to be seen.
                     mInnerFields.mDisplayHasContent = true;
                 }
+                if (mInnerFields.mPreferredRefreshRate == 0
+                        && w.mAttrs.preferredRefreshRate != 0) {
+                    mInnerFields.mPreferredRefreshRate = w.mAttrs.preferredRefreshRate;
+                }
             }
         }
     }
@@ -9215,6 +9221,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 // Reset for each display.
                 mInnerFields.mDisplayHasContent = false;
+                mInnerFields.mPreferredRefreshRate = 0;
 
                 int repeats = 0;
                 do {
@@ -9434,8 +9441,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     updateResizingWindows(w);
                 }
 
-                mDisplayManagerInternal.setDisplayHasContent(displayId,
-                        mInnerFields.mDisplayHasContent,
+                mDisplayManagerInternal.setDisplayProperties(displayId,
+                        mInnerFields.mDisplayHasContent, mInnerFields.mPreferredRefreshRate,
                         true /* inTraversal, must call performTraversalInTrans... below */);
 
                 getDisplayContentLocked(displayId).stopDimmingIfNeeded();

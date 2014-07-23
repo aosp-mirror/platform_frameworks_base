@@ -777,17 +777,28 @@ public final class DisplayManagerService extends SystemService {
         }
     }
 
-    private void setDisplayHasContentInternal(int displayId, boolean hasContent,
-            boolean inTraversal) {
+    private void setDisplayPropertiesInternal(int displayId, boolean hasContent,
+            float requestedRefreshRate, boolean inTraversal) {
         synchronized (mSyncRoot) {
             LogicalDisplay display = mLogicalDisplays.get(displayId);
-            if (display != null && display.hasContentLocked() != hasContent) {
+            if (display == null) {
+                return;
+            }
+            if (display.hasContentLocked() != hasContent) {
                 if (DEBUG) {
                     Slog.d(TAG, "Display " + displayId + " hasContent flag changed: "
                             + "hasContent=" + hasContent + ", inTraversal=" + inTraversal);
                 }
 
                 display.setHasContentLocked(hasContent);
+                scheduleTraversalLocked(inTraversal);
+            }
+            if (display.getRequestedRefreshRateLocked() != requestedRefreshRate) {
+                if (DEBUG) {
+                    Slog.d(TAG, "Display " + displayId + " has requested a new refresh rate: "
+                            + requestedRefreshRate + "fps");
+                }
+                display.setRequestedRefreshRateLocked(requestedRefreshRate);
                 scheduleTraversalLocked(inTraversal);
             }
         }
@@ -1482,8 +1493,9 @@ public final class DisplayManagerService extends SystemService {
         }
 
         @Override
-        public void setDisplayHasContent(int displayId, boolean hasContent, boolean inTraversal) {
-            setDisplayHasContentInternal(displayId, hasContent, inTraversal);
+        public void setDisplayProperties(int displayId, boolean hasContent,
+                float requestedRefreshRate, boolean inTraversal) {
+            setDisplayPropertiesInternal(displayId, hasContent, requestedRefreshRate, inTraversal);
         }
     }
 }
