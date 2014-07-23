@@ -16,20 +16,27 @@
 
 package com.android.systemui.doze;
 
+import static android.os.PowerManager.BRIGHTNESS_OFF;
+import static android.os.PowerManager.BRIGHTNESS_ON;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Resources;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.hardware.TriggerEvent;
 import android.hardware.TriggerEventListener;
+import android.os.Handler;
 import android.os.PowerManager;
 import android.os.SystemProperties;
 import android.os.Vibrator;
 import android.service.dreams.DozeHardware;
 import android.service.dreams.DreamService;
 import android.util.Log;
+import android.util.MathUtils;
+import android.view.Display;
 
 import com.android.systemui.R;
 import com.android.systemui.SystemUIApplication;
@@ -38,12 +45,14 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 public class DozeService extends DreamService {
-    private static final boolean DEBUG = false;
+    private static final String TAG = "DozeService";
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private static final String TEASE_ACTION = "com.android.systemui.doze.tease";
 
-    private final String mTag = String.format("DozeService.%08x", hashCode());
+    private final String mTag = String.format(TAG + ".%08x", hashCode());
     private final Context mContext = this;
+    private final Handler mHandler = new Handler();
 
     private Host mHost;
     private DozeHardware mDozeHardware;
@@ -51,10 +60,13 @@ public class DozeService extends DreamService {
     private Sensor mSigMotionSensor;
     private PowerManager mPowerManager;
     private PowerManager.WakeLock mWakeLock;
+    private int mMaxBrightness;
     private boolean mDreaming;
     private boolean mTeaseReceiverRegistered;
     private boolean mSigMotionConfigured;
     private boolean mSigMotionEnabled;
+    private boolean mDisplayStateSupported;
+    private int mDisplayStateWhenOn;
 
     public DozeService() {
         if (DEBUG) Log.d(mTag, "new DozeService()");
@@ -70,6 +82,8 @@ public class DozeService extends DreamService {
         pw.print("  mSigMotionSensor: "); pw.println(mSigMotionSensor);
         pw.print("  mSigMotionConfigured: "); pw.println(mSigMotionConfigured);
         pw.print("  mSigMotionEnabled: "); pw.println(mSigMotionEnabled);
+        pw.print("  mMaxBrightness: "); pw.println(mMaxBrightness);
+        pw.print("  mDisplayStateSupported: "); pw.println(mDisplayStateSupported);
     }
 
     @Override
@@ -88,8 +102,16 @@ public class DozeService extends DreamService {
         mSigMotionSensor = mSensors.getDefaultSensor(Sensor.TYPE_SIGNIFICANT_MOTION);
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, mTag);
+        final Resources res = mContext.getResources();
         mSigMotionConfigured = SystemProperties.getBoolean("doze.tease.sigmotion",
-                mContext.getResources().getBoolean(R.bool.doze_tease_on_significant_motion));
+                res.getBoolean(R.bool.doze_tease_on_significant_motion));
+        mDisplayStateSupported = SystemProperties.getBoolean("doze.display.supported",
+                res.getBoolean(R.bool.doze_display_state_supported));
+        mMaxBrightness = MathUtils.constrain(res.getInteger(R.integer.doze_tease_brightness),
+                BRIGHTNESS_OFF, BRIGHTNESS_ON);
+
+        mDisplayStateWhenOn = mDisplayStateSupported ? Display.STATE_DOZE : Display.STATE_ON;
+        setDozeScreenState(mDisplayStateWhenOn);
     }
 
     @Override
@@ -112,7 +134,16 @@ public class DozeService extends DreamService {
     public void stayAwake(long millis) {
         if (mDreaming && millis > 0) {
             mWakeLock.acquire(millis);
+            setDozeScreenState(mDisplayStateWhenOn);
+            setDozeScreenBrightness(mMaxBrightness);
+            rescheduleOff(millis);
         }
+    }
+
+    private void rescheduleOff(long millis) {
+        if (DEBUG) Log.d(TAG, "rescheduleOff millis=" + millis);
+        mHandler.removeCallbacks(mDisplayOff);
+        mHandler.postDelayed(mDisplayOff, millis);
     }
 
     public void startDozing() {
@@ -224,6 +255,15 @@ public class DozeService extends DreamService {
         }
         return sb.append(']').toString();
     }
+
+    private final Runnable mDisplayOff = new Runnable() {
+        @Override
+        public void run() {
+            if (DEBUG) Log.d(TAG, "Display off");
+            setDozeScreenState(Display.STATE_OFF);
+            setDozeScreenBrightness(PowerManager.BRIGHTNESS_DEFAULT);
+        }
+    };
 
     private final TriggerEventListener mSigMotionListener = new TriggerEventListener() {
         @Override
