@@ -65,7 +65,6 @@ public class UsbDebuggingActivity extends AlertActivity
 
         final AlertController.AlertParams ap = mAlertParams;
         ap.mTitle = getString(R.string.usb_debugging_title);
-        ap.mIconId = com.android.internal.R.drawable.ic_dialog_usb;
         ap.mMessage = getString(R.string.usb_debugging_message, fingerprints);
         ap.mPositiveButtonText = getString(android.R.string.ok);
         ap.mNegativeButtonText = getString(android.R.string.cancel);
