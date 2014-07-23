@@ -3554,13 +3554,22 @@ public final class ActivityManagerService extends ActivityManagerNative
             Slog.w(TAG, msg);
             throw new SecurityException(msg);
         }
-        final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId);
-        if (task == null) {
-            throw new ActivityNotFoundException("Task " + taskId + " not found.");
+        final int callingUid;
+        final String callingPackage;
+        final Intent intent;
+        final int userId;
+        synchronized (this) {
+            final TaskRecord task = recentTaskForIdLocked(taskId);
+            if (task == null) {
+                throw new ActivityNotFoundException("Task " + taskId + " not found.");
+            }
+            callingUid = task.mCallingUid;
+            callingPackage = task.mCallingPackage;
+            intent = task.intent;
+            userId = task.userId;
         }
-        return startActivityInPackage(task.mCallingUid, task.mCallingPackage,
-                task.intent, null, null, null, 0, 0, options, task.userId,
-                null);
+        return startActivityInPackage(callingUid, callingPackage, intent, null, null, null, 0, 0,
+                options, userId, null);
     }
 
     final int startActivityInPackage(int uid, String callingPackage,
