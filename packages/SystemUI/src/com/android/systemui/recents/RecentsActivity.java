@@ -431,6 +431,9 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         super.onNewIntent(intent);
         setIntent(intent);
 
+        // Reinitialize the configuration
+        RecentsConfiguration.reinitialize(this, RecentsTaskLoader.getInstance().getSystemServicesProxy());
+
         // Clear any debug rects
         if (mDebugOverlay != null) {
             mDebugOverlay.clear();
