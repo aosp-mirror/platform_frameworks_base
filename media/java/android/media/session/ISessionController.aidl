@@ -16,6 +16,7 @@
 package android.media.session;
 
 import android.content.Intent;
+import android.content.pm.ParceledListSlice;
 import android.media.MediaMetadata;
 import android.media.Rating;
 import android.media.routing.IMediaRouterDelegate;
@@ -24,16 +25,20 @@ import android.media.session.ISessionControllerCallback;
 import android.media.session.MediaSessionInfo;
 import android.media.session.ParcelableVolumeInfo;
 import android.media.session.PlaybackState;
+import android.media.session.MediaSession;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.ResultReceiver;
 import android.view.KeyEvent;
+
+import java.util.List;
 
 /**
  * Interface to a MediaSession in the system.
  * @hide
  */
 interface ISessionController {
-    void sendCommand(String command, in Bundle extras, in ResultReceiver cb);
+    void sendCommand(String command, in Bundle args, in ResultReceiver cb);
     boolean sendMediaButton(in KeyEvent mediaButton);
     void registerCallbackListener(in ISessionControllerCallback cb);
     void unregisterCallbackListener(in ISessionControllerCallback cb);
@@ -48,6 +53,9 @@ interface ISessionController {
 
     // These commands are for the TransportControls
     void play();
+    void playUri(in Uri uri, in Bundle extras);
+    void playFromSearch(String string, in Bundle extras);
+    void skipToTrack(long id);
     void pause();
     void stop();
     void next();
@@ -56,7 +64,11 @@ interface ISessionController {
     void rewind();
     void seekTo(long pos);
     void rate(in Rating rating);
+    void sendCustomAction(String action, in Bundle args);
     MediaMetadata getMetadata();
     PlaybackState getPlaybackState();
+    ParceledListSlice getQueue();
+    CharSequence getQueueTitle();
+    Bundle getExtras();
     int getRatingType();
 }
