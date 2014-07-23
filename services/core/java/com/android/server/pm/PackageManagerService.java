@@ -5226,6 +5226,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             // The system package is special.
             dataPath = new File (Environment.getDataDirectory(), "system");
             pkg.applicationInfo.dataDir = dataPath.getPath();
+
         } else {
             // This is a normal package, need to make its data directory.
             dataPath = getDataPathForPackage(pkg.packageName, 0);
@@ -5514,6 +5515,15 @@ public class PackageManagerService extends IPackageManager.Stub {
                     }
                 }
             }
+        }
+
+        // This is a special case for the "system" package, where the ABI is
+        // dictated by the zygote configuration (and init.rc). We should keep track
+        // of this ABI so that we can deal with "normal" applications that run under
+        // the same UID correctly.
+        if (mPlatformPackage == pkg) {
+            pkg.applicationInfo.primaryCpuAbi = VMRuntime.getRuntime().is64Bit() ?
+                    Build.SUPPORTED_64_BIT_ABIS[0] : Build.SUPPORTED_32_BIT_ABIS[0];
         }
 
         pkgSetting.primaryCpuAbiString = pkg.applicationInfo.primaryCpuAbi;
