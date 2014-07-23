@@ -663,6 +663,72 @@ public class AccountManager {
     }
 
     /**
+     * Rename the specified {@link Account}.  This is equivalent to removing
+     * the existing account and adding a new renamed account with the old
+     * account's user data.
+     *
+     * <p>It is safe to call this method from the main thread.
+     *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#AUTHENTICATE_ACCOUNTS}
+     * and have the same UID as the account's authenticator.
+     *
+     * @param account The {@link Account} to rename
+     * @param newName String name to be associated with the account.
+     * @param callback Callback to invoke when the request completes, null for
+     *     no callback
+     * @param handler {@link Handler} identifying the callback thread, null for
+     *     the main thread
+     * @return An {@link AccountManagerFuture} which resolves to the Account
+     *     after the name change. If successful the account's name will be the
+     *     specified new name.
+     */
+    public AccountManagerFuture<Account> renameAccount(
+            final Account account,
+            final String newName,
+            AccountManagerCallback<Account> callback,
+            Handler handler) {
+        if (account == null) throw new IllegalArgumentException("account is null.");
+        if (TextUtils.isEmpty(newName)) {
+              throw new IllegalArgumentException("newName is empty or null.");
+        }
+        return new Future2Task<Account>(handler, callback) {
+            @Override
+            public void doWork() throws RemoteException {
+                mService.renameAccount(mResponse, account, newName);
+            }
+            @Override
+            public Account bundleToResult(Bundle bundle) throws AuthenticatorException {
+                String name = bundle.getString(KEY_ACCOUNT_NAME);
+                String type = bundle.getString(KEY_ACCOUNT_TYPE);
+                return new Account(name, type);
+            }
+        }.start();
+    }
+
+    /**
+     * Gets the previous name associated with the account or {@code null}, if
+     * none. This is intended so that clients of {@link
+     * #LOGIN_ACCOUNTS_CHANGED_ACTION} broadcasts can determine if an
+     * authenticator has renamed an account.
+     *
+     * <p>It is safe to call this method from the main thread.
+     *
+     * @param account The account to query for a previous name.
+     * @return The account's previous name, null if the account has never been
+     *         renamed.
+     */
+    public String getPreviousName(final Account account) {
+        if (account == null) throw new IllegalArgumentException("account is null");
+        try {
+            return mService.getPreviousName(account);
+        } catch (RemoteException e) {
+            // will never happen
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
      * Removes an account from the AccountManager.  Does nothing if the account
      * does not exist.  Does not delete the account from the server.
      * The authenticator may have its own policies preventing account
