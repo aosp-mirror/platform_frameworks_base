@@ -18,6 +18,7 @@ package android.bluetooth;
 
 import android.bluetooth.IBluetoothCallback;
 import android.bluetooth.IBluetoothStateChangeCallback;
+import android.bluetooth.BluetoothActivityEnergyInfo;
 import android.bluetooth.BluetoothDevice;
 import android.os.ParcelUuid;
 import android.os.ParcelFileDescriptor;
@@ -88,4 +89,7 @@ interface IBluetooth
     boolean isMultiAdvertisementSupported();
     boolean isOffloadedFilteringSupported();
     boolean isOffloadedScanBatchingSupported();
+    boolean isActivityAndEnergyReportingSupported();
+    void getActivityEnergyInfoFromController();
+    BluetoothActivityEnergyInfo reportActivityInfo();
 }
