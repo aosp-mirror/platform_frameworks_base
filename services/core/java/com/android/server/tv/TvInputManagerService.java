@@ -993,7 +993,10 @@ public final class TvInputManagerService extends SystemService {
                 synchronized (mLock) {
                     try {
                         getSessionLocked(sessionToken, callingUid, resolvedUserId).tune(channelUri);
-
+                        if (TvContract.isChannelUriForPassthroughTvInput(channelUri)) {
+                            // Do not log the watch history for passthrough inputs.
+                            return;
+                        }
                         long currentTime = System.currentTimeMillis();
                         long channelId = ContentUris.parseId(channelUri);
 
