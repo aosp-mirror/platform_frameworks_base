@@ -241,6 +241,13 @@ public:
         bottom = ceilf(bottom);
     }
 
+    void expandToCoverVertex(float x, float y) {
+        left = fminf(left, x);
+        top = fminf(top, y);
+        right = fmaxf(right, x);
+        bottom = fmaxf(bottom, y);
+    }
+
     void dump(const char* label = NULL) const {
         ALOGD("%s[l=%f t=%f r=%f b=%f]", label ? label : "Rect", left, top, right, bottom);
     }
