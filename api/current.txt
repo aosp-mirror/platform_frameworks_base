@@ -16567,18 +16567,22 @@ package android.media.session {
     method public boolean dispatchMediaButtonEvent(android.view.KeyEvent);
     method public android.media.MediaMetadata getMetadata();
     method public android.media.session.PlaybackState getPlaybackState();
+    method public java.util.List<android.media.session.MediaSession.Track> getQueue();
     method public int getRatingType();
     method public android.media.session.MediaController.TransportControls getTransportControls();
     method public android.media.session.MediaController.VolumeInfo getVolumeInfo();
     method public void removeCallback(android.media.session.MediaController.Callback);
-    method public void sendControlCommand(java.lang.String, android.os.Bundle, android.os.ResultReceiver);
+    method public void sendCommand(java.lang.String, android.os.Bundle, android.os.ResultReceiver);
     method public void setVolumeTo(int, int);
   }
 
   public static abstract class MediaController.Callback {
     ctor public MediaController.Callback();
+    method public void onExtrasChanged(android.os.Bundle);
     method public void onMetadataChanged(android.media.MediaMetadata);
     method public void onPlaybackStateChanged(android.media.session.PlaybackState);
+    method public void onQueueChanged(java.util.List<android.media.session.MediaSession.Track>);
+    method public void onQueueTitleChanged(java.lang.CharSequence);
     method public void onSessionEvent(java.lang.String, android.os.Bundle);
     method public void onVolumeInfoChanged(android.media.session.MediaController.VolumeInfo);
   }
@@ -16587,11 +16591,16 @@ package android.media.session {
     method public void fastForward();
     method public void pause();
     method public void play();
+    method public void playFromSearch(java.lang.String, android.os.Bundle);
+    method public void playUri(android.net.Uri, android.os.Bundle);
     method public void rewind();
     method public void seekTo(long);
+    method public void sendCustomAction(android.media.session.PlaybackState.CustomAction, android.os.Bundle);
+    method public void sendCustomAction(java.lang.String, android.os.Bundle);
     method public void setRating(android.media.Rating);
     method public void skipToNext();
     method public void skipToPrevious();
+    method public void skipToTrack(long);
     method public void stop();
   }
 
@@ -16616,6 +16625,7 @@ package android.media.session {
     method public void removeTransportControlsCallback(android.media.session.MediaSession.TransportControlsCallback);
     method public void sendSessionEvent(java.lang.String, android.os.Bundle);
     method public void setActive(boolean);
+    method public void setExtras(android.os.Bundle);
     method public void setFlags(int);
     method public void setLaunchPendingIntent(android.app.PendingIntent);
     method public void setMediaRouter(android.media.routing.MediaRouter);
@@ -16623,6 +16633,8 @@ package android.media.session {
     method public void setPlaybackState(android.media.session.PlaybackState);
     method public void setPlaybackToLocal(android.media.AudioAttributes);
     method public void setPlaybackToRemote(android.media.VolumeProvider);
+    method public void setQueue(java.util.List<android.media.session.MediaSession.Track>);
+    method public void setQueueTitle(java.lang.CharSequence);
     field public static final int FLAG_HANDLES_MEDIA_BUTTONS = 1; // 0x1
     field public static final int FLAG_HANDLES_TRANSPORT_CONTROLS = 2; // 0x2
     field public static final int PLAYBACK_TYPE_LOCAL = 1; // 0x1
@@ -16631,7 +16643,7 @@ package android.media.session {
 
   public static abstract class MediaSession.Callback {
     ctor public MediaSession.Callback();
-    method public void onControlCommand(java.lang.String, android.os.Bundle, android.os.ResultReceiver);
+    method public void onCommand(java.lang.String, android.os.Bundle, android.os.ResultReceiver);
     method public void onMediaButtonEvent(android.content.Intent);
   }
 
@@ -16641,16 +16653,37 @@ package android.media.session {
     field public static final android.os.Parcelable.Creator CREATOR;
   }
 
+  public static final class MediaSession.Track implements android.os.Parcelable {
+    method public int describeContents();
+    method public android.os.Bundle getExtras();
+    method public long getId();
+    method public android.media.MediaMetadata getMetadata();
+    method public android.net.Uri getUri();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final int UNKNOWN_ID = -1; // 0xffffffff
+  }
+
+  public static final class MediaSession.Track.Builder {
+    ctor public MediaSession.Track.Builder(android.media.MediaMetadata, long, android.net.Uri);
+    method public android.media.session.MediaSession.Track build();
+    method public android.media.session.MediaSession.Track.Builder setExtras(android.os.Bundle);
+  }
+
   public static abstract class MediaSession.TransportControlsCallback {
     ctor public MediaSession.TransportControlsCallback();
+    method public void onCustomAction(java.lang.String, android.os.Bundle);
     method public void onFastForward();
     method public void onPause();
     method public void onPlay();
+    method public void onPlayFromSearch(java.lang.String, android.os.Bundle);
+    method public void onPlayUri(android.net.Uri, android.os.Bundle);
     method public void onRewind();
     method public void onSeekTo(long);
     method public void onSetRating(android.media.Rating);
     method public void onSkipToNext();
     method public void onSkipToPrevious();
+    method public void onSkipToTrack(long);
     method public void onStop();
   }
 
@@ -16668,6 +16701,7 @@ package android.media.session {
     method public int describeContents();
     method public long getActions();
     method public long getBufferPosition();
+    method public java.util.List<android.media.session.PlaybackState.CustomAction> getCustomActions();
     method public java.lang.CharSequence getErrorMessage();
     method public long getLastPositionUpdateTime();
     method public float getPlaybackSpeed();
@@ -16677,12 +16711,15 @@ package android.media.session {
     field public static final long ACTION_FAST_FORWARD = 64L; // 0x40L
     field public static final long ACTION_PAUSE = 2L; // 0x2L
     field public static final long ACTION_PLAY = 4L; // 0x4L
+    field public static final long ACTION_PLAY_FROM_SEARCH = 2048L; // 0x800L
     field public static final long ACTION_PLAY_PAUSE = 512L; // 0x200L
+    field public static final long ACTION_PLAY_URI = 1024L; // 0x400L
     field public static final long ACTION_REWIND = 8L; // 0x8L
     field public static final long ACTION_SEEK_TO = 256L; // 0x100L
     field public static final long ACTION_SET_RATING = 128L; // 0x80L
     field public static final long ACTION_SKIP_TO_NEXT = 32L; // 0x20L
     field public static final long ACTION_SKIP_TO_PREVIOUS = 16L; // 0x10L
+    field public static final long ACTION_SKIP_TO_TRACK = 4096L; // 0x1000L
     field public static final long ACTION_STOP = 1L; // 0x1L
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final long PLAYBACK_POSITION_UNKNOWN = -1L; // 0xffffffffffffffffL
@@ -16702,12 +16739,31 @@ package android.media.session {
   public static final class PlaybackState.Builder {
     ctor public PlaybackState.Builder();
     ctor public PlaybackState.Builder(android.media.session.PlaybackState);
+    method public android.media.session.PlaybackState.Builder addCustomAction(java.lang.String, java.lang.String, int);
+    method public android.media.session.PlaybackState.Builder addCustomAction(android.media.session.PlaybackState.CustomAction);
     method public android.media.session.PlaybackState build();
     method public android.media.session.PlaybackState.Builder setActions(long);
+    method public android.media.session.PlaybackState.Builder setActiveTrack(long);
     method public android.media.session.PlaybackState.Builder setBufferPosition(long);
     method public android.media.session.PlaybackState.Builder setErrorMessage(java.lang.CharSequence);
     method public android.media.session.PlaybackState.Builder setState(int, long, float, long);
     method public android.media.session.PlaybackState.Builder setState(int, long, float);
+  }
+
+  public static final class PlaybackState.CustomAction implements android.os.Parcelable {
+    method public int describeContents();
+    method public java.lang.String getAction();
+    method public android.os.Bundle getExtras();
+    method public int getIcon();
+    method public java.lang.CharSequence getName();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
+  public static final class PlaybackState.CustomAction.Builder {
+    ctor public PlaybackState.CustomAction.Builder(java.lang.String, java.lang.CharSequence, int);
+    method public android.media.session.PlaybackState.CustomAction build();
+    method public android.media.session.PlaybackState.CustomAction.Builder setExtras(android.os.Bundle);
   }
 
 }
