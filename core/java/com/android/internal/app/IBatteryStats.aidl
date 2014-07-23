@@ -31,6 +31,8 @@ interface IBatteryStats {
     void noteStopVideo(int uid);
     void noteStartAudio(int uid);
     void noteStopAudio(int uid);
+    void noteResetVideo();
+    void noteResetAudio();
 
     // Remaining methods are only used in Java.
     byte[] getStatistics();
