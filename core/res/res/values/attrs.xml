@@ -4185,6 +4185,8 @@
         <attr name="dropDownSelector" />
         <!-- Background drawable to use for the dropdown in spinnerMode="dropdown". -->
         <attr name="popupBackground" />
+        <!-- Window elevation to use for the dropdown in spinnerMode="dropdown". -->
+        <attr name="popupElevation" />
         <!-- Vertical offset from the spinner widget for positioning the dropdown in
              spinnerMode="dropdown". -->
         <attr name="dropDownVerticalOffset" />
