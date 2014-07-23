@@ -16,6 +16,7 @@
 
 package com.android.internal.telephony;
 
+import android.content.Intent;
 import android.os.Bundle;
 import java.util.List;
 import android.telephony.NeighboringCellInfo;
@@ -658,6 +659,17 @@ interface ITelephony {
      * Similar to above, but check for pkg whose name is pkgname.
      */
     int checkCarrierPrivilegesForPackage(String pkgname);
+
+    /**
+     * Returns the package name of the carrier apps that should handle the input intent.
+     *
+     * @param packageManager PackageManager for getting receivers.
+     * @param intent Intent that will be broadcast.
+     * @return list of carrier app package names that can handle the intent.
+     *         Returns null if there is an error and an empty list if there
+     *         are no matching packages.
+     */
+    List<String> getCarrierPackageNamesForBroadcastIntent(in Intent intent);
 
     /**
      * Set whether Android should display a simplified Mobile Network Settings UI.
