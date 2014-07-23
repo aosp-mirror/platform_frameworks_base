@@ -25,11 +25,15 @@ import android.hardware.camera2.ICameraDeviceCallbacks;
 import android.hardware.camera2.ICameraDeviceUser;
 import android.hardware.camera2.utils.LongParcelable;
 import android.hardware.camera2.impl.CameraMetadataNative;
+import android.hardware.camera2.impl.CaptureResultExtras;
 import android.hardware.camera2.utils.CameraBinderDecorator;
 import android.hardware.camera2.utils.CameraRuntimeException;
 import android.os.ConditionVariable;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.SparseArray;
@@ -66,14 +70,18 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
     private final SparseArray<Surface> mSurfaces;
     private final CameraCharacteristics mCameraCharacteristics;
     private final CameraLooper mCameraInit;
+    private final CameraCallbackThread mCameraCallbacks;
+
 
     protected CameraDeviceUserShim(int cameraId, LegacyCameraDevice legacyCamera,
-            CameraCharacteristics characteristics, CameraLooper cameraInit) {
+            CameraCharacteristics characteristics, CameraLooper cameraInit,
+            CameraCallbackThread cameraCallbacks) {
         mLegacyDevice = legacyCamera;
         mConfiguring = false;
         mSurfaces = new SparseArray<Surface>();
         mCameraCharacteristics = characteristics;
         mCameraInit = cameraInit;
+        mCameraCallbacks = cameraCallbacks;
 
         mSurfaceIdCounter = 0;
     }
@@ -173,6 +181,122 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
         }
     }
 
+    /**
+     * A thread to process callbacks to send back to the camera client.
+     *
+     * <p>This effectively emulates one-way binder semantics when in the same process as the
+     * callee.</p>
+     */
+    private static class CameraCallbackThread implements ICameraDeviceCallbacks {
+        private static final int CAMERA_ERROR = 0;
+        private static final int CAMERA_IDLE = 1;
+        private static final int CAPTURE_STARTED = 2;
+        private static final int RESULT_RECEIVED = 3;
+
+        private final HandlerThread mHandlerThread;
+        private Handler mHandler;
+
+        private final ICameraDeviceCallbacks mCallbacks;
+
+        public CameraCallbackThread(ICameraDeviceCallbacks callbacks) {
+            mCallbacks = callbacks;
+
+            mHandlerThread = new HandlerThread("LegacyCameraCallback");
+            mHandlerThread.start();
+        }
+
+        public void close() {
+            mHandlerThread.quitSafely();
+        }
+
+        @Override
+        public void onCameraError(final int errorCode, final CaptureResultExtras resultExtras) {
+            Message msg = getHandler().obtainMessage(CAMERA_ERROR,
+                /*arg1*/ errorCode, /*arg2*/ 0,
+                /*obj*/ resultExtras);
+            getHandler().sendMessage(msg);
+        }
+
+        @Override
+        public void onCameraIdle() {
+            Message msg = getHandler().obtainMessage(CAMERA_IDLE);
+            getHandler().sendMessage(msg);
+        }
+
+        @Override
+        public void onCaptureStarted(final CaptureResultExtras resultExtras, final long timestamp) {
+            Message msg = getHandler().obtainMessage(CAPTURE_STARTED,
+                    /*arg1*/ (int) (timestamp & 0xFFFFFFFFL),
+                    /*arg2*/ (int) ( (timestamp >> 32) & 0xFFFFFFFFL),
+                    /*obj*/ resultExtras);
+            getHandler().sendMessage(msg);
+        }
+
+        @Override
+        public void onResultReceived(final CameraMetadataNative result,
+                final CaptureResultExtras resultExtras) {
+            Object[] resultArray = new Object[] { result, resultExtras };
+            Message msg = getHandler().obtainMessage(RESULT_RECEIVED,
+                    /*obj*/ resultArray);
+            getHandler().sendMessage(msg);
+        }
+
+        @Override
+        public IBinder asBinder() {
+            // This is solely intended to be used for in-process binding.
+            return null;
+        }
+
+        private Handler getHandler() {
+            if (mHandler == null) {
+                mHandler = new CallbackHandler(mHandlerThread.getLooper());
+            }
+            return mHandler;
+        }
+
+        private class CallbackHandler extends Handler {
+            public CallbackHandler(Looper l) {
+                super(l);
+            }
+
+            public void handleMessage(Message msg) {
+                try {
+                    switch (msg.what) {
+                        case CAMERA_ERROR: {
+                            int errorCode = msg.arg1;
+                            CaptureResultExtras resultExtras = (CaptureResultExtras) msg.obj;
+                            mCallbacks.onCameraError(errorCode, resultExtras);
+                            break;
+                        }
+                        case CAMERA_IDLE:
+                            mCallbacks.onCameraIdle();
+                            break;
+                        case CAPTURE_STARTED: {
+                            long timestamp = msg.arg2 & 0xFFFFFFFFL;
+                            timestamp = (timestamp << 32) | (msg.arg1 & 0xFFFFFFFFL);
+                            CaptureResultExtras resultExtras = (CaptureResultExtras) msg.obj;
+                            mCallbacks.onCaptureStarted(resultExtras, timestamp);
+                            break;
+                        }
+                        case RESULT_RECEIVED: {
+                            Object[] resultArray = (Object[]) msg.obj;
+                            CameraMetadataNative result = (CameraMetadataNative) resultArray[0];
+                            CaptureResultExtras resultExtras = (CaptureResultExtras) resultArray[1];
+                            mCallbacks.onResultReceived(result, resultExtras);
+                            break;
+                        }
+                        default:
+                            throw new IllegalArgumentException(
+                                "Unknown callback message " + msg.what);
+                    }
+                } catch (RemoteException e) {
+                    throw new IllegalStateException(
+                        "Received remote exception during camera callback " + msg.what, e);
+                }
+            }
+        }
+    }
+
     public static CameraDeviceUserShim connectBinderShim(ICameraDeviceCallbacks callbacks,
                                                          int cameraId) {
         if (DEBUG) {
@@ -187,6 +311,8 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
 
         CameraLooper init = new CameraLooper(cameraId);
 
+        CameraCallbackThread threadCallbacks = new CameraCallbackThread(callbacks);
+
         // TODO: Make this async instead of blocking
         int initErrors = init.waitForOpen(OPEN_CAMERA_TIMEOUT_MS);
         Camera legacyCamera = init.getCamera();
@@ -200,8 +326,8 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
         CameraCharacteristics characteristics =
                 LegacyMetadataMapper.createCharacteristics(legacyCamera.getParameters(), info);
         LegacyCameraDevice device = new LegacyCameraDevice(
-                cameraId, legacyCamera, characteristics, callbacks);
-        return new CameraDeviceUserShim(cameraId, device, characteristics, init);
+                cameraId, legacyCamera, characteristics, threadCallbacks);
+        return new CameraDeviceUserShim(cameraId, device, characteristics, init, threadCallbacks);
     }
 
     @Override
@@ -214,6 +340,7 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
             mLegacyDevice.close();
         } finally {
             mCameraInit.close();
+            mCameraCallbacks.close();
         }
     }
 
