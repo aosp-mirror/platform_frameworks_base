@@ -377,6 +377,12 @@ public final class BluetoothAdapter {
 
     private static final int ADDRESS_LENGTH = 17;
 
+    private static final int CONTROLLER_ENERGY_UPDATE_TIMEOUT_MILLIS = 30;
+    /** @hide */
+    public static final int ACTIVITY_ENERGY_INFO_CACHED = 0;
+    /** @hide */
+    public static final int ACTIVITY_ENERGY_INFO_REFRESHED = 1;
+
     /**
      * Lazily initialized singleton. Guaranteed final after first object
      * constructed.
@@ -932,6 +938,43 @@ public final class BluetoothAdapter {
             Log.e(TAG, "failed to get isOffloadedScanBatchingSupported, error: ", e);
         }
         return false;
+    }
+
+    /**
+     * Return the record of {@link BluetoothActivityEnergyInfo} object that
+     * has the activity and energy info. This can be used to ascertain what
+     * the controller has been up to, since the last sample.
+     * @param updateType Type of info, cached vs refreshed.
+     *
+     * @return a record with {@link BluetoothActivityEnergyInfo} or null if
+     * report is unavailable or unsupported
+     * @hide
+     */
+    public BluetoothActivityEnergyInfo getControllerActivityEnergyInfo(int updateType) {
+        if (getState() != STATE_ON) return null;
+        try {
+            BluetoothActivityEnergyInfo record;
+            if (!mService.isActivityAndEnergyReportingSupported()) {
+                return null;
+            }
+            synchronized(this) {
+                if (updateType == ACTIVITY_ENERGY_INFO_REFRESHED) {
+                    mService.getActivityEnergyInfoFromController();
+                    wait(CONTROLLER_ENERGY_UPDATE_TIMEOUT_MILLIS);
+                }
+                record = mService.reportActivityInfo();
+                if (record.isValid()) {
+                    return record;
+                } else {
+                    return null;
+                }
+            }
+        } catch (InterruptedException e) {
+            Log.e(TAG, "getControllerActivityEnergyInfoCallback wait interrupted: " + e);
+        } catch (RemoteException e) {
+            Log.e(TAG, "getControllerActivityEnergyInfoCallback: " + e);
+        }
+        return null;
     }
 
     /**
