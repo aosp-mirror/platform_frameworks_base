@@ -577,7 +577,7 @@ public class VpnService extends Service {
          * @return this {@link Builder} object to facilitate chaining method calls.
          */
         public Builder setBlocking(boolean blocking) {
-            // TODO
+            mConfig.blocking = blocking;
             return this;
         }
 
