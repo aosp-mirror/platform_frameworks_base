@@ -18,6 +18,7 @@ package android.media.session;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.MediaMetadata;
 import android.media.Rating;
@@ -206,7 +207,7 @@ public final class MediaController {
     public @Nullable VolumeInfo getVolumeInfo() {
         try {
             ParcelableVolumeInfo result = mSessionBinder.getVolumeAttributes();
-            return new VolumeInfo(result.volumeType, result.audioStream, result.controlType,
+            return new VolumeInfo(result.volumeType, result.audioAttrs, result.controlType,
                     result.maxVolume, result.currentVolume);
 
         } catch (RemoteException e) {
@@ -216,8 +217,8 @@ public final class MediaController {
     }
 
     /**
-     * Set the volume of the stream or output this session is playing on. The
-     * command will be ignored if it does not support
+     * Set the volume of the output this session is playing on. The command will
+     * be ignored if it does not support
      * {@link VolumeProvider#VOLUME_CONTROL_ABSOLUTE}. The flags in
      * {@link AudioManager} may be used to affect the handling.
      *
@@ -234,8 +235,8 @@ public final class MediaController {
     }
 
     /**
-     * Adjust the volume of the stream or output this session is playing on. The
-     * direction must be one of {@link AudioManager#ADJUST_LOWER},
+     * Adjust the volume of the output this session is playing on. The direction
+     * must be one of {@link AudioManager#ADJUST_LOWER},
      * {@link AudioManager#ADJUST_RAISE}, or {@link AudioManager#ADJUST_SAME}.
      * The command will be ignored if the session does not support
      * {@link VolumeProvider#VOLUME_CONTROL_RELATIVE} or
@@ -570,17 +571,17 @@ public final class MediaController {
      */
     public static final class VolumeInfo {
         private final int mVolumeType;
-        private final int mAudioStream;
         private final int mVolumeControl;
         private final int mMaxVolume;
         private final int mCurrentVolume;
+        private final AudioAttributes mAudioAttrs;
 
         /**
          * @hide
          */
-        public VolumeInfo(int type, int stream, int control, int max, int current) {
+        public VolumeInfo(int type, AudioAttributes attrs, int control, int max, int current) {
             mVolumeType = type;
-            mAudioStream = stream;
+            mAudioAttrs = attrs;
             mVolumeControl = control;
             mMaxVolume = max;
             mCurrentVolume = current;
@@ -600,14 +601,15 @@ public final class MediaController {
         }
 
         /**
-         * Get the stream this is currently controlling volume on. When the volume
-         * type is {@link MediaSession#PLAYBACK_TYPE_REMOTE} this value does not
-         * have meaning and should be ignored.
+         * Get the audio attributes for this session. The attributes will affect
+         * volume handling for the session. When the volume type is
+         * {@link MediaSession#PLAYBACK_TYPE_REMOTE} these may be ignored by the
+         * remote volume handler.
          *
-         * @return The stream this session is playing on.
+         * @return The attributes for this session.
          */
-        public int getAudioStream() {
-            return mAudioStream;
+        public AudioAttributes getAudioAttributes() {
+            return mAudioAttrs;
         }
 
         /**
@@ -679,7 +681,7 @@ public final class MediaController {
         public void onVolumeInfoChanged(ParcelableVolumeInfo pvi) {
             MediaController controller = mController.get();
             if (controller != null) {
-                VolumeInfo info = new VolumeInfo(pvi.volumeType, pvi.audioStream, pvi.controlType,
+                VolumeInfo info = new VolumeInfo(pvi.volumeType, pvi.audioAttrs, pvi.controlType,
                         pvi.maxVolume, pvi.currentVolume);
                 controller.postMessage(MSG_UPDATE_VOLUME, info, null);
             }
