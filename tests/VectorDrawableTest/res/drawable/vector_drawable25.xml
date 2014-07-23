@@ -13,15 +13,11 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<vector xmlns:android="http://schemas.android.com/apk/res/android" >
-
-    <size
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
         android:height="64dp"
-        android:width="64dp" />
-
-    <viewport
+        android:width="64dp"
         android:viewportHeight="400"
-        android:viewportWidth="400" />
+        android:viewportWidth="400" >
 
     <group
         android:name="FirstLevelGroup"
@@ -34,7 +30,7 @@
             android:translateX="-100.0"
             android:translateY="50.0" >
             <path
-                android:fill="#FF00FF00"
+                android:fillColor="#FF00FF00"
                 android:pathData="@string/rectangle200" />
 
             <group
@@ -43,7 +39,7 @@
                 android:translateX="-100.0"
                 android:translateY="50.0" >
                 <path
-                    android:fill="#FF0000FF"
+                    android:fillColor="#FF0000FF"
                     android:pathData="@string/rectangle200" />
             </group>
             <group
@@ -52,7 +48,7 @@
                 android:translateX="100.0"
                 android:translateY="50.0" >
                 <path
-                    android:fill="#FF000000"
+                    android:fillColor="#FF000000"
                     android:pathData="@string/rectangle200" />
             </group>
         </group>
@@ -62,7 +58,7 @@
             android:translateX="100.0"
             android:translateY="50.0" >
             <path
-                android:fill="#FF0000FF"
+                android:fillColor="#FF0000FF"
                 android:pathData="@string/rectangle200" />
 
             <group
@@ -71,7 +67,7 @@
                 android:translateX="-100.0"
                 android:translateY="50.0" >
                 <path
-                    android:fill="#FFFF0000"
+                    android:fillColor="#FFFF0000"
                     android:pathData="@string/rectangle200" />
             </group>
             <group
@@ -80,13 +76,13 @@
                 android:translateX="100.0"
                 android:translateY="50.0" >
                 <path
-                    android:fill="#FF00FF00"
+                    android:fillColor="#FF00FF00"
                     android:pathData="@string/rectangle200" />
             </group>
         </group>
 
         <path
-            android:fill="#FFFF0000"
+            android:fillColor="#FFFF0000"
             android:pathData="@string/rectangle200" />
     </group>
 

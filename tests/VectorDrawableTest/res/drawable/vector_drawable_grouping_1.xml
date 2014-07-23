@@ -13,15 +13,11 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<vector xmlns:android="http://schemas.android.com/apk/res/android" >
-
-    <size
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
         android:height="64dp"
-        android:width="64dp" />
-
-    <viewport
+        android:width="64dp"
         android:viewportHeight="256"
-        android:viewportWidth="256" />
+        android:viewportWidth="256" >
 
     <group
         android:name="shape_layer_1"
@@ -30,7 +26,7 @@
         <group android:name="sun" >
             <path
                 android:name="ellipse_path_1"
-                android:fill="#ffff8000"
+                android:fillColor="#ffff8000"
                 android:pathData="m -25 0 a 25,25 0 1,0 50,0 a 25,25 0 1,0 -50,0" />
 
             <group
@@ -38,7 +34,7 @@
                 android:translateX="75" >
                 <path
                     android:name="ellipse_path_1_1"
-                    android:fill="#ff5656ea"
+                    android:fillColor="#ff5656ea"
                     android:pathData="m -10 0 a 10,10 0 1,0 20,0 a 10,10 0 1,0 -20,0" />
 
                 <group
@@ -46,7 +42,7 @@
                     android:translateX="25" >
                     <path
                         android:name="ellipse_path_1_2"
-                        android:fill="#ffadadad"
+                        android:fillColor="#ffadadad"
                         android:pathData="m -5 0 a 5,5 0 1,0 10,0 a 5,5 0 1,0 -10,0" />
                 </group>
             </group>

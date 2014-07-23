@@ -13,15 +13,11 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<vector xmlns:android="http://schemas.android.com/apk/res/android" >
-
-    <size
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
         android:height="64dp"
-        android:width="64dp" />
-
-    <viewport
+        android:width="64dp"
         android:viewportHeight="800"
-        android:viewportWidth="1000" />
+        android:viewportWidth="1000" >
 
     <group>
         <path
@@ -29,8 +25,8 @@
             android:pathData="M10,300 Q400,550 600,300 T1000,300"
             android:pivotX="90"
             android:pivotY="100"
-            android:fill="#00000000"
-            android:stroke="#FFFF0000"
+            android:fillColor="#00000000"
+            android:strokeColor="#FFFF0000"
             android:strokeWidth="60" />
     </group>
 
