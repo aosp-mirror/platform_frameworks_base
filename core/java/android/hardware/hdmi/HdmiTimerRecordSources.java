@@ -141,7 +141,7 @@ public class HdmiTimerRecordSources {
      * @param hour hour in range of [0, 24]
      * @param minute minute in range of [0, 60]
      * @return {@link Duration}
-     * @throw IllegalArgumentException if hour or minute is out of range
+     * @throws IllegalArgumentException if hour or minute is out of range
      */
     public static Time ofTime(int hour, int minute) {
         checkTimeValue(hour, minute);
@@ -163,7 +163,7 @@ public class HdmiTimerRecordSources {
      * @param hour hour in range of [0, 90]
      * @param minute minute in range of [0, 60]
      * @return {@link Duration}
-     * @throw IllegalArgumentException if hour or minute is out of range
+     * @throws IllegalArgumentException if hour or minute is out of range
      */
     public static Duration ofDuration(int hour, int minute) {
         checkDurationValue(hour, minute);
@@ -254,7 +254,7 @@ public class HdmiTimerRecordSources {
      *            {@link #RECORDING_SEQUENCE_REPEAT_FRIDAY},
      *            {@link #RECORDING_SEQUENCE_REPEAT_SATUREDAY}.
      * @return {@link TimerInfo}.
-     * @throw IllegalArgumentException if input value is invalid
+     * @throws IllegalArgumentException if input value is invalid
      */
     public static TimerInfo timerInfoOf(int dayOfMonth, int monthOfYear, Time startTime,
             Duration duration, int recordingSequence) {
