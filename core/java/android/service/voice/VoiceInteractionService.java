@@ -193,17 +193,6 @@ public class VoiceInteractionService extends Service {
                 mHotwordDetector.onSoundModelsChanged();
             }
         }
-        onSoundModelsChanged();
-    }
-
-    /**
-     * Called when the sound models available for recognition change.
-     * This may be called if a new sound model is available or
-     * an existing one is updated or removed.
-     * Implementations must check the availability of the hotword detector if they own one
-     * by calling {@link AlwaysOnHotwordDetector#getAvailability()} before calling into it.
-     */
-    public void onSoundModelsChanged() {
     }
 
     /**
