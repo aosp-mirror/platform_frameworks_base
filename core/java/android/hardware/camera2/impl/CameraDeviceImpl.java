@@ -28,8 +28,6 @@ import android.hardware.camera2.ICameraDeviceUser;
 import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.utils.CameraBinderDecorator;
 import android.hardware.camera2.utils.CameraRuntimeException;
-import android.hardware.camera2.utils.CloseableLock;
-import android.hardware.camera2.utils.CloseableLock.ScopedLock;
 import android.hardware.camera2.utils.LongParcelable;
 import android.os.Handler;
 import android.os.IBinder;
@@ -59,7 +57,8 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
     // TODO: guard every function with if (!mRemoteDevice) check (if it was closed)
     private ICameraDeviceUser mRemoteDevice;
 
-    private final CloseableLock mCloseLock;
+    // Lock to synchronize cross-thread access to device public interface
+    private final Object mInterfaceLock = new Object();
     private final CameraDeviceCallbacks mCallbacks = new CameraDeviceCallbacks();
 
     private final StateListener mDeviceListener;
@@ -104,60 +103,64 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
     private final Runnable mCallOnOpened = new Runnable() {
         @Override
         public void run() {
-            try (ScopedLock scopedLock = mCloseLock.acquireLock()) {
-                if (scopedLock == null) return; // Camera already closed
+            StateListener sessionListener = null;
+            synchronized(mInterfaceLock) {
+                if (mRemoteDevice == null) return; // Camera already closed
 
-                StateListener sessionListener = mSessionStateListener;
-                if (sessionListener != null) {
-                    sessionListener.onOpened(CameraDeviceImpl.this);
-                }
-                mDeviceListener.onOpened(CameraDeviceImpl.this);
+                sessionListener = mSessionStateListener;
             }
+            if (sessionListener != null) {
+                sessionListener.onOpened(CameraDeviceImpl.this);
+            }
+            mDeviceListener.onOpened(CameraDeviceImpl.this);
         }
     };
 
     private final Runnable mCallOnUnconfigured = new Runnable() {
         @Override
         public void run() {
-            try (ScopedLock scopedLock = mCloseLock.acquireLock()) {
-                if (scopedLock == null) return; // Camera already closed
+            StateListener sessionListener = null;
+            synchronized(mInterfaceLock) {
+                if (mRemoteDevice == null) return; // Camera already closed
 
-                StateListener sessionListener = mSessionStateListener;
-                if (sessionListener != null) {
-                    sessionListener.onUnconfigured(CameraDeviceImpl.this);
-                }
-                mDeviceListener.onUnconfigured(CameraDeviceImpl.this);
+                sessionListener = mSessionStateListener;
             }
+            if (sessionListener != null) {
+                sessionListener.onUnconfigured(CameraDeviceImpl.this);
+            }
+            mDeviceListener.onUnconfigured(CameraDeviceImpl.this);
         }
     };
 
     private final Runnable mCallOnActive = new Runnable() {
         @Override
         public void run() {
-            try (ScopedLock scopedLock = mCloseLock.acquireLock()) {
-                if (scopedLock == null) return; // Camera already closed
+            StateListener sessionListener = null;
+            synchronized(mInterfaceLock) {
+                if (mRemoteDevice == null) return; // Camera already closed
 
-                StateListener sessionListener = mSessionStateListener;
-                if (sessionListener != null) {
-                    sessionListener.onActive(CameraDeviceImpl.this);
-                }
-                mDeviceListener.onActive(CameraDeviceImpl.this);
+                sessionListener = mSessionStateListener;
             }
+            if (sessionListener != null) {
+                sessionListener.onActive(CameraDeviceImpl.this);
+            }
+            mDeviceListener.onActive(CameraDeviceImpl.this);
         }
     };
 
     private final Runnable mCallOnBusy = new Runnable() {
         @Override
         public void run() {
-            try (ScopedLock scopedLock = mCloseLock.acquireLock()) {
-                if (scopedLock == null) return; // Camera already closed
+            StateListener sessionListener = null;
+            synchronized(mInterfaceLock) {
+                if (mRemoteDevice == null) return; // Camera already closed
 
-                StateListener sessionListener = mSessionStateListener;
-                if (sessionListener != null) {
-                    sessionListener.onBusy(CameraDeviceImpl.this);
-                }
-                mDeviceListener.onBusy(CameraDeviceImpl.this);
+                sessionListener = mSessionStateListener;
             }
+            if (sessionListener != null) {
+                sessionListener.onBusy(CameraDeviceImpl.this);
+            }
+            mDeviceListener.onBusy(CameraDeviceImpl.this);
         }
     };
 
@@ -169,8 +172,10 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
             if (mClosedOnce) {
                 throw new AssertionError("Don't post #onClosed more than once");
             }
-
-            StateListener sessionListener = mSessionStateListener;
+            StateListener sessionListener = null;
+            synchronized(mInterfaceLock) {
+                sessionListener = mSessionStateListener;
+            }
             if (sessionListener != null) {
                 sessionListener.onClosed(CameraDeviceImpl.this);
             }
@@ -182,30 +187,32 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
     private final Runnable mCallOnIdle = new Runnable() {
         @Override
         public void run() {
-            try (ScopedLock scopedLock = mCloseLock.acquireLock()) {
-                if (scopedLock == null) return; // Camera already closed
+            StateListener sessionListener = null;
+            synchronized(mInterfaceLock) {
+                if (mRemoteDevice == null) return; // Camera already closed
 
-                StateListener sessionListener = mSessionStateListener;
-                if (sessionListener != null) {
-                    sessionListener.onIdle(CameraDeviceImpl.this);
-                }
-                mDeviceListener.onIdle(CameraDeviceImpl.this);
+                sessionListener = mSessionStateListener;
             }
+            if (sessionListener != null) {
+                sessionListener.onIdle(CameraDeviceImpl.this);
+            }
+            mDeviceListener.onIdle(CameraDeviceImpl.this);
         }
     };
 
     private final Runnable mCallOnDisconnected = new Runnable() {
         @Override
         public void run() {
-            try (ScopedLock scopedLock = mCloseLock.acquireLock()) {
-                if (scopedLock == null) return; // Camera already closed
+            StateListener sessionListener = null;
+            synchronized(mInterfaceLock) {
+                if (mRemoteDevice == null) return; // Camera already closed
 
-                StateListener sessionListener = mSessionStateListener;
-                if (sessionListener != null) {
-                    sessionListener.onDisconnected(CameraDeviceImpl.this);
-                }
-                mDeviceListener.onDisconnected(CameraDeviceImpl.this);
+                sessionListener = mSessionStateListener;
             }
+            if (sessionListener != null) {
+                sessionListener.onDisconnected(CameraDeviceImpl.this);
+            }
+            mDeviceListener.onDisconnected(CameraDeviceImpl.this);
         }
     };
 
@@ -218,7 +225,6 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
         mDeviceListener = listener;
         mDeviceHandler = handler;
         mCharacteristics = characteristics;
-        mCloseLock = new CloseableLock(/*name*/"CD-" + mCameraId);
 
         final int MAX_TAG_LEN = 23;
         String tag = String.format("CameraDevice-JV-%s", mCameraId);
@@ -243,8 +249,8 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
     }
 
     public void setRemoteDevice(ICameraDeviceUser remoteDevice) {
-        try (ScopedLock scopedLock = mCloseLock.acquireLock()) {
-        // TODO: Move from decorator to direct binder-mediated exceptions
+        synchronized(mInterfaceLock) {
+            // TODO: Move from decorator to direct binder-mediated exceptions
             // If setRemoteFailure already called, do nothing
             if (mInError) return;
 
@@ -287,8 +293,8 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
         }
         final int code = failureCode;
         final boolean isError = failureIsError;
-        try (ScopedLock scopedLock = mCloseLock.acquireLock()) {
-            if (scopedLock == null) return; // Camera already closed, can't go to error state
+        synchronized(mInterfaceLock) {
+            if (mRemoteDevice == null) return; // Camera already closed, can't go to error state
 
             mInError = true;
             mDeviceHandler.post(new Runnable() {
@@ -314,7 +320,7 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
         if (outputs == null) {
             outputs = new ArrayList<Surface>();
         }
-        try (ScopedLock scopedLock = mCloseLock.acquireExclusiveLock()) {
+        synchronized(mInterfaceLock) {
             checkIfCameraClosedOrInError();
 
             HashSet<Surface> addSet = new HashSet<Surface>(outputs);    // Streams to create
@@ -378,7 +384,7 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
     public void createCaptureSession(List<Surface> outputs,
             CameraCaptureSession.StateListener listener, Handler handler)
             throws CameraAccessException {
-        try (ScopedLock scopedLock = mCloseLock.acquireExclusiveLock()) {
+        synchronized(mInterfaceLock) {
             if (DEBUG) {
                 Log.d(TAG, "createCaptureSession");
             }
@@ -423,7 +429,7 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
     @Override
     public CaptureRequest.Builder createCaptureRequest(int templateType)
             throws CameraAccessException {
-        try (ScopedLock scopedLock = mCloseLock.acquireExclusiveLock()) {
+        synchronized(mInterfaceLock) {
             checkIfCameraClosedOrInError();
 
             CameraMetadataNative templatedRequest = new CameraMetadataNative();
@@ -554,7 +560,7 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
             }
         }
 
-        try (ScopedLock scopedLock = mCloseLock.acquireExclusiveLock()) {
+        synchronized(mInterfaceLock) {
             checkIfCameraClosedOrInError();
             int requestId;
 
@@ -623,7 +629,7 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
 
     public void stopRepeating() throws CameraAccessException {
 
-        try (ScopedLock scopedLock = mCloseLock.acquireExclusiveLock()) {
+        synchronized(mInterfaceLock) {
             checkIfCameraClosedOrInError();
             if (mRepeatingRequestId != REQUEST_ID_NONE) {
 
@@ -654,12 +660,12 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
 
     private void waitUntilIdle() throws CameraAccessException {
 
-        try (ScopedLock scopedLock = mCloseLock.acquireExclusiveLock()) {
+        synchronized(mInterfaceLock) {
             checkIfCameraClosedOrInError();
+
             if (mRepeatingRequestId != REQUEST_ID_NONE) {
                 throw new IllegalStateException("Active repeating request ongoing");
             }
-
             try {
                 mRemoteDevice.waitUntilIdle();
             } catch (CameraRuntimeException e) {
@@ -668,13 +674,11 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
                 // impossible
                 return;
             }
-
-            mRepeatingRequestId = REQUEST_ID_NONE;
         }
     }
 
     public void flush() throws CameraAccessException {
-        try (ScopedLock scopedLock = mCloseLock.acquireExclusiveLock()) {
+        synchronized(mInterfaceLock) {
             checkIfCameraClosedOrInError();
 
             mDeviceHandler.post(mCallOnBusy);
@@ -697,15 +701,7 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
 
     @Override
     public void close() {
-        mClosing = true;
-        // Acquire exclusive lock, close, release (idempotent)
-        mCloseLock.close();
-
-        /*
-         *  The rest of this is safe, since no other methods will be able to execute
-         *  (they will throw ISE instead; the callbacks will get dropped)
-         */
-        {
+        synchronized (mInterfaceLock) {
             try {
                 if (mRemoteDevice != null) {
                     mRemoteDevice.disconnect();
@@ -853,8 +849,8 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
                 // remove request from mCaptureListenerMap
                 final int requestId = frameNumberRequestPair.getValue();
                 final CaptureListenerHolder holder;
-                try (ScopedLock scopedLock = mCloseLock.acquireLock()) {
-                    if (scopedLock == null) {
+                synchronized(mInterfaceLock) {
+                    if (mRemoteDevice == null) {
                         Log.w(TAG, "Camera closed while checking sequences");
                         return;
                     }
@@ -944,8 +940,8 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
         public void onCameraError(final int errorCode, CaptureResultExtras resultExtras) {
             Runnable r = null;
 
-            try (ScopedLock scopedLock = mCloseLock.acquireLock()) {
-                if (scopedLock == null) {
+            synchronized(mInterfaceLock) {
+                if (mRemoteDevice == null) {
                     return; // Camera already closed
                 }
 
@@ -985,8 +981,8 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
             if (DEBUG) {
                 Log.d(TAG, "Camera now idle");
             }
-            try (ScopedLock scopedLock = mCloseLock.acquireLock()) {
-                if (scopedLock == null) return; // Camera already closed
+            synchronized(mInterfaceLock) {
+                if (mRemoteDevice == null) return; // Camera already closed
 
                 if (!CameraDeviceImpl.this.mIdle) {
                     CameraDeviceImpl.this.mDeviceHandler.post(mCallOnIdle);
@@ -1003,8 +999,8 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
             }
             final CaptureListenerHolder holder;
 
-            try (ScopedLock scopedLock = mCloseLock.acquireLock()) {
-                if (scopedLock == null) return; // Camera already closed
+            synchronized(mInterfaceLock) {
+                if (mRemoteDevice == null) return; // Camera already closed
 
                 // Get the listener for this frame ID, if there is one
                 holder = CameraDeviceImpl.this.mCaptureListenerMap.get(requestId);
@@ -1042,8 +1038,8 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
                         + requestId);
             }
 
-            try (ScopedLock scopedLock = mCloseLock.acquireLock()) {
-                if (scopedLock == null) return; // Camera already closed
+            synchronized(mInterfaceLock) {
+                if (mRemoteDevice == null) return; // Camera already closed
 
                 // TODO: Handle CameraCharacteristics access from CaptureResult correctly.
                 result.set(CameraCharacteristics.LENS_INFO_SHADING_MAP_SIZE,
