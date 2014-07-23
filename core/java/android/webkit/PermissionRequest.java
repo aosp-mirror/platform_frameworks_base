@@ -22,39 +22,41 @@ import android.net.Uri;
  * This interface defines a permission request and is used when web content
  * requests access to protected resources.
  *
- * Either {@link #grant(long) grant()} or {@link #deny()} must be called in UI
+ * Either {@link #grant(String[]) grant()} or {@link #deny()} must be called in UI
  * thread to respond to the request.
  */
-public interface PermissionRequest {
-    /**
-     * Resource belongs to geolocation service.
-     */
-    public final static long RESOURCE_GEOLOCATION = 1 << 0;
+public abstract class PermissionRequest {
     /**
      * Resource belongs to video capture device, like camera.
      */
-    public final static long RESOURCE_VIDEO_CAPTURE = 1 << 1;
+    public final static String RESOURCE_VIDEO_CAPTURE = "android.webkit.resource.VIDEO_CAPTURE";
     /**
      * Resource belongs to audio capture device, like microphone.
      */
-    public final static long RESOURCE_AUDIO_CAPTURE = 1 << 2;
+    public final static String RESOURCE_AUDIO_CAPTURE = "android.webkit.resource.AUDIO_CAPTURE";
     /**
      * Resource belongs to protected media identifier.
      * After the user grants this resource, the origin can use EME APIs to generate the license
      * requests.
      */
-    public final static long RESOURCE_PROTECTED_MEDIA_ID = 1 << 3;
+    public final static String RESOURCE_PROTECTED_MEDIA_ID =
+            "android.webkit.resource.PROTECTED_MEDIA_ID";
 
     /**
+     * Call this method to get the origin of the web page which is trying to access
+     * the restricted resources.
+     *
      * @return the origin of web content which attempt to access the restricted
      *         resources.
      */
-    public Uri getOrigin();
+    public abstract Uri getOrigin();
 
     /**
-     * @return a bit mask of resources the web content wants to access.
+     * Call this method to get the resources the web page is trying to access.
+     *
+     * @return the array of resources the web content wants to access.
      */
-    public long getResources();
+    public abstract String[] getResources();
 
     /**
      * Call this method to grant origin the permission to access the given resources.
@@ -66,10 +68,10 @@ public interface PermissionRequest {
      *        This parameter is designed to avoid granting permission by accident
      *        especially when new resources are requested by web content.
      */
-    public void grant(long resources);
+    public abstract void grant(String[] resources);
 
     /**
      * Call this method to deny the request.
      */
-    public void deny();
+    public abstract void deny();
 }
