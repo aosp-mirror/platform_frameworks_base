@@ -4310,8 +4310,9 @@
     <!-- Description of a wireless display route. [CHAR LIMIT=50] -->
     <string name="wireless_display_route_description">Wireless display</string>
 
-    <!-- Content description of a MediaRouteButton for accessibility support -->
-    <string name="media_route_button_content_description">Media output</string>
+    <!-- Content description of a MediaRouteButton for accessibility support.
+        Cast is the standard android verb for sending content to a remote device. [CHAR LIMIT=50] -->
+    <string name="media_route_button_content_description">Cast</string>
 
     <!-- Title of the media route chooser dialog. [CHAR LIMIT=40] -->
     <string name="media_route_chooser_title">Connect to device</string>
