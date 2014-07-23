@@ -29,6 +29,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.graphics.Rect;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IInterface;
@@ -36,6 +37,7 @@ import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.Settings;
 import android.util.Log;
 import android.util.Slog;
 
@@ -306,6 +308,30 @@ public class LauncherAppsService extends SystemService {
                 Binder.restoreCallingIdentity(ident);
             }
         }
+
+        @Override
+        public void showAppDetailsAsUser(ComponentName component, Rect sourceBounds,
+                Bundle opts, UserHandle user) throws RemoteException {
+            ensureInUserProfiles(user, "Cannot show app details for unrelated profile " + user);
+            if (!isUserEnabled(user)) {
+                throw new IllegalStateException("Cannot show app details for disabled profile "
+                        + user);
+            }
+
+            long ident = Binder.clearCallingIdentity();
+            try {
+                String packageName = component.getPackageName();
+                Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                        Uri.fromParts("package", packageName, null));
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |
+                        Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+                intent.setSourceBounds(sourceBounds);
+                mContext.startActivityAsUser(intent, opts, user);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
 
         private class MyPackageMonitor extends PackageMonitor {
 
