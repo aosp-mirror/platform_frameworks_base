@@ -16,31 +16,32 @@
 
 package com.android.server.location;
 
-import android.location.GpsMeasurementsEvent;
-import android.location.IGpsMeasurementsListener;
+import android.location.GpsNavigationMessageEvent;
+import android.location.IGpsNavigationMessageListener;
 import android.os.RemoteException;
 
 /**
- * An base implementation for GPS measurements provider.
+ * An base implementation for GPS navigation messages provider.
  * It abstracts out the responsibility of handling listeners, while still allowing technology
  * specific implementations to be built.
  *
  * @hide
  */
-public abstract class GpsMeasurementsProvider
-        extends RemoteListenerHelper<IGpsMeasurementsListener> {
-    public GpsMeasurementsProvider() {
-        super("GpsMeasurementsProvider");
+public abstract class GpsNavigationMessageProvider
+        extends RemoteListenerHelper<IGpsNavigationMessageListener> {
+    public GpsNavigationMessageProvider() {
+        super("GpsNavigationMessageProvider");
     }
 
-    public void onMeasurementsAvailable(final GpsMeasurementsEvent event) {
-        ListenerOperation<IGpsMeasurementsListener> operation =
-                new ListenerOperation<IGpsMeasurementsListener>() {
-            @Override
-            public void execute(IGpsMeasurementsListener listener) throws RemoteException {
-                listener.onGpsMeasurementsReceived(event);
-            }
-        };
+    public void onNavigationMessageAvailable(final GpsNavigationMessageEvent event) {
+        ListenerOperation<IGpsNavigationMessageListener> operation =
+                new ListenerOperation<IGpsNavigationMessageListener>() {
+                    @Override
+                    public void execute(IGpsNavigationMessageListener listener)
+                            throws RemoteException {
+                        listener.onGpsNavigationMessageReceived(event);
+                    }
+                };
 
         foreach(operation);
     }

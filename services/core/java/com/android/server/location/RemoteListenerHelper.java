@@ -32,16 +32,19 @@ import java.util.HashMap;
  * A helper class, that handles operations in remote listeners, and tracks for remote process death.
  */
 abstract class RemoteListenerHelper<TListener extends IInterface> {
-    private static final String TAG = "RemoteListenerHelper";
-
+    private final String mTag;
     private final HashMap<IBinder, LinkedListener> mListenerMap =
             new HashMap<IBinder, LinkedListener>();
 
+    protected RemoteListenerHelper(String name) {
+        Preconditions.checkNotNull(name);
+        mTag = name;
+    }
+
     public boolean addListener(@NonNull TListener listener) {
         Preconditions.checkNotNull(listener, "Attempted to register a 'null' listener.");
-
         if (!isSupported()) {
-            Log.e(TAG, "Refused to add listener, the feature is not supported.");
+            Log.e(mTag, "Refused to add listener, the feature is not supported.");
             return false;
         }
 
@@ -58,13 +61,17 @@ abstract class RemoteListenerHelper<TListener extends IInterface> {
             } catch (RemoteException e) {
                 // if the remote process registering the listener is already death, just swallow the
                 // exception and continue
-                Log.e(TAG, "Remote listener already died.", e);
+                Log.e(mTag, "Remote listener already died.", e);
                 return false;
             }
 
             mListenerMap.put(binder, deathListener);
             if (mListenerMap.size() == 1) {
-                onFirstListenerAdded();
+                if (!registerWithService()) {
+                    Log.e(mTag, "RegisterWithService failed, listener will be removed.");
+                    removeListener(listener);
+                    return false;
+                }
             }
         }
 
@@ -73,9 +80,8 @@ abstract class RemoteListenerHelper<TListener extends IInterface> {
 
     public boolean removeListener(@NonNull TListener listener) {
         Preconditions.checkNotNull(listener, "Attempted to remove a 'null' listener.");
-
         if (!isSupported()) {
-            Log.e(TAG, "Refused to remove listener, the feature is not supported.");
+            Log.e(mTag, "Refused to remove listener, the feature is not supported.");
             return false;
         }
 
@@ -84,26 +90,19 @@ abstract class RemoteListenerHelper<TListener extends IInterface> {
         synchronized (mListenerMap) {
             linkedListener = mListenerMap.remove(binder);
             if (mListenerMap.isEmpty() && linkedListener != null) {
-                onLastListenerRemoved();
+                unregisterFromService();
             }
         }
 
         if (linkedListener != null) {
             binder.unlinkToDeath(linkedListener, 0 /* flags */);
         }
-
         return true;
     }
 
     protected abstract boolean isSupported();
-
-    protected void onFirstListenerAdded() {
-        // event triggered when the first listener has been added
-    }
-
-    protected void onLastListenerRemoved() {
-        // event triggered when the last listener has bee removed
-    }
+    protected abstract boolean registerWithService();
+    protected abstract void unregisterFromService();
 
     protected interface ListenerOperation<TListener extends IInterface> {
         void execute(TListener listener) throws RemoteException;
@@ -121,7 +120,7 @@ abstract class RemoteListenerHelper<TListener extends IInterface> {
             try {
                 operation.execute(listener);
             } catch (RemoteException e) {
-                Log.e(TAG, "Error in monitored listener.", e);
+                Log.e(mTag, "Error in monitored listener.", e);
                 removeListener(listener);
             }
         }
@@ -141,7 +140,7 @@ abstract class RemoteListenerHelper<TListener extends IInterface> {
 
         @Override
         public void binderDied() {
-            Log.d(TAG, "Remote Listener died: " + mListener);
+            Log.d(mTag, "Remote Listener died: " + mListener);
             removeListener(mListener);
         }
     }
