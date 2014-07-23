@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.view.WindowManager.LayoutParams.*;
 
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
+import android.app.admin.DevicePolicyManager;
 import android.app.AppOpsManager;
 import android.util.ArraySet;
 import android.util.TimeUtils;
@@ -424,6 +425,13 @@ public class WindowManagerService extends IWindowManager.Stub
      * been removed.
      */
     WindowState[] mRebuildTmp = new WindowState[20];
+
+    /**
+     * Stores for each user whether screencapture is disabled
+     * This array is essentially a cache for all userId for
+     * {@link android.app.admin.DevicePolicyManager#getScreenCaptureDisabled(null, userId)}
+     */
+    SparseArray<Boolean> mScreenCaptureDisabled = new SparseArray<Boolean>();
 
     IInputMethodManager mInputMethodManager;
 
@@ -2437,6 +2445,45 @@ public class WindowManagerService extends IWindowManager.Stub
         Binder.restoreCallingIdentity(origId);
 
         return res;
+    }
+
+    /**
+     * Returns whether screen capture is disabled for all windows of a specific user.
+     */
+    boolean isScreenCaptureDisabledLocked(int userId) {
+        Boolean disabled = mScreenCaptureDisabled.get(userId);
+        if (disabled != null) {
+            return disabled;
+        }
+
+        // mScreenCaptureDisabled not set yet, try to update it.
+        updateScreenCaptureDisabledLocked(userId);
+        disabled = mScreenCaptureDisabled.get(userId);
+        if (disabled == null) {
+            // Not able to update, return false by default.
+            return false;
+        } else {
+            return disabled;
+        }
+    }
+
+    /**
+     * Update mScreenCaptureDisabled for specific user according to the device policy manager.
+     */
+    @Override
+    public void updateScreenCaptureDisabled(int userId) {
+        mH.sendMessage(mH.obtainMessage(H.UPDATE_SCRN_CAP, userId, 0 /* unused argument */));
+    }
+
+    void updateScreenCaptureDisabledLocked(int userId) {
+        DevicePolicyManager dpm = (DevicePolicyManager) mContext
+                .getSystemService(Context.DEVICE_POLICY_SERVICE);
+        if (dpm != null) {
+            boolean disabled = dpm.getScreenCaptureDisabled(null, userId);
+            mScreenCaptureDisabled.put(userId, disabled);
+        } else {
+            Slog.e(TAG, "Could not get DevicePolicyManager.");
+        }
     }
 
     public void removeWindow(Session session, IWindow client) {
@@ -7203,6 +7250,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
         public static final int NEW_ANIMATOR_SCALE = 34;
 
+        public static final int UPDATE_SCRN_CAP = 35;
+
         @Override
         public void handleMessage(Message msg) {
             if (DEBUG_WINDOW_TRACE) {
@@ -7674,6 +7723,13 @@ public class WindowManagerService extends IWindowManager.Stub
                             } catch (RemoteException e) {
                             }
                         }
+                    }
+                }
+                break;
+
+                case UPDATE_SCRN_CAP: {
+                    synchronized (mWindowMap) {
+                        updateScreenCaptureDisabledLocked(msg.arg1);
                     }
                 }
                 break;

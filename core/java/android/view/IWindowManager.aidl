@@ -149,6 +149,12 @@ interface IWindowManager
     // boolean string as parsed by SystemProperties.getBoolean().
     void setStrictModeVisualIndicatorPreference(String enabled);
 
+    /**
+     * Update the windowmanagers cached value of
+     * {@link android.app.admin.DevicePolicyManager#getScreenCaptureDisabled(null, userId)}
+     */
+    void updateScreenCaptureDisabled(int userId);
+
     // These can only be called with the SET_ORIENTATION permission.
     /**
      * Update the current screen rotation based on the current state of

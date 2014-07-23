@@ -360,6 +360,11 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
+    public void updateScreenCaptureDisabled(int userId) {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
     public void updateRotation(boolean arg0, boolean arg1) throws RemoteException {
         // TODO Auto-generated method stub
     }
