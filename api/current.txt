@@ -16577,10 +16577,12 @@ package android.media.session {
     method public void adjustVolume(int, int);
     method public android.media.routing.MediaRouter.Delegate createMediaRouterDelegate();
     method public boolean dispatchMediaButtonEvent(android.view.KeyEvent);
+    method public long getFlags();
     method public android.media.MediaMetadata getMetadata();
     method public android.media.session.PlaybackState getPlaybackState();
     method public java.util.List<android.media.session.MediaSession.Track> getQueue();
     method public int getRatingType();
+    method public android.media.session.MediaSession.Token getSessionToken();
     method public android.media.session.MediaController.TransportControls getTransportControls();
     method public android.media.session.MediaController.VolumeInfo getVolumeInfo();
     method public void removeCallback(android.media.session.MediaController.Callback);
