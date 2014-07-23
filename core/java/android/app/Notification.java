@@ -799,6 +799,12 @@ public class Notification implements Parcelable
     public static final String EXTRA_MEDIA_SESSION = "android.mediaSession";
 
     /**
+     * {@link #extras} key: the indices of actions to be shown in the compact view,
+     * as supplied to (e.g.) {@link MediaStyle#setShowActionsInCompactView(int...)}.
+     */
+    public static final String EXTRA_COMPACT_ACTIONS = "android.compactActions";
+
+    /**
      * Value for {@link #EXTRA_AS_HEADS_UP} that indicates this notification should not be
      * displayed in the heads up space.
      *
@@ -3361,6 +3367,9 @@ public class Notification implements Parcelable
 
             if (mToken != null) {
                 extras.putParcelable(EXTRA_MEDIA_SESSION, mToken);
+            }
+            if (mActionsToShowInCompact != null) {
+                extras.putIntArray(EXTRA_COMPACT_ACTIONS, mActionsToShowInCompact);
             }
         }
 
