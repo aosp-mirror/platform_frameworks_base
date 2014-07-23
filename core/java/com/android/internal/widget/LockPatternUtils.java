@@ -256,15 +256,11 @@ public class LockPatternUtils {
                 getCurrentOrCallingUserId());
     }
 
-    /**
-     * Returns the actual password mode, as set by keyguard after updating the password.
-     *
-     * @return
-     */
     public void reportFailedPasswordAttempt() {
-        getDevicePolicyManager().reportFailedPasswordAttempt(getCurrentOrCallingUserId());
-        getTrustManager().reportUnlockAttempt(false /* authenticated */,
-                getCurrentOrCallingUserId());
+        int userId = getCurrentOrCallingUserId();
+        getDevicePolicyManager().reportFailedPasswordAttempt(userId);
+        getTrustManager().reportUnlockAttempt(false /* authenticated */, userId);
+        getTrustManager().reportRequireCredentialEntry(userId);
     }
 
     public void reportSuccessfulPasswordAttempt() {
