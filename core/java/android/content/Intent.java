@@ -2682,8 +2682,7 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.action.QUICK_CLOCK";
 
     /**
-     * Broadcast Action: This is broadcast when a user action should request the
-     * brightness setting dialog.
+     * Activity Action: Shows the brightness setting dialog.
      * @hide
      */
     public static final String ACTION_SHOW_BRIGHTNESS_DIALOG =
