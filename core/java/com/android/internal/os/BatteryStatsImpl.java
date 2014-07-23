@@ -172,6 +172,8 @@ public final class BatteryStatsImpl extends BatteryStats {
     final ArrayList<StopwatchTimer> mWifiScanTimers = new ArrayList<StopwatchTimer>();
     final SparseArray<ArrayList<StopwatchTimer>> mWifiBatchedScanTimers =
             new SparseArray<ArrayList<StopwatchTimer>>();
+    final ArrayList<StopwatchTimer> mAudioTurnedOnTimers = new ArrayList<StopwatchTimer>();
+    final ArrayList<StopwatchTimer> mVideoTurnedOnTimers = new ArrayList<StopwatchTimer>();
 
     // Last partial timers we use for distributing CPU usage.
     final ArrayList<StopwatchTimer> mLastPartialTimers = new ArrayList<StopwatchTimer>();
@@ -256,10 +258,10 @@ public final class BatteryStatsImpl extends BatteryStats {
     boolean mPhoneOn;
     StopwatchTimer mPhoneOnTimer;
 
-    boolean mAudioOn;
+    int mAudioOnNesting;
     StopwatchTimer mAudioOnTimer;
 
-    boolean mVideoOn;
+    int mVideoOnNesting;
     StopwatchTimer mVideoOnTimer;
 
     boolean mFlashlightOn;
@@ -1469,6 +1471,13 @@ public final class BatteryStatsImpl extends BatteryStats {
                     // count.  A somewhat cheezy strategy, but hey.
                     mCount--;
                 }
+            }
+        }
+
+        void stopAllRunningLocked(long elapsedRealtimeMs) {
+            if (mNesting > 0) {
+                mNesting = 1;
+                stopRunningLocked(elapsedRealtimeMs);
             }
         }
 
@@ -3187,27 +3196,29 @@ public final class BatteryStatsImpl extends BatteryStats {
         uid = mapUid(uid);
         final long elapsedRealtime = SystemClock.elapsedRealtime();
         final long uptime = SystemClock.uptimeMillis();
-        if (!mAudioOn) {
+        if (mAudioOnNesting == 0) {
             mHistoryCur.states |= HistoryItem.STATE_AUDIO_ON_FLAG;
             if (DEBUG_HISTORY) Slog.v(TAG, "Audio on to: "
                     + Integer.toHexString(mHistoryCur.states));
             addHistoryRecordLocked(elapsedRealtime, uptime);
-            mAudioOn = true;
             mAudioOnTimer.startRunningLocked(elapsedRealtime);
         }
+        mAudioOnNesting++;
         getUidStatsLocked(uid).noteAudioTurnedOnLocked(elapsedRealtime);
     }
 
     public void noteAudioOffLocked(int uid) {
+        if (mAudioOnNesting == 0) {
+            return;
+        }
         uid = mapUid(uid);
         final long elapsedRealtime = SystemClock.elapsedRealtime();
         final long uptime = SystemClock.uptimeMillis();
-        if (mAudioOn) {
+        if (--mAudioOnNesting == 0) {
             mHistoryCur.states &= ~HistoryItem.STATE_AUDIO_ON_FLAG;
             if (DEBUG_HISTORY) Slog.v(TAG, "Audio off to: "
                     + Integer.toHexString(mHistoryCur.states));
             addHistoryRecordLocked(elapsedRealtime, uptime);
-            mAudioOn = false;
             mAudioOnTimer.stopRunningLocked(elapsedRealtime);
         }
         getUidStatsLocked(uid).noteAudioTurnedOffLocked(elapsedRealtime);
@@ -3217,30 +3228,66 @@ public final class BatteryStatsImpl extends BatteryStats {
         uid = mapUid(uid);
         final long elapsedRealtime = SystemClock.elapsedRealtime();
         final long uptime = SystemClock.uptimeMillis();
-        if (!mVideoOn) {
+        if (mVideoOnNesting == 0) {
             mHistoryCur.states2 |= HistoryItem.STATE2_VIDEO_ON_FLAG;
             if (DEBUG_HISTORY) Slog.v(TAG, "Video on to: "
                     + Integer.toHexString(mHistoryCur.states));
             addHistoryRecordLocked(elapsedRealtime, uptime);
-            mVideoOn = true;
             mVideoOnTimer.startRunningLocked(elapsedRealtime);
         }
+        mVideoOnNesting++;
         getUidStatsLocked(uid).noteVideoTurnedOnLocked(elapsedRealtime);
     }
 
     public void noteVideoOffLocked(int uid) {
+        if (mVideoOnNesting == 0) {
+            return;
+        }
         uid = mapUid(uid);
         final long elapsedRealtime = SystemClock.elapsedRealtime();
         final long uptime = SystemClock.uptimeMillis();
-        if (mVideoOn) {
+        if (--mVideoOnNesting == 0) {
             mHistoryCur.states2 &= ~HistoryItem.STATE2_VIDEO_ON_FLAG;
             if (DEBUG_HISTORY) Slog.v(TAG, "Video off to: "
                     + Integer.toHexString(mHistoryCur.states));
             addHistoryRecordLocked(elapsedRealtime, uptime);
-            mVideoOn = false;
             mVideoOnTimer.stopRunningLocked(elapsedRealtime);
         }
         getUidStatsLocked(uid).noteVideoTurnedOffLocked(elapsedRealtime);
+    }
+
+    public void noteResetAudioLocked() {
+        if (mAudioOnNesting > 0) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mAudioOnNesting = 0;
+            mHistoryCur.states &= ~HistoryItem.STATE_AUDIO_ON_FLAG;
+            if (DEBUG_HISTORY) Slog.v(TAG, "Audio off to: "
+                    + Integer.toHexString(mHistoryCur.states));
+            addHistoryRecordLocked(elapsedRealtime, uptime);
+            mAudioOnTimer.stopAllRunningLocked(elapsedRealtime);
+            for (int i=0; i<mUidStats.size(); i++) {
+                BatteryStatsImpl.Uid uid = mUidStats.valueAt(i);
+                uid.noteResetAudioLocked(elapsedRealtime);
+            }
+        }
+    }
+
+    public void noteResetVideoLocked() {
+        if (mVideoOnNesting > 0) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mAudioOnNesting = 0;
+            mHistoryCur.states2 &= ~HistoryItem.STATE2_VIDEO_ON_FLAG;
+            if (DEBUG_HISTORY) Slog.v(TAG, "Video off to: "
+                    + Integer.toHexString(mHistoryCur.states));
+            addHistoryRecordLocked(elapsedRealtime, uptime);
+            mVideoOnTimer.stopAllRunningLocked(elapsedRealtime);
+            for (int i=0; i<mUidStats.size(); i++) {
+                BatteryStatsImpl.Uid uid = mUidStats.valueAt(i);
+                uid.noteResetVideoLocked(elapsedRealtime);
+            }
+        }
     }
 
     public void noteActivityResumedLocked(int uid) {
@@ -3855,10 +3902,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         boolean mWifiMulticastEnabled;
         StopwatchTimer mWifiMulticastTimer;
 
-        boolean mAudioTurnedOn;
         StopwatchTimer mAudioTurnedOnTimer;
-
-        boolean mVideoTurnedOn;
         StopwatchTimer mVideoTurnedOnTimer;
 
         StopwatchTimer mForegroundActivityTimer;
@@ -4073,52 +4117,48 @@ public final class BatteryStatsImpl extends BatteryStats {
         public StopwatchTimer createAudioTurnedOnTimerLocked() {
             if (mAudioTurnedOnTimer == null) {
                 mAudioTurnedOnTimer = new StopwatchTimer(Uid.this, AUDIO_TURNED_ON,
-                        null, mOnBatteryTimeBase);
+                        mAudioTurnedOnTimers, mOnBatteryTimeBase);
             }
             return mAudioTurnedOnTimer;
         }
 
-        @Override
         public void noteAudioTurnedOnLocked(long elapsedRealtimeMs) {
-            if (!mAudioTurnedOn) {
-                mAudioTurnedOn = true;
-                createAudioTurnedOnTimerLocked().startRunningLocked(elapsedRealtimeMs);
+            createAudioTurnedOnTimerLocked().startRunningLocked(elapsedRealtimeMs);
+        }
+
+        public void noteAudioTurnedOffLocked(long elapsedRealtimeMs) {
+            if (mAudioTurnedOnTimer != null) {
+                mAudioTurnedOnTimer.stopRunningLocked(elapsedRealtimeMs);
             }
         }
 
-        @Override
-        public void noteAudioTurnedOffLocked(long elapsedRealtimeMs) {
-            if (mAudioTurnedOn) {
-                mAudioTurnedOn = false;
-                if (mAudioTurnedOnTimer != null) {
-                    mAudioTurnedOnTimer.stopRunningLocked(elapsedRealtimeMs);
-                }
+        public void noteResetAudioLocked(long elapsedRealtimeMs) {
+            if (mAudioTurnedOnTimer != null) {
+                mAudioTurnedOnTimer.stopAllRunningLocked(elapsedRealtimeMs);
             }
         }
 
         public StopwatchTimer createVideoTurnedOnTimerLocked() {
             if (mVideoTurnedOnTimer == null) {
                 mVideoTurnedOnTimer = new StopwatchTimer(Uid.this, VIDEO_TURNED_ON,
-                        null, mOnBatteryTimeBase);
+                        mVideoTurnedOnTimers, mOnBatteryTimeBase);
             }
             return mVideoTurnedOnTimer;
         }
 
-        @Override
         public void noteVideoTurnedOnLocked(long elapsedRealtimeMs) {
-            if (!mVideoTurnedOn) {
-                mVideoTurnedOn = true;
-                createVideoTurnedOnTimerLocked().startRunningLocked(elapsedRealtimeMs);
+            createVideoTurnedOnTimerLocked().startRunningLocked(elapsedRealtimeMs);
+        }
+
+        public void noteVideoTurnedOffLocked(long elapsedRealtimeMs) {
+            if (mVideoTurnedOnTimer != null) {
+                mVideoTurnedOnTimer.stopRunningLocked(elapsedRealtimeMs);
             }
         }
 
-        @Override
-        public void noteVideoTurnedOffLocked(long elapsedRealtimeMs) {
-            if (mVideoTurnedOn) {
-                mVideoTurnedOn = false;
-                if (mVideoTurnedOnTimer != null) {
-                    mVideoTurnedOnTimer.stopRunningLocked(elapsedRealtimeMs);
-                }
+        public void noteResetVideoLocked(long elapsedRealtimeMs) {
+            if (mVideoTurnedOnTimer != null) {
+                mVideoTurnedOnTimer.stopAllRunningLocked(elapsedRealtimeMs);
             }
         }
 
@@ -4416,11 +4456,9 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
             if (mAudioTurnedOnTimer != null) {
                 active |= !mAudioTurnedOnTimer.reset(false);
-                active |= mAudioTurnedOn;
             }
             if (mVideoTurnedOnTimer != null) {
                 active |= !mVideoTurnedOnTimer.reset(false);
-                active |= mVideoTurnedOn;
             }
             if (mForegroundActivityTimer != null) {
                 active |= !mForegroundActivityTimer.reset(false);
@@ -4803,17 +4841,15 @@ public final class BatteryStatsImpl extends BatteryStats {
             } else {
                 mWifiMulticastTimer = null;
             }
-            mAudioTurnedOn = false;
             if (in.readInt() != 0) {
                 mAudioTurnedOnTimer = new StopwatchTimer(Uid.this, AUDIO_TURNED_ON,
-                        null, mOnBatteryTimeBase, in);
+                        mAudioTurnedOnTimers, mOnBatteryTimeBase, in);
             } else {
                 mAudioTurnedOnTimer = null;
             }
-            mVideoTurnedOn = false;
             if (in.readInt() != 0) {
                 mVideoTurnedOnTimer = new StopwatchTimer(Uid.this, VIDEO_TURNED_ON,
-                        null, mOnBatteryTimeBase, in);
+                        mVideoTurnedOnTimers, mOnBatteryTimeBase, in);
             } else {
                 mVideoTurnedOnTimer = null;
             }
@@ -7554,11 +7590,9 @@ public final class BatteryStatsImpl extends BatteryStats {
             if (in.readInt() != 0) {
                 u.mWifiMulticastTimer.readSummaryFromParcelLocked(in);
             }
-            u.mAudioTurnedOn = false;
             if (in.readInt() != 0) {
                 u.createAudioTurnedOnTimerLocked().readSummaryFromParcelLocked(in);
             }
-            u.mVideoTurnedOn = false;
             if (in.readInt() != 0) {
                 u.createVideoTurnedOnTimerLocked().readSummaryFromParcelLocked(in);
             }
@@ -8071,9 +8105,9 @@ public final class BatteryStatsImpl extends BatteryStats {
             mBluetoothStateTimer[i] = new StopwatchTimer(null, -500-i,
                     null, mOnBatteryTimeBase, in);
         }
-        mAudioOn = false;
+        mAudioOnNesting = 0;
         mAudioOnTimer = new StopwatchTimer(null, -7, null, mOnBatteryTimeBase);
-        mVideoOn = false;
+        mVideoOnNesting = 0;
         mVideoOnTimer = new StopwatchTimer(null, -8, null, mOnBatteryTimeBase);
         mFlashlightOn = false;
         mFlashlightOnTimer = new StopwatchTimer(null, -9, null, mOnBatteryTimeBase, in);
@@ -8125,6 +8159,8 @@ public final class BatteryStatsImpl extends BatteryStats {
         mWifiScanTimers.clear();
         mWifiBatchedScanTimers.clear();
         mWifiMulticastTimers.clear();
+        mAudioTurnedOnTimers.clear();
+        mVideoTurnedOnTimers.clear();
 
         sNumSpeedSteps = in.readInt();
 
