@@ -346,10 +346,6 @@ public abstract class BatteryStats implements Parcelable {
         public abstract void noteWifiBatchedScanStoppedLocked(long elapsedRealtime);
         public abstract void noteWifiMulticastEnabledLocked(long elapsedRealtime);
         public abstract void noteWifiMulticastDisabledLocked(long elapsedRealtime);
-        public abstract void noteAudioTurnedOnLocked(long elapsedRealtime);
-        public abstract void noteAudioTurnedOffLocked(long elapsedRealtime);
-        public abstract void noteVideoTurnedOnLocked(long elapsedRealtime);
-        public abstract void noteVideoTurnedOffLocked(long elapsedRealtime);
         public abstract void noteActivityResumedLocked(long elapsedRealtime);
         public abstract void noteActivityPausedLocked(long elapsedRealtime);
         public abstract long getWifiRunningTime(long elapsedRealtimeUs, int which);
