@@ -33,6 +33,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.util.SparseArray;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -40,6 +41,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -65,8 +67,8 @@ public final class MediaBrowser {
     private final Handler mHandler = new Handler();
     private final ArrayMap<Uri,Subscription> mSubscriptions =
             new ArrayMap<Uri, MediaBrowser.Subscription>();
-    private final ArrayMap<ThumbnailRequest, HashSet<ThumbnailCallback>> mThumbnailCallbacks =
-            new ArrayMap<ThumbnailRequest, HashSet<ThumbnailCallback>>();
+    private final SparseArray<ThumbnailRequest> mThumbnailRequests =
+            new SparseArray<ThumbnailRequest>();
 
     private int mState = CONNECT_STATE_DISCONNECTED;
     private MediaServiceConnection mServiceConnection;
@@ -75,6 +77,7 @@ public final class MediaBrowser {
     private Uri mRootUri;
     private MediaSession.Token mMediaSessionToken;
     private Bundle mExtras;
+    private int mNextSeq;
 
     /**
      * Creates a media browser for the specified media browse service.
@@ -367,21 +370,20 @@ public final class MediaBrowser {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                HashSet<ThumbnailCallback> callbackSet;
-                ThumbnailRequest request = new ThumbnailRequest(uri, width, height);
-                callbackSet = mThumbnailCallbacks.get(request);
-                if (callbackSet != null) {
-                    callbackSet.add(callback);
-                    mThumbnailCallbacks.put(request, callbackSet);
-                    // same request has been sent. we will wait for the callback.
-                    return;
+                for (int i = 0; i < mThumbnailRequests.size(); i++) {
+                    ThumbnailRequest existingRequest = mThumbnailRequests.valueAt(i);
+                    if (existingRequest.isSameRequest(uri, width, height)) {
+                        existingRequest.addCallback(callback);
+                        return;
+                    }
                 }
-                callbackSet = new HashSet<ThumbnailCallback>();
-                callbackSet.add(callback);
-                mThumbnailCallbacks.put(request, callbackSet);
+                final int seq = mNextSeq++;
+                ThumbnailRequest request = new ThumbnailRequest(seq, uri, width, height);
+                request.addCallback(callback);
+                mThumbnailRequests.put(seq, request);
                 if (mState == CONNECT_STATE_CONNECTED) {
                     try {
-                        mServiceBinder.loadThumbnail(uri, width, height, mServiceCallbacks);
+                        mServiceBinder.loadThumbnail(seq, uri, width, height, mServiceCallbacks);
                     } catch (RemoteException e) {
                         // Process is crashing.  We will disconnect, and upon reconnect we will
                         // automatically reload the thumbnails. So nothing to do here.
@@ -449,17 +451,17 @@ public final class MediaBrowser {
                     }
                 }
 
-                for (ThumbnailRequest request : mThumbnailCallbacks.keySet()) {
+                for (int i = 0; i < mThumbnailRequests.size(); i++) {
+                    ThumbnailRequest request = mThumbnailRequests.valueAt(i);
                     try {
-                        mServiceBinder.loadThumbnail(request.uri, request.width, request.height,
-                                mServiceCallbacks);
+                        mServiceBinder.loadThumbnail(request.mSeq, request.mUri,
+                                request.mWidth, request.mHeight, mServiceCallbacks);
                     } catch (RemoteException e) {
                         // Process is crashing.  We will disconnect, and upon reconnect we will
                         // automatically reload. So nothing to do here.
-                        Log.d(TAG, "loadThumbnail failed with RemoteException uri=" + request.uri);
+                        Log.d(TAG, "loadThumbnail failed with RemoteException request=" + request);
                     }
                 }
-
             }
         });
     }
@@ -527,7 +529,7 @@ public final class MediaBrowser {
     }
 
     private final void onLoadThumbnail(final IMediaBrowserServiceCallbacks callback,
-            final ThumbnailRequest request, final Bitmap bitmap) {
+            final int seqNum, final Bitmap bitmap) {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
@@ -537,16 +539,16 @@ public final class MediaBrowser {
                     return;
                 }
 
-                Set<ThumbnailCallback> callbackSet = mThumbnailCallbacks.get(request);
-                if (callbackSet == null) {
-                    Log.d(TAG, "onLoadThumbnail called for request=" + request +
-                            " but the callback is not registered");
+                ThumbnailRequest request = mThumbnailRequests.get(seqNum);
+                if (request == null) {
+                    Log.d(TAG, "onLoadThumbnail called for seqNum=" + seqNum + " request="
+                            + request + " but the request is not registered");
                     return;
                 }
-                for (ThumbnailCallback thumbnailCallback : callbackSet) {
-                    thumbnailCallback.onThumbnailLoaded(request.uri, bitmap);
+                mThumbnailRequests.delete(seqNum);
+                for (ThumbnailCallback thumbnailCallback : request.getCallbacks()) {
+                    thumbnailCallback.onThumbnailLoaded(request.mUri, bitmap);
                 }
-                mThumbnailCallbacks.remove(request);
             }
         });
     }
@@ -651,47 +653,66 @@ public final class MediaBrowser {
     }
 
     private static class ThumbnailRequest {
-        Uri uri;
-        int width;
-        int height;
-        ThumbnailRequest(@NonNull Uri uri, int width, int height) {
+        final int mSeq;
+        final Uri mUri;
+        final int mWidth;
+        final int mHeight;
+        final List<ThumbnailCallback> mCallbacks;
+
+        /**
+         * Constructs a thumbnail request.
+         * @param seq The unique sequence number assigned to the request by the media browser.
+         * @param uri The Uri for the thumbnail.
+         * @param width The width for the thumbnail.
+         * @param height The height for the thumbnail.
+         */
+        ThumbnailRequest(int seq, @NonNull Uri uri, int width, int height) {
             if (uri == null) {
                 throw new IllegalArgumentException("thumbnail uri cannot be null");
             }
-            this.uri = uri;
-            this.width = width;
-            this.height = height;
+            this.mSeq = seq;
+            this.mUri = uri;
+            this.mWidth = width;
+            this.mHeight = height;
+            mCallbacks = new ArrayList<ThumbnailCallback>();
         }
 
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (!(o instanceof ThumbnailRequest)) return false;
-
-            ThumbnailRequest that = (ThumbnailRequest) o;
-
-            if (height != that.height) return false;
-            if (width != that.width) return false;
-            if (!uri.equals(that.uri)) return false;
-
-            return true;
+        /**
+         * Adds a callback to the thumbnail request.
+         * If the callback already exists, it will not be added again.
+         */
+        public void addCallback(@NonNull ThumbnailCallback callback) {
+            if (callback == null) {
+                throw new IllegalArgumentException("callback cannot be null in ThumbnailRequest");
+            }
+            if (!mCallbacks.contains(callback)) {
+                mCallbacks.add(callback);
+            }
         }
 
-        @Override
-        public int hashCode() {
-            int result = uri.hashCode();
-            result = 31 * result + width;
-            result = 31 * result + height;
-            return result;
+        /**
+         * Checks if the thumbnail request has the same uri, width, and height as the given values.
+         */
+        public boolean isSameRequest(@Nullable Uri uri, int width, int height) {
+            return Objects.equals(mUri, uri) && mWidth == width && mHeight == height;
         }
 
         @Override
         public String toString() {
-            return "ThumbnailRequest{" +
-                    "uri=" + uri +
-                    ", width=" + width +
-                    ", height=" + height +
-                    '}';
+            final StringBuilder sb = new StringBuilder("ThumbnailRequest{");
+            sb.append("uri=").append(mUri);
+            sb.append(", width=").append(mWidth);
+            sb.append(", height=").append(mHeight);
+            sb.append(", seq=").append(mSeq);
+            sb.append('}');
+            return sb.toString();
+        }
+
+        /**
+         * Gets an unmodifiable view of the list of callbacks associated with the request.
+         */
+        public List<ThumbnailCallback> getCallbacks() {
+            return Collections.unmodifiableList(mCallbacks);
         }
     }
 
@@ -822,11 +843,10 @@ public final class MediaBrowser {
         }
 
         @Override
-        public void onLoadThumbnail(final Uri uri, int width, int height, final Bitmap bitmap) {
+        public void onLoadThumbnail(final int seqNum, final Bitmap bitmap) {
             MediaBrowser mediaBrowser = mMediaBrowser.get();
             if (mediaBrowser != null) {
-                ThumbnailRequest request = new ThumbnailRequest(uri, width, height);
-                mediaBrowser.onLoadThumbnail(this, request, bitmap);
+                mediaBrowser.onLoadThumbnail(this, seqNum, bitmap);
             }
         }
     }
