@@ -16,23 +16,24 @@
 
 package com.android.internal.app;
 
+import static android.content.pm.PackageManager.MATCH_DEFAULT_ONLY;
+
 import android.app.Activity;
+import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
 import android.os.Bundle;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.IPackageManager;
 import android.content.pm.UserInfo;
+import android.os.Process;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.app.ActivityManagerNative;
-import android.os.RemoteException;
 import android.util.Slog;
+import android.widget.Toast;
 import java.util.List;
 import java.util.Set;
-
-
-
 
 /*
  * This is used in conjunction with the {@link setCrossProfileIntentFilter} method of
@@ -56,13 +57,17 @@ public class IntentForwarderActivity extends Activity  {
 
         String className = intentReceived.getComponent().getClassName();
         final UserHandle userDest;
+        final int userMessageId;
 
         if (className.equals(FORWARD_INTENT_TO_USER_OWNER)) {
+            userMessageId = com.android.internal.R.string.forward_intent_to_owner;
             userDest = UserHandle.OWNER;
         } else if (className.equals(FORWARD_INTENT_TO_MANAGED_PROFILE)) {
+            userMessageId = com.android.internal.R.string.forward_intent_to_work;
             userDest = getManagedProfile();
         } else {
             Slog.wtf(TAG, IntentForwarderActivity.class.getName() + " cannot be called directly");
+            userMessageId = -1;
             userDest = null;
         }
         if (userDest == null) { // This covers the case where there is no managed profile.
@@ -85,7 +90,19 @@ public class IntentForwarderActivity extends Activity  {
         }
         if (canForward) {
             newIntent.prepareToLeaveUser(callingUserId);
+
+            final android.content.pm.ResolveInfo ri = getPackageManager().resolveActivityAsUser(
+                        newIntent, MATCH_DEFAULT_ONLY, userDest.getIdentifier());
+
+            // Only show a disclosure if this is a normal (non-OS) app
+            final boolean shouldShowDisclosure =
+                    !UserHandle.isSameApp(ri.activityInfo.applicationInfo.uid, Process.SYSTEM_UID);
+
             startActivityAsUser(newIntent, userDest);
+
+            if (shouldShowDisclosure) {
+                Toast.makeText(this, getString(userMessageId), Toast.LENGTH_LONG).show();
+            }
         } else {
             Slog.wtf(TAG, "the intent: " + newIntent + "cannot be forwarded from user "
                     + callingUserId + " to user " + userDest.getIdentifier());
