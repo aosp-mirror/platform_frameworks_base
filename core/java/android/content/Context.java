@@ -2837,6 +2837,7 @@ public abstract class Context {
      * @see android.net.NetworkScoreManager
      * @hide
      */
+    @SystemApi
     public static final String NETWORK_SCORE_SERVICE = "network_score";
 
     /**
