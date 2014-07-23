@@ -794,16 +794,6 @@ void PathTessellator::tessellatePath(const SkPath &path, const SkPaint* paint,
     vertexBuffer.setBounds(bounds);
 }
 
-static void expandRectToCoverVertex(Rect& rect, float x, float y) {
-    rect.left = fminf(rect.left, x);
-    rect.top = fminf(rect.top, y);
-    rect.right = fmaxf(rect.right, x);
-    rect.bottom = fmaxf(rect.bottom, y);
-}
-static void expandRectToCoverVertex(Rect& rect, const Vertex& vertex) {
-    expandRectToCoverVertex(rect, vertex.x, vertex.y);
-}
-
 template <class TYPE>
 static void instanceVertices(VertexBuffer& srcBuffer, VertexBuffer& dstBuffer,
         const float* points, int count, Rect& bounds) {
@@ -814,7 +804,7 @@ static void instanceVertices(VertexBuffer& srcBuffer, VertexBuffer& dstBuffer,
     dstBuffer.alloc<TYPE>(numPoints * verticesPerPoint + (numPoints - 1) * 2);
 
     for (int i = 0; i < count; i += 2) {
-        expandRectToCoverVertex(bounds, points[i + 0], points[i + 1]);
+        bounds.expandToCoverVertex(points[i + 0], points[i + 1]);
         dstBuffer.copyInto<TYPE>(srcBuffer, points[i + 0], points[i + 1]);
     }
     dstBuffer.createDegenerateSeparators<TYPE>(verticesPerPoint);
@@ -896,8 +886,8 @@ void PathTessellator::tessellateLines(const float* points, int count, const SkPa
         }
 
         // calculate bounds
-        expandRectToCoverVertex(bounds, tempVerticesData[0]);
-        expandRectToCoverVertex(bounds, tempVerticesData[1]);
+        bounds.expandToCoverVertex(tempVerticesData[0].x, tempVerticesData[0].y);
+        bounds.expandToCoverVertex(tempVerticesData[1].x, tempVerticesData[1].y);
     }
 
     // since multiple objects tessellated into buffer, separate them with degen tris

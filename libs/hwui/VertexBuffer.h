@@ -62,6 +62,8 @@ public:
         mVertexCount = vertexCount;
         mByteCount = mVertexCount * sizeof(TYPE);
         mReallocBuffer = mBuffer = (void*)new TYPE[vertexCount];
+        memset(mBuffer, 0, sizeof(TYPE) * vertexCount);
+
         mCleanupMethod = &(cleanup<TYPE>);
 
         return (TYPE*)mBuffer;
@@ -76,6 +78,24 @@ public:
 
         for (int i = 0; i < verticesToCopy; i++) {
             TYPE::copyWithOffset(&dst[i], src[i], xOffset, yOffset);
+        }
+    }
+
+    /**
+     * Brute force bounds computation, used only if the producer of this
+     * vertex buffer can't determine bounds more simply/efficiently
+     */
+    template <class TYPE>
+    void computeBounds() {
+        if (!mVertexCount) {
+            mBounds.setEmpty();
+            return;
+        }
+        TYPE* current = (TYPE*)mBuffer;
+        TYPE* end = current + mVertexCount;
+        mBounds.set(current->x, current->y, current->x, current->y);
+        for (; current < end; current++) {
+            mBounds.expandToCoverVertex(current->x, current->y);
         }
     }
 
