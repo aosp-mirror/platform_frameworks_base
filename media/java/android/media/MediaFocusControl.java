@@ -78,7 +78,6 @@ public class MediaFocusControl implements OnFinished {
     private final Context mContext;
     private final ContentResolver mContentResolver;
     private final AudioService.VolumeController mVolumeController;
-    private final BroadcastReceiver mReceiver = new PackageIntentsReceiver();
     private final AppOpsManager mAppOps;
     private final KeyguardManager mKeyguardManager;
     private final AudioService mAudioService;
@@ -102,16 +101,6 @@ public class MediaFocusControl implements OnFinished {
         TelephonyManager tmgr = (TelephonyManager)
                 mContext.getSystemService(Context.TELEPHONY_SERVICE);
         tmgr.listen(mPhoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
-
-        // Register for package addition/removal/change intent broadcasts
-        //    for media button receiver persistence
-        IntentFilter pkgFilter = new IntentFilter();
-        pkgFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
-        pkgFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
-        pkgFilter.addAction(Intent.ACTION_PACKAGE_CHANGED);
-        pkgFilter.addAction(Intent.ACTION_PACKAGE_DATA_CLEARED);
-        pkgFilter.addDataScheme("package");
-        mContext.registerReceiver(mReceiver, pkgFilter);
 
         mAppOps = (AppOpsManager)mContext.getSystemService(Context.APP_OPS_SERVICE);
         mKeyguardManager =
@@ -321,7 +310,6 @@ public class MediaFocusControl implements OnFinished {
     //==========================================================================================
 
     // event handler messages
-    private static final int MSG_PERSIST_MEDIABUTTONRECEIVER = 0;
     private static final int MSG_RCDISPLAY_CLEAR = 1;
     private static final int MSG_RCDISPLAY_UPDATE = 2;
     private static final int MSG_REEVALUATE_REMOTE = 3;
@@ -362,10 +350,6 @@ public class MediaFocusControl implements OnFinished {
         @Override
         public void handleMessage(Message msg) {
             switch(msg.what) {
-                case MSG_PERSIST_MEDIABUTTONRECEIVER:
-                    onHandlePersistMediaButtonReceiver( (ComponentName) msg.obj );
-                    break;
-
                 case MSG_RCDISPLAY_CLEAR:
                     onRcDisplayClear();
                     break;
@@ -874,29 +858,6 @@ public class MediaFocusControl implements OnFinished {
 
     }
 
-    private class PackageIntentsReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (action.equals(Intent.ACTION_PACKAGE_REMOVED)
-                    || action.equals(Intent.ACTION_PACKAGE_DATA_CLEARED)) {
-                if (!intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
-                    // a package is being removed, not replaced
-                    String packageName = intent.getData().getSchemeSpecificPart();
-                    if (packageName != null) {
-                        cleanupMediaButtonReceiverForPackage(packageName, true);
-                    }
-                }
-            } else if (action.equals(Intent.ACTION_PACKAGE_ADDED)
-                    || action.equals(Intent.ACTION_PACKAGE_CHANGED)) {
-                String packageName = intent.getData().getSchemeSpecificPart();
-                if (packageName != null) {
-                    cleanupMediaButtonReceiverForPackage(packageName, false);
-                }
-            }
-        }
-    }
-
     private static boolean isValidMediaKeyEvent(KeyEvent keyEvent) {
         if (keyEvent == null) {
             return false;
@@ -1113,85 +1074,6 @@ public class MediaFocusControl implements OnFinished {
 
     /**
      * Helper function:
-     * Remove any entry in the remote control stack that has the same package name as packageName
-     * Pre-condition: packageName != null
-     */
-    private void cleanupMediaButtonReceiverForPackage(String packageName, boolean removeAll) {
-        synchronized(mPRStack) {
-            if (mPRStack.empty()) {
-                return;
-            } else {
-                final PackageManager pm = mContext.getPackageManager();
-                PlayerRecord oldTop = mPRStack.peek();
-                Iterator<PlayerRecord> stackIterator = mPRStack.iterator();
-                // iterate over the stack entries
-                // (using an iterator on the stack so we can safely remove an entry after having
-                //  evaluated it, traversal order doesn't matter here)
-                while(stackIterator.hasNext()) {
-                    PlayerRecord prse = stackIterator.next();
-                    if (removeAll
-                            && packageName.equals(prse.getMediaButtonIntent().getCreatorPackage()))
-                    {
-                        // a stack entry is from the package being removed, remove it from the stack
-                        stackIterator.remove();
-                        prse.destroy();
-                    } else if (prse.getMediaButtonReceiver() != null) {
-                        try {
-                            // Check to see if this receiver still exists.
-                            pm.getReceiverInfo(prse.getMediaButtonReceiver(), 0);
-                        } catch (PackageManager.NameNotFoundException e) {
-                            // Not found -- remove it!
-                            stackIterator.remove();
-                            prse.destroy();
-                        }
-                    }
-                }
-                if (mPRStack.empty()) {
-                    // no saved media button receiver
-                    mEventHandler.sendMessage(
-                            mEventHandler.obtainMessage(MSG_PERSIST_MEDIABUTTONRECEIVER, 0, 0,
-                                    null));
-                } else if (oldTop != mPRStack.peek()) {
-                    // the top of the stack has changed, save it in the system settings
-                    // by posting a message to persist it; only do this however if it has
-                    // a concrete component name (is not a transient registration)
-                    PlayerRecord prse = mPRStack.peek();
-                    if (prse.getMediaButtonReceiver() != null) {
-                        mEventHandler.sendMessage(
-                                mEventHandler.obtainMessage(MSG_PERSIST_MEDIABUTTONRECEIVER, 0, 0,
-                                        prse.getMediaButtonReceiver()));
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Helper function:
-     * Restore remote control receiver from the system settings.
-     */
-    protected void restoreMediaButtonReceiver() {
-        String receiverName = Settings.System.getStringForUser(mContentResolver,
-                Settings.System.MEDIA_BUTTON_RECEIVER, UserHandle.USER_CURRENT);
-        if ((null != receiverName) && !receiverName.isEmpty()) {
-            ComponentName eventReceiver = ComponentName.unflattenFromString(receiverName);
-            if (eventReceiver == null) {
-                // an invalid name was persisted
-                return;
-            }
-            // construct a PendingIntent targeted to the restored component name
-            // for the media button and register it
-            Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
-            //     the associated intent will be handled by the component being registered
-            mediaButtonIntent.setComponent(eventReceiver);
-            PendingIntent pi = PendingIntent.getBroadcast(mContext,
-                    0/*requestCode, ignored*/, mediaButtonIntent, 0/*flags*/);
-            registerMediaButtonIntent(pi, eventReceiver, null /*token*/);
-        }
-    }
-
-    /**
-     * Helper function:
      * Push the new media button receiver "near" the top of the PlayerRecord stack.
      * "Near the top" is defined as:
      *   - at the top if the current PlayerRecord at the top is not playing
@@ -1258,13 +1140,6 @@ public class MediaFocusControl implements OnFinished {
                 }
             }
 
-            topChanged = (oldTopPrse != mPRStack.lastElement());
-            // post message to persist the default media button receiver
-            if (topChanged && (target != null)) {
-                mEventHandler.sendMessage( mEventHandler.obtainMessage(
-                        MSG_PERSIST_MEDIABUTTONRECEIVER, 0, 0, target/*obj*/) );
-            }
-
         } catch (ArrayIndexOutOfBoundsException e) {
             // not expected to happen, indicates improper concurrent modification or bad index
             Log.e(TAG, "Wrong index (inStack=" + inStackIndex + " lastPlaying=" + lastPlayingIndex
@@ -1307,13 +1182,6 @@ public class MediaFocusControl implements OnFinished {
             return true;
         }
         return false;
-    }
-
-    private void onHandlePersistMediaButtonReceiver(ComponentName receiver) {
-        Settings.System.putStringForUser(mContentResolver,
-                                         Settings.System.MEDIA_BUTTON_RECEIVER,
-                                         receiver == null ? "" : receiver.flattenToString(),
-                                         UserHandle.USER_CURRENT);
     }
 
     //==========================================================================================
