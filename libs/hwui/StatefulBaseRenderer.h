@@ -52,7 +52,6 @@ public:
      * the render target.
      */
     virtual void setViewport(int width, int height);
-    virtual void initializeLight(const Vector3& lightCenter, float lightRadius);
     void initializeSaveStack(float clipLeft, float clipTop, float clipRight, float clipBottom);
 
     // getters
@@ -161,10 +160,6 @@ protected:
     // Current state
     // TODO: should become private, once hooks needed by OpenGLRenderer are added
     sp<Snapshot> mSnapshot;
-
-    Vector3 mLightCenter;
-    float mLightRadius;
-
 }; // class StatefulBaseRenderer
 
 }; // namespace uirenderer

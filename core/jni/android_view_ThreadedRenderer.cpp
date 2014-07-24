@@ -219,9 +219,11 @@ static void android_view_ThreadedRenderer_pauseSurface(JNIEnv* env, jobject claz
 
 static void android_view_ThreadedRenderer_setup(JNIEnv* env, jobject clazz, jlong proxyPtr,
         jint width, jint height,
-        jfloat lightX, jfloat lightY, jfloat lightZ, jfloat lightRadius) {
+        jfloat lightX, jfloat lightY, jfloat lightZ, jfloat lightRadius,
+        jint ambientShadowAlpha, jint spotShadowAlpha) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
-    proxy->setup(width, height, Vector3(lightX, lightY, lightZ), lightRadius);
+    proxy->setup(width, height, Vector3(lightX, lightY, lightZ), lightRadius,
+            ambientShadowAlpha, spotShadowAlpha);
 }
 
 static void android_view_ThreadedRenderer_setOpaque(JNIEnv* env, jobject clazz,
@@ -358,7 +360,7 @@ static JNINativeMethod gMethods[] = {
     { "nInitialize", "(JLandroid/view/Surface;)Z", (void*) android_view_ThreadedRenderer_initialize },
     { "nUpdateSurface", "(JLandroid/view/Surface;)V", (void*) android_view_ThreadedRenderer_updateSurface },
     { "nPauseSurface", "(JLandroid/view/Surface;)V", (void*) android_view_ThreadedRenderer_pauseSurface },
-    { "nSetup", "(JIIFFFF)V", (void*) android_view_ThreadedRenderer_setup },
+    { "nSetup", "(JIIFFFFII)V", (void*) android_view_ThreadedRenderer_setup },
     { "nSetOpaque", "(JZ)V", (void*) android_view_ThreadedRenderer_setOpaque },
     { "nSyncAndDrawFrame", "(JJJF)I", (void*) android_view_ThreadedRenderer_syncAndDrawFrame },
     { "nDestroyCanvasAndSurface", "(J)V", (void*) android_view_ThreadedRenderer_destroyCanvasAndSurface },
