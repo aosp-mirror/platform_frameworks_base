@@ -1530,6 +1530,11 @@ public class PackageParser {
 
                 XmlUtils.skipCurrentTag(parser);
 
+            } else if (tagName.equals("feature-group")) {
+                // Skip this for now until we know what to do with it.
+
+                XmlUtils.skipCurrentTag(parser);
+
             } else if (tagName.equals("uses-sdk")) {
                 if (SDK_VERSION > 0) {
                     sa = res.obtainAttributes(attrs,
