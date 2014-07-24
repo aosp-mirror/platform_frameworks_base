@@ -298,6 +298,10 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Programai leidžiama gauti ir apdoroti „Bluetooth“ MAP pranešimus. Tai reiškia, kad programa gali stebėti ir ištrinti į jūsų įrenginį siunčiamus pranešimus jums jų neparodžiusi."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"nuskaityti vykdomas programas"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Leidžiama programai nuskaityti informaciją apie šiuo ir pastaruoju metu vykdomas užduotis. Taip programa gali atrasti informacijos, kokios programos naudojamos įrenginyje."</string>
+    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
+    <skip />
+    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
+    <skip />
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"sąveikauti su naudotojais"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Leidžiama programai atlikti veiksmus skirtingų įrenginio naudotojų profiliuose. Kenkėjiškos programos gali pasinaudoti šiuo leidimu, kad pažeistų naudotojų saugumą."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"visa licencija, leidžianti sąveikauti su naudotojais"</string>
@@ -1555,7 +1559,8 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Sistema"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"„Bluetooth“ garsas"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Belaidis rodymas"</string>
-    <string name="media_route_button_content_description" msgid="5758553567065145276">"Medijos išvestis"</string>
+    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
+    <skip />
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Prijungimas prie įrenginio"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Perduoti ekraną į įrenginį"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Ieškoma įrenginių…"</string>
@@ -1743,7 +1748,7 @@
     <string name="lock_to_app_toast" msgid="2126866321272822564">"Įjungėte programos užrakinimo funkcijos režimą. Kad išeitumėte, palieskite ir palaikykite mygtuką „Naujausios“"</string>
     <string name="lock_to_app_toast_locked" msgid="4229650395479263497">"Įjungėte programos užrakinimo funkcijos režimą."</string>
     <string name="lock_to_app_title" msgid="5895142291937470019">"Naudoti programos užrakinimo funkciją?"</string>
-    <string name="lock_to_app_description" msgid="2800403592608529611">"Naudojant programos užrakinimo funkciją ekrane užrakinama viena programa.\n\nKad išeitumėte, palieskite ir palaikykite mygtuką „Naujausios“"</string>
+    <string name="lock_to_app_description" msgid="2800403592608529611">"Naudojant programos užrakinimo funkciją ekrane užrakinama viena programa.\n\nKad išeitumėte, palieskite ir palaikykite mygtuką „Naujausios“."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"NE, AČIŪ"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"ĮJUNGTI"</string>
     <string name="lock_to_app_start" msgid="3074665051586318340">"Naudojama programos užrakinimo funkcija"</string>

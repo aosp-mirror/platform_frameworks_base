@@ -298,6 +298,10 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Pinapayagan ang app na makatanggap at makapagproseso ng mga mensahe ng Bluetooth MAP. Nangangahulugan ito na maaaring subaybayan o i-delete ng app ang mga mensaheng ipinapadala sa iyong device nang hindi ipinapakita ang mga ito sa iyo."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"bawiin ang tumatakbong apps"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Pinapayagan ang app na kumuha ng impormasyon tungkol sa mga kasalukuyan at kamakailang gumaganang gawain. Maaari nitong payagan ang app na tumuklas ng impormasyon tungkol sa kung aling mga application ang ginagamit sa device."</string>
+    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
+    <skip />
+    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
+    <skip />
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"makipag-ugnayan sa kabuuan ng mga user"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Binibigyang-daan ang app upang magsagawa ng mga pagkilos sa kabuuan ng iba\'t ibang mga user sa device. Maaari itong gamitin ng nakakahamak na apps upang lumabag sa proteksyon sa pagitan ng mga user."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"ganap na lisensya upang makipag-ugnayan sa kabuuan ng mga user"</string>
@@ -1555,7 +1559,8 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"System"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Audio sa Bluetooth"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Wireless display"</string>
-    <string name="media_route_button_content_description" msgid="5758553567065145276">"Output ng media"</string>
+    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
+    <skip />
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Kumonekta sa device"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"I-cast ang screen sa device"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Naghahanap ng mga device…"</string>

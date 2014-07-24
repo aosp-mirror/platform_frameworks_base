@@ -298,6 +298,10 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"መተግበሪያው የብሉቱዝ ኤምኤፒ መልእክቶችን እንዲቀበልና እንዲያካሂድ ይፈቅድለታል። ይህ ማለት መተግበሪያው ወደመሳሪያዎ የተላኩ መልእክቶችን ለእርስዎ ሳያሳይ ሊከታተል ወይም ሊሰረዝ ይችላል ማለት ነው።"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"አሂድ መተግበሪያዎችን ሰርስረው ያውጡ"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"መተግበሪያው በአሁኑ ጊዜና በቅርቡ እየተካሄዱ ስላሉ ተግባሮችን መረጃ ሰርስሮ እንዲያወጣ ይፈቅድለታል። ይህ መተግበሪያው በመሳሪያው ላይ የትኛዎቹ መተግበሪያዎች ጥቅም ላይ ስለመዋላቸው መረጃ እንዲያገኝ ሊፈቅድለት ይችላል።"</string>
+    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
+    <skip />
+    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
+    <skip />
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"በተለያዩ ተጠቃሚዎች መካከል መስተጋብር መፍጠር"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"መተግበሪያው በመሣሪያው ላይ በተለያዩ ተጠቃሚዎች ላይ እርምጃዎችን እንዲፈጽም ይፈቅድለታል። ተንኮል-አዘል መተግበሪያዎች ይህንን ተጠቅመው በተጠቃሚዎች መካከል ያለውን ጥበቃ ሊጥሱ ይችላሉ።"</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"በተለያዩ ተጠቃሚዎች መካከል መስተጋብር ለመፍጠር ሙሉ ፍቃድ"</string>
@@ -1006,16 +1010,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"መተግበሪያው ስልክህ ላይ የተከማቹ የአሳሹን ታሪክ ወይም ዕልባቶችን እንዲቀይር ይፈቅድለታል። ይህ መተግበሪያው የአሳሽ ውሂብ እንዲያጠፋ ወይም እንዲያስተካክል ሊፈቅድለት ይችላል። ማስታወሻ፦ ይህ ፈቃድ በሶስተኛ ወገን አሳሾች ወይም በሌላ የድር አሳሽነት አቅም ባላቸው መተግበሪያዎች ላይፈጸም ይችላል።"</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"ማንቂያ አስቀምጥ"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"በተጫነው የማንቂያ ሰዓት መተግበሪያ ውስጥ ማንቅያን ለማደራጀት ለመተግበሪያው ይፈቅዳሉ፡፡አንዳንድ የማንቂያ ሰዓት መተግበሪያዎች ይሄንን ባህሪ ላይፈፅሙ ይችላሉ፡፡"</string>
-    <!-- no translation found for permlab_writeVoicemail (7309899891683938100) -->
-    <skip />
-    <!-- no translation found for permdesc_writeVoicemail (6592572839715924830) -->
-    <skip />
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"የድምጽ መልእክቶችን ይጻፉ"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"መተግበሪያው ከድምጽ መልእክት የገቢ መልእክት ሳጥንዎ ውስጥ መልእክቶችን እንዲያስተካክልና እንዲያስወግድ ይፈቅዳል።"</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"የድምፅ መልዕክት አክል"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"ወደ ድምፅ መልዕክት የገቢ መልዕክትህ መልዕክቶች ለማከል ለመተግበሪያው ይፈቅዳሉ።"</string>
-    <!-- no translation found for permlab_readVoicemail (8415201752589140137) -->
-    <skip />
-    <!-- no translation found for permdesc_readVoicemail (8926534735321616550) -->
-    <skip />
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"የድምጽ መልእክት አንብብ"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"መተግበሪያዎ የድምጽ መልእክቶችን እንዲያነብ ይፈቅዳል።"</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"የአሳሽ ገፀ ሥፍራ ፍቃዶችን ቀይር"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"የአሳሹን የጂኦ-አካባቢ ፍቃዶችን እንዲለውጥ ለመተግበሪያው ይፈቅዳል፡፡ተንኮል አዘል መተግበሪያዎች የመላኪያ አከባቢን መረጃ ወደ አጠራጣሪ የድር ጣቢያዎች ለመፍቀድ ይሄንን ሊጠቀሙበት ይችላሉ፡፡"</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"ፓኬጆችን አረጋግጥ"</string>
@@ -1559,7 +1559,8 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"ስርዓት"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"የብሉቱዝ ድምጽ"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"ገመድ አልባ ማሳያ"</string>
-    <string name="media_route_button_content_description" msgid="5758553567065145276">"የሚዲያ ውጽዓት"</string>
+    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
+    <skip />
     <string name="media_route_chooser_title" msgid="1751618554539087622">"ከመሳሪያ ጋር ያገናኙ"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"ማያ ገጽን ወደ መሣሪያ ይውሰዱ"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"መሳሪያዎችን በመፈለግ ላይ…"</string>

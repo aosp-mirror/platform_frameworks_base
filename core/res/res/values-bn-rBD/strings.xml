@@ -298,6 +298,10 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Bluetooth MAP বার্তা পেতে ও প্রক্রিয়া করতে অ্যাপ্লিকেশানটিকে অনুমতি দিন। এর অর্থ হলো, অ্যাপ্লিকেশানটি আপনাকে না দেখিয়েই আপনার ডিভাইসে পাঠানো বার্তা পর্যবেক্ষণ বা মুছতে পারবে।"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"চলমান অ্যাপ্লিকেশান উদ্ধার করে"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"বর্তমানে ও সাম্প্রতিককালের সক্রিয় ক্রিয়াগুলি সম্বন্ধে তথ্য পুনরুদ্ধার করতে অ্যাপ্লিকেশানটিকে মঞ্জুর করে৷ এছাড়া এটি ডিভাইসটিতে কোন অ্যাপ্লিকেশানগুলি ব্যবহৃত হচ্ছে তার বিষয়ে তথ্য খুঁজে বের করতে অ্যাপ্লিকেশানটিকে মঞ্জুর করতে পারে৷"</string>
+    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
+    <skip />
+    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
+    <skip />
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"সামগ্রী ব্যবহারকারীদের সাথে ইন্টারঅ্যাক্ট করুন"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"ডিভাইসটিতে থাকা বিভিন্ন ব্যবহারকারীর মধ্যে ক্রিয়াগুলির কার্য-সম্পাদনা করতে অ্যাপ্লিকেশানটিকে মঞ্জুর করে৷ ক্ষতিকারক অ্যাপ্লিকেশানগুলি এটিকে ব্যবহারকারীদের মধ্যে সুরক্ষা লঙ্ঘন করতে ব্যবহার করতে পারে৷"</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"ব্যবহারকারীদের সাথে ইন্টারঅ্যাক্ট করার সম্পূর্ণ লাইসেন্স"</string>
@@ -1006,16 +1010,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"অ্যাপ্লিকেশানটিকে আপনার ফোনে সঞ্চিত ব্রাউজারের ইতিহাস বা বুকমার্কগুলি পরিবর্তন করতে দেয়৷ এটি অ্যাপ্লিকেশানটিকে ব্রাউজার ডেটা মুছে দিতে বা পরিবর্তন করতে দেয়৷ দ্রষ্টব্য: এই অনুমতি তৃতীয় পক্ষের ব্রাউজারগুলির বা ওয়েব ব্রাউজিং ক্ষমতা সম্পন্ন অন্যান্য অ্যাপ্লিকেশানগুলি দ্বারা বলবৎ নাও হতে পারে৷"</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"একটি অ্যালার্ম সেট করুন"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"অ্যাপ্লিকেশানকে একটি ইনস্টল থাকা অ্যালার্ম অ্যাপ্লিকেশানে একটি অ্যালার্ম সেট করতে দেয়৷ কিছু অ্যালার্ম ঘড়ি অ্যাপ্লিকেশানগুলিতে ভবিষ্যতে এটি লাগু নাও হতে পারে৷"</string>
-    <!-- no translation found for permlab_writeVoicemail (7309899891683938100) -->
-    <skip />
-    <!-- no translation found for permdesc_writeVoicemail (6592572839715924830) -->
-    <skip />
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"ভয়েসমেলগুলি লিখুন"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"অ্যাপ্লিকেশানটিকে আপনার ভয়েসমেল ইনবক্স থেকে বার্তা পরিবর্তনের ও সরানোর অনুমতি দেয়৷"</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"ভয়েসমেল যোগ করে"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"অ্যাপ্লিকেশানকে আপনার ভয়েসমেইল ইনবক্সে বার্তা যোগ করার অনুমতি দেয়৷"</string>
-    <!-- no translation found for permlab_readVoicemail (8415201752589140137) -->
-    <skip />
-    <!-- no translation found for permdesc_readVoicemail (8926534735321616550) -->
-    <skip />
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"ভয়েসমেল পড়ুন"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"অ্যাপ্লিকেশানটিকে আপনার ভয়েসমেলগুলি পড়ার অনুমতি দেয়।"</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"ব্রাউজারের ভূঅবস্থানিক অনুমতিগুলি সংশোধন করে"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"অ্যাপ্লিকেশানকে ব্রাউজারের ভূঅবস্থানিক অনুমতি সংশোধন করতে দেয়৷ ক্ষতিকারক অ্যাপ্লিকেশানগুলি নির্বিচারে ওয়েব সাইটগুলিতে অবস্থানের ডেটা পাঠানো সক্ষম করতে এটি ব্যবহার করতে পারে৷"</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"প্যাকেজগুলি যাচাই করে"</string>
@@ -1559,7 +1559,8 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"সিস্টেম"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth অডিও"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"ওয়্যারলেস প্রদর্শন"</string>
-    <string name="media_route_button_content_description" msgid="5758553567065145276">"মিডিয়া আউটপুট"</string>
+    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
+    <skip />
     <string name="media_route_chooser_title" msgid="1751618554539087622">"ডিভাইসে সংযোগ করুন"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"ডিভাইসে স্ক্রীণ কাস্ট করুন"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"ডিভাইসগুলি অনুসন্ধান করা হচ্ছে…"</string>

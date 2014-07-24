@@ -298,6 +298,10 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Bluetooth MAPメッセージの受信と処理をアプリに許可します。これにより、端末に届いたメッセージをアプリが表示することなく監視または削除するおそれがあります。"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"実行中のアプリの取得"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"現在実行中または最近実行したタスクに関する情報の取得をアプリに許可します。これにより、その端末でどのアプリを使用しているかをアプリから識別できるようになる可能性があります。"</string>
+    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
+    <skip />
+    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
+    <skip />
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"ユーザー間の交流"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"端末上の各ユーザーに対して操作を実行することをアプリに許可します。この許可を悪意のあるアプリに利用されると、ユーザー間の保護が侵害される恐れがあります。"</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"ユーザー間で交流するための完全ライセンス"</string>
@@ -1555,7 +1559,8 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"システム"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth音声"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"ワイヤレスディスプレイ"</string>
-    <string name="media_route_button_content_description" msgid="5758553567065145276">"メディア出力"</string>
+    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
+    <skip />
     <string name="media_route_chooser_title" msgid="1751618554539087622">"端末に接続"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"端末への画面のキャスト"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"端末を検索しています…"</string>

@@ -298,6 +298,10 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Bluetooth MAP mezuak jaso eta prozesatzeko baimena ematen die aplikazioei. Horrela, aplikazioek gailura bidalitako mezuak kontrola eta ezaba ditzakete, mezuak zuri erakutsi gabe."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"Eskuratu abian diren aplikazioak"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Unean edo duela gutxi exekutatutako zereginei buruzko informazioa lortzeko baimena ematen die aplikazioei. Horrela, aplikazioak gailuan erabiltzen ari diren aplikazioei buruzko informazioa ezagut dezake."</string>
+    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
+    <skip />
+    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
+    <skip />
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"erabiltzaileekin elkarrekintzan jardutea"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Gailuaren erabiltzaileetan ekintzak gauzatzeko baimena ematen die aplikazioei. Aplikazio gaiztoek erabil dezakete erabiltzaileen arteko babesa urratzeko."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"erabiltzaileekin elkarrekintzan jarduteko baimen osoa"</string>
@@ -443,9 +447,9 @@
     <string name="permdesc_clearAppCache" product="default" msgid="2459441021956436779">"Beste aplikazioen cache-direktorioetako fitxategiak ezabatuta telefono-memorian tokia egiteko baimena ematen die aplikazioei. Hori eginez gero, beste aplikazio horiek motelago abiarazi daitezke, datuak berriro lortu beharko dituztelako."</string>
     <string name="permlab_movePackage" msgid="3289890271645921411">"Aldatu tokiz aplikazioen baliabideak"</string>
     <string name="permdesc_movePackage" msgid="319562217778244524">"Aplikazio-baliabideak barneko euskarritik kanpoko batera (eta alderantziz) eramatea baimentzen die aplikazioei."</string>
-    <string name="permlab_readLogs" msgid="6615778543198967614">"Irakurri egunkarietako isilpeko datuak"</string>
-    <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"Sistemaren askotariko egunkari-fitxategiak irakurtzea baimentzen die aplikazioei. Horrela, tabletarekin egiten ari zarenari buruzko informazio orokorra aurki dezakete, eta isilpekoa edo pertsonala den informazioa ere barne har daiteke."</string>
-    <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Sistemaren askotariko egunkari-fitxategiak irakurtzea baimentzen die aplikazioei. Horrela, telefonoarekin egiten ari zarenari buruzko informazio orokorra aurki dezakete, eta isilpekoa edo pertsonala den informazioa ere barne har daiteke."</string>
+    <string name="permlab_readLogs" msgid="6615778543198967614">"Irakurri erregistroetako isilpeko datuak"</string>
+    <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"Sistemaren askotariko erregistro-fitxategiak irakurtzea baimentzen die aplikazioei. Horrela, tabletarekin egiten ari zarenari buruzko informazio orokorra aurki dezakete, eta isilpekoa edo pertsonala den informazioa ere barne har daiteke."</string>
+    <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Sistemaren askotariko erregistro-fitxategiak irakurtzea baimentzen die aplikazioei. Horrela, telefonoarekin egiten ari zarenari buruzko informazio orokorra aurki dezakete, eta isilpekoa edo pertsonala den informazioa ere barne har daiteke."</string>
     <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"erreprodukziorako edozein multimedia-deskodetzaile erabiltzea"</string>
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Instalatutako edozein multimedia-deskodetzaile erabiltzeko baimena ematen die aplikazioei, gauzak erreproduzitu ahal izateko deskodetzeko."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"Kudeatu kredentzial fidagarriak"</string>
@@ -1181,11 +1185,11 @@
     <string name="whichApplication" msgid="4533185947064773386">"Gauzatu ekintza hau erabilita:"</string>
     <string name="whichApplicationNamed" msgid="8260158865936942783">"Osatu ekintza %1$s erabiliz"</string>
     <string name="whichViewApplication" msgid="3272778576700572102">"Ireki honekin:"</string>
-    <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Irekin honekin: %1$s"</string>
+    <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Irekin %1$s aplikazioarekin"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"Editatu honekin:"</string>
-    <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Editatu honekin: %1$s"</string>
+    <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Editatu %1$s aplikazioarekin"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"Partekatu honekin:"</string>
-    <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Partekatu honekin: %1$s"</string>
+    <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Partekatu %1$s aplikazioarekin"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"Hautatu hasierako pantailako aplikazio bat"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Erabili modu lehenetsian ekintza honetarako."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Garbitu aplikazio lehenetsia Sistemaren ezarpenak &gt; Aplikazioak &gt; Deskargatutakoak atalean."</string>
@@ -1386,7 +1390,7 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Konfiantza zehazteko agente baten zerbitzuari lotzea baimentzen die aplikazioei."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Interaktuatu eguneratze- eta eskuratze-sistemekin"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Eskuratze-sistemarekin nahiz sistema-eguneratzeekin interaktuatzeko aukera ematen die aplikazioei."</string>
-    <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Sortu multimedia-elementuak proiektatzeko saioak"</string>
+    <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Sortu multimedia-edukia proiektatzeko saioak"</string>
     <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"Multimedia-elementuak proiektatzeko saioak sortzea baimentzen die aplikazioei. Saio horiekin, aplikazioek pantailan bistaratutakoa eta audioa graba ditzakete. Aplikazio normalek ez lukete behar."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Ukitu birritan zooma kontrolatzeko"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Ezin izan da widgeta gehitu."</string>
@@ -1555,7 +1559,8 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Sistema"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetootharen audioa"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Hari gabeko pantaila"</string>
-    <string name="media_route_button_content_description" msgid="5758553567065145276">"Multimedia-irteera"</string>
+    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
+    <skip />
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Konektatu gailura"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Igorri pantaila gailura"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Gailuak bilatzen…"</string>
@@ -1747,7 +1752,7 @@
     <string name="lock_to_app_negative" msgid="2259143719362732728">"EZ, ESKERRIK ASKO"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"HASI"</string>
     <string name="lock_to_app_start" msgid="3074665051586318340">"Aplikazio batean blokeatuta"</string>
-    <string name="lock_to_app_exit" msgid="8967089657201849300">"Pantaila ez dago jada aplikazio bakarrean blokeatuta"</string>
+    <string name="lock_to_app_exit" msgid="8967089657201849300">"Aplikazio bakarreko modutik irten egin da"</string>
     <string name="lock_to_app_use_screen_lock" msgid="1434584309048590886">"Irten aurretik, eskatu %1$s"</string>
     <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN kodea"</string>
     <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"desblokeatzeko eredua"</string>

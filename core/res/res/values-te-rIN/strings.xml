@@ -298,6 +298,10 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"బ్లూటూత్ MAP సందేశాలను స్వీకరించడానికి మరియు ప్రాసెస్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. అనువర్తనం మీ పరికరానికి పంపబడిన సందేశాలను పర్యవేక్షించగలదని లేదా మీకు చూపకుండానే తొలగించగలదని దీనర్థం."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"అమలవుతున్న అనువర్తనాలను పునరుద్ధరించడం"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"ప్రస్తుతం మరియు ఇటీవల అమలవుతున్న విధుల గురించి వివరణాత్మక సమాచారాన్ని తిరిగి పొందడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఇది పరికరంలో ఉపయోగించబడిన అనువర్తనాల గురించి సమాచారాన్ని కనుగొనడానికి అనువర్తనాన్ని అనుమతించవచ్చు."</string>
+    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
+    <skip />
+    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
+    <skip />
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"వినియోగదారుల మధ్య పరస్పర చర్య చేయడం"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"పరికరంలోని విభిన్న వినియోగదారుల తరపున చర్యలను అమలు చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. హానికరమైన అనువర్తనాలు వినియోగదారుల మధ్య రక్షణను ఉల్లంఘించడానికి దీన్ని ఉపయోగించవచ్చు."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"వినియోగదారుల మధ్య పరస్పర చర్య చేయడానికి పూర్తి లైసెన్స్"</string>
@@ -1555,7 +1559,8 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"సిస్టమ్"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"బ్లూటూత్ ఆడియో"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"వైర్‌లెస్ డిస్‌ప్లే"</string>
-    <string name="media_route_button_content_description" msgid="5758553567065145276">"మీడియా అవుట్‌పుట్"</string>
+    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
+    <skip />
     <string name="media_route_chooser_title" msgid="1751618554539087622">"పరికరానికి కనెక్ట్ చేయండి"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"స్క్రీన్‌ను పరికరానికి ప్రసారం చేయండి"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"పరికరాల కోసం శోధిస్తోంది…"</string>

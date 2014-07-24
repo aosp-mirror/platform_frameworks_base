@@ -298,6 +298,10 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"允許應用程式接收和處理藍牙 MAP 訊息。這項設定可讓應用程式監控傳送至您裝置的訊息，或在您閱讀訊息前擅自刪除訊息。"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"擷取執行中的應用程式"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"允許應用程式擷取有關目前和最近執行的工作的資訊。如此一來，應用程式或可找出裝置上所使用應用程式的相關資訊。"</string>
+    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
+    <skip />
+    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
+    <skip />
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"與其他用戶互動"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"允許應用程式對裝置上的不同用戶執行各種操作。請注意，惡意應用程式可能藉此破壞各用戶之間的保護機制。"</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"全面授權與其他用戶互動"</string>
@@ -1006,12 +1010,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"允許應用程式修改手機上儲存的瀏覽器記錄或書籤。如此一來，應用程式或可清除或修改瀏覽器資料。注意：這項權限可能不適用於第三方瀏覽器或其他具備網頁瀏覽功能的應用程式。"</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"設定鬧鐘"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"允許應用程式在安裝的鬧鐘應用程式中設定鬧鐘，某些鬧鐘應用程式可能沒有這項功能。"</string>
-    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"寫入語音留言"</string>
-    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"允許應用程式修改及移除語音留言收件匣中的訊息。"</string>
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"寫入留言訊息"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"允許應用程式修改和移除留言信箱中的訊息。"</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"新增留言"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"允許應用程式將訊息加到您的留言信箱收件箱。"</string>
-    <string name="permlab_readVoicemail" msgid="8415201752589140137">"讀取語音留言"</string>
-    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"允許應用程式讀取您的語音留言。"</string>
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"讀取留言訊息"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"允許應用程式讀取您的留言訊息。"</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"修改瀏覽器地理資訊的權限"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"允許應用程式修改瀏覽器的地理資訊權限。惡意應用程式可能會藉此允許將您的位置資訊任意傳送給某些網站。"</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"驗證套件"</string>
@@ -1555,7 +1559,8 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"系統"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"藍牙音頻"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"無線螢幕分享"</string>
-    <string name="media_route_button_content_description" msgid="5758553567065145276">"媒體輸出"</string>
+    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
+    <skip />
     <string name="media_route_chooser_title" msgid="1751618554539087622">"連接裝置"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"在裝置上放送螢幕"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"正在搜尋裝置…"</string>

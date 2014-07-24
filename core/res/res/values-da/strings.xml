@@ -298,6 +298,10 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Tillader, at appen kan modtage og behandle Bluetooth MAP-beskeder. Det betyder, at appen kan overvåge eller slette de beskeder, der sendes til din enhed, uden at vise dem til dig."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"hente kørende apps"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Tillader, at appen kan hente oplysninger om nuværende og seneste opgaver. Med denne tilladelse kan appen finde oplysninger om, hvilke applikationer der bruges på enheden."</string>
+    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
+    <skip />
+    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
+    <skip />
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"kommunikere på tværs af brugere"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Tillader, at appen udfører handlinger på tværs af forskellige brugere på enheden. Ondsindede apps kan bruge dette til at krænke beskyttelsen mellem brugere."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"fuld licens til at kommunikere på tværs af brugere"</string>
@@ -1555,7 +1559,8 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"System"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth-lyd"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Trådløs skærm"</string>
-    <string name="media_route_button_content_description" msgid="5758553567065145276">"Medieudgang"</string>
+    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
+    <skip />
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Opret forbindelse til enheden"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Send skærm til enhed"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Søger efter enheder…"</string>

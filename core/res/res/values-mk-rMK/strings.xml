@@ -298,6 +298,10 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Овозможува апликацијата да прима и да обработува пораки МАП преку Bluetooth. Тоа значи дека апликацијата може да следи или да брише пораки испратени до вашиот уред без да ви ги прикаже вам."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"обнови активни апликации"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Овозможува апликацијата да поврати информации за тековно и до неодамна активни задачи. Ова може да овозможи апликацијата да открие информации за тоа кои апликации се користат на уредот."</string>
+    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
+    <skip />
+    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
+    <skip />
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"комуницирај со корисници"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Овозможува апликацијата да врши дејства кај различни корисници на уредот. Злонамерните апликации може да го искористат тоа да ја нарушат заштитата меѓу корисниците."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"целосна дозвола за комуникација меѓу корисници"</string>
@@ -1557,7 +1561,8 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Систем"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Аудио на Bluetooth"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Безжичен приказ"</string>
-    <string name="media_route_button_content_description" msgid="5758553567065145276">"Излез за медиуми"</string>
+    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
+    <skip />
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Поврзи се со уред"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Префрли екран на уред"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Пребарување за уреди..."</string>
