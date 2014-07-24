@@ -2391,8 +2391,9 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a profile owner to remove the cross-profile intent filters from the managed profile
-     * and from the parent.
+     * Called by a profile owner to remove the cross-profile intent filters that go from the
+     * managed profile to the parent, or from the parent to the managed profile.
+     * Only removes those that have been set by the profile owner.
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      */
     public void clearCrossProfileIntentFilters(ComponentName admin) {
