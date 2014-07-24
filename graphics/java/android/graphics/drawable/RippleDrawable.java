@@ -416,7 +416,6 @@ public class RippleDrawable extends LayerDrawable {
         if (mAnimatingRipplesCount >= MAX_RIPPLES) {
             // This should never happen unless the user is tapping like a maniac
             // or there is a bug that's preventing ripples from being removed.
-            Log.d(LOG_TAG, "Max ripple count exceeded", new RuntimeException());
             return;
         }
 
