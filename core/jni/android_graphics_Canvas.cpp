@@ -19,6 +19,7 @@
 #include <android_runtime/AndroidRuntime.h>
 
 #include "Canvas.h"
+#include "SkDrawFilter.h"
 #include "SkGraphics.h"
 #include "SkPorterDuff.h"
 #include "Paint.h"
@@ -409,13 +410,110 @@ static void drawBitmapMesh(JNIEnv* env, jobject, jlong canvasHandle, jlong bitma
                                              vertA.ptr(), colorA.ptr(), paint);
 }
 
+class DrawTextFunctor {
+public:
+    DrawTextFunctor(const Layout& layout, Canvas* canvas, uint16_t* glyphs, float* pos,
+                    const SkPaint& paint, float x, float y, MinikinRect& bounds)
+            : layout(layout), canvas(canvas), glyphs(glyphs), pos(pos), paint(paint),
+              x(x), y(y), bounds(bounds) { }
+
+    void operator()(size_t start, size_t end) {
+        if (canvas->drawTextAbsolutePos()) {
+            for (size_t i = start; i < end; i++) {
+                glyphs[i] = layout.getGlyphId(i);
+                pos[2 * i] = x + layout.getX(i);
+                pos[2 * i + 1] = y + layout.getY(i);
+            }
+        } else {
+            for (size_t i = start; i < end; i++) {
+                glyphs[i] = layout.getGlyphId(i);
+                pos[2 * i] = layout.getX(i);
+                pos[2 * i + 1] = layout.getY(i);
+            }
+        }
+
+        size_t glyphCount = end - start;
+        canvas->drawText(glyphs + start, pos + (2 * start), glyphCount, paint, x, y,
+                         bounds.mLeft , bounds.mTop , bounds.mRight , bounds.mBottom);
+    }
+private:
+    const Layout& layout;
+    Canvas* canvas;
+    uint16_t* glyphs;
+    float* pos;
+    const SkPaint& paint;
+    float x;
+    float y;
+    MinikinRect& bounds;
+};
+
+// Same values used by Skia
+#define kStdStrikeThru_Offset   (-6.0f / 21.0f)
+#define kStdUnderline_Offset    (1.0f / 9.0f)
+#define kStdUnderline_Thickness (1.0f / 18.0f)
+
+void drawTextDecorations(Canvas* canvas, float x, float y, float length, const SkPaint& paint) {
+    uint32_t flags;
+    SkDrawFilter* drawFilter = canvas->getDrawFilter();
+    if (drawFilter) {
+        SkPaint paintCopy(paint);
+        drawFilter->filter(&paintCopy, SkDrawFilter::kText_Type);
+        flags = paintCopy.getFlags();
+    } else {
+        flags = paint.getFlags();
+    }
+    if (flags & (SkPaint::kUnderlineText_Flag | SkPaint::kStrikeThruText_Flag)) {
+        SkScalar left = x;
+        SkScalar right = x + length;
+        float textSize = paint.getTextSize();
+        float strokeWidth = fmax(textSize * kStdUnderline_Thickness, 1.0f);
+        if (flags & SkPaint::kUnderlineText_Flag) {
+            SkScalar top = y + textSize * kStdUnderline_Offset - 0.5f * strokeWidth;
+            SkScalar bottom = y + textSize * kStdUnderline_Offset + 0.5f * strokeWidth;
+            canvas->drawRect(left, top, right, bottom, paint);
+        }
+        if (flags & SkPaint::kStrikeThruText_Flag) {
+            SkScalar top = y + textSize * kStdStrikeThru_Offset - 0.5f * strokeWidth;
+            SkScalar bottom = y + textSize * kStdStrikeThru_Offset + 0.5f * strokeWidth;
+            canvas->drawRect(left, top, right, bottom, paint);
+        }
+    }
+}
+
+void drawText(Canvas* canvas, const uint16_t* text, int start, int count, int contextCount,
+             float x, float y, int bidiFlags, const Paint& origPaint, TypefaceImpl* typeface) {
+    // minikin may modify the original paint
+    Paint paint(origPaint);
+
+    Layout layout;
+    std::string css = MinikinUtils::setLayoutProperties(&layout, &paint, bidiFlags, typeface);
+    layout.doLayout(text, start, count, contextCount, css);
+
+    size_t nGlyphs = layout.nGlyphs();
+    uint16_t* glyphs = new uint16_t[nGlyphs];
+    float* pos = new float[nGlyphs * 2];
+
+    x += MinikinUtils::xOffsetForTextAlign(&paint, layout);
+
+    MinikinRect bounds;
+    layout.getBounds(&bounds);
+
+    DrawTextFunctor f(layout, canvas, glyphs, pos, paint, x, y, bounds);
+    MinikinUtils::forFontRun(layout, &paint, f);
+
+    drawTextDecorations(canvas, x, y, layout.getAdvance(), paint);
+
+    delete[] glyphs;
+    delete[] pos;
+}
+
 static void drawTextChars(JNIEnv* env, jobject, jlong canvasHandle, jcharArray text,
                           jint index, jint count, jfloat x, jfloat y, jint bidiFlags,
                           jlong paintHandle, jlong typefaceHandle) {
     Paint* paint = reinterpret_cast<Paint*>(paintHandle);
     TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
     jchar* jchars = env->GetCharArrayElements(text, NULL);
-    get_canvas(canvasHandle)->drawText(jchars + index, 0, count, count, x, y,
+    drawText(get_canvas(canvasHandle), jchars + index, 0, count, count, x, y,
                                        bidiFlags, *paint, typeface);
     env->ReleaseCharArrayElements(text, jchars, JNI_ABORT);
 }
@@ -427,7 +525,7 @@ static void drawTextString(JNIEnv* env, jobject, jlong canvasHandle, jstring tex
     TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
     const int count = end - start;
     const jchar* jchars = env->GetStringChars(text, NULL);
-    get_canvas(canvasHandle)->drawText(jchars + start, 0, count, count, x, y,
+    drawText(get_canvas(canvasHandle), jchars + start, 0, count, count, x, y,
                                        bidiFlags, *paint, typeface);
     env->ReleaseStringChars(text, jchars);
 }
@@ -440,7 +538,7 @@ static void drawTextRunChars(JNIEnv* env, jobject, jlong canvasHandle, jcharArra
 
     const int bidiFlags = isRtl ? kBidi_Force_RTL : kBidi_Force_LTR;
     jchar* jchars = env->GetCharArrayElements(text, NULL);
-    get_canvas(canvasHandle)->drawText(jchars + contextIndex, index - contextIndex, count,
+    drawText(get_canvas(canvasHandle), jchars + contextIndex, index - contextIndex, count,
                                        contextCount, x, y, bidiFlags, *paint, typeface);
     env->ReleaseCharArrayElements(text, jchars, JNI_ABORT);
 }
@@ -456,7 +554,7 @@ static void drawTextRunString(JNIEnv* env, jobject obj, jlong canvasHandle, jstr
     jint count = end - start;
     jint contextCount = contextEnd - contextStart;
     const jchar* jchars = env->GetStringChars(text, NULL);
-    get_canvas(canvasHandle)->drawText(jchars + contextStart, start - contextStart, count,
+    drawText(get_canvas(canvasHandle), jchars + contextStart, start - contextStart, count,
                                        contextCount, x, y, bidiFlags, *paint, typeface);
     env->ReleaseStringChars(text, jchars);
 }

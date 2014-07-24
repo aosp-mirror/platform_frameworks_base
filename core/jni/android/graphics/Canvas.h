@@ -23,11 +23,6 @@
 
 namespace android {
 
-// TODO: move this further up the stack so that all interaction with minikin
-//       happens prior to calling into this interface
-class Paint;
-class TypefaceImpl;
-
 class Canvas {
 public:
     virtual ~Canvas() {};
@@ -61,7 +56,7 @@ public:
     virtual void restoreToCount(int saveCount) = 0;
 
     virtual int saveLayer(float left, float top, float right, float bottom,
-                const Paint* paint, SkCanvas::SaveFlags flags) = 0;
+                const SkPaint* paint, SkCanvas::SaveFlags flags) = 0;
     virtual int saveLayerAlpha(float left, float top, float right, float bottom,
             int alpha, SkCanvas::SaveFlags flags) = 0;
 
@@ -85,53 +80,63 @@ public:
     virtual bool clipRegion(const SkRegion* region, SkRegion::Op op) = 0;
 
     // filters
+    virtual SkDrawFilter* getDrawFilter() = 0;
     virtual void setDrawFilter(SkDrawFilter* drawFilter) = 0;
 
 // ----------------------------------------------------------------------------
 // Canvas draw operations
 // ----------------------------------------------------------------------------
     virtual void drawColor(int color, SkXfermode::Mode mode) = 0;
-    virtual void drawPaint(const Paint& paint) = 0;
+    virtual void drawPaint(const SkPaint& paint) = 0;
 
     // Geometry
-    virtual void drawPoint(float x, float y, const Paint& paint) = 0;
-    virtual void drawPoints(const float* points, int count, const Paint& paint) = 0;
+    virtual void drawPoint(float x, float y, const SkPaint& paint) = 0;
+    virtual void drawPoints(const float* points, int count, const SkPaint& paint) = 0;
     virtual void drawLine(float startX, float startY, float stopX, float stopY,
-                const Paint& paint) = 0;
-    virtual void drawLines(const float* points, int count, const Paint& paint) = 0;
+                const SkPaint& paint) = 0;
+    virtual void drawLines(const float* points, int count, const SkPaint& paint) = 0;
     virtual void drawRect(float left, float top, float right, float bottom,
-            const Paint& paint) = 0;
+            const SkPaint& paint) = 0;
     virtual void drawRoundRect(float left, float top, float right, float bottom,
-            float rx, float ry, const Paint& paint) = 0;
-    virtual void drawCircle(float x, float y, float radius, const Paint& paint) = 0;
+            float rx, float ry, const SkPaint& paint) = 0;
+    virtual void drawCircle(float x, float y, float radius, const SkPaint& paint) = 0;
     virtual void drawOval(float left, float top, float right, float bottom,
-            const Paint& paint) = 0;
+            const SkPaint& paint) = 0;
     virtual void drawArc(float left, float top, float right, float bottom,
-            float startAngle, float sweepAngle, bool useCenter, const Paint& paint) = 0;
-    virtual void drawPath(const SkPath& path, const Paint& paint) = 0;
+            float startAngle, float sweepAngle, bool useCenter, const SkPaint& paint) = 0;
+    virtual void drawPath(const SkPath& path, const SkPaint& paint) = 0;
     virtual void drawVertices(SkCanvas::VertexMode vertexMode, int vertexCount,
                               const float* verts, const float* tex, const int* colors,
-                              const uint16_t* indices, int indexCount, const Paint& paint) = 0;
+                              const uint16_t* indices, int indexCount, const SkPaint& paint) = 0;
 
     // Bitmap-based
     virtual void drawBitmap(const SkBitmap& bitmap, float left, float top,
-            const Paint* paint) = 0;
+            const SkPaint* paint) = 0;
     virtual void drawBitmap(const SkBitmap& bitmap, const SkMatrix& matrix,
-            const Paint* paint) = 0;
+            const SkPaint* paint) = 0;
     virtual void drawBitmap(const SkBitmap& bitmap, float srcLeft, float srcTop,
             float srcRight, float srcBottom, float dstLeft, float dstTop,
-            float dstRight, float dstBottom, const Paint* paint) = 0;
+            float dstRight, float dstBottom, const SkPaint* paint) = 0;
     virtual void drawBitmapMesh(const SkBitmap& bitmap, int meshWidth, int meshHeight,
-            const float* vertices, const int* colors, const Paint* paint) = 0;
+            const float* vertices, const int* colors, const SkPaint* paint) = 0;
 
     // Text
-    virtual void drawText(const uint16_t* text, int start, int count, int contextCount,
-            float x, float y, int bidiFlags, const Paint& paint,
-            TypefaceImpl* typeface) = 0;
+    virtual void drawText(const uint16_t* text, const float* positions, int count,
+            const SkPaint& paint, float x, float y,
+            float boundsLeft, float boundsTop, float boundsRight, float boundsBottom) = 0;
     virtual void drawPosText(const uint16_t* text, const float* positions, int count,
-            int posCount, const Paint& paint) = 0;
+            int posCount, const SkPaint& paint) = 0;
     virtual void drawTextOnPath(const uint16_t* glyphs, int count, const SkPath& path,
-            float hOffset, float vOffset, const Paint& paint) = 0;
+            float hOffset, float vOffset, const SkPaint& paint) = 0;
+
+    /*
+     * Specifies if the positions passed to ::drawText are absolute or relative
+     * to the (x,y) value provided.
+     *
+     * If true the (x,y) values are ignored. Otherwise, those (x,y) values need
+     * to be added to each glyph's position to get its absolute position.
+     */
+    virtual bool drawTextAbsolutePos() const = 0;
 };
 
 }; // namespace android
