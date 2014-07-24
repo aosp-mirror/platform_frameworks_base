@@ -360,4 +360,9 @@
 
     <!-- width of ImmersiveModeConfirmation (-1 for match_parent) -->
     <dimen name="immersive_mode_cling_width">-1px</dimen>
+
+     <!-- Size of the offset applied to the position of the circular mask. This is only
+     used on circular displays. In the case where there is no "chin", this will default
+     to 0 -->
+     <dimen name="circular_display_mask_offset">0px</dimen>
 </resources>
