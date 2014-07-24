@@ -96,7 +96,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         OptionsStateChangeListener, OptionsStateController {
     private static final String LOG_TAG = "PrintActivity";
 
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     public static final String INTENT_EXTRA_PRINTER_ID = "INTENT_EXTRA_PRINTER_ID";
 
@@ -1289,7 +1289,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         if (mDestinationSpinnerAdapter.getPdfPrinter() != mCurrentPrinter) {
             mPrintButton.setImageResource(com.android.internal.R.drawable.ic_print);
         } else {
-            mPrintButton.setImageResource(com.android.internal.R.drawable.ic_menu_save);
+            mPrintButton.setImageResource(R.drawable.ic_menu_savetopdf);
         }
         if ((mRangeOptionsSpinner.getSelectedItemPosition() == 1
                 && (TextUtils.isEmpty(mPageRangeEditText.getText()) || hasErrors()))
