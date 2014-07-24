@@ -88,8 +88,8 @@ public class ThreadedRenderer extends HardwareRenderer {
     private final float mLightY;
     private final float mLightZ;
     private final float mLightRadius;
-    private final float mAmbientShadowAlpha;
-    private final float mSpotShadowAlpha;
+    private final int mAmbientShadowAlpha;
+    private final int mSpotShadowAlpha;
 
     private long mNativeProxy;
     private boolean mInitialized = false;
@@ -104,8 +104,10 @@ public class ThreadedRenderer extends HardwareRenderer {
         mLightY = a.getDimension(R.styleable.Lighting_lightY, 0);
         mLightZ = a.getDimension(R.styleable.Lighting_lightZ, 0);
         mLightRadius = a.getDimension(R.styleable.Lighting_lightRadius, 0);
-        mAmbientShadowAlpha = a.getFloat(R.styleable.Lighting_ambientShadowAlpha, 0);
-        mSpotShadowAlpha = a.getFloat(R.styleable.Lighting_spotShadowAlpha, 0);
+        mAmbientShadowAlpha = Math.round(
+                255 * a.getFloat(R.styleable.Lighting_ambientShadowAlpha, 0));
+        mSpotShadowAlpha = Math.round(
+                255 * a.getFloat(R.styleable.Lighting_spotShadowAlpha, 0));
         a.recycle();
 
         long rootNodePtr = nCreateRootRenderNode();
@@ -208,7 +210,9 @@ public class ThreadedRenderer extends HardwareRenderer {
             mSurfaceHeight = height;
         }
         mRootNode.setLeftTopRightBottom(-mInsetLeft, -mInsetTop, mSurfaceWidth, mSurfaceHeight);
-        nSetup(mNativeProxy, mSurfaceWidth, mSurfaceHeight, lightX, mLightY, mLightZ, mLightRadius);
+        nSetup(mNativeProxy, mSurfaceWidth, mSurfaceHeight,
+                lightX, mLightY, mLightZ, mLightRadius,
+                mAmbientShadowAlpha, mSpotShadowAlpha);
     }
 
     @Override
@@ -453,7 +457,8 @@ public class ThreadedRenderer extends HardwareRenderer {
     private static native void nUpdateSurface(long nativeProxy, Surface window);
     private static native void nPauseSurface(long nativeProxy, Surface window);
     private static native void nSetup(long nativeProxy, int width, int height,
-            float lightX, float lightY, float lightZ, float lightRadius);
+            float lightX, float lightY, float lightZ, float lightRadius,
+            int ambientShadowAlpha, int spotShadowAlpha);
     private static native void nSetOpaque(long nativeProxy, boolean opaque);
     private static native int nSyncAndDrawFrame(long nativeProxy,
             long frameTimeNanos, long recordDuration, float density);

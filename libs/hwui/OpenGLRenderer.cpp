@@ -132,19 +132,21 @@ static inline T min(T a, T b) {
 ///////////////////////////////////////////////////////////////////////////////
 
 OpenGLRenderer::OpenGLRenderer(RenderState& renderState)
-        : mCaches(Caches::getInstance())
+        : mFrameStarted(false)
+        , mCaches(Caches::getInstance())
         , mExtensions(Extensions::getInstance())
-        , mRenderState(renderState) {
+        , mRenderState(renderState)
+        , mScissorOptimizationDisabled(false)
+        , mCountOverdraw(false)
+        , mLightCenter(FLT_MIN, FLT_MIN, FLT_MIN)
+        , mLightRadius(FLT_MIN)
+        , mAmbientShadowAlpha(0)
+        , mSpotShadowAlpha(0) {
     // *set* draw modifiers to be 0
     memset(&mDrawModifiers, 0, sizeof(mDrawModifiers));
     mDrawModifiers.mOverrideLayerAlpha = 1.0f;
 
     memcpy(mMeshVertices, gMeshVertices, sizeof(gMeshVertices));
-
-    mFrameStarted = false;
-    mCountOverdraw = false;
-
-    mScissorOptimizationDisabled = false;
 }
 
 OpenGLRenderer::~OpenGLRenderer() {
@@ -161,6 +163,14 @@ void OpenGLRenderer::initProperties() {
     } else {
         INIT_LOGD("  Scissor optimization enabled");
     }
+}
+
+void OpenGLRenderer::initLight(const Vector3& lightCenter, float lightRadius,
+        uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha) {
+    mLightCenter = lightCenter;
+    mLightRadius = lightRadius;
+    mAmbientShadowAlpha = ambientShadowAlpha;
+    mSpotShadowAlpha = spotShadowAlpha;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -3172,13 +3182,13 @@ status_t OpenGLRenderer::drawShadow(float casterAlpha,
     SkPaint paint;
     paint.setAntiAlias(true); // want to use AlphaVertex
 
-    if (ambientShadowVertexBuffer && mCaches.propertyAmbientShadowStrength > 0) {
-        paint.setARGB(casterAlpha * mCaches.propertyAmbientShadowStrength, 0, 0, 0);
+    if (ambientShadowVertexBuffer && mAmbientShadowAlpha > 0) {
+        paint.setARGB(casterAlpha * mAmbientShadowAlpha, 0, 0, 0);
         drawVertexBuffer(*ambientShadowVertexBuffer, &paint);
     }
 
-    if (spotShadowVertexBuffer && mCaches.propertySpotShadowStrength > 0) {
-        paint.setARGB(casterAlpha * mCaches.propertySpotShadowStrength, 0, 0, 0);
+    if (spotShadowVertexBuffer && mSpotShadowAlpha > 0) {
+        paint.setARGB(casterAlpha * mSpotShadowAlpha, 0, 0, 0);
         drawVertexBuffer(*spotShadowVertexBuffer, &paint);
     }
 
