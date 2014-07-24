@@ -657,8 +657,12 @@ public final class TvInputManagerService extends SystemService {
     }
 
     private void removeSessionStateLocked(IBinder sessionToken, int userId) {
-        // Remove the session state from the global session state map of the current user.
         UserState userState = getUserStateLocked(userId);
+        if (sessionToken == userState.mainSessionToken) {
+            userState.mainSessionToken = null;
+        }
+
+        // Remove the session state from the global session state map of the current user.
         SessionState sessionState = userState.sessionStateMap.remove(sessionToken);
 
         // Close the open log entry, if any.
@@ -936,17 +940,21 @@ public final class TvInputManagerService extends SystemService {
                         return;
                     }
 
-                    SessionState prevMainSessionState = getSessionStateLocked(
-                            userState.mainSessionToken, Process.SYSTEM_UID, resolvedUserId);
-                    ServiceState prevMainServiceState = getServiceStateLocked(
-                            prevMainSessionState.mInfo.getComponent(), resolvedUserId);
-                    ITvInputSession prevMainSession = getSessionLocked(prevMainSessionState);
-
                     SessionState sessionState = getSessionStateLocked(sessionToken, callingUid,
                             resolvedUserId);
                     ServiceState serviceState = getServiceStateLocked(
                             sessionState.mInfo.getComponent(), resolvedUserId);
                     ITvInputSession session = getSessionLocked(sessionState);
+
+                    ServiceState prevMainServiceState = null;
+                    ITvInputSession prevMainSession = null;
+                    if (userState.mainSessionToken != null) {
+                        SessionState prevMainSessionState = getSessionStateLocked(
+                                userState.mainSessionToken, Process.SYSTEM_UID, resolvedUserId);
+                        prevMainServiceState = getServiceStateLocked(
+                                prevMainSessionState.mInfo.getComponent(), resolvedUserId);
+                        prevMainSession = getSessionLocked(prevMainSessionState);
+                    }
 
                     userState.mainSessionToken = sessionToken;
 
@@ -958,7 +966,7 @@ public final class TvInputManagerService extends SystemService {
                             Slog.e(TAG, "error in setMainSession", e);
                         }
                     }
-                    if (prevMainServiceState.mIsHardware) {
+                    if (prevMainSession != null && prevMainServiceState.mIsHardware) {
                         try {
                             prevMainSession.setMainSession(false);
                         } catch (RemoteException e) {
