@@ -110,8 +110,9 @@ final class Notifier {
     // True if a user activity message should be sent.
     private boolean mUserActivityPending;
 
-    // True if the screen on blocker has been acquired.
-    private boolean mScreenOnBlockerAcquired;
+    // The currently active screen on listener. This field is non-null whenever the
+    // ScreenOnBlocker has been acquired and we are awaiting a callback to release it.
+    private ScreenOnUnblocker mPendingScreenOnUnblocker;
 
     public Notifier(Looper looper, Context context, IBatteryStats batteryStats,
             IAppOpsService appOps, SuspendBlocker suspendBlocker, ScreenOnBlocker screenOnBlocker,
@@ -255,15 +256,16 @@ final class Notifier {
                 if (mActualPowerState != POWER_STATE_AWAKE) {
                     mActualPowerState = POWER_STATE_AWAKE;
                     mPendingWakeUpBroadcast = true;
-                    if (!mScreenOnBlockerAcquired) {
-                        mScreenOnBlockerAcquired = true;
+                    if (mPendingScreenOnUnblocker == null) {
                         mScreenOnBlocker.acquire();
                     }
+                    final ScreenOnUnblocker unblocker = new ScreenOnUnblocker();
+                    mPendingScreenOnUnblocker = unblocker;
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
                             EventLog.writeEvent(EventLogTags.POWER_SCREEN_STATE, 1, 0, 0, 0);
-                            mPolicy.wakingUp(mScreenOnListener);
+                            mPolicy.wakingUp(unblocker);
                             mActivityManagerInternal.wakingUp();
                         }
                     });
@@ -459,18 +461,17 @@ final class Notifier {
         }
     }
 
-    private final WindowManagerPolicy.ScreenOnListener mScreenOnListener =
-            new WindowManagerPolicy.ScreenOnListener() {
+    private final class ScreenOnUnblocker implements WindowManagerPolicy.ScreenOnListener {
         @Override
         public void onScreenOn() {
             synchronized (mLock) {
-                if (mScreenOnBlockerAcquired && !mPendingWakeUpBroadcast) {
-                    mScreenOnBlockerAcquired = false;
+                if (mPendingScreenOnUnblocker == this) {
+                    mPendingScreenOnUnblocker = null;
                     mScreenOnBlocker.release();
                 }
             }
         }
-    };
+    }
 
     private final BroadcastReceiver mWakeUpBroadcastDone = new BroadcastReceiver() {
         @Override
