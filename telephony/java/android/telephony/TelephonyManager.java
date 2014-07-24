@@ -20,6 +20,7 @@ import android.annotation.SystemApi;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -2976,6 +2977,19 @@ public class TelephonyManager {
             Rlog.e(TAG, "hasCarrierPrivileges NPE", ex);
         }
         return CARRIER_PRIVILEGE_STATUS_NO_ACCESS;
+    }
+
+    /** @hide */
+    @SystemApi
+    public List<String> getCarrierPackageNamesForBroadcastIntent(Intent intent) {
+        try {
+            return getITelephony().getCarrierPackageNamesForBroadcastIntent(intent);
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "getCarrierPackageNamesForBroadcastIntent RemoteException", ex);
+        } catch (NullPointerException ex) {
+            Rlog.e(TAG, "getCarrierPackageNamesForBroadcastIntent NPE", ex);
+        }
+        return null;
     }
 
     /** @hide */
