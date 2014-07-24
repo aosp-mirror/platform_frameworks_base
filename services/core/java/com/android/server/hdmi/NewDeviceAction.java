@@ -18,6 +18,7 @@ package com.android.server.hdmi;
 import android.hardware.hdmi.HdmiCecDeviceInfo;
 import android.util.Slog;
 
+import com.android.server.hdmi.HdmiCecLocalDevice.ActiveSource;
 import java.io.UnsupportedEncodingException;
 
 /**
@@ -190,7 +191,8 @@ final class NewDeviceAction extends FeatureAction {
         }
     }
 
-    boolean isActionOf(int address, int path) {
-        return (mDeviceLogicalAddress == address) && (mDevicePhysicalAddress == path);
+    boolean isActionOf(ActiveSource activeSource) {
+        return (mDeviceLogicalAddress == activeSource.logicalAddress)
+                && (mDevicePhysicalAddress == activeSource.physicalAddress);
     }
 }

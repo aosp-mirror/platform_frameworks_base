@@ -147,12 +147,15 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         if (targetAddress == Constants.ADDR_INTERNAL) {
             handleSelectInternalSource();
             // Switching to internal source is always successful even when CEC control is disabled.
-            setActiveSource(targetAddress);
+            setActiveSource(targetAddress, mService.getPhysicalAddress());
             invokeCallback(callback, HdmiControlManager.RESULT_SUCCESS);
             return;
         }
         if (!mService.isControlEnabled()) {
-            setActiveSource(targetAddress);
+            HdmiCecDeviceInfo info = getDeviceInfo(targetAddress);
+            if (info != null) {
+                setActiveSource(info);
+            }
             invokeCallback(callback, HdmiControlManager.RESULT_INCORRECT_MODE);
             return;
         }
@@ -169,7 +172,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     private void handleSelectInternalSource() {
         assertRunOnServiceThread();
         // Seq #18
-        if (mService.isControlEnabled() && getActiveSource() != mAddress) {
+        if (mService.isControlEnabled() && mActiveSource.logicalAddress != mAddress) {
             updateActiveSource(mAddress, mService.getPhysicalAddress());
             // TODO: Check if this comes from <Text/Image View On> - if true, do nothing.
             HdmiCecMessage activeSource = HdmiCecMessageBuilder.buildActiveSource(
@@ -179,16 +182,22 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     }
 
     @ServiceThreadOnly
-    void updateActiveSource(int activeSource, int activePath) {
+    void updateActiveSource(int logicalAddress, int physicalAddress) {
+        assertRunOnServiceThread();
+        updateActiveSource(ActiveSource.of(logicalAddress, physicalAddress));
+    }
+
+    @ServiceThreadOnly
+    void updateActiveSource(ActiveSource newActive) {
         assertRunOnServiceThread();
         // Seq #14
-        if (activeSource == getActiveSource() && activePath == getActivePath()) {
+        if (mActiveSource.equals(newActive)) {
             return;
         }
-        setActiveSource(activeSource);
-        setActivePath(activePath);
-        if (getDeviceInfo(activeSource) != null && activeSource != mAddress) {
-            if (mService.pathToPortId(activePath) == getActivePortId()) {
+        setActiveSource(newActive);
+        int logicalAddress = newActive.logicalAddress;
+        if (getDeviceInfo(logicalAddress) != null && logicalAddress != mAddress) {
+            if (mService.pathToPortId(newActive.physicalAddress) == getActivePortId()) {
                 setPrevPortId(getActivePortId());
             }
             // TODO: Show the OSD banner related to the new active source device.
@@ -222,16 +231,26 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     }
 
     @ServiceThreadOnly
-    void updateActivePortId(int portId) {
+    void updateActiveInput(int path, boolean notifyInputChange) {
         assertRunOnServiceThread();
         // Seq #15
+        int portId = mService.pathToPortId(path);
         if (portId == getActivePortId()) {
             return;
         }
+        setActivePath(path);
         setPrevPortId(portId);
-        // TODO: Actually switch the physical port here. Handle PAP/PIP as well.
-        //       Show OSD port change banner
-        mService.invokeInputChangeListener(getActiveSource());
+        // TODO: Handle PAP/PIP case.
+        // Show OSD port change banner
+        if (notifyInputChange) {
+            ActiveSource activeSource = getActiveSource();
+            HdmiCecDeviceInfo info = getDeviceInfo(activeSource.logicalAddress);
+            if (info == null) {
+                info = new HdmiCecDeviceInfo(Constants.ADDR_INVALID, path, portId,
+                        HdmiCecDeviceInfo.DEVICE_RESERVED, 0, null);
+            }
+            mService.invokeInputChangeListener(info);
+        }
     }
 
     @ServiceThreadOnly
@@ -242,26 +261,25 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             invokeCallback(callback, HdmiControlManager.RESULT_INCORRECT_MODE);
             return;
         }
+        if (portId == getActivePortId()) {
+            invokeCallback(callback, HdmiControlManager.RESULT_SUCCESS);
+            return;
+        }
+        setActiveSource(Constants.ADDR_INVALID, Constants.INVALID_PHYSICAL_ADDRESS);
         if (!mService.isControlEnabled()) {
             setActivePortId(portId);
             invokeCallback(callback, HdmiControlManager.RESULT_INCORRECT_MODE);
             return;
         }
-        if (portId == getActivePortId()) {
-            invokeCallback(callback, HdmiControlManager.RESULT_SUCCESS);
-            return;
-        }
-        setActivePortId(portId);
         // TODO: Return immediately if the operation is triggered by <Text/Image View On>
-        //       and this is the first notification about the active input after power-on
-        //       (switch to HDMI didn't happen so far but is expected to happen soon).
-        removeAction(RoutingControlAction.class);
-
-        int oldPath = mService.portIdToPath(mService.portIdToPath(getActivePortId()));
+        // and this is the first notification about the active input after power-on
+        // (switch to HDMI didn't happen so far but is expected to happen soon).
+        int oldPath = mService.portIdToPath(getActivePortId());
         int newPath = mService.portIdToPath(portId);
         HdmiCecMessage routingChange =
                 HdmiCecMessageBuilder.buildRoutingChange(mAddress, oldPath, newPath);
         mService.sendCecCommand(routingChange);
+        removeAction(RoutingControlAction.class);
         addAndStartAction(new RoutingControlAction(this, newPath, false, callback));
     }
 
@@ -284,7 +302,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             action.get(0).processKeyEvent(keyCode, isPressed);
         } else {
             if (isPressed) {
-                addAndStartAction(new SendKeyAction(this, getActiveSource(), keyCode));
+                int logicalAddress = getActiveSource().logicalAddress;
+                addAndStartAction(new SendKeyAction(this, logicalAddress, keyCode));
             } else {
                 Slog.w(TAG, "Discard key release event");
             }
@@ -306,12 +325,13 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     protected boolean handleActiveSource(HdmiCecMessage message) {
         assertRunOnServiceThread();
-        int address = message.getSource();
-        int path = HdmiUtils.twoBytesToInt(message.getParams());
-        if (getDeviceInfo(address) == null) {
-            handleNewDeviceAtTheTailOfActivePath(path);
+        int logicalAddress = message.getSource();
+        int physicalAddress = HdmiUtils.twoBytesToInt(message.getParams());
+        if (getDeviceInfo(logicalAddress) == null) {
+            handleNewDeviceAtTheTailOfActivePath(physicalAddress);
         } else {
-            ActiveSourceHandler.create(this, null).process(address, path);
+            ActiveSource activeSource = ActiveSource.of(logicalAddress, physicalAddress);
+            ActiveSourceHandler.create(this, null).process(activeSource);
         }
         return true;
     }
@@ -323,7 +343,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         // Seq #10
 
         // Ignore <Inactive Source> from non-active source device.
-        if (getActiveSource() != message.getSource()) {
+        if (getActiveSource().logicalAddress != message.getSource()) {
             return true;
         }
         if (isProhibitMode()) {
@@ -342,7 +362,6 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             }
             // TODO: Switch the TV freeze mode off
 
-            setActivePortId(portId);
             doManualPortSwitching(portId, null);
             setPrevPortId(Constants.INVALID_PORT_ID);
         }
@@ -354,7 +373,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     protected boolean handleRequestActiveSource(HdmiCecMessage message) {
         assertRunOnServiceThread();
         // Seq #19
-        if (mAddress == getActiveSource()) {
+        if (mAddress == getActiveSource().logicalAddress) {
             mService.sendCecCommand(
                     HdmiCecMessageBuilder.buildActiveSource(mAddress, getActivePath()));
         }
@@ -392,11 +411,11 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         if (!isInDeviceList(path, address)) {
             handleNewDeviceAtTheTailOfActivePath(path);
         }
-        startNewDeviceAction(address, path);
+        startNewDeviceAction(ActiveSource.of(address, path));
         return true;
     }
 
-    void startNewDeviceAction(int address, int path) {
+    void startNewDeviceAction(ActiveSource activeSource) {
         for (NewDeviceAction action : getActions(NewDeviceAction.class)) {
             // If there is new device action which has the same logical address and path
             // ignore new request.
@@ -406,12 +425,13 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             // in. However, TV can detect a new device from HotPlugDetectionAction,
             // which sends <Give Physical Address> to the source for newly detected
             // device.
-            if (action.isActionOf(address, path)) {
+            if (action.isActionOf(activeSource)) {
                 return;
             }
         }
 
-        addAndStartAction(new NewDeviceAction(this, address, path));
+        addAndStartAction(new NewDeviceAction(this, activeSource.logicalAddress,
+                activeSource.physicalAddress));
     }
 
     private void handleNewDeviceAtTheTailOfActivePath(int path) {
