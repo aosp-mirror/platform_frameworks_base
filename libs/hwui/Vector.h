@@ -24,17 +24,10 @@ namespace uirenderer {
 // Classes
 ///////////////////////////////////////////////////////////////////////////////
 
+// MUST BE A POD - this means no ctor or dtor!
 struct Vector2 {
     float x;
     float y;
-
-    Vector2() :
-        x(0.0f), y(0.0f) {
-    }
-
-    Vector2(float px, float py) :
-        x(px), y(py) {
-    }
 
     float lengthSquared() const {
         return x * x + y * y;
@@ -75,19 +68,19 @@ struct Vector2 {
     }
 
     Vector2 operator+(const Vector2& v) const {
-        return Vector2(x + v.x, y + v.y);
+        return (Vector2){x + v.x, y + v.y};
     }
 
     Vector2 operator-(const Vector2& v) const {
-        return Vector2(x - v.x, y - v.y);
+        return (Vector2){x - v.x, y - v.y};
     }
 
     Vector2 operator/(float s) const {
-        return Vector2(x / s, y / s);
+        return (Vector2){x / s, y / s};
     }
 
     Vector2 operator*(float s) const {
-        return Vector2(x * s, y * s);
+        return (Vector2){x * s, y * s};
     }
 
     void normalize() {
@@ -97,7 +90,7 @@ struct Vector2 {
     }
 
     Vector2 copyNormalized() const {
-        Vector2 v(x, y);
+        Vector2 v = {x, y};
         v.normalize();
         return v;
     }
@@ -111,30 +104,17 @@ struct Vector2 {
     }
 }; // class Vector2
 
+// MUST BE A POD - this means no ctor or dtor!
 class Vector3 {
 public:
     float x;
     float y;
     float z;
 
-    Vector3() :
-        x(0.0f), y(0.0f), z(0.0f) {
-    }
-
-    Vector3(float px, float py, float pz) :
-        x(px), y(py), z(pz) {
-    }
-
     void dump() {
         ALOGD("Vector3[%.2f, %.2f, %.2f]", x, y, z);
     }
 };
-
-///////////////////////////////////////////////////////////////////////////////
-// Types
-///////////////////////////////////////////////////////////////////////////////
-
-typedef Vector2 vec2;
 
 }; // namespace uirenderer
 }; // namespace android

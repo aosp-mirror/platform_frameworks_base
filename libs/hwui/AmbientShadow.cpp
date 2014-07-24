@@ -97,9 +97,9 @@ void AmbientShadow::createAmbientShadow(bool isCasterOpaque,
     // calculate the normal N, which should be perpendicular to the edge of the
     // polygon (represented by the neighbor intersection points) .
     // Shadow's vertices will be generated as : P + N * scale.
-    const Vector2 centroid2d = Vector2(centroid3d.x, centroid3d.y);
+    const Vector2 centroid2d = {centroid3d.x, centroid3d.y};
     for (int rayIndex = 0; rayIndex < rays; rayIndex++) {
-        Vector2 normal(1.0f, 0.0f);
+        Vector2 normal = {1.0f, 0.0f};
         calculateNormal(rays, rayIndex, dir.array(), rayDist, normal);
 
         // The vertex should be start from rayDist[i] then scale the
