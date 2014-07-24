@@ -136,14 +136,15 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
         Transition transition = getSharedElementExitTransition();
         final ArrayList<View> sharedElementSnapshots = createSnapshots(mExitSharedElementBundle,
                 mSharedElementNames);
-        transition.addListener(new Transition.TransitionListenerAdapter() {
+        transition.addListener(new ContinueTransitionListener() {
             @Override
             public void onTransitionEnd(Transition transition) {
                 transition.removeListener(this);
+                super.onTransitionEnd(transition);
                 int count = mSharedElements.size();
                 for (int i = 0; i < count; i++) {
                     View sharedElement = mSharedElements.get(i);
-                    ((ViewGroup)sharedElement.getParent()).suppressLayout(true);
+                    ((ViewGroup) sharedElement.getParent()).suppressLayout(true);
                 }
             }
         });
@@ -221,6 +222,8 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
         if (transition != null) {
             TransitionManager.beginDelayedTransition(getDecor(), transition);
             mTransitioningViews.get(0).invalidate();
+        } else {
+            transitionStarted();
         }
     }
 
@@ -307,6 +310,8 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
         if (transition != null) {
             TransitionManager.beginDelayedTransition(getDecor(), transition);
             getDecor().invalidate();
+        } else {
+            transitionStarted();
         }
     }
 
