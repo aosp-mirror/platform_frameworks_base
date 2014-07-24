@@ -23,10 +23,13 @@
 namespace android {
 namespace uirenderer {
 
-StatefulBaseRenderer::StatefulBaseRenderer() :
-        mDirtyClip(false), mWidth(-1), mHeight(-1),
-        mSaveCount(1), mFirstSnapshot(new Snapshot), mSnapshot(mFirstSnapshot),
-        mLightCenter(FLT_MIN, FLT_MIN, FLT_MIN), mLightRadius(FLT_MIN) {
+StatefulBaseRenderer::StatefulBaseRenderer()
+        : mDirtyClip(false)
+        , mWidth(-1)
+        , mHeight(-1)
+        , mSaveCount(1)
+        , mFirstSnapshot(new Snapshot)
+        , mSnapshot(mFirstSnapshot) {
 }
 
 void StatefulBaseRenderer::initializeSaveStack(float clipLeft, float clipTop,
@@ -43,11 +46,6 @@ void StatefulBaseRenderer::setViewport(int width, int height) {
     mHeight = height;
     mFirstSnapshot->initializeViewport(width, height);
     onViewportInitialized();
-}
-
-void StatefulBaseRenderer::initializeLight(const Vector3& lightCenter, float lightRadius) {
-    mLightCenter = lightCenter;
-    mLightRadius = lightRadius;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

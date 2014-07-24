@@ -124,6 +124,8 @@ public:
     virtual ~OpenGLRenderer();
 
     void initProperties();
+    void initLight(const Vector3& lightCenter, float lightRadius,
+            uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha);
 
     virtual void onViewportInitialized();
     virtual status_t prepareDirty(float left, float top, float right, float bottom, bool opaque);
@@ -1009,6 +1011,12 @@ private:
     float mOverdraw;
 
     bool mSkipOutlineClip;
+
+    // Lighting + shadows
+    Vector3 mLightCenter;
+    float mLightRadius;
+    uint8_t mAmbientShadowAlpha;
+    uint8_t mSpotShadowAlpha;
 
     friend class Layer;
     friend class TextSetupFunctor;
