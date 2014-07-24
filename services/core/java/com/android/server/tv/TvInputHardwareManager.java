@@ -172,6 +172,23 @@ class TvInputHardwareManager implements TvInputHal.Callback {
         }
     }
 
+    @Override
+    public void onFirstFrameCaptured(int deviceId, int streamId) {
+        synchronized (mLock) {
+            Connection connection = mConnections.get(deviceId);
+            if (connection == null) {
+                Slog.e(TAG, "FirstFrameCaptured: Cannot find a connection with "
+                        + deviceId);
+                return;
+            }
+            Runnable runnable = connection.getOnFirstFrameCapturedLocked();
+            if (runnable != null) {
+                runnable.run();
+                connection.setOnFirstFrameCapturedLocked(null);
+            }
+        }
+    }
+
     public List<TvInputHardwareInfo> getHardwareList() {
         synchronized (mLock) {
             return mInfoList;
@@ -337,6 +354,74 @@ class TvInputHardwareManager implements TvInputHal.Callback {
         return null;
     }
 
+    private int findDeviceIdForInputIdLocked(String inputId) {
+        for (int i = 0; i < mConnections.size(); ++i) {
+            Connection connection = mConnections.get(i);
+            if (connection.getInfoLocked().getId().equals(inputId)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Get the list of TvStreamConfig which is buffered mode.
+     */
+    public List<TvStreamConfig> getAvailableTvStreamConfigList(String inputId, int callingUid,
+            int resolvedUserId) {
+        List<TvStreamConfig> configsList = new ArrayList<TvStreamConfig>();
+        synchronized (mLock) {
+            int deviceId = findDeviceIdForInputIdLocked(inputId);
+            if (deviceId < 0) {
+                Slog.e(TAG, "Invalid inputId : " + inputId);
+                return configsList;
+            }
+            Connection connection = mConnections.get(deviceId);
+            for (TvStreamConfig config : connection.getConfigsLocked()) {
+                if (config.getType() == TvStreamConfig.STREAM_TYPE_BUFFER_PRODUCER) {
+                    configsList.add(config);
+                }
+            }
+        }
+        return configsList;
+    }
+
+    /**
+     * Take a snapshot of the given TV input into the provided Surface.
+     */
+    public boolean captureFrame(String inputId, Surface surface, final TvStreamConfig config,
+            int callingUid, int resolvedUserId) {
+        synchronized (mLock) {
+            int deviceId = findDeviceIdForInputIdLocked(inputId);
+            if (deviceId < 0) {
+                Slog.e(TAG, "Invalid inputId : " + inputId);
+                return false;
+            }
+            Connection connection = mConnections.get(deviceId);
+            final TvInputHardwareImpl hardwareImpl = connection.getHardwareImplLocked();
+            if (hardwareImpl != null) {
+                // Stop previous capture.
+                Runnable runnable = connection.getOnFirstFrameCapturedLocked();
+                if (runnable != null) {
+                    runnable.run();
+                    connection.setOnFirstFrameCapturedLocked(null);
+                }
+
+                boolean result = hardwareImpl.startCapture(surface, config);
+                if (result) {
+                    connection.setOnFirstFrameCapturedLocked(new Runnable() {
+                        @Override
+                        public void run() {
+                            hardwareImpl.stopCapture(config);
+                        }
+                    });
+                }
+                return result;
+            }
+        }
+        return false;
+    }
+
     private class Connection implements IBinder.DeathRecipient {
         private final TvInputHardwareInfo mHardwareInfo;
         private TvInputInfo mInfo;
@@ -345,6 +430,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
         private TvStreamConfig[] mConfigs = null;
         private Integer mCallingUid = null;
         private Integer mResolvedUserId = null;
+        private Runnable mOnFirstFrameCaptured;
 
         public Connection(TvInputHardwareInfo hardwareInfo) {
             mHardwareInfo = hardwareInfo;
@@ -367,6 +453,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
             mInfo = info;
             mCallingUid = callingUid;
             mResolvedUserId = resolvedUserId;
+            mOnFirstFrameCaptured = null;
 
             if (mHardware != null && mCallback != null) {
                 try {
@@ -393,6 +480,10 @@ class TvInputHardwareManager implements TvInputHal.Callback {
             return mHardware;
         }
 
+        public TvInputHardwareImpl getHardwareImplLocked() {
+            return mHardware;
+        }
+
         public ITvInputHardwareCallback getCallbackLocked() {
             return mCallback;
         }
@@ -407,6 +498,14 @@ class TvInputHardwareManager implements TvInputHal.Callback {
 
         public Integer getResolvedUserIdLocked() {
             return mResolvedUserId;
+        }
+
+        public void setOnFirstFrameCapturedLocked(Runnable runnable) {
+            mOnFirstFrameCaptured = runnable;
+        }
+
+        public Runnable getOnFirstFrameCapturedLocked() {
+            return mOnFirstFrameCaptured;
         }
 
         @Override
@@ -558,6 +657,37 @@ class TvInputHardwareManager implements TvInputHal.Callback {
             }
             // TODO(hdmi): mHdmiClient.sendKeyEvent(event);
             return false;
+        }
+
+        private boolean startCapture(Surface surface, TvStreamConfig config) {
+            synchronized (mImplLock) {
+                if (mReleased) {
+                    return false;
+                }
+                if (surface == null || config == null) {
+                    return false;
+                }
+                if (config.getType() != TvStreamConfig.STREAM_TYPE_BUFFER_PRODUCER) {
+                    return false;
+                }
+
+                int result = mHal.addStream(mInfo.getDeviceId(), surface, config);
+                return result == TvInputHal.SUCCESS;
+            }
+        }
+
+        private boolean stopCapture(TvStreamConfig config) {
+            synchronized (mImplLock) {
+                if (mReleased) {
+                    return false;
+                }
+                if (config == null) {
+                    return false;
+                }
+
+                int result = mHal.removeStream(mInfo.getDeviceId(), config);
+                return result == TvInputHal.SUCCESS;
+            }
         }
     }
 

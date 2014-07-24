@@ -683,6 +683,41 @@ public final class TvInputManager {
     }
 
     /**
+     * Returns the TvStreamConfig list of the given TV input.
+     *
+     * @param inputId the id of the TV input.
+     * @return List of {@link TvStreamConfig} which is available for capturing
+     *   of the given TV input.
+     * @hide
+     */
+    @SystemApi
+    public List<TvStreamConfig> getAvailableTvStreamConfigList(String inputId) {
+        try {
+            return mService.getAvailableTvStreamConfigList(inputId, mUserId);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Take a snapshot of the given TV input into the provided Surface.
+     *
+     * @param inputId the id of the TV input.
+     * @param surface the {@link Surface} to which the snapshot is captured.
+     * @param config the {@link TvStreamConfig} which is used for capturing.
+     * @return true when the {@link Surface} is ready to be captured.
+     * @hide
+     */
+    @SystemApi
+    public boolean captureFrame(String inputId, Surface surface, TvStreamConfig config) {
+        try {
+            return mService.captureFrame(inputId, surface, config, mUserId);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
      * The Session provides the per-session functionality of TV inputs.
      * @hide
      */
