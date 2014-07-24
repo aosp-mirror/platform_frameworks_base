@@ -2083,7 +2083,6 @@ public class DevicePolicyManager {
 
     /**
      * @hide
-     * @SystemApi
      * Sets the given component as an active admin and registers the package as the profile
      * owner for this user. The package must already be installed and there shouldn't be
      * an existing profile owner registered for this user. Also, this method must be called
@@ -2097,6 +2096,7 @@ public class DevicePolicyManager {
      * @throws IllegalArgumentException if packageName is null, the package isn't installed, or
      *         the user has already been set up.
      */
+    @SystemApi
     public boolean setActiveProfileOwner(ComponentName admin, String ownerName)
             throws IllegalArgumentException {
         if (mService != null) {
