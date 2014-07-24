@@ -51,4 +51,15 @@ interface IImsService {
      * Config interface to get/set IMS service/capability parameters.
      */
     IImsConfig getConfigInterface();
+
+    /**
+     * Used for turning on IMS when its in OFF state.
+     */
+    void turnOnIms();
+
+    /**
+     * Used for turning off IMS when its in ON state.
+     * When IMS is OFF, device will behave as CSFB'ed.
+     */
+    void turnOffIms();
 }

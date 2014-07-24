@@ -55,4 +55,15 @@ interface IImsRegistrationListener {
      *    Else ({@code event} is 1), meaning the specified service is added to the IMS connection.
      */
     void registrationServiceCapabilityChanged(int serviceClass, int event);
+
+    /**
+     * Notifies the application when features on a particular service enabled or
+     * disabled successfully based on user preferences.
+     *
+     * @param serviceClass a service class specified in {@link ImsServiceClass}
+     * @param enabledFeatures features enabled as defined in com.android.ims.ImsConfig#FeatureConstants.
+     * @param disabledFeatures features disabled as defined in com.android.ims.ImsConfig#FeatureConstants.
+     */
+    void registrationFeatureCapabilityChanged(int serviceClass,
+            out int[] enabledFeatures, out int[] disabledFeatures);
 }
