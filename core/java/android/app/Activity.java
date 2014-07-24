@@ -5501,6 +5501,14 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Activities cannot draw during the period that their windows are animating in. In order
+     * to know when it is safe to begin drawing they can override this method which will be
+     * called when the entering animation has completed.
+     */
+    public void onEnterAnimationComplete() {
+    }
+
+    /**
      * Adjust the current immersive mode setting.
      *
      * Note that changing this value will have no effect on the activity's

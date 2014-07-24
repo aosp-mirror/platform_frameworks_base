@@ -297,6 +297,13 @@ public class AppWindowAnimator {
             mAppToken.mLaunchTaskBehind = false;
         } else {
             mAppToken.updateReportedVisibilityLocked();
+            if (mAppToken.mEnteringAnimation) {
+                mAppToken.mEnteringAnimation = false;
+                try {
+                    mService.mActivityManager.notifyEnterAnimationComplete(mAppToken.token);
+                } catch (RemoteException e) {
+                }
+            }
         }
 
         return false;

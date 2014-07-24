@@ -1158,6 +1158,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int UPDATE_TIME = 41;
     static final int SYSTEM_USER_START_MSG = 42;
     static final int SYSTEM_USER_CURRENT_MSG = 43;
+    static final int ENTER_ANIMATION_COMPLETE_MSG = 44;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
@@ -1811,6 +1812,18 @@ public final class ActivityManagerService extends ActivityManagerNative
                         BatteryStats.HistoryItem.EVENT_USER_FOREGROUND_START,
                         Integer.toString(msg.arg1), msg.arg1);
                 mSystemServiceManager.switchUser(msg.arg1);
+                break;
+            }
+            case ENTER_ANIMATION_COMPLETE_MSG: {
+                synchronized (ActivityManagerService.this) {
+                    ActivityRecord r = ActivityRecord.forToken((IBinder) msg.obj);
+                    if (r != null && r.app != null && r.app.thread != null) {
+                        try {
+                            r.app.thread.scheduleEnterAnimationComplete(r.appToken);
+                        } catch (RemoteException e) {
+                        }
+                    }
+                }
                 break;
             }
             }
@@ -5696,6 +5709,11 @@ public final class ActivityManagerService extends ActivityManagerNative
     @Override
     public final void notifyLaunchTaskBehindComplete(IBinder token) {
         mStackSupervisor.scheduleLaunchTaskBehindComplete(token);
+    }
+
+    @Override
+    public final void notifyEnterAnimationComplete(IBinder token) {
+        mHandler.sendMessage(mHandler.obtainMessage(ENTER_ANIMATION_COMPLETE_MSG, token));
     }
 
     @Override

@@ -4450,6 +4450,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (visible) {
                     mOpeningApps.add(wtoken);
                     wtoken.startingMoved = false;
+                    wtoken.mEnteringAnimation = true;
 
                     // If the token is currently hidden (should be the
                     // common case), then we need to set up to wait for
@@ -4472,6 +4473,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                 } else {
                     mClosingApps.add(wtoken);
+                    wtoken.mEnteringAnimation = false;
 
                     // If the token is currently visible (should be the
                     // common case), then set up to wait for it to be hidden.
