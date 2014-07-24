@@ -474,6 +474,32 @@ public abstract class TvInputService extends Service {
         public abstract void onRelease();
 
         /**
+         * Set the current session as the "main" session. See {@link TvView#setMainTvView} for the
+         * meaning of "main".
+         * <p>
+         * This is primarily for HDMI-CEC active source management. TV input service that manages
+         * HDMI-CEC logical device should make sure not only to select the corresponding HDMI
+         * logical device as source device on {@code onSetMainSession(true)}, but also to select
+         * internal device on {@code onSetMainSession(false)}. Also, if surface is set to non-main
+         * session, it needs to select internal device after temporarily selecting corresponding
+         * HDMI logical device for set up.
+         * </p><p>
+         * It is guaranteed that {@code onSetMainSession(true)} for new session is called first,
+         * and {@code onSetMainSession(false)} for old session is called afterwards. This allows
+         * {@code onSetMainSession(false)} to be no-op when TV input service knows that the next
+         * main session corresponds to another HDMI logical device. Practically, this implies that
+         * one TV input service should handle all HDMI port and HDMI-CEC logical devices for smooth
+         * active source transition.
+         * </p>
+         *
+         * @param isMainSession If true, session is main.
+         * @hide
+         */
+        @SystemApi
+        public void onSetMainSession(boolean isMainSession) {
+        }
+
+        /**
          * Sets the {@link Surface} for the current input session on which the TV input renders
          * video.
          *
@@ -724,6 +750,13 @@ public abstract class TvInputService extends Service {
                 mSurface = null;
             }
             removeOverlayView(true);
+        }
+
+        /**
+         * Calls {@link #onSetMain}.
+         */
+        void setMainSession(boolean isMainSession) {
+            onSetMainSession(isMainSession);
         }
 
         /**

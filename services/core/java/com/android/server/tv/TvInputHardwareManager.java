@@ -86,7 +86,6 @@ class TvInputHardwareManager implements TvInputHal.Callback {
             new HdmiHotplugEventListener();
     private final IHdmiDeviceEventListener mHdmiDeviceEventListener = new HdmiDeviceEventListener();
     private final IHdmiInputChangeListener mHdmiInputChangeListener = new HdmiInputChangeListener();
-    private final Set<Integer> mActiveHdmiSources = new HashSet<Integer>();
     // TODO: Should handle INACTIVE case.
     private final SparseBooleanArray mHdmiStateMap = new SparseBooleanArray();
 
@@ -584,19 +583,6 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                 }
                 if (surface == null && mActiveConfig == null) {
                     return false;
-                }
-                if (mInfo.getType() == TvInputHardwareInfo.TV_INPUT_TYPE_HDMI) {
-                    if (surface != null) {
-                        // Set "Active Source" for HDMI.
-                        // TODO(hdmi): mHdmiClient.deviceSelect(...);
-                        mActiveHdmiSources.add(mInfo.getDeviceId());
-                    } else {
-                        mActiveHdmiSources.remove(mInfo.getDeviceId());
-                        if (mActiveHdmiSources.size() == 0) {
-                            // Tell HDMI that no HDMI source is active
-                            // TODO(hdmi): mHdmiClient.portSelect(null);
-                        }
-                    }
                 }
                 if (mAudioSource != null && mAudioSink != null) {
                     if (surface != null) {
