@@ -121,23 +121,29 @@ public class BrowserService extends MediaBrowserService {
     }
 
     @Override
-    protected List<MediaBrowserItem> onLoadChildren(Uri parentUri) {
-        final ArrayList<MediaBrowserItem> results = new ArrayList();
+    protected void onLoadChildren(final Uri parentUri,
+            final Result<List<MediaBrowserItem>> result) {
+        new Handler().postDelayed(new Runnable() {
+                public void run() {
+                    final ArrayList<MediaBrowserItem> list = new ArrayList();
 
-        for (int i=0; i<10; i++) {
-            results.add(new MediaBrowserItem.Builder(
-                    Uri.withAppendedPath(BASE_URI, Integer.toString(i)),
-                    MediaBrowserItem.FLAG_BROWSABLE, "Title " + i)
-                    .setSummary("Summary " + i)
-                    .build());
-        }
+                    for (int i=0; i<10; i++) {
+                        list.add(new MediaBrowserItem.Builder(
+                                    Uri.withAppendedPath(BASE_URI, Integer.toString(i)),
+                                    MediaBrowserItem.FLAG_BROWSABLE, "Title " + i)
+                                .setSummary("Summary " + i)
+                                .build());
+                    }
 
-        return results;
+                    result.sendResult(list);
+                }
+            }, 2000);
+        result.detach();
     }
 
     @Override
-    protected Bitmap onGetThumbnail(Uri uri, int width, int height) {
-        return null;
+    protected void onLoadThumbnail(Uri uri, int width, int height, Result<Bitmap> result) {
+        result.sendResult(null);
     }
 
     /*
