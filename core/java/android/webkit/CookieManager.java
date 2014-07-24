@@ -82,8 +82,7 @@ public class CookieManager {
      * @param accept whether the {@link WebView} instance should accept
      *               third party cookies
      */
-    public synchronized void setAcceptThirdPartyCookies(WebView webview,
-            boolean accept) {
+    public void setAcceptThirdPartyCookies(WebView webview, boolean accept) {
         throw new MustOverrideException();
     }
 
