@@ -43,7 +43,7 @@ struct Vertex {
         vertex[0].y = y;
     }
 
-    static inline void set(Vertex* vertex, vec2 val) {
+    static inline void set(Vertex* vertex, Vector2 val) {
         set(vertex, val.x, val.y);
     }
 

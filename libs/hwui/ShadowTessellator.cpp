@@ -172,7 +172,8 @@ Vector2 ShadowTessellator::centroid2d(const Vector2* poly, int polyLength) {
 
     Vector2 centroid = poly[0];
     if (area != 0) {
-        centroid = Vector2(sumx / (3 * area), sumy / (3 * area));
+        centroid = (Vector2){static_cast<float>(sumx / (3 * area)),
+            static_cast<float>(sumy / (3 * area))};
     } else {
         ALOGW("Area is 0 while computing centroid!");
     }
@@ -212,19 +213,19 @@ bool ShadowTessellator::isClockwisePath(const SkPath& path) {
     while (SkPath::kDone_Verb != (v = iter.next(pts))) {
             switch (v) {
             case SkPath::kMove_Verb:
-                arrayForDirection.add(Vector2(pts[0].x(), pts[0].y()));
+                arrayForDirection.add((Vector2){pts[0].x(), pts[0].y()});
                 break;
             case SkPath::kLine_Verb:
-                arrayForDirection.add(Vector2(pts[1].x(), pts[1].y()));
+                arrayForDirection.add((Vector2){pts[1].x(), pts[1].y()});
                 break;
             case SkPath::kQuad_Verb:
-                arrayForDirection.add(Vector2(pts[1].x(), pts[1].y()));
-                arrayForDirection.add(Vector2(pts[2].x(), pts[2].y()));
+                arrayForDirection.add((Vector2){pts[1].x(), pts[1].y()});
+                arrayForDirection.add((Vector2){pts[2].x(), pts[2].y()});
                 break;
             case SkPath::kCubic_Verb:
-                arrayForDirection.add(Vector2(pts[1].x(), pts[1].y()));
-                arrayForDirection.add(Vector2(pts[2].x(), pts[2].y()));
-                arrayForDirection.add(Vector2(pts[3].x(), pts[3].y()));
+                arrayForDirection.add((Vector2){pts[1].x(), pts[1].y()});
+                arrayForDirection.add((Vector2){pts[2].x(), pts[2].y()});
+                arrayForDirection.add((Vector2){pts[3].x(), pts[3].y()});
                 break;
             default:
                 break;

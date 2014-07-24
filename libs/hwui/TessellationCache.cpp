@@ -125,7 +125,7 @@ public:
     }
 };
 
-struct TessellationCache::Buffer {
+class TessellationCache::Buffer {
 public:
     Buffer(const sp<Task<VertexBuffer*> >& task)
             : mTask(task)
@@ -236,7 +236,7 @@ static void tessellateShadows(
     float maxZ = -FLT_MAX;
     for (int i = 0; i < casterVertexCount; i++) {
         const Vertex& point2d = casterVertices2d[i];
-        casterPolygon[i] = Vector3(point2d.x, point2d.y, 0);
+        casterPolygon[i] = (Vector3){point2d.x, point2d.y, 0};
         mapPointFakeZ(casterPolygon[i], casterTransformXY, casterTransformZ);
         minZ = fmin(minZ, casterPolygon[i].z);
         maxZ = fmax(maxZ, casterPolygon[i].z);
@@ -246,7 +246,7 @@ static void tessellateShadows(
     Vector2 centroid =  ShadowTessellator::centroid2d(
             reinterpret_cast<const Vector2*>(casterVertices2d.array()),
             casterVertexCount);
-    Vector3 centroid3d(centroid.x, centroid.y, 0);
+    Vector3 centroid3d = {centroid.x, centroid.y, 0};
     mapPointFakeZ(centroid3d, casterTransformXY, casterTransformZ);
 
     // if the caster intersects the z=0 plane, lift it in Z so it doesn't

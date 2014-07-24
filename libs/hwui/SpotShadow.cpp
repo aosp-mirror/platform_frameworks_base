@@ -218,7 +218,7 @@ int SpotShadow::intersection(const Vector2* poly1, int poly1Length,
 
     // Since neither polygon fully contain the other one, we need to add all the
     // intersection points.
-    Vector2 intersection;
+    Vector2 intersection = {0, 0};
     for (int i = 0; i < poly2Length; i++) {
         for (int j = 0; j < poly1Length; j++) {
             int poly2LineStart = i;
@@ -250,7 +250,7 @@ int SpotShadow::intersection(const Vector2* poly1, int poly1Length,
     }
 
     // Sort the result polygon around the center.
-    Vector2 center(0.0f, 0.0f);
+    Vector2 center = {0.0f, 0.0f};
     for (int i = 0; i < count; i++) {
         center += poly[i];
     }
@@ -557,7 +557,7 @@ void SpotShadow::computeSpotShadow(bool isCasterOpaque, const Vector3* lightPoly
             float x = lightPoly[j].x - ratioZ * (lightPoly[j].x - poly[i].x);
             float y = lightPoly[j].y - ratioZ * (lightPoly[j].y - poly[i].y);
 
-            Vector2 newPoint = Vector2(x, y);
+            Vector2 newPoint = {x, y};
             shadowRegion[k] = newPoint;
             outline[m] = newPoint;
 
