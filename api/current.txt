@@ -302,6 +302,7 @@ package android {
     field public static final int amPmSelectedBackgroundColor = 16843947; // 0x10104ab
     field public static final int amPmTextColor = 16843945; // 0x10104a9
     field public static final int amPmUnselectedBackgroundColor = 16843946; // 0x10104aa
+    field public static final int ambientShadowAlpha = 16843954; // 0x10104b2
     field public static final int angle = 16843168; // 0x10101a0
     field public static final int animateFirstView = 16843477; // 0x10102d5
     field public static final int animateLayoutChanges = 16843506; // 0x10102f2
@@ -813,6 +814,7 @@ package android {
     field public static final int layout_x = 16843135; // 0x101017f
     field public static final int layout_y = 16843136; // 0x1010180
     field public static final int left = 16843181; // 0x10101ad
+    field public static final int lightingStyle = 16843953; // 0x10104b1
     field public static final int lineSpacingExtra = 16843287; // 0x1010217
     field public static final int lineSpacingMultiplier = 16843288; // 0x1010218
     field public static final int lines = 16843092; // 0x1010154
@@ -1123,6 +1125,7 @@ package android {
     field public static final int spinnersShown = 16843595; // 0x101034b
     field public static final int splitMotionEvents = 16843503; // 0x10102ef
     field public static final int splitTrack = 16843854; // 0x101044e
+    field public static final int spotShadowAlpha = 16843955; // 0x10104b3
     field public static final int src = 16843033; // 0x1010119
     field public static final int ssp = 16843747; // 0x10103e3
     field public static final int sspPattern = 16843749; // 0x10103e5
@@ -1868,6 +1871,7 @@ package android {
     field public static final int Holo_Light_ButtonBar_AlertDialog = 16974056; // 0x10300e8
     field public static final int Holo_Light_SegmentedButton = 16974058; // 0x10300ea
     field public static final int Holo_SegmentedButton = 16974057; // 0x10300e9
+    field public static final int Lighting = 16974559; // 0x10302df
     field public static final int MediaButton = 16973879; // 0x1030037
     field public static final int MediaButton_Ffwd = 16973883; // 0x103003b
     field public static final int MediaButton_Next = 16973881; // 0x1030039
