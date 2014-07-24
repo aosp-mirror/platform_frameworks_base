@@ -22,10 +22,12 @@
 
 namespace android {
 
-Paint::Paint() : SkPaint() {
+Paint::Paint() : SkPaint(),
+        mLetterSpacing(0) {
 }
 
-Paint::Paint(const Paint& paint) : SkPaint(paint) {
+Paint::Paint(const Paint& paint) : SkPaint(paint),
+        mLetterSpacing(0) {
 }
 
 Paint::~Paint() {
@@ -33,11 +35,13 @@ Paint::~Paint() {
 
 Paint& Paint::operator=(const Paint& other) {
     SkPaint::operator=(other);
+    mLetterSpacing = other.mLetterSpacing;
     return *this;
 }
 
 bool operator==(const Paint& a, const Paint& b) {
-    return static_cast<const SkPaint&>(a) == static_cast<const SkPaint&>(b);
+    return static_cast<const SkPaint&>(a) == static_cast<const SkPaint&>(b)
+            && a.mLetterSpacing == b.mLetterSpacing;
 }
 
 }
