@@ -254,13 +254,14 @@ public final class MediaSession {
     }
 
     /**
-     * Set a media button event receiver component to use to restart playback
-     * after an app has been stopped.
+     * Set a pending intent for your media button receiver to allow restarting
+     * playback after the session has been stopped. If your app is started in
+     * this way an {@link Intent#ACTION_MEDIA_BUTTON} intent will be sent via
+     * the pending intent.
      *
-     * @param mbr The receiver component to send the media button event to.
-     * @hide
+     * @param mbr The {@link PendingIntent} to send the media button event to.
      */
-    public void setMediaButtonReceiver(@Nullable ComponentName mbr) {
+    public void setMediaButtonReceiver(@Nullable PendingIntent mbr) {
         try {
             mBinder.setMediaButtonReceiver(mbr);
         } catch (RemoteException e) {

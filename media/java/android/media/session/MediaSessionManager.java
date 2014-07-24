@@ -175,7 +175,6 @@ public final class MediaSessionManager {
      * Stop receiving active sessions updates on the specified listener.
      *
      * @param listener The listener to remove.
-     * @hide
      */
     public void removeActiveSessionsListener(@NonNull SessionListener listener) {
         if (listener == null) {

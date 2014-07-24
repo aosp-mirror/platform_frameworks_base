@@ -20,6 +20,8 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.KeyguardManager;
+import android.app.PendingIntent;
+import android.app.PendingIntent.CanceledException;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -407,16 +409,6 @@ public class MediaSessionService extends SystemService implements Monitor {
         return user;
     }
 
-    private int findIndexOfSessionForIdLocked(String sessionId) {
-        for (int i = mAllSessions.size() - 1; i >= 0; i--) {
-            MediaSessionRecord session = mAllSessions.get(i);
-            if (TextUtils.equals(session.getSessionInfo().getId(), sessionId)) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
     private int findIndexOfSessionsListenerLocked(IActiveSessionsListener listener) {
         for (int i = mSessionsListeners.size() - 1; i >= 0; i--) {
             if (mSessionsListeners.get(i).mListener == listener) {
@@ -436,7 +428,7 @@ public class MediaSessionService extends SystemService implements Monitor {
             List<MediaSessionRecord> records = mPriorityStack.getActiveSessions(userId);
             int size = records.size();
             if (size > 0) {
-                persistMediaButtonReceiverLocked(records.get(0));
+                rememberMediaButtonReceiverLocked(records.get(0));
             }
             ArrayList<MediaSession.Token> tokens = new ArrayList<MediaSession.Token>();
             for (int i = 0; i < size; i++) {
@@ -469,13 +461,11 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
     }
 
-    private void persistMediaButtonReceiverLocked(MediaSessionRecord record) {
-        ComponentName receiver = record.getMediaButtonReceiver();
-        if (receiver != null) {
-            Settings.System.putStringForUser(mContentResolver,
-                    Settings.System.MEDIA_BUTTON_RECEIVER,
-                    receiver == null ? "" : receiver.flattenToString(),
-                    UserHandle.USER_CURRENT);
+    private void rememberMediaButtonReceiverLocked(MediaSessionRecord record) {
+        PendingIntent receiver = record.getMediaButtonReceiver();
+        UserRecord user = mUserRecords.get(record.getUserId());
+        if (receiver != null && user != null) {
+            user.mLastMediaButtonReceiver = receiver;
         }
     }
 
@@ -486,6 +476,7 @@ public class MediaSessionService extends SystemService implements Monitor {
     final class UserRecord {
         private final int mUserId;
         private final ArrayList<MediaSessionRecord> mSessions = new ArrayList<MediaSessionRecord>();
+        private PendingIntent mLastMediaButtonReceiver;
 
         public UserRecord(Context context, int userId) {
             mUserId = userId;
@@ -521,6 +512,7 @@ public class MediaSessionService extends SystemService implements Monitor {
         public void dumpLocked(PrintWriter pw, String prefix) {
             pw.println(prefix + "Record for user " + mUserId);
             String indent = prefix + "  ";
+            pw.println(indent + "MediaButtonReceiver:" + mLastMediaButtonReceiver);
             int size = mSessions.size();
             pw.println(indent + size + " Sessions:");
             for (int i = 0; i < size; i++) {
@@ -843,21 +835,43 @@ public class MediaSessionService extends SystemService implements Monitor {
                         needWakeLock ? mKeyEventReceiver.mLastTimeoutId : -1,
                         mKeyEventReceiver);
             } else {
-                if (needWakeLock) {
-                    mMediaEventWakeLock.acquire();
+                // Launch the last PendingIntent we had with priority
+                int userId = ActivityManager.getCurrentUser();
+                UserRecord user = mUserRecords.get(userId);
+                if (user.mLastMediaButtonReceiver != null) {
+                    if (DEBUG) {
+                        Log.d(TAG, "Sending media key to last known PendingIntent");
+                    }
+                    if (needWakeLock) {
+                        mKeyEventReceiver.aquireWakeLockLocked();
+                    }
+                    Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
+                    mediaButtonIntent.putExtra(Intent.EXTRA_KEY_EVENT, keyEvent);
+                    try {
+                        user.mLastMediaButtonReceiver.send(getContext(),
+                                needWakeLock ? mKeyEventReceiver.mLastTimeoutId : -1,
+                                mediaButtonIntent, mKeyEventReceiver, null);
+                    } catch (CanceledException e) {
+                        Log.i(TAG, "Error sending key event to media button receiver "
+                                + user.mLastMediaButtonReceiver, e);
+                    }
+                } else {
+                    if (DEBUG) {
+                        Log.d(TAG, "Sending media key ordered broadcast");
+                    }
+                    if (needWakeLock) {
+                        mMediaEventWakeLock.acquire();
+                    }
+                    // Fallback to legacy behavior
+                    Intent keyIntent = new Intent(Intent.ACTION_MEDIA_BUTTON, null);
+                    keyIntent.putExtra(Intent.EXTRA_KEY_EVENT, keyEvent);
+                    if (needWakeLock) {
+                        keyIntent.putExtra(EXTRA_WAKELOCK_ACQUIRED,
+                                WAKELOCK_RELEASE_ON_FINISHED);
+                    }
+                    getContext().sendOrderedBroadcastAsUser(keyIntent, UserHandle.ALL,
+                            null, mKeyEventDone, mHandler, Activity.RESULT_OK, null, null);
                 }
-                if (DEBUG) {
-                    Log.d(TAG, "Sending media key ordered broadcast");
-                }
-                // Fallback to legacy behavior
-                Intent keyIntent = new Intent(Intent.ACTION_MEDIA_BUTTON, null);
-                keyIntent.putExtra(Intent.EXTRA_KEY_EVENT, keyEvent);
-                if (needWakeLock) {
-                    keyIntent.putExtra(EXTRA_WAKELOCK_ACQUIRED,
-                            WAKELOCK_RELEASE_ON_FINISHED);
-                }
-                getContext().sendOrderedBroadcastAsUser(keyIntent, UserHandle.ALL,
-                        null, mKeyEventDone, mHandler, Activity.RESULT_OK, null, null);
             }
         }
 
@@ -904,7 +918,8 @@ public class MediaSessionService extends SystemService implements Monitor {
 
         private KeyEventWakeLockReceiver mKeyEventReceiver = new KeyEventWakeLockReceiver(mHandler);
 
-        class KeyEventWakeLockReceiver extends ResultReceiver implements Runnable {
+        class KeyEventWakeLockReceiver extends ResultReceiver implements Runnable,
+                PendingIntent.OnFinished {
             private final Handler mHandler;
             private int mRefCount = 0;
             private int mLastTimeoutId = 0;
@@ -962,6 +977,12 @@ public class MediaSessionService extends SystemService implements Monitor {
             private void releaseWakeLockLocked() {
                 mMediaEventWakeLock.release();
                 mHandler.removeCallbacks(this);
+            }
+
+            @Override
+            public void onSendFinished(PendingIntent pendingIntent, Intent intent, int resultCode,
+                    String resultData, Bundle resultExtras) {
+                onReceiveResult(resultCode, null);
             }
         };
 

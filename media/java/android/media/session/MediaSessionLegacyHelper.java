@@ -304,7 +304,7 @@ public class MediaSessionLegacyHelper {
 
         holder.mMediaButtonReceiver = new MediaButtonReceiver(pi, context);
         holder.mSession.addCallback(holder.mMediaButtonReceiver, mHandler);
-        holder.mSession.setMediaButtonReceiver(mbrComponent);
+        holder.mSession.setMediaButtonReceiver(pi);
         if (DEBUG) {
             Log.d(TAG, "addMediaButtonListener added " + pi);
         }

@@ -99,7 +99,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
 
     private long mFlags;
     private IMediaRouter mMediaRouter;
-    private ComponentName mMediaButtonReceiver;
+    private PendingIntent mMediaButtonReceiver;
     private PendingIntent mLaunchIntent;
 
     // TransportPerformer fields
@@ -170,7 +170,12 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         return mSessionInfo;
     }
 
-    public ComponentName getMediaButtonReceiver() {
+    /**
+     * Get the intent the app set for their media button receiver.
+     *
+     * @return The pending intent set by the app or null.
+     */
+    public PendingIntent getMediaButtonReceiver() {
         return mMediaButtonReceiver;
     }
 
@@ -648,8 +653,8 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
 
         @Override
-        public void setMediaButtonReceiver(ComponentName mbr) {
-            mMediaButtonReceiver = mbr;
+        public void setMediaButtonReceiver(PendingIntent pi) {
+            mMediaButtonReceiver = pi;
         }
 
         @Override
