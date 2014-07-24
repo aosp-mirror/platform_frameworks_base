@@ -78,7 +78,7 @@ void RenderNode::setStagingDisplayList(DisplayListData* data) {
     delete mStagingDisplayListData;
     mStagingDisplayListData = data;
     if (mStagingDisplayListData) {
-        Caches::getInstance().registerFunctors(mStagingDisplayListData->functorCount);
+        Caches::getInstance().registerFunctors(mStagingDisplayListData->functors.size());
     }
 }
 
@@ -254,6 +254,11 @@ void RenderNode::pushStagingDisplayListChanges(TreeInfo& info) {
         deleteDisplayListData();
         mDisplayListData = mStagingDisplayListData;
         mStagingDisplayListData = NULL;
+        if (mDisplayListData) {
+            for (size_t i = 0; i < mDisplayListData->functors.size(); i++) {
+                (*mDisplayListData->functors[i])(DrawGlInfo::kModeSync, NULL);
+            }
+        }
         damageSelf(info);
     }
 }
@@ -271,7 +276,7 @@ void RenderNode::deleteDisplayListData() {
 void RenderNode::prepareSubTree(TreeInfo& info, DisplayListData* subtree) {
     if (subtree) {
         TextureCache& cache = Caches::getInstance().textureCache;
-        info.out.hasFunctors |= subtree->functorCount;
+        info.out.hasFunctors |= subtree->functors.size();
         // TODO: Fix ownedBitmapResources to not require disabling prepareTextures
         // and thus falling out of async drawing path.
         if (subtree->ownedBitmapResources.size()) {
