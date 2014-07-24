@@ -16,6 +16,7 @@
 
 package android.media.tv;
 
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
@@ -23,6 +24,7 @@ import android.util.Log;
 /**
  * @hide
  */
+@SystemApi
 public class TvStreamConfig implements Parcelable {
     static final String TAG = TvStreamConfig.class.getSimpleName();
 
