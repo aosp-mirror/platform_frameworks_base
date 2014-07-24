@@ -371,7 +371,7 @@ public class VolumePanel extends Handler {
         final boolean masterVolumeKeySounds = res.getBoolean(R.bool.config_useVolumeKeySounds);
         mPlayMasterStreamTones = masterVolumeOnly && masterVolumeKeySounds;
 
-        listenToRingerMode();
+        registerReceiver();
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
@@ -441,9 +441,10 @@ public class VolumePanel extends Handler {
         updateStates();
     }
 
-    private void listenToRingerMode() {
+    private void registerReceiver() {
         final IntentFilter filter = new IntentFilter();
         filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
+        filter.addAction(Intent.ACTION_SCREEN_OFF);
         mContext.registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -452,6 +453,10 @@ public class VolumePanel extends Handler {
                 if (AudioManager.RINGER_MODE_CHANGED_ACTION.equals(action)) {
                     removeMessages(MSG_RINGER_MODE_CHANGED);
                     sendMessage(obtainMessage(MSG_RINGER_MODE_CHANGED));
+                }
+
+                if (Intent.ACTION_SCREEN_OFF.equals(action)) {
+                    postDismiss(0);
                 }
             }
         }, filter);
