@@ -37,14 +37,30 @@
         >
         <include layout="@layout/notification_template_part_line1" />
         <include layout="@layout/notification_template_part_line2" />
-        <TextView android:id="@+id/big_text"
-            android:textAppearance="@style/TextAppearance.StatusBar.Material.EventContent"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
-            android:singleLine="false"
-            android:visibility="gone"
-            />
+            android:orientation="horizontal"
+            android:gravity="top"
+            >
+            <TextView android:id="@+id/big_text"
+                android:textAppearance="@style/TextAppearance.StatusBar.Material.EventContent"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:singleLine="false"
+                android:visibility="gone"
+                />
+            <ImageView android:id="@+id/profile_badge_large_template"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_weight="0"
+                android:layout_marginStart="4dp"
+                android:scaleType="fitCenter"
+                android:visibility="gone"
+                />
+        </LinearLayout>
         <include
             layout="@layout/notification_template_part_line3"
             android:layout_width="match_parent"
