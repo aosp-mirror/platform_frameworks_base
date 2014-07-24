@@ -40,16 +40,14 @@ final class AccessibilityCache {
 
     private final Object mLock = new Object();
 
-    private final LongArray mTempLongArray = new LongArray();
-
     private final SparseArray<AccessibilityWindowInfo> mWindowCache =
-            new SparseArray<AccessibilityWindowInfo>();
+            new SparseArray<>();
 
     private final SparseArray<LongSparseArray<AccessibilityNodeInfo>> mNodeCache =
-            new SparseArray<LongSparseArray<AccessibilityNodeInfo>>();
+            new SparseArray<>();
 
     private final SparseArray<AccessibilityWindowInfo> mTempWindowArray =
-            new SparseArray<AccessibilityWindowInfo>();
+            new SparseArray<>();
 
     public void addWindow(AccessibilityWindowInfo window) {
         synchronized (mLock) {
@@ -183,7 +181,7 @@ final class AccessibilityCache {
                     sortedWindows.put(window.getLayer(), window);
                 }
 
-                List<AccessibilityWindowInfo> windows = new ArrayList<AccessibilityWindowInfo>();
+                List<AccessibilityWindowInfo> windows = new ArrayList<>();
                 for (int i = windowCount - 1; i >= 0; i--) {
                     AccessibilityWindowInfo window = sortedWindows.valueAt(i);
                     windows.add(AccessibilityWindowInfo.obtain(window));
@@ -221,7 +219,7 @@ final class AccessibilityCache {
             final int windowId = info.getWindowId();
             LongSparseArray<AccessibilityNodeInfo> nodes = mNodeCache.get(windowId);
             if (nodes == null) {
-                nodes = new LongSparseArray<AccessibilityNodeInfo>();
+                nodes = new LongSparseArray<>();
                 mNodeCache.put(windowId, nodes);
             }
 
@@ -233,23 +231,14 @@ final class AccessibilityCache {
                 // children have been removed to remove the descendants that
                 // are no longer present.
                 final LongArray newChildrenIds = info.getChildNodeIds();
-                if (newChildrenIds != null) {
-                    // Cache the new ids as we will do some lookups.
-                    LongArray newChildNodeIds = mTempLongArray;
-                    final int newChildCount = newChildNodeIds.size();
-                    for (int i = 0; i < newChildCount; i++) {
-                        newChildNodeIds.add(newChildrenIds.get(i));
-                    }
 
-                    final int oldChildCount = oldInfo.getChildCount();
-                    for (int i = 0; i < oldChildCount; i++) {
-                        final long oldChildId = oldInfo.getChildId(i);
-                        if (newChildNodeIds.indexOf(oldChildId) < 0) {
-                            clearSubTreeLocked(windowId, oldChildId);
-                        }
+                final int oldChildCount = oldInfo.getChildCount();
+                for (int i = 0; i < oldChildCount; i++) {
+                    final long oldChildId = oldInfo.getChildId(i);
+                    // If the child is no longer present, remove the sub-tree.
+                    if (newChildrenIds == null || newChildrenIds.indexOf(oldChildId) < 0) {
+                        clearSubTreeLocked(windowId, oldChildId);
                     }
-
-                    newChildNodeIds.clear();
                 }
 
                 // Also be careful if the parent has changed since the new
@@ -397,7 +386,7 @@ final class AccessibilityCache {
                     continue;
                 }
 
-                ArraySet<AccessibilityNodeInfo> seen = new ArraySet<AccessibilityNodeInfo>();
+                ArraySet<AccessibilityNodeInfo> seen = new ArraySet<>();
                 final int windowId = mNodeCache.keyAt(i);
 
                 final int nodeCount = nodes.size();
@@ -408,6 +397,8 @@ final class AccessibilityCache {
                     if (!seen.add(node)) {
                         Log.e(LOG_TAG, "Duplicate node: " + node
                                 + " in window:" + windowId);
+                        // Stop now as we potentially found a loop.
+                        continue;
                     }
 
                     // Check for one accessibility focus.
