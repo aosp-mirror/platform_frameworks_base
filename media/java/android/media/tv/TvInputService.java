@@ -325,10 +325,6 @@ public abstract class TvInputService extends Service {
          * @param tracks A list which includes track information.
          */
         public void notifyTrackInfoChanged(final List<TvTrackInfo> tracks) {
-            if (!TvTrackInfo.checkSanity(tracks)) {
-                throw new IllegalArgumentException(
-                        "Two or more selected tracks for a track type.");
-            }
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -337,6 +333,28 @@ public abstract class TvInputService extends Service {
                         mSessionCallback.onTrackInfoChanged(tracks);
                     } catch (RemoteException e) {
                         Log.w(TAG, "error in notifyTrackInfoChanged");
+                    }
+                }
+            });
+        }
+
+        /**
+         * Sends the list of selected tracks. This is expected to be called whenever there is a
+         * change on track selection.
+         *
+         * @param selectedTracks A list of selected tracks.
+         * @see #onSelectTrack(TvTrackInfo)
+         * @see #onUnselectTrack(TvTrackInfo)
+         */
+        public void notifyTrackSelectionChanged(final List<TvTrackInfo> selectedTracks) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) Log.d(TAG, "notifyTrackSelectionChanged");
+                        mSessionCallback.onTrackSelectionChanged(selectedTracks);
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in notifyTrackSelectionChanged");
                     }
                 }
             });
@@ -572,13 +590,12 @@ public abstract class TvInputService extends Service {
          * If it is called multiple times on the same type of track (ie. Video, Audio, Text), the
          * track selected previously should be unselected in the implementation of this method.
          * Also, if the select operation was successful, the implementation should call
-         * {@link #notifyTrackInfoChanged(List)} to report the updated track information.
+         * {@link #notifyTrackSelectionChanged(List)} to report the selected track list.
          * </p>
          *
          * @param track The track to be selected.
          * @return {@code true} if the select operation was successful, {@code false} otherwise.
-         * @see #notifyTrackInfoChanged
-         * @see TvTrackInfo#KEY_IS_SELECTED
+         * @see #notifyTrackSelectionChanged(List)
          */
         public boolean onSelectTrack(TvTrackInfo track) {
             return false;
@@ -588,13 +605,12 @@ public abstract class TvInputService extends Service {
          * Unselects a given track.
          * <p>
          * If the unselect operation was successful, the implementation should call
-         * {@link #notifyTrackInfoChanged(List)} to report the updated track information.
+         * {@link #notifyTrackSelectionChanged(List)} to report the selected track list.
          * </p>
          *
          * @param track The track to be unselected.
          * @return {@code true} if the unselect operation was successful, {@code false} otherwise.
-         * @see #notifyTrackInfoChanged
-         * @see TvTrackInfo#KEY_IS_SELECTED
+         * @see #notifyTrackSelectionChanged(List)
          */
         public boolean onUnselectTrack(TvTrackInfo track) {
             return false;
