@@ -359,7 +359,8 @@ public class LockPatternUtils {
      * @return Whether the password matches any in the history.
      */
     public boolean checkPasswordHistory(String password) {
-        String passwordHashString = new String(passwordToHash(password));
+        String passwordHashString = new String(
+                passwordToHash(password, getCurrentOrCallingUserId()));
         String passwordHistory = getString(PASSWORD_HISTORY_KEY);
         if (passwordHistory == null) {
             return false;
@@ -828,7 +829,7 @@ public class LockPatternUtils {
                 if (passwordHistoryLength == 0) {
                     passwordHistory = "";
                 } else {
-                    byte[] hash = passwordToHash(password);
+                    byte[] hash = passwordToHash(password, userHandle);
                     passwordHistory = new String(hash) + "," + passwordHistory;
                     // Cut it to contain passwordHistoryLength hashes
                     // and passwordHistoryLength -1 commas.
@@ -944,13 +945,13 @@ public class LockPatternUtils {
         }
     }
 
-    private String getSalt() {
-        long salt = getLong(LOCK_PASSWORD_SALT_KEY, 0);
+    private String getSalt(int userId) {
+        long salt = getLong(LOCK_PASSWORD_SALT_KEY, 0, userId);
         if (salt == 0) {
             try {
                 salt = SecureRandom.getInstance("SHA1PRNG").nextLong();
-                setLong(LOCK_PASSWORD_SALT_KEY, salt);
-                Log.v(TAG, "Initialized lock password salt");
+                setLong(LOCK_PASSWORD_SALT_KEY, salt, userId);
+                Log.v(TAG, "Initialized lock password salt for user: " + userId);
             } catch (NoSuchAlgorithmException e) {
                 // Throw an exception rather than storing a password we'll never be able to recover
                 throw new IllegalStateException("Couldn't get SecureRandom number", e);
@@ -966,14 +967,14 @@ public class LockPatternUtils {
      * @param password the gesture pattern.
      * @return the hash of the pattern in a byte array.
      */
-    public byte[] passwordToHash(String password) {
+    public byte[] passwordToHash(String password, int userId) {
         if (password == null) {
             return null;
         }
         String algo = null;
         byte[] hashed = null;
         try {
-            byte[] saltedPassword = (password + getSalt()).getBytes();
+            byte[] saltedPassword = (password + getSalt(userId)).getBytes();
             byte[] sha1 = MessageDigest.getInstance(algo = "SHA-1").digest(saltedPassword);
             byte[] md5 = MessageDigest.getInstance(algo = "MD5").digest(saltedPassword);
             hashed = (toHex(sha1) + toHex(md5)).getBytes();
@@ -1334,6 +1335,14 @@ public class LockPatternUtils {
         }
         writeAppWidgets(newWidgets);
         return true;
+    }
+
+    private long getLong(String secureSettingKey, long defaultValue, int userHandle) {
+        try {
+            return getLockSettings().getLong(secureSettingKey, defaultValue, userHandle);
+        } catch (RemoteException re) {
+            return defaultValue;
+        }
     }
 
     private long getLong(String secureSettingKey, long defaultValue) {

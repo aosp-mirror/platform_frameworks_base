@@ -346,7 +346,8 @@ public class LockSettingsService extends ILockSettings.Stub {
 
         maybeUpdateKeystore(password, userId);
 
-        writeFile(getLockPasswordFilename(userId), mLockPatternUtils.passwordToHash(password));
+        writeFile(getLockPasswordFilename(userId),
+                mLockPatternUtils.passwordToHash(password, userId));
     }
 
     @Override
@@ -391,7 +392,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                 return true;
             }
             // Compare the hash from the file with the entered password's hash
-            final byte[] hash = mLockPatternUtils.passwordToHash(password);
+            final byte[] hash = mLockPatternUtils.passwordToHash(password, userId);
             final boolean matched = Arrays.equals(stored, hash);
             if (matched && !TextUtils.isEmpty(password)) {
                 maybeUpdateKeystore(password, userId);
