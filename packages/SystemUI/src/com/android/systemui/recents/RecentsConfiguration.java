@@ -80,6 +80,7 @@ public class RecentsConfiguration {
     public int taskViewTranslationZIncrementPx;
     public int taskViewRoundedCornerRadiusPx;
     public int taskViewHighlightPx;
+    public int taskViewAffiliateGroupEnterOffsetPx;
 
     /** Task bar colors */
     public int taskBarViewDefaultBackgroundColor;
@@ -210,6 +211,8 @@ public class RecentsConfiguration {
         taskViewTranslationZMinPx = res.getDimensionPixelSize(R.dimen.recents_task_view_z_min);
         taskViewTranslationZIncrementPx =
                 res.getDimensionPixelSize(R.dimen.recents_task_view_z_increment);
+        taskViewAffiliateGroupEnterOffsetPx =
+                res.getDimensionPixelSize(R.dimen.recents_task_view_affiliate_group_enter_offset);
 
         // Task bar colors
         taskBarViewDefaultBackgroundColor =
