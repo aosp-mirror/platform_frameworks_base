@@ -53,6 +53,18 @@ public class TaskGrouping {
         return mTaskKeyIndices.get(t.key);
     }
 
+    /** Returns whether a task is in this grouping. */
+    public boolean containsTask(Task t) {
+        return mTaskKeyIndices.containsKey(t.key);
+    }
+
+    /** Returns whether one task is above another in the group.  If they are not in the same group,
+     * this returns false. */
+    public boolean isTaskAboveTask(Task t, Task below) {
+        return mTaskKeyIndices.containsKey(t.key) && mTaskKeyIndices.containsKey(below.key) &&
+                mTaskKeyIndices.get(t.key) > mTaskKeyIndices.get(below.key);
+    }
+
     /** Returns the number of tasks in this group. */
     public int getTaskCount() { return mTaskKeys.size(); }
 
