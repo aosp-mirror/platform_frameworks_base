@@ -788,7 +788,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
         }
 
-        mTethering = new Tethering(mContext, mNetd, statsService, this, mHandler.getLooper());
+        mTethering = new Tethering(mContext, mNetd, statsService, mHandler.getLooper());
 
         //set up the listener for user state for creating user VPNs
         IntentFilter intentFilter = new IntentFilter();
