@@ -28201,6 +28201,8 @@ package android.system {
     field public static final int PROT_NONE;
     field public static final int PROT_READ;
     field public static final int PROT_WRITE;
+    field public static final int PR_GET_DUMPABLE;
+    field public static final int PR_SET_DUMPABLE;
     field public static final int PR_SET_NO_NEW_PRIVS;
     field public static final int RT_SCOPE_HOST;
     field public static final int RT_SCOPE_LINK;
