@@ -507,8 +507,6 @@ void SpotShadow::createSpotShadow(bool isCasterOpaque, const Vector3* poly,
     computeLightPolygon(lightVertexCount, lightCenter, lightSize, light);
     computeSpotShadow(isCasterOpaque, light, lightVertexCount, lightCenter, poly,
             polyLength, retStrips);
-    retStrips.setMode(VertexBuffer::kTwoPolyRingShadow);
-    retStrips.computeBounds<AlphaVertex>();
 }
 
 /**
@@ -785,6 +783,9 @@ void SpotShadow::generateTriangleStrip(bool isCasterOpaque, const Vector2* penum
             shadowVertices[2 * rays + rayIndex] = centroidXYA;
         }
     }
+
+    shadowTriangleStrip.setMode(VertexBuffer::kTwoPolyRingShadow);
+    shadowTriangleStrip.computeBounds<AlphaVertex>();
 }
 
 /**
