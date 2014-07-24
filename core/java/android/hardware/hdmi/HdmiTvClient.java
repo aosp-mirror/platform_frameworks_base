@@ -15,6 +15,9 @@
  */
 package android.hardware.hdmi;
 
+import static android.hardware.hdmi.HdmiRecordSources.RecordSource;
+import static android.hardware.hdmi.HdmiTimerRecordSources.TimerRecordSource;
+
 import android.annotation.SystemApi;
 import android.os.RemoteException;
 import android.util.Log;
@@ -162,7 +165,7 @@ public final class HdmiTvClient extends HdmiClient {
          *
          * @return {@link HdmiRecordSources} to be used to set recording info
          */
-        HdmiRecordSources.RecordSource onRecordRequestReceived(int recorderAddress);
+        RecordSource onRecordRequestReceived(int recorderAddress);
     }
 
     /**
@@ -187,13 +190,26 @@ public final class HdmiTvClient extends HdmiClient {
      * tvClient.startOneTouchRecord(recorderAddress, ownSource);
      * </pre>
      */
-    public void startOneTouchRecord(int recorderAddress, HdmiRecordSources.RecordSource source) {
+    public void startOneTouchRecord(int recorderAddress, RecordSource source) {
         try {
             byte[] data = new byte[source.getDataSize(true)];
             source.toByteArray(true, data, 0);
             mService.startOneTouchRecord(recorderAddress, data);
         } catch (RemoteException e) {
             Log.e(TAG, "failed to start record: ", e);
+        }
+    }
+
+    /**
+     * Stop one touch record.
+     *
+     * @param recorderAddress recorder address where recoding will be stopped
+     */
+    public void stopOneTouchRecord(int recorderAddress) {
+        try {
+            mService.stopOneTouchRecord(recorderAddress);
+        } catch (RemoteException e) {
+            Log.e(TAG, "failed to stop record: ", e);
         }
     }
 
@@ -211,13 +227,47 @@ public final class HdmiTvClient extends HdmiClient {
      * TimerRecordSource source = HdmiTimerRecourdSources.ofDigitalSource(timerInfo, recordSource);
      * tvClient.startTimerRecording(recorderAddress, source);
      * </pre>
+     *
+     * @param recorderAddress target recorder address
+     * @param sourceType type of record source. It should be one of
+     *          {@link HdmiControlManager#TIMER_RECORDING_TYPE_DIGITAL},
+     *          {@link HdmiControlManager#TIMER_RECORDING_TYPE_ANALOGUE},
+     *          {@link HdmiControlManager#TIMER_RECORDING_TYPE_EXTERNAL}.
+     * @param source record source to be used
      */
-    public void startTimerRecording(int recorderAddress,
-            HdmiTimerRecordSources.TimerRecordSource source) {
+    public void startTimerRecording(int recorderAddress, int sourceType, TimerRecordSource source) {
+        checkTimerRecordingSourceType(sourceType);
+
         try {
             byte[] data = new byte[source.getDataSize()];
             source.toByteArray(data, 0);
-            mService.startTimerRecording(recorderAddress, data);
+            mService.startTimerRecording(recorderAddress, sourceType, data);
+        } catch (RemoteException e) {
+            Log.e(TAG, "failed to start record: ", e);
+        }
+    }
+
+    private void checkTimerRecordingSourceType(int sourceType) {
+        switch (sourceType) {
+            case HdmiControlManager.TIMER_RECORDING_TYPE_DIGITAL:
+            case HdmiControlManager.TIMER_RECORDING_TYPE_ANALOGUE:
+            case HdmiControlManager.TIMER_RECORDING_TYPE_EXTERNAL:
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid source type:" + sourceType);
+        }
+    }
+
+    /**
+     * Clear timer recording with the given recorder address and recording source.
+     * For more details, please refer {@link #startTimerRecording(int, int, TimerRecordSource)}.
+     */
+    public void clearTimerRecording(int recorderAddress, int sourceType, TimerRecordSource source) {
+        checkTimerRecordingSourceType(sourceType);
+        try {
+            byte[] data = new byte[source.getDataSize()];
+            source.toByteArray(data, 0);
+            mService.clearTimerRecording(recorderAddress, sourceType, data);
         } catch (RemoteException e) {
             Log.e(TAG, "failed to start record: ", e);
         }

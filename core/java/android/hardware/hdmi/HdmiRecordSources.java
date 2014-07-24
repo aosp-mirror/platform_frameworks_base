@@ -103,8 +103,10 @@ public final class HdmiRecordSources {
      */
     @SystemApi
     public static final class OwnSource extends RecordSource {
-        protected OwnSource() {
-            super(RECORD_SOURCE_TYPE_OWN_SOURCE, 0);
+        private static final int EXTRA_DATA_SIZE = 0;
+
+        private OwnSource() {
+            super(RECORD_SOURCE_TYPE_OWN_SOURCE, EXTRA_DATA_SIZE);
         }
 
         @Override
@@ -743,5 +745,28 @@ public final class HdmiRecordSources {
         byteArray[index] = (byte) ((value >>> 8) & 0xFF);
         byteArray[index + 1] = (byte) (value & 0xFF);
         return 2;
+    }
+
+    /**
+     * Check the byte array of record source.
+     * @hide
+     */
+    public static boolean checkRecordSource(byte[] recordSource) {
+        int recordSourceType = recordSource[0];
+        int extraDataSize = recordSource.length - 1;
+        switch (recordSourceType) {
+            case RECORD_SOURCE_TYPE_OWN_SOURCE:
+                return extraDataSize == OwnSource.EXTRA_DATA_SIZE;
+            case RECORD_SOURCE_TYPE_DIGITAL_SERVICE:
+                return extraDataSize == DigitalServiceSource.EXTRA_DATA_SIZE;
+            case RECORD_SOURCE_TYPE_ANALOGUE_SERVICE:
+                return extraDataSize == AnalogueServiceSource.EXTRA_DATA_SIZE;
+            case RECORD_SOURCE_TYPE_EXTERNAL_PLUG:
+                return extraDataSize == ExternalPlugData.EXTRA_DATA_SIZE;
+            case RECORD_SOURCE_TYPE_EXTERNAL_PHYSICAL_ADDRESS:
+                return extraDataSize == ExternalPhysicalAddress.EXTRA_DATA_SIZE;
+            default:
+                return false;
+        }
     }
 }

@@ -69,6 +69,76 @@ public final class HdmiControlManager {
     public static final int RESULT_INCORRECT_MODE = 6;
     public static final int RESULT_COMMUNICATION_FAILED = 7;
 
+    // -- Message ids for display osd.
+
+    /** Place holder for recording status message. Indicates the status of a recording. */
+    public static final int MESSAGE_RECORDING_STATUS_MESSAGE_START = 0x100;
+    /** Recording currently selected source. Indicates the status of a recording. */
+    public static final int MESSAGE_RECORDING_CURRENTLY_SELECTED_SOURCE = 0x101;
+    /** Recording Digital Service. Indicates the status of a recording. */
+    public static final int MESSAGE_RECORDING_DIGITAL_SERVICE = 0x102;
+    /** Recording Analogue Service. Indicates the status of a recording. */
+    public static final int MESSAGE_RECORDING_ANALOGUE_SERVICE = 0x103;
+    /** Recording External input. Indicates the status of a recording. */
+    public static final int MESSAGE_RECORDING_EXTERNAL_INPUT = 0x104;
+    /** No recording – unable to record Digital Service. No suitable tuner. */
+    public static final int MESSAGE_NO_RECORDNIG_UNABLE_DIGITAL_SERVICE = 0x105;
+    /** No recording – unable to record Analogue Service. No suitable tuner. */
+    public static final int MESSAGE_NO_RECORDNIG_UNABLE_ANALOGUE_SERVICE = 0x106;
+    /**
+     * No recording – unable to select required service. as suitable tuner, but the requested
+     * parameters are invalid or out of range for that tuner.
+     */
+    public static final int MESSAGE_NO_RECORDNIG_UNABLE_SELECTED_SERVICE = 0x107;
+    /** No recording – invalid External plug number */
+    public static final int MESSAGE_NO_RECORDNIG_INVALID_EXTERNAL_PLUG_NUMBER = 0x109;
+    /** No recording – invalid External Physical Address */
+    public static final int MESSAGE_NO_RECORDNIG_INVALID_EXTERNAL_PHYSICAL_ADDRESS = 0x10A;
+    /** No recording – CA system not supported */
+    public static final int MESSAGE_NO_RECORDNIG_UNSUPPORTED_CA = 0x10B;
+    /** No Recording – No or Insufficient CA Entitlements” */
+    public static final int MESSAGE_NO_RECORDNIG_NO_OR_INSUFFICIENT_CA_ENTITLEMENTS = 0x10C;
+    /** No recording – Not allowed to copy source. Source is “copy never”. */
+    public static final int MESSAGE_NO_RECORDNIG_DISALLOW_TO_COPY = 0x10D;
+    /** No recording – No further copies allowed */
+    public static final int MESSAGE_NO_RECORDNIG_DISALLOW_TO_FUTHER_COPIES = 0x10E;
+    /** No recording – No media */
+    public static final int MESSAGE_NO_RECORDNIG_NO_MEDIA = 0x110;
+    /** No recording – playing */
+    public static final int MESSAGE_NO_RECORDNIG_PLAYING = 0x111;
+    /** No recording – already recording */
+    public static final int MESSAGE_NO_RECORDNIG_ALREADY_RECORDING = 0x112;
+    /** No recording – media protected */
+    public static final int MESSAGE_NO_RECORDNIG_MEDIA_PROTECTED = 0x113;
+    /** No recording – no source signal */
+    public static final int MESSAGE_NO_RECORDNIG_NO_SOURCE_SIGNAL = 0x114;
+    /** No recording – media problem */
+    public static final int MESSAGE_NO_RECORDNIG_MEDIA_PROBLEM = 0x115;
+    /** No recording – not enough space available */
+    public static final int MESSAGE_NO_RECORDNIG_NOT_ENOUGH_SPACE = 0x116;
+    /** No recording – Parental Lock On */
+    public static final int MESSAGE_NO_RECORDNIG_PARENT_LOCK_ON = 0x117;
+    /** Recording terminated normally */
+    public static final int MESSAGE_RECORDING_TERMINATED_NORMALLY = 0x11A;
+    /** Recording has already terminated */
+    public static final int MESSAGE_RECORDING_ALREADY_TERMINATED = 0x11B;
+    /** No recording – other reason */
+    public static final int MESSAGE_NO_RECORDNIG_OTHER_REASON = 0x11F;
+    // From here extra message for recording that is not mentioned in CEC spec
+    /** No recording. Previous recording request in progress. */
+    public static final int MESSAGE_NO_RECORDING_PREVIOUS_RECORDING_IN_PROGRESS = 0x130;
+    /** No recording. Please check recorder and connection. */
+    public static final int MESSAGE_NO_RECORDING_CHECK_RECORDER_CONNECTION = 0x131;
+    /** Cannot record currently displayed source. */
+    public static final int MESSAGE_NO_RECORDING_FAIL_TO_RECORD_DISPLAYED_SCREEN = 0x132;
+
+    /** Timer recording type for digital service source. */
+    public static final int TIMER_RECORDING_TYPE_DIGITAL = 1;
+    /** Timer recording type for analogue service source. */
+    public static final int TIMER_RECORDING_TYPE_ANALOGUE = 2;
+    /** Timer recording type for external source. */
+    public static final int TIMER_RECORDING_TYPE_EXTERNAL = 3;
+
     // True if we have a logical device of type playback hosted in the system.
     private final boolean mHasPlaybackDevice;
     // True if we have a logical device of type TV hosted in the system.
