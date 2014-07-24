@@ -298,6 +298,10 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Дозвољава апликацији да прима и обрађује Bluetooth MAP поруке. То значи да апликација може да надгледа или брише поруке које се шаљу на уређај, а да вам их не прикаже."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"преузимање покренутих апликација"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Дозвољава апликацији да преузима информације о актуелним и недавно покренутим задацима. Ово може да омогући апликацији да открије информације о томе које се апликације користе на уређају."</string>
+    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
+    <skip />
+    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
+    <skip />
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"интеракција између корисника"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Дозвољава апликацији да обавља радње између различитих корисника на уређају. Злонамерне апликације могу да користе ово да би угрозиле заштиту између корисника."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"пуна лиценца за интеракцију између корисника"</string>
@@ -1006,12 +1010,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Дозвољава апликацији да мења историју Прегледача или обележиваче ускладиштене на телефону. Ово може да омогући апликацији да брише или мења податке Прегледача. Напомена: Ова дозвола се можда на примењује на прегледаче треће стране и друге апликације са могућношћу веб прегледања."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"подешавање аларма"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Дозвољава апликацији да подеси аларм у инсталираној апликацији будилника. Неке апликације будилника можда не примењују ову функцију."</string>
-    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"управљање порукама говорне поште"</string>
-    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"Дозвољава апликацији да мења и уклања поруке из пријемног сандучета говорне поште."</string>
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"пиши поруке говорне поште"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"Дозвољава апликацији да мења и уклања поруке из пријемног сандучета говорне поште."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"додавање говорне поште"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Дозвољава апликацији да додаје поруке у пријемно сандуче говорне поште."</string>
-    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"читај сву говорну пошту"</string>
-    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"Дозвољава апликацији да чита говорну пошту."</string>
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"читај говорну пошту"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"Дозвољава апликацији да чита поруке говорне поште."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"измена дозвола за географске локације Прегледача"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Дозвољава апликацији да измени дозволе Прегледача за утврђивање географске локације. Злонамерне апликације то могу да злоупотребе и искористе за слање информација о локацији насумичним веб сајтовима."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"верификовање пакета"</string>
@@ -1555,7 +1559,8 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Систем"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth аудио"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Бежични екран"</string>
-    <string name="media_route_button_content_description" msgid="5758553567065145276">"Излаз медија"</string>
+    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
+    <skip />
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Повежите са уређајем"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Пребаците екран на уређај"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Тражење уређаја…"</string>

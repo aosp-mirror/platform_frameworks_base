@@ -298,6 +298,10 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Uygulamanın Bluetooth MAP iletilerini alıp işlemesine izin verir. Bu izin, uygulamanın cihazınıza gönderilen iletileri izleyebileceği veya size göstermeden silebileceği anlamına gelir."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"çalışan uygulamaları al"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Uygulamaya o anda ve son çalışan görevler hakkında bilgi alma izni verir. Bu izin, uygulamanın cihaz tarafından kullanılan uygulamalar hakkında bilgi elde etmesine olanak sağlayabilir."</string>
+    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
+    <skip />
+    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
+    <skip />
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"kullanıcılar arasında etkileşim kurma"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Uygulamaya cihazdaki farklı kullanıcılar arasında işlem gerçekleştirme izni verir. Kötü amaçlı uygulamalar bu izinle kullanıcılar arasındaki korumayı ihlal edebilir."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"kullanıcılar arasında etkileşim kurmak için tam izin"</string>
@@ -1006,12 +1010,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Uygulamaya Tarayıcı geçmişini ve telefonunuzda depolanan yer işaretlerini değiştirme izni verir. Bu izin, uygulamanın Tarayıcı geçmişini silmesine ve değiştirmesine olanak sağlar. Not: Bu izin, üçüncü taraf cihazlar veya Web\'e göz atma işlevine sahip diğer uygulamalar tarafından kullanılmayabilir."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"alarm ayarla"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Uygulamaya, çalar saat uygulamasının alarmını ayarlama izni verir. Bazı çalar saat uygulamaları bu özelliği uygulayamayabilir."</string>
-    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"sesli mesajları yönet"</string>
-    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"Uygulamanın sesli mesaj gelen kutunuzdaki mesajları değiştirmesine ve kaldırmasına izin verir."</string>
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"sesli mesaj yaz"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"Uygulamanın sesli mesaj gelen kutunuzdaki mesajları değiştirmesine ve kaldırmasına izin verir."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"sesli mesaj ekle"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Uygulamaya, sesli mesaj gelen kutunuza mesaj ekleme izni verir."</string>
-    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"tüm sesli mesajları oku"</string>
-    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"Uygulamanın tüm sesli mesajlarınızı okumasına izin verir."</string>
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"sesli mesaj oku"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"Uygulamanın sesli mesajlarınızı okumasına izin verir."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"Tarayıcı\'nın coğrafi konum izinlerini değiştir"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Uygulamaya, Tarayıcı\'nın coğrafi konum izinlerini değiştirme izni verir. Kötü amaçlı uygulamalar keyfi web sitelerine konum bilgisi gönderilmesini sağlamak için bunu kullanabilirler."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"paketleri doğrula"</string>
@@ -1555,7 +1559,8 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Sistem"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth ses"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Kablosuz ekran"</string>
-    <string name="media_route_button_content_description" msgid="5758553567065145276">"Medya çıkışı"</string>
+    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
+    <skip />
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Cihaza bağlanın"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Ekranı cihaza yayınlayın"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Cihaz aranıyor…"</string>

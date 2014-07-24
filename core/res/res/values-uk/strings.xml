@@ -298,6 +298,10 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Дозволяє додаткові отримувати й обробляти повідомлення Bluetooth MAP. Це означає, що додаток може відстежувати чи видаляти повідомлення, надіслані на ваш пристрій, навіть не показуючи їх вам."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"отримувати запущені програми"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Дозволяє програмі отримувати інформацію про поточні й останні запущені завдання. Це може дозволити програмі виявляти інформацію про програми, які використовуються на пристрої."</string>
+    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
+    <skip />
+    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
+    <skip />
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"взаємодіяти між користувачами"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Дозволяє програмі виконувати дії щодо різних користувачів на пристрої. Шкідливі програми можуть використовувати це для порушення захисту окремих користувачів."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"повна ліцензія на взаємодію між користувачами"</string>
@@ -1006,12 +1010,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Дозволяє програмі змінювати історію чи закладки веб-переглядача, збережені у вашому телефоні. Це може дозволити програмі стирати чи змінювати дані веб-переглядача. Зауважте: цей дозвіл не може застосовуватися веб-переглядачами третіх сторін або іншими програмами з можливостями веб-перегляду."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"установлювати будильник"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Дозволяє програмі налаштовувати сигнал у встановленій програмі будильника. У деяких програмах будильника ця функція може не застосовуватися."</string>
-    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"керувати голосовою поштою"</string>
-    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"Додаток може змінювати голосові повідомлення та видаляти їх із папки \"Вхідні\"."</string>
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"записувати голосові повідомлення"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"Додаток може змінювати голосові повідомлення та видаляти їх із папки \"Вхідні\"."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"додавати голосову пошту"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Дозволяє програмі додавати повідомлення в папку \"Вхідні\" голосової пошти."</string>
-    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"читати всі голосові повідомлення"</string>
-    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"Додаток може читати всі голосові повідомлення."</string>
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"читати голосові повідомлення"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"Додаток може читати голосові повідомлення."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"змінювати дозволи географічного місцезнаходження у веб-переглядачі"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Дозволяє програмі змінювати дозволи географічного місцезнаходження у веб-переглядачі. Шкідливі програми можуть використовувати це, щоб дозволяти надсилати інформацію про місцезнаходження довільним веб-сайтам."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"перевіряти пакети"</string>
@@ -1386,8 +1390,8 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Дозволяє додатку прив’язуватися до служби довірчих агентів."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Взаємодіяти з оновленнями системи та системою відновлення."</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Дозволяє додатку взаємодіяти із системою відновлення й оновленнями системи."</string>
-    <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Створювати сеанси проектування медіа"</string>
-    <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"Додаток може створювати сеанси проектування медіа. Під час цих сеансів додатки зможуть збирати аудіовміст і вміст дисплея. Не використовується звичайними додатками."</string>
+    <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Створювати сеанси трансляції вмісту"</string>
+    <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"Додаток може створювати сеанси трансляції вмісту. Під час цих сеансів додаток зможе отримати доступ до аудіо й зображення на екрані. Не використовується звичайними додатками."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Двічі торкніться, щоб керувати масштабом"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Не вдалося додати віджет."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Йти"</string>
@@ -1516,7 +1520,7 @@
     <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"Дані 4G вимкнено"</string>
     <string name="data_usage_mobile_limit_title" msgid="3393439305227911006">"Мобільні дані вимкнено"</string>
     <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"Дані Wi-Fi вимкнено"</string>
-    <string name="data_usage_limit_body" msgid="6131350187562939365">"Досягнуто ліміту"</string>
+    <string name="data_usage_limit_body" msgid="6131350187562939365">"Перевищено ліміт"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Перевищено ліміт даних 2G–3G"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Перевищено ліміт даних 4G"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Перевищено ліміт мобільних даних"</string>
@@ -1555,7 +1559,8 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Система"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Аудіо Bluetooth"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Бездротовий екран"</string>
-    <string name="media_route_button_content_description" msgid="5758553567065145276">"Вивід медіа-даних"</string>
+    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
+    <skip />
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Під’єднатися до пристрою"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Транслювати екран на пристрій"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Пошук пристроїв…"</string>

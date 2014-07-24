@@ -298,6 +298,10 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Umožňuje aplikácii prijímať a spracovávať správy MAP rozhrania Bluetooth. Znamená to, že aplikácia môže sledovať správy odoslané na vaše zariadenie alebo ich odstrániť bez toho, aby sa vám zobrazili."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"načítať spustené aplikácie"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Umožňuje aplikácii načítať informácie o aktuálne či nedávno spustených úlohách. Toto povolenie môže aplikácii umožniť objaviť informácie o tom, ktoré aplikácie sa na zariadení používajú."</string>
+    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
+    <skip />
+    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
+    <skip />
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"interakcie naprieč používateľmi"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Umožňuje aplikácii vykonávať akcie naprieč rôznymi používateľmi zariadenia. Škodlivé aplikácie môžu toto povolenie zneužiť na obídenie ochrany medzi používateľmi."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"plná licencia na interakcie naprieč používateľmi"</string>
@@ -1006,12 +1010,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Umožňuje aplikácii upraviť históriu prehliadača alebo záložky uložené v telefóne. Aplikácia s týmto povolením môže vymazať alebo upraviť údaje prehliadača. Poznámka: Toto povolenie nemôžu vynucovať prehliadače tretích strán ani žiadne ďalšie aplikácie umožňujúce prehliadanie webu."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"nastaviť budík"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Umožňuje aplikácii nastaviť budík v nainštalovanej aplikácii budík. Niektoré aplikácie budíka nemusia túto funkciu implementovať."</string>
-    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"správa hlasových správ"</string>
-    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"Povoľuje aplikácii upravovať a odstraňovať správy z hlasovej schránky."</string>
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"zapisovanie do hlasovej schránky"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"Povoľuje aplikácii upravovať a odstraňovať správy z hlasovej schránky."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"pridať hlasovú schránku"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Umožní aplikácii pridávať správy do doručenej pošty hlasovej schránky."</string>
-    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"čítanie všetkých hlasových schránok"</string>
-    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"Umožňuje aplikácii čítať všetky vaše hlasové schránky."</string>
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"čítanie hlasových správ"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"Umožňuje aplikácii čítať vaše hlasové správy."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"zmeniť povolenia prehliadača poskytovať informácie o zemepisnej polohe"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Umožňuje aplikácii zmeniť povolenia prehliadača na poskytovanie údajov o zemepisnej polohe. Škodlivé aplikácie to môžu použiť na odosielanie informácií o polohe ľubovoľným webovým stránkam."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"overiť balíky"</string>
@@ -1555,7 +1559,8 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Systém"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth audio"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Bezdrôtový displej"</string>
-    <string name="media_route_button_content_description" msgid="5758553567065145276">"Výstup médií"</string>
+    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
+    <skip />
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Pripojenie k zariadeniu"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Prenos obraz. do zariad."</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Prebieha vyhľadávanie zariadení…"</string>

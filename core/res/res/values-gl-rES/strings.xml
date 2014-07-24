@@ -298,6 +298,10 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Permite que a aplicación reciba e procese as mensaxes de MAP por Bluetooth. Isto quere dicir que a aplicación podería controlar ou eliminar as mensaxes enviadas ao teu dispositivo sen mostrarchas."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"recuperar aplicacións en execución"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Permite á aplicación recuperar información acerca de tarefas que se están executando actualmente ou que se executaron recentemente. É posible que esta acción permita á aplicación descubrir información acerca de que aplicacións se utilizan no dispositivo."</string>
+    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
+    <skip />
+    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
+    <skip />
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"interactuar entre os usuarios"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Permite á aplicación levar a cabo accións nos diferentes usuarios do dispositivo. É posible que aplicacións maliciosas utilicen isto para vulnerar a protección entre os usuarios."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"licenza completa para interactuar entre os usuarios"</string>
@@ -1006,12 +1010,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Permite á aplicación modificar o historial ou os favoritos do navegador que están almacenados no teu teléfono. É posible que esta acción permita á aplicación borrar ou modificar os datos do navegador. Nota: É posible que este permiso non sexa executado por navegadores de terceiros ou outras aplicacións con funcionalidades de navegación web."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"definir unha alarma"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Permite á aplicación definir unha alarma nunha aplicación de espertador instalada. É posible que algunhas aplicacións de espertador non implementen esta función."</string>
-    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"xestionar correos de voz"</string>
-    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"Permite á aplicación modificar e eliminar mensaxes da caixa de entrada do teu correo de voz."</string>
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"escribir correos de voz"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"Permite á aplicación modificar e eliminar mensaxes da caixa de entrada do teu correo de voz."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"engadir correo de voz"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Permite á aplicación engadir mensaxes á caixa de entrada do teu correo de voz."</string>
-    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"ler todo o correo de voz"</string>
-    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"Permite que a aplicación lea todos os correos de voz."</string>
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"ler correo de voz"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"Permite á aplicación ler os teus correos de voz."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"modificar os permisos de xeolocalización do navegador"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Permite á aplicación modificar os permisos de xeolocalización do navegador. É posible que as aplicacións maliciosas utilicen esta opción para permitir o envío de información de localización a sitios web arbitrarios."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"verificar paquetes"</string>
@@ -1555,7 +1559,8 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Sistema"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Audio por Bluetooth"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Visualización sen fíos"</string>
-    <string name="media_route_button_content_description" msgid="5758553567065145276">"Saída multimedia"</string>
+    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
+    <skip />
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Conectar co dispositivo"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Emisión de pantalla no dispositivo"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Buscando dispositivos…"</string>

@@ -298,6 +298,10 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"აპს შეეძლება Bluetooth MAP შეტყობინებების მიღება და დამუშავება. ეს ნიშნავს, რომ აპს შეეძლება შეტყობინებების მონიტორინგი და მათი წაშლა თქვენთვის ჩვენების გარეშე."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"მოქმედი აპების მოძიება"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"აპს შეეძლება მოიძიოს ინფორმაცია ამჟამად და უახლოეს წარსულში მიმდინარე ამოცანების შესახებ. ამგვარად, აპს აქვს შესაძლებლობა აღმოაჩინოს ინფორმაცია იმის შესახებ, თუ რომელი აპლიკაციებია გამოყენებული მოწყობილობაზე."</string>
+    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
+    <skip />
+    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
+    <skip />
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"მომხმარებლებს შორის ინტერაქცია"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"აპს შეეძლება, სხვადასხვა მომხმარებლის მოქმედებები შეასრულოს მოწყობილობაზე. მავნე აპებმა შეიძლება მომხმარებლებს შორის დაცვის დასარღვევად გამოიყენონ."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"მომხმარებლებთან ინტერაქციის სრული ლიცენზია"</string>
@@ -1006,12 +1010,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"აპს შეეძლება, შეცვალოს ბრაუზერის ისტორია და თქვენ ტელეფონში შენახული სანიშნეები. ამან შეიძლება უფლება მისცეს აპს, წაშალოს ან შეცვალოს ბრაუზერის მონაცემები. შენიშვნა: ეს ნებართვა არ შეიძლება შესრულდეს მესამე მხარის ბრაუზერების ან ვებ დათვალიერების შესაძლებლობის მქონე სხვა აპლიკაციების მიერ."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"მაღვიძარას დაყენება"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"აპს შეეძლება მაღვიძარას დაყენება დაინსტალირებული მაღვიძარას აპლიკაციაში. ამ ფუნქციას მაღვიძარას ზოგიერთი აპი არ იყენებს."</string>
-    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"ხმოვანი ფოსტის მართვა"</string>
-    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"ნებას რთავს ამ აპს, შეცვალოს და ამოშალოს შეტყობინებები თქვენი ხმოვანი ფოსტის შემოსულებიდან."</string>
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"ხმოვანი ფოსტის ჩათვლით"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"ნებას რთავს ამ აპს, შეცვალოს და ამოშალოს შეტყობინებები თქვენი ხმოვანი ფოსტის შემოსულებიდან."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"ხმოვანი ფოსტის დამატება"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"აპს შეეძლება დაამატოს შეტყობინებები თქვენი ხმოვანი ფოსტის შემოსულებში."</string>
-    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"მთელი ხმოვანი ფოსტის წაკითხვა"</string>
-    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"აპს ეძლევა მთელი თქვენი ხმოვანი ფოსტების წაკითხვის უფლება."</string>
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"ხმოვანი ფოსტის წაკითხვა"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"აპს ეძლევა მთელი თქვენი ხმოვანი ფოსტების წაკითხვის უფლება."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"ბრაუზერის გეოლოკაციის უფლებების შეცვლა"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"აპს შეეძლება ბრაუზერის გეოლოკაციის უფლებების შეცვლა. მავნე აპებმა ეს შესაძლოა გამოიყენონ  ნებისმიერი ვებსაიტისთვის მდებარეობის შესახებ ინფორმაციის გასაგზავნად."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"პაკეტების გადამოწმება"</string>
@@ -1291,7 +1295,7 @@
     <string name="sim_removed_message" msgid="5450336489923274918">"ფიჭური კავშირი არ იქნება ხელმისაწვდომი, ვიდრე არ ჩადებთ ქმედით SIM ბარათს და გადატვირთავთ."</string>
     <string name="sim_done_button" msgid="827949989369963775">"დასრულდა"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIM ბარათი დაემატა"</string>
-    <string name="sim_added_message" msgid="7797975656153714319">"გადატვირთთ თქვენი მოწყობილობა ფიჭურ ქსელზე წვდომისთვის."</string>
+    <string name="sim_added_message" msgid="7797975656153714319">"გადატვირთეთ თქვენი მოწყობილობა ფიჭურ ქსელზე წვდომისთვის."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"გადატვირთვა"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"დროის დაყენება"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"თარიღის დაყენება"</string>
@@ -1386,10 +1390,8 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"საშუალებას აძლევს აპლიკაციას მიემაგროს სანდო აგენტის სერვისს."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"განახლებასთან და აღდგენის სისტემასთან ინტერაქცია"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"საშუალებას აძლევს აპლიკაციას მოახდინოს აღდგენის სისტემასთან და სისტემის განახლებასთან ინტერაქცია."</string>
-    <!-- no translation found for permlab_createMediaProjection (4941338725487978112) -->
-    <skip />
-    <!-- no translation found for permdesc_createMediaProjection (1284530992706219702) -->
-    <skip />
+    <string name="permlab_createMediaProjection" msgid="4941338725487978112">"მედია პროეცირების სესიების შექმნა"</string>
+    <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"საშუალებას აძლევს აპლიკაციას, შექმნას მედია პროეცირების სესიები. ამ სესიებმა შესაძლოა მისცეს აპლიკაციებს საშუალება, აღიბეჭდოს ეკრანისა და აუდიოს კონტენტი. ჩვეულებრივ აპს წესით ეს არასოდეს არ უნდა დასჭირდეს."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"მასშტაბის მართვისთვის შეეხეთ ორჯერ."</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"ვერ დაემატა ვიჯეტი."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"გადასვლა"</string>
@@ -1514,20 +1516,14 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"რედაქტირება"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"ინტერნეტის გამოყენების გაფრთხილება"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"შეეხეთ მოხმარებისა და პარამეტრების სანახავად."</string>
-    <!-- no translation found for data_usage_3g_limit_title (4462365924791862301) -->
-    <skip />
-    <!-- no translation found for data_usage_4g_limit_title (7476424187522765328) -->
-    <skip />
-    <!-- no translation found for data_usage_mobile_limit_title (3393439305227911006) -->
-    <skip />
-    <!-- no translation found for data_usage_wifi_limit_title (3461968509557554571) -->
-    <skip />
-    <!-- no translation found for data_usage_limit_body (6131350187562939365) -->
-    <skip />
+    <string name="data_usage_3g_limit_title" msgid="4462365924791862301">"2G-3G მონაც. გადაცემა გამორთულია"</string>
+    <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"4G მონაც. გადაცემა გამორთულია"</string>
+    <string name="data_usage_mobile_limit_title" msgid="3393439305227911006">"ფიჭური ინტერნეტი გამორთულია"</string>
+    <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"Wi-Fi მონაც. გადაცემა გამორთულია"</string>
+    <string name="data_usage_limit_body" msgid="6131350187562939365">"ლიმიტი მიღწეულია"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"გადაჭარბებულია 2G-3G მონაცემების ლიმიტი"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G ლიმიტი გადაჭარბებულია"</string>
-    <!-- no translation found for data_usage_mobile_limit_snoozed_title (4941346653729943789) -->
-    <skip />
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"ფიჭ. ინტერნეტის ლიმიტი მიღწეულია"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Wi‑Fi მონაცემთა ლიმიტი გადაჭარბებულია"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"ლიმიტი გადაჭარბებულია <xliff:g id="SIZE">%s</xliff:g>-ით."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"მონაცემთა ფონური გადაცემა შეზღუდულია"</string>
@@ -1563,7 +1559,8 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"სისტემა"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth აუდიო"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"უსადენო ეკრანი"</string>
-    <string name="media_route_button_content_description" msgid="5758553567065145276">"მედია გამომავალი"</string>
+    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
+    <skip />
     <string name="media_route_chooser_title" msgid="1751618554539087622">"მოწყობილობასთან დაკავშირება"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"ეკრანის მოწყობილობაზე გადაცემა"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"მოწყობილობების ძიება…"</string>

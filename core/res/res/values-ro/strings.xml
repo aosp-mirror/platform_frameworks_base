@@ -298,6 +298,10 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Permite aplicației să primească și să proceseze mesaje MAP prin Bluetooth. Aceasta înseamnă că aplicația ar putea monitoriza sau șterge mesajele trimise pe dispozitiv fără a le afișa."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"preluare aplicaţii care rulează"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Permite aplicaţiei să preia informaţiile despre activităţile care rulează în prezent şi care au rulat recent. În acest fel, aplicaţia poate descoperi informaţii despre aplicaţiile care sunt utilizate pe dispozitiv."</string>
+    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
+    <skip />
+    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
+    <skip />
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"interacţiune între utilizatori"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Permite aplicaţiei să efectueze acţiuni pentru diferiţi utilizatori pe dispozitiv. Aplicaţiile rău intenţionate pot utiliza această permisiune pentru a încălca protecţia între utilizatori."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"licenţă completă pentru interacţiune între utilizatori"</string>
@@ -719,8 +723,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Permite proprietarului să se conecteze la interfața de nivel superior a unui serviciu de citire a notificărilor. În mod normal aplicațiile nu ar trebui să aibă nevoie de această permisiune."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"conectare la un serviciu furnizor de condiții"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Permite proprietarului să se conecteze la interfața de nivel superior a unui serviciu furnizor de condiții. Nu ar trebui să fie necesară pentru aplicațiile obișnuite."</string>
-    <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"conectare la un serviciu de trasee multimedia"</string>
-    <string name="permdesc_bindMediaRouteService" msgid="6436655024972496687">"Permite proprietarului să se conecteze la interfața de nivel superior a unui serviciu de trasee multimedia. Nu ar trebui să fie necesară pentru aplicațiile obișnuite."</string>
+    <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"se conectează la un serviciu de trasee multimedia"</string>
+    <string name="permdesc_bindMediaRouteService" msgid="6436655024972496687">"Permite deținătorului să se conecteze la interfața de nivel superior a unui serviciu de trasee multimedia. Nu ar trebui să fie necesară pentru aplicațiile obișnuite."</string>
     <string name="permlab_bindDreamService" msgid="4153646965978563462">"se conectează la un serviciu de vis"</string>
     <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Permite deținătorului să se conecteze la interfața superioară a unui serviciu de vis. Această opțiune nu ar trebui să fie necesară pentru aplicațiile obișnuite."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"apelarea aplicației de configurare furnizată de operator"</string>
@@ -1006,12 +1010,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Permite aplicaţiei să modifice istoricul Browserului sau marcajele stocate pe telefon. În acest fel, aplicaţia poate şterge sau modifica datele din Browser. Notă: această permisiune nu poate fi aplicată de browsere terţă parte sau de alte aplicaţii cu capacităţi de navigare pe web."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"setează o alarmă"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Permite aplicaţiei să seteze o alarmă într-o aplicaţie de ceas cu alarmă instalată. Este posibil ca unele aplicaţii de ceas cu alarmă să nu implementeze această funcţie."</string>
-    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"gestionarea mesajelor vocale"</string>
-    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"Permite aplicației să modifice și să elimine mesaje din secțiunea de mesaje vocale primite."</string>
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"scrierea mesajelor vocale"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"Permite aplicației să modifice și să elimine mesaje din secțiunea de mesaje vocale primite."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"adăugare mesagerie vocală"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Permite aplicaţiei să adauge mesaje în Mesaje primite în mesageria vocală."</string>
-    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"acces la toate mesajele vocale"</string>
-    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"Permite aplicației să acceseze toate mesajele vocale."</string>
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"citirea mesajelor vocale"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"Permite aplicației să citească mesajele vocale."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"modificare permisiuni pentru locaţia geografică a browserului"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Permite aplicaţiei să modifice permisiunile privind locaţia geografică a browserului. Aplicaţiile rău intenţionate pot utiliza această permisiune pentru a permite trimiterea informaţiilor privind locaţia către site-uri web arbitrare."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"verificare pachete"</string>
@@ -1555,7 +1559,8 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Sistem"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Audio Bluetooth"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Ecran wireless"</string>
-    <string name="media_route_button_content_description" msgid="5758553567065145276">"Rezultate media"</string>
+    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
+    <skip />
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Conectați-vă la dispozitiv"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Proiectați ecranul pe dispozitiv"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Se caută dispozitive..."</string>

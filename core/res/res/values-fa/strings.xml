@@ -298,6 +298,10 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"‏به برنامه اجازه می‌دهد پیام‌های بلوتوث MAP را دریافت و پردازش کند. این یعنی برنامه می‌تواند پیام‌های ارسالی به دستگاه شما را بدون نمایش آن‌ها به شما حذف یا کنترل کند."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"‏بازیابی برنامه‎های در حال اجرا"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"به برنامه امکان می‌دهد اطلاعات مربوط به کارهای در حال اجرای اخیر و کنونی را بازیابی کند. این ممکن است به برنامه امکان دهد به اطلاعات مربوط به برنامه‌هایی که در دستگاه استفاده می‌شوند دست یابد."</string>
+    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
+    <skip />
+    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
+    <skip />
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"ارتباط بین کاربران"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"به برنامه اجازه می‌دهد اقداماتی در بین کاربران مختلف در دستگاه انجام دهد. ممکن است برنامه‌های مخرب از این قابلیت برای نقض حفاظت موجود در بین کاربران استفاده کنند."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"مجوز کامل برای ارتباط بین کاربران"</string>
@@ -1006,12 +1010,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"به برنامه اجازه می‌دهد سابقه مرورگر یا نشانک‌های ذخیره شده در تلفن شما را اصلاح کند. این ویژگی ممکن است به برنامه اجازه دهد داده‌های مرورگر را حذف یا اصلاح کند. توجه: این مجوز ممکن است توسط مرورگرهای شخص ثالث یا سایر برنامه‌های دارای قابلیت مرور وب قابل اجرا نباشد."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"تنظیم یک هشدار"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"‏به برنامه اجازه می‎دهد تا هشداری را در برنامه ساعت زنگدار نصب شده تنظیم کند. برخی از برنامه‎های ساعت زنگدار نمی‎توانند این ویژگی را اعمال کنند."</string>
-    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"مدیریت پست‌های صوتی"</string>
-    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"به برنامه امکان می‌دهد پیام‌ها را از صندوق ورودی پست صوتی شما تغییر داده و حذف کند."</string>
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"نوشتن پست‌های صوتی"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"به برنامه اجازه می‌دهد پیام‌ها را از صندوق ورودی پست صوتی شما تغییر داده و حذف کند."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"افزودن پست صوتی"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"به برنامه اجازه می‌دهد تا پیام‌ها را به صندوق دریافت پست صوتی شما اضافه کند."</string>
-    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"خواندن کل پست صوتی"</string>
-    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"به برنامه اجازه می‌دهد همه پست‌های صوتی‌تان را بخواند."</string>
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"خواندن پست صوتی"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"به برنامه اجازه می‌دهد پست‌های صوتی‌تان را بخواند."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"تغییر مجوزهای مکان جغرافیایی مرورگر"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"‏به برنامه اجازه می‎دهد تا مجوزهای جغرافیایی مرورگر را تغییر دهد. برنامه‎های مخرب می‎توانند از آن استفاده کنند تا اطلاعات موقعیت مکانی را به سایت‌های وب کتابخانه بفرستند."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"تأیید بسته‌ها"</string>
@@ -1555,7 +1559,8 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"سیستم"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"بلوتوث‌های صوتی"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"صفحه نمایش بی‌سیم"</string>
-    <string name="media_route_button_content_description" msgid="5758553567065145276">"خروجی رسانه"</string>
+    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
+    <skip />
     <string name="media_route_chooser_title" msgid="1751618554539087622">"برقراری ارتباط با دستگاه"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"فرستادن صفحه نمایش به دستگاه"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"در حال جستجو برای دستگاه‌ها..."</string>

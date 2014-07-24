@@ -298,6 +298,10 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Tillåter att appen tar emot och hanterar Bluetooth MAP-meddelanden. Detta innebär att appen kan övervaka eller ta bort meddelanden som skickats till enheten utan att visa dem för dig."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"hämta appar som körs"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Tillåter att appen hämtar information om nyligen körda och pågående aktiviteter. Detta kan innebära att appen tillåts ta reda på vilka appar som används på enheten."</string>
+    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
+    <skip />
+    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
+    <skip />
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"interagera mellan användare"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Tillåter att appen utför åtgärder mellan användare på enheten. Skadliga appar kan använda detta som ett sätt att kringgå skyddet mellan användare."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"fullständig behörighet att interagera mellan användare"</string>
@@ -1006,12 +1010,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Tillåter att appen ändrar historiken för besökta sidor i webbläsaren eller bokmärken som sparats på telefonen. Det kan innebära att appen kan ta bort eller ändra webbläsarinformation. Observera att den här behörigheten kanske inte är tillämplig för webbläsare från tredje part eller andra appar med surffunktion."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"ställa in ett alarm"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Tillåter att appen ställer in ett alarm i en befintlig alarmapp. Vissa alarmappar har inte den här funktionen."</string>
-    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"hantera meddelanden i röstbrevlådan"</string>
-    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"Tillåter att appen ändrar och tar bort meddelanden från röstbrevlådans inkorg."</string>
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"skriva röstmeddelanden"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"Tillåter att appen ändrar och tar bort meddelanden från röstbrevlådans inkorg."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"lägg till röstbrevlåda"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Gör att appen lägger till meddelanden i röstbrevlådans inkorg."</string>
-    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"läsa alla röstmeddelanden"</string>
-    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"Tillåter att appen läser alla dina röstmeddelanden."</string>
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"läsa röstmeddelanden"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"Tillåter att appen läser dina röstmeddelanden."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"Ändra geografisk plats för webbläsaren"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Tillåter att appen ändrar webbläsarens behörigheter för geografisk plats. Skadliga appar kan använda detta för att tillåta att platsinformation skickas till godtyckliga webbplatser."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"kontrollera paket"</string>
@@ -1555,7 +1559,8 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"System"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth-ljud"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Trådlös skärm"</string>
-    <string name="media_route_button_content_description" msgid="5758553567065145276">"Medieuppspelning"</string>
+    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
+    <skip />
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Anslut till enhet"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Överför skärmen till enheten"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Söker efter enheter ..."</string>

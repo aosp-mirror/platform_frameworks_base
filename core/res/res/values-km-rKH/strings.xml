@@ -298,6 +298,10 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"ឲ្យ​កម្មវិធី​ទទួល និង​ដំណើរការ​សារ MAP ប៊្លូធូស។ មាន​ន័យ​ថា កម្មវិធី​អាច​តាមដាន​ ឬ​លុប​សារ​ដែល​បាន​ផ្ញើ​ទៅ​ឧបករណ៍​របស់​អ្នក​ដោយ​​មិន​បង្ហាញ​ពួកវា​ដល់​អ្នក។"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"ទៅ​យក​កម្មវិធី​កំពុង​ដំណើរការ"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"ឲ្យ​កម្មវិធី​ទៅ​យក​ព័ត៌មាន​លម្អិត​អំពី​កិច្ចការ​ដែល​កំពុង​ដំណើរការ​បច្ចុប្បន្ន។ វា​អាច​ឲ្យ​កម្មវិធី​រកមើល​ព័ត៌មាន​ថា​តើ​កម្មវិធី​ណាមួយ​ត្រូវ​បាន​ប្រើ​លើ​ឧបករណ៍។"</string>
+    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
+    <skip />
+    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
+    <skip />
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"អន្តរកម្ម​តាម​​អ្នក​ប្រើ"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"ឲ្យ​កម្មវិធី​អនុវត្ត​សកម្មភាព​ឆ្លង​អ្នកប្រើ​ផ្សេងៗ​​លើ​ឧបករណ៍។ កម្មវិធី​ព្យាបាទ​អាច​ប្រើ​វា ដើម្បី​បំពាន​ការ​ការពារ​រវាង​អ្នក​ប្រើ។"</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"អាជ្ញាប័ណ្ណ​ពេញលេញ​ ដើម្បី​ទាក់ទង​អ្នក​ប្រើ"</string>
@@ -1006,12 +1010,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"ឲ្យ​កម្មវិធី​កែ​ប្រវត្តិ ឬ​ចំណាំ​របស់​កម្មវិធី​អ៊ីនធឺណិត​ដែល​បាន​រក្សាទុក​ក្នុង​ទូរស័ព្ទ​​របស់​អ្នក។ កម្មវិធី​ព្យាបាទ​អាច​ប្រើ​វា​ដើម្បី​លុប ឬ​កែ​ទិន្នន័យ​នៃ​កម្មវិធី​អ៊ីនធឺណិត​របស់​អ្នក។ ចំណាំ៖ សិទ្ធិ​នេះ​អាច​ត្រូវ​បាន​បង្ខំ​ដោយ​កម្មវិធី​អ៊ីនធឺណិត​​ភាគី​ទីបី​ ឬ​​កម្មវិធី​ផ្សេង​ដែល​មាន​សមត្ថភាព​រុករក​បណ្ដាញ។ស"</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"កំណត់​សំឡេង​រោទ៍"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"ឲ្យ​កម្មវិធី​កំណត់​​សំឡេង​រោទ៍​ក្នុង​កម្មវិធី​នាឡិកា​រោទ៍​បាន​ដំឡើង។​ កម្មវិធី​នាឡិកា​រោទ៍​មួយ​ចំនួន​អាច​មិន​អនុវត្ត​លក្ខណៈ​នេះ។"</string>
-    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"គ្រប់គ្រង​សារ​ជា​សំឡេង"</string>
-    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"ឲ្យ​កម្មវិធី​កែប្រែ​ និង​លុប​សារ​ចេញ​ពី​ប្រអប់​ទទួល​សារ​ជា​សំឡេង​របស់​អ្នក។"</string>
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"សរសេរ​សារ​ជា​សំឡេង"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"ឲ្យ​កម្មវិធី​កែប្រែ​ និង​លុប​សារ​ចេញពី​ប្រអប់​ទទួល​សារ​ជា​សំឡេង​របស់​អ្នក។"</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"បន្ថែម​សារ​ជា​សំឡេង"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"ឲ្យ​កម្មវិធី​បន្ថែម​សារ​ទៅ​ប្រអប់​ទទួល​សារ​ជា​សំឡេង​របស់​អ្នក។"</string>
-    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"អាន​សារ​ជា​សំឡេង​ទាំងអស់"</string>
-    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"ឲ្យ​កម្មវិធី​អាន​​សារ​ជា​សំឡេង​របស់​អ្នក​ទាំងអស់។"</string>
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"អាន​សារ​ជា​សំឡេង"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"ឲ្យ​កម្មវិធី​អាន​សារ​ជា​សំឡេង​របស់​អ្នក។"</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"កែ​សិទ្ធិ​ទីតាំង​ភូមិសាស្ត្រ​របស់​​កម្មវិធី​អ៊ីនធឺណិត"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"ឲ្យ​កម្មវិធី​កែ​​សិទ្ធិ​ទី​តាំង​ភូមិសាស្ត្រ​របស់​កម្មវិធី​អ៊ីនធឺណិត។ កម្មវិធី​ព្យាបាទ​អាច​ប្រើ​វា ដើម្បី​ឲ្យ​ផ្ញើ​ព័ត៌មាន​ទីតាំង​ទៅ​តំបន់បណ្ដាញ​ដោយ​បំពាន។"</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"ផ្ទៀងផ្ទាត់​កញ្ចប់"</string>
@@ -1557,7 +1561,8 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"ប្រព័ន្ធ"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"សំឡេង​ប៊្លូធូស"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"បង្ហាញ​បណ្ដាញ​ឥត​ខ្សែ"</string>
-    <string name="media_route_button_content_description" msgid="5758553567065145276">"លទ្ធផល​មេឌៀ"</string>
+    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
+    <skip />
     <string name="media_route_chooser_title" msgid="1751618554539087622">"ភ្ជាប់​ឧបករណ៍"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"ចាត់​ថ្នាក់​អេក្រង់​ទៅ​ឧបករណ៍"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"កំពុង​ស្វែងរក​ឧបករណ៍..."</string>

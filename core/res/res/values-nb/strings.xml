@@ -298,6 +298,10 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Appen gis tillatelse til å motta og behandle Bluetooth MAP-meldinger. Dette betyr at appen kan overvåke eller slette meldinger som er sendt til enheten din, uten at du får se dem."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"hente apper som kjører"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Lar appen hente informasjon om oppgaver som kjører og som nylig har kjørt. Dette kan tillate appen å oppdage informasjon om hvilke apper som brukes på enheten."</string>
+    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
+    <skip />
+    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
+    <skip />
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"samhandling på tvers av brukere"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Tillater at appen utfører handlinger på tvers av ulike brukere på enheten. Skadelige apper kan utnytte dette til å bryte beskyttelsen mellom brukere."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"full lisens til å samhandle på tvers av brukere"</string>
@@ -1006,12 +1010,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Lar appen endre nettleserens logg eller bokmerker lagret på telefonen din. Dette kan føre til at appen sletter eller endrer nettleserdata. Vær oppmerksom på at denne tillatelsen kanskje ikke benyttes av tredjepartsnettlesere eller andre apper med mulighet for nettsurfing."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"stille alarm"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Lar appen stille inn alarmen for en installert alarmklokke-app. Enkelte alarmklokke-apper implementerer kanskje ikke denne funksjonen."</string>
-    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"administrere talepostkassen"</string>
-    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"Lar appen endre og fjerne meldinger fra talepostkassen."</string>
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"skrive talepost"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"Lar appen endre og fjerne meldinger fra talepostkassen."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"legge til talepost"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Lar appen legge til meldinger i talepostkassen din."</string>
-    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"lese alle meldingene i talepostkassen"</string>
-    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"Lar appen lese alle meldingene i talepostkassen din."</string>
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"lese talepost"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"Lar appen lese taleposten din."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"endre nettleserens tillatelser for geoposisjonering"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Lar appen endre nettleserens tillatelser for geoposisjonering. Ondsinnede apper kan bruke dette for å tillate sending av posisjonsinformasjon til vilkårlige nettsteder."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"bekrefte pakker"</string>
@@ -1555,7 +1559,8 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"System"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth-lyd"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Trådløs skjerm"</string>
-    <string name="media_route_button_content_description" msgid="5758553567065145276">"Medieutgang"</string>
+    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
+    <skip />
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Koble til enheten"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Cast skjermen til enheten"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Søker etter enheter …"</string>

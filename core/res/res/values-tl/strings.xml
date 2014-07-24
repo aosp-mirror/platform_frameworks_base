@@ -298,6 +298,10 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Pinapayagan ang app na makatanggap at makapagproseso ng mga mensahe ng Bluetooth MAP. Nangangahulugan ito na maaaring subaybayan o i-delete ng app ang mga mensaheng ipinapadala sa iyong device nang hindi ipinapakita ang mga ito sa iyo."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"bawiin ang tumatakbong apps"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Pinapayagan ang app na kumuha ng impormasyon tungkol sa mga kasalukuyan at kamakailang gumaganang gawain. Maaari nitong payagan ang app na tumuklas ng impormasyon tungkol sa kung aling mga application ang ginagamit sa device."</string>
+    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
+    <skip />
+    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
+    <skip />
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"makipag-ugnayan sa kabuuan ng mga user"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Binibigyang-daan ang app upang magsagawa ng mga pagkilos sa kabuuan ng iba\'t ibang mga user sa device. Maaari itong gamitin ng nakakahamak na apps upang lumabag sa proteksyon sa pagitan ng mga user."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"ganap na lisensya upang makipag-ugnayan sa kabuuan ng mga user"</string>
@@ -1006,12 +1010,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Pinapayagan ang app na baguhin ang kasaysayan o mga bookmark ng Browser na naka-imbak sa iyong telepono. Maaari nitong payagan ang app na burahin o baguhin ang data ng Browser. Tandaan: hindi maaaring ipatupad ang pahintulot na ito ng mga third-party na browser o iba pang mga application na may mga kakayahan sa pagba-browse sa web."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"magtakda ng alarm"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Pinapayagan ang app na magtakda ng alarm sa isang naka-install na app ng alarm clock. Maaaring hindi ipatupad ng ilang apps ng alarm clock ang tampok na ito."</string>
-    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"pamahalaan ang mga voicemail"</string>
-    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"Pinapayagan ang app na magbago at mag-alis ng mga mensahe mula sa iyong inbox ng voicemail."</string>
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"sumulat ng mga voicemail"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"Pinapayagan ang app na magbago at mag-alis ng mga mensahe sa iyong inbox ng voicemail."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"magdagdag ng voicemail"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Pinapayagan ang app na magdagdag ng mga mensahe sa iyong inbox ng voicemail."</string>
-    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"basahin ang lahat ng voicemail"</string>
-    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"Pinapayagan ang app na basahin ang lahat ng iyong voicemail."</string>
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"basahin ang voicemail"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"Pinapayagan ang app na basahin ang iyong mga voicemail."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"baguhin ang mga pahintulot ng geolocation ng Browser"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Pinapayagan ang app na baguhin ang mga pahintulot sa geolocation ng Browser. Maaari itong gamitin ng nakakahamak na apps upang payagan ang pagpapadala ng impormasyon ng lokasyon sa mga hindi tukoy na web site."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"i-verify ang mga package"</string>
@@ -1555,7 +1559,8 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"System"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Audio sa Bluetooth"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Wireless display"</string>
-    <string name="media_route_button_content_description" msgid="5758553567065145276">"Output ng media"</string>
+    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
+    <skip />
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Kumonekta sa device"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"I-cast ang screen sa device"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Naghahanap ng mga device…"</string>
