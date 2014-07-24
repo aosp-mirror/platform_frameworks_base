@@ -65,7 +65,7 @@ public class LinearGradient extends Shader {
         mColors = colors;
         mPositions = positions;
         mTileMode = tile;
-        native_instance = nativeCreate1(x0, y0, x1, y1, colors, positions, tile.nativeInt);
+        init(nativeCreate1(x0, y0, x1, y1, colors, positions, tile.nativeInt));
     }
 
     /** Create a shader that draws a linear gradient along a line.
@@ -87,7 +87,7 @@ public class LinearGradient extends Shader {
         mColor0 = color0;
         mColor1 = color1;
         mTileMode = tile;
-        native_instance = nativeCreate2(x0, y0, x1, y1, color0, color1, tile.nativeInt);
+        init(nativeCreate2(x0, y0, x1, y1, color0, color1, tile.nativeInt));
     }
 
     /**
