@@ -69,7 +69,7 @@ import com.android.server.job.controllers.TimeController;
  * @hide
  */
 public class JobSchedulerService extends com.android.server.SystemService
-        implements StateChangedListener, JobCompletedListener, JobMapReadFinishedListener {
+        implements StateChangedListener, JobCompletedListener {
     // TODO: Switch this off for final version.
     static final boolean DEBUG = true;
     /** The number of concurrent jobs we run at one time. */
@@ -485,28 +485,6 @@ public class JobSchedulerService extends com.android.server.SystemService
     @Override
     public void onRunJobNow(JobStatus jobStatus) {
         mHandler.obtainMessage(MSG_JOB_EXPIRED, jobStatus).sendToTarget();
-    }
-
-    /**
-     * Disk I/O is finished, take the list of jobs we read from disk and add them to our
-     * {@link JobStore}.
-     * This is run on the {@link com.android.server.IoThread} instance, which is a separate thread,
-     * and is called once at boot.
-     */
-    @Override
-    public void onJobMapReadFinished(List<JobStatus> jobs) {
-        synchronized (mJobs) {
-            for (int i=0; i<jobs.size(); i++) {
-                JobStatus js = jobs.get(i);
-                if (mJobs.containsJobIdForUid(js.getJobId(), js.getUid())) {
-                    // An app with BOOT_COMPLETED *might* have decided to reschedule their job, in
-                    // the same amount of time it took us to read it from disk. If this is the case
-                    // we leave it be.
-                    continue;
-                }
-                startTrackingJob(js);
-            }
-        }
     }
 
     private class JobHandler extends Handler {
