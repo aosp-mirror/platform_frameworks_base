@@ -75,6 +75,7 @@ public abstract class TvInputPassthroughWrapperService extends TvInputService {
         if (!session.connect(passthroughInputId)) {
             throw new IllegalStateException("WrapperSession cannot be reused.");
         }
+        notifyWrappedInputId(inputId, passthroughInputId);
         return session;
     }
 
