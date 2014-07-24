@@ -36,6 +36,7 @@ static struct {
     jmethodID deviceAvailable;
     jmethodID deviceUnavailable;
     jmethodID streamConfigsChanged;
+    jmethodID firstFrameCaptured;
 } gTvInputHalClassInfo;
 
 static struct {
@@ -539,6 +540,14 @@ void JTvInputHal::onCaptured(int deviceId, int streamId, uint32_t seq, bool succ
         thread = connection.mThread;
     }
     thread->onCaptured(seq, succeeded);
+    if (seq == 0) {
+        JNIEnv* env = AndroidRuntime::getJNIEnv();
+        env->CallVoidMethod(
+                mThiz,
+                gTvInputHalClassInfo.firstFrameCaptured,
+                deviceId,
+                streamId);
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -638,6 +647,9 @@ int register_android_server_tv_TvInputHal(JNIEnv* env) {
     GET_METHOD_ID(
             gTvInputHalClassInfo.streamConfigsChanged, clazz,
             "streamConfigsChangedFromNative", "(I)V");
+    GET_METHOD_ID(
+            gTvInputHalClassInfo.firstFrameCaptured, clazz,
+            "firstFrameCapturedFromNative", "(II)V");
 
     FIND_CLASS(gTvStreamConfigClassInfo.clazz, "android/media/tv/TvStreamConfig");
     gTvStreamConfigClassInfo.clazz = jclass(env->NewGlobalRef(gTvStreamConfigClassInfo.clazz));

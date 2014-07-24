@@ -24,6 +24,7 @@ import android.media.tv.ITvInputHardwareCallback;
 import android.media.tv.ITvInputManagerCallback;
 import android.media.tv.TvInputHardwareInfo;
 import android.media.tv.TvInputInfo;
+import android.media.tv.TvStreamConfig;
 import android.media.tv.TvTrackInfo;
 import android.net.Uri;
 import android.os.Bundle;
@@ -67,4 +68,9 @@ interface ITvInputManager {
     ITvInputHardware acquireTvInputHardware(int deviceId, in ITvInputHardwareCallback callback,
             in TvInputInfo info, int userId);
     void releaseTvInputHardware(int deviceId, in ITvInputHardware hardware, int userId);
+
+    // For TV input capturing
+    List<TvStreamConfig> getAvailableTvStreamConfigList(in String inputId, int userId);
+    boolean captureFrame(in String inputId, in Surface surface, in TvStreamConfig config,
+            int userId);
 }
