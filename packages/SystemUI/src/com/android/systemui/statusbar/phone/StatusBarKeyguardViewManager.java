@@ -176,6 +176,19 @@ public class StatusBarKeyguardViewManager {
     }
 
     public void setOccluded(boolean occluded) {
+        if (occluded && !mOccluded && mShowing) {
+            if (mPhoneStatusBar.isInLaunchTransition()) {
+                mOccluded = true;
+                mPhoneStatusBar.fadeKeyguardAfterLaunchTransition(null /* beforeFading */,
+                        new Runnable() {
+                            @Override
+                            public void run() {
+                                mStatusBarWindowManager.setKeyguardOccluded(true);
+                            }
+                        });
+                return;
+            }
+        }
         mOccluded = occluded;
         mStatusBarWindowManager.setKeyguardOccluded(occluded);
         reset();
@@ -188,29 +201,50 @@ public class StatusBarKeyguardViewManager {
     /**
      * Hides the keyguard view
      */
-    public void hide(long startTime, long fadeoutDuration) {
+    public void hide(long startTime, final long fadeoutDuration) {
         mShowing = false;
 
         long uptimeMillis = SystemClock.uptimeMillis();
-        long delay = startTime - uptimeMillis;
-        if (delay < 0) {
-            delay = 0;
+        long delay = Math.max(0, startTime - uptimeMillis);
+
+        if (mPhoneStatusBar.isInLaunchTransition() ) {
+            mPhoneStatusBar.fadeKeyguardAfterLaunchTransition(new Runnable() {
+                @Override
+                public void run() {
+                    mStatusBarWindowManager.setKeyguardShowing(false);
+                    mStatusBarWindowManager.setKeyguardFadingAway(true);
+                    mBouncer.animateHide(PhoneStatusBar.FADE_KEYGUARD_START_DELAY,
+                            PhoneStatusBar.FADE_KEYGUARD_DURATION);
+                    updateStates();
+                    mScrimController.animateKeyguardFadingOut(
+                            PhoneStatusBar.FADE_KEYGUARD_START_DELAY,
+                            PhoneStatusBar.FADE_KEYGUARD_DURATION, null);
+                }
+            }, new Runnable() {
+                @Override
+                public void run() {
+                    mPhoneStatusBar.hideKeyguard();
+                    mStatusBarWindowManager.setKeyguardFadingAway(false);
+                    mViewMediatorCallback.keyguardGone();
+                }
+            });
+        } else {
+            mPhoneStatusBar.setKeyguardFadingAway(delay, fadeoutDuration);
+            mPhoneStatusBar.hideKeyguard();
+            mStatusBarWindowManager.setKeyguardFadingAway(true);
+            mStatusBarWindowManager.setKeyguardShowing(false);
+            mBouncer.animateHide(delay, fadeoutDuration);
+            mScrimController.animateKeyguardFadingOut(delay, fadeoutDuration, new Runnable() {
+                @Override
+                public void run() {
+                    mStatusBarWindowManager.setKeyguardFadingAway(false);
+                    mPhoneStatusBar.finishKeyguardFadingAway();
+                }
+            });
+            mViewMediatorCallback.keyguardGone();
+            updateStates();
         }
 
-        mPhoneStatusBar.setKeyguardFadingAway(delay, fadeoutDuration);
-        mPhoneStatusBar.hideKeyguard();
-        mStatusBarWindowManager.setKeyguardFadingAway(true);
-        mStatusBarWindowManager.setKeyguardShowing(false);
-        mBouncer.animateHide(delay, fadeoutDuration);
-        mScrimController.animateKeyguardFadingOut(delay, fadeoutDuration, new Runnable() {
-            @Override
-            public void run() {
-                mStatusBarWindowManager.setKeyguardFadingAway(false);
-                mPhoneStatusBar.finishKeyguardFadingAway();
-            }
-        });
-        mViewMediatorCallback.keyguardGone();
-        updateStates();
     }
 
     /**
