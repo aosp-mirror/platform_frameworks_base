@@ -244,9 +244,6 @@ public abstract class BaseStatusBar extends SystemUI implements
                             // the user switches to home.  We know it is safe to do at this
                             // point, so make sure new activity switches are now allowed.
                             ActivityManagerNative.getDefault().resumeAppSwitches();
-                            // Also, notifications can be launched from the lock screen,
-                            // so dismiss the lock screen when the activity starts.
-                            ActivityManagerNative.getDefault().dismissKeyguardOnNextActivity();
                         } catch (RemoteException e) {
                         }
 
@@ -1153,9 +1150,6 @@ public abstract class BaseStatusBar extends SystemUI implements
                         // the user switches to home.  We know it is safe to do at this
                         // point, so make sure new activity switches are now allowed.
                         ActivityManagerNative.getDefault().resumeAppSwitches();
-                        // Also, notifications can be launched from the lock screen,
-                        // so dismiss the lock screen when the activity starts.
-                        ActivityManagerNative.getDefault().dismissKeyguardOnNextActivity();
                     } catch (RemoteException e) {
                     }
 
