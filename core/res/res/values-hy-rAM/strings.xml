@@ -298,6 +298,10 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Թույլ է տալիս հավելվածին ստանալ և մշակել Bluetooth MAP հաղորդագրությունները: Սա նշանակում է, որ հավելվածը կարող է ստուգել կամ ջնջել ձեր սարքին ուղարկված հաղորդագրությունները` առանց դրանք ձեզ ցուցադրելու:"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"առբերել աշխատող հավելվածները"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Թույլ է տալիս հավելվածին առբերել մանրամասն տեղեկություններ առկա և վերջերս աշխատող առաջադրանքների մասին: Սա կարող է թույլ տալ հավելվածին հայտնաբերել անձնական տեղեկություններ այլ հավելվածների վերաբերյալ:"</string>
+    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
+    <skip />
+    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
+    <skip />
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"հաղորդակցվել օգտվողների միջև"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Թույլ է տալիս հավելվածին իրականացնել գործողություններ սարքի տարբեր օգտվողների միջոցով: Վնասարար հավելվածները կարող են օգտագործել սա` խախտելու օգտվողների միջև պաշտպանությունը:"</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"ամբողջական հաղորդակցվելու արտոնություն օգտվողների միջև"</string>
@@ -1006,12 +1010,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Թույլ է տալիս հավելվածին փոփոխել դիտարկչի պատմությունը կամ ձեր հեռախոսում պահված էջանիշերը: Այն կարող է թույլ տալ հավելվածին ջնջել կամ փոփոխել դիտարկչի տվյալները: Նշում. այս թույլտվությունը չի կարող գործածվել կողմնակի դիտարկիչների կամ վեբ զննարկման հնարավորություններով այլ հավելվածների կողմից:"</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"դնել ազդանշան"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Թույլ է տալիս հավելվածին սահմանել զարթուցիչի ծրագրում տեղադրված ազդանշանը: Զարթուցիչի որոշ հավելվածներ չեն կարող կիրառել այս հատկությունը:"</string>
-    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"կառավարել ձայնային հաղորդագրությունները"</string>
-    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"Ծրագրին թույլ է տալիս մուտքի արկղից փոփոխել և հեռացնել ձեր ձայնային հաղորդագրությունները:"</string>
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"գրել ձայնային փոստ"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"Ծրագրին թույլ է տալիս մուտքի արկղից փոփոխել և հեռացնել ձեր ձայնային փոստը:"</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"ավելացնել ձայնային փոստ"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Թույլ է տալիս հավելվածին ավելացնել հաղորդագրություններ ձեր ձայնային փոստի արկղում:"</string>
-    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"կարդալ ձայնային հաղորդագրությունները"</string>
-    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"Թույլ է տալիս հավելվածին կարդալ ձեր բոլոր ձայնային հաղորդագրությունները:"</string>
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"կարդալ ձայնային փոստը"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"Ծրագրին թույլ է տալիս կարդալ ձեր ձայնային փոստը"</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"փոփոխել դիտարկչի աշխարհագրական տեղանքի թույլտվությունները"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Թույլ է տալիս հավելվածին փոփոխել զննարկչի աշխարհագրական դիրքի թույլտվությունները: Վնասարար հավելվածները կարող են օգտագործել սա` թույլատրելու ուղարկել տեղադրության վերաբերյալ տեղեկությունները կամայական վեբ կայքերին:"</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"հաստատել փաթեթները"</string>
@@ -1386,10 +1390,8 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Ծրագրին թույլ է տալիս կապվել վստահելի գործակալի ծառայությանը:"</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Փոխազդել թարմացման և վերականգնման համակարգի հետ"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Թույլ է տալիս ծրագրին փոխազդել վերականգնման համակարգի և համակարգի թարմացումների հետ:"</string>
-    <!-- no translation found for permlab_createMediaProjection (4941338725487978112) -->
-    <skip />
-    <!-- no translation found for permdesc_createMediaProjection (1284530992706219702) -->
-    <skip />
+    <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Ստեղծել մեդիայի տեսարձակման աշխատաշրջաններ"</string>
+    <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"Ծրագրին թույլ է տալիս ստեղծել մեդիայի տեսարձակման աշխատաշրջաններ: Այդ աշխատաշրջանները կարող են ծրագրերին թույլ տալ հավաքագրել էկրանի և աուդիոյի բովանդակությունը: Սովորական հավելվածների համար երբևէ չպետք է անհրաժեշտ լինի:"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Հպեք երկու անգամ` դիտափոխման կարգավորման համար"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Չհաջողվեց վիջեթ ավելացնել:"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Առաջ"</string>
@@ -1514,20 +1516,14 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Խմբագրել"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Տվյալների օգտագործման նախազգուշացում"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"Հպեք` օգտագործումը և կարգավորումները տեսնելու համար:"</string>
-    <!-- no translation found for data_usage_3g_limit_title (4462365924791862301) -->
-    <skip />
-    <!-- no translation found for data_usage_4g_limit_title (7476424187522765328) -->
-    <skip />
-    <!-- no translation found for data_usage_mobile_limit_title (3393439305227911006) -->
-    <skip />
-    <!-- no translation found for data_usage_wifi_limit_title (3461968509557554571) -->
-    <skip />
-    <!-- no translation found for data_usage_limit_body (6131350187562939365) -->
-    <skip />
+    <string name="data_usage_3g_limit_title" msgid="4462365924791862301">"2G-3G տվյալների կապն անջատված է"</string>
+    <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"4G տվյալների կապն անջատված է"</string>
+    <string name="data_usage_mobile_limit_title" msgid="3393439305227911006">"Բջջային տվյալներն անջատված են"</string>
+    <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"Wi-Fi տվյալներն անջատված են"</string>
+    <string name="data_usage_limit_body" msgid="6131350187562939365">"Սահմանաչափը սպառվեց"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G տվյալների սահմանը գերազանցված է"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G տվյալների սահմանը գերազանցվել է"</string>
-    <!-- no translation found for data_usage_mobile_limit_snoozed_title (4941346653729943789) -->
-    <skip />
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Բջջային տվյալների չափը սպառվեց"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Wi-Fi տվյալների սահմանը գերազանցվել է"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g>-ը գերազանցում է նշված սահմանաչափը:"</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Հետնաշերտային տվյալները սահմանափակ են"</string>
@@ -1563,7 +1559,8 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Համակարգ"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth-ի ձայնանյութ"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Անլար էկրան"</string>
-    <string name="media_route_button_content_description" msgid="5758553567065145276">"Մեդիա արտածում"</string>
+    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
+    <skip />
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Միանալ սարքին"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Հեռարձակել էկրանը սարքի վրա"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Որոնվում են սարքեր..."</string>

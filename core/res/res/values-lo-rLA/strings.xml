@@ -298,6 +298,10 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບຯ​ສາ​ມາດ​ຮັບ​ແລະ​ສົ່ງ​ຂໍ້​ຄວາມ Bluetooth MAP ໄດ້. ນີ້​ໝາຍ​ຄວາມ​ວ່າ​ແອັບຯ​ຈະ​ສາ​ມາດ​ກວດ​ເບິ່ງ ຫຼື​ລຶບ​ຂໍ້​ຄວາມ​ທີ່​ສົ່ງ​ຫາ​ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ​ໄດ້​ໂດຍ​ບໍ່​ສະ​ແດງ​ຂໍ້​ຄວາມ​ເຫຼົ່າ​ນັ້ນໃຫ້​ທ່ານ​ເຫັນ."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"ດຶງແອັບຯທີ່ເຮັດວຽກຢູ່ມາ"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"ອະນຸຍາດໃຫ້ແອັບຯດຶງຂໍ້ມູນກ່ຽວກັບການເຮັດວຽກໃນປັດຈຸບັນ ແລະຫາກໍຜ່ານມາ. ແອັບຯທີ່ເປັນອັນຕະລາຍອາດຄົ້ນພົບຂໍ້ມູນ ກ່ຽວກັບແອັບພລິເຄຊັນທີ່ໃຊ້ຢູ່ໃນອຸປະກອນໄດ້."</string>
+    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
+    <skip />
+    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
+    <skip />
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"ການຕອບໂຕ້ລະຫວ່າງຜູ່ໃຊ້"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"ອະນຸຍາດໃຫ້ແອັບຯດຳເນີນການ ສັ່ງງານຜ່ານຜູ່ໃຊ້ອື່ນໆໃນອຸປະກອນ. ແອັບຯທີ່ເປັນອັນຕະລາຍອາດໃຊ້ຄວາມສາມາດນີ້ ເພື່ອລະເມີດການປ້ອງກັນລະຫວ່າງຜູ່ໃຊ້."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"ໃບອະນຸຍາດສະບັບເຕັມໃນການໂຕ້ຕອບລະຫວ່າງຜູ່ໃຊ້"</string>
@@ -1006,12 +1010,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"ອະນຸຍາດໃຫ້ແອັບຯ ແກ້ໄຂປະຫວັດໂປຣແກຣມທ່ອງເວັບ ຫຼືບຸກມາກທີ່ເກັບໄວ້ໃນໂທລະສັບຂອງທ່ານ. ນີ້ອາດອະນຸຍາດໃຫ້ແອັບຯລຶບ ຫຼືແກ້ໄຂຂໍ້ມູນໂປຣແກຣມທ່ອງເວັບ. ໝາຍເຫດ: ການກຳນົດສິດນີ້ ອາດບໍ່ໄດ້ຖືກບັງຄັບໃຊ້ໃນໂປຣແກຣມທ່ອງເວັບພາກສ່ວນທີສາມ ຫຼືແອັບພລິເຄຊັນອື່ນທີ່ມີຄວາມສາມາດທ່ອງເວັບ."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"ຕັ້ງການແຈ້ງເຕືອນ"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"ອະນຸຍາດໃຫ້ແອັບຯຕັ້ງໂມງປຸກໃນແອັບຯໂມງປຸກທີ່ຕິດຕັ້ງໄວ້. ບາງແອັບຯໂມງປຸກອາດບໍ່ມີຄຸນສົມບັດແບບນີ້ເທື່ອ."</string>
-    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"ຈັດ​ການ​ຂໍ້​ຄວາມ​ສຽງ"</string>
-    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"ອະ​​ນຸ​ຍາດ​ໃຫ້​ແອັບຯ​ແກ້​ໄຂ​ແລະ​ລຶບ​ຂໍ້​ຄວາມ​ອອກ​ຈາກ​ອິນ​ບັອກ​ຂໍ້​ຄວາມ​ສຽງ​ຂອງ​ທ່ານ."</string>
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"​ຂຽນ​ຂໍ້​ຄວາມ​ສຽງ"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"ອະ​​ນຸ​ຍາດ​ໃຫ້​ແອັບຯ​ແກ້​ໄຂ​ແລະ​ລຶບ​ຂໍ້​ຄວາມ​ອອກ​ຈາກ​ອິນ​ບັອກ​ຂໍ້​ຄວາມ​ສຽງ​ຂອງ​ທ່ານ."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"ເພີ່ມຂໍ້ຄວາມສຽງ"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"ອະນຸຍາດໃຫ້ແອັບຯ ສາມາດເພີ່ມຂໍ້ຄວາມໃສ່ອິນບັອກຂໍ້ຄວາມສຽງຂອງທ່ານໄດ້."</string>
-    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"ອ່ານ​ຂໍ້​ຄວາມ​ສຽງ​ທັງ​ໝົດ"</string>
-    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"​ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບຯ​ອ່ານ​ຂໍ້​ຄວາມ​ສຽງ​ທັງ​ໝົດ​ຂອງ​ທ່ານ."</string>
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"ອ່ານ​ຂໍ້​ຄວາມ​ສຽງ"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບຯ​ອ່ານ​ຂໍ້​ຄວາມ​ສຽງ​ຂອງ​ທ່ານ."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"ແກ້ໄຂສິດທາງສະຖານທີ່ພູມສາດຂອງໂປຣແກຣມທ່ອງເວັບ"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"ອະນຸຍາດໃຫ້ແອັບຯແກ້ໄຂ ການອະນຸຍາດຕຳແໜ່ງທາງພູມສາດ ຂອງໂປຣແກຣມທ່ອງເວັບ. ແອັບຯທີ່ເປັນອັນຕະລາຍອາດໃຊ້ຄຸນສົມບັດນີ້ ເພື່ອສົ່ງຂໍ້ມູນສະຖານທີ່ໄປໃຫ້ເວັບໄຊຕ່າງໆໄດ້."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"ຢັ້ງຢືນແພັກເກດ"</string>
@@ -1555,7 +1559,8 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"ລະບົບ"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"ສຽງ Bluetooth"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"ການສະແດງຜົນໄຮ້ສາຍ"</string>
-    <string name="media_route_button_content_description" msgid="5758553567065145276">"ມີເດຍເອົ້າພຸດ"</string>
+    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
+    <skip />
     <string name="media_route_chooser_title" msgid="1751618554539087622">"ເຊື່ອມຕໍ່ຫາອຸປະກອນ"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"ສົ່ງພາບໜ້າຈໍໄປຫາອຸປະກອນ"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"ກຳລັງຊອກຫາອຸປະກອນ..."</string>

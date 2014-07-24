@@ -298,6 +298,10 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Bluetooth MAPメッセージの受信と処理をアプリに許可します。これにより、端末に届いたメッセージをアプリが表示することなく監視または削除するおそれがあります。"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"実行中のアプリの取得"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"現在実行中または最近実行したタスクに関する情報の取得をアプリに許可します。これにより、その端末でどのアプリを使用しているかをアプリから識別できるようになる可能性があります。"</string>
+    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
+    <skip />
+    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
+    <skip />
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"ユーザー間の交流"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"端末上の各ユーザーに対して操作を実行することをアプリに許可します。この許可を悪意のあるアプリに利用されると、ユーザー間の保護が侵害される恐れがあります。"</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"ユーザー間で交流するための完全ライセンス"</string>
@@ -1006,12 +1010,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"携帯端末に保存されているブラウザの履歴やブックマークの変更をアプリに許可します。これにより、アプリがブラウザデータを消去または変更できるようになる可能性があります。注: この許可は、サードパーティブラウザまたはウェブブラウジング機能を備えたその他のアプリでは適用されない場合があります。"</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"アラームの設定"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"インストール済みアラームアプリのアラームを設定することをアプリに許可します。この機能が実装されていないアラームアプリもあります。"</string>
-    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"ボイスメールの管理"</string>
-    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"ボイスメール受信トレイからメッセージを修正、削除することをアプリに許可します。"</string>
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"ボイスメールの書き込み"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"ボイスメール受信トレイからメッセージを修正、削除することをアプリに許可します。"</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"ボイスメールの追加"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"ボイスメール受信トレイにメッセージを追加することをアプリに許可します｡"</string>
-    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"すべてのボイスメールの読み取り"</string>
-    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"すべてのボイスメールの読み取りをアプリに許可します。"</string>
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"ボイスメールの読み取り"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"ボイスメールの読み取りをアプリに許可します。"</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"ブラウザの現在地情報に対する権限の変更"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"ブラウザの現在地情報に対する権限の変更をアプリに許可します。この許可を悪意のあるアプリに利用されると、任意のウェブサイトに現在地情報が送信される恐れがあります。"</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"パッケージのベリファイ"</string>
@@ -1555,7 +1559,8 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"システム"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth音声"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"ワイヤレスディスプレイ"</string>
-    <string name="media_route_button_content_description" msgid="5758553567065145276">"メディア出力"</string>
+    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
+    <skip />
     <string name="media_route_chooser_title" msgid="1751618554539087622">"端末に接続"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"端末への画面のキャスト"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"端末を検索しています…"</string>

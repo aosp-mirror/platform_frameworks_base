@@ -298,6 +298,10 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"‏ایپ کو بلوتوٹھ MAP پیغامات وصول اور ان پر کارروائی کرنے کی اجازت دیتی ہے۔ اس کا مطلب یہ ہے کہ ایپ آپ کے آلہ پر ارسال کردہ پیغامات آپ کو دکھائے بغیر ان پر نگاہ رکھ یا انہیں حذف کرسکتی ہے۔"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"چل رہی ایپس کی بازیافت کریں"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"ایپ کو موجودہ اور حالیہ چل رہے ٹاسکس کے بارے میں معلومات بازیافت کرنے کی اجازت دیتا ہے۔ یہ ایپ کو اس بارے میں معلومات دریافت کرنے کی اجازت دے سکتا ہے کہ آلہ پر کون سی ایپلیکیشنز استعمال کی جاتی ہیں۔"</string>
+    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
+    <skip />
+    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
+    <skip />
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"سبھی صارفین کے ساتھ تعامل کریں"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"ایپ کو آلے پر موجود مختلف صارفین کے بیچ کارروائیاں انجام دینے کی اجازت دیتا ہے۔ نقصان دہ ایپس صارفین کے مابین تحفظ کی خلاف ورزی کرنے کیلئے اسے استعمال کرسکتی ہیں۔"</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"سبھی صارفین کے ساتھ تعامل کرنے کیلئے مکمل لائسنس"</string>
@@ -1006,12 +1010,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"ایپ کو آپ کے فون پر اسٹور کردہ براؤزر کی سرگزشت یا بک مارکس میں ترمیم کرنے کی اجازت دیتا ہے۔ یہ ایپ کو براؤزر کا ڈیٹا مٹانے یا اس میں ترمیم کرنے کی اجازت دے سکتا ہے۔ نوٹ: یہ اجازت تیسرے فریق کے براؤزرز یا ویب براؤزنگ کی لیاقتوں والی دیگر ایپلیکیشنز کے ذریعہ نافذ نہیں کی جاسکتی ہے۔"</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"ایک الارم سیٹ کریں"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"ایپ کو ایک انسٹال کردہ الارم گھڑی کی ایپ میں ایک الارم سیٹ کرنے کی اجازت دیتا ہے۔ الارم گھڑی کی کچھ ایپس اس خصوصیت کو نافذ نہیں کر سکتی ہیں۔"</string>
-    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"صوتی میلز کا نظم کریں"</string>
-    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"ایپ کو پیغامات میں ترمیم کرنے اور ان کو آپ کے صوتی میل ان باکس سے ہٹانے کی اجازت دیتا ہے۔"</string>
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"صوتی میلز لکھیں"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"ایپ کو پیغامات میں ترمیم کرنے اور ان کو آپ کے صوتی میل ان باکس سے ہٹانے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"صوتی میل شامل کریں"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"ایپ کو آپ کے صوتی میل کے ان باکس میں پیغامات شامل کرنے کی اجازت دیتا ہے۔"</string>
-    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"سبھی صوتی میل پڑھیں"</string>
-    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"ایپ کو آپ کے سبھی صوتی میل پڑھنے کی اجازت دیتی ہے۔"</string>
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"صوتی میل پڑھیں"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"اپنے صوتی میلز پڑھنے کیلئے ایپ کو اجازت دیتا ہے۔"</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"براؤزر کی جغرافیائی مقام کی اجازتوں میں ترمیم کریں"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"ایپ کو براؤزر کی جغرافیائی مقام کی اجازتوں میں ترمیم کرنے کی اجازت دیتا ہے۔ نقصان دہ ایپس متنازعہ ویب سائٹس پر مقام کی معلومات بھیجنے کی اجازت دینے کیلئے اس کا استعمال کر سکتی ہیں۔"</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"پیکیجز کی توثیق کریں"</string>
@@ -1555,7 +1559,8 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"سسٹم"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"بلوٹوتھ آڈیو"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"وائرلیس ڈسپلے"</string>
-    <string name="media_route_button_content_description" msgid="5758553567065145276">"میڈیا آؤٹ پٹ"</string>
+    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
+    <skip />
     <string name="media_route_chooser_title" msgid="1751618554539087622">"آلہ سے مربوط ہوں"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"اسکرین کو آلہ پر کاسٹ کریں"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"آلات تلاش کر رہا ہے…"</string>

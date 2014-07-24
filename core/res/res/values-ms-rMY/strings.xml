@@ -298,6 +298,10 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Membenarkan apl menerima dan memproses mesej MAP Bluetooth. Ini bermakna apl boleh memantau atau memadam mesej yang dihantar ke peranti anda tanpa menunjukkannya kepada anda."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"dapatkan semula apl yang sedang dijalankan"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Membenarkan apl mengambil maklumat tentang tugasan yang sedang dan baru berjalan. Ini boleh membenarkan apl untuk menemui maklumat tentang apl mana yang digunakan pada peranti."</string>
+    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
+    <skip />
+    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
+    <skip />
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"berinteraksi sesama pengguna"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Membenarkan apl melakukan tindakan merentasi pengguna berbeza pada peranti. Apl hasad boleh menggunakan ini untuk melanggar perlindungan antara pengguna."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"lesen penuh untuk berinteraksi sesama pengguna"</string>
@@ -1006,12 +1010,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Membenarkan apl mengubah suai sejarah atau penanda halaman Penyemak Imbas yang tersimpan pada telefon anda. Ini boleh membenarkan apl untuk memadam atau mengubah suai data Penyemak Imbas. Nota: kebenaran ini tidak boleh dikuatkuasakan oleh penyemak imbas pihak ketiga atau aplikasi lain dengan keupayaan menyemak imbas web."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"tetapkan penggera"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Membenarkan apl untuk menetapkan penggera dalam apl penggera jam yang dipasang. Sesetengah applikasi jam penggera tidak boleh melaksanakan ciri ini."</string>
-    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"urus mel suara"</string>
-    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"Membenarkan apl mengubah suai dan mengalih keluar mesej dari peti masuk mel suara anda."</string>
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"tulis mel suara"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"Membenarkan apl mengubah suai dan mengalih keluar mesej dari peti masuk mel suara anda."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"tambah mel suara"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Membenarkan apl untuk menambahkan mesej pada peti masuk mel suara anda."</string>
-    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"baca semua mel suara"</string>
-    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"Membenarkan apl membaca semua mel suara anda."</string>
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"baca mel suara"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"Membenarkan apl membaca mel suara anda."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"ubah suai kebenaran geolokasi Penyemak Imbas"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Membenarkan apl untuk mengubah suai kebenaran geolokasi Penyemak Imbas. Apl hasad boleh menggunakannya untuk membenarkan menghantar maklumat lokasi kepada laman web sembarangan."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"sahkan pakej"</string>
@@ -1386,10 +1390,8 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Membenarkan aplikasi terikat kepada perkhidmatan ejen amanah."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Berinteraksi dengan kemas kini dan sistem pemulihan"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Membenarkan aplikasi berinteraksi dengan sistem pemulihan dan kemas kini sistem."</string>
-    <!-- no translation found for permlab_createMediaProjection (4941338725487978112) -->
-    <skip />
-    <!-- no translation found for permdesc_createMediaProjection (1284530992706219702) -->
-    <skip />
+    <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Buat sesi unjuran media"</string>
+    <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"Membenarkan aplikasi membuat sesi unjuran media. Sesi ini boleh memberikan aplikasi keupayaan untuk mengabadikan paparan dan kandungan audio. Tidak sekali-kali diperlukan oleh apl biasa."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Sentuh dua kali untuk mendapatkan kawalan zum"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Tidak dapat menambahkan widget."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Pergi"</string>
@@ -1514,20 +1516,14 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Edit"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Amaran penggunaan data"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"Sentuh untuk melihat penggunaan dan tetapan."</string>
-    <!-- no translation found for data_usage_3g_limit_title (4462365924791862301) -->
-    <skip />
-    <!-- no translation found for data_usage_4g_limit_title (7476424187522765328) -->
-    <skip />
-    <!-- no translation found for data_usage_mobile_limit_title (3393439305227911006) -->
-    <skip />
-    <!-- no translation found for data_usage_wifi_limit_title (3461968509557554571) -->
-    <skip />
-    <!-- no translation found for data_usage_limit_body (6131350187562939365) -->
-    <skip />
+    <string name="data_usage_3g_limit_title" msgid="4462365924791862301">"Data 2G-3G dimatikan"</string>
+    <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"Data 4G dimatikan"</string>
+    <string name="data_usage_mobile_limit_title" msgid="3393439305227911006">"Data selular dimatikan"</string>
+    <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"Data Wi-Fi dimatikan"</string>
+    <string name="data_usage_limit_body" msgid="6131350187562939365">"Sudah mencapai had"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Melebihi had data 2G-3G"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Melebihi had data 4G"</string>
-    <!-- no translation found for data_usage_mobile_limit_snoozed_title (4941346653729943789) -->
-    <skip />
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Melebihi had data seluluar"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Melebihi had data Wi-Fi"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> melebihi had yang ditentukan."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Data latar belakang terhad"</string>
@@ -1563,7 +1559,8 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Sistem"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Audio Bluetooth"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Paparan wayarles"</string>
-    <string name="media_route_button_content_description" msgid="5758553567065145276">"Output media"</string>
+    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
+    <skip />
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Sambung ke peranti"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Hantar skrin ke peranti"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Mencari peranti..."</string>

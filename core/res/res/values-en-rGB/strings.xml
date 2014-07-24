@@ -298,6 +298,10 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Allows the app to receive and process Bluetooth MAP messages. This means that the app could monitor or delete messages sent to your device without showing them to you."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"retrieve running apps"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Allows the app to retrieve information about currently and recently running tasks. This may allow the app to discover information about which applications are used on the device."</string>
+    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
+    <skip />
+    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
+    <skip />
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"interact across users"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Allows the app to perform actions across different users on the device. Malicious apps may use this to violate the protection between users."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"full license to interact across users"</string>
@@ -1006,12 +1010,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Allows the app to modify the Browser\'s history or bookmarks stored on your phone. This may allow the app to delete or modify Browser data. Note: this permission may not be enforced by third-party browsers or other applications with web browsing capabilities."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"set an alarm"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Allows the app to set an alarm in an installed alarm clock app. Some alarm clock apps may not implement this feature."</string>
-    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"manage voicemails"</string>
-    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"Allows the app to modify and remove messages from your voicemail inbox."</string>
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"write voicemails"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"Allows the app to modify and remove messages from your voicemail inbox."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"add voicemail"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Allows the app to add messages to your voicemail inbox."</string>
-    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"read all voicemail"</string>
-    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"Allows the app to read all your voicemails."</string>
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"read voicemail"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"Allows the app to read your voicemails."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"Modify Browser geo-location permissions"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Allows the app to modify the Browser\'s geo-location permissions. Malicious apps may use this to allow sending location information to arbitrary websites."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"verify packages"</string>
@@ -1555,7 +1559,8 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"System"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth audio"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Wireless display"</string>
-    <string name="media_route_button_content_description" msgid="5758553567065145276">"Media output"</string>
+    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
+    <skip />
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Connect to device"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Cast screen to device"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Searching for devices…"</string>
@@ -1728,7 +1733,7 @@
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Try again later"</string>
     <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Swipe down from the top to exit full screen."</string>
-    <string name="done_label" msgid="2093726099505892398">"Finished"</string>
+    <string name="done_label" msgid="2093726099505892398">"Done"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"Hours circular slider"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"Minutes circular slider"</string>
     <string name="select_hours" msgid="6043079511766008245">"Select hours"</string>

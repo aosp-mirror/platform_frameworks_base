@@ -298,6 +298,8 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Апп нь Блютүүт MAP мессежийг хүлээн авах болон гүйцэтгэх боломжтой. Ингэснээр апп нь таны төхөөрөмжрүү илгээсэн мессежийг танд үзүүлэхгүйгээр хянах болон устгаж чадна."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"ажиллаж байгаа апп-г дуудах"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Апп нь одоо ажиллаж байгаа болон сүүлд ажилласан даалгаврын талаарх мэдээллийг авах боломжтой. Ингэснээр апп нь төхөөмж дээрх ямар аппликешнүүд ашиглагдсан талаарх мэдээлийг олох боломжтой."</string>
+    <string name="permlab_startTasksFromRecents" msgid="8990073877885690623">"саяхных дотроос ажил эхлүүлэх"</string>
+    <string name="permdesc_startTasksFromRecents" msgid="7382133554871222235">"Апп-д ActivityManager.getRecentTaskList()-с буцаж ирсэн дууссан ажлыг эхлүүлэхийн тулд ActivityManager.RecentTaskInfo объектыг ашиглах боломж олгоно."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"хэрэглэгчидтэй харилцан үйлчлэлцэх"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Апп нь төхөөрөмж дээрх ялгаатай хэрэглэгчдэд үйлдэл гүйцэтгэх боломжтой. Хортой апп нь энийг ашиглан хэрэглэгч хоорондын хамгаалалтыг зөрчих боломжтой."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"хэрэглэгчидтэй харилцан үйлчлэлцэх бүрэн зөвшөөрөл"</string>
@@ -1006,12 +1008,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Апп нь таны утсан дээр хадгалагдсан Хөтчийн түүх эсвэл хавчуургыг өөрчлөх боломжтой. Энэ нь апп-д Хөтчийн датаг арилгах эсвэл өөрчлөх боломжийг олгоно. Анхаар: Энэ зөвшөөрөл нь гуравдагч талын хөтөч эсвэл вебээр хөтөчлөх чадвартай аппликешнд ажиллахгүй байх боломжтой."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"сэрүүлэг тохируулах"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Апп нь суулгагдсан сэрүүлэгний апп дээр сэрүүлэг тохируулах боломжтой. Зарим сэрүүлэгний апп нь энэ функцийг дэмжихгүй байж болзошгүй."</string>
-    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"дуут шууданг удирдах"</string>
-    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"Апп нь таны дуут шуудангийн ирсэн мэйлээс зурвас хасах боломжтой."</string>
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"дуут шуудан бичих"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"Апп нь таны дуут шуудангийн ирсэн мэйлээс зурвас хасах боломжтой."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"дуут шуудан нэмэх"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Таны дуут шуудангийн ирсэн мэйлд зурвас нэмэхийг апп-д зөвшөөрөх."</string>
-    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"бүх дуут шууданг унших"</string>
-    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"Апп-д таны бүх дуут шууданг унших боломж олгоно."</string>
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"дуут шууданг унших"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"Апп-д таны дуут шууданг унших боломж олгоно."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"Хөтчийн геобайршлын зөвшөөрлийг өөрчлөх"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Апп нь Хөтчийн гео байршлын зөвшөөрлийг өөрчлөх боломжтой. Хортой апп нь энийг ашиглан дурын веб хуудасруу байршлын мэдээллийг илгээх боломжтой."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"багцийг тулгах"</string>
@@ -1555,7 +1557,8 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Систем"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Блютүүт аудио"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Утасгүй дэлгэц"</string>
-    <string name="media_route_button_content_description" msgid="5758553567065145276">"Медиа гаралт"</string>
+    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
+    <skip />
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Төхөөрөмжтэй холбох"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Дэлгэцийг төхөөрөмж рүү дамжуулах"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Төхөөрөмжүүдийг хайж байна…"</string>

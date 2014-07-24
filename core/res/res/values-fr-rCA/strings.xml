@@ -298,6 +298,10 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Permet à l\'application de recevoir et traiter des messages par Bluetooth à l\'aide du profil MAP. Cela signifie que l\'application peut contrôler ou supprimer les messages envoyés à votre appareil sans vous les montrer."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"récupérer les données des applications en cours d\'exécution"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Permet à l\'application de récupérer des données sur des tâches en cours d\'exécution et récemment exécutées. L\'application est ainsi susceptible d\'obtenir des données concernant les applications utilisées sur l\'appareil."</string>
+    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
+    <skip />
+    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
+    <skip />
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"interagir entre les utilisateurs"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Permet à l\'application d\'effectuer des actions entre les différents utilisateurs de l\'appareil. Les applications malveillantes peuvent utiliser cette autorisation pour passer outre la protection entre les utilisateurs."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"autorisation totale d\'interagir entre les utilisateurs"</string>
@@ -1006,12 +1010,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Permet à l\'application de modifier l\'historique du navigateur ou les favoris enregistrés sur votre téléphone. Cette autorisation peut lui permettre d\'effacer ou de modifier les données du navigateur. Remarque : il est possible que cette autorisation ne soit pas appliquée par les navigateurs tiers ni par d\'autres applications permettant de naviguer sur le Web."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"définir une alarme"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Permet à l\'application de régler la sonnerie d\'une fonction de réveil installée sur votre appareil. Cette fonctionnalité n\'est pas compatible avec toutes les applications de réveils."</string>
-    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"gérer les messages vocaux"</string>
-    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"Autoriser l\'application à modifier et à supprimer des messages de la boîte de réception des messages vocaux."</string>
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"modifier les messages vocaux"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"Autoriser l\'application à modifier et à supprimer des messages de la boîte de réception des messages vocaux."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"ajouter des messages vocaux"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Permet à l\'application d\'ajouter des messages à votre messagerie vocale."</string>
-    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"accéder à tous les messages vocaux"</string>
-    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"Permet à l\'application d\'accéder à tous vos messages vocaux."</string>
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"accéder aux messages vocaux"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"Autoriser l\'application à accéder à vos messages vocaux."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"modifier les autorisations de géolocalisation du navigateur"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Permet à l\'application de modifier les autorisations de géolocalisation du navigateur. Des applications malveillantes peuvent exploiter cette fonctionnalité pour permettre l\'envoi de données de localisation à des sites Web arbitraires."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"vérifier les paquets"</string>
@@ -1555,7 +1559,8 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Système"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Audio Bluetooth"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Affichage sans fil"</string>
-    <string name="media_route_button_content_description" msgid="5758553567065145276">"Sortie multimédia"</string>
+    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
+    <skip />
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Connexion à l\'appareil"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Diffuser l\'écran sur l\'appareil"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Recherche d\'appareils en cours…"</string>

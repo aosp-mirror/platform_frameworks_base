@@ -162,7 +162,7 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"ปิดเสียง"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"เสียงเรียกเข้าแบบสั่น"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"เปิดเสียง"</string>
-    <string name="shutdown_progress" msgid="2281079257329981203">"กำลังปิดระบบ..."</string>
+    <string name="shutdown_progress" msgid="2281079257329981203">"กำลังปิด..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"แท็บเล็ตของคุณจะปิดการทำงาน"</string>
     <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"นาฬิกาจะปิดการทำงาน"</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"โทรศัพท์ของคุณจะปิดเครื่อง"</string>
@@ -298,6 +298,10 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"อนุญาตให้แอปรับและประมวลผลข้อความ MAP สำหรับบลูทูธ ซึ่งหมายความว่าแอปจะสามารถตรวจสอบหรือลบข้อความที่ส่งไปยังอุปกรณ์ของคุณได้โดยไม่ต้องแสดงให้คุณเห็น"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"เรียกแอปพลิเคชันที่ทำงานอยู่"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"อนุญาตให้แอปพลิเคชันเรียกดูข้อมูลเกี่ยวกับงานที่ดำเนินการอยู่ในขณะนี้และเมื่อเร็วๆ นี้ ซึ่งอาจทำให้แอปพลิเคชันสามารถค้นข้อมูลได้ว่าอุปกรณ์นี้ใช้แอปพลิเคชันใดบ้าง"</string>
+    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
+    <skip />
+    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
+    <skip />
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"โต้ตอบระหว่างผู้ใช้"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"อนุญาตให้แอปพลิเคชันทำงานได้กับผู้ใช้หลายรายบนอุปกรณ์นี้ แอปพลิเคชันที่เป็นอันตรายอาจใช้การทำงานนี้ในการบุกรุกการป้องกันระหว่างผู้ใช้"</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"ใบอนุญาตฉบับเต็มสำหรับการโต้ตอบระหว่างผู้ใช้"</string>
@@ -1006,12 +1010,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"อนุญาตให้แอปพลิเคชันเปลี่ยนแปลงประวัติหรือบุ๊กมาร์กของเบราว์เซอร์ที่จัดเก็บไว้ในโทรศัพท์ ซึ่งทำให้แอปพลิเคชันสามารถลบหรือเปลี่ยนข้อมูลเบราว์เซอร์ได้ หมายเหตุ: การอนุญาตนี้อาจไม่สามารถใช้งานได้กับเบราว์เซอร์ของบุคคลที่สามหรือแอปพลิเคชันอื่นๆ ที่มีความสามารถในการเรียกดูบนเว็บ"</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"ตั้งปลุก"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"อนุญาตให้แอปพลิเคชันตั้งเวลาปลุกในแอปพลิเคชันนาฬิกาปลุกที่ติดตั้ง แอปพลิเคชันนาฬิกาปลุกบางรายการอาจไม่ใช้คุณลักษณะนี้"</string>
-    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"จัดการข้อความเสียง"</string>
-    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"อนุญาตให้แอปแก้ไขและนำข้อความออกจากกล่องข้อความเสียงของคุณ"</string>
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"เขียนข้อความเสียง"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"อนุญาตให้แอปแก้ไขและนำข้อความออกจากกล่องข้อความเสียงของคุณ"</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"เพิ่มข้อวามเสียง"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"อนุญาตให้แอปพลิเคชันเพิ่มข้อความลงในกล่องข้อความเสียงของคุณ"</string>
-    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"อ่านข้อความเสียงทั้งหมด"</string>
-    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"อนุญาตให้แอปอ่านข้อความเสียงทั้งหมดของคุณ"</string>
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"อ่านข้อความเสียง"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"อนุญาตให้แอปอ่านข้อความเสียงของคุณได้"</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"แก้ไขการอนุญาตเกี่ยวกับการระบุตำแหน่งทางภูมิศาสตร์ของเบราว์เซอร์"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"อนุญาตให้แอปพลิเคชันแก้ไขการอนุญาตตำแหน่งทางภูมิศาสตร์ของเบราว์เซอร์ แอปพลิเคชันที่เป็นอันตรายอาจใช้การอนุญาตนี้ในการส่งข้อมูลตำแหน่งไปยังเว็บไซต์ต่างๆ ได้ตามต้องการ"</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"ยืนยันแพ็กเกจ"</string>
@@ -1555,7 +1559,8 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"ระบบ"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"เสียงบลูทูธ"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"การแสดงผลแบบไร้สาย"</string>
-    <string name="media_route_button_content_description" msgid="5758553567065145276">"เอาต์พุตสื่อ"</string>
+    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
+    <skip />
     <string name="media_route_chooser_title" msgid="1751618554539087622">"เชื่อมต่อกับอุปกรณ์"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"ส่งหน้าจอไปยังอุปกรณ์"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"กำลังค้นหาอุปกรณ์…"</string>

@@ -298,6 +298,10 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Võimaldab rakendusel vastu võtta ja töödelda Bluetoothi MAP-sõnumeid. See tähendab, et rakendus saab teie seadmesse saadetud sõnumeid jälgida või kustutada ilma neid teile näitamata."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"Käitatud rakenduste toomine"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Võimaldab rakendusel tuua teavet praegu ja hiljuti käitatud ülesannete kohta. See võib lubada rakendusel avastada teavet selle kohta, milliseid rakendusi seadmes kasutatakse."</string>
+    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
+    <skip />
+    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
+    <skip />
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"toimingud erinevatel kasutajakontodel"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Lubab rakendusel teha toiminguid seadme erinevatel kasutajakontodel. Pahatahtlikud rakendused võivad kasutada seda kasutajatevahelise kaitse rikkumiseks."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"täielik litsents teha toiminguid erinevatel kasutajakontodel"</string>
@@ -1006,12 +1010,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Võimaldab rakendusel muuta telefoni salvestatud brauseri ajalugu või järjehoidjaid. See võimaldab rakendusel kustutada või muuta brauseri andmeid. Märkus: see luba ei pruugi jõustuda kolmanda osapoole brauserites või teistes veebisirvimisvõimega rakendustes."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"määrake äratus"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Võimaldab rakendusel seada installitud äratuskellarakenduses äratuse. Mõned äratuskellarakendused ei pruugi seda funktsiooni juurutada."</string>
-    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"kõneposti haldamine"</string>
-    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"Lubab rakendusel muuta ja kustutada kõneposti postkasti sõnumeid."</string>
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"kõneposti sõnumite kirjutamine"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"Lubab rakendusel muuta ja kustutada kõneposti postkasti sõnumeid."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"lisa kõneposti"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Võimaldab rakendusel lisada sõnumeid teie kõneposti postkasti."</string>
-    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"kogu kõneposti lugemine"</string>
-    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"Võimaldab rakendusel kogu kõneposti lugeda."</string>
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"kõneposti sõnumite lugemine"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"Lubab rakendusel lugeda teie kõneposti sõnumeid."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"Brauseri geolokatsiooniõiguste muutmine"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Võimaldab rakendusel muuta brauseri geolokatsiooniõigusi. Pahatahtlikud rakendused võivad seda kasutada asukohateabe saatmise lubamiseks suvalistele veebisaitidele."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"pakettide kinnitamine"</string>
@@ -1555,7 +1559,8 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Süsteem"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth-heli"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Juhtmeta ekraan"</string>
-    <string name="media_route_button_content_description" msgid="5758553567065145276">"Meediaväljund"</string>
+    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
+    <skip />
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Seadmega ühendamine"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Ekraanikuva ülekandmine seadmesse"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Seadmete otsimine …"</string>

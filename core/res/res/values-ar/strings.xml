@@ -298,6 +298,10 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"‏يسمح للتطبيق بتلقي رسائل بلوتوث MAP ومعالجتها. وهذا يعني أنه سيكون بإمكان التطبيق الإشراف على أو حذف الرسائل المرسلة إليك بدون عرضها لك."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"استرداد التطبيقات التي قيد التشغيل"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"للسماح للتطبيق باسترداد معلومات حول المهام التي يجري تشغيلها حاليًا والتي تم تشغيلها مؤخرًا. وقد يسمح هذا للتطبيق باكتشاف معلومات حول التطبيقات المستخدمة على الجهاز."</string>
+    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
+    <skip />
+    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
+    <skip />
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"التعامل بين المستخدمين"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"للسماح للتطبيق بتنفيذ إجراءات بين مستخدمين مختلفين على الجهاز. قد تستخدم التطبيقات الضارة ذلك لانتهاك الحماية بين المستخدمين."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"الترخيص بالكامل للتعامل بين المستخدمين"</string>
@@ -1006,12 +1010,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"للسماح للتطبيق بتعديل سجل المتصفح أو الإشارات المرجعية المخزنة على هاتفك. وقد يتيح هذا للتطبيق محو بيانات المتصفح أو تعديلها. ملاحظة: لا يجوز فرض هذا الإذن من قِبل متصفحات جهات خارجية أو تطبيقات أخرى بها إمكانيات تصفح الويب."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"تعيين منبه"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"للسماح للتطبيق بضبط المنبه في تطبيق المنبه المثبّت. ربما لا تنفذ بعض تطبيقات المنبه هذه الميزة."</string>
-    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"إدارة رسائل البريد الصوتي"</string>
-    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"للسماح للتطبيق بتعديل الرسائل وإزالتها من صندوق البريد الصوتي."</string>
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"كتابة رسائل البريد الصوتي"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"للسماح للتطبيق بتعديل الرسائل وإزالتها من صندوق البريد الصوتي."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"إضافة بريد صوتي"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"للسماح للتطبيق بإضافة رسائل إلى صندوق البريد الصوتي."</string>
-    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"قراءة جميع رسائل البريد الصوتي"</string>
-    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"للسماح للتطبيق بقراءة جميع رسائل البريد الصوتي."</string>
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"قراءة رسائل البريد الصوتي"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"للسماح للتطبيق بقراءة رسائل البريد الصوتي."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"تعديل أذونات الموقع الجغرافي للمتصفح"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"للسماح لأحد التطبيقات بتعديل أذونات الموقع الجغرافي للمتصفح. يمكن أن تستخدم التطبيقات الضارة هذا للسماح بإرسال معلومات الموقع إلى مواقع ويب عشوائية."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"التحقق من الحزم"</string>
@@ -1555,7 +1559,8 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"النظام"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"صوت بلوتوث"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"عرض شاشة لاسلكي"</string>
-    <string name="media_route_button_content_description" msgid="5758553567065145276">"المنفذ الإعلامي"</string>
+    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
+    <skip />
     <string name="media_route_chooser_title" msgid="1751618554539087622">"الاتصال بجهاز"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"بث الشاشة على الجهاز"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"جارٍ البحث عن الأجهزة…"</string>

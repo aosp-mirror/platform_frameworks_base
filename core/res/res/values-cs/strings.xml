@@ -298,6 +298,10 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Umožňuje aplikaci přijímat a zpracovat zprávy Bluetooth MAP. To znamená, že aplikace může sledovat a mazat zprávy odeslané do zařízení, aniž by vám je zobrazila."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"načtení spuštěných aplikací"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Umožňuje aplikaci získat informace o aktuálně a naposledy spuštěných úlohách. Aplikace s tímto oprávněním může odhalit informace o aplikacích, které se v zařízení používají."</string>
+    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
+    <skip />
+    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
+    <skip />
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"interakce napříč uživateli"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Umožňuje aplikaci provádět akce napříč různými uživateli zařízení. Škodlivé aplikace toto oprávnění mohou zneužít k obejití ochrany mezi uživateli."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"úplné oprávnění k interakcím napříč uživateli"</string>
@@ -1006,12 +1010,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Umožňuje aplikaci upravit historii prohlížeče nebo záložky uložené v telefonu. Aplikace s tímto oprávněním může vymazat či pozměnit data prohlížeče. Poznámka: Pro prohlížeče třetí strany a jiné aplikace umožňující procházení webu toto oprávnění platit nemusí."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"nastavení budíku"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Umožňuje aplikaci nastavit budík v nainstalované aplikaci budík. Některé aplikace budík tuto funkci nemusí obsahovat."</string>
-    <string name="permlab_manageVoicemail" msgid="7884874112753411405">"správa hlasových zpráv"</string>
-    <string name="permdesc_manageVoicemail" msgid="4134567328139761134">"Povoluje aplikaci upravit a odebrat zprávy z hlasové schránky."</string>
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"zápis do hlasové schránky"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"Povoluje aplikaci upravit a odebrat zprávy z hlasové schránky."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"přidat hlasovou zprávu"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Umožňuje aplikaci přidávat zprávy do hlasové schránky."</string>
-    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"číst všechny hlasové zprávy"</string>
-    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"Umožňuje aplikaci číst všechny vaše hlasové zprávy."</string>
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"čtení hlasových zpráv"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"Povoluje aplikaci číst hlasové zprávy."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"změna oprávnění prohlížeče poskytovat informace o zeměpisné poloze"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Umožňuje aplikaci upravit oprávnění funkce geolokace v prohlížeči. Škodlivé aplikace toho mohou využít k odeslání údajů o poloze na libovolné webové stránky."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"ověřit balíčky"</string>
@@ -1555,7 +1559,8 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Systém"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth Audio"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Bezdrátový displej"</string>
-    <string name="media_route_button_content_description" msgid="5758553567065145276">"Výstup médií"</string>
+    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
+    <skip />
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Připojení k zařízení"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Odesílání obsahu obrazovky do zařízení"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Vyhledávání zařízení…"</string>
