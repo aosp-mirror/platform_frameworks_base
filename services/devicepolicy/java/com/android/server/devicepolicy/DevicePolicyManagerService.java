@@ -252,8 +252,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     };
 
-    private IAppOpsService mAppOpsService;
-
     static class ActiveAdmin {
         private static final String TAG_DISABLE_KEYGUARD_FEATURES = "disable-keyguard-features";
         private static final String TAG_DISABLE_CAMERA = "disable-camera";
@@ -1288,24 +1286,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         getUserData(UserHandle.USER_OWNER);
         loadDeviceOwner();
         cleanUpOldUsers();
-        mAppOpsService = IAppOpsService.Stub.asInterface(
-                ServiceManager.getService(Context.APP_OPS_SERVICE));
-        if (mDeviceOwner != null) {
-            if (mDeviceOwner.hasDeviceOwner()) {
-                try {
-                    mAppOpsService.setDeviceOwner(mDeviceOwner.getDeviceOwnerPackageName());
-                } catch (RemoteException e) {
-                    Log.w(LOG_TAG, "Unable to notify AppOpsService of DeviceOwner", e);
-                }
-            }
-            for (Integer i : mDeviceOwner.getProfileOwnerKeys()) {
-                try {
-                    mAppOpsService.setProfileOwner(mDeviceOwner.getProfileOwnerPackageName(i), i);
-                } catch (RemoteException e) {
-                    Log.w(LOG_TAG, "Unable to notify AppOpsService of ProfileOwner", e);
-                }
-            }
-        }
         // Register an observer for watching for user setup complete.
         new SetupContentObserver(mHandler).register(mContext.getContentResolver());
         // Initialize the user setup state, to handle the upgrade case.
@@ -3169,14 +3149,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         "Trying to set device owner but device owner is already set.");
             }
 
-            long token = Binder.clearCallingIdentity();
-            try {
-                mAppOpsService.setDeviceOwner(packageName);
-            } catch (RemoteException e) {
-                Log.w(LOG_TAG, "Unable to notify AppOpsService of DeviceOwner", e);
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
             if (mDeviceOwner == null) {
                 // Device owner is not set and does not exist, set it.
                 mDeviceOwner = DeviceOwner.createWithDeviceOwner(packageName, ownerName);
@@ -3284,14 +3256,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 throw new IllegalStateException(
                         "Trying to set profile owner but user is already set-up.");
             }
-            long token = Binder.clearCallingIdentity();
-            try {
-                mAppOpsService.setProfileOwner(packageName, userHandle);
-            } catch (RemoteException e) {
-                Log.w(LOG_TAG, "Unable to notify AppOpsService of ProfileOwner", e);
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
+
             if (mDeviceOwner == null) {
                 // Device owner state does not exist, create it.
                 mDeviceOwner = DeviceOwner.createWithProfileOwner(packageName, ownerName,

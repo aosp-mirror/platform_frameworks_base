@@ -96,8 +96,6 @@ public class AppOpsService extends IAppOpsService.Stub {
     final SparseArray<HashMap<String, Ops>> mUidOps
             = new SparseArray<HashMap<String, Ops>>();
 
-    private int mDeviceOwnerUid;
-    private final SparseIntArray mProfileOwnerUids = new SparseIntArray();
     private final SparseArray<boolean[]> mOpRestrictions = new SparseArray<boolean[]>();
 
     public final static class Ops extends SparseArray<Op> {
@@ -873,15 +871,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     }
                 }
             }
-            if (userHandle == UserHandle.USER_OWNER) {
-                if (uid != mDeviceOwnerUid) {
-                    return true;
-                }
-            } else {
-                if (uid != mProfileOwnerUids.get(userHandle, -1)) {
-                    return true;
-                }
-            }
+            return true;
         }
         return false;
     }
@@ -1256,35 +1246,6 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     @Override
-    public void setDeviceOwner(String packageName) throws RemoteException {
-        checkSystemUid("setDeviceOwner");
-        try {
-            mDeviceOwnerUid = mContext.getPackageManager().getPackageUid(packageName,
-                    UserHandle.USER_OWNER);
-        } catch (NameNotFoundException e) {
-            Log.e(TAG, "Could not find Device Owner UID");
-            mDeviceOwnerUid = -1;
-            throw new IllegalArgumentException("Could not find device owner package "
-                    + packageName);
-        }
-    }
-
-    @Override
-    public void setProfileOwner(String packageName, int userHandle) throws RemoteException {
-        checkSystemUid("setProfileOwner");
-        try {
-            int uid = mContext.getPackageManager().getPackageUid(packageName,
-                    userHandle);
-            mProfileOwnerUids.put(userHandle, uid);
-        } catch (NameNotFoundException e) {
-            Log.e(TAG, "Could not find Profile Owner UID");
-            mProfileOwnerUids.put(userHandle, -1);
-            throw new IllegalArgumentException("Could not find profile owner package "
-                    + packageName);
-        }
-    }
-
-    @Override
     public void setUserRestrictions(Bundle restrictions, int userHandle) throws RemoteException {
         checkSystemUid("setUserRestrictions");
         boolean[] opRestrictions = mOpRestrictions.get(userHandle);
@@ -1306,10 +1267,6 @@ public class AppOpsService extends IAppOpsService.Stub {
     public void removeUser(int userHandle) throws RemoteException {
         checkSystemUid("removeUser");
         mOpRestrictions.remove(userHandle);
-        final int index = mProfileOwnerUids.indexOfKey(userHandle);
-        if (index >= 0) {
-            mProfileOwnerUids.removeAt(index);
-        }
     }
 
     private void checkSystemUid(String function) {
