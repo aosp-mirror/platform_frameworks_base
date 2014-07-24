@@ -76,8 +76,13 @@ public final class PageContentRepository {
         public void onPageContentAvailable(BitmapDrawable content);
     }
 
-    public PageContentRepository(Context context) {
-        mRenderer = new AsyncRenderer(context);
+    public interface OnMalformedPdfFileListener {
+        public void onMalformedPdfFile();
+    }
+
+    public PageContentRepository(Context context,
+            OnMalformedPdfFileListener malformedPdfFileListener) {
+        mRenderer = new AsyncRenderer(context, malformedPdfFileListener);
         mState = STATE_CLOSED;
         if (DEBUG) {
             Log.i(LOG_TAG, "STATE_CLOSED");
@@ -440,19 +445,24 @@ public final class PageContentRepository {
     }
 
     private static class AsyncRenderer {
+        private static final int MALFORMED_PDF_FILE_ERROR = -2;
+
         private final Context mContext;
 
         private final PageContentLruCache mPageContentCache;
 
         private final ArrayMap<Integer, RenderPageTask> mPageToRenderTaskMap = new ArrayMap<>();
 
+        private final OnMalformedPdfFileListener mOnMalformedPdfFileListener;
+
         private int mPageCount = PrintDocumentInfo.PAGE_COUNT_UNKNOWN;
 
         // Accessed only by the executor thread.
         private PdfRenderer mRenderer;
 
-        public AsyncRenderer(Context context) {
+        public AsyncRenderer(Context context, OnMalformedPdfFileListener malformedPdfFileListener) {
             mContext = context;
+            mOnMalformedPdfFileListener = malformedPdfFileListener;
 
             ActivityManager activityManager = (ActivityManager)
                     mContext.getSystemService(Context.ACTIVITY_SERVICE);
@@ -474,13 +484,19 @@ public final class PageContentRepository {
                         mRenderer = new PdfRenderer(source);
                         return mRenderer.getPageCount();
                     } catch (IOException ioe) {
-                        throw new IllegalStateException("Cannot open PDF document");
+                        Log.e(LOG_TAG, "Cannot open PDF document");
+                        return MALFORMED_PDF_FILE_ERROR;
                     }
                 }
 
                 @Override
                 public void onPostExecute(Integer pageCount) {
-                    mPageCount = pageCount;
+                    if (pageCount == MALFORMED_PDF_FILE_ERROR) {
+                        mOnMalformedPdfFileListener.onMalformedPdfFile();
+                        mPageCount = PrintDocumentInfo.PAGE_COUNT_UNKNOWN;
+                    } else {
+                        mPageCount = pageCount;
+                    }
                     if (callback != null) {
                         callback.run();
                     }
