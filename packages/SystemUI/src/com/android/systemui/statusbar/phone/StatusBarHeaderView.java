@@ -35,6 +35,7 @@ import com.android.systemui.R;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.statusbar.policy.BatteryController;
+import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.policy.UserInfoController;
 
 /**
@@ -97,6 +98,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     private ActivityStarter mActivityStarter;
     private BatteryController mBatteryController;
     private QSPanel mQSPanel;
+    private boolean mHasKeyguardUserSwitcher;
 
     private final Rect mClipBounds = new Rect();
     private final StatusIconClipper mStatusIconClipper = new StatusIconClipper();
@@ -373,7 +375,11 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     private void updateClickTargets() {
         setClickable(!mKeyguardShowing || mExpanded);
         mDateTime.setClickable(mExpanded);
-        mMultiUserSwitch.setClickable(mExpanded);
+
+        boolean keyguardSwitcherAvailable =
+                mHasKeyguardUserSwitcher && mKeyguardShowing && !mExpanded;
+        mMultiUserSwitch.setClickable(mExpanded || keyguardSwitcherAvailable);
+        mMultiUserSwitch.setKeyguardMode(keyguardSwitcherAvailable);
         mSystemIconsSuperContainer.setClickable(mExpanded);
     }
 
@@ -509,6 +515,11 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         mMultiUserSwitch.setQsPanel(qsp);
     }
 
+    public void setKeyguarUserSwitcher(KeyguardUserSwitcher keyguardUserSwitcher) {
+        mHasKeyguardUserSwitcher = true;
+        mMultiUserSwitch.setKeyguardUserSwitcher(keyguardUserSwitcher);
+    }
+
     @Override
     public boolean shouldDelayChildPressedState() {
         return true;
@@ -522,7 +533,6 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     }
 
     public void setKeyguardUserSwitcherShowing(boolean showing) {
-        // STOPSHIP: NOT CALLED PROPERLY WHEN GOING TO FULL SHADE AND RETURNING!?!
         mKeyguardUserSwitcherShowing = showing;
         updateVisibilities();
         updateSystemIconsLayoutParams();
