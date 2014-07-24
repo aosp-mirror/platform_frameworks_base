@@ -40,16 +40,17 @@ final class TvInputHal implements Handler.Callback {
     public final static int ERROR_STALE_CONFIG = -2;
     public final static int ERROR_UNKNOWN = -3;
 
-    // Below should be in sync with hardware/libhardware/include/hardware/tv_input.h
     public static final int EVENT_DEVICE_AVAILABLE = 1;
     public static final int EVENT_DEVICE_UNAVAILABLE = 2;
     public static final int EVENT_STREAM_CONFIGURATION_CHANGED = 3;
+    public static final int EVENT_FIRST_FRAME_CAPTURED = 4;
 
     public interface Callback {
         public void onDeviceAvailable(
                 TvInputHardwareInfo info, TvStreamConfig[] configs);
         public void onDeviceUnavailable(int deviceId);
         public void onStreamConfigurationChanged(int deviceId, TvStreamConfig[] configs);
+        public void onFirstFrameCaptured(int deviceId, int streamId);
     }
 
     private native long nativeOpen();
@@ -131,6 +132,11 @@ final class TvInputHal implements Handler.Callback {
         mHandler.obtainMessage(EVENT_STREAM_CONFIGURATION_CHANGED, deviceId, 0).sendToTarget();
     }
 
+    private void firstFrameCapturedFromNative(int deviceId, int streamId) {
+        mHandler.sendMessage(
+                mHandler.obtainMessage(EVENT_STREAM_CONFIGURATION_CHANGED, deviceId, streamId));
+    }
+
     // Handler.Callback implementation
 
     private Queue<Message> mPendingMessageQueue = new LinkedList<Message>();
@@ -164,6 +170,13 @@ final class TvInputHal implements Handler.Callback {
                 }
                 retrieveStreamConfigs(deviceId);
                 mCallback.onStreamConfigurationChanged(deviceId, mStreamConfigs);
+                break;
+            }
+
+            case EVENT_FIRST_FRAME_CAPTURED: {
+                int deviceId = msg.arg1;
+                int streamId = msg.arg2;
+                mCallback.onFirstFrameCaptured(deviceId, streamId);
                 break;
             }
 
