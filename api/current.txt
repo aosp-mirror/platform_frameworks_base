@@ -36713,7 +36713,7 @@ package android.webkit {
     method public void removeSessionCookies(android.webkit.ValueCallback<java.lang.Boolean>);
     method public synchronized void setAcceptCookie(boolean);
     method public static void setAcceptFileSchemeCookies(boolean);
-    method public synchronized void setAcceptThirdPartyCookies(android.webkit.WebView, boolean);
+    method public void setAcceptThirdPartyCookies(android.webkit.WebView, boolean);
     method public void setCookie(java.lang.String, java.lang.String);
     method public void setCookie(java.lang.String, java.lang.String, android.webkit.ValueCallback<java.lang.Boolean>);
   }
