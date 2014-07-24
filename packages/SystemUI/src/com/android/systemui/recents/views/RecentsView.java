@@ -449,7 +449,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         if (tv == null) {
             post(launchRunnable);
         } else {
-            stackView.animateOnLaunchingTask(tv, launchRunnable);
+            stackView.startLaunchTaskAnimation(tv, launchRunnable);
         }
     }
 
