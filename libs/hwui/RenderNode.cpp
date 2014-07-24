@@ -836,7 +836,8 @@ void RenderNode::issueOperations(OpenGLRenderer& renderer, T& handler) {
             DisplayListLogBuffer& logBuffer = DisplayListLogBuffer::getInstance();
             const int saveCountOffset = renderer.getSaveCount() - 1;
             const int projectionReceiveIndex = mDisplayListData->projectionReceiveIndex;
-            for (unsigned int i = 0; i < mDisplayListData->displayListOps.size(); i++) {
+            const int size = static_cast<int>(mDisplayListData->displayListOps.size());
+            for (int i = 0; i < size; i++) {
                 DisplayListOp *op = mDisplayListData->displayListOps[i];
 
 #if DEBUG_DISPLAY_LIST

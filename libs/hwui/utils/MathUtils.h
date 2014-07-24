@@ -19,19 +19,19 @@
 namespace android {
 namespace uirenderer {
 
+#define NON_ZERO_EPSILON (0.001f)
+
 class MathUtils {
-private:
-    static const float gNonZeroEpsilon = 0.001f;
 public:
     /**
      * Check for floats that are close enough to zero.
      */
     inline static bool isZero(float value) {
-        return (value >= -gNonZeroEpsilon) && (value <= gNonZeroEpsilon);
+        return (value >= -NON_ZERO_EPSILON) && (value <= NON_ZERO_EPSILON);
     }
 
     inline static bool isPositive(float value) {
-        return value >= gNonZeroEpsilon;
+        return value >= NON_ZERO_EPSILON;
     }
 
     inline static bool areEqual(float valueA, float valueB) {

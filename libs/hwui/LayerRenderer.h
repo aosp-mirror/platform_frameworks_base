@@ -49,7 +49,7 @@ public:
     LayerRenderer(RenderState& renderState, Layer* layer);
     virtual ~LayerRenderer();
 
-    virtual void onViewportInitialized(int width, int height) { /* do nothing */ }
+    virtual void onViewportInitialized() { /* do nothing */ }
     virtual status_t prepareDirty(float left, float top, float right, float bottom, bool opaque);
     virtual status_t clear(float left, float top, float right, float bottom, bool opaque);
     virtual void finish();
