@@ -357,6 +357,7 @@ public class WifiConfiguration implements Parcelable {
      * @hide
      * Uid of last app modifying the configuration
      */
+    @SystemApi
     public int lastUpdateUid;
 
     /**
