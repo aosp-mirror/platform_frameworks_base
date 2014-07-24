@@ -354,26 +354,8 @@ public final class BluetoothAdapter {
     /** The profile is in disconnecting state */
     public static final int STATE_DISCONNECTING = 3;
 
-    /** States for Bluetooth LE advertising */
-    /** @hide */
-    public static final int STATE_ADVERTISE_STARTING = 0;
-    /** @hide */
-    public static final int STATE_ADVERTISE_STARTED = 1;
-    /** @hide */
-    public static final int STATE_ADVERTISE_STOPPING = 2;
-    /** @hide */
-    public static final int STATE_ADVERTISE_STOPPED = 3;
-    /**
-     * Force stopping advertising without callback in case the advertising app dies.
-     * @hide
-     */
-    public static final int STATE_ADVERTISE_FORCE_STOPPING = 4;
-
     /** @hide */
     public static final String BLUETOOTH_MANAGER_SERVICE = "bluetooth_manager";
-
-    /** @hide */
-    public static final int ADVERTISE_CALLBACK_SUCCESS = 0;
 
     private static final int ADDRESS_LENGTH = 17;
 
