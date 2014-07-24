@@ -2268,9 +2268,6 @@
   <public type="attr" name="checkMarkTintMode" />
   <public type="attr" name="popupTheme" />
   <public type="attr" name="toolbarStyle" />
-  <public type="attr" name="lightingStyle" />
-  <public type="attr" name="ambientShadowAlpha" />
-  <public type="attr" name="spotShadowAlpha" />
 
   <public-padding type="dimen" name="l_resource_pad" end="0x01050010" />
 
@@ -2516,10 +2513,9 @@
   <public type="style" name="Widget.Material.Button.Borderless.Colored" />
   <public type="style" name="Widget.Material.Light.Button.Borderless.Colored" />
 
-  <public type="style" name="Theme.Leanback.FormWizard"/>
-  <public type="style" name="Lighting" />
-
   <public-padding type="interpolator" name="l_resource_pad" end="0x010c0010" />
+
+  <public type="style" name="Theme.Leanback.FormWizard"/>
 
   <!-- An interpolator which accelerates fast but decelerates slowly. -->
   <public type="interpolator" name="fast_out_slow_in" />
