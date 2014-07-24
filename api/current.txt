@@ -5414,6 +5414,7 @@ package android.app.admin {
     field public static final java.lang.String EXTRA_DEVICE_ADMIN = "android.app.extra.DEVICE_ADMIN";
     field public static final java.lang.String EXTRA_PROVISIONING_DEFAULT_MANAGED_PROFILE_NAME = "android.app.extra.defaultManagedProfileName";
     field public static final java.lang.String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_CHECKSUM = "android.app.extra.deviceAdminPackageChecksum";
+    field public static final java.lang.String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_COOKIE_HEADER = "android.app.extra.deviceAdminPackageDownloadCookieHeader";
     field public static final java.lang.String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION = "android.app.extra.deviceAdminPackageDownloadLocation";
     field public static final java.lang.String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME = "android.app.extra.deviceAdminPackageName";
     field public static final java.lang.String EXTRA_PROVISIONING_EMAIL_ADDRESS = "android.app.extra.ManagedProfileEmailAddress";

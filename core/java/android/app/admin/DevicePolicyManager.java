@@ -272,6 +272,16 @@ public class DevicePolicyManager {
         = "android.app.extra.deviceAdminPackageDownloadLocation";
 
     /**
+     * A String extra holding a http cookie header which should be used in the http request to the
+     * url specified in {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION}.
+     *
+     * <p>Use in an Nfc record with {@link #PROVISIONING_NFC_MIME_TYPE} that starts device owner
+     * provisioning via an Nfc bump.
+     */
+    public static final String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_COOKIE_HEADER
+        = "android.app.extra.deviceAdminPackageDownloadCookieHeader";
+
+    /**
      * A String extra holding the SHA-1 checksum of the file at download location specified in
      * {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION}. If this doesn't match
      * the file at the download location an error will be shown to the user and the user will be
@@ -301,6 +311,7 @@ public class DevicePolicyManager {
      * <ul>
      * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME}</li>
      * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION}</li>
+     * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_COOKIE_HEADER}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_CHECKSUM}</li>
      * <li>{@link #EXTRA_PROVISIONING_LOCAL_TIME} (convert to String), optional</li>
      * <li>{@link #EXTRA_PROVISIONING_TIME_ZONE}, optional</li>
