@@ -265,6 +265,12 @@ public class CallLog {
         public static final String VOICEMAIL_URI = "voicemail_uri";
 
         /**
+         * Transcription of the call or voicemail entry. This will only be populated for call log
+         * entries of type {@link #VOICEMAIL_TYPE} that have valid transcriptions.
+         */
+        public static final String TRANSCRIPTION = "transcription";
+
+        /**
          * Whether this item has been read or otherwise consumed by the user.
          * <p>
          * Unlike the {@link #NEW} field, which requires the user to have acknowledged the
