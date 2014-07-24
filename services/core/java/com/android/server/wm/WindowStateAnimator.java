@@ -735,6 +735,7 @@ class WindowStateAnimator {
             mSurfaceX = 0;
             mSurfaceY = 0;
             w.mLastSystemDecorRect.set(0, 0, 0, 0);
+            mLastClipRect.set(0, 0, 0, 0);
 
             // Set up surface control with initial size.
             try {
