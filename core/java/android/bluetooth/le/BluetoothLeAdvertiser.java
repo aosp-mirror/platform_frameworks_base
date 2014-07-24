@@ -18,6 +18,7 @@ package android.bluetooth.le;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothGatt;
+import android.bluetooth.BluetoothUuid;
 import android.bluetooth.IBluetoothGatt;
 import android.bluetooth.IBluetoothGattCallback;
 import android.bluetooth.IBluetoothManager;
@@ -48,6 +49,14 @@ import java.util.UUID;
 public final class BluetoothLeAdvertiser {
 
     private static final String TAG = "BluetoothLeAdvertiser";
+
+    private static final int MAX_ADVERTISING_DATA_BYTES = 31;
+    // Each fields need one byte for field length and another byte for field type.
+    private static final int OVERHEAD_BYTES_PER_FIELD = 2;
+    // Flags field will be set by system.
+    private static final int FLAGS_FIELD_BYTES = 3;
+    private static final int MANUFACTURER_SPECIFIC_DATA_LENGTH = 2;
+    private static final int SERVICE_DATA_UUID_LENGTH = 2;
 
     private final IBluetoothManager mBluetoothManager;
     private final Handler mHandler;
@@ -100,6 +109,11 @@ public final class BluetoothLeAdvertiser {
             final AdvertiseCallback callback) {
         if (callback == null) {
             throw new IllegalArgumentException("callback cannot be null");
+        }
+        if (totalBytes(advertiseData) > MAX_ADVERTISING_DATA_BYTES ||
+                totalBytes(scanResponse) > MAX_ADVERTISING_DATA_BYTES) {
+            postCallbackFailure(callback, AdvertiseCallback.ADVERTISE_FAILED_DATA_TOO_LARGE);
+            return;
         }
         if (mLeAdvertisers.containsKey(callback)) {
             postCallbackFailure(callback, AdvertiseCallback.ADVERTISE_FAILED_ALREADY_STARTED);
@@ -157,6 +171,62 @@ public final class BluetoothLeAdvertiser {
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to stop advertising", e);
         }
+    }
+
+    // Compute the size of the advertise data.
+    private int totalBytes(AdvertiseData data) {
+        if (data == null) {
+            return 0;
+        }
+        int size = FLAGS_FIELD_BYTES; // flags field is always set.
+        if (data.getServiceUuids() != null) {
+            int num16BitUuids = 0;
+            int num32BitUuids = 0;
+            int num128BitUuids = 0;
+            for (ParcelUuid uuid : data.getServiceUuids()) {
+                if (BluetoothUuid.is16BitUuid(uuid)) {
+                    ++num16BitUuids;
+                } else if (BluetoothUuid.is32BitUuid(uuid)) {
+                    ++num32BitUuids;
+                } else {
+                    ++num128BitUuids;
+                }
+            }
+            // 16 bit service uuids are grouped into one field when doing advertising.
+            if (num16BitUuids != 0) {
+                size += OVERHEAD_BYTES_PER_FIELD +
+                        num16BitUuids * BluetoothUuid.UUID_BYTES_16_BIT;
+            }
+            // 32 bit service uuids are grouped into one field when doing advertising.
+            if (num32BitUuids != 0) {
+                size += OVERHEAD_BYTES_PER_FIELD +
+                        num32BitUuids * BluetoothUuid.UUID_BYTES_32_BIT;
+            }
+            // 128 bit service uuids are grouped into one field when doing advertising.
+            if (num128BitUuids != 0) {
+                size += OVERHEAD_BYTES_PER_FIELD +
+                        num128BitUuids * BluetoothUuid.UUID_BYTES_128_BIT;
+            }
+        }
+        if (data.getServiceDataUuid() != null) {
+            size += OVERHEAD_BYTES_PER_FIELD + SERVICE_DATA_UUID_LENGTH
+                    + byteLength(data.getServiceData());
+        }
+        if (data.getManufacturerId() > 0) {
+            size += OVERHEAD_BYTES_PER_FIELD + MANUFACTURER_SPECIFIC_DATA_LENGTH +
+                    byteLength(data.getManufacturerSpecificData());
+        }
+        if (data.getIncludeTxPowerLevel()) {
+            size += OVERHEAD_BYTES_PER_FIELD + 1; // tx power level value is one byte.
+        }
+        if (data.getIncludeDeviceName() && mBluetoothAdapter.getName() != null) {
+            size += OVERHEAD_BYTES_PER_FIELD + mBluetoothAdapter.getName().length();
+        }
+        return size;
+    }
+
+    private int byteLength(byte[] array) {
+        return array == null ? 0 : array.length;
     }
 
     /**
