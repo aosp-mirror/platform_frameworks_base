@@ -1285,6 +1285,19 @@
         <attr name="required" format="boolean" />
     </declare-styleable>
 
+    <!-- The <code>feature-group</code> tag specifies
+         a set of one or more <code>uses-feature</code> elements that
+         the application can utilize. An application uses multiple
+         <code>feature-group</code> sets to indicate that it can support
+         different combinations of features.
+
+         <p>This appears as a child tag of the root
+         {@link #AndroidManifest manifest} tag. -->
+    <declare-styleable name="AndroidManifestFeatureGroup">
+        <!-- The human-readable name of the feature group. -->
+        <attr name="label" />
+    </declare-styleable>
+
     <!-- The <code>uses-sdk</code> tag describes the SDK features that the
          containing package must be running on to operate correctly.
          

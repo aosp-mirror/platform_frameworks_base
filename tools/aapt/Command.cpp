@@ -4,20 +4,23 @@
 // Android Asset Packaging Tool main entry point.
 //
 #include "ApkBuilder.h"
-#include "Main.h"
 #include "Bundle.h"
+#include "Images.h"
+#include "Main.h"
 #include "ResourceFilter.h"
 #include "ResourceTable.h"
-#include "Images.h"
 #include "XMLNode.h"
 
-#include <utils/Log.h>
-#include <utils/threads.h>
-#include <utils/List.h>
 #include <utils/Errors.h>
+#include <utils/KeyedVector.h>
+#include <utils/List.h>
+#include <utils/Log.h>
+#include <utils/SortedVector.h>
+#include <utils/threads.h>
+#include <utils/Vector.h>
 
-#include <fcntl.h>
 #include <errno.h>
+#include <fcntl.h>
 
 using namespace android;
 
@@ -588,6 +591,106 @@ static void printComponentPresence(const char* componentName) {
     printf("provides-component:'%s'\n", componentName);
 }
 
+/**
+ * Represents a feature that has been automatically added due to
+ * a pre-requisite or some other reason.
+ */
+struct ImpliedFeature {
+    /**
+     * Name of the implied feature.
+     */
+    String8 name;
+
+    /**
+     * List of human-readable reasons for why this feature was implied.
+     */
+    SortedVector<String8> reasons;
+};
+
+/**
+ * Represents a <feature-group> tag in the AndroidManifest.xml
+ */
+struct FeatureGroup {
+    /**
+     * Human readable label
+     */
+    String8 label;
+
+    /**
+     * Explicit features defined in the group
+     */
+    KeyedVector<String8, bool> features;
+};
+
+static void addImpliedFeature(KeyedVector<String8, ImpliedFeature>* impliedFeatures,
+        const char* name, const char* reason) {
+    String8 name8(name);
+    ssize_t idx = impliedFeatures->indexOfKey(name8);
+    if (idx < 0) {
+        idx = impliedFeatures->add(name8, ImpliedFeature());
+        impliedFeatures->editValueAt(idx).name = name8;
+    }
+    impliedFeatures->editValueAt(idx).reasons.add(String8(reason));
+}
+
+static void printFeatureGroup(const FeatureGroup& grp,
+        const KeyedVector<String8, ImpliedFeature>* impliedFeatures = NULL) {
+    printf("feature-group: label='%s'\n", grp.label.string());
+
+    const size_t numFeatures = grp.features.size();
+    for (size_t i = 0; i < numFeatures; i++) {
+        if (!grp.features[i]) {
+            continue;
+        }
+
+        const String8& featureName = grp.features.keyAt(i);
+        printf("  uses-feature: name='%s'\n",
+                ResTable::normalizeForOutput(featureName.string()).string());
+    }
+
+    const size_t numImpliedFeatures =
+        (impliedFeatures != NULL) ? impliedFeatures->size() : 0;
+    for (size_t i = 0; i < numImpliedFeatures; i++) {
+        const ImpliedFeature& impliedFeature = impliedFeatures->valueAt(i);
+        if (grp.features.indexOfKey(impliedFeature.name) >= 0) {
+            // The feature is explicitly set, no need to use implied
+            // definition.
+            continue;
+        }
+
+        String8 printableFeatureName(ResTable::normalizeForOutput(
+                    impliedFeature.name.string()));
+        printf("  uses-feature: name='%s'\n", printableFeatureName.string());
+        printf("  uses-implied-feature: name='%s' reason='",
+                printableFeatureName.string());
+        const size_t numReasons = impliedFeature.reasons.size();
+        for (size_t j = 0; j < numReasons; j++) {
+            printf("%s", impliedFeature.reasons[j].string());
+            if (j + 2 < numReasons) {
+                printf(", ");
+            } else if (j + 1 < numReasons) {
+                printf(", and ");
+            }
+        }
+        printf("'\n");
+    }
+}
+
+static void addParentFeatures(FeatureGroup* grp, const String8& name) {
+    if (name == "android.hardware.camera.autofocus" ||
+            name == "android.hardware.camera.flash") {
+        grp->features.add(String8("android.hardware.camera"), true);
+    } else if (name == "android.hardware.location.gps" ||
+            name == "android.hardware.location.network") {
+        grp->features.add(String8("android.hardware.location"), true);
+    } else if (name == "android.hardware.touchscreen.multitouch") {
+        grp->features.add(String8("android.hardware.touchscreen"), true);
+    } else if (name == "android.hardware.touchscreen.multitouch.distinct") {
+        grp->features.add(String8("android.hardware.touchscreen.multitouch"), true);
+        grp->features.add(String8("android.hardware.touchscreen"), true);
+    }
+}
+
 /*
  * Handle the "dump" command, to extract select data from an archive.
  */
@@ -797,6 +900,7 @@ int doDump(Bundle* bundle)
             bool isSearchable = false;
             bool withinApplication = false;
             bool withinSupportsInput = false;
+            bool withinFeatureGroup = false;
             bool withinReceiver = false;
             bool withinService = false;
             bool withinProvider = false;
@@ -869,36 +973,7 @@ int doDump(Bundle* bundle)
             // some new uses-feature constants in 2.1 and 2.2. In most cases, the
             // heuristic is "if an app requests a permission but doesn't explicitly
             // request the corresponding <uses-feature>, presume it's there anyway".
-            bool specCameraFeature = false; // camera-related
-            bool specCameraAutofocusFeature = false;
-            bool reqCameraAutofocusFeature = false;
-            bool reqCameraFlashFeature = false;
-            bool hasCameraPermission = false;
-            bool specLocationFeature = false; // location-related
-            bool specNetworkLocFeature = false;
-            bool reqNetworkLocFeature = false;
-            bool specGpsFeature = false;
-            bool reqGpsFeature = false;
-            bool hasMockLocPermission = false;
-            bool hasCoarseLocPermission = false;
-            bool hasGpsPermission = false;
-            bool hasGeneralLocPermission = false;
-            bool specBluetoothFeature = false; // Bluetooth API-related
-            bool hasBluetoothPermission = false;
-            bool specMicrophoneFeature = false; // microphone-related
-            bool hasRecordAudioPermission = false;
-            bool specWiFiFeature = false;
-            bool hasWiFiPermission = false;
-            bool specTelephonyFeature = false; // telephony-related
-            bool reqTelephonySubFeature = false;
-            bool hasTelephonyPermission = false;
-            bool specTouchscreenFeature = false; // touchscreen-related
-            bool specMultitouchFeature = false;
-            bool reqDistinctMultitouchFeature = false;
-            bool specScreenPortraitFeature = false;
-            bool specScreenLandscapeFeature = false;
-            bool reqScreenPortraitFeature = false;
-            bool reqScreenLandscapeFeature = false;
+
             // 2.2 also added some other features that apps can request, but that
             // have no corresponding permission, so we cannot implement any
             // back-compatibility heuristic for them. The below are thus unnecessary
@@ -926,6 +1001,11 @@ int doDump(Bundle* bundle)
             String8 receiverName;
             String8 serviceName;
             Vector<String8> supportedInput;
+
+            FeatureGroup commonFeatures;
+            Vector<FeatureGroup> featureGroups;
+            KeyedVector<String8, ImpliedFeature> impliedFeatures;
+
             while ((code=tree.next()) != ResXMLTree::END_DOCUMENT && code != ResXMLTree::BAD_DOCUMENT) {
                 if (code == ResXMLTree::END_TAG) {
                     depth--;
@@ -946,6 +1026,7 @@ int doDump(Bundle* bundle)
                         }
                         withinApplication = false;
                         withinSupportsInput = false;
+                        withinFeatureGroup = false;
                     } else if (depth < 3) {
                         if (withinActivity && isMainActivity) {
                             String8 aName(getComponentName(pkg, activityName));
@@ -1210,59 +1291,27 @@ int doDump(Bundle* bundle)
                                 COMPATIBLE_WIDTH_LIMIT_DP_ATTR, NULL, 0);
                         largestWidthLimitDp = getIntegerAttribute(tree,
                                 LARGEST_WIDTH_LIMIT_DP_ATTR, NULL, 0);
+                    } else if (tag == "feature-group") {
+                        withinFeatureGroup = true;
+                        FeatureGroup group;
+                        group.label = getResolvedAttribute(&res, tree, LABEL_ATTR, &error);
+                        if (error != "") {
+                            fprintf(stderr, "ERROR getting 'android:label' attribute:"
+                                    " %s\n", error.string());
+                            goto bail;
+                        }
+                        featureGroups.add(group);
+
                     } else if (tag == "uses-feature") {
                         String8 name = getAttribute(tree, NAME_ATTR, &error);
-
                         if (name != "" && error == "") {
                             int req = getIntegerAttribute(tree,
                                     REQUIRED_ATTR, NULL, 1);
 
-                            if (name == "android.hardware.camera") {
-                                specCameraFeature = true;
-                            } else if (name == "android.hardware.camera.autofocus") {
-                                // these have no corresponding permission to check for,
-                                // but should imply the foundational camera permission
-                                reqCameraAutofocusFeature = reqCameraAutofocusFeature || req;
-                                specCameraAutofocusFeature = true;
-                            } else if (req && (name == "android.hardware.camera.flash")) {
-                                // these have no corresponding permission to check for,
-                                // but should imply the foundational camera permission
-                                reqCameraFlashFeature = true;
-                            } else if (name == "android.hardware.location") {
-                                specLocationFeature = true;
-                            } else if (name == "android.hardware.location.network") {
-                                specNetworkLocFeature = true;
-                                reqNetworkLocFeature = reqNetworkLocFeature || req;
-                            } else if (name == "android.hardware.location.gps") {
-                                specGpsFeature = true;
-                                reqGpsFeature = reqGpsFeature || req;
-                            } else if (name == "android.hardware.bluetooth") {
-                                specBluetoothFeature = true;
-                            } else if (name == "android.hardware.touchscreen") {
-                                specTouchscreenFeature = true;
-                            } else if (name == "android.hardware.touchscreen.multitouch") {
-                                specMultitouchFeature = true;
-                            } else if (name == "android.hardware.touchscreen.multitouch.distinct") {
-                                reqDistinctMultitouchFeature = reqDistinctMultitouchFeature || req;
-                            } else if (name == "android.hardware.microphone") {
-                                specMicrophoneFeature = true;
-                            } else if (name == "android.hardware.wifi") {
-                                specWiFiFeature = true;
-                            } else if (name == "android.hardware.telephony") {
-                                specTelephonyFeature = true;
-                            } else if (req && (name == "android.hardware.telephony.gsm" ||
-                                               name == "android.hardware.telephony.cdma")) {
-                                // these have no corresponding permission to check for,
-                                // but should imply the foundational telephony permission
-                                reqTelephonySubFeature = true;
-                            } else if (name == "android.hardware.screen.portrait") {
-                                specScreenPortraitFeature = true;
-                            } else if (name == "android.hardware.screen.landscape") {
-                                specScreenLandscapeFeature = true;
+                            commonFeatures.features.add(name, req);
+                            if (req) {
+                                addParentFeatures(&commonFeatures, name);
                             }
-                            printf("uses-feature%s:'%s'\n",
-                                    req ? "" : "-not-required",
-                                            ResTable::normalizeForOutput(name.string()).string());
                         } else {
                             int vers = getIntegerAttribute(tree,
                                     GL_ES_VERSION_ATTR, &error);
@@ -1274,25 +1323,51 @@ int doDump(Bundle* bundle)
                         String8 name = getAttribute(tree, NAME_ATTR, &error);
                         if (name != "" && error == "") {
                             if (name == "android.permission.CAMERA") {
-                                hasCameraPermission = true;
+                                addImpliedFeature(&impliedFeatures, "android.hardware.feature",
+                                        String8::format("requested %s permission", name.string())
+                                        .string());
                             } else if (name == "android.permission.ACCESS_FINE_LOCATION") {
-                                hasGpsPermission = true;
+                                addImpliedFeature(&impliedFeatures, "android.hardware.location.gps",
+                                        String8::format("requested %s permission", name.string())
+                                        .string());
+                                addImpliedFeature(&impliedFeatures, "android.hardware.location",
+                                        String8::format("requested %s permission", name.string())
+                                        .string());
                             } else if (name == "android.permission.ACCESS_MOCK_LOCATION") {
-                                hasMockLocPermission = true;
+                                addImpliedFeature(&impliedFeatures, "android.hardware.location",
+                                        String8::format("requested %s permission", name.string())
+                                        .string());
                             } else if (name == "android.permission.ACCESS_COARSE_LOCATION") {
-                                hasCoarseLocPermission = true;
+                                addImpliedFeature(&impliedFeatures, "android.hardware.location.network",
+                                        String8::format("requested %s permission", name.string())
+                                        .string());
+                                addImpliedFeature(&impliedFeatures, "android.hardware.location",
+                                        String8::format("requested %s permission", name.string())
+                                        .string());
                             } else if (name == "android.permission.ACCESS_LOCATION_EXTRA_COMMANDS" ||
                                        name == "android.permission.INSTALL_LOCATION_PROVIDER") {
-                                hasGeneralLocPermission = true;
+                                addImpliedFeature(&impliedFeatures, "android.hardware.location",
+                                        String8::format("requested %s permission", name.string())
+                                        .string());
                             } else if (name == "android.permission.BLUETOOTH" ||
                                        name == "android.permission.BLUETOOTH_ADMIN") {
-                                hasBluetoothPermission = true;
+                                if (targetSdk > 4) {
+                                    addImpliedFeature(&impliedFeatures, "android.hardware.bluetooth",
+                                            String8::format("requested %s permission", name.string())
+                                            .string());
+                                    addImpliedFeature(&impliedFeatures, "android.hardware.bluetooth",
+                                            "targetSdkVersion > 4");
+                                }
                             } else if (name == "android.permission.RECORD_AUDIO") {
-                                hasRecordAudioPermission = true;
+                                addImpliedFeature(&impliedFeatures, "android.hardware.microphone",
+                                        String8::format("requested %s permission", name.string())
+                                        .string());
                             } else if (name == "android.permission.ACCESS_WIFI_STATE" ||
                                        name == "android.permission.CHANGE_WIFI_STATE" ||
                                        name == "android.permission.CHANGE_WIFI_MULTICAST_STATE") {
-                                hasWiFiPermission = true;
+                                addImpliedFeature(&impliedFeatures, "android.hardware.wifi",
+                                        String8::format("requested %s permission", name.string())
+                                        .string());
                             } else if (name == "android.permission.CALL_PHONE" ||
                                        name == "android.permission.CALL_PRIVILEGED" ||
                                        name == "android.permission.MODIFY_PHONE_STATE" ||
@@ -1304,7 +1379,8 @@ int doDump(Bundle* bundle)
                                        name == "android.permission.SEND_SMS" ||
                                        name == "android.permission.WRITE_APN_SETTINGS" ||
                                        name == "android.permission.WRITE_SMS") {
-                                hasTelephonyPermission = true;
+                                addImpliedFeature(&impliedFeatures, "android.hardware.telephony",
+                                        String8("requested a telephony permission").string());
                             } else if (name == "android.permission.WRITE_EXTERNAL_STORAGE") {
                                 hasWriteExternalStoragePermission = true;
                             } else if (name == "android.permission.READ_EXTERNAL_STORAGE") {
@@ -1430,10 +1506,12 @@ int doDump(Bundle* bundle)
                             if (error == "") {
                                 if (orien == 0 || orien == 6 || orien == 8) {
                                     // Requests landscape, sensorLandscape, or reverseLandscape.
-                                    reqScreenLandscapeFeature = true;
+                                    addImpliedFeature(&impliedFeatures, "android.hardware.screen.landscape",
+                                            "one or more activities have specified a landscape orientation");
                                 } else if (orien == 1 || orien == 7 || orien == 9) {
                                     // Requests portrait, sensorPortrait, or reversePortrait.
-                                    reqScreenPortraitFeature = true;
+                                    addImpliedFeature(&impliedFeatures, "android.hardware.screen.portrait",
+                                            "one or more activities have specified a portrait orientation");
                                 }
                             }
                         } else if (tag == "uses-library") {
@@ -1559,6 +1637,20 @@ int doDump(Bundle* bundle)
                                         error.string());
                                 goto bail;
                             }
+                        }
+                    } else if (withinFeatureGroup && tag == "uses-feature") {
+                        String8 name = getResolvedAttribute(&res, tree, NAME_ATTR, &error);
+                        if (error != "") {
+                            fprintf(stderr, "ERROR getting 'android:name' attribute: %s\n",
+                                    error.string());
+                            goto bail;
+                        }
+
+                        int required = getIntegerAttribute(tree, REQUIRED_ATTR, NULL, 1);
+                        FeatureGroup& top = featureGroups.editTop();
+                        top.features.add(name, required);
+                        if (required) {
+                            addParentFeatures(&top, name);
                         }
                     }
                 } else if (depth == 4) {
@@ -1734,137 +1826,34 @@ int doDump(Bundle* bundle)
                 }
             }
 
-            /* The following blocks handle printing "inferred" uses-features, based
-             * on whether related features or permissions are used by the app.
-             * Note that the various spec*Feature variables denote whether the
-             * relevant tag was *present* in the AndroidManfest, not that it was
-             * present and set to true.
-             */
-            // Camera-related back-compatibility logic
-            if (!specCameraFeature) {
-                if (reqCameraFlashFeature) {
-                    // if app requested a sub-feature (autofocus or flash) and didn't
-                    // request the base camera feature, we infer that it meant to
-                    printf("uses-feature:'android.hardware.camera'\n");
-                    printf("uses-implied-feature:'android.hardware.camera'," \
-                            "'requested android.hardware.camera.flash feature'\n");
-                } else if (reqCameraAutofocusFeature) {
-                    // if app requested a sub-feature (autofocus or flash) and didn't
-                    // request the base camera feature, we infer that it meant to
-                    printf("uses-feature:'android.hardware.camera'\n");
-                    printf("uses-implied-feature:'android.hardware.camera'," \
-                            "'requested android.hardware.camera.autofocus feature'\n");
-                } else if (hasCameraPermission) {
-                    // if app wants to use camera but didn't request the feature, we infer
-                    // that it meant to, and further that it wants autofocus
-                    // (which was the 1.0 - 1.5 behavior)
-                    printf("uses-feature:'android.hardware.camera'\n");
-                    if (!specCameraAutofocusFeature) {
-                        printf("uses-feature:'android.hardware.camera.autofocus'\n");
-                        printf("uses-implied-feature:'android.hardware.camera.autofocus'," \
-                                "'requested android.permission.CAMERA permission'\n");
+            addImpliedFeature(&impliedFeatures, "android.hardware.touchscreen",
+                    "default feature for all apps");
+
+            const size_t numFeatureGroups = featureGroups.size();
+            if (numFeatureGroups == 0) {
+                // If no <feature-group> tags were defined, apply auto-implied features.
+                printFeatureGroup(commonFeatures, &impliedFeatures);
+
+            } else {
+                // <feature-group> tags are defined, so we ignore implied features and
+                for (size_t i = 0; i < numFeatureGroups; i++) {
+                    FeatureGroup& grp = featureGroups.editItemAt(i);
+
+                    // Merge the features defined in the top level (not inside a <feature-group>)
+                    // with this feature group.
+                    const size_t numCommonFeatures = commonFeatures.features.size();
+                    for (size_t j = 0; j < numCommonFeatures; j++) {
+                        if (grp.features.indexOfKey(commonFeatures.features.keyAt(j)) < 0) {
+                            grp.features.add(commonFeatures.features.keyAt(j), commonFeatures.features[j]);
+                        }
+                    }
+
+                   if (!grp.features.isEmpty()) {
+                        printFeatureGroup(grp);
                     }
                 }
             }
 
-            // Location-related back-compatibility logic
-            if (!specLocationFeature &&
-                (hasMockLocPermission || hasCoarseLocPermission || hasGpsPermission ||
-                 hasGeneralLocPermission || reqNetworkLocFeature || reqGpsFeature)) {
-                // if app either takes a location-related permission or requests one of the
-                // sub-features, we infer that it also meant to request the base location feature
-                printf("uses-feature:'android.hardware.location'\n");
-                printf("uses-implied-feature:'android.hardware.location'," \
-                        "'requested a location access permission'\n");
-            }
-            if (!specGpsFeature && hasGpsPermission) {
-                // if app takes GPS (FINE location) perm but does not request the GPS
-                // feature, we infer that it meant to
-                printf("uses-feature:'android.hardware.location.gps'\n");
-                printf("uses-implied-feature:'android.hardware.location.gps'," \
-                        "'requested android.permission.ACCESS_FINE_LOCATION permission'\n");
-            }
-            if (!specNetworkLocFeature && hasCoarseLocPermission) {
-                // if app takes Network location (COARSE location) perm but does not request the
-                // network location feature, we infer that it meant to
-                printf("uses-feature:'android.hardware.location.network'\n");
-                printf("uses-implied-feature:'android.hardware.location.network'," \
-                        "'requested android.permission.ACCESS_COARSE_LOCATION permission'\n");
-            }
-
-            // Bluetooth-related compatibility logic
-            if (!specBluetoothFeature && hasBluetoothPermission && (targetSdk > 4)) {
-                // if app takes a Bluetooth permission but does not request the Bluetooth
-                // feature, we infer that it meant to
-                printf("uses-feature:'android.hardware.bluetooth'\n");
-                printf("uses-implied-feature:'android.hardware.bluetooth'," \
-                        "'requested android.permission.BLUETOOTH or android.permission.BLUETOOTH_ADMIN " \
-                        "permission and targetSdkVersion > 4'\n");
-            }
-
-            // Microphone-related compatibility logic
-            if (!specMicrophoneFeature && hasRecordAudioPermission) {
-                // if app takes the record-audio permission but does not request the microphone
-                // feature, we infer that it meant to
-                printf("uses-feature:'android.hardware.microphone'\n");
-                printf("uses-implied-feature:'android.hardware.microphone'," \
-                        "'requested android.permission.RECORD_AUDIO permission'\n");
-            }
-
-            // WiFi-related compatibility logic
-            if (!specWiFiFeature && hasWiFiPermission) {
-                // if app takes one of the WiFi permissions but does not request the WiFi
-                // feature, we infer that it meant to
-                printf("uses-feature:'android.hardware.wifi'\n");
-                printf("uses-implied-feature:'android.hardware.wifi'," \
-                        "'requested android.permission.ACCESS_WIFI_STATE, " \
-                        "android.permission.CHANGE_WIFI_STATE, or " \
-                        "android.permission.CHANGE_WIFI_MULTICAST_STATE permission'\n");
-            }
-
-            // Telephony-related compatibility logic
-            if (!specTelephonyFeature && (hasTelephonyPermission || reqTelephonySubFeature)) {
-                // if app takes one of the telephony permissions or requests a sub-feature but
-                // does not request the base telephony feature, we infer that it meant to
-                printf("uses-feature:'android.hardware.telephony'\n");
-                printf("uses-implied-feature:'android.hardware.telephony'," \
-                        "'requested a telephony-related permission or feature'\n");
-            }
-
-            // Touchscreen-related back-compatibility logic
-            if (!specTouchscreenFeature) { // not a typo!
-                // all apps are presumed to require a touchscreen, unless they explicitly say
-                // <uses-feature android:name="android.hardware.touchscreen" android:required="false"/>
-                // Note that specTouchscreenFeature is true if the tag is present, regardless
-                // of whether its value is true or false, so this is safe
-                printf("uses-feature:'android.hardware.touchscreen'\n");
-                printf("uses-implied-feature:'android.hardware.touchscreen'," \
-                        "'assumed you require a touch screen unless explicitly made optional'\n");
-            }
-            if (!specMultitouchFeature && reqDistinctMultitouchFeature) {
-                // if app takes one of the telephony permissions or requests a sub-feature but
-                // does not request the base telephony feature, we infer that it meant to
-                printf("uses-feature:'android.hardware.touchscreen.multitouch'\n");
-                printf("uses-implied-feature:'android.hardware.touchscreen.multitouch'," \
-                        "'requested android.hardware.touchscreen.multitouch.distinct feature'\n");
-            }
-
-            // Landscape/portrait-related compatibility logic
-            if (!specScreenLandscapeFeature && !specScreenPortraitFeature) {
-                // If the app has specified any activities in its manifest
-                // that request a specific orientation, then assume that
-                // orientation is required.
-                if (reqScreenLandscapeFeature) {
-                    printf("uses-feature:'android.hardware.screen.landscape'\n");
-                    printf("uses-implied-feature:'android.hardware.screen.landscape'," \
-                            "'one or more activities have specified a landscape orientation'\n");
-                }
-                if (reqScreenPortraitFeature) {
-                    printf("uses-feature:'android.hardware.screen.portrait'\n");
-                    printf("uses-implied-feature:'android.hardware.screen.portrait'," \
-                            "'one or more activities have specified a portrait orientation'\n");
-                }
-            }
 
             if (hasWidgetReceivers) {
                 printComponentPresence("app-widget");
