@@ -34,8 +34,10 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * This test is intended to measure the amount of memory applications use when
@@ -57,11 +59,12 @@ public class MemoryUsageTest extends InstrumentationTestCase {
 
     private static final String TAG = "MemoryUsageInstrumentation";
     private static final String KEY_APPS = "apps";
-
+    private static final String KEY_PROCS = "persistent";
+    private static final String LAUNCHER_KEY = "launcher";
     private Map<String, Intent> mNameToIntent;
     private Map<String, String> mNameToProcess;
     private Map<String, String> mNameToResultKey;
-
+    private Set<String> mPersistentProcesses;
     private IActivityManager mAm;
 
     public void testMemory() {
@@ -75,35 +78,61 @@ public class MemoryUsageTest extends InstrumentationTestCase {
 
         Bundle results = new Bundle();
         for (String app : mNameToResultKey.keySet()) {
-            String processName;
-            try {
-                processName = startApp(app);
-                measureMemory(app, processName, results);
-                closeApp();
-            } catch (NameNotFoundException e) {
-                Log.i(TAG, "Application " + app + " not found");
+            if (!mPersistentProcesses.contains(app)) {
+                String processName;
+                try {
+                    processName = startApp(app);
+                    measureMemory(app, processName, results);
+                    closeApp();
+                } catch (NameNotFoundException e) {
+                    Log.i(TAG, "Application " + app + " not found");
+                }
+            } else {
+                measureMemory(app, app, results);
             }
-
         }
         instrumentation.sendStatus(0, results);
     }
 
-    private void parseArgs(Bundle args) {
-        mNameToResultKey = new HashMap<String, String>();
-        String appList = args.getString(KEY_APPS);
+    private String getLauncherPackageName() {
+      Intent intent = new Intent(Intent.ACTION_MAIN);
+      intent.addCategory(Intent.CATEGORY_HOME);
+      ResolveInfo resolveInfo = getInstrumentation().getContext().
+          getPackageManager().resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY);
+      return resolveInfo.activityInfo.packageName;
+    }
 
-        if (appList == null)
-            return;
-
-        String appNames[] = appList.split("\\|");
-        for (String pair : appNames) {
+    private Map<String, String> parseListToMap(String list) {
+        Map<String, String> map = new HashMap<String, String>();
+        String names[] = list.split("\\|");
+        for (String pair : names) {
             String[] parts = pair.split("\\^");
             if (parts.length != 2) {
                 Log.e(TAG, "The apps key is incorectly formatted");
                 fail();
             }
+            map.put(parts[0], parts[1]);
+        }
+        return map;
+    }
 
-            mNameToResultKey.put(parts[0], parts[1]);
+    private void parseArgs(Bundle args) {
+        mNameToResultKey = new HashMap<String, String>();
+        mPersistentProcesses = new HashSet<String>();
+        String appList = args.getString(KEY_APPS);
+        String procList = args.getString(KEY_PROCS);
+        String mLauncherPackageName = getLauncherPackageName();
+        mPersistentProcesses.add(mLauncherPackageName);
+        mNameToResultKey.put(mLauncherPackageName, LAUNCHER_KEY);
+        if (appList == null && procList == null)
+            return;
+        if (appList != null) {
+            mNameToResultKey.putAll(parseListToMap(appList));
+        }
+        if (procList != null) {
+            Map<String, String> procMap = parseListToMap(procList);
+            mPersistentProcesses.addAll(procMap.keySet());
+            mNameToResultKey.putAll(procMap);
         }
     }
 
