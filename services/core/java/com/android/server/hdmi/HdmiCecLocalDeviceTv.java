@@ -19,6 +19,7 @@ package com.android.server.hdmi;
 import android.content.Intent;
 import android.hardware.hdmi.HdmiCecDeviceInfo;
 import android.hardware.hdmi.HdmiControlManager;
+import android.hardware.hdmi.HdmiRecordSources;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.media.AudioManager;
 import android.media.AudioSystem;
@@ -35,6 +36,7 @@ import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -808,6 +810,26 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         return true;
     }
 
+    // Seq #53
+    @Override
+    @ServiceThreadOnly
+    protected boolean handleRecordTvScreen(HdmiCecMessage message) {
+        List<OneTouchRecordAction> actions = getActions(OneTouchRecordAction.class);
+        if (!actions.isEmpty()) {
+            // Assumes only one OneTouchRecordAction.
+            OneTouchRecordAction action = actions.get(0);
+            if (action.getRecorderAddress() != message.getSource()) {
+                displayOsd(HdmiControlManager.MESSAGE_NO_RECORDING_PREVIOUS_RECORDING_IN_PROGRESS);
+            }
+            return super.handleRecordTvScreen(message);
+        }
+
+        int recorderAddress = message.getSource();
+        byte[] recordSource = mService.invokeRecordRequestListener(recorderAddress);
+        startOneTouchRecord(recorderAddress, recordSource);
+        return true;
+    }
+
     private boolean isMessageForSystemAudio(HdmiCecMessage message) {
         if (message.getSource() != Constants.ADDR_AUDIO_SYSTEM
                 || message.getDestination() != Constants.ADDR_TV
@@ -1129,6 +1151,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         //     LocalDeviceTv.onAddressAllocated() -> launchDeviceDiscovery().
         removeAction(DeviceDiscoveryAction.class);
         removeAction(HotplugDetectionAction.class);
+        // Remove one touch record action.
+        removeAction(OneTouchRecordAction.class);
 
         disableSystemAudioIfExist();
         disableArcIfExist();
@@ -1209,5 +1233,73 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         intent.putExtra(HdmiControlManager.EXTRA_MESSAGE_ID, messageId);
         mService.getContext().sendBroadcastAsUser(intent, UserHandle.ALL,
                 HdmiControlService.PERMISSION);
+    }
+
+    // Seq #54 and #55
+    @ServiceThreadOnly
+    void startOneTouchRecord(int recorderAddress, byte[] recordSource) {
+        assertRunOnServiceThread();
+        if (!mService.isControlEnabled()) {
+            Slog.w(TAG, "Can not start one touch record. CEC control is disabled.");
+            return;
+        }
+
+        if (!checkRecorder(recorderAddress)) {
+            Slog.w(TAG, "Invalid recorder address:" + recorderAddress);
+            return;
+        }
+
+        if (!checkRecordSource(recordSource)) {
+            Slog.w(TAG, "Invalid record source." + Arrays.toString(recordSource));
+            return;
+        }
+
+        addAndStartAction(new OneTouchRecordAction(this, recorderAddress, recordSource));
+        Slog.i(TAG, "Start new [One Touch Record]-Target:" + recorderAddress + ", recordSource:"
+                + Arrays.toString(recordSource));
+    }
+
+    @ServiceThreadOnly
+    void stopOneTouchRecord(int recorderAddress) {
+        assertRunOnServiceThread();
+        if (!mService.isControlEnabled()) {
+            Slog.w(TAG, "Can not stop one touch record. CEC control is disabled.");
+            return;
+        }
+
+        if (!checkRecorder(recorderAddress)) {
+            Slog.w(TAG, "Invalid recorder address:" + recorderAddress);
+            return;
+        }
+
+        // Remove one touch record action so that other one touch record can be started.
+        removeAction(OneTouchRecordAction.class);
+        mService.sendCecCommand(HdmiCecMessageBuilder.buildRecordOff(mAddress, recorderAddress));
+        Slog.i(TAG, "Stop [One Touch Record]-Target:" + recorderAddress);
+    }
+
+    private boolean checkRecorder(int recorderAddress) {
+        HdmiCecDeviceInfo device = getDeviceInfo(recorderAddress);
+        return (device != null)
+                && (HdmiUtils.getTypeFromAddress(recorderAddress)
+                        == HdmiCecDeviceInfo.DEVICE_RECORDER);
+    }
+
+    private boolean checkRecordSource(byte[] recordSource) {
+        return (recordSource != null) && HdmiRecordSources.checkRecordSource(recordSource);
+    }
+
+    @ServiceThreadOnly
+    void startTimerRecording(int recorderAddress, int sourceType, byte[] recordSource) {
+        assertRunOnServiceThread();
+
+        // TODO: implement this.
+    }
+
+    @ServiceThreadOnly
+    void clearTimerRecording(int recorderAddress, int sourceType, byte[] recordSource) {
+        assertRunOnServiceThread();
+
+        // TODO: implement this.
     }
 }

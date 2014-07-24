@@ -200,6 +200,8 @@ abstract class HdmiCecLocalDevice {
                 return handleVendorCommandWithId(message);
             case Constants.MESSAGE_SET_OSD_NAME:
                 return handleSetOsdName(message);
+            case Constants.MESSAGE_RECORD_TV_SCREEN:
+                return handleRecordTvScreen(message);
             default:
                 return false;
         }
@@ -400,6 +402,13 @@ abstract class HdmiCecLocalDevice {
 
     protected boolean handleSetOsdName(HdmiCecMessage message) {
         // The default behavior of <Set Osd Name> is doing nothing.
+        return true;
+    }
+
+    protected boolean handleRecordTvScreen(HdmiCecMessage message) {
+        // The default behavior of <Record TV Screen> is replying <Feature Abort> with "Refused".
+        mService.sendCecCommand(HdmiCecMessageBuilder.buildFeatureAbortCommand(mAddress,
+                message.getSource(), message.getOpcode(), Constants.ABORT_REFUSED));
         return true;
     }
 

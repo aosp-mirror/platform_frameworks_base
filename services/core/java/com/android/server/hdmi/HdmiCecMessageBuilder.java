@@ -455,6 +455,29 @@ public class HdmiCecMessageBuilder {
         return buildCommand(src, dest, Constants.MESSAGE_VENDOR_COMMAND_WITH_ID, params);
     }
 
+    /**
+     * Build &lt;Record On&gt; command.
+     *
+     * @param src source address of command
+     * @param dest destination address of command
+     * @param params parameter of command
+     * @return newly created {@link HdmiCecMessage}
+     */
+    static HdmiCecMessage buildRecordOn(int src, int dest, byte[] params) {
+        return buildCommand(src, dest, Constants.MESSAGE_RECORD_ON, params);
+    }
+
+    /**
+     * Build &lt;Record Off&gt; command.
+     *
+     * @param src source address of command
+     * @param dest destination address of command
+     * @return newly created {@link HdmiCecMessage}
+     */
+    static HdmiCecMessage buildRecordOff(int src, int dest) {
+        return buildCommand(src, dest, Constants.MESSAGE_RECORD_OFF);
+    }
+
     /***** Please ADD new buildXXX() methods above. ******/
 
     /**
