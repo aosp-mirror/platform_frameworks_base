@@ -6563,13 +6563,20 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     void grantUriPermissionLocked(int callingUid, String targetPkg, GrantUri grantUri,
-            final int modeFlags, UriPermissionOwner owner) {
+            final int modeFlags, UriPermissionOwner owner, int targetUserId) {
         if (targetPkg == null) {
             throw new NullPointerException("targetPkg");
         }
+        int targetUid;
+        final IPackageManager pm = AppGlobals.getPackageManager();
+        try {
+            targetUid = pm.getPackageUid(targetPkg, targetUserId);
+        } catch (RemoteException ex) {
+            return;
+        }
 
-        int targetUid = checkGrantUriPermissionLocked(callingUid, targetPkg, grantUri, modeFlags,
-                -1);
+        targetUid = checkGrantUriPermissionLocked(callingUid, targetPkg, grantUri, modeFlags,
+                targetUid);
         if (targetUid < 0) {
             return;
         }
@@ -6720,7 +6727,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                     | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
                     | Intent.FLAG_GRANT_PREFIX_URI_PERMISSION);
 
-            grantUriPermissionLocked(r.uid, targetPkg, grantUri, modeFlags, null);
+            grantUriPermissionLocked(r.uid, targetPkg, grantUri, modeFlags, null,
+                    UserHandle.getUserId(r.uid));
         }
     }
 
@@ -6897,7 +6905,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public void grantUriPermissionFromOwner(IBinder token, int fromUid, String targetPkg, Uri uri,
-            final int modeFlags, int userId) {
+            final int modeFlags, int sourceUserId, int targetUserId) {
         synchronized(this) {
             UriPermissionOwner owner = UriPermissionOwner.fromExternalToken(token);
             if (owner == null) {
@@ -6917,8 +6925,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 throw new IllegalArgumentException("null uri");
             }
 
-            grantUriPermissionLocked(fromUid, targetPkg, new GrantUri(userId, uri, false),
-                    modeFlags, owner);
+            grantUriPermissionLocked(fromUid, targetPkg, new GrantUri(sourceUserId, uri, false),
+                    modeFlags, owner, targetUserId);
         }
     }
 

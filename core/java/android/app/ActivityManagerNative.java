@@ -1661,8 +1661,10 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             String targetPkg = data.readString();
             Uri uri = Uri.CREATOR.createFromParcel(data);
             int mode = data.readInt();
-            int userId = data.readInt();
-            grantUriPermissionFromOwner(owner, fromUid, targetPkg, uri, mode, userId);
+            int sourceUserId = data.readInt();
+            int targetUserId = data.readInt();
+            grantUriPermissionFromOwner(owner, fromUid, targetPkg, uri, mode, sourceUserId,
+                    targetUserId);
             reply.writeNoException();
             return true;
         }
@@ -4343,7 +4345,7 @@ class ActivityManagerProxy implements IActivityManager
     }
 
     public void grantUriPermissionFromOwner(IBinder owner, int fromUid, String targetPkg,
-            Uri uri, int mode, int userId) throws RemoteException {
+            Uri uri, int mode, int sourceUserId, int targetUserId) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
@@ -4352,7 +4354,8 @@ class ActivityManagerProxy implements IActivityManager
         data.writeString(targetPkg);
         uri.writeToParcel(data, 0);
         data.writeInt(mode);
-        data.writeInt(userId);
+        data.writeInt(sourceUserId);
+        data.writeInt(targetUserId);
         mRemote.transact(GRANT_URI_PERMISSION_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();

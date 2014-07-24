@@ -828,6 +828,26 @@ public class ClipData implements Parcelable {
         }
     }
 
+    /**
+     * Only fixing the data field of the intents
+     * @hide
+     */
+    public void fixUrisLight(int contentUserHint) {
+        final int size = mItems.size();
+        for (int i = 0; i < size; i++) {
+            final Item item = mItems.get(i);
+            if (item.mIntent != null) {
+                Uri data = item.mIntent.getData();
+                if (data != null) {
+                    item.mIntent.setData(maybeAddUserId(data, contentUserHint));
+                }
+            }
+            if (item.mUri != null) {
+                item.mUri = maybeAddUserId(item.mUri, contentUserHint);
+            }
+        }
+    }
+
     @Override
     public String toString() {
         StringBuilder b = new StringBuilder(128);
