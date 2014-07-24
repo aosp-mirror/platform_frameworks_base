@@ -34,6 +34,7 @@ import com.android.systemui.R;
 import com.android.systemui.recents.AlternateRecentsComponent;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
+import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.Task;
 
 /* A task view */
@@ -46,6 +47,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         public void onTaskViewClicked(TaskView tv, Task task, boolean lockToTask);
         public void onTaskViewDismissed(TaskView tv);
         public void onTaskViewClipStateChanged(TaskView tv);
+        public void onTaskViewFullScreenTransitionCompleted();
     }
 
     RecentsConfiguration mConfig;
@@ -200,11 +202,13 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
 
     /** Prepares this task view for the enter-recents animations.  This is called earlier in the
      * first layout because the actual animation into recents may take a long time. */
-    public void prepareEnterRecentsAnimation(boolean isTaskViewLaunchTargetTask, int offscreenY) {
+    public void prepareEnterRecentsAnimation(boolean isTaskViewLaunchTargetTask,
+                                             boolean occludesLaunchTarget, int offscreenY) {
         if (mConfig.launchedFromAppWithScreenshot) {
             if (isTaskViewLaunchTargetTask) {
-                // Also hide the front most task bar view so we can animate it in
-                // mBarView.prepareEnterRecentsAnimation();
+                mBarView.prepareEnterRecentsAnimation();
+                // Hide the footer during the transition in, and animate it out afterwards?
+                mFooterView.animateFooterVisibility(false, 0);
             } else {
                 // Don't do anything for the side views when animating in
             }
@@ -215,6 +219,9 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                 mBarView.prepareEnterRecentsAnimation();
                 // Set the dim to 0 so we can animate it in
                 setDim(0);
+            } else if (occludesLaunchTarget) {
+                // Move the task view off screen (below) so we can animate it in
+                setTranslationY(offscreenY);
             }
 
         } else if (mConfig.launchedFromHome) {
@@ -230,15 +237,18 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
 
     /** Animates this task view as it enters recents */
     public void startEnterRecentsAnimation(final ViewAnimation.TaskViewEnterContext ctx) {
-        TaskViewTransform transform = ctx.currentTaskTransform;
-        Rect taskRect = ctx.currentTaskRect;
+        final TaskViewTransform transform = ctx.currentTaskTransform;
 
         if (mConfig.launchedFromAppWithScreenshot) {
             if (mTask.isLaunchTarget) {
-                int duration = mConfig.taskViewEnterFromHomeDuration * 5;
+                Rect taskRect = ctx.currentTaskRect;
+                int duration = mConfig.taskViewEnterFromHomeDuration * 10;
                 int windowInsetTop = mConfig.systemInsets.top; // XXX: Should be for the window
                 float taskScale = ((float) taskRect.width() / getMeasuredWidth()) * transform.scale;
-                float taskTranslationY = taskRect.top + transform.translationY - windowInsetTop;
+                float scaledYOffset = ((1f - taskScale) * getMeasuredHeight()) / 2;
+                float scaledWindowInsetTop = (int) (taskScale * windowInsetTop);
+                float scaledTranslationY = taskRect.top + transform.translationY -
+                        (scaledWindowInsetTop + scaledYOffset);
 
                 // Animate the top clip
                 mViewBounds.animateClipTop(windowInsetTop, duration,
@@ -256,29 +266,39 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                 } else {
                     mViewBounds.animateClipBottom(getMeasuredHeight() - (windowInsetTop + size), duration);
                 }
+                // Animate the task bar of the first task view
+                mBarView.startEnterRecentsAnimation(0, null);
                 animate()
                         .scaleX(taskScale)
                         .scaleY(taskScale)
-                        .translationY(taskTranslationY)
+                        .translationY(scaledTranslationY)
                         .setDuration(duration)
                         .withEndAction(new Runnable() {
                             @Override
                             public void run() {
-                                // Animate the task bar of the first task view
-                                mBarView.startEnterRecentsAnimation(0, mThumbnailView.enableTaskBarClipAsRunnable(mBarView));
+                                setIsFullScreen(false);
+                                requestLayout();
+
+                                // Reset the clip
+                                mViewBounds.setClipTop(0);
+                                mViewBounds.setClipBottom(0);
+                                mViewBounds.setClipRight(0);
+                                // Reset the bar translation
+                                mBarView.setTranslationY(0);
+                                // Enable the thumbnail clip
+                                mThumbnailView.enableTaskBarClip(mBarView);
                                 // Animate the footer into view (if it is the front most task)
                                 animateFooterVisibility(true, mConfig.taskBarEnterAnimDuration);
-                                // Decrement the post animation trigger
-                                ctx.postAnimationTrigger.decrement();
 
-                                // XXX Request layout and only start hte next animation after the next
-                                // layout
-
-                                setIsFullScreen(false);
-                                mThumbnailView.unbindFromScreenshot();
-
+                                // Unbind the thumbnail from the screenshot
+                                RecentsTaskLoader.getInstance().loadTaskData(mTask);
                                 // Recycle the full screen screenshot
                                 AlternateRecentsComponent.consumeLastScreenshot();
+
+                                mCb.onTaskViewFullScreenTransitionCompleted();
+
+                                // Decrement the post animation trigger
+                                ctx.postAnimationTrigger.decrement();
                             }
                         })
                         .start();
@@ -315,7 +335,29 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                 // Animate the footer into view
                 animateFooterVisibility(true, mConfig.taskBarEnterAnimDuration);
             } else {
+                // Enable the task bar clip
                 mThumbnailView.enableTaskBarClip(mBarView);
+                // Animate the task up if it was occluding the launch target
+                if (ctx.currentTaskOccludesLaunchTarget) {
+                    setTranslationY(transform.translationY + mConfig.taskViewAffiliateGroupEnterOffsetPx);
+                    setAlpha(0f);
+                    animate().alpha(1f)
+                            .translationY(transform.translationY)
+                            .setStartDelay(mConfig.taskBarEnterAnimDelay)
+                            .setUpdateListener(null)
+                            .setInterpolator(mConfig.fastOutSlowInInterpolator)
+                            .setDuration(mConfig.taskViewEnterFromHomeDuration)
+                            .withEndAction(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mThumbnailView.enableTaskBarClip(mBarView);
+                                    // Decrement the post animation trigger
+                                    ctx.postAnimationTrigger.decrement();
+                                }
+                            })
+                            .start();
+                    ctx.postAnimationTrigger.increment();
+                }
             }
 
         } else if (mConfig.launchedFromHome) {
@@ -371,7 +413,8 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     }
 
     /** Animates this task view as it exits recents */
-    public void startLaunchTaskAnimation(final Runnable r, boolean isLaunchingTask) {
+    public void startLaunchTaskAnimation(final Runnable r, boolean isLaunchingTask,
+                                         boolean occludesLaunchTarget) {
         if (isLaunchingTask) {
             // Disable the thumbnail clip and animate the bar out
             mBarView.startLaunchTaskAnimation(mThumbnailView.disableTaskBarClipAsRunnable(), r);
@@ -386,6 +429,17 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         } else {
             // Hide the dismiss button
             mBarView.startLaunchTaskDismissAnimation();
+            // If this is another view in the task grouping and is in front of the launch task,
+            // animate it away first
+            if (occludesLaunchTarget) {
+                animate().alpha(0f)
+                    .translationY(getTranslationY() + mConfig.taskViewAffiliateGroupEnterOffsetPx)
+                    .setStartDelay(0)
+                    .setUpdateListener(null)
+                    .setInterpolator(mConfig.fastOutLinearInInterpolator)
+                    .setDuration(mConfig.taskBarExitAnimDuration)
+                    .start();
+            }
         }
     }
 
