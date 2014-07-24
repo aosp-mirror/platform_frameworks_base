@@ -492,7 +492,7 @@ public final class HdmiRecordSources {
         /** Indicates that a service is identified by a logical or virtual channel number. */
         private static final int DIGITAL_SERVICE_IDENTIFIED_BY_CHANNEL = 1;
 
-        private static final int EXTRA_DATA_SIZE = 7;
+        static final int EXTRA_DATA_SIZE = 7;
 
         /**
          * Type of identification. It should be one of DIGITAL_SERVICE_IDENTIFIED_BY_DIGITAL_ID and
@@ -609,7 +609,7 @@ public final class HdmiRecordSources {
      */
     @SystemApi
     public static final class AnalogueServiceSource extends RecordSource {
-        private static final int EXTRA_DATA_SIZE = 4;
+        static final int EXTRA_DATA_SIZE = 4;
 
         /** Indicates the Analogue broadcast type. */
         private final int mBroadcastType;
@@ -668,7 +668,7 @@ public final class HdmiRecordSources {
      */
     @SystemApi
     public static final class ExternalPlugData extends RecordSource {
-        private static final int EXTRA_DATA_SIZE = 1;
+        static final int EXTRA_DATA_SIZE = 1;
 
         /** External Plug number on the Recording Device. */
         private final int mPlugNumber;
@@ -713,7 +713,7 @@ public final class HdmiRecordSources {
      */
     @SystemApi
     public static final class ExternalPhysicalAddress extends RecordSource {
-        private static final int EXTRA_DATA_SIZE = 2;
+        static final int EXTRA_DATA_SIZE = 2;
 
         private final int mPhysicalAddress;
 
@@ -751,6 +751,7 @@ public final class HdmiRecordSources {
      * Check the byte array of record source.
      * @hide
      */
+    @SystemApi
     public static boolean checkRecordSource(byte[] recordSource) {
         int recordSourceType = recordSource[0];
         int extraDataSize = recordSource.length - 1;
