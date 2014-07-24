@@ -46,8 +46,8 @@ import android.os.PersistableBundle;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-
 import android.util.SparseIntArray;
+
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IAppOpsService;
@@ -222,7 +222,11 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public final class ActivityManagerService extends ActivityManagerNative
         implements Watchdog.Monitor, BatteryStatsImpl.BatteryCallback {
+
     private static final String USER_DATA_DIR = "/data/user/";
+    // File that stores last updated system version and called preboot receivers
+    static final String CALLED_PRE_BOOTS_FILENAME = "called_pre_boots.dat";
+
     static final String TAG = "ActivityManager";
     static final String TAG_MU = "ActivityManagerServiceMU";
     static final boolean DEBUG = false;
@@ -353,6 +357,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int ALLOW_NON_FULL = 0;
     static final int ALLOW_NON_FULL_IN_PROFILE = 1;
     static final int ALLOW_FULL_ONLY = 2;
+
+    static final int LAST_PREBOOT_DELIVERED_FILE_VERSION = 10000;
 
     /** All system services */
     SystemServiceManager mSystemServiceManager;
@@ -9947,11 +9953,9 @@ public final class ActivityManagerService extends ActivityManagerNative
     private static File getCalledPreBootReceiversFile() {
         File dataDir = Environment.getDataDirectory();
         File systemDir = new File(dataDir, "system");
-        File fname = new File(systemDir, "called_pre_boots.dat");
+        File fname = new File(systemDir, CALLED_PRE_BOOTS_FILENAME);
         return fname;
     }
-
-    static final int LAST_DONE_VERSION = 10000;
 
     private static ArrayList<ComponentName> readLastDonePreBootReceivers() {
         ArrayList<ComponentName> lastDoneReceivers = new ArrayList<ComponentName>();
@@ -9961,7 +9965,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             fis = new FileInputStream(file);
             DataInputStream dis = new DataInputStream(new BufferedInputStream(fis, 2048));
             int fvers = dis.readInt();
-            if (fvers == LAST_DONE_VERSION) {
+            if (fvers == LAST_PREBOOT_DELIVERED_FILE_VERSION) {
                 String vers = dis.readUTF();
                 String codename = dis.readUTF();
                 String build = dis.readUTF();
@@ -9990,16 +9994,15 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
         return lastDoneReceivers;
     }
-    
+
     private static void writeLastDonePreBootReceivers(ArrayList<ComponentName> list) {
         File file = getCalledPreBootReceiversFile();
         FileOutputStream fos = null;
         DataOutputStream dos = null;
         try {
-            Slog.i(TAG, "Writing new set of last done pre-boot receivers...");
             fos = new FileOutputStream(file);
             dos = new DataOutputStream(new BufferedOutputStream(fos, 2048));
-            dos.writeInt(LAST_DONE_VERSION);
+            dos.writeInt(LAST_PREBOOT_DELIVERED_FILE_VERSION);
             dos.writeUTF(android.os.Build.VERSION.RELEASE);
             dos.writeUTF(android.os.Build.VERSION.CODENAME);
             dos.writeUTF(android.os.Build.VERSION.INCREMENTAL);
@@ -10023,11 +10026,92 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
     }
-    
+
+    private boolean deliverPreBootCompleted(final Runnable onFinishCallback,
+            ArrayList<ComponentName> doneReceivers, int userId) {
+        boolean waitingUpdate = false;
+        Intent intent = new Intent(Intent.ACTION_PRE_BOOT_COMPLETED);
+        List<ResolveInfo> ris = null;
+        try {
+            ris = AppGlobals.getPackageManager().queryIntentReceivers(
+                    intent, null, 0, userId);
+        } catch (RemoteException e) {
+        }
+        if (ris != null) {
+            for (int i=ris.size()-1; i>=0; i--) {
+                if ((ris.get(i).activityInfo.applicationInfo.flags
+                        &ApplicationInfo.FLAG_SYSTEM) == 0) {
+                    ris.remove(i);
+                }
+            }
+            intent.addFlags(Intent.FLAG_RECEIVER_BOOT_UPGRADE);
+
+            // For User 0, load the version number. When delivering to a new user, deliver
+            // to all receivers.
+            if (userId == UserHandle.USER_OWNER) {
+                ArrayList<ComponentName> lastDoneReceivers = readLastDonePreBootReceivers();
+                for (int i=0; i<ris.size(); i++) {
+                    ActivityInfo ai = ris.get(i).activityInfo;
+                    ComponentName comp = new ComponentName(ai.packageName, ai.name);
+                    if (lastDoneReceivers.contains(comp)) {
+                        // We already did the pre boot receiver for this app with the current
+                        // platform version, so don't do it again...
+                        ris.remove(i);
+                        i--;
+                        // ...however, do keep it as one that has been done, so we don't
+                        // forget about it when rewriting the file of last done receivers.
+                        doneReceivers.add(comp);
+                    }
+                }
+            }
+
+            // If primary user, send broadcast to all available users, else just to userId
+            final int[] users = userId == UserHandle.USER_OWNER ? getUsersLocked()
+                    : new int[] { userId };
+            for (int i = 0; i < ris.size(); i++) {
+                ActivityInfo ai = ris.get(i).activityInfo;
+                ComponentName comp = new ComponentName(ai.packageName, ai.name);
+                doneReceivers.add(comp);
+                intent.setComponent(comp);
+                for (int j=0; j<users.length; j++) {
+                    IIntentReceiver finisher = null;
+                    // On last receiver and user, set up a completion callback
+                    if (i == ris.size() - 1 && j == users.length - 1 && onFinishCallback != null) {
+                        finisher = new IIntentReceiver.Stub() {
+                            public void performReceive(Intent intent, int resultCode,
+                                    String data, Bundle extras, boolean ordered,
+                                    boolean sticky, int sendingUser) {
+                                // The raw IIntentReceiver interface is called
+                                // with the AM lock held, so redispatch to
+                                // execute our code without the lock.
+                                mHandler.post(onFinishCallback);
+                            }
+                        };
+                    }
+                    Slog.i(TAG, "Sending system update to " + intent.getComponent()
+                            + " for user " + users[j]);
+                    broadcastIntentLocked(null, null, intent, null, finisher,
+                            0, null, null, null, AppOpsManager.OP_NONE,
+                            true, false, MY_PID, Process.SYSTEM_UID,
+                            users[j]);
+                    if (finisher != null) {
+                        waitingUpdate = true;
+                    }
+                }
+            }
+        }
+
+        return waitingUpdate;
+    }
+
     public void systemReady(final Runnable goingCallback) {
         synchronized(this) {
             if (mSystemReady) {
-                if (goingCallback != null) goingCallback.run();
+                // If we're done calling all the receivers, run the next "boot phase" passed in
+                // by the SystemServer
+                if (goingCallback != null) {
+                    goingCallback.run();
+                }
                 return;
             }
 
@@ -10048,82 +10132,20 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (mWaitingUpdate) {
                     return;
                 }
-                Intent intent = new Intent(Intent.ACTION_PRE_BOOT_COMPLETED);
-                List<ResolveInfo> ris = null;
-                try {
-                    ris = AppGlobals.getPackageManager().queryIntentReceivers(
-                            intent, null, 0, 0);
-                } catch (RemoteException e) {
-                }
-                if (ris != null) {
-                    for (int i=ris.size()-1; i>=0; i--) {
-                        if ((ris.get(i).activityInfo.applicationInfo.flags
-                                &ApplicationInfo.FLAG_SYSTEM) == 0) {
-                            ris.remove(i);
+                final ArrayList<ComponentName> doneReceivers = new ArrayList<ComponentName>();
+                mWaitingUpdate = deliverPreBootCompleted(new Runnable() {
+                    public void run() {
+                        synchronized (ActivityManagerService.this) {
+                            mDidUpdate = true;
                         }
+                        writeLastDonePreBootReceivers(doneReceivers);
+                        showBootMessage(mContext.getText(
+                                R.string.android_upgrading_complete),
+                                false);
+                        systemReady(goingCallback);
                     }
-                    intent.addFlags(Intent.FLAG_RECEIVER_BOOT_UPGRADE);
+                }, doneReceivers, UserHandle.USER_OWNER);
 
-                    ArrayList<ComponentName> lastDoneReceivers = readLastDonePreBootReceivers();
-
-                    final ArrayList<ComponentName> doneReceivers = new ArrayList<ComponentName>();
-                    for (int i=0; i<ris.size(); i++) {
-                        ActivityInfo ai = ris.get(i).activityInfo;
-                        ComponentName comp = new ComponentName(ai.packageName, ai.name);
-                        if (lastDoneReceivers.contains(comp)) {
-                            // We already did the pre boot receiver for this app with the current
-                            // platform version, so don't do it again...
-                            ris.remove(i);
-                            i--;
-                            // ...however, do keep it as one that has been done, so we don't
-                            // forget about it when rewriting the file of last done receivers.
-                            doneReceivers.add(comp);
-                        }
-                    }
-
-                    final int[] users = getUsersLocked();
-                    for (int i=0; i<ris.size(); i++) {
-                        ActivityInfo ai = ris.get(i).activityInfo;
-                        ComponentName comp = new ComponentName(ai.packageName, ai.name);
-                        doneReceivers.add(comp);
-                        intent.setComponent(comp);
-                        for (int j=0; j<users.length; j++) {
-                            IIntentReceiver finisher = null;
-                            if (i == ris.size()-1 && j == users.length-1) {
-                                finisher = new IIntentReceiver.Stub() {
-                                    public void performReceive(Intent intent, int resultCode,
-                                            String data, Bundle extras, boolean ordered,
-                                            boolean sticky, int sendingUser) {
-                                        // The raw IIntentReceiver interface is called
-                                        // with the AM lock held, so redispatch to
-                                        // execute our code without the lock.
-                                        mHandler.post(new Runnable() {
-                                            public void run() {
-                                                synchronized (ActivityManagerService.this) {
-                                                    mDidUpdate = true;
-                                                }
-                                                writeLastDonePreBootReceivers(doneReceivers);
-                                                showBootMessage(mContext.getText(
-                                                        R.string.android_upgrading_complete),
-                                                        false);
-                                                systemReady(goingCallback);
-                                            }
-                                        });
-                                    }
-                                };
-                            }
-                            Slog.i(TAG, "Sending system update to " + intent.getComponent()
-                                    + " for user " + users[j]);
-                            broadcastIntentLocked(null, null, intent, null, finisher,
-                                    0, null, null, null, AppOpsManager.OP_NONE,
-                                    true, false, MY_PID, Process.SYSTEM_UID,
-                                    users[j]);
-                            if (finisher != null) {
-                                mWaitingUpdate = true;
-                            }
-                        }
-                    }
-                }
                 if (mWaitingUpdate) {
                     return;
                 }
@@ -17156,6 +17178,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
 
                 if (needStart) {
+                    // Send USER_STARTED broadcast
                     Intent intent = new Intent(Intent.ACTION_USER_STARTED);
                     intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
                             | Intent.FLAG_RECEIVER_FOREGROUND);
@@ -17167,6 +17190,11 @@ public final class ActivityManagerService extends ActivityManagerNative
 
                 if ((userInfo.flags&UserInfo.FLAG_INITIALIZED) == 0) {
                     if (userId != UserHandle.USER_OWNER) {
+                        // Send PRE_BOOT_COMPLETED broadcasts for this new user
+                        final ArrayList<ComponentName> doneReceivers
+                                = new ArrayList<ComponentName>();
+                        deliverPreBootCompleted(null, doneReceivers, userId);
+
                         Intent intent = new Intent(Intent.ACTION_USER_INITIALIZE);
                         intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
                         broadcastIntentLocked(null, null, intent, null,
