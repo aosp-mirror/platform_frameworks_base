@@ -2242,6 +2242,33 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
             new Key<Rational[]>("android.sensor.neutralColorPoint", Rational[].class);
 
     /**
+     * <p>Noise model coefficients for each CFA mosaic channel.</p>
+     * <p>This tag contains two noise model coefficients for each CFA channel
+     * corresponding to the sensor amplification (S) and sensor readout
+     * noise (O).  These are given as pairs of coefficients for each channel
+     * in the same order as channels listed for the CFA layout tag
+     * (see {@link CameraCharacteristics#SENSOR_INFO_COLOR_FILTER_ARRANGEMENT android.sensor.info.colorFilterArrangement}).  This is
+     * represented as an array of Pair&lt;Double, Double&gt;, where
+     * the first member of the Pair at index n is the S coefficient and the
+     * second member is the O coefficient for the nth color channel in the CFA.</p>
+     * <p>These coefficients are used in a two parameter noise model to describe
+     * the amount of noise present in the image for each CFA channel.  The
+     * noise model used here is:</p>
+     * <p>N(x) = sqrt(Sx + O)</p>
+     * <p>Where x represents the recorded signal of a CFA channel normalized to
+     * the range [0, 1], and S and O are the noise model coeffiecients for
+     * that channel.</p>
+     * <p>A more detailed description of the noise model can be found in the
+     * Adobe DNG specification for the NoiseProfile tag.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     *
+     * @see CameraCharacteristics#SENSOR_INFO_COLOR_FILTER_ARRANGEMENT
+     */
+    @PublicKey
+    public static final Key<android.util.Pair<Double,Double>[]> SENSOR_NOISE_PROFILE =
+            new Key<android.util.Pair<Double,Double>[]>("android.sensor.noiseProfile", new TypeReference<android.util.Pair<Double,Double>[]>() {{ }});
+
+    /**
      * <p>The worst-case divergence between Bayer green channels.</p>
      * <p>This value is an estimate of the worst case split between the
      * Bayer green channels in the red and blue rows in the sensor color
