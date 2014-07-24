@@ -202,6 +202,7 @@ public final class AdvertiseData implements Parcelable {
             @Override
                 public AdvertiseData createFromParcel(Parcel in) {
                     Builder builder = new Builder();
+                    @SuppressWarnings("unchecked")
                     List<ParcelUuid> uuids = in.readArrayList(ParcelUuid.class.getClassLoader());
                     if (uuids != null) {
                         for (ParcelUuid uuid : uuids) {
@@ -233,12 +234,6 @@ public final class AdvertiseData implements Parcelable {
      * Builder for {@link AdvertiseData}.
      */
     public static final class Builder {
-        private static final int MAX_ADVERTISING_DATA_BYTES = 31;
-        // Each fields need one byte for field length and another byte for field type.
-        private static final int OVERHEAD_BYTES_PER_FIELD = 2;
-        // Flags field will be set by system.
-        private static final int FLAGS_FIELD_BYTES = 3;
-
         @Nullable
         private List<ParcelUuid> mServiceUuids = new ArrayList<ParcelUuid>();
         private int mManufacturerId = -1;
@@ -333,50 +328,6 @@ public final class AdvertiseData implements Parcelable {
                     mServiceDataUuid,
                     mServiceData, mManufacturerId, mManufacturerSpecificData,
                     mIncludeTxPowerLevel, mIncludeDeviceName);
-        }
-
-        // Compute the size of the advertisement data.
-        private int totalBytes() {
-            int size = FLAGS_FIELD_BYTES; // flags field is always set.
-            if (mServiceUuids != null) {
-                int num16BitUuids = 0;
-                int num32BitUuids = 0;
-                int num128BitUuids = 0;
-                for (ParcelUuid uuid : mServiceUuids) {
-                    if (BluetoothUuid.is16BitUuid(uuid)) {
-                        ++num16BitUuids;
-                    } else if (BluetoothUuid.is32BitUuid(uuid)) {
-                        ++num32BitUuids;
-                    } else {
-                        ++num128BitUuids;
-                    }
-                }
-                // 16 bit service uuids are grouped into one field when doing advertising.
-                if (num16BitUuids != 0) {
-                    size += OVERHEAD_BYTES_PER_FIELD +
-                            num16BitUuids * BluetoothUuid.UUID_BYTES_16_BIT;
-                }
-                // 32 bit service uuids are grouped into one field when doing advertising.
-                if (num32BitUuids != 0) {
-                    size += OVERHEAD_BYTES_PER_FIELD +
-                            num32BitUuids * BluetoothUuid.UUID_BYTES_32_BIT;
-                }
-                // 128 bit service uuids are grouped into one field when doing advertising.
-                if (num128BitUuids != 0) {
-                    size += OVERHEAD_BYTES_PER_FIELD +
-                            num128BitUuids * BluetoothUuid.UUID_BYTES_128_BIT;
-                }
-            }
-            if (mServiceData != null) {
-                size += OVERHEAD_BYTES_PER_FIELD + mServiceData.length;
-            }
-            if (mManufacturerSpecificData != null) {
-                size += OVERHEAD_BYTES_PER_FIELD + mManufacturerSpecificData.length;
-            }
-            if (mIncludeTxPowerLevel) {
-                size += OVERHEAD_BYTES_PER_FIELD + 1; // tx power level value is one byte.
-            }
-            return size;
         }
     }
 }
