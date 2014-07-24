@@ -266,7 +266,7 @@ public abstract class MediaBrowserService extends Service {
         }
 
         @Override
-        public void loadThumbnail(final Uri uri, final int width, final int height,
+        public void loadThumbnail(final int seq, final Uri uri, final int width, final int height,
                 final IMediaBrowserServiceCallbacks callbacks) {
             if (uri == null) {
                 throw new IllegalStateException("loadThumbnail sent null list for uri " + uri);
@@ -299,7 +299,7 @@ public abstract class MediaBrowserService extends Service {
                             }
 
                             try {
-                                callbacks.onLoadThumbnail(uri, width, height, bitmap);
+                                callbacks.onLoadThumbnail(seq, bitmap);
                             } catch (RemoteException e) {
                                 // The other side is in the process of crashing.
                                 Log.w(TAG, "RemoteException in calling onLoadThumbnail", e);
