@@ -62,7 +62,6 @@ public:
         mVertexCount = vertexCount;
         mByteCount = mVertexCount * sizeof(TYPE);
         mReallocBuffer = mBuffer = (void*)new TYPE[vertexCount];
-        memset(mBuffer, 0, sizeof(TYPE) * vertexCount);
 
         mCleanupMethod = &(cleanup<TYPE>);
 
@@ -86,13 +85,17 @@ public:
      * vertex buffer can't determine bounds more simply/efficiently
      */
     template <class TYPE>
-    void computeBounds() {
+    void computeBounds(int vertexCount = 0) {
         if (!mVertexCount) {
             mBounds.setEmpty();
             return;
         }
+
+        // default: compute over every vertex
+        if (vertexCount == 0) vertexCount = mVertexCount;
+
         TYPE* current = (TYPE*)mBuffer;
-        TYPE* end = current + mVertexCount;
+        TYPE* end = current + vertexCount;
         mBounds.set(current->x, current->y, current->x, current->y);
         for (; current < end; current++) {
             mBounds.expandToCoverVertex(current->x, current->y);

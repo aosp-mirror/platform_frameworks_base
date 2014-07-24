@@ -48,7 +48,6 @@ void AmbientShadow::createAmbientShadow(bool isCasterOpaque,
         const Vector3* vertices, int vertexCount, const Vector3& centroid3d,
         float heightFactor, float geomFactor, VertexBuffer& shadowVertexBuffer) {
     const int rays = SHADOW_RAY_COUNT;
-    VertexBuffer::Mode mode = VertexBuffer::kOnePolyRingShadow;
     // Validate the inputs.
     if (vertexCount < 3 || heightFactor <= 0 || rays <= 0
         || geomFactor <= 0) {
@@ -124,19 +123,23 @@ void AmbientShadow::createAmbientShadow(bool isCasterOpaque,
                 opacity);
     }
 
-    // If caster isn't opaque, we need to to fill the umbra by storing the umbra's
-    // centroid in the innermost ring of vertices.
-    if (!isCasterOpaque) {
-        mode = VertexBuffer::kTwoPolyRingShadow;
+    if (isCasterOpaque) {
+        // skip inner ring, calc bounds over filled portion of buffer
+        shadowVertexBuffer.computeBounds<AlphaVertex>(2 * rays);
+        shadowVertexBuffer.setMode(VertexBuffer::kOnePolyRingShadow);
+    } else {
+        // If caster isn't opaque, we need to to fill the umbra by storing the umbra's
+        // centroid in the innermost ring of vertices.
         float centroidAlpha = 1.0 / (1 + centroid3d.z * heightFactor);
         AlphaVertex centroidXYA;
         AlphaVertex::set(&centroidXYA, centroid2d.x, centroid2d.y, centroidAlpha);
         for (int rayIndex = 0; rayIndex < rays; rayIndex++) {
             shadowVertices[2 * rays + rayIndex] = centroidXYA;
         }
+        // calc bounds over entire buffer
+        shadowVertexBuffer.computeBounds<AlphaVertex>();
+        shadowVertexBuffer.setMode(VertexBuffer::kTwoPolyRingShadow);
     }
-    shadowVertexBuffer.setMode(mode);
-    shadowVertexBuffer.computeBounds<AlphaVertex>();
 
 #if DEBUG_SHADOW
     for (int i = 0; i < SHADOW_VERTEX_COUNT; i++) {
