@@ -32,7 +32,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
-import android.widget.CheckBox;
 import android.widget.TextView;
 import com.android.printspooler.R;
 import com.android.printspooler.model.PageContentRepository;
@@ -48,7 +47,8 @@ import java.util.List;
 /**
  * This class represents the adapter for the pages in the print preview list.
  */
-public final class PageAdapter extends Adapter {
+public final class PageAdapter extends Adapter implements
+        PageContentRepository.OnMalformedPdfFileListener{
     private static final String LOG_TAG = "PageAdapter";
 
     private static final int MAX_PREVIEW_PAGES_BATCH = 50;
@@ -75,7 +75,7 @@ public final class PageAdapter extends Adapter {
     private final Context mContext;
     private final LayoutInflater mLayoutInflater;
 
-    private final ContentUpdateRequestCallback mContentUpdateRequestCallback;
+    private final ContentCallbacks mCallbacks;
     private final PageContentRepository mPageContentRepository;
     private final PreviewArea mPreviewArea;
 
@@ -109,8 +109,9 @@ public final class PageAdapter extends Adapter {
     private int mPageContentWidth;
     private int mPageContentHeight;
 
-    public interface ContentUpdateRequestCallback {
-        public void requestContentUpdate();
+    public interface ContentCallbacks {
+        public void onRequestContentUpdate();
+        public void onMalformedPdfFile();
     }
 
     public interface PreviewArea {
@@ -120,13 +121,12 @@ public final class PageAdapter extends Adapter {
         public void setPadding(int left, int top, int right, int bottom);
     }
 
-    public PageAdapter(Context context, ContentUpdateRequestCallback updateRequestCallback,
-            PreviewArea previewArea) {
+    public PageAdapter(Context context, ContentCallbacks callbacks, PreviewArea previewArea) {
         mContext = context;
-        mContentUpdateRequestCallback = updateRequestCallback;
+        mCallbacks = callbacks;
         mLayoutInflater = (LayoutInflater) context.getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
-        mPageContentRepository = new PageContentRepository(context);
+        mPageContentRepository = new PageContentRepository(context, this);
 
         mSelectedPageElevation = mContext.getResources().getDimension(
                 R.dimen.selected_page_elevation);
@@ -165,6 +165,11 @@ public final class PageAdapter extends Adapter {
         }
     }
 
+    @Override
+    public void onMalformedPdfFile() {
+        mCallbacks.onMalformedPdfFile();
+    }
+
     public void onOrientationChanged() {
         mColumnCount = mContext.getResources().getInteger(
                 R.integer.preview_page_per_row_count);
@@ -199,7 +204,7 @@ public final class PageAdapter extends Adapter {
                 // If we already requested all pages, just wait.
                 if (!Arrays.equals(ALL_PAGES_ARRAY, mRequestedPages)) {
                     mRequestedPages = ALL_PAGES_ARRAY;
-                    mContentUpdateRequestCallback.requestContentUpdate();
+                    mCallbacks.onRequestContentUpdate();
                 }
                 return;
             } else {
@@ -548,7 +553,7 @@ public final class PageAdapter extends Adapter {
             if (DEBUG) {
                 Log.i(LOG_TAG, "Requesting pages: " + Arrays.toString(mRequestedPages));
             }
-            mContentUpdateRequestCallback.requestContentUpdate();
+            mCallbacks.onRequestContentUpdate();
         }
     }
 

@@ -92,7 +92,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class PrintActivity extends Activity implements RemotePrintDocument.UpdateResultCallbacks,
-        PrintErrorFragment.OnActionListener, PageAdapter.ContentUpdateRequestCallback,
+        PrintErrorFragment.OnActionListener, PageAdapter.ContentCallbacks,
         OptionsStateChangeListener, OptionsStateController {
     private static final String LOG_TAG = "PrintActivity";
 
@@ -351,16 +351,26 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     }
 
     @Override
-    public void requestContentUpdate() {
+    public void onRequestContentUpdate() {
         if (canUpdateDocument()) {
             updateDocument(true, false);
         }
     }
 
     @Override
+    public void onMalformedPdfFile() {
+        mProgressMessageController.cancel();
+        ensureErrorUiShown(null, PrintErrorFragment.ACTION_RETRY);
+
+        setState(STATE_UPDATE_FAILED);
+
+        updateOptionsUi();
+    }
+
+    @Override
     public void onActionPerformed() {
-        if (mState == STATE_UPDATE_FAILED && canUpdateDocument()) {
-            updateDocument(true, true);
+        if (mState == STATE_UPDATE_FAILED
+                && canUpdateDocument() && updateDocument(true, true)) {
             ensurePreviewUiShown();
             setState(STATE_CONFIGURING);
             updateOptionsUi();
@@ -503,18 +513,15 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         switch (requestCode) {
             case ACTIVITY_REQUEST_CREATE_FILE: {
                 onStartCreateDocumentActivityResult(resultCode, data);
-            }
-            break;
+            } break;
 
             case ACTIVITY_REQUEST_SELECT_PRINTER: {
                 onSelectPrinterActivityResult(resultCode, data);
-            }
-            break;
+            } break;
 
             case ACTIVITY_REQUEST_POPULATE_ADVANCED_PRINT_OPTIONS: {
                 onAdvancedPrintOptionsActivityResult(resultCode, data);
-            }
-            break;
+            } break;
         }
     }
 
