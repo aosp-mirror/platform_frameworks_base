@@ -29,6 +29,8 @@
 namespace android {
 
 // Do an sprintf starting at offset n, abort on overflow
+static int snprintfcat(char* buf, int off, int size, const char* format, ...)
+        __attribute__((__format__(__printf__, 4, 5)));
 static int snprintfcat(char* buf, int off, int size, const char* format, ...) {
     va_list args;
     va_start(args, format);
@@ -43,17 +45,18 @@ std::string MinikinUtils::setLayoutProperties(Layout* layout, const Paint* paint
     TypefaceImpl* resolvedFace = TypefaceImpl_resolveDefault(typeface);
     layout->setFontCollection(resolvedFace->fFontCollection);
     FontStyle style = resolvedFace->fStyle;
-    char css[256];
+    char css[512];
     int off = snprintfcat(css, 0, sizeof(css),
         "font-size: %d; font-scale-x: %f; font-skew-x: %f; -paint-flags: %d;"
-        " font-weight: %d; font-style: %s; -minikin-bidi: %d;",
+        " font-weight: %d; font-style: %s; -minikin-bidi: %d; letter-spacing: %f;",
         (int)paint->getTextSize(),
         paint->getTextScaleX(),
         paint->getTextSkewX(),
         MinikinFontSkia::packPaintFlags(paint),
         style.getWeight() * 100,
         style.getItalic() ? "italic" : "normal",
-        bidiFlags);
+        bidiFlags,
+        paint->getLetterSpacing());
     SkString langString = paint->getPaintOptionsAndroid().getLanguage().getTag();
     off = snprintfcat(css, off, sizeof(css), " lang: %s;", langString.c_str());
     SkPaintOptionsAndroid::FontVariant var = paint->getPaintOptionsAndroid().getFontVariant();
