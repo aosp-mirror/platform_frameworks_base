@@ -16,6 +16,7 @@
 
 package android.webkit;
 
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -409,55 +410,93 @@ public class WebChromeClient {
      *
      * @see FileChooserParams
      */
-    public boolean showFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback,
+    public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback,
             FileChooserParams fileChooserParams) {
         return false;
     }
 
     /**
-     * Parameters used in the {@link #showFileChooser} method.
-     * This is intended to be used as a read-only data struct by the application.
+     * UploadHelper simplifies file upload operations by providing helper methods that
+     * would handle most common file picker/media capture requests. The application
+     * can use the helper to build an intent to start a file picker, and then parse
+     * the result returned by the activity.
+     *
+     * How to use:
+     * 1. Create a helper using {@link FileChooserParams#getUploadHelper}
+     * 2. Build an intent using {@link UploadHelper#buildIntent}
+     * 3. Fire the intent using {@link android.app.Activity#startActivityForResult}.
+     * 4. Check for ActivityNotFoundException and take a user friendly action if thrown.
+     * 5. Listen the result using {@link android.app.Activity#onActivityResult}
+     * 6. Parse the result using {@link UploadHelper#parseResult}
+     * 7. Send the result using filePathCallback of {@link WebChromeClient#onShowFileChooser}
      */
-    public static class FileChooserParams {
-        // Flags for mode
-        /** Bitflag for <code>mode</code> indicating multiple files maybe selected */
-        public static final int MODE_OPEN_MULTIPLE = 1 << 0;
-        /** Bitflag for <code>mode</code> indicating a folder  maybe selected.
-         * The implementation should enumerate all files selected by this operation */
-        public static final int MODE_OPEN_FOLDER = 1 << 1;
-        /** Bitflag for <code>mode</code> indicating a non-existant filename maybe returned */
-        public static final int MODE_SAVE = 1 << 2;
+    public static abstract class UploadHelper {
+        /**
+         * Returns an intent that would start a file picker for file selection/media capture.
+         */
+        public abstract Intent buildIntent();
 
         /**
-         * Bit-field of the <code>MODE_</code> flags.
+         * Parses the result returned by the file picker activity.
          *
-         * 0 indicates plain single file open.
+         * @param resultCode the integer result code returned by the file picker activity.
+         * @param data the intent returned by the file picker activity.
+         * @return the Uris of selected file(s) or null if the resultCode indicates
+         *         activity canceled or any other error.
          */
-        public int mode;
+        public abstract Uri[] parseResult(int resultCode, Intent data);
+    }
+
+    /**
+     * Parameters used in the {@link #onShowFileChooser} method.
+     */
+    public static abstract class FileChooserParams {
+        /** Open single file. Requires that the file exists before allowing the user to pick it. */
+        public static final int OPEN = 0;
+        /** Like Open but allows multiple files to be selected. */
+        public static final int OPEN_MULTIPLE = 1;
+        /** Like Open but allows a folder to be selected. The implementation should enumerate
+            all files selected by this operation. */
+        public static final int OPEN_FOLDER = 2;
+        /**  Allows picking a nonexistent file and saving it. */
+        public static final int SAVE = 3;
 
         /**
-         * Comma-seperated list of acceptable MIME types.
+         * Returns a helper to simplify choosing and uploading files. The helper builds a default
+         * intent that the application can send using startActivityForResult and processes the
+         * results.
          */
-        public String acceptTypes;
+        public abstract UploadHelper getUploadHelper();
 
         /**
-         * true indicates a preference for a live media captured value (e.g. Camera, Microphone).
+         * Returns file chooser mode.
+         */
+        public abstract int getMode();
+
+        /**
+         * Returns an array of acceptable MIME types. The array will be empty if no
+         * acceptable types are specified.
+         */
+        public abstract String[] getAcceptTypes();
+
+        /**
+         * Returns preference for a live media captured value (e.g. Camera, Microphone).
+         * True indicates capture is enabled, false disabled.
          *
-         * Use <code>acceptTypes</code> to determine suitable capture devices.
+         * Use <code>getAcceptTypes</code> to determine suitable capture devices.
          */
-        public boolean capture;
+        public abstract boolean isCaptureEnabled();
 
         /**
-         * The title to use for this file selector, or null.
-         *
-         * Maybe null, in which case a default title should be used.
+         * Returns the title to use for this file selector, or null. If null a default
+         * title should be used.
          */
-        public String title;
+        public abstract CharSequence getTitle();
 
         /**
-         * Name of a default selection if appropriate, or null.
+         * The file path of a default selection if specified, or null.
          */
-        public String defaultFilename;
+        public abstract String getDefaultFilename();
     };
 
     /**
