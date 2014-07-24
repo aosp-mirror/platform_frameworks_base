@@ -203,7 +203,9 @@ public class HdmiTimerRecordSources {
 
     /**
      * Place holder for time value.
+     * @hide
      */
+    @SystemApi
     public static class Time extends TimeUnit {
         private Time(int hour, int minute) {
             super(hour, minute);
@@ -212,7 +214,9 @@ public class HdmiTimerRecordSources {
 
     /**
      * Place holder for duration value.
+     * @hide
      */
+    @SystemApi
     public static class Duration extends TimeUnit {
         private Duration(int hour, int minute) {
             super(hour, minute);
@@ -287,7 +291,9 @@ public class HdmiTimerRecordSources {
      * <li>[Duration]
      * <li>[Recording Sequence]
      * </ul>
+     * @hide
      */
+    @SystemApi
     public static class TimerInfo {
         private static final int DAY_OF_MONTH_SIZE = 1;
         private static final int MONTH_OF_YEAR_SIZE = 1;
@@ -360,7 +366,9 @@ public class HdmiTimerRecordSources {
      * <li>{@link #ofExternalPlug} for external plug type
      * <li>{@link #ofExternalPhysicalAddress} for external physical address type.
      * </ul>
+     * @hide
      */
+    @SystemApi
     public static class TimerRecordSource {
         private final RecordSource mRecordSource;
         private final TimerInfo mTimerInfo;
