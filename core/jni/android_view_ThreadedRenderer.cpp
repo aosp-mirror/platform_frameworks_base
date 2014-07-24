@@ -222,7 +222,7 @@ static void android_view_ThreadedRenderer_setup(JNIEnv* env, jobject clazz, jlon
         jfloat lightX, jfloat lightY, jfloat lightZ, jfloat lightRadius,
         jint ambientShadowAlpha, jint spotShadowAlpha) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
-    proxy->setup(width, height, Vector3(lightX, lightY, lightZ), lightRadius,
+    proxy->setup(width, height, (Vector3){lightX, lightY, lightZ}, lightRadius,
             ambientShadowAlpha, spotShadowAlpha);
 }
 
