@@ -16,6 +16,7 @@
 
 package com.android.server.media;
 
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -99,6 +100,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     private long mFlags;
     private IMediaRouter mMediaRouter;
     private ComponentName mMediaButtonReceiver;
+    private PendingIntent mLaunchIntent;
 
     // TransportPerformer fields
 
@@ -651,6 +653,11 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
 
         @Override
+        public void setLaunchPendingIntent(PendingIntent pi) {
+            mLaunchIntent = pi;
+        }
+
+        @Override
         public void setMetadata(MediaMetadata metadata) {
             mMetadata = metadata;
             mHandler.post(MessageHandler.MSG_UPDATE_METADATA);
@@ -918,6 +925,11 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         @Override
         public MediaSessionInfo getSessionInfo() {
             return mSessionInfo;
+        }
+
+        @Override
+        public PendingIntent getLaunchPendingIntent() {
+            return mLaunchIntent;
         }
 
         @Override

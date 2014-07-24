@@ -16578,6 +16578,7 @@ package android.media.session {
     method public android.media.routing.MediaRouter.Delegate createMediaRouterDelegate();
     method public boolean dispatchMediaButtonEvent(android.view.KeyEvent);
     method public long getFlags();
+    method public android.app.PendingIntent getLaunchActivity();
     method public android.media.MediaMetadata getMetadata();
     method public android.media.session.PlaybackState getPlaybackState();
     method public java.util.List<android.media.session.MediaSession.Track> getQueue();
@@ -16641,7 +16642,7 @@ package android.media.session {
     method public void setActive(boolean);
     method public void setExtras(android.os.Bundle);
     method public void setFlags(int);
-    method public void setLaunchPendingIntent(android.app.PendingIntent);
+    method public void setLaunchActivity(android.app.PendingIntent);
     method public void setMediaRouter(android.media.routing.MediaRouter);
     method public void setMetadata(android.media.MediaMetadata);
     method public void setPlaybackState(android.media.session.PlaybackState);

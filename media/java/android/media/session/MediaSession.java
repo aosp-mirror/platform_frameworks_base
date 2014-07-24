@@ -19,6 +19,7 @@ package android.media.session;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
@@ -222,12 +223,17 @@ public final class MediaSession {
 
     /**
      * Set an intent for launching UI for this Session. This can be used as a
-     * quick link to an ongoing media screen.
+     * quick link to an ongoing media screen. The intent should be for an
+     * activity that may be started using {@link Activity#startActivity(Intent)}.
      *
      * @param pi The intent to launch to show UI for this Session.
      */
-    public void setLaunchPendingIntent(@Nullable PendingIntent pi) {
-        // TODO
+    public void setLaunchActivity(@Nullable PendingIntent pi) {
+        try {
+            mBinder.setLaunchPendingIntent(pi);
+        } catch (RemoteException e) {
+            Log.wtf(TAG, "Failure in setLaunchPendingIntent.", e);
+        }
     }
 
     /**

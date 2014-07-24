@@ -18,6 +18,7 @@ package android.media.session;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.PendingIntent;
 import android.content.pm.ParceledListSlice;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
@@ -236,6 +237,21 @@ public final class MediaController {
 
         } catch (RemoteException e) {
             Log.wtf(TAG, "Error calling getVolumeInfo.", e);
+        }
+        return null;
+    }
+
+    /**
+     * Get an intent for launching UI associated with this session if one
+     * exists.
+     *
+     * @return A {@link PendingIntent} to launch UI or null.
+     */
+    public @Nullable PendingIntent getLaunchActivity() {
+        try {
+            return mSessionBinder.getLaunchPendingIntent();
+        } catch (RemoteException e) {
+            Log.wtf(TAG, "Error calling getPendingIntent.", e);
         }
         return null;
     }

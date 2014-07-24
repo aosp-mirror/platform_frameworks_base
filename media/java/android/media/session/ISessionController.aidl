@@ -15,6 +15,7 @@
 
 package android.media.session;
 
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.pm.ParceledListSlice;
 import android.media.MediaMetadata;
@@ -44,6 +45,7 @@ interface ISessionController {
     void unregisterCallbackListener(in ISessionControllerCallback cb);
     boolean isTransportControlEnabled();
     MediaSessionInfo getSessionInfo();
+    PendingIntent getLaunchPendingIntent();
     long getFlags();
     ParcelableVolumeInfo getVolumeAttributes();
     void adjustVolume(int direction, int flags);
