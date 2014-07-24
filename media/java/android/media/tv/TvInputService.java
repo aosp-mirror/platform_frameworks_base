@@ -753,7 +753,7 @@ public abstract class TvInputService extends Service {
         }
 
         /**
-         * Calls {@link #onSetMain}.
+         * Calls {@link #onSetMainSession}.
          */
         void setMainSession(boolean isMainSession) {
             onSetMainSession(isMainSession);
