@@ -54,8 +54,8 @@ public class InputMethodSubtypeSwitchingController {
         public final CharSequence mSubtypeName;
         public final InputMethodInfo mImi;
         public final int mSubtypeId;
-        private final boolean mIsSystemLocale;
-        private final boolean mIsSystemLanguage;
+        public final boolean mIsSystemLocale;
+        public final boolean mIsSystemLanguage;
 
         public ImeSubtypeListItem(CharSequence imeName, CharSequence subtypeName,
                 InputMethodInfo imi, int subtypeId, String subtypeLocale, String systemLocale) {
@@ -68,8 +68,28 @@ public class InputMethodSubtypeSwitchingController {
                 mIsSystemLanguage = false;
             } else {
                 mIsSystemLocale = subtypeLocale.equals(systemLocale);
-                mIsSystemLanguage = mIsSystemLocale
-                        || subtypeLocale.startsWith(systemLocale.substring(0, 2));
+                if (mIsSystemLocale) {
+                    mIsSystemLanguage = true;
+                } else {
+                    // TODO: Use Locale#getLanguage or Locale#toLanguageTag
+                    final String systemLanguage = parseLanguageFromLocaleString(systemLocale);
+                    final String subtypeLanguage = parseLanguageFromLocaleString(subtypeLocale);
+                    mIsSystemLanguage = systemLanguage.length() >= 2 &&
+                            systemLanguage.equals(subtypeLanguage);
+                }
+            }
+        }
+
+        /**
+         * Returns the language component of a given locale string.
+         * TODO: Use {@link Locale#getLanguage()} instead.
+         */
+        private static String parseLanguageFromLocaleString(final String locale) {
+            final int idx = locale.indexOf('_');
+            if (idx < 0) {
+                return locale;
+            } else {
+                return locale.substring(0, idx);
             }
         }
 

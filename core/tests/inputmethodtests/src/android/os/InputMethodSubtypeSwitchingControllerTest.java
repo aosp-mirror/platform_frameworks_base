@@ -295,4 +295,33 @@ public class InputMethodSubtypeSwitchingControllerTest extends InstrumentationTe
         assertRotationOrder(anotherController, false /* onlyCurrentIme */,
                 switchingUnawarelatinIme_en_UK, switchUnawareJapaneseIme_ja_JP);
     }
+
+    @SmallTest
+    public void testImeSubtypeListItem() throws Exception {
+        final List<ImeSubtypeListItem> items = new ArrayList<ImeSubtypeListItem>();
+        addDummyImeSubtypeListItems(items, "LatinIme", "LatinIme",
+                Arrays.asList("en_US", "fr", "en", "en_uk", "enn", "e", "EN_US"),
+                true /* supportsSwitchingToNextInputMethod*/);
+        final ImeSubtypeListItem item_en_US = items.get(0);
+        final ImeSubtypeListItem item_fr = items.get(1);
+        final ImeSubtypeListItem item_en = items.get(2);
+        final ImeSubtypeListItem item_enn = items.get(3);
+        final ImeSubtypeListItem item_e = items.get(4);
+        final ImeSubtypeListItem item_EN_US = items.get(5);
+
+        assertTrue(item_en_US.mIsSystemLocale);
+        assertFalse(item_fr.mIsSystemLocale);
+        assertFalse(item_en.mIsSystemLocale);
+        assertFalse(item_en.mIsSystemLocale);
+        assertFalse(item_enn.mIsSystemLocale);
+        assertFalse(item_e.mIsSystemLocale);
+        assertFalse(item_EN_US.mIsSystemLocale);
+
+        assertTrue(item_en_US.mIsSystemLanguage);
+        assertFalse(item_fr.mIsSystemLanguage);
+        assertTrue(item_en.mIsSystemLanguage);
+        assertFalse(item_enn.mIsSystemLocale);
+        assertFalse(item_e.mIsSystemLocale);
+        assertFalse(item_EN_US.mIsSystemLocale);
+    }
 }
