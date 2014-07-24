@@ -7233,17 +7233,12 @@
         <attr name="layout_gravity" />
     </declare-styleable>
 
-    <!-- Used to specify lighting properties such as shadow alpha. -->
+    <!-- @hide -->
     <declare-styleable name="Lighting">
-        <!-- @hide -->
         <attr name="lightY" format="dimension" />
-        <!-- @hide -->
         <attr name="lightZ" format="dimension" />
-        <!-- @hide -->
         <attr name="lightRadius" format="dimension" />
-        <!-- Alpha value for the ambient shadow. -->
         <attr name="ambientShadowAlpha" format="float" />
-        <!-- Alpha value for the spot shadow. -->
         <attr name="spotShadowAlpha" format="float" />
     </declare-styleable>
 
