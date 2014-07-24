@@ -88,19 +88,26 @@ public class JobStore {
         synchronized (sSingletonLock) {
             if (sSingleton == null) {
                 sSingleton = new JobStore(jobManagerService.getContext(),
-                        Environment.getDataDirectory(), jobManagerService);
+                        Environment.getDataDirectory());
             }
             return sSingleton;
         }
     }
 
+    /**
+     * @return A freshly initialized job store object, with no loaded jobs.
+     */
     @VisibleForTesting
-    public static JobStore initAndGetForTesting(Context context, File dataDir,
-                                                 JobMapReadFinishedListener callback) {
-        return new JobStore(context, dataDir, callback);
+    public static JobStore initAndGetForTesting(Context context, File dataDir) {
+        JobStore jobStoreUnderTest = new JobStore(context, dataDir);
+        jobStoreUnderTest.clear();
+        return jobStoreUnderTest;
     }
 
-    private JobStore(Context context, File dataDir, JobMapReadFinishedListener callback) {
+    /**
+     * Construct the instance of the job store. This results in a blocking read from disk.
+     */
+    private JobStore(Context context, File dataDir) {
         mContext = context;
         mDirtyOperations = 0;
 
@@ -111,7 +118,7 @@ public class JobStore {
 
         mJobSet = new ArraySet<JobStatus>();
 
-        readJobMapFromDiskAsync(callback);
+        readJobMapFromDisk(mJobSet);
     }
 
     /**
@@ -249,12 +256,9 @@ public class JobStore {
         }
     }
 
-    private void readJobMapFromDiskAsync(JobMapReadFinishedListener callback) {
-        mIoHandler.post(new ReadJobMapFromDiskRunnable(callback));
-    }
-
-    public void readJobMapFromDisk(JobMapReadFinishedListener callback) {
-        new ReadJobMapFromDiskRunnable(callback).run();
+    @VisibleForTesting
+    public void readJobMapFromDisk(ArraySet<JobStatus> jobSet) {
+        new ReadJobMapFromDiskRunnable(jobSet).run();
     }
 
     /**
@@ -398,13 +402,18 @@ public class JobStore {
     }
 
     /**
-     * Runnable that reads list of persisted job from xml.
-     * NOTE: This Runnable locks on JobStore.this
+     * Runnable that reads list of persisted job from xml. This is run once at start up, so doesn't
+     * need to go through {@link JobStore#add(com.android.server.job.controllers.JobStatus)}.
      */
     private class ReadJobMapFromDiskRunnable implements Runnable {
-        private JobMapReadFinishedListener mCallback;
-        public ReadJobMapFromDiskRunnable(JobMapReadFinishedListener callback) {
-            mCallback = callback;
+        private final ArraySet<JobStatus> jobSet;
+
+        /**
+         * @param jobSet Reference to the (empty) set of JobStatus objects that back the JobStore,
+         *               so that after disk read we can populate it directly.
+         */
+        ReadJobMapFromDiskRunnable(ArraySet<JobStatus> jobSet) {
+            this.jobSet = jobSet;
         }
 
         @Override
@@ -414,11 +423,13 @@ public class JobStore {
                 FileInputStream fis = mJobsFile.openRead();
                 synchronized (JobStore.this) {
                     jobs = readJobMapImpl(fis);
+                    if (jobs != null) {
+                        for (int i=0; i<jobs.size(); i++) {
+                            this.jobSet.add(jobs.get(i));
+                        }
+                    }
                 }
                 fis.close();
-                if (jobs != null) {
-                    mCallback.onJobMapReadFinished(jobs);
-                }
             } catch (FileNotFoundException e) {
                 if (JobSchedulerService.DEBUG) {
                     Slog.d(TAG, "Could not find jobs file, probably there was nothing to load.");
