@@ -1293,8 +1293,14 @@ public final class TvInputManagerService extends SystemService {
             final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
                     userId, "captureFrame");
             try {
+                final String wrappedInputId;
+                synchronized (mLock) {
+                    UserState userState = getUserStateLocked(resolvedUserId);
+                    wrappedInputId = userState.wrappedInputMap.get(inputId);
+                }
                 return mTvInputHardwareManager.captureFrame(
-                        inputId, surface, config, callingUid, resolvedUserId);
+                        (wrappedInputId != null) ? wrappedInputId : inputId,
+                        surface, config, callingUid, resolvedUserId);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -1470,6 +1476,9 @@ public final class TvInputManagerService extends SystemService {
         // A set of callbacks.
         private final Set<ITvInputManagerCallback> callbackSet =
                 new HashSet<ITvInputManagerCallback>();
+
+        // A mapping from the TV input id to wrapped input id.
+        private final Map<String, String> wrappedInputMap = new HashMap<String, String>();
     }
 
     private final class ClientState implements IBinder.DeathRecipient {
@@ -1662,8 +1671,10 @@ public final class TvInputManagerService extends SystemService {
 
                     for (TvInputState inputState : userState.inputMap.values()) {
                         if (inputState.mInfo.getComponent().equals(name)) {
-                            notifyInputStateChangedLocked(userState, inputState.mInfo.getId(),
+                            String inputId = inputState.mInfo.getId();
+                            notifyInputStateChangedLocked(userState, inputId,
                                     INPUT_STATE_DISCONNECTED, null);
+                            userState.wrappedInputMap.remove(inputId);
                         }
                     }
                     updateServiceConnectionLocked(mName, mUserId);
@@ -1741,6 +1752,27 @@ public final class TvInputManagerService extends SystemService {
                     Slog.e(TAG, "TvInputInfo with inputId=" + inputId + " not found.");
                 }
             }
+        }
+
+        @Override
+        public void setWrappedInputId(String inputId, String wrappedInputId) {
+            synchronized (mLock) {
+                if (!hasInputIdLocked(inputId)) {
+                    return;
+                }
+                UserState userState = getUserStateLocked(mUserId);
+                userState.wrappedInputMap.put(inputId, wrappedInputId);
+            }
+        }
+
+        private boolean hasInputIdLocked(String inputId) {
+            ServiceState serviceState = getServiceStateLocked(mName, mUserId);
+            for (TvInputInfo inputInfo : serviceState.mInputList) {
+                if (inputInfo.getId().equals(inputId)) {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 
