@@ -37,6 +37,7 @@ public class SampleTrustAgentSettings extends Activity implements View.OnClickLi
 
         findViewById(R.id.enable_trust).setOnClickListener(this);
         findViewById(R.id.revoke_trust).setOnClickListener(this);
+        findViewById(R.id.crash).setOnClickListener(this);
 
         mReportUnlockAttempts = (CheckBox) findViewById(R.id.report_unlock_attempts);
         mReportUnlockAttempts.setOnCheckedChangeListener(this);
@@ -56,6 +57,8 @@ public class SampleTrustAgentSettings extends Activity implements View.OnClickLi
                     null /* extra */);
         } else if (id == R.id.revoke_trust) {
             SampleTrustAgent.sendRevokeTrust(this);
+        } else if (id == R.id.crash) {
+            throw new RuntimeException("crash");
         }
     }
 

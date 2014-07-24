@@ -45,6 +45,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.service.trust.TrustAgentService;
@@ -98,12 +99,6 @@ public class TrustManagerService extends SystemService {
     private final Context mContext;
 
     private UserManager mUserManager;
-
-    /**
-     * Cache for {@link #refreshAgentList()}
-     */
-    private final ArraySet<AgentInfo> mObsoleteAgents = new ArraySet<AgentInfo>();
-
 
     public TrustManagerService(Context context) {
         super(context);
@@ -168,8 +163,8 @@ public class TrustManagerService extends SystemService {
         List<UserInfo> userInfos = mUserManager.getUsers(true /* excludeDying */);
         LockPatternUtils lockPatternUtils = new LockPatternUtils(mContext);
 
-        mObsoleteAgents.clear();
-        mObsoleteAgents.addAll(mActiveAgents);
+        ArraySet<AgentInfo> obsoleteAgents = new ArraySet<>();
+        obsoleteAgents.addAll(mActiveAgents);
 
         for (UserInfo userInfo : userInfos) {
             int disabledFeatures = lockPatternUtils.getDevicePolicyManager()
@@ -208,14 +203,14 @@ public class TrustManagerService extends SystemService {
                             new Intent().setComponent(name), userInfo.getUserHandle());
                     mActiveAgents.add(agentInfo);
                 } else {
-                    mObsoleteAgents.remove(agentInfo);
+                    obsoleteAgents.remove(agentInfo);
                 }
             }
         }
 
         boolean trustMayHaveChanged = false;
-        for (int i = 0; i < mObsoleteAgents.size(); i++) {
-            AgentInfo info = mObsoleteAgents.valueAt(i);
+        for (int i = 0; i < obsoleteAgents.size(); i++) {
+            AgentInfo info = obsoleteAgents.valueAt(i);
             if (info.agent.isTrusted()) {
                 trustMayHaveChanged = true;
             }
@@ -226,6 +221,43 @@ public class TrustManagerService extends SystemService {
         if (trustMayHaveChanged) {
             updateTrustAll();
         }
+    }
+
+    private void removeAgentsOfPackage(String packageName) {
+        boolean trustMayHaveChanged = false;
+        for (int i = mActiveAgents.size() - 1; i >= 0; i--) {
+            AgentInfo info = mActiveAgents.valueAt(i);
+            if (packageName.equals(info.component.getPackageName())) {
+                Log.i(TAG, "Resetting agent " + info.component.flattenToShortString());
+                if (info.agent.isTrusted()) {
+                    trustMayHaveChanged = true;
+                }
+                info.agent.unbind();
+                mActiveAgents.removeAt(i);
+            }
+        }
+        if (trustMayHaveChanged) {
+            updateTrustAll();
+        }
+    }
+
+    public void resetAgent(ComponentName name, int userId) {
+        boolean trustMayHaveChanged = false;
+        for (int i = mActiveAgents.size() - 1; i >= 0; i--) {
+            AgentInfo info = mActiveAgents.valueAt(i);
+            if (name.equals(info.component) && userId == info.userId) {
+                Log.i(TAG, "Resetting agent " + info.component.flattenToShortString());
+                if (info.agent.isTrusted()) {
+                    trustMayHaveChanged = true;
+                }
+                info.agent.unbind();
+                mActiveAgents.removeAt(i);
+            }
+        }
+        if (trustMayHaveChanged) {
+            updateTrust(userId);
+        }
+        refreshAgentList();
     }
 
     private ComponentName getSettingsComponentName(PackageManager pm, ResolveInfo resolveInfo) {
@@ -448,10 +480,17 @@ public class TrustManagerService extends SystemService {
                 if (info.userId != user.id) { continue; }
                 boolean trusted = info.agent.isTrusted();
                 fout.print("    "); fout.println(info.component.flattenToShortString());
-                fout.print("     connected=" + dumpBool(info.agent.isConnected()));
+                fout.print("     bound=" + dumpBool(info.agent.isBound()));
+                fout.print(", connected=" + dumpBool(info.agent.isConnected()));
                 fout.println(", trusted=" + dumpBool(trusted));
                 if (trusted) {
                     fout.println("      message=\"" + info.agent.getMessage() + "\"");
+                }
+                if (!info.agent.isConnected()) {
+                    String restartTime = TrustArchive.formatDuration(
+                            info.agent.getScheduledRestartUptimeMillis()
+                                    - SystemClock.uptimeMillis());
+                    fout.println("      restartScheduledAt=" + restartTime);
                 }
                 if (!simpleNames.add(TrustArchive.getSimpleName(info.component))) {
                     duplicateSimpleNames = true;
@@ -500,6 +539,11 @@ public class TrustManagerService extends SystemService {
         public boolean onPackageChanged(String packageName, int uid, String[] components) {
             // We're interested in all changes, even if just some components get enabled / disabled.
             return true;
+        }
+
+        @Override
+        public void onPackageDisappeared(String packageName, int reason) {
+            removeAgentsOfPackage(packageName);
         }
     };
 
