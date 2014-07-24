@@ -1009,8 +1009,6 @@ public abstract class BaseStatusBar extends SystemUI implements
             expanded.setExpandedChild(bigContentViewLocal);
         }
 
-        PackageManager pm = mContext.getPackageManager();
-
         // now the public version
         View publicViewLocal = null;
         if (publicNotification != null) {
@@ -1031,6 +1029,9 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
 
         if (publicViewLocal == null) {
+            PackageManager pm = getPackageManagerForUser(
+                    entry.notification.getUser().getIdentifier());
+
             // Add a basic notification template
             publicViewLocal = LayoutInflater.from(mContext).inflate(
                     com.android.internal.R.layout.notification_template_material_base,
@@ -1663,5 +1664,27 @@ public abstract class BaseStatusBar extends SystemUI implements
         } catch (RemoteException e) {
             // Ignore.
         }
+    }
+
+    /**
+     * @return a PackageManger for userId or if userId is < 0 (USER_ALL etc) then
+     *         return PackageManager for mContext
+     */
+    protected PackageManager getPackageManagerForUser(int userId) {
+        Context contextForUser = mContext;
+        // UserHandle defines special userId as negative values, e.g. USER_ALL
+        if (userId >= 0) {
+            try {
+                // Create a context for the correct user so if a package isn't installed
+                // for user 0 we can still load information about the package.
+                contextForUser =
+                        mContext.createPackageContextAsUser(mContext.getPackageName(),
+                        Context.CONTEXT_RESTRICTED,
+                        new UserHandle(userId));
+            } catch (NameNotFoundException e) {
+                // Shouldn't fail to find the package name for system ui.
+            }
+        }
+        return contextForUser.getPackageManager();
     }
 }
