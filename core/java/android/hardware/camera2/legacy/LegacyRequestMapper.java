@@ -238,6 +238,57 @@ public class LegacyRequestMapper {
                                 + infinityFocusSupported + ", only 0.0f is supported");
             }
         }
+
+        // control.sceneMode, control.mode
+        {
+            // TODO: Map FACE_PRIORITY scene mode to face detection.
+
+            if (params.getSupportedSceneModes() != null) {
+                int controlMode = ParamsUtils.getOrDefault(request, CONTROL_MODE,
+                    /*defaultValue*/CONTROL_MODE_AUTO);
+                String modeToSet;
+                switch (controlMode) {
+                    case CONTROL_MODE_USE_SCENE_MODE: {
+                        int sceneMode = ParamsUtils.getOrDefault(request, CONTROL_SCENE_MODE,
+                        /*defaultValue*/CONTROL_SCENE_MODE_DISABLED);
+                        String legacySceneMode = LegacyMetadataMapper.
+                                convertSceneModeToLegacy(sceneMode);
+                        if (legacySceneMode != null) {
+                            modeToSet = legacySceneMode;
+                        } else {
+                            modeToSet = Parameters.SCENE_MODE_AUTO;
+                            Log.w(TAG, "Skipping unknown requested scene mode: " + sceneMode);
+                        }
+                        break;
+                    }
+                    case CONTROL_MODE_AUTO: {
+                        modeToSet = Parameters.SCENE_MODE_AUTO;
+                        break;
+                    }
+                    default: {
+                        Log.w(TAG, "Control mode " + controlMode +
+                                " is unsupported, defaulting to AUTO");
+                        modeToSet = Parameters.SCENE_MODE_AUTO;
+                    }
+                }
+                params.setSceneMode(modeToSet);
+            }
+        }
+
+        // control.effectMode
+        {
+            if (params.getSupportedColorEffects() != null) {
+                int effectMode = ParamsUtils.getOrDefault(request, CONTROL_EFFECT_MODE,
+                    /*defaultValue*/CONTROL_EFFECT_MODE_OFF);
+                String legacyEffectMode = LegacyMetadataMapper.convertEffectModeToLegacy(effectMode);
+                if (legacyEffectMode != null) {
+                    params.setColorEffect(legacyEffectMode);
+                } else {
+                    params.setColorEffect(Parameters.EFFECT_NONE);
+                    Log.w(TAG, "Skipping unknown requested effect mode: " + effectMode);
+                }
+            }
+        }
     }
 
     private static List<Camera.Area> convertMeteringRegionsToLegacy(

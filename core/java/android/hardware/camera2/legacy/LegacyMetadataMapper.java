@@ -78,6 +78,8 @@ public class LegacyMetadataMapper {
     private static final long APPROXIMATE_SENSOR_AREA_PX = (1 << 23); // 8 megapixels
     private static final long APPROXIMATE_JPEG_ENCODE_TIME_MS = 600; // 600 milliseconds
 
+    static final int UNKNOWN_MODE = -1;
+
     /*
      * Development hijinks: Lie about not supporting certain capabilities
      *
@@ -458,7 +460,22 @@ public class LegacyMetadataMapper {
 
         m.set(CONTROL_MAX_REGIONS, maxRegions);
 
-        // TODO rest of control fields
+        /*
+         * android.control.availableEffects
+         */
+        List<String> effectModes = p.getSupportedColorEffects();
+        int[] supportedEffectModes = (effectModes == null) ? new int[0] :
+                ArrayUtils.convertStringListToIntArray(effectModes, sLegacyEffectMode,
+                        sEffectModes);
+        m.set(CONTROL_AVAILABLE_EFFECTS, supportedEffectModes);
+
+        /*
+         * android.control.availableSceneModes
+         */
+        List<String> sceneModes = p.getSupportedSceneModes();
+        int[] supportedSceneModes = (sceneModes == null) ? new int[0] :
+                ArrayUtils.convertStringListToIntArray(sceneModes, sLegacySceneModes, sSceneModes);
+        m.set(CONTROL_AVAILABLE_SCENE_MODES, supportedSceneModes);
     }
 
     private static void mapLens(CameraMetadataNative m, Camera.Parameters p) {
@@ -678,6 +695,106 @@ public class LegacyMetadataMapper {
                     new StreamConfiguration(format, size.width, size.height, /*input*/false);
             configs.add(config);
         }
+    }
+
+    private final static String[] sLegacySceneModes = {
+        Parameters.SCENE_MODE_AUTO,
+        Parameters.SCENE_MODE_ACTION,
+        Parameters.SCENE_MODE_PORTRAIT,
+        Parameters.SCENE_MODE_LANDSCAPE,
+        Parameters.SCENE_MODE_NIGHT,
+        Parameters.SCENE_MODE_NIGHT_PORTRAIT,
+        Parameters.SCENE_MODE_THEATRE,
+        Parameters.SCENE_MODE_BEACH,
+        Parameters.SCENE_MODE_SNOW,
+        Parameters.SCENE_MODE_SUNSET,
+        Parameters.SCENE_MODE_STEADYPHOTO,
+        Parameters.SCENE_MODE_FIREWORKS,
+        Parameters.SCENE_MODE_SPORTS,
+        Parameters.SCENE_MODE_PARTY,
+        Parameters.SCENE_MODE_CANDLELIGHT,
+        Parameters.SCENE_MODE_BARCODE,
+    };
+
+    private final static int[] sSceneModes = {
+        CameraCharacteristics.CONTROL_SCENE_MODE_DISABLED,
+        CameraCharacteristics.CONTROL_SCENE_MODE_ACTION,
+        CameraCharacteristics.CONTROL_SCENE_MODE_PORTRAIT,
+        CameraCharacteristics.CONTROL_SCENE_MODE_LANDSCAPE,
+        CameraCharacteristics.CONTROL_SCENE_MODE_NIGHT,
+        CameraCharacteristics.CONTROL_SCENE_MODE_NIGHT_PORTRAIT,
+        CameraCharacteristics.CONTROL_SCENE_MODE_THEATRE,
+        CameraCharacteristics.CONTROL_SCENE_MODE_BEACH,
+        CameraCharacteristics.CONTROL_SCENE_MODE_SNOW,
+        CameraCharacteristics.CONTROL_SCENE_MODE_SUNSET,
+        CameraCharacteristics.CONTROL_SCENE_MODE_STEADYPHOTO,
+        CameraCharacteristics.CONTROL_SCENE_MODE_FIREWORKS,
+        CameraCharacteristics.CONTROL_SCENE_MODE_SPORTS,
+        CameraCharacteristics.CONTROL_SCENE_MODE_PARTY,
+        CameraCharacteristics.CONTROL_SCENE_MODE_CANDLELIGHT,
+        CameraCharacteristics.CONTROL_SCENE_MODE_BARCODE,
+    };
+
+    static int convertSceneModeFromLegacy(String mode) {
+        if (mode == null) {
+            return CameraCharacteristics.CONTROL_SCENE_MODE_DISABLED;
+        }
+        int index = ArrayUtils.getArrayIndex(sLegacySceneModes, mode);
+        if (index < 0) {
+            return UNKNOWN_MODE;
+        }
+        return sSceneModes[index];
+    }
+
+    static String convertSceneModeToLegacy(int mode) {
+        int index = ArrayUtils.getArrayIndex(sSceneModes, mode);
+        if (index < 0) {
+            return null;
+        }
+        return sLegacySceneModes[index];
+    }
+
+    private final static String[] sLegacyEffectMode = {
+        Parameters.EFFECT_NONE,
+        Parameters.EFFECT_MONO,
+        Parameters.EFFECT_NEGATIVE,
+        Parameters.EFFECT_SOLARIZE,
+        Parameters.EFFECT_SEPIA,
+        Parameters.EFFECT_POSTERIZE,
+        Parameters.EFFECT_WHITEBOARD,
+        Parameters.EFFECT_BLACKBOARD,
+        Parameters.EFFECT_AQUA,
+    };
+
+    private final static int[] sEffectModes = {
+        CameraCharacteristics.CONTROL_EFFECT_MODE_OFF,
+        CameraCharacteristics.CONTROL_EFFECT_MODE_MONO,
+        CameraCharacteristics.CONTROL_EFFECT_MODE_NEGATIVE,
+        CameraCharacteristics.CONTROL_EFFECT_MODE_SOLARIZE,
+        CameraCharacteristics.CONTROL_EFFECT_MODE_SEPIA,
+        CameraCharacteristics.CONTROL_EFFECT_MODE_POSTERIZE,
+        CameraCharacteristics.CONTROL_EFFECT_MODE_WHITEBOARD,
+        CameraCharacteristics.CONTROL_EFFECT_MODE_BLACKBOARD,
+        CameraCharacteristics.CONTROL_EFFECT_MODE_AQUA,
+    };
+
+    static int convertEffectModeFromLegacy(String mode) {
+        if (mode == null) {
+            return CameraCharacteristics.CONTROL_EFFECT_MODE_OFF;
+        }
+        int index = ArrayUtils.getArrayIndex(sLegacyEffectMode, mode);
+        if (index < 0) {
+            return UNKNOWN_MODE;
+        }
+        return sEffectModes[index];
+    }
+
+    static String convertEffectModeToLegacy(int mode) {
+        int index = ArrayUtils.getArrayIndex(sEffectModes, mode);
+        if (index < 0) {
+            return null;
+        }
+        return sLegacyEffectMode[index];
     }
 
     /**
