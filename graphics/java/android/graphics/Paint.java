@@ -919,7 +919,7 @@ public class Paint {
     public Shader setShader(Shader shader) {
         long shaderNative = 0;
         if (shader != null)
-            shaderNative = shader.native_instance;
+            shaderNative = shader.getNativeInstance();
         native_setShader(mNativePaint, shaderNative);
         mShader = shader;
         return shader;

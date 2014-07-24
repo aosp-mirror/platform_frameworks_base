@@ -50,15 +50,20 @@ static jint Color_HSVToColor(JNIEnv* env, jobject, jint alpha, jfloatArray hsvAr
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
-static void Shader_destructor(JNIEnv* env, jobject o, jlong shaderHandle)
+static void Shader_destructor(JNIEnv* env, jobject o, jlong shaderHandle, jlong shaderWithLMHandle)
 {
     SkShader* shader = reinterpret_cast<SkShader*>(shaderHandle);
     SkSafeUnref(shader);
+    SkShader* shaderWithLM = reinterpret_cast<SkShader*>(shaderWithLMHandle);
+    SkSafeUnref(shaderWithLM);
 }
 
 static jlong Shader_setLocalMatrix(JNIEnv* env, jobject o, jlong shaderHandle,
-        jlong matrixHandle)
+        jlong oldLocalMatrixShaderHandle, jlong matrixHandle)
 {
+    // The old shader with local matrix is no longer needed, so unref it.
+    SkSafeUnref(reinterpret_cast<SkShader*>(oldLocalMatrixShaderHandle));
+
     SkShader* shader       = reinterpret_cast<SkShader*>(shaderHandle);
     const SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixHandle);
     if (shader) {
@@ -66,7 +71,6 @@ static jlong Shader_setLocalMatrix(JNIEnv* env, jobject o, jlong shaderHandle,
             matrix = &SkMatrix::I();
         }
         SkShader* newShader = SkShader::CreateLocalMatrixShader(shader, *matrix);
-        shader->unref();
         shader = newShader;
     }
     return reinterpret_cast<jlong>(shader);
@@ -239,8 +243,8 @@ static JNINativeMethod gColorMethods[] = {
 };
 
 static JNINativeMethod gShaderMethods[] = {
-    { "nativeDestructor",        "(J)V",    (void*)Shader_destructor        },
-    { "nativeSetLocalMatrix",    "(JJ)J",   (void*)Shader_setLocalMatrix    }
+    { "nativeDestructor",        "(JJ)V",    (void*)Shader_destructor        },
+    { "nativeSetLocalMatrix",    "(JJJ)J",   (void*)Shader_setLocalMatrix    }
 };
 
 static JNINativeMethod gBitmapShaderMethods[] = {
