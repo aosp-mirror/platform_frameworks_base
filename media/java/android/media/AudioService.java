@@ -44,6 +44,7 @@ import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.database.ContentObserver;
 import android.hardware.hdmi.HdmiControlManager;
+import android.hardware.hdmi.HdmiPlaybackClient;
 import android.hardware.hdmi.HdmiTvClient;
 import android.hardware.usb.UsbManager;
 import android.media.MediaPlayer.OnCompletionListener;
@@ -144,7 +145,23 @@ public class AudioService extends IAudioService.Stub {
     private final Context mContext;
     private final ContentResolver mContentResolver;
     private final AppOpsManager mAppOps;
-    private final boolean mVoiceCapable;
+
+    // the platform has no specific capabilities
+    private static final int PLATFORM_DEFAULT = 0;
+    // the platform is voice call capable (a phone)
+    private static final int PLATFORM_VOICE = 1;
+    // the platform is a television or a set-top box
+    private static final int PLATFORM_TELEVISION = 2;
+    // the platform type affects volume and silent mode behavior
+    private final int mPlatformType;
+
+    private boolean isPlatformVoice() {
+        return mPlatformType == PLATFORM_VOICE;
+    }
+
+    private boolean isPlatformTelevision() {
+        return mPlatformType == PLATFORM_TELEVISION;
+    }
 
     /** The controller for the volume UI. */
     private final VolumeController mVolumeController = new VolumeController();
@@ -243,9 +260,10 @@ public class AudioService extends IAudioService.Stub {
      * NOTE: do not create loops in aliases!
      * Some streams alias to different streams according to device category (phone or tablet) or
      * use case (in call vs off call...). See updateStreamVolumeAlias() for more details.
-     *  mStreamVolumeAlias contains the default aliases for a voice capable device (phone) and
-     *  STREAM_VOLUME_ALIAS_NON_VOICE for a non voice capable device (tablet).*/
-    private final int[] STREAM_VOLUME_ALIAS = new int[] {
+     *  mStreamVolumeAlias contains STREAM_VOLUME_ALIAS_VOICE aliases for a voice capable device
+     *  (phone), STREAM_VOLUME_ALIAS_TELEVISION for a television or set-top box and
+     *  STREAM_VOLUME_ALIAS_DEFAULT for other devices (e.g. tablets).*/
+    private final int[] STREAM_VOLUME_ALIAS_VOICE = new int[] {
         AudioSystem.STREAM_VOICE_CALL,      // STREAM_VOICE_CALL
         AudioSystem.STREAM_RING,            // STREAM_SYSTEM
         AudioSystem.STREAM_RING,            // STREAM_RING
@@ -257,7 +275,19 @@ public class AudioService extends IAudioService.Stub {
         AudioSystem.STREAM_RING,            // STREAM_DTMF
         AudioSystem.STREAM_MUSIC            // STREAM_TTS
     };
-    private final int[] STREAM_VOLUME_ALIAS_NON_VOICE = new int[] {
+    private final int[] STREAM_VOLUME_ALIAS_TELEVISION = new int[] {
+        AudioSystem.STREAM_MUSIC,       // STREAM_VOICE_CALL
+        AudioSystem.STREAM_MUSIC,       // STREAM_SYSTEM
+        AudioSystem.STREAM_MUSIC,       // STREAM_RING
+        AudioSystem.STREAM_MUSIC,       // STREAM_MUSIC
+        AudioSystem.STREAM_MUSIC,       // STREAM_ALARM
+        AudioSystem.STREAM_MUSIC,       // STREAM_NOTIFICATION
+        AudioSystem.STREAM_MUSIC,       // STREAM_BLUETOOTH_SCO
+        AudioSystem.STREAM_MUSIC,       // STREAM_SYSTEM_ENFORCED
+        AudioSystem.STREAM_MUSIC,       // STREAM_DTMF
+        AudioSystem.STREAM_MUSIC        // STREAM_TTS
+    };
+    private final int[] STREAM_VOLUME_ALIAS_DEFAULT = new int[] {
         AudioSystem.STREAM_VOICE_CALL,      // STREAM_VOICE_CALL
         AudioSystem.STREAM_MUSIC,           // STREAM_SYSTEM
         AudioSystem.STREAM_RING,            // STREAM_RING
@@ -455,9 +485,12 @@ public class AudioService extends IAudioService.Stub {
     public final static int STREAM_REMOTE_MUSIC = -200;
 
     // Devices for which the volume is fixed and VolumePanel slider should be disabled
-    final int mFixedVolumeDevices = AudioSystem.DEVICE_OUT_HDMI |
+    int mFixedVolumeDevices = AudioSystem.DEVICE_OUT_HDMI |
             AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET |
-            AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET;
+            AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET |
+            AudioSystem.DEVICE_OUT_HDMI_ARC |
+            AudioSystem.DEVICE_OUT_SPDIF |
+            AudioSystem.DEVICE_OUT_AUX_LINE;
 
     // TODO merge orientation and rotation
     private final boolean mMonitorOrientation;
@@ -491,8 +524,16 @@ public class AudioService extends IAudioService.Stub {
         mContext = context;
         mContentResolver = context.getContentResolver();
         mAppOps = (AppOpsManager)context.getSystemService(Context.APP_OPS_SERVICE);
-        mVoiceCapable = mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_voice_capable);
+
+        if (mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_voice_capable)) {
+            mPlatformType = PLATFORM_VOICE;
+        } else if (context.getPackageManager().hasSystemFeature(
+                                                            PackageManager.FEATURE_TELEVISION)) {
+            mPlatformType = PLATFORM_TELEVISION;
+        } else {
+            mPlatformType = PLATFORM_DEFAULT;
+        }
 
         PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
         mAudioEventWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "handleAudioEvent");
@@ -622,10 +663,15 @@ public class AudioService extends IAudioService.Stub {
                                     BluetoothProfile.A2DP);
         }
 
-        HdmiControlManager hdmiManager =
+        mHdmiManager =
                 (HdmiControlManager) mContext.getSystemService(Context.HDMI_CONTROL_SERVICE);
-        // Null if device is not Tv.
-        mHdmiTvClient = hdmiManager.getTvClient();
+        if (mHdmiManager != null) {
+            synchronized (mHdmiManager) {
+                mHdmiTvClient = mHdmiManager.getTvClient();
+                mHdmiPlaybackClient = mHdmiManager.getPlaybackClient();
+                mHdmiCecSink = false;
+            }
+        }
 
         sendMsg(mAudioHandler,
                 MSG_CONFIGURE_SAFE_MEDIA_VOLUME_FORCED,
@@ -670,6 +716,14 @@ public class AudioService extends IAudioService.Stub {
         }
     }
 
+    private void checkAllFixedVolumeDevices()
+    {
+        int numStreamTypes = AudioSystem.getNumStreamTypes();
+        for (int streamType = 0; streamType < numStreamTypes; streamType++) {
+            mStreamStates[streamType].checkFixedVolumeDevices();
+        }
+    }
+
     private void createStreamStates() {
         int numStreamTypes = AudioSystem.getNumStreamTypes();
         VolumeStreamState[] streams = mStreamStates = new VolumeStreamState[numStreamTypes];
@@ -678,6 +732,7 @@ public class AudioService extends IAudioService.Stub {
             streams[i] = new VolumeStreamState(System.VOLUME_SETTINGS[mStreamVolumeAlias[i]], i);
         }
 
+        checkAllFixedVolumeDevices();
         checkAllAliasStreamVolumes();
     }
 
@@ -702,19 +757,32 @@ public class AudioService extends IAudioService.Stub {
 
     private void updateStreamVolumeAlias(boolean updateVolumes) {
         int dtmfStreamAlias;
-        if (mVoiceCapable) {
-            mStreamVolumeAlias = STREAM_VOLUME_ALIAS;
+
+        switch (mPlatformType) {
+        case PLATFORM_VOICE:
+            mStreamVolumeAlias = STREAM_VOLUME_ALIAS_VOICE;
             dtmfStreamAlias = AudioSystem.STREAM_RING;
-        } else {
-            mStreamVolumeAlias = STREAM_VOLUME_ALIAS_NON_VOICE;
+            break;
+        case PLATFORM_TELEVISION:
+            mStreamVolumeAlias = STREAM_VOLUME_ALIAS_TELEVISION;
+            dtmfStreamAlias = AudioSystem.STREAM_MUSIC;
+            break;
+        default:
+            mStreamVolumeAlias = STREAM_VOLUME_ALIAS_DEFAULT;
             dtmfStreamAlias = AudioSystem.STREAM_MUSIC;
         }
-        if (isInCommunication()) {
-            dtmfStreamAlias = AudioSystem.STREAM_VOICE_CALL;
-            mRingerModeAffectedStreams &= ~(1 << AudioSystem.STREAM_DTMF);
+
+        if (isPlatformTelevision()) {
+            mRingerModeAffectedStreams = 0;
         } else {
-            mRingerModeAffectedStreams |= (1 << AudioSystem.STREAM_DTMF);
+            if (isInCommunication()) {
+                dtmfStreamAlias = AudioSystem.STREAM_VOICE_CALL;
+                mRingerModeAffectedStreams &= ~(1 << AudioSystem.STREAM_DTMF);
+            } else {
+                mRingerModeAffectedStreams |= (1 << AudioSystem.STREAM_DTMF);
+            }
         }
+
         mStreamVolumeAlias[AudioSystem.STREAM_DTMF] = dtmfStreamAlias;
         if (updateVolumes) {
             mStreamStates[AudioSystem.STREAM_DTMF].setAllIndexes(mStreamStates[dtmfStreamAlias]);
@@ -768,7 +836,7 @@ public class AudioService extends IAudioService.Stub {
         if (ringerMode != ringerModeFromSettings) {
             Settings.Global.putInt(cr, Settings.Global.MODE_RINGER, ringerMode);
         }
-        if (mUseFixedVolume) {
+        if (mUseFixedVolume || isPlatformTelevision()) {
             ringerMode = AudioManager.RINGER_MODE_NORMAL;
         }
         synchronized(mSettingsLock) {
@@ -998,15 +1066,30 @@ public class AudioService extends IAudioService.Stub {
 
             // Check if volume update should be send to Hdmi system audio.
             int newIndex = mStreamStates[streamType].getIndex(device);
-            if (mHdmiTvClient != null &&
-                streamTypeAlias == AudioSystem.STREAM_MUSIC &&
-                (flags & AudioManager.FLAG_HDMI_SYSTEM_AUDIO_VOLUME) == 0 &&
-                oldIndex != newIndex) {
-                int maxIndex = getStreamMaxVolume(streamType);
-                synchronized (mHdmiTvClient) {
-                    if (mHdmiSystemAudioSupported) {
-                        mHdmiTvClient.setSystemAudioVolume(
-                                (oldIndex + 5) / 10, (newIndex + 5) / 10, maxIndex);
+            if (mHdmiManager != null) {
+                synchronized (mHdmiManager) {
+                    if (mHdmiTvClient != null &&
+                        streamTypeAlias == AudioSystem.STREAM_MUSIC &&
+                        (flags & AudioManager.FLAG_HDMI_SYSTEM_AUDIO_VOLUME) == 0 &&
+                        oldIndex != newIndex) {
+                        int maxIndex = getStreamMaxVolume(streamType);
+                        synchronized (mHdmiTvClient) {
+                            if (mHdmiSystemAudioSupported) {
+                                mHdmiTvClient.setSystemAudioVolume(
+                                        (oldIndex + 5) / 10, (newIndex + 5) / 10, maxIndex);
+                            }
+                        }
+                    }
+                    // mHdmiCecSink true => mHdmiPlaybackClient != null
+                    if (mHdmiCecSink &&
+                            streamTypeAlias == AudioSystem.STREAM_MUSIC &&
+                            oldIndex != newIndex) {
+                        synchronized (mHdmiPlaybackClient) {
+                            int keyCode = (direction == -1) ? KeyEvent.KEYCODE_VOLUME_DOWN :
+                                                               KeyEvent.KEYCODE_VOLUME_UP;
+                            mHdmiPlaybackClient.sendKeyEvent(keyCode, true);
+                            mHdmiPlaybackClient.sendKeyEvent(keyCode, false);
+                        }
                     }
                 }
             }
@@ -1110,15 +1193,19 @@ public class AudioService extends IAudioService.Stub {
                 }
             }
 
-            if (mHdmiTvClient != null &&
-                streamTypeAlias == AudioSystem.STREAM_MUSIC &&
-                (flags & AudioManager.FLAG_HDMI_SYSTEM_AUDIO_VOLUME) == 0 &&
-                oldIndex != index) {
-                int maxIndex = getStreamMaxVolume(streamType);
-                synchronized (mHdmiTvClient) {
-                    if (mHdmiSystemAudioSupported) {
-                        mHdmiTvClient.setSystemAudioVolume(
-                                (oldIndex + 5) / 10, (index + 5) / 10, maxIndex);
+            if (mHdmiManager != null) {
+                synchronized (mHdmiManager) {
+                    if (mHdmiTvClient != null &&
+                        streamTypeAlias == AudioSystem.STREAM_MUSIC &&
+                        (flags & AudioManager.FLAG_HDMI_SYSTEM_AUDIO_VOLUME) == 0 &&
+                        oldIndex != index) {
+                        int maxIndex = getStreamMaxVolume(streamType);
+                        synchronized (mHdmiTvClient) {
+                            if (mHdmiSystemAudioSupported) {
+                                mHdmiTvClient.setSystemAudioVolume(
+                                        (oldIndex + 5) / 10, (index + 5) / 10, maxIndex);
+                            }
+                        }
                     }
                 }
             }
@@ -1257,7 +1344,7 @@ public class AudioService extends IAudioService.Stub {
 
     // UI update and Broadcast Intent
     private void sendVolumeUpdate(int streamType, int oldIndex, int index, int flags) {
-        if (!mVoiceCapable && (streamType == AudioSystem.STREAM_RING)) {
+        if (!isPlatformVoice() && (streamType == AudioSystem.STREAM_RING)) {
             streamType = AudioSystem.STREAM_NOTIFICATION;
         }
 
@@ -1346,10 +1433,14 @@ public class AudioService extends IAudioService.Stub {
         }
 
         if (isStreamAffectedByMute(streamType)) {
-            if (streamType == AudioSystem.STREAM_MUSIC && mHdmiTvClient != null) {
-                synchronized (mHdmiTvClient) {
-                    if (mHdmiSystemAudioSupported) {
-                        mHdmiTvClient.setSystemAudioMute(state);
+            if (mHdmiManager != null) {
+                synchronized (mHdmiManager) {
+                    if (streamType == AudioSystem.STREAM_MUSIC && mHdmiTvClient != null) {
+                        synchronized (mHdmiTvClient) {
+                            if (mHdmiSystemAudioSupported) {
+                                mHdmiTvClient.setSystemAudioMute(state);
+                            }
+                        }
                     }
                 }
             }
@@ -1472,11 +1563,15 @@ public class AudioService extends IAudioService.Stub {
 
     /** @see AudioManager#getMasterStreamType()  */
     public int getMasterStreamType() {
-        if (mVoiceCapable) {
-            return AudioSystem.STREAM_RING;
-        } else {
-            return AudioSystem.STREAM_NOTIFICATION;
+        switch (mPlatformType) {
+            case PLATFORM_VOICE:
+                return AudioSystem.STREAM_RING;
+            case PLATFORM_TELEVISION:
+                return AudioSystem.STREAM_MUSIC;
+            default:
+                break;
         }
+        return AudioSystem.STREAM_NOTIFICATION;
     }
 
     /** @see AudioManager#setMicrophoneMute(boolean) */
@@ -1504,7 +1599,7 @@ public class AudioService extends IAudioService.Stub {
 
     /** @see AudioManager#setRingerMode(int) */
     public void setRingerMode(int ringerMode) {
-        if (mUseFixedVolume) {
+        if (mUseFixedVolume || isPlatformTelevision()) {
             return;
         }
 
@@ -1534,7 +1629,7 @@ public class AudioService extends IAudioService.Stub {
                     ringerMode == AudioManager.RINGER_MODE_NORMAL) {
                     // ring and notifications volume should never be 0 when not silenced
                     // on voice capable devices
-                    if (mVoiceCapable &&
+                    if (isPlatformVoice() &&
                             mStreamVolumeAlias[streamType] == AudioSystem.STREAM_RING) {
                         synchronized (mStreamStates[streamType]) {
                             Set set = mStreamStates[streamType].mIndex.entrySet();
@@ -2041,6 +2136,7 @@ public class AudioService extends IAudioService.Stub {
         // muted by ringer mode have the correct volume
         setRingerModeInt(getRingerMode(), false);
 
+        checkAllFixedVolumeDevices();
         checkAllAliasStreamVolumes();
 
         synchronized (mSafeMediaVolumeState) {
@@ -2760,11 +2856,18 @@ public class AudioService extends IAudioService.Stub {
                                         (1 << AudioSystem.STREAM_NOTIFICATION)|
                                         (1 << AudioSystem.STREAM_SYSTEM);
 
-        if (mVoiceCapable) {
-            ringerModeAffectedStreams &= ~(1 << AudioSystem.STREAM_MUSIC);
-        } else {
-            ringerModeAffectedStreams |= (1 << AudioSystem.STREAM_MUSIC);
+        switch (mPlatformType) {
+            case PLATFORM_VOICE:
+                ringerModeAffectedStreams &= ~(1 << AudioSystem.STREAM_MUSIC);
+                break;
+            case PLATFORM_TELEVISION:
+                ringerModeAffectedStreams = 0;
+                break;
+            default:
+                ringerModeAffectedStreams |= (1 << AudioSystem.STREAM_MUSIC);
+                break;
         }
+
         synchronized (mCameraSoundForced) {
             if (mCameraSoundForced) {
                 ringerModeAffectedStreams &= ~(1 << AudioSystem.STREAM_SYSTEM_ENFORCED);
@@ -2833,7 +2936,8 @@ public class AudioService extends IAudioService.Stub {
     }
 
     private int getActiveStreamType(int suggestedStreamType) {
-        if (mVoiceCapable) {
+        switch (mPlatformType) {
+        case PLATFORM_VOICE:
             if (isInCommunication()) {
                 if (AudioSystem.getForceUse(AudioSystem.FOR_COMMUNICATION)
                         == AudioSystem.FORCE_BT_SCO) {
@@ -2863,12 +2967,26 @@ public class AudioService extends IAudioService.Stub {
                 if (DEBUG_VOL)
                     Log.v(TAG, "getActiveStreamType: Forcing STREAM_MUSIC stream active");
                 return AudioSystem.STREAM_MUSIC;
-            } else {
-                if (DEBUG_VOL) Log.v(TAG, "getActiveStreamType: Returning suggested type "
-                        + suggestedStreamType);
-                return suggestedStreamType;
             }
-        } else {
+            break;
+        case PLATFORM_TELEVISION:
+            if (suggestedStreamType == AudioManager.USE_DEFAULT_STREAM_TYPE) {
+                if (isAfMusicActiveRecently(DEFAULT_STREAM_TYPE_OVERRIDE_DELAY_MS)) {
+                    if (DEBUG_VOL) Log.v(TAG, "getActiveStreamType: forcing STREAM_MUSIC");
+                    return AudioSystem.STREAM_MUSIC;
+                } else if (mMediaFocusControl.checkUpdateRemoteStateIfActive(
+                                                                        AudioSystem.STREAM_MUSIC)) {
+                    if (DEBUG_VOL)
+                        Log.v(TAG, "getActiveStreamType: Forcing STREAM_REMOTE_MUSIC");
+                    return STREAM_REMOTE_MUSIC;
+                } else {
+                    if (DEBUG_VOL) Log.v(TAG,
+                            "getActiveStreamType: using STREAM_MUSIC as default");
+                    return AudioSystem.STREAM_MUSIC;
+                }
+            }
+            break;
+        default:
             if (isInCommunication()) {
                 if (AudioSystem.getForceUse(AudioSystem.FOR_COMMUNICATION)
                         == AudioSystem.FORCE_BT_SCO) {
@@ -2899,12 +3017,12 @@ public class AudioService extends IAudioService.Stub {
                             "getActiveStreamType: using STREAM_NOTIFICATION as default");
                     return AudioSystem.STREAM_NOTIFICATION;
                 }
-            } else {
-                if (DEBUG_VOL) Log.v(TAG, "getActiveStreamType: Returning suggested type "
-                        + suggestedStreamType);
-                return suggestedStreamType;
             }
+            break;
         }
+        if (DEBUG_VOL) Log.v(TAG, "getActiveStreamType: Returning suggested type "
+                + suggestedStreamType);
+        return suggestedStreamType;
     }
 
     private void broadcastRingerMode(int ringerMode) {
@@ -3098,13 +3216,7 @@ public class AudioService extends IAudioService.Stub {
                         continue;
                     }
 
-                    // ignore settings for fixed volume devices: volume should always be at max or 0
-                    if ((mStreamVolumeAlias[mStreamType] == AudioSystem.STREAM_MUSIC) &&
-                            ((device & mFixedVolumeDevices) != 0)) {
-                        mIndex.put(device, (index != 0) ? mIndexMax : 0);
-                    } else {
-                        mIndex.put(device, getValidIndex(10 * index));
-                    }
+                    mIndex.put(device, getValidIndex(10 * index));
                 }
             }
         }
@@ -3261,6 +3373,25 @@ public class AudioService extends IAudioService.Stub {
 
         public int getStreamType() {
             return mStreamType;
+        }
+
+        public void checkFixedVolumeDevices() {
+            synchronized (VolumeStreamState.class) {
+                // ignore settings for fixed volume devices: volume should always be at max or 0
+                if (mStreamVolumeAlias[mStreamType] == AudioSystem.STREAM_MUSIC) {
+                    Set set = mIndex.entrySet();
+                    Iterator i = set.iterator();
+                    while (i.hasNext()) {
+                        Map.Entry entry = (Map.Entry)i.next();
+                        int device = ((Integer)entry.getKey()).intValue();
+                        int index = ((Integer)entry.getValue()).intValue();
+                        if (((device & mFixedVolumeDevices) != 0) && index != 0) {
+                            entry.setValue(mIndexMax);
+                        }
+                        applyDeviceVolume(device);
+                    }
+                }
+            }
         }
 
         private int getValidIndex(int index) {
@@ -3467,6 +3598,9 @@ public class AudioService extends IAudioService.Stub {
 
         private void persistVolume(VolumeStreamState streamState, int device) {
             if (mUseFixedVolume) {
+                return;
+            }
+            if (isPlatformTelevision() && (streamState.mStreamType != AudioSystem.STREAM_MUSIC)) {
                 return;
             }
             System.putIntForUser(mContentResolver,
@@ -3825,11 +3959,13 @@ public class AudioService extends IAudioService.Stub {
                                 mDockAudioMediaEnabled ?
                                         AudioSystem.FORCE_ANALOG_DOCK : AudioSystem.FORCE_NONE);
                     }
-
-                    if (mHdmiTvClient != null) {
-                        setHdmiSystemAudioSupported(mHdmiSystemAudioSupported);
+                    if (mHdmiManager != null) {
+                        synchronized (mHdmiManager) {
+                            if (mHdmiTvClient != null) {
+                                setHdmiSystemAudioSupported(mHdmiSystemAudioSupported);
+                            }
+                        }
                     }
-
                     // indicate the end of reconfiguration phase to audio HAL
                     AudioSystem.setParameters("restarting=false");
                     break;
@@ -4275,6 +4411,27 @@ public class AudioService extends IAudioService.Stub {
                             null,
                             MUSIC_ACTIVE_POLL_PERIOD_MS);
                 }
+                // Television devices without CEC service apply software volume on HDMI output
+                if (isPlatformTelevision() && ((device & AudioSystem.DEVICE_OUT_HDMI) != 0)) {
+                    mFixedVolumeDevices |= AudioSystem.DEVICE_OUT_HDMI;
+                    checkAllFixedVolumeDevices();
+                    if (mHdmiManager != null) {
+                        synchronized (mHdmiManager) {
+                            if (mHdmiPlaybackClient != null) {
+                                mHdmiCecSink = false;
+                                mHdmiPlaybackClient.queryDisplayStatus(mHdmiDisplayStatusCallback);
+                            }
+                        }
+                    }
+                }
+            } else {
+                if (isPlatformTelevision() && ((device & AudioSystem.DEVICE_OUT_HDMI) != 0)) {
+                    if (mHdmiManager != null) {
+                        synchronized (mHdmiManager) {
+                            mHdmiCecSink = false;
+                        }
+                    }
+                }
             }
             if (!isUsb && (device != AudioSystem.DEVICE_IN_WIRED_HEADSET)) {
                 sendDeviceConnectionIntent(device, state, name);
@@ -4577,18 +4734,20 @@ public class AudioService extends IAudioService.Stub {
                     if (cameraSoundForced != mCameraSoundForced) {
                         mCameraSoundForced = cameraSoundForced;
 
-                        VolumeStreamState s = mStreamStates[AudioSystem.STREAM_SYSTEM_ENFORCED];
-                        if (cameraSoundForced) {
-                            s.setAllIndexesToMax();
-                            mRingerModeAffectedStreams &=
-                                    ~(1 << AudioSystem.STREAM_SYSTEM_ENFORCED);
-                        } else {
-                            s.setAllIndexes(mStreamStates[AudioSystem.STREAM_SYSTEM]);
-                            mRingerModeAffectedStreams |=
-                                    (1 << AudioSystem.STREAM_SYSTEM_ENFORCED);
+                        if (!isPlatformTelevision()) {
+                            VolumeStreamState s = mStreamStates[AudioSystem.STREAM_SYSTEM_ENFORCED];
+                            if (cameraSoundForced) {
+                                s.setAllIndexesToMax();
+                                mRingerModeAffectedStreams &=
+                                        ~(1 << AudioSystem.STREAM_SYSTEM_ENFORCED);
+                            } else {
+                                s.setAllIndexes(mStreamStates[AudioSystem.STREAM_SYSTEM]);
+                                mRingerModeAffectedStreams |=
+                                        (1 << AudioSystem.STREAM_SYSTEM_ENFORCED);
+                            }
+                            // take new state into account for streams muted by ringer mode
+                            setRingerModeInt(getRingerMode(), false);
                         }
-                        // take new state into account for streams muted by ringer mode
-                        setRingerModeInt(getRingerMode(), false);
 
                         sendMsg(mAudioHandler,
                                 MSG_SET_FORCE_USE,
@@ -4804,27 +4963,57 @@ public class AudioService extends IAudioService.Stub {
     // to HdmiControlService so that audio recevier can handle volume change.
     //==========================================================================================
 
+    private class MyDisplayStatusCallback implements HdmiPlaybackClient.DisplayStatusCallback {
+        public void onComplete(int status) {
+            if (mHdmiManager != null) {
+                synchronized (mHdmiManager) {
+                    mHdmiCecSink = (status != HdmiControlManager.POWER_STATUS_UNKNOWN);
+                    // Television devices without CEC service apply software volume on HDMI output
+                    if (isPlatformTelevision() && !mHdmiCecSink) {
+                        mFixedVolumeDevices &= ~AudioSystem.DEVICE_OUT_HDMI;
+                    }
+                    checkAllFixedVolumeDevices();
+                }
+            }
+        }
+    };
+
     // If HDMI-CEC system audio is supported
     private boolean mHdmiSystemAudioSupported = false;
     // Set only when device is tv.
     private HdmiTvClient mHdmiTvClient;
+    // true if the device has system feature PackageManager.FEATURE_TELEVISION.
+    // cached HdmiControlManager interface
+    private HdmiControlManager mHdmiManager;
+    // Set only when device is a set-top box.
+    private HdmiPlaybackClient mHdmiPlaybackClient;
+    // true if we are a set-top box, an HDMI sink is connected and it supports CEC.
+    private boolean mHdmiCecSink;
+
+    private MyDisplayStatusCallback mHdmiDisplayStatusCallback = new MyDisplayStatusCallback();
 
     @Override
     public int setHdmiSystemAudioSupported(boolean on) {
-        if (mHdmiTvClient == null) {
-            Log.w(TAG, "Only Hdmi-Cec enabled TV device supports system audio mode.");
-            return AudioSystem.DEVICE_NONE;
-        }
+        int device = AudioSystem.DEVICE_NONE;
+        if (mHdmiManager != null) {
+            synchronized (mHdmiManager) {
+                if (mHdmiTvClient == null) {
+                    Log.w(TAG, "Only Hdmi-Cec enabled TV device supports system audio mode.");
+                    return device;
+                }
 
-        synchronized (mHdmiTvClient) {
-            if (mHdmiSystemAudioSupported == on) {
-                return AudioSystem.getDevicesForStream(AudioSystem.STREAM_MUSIC);
+                synchronized (mHdmiTvClient) {
+                    if (mHdmiSystemAudioSupported != on) {
+                        mHdmiSystemAudioSupported = on;
+                        AudioSystem.setForceUse(AudioSystem.FOR_HDMI_SYSTEM_AUDIO,
+                                on ? AudioSystem.FORCE_HDMI_SYSTEM_AUDIO_ENFORCED :
+                                     AudioSystem.FORCE_NONE);
+                    }
+                    device = AudioSystem.getDevicesForStream(AudioSystem.STREAM_MUSIC);
+                }
             }
-            mHdmiSystemAudioSupported = on;
-            AudioSystem.setForceUse(AudioSystem.FOR_HDMI_SYSTEM_AUDIO,
-                    on ? AudioSystem.FORCE_HDMI_SYSTEM_AUDIO_ENFORCED : AudioSystem.FORCE_NONE);
         }
-        return AudioSystem.getDevicesForStream(AudioSystem.STREAM_MUSIC);
+        return device;
     }
 
     //==========================================================================================
