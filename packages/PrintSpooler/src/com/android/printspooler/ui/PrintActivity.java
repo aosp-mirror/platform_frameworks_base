@@ -121,6 +121,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     private static final int STATE_CREATE_FILE_FAILED = 4;
     private static final int STATE_PRINTER_UNAVAILABLE = 5;
     private static final int STATE_UPDATE_SLOW = 6;
+    private static final int STATE_PRINT_COMPLETED = 7;
 
     private static final int UI_STATE_PREVIEW = 0;
     private static final int UI_STATE_ERROR = 1;
@@ -302,6 +303,10 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             switch (mState) {
                 case STATE_PRINT_CONFIRMED: {
                     spooler.setPrintJobState(mPrintJob.getId(), PrintJobInfo.STATE_QUEUED, null);
+                } break;
+
+                case STATE_PRINT_COMPLETED: {
+                    spooler.setPrintJobState(mPrintJob.getId(), PrintJobInfo.STATE_COMPLETED, null);
                 } break;
 
                 case STATE_CREATE_FILE_FAILED: {
@@ -539,6 +544,8 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
     private void onStartCreateDocumentActivityResult(int resultCode, Intent data) {
         if (resultCode == RESULT_OK && data != null) {
+            setState(STATE_PRINT_COMPLETED);
+            updateOptionsUi();
             Uri uri = data.getData();
             mPrintedDocument.writeContent(getContentResolver(), uri);
             // Calling finish here does not invoke lifecycle callbacks but we
@@ -706,7 +713,8 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
     private static boolean isFinalState(int state) {
         return state == STATE_PRINT_CONFIRMED
-                || state == STATE_PRINT_CANCELED;
+                || state == STATE_PRINT_CANCELED
+                || state == STATE_PRINT_COMPLETED;
     }
 
     private void updateSelectedPagesFromPreview() {
@@ -1060,6 +1068,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         }
 
         if (mState == STATE_PRINT_CONFIRMED
+                || mState == STATE_PRINT_COMPLETED
                 || mState == STATE_PRINT_CANCELED
                 || mState == STATE_UPDATE_FAILED
                 || mState == STATE_CREATE_FILE_FAILED
