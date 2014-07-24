@@ -16235,8 +16235,8 @@ package android.media.browse {
     method public void notifyChildrenChanged(android.net.Uri);
     method public android.os.IBinder onBind(android.content.Intent);
     method public abstract android.media.browse.MediaBrowserService.BrowserRoot onGetRoot(java.lang.String, int, android.os.Bundle);
-    method public abstract android.graphics.Bitmap onGetThumbnail(android.net.Uri, int, int);
-    method public abstract java.util.List<android.media.browse.MediaBrowserItem> onLoadChildren(android.net.Uri);
+    method protected abstract void onLoadChildren(android.net.Uri, android.media.browse.MediaBrowserService.Result<java.util.List<android.media.browse.MediaBrowserItem>>);
+    method protected abstract void onLoadThumbnail(android.net.Uri, int, int, android.media.browse.MediaBrowserService.Result<android.graphics.Bitmap>);
     method public void setSessionToken(android.media.session.MediaSession.Token);
     field public static final java.lang.String SERVICE_ACTION = "android.media.browse.MediaBrowserService";
   }
@@ -16245,6 +16245,11 @@ package android.media.browse {
     ctor public MediaBrowserService.BrowserRoot(android.net.Uri, android.os.Bundle);
     method public android.os.Bundle getExtras();
     method public android.net.Uri getRootUri();
+  }
+
+  public class MediaBrowserService.Result {
+    method public void detach();
+    method public void sendResult(T);
   }
 
 }
