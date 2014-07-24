@@ -94,7 +94,6 @@ public class Tethering extends BaseNetworkObserver {
 
     private final INetworkManagementService mNMService;
     private final INetworkStatsService mStatsService;
-    private final ConnectivityManager mConnManager;
     private Looper mLooper;
 
     private HashMap<String, TetherInterfaceSM> mIfaces; // all tethered/tetherable ifaces
@@ -135,7 +134,6 @@ public class Tethering extends BaseNetworkObserver {
         mContext = context;
         mNMService = nmService;
         mStatsService = statsService;
-        mConnManager = (ConnectivityManager)mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
         mLooper = looper;
 
         mPublicSync = new Object();
@@ -173,6 +171,12 @@ public class Tethering extends BaseNetworkObserver {
         mDefaultDnsServers = new String[2];
         mDefaultDnsServers[0] = DNS_DEFAULT_SERVER1;
         mDefaultDnsServers[1] = DNS_DEFAULT_SERVER2;
+    }
+
+    // We can't do this once in the Tethering() constructor and cache the value, because the
+    // CONNECTIVITY_SERVICE is registered only after the Tethering() constructor has completed.
+    private ConnectivityManager getConnectivityManager() {
+        return (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
     }
 
     void updateConfiguration() {
@@ -366,7 +370,7 @@ public class Tethering extends BaseNetworkObserver {
     // TODO - move all private methods used only by the state machine into the state machine
     // to clarify what needs synchronized protection.
     private void sendTetherStateChangedBroadcast() {
-        if (!mConnManager.isTetheringSupported()) return;
+        if (!getConnectivityManager().isTetheringSupported()) return;
 
         ArrayList<String> availableList = new ArrayList<String>();
         ArrayList<String> activeList = new ArrayList<String>();
@@ -1183,8 +1187,8 @@ public class Tethering extends BaseNetworkObserver {
                 int result = PhoneConstants.APN_REQUEST_FAILED;
                 String enableString = enableString(apnType);
                 if (enableString == null) return false;
-                result = mConnManager.startUsingNetworkFeature(ConnectivityManager.TYPE_MOBILE,
-                        enableString);
+                result = getConnectivityManager().startUsingNetworkFeature(
+                        ConnectivityManager.TYPE_MOBILE, enableString);
                 switch (result) {
                 case PhoneConstants.APN_ALREADY_ACTIVE:
                 case PhoneConstants.APN_REQUEST_STARTED:
@@ -1205,8 +1209,8 @@ public class Tethering extends BaseNetworkObserver {
                 // ignore pending renewal requests
                 ++mCurrentConnectionSequence;
                 if (mMobileApnReserved != ConnectivityManager.TYPE_NONE) {
-                    mConnManager.stopUsingNetworkFeature(ConnectivityManager.TYPE_MOBILE,
-                            enableString(mMobileApnReserved));
+                    getConnectivityManager().stopUsingNetworkFeature(
+                            ConnectivityManager.TYPE_MOBILE, enableString(mMobileApnReserved));
                     mMobileApnReserved = ConnectivityManager.TYPE_NONE;
                 }
                 return true;
@@ -1269,7 +1273,8 @@ public class Tethering extends BaseNetworkObserver {
                     }
 
                     for (Integer netType : mUpstreamIfaceTypes) {
-                        NetworkInfo info = mConnManager.getNetworkInfo(netType.intValue());
+                        NetworkInfo info =
+                                getConnectivityManager().getNetworkInfo(netType.intValue());
                         if ((info != null) && info.isConnected()) {
                             upType = netType.intValue();
                             break;
@@ -1307,7 +1312,8 @@ public class Tethering extends BaseNetworkObserver {
                         sendMessageDelayed(CMD_RETRY_UPSTREAM, UPSTREAM_SETTLE_TIME_MS);
                     }
                 } else {
-                    LinkProperties linkProperties = mConnManager.getLinkProperties(upType);
+                    LinkProperties linkProperties =
+                            getConnectivityManager().getLinkProperties(upType);
                     if (linkProperties != null) {
                         // Find the interface with the default IPv4 route. It may be the
                         // interface described by linkProperties, or one of the interfaces
