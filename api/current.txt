@@ -28875,6 +28875,7 @@ package android.telecomm {
     method public android.telecomm.PhoneAccountHandle getDefaultOutgoingPhoneAccount();
     method public java.util.List<android.telecomm.PhoneAccountHandle> getEnabledPhoneAccounts();
     method public android.telecomm.PhoneAccount getPhoneAccount(android.telecomm.PhoneAccountHandle);
+    method public boolean hasMultipleEnabledAccounts();
     method public void registerPhoneAccount(android.telecomm.PhoneAccount);
     method public void unregisterPhoneAccount(android.telecomm.PhoneAccountHandle);
     field public static final java.lang.String ACTION_CONNECTION_SERVICE_CONFIGURE = "android.intent.action.CONNECTION_SERVICE_CONFIGURE";
