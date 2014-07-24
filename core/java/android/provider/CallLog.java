@@ -116,7 +116,8 @@ public class CallLog {
 
         /**
          * Content uri used to access call log entries, including voicemail records. You must have
-         * the READ_CALL_LOG and WRITE_CALL_LOG permissions to read and write to the call log.
+         * the READ_CALL_LOG and WRITE_CALL_LOG permissions to read and write to the call log, as
+         * well as READ_VOICEMAIL and WRITE_VOICEMAIL permissions to read and write voicemails.
          */
         public static final Uri CONTENT_URI_WITH_VOICEMAIL = CONTENT_URI.buildUpon()
                 .appendQueryParameter(ALLOW_VOICEMAILS_PARAM_KEY, "true")
