@@ -553,8 +553,9 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         }
 
         public void update() {
-            final boolean onKeyguardAndCollapsed = mKeyguardShowing && !mExpanded;
-            mSystemIconsContainer.setClipBounds(onKeyguardAndCollapsed ? null : mClipBounds);
+            final boolean collapsedKeyguard = mKeyguardShowing && !mExpanded;
+            final boolean expanded = mExpanded && !mOverscrolled;
+            mSystemIconsContainer.setClipBounds(collapsedKeyguard || expanded ? null : mClipBounds);
         }
     }
 
