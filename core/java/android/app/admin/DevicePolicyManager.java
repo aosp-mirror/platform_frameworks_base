@@ -1708,7 +1708,7 @@ public class DevicePolicyManager {
      * storage.  If the result is {@link #ENCRYPTION_STATUS_ACTIVATING} or
      * {@link #ENCRYPTION_STATUS_ACTIVE}, no further action is required.
      *
-     * @return current status of encryption.  The value will be one of
+     * @return current status of encryption. The value will be one of
      * {@link #ENCRYPTION_STATUS_UNSUPPORTED}, {@link #ENCRYPTION_STATUS_INACTIVE},
      * {@link #ENCRYPTION_STATUS_ACTIVATING}, or{@link #ENCRYPTION_STATUS_ACTIVE}.
      */
@@ -1729,15 +1729,18 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Installs the given certificate as a User CA.
+     * Installs the given certificate as a user CA.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param certBuffer encoded form of the certificate to install.
      *
      * @return false if the certBuffer cannot be parsed or installation is
-     *         interrupted, otherwise true
+     *         interrupted, true otherwise.
      */
-    public boolean installCaCert(ComponentName who, byte[] certBuffer) {
+    public boolean installCaCert(ComponentName admin, byte[] certBuffer) {
         if (mService != null) {
             try {
-                return mService.installCaCert(who, certBuffer);
+                return mService.installCaCert(admin, certBuffer);
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }
@@ -1746,13 +1749,16 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Uninstalls the given certificate from the list of User CAs, if present.
+     * Uninstalls the given certificate from trusted user CAs, if present.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param certBuffer encoded form of the certificate to remove.
      */
-    public void uninstallCaCert(ComponentName who, byte[] certBuffer) {
+    public void uninstallCaCert(ComponentName admin, byte[] certBuffer) {
         if (mService != null) {
             try {
                 final String alias = getCaCertAlias(certBuffer);
-                mService.uninstallCaCert(who, alias);
+                mService.uninstallCaCert(admin, alias);
             } catch (CertificateException e) {
                 Log.w(TAG, "Unable to parse certificate", e);
             } catch (RemoteException e) {
@@ -1762,16 +1768,47 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Returns whether there are any user-installed CA certificates.
+     * Returns all CA certificates that are currently trusted, excluding system CA certificates.
+     * If a user has installed any certificates by other means than device policy these will be
+     * included too.
+     *
+     * @return a List of byte[] arrays, each encoding one user CA certificate.
      */
-    public boolean hasAnyCaCertsInstalled() {
-        TrustedCertificateStore certStore = new TrustedCertificateStore();
-        Set<String> aliases = certStore.userAliases();
-        return aliases != null && !aliases.isEmpty();
+    public List<byte[]> getInstalledCaCerts() {
+        final TrustedCertificateStore certStore = new TrustedCertificateStore();
+        List<byte[]> certs = new ArrayList<byte[]>();
+        for (String alias : certStore.userAliases()) {
+            try {
+                certs.add(certStore.getCertificate(alias).getEncoded());
+            } catch (CertificateException ce) {
+                Log.w(TAG, "Could not encode certificate: " + alias, ce);
+            }
+        }
+        return certs;
     }
 
     /**
-     * Returns whether this certificate has been installed as a User CA.
+     * Uninstalls all custom trusted CA certificates from the profile. Certificates installed by
+     * means other than device policy will also be removed, except for system CA certificates.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     */
+    public void uninstallAllUserCaCerts(ComponentName admin) {
+        if (mService != null) {
+            for (String alias : new TrustedCertificateStore().userAliases()) {
+                try {
+                    mService.uninstallCaCert(admin, alias);
+                } catch (RemoteException re) {
+                    Log.w(TAG, "Failed talking with device policy service", re);
+                }
+            }
+        }
+    }
+
+    /**
+     * Returns whether this certificate is installed as a trusted CA.
+     *
+     * @param certBuffer encoded form of the certificate to look up.
      */
     public boolean hasCaCertInstalled(byte[] certBuffer) {
         try {
