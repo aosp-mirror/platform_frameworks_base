@@ -170,7 +170,7 @@ public abstract class TvInputPassthroughWrapperService extends TvInputService {
             public void onSessionEvent(TvInputManager.Session session, String eventType,
                     Bundle eventArgs) {
                 if (mSession == session) {
-                    dispatchSessionEvent(eventType, eventArgs);
+                    notifySessionEvent(eventType, eventArgs);
                 }
             }
         };
@@ -188,13 +188,13 @@ public abstract class TvInputPassthroughWrapperService extends TvInputService {
 
         /**
          * Called when the underlying pass-through TV input session calls
-         * {@link #dispatchVideoAvailable()}.
+         * {@link #notifyVideoAvailable()}.
          */
         public abstract void onPassthroughVideoAvailable();
 
         /**
          * Called when the underlying pass-through TV input session calls
-         * {@link #dispatchVideoUnavailable(int)}.
+         * {@link #notifyVideoUnavailable(int)}.
          *
          * @param reason The reason why the pass-through TV input stopped the playback.
          */
