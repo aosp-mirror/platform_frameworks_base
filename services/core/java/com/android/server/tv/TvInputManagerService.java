@@ -931,7 +931,7 @@ public final class TvInputManagerService extends SystemService {
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
-                    UserState userState = getUserStateLocked(callingUid);
+                    UserState userState = getUserStateLocked(resolvedUserId);
                     if (sessionToken == userState.mainSessionToken) {
                         return;
                     }
