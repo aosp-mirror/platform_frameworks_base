@@ -138,7 +138,7 @@ OpenGLRenderer::OpenGLRenderer(RenderState& renderState)
         , mRenderState(renderState)
         , mScissorOptimizationDisabled(false)
         , mCountOverdraw(false)
-        , mLightCenter(FLT_MIN, FLT_MIN, FLT_MIN)
+        , mLightCenter((Vector3){FLT_MIN, FLT_MIN, FLT_MIN})
         , mLightRadius(FLT_MIN)
         , mAmbientShadowAlpha(0)
         , mSpotShadowAlpha(0) {
