@@ -6807,16 +6807,18 @@
     <!-- Use <code>voice-enrollment-application</code>
          as the root tag of the XML resource that escribes the supported keyphrases (hotwords)
          by the enrollment application.
-         Described here are the attributes that can be included in that tag. -->
+         Described here are the attributes that can be included in that tag.
+         @hide
+         @SystemApi -->
     <declare-styleable name="VoiceEnrollmentApplication">
-        <!-- A globally unique ID for the keyphrase. -->
+        <!-- A globally unique ID for the keyphrase. @hide @SystemApi -->
         <attr name="searchKeyphraseId" format="integer" />
-        <!-- The actual keyphrase/hint text, or empty if not keyphrase dependent. -->
+        <!-- The actual keyphrase/hint text, or empty if not keyphrase dependent. @hide @SystemApi -->
         <attr name="searchKeyphrase" format="string" />
         <!-- A comma separated list of java locales that are supported for this keyphrase,
-             or empty if not locale dependent. -->
+             or empty if not locale dependent. @hide @SystemApi -->
         <attr name="searchKeyphraseSupportedLocales" format="string" />
-        <!-- Flags for supported recognition modes. -->
+        <!-- Flags for supported recognition modes. @hide @SystemApi -->
         <attr name="searchKeyphraseRecognitionFlags">
             <flag name="none" value="0" />
             <flag name="voiceTrigger" value="0x1" />
