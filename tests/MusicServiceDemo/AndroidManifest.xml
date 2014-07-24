@@ -47,7 +47,7 @@
             android:exported="true"
             >
             <intent-filter>
-                <action android:name="android.media.browse.MediaBrowseService" />
+                <action android:name="android.media.browse.MediaBrowserService" />
             </intent-filter>
         </service>
     </application>
