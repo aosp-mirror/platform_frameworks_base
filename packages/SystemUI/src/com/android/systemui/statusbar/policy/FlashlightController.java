@@ -77,7 +77,7 @@ public class FlashlightController {
     public void initialize() {
         try {
             mCameraId = getCameraId();
-        } catch (CameraAccessException e) {
+        } catch (Throwable e) {
             Log.e(TAG, "Couldn't initialize.", e);
             return;
         }
