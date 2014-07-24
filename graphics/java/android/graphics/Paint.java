@@ -1260,6 +1260,29 @@ public class Paint {
     public native void setTextSkewX(float skewX);
 
     /**
+     * Return the paint's letter-spacing for text. The default value
+     * is 0.
+     *
+     * @return         the paint's letter-spacing for drawing text.
+     * @hide
+     */
+    public float getLetterSpacing() {
+        return native_getLetterSpacing(mNativePaint);
+    }
+
+    /**
+     * Set the paint's letter-spacing for text. The default value
+     * is 0.  The value is in 'EM' units.  Typical values for slight
+     * expansion will be around 0.05.  Negative values tighten text.
+     *
+     * @param letterSpacing set the paint's letter-spacing for drawing text.
+     * @hide
+     */
+    public void setLetterSpacing(float letterSpacing) {
+        native_setLetterSpacing(mNativePaint, letterSpacing);
+    }
+
+    /**
      * Return the distance above (negative) the baseline (ascent) based on the
      * current typeface and text size.
      *
@@ -2232,4 +2255,8 @@ public class Paint {
     private static native void native_setShadowLayer(long native_object,
             float radius, float dx, float dy, int color);
     private static native boolean native_hasShadowLayer(long native_object);
+
+    private static native float native_getLetterSpacing(long native_object);
+    private static native void native_setLetterSpacing(long native_object,
+                                                       float letterSpacing);
 }
