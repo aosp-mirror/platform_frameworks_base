@@ -23965,6 +23965,7 @@ package android.provider {
     field public static final int PRESENTATION_PAYPHONE = 4; // 0x4
     field public static final int PRESENTATION_RESTRICTED = 2; // 0x2
     field public static final int PRESENTATION_UNKNOWN = 3; // 0x3
+    field public static final java.lang.String TRANSCRIPTION = "transcription";
     field public static final java.lang.String TYPE = "type";
     field public static final int VOICEMAIL_TYPE = 4; // 0x4
     field public static final java.lang.String VOICEMAIL_URI = "voicemail_uri";
