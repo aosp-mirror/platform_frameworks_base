@@ -190,6 +190,10 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         }
     }
 
+    int getPortId(int physicalAddress) {
+        return mService.pathToPortId(physicalAddress);
+    }
+
     /**
      * Returns the previous port id kept to handle input switching on <Inactive Source>.
      */
@@ -512,8 +516,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         }
 
         addCecDevice(new HdmiCecDeviceInfo(deviceInfo.getLogicalAddress(),
-                deviceInfo.getPhysicalAddress(), deviceInfo.getDeviceType(),
-                deviceInfo.getVendorId(), osdName));
+                deviceInfo.getPhysicalAddress(), deviceInfo.getPortId(),
+                deviceInfo.getDeviceType(), deviceInfo.getVendorId(), osdName));
         return true;
     }
 

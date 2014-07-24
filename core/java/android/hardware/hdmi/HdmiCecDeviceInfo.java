@@ -67,6 +67,7 @@ public final class HdmiCecDeviceInfo implements Parcelable {
     // are immutable value.
     private final int mLogicalAddress;
     private final int mPhysicalAddress;
+    private final int mPortId;
     private final int mDeviceType;
     private final int mVendorId;
     private final String mDisplayName;
@@ -80,11 +81,12 @@ public final class HdmiCecDeviceInfo implements Parcelable {
                 public HdmiCecDeviceInfo createFromParcel(Parcel source) {
                     int logicalAddress = source.readInt();
                     int physicalAddress = source.readInt();
+                    int portId = source.readInt();
                     int deviceType = source.readInt();
                     int vendorId = source.readInt();
                     String displayName = source.readString();
-                    return new HdmiCecDeviceInfo(logicalAddress, physicalAddress, deviceType,
-                            vendorId, displayName);
+                    return new HdmiCecDeviceInfo(logicalAddress, physicalAddress, portId,
+                            deviceType, vendorId, displayName);
                 }
 
                 @Override
@@ -98,15 +100,17 @@ public final class HdmiCecDeviceInfo implements Parcelable {
      *
      * @param logicalAddress logical address of HDMI-CEC device
      * @param physicalAddress physical address of HDMI-CEC device
+     * @param portId HDMI port ID (1 for HDMI1)
      * @param deviceType type of device
      * @param vendorId vendor id of device. Used for vendor specific command.
      * @param displayName name of device
      * @hide
      */
-    public HdmiCecDeviceInfo(int logicalAddress, int physicalAddress, int deviceType,
+    public HdmiCecDeviceInfo(int logicalAddress, int physicalAddress, int portId, int deviceType,
             int vendorId, String displayName) {
         mLogicalAddress = logicalAddress;
         mPhysicalAddress = physicalAddress;
+        mPortId = portId;
         mDeviceType = deviceType;
         mDisplayName = displayName;
         mVendorId = vendorId;
@@ -124,6 +128,13 @@ public final class HdmiCecDeviceInfo implements Parcelable {
      */
     public int getPhysicalAddress() {
         return mPhysicalAddress;
+    }
+
+    /**
+     * Return the port ID.
+     */
+    public int getPortId() {
+        return mPortId;
     }
 
     /**
@@ -179,6 +190,7 @@ public final class HdmiCecDeviceInfo implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mLogicalAddress);
         dest.writeInt(mPhysicalAddress);
+        dest.writeInt(mPortId);
         dest.writeInt(mDeviceType);
         dest.writeInt(mVendorId);
         dest.writeString(mDisplayName);
@@ -189,6 +201,7 @@ public final class HdmiCecDeviceInfo implements Parcelable {
         StringBuffer s = new StringBuffer();
         s.append("logical_address: ").append(mLogicalAddress).append(", ");
         s.append("physical_address: ").append(mPhysicalAddress).append(", ");
+        s.append("port_id: ").append(mPortId).append(", ");
         s.append("device_type: ").append(mDeviceType).append(", ");
         s.append("vendor_id: ").append(mVendorId).append(", ");
         s.append("display_name: ").append(mDisplayName);
@@ -204,6 +217,7 @@ public final class HdmiCecDeviceInfo implements Parcelable {
         HdmiCecDeviceInfo other = (HdmiCecDeviceInfo) obj;
         return mLogicalAddress == other.mLogicalAddress
                 && mPhysicalAddress == other.mPhysicalAddress
+                && mPortId == other.mPortId
                 && mDeviceType == other.mDeviceType
                 && mVendorId == other.mVendorId
                 && mDisplayName.equals(other.mDisplayName);

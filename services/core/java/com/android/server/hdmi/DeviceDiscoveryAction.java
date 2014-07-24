@@ -69,6 +69,7 @@ final class DeviceDiscoveryAction extends FeatureAction {
         private final int mLogicalAddress;
 
         private int mPhysicalAddress = Constants.INVALID_PHYSICAL_ADDRESS;
+        private int mPortId = Constants.INVALID_PORT_ID;
         private int mVendorId = Constants.UNKNOWN_VENDOR_ID;
         private String mDisplayName = "";
         private int mDeviceType = HdmiCecDeviceInfo.DEVICE_INACTIVE;
@@ -78,8 +79,8 @@ final class DeviceDiscoveryAction extends FeatureAction {
         }
 
         private HdmiCecDeviceInfo toHdmiCecDeviceInfo() {
-            return new HdmiCecDeviceInfo(mLogicalAddress, mPhysicalAddress, mDeviceType, mVendorId,
-                    mDisplayName);
+            return new HdmiCecDeviceInfo(mLogicalAddress, mPhysicalAddress, mPortId, mDeviceType,
+                    mVendorId, mDisplayName);
         }
     }
 
@@ -252,10 +253,15 @@ final class DeviceDiscoveryAction extends FeatureAction {
 
         byte params[] = cmd.getParams();
         current.mPhysicalAddress = HdmiUtils.twoBytesToInt(params);
+        current.mPortId = getPortId(current.mPhysicalAddress);
         current.mDeviceType = params[2] & 0xFF;
 
         increaseProcessedDeviceCount();
         checkAndProceedStage();
+    }
+
+    private int getPortId(int physicalAddress) {
+        return tv().getPortId(physicalAddress);
     }
 
     private void handleSetOsdName(HdmiCecMessage cmd) {
