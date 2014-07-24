@@ -16,51 +16,118 @@
 
 package com.android.server.hdmi;
 
-import static com.android.server.hdmi.Constants.RECORDING_TYPE_ANALOGUE_RF;
-import static com.android.server.hdmi.Constants.RECORDING_TYPE_DIGITAL_RF;
-import static com.android.server.hdmi.Constants.RECORDING_TYPE_EXTERNAL_PHYSICAL_ADDRESS;
-import static com.android.server.hdmi.Constants.RECORDING_TYPE_OWN_SOURCE;
+import static android.hardware.hdmi.HdmiControlManager.MESSAGE_NO_RECORDING_CHECK_RECORDER_CONNECTION;
+import static android.hardware.hdmi.HdmiControlManager.MESSAGE_RECORDING_ANALOGUE_SERVICE;
+import static android.hardware.hdmi.HdmiControlManager.MESSAGE_RECORDING_CURRENTLY_SELECTED_SOURCE;
+import static android.hardware.hdmi.HdmiControlManager.MESSAGE_RECORDING_DIGITAL_SERVICE;
+import static android.hardware.hdmi.HdmiControlManager.MESSAGE_RECORDING_EXTERNAL_INPUT;
+import static android.hardware.hdmi.HdmiControlManager.MESSAGE_RECORDING_STATUS_MESSAGE_START;
+
+import android.util.Slog;
+
+import com.android.server.hdmi.HdmiControlService.SendMessageCallback;
 
 /**
  * Feature action that performs one touch record. This class only provides a skeleton of one touch
  * play and has no detail implementation.
  */
 public class OneTouchRecordAction extends FeatureAction {
-    private final int mRecorderAddress;
-    private final int mRecordingType;
+    private static final String TAG = "OneTouchRecordAction";
 
-    OneTouchRecordAction(HdmiCecLocalDevice source, int recorderAddress, int recordingType) {
+    // Timer out for waiting <Record Status>
+    private static final int RECORD_STATUS_TIMEOUT = 120000;
+
+    // State that waits for <Record Status> once sending <Record On>
+    private static final int STATE_WAITING_FOR_RECORD_STATUS = 1;
+    // State that describes recording in progress.
+    private static final int STATE_RECORDING_IN_PROGRESS = 2;
+
+    private final int mRecorderAddress;
+    private final byte[] mRecordSource;
+
+    OneTouchRecordAction(HdmiCecLocalDevice source, int recorderAddress, byte[] recordSource) {
         super(source);
         mRecorderAddress = recorderAddress;
-        mRecordingType = recordingType;
+        mRecordSource = recordSource;
     }
 
     @Override
     boolean start() {
-        return false;
+        sendRecordOn();
+        return true;
     }
 
-    private void sendRecordOn(int recordingType) {
-        switch (recordingType) {
-            case RECORDING_TYPE_DIGITAL_RF:
-                break;
-            case RECORDING_TYPE_ANALOGUE_RF:
-                break;
-            case RECORDING_TYPE_EXTERNAL_PHYSICAL_ADDRESS:
-                break;
-            case RECORDING_TYPE_OWN_SOURCE:
-                break;
-            // TODO: implement this.
-        }
+    private void sendRecordOn() {
+        sendCommand(HdmiCecMessageBuilder.buildRecordOn(getSourceAddress(), mRecorderAddress,
+                mRecordSource),
+                new SendMessageCallback() {
+                @Override
+                    public void onSendCompleted(int error) {
+                        // if failed to send <Record On>, display error message and finish action.
+                        if (error != Constants.SEND_RESULT_SUCCESS) {
+                            tv().displayOsd(MESSAGE_NO_RECORDING_CHECK_RECORDER_CONNECTION);
+                            finish();
+                            return;
+                        }
+
+                        mState = STATE_WAITING_FOR_RECORD_STATUS;
+                        addTimer(mState, RECORD_STATUS_TIMEOUT);
+                    }
+                });
     }
 
     @Override
     boolean processCommand(HdmiCecMessage cmd) {
+        if (mState != STATE_WAITING_FOR_RECORD_STATUS) {
+            return false;
+        }
+
+        switch (cmd.getOpcode()) {
+            case Constants.MESSAGE_RECORD_STATUS:
+                return handleRecordStatus(cmd);
+
+        }
         return false;
+    }
+
+    private boolean handleRecordStatus(HdmiCecMessage cmd) {
+        // Only handle message coming from original recorder.
+        if (cmd.getSource() != mRecorderAddress) {
+            return false;
+        }
+
+        int recordStatus = cmd.getParams()[0];
+        Slog.i(TAG, "Got record status:" + recordStatus + " from " + cmd.getSource());
+
+        int recordStatusMessageCode = recordStatus + MESSAGE_RECORDING_STATUS_MESSAGE_START;
+        tv().displayOsd(recordStatusMessageCode);
+
+        // If recording started successfully, change state and keep this action until <Record Off>
+        // received. Otherwise, finish action.
+        switch (recordStatusMessageCode) {
+            case MESSAGE_RECORDING_CURRENTLY_SELECTED_SOURCE:
+            case MESSAGE_RECORDING_DIGITAL_SERVICE:
+            case MESSAGE_RECORDING_ANALOGUE_SERVICE:
+            case MESSAGE_RECORDING_EXTERNAL_INPUT:
+                mState = STATE_RECORDING_IN_PROGRESS;
+                mActionTimer.clearTimerMessage();
+                break;
+            default:
+                finish();
+                break;
+        }
+        return true;
     }
 
     @Override
     void handleTimerEvent(int state) {
+        if (mState != state) {
+            Slog.w(TAG, "Timeout in invalid state:[Expected:" + mState + ", Actual:" + state + "]");
+            return;
+        }
+
+        tv().displayOsd(MESSAGE_NO_RECORDING_CHECK_RECORDER_CONNECTION);
+        finish();
     }
 
     int getRecorderAddress() {

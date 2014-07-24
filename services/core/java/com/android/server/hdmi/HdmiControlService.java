@@ -55,6 +55,8 @@ import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
 import com.android.server.hdmi.HdmiCecController.AllocateAddressCallback;
 import com.android.server.hdmi.HdmiCecLocalDevice.PendingActionClearedCallback;
 
+import libcore.util.EmptyArray;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -156,6 +158,12 @@ public final class HdmiControlService extends SystemService {
 
     @GuardedBy("mLock")
     private InputChangeListenerRecord mInputChangeListenerRecord;
+
+    @GuardedBy("mLock")
+    private IHdmiRecordRequestListener mRecordRequestListener;
+
+    @GuardedBy("mLock")
+    private HdmiRecordRequestListenerRecord mRecordRequestListenerRecord;
 
     // Set to true while HDMI control is enabled. If set to false, HDMI-CEC/MHL protocol
     // handling will be disabled and no request will be handled.
@@ -684,6 +692,15 @@ public final class HdmiControlService extends SystemService {
         }
     }
 
+    private class HdmiRecordRequestListenerRecord implements IBinder.DeathRecipient {
+        @Override
+        public void binderDied() {
+            synchronized (mLock) {
+                mRecordRequestListener = null;
+            }
+        }
+    }
+
     private void enforceAccessPermission() {
         getContext().enforceCallingOrSelfPermission(PERMISSION, TAG);
     }
@@ -1014,17 +1031,65 @@ public final class HdmiControlService extends SystemService {
 
         @Override
         public void setOneTouchRecordRequestListener(IHdmiRecordRequestListener listener) {
-            // TODO: implement this.
+            HdmiControlService.this.setOneTouchRecordRequestListener(listener);
         }
 
         @Override
-        public void startOneTouchRecord(int recorderAddress, byte[] recordSource) {
-            // TODO: implement this.
+        public void startOneTouchRecord(final int recorderAddress, final byte[] recordSource) {
+            runOnServiceThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (!isTvDevice()) {
+                        Slog.w(TAG, "No TV is available.");
+                        return;
+                    }
+                    tv().startOneTouchRecord(recorderAddress, recordSource);
+                }
+            });
         }
 
         @Override
-        public void startTimerRecording(int recorderAddress, byte[] recordSource) {
-            // TODO: implement this.
+        public void stopOneTouchRecord(final int recorderAddress) {
+            runOnServiceThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (!isTvDevice()) {
+                        Slog.w(TAG, "No TV is available.");
+                        return;
+                    }
+                    tv().stopOneTouchRecord(recorderAddress);
+                }
+            });
+        }
+
+        @Override
+        public void startTimerRecording(final int recorderAddress, final int sourceType,
+                final byte[] recordSource) {
+            runOnServiceThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (!isTvDevice()) {
+                        Slog.w(TAG, "No TV is available.");
+                        return;
+                    }
+                    tv().startTimerRecording(recorderAddress, sourceType, recordSource);
+                }
+            });
+        }
+
+        @Override
+        public void clearTimerRecording(final int recorderAddress, final int sourceType,
+                final byte[] recordSource) {
+            runOnServiceThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (!isTvDevice()) {
+                        Slog.w(TAG, "No TV is available.");
+                        return;
+                    }
+                    tv().clearTimerRecording(recorderAddress, sourceType, recordSource);
+                }
+            });
         }
     }
 
@@ -1166,6 +1231,32 @@ public final class HdmiControlService extends SystemService {
                     Slog.w(TAG, "Exception thrown by IHdmiInputChangeListener: " + e);
                 }
             }
+        }
+    }
+
+    private void setOneTouchRecordRequestListener(IHdmiRecordRequestListener listener) {
+        synchronized (mLock) {
+            mRecordRequestListenerRecord = new HdmiRecordRequestListenerRecord();
+            try {
+                listener.asBinder().linkToDeath(mRecordRequestListenerRecord, 0);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Listener already died", e);
+                return;
+            }
+            mRecordRequestListener = listener;
+        }
+    }
+
+    byte[] invokeRecordRequestListener(int recorderAddress) {
+        synchronized (mLock) {
+            try {
+                if (mRecordRequestListener != null) {
+                    return mRecordRequestListener.onRecordRequestReceived(recorderAddress);
+                }
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Failed to start record.", e);
+            }
+            return EmptyArray.BYTE;
         }
     }
 
