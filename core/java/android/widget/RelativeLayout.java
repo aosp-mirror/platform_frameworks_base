@@ -195,6 +195,11 @@ public class RelativeLayout extends ViewGroup {
             LEFT_OF, RIGHT_OF, ALIGN_LEFT, ALIGN_RIGHT, START_OF, END_OF, ALIGN_START, ALIGN_END
     };
 
+    /**
+     * Used to indicate left/right/top/bottom should be inferred from constraints
+     */
+    private static final int VALUE_NOT_SET = Integer.MIN_VALUE;
+
     private View mBaselineView = null;
     private boolean mHasBaselineAlignedChild;
 
@@ -670,8 +675,8 @@ public class RelativeLayout extends ViewGroup {
 
     /**
      * Measure a child. The child should have left, top, right and bottom information
-     * stored in its LayoutParams. If any of these values is -1 it means that the view
-     * can extend up to the corresponding edge.
+     * stored in its LayoutParams. If any of these values is VALUE_NOT_SET it means
+     * that the view can extend up to the corresponding edge.
      *
      * @param child Child to measure
      * @param params LayoutParams associated with child
@@ -744,11 +749,11 @@ public class RelativeLayout extends ViewGroup {
         int childSpecMode = 0;
         int childSpecSize = 0;
 
-        // Negative values in a mySize/myWidth/myWidth value in RelativeLayout
+        // Negative values in a mySize value in RelativeLayout
         // measurement is code for, "we got an unspecified mode in the
         // RelativeLayout's measure spec."
         if (mySize < 0 && !mAllowBrokenMeasureSpecs) {
-            if (childStart >= 0 && childEnd >= 0) {
+            if (childStart != VALUE_NOT_SET && childEnd != VALUE_NOT_SET) {
                 // Constraints fixed both edges, so child has an exact size.
                 childSpecSize = Math.max(0, childEnd - childStart);
                 childSpecMode = MeasureSpec.EXACTLY;
@@ -771,17 +776,17 @@ public class RelativeLayout extends ViewGroup {
 
         // If the view did not express a layout constraint for an edge, use
         // view's margins and our padding
-        if (tempStart < 0) {
+        if (tempStart == VALUE_NOT_SET) {
             tempStart = startPadding + startMargin;
         }
-        if (tempEnd < 0) {
+        if (tempEnd == VALUE_NOT_SET) {
             tempEnd = mySize - endPadding - endMargin;
         }
 
         // Figure out maximum size available to this view
         int maxAvailable = tempEnd - tempStart;
 
-        if (childStart >= 0 && childEnd >= 0) {
+        if (childStart != VALUE_NOT_SET && childEnd != VALUE_NOT_SET) {
             // Constraints fixed both edges, so child must be an exact size
             childSpecMode = MeasureSpec.EXACTLY;
             childSpecSize = maxAvailable;
@@ -828,13 +833,13 @@ public class RelativeLayout extends ViewGroup {
         final int layoutDirection = getLayoutDirection();
         int[] rules = params.getRules(layoutDirection);
 
-        if (params.mLeft < 0 && params.mRight >= 0) {
+        if (params.mLeft == VALUE_NOT_SET && params.mRight != VALUE_NOT_SET) {
             // Right is fixed, but left varies
             params.mLeft = params.mRight - child.getMeasuredWidth();
-        } else if (params.mLeft >= 0 && params.mRight < 0) {
+        } else if (params.mLeft != VALUE_NOT_SET && params.mRight == VALUE_NOT_SET) {
             // Left is fixed, but right varies
             params.mRight = params.mLeft + child.getMeasuredWidth();
-        } else if (params.mLeft < 0 && params.mRight < 0) {
+        } else if (params.mLeft == VALUE_NOT_SET && params.mRight == VALUE_NOT_SET) {
             // Both left and right vary
             if (rules[CENTER_IN_PARENT] != 0 || rules[CENTER_HORIZONTAL] != 0) {
                 if (!wrapContent) {
@@ -864,13 +869,13 @@ public class RelativeLayout extends ViewGroup {
 
         int[] rules = params.getRules();
 
-        if (params.mTop < 0 && params.mBottom >= 0) {
+        if (params.mTop == VALUE_NOT_SET && params.mBottom != VALUE_NOT_SET) {
             // Bottom is fixed, but top varies
             params.mTop = params.mBottom - child.getMeasuredHeight();
-        } else if (params.mTop >= 0 && params.mBottom < 0) {
+        } else if (params.mTop != VALUE_NOT_SET && params.mBottom == VALUE_NOT_SET) {
             // Top is fixed, but bottom varies
             params.mBottom = params.mTop + child.getMeasuredHeight();
-        } else if (params.mTop < 0 && params.mBottom < 0) {
+        } else if (params.mTop == VALUE_NOT_SET && params.mBottom == VALUE_NOT_SET) {
             // Both top and bottom vary
             if (rules[CENTER_IN_PARENT] != 0 || rules[CENTER_VERTICAL] != 0) {
                 if (!wrapContent) {
@@ -891,12 +896,14 @@ public class RelativeLayout extends ViewGroup {
     private void applyHorizontalSizeRules(LayoutParams childParams, int myWidth, int[] rules) {
         RelativeLayout.LayoutParams anchorParams;
 
-        // -1 indicated a "soft requirement" in that direction. For example:
-        // left=10, right=-1 means the view must start at 10, but can go as far as it wants to the right
-        // left =-1, right=10 means the view must end at 10, but can go as far as it wants to the left
+        // VALUE_NOT_SET indicates a "soft requirement" in that direction. For example:
+        // left=10, right=VALUE_NOT_SET means the view must start at 10, but can go as far as it
+        // wants to the right
+        // left=VALUE_NOT_SET, right=10 means the view must end at 10, but can go as far as it
+        // wants to the left
         // left=10, right=20 means the left and right ends are both fixed
-        childParams.mLeft = -1;
-        childParams.mRight = -1;
+        childParams.mLeft = VALUE_NOT_SET;
+        childParams.mRight = VALUE_NOT_SET;
 
         anchorParams = getRelatedViewParams(rules, LEFT_OF);
         if (anchorParams != null) {
@@ -947,8 +954,8 @@ public class RelativeLayout extends ViewGroup {
         int[] rules = childParams.getRules();
         RelativeLayout.LayoutParams anchorParams;
 
-        childParams.mTop = -1;
-        childParams.mBottom = -1;
+        childParams.mTop = VALUE_NOT_SET;
+        childParams.mBottom = VALUE_NOT_SET;
 
         anchorParams = getRelatedViewParams(rules, ABOVE);
         if (anchorParams != null) {
@@ -1221,9 +1228,6 @@ public class RelativeLayout extends ViewGroup {
         private int[] mInitialRules = new int[VERB_COUNT];
 
         private int mLeft, mTop, mRight, mBottom;
-
-        private int mStart = DEFAULT_MARGIN_RELATIVE;
-        private int mEnd = DEFAULT_MARGIN_RELATIVE;
 
         private boolean mRulesChanged = false;
         private boolean mIsRtlCompatibilityMode = false;
@@ -1601,14 +1605,6 @@ public class RelativeLayout extends ViewGroup {
         @Override
         public void resolveLayoutDirection(int layoutDirection) {
             final boolean isLayoutRtl = isLayoutRtl();
-            if (isLayoutRtl) {
-                if (mStart != DEFAULT_MARGIN_RELATIVE) mRight = mStart;
-                if (mEnd != DEFAULT_MARGIN_RELATIVE) mLeft = mEnd;
-            } else {
-                if (mStart != DEFAULT_MARGIN_RELATIVE) mLeft = mStart;
-                if (mEnd != DEFAULT_MARGIN_RELATIVE) mRight = mEnd;
-            }
-
             if (hasRelativeRules() && layoutDirection != getLayoutDirection()) {
                 resolveRules(layoutDirection);
             }
