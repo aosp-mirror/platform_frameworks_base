@@ -70,6 +70,13 @@ import java.util.Set;
  */
 public abstract class MediaBrowserService extends Service {
     private static final String TAG = "MediaBrowserService";
+    private static final boolean DBG = false;
+
+    /**
+     * The {@link Intent} that must be declared as handled by the service.
+     */
+    @SdkConstant(SdkConstantType.SERVICE_ACTION)
+    public static final String SERVICE_ACTION = "android.media.browse.MediaBrowserService";
 
     private final ArrayMap<IBinder, ConnectionRecord> mConnections = new ArrayMap();
     private final Handler mHandler = new Handler();
@@ -88,10 +95,65 @@ public abstract class MediaBrowserService extends Service {
     }
 
     /**
-     * The {@link Intent} that must be declared as handled by the service.
+     * Completion handler for asynchronous callback methods in {@link MediaBrowserService}.
+     * <p>
+     * Each of the methods that takes one of these to send the result must call
+     * {@link #sendResult} to respond to the caller with the given results.  If those
+     * functions return without calling {@link #sendResult}, they must instead call
+     * {@link #detach} before returning, and then may call {@link #sendResult} when
+     * they are done.  If more than one of those methods is called, an exception will
+     * be thrown.
+     *
+     * @see MediaBrowserService#onLoadChildren
+     * @see MediaBrowserService#onLoadThumbnail
      */
-    @SdkConstant(SdkConstantType.SERVICE_ACTION)
-    public static final String SERVICE_ACTION = "android.media.browse.MediaBrowserService";
+    public class Result<T> {
+        private Object mDebug;
+        private boolean mDetachCalled;
+        private boolean mSendResultCalled;
+
+        Result(Object debug) {
+            mDebug = debug;
+        }
+
+        /**
+         * Send the result back to the caller.
+         */
+        public void sendResult(T result) {
+            if (mSendResultCalled) {
+                throw new IllegalStateException("sendResult() called twice for: " + mDebug);
+            }
+            mSendResultCalled = true;
+            onResultSent(result);
+        }
+
+        /**
+         * Detach this message from the current thread and allow the {@link #sendResult}
+         * call to happen later.
+         */
+        public void detach() {
+            if (mDetachCalled) {
+                throw new IllegalStateException("detach() called when detach() had already"
+                        + " been called for: " + mDebug);
+            }
+            if (mSendResultCalled) {
+                throw new IllegalStateException("detach() called when sendResult() had already"
+                        + " been called for: " + mDebug);
+            }
+            mDetachCalled = true;
+        }
+
+        boolean isDone() {
+            return mDetachCalled || mSendResultCalled;
+        }
+
+        /**
+         * Called when the result is sent, after assertions about not being called twice
+         * have happened.
+         */
+        void onResultSent(T result) {
+        }
+    }
 
     private class ServiceBinder extends IMediaBrowserService.Stub {
         @Override
@@ -206,14 +268,51 @@ public abstract class MediaBrowserService extends Service {
         @Override
         public void loadThumbnail(final Uri uri, final int width, final int height,
                 final IMediaBrowserServiceCallbacks callbacks) {
+            if (uri == null) {
+                throw new IllegalStateException("loadThumbnail sent null list for uri " + uri);
+            }
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    Bitmap bitmap = onGetThumbnail(uri, width, height);
-                    try {
-                        callbacks.onLoadThumbnail(uri, width, height, bitmap);
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "RemoteException in calling onLoadThumbnail", e);
+                    // In theory we could return a result to a new connection, but in practice
+                    // the other side in MediaBrowser uses a new IMediaBrowserServiceCallbacks
+                    // object every time it calls connect(), so as long as it does that we won't
+                    // see results sent for the wrong connection.
+                    final ConnectionRecord connection = mConnections.get(callbacks.asBinder());
+                    if (connection == null) {
+                        if (DBG) {
+                            Log.d(TAG, "Not loading bitmap for invalid connection. uri=" + uri);
+                        }
+                        return;
+                    }
+
+                    final Result<Bitmap> result = new Result<Bitmap>(uri) {
+                        @Override
+                        void onResultSent(Bitmap bitmap) {
+                            if (mConnections.get(connection.callbacks.asBinder()) != connection) {
+                                if (DBG) {
+                                    Log.d(TAG, "Not sending onLoadThumbnail result for connection"
+                                            + " that has been disconnected. pkg=" + connection.pkg
+                                            + " uri=" + uri);
+                                }
+                                return;
+                            }
+
+                            try {
+                                callbacks.onLoadThumbnail(uri, width, height, bitmap);
+                            } catch (RemoteException e) {
+                                // The other side is in the process of crashing.
+                                Log.w(TAG, "RemoteException in calling onLoadThumbnail", e);
+                            }
+                        }
+                    };
+
+                    onLoadThumbnail(uri, width, height, result);
+
+                    if (!result.isDone()) {
+                        throw new IllegalStateException("onLoadThumbnail must call detach() or"
+                                + " sendResult() before returning for package=" + connection.pkg
+                                + " uri=" + uri);
                     }
                 }
             });
@@ -261,15 +360,28 @@ public abstract class MediaBrowserService extends Service {
 
     /**
      * Called to get information about the children of a media item.
+     * <p>
+     * Implementations must call result.{@link Result#sendResult result.sendResult} with the list
+     * of children. If loading the children will be an expensive operation that should be performed
+     * on another thread, result.{@link Result#detach result.detach} may be called before returning
+     * from this function, and then {@link Result#sendResult result.sendResult} called when
+     * the loading is complete.
      *
      * @param parentUri The uri of the parent media item whose
      * children are to be queried.
      * @return The list of children, or null if the uri is invalid.
      */
-    public abstract @Nullable List<MediaBrowserItem> onLoadChildren(@NonNull Uri parentUri);
+    protected abstract void onLoadChildren(@NonNull Uri parentUri,
+            @NonNull Result<List<MediaBrowserItem>> result);
 
     /**
      * Called to get the thumbnail of a particular media item.
+     * <p>
+     * Implementations must call result.{@link Result#sendResult result.sendResult} with the bitmap.
+     * If loading the bitmap will be an expensive operation that should be performed
+     * on another thread, result.{@link Result#detach result.detach} may be called before returning
+     * from this function, and then {@link Result#sendResult result.sendResult} called when
+     * the loading is complete.
      *
      * @param uri The uri of the media item.
      * @param width The requested width of the icon in dp.
@@ -278,7 +390,8 @@ public abstract class MediaBrowserService extends Service {
      * @return The file descriptor of the thumbnail, which may then be loaded
      *          using a bitmap factory, or null if the item does not have a thumbnail.
      */
-    public abstract @Nullable Bitmap onGetThumbnail(@NonNull Uri uri, int width, int height);
+    protected abstract void onLoadThumbnail(@NonNull Uri uri, int width, int height,
+            @NonNull Result<Bitmap> result);
 
     /**
      * Call to set the media session.
@@ -363,21 +476,38 @@ public abstract class MediaBrowserService extends Service {
      * Call onLoadChildren and then send the results back to the connection.
      * <p>
      * Callers must make sure that this connection is still connected.
-     * <p>
-     * TODO: Think about caching and combining these calls.
      */
-    private void performLoadChildren(Uri uri, ConnectionRecord connection) {
-        final List<MediaBrowserItem> list = onLoadChildren(uri);
-        if (list == null) {
-            throw new IllegalStateException("onLoadChildren returned null for uri " + uri);
-        }
-        final ParceledListSlice<MediaBrowserItem> pls = new ParceledListSlice(list);
-        try {
-            connection.callbacks.onLoadChildren(uri, pls);
-        } catch (RemoteException ex) {
-            // The other side is in the process of crashing.
-            Log.w(TAG, "Calling onLoadChildren() failed for uri=" + uri
-                    + " package=" + connection.pkg);
+    private void performLoadChildren(final Uri uri, final ConnectionRecord connection) {
+        final Result<List<MediaBrowserItem>> result = new Result<List<MediaBrowserItem>>(uri) {
+            @Override
+            void onResultSent(List<MediaBrowserItem> list) {
+                if (list == null) {
+                    throw new IllegalStateException("onLoadChildren sent null list for uri " + uri);
+                }
+                if (mConnections.get(connection.callbacks.asBinder()) != connection) {
+                    if (DBG) {
+                        Log.d(TAG, "Not sending onLoadChildren result for connection that has"
+                                + " been disconnected. pkg=" + connection.pkg + " uri=" + uri);
+                    }
+                    return;
+                }
+
+                final ParceledListSlice<MediaBrowserItem> pls = new ParceledListSlice(list);
+                try {
+                    connection.callbacks.onLoadChildren(uri, pls);
+                } catch (RemoteException ex) {
+                    // The other side is in the process of crashing.
+                    Log.w(TAG, "Calling onLoadChildren() failed for uri=" + uri
+                            + " package=" + connection.pkg);
+                }
+            }
+        };
+
+        onLoadChildren(uri, result);
+
+        if (!result.isDone()) {
+            throw new IllegalStateException("onLoadChildren must call detach() or sendResult()"
+                    + " before returning for package=" + connection.pkg + " uri=" + uri);
         }
     }
 
