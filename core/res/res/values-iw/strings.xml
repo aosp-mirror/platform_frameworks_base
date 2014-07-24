@@ -298,6 +298,10 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"‏הרשאה זו מאפשרת לאפליקציה לקבל ולעבד הודעות MAP של Bluetooth. משמעות הדבר היא שהאפליקציה יכולה לעקוב אחר הודעות הנשלחות למכשיר שלך או למחוק אותן מבלי להראות לך אותן."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"אחזור אפליקציות פעילות"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"מאפשר לאפליקציה לאחזר מידע לגבי משימות הפועלות כרגע ושפעלו לאחרונה. ייתכן שהדבר יתיר לאפליקציה לגלות מידע לגבי האפליקציות שבהן נעשה שימוש במכשיר."</string>
+    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
+    <skip />
+    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
+    <skip />
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"אינטראקציה בין משתמשים"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"מאפשר לאפליקציה לבצע פעולות בין משתמשים שונים במכשיר. אפליקציות זדוניות עשויות להשתמש ביכולת זו כדי לפרוץ את ההגנה בין משתמשים."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"רישיון מלא לבצע אינטראקציה בין משתמשים"</string>
@@ -1006,16 +1010,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"‏מאפשר לאפליקציה לשנות את ההיסטוריה או ה-Bookmarks של הדפדפן המאוחסנים בטלפון. הדבר עשוי לאפשר לאפליקציה למחוק או לשנות נתוני דפדפן. שים לב: אישור זה אינו ניתן לאכיפה על ידי דפדפני צד שלישי או אפליקציות אחרות בעלות יכולות גלישה באינטרנט."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"הגדרת התראה"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"מאפשר לאפליקציה להגדיר התראה באפליקציה מותקנת של שעון מעורר. אפליקציות מסוימות של שעון מעורר אינן מיישמות תכונה זו."</string>
-    <!-- no translation found for permlab_writeVoicemail (7309899891683938100) -->
-    <skip />
-    <!-- no translation found for permdesc_writeVoicemail (6592572839715924830) -->
-    <skip />
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"כתיבת הודעות דואר קולי"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"מאפשרת לאפליקציה לשנות ולהסיר הודעות מתיבת הדואר הנכנס של דואר קולי."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"הוסף דואר קולי"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"מאפשר לאפליקציה להוסיף הודעות לתיבת הדואר הקולי."</string>
-    <!-- no translation found for permlab_readVoicemail (8415201752589140137) -->
-    <skip />
-    <!-- no translation found for permdesc_readVoicemail (8926534735321616550) -->
-    <skip />
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"קריאת דואר קולי"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"מאפשרת לאפליקציה לקרוא את הודעות הדואר הקולי שלך."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"שינוי הרשאות המיקום הגיאוגרפי של הדפדפן"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"מאפשר לאפליקציה לשנות את הרשאות המיקום הגיאוגרפי של הדפדפן. אפליקציות זדוניות עלולות להשתמש בכך כדי לאפשר משלוח של פרטי מיקום לאתרים זדוניים אחרים."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"אימות חבילות"</string>
@@ -1559,7 +1559,8 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"מערכת"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"‏אודיו Bluetooth"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"צג אלחוטי"</string>
-    <string name="media_route_button_content_description" msgid="5758553567065145276">"פלט מדיה"</string>
+    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
+    <skip />
     <string name="media_route_chooser_title" msgid="1751618554539087622">"התחברות למכשיר"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"העברת מסך אל מכשיר"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"מחפש מכשירים…"</string>

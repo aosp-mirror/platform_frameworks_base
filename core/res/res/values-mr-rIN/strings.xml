@@ -298,6 +298,10 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Bluetooth नकाशा संदेश प्राप्त करण्यास आणि त्यावर प्रक्रिया करण्यास अॅप ला अनुमती देते. याचा अर्थ अॅप आपल्या डिव्हाइसवर पाठविलेले संदेश आपल्याला न दर्शवता त्यांचे परीक्षण करू किंवा ते हटवू शकतो."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"चालणारे अॅप्स पुनर्प्राप्त करा"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"सध्या आणि अलीकडे चालणार्‍या कार्यांविषयी माहिती पुनर्प्राप्त करण्यासाठी अॅप ला अनुमती देते. हे डिव्हाइसवर कोणते अनुप्रयोग वापरले जात आहेत त्याविषयी माहिती शोधण्यासाठी अॅप ला अनुमती देऊ शकतात."</string>
+    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
+    <skip />
+    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
+    <skip />
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"वापरकर्त्यांशी परस्परसंवाद साधा"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"डिव्हाइसवरील भिन्न वापरकर्त्यांवर कारवाई करण्यासाठी अॅप ला अनुमती देते. दुर्भावनापूर्ण अॅप्स वापरकर्त्यांमधील संरक्षणाचे उल्लंघन करण्यासाठी हे वापरू शकतात."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"वापरकर्त्यांशी परस्परसंवाद साधण्यासाठी पूर्ण परवाना"</string>
@@ -1555,7 +1559,8 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"सिस्टम"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth ऑडिओ"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"वायरलेस प्रदर्शन"</string>
-    <string name="media_route_button_content_description" msgid="5758553567065145276">"माध्यम आउटपुट"</string>
+    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
+    <skip />
     <string name="media_route_chooser_title" msgid="1751618554539087622">"डिव्हाइसला कनेक्ट करा"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"डिव्‍हाइसवर स्क्रीन कास्‍ट करा"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"डिव्‍हाइसेस शोधत आहे…"</string>

@@ -298,6 +298,10 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Bluetooth MAP സന്ദേശങ്ങൾ സ്വീകരിക്കുന്നതിനും പ്രോസസ്സുചെയ്യുന്നതിനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഉപകരണത്തിലേക്ക് അയച്ച സന്ദേശങ്ങൾ നിങ്ങളെ കാണിക്കാതെ തന്നെ നിരീക്ഷിക്കാനോ ഇല്ലാതാക്കാനോ അപ്ലിക്കേഷനാവും."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"പ്രവർത്തിക്കുന്ന അപ്ലിക്കേഷനുകൾ വീണ്ടെടുക്കുക"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"നിലവിലും സമീപകാലത്തും പ്രവർത്തിക്കുന്ന ടാസ്‌ക്കുകളെക്കുറിച്ചുള്ള വവിവരങ്ങൾ വീണ്ടെടുക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഇത് ഉപകരണത്തിൽ ഉപയോഗിച്ച അപ്ലിക്കേഷനുകളെക്കുറിച്ചുള്ള വിവരം കണ്ടെത്താൻ അപ്ലിക്കേഷനെ അനുവദിക്കാനിടയുണ്ട്."</string>
+    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
+    <skip />
+    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
+    <skip />
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"എല്ലാ ഉപയോക്താക്കളുമായും സംവദിക്കുക"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"ഉപകരണത്തിലെ വ്യത്യസ്‌ത ഉപയോക്താക്കളിലുടനീളം പ്രവർത്തനങ്ങൾ നടത്താൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ക്ഷുദ്രകരമായ അപ്ലിക്കേഷനുകൾ ഉപയോക്താക്കൾക്കിടയിലുള്ള പരിരക്ഷ ലംഘിക്കാൻ ഇത് ഉപയോഗിക്കാനിടയുണ്ട്."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"എല്ലാ ഉപയോക്താക്കളുമായും സംവദിക്കാനുള്ള പൂർണ്ണ ലൈസൻസ്"</string>
@@ -1555,7 +1559,8 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"സിസ്റ്റം"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth ഓഡിയോ"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"വയർലെസ് ഡിസ്‌പ്ലേ"</string>
-    <string name="media_route_button_content_description" msgid="5758553567065145276">"മീഡിയ ഔട്ട്പുട്ട്"</string>
+    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
+    <skip />
     <string name="media_route_chooser_title" msgid="1751618554539087622">"ഉപകരണത്തിലേക്ക് കണക്റ്റുചെയ്യുക"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"സ്‌ക്രീൻ ഉപകരണത്തിലേക്ക് കാസ്റ്റുചെയ്യുക"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"ഉപകരണങ്ങൾക്കായി തിരയുന്നു…"</string>

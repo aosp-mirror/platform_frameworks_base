@@ -298,6 +298,10 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບຯ​ສາ​ມາດ​ຮັບ​ແລະ​ສົ່ງ​ຂໍ້​ຄວາມ Bluetooth MAP ໄດ້. ນີ້​ໝາຍ​ຄວາມ​ວ່າ​ແອັບຯ​ຈະ​ສາ​ມາດ​ກວດ​ເບິ່ງ ຫຼື​ລຶບ​ຂໍ້​ຄວາມ​ທີ່​ສົ່ງ​ຫາ​ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ​ໄດ້​ໂດຍ​ບໍ່​ສະ​ແດງ​ຂໍ້​ຄວາມ​ເຫຼົ່າ​ນັ້ນໃຫ້​ທ່ານ​ເຫັນ."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"ດຶງແອັບຯທີ່ເຮັດວຽກຢູ່ມາ"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"ອະນຸຍາດໃຫ້ແອັບຯດຶງຂໍ້ມູນກ່ຽວກັບການເຮັດວຽກໃນປັດຈຸບັນ ແລະຫາກໍຜ່ານມາ. ແອັບຯທີ່ເປັນອັນຕະລາຍອາດຄົ້ນພົບຂໍ້ມູນ ກ່ຽວກັບແອັບພລິເຄຊັນທີ່ໃຊ້ຢູ່ໃນອຸປະກອນໄດ້."</string>
+    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
+    <skip />
+    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
+    <skip />
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"ການຕອບໂຕ້ລະຫວ່າງຜູ່ໃຊ້"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"ອະນຸຍາດໃຫ້ແອັບຯດຳເນີນການ ສັ່ງງານຜ່ານຜູ່ໃຊ້ອື່ນໆໃນອຸປະກອນ. ແອັບຯທີ່ເປັນອັນຕະລາຍອາດໃຊ້ຄວາມສາມາດນີ້ ເພື່ອລະເມີດການປ້ອງກັນລະຫວ່າງຜູ່ໃຊ້."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"ໃບອະນຸຍາດສະບັບເຕັມໃນການໂຕ້ຕອບລະຫວ່າງຜູ່ໃຊ້"</string>
@@ -1555,7 +1559,8 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"ລະບົບ"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"ສຽງ Bluetooth"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"ການສະແດງຜົນໄຮ້ສາຍ"</string>
-    <string name="media_route_button_content_description" msgid="5758553567065145276">"ມີເດຍເອົ້າພຸດ"</string>
+    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
+    <skip />
     <string name="media_route_chooser_title" msgid="1751618554539087622">"ເຊື່ອມຕໍ່ຫາອຸປະກອນ"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"ສົ່ງພາບໜ້າຈໍໄປຫາອຸປະກອນ"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"ກຳລັງຊອກຫາອຸປະກອນ..."</string>

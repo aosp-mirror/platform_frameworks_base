@@ -298,6 +298,10 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Cho phép ứng dụng nhận và xử lý tin nhắn MAP qua Bluetooth. Điều này có nghĩa là ứng dụng có thể giám sát hoặc xóa tin nhắn được gửi đến thiết bị của bạn mà không hiển thị chúng cho bạn."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"truy xuất các ứng dụng đang chạy"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Cho phép ứng dụng truy xuất thông tin về các công việc đã và đang chạy gần đây. Việc này có thể cho phép ứng dụng phát hiện thông tin về những ứng dụng nào đã được sử dụng trên thiết bị."</string>
+    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
+    <skip />
+    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
+    <skip />
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"tương tác giữa người dùng"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Cho phép ứng dụng thực hiện hành động giữa những người dùng khác trên thiết bị. Ứng dụng độc hại có thể sử dụng quyền này để vi phạm khả năng bảo vệ giữa người dùng."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"cấp phép đầy đủ để tương tác giữa người dùng"</string>
@@ -1555,7 +1559,8 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Hệ thống"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Âm thanh Bluetooth"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Hiển thị không dây"</string>
-    <string name="media_route_button_content_description" msgid="5758553567065145276">"Đầu ra phương tiện"</string>
+    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
+    <skip />
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Kết nối với thiết bị"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Truyền màn hình tới thiết bị"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Đang tìm kiếm thiết bị…"</string>

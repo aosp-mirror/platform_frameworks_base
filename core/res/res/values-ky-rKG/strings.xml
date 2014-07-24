@@ -430,6 +430,10 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Колдонмого Bluetooth MAP билдирүүлөрүн алуу жана иштеп чыгуу мүмкүнчүлүгүн берет. Демек, колдонмо түзмөгүңүздөгү билдирүүлөрдү сизге көрсөтпөстөн тескеп же жок кыла алат."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"иштеп жаткан колдонмолорду түшүрүп алуу"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Колдонмого учурдагы жана акыркы убакытта пайдаланылган колдонмолор тууралуу  маалымат алууга уруксат берет. Бул колдонмого түзмөктө кандай колдонмолор колдонулаарын билип алууга жол бериши мүмкүн."</string>
+    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
+    <skip />
+    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
+    <skip />
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"колдонуучулар менен иштешүү"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Колдонмого түзмөктөгү ар кандай колдонуучулардын атынан кыймыл-аракеттерди жүргүзүү уруксатын берет. Зыяндуу колдонмолор, муну менен колдонуучулар аарсындагы коргонду бузуп салышы мүмкүн."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"колдонуучулар менен иштешүү үчүн толук лицензия"</string>
@@ -1340,16 +1344,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Колдонмого телефонуңузда сакталган Серепчинин тарыхын жана Серепчинин бүктөмөлөрүн өзгөртүү уруксатын берет. Бул колдонмого Серепчинин берилиштерин өчүрүү же өзгөртүү уруксатын берет. Эскертүү: бул уруксат үчүнчү тараптык интернет-серепчилерге, же интернетке кирүү мүмкүнчүлүгү бар колдонмолорго таасир этпеши мүмкүн."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"ойготкуч коюу"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Колдонмого ойготкуч саат колдонмосуна үн ишаратын коюу мүмкүнчүлүгүн берет. Айрым ойготкуч саат колдонмолорунда бул мүмкүнчүлүк иштебеши мүмкүн."</string>
-    <!-- no translation found for permlab_writeVoicemail (7309899891683938100) -->
-    <skip />
-    <!-- no translation found for permdesc_writeVoicemail (6592572839715924830) -->
-    <skip />
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"үн почталарын жазуу"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"Колдонмонун үн почтаңыздын кирүү кутусунан билдирүүлөрдү өзгөртүп жана алып салуусуна жол ачат."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"үнкат кошуу"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Колдонмого үн почтаңыздын кирүү кутусуна билдирүүлөрдү кошуу мүмкүнчүлүгүн берет."</string>
-    <!-- no translation found for permlab_readVoicemail (8415201752589140137) -->
-    <skip />
-    <!-- no translation found for permdesc_readVoicemail (8926534735321616550) -->
-    <skip />
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"үн почтасын окуу"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"Колдонмонун үн почталарыңызды окуусуна жол ачат."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"Серепчинин гео-жайгашуу уруксаттарын өзгөртүү"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Колдонмого Серепчинин гео-жайгашуу уруксаттарын өзгөртүү мүмкүнчүлүгүн берет. Кесепеттүү колдонмолор ушундай мүмкүнчүлүктөн пайдаланып ар кайсы вебсайтка жайгашкан жер жөнүндө маалыматтын жөнөтүлүшүнө уруксат берип салышы мүмкүн."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"таңгактарды текшерүү"</string>
@@ -1809,10 +1809,8 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Колдонмого ишенимдүү агент кызматына жалгашууга мүмкүнчүлүк берет."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Калыбына келтирүү системасы жана жаңыртуулар менен иштөө"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Колдонмого калыбына келтирүү системасы жана система жаңыртуулары менен карым-катнашуу мүмкүнчүлүгүн берет."</string>
-    <!-- no translation found for permlab_createMediaProjection (4941338725487978112) -->
-    <skip />
-    <!-- no translation found for permdesc_createMediaProjection (1284530992706219702) -->
-    <skip />
+    <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Медиа чагылдыруу сеанстарын түзүү"</string>
+    <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"Колдонмого медиа чагылдыруу сеанстарын түзүү мүмкүнчүлүгүн берет. Мындай сеанстардын жардамы менен, колдонмолор дисплей жана видео мазмунду сүрөткө тартып турушат. Кадимки колдонмолор үчүн талап кылынбайт."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Чен өлчөмүн көзөмөлдөө үчүн эки жолу тийип коюңуз"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Виджетти кошуу мүмкүн болбоду."</string>
     <!-- no translation found for ime_action_go (8320845651737369027) -->
@@ -1986,20 +1984,14 @@
     <!-- no translation found for data_usage_warning_title (1955638862122232342) -->
     <skip />
     <string name="data_usage_warning_body" msgid="2814673551471969954">"Колдонууну көрүш үчүн басыңыз."</string>
-    <!-- no translation found for data_usage_3g_limit_title (4462365924791862301) -->
-    <skip />
-    <!-- no translation found for data_usage_4g_limit_title (7476424187522765328) -->
-    <skip />
-    <!-- no translation found for data_usage_mobile_limit_title (3393439305227911006) -->
-    <skip />
-    <!-- no translation found for data_usage_wifi_limit_title (3461968509557554571) -->
-    <skip />
-    <!-- no translation found for data_usage_limit_body (6131350187562939365) -->
-    <skip />
+    <string name="data_usage_3g_limit_title" msgid="4462365924791862301">"2Гб-3Гб көлмдөгү дайындр өчүрлдү."</string>
+    <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"4Гб көлөмдөгү дайындар өчүрүлдү"</string>
+    <string name="data_usage_mobile_limit_title" msgid="3393439305227911006">"Уюктук дайындар тармагы өчүк"</string>
+    <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"Wi-Fi дайындар тармагы өчүк"</string>
+    <string name="data_usage_limit_body" msgid="6131350187562939365">"Белгиленген чекке жеттиңиз"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G трафик чектен ашты"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G трафик чектен ашты"</string>
-    <!-- no translation found for data_usage_mobile_limit_snoozed_title (4941346653729943789) -->
-    <skip />
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Уюкт дайндр белглнгн чегнн аштңз"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Wi-Fi трафик чегинен ашты"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"Орнотулган чектөөдөн <xliff:g id="SIZE">%s</xliff:g> ашты."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Фондук трафик чектелген"</string>
@@ -2049,7 +2041,8 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Систем"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth аудио"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Зымсыз дисплей"</string>
-    <string name="media_route_button_content_description" msgid="5758553567065145276">"Медиа чыгаруу"</string>
+    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
+    <skip />
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Түзмөккө туташуу"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Сырткы экранга чыгаруу"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Түзмөктөр изделүүдө..."</string>

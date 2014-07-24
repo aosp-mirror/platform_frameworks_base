@@ -298,6 +298,10 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"புளூடூத் MAP செய்திகளைப் பெற மற்றும் செயல்படுத்த பயன்பாட்டை அனுமதிக்கிறது. அதாவது பயன்பாட்டால் சாதனத்திற்கு அனுப்பப்பட்ட செய்திகளை, உங்களிடம் காட்டாமலே கண்காணிக்கவோ, நீக்கவோ முடியும்."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"இயங்கும் பயன்பாடுகளை மீட்டெடுத்தல்"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"நடப்பில் மற்றும் சமீபத்தில் இயங்கும் காரியங்களின் தகவலைப் பெற பயன்பாட்டை அனுமதிக்கிறது. சாதனத்தில் எந்தப் பயன்பாடுகள் பயன்படுத்தப்படுகின்றன என்பது குறித்த தகவலைக் கண்டறிய பயன்பாட்டை இது அனுமதிக்கலாம்."</string>
+    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
+    <skip />
+    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
+    <skip />
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"பிற பயனர்களுடன் தொடர்புகொள்ளுதல்"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"சாதனத்தில் உள்ள பல்வேறு பயனர்கள் அனைவரிலும் செயல்களைச் செய்ய பயன்பாட்டை அனுமதிக்கிறது. பயனர்கள் இடையேயான பாதுகாப்பை மீற தீங்கிழைக்கும் பயன்பாடுகள் இதைப் பயன்படுத்தலாம்."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"பிற பயனர்களுடன் தொடர்புகொள்வதற்கான முழு உரிமம்"</string>
@@ -1555,7 +1559,8 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"அமைப்பு"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"புளூடூத் ஆடியோ"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"வயர்லெஸ் காட்சி"</string>
-    <string name="media_route_button_content_description" msgid="5758553567065145276">"மீடியா வெளியீடு"</string>
+    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
+    <skip />
     <string name="media_route_chooser_title" msgid="1751618554539087622">"சாதனத்துடன் இணைக்கவும்"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"திரையிலிருந்து சாதனத்திற்கு அனுப்புக"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"சாதனங்களைத் தேடுகிறது..."</string>

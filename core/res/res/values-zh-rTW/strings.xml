@@ -298,6 +298,10 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"允許應用程式接收及處理藍牙 MAP 訊息。這項設定可讓應用程式監控傳送至您裝置的訊息，或在您閱讀訊息前主動刪除訊息。"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"擷取執行中的應用程式"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"允許應用程式擷取最近執行工作的資訊。這項設定可讓應用程式找出裝置所用程式的相關資訊。"</string>
+    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
+    <skip />
+    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
+    <skip />
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"對所有使用者執行各種動作"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"允許應用程式對裝置上的所有使用者執行各種動作。請注意，惡意應用程式可能利用此功能侵害使用者之間的保護機制。"</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"完整授權對所有使用者執行各種動作"</string>
@@ -1181,11 +1185,11 @@
     <string name="whichApplication" msgid="4533185947064773386">"選擇要使用的應用程式"</string>
     <string name="whichApplicationNamed" msgid="8260158865936942783">"完成操作需使用 %1$s"</string>
     <string name="whichViewApplication" msgid="3272778576700572102">"選擇開啟工具"</string>
-    <string name="whichViewApplicationNamed" msgid="2286418824011249620">"使用 %1$s 開啟"</string>
+    <string name="whichViewApplicationNamed" msgid="2286418824011249620">"透過 %1$s 開啟"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"選擇編輯工具"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"使用 %1$s 編輯"</string>
-    <string name="whichSendApplication" msgid="6902512414057341668">"選擇分享對象"</string>
-    <string name="whichSendApplicationNamed" msgid="2799370240005424391">"與 %1$s 共用"</string>
+    <string name="whichSendApplication" msgid="6902512414057341668">"選擇分享工具"</string>
+    <string name="whichSendApplicationNamed" msgid="2799370240005424391">"透過 %1$s 分享"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"選取主螢幕應用程式"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"設為預設應用程式。"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"前往 [系統設定] &gt; [應用程式] &gt; [下載] 清除預設值。"</string>
@@ -1555,7 +1559,8 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"系統"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"藍牙音訊"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"無線螢幕分享"</string>
-    <string name="media_route_button_content_description" msgid="5758553567065145276">"媒體輸出"</string>
+    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
+    <skip />
     <string name="media_route_chooser_title" msgid="1751618554539087622">"連線至裝置"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"將螢幕投放到裝置上"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"正在搜尋裝置..."</string>

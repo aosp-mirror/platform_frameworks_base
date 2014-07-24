@@ -298,6 +298,10 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Дозвољава апликацији да прима и обрађује Bluetooth MAP поруке. То значи да апликација може да надгледа или брише поруке које се шаљу на уређај, а да вам их не прикаже."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"преузимање покренутих апликација"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Дозвољава апликацији да преузима информације о актуелним и недавно покренутим задацима. Ово може да омогући апликацији да открије информације о томе које се апликације користе на уређају."</string>
+    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
+    <skip />
+    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
+    <skip />
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"интеракција између корисника"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Дозвољава апликацији да обавља радње између различитих корисника на уређају. Злонамерне апликације могу да користе ово да би угрозиле заштиту између корисника."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"пуна лиценца за интеракцију између корисника"</string>
@@ -1555,7 +1559,8 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Систем"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth аудио"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Бежични екран"</string>
-    <string name="media_route_button_content_description" msgid="5758553567065145276">"Излаз медија"</string>
+    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
+    <skip />
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Повежите са уређајем"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Пребаците екран на уређај"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Тражење уређаја…"</string>

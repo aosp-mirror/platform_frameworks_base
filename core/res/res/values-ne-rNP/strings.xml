@@ -298,6 +298,10 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"अनुप्रयोगलाई ब्लुटुथ MAP सन्देशहरू प्राप्त गर्न र प्रक्रिया गर्न अनुमति दिन्छ। यो अनुप्रयोगले तपाईँलाई नदेखाई आफ्नो उपकरणमा पठाइएको सन्देशहरू अनुगमन वा मेटाउन सक्दछ।"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"चलिरहेका अनुप्रयोगहरू पुनःबहाली गर्नुहोस्"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"वर्तमानमा र भरखरै चलिरहेका कार्यहरू बारेको सूचना पुनःबहाली गर्न अनुप्रयोगलाई अनुमित दिन्छ। यसले उपकरणमा प्रयोग भएका अनुप्रयोगहरूको बारेमा सूचना पत्ता लगाउन अनुप्रयोगलाई अनुमति दिन सक्छ।"</string>
+    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
+    <skip />
+    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
+    <skip />
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"प्रयोगकर्ताहरू तर्फ अन्तर्क्रिया गर्नुहोस्"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"अनुप्रयोगलाई उपकरणमा विभिन्न प्रयोगकर्ताहरू मार्फत कार्यहरू गर्न अनुमति दिन्छ। खराब अनुप्रयोगहरूले यो प्रयोगकर्ताहरू बिच सुरक्षा बिथोल्न प्रयोग गर्न सक्ने छन्।"</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"कुराकानी प्रयोगकर्ताहरू बिच अन्तर्क्रिया गर्न पूर्ण अनुमति"</string>
@@ -1006,16 +1010,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"तपाईँको फोनमा भण्डारण भएको ब्राउजरको इतिहास वा बुकमार्कहरू परिवर्तन गर्नको लागि अनुप्रयोगलाई अनुमति दिन्छ। यसले सायद ब्राउजर डेटालाई मेट्न वा परिवर्तन गर्नको लागि अनुप्रयोगलाई अनुमति दिन्छ। नोट: वेब ब्राउज गर्ने क्षमतासहितका अन्य अनुप्रयोगहरू वा तेस्रो- पक्ष ब्राउजरद्वारा सायद यस अनुमतिलाई लागु गर्न सकिंदैन।"</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"एउटा आलर्म सेट गर्नुहोस्"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"स्थापना गरिएको सङ्केत घडी अनुप्रयोगमा सङ्केत समय मिलाउन अनुप्रयोगलाई अनुमति दिन्छ। केही सङ्केत घडी अनुप्रयोगहरूले यो सुविधा कार्यान्वयन नगर्न सक्छन्।"</string>
-    <!-- no translation found for permlab_writeVoicemail (7309899891683938100) -->
-    <skip />
-    <!-- no translation found for permdesc_writeVoicemail (6592572839715924830) -->
-    <skip />
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"भ्वाइसमेलहरू लेख्नुहोस्"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"तपाईँको भ्वाइसमेल इनबक्समा सन्देश परिमार्जन गर्न र हटाउन अनुप्रयोगलाई अनुमति दिनुहोस्।"</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"भ्वाइसमेल थप गर्नुहोस्"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"तपाईँको भ्वाइसमेल इनबक्समा सन्देश थप्नको लागि अनुप्रयोगलाई अनुमति दिन्छ।"</string>
-    <!-- no translation found for permlab_readVoicemail (8415201752589140137) -->
-    <skip />
-    <!-- no translation found for permdesc_readVoicemail (8926534735321616550) -->
-    <skip />
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"भ्वाइसमेल पढ्नुहोस्"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"तपाईँको भ्वाइसमेलहरु पढ्न अनुमति दिन्छ।"</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"भूस्थान अनुमतिहरू ब्राउजर परिवर्तन गर्नुहोस्"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"ब्राउजरको भू-स्थान अनुमतिहरू परिमार्जन गर्न अनुप्रयोगलाई अनुमति दिन्छ। खराब अनुप्रयोगहरूले  स्थान सूचना मनपरी वेब साइटहरूमा पठाउने अनुमतिको लागि यसलाई प्रयोग गर्न सक्छन्।"</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"प्यकेजहरूको निरीक्षण गर्नुहोस्"</string>
@@ -1399,7 +1399,7 @@
     <string name="permlab_recovery" msgid="3157024487744125846">"अद्यावधिक र रिकभरी प्रणालीको साथ अन्तर्क्रिया"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"अनुप्रयोगलाई रिकभरी प्रणाली र प्रणाली अद्यावधिकहरूको साथ अन्तर्क्रिया गर्न अनुमति दिन्छ।"</string>
     <string name="permlab_createMediaProjection" msgid="4941338725487978112">"मिडिया प्रक्षेपण सत्रहरू सिर्जना गर्नुहोस्"</string>
-    <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"मिडिया प्रक्षेपण सत्र सिर्जना गर्न अनुप्रयोग लाई अनुमति दिन्छ। यी सत्रले प्रदर्शन र अडियो सामग्री खिच्ने क्षमताका अनुप्रयोगहरू प्रदान गर्न सक्छन्। सामान्य अनुप्रयोगहरूको कहिल्यै पनि आवश्यक पर्दैन।"</string>
+    <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"मिडिया प्रक्षेपण सत्र सिर्जना गर्न अनुप्रयोगलाई अनुमति दिन्छ। यी सत्रले प्रदर्शन र अडियो सामग्री खिच्ने क्षमताका अनुप्रयोगहरू प्रदान गर्न सक्छन्। सामान्य अनुप्रयोगहरूको कहिल्यै पनि आवश्यक पर्दैन।"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"जुम नियन्त्रणको लागि दुई चोटि टच गर्नुहोस्"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"विजेट थप गर्न सकिँदैन।"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"जानुहोस्"</string>
@@ -1528,7 +1528,7 @@
     <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"4G डेटा बन्द छ"</string>
     <string name="data_usage_mobile_limit_title" msgid="3393439305227911006">"सेलुलर डेटा बन्द छ"</string>
     <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"वाइफाइ डेटा बन्द छ"</string>
-    <string name="data_usage_limit_body" msgid="6131350187562939365">"सिमा पुग्यो"</string>
+    <string name="data_usage_limit_body" msgid="6131350187562939365">"सीमा पुग्यो"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G डेटा सीमा भन्दा पार भएको छ"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G डेटा SIMा नाघ्यो"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"सेलुलर डेटा सीमा नाघ्यो"</string>
@@ -1567,7 +1567,8 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"प्रणाली"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"ब्लुटुथ अडियो"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"ताररहित प्रदर्शन"</string>
-    <string name="media_route_button_content_description" msgid="5758553567065145276">"मिडियाको उत्पादन"</string>
+    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
+    <skip />
     <string name="media_route_chooser_title" msgid="1751618554539087622">"उपकरणमा जडान गर्नुहोस्"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"उपकरणलाई स्क्रिनमा कास्ट गर्नुहोस्"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"उपकरणको खोजी गरिँदै..."</string>

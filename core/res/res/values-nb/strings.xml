@@ -298,6 +298,10 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Appen gis tillatelse til å motta og behandle Bluetooth MAP-meldinger. Dette betyr at appen kan overvåke eller slette meldinger som er sendt til enheten din, uten at du får se dem."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"hente apper som kjører"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Lar appen hente informasjon om oppgaver som kjører og som nylig har kjørt. Dette kan tillate appen å oppdage informasjon om hvilke apper som brukes på enheten."</string>
+    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
+    <skip />
+    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
+    <skip />
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"samhandling på tvers av brukere"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Tillater at appen utfører handlinger på tvers av ulike brukere på enheten. Skadelige apper kan utnytte dette til å bryte beskyttelsen mellom brukere."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"full lisens til å samhandle på tvers av brukere"</string>
@@ -1555,7 +1559,8 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"System"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth-lyd"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Trådløs skjerm"</string>
-    <string name="media_route_button_content_description" msgid="5758553567065145276">"Medieutgang"</string>
+    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
+    <skip />
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Koble til enheten"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Cast skjermen til enheten"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Søker etter enheter …"</string>

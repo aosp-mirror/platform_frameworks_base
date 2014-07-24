@@ -298,6 +298,10 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Tillåter att appen tar emot och hanterar Bluetooth MAP-meddelanden. Detta innebär att appen kan övervaka eller ta bort meddelanden som skickats till enheten utan att visa dem för dig."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"hämta appar som körs"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Tillåter att appen hämtar information om nyligen körda och pågående aktiviteter. Detta kan innebära att appen tillåts ta reda på vilka appar som används på enheten."</string>
+    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
+    <skip />
+    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
+    <skip />
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"interagera mellan användare"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Tillåter att appen utför åtgärder mellan användare på enheten. Skadliga appar kan använda detta som ett sätt att kringgå skyddet mellan användare."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"fullständig behörighet att interagera mellan användare"</string>
@@ -1555,7 +1559,8 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"System"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth-ljud"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Trådlös skärm"</string>
-    <string name="media_route_button_content_description" msgid="5758553567065145276">"Medieuppspelning"</string>
+    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
+    <skip />
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Anslut till enhet"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Överför skärmen till enheten"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Söker efter enheter ..."</string>

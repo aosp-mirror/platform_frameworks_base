@@ -298,6 +298,10 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Permite que la aplicación reciba y procese mensajes por Bluetooth (MAP), lo que significa que podría utilizar este permiso para controlar o eliminar mensajes enviados al dispositivo sin mostrárselos al usuario."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"recuperar aplicaciones en ejecución"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Permite que aplicación recupere información sobre tareas que se están ejecutando en ese momento o que se han ejecutado recientemente. La aplicación puede utilizar este permiso para descubrir cuáles son las aplicaciones que se utilizan en el dispositivo."</string>
+    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
+    <skip />
+    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
+    <skip />
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"interactuar con los usuarios"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Permite que la aplicación lleve a cabo acciones entre los diferentes usuarios del dispositivo. Las aplicaciones maliciosas pueden utilizar este permiso para infringir la protección entre usuarios."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"licencia completa para interactuar con los usuarios"</string>
@@ -1555,7 +1559,8 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Sistema"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Audio Bluetooth"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Pantalla inalámbrica"</string>
-    <string name="media_route_button_content_description" msgid="5758553567065145276">"Salida multimedia"</string>
+    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
+    <skip />
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Conectar a dispositivo"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Enviar pantalla a dispositivo"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Buscando dispositivos…"</string>

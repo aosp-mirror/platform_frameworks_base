@@ -298,6 +298,10 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Leyfir forritinu að taka á móti og vinna úr Bluetooth MAP-skilaboðum. Þetta þýðir að forritið getur fylgst með eða eytt skilaboðum sem send eru í tækið án þess að sýna þér þau."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"sækja forrit í gangi"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Leyfir forriti að sækja upplýsingar um opin forrit og forrit sem nýlega hafa verið opin. Þetta getur gert forritinu kleift að nálgast upplýsingar um forritin sem notuð eru í tækinu."</string>
+    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
+    <skip />
+    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
+    <skip />
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"samskipti á milli notenda"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Leyfir forriti að framkvæma aðgerðir á milli notenda tækisins. Spilliforrit geta notað þetta til að brjóta á bak aftur vörn á milli notenda."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"fullt leyfi til að eiga í samskiptum notenda á milli"</string>
@@ -1555,7 +1559,8 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Kerfi"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth-hljóð"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Þráðlaus skjábirting"</string>
-    <string name="media_route_button_content_description" msgid="5758553567065145276">"Margmiðlunarúttak"</string>
+    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
+    <skip />
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Tengjast tæki"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Senda skjá út í tæki"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Leitar að tækjum…"</string>

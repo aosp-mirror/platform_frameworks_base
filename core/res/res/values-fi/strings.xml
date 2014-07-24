@@ -298,6 +298,10 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Antaa sovelluksen vastaanottaa ja käsitellä Bluetooth MAP -viestejä. Sovellus voi valvoa ja poistaa laitteeseesi lähetettyjä viestejä näyttämättä niitä sinulle."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"käynnissä olevien sovellusten noutaminen"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Antaa sovelluksen noutaa tietoja käynnissä olevista ja äskettäin suoritetuista tehtävistä. Sovellus voi saada tietoja laitteella käytetyistä sovelluksista."</string>
+    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
+    <skip />
+    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
+    <skip />
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"suorita käyttäjien välisiä toimintoja"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Antaa sovelluksen suorittaa käyttäjien välisiä toimintoja laitteessa. Haitalliset sovellukset voivat vahingoittaa käyttäjien välistä suojausta."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"lupa suorittaa käyttäjien välisiä toimintoja"</string>
@@ -1006,16 +1010,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Antaa sovelluksen muokata selaimen historiaa ja puhelimeen tallennettuja kirjanmerkkejä. Sovellus voi poistaa tai muokata selaimen tietoja. Huomaa: kolmannen osapuolen selaimet tai muut sovellukset, jotka pystyvät selaamaan verkkoa, eivät saa käyttää tätä lupaa."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"aseta herätys"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Antaa sovelluksen asettaa hälytyksen sisäiseen herätyskellosovellukseen. Jotkin herätyskellosovellukset eivät välttämättä käytä tätä ominaisuutta."</string>
-    <!-- no translation found for permlab_writeVoicemail (7309899891683938100) -->
-    <skip />
-    <!-- no translation found for permdesc_writeVoicemail (6592572839715924830) -->
-    <skip />
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"vastaajaviestien kirjoitus"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"Antaa sovelluksen muokata ja poistaa puhelinvastaajaan saapuneita viestejä."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"lisää vastaajaviesti"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Antaa sovelluksen lisätä viestejä saapuneisiin vastaajaviesteihin."</string>
-    <!-- no translation found for permlab_readVoicemail (8415201752589140137) -->
-    <skip />
-    <!-- no translation found for permdesc_readVoicemail (8926534735321616550) -->
-    <skip />
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"vastaajaviestien luku"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"Antaa sovelluksen lukea vastaajaviestisi."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"selaimen maantieteellisen sijainnin lupien muokkaaminen"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Antaa sovelluksen muokata Selaimen maantieteellisen sijainnin lupia. Haitalliset sovellukset voivat sallia tällä sijaintitietojen lähettämisen mielivaltaisiin sivustoihin."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"vahvista paketteja"</string>
@@ -1559,7 +1559,8 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Järjestelmä"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth-ääni"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Langaton näyttö"</string>
-    <string name="media_route_button_content_description" msgid="5758553567065145276">"Median äänentoisto"</string>
+    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
+    <skip />
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Yhdistä laitteeseen"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Lähetä näyttö laitteeseen"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Etsitään laitteita…"</string>

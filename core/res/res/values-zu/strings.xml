@@ -298,6 +298,10 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Ivumela uhlelo lokusebenza ukuthola nokucubungula imilayezo ye-Bluetooth MAP. Lokhu kusho ukuthi uhlelo lokusebenza lingakwazi ukugada noma ukususa imilayezo ethunyelwa kwidivayisi yakho ngaphandle kokukubonisa yona."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"thola izinhlelo zokusebenza ezisebenzayo"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Ivumela uhlelo lokusebenza ukubuyisa ulwazi mayelana nemisebenzi yamanje neyakamuva. Lokhu kungavumela uhlelo lokusebenza ukuthola ulwazi mayelana nokuthi iziphi izinhlelo zokusebenza ezisetshenziswa kudivayisi."</string>
+    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
+    <skip />
+    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
+    <skip />
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"ihlanganyela phakathi kwabasebenzisi"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Ivumela uhlelo lokusebenza ukwenza izenzo kubasebenzisi bonke kudivayisi. Izinhlelo zokusebenza ezingalungile zingasebenzisa lokhu ukwephula ukuvikela phakathi kwabasebenzisi."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"ilayisensi egcwele yokuhlanganyela kubasebenzisi"</string>
@@ -1555,7 +1559,8 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Isistimu"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Umsindo we-Bluetooth"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Ukubonisa okungenazintambo"</string>
-    <string name="media_route_button_content_description" msgid="5758553567065145276">"Okukhiphayo kwemidiya"</string>
+    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
+    <skip />
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Xhuma kudivayisi"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Lingisa isikrini kudivayisi"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Isesha amadivayisi…"</string>
