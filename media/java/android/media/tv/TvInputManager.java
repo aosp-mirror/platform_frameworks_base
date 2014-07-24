@@ -774,6 +774,22 @@ public final class TvInputManager {
         }
 
         /**
+         * Set this as main session. See {@link TvView#setMainTvView} for about meaning of "main".
+         * @hide
+         */
+        public void setMainSession() {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.setMainSession(mToken, mUserId);
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        /**
          * Sets the {@link android.view.Surface} for this session.
          *
          * @param surface A {@link android.view.Surface} used to render video.

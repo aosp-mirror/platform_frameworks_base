@@ -62,6 +62,9 @@ public class TvView extends ViewGroup {
 
     private static final int VIDEO_SIZE_VALUE_UNKNOWN = 0;
 
+    private static final Object sMainTvViewLock = new Object();
+    private static TvView sMainTvView;
+
     private final Handler mHandler = new Handler();
     private Session mSession;
     private final SurfaceView mSurfaceView;
@@ -161,6 +164,29 @@ public class TvView extends ViewGroup {
     }
 
     /**
+     * Set this as main TvView.
+     * <p>
+     * Main TvView is the TvView which user is watching and interacting mainly.  It is used for
+     * determining internal behavior of hardware TV input devices. For example, this influences
+     * how HDMI-CEC active source will be managed.
+     * </p><p>
+     * First tuned TvView becomes main automatically, and keeps to be main until setMainTvView() is
+     * called for other TvView. Note that main TvView won't be reset even when current main TvView
+     * is removed from view hierarchy.
+     * </p>
+     * @hide
+     */
+    @SystemApi
+    public void setMainTvView() {
+        synchronized (sMainTvViewLock) {
+            sMainTvView = this;
+            if (hasWindowFocus() && mSession != null) {
+                mSession.setMainSession();
+            }
+        }
+    }
+
+    /**
      * Sets the relative stream volume of this session to handle a change of audio focus.
      *
      * @param volume A volume value between 0.0f to 1.0f.
@@ -186,6 +212,11 @@ public class TvView extends ViewGroup {
         if (DEBUG) Log.d(TAG, "tune(" + channelUri + ")");
         if (TextUtils.isEmpty(inputId)) {
             throw new IllegalArgumentException("inputId cannot be null or an empty string");
+        }
+        synchronized (sMainTvViewLock) {
+            if (sMainTvView == null) {
+                sMainTvView = this;
+            }
         }
         if (mSessionCallback != null && mSessionCallback.mInputId.equals(inputId)) {
             if (mSession != null) {
@@ -410,6 +441,18 @@ public class TvView extends ViewGroup {
         int ret = mSession.dispatchInputEvent(copiedEvent, copiedEvent, mFinishedInputEventCallback,
                 mHandler);
         return ret != Session.DISPATCH_NOT_HANDLED;
+    }
+
+    @Override
+    public void dispatchWindowFocusChanged(boolean hasFocus) {
+        super.dispatchWindowFocusChanged(hasFocus);
+        // Other app may have shown its own main TvView.
+        // Set main again to regain main session.
+        synchronized (sMainTvViewLock) {
+            if (hasFocus && this == sMainTvView && mSession != null) {
+                mSession.setMainSession();
+            }
+        }
     }
 
     @Override
@@ -665,6 +708,11 @@ public class TvView extends ViewGroup {
             }
             mSession = session;
             if (session != null) {
+                synchronized (sMainTvViewLock) {
+                    if (hasWindowFocus() && TvView.this == sMainTvView) {
+                        mSession.setMainSession();
+                    }
+                }
                 // mSurface may not be ready yet as soon as starting an application.
                 // In the case, we don't send Session.setSurface(null) unnecessarily.
                 // setSessionSurface will be called in surfaceCreated.
