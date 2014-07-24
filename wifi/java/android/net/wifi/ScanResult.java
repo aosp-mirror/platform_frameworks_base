@@ -70,7 +70,7 @@ public class ScanResult implements Parcelable {
     /** @hide */
     public static final int AUTO_JOIN_DISABLED                               = 32;
     /** @hide */
-    public static final int AUTHENTICATIO_ERROR                              = 128;
+    public static final int AUTHENTICATION_ERROR                              = 128;
 
     /**
      * Status: indicating join status
