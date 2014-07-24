@@ -423,6 +423,16 @@ public:
         GraphicsJNI::getNativePaint(env, paint)->setTextSkewX(skewX);
     }
 
+    static jfloat getLetterSpacing(JNIEnv* env, jobject clazz, jlong paintHandle) {
+        Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+        return paint->getLetterSpacing();
+    }
+
+    static void setLetterSpacing(JNIEnv* env, jobject clazz, jlong paintHandle, jfloat letterSpacing) {
+        Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+        paint->setLetterSpacing(letterSpacing);
+    }
+
     static SkScalar getMetricsInternal(JNIEnv* env, jobject jpaint, Paint::FontMetrics *metrics) {
         const int kElegantTop = 2500;
         const int kElegantBottom = -1000;
@@ -988,6 +998,8 @@ static JNINativeMethod methods[] = {
     {"setTextScaleX","(F)V", (void*) PaintGlue::setTextScaleX},
     {"getTextSkewX","()F", (void*) PaintGlue::getTextSkewX},
     {"setTextSkewX","(F)V", (void*) PaintGlue::setTextSkewX},
+    {"native_getLetterSpacing","(J)F", (void*) PaintGlue::getLetterSpacing},
+    {"native_setLetterSpacing","(JF)V", (void*) PaintGlue::setLetterSpacing},
     {"ascent","()F", (void*) PaintGlue::ascent},
     {"descent","()F", (void*) PaintGlue::descent},
     {"getFontMetrics", "(Landroid/graphics/Paint$FontMetrics;)F", (void*)PaintGlue::getFontMetrics},

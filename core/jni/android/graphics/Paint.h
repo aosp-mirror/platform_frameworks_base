@@ -34,7 +34,16 @@ public:
         return !(a == b);
     }
 
+    void setLetterSpacing(float letterSpacing) {
+        mLetterSpacing = letterSpacing;
+    }
+
+    float getLetterSpacing() const {
+        return mLetterSpacing;
+    }
+
 private:
+    float mLetterSpacing;
 };
 
 }  // namespace android
