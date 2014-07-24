@@ -5458,14 +5458,14 @@
          described here. -->
     <declare-styleable name="Slide">
         <attr name="slideEdge">
+            <!-- Slide to and from the left edge of the Scene. -->
+            <enum name="left" value="0x03" />
+            <!-- Slide to and from the top edge of the Scene. -->
+            <enum name="top" value="0x30" />
+            <!-- Slide to and from the right edge of the Scene. -->
+            <enum name="right" value="0x05" />
             <!-- Slide to and from the bottom edge of the Scene. -->
-            <enum name="left" value="0" />
-            <!-- Slide to and from the bottom edge of the Scene. -->
-            <enum name="top" value="1" />
-            <!-- Slide to and from the bottom edge of the Scene. -->
-            <enum name="right" value="2" />
-            <!-- Slide to and from the bottom edge of the Scene. -->
-            <enum name="bottom" value="3" />
+            <enum name="bottom" value="0x50" />
         </attr>
     </declare-styleable>
 
