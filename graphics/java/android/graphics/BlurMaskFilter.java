@@ -25,10 +25,25 @@ package android.graphics;
 public class BlurMaskFilter extends MaskFilter {
 
     public enum Blur {
-        NORMAL(0),  //!< blur inside and outside of the original border
-        SOLID(1),   //!< include the original mask, blur outside
-        OUTER(2),   //!< just blur outside the original border
-        INNER(3);   //!< just blur inside the original border
+        /**
+         * Blur inside and outside the original border.
+         */
+        NORMAL(0),
+
+        /**
+         * Draw solid inside the border, blur outside.
+         */
+        SOLID(1),
+
+        /**
+         * Draw nothing inside the border, blur outside.
+         */
+        OUTER(2),
+
+        /**
+         * Blur inside the border, draw nothing outside.
+         */
+        INNER(3);
         
         Blur(int value) {
             native_int = value;
