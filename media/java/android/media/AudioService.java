@@ -1131,6 +1131,13 @@ public class AudioService extends IAudioService.Stub {
             mFlags = flags;
             mDevice = device;
         }
+
+        @Override
+        public String toString() {
+            return new StringBuilder().append("{streamType=").append(mStreamType).append(",index=")
+                    .append(mIndex).append(",flags=").append(mFlags).append(",device=")
+                    .append(mDevice).append('}').toString();
+        }
     };
 
     private void onSetStreamVolume(int streamType, int index, int flags, int device) {
@@ -2724,8 +2731,10 @@ public class AudioService extends IAudioService.Stub {
             if ((mMcc != mcc) || ((mMcc == 0) && force)) {
                 mSafeMediaVolumeIndex = mContext.getResources().getInteger(
                         com.android.internal.R.integer.config_safe_media_volume_index) * 10;
-                boolean safeMediaVolumeEnabled = mContext.getResources().getBoolean(
-                        com.android.internal.R.bool.config_safe_media_volume_enabled);
+                boolean safeMediaVolumeEnabled =
+                        SystemProperties.getBoolean("audio.safemedia.force", false)
+                        || mContext.getResources().getBoolean(
+                                com.android.internal.R.bool.config_safe_media_volume_enabled);
 
                 // The persisted state is either "disabled" or "active": this is the state applied
                 // next time we boot and cannot be "inactive"
@@ -4863,10 +4872,10 @@ public class AudioService extends IAudioService.Stub {
     // SAFE_MEDIA_VOLUME_DISABLED according to country option. If not SAFE_MEDIA_VOLUME_DISABLED, it
     // can be set to SAFE_MEDIA_VOLUME_INACTIVE by calling AudioService.disableSafeMediaVolume()
     // (when user opts out).
-    private final int SAFE_MEDIA_VOLUME_NOT_CONFIGURED = 0;
-    private final int SAFE_MEDIA_VOLUME_DISABLED = 1;
-    private final int SAFE_MEDIA_VOLUME_INACTIVE = 2;
-    private final int SAFE_MEDIA_VOLUME_ACTIVE = 3;
+    private static final int SAFE_MEDIA_VOLUME_NOT_CONFIGURED = 0;
+    private static final int SAFE_MEDIA_VOLUME_DISABLED = 1;
+    private static final int SAFE_MEDIA_VOLUME_INACTIVE = 2;  // confirmed
+    private static final int SAFE_MEDIA_VOLUME_ACTIVE = 3;  // unconfirmed
     private Integer mSafeMediaVolumeState;
 
     private int mMcc = 0;
@@ -5058,7 +5067,24 @@ public class AudioService extends IAudioService.Stub {
         pw.println("\nAudio routes:");
         pw.print("  mMainType=0x"); pw.println(Integer.toHexString(mCurAudioRoutes.mMainType));
         pw.print("  mBluetoothName="); pw.println(mCurAudioRoutes.mBluetoothName);
+
+        pw.println("\nOther state:");
         pw.print("  mVolumeController="); pw.println(mVolumeController);
+        pw.print("  mSafeMediaVolumeState=");
+        pw.println(safeMediaVolumeStateToString(mSafeMediaVolumeState));
+        pw.print("  mSafeMediaVolumeIndex="); pw.println(mSafeMediaVolumeIndex);
+        pw.print("  mPendingVolumeCommand="); pw.println(mPendingVolumeCommand);
+        pw.print("  mMusicActiveMs="); pw.println(mMusicActiveMs);
+    }
+
+    private static String safeMediaVolumeStateToString(Integer state) {
+        switch(state) {
+            case SAFE_MEDIA_VOLUME_NOT_CONFIGURED: return "SAFE_MEDIA_VOLUME_NOT_CONFIGURED";
+            case SAFE_MEDIA_VOLUME_DISABLED: return "SAFE_MEDIA_VOLUME_DISABLED";
+            case SAFE_MEDIA_VOLUME_INACTIVE: return "SAFE_MEDIA_VOLUME_INACTIVE";
+            case SAFE_MEDIA_VOLUME_ACTIVE: return "SAFE_MEDIA_VOLUME_ACTIVE";
+        }
+        return null;
     }
 
     // Inform AudioFlinger of our device's low RAM attribute
