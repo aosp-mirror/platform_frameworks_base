@@ -16,7 +16,6 @@
 */
 -->
 <resources>
-
   <!-- We don't want to publish private symbols in android.R as part of the
        SDK.  Instead, put them here. -->
   <private-symbols package="com.android.internal" />
@@ -1432,6 +1431,8 @@
   <java-symbol type="style" name="Animation.LockScreen" />
   <java-symbol type="style" name="Theme.Dialog.RecentApplications" />
   <java-symbol type="style" name="Theme.ExpandedMenu" />
+  <java-symbol type="string" name="forward_intent_to_owner" />
+  <java-symbol type="string" name="forward_intent_to_work" />
 
   <!-- From services -->
   <java-symbol type="anim" name="screen_rotate_0_enter" />
