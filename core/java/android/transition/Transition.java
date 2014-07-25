@@ -1623,12 +1623,14 @@ public abstract class Transition implements Cloneable {
         if (!mEnded) {
             ArrayMap<Animator, AnimationInfo> runningAnimators = getRunningAnimators();
             int numOldAnims = runningAnimators.size();
-            WindowId windowId = sceneRoot.getWindowId();
-            for (int i = numOldAnims - 1; i >= 0; i--) {
-                AnimationInfo info = runningAnimators.valueAt(i);
-                if (info.view != null && windowId.equals(info.windowId)) {
-                    Animator anim = runningAnimators.keyAt(i);
-                    anim.pause();
+            if (sceneRoot != null) {
+                WindowId windowId = sceneRoot.getWindowId();
+                for (int i = numOldAnims - 1; i >= 0; i--) {
+                    AnimationInfo info = runningAnimators.valueAt(i);
+                    if (info.view != null && windowId.equals(info.windowId)) {
+                        Animator anim = runningAnimators.keyAt(i);
+                        anim.pause();
+                    }
                 }
             }
             if (mListeners != null && mListeners.size() > 0) {
