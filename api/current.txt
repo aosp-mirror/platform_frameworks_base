@@ -24838,7 +24838,7 @@ package android.provider {
     ctor public ContactsContract.PinnedPositions();
     field public static final int DEMOTED = -1; // 0xffffffff
     field public static final java.lang.String UNDEMOTE_METHOD = "undemote";
-    field public static final int UNPINNED = 2147483647; // 0x7fffffff
+    field public static final int UNPINNED = 0; // 0x0
   }
 
   public static final deprecated class ContactsContract.Presence extends android.provider.ContactsContract.StatusUpdates {

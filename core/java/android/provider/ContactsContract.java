@@ -8018,9 +8018,8 @@ public final class ContactsContract {
      *
      * <p>
      * By default, unpinned contacts will have a pinned position of
-     * {@link PinnedPositions#UNPINNED}, or {@link Integer#MAX_VALUE} (2^31 - 1). Client-provided
-     * pinned positions can be positive integers that range anywhere from 0 to
-     * {@link PinnedPositions#UNPINNED}.
+     * {@link PinnedPositions#UNPINNED}. Client-provided pinned positions can be positive
+     * integers that are greater than 1.
      * </p>
      */
     public static final class PinnedPositions {
@@ -8043,10 +8042,9 @@ public final class ContactsContract {
         public static final String UNDEMOTE_METHOD = "undemote";
 
         /**
-         * Default value for the pinned position of an unpinned contact. Also equal to
-         * {@link Integer#MAX_VALUE}.
+         * Default value for the pinned position of an unpinned contact. Also equal to 0.
          */
-        public static final int UNPINNED = 0x7FFFFFFF;
+        public static final int UNPINNED = 0;
 
         /**
          * Value of pinned position for a contact that a user has indicated should be considered
