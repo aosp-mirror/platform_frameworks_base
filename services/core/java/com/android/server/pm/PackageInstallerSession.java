@@ -71,6 +71,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     // TODO: enforce INSTALL_ALLOW_DOWNGRADE
     // TODO: handle INSTALL_EXTERNAL, INSTALL_INTERNAL
 
+    // TODO: treat INHERIT_EXISTING as installExistingPackage()
+
     private final PackageInstallerService.Callback mCallback;
     private final PackageManagerService mPm;
     private final Handler mHandler;
@@ -84,7 +86,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     public final long createdMillis;
     public final File sessionStageDir;
 
-    private static final int MSG_INSTALL = 0;
+    private static final int MSG_COMMIT = 0;
 
     private Handler.Callback mHandlerCallback = new Handler.Callback() {
         @Override
@@ -95,7 +97,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 }
 
                 try {
-                    installLocked();
+                    commitLocked();
                 } catch (PackageManagerException e) {
                     Slog.e(TAG, "Install failed: " + e);
                     destroyInternal();
@@ -114,8 +116,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     private final Object mLock = new Object();
 
-    private int mClientProgress;
-    private int mProgress = 0;
+    private float mClientProgress;
+    private float mProgress = 0;
 
     private String mPackageName;
     private int mVersionCode;
@@ -168,23 +170,23 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         info.progress = mProgress;
 
         info.mode = params.mode;
-        info.packageName = params.packageName;
-        info.icon = params.icon;
-        info.title = params.title;
+        info.sizeBytes = params.sizeBytes;
+        info.appPackageName = params.appPackageName;
+        info.appIcon = params.appIcon;
+        info.appLabel = params.appLabel;
 
         return info;
     }
 
     @Override
-    public void setClientProgress(int progress) {
+    public void setClientProgress(float progress) {
         mClientProgress = progress;
-        mProgress = MathUtils.constrain(
-                (int) (((float) mClientProgress) / ((float) params.progressMax)) * 80, 0, 80);
-        mCallback.onSessionProgress(this, mProgress);
+        mProgress = MathUtils.constrain(mClientProgress * 0.8f, 0f, 0.8f);
+        mCallback.onSessionProgressChanged(this, mProgress);
     }
 
     @Override
-    public void addClientProgress(int progress) {
+    public void addClientProgress(float progress) {
         setClientProgress(mClientProgress + progress);
     }
 
@@ -250,12 +252,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     @Override
-    public void install(IPackageInstallObserver2 observer) {
+    public void commit(IPackageInstallObserver2 observer) {
         Preconditions.checkNotNull(observer);
-        mHandler.obtainMessage(MSG_INSTALL, observer).sendToTarget();
+        mHandler.obtainMessage(MSG_COMMIT, observer).sendToTarget();
     }
 
-    private void installLocked() throws PackageManagerException {
+    private void commitLocked() throws PackageManagerException {
         if (mInvalid) {
             throw new PackageManagerException(INSTALL_FAILED_ALREADY_EXISTS, "Invalid session");
         }
@@ -295,7 +297,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         // TODO: surface more granular state from dexopt
-        mCallback.onSessionProgress(this, 90);
+        mCallback.onSessionProgressChanged(this, 0.9f);
 
         // TODO: for ASEC based applications, grow and stream in packages
 
@@ -458,7 +460,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     @Override
-    public void destroy() {
+    public void close() {
+        // Currently ignored
+    }
+
+    @Override
+    public void abandon() {
         try {
             destroyInternal();
         } finally {

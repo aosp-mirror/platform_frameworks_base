@@ -16,11 +16,16 @@
 
 package android.content.pm;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.PackageInstallObserver;
 import android.app.PackageUninstallObserver;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.os.FileBridge;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.util.ExceptionUtils;
@@ -28,6 +33,8 @@ import android.util.ExceptionUtils;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -61,6 +68,8 @@ public class PackageInstaller {
     private final int mUserId;
     private final String mInstallerPackageName;
 
+    private final ArrayList<SessionCallbackDelegate> mDelegates = new ArrayList<>();
+
     /** {@hide} */
     public PackageInstaller(PackageManager pm, IPackageInstaller installer,
             String installerPackageName, int userId) {
@@ -68,28 +77,6 @@ public class PackageInstaller {
         mInstaller = installer;
         mInstallerPackageName = installerPackageName;
         mUserId = userId;
-    }
-
-    /**
-     * Quickly test if the given package is already available on the device.
-     * This is typically used in multi-user scenarios where another user on the
-     * device has already installed the package.
-     *
-     * @hide
-     */
-    public boolean isPackageAvailable(String packageName) {
-        return mPm.isPackageAvailable(packageName);
-    }
-
-    /** {@hide} */
-    public void installAvailablePackage(String packageName, PackageInstallObserver observer) {
-        int returnCode;
-        try {
-            returnCode = mPm.installExistingPackage(packageName);
-        } catch (NameNotFoundException e) {
-            returnCode = PackageManager.INSTALL_FAILED_PACKAGE_CHANGED;
-        }
-        observer.packageInstalled(packageName, null, returnCode);
     }
 
     /**
@@ -104,9 +91,9 @@ public class PackageInstaller {
      * @throws IOException if parameters were unsatisfiable, such as lack of
      *             disk space or unavailable media.
      */
-    public int createSession(InstallSessionParams params) throws IOException {
+    public int createSession(@NonNull InstallSessionParams params) throws IOException {
         try {
-            return mInstaller.createSession(mInstallerPackageName, params, mUserId);
+            return mInstaller.createSession(params, mInstallerPackageName, mUserId);
         } catch (RuntimeException e) {
             ExceptionUtils.maybeUnwrapIOException(e);
             throw e;
@@ -116,9 +103,10 @@ public class PackageInstaller {
     }
 
     /**
-     * Open an existing session to actively perform work.
+     * Open an existing session to actively perform work. To succeed, the caller
+     * must be the owner of the install session.
      */
-    public Session openSession(int sessionId) {
+    public @NonNull Session openSession(int sessionId) {
         try {
             return new Session(mInstaller.openSession(sessionId));
         } catch (RemoteException e) {
@@ -127,13 +115,35 @@ public class PackageInstaller {
     }
 
     /**
-     * Return list of all active install sessions on the device.
+     * Return details for a specific session. To succeed, the caller must either
+     * own this session, or be the current home app.
      */
-    public List<InstallSessionInfo> getActiveSessions() {
-        // TODO: filter based on caller
-        // TODO: let launcher app see all active sessions
+    public @Nullable InstallSessionInfo getSessionInfo(int sessionId) {
         try {
-            return mInstaller.getSessions(mUserId);
+            return mInstaller.getSessionInfo(sessionId);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    /**
+     * Return list of all active install sessions, regardless of the installer.
+     * To succeed, the caller must be the current home app.
+     */
+    public @NonNull List<InstallSessionInfo> getAllSessions() {
+        try {
+            return mInstaller.getAllSessions(mUserId);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    /**
+     * Return list of all install sessions owned by the calling app.
+     */
+    public @NonNull List<InstallSessionInfo> getMySessions() {
+        try {
+            return mInstaller.getMySessions(mInstallerPackageName, mUserId);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
@@ -144,10 +154,10 @@ public class PackageInstaller {
      * method is only available to the current "installer of record" for the
      * package.
      */
-    public void uninstall(String packageName, UninstallResultCallback callback) {
+    public void uninstall(@NonNull String packageName, @NonNull UninstallCallback callback) {
         try {
             mInstaller.uninstall(packageName, 0,
-                    new UninstallResultCallbackDelegate(callback).getBinder(), mUserId);
+                    new UninstallCallbackDelegate(callback).getBinder(), mUserId);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
@@ -158,10 +168,11 @@ public class PackageInstaller {
      *
      * @hide
      */
-    public void uninstall(String packageName, String splitName, UninstallResultCallback callback) {
+    public void uninstall(@NonNull String packageName, @NonNull String splitName,
+            @NonNull UninstallCallback callback) {
         try {
             mInstaller.uninstallSplit(packageName, splitName, 0,
-                    new UninstallResultCallbackDelegate(callback).getBinder(), mUserId);
+                    new UninstallCallbackDelegate(callback).getBinder(), mUserId);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
@@ -170,69 +181,121 @@ public class PackageInstaller {
     /**
      * Events for observing session lifecycle.
      */
-    public static abstract class SessionObserver {
-        private final IPackageInstallerObserver.Stub mBinder = new IPackageInstallerObserver.Stub() {
-            @Override
-            public void onSessionCreated(InstallSessionInfo info) {
-                SessionObserver.this.onCreated(info);
-            }
-
-            @Override
-            public void onSessionProgress(int sessionId, int progress) {
-                SessionObserver.this.onProgress(sessionId, progress);
-            }
-
-            @Override
-            public void onSessionFinished(int sessionId, boolean success) {
-                SessionObserver.this.onFinalized(sessionId, success);
-            }
-        };
-
-        /** {@hide} */
-        public IPackageInstallerObserver getBinder() {
-            return mBinder;
-        }
-
+    public static abstract class SessionCallback {
         /**
          * New session has been created.
          */
-        public abstract void onCreated(InstallSessionInfo info);
+        public abstract void onCreated(int sessionId);
 
         /**
          * Progress for given session has been updated.
          * <p>
          * Note that this progress may not directly correspond to the value
-         * reported by {@link PackageInstaller.Session#setProgress(int)}, as the
-         * system may carve out a portion of the overall progress to represent
-         * its own internal installation work.
+         * reported by {@link PackageInstaller.Session#setProgress(float)}, as
+         * the system may carve out a portion of the overall progress to
+         * represent its own internal installation work.
          */
-        public abstract void onProgress(int sessionId, int progress);
+        public abstract void onProgressChanged(int sessionId, float progress);
 
         /**
-         * Session has been finalized, either with success or failure.
+         * Session has completely finished, either with success or failure.
          */
-        public abstract void onFinalized(int sessionId, boolean success);
+        public abstract void onFinished(int sessionId, boolean success);
     }
 
-    /**
-     * Register to watch for session lifecycle events.
-     */
-    public void registerSessionObserver(SessionObserver observer) {
-        try {
-            mInstaller.registerObserver(observer.getBinder(), mUserId);
-        } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+    /** {@hide} */
+    private static class SessionCallbackDelegate extends IPackageInstallerCallback.Stub implements
+            Handler.Callback {
+        private static final int MSG_SESSION_CREATED = 1;
+        private static final int MSG_SESSION_PROGRESS_CHANGED = 2;
+        private static final int MSG_SESSION_FINISHED = 3;
+
+        final SessionCallback mCallback;
+        final Handler mHandler;
+
+        public SessionCallbackDelegate(SessionCallback callback, Looper looper) {
+            mCallback = callback;
+            mHandler = new Handler(looper, this);
+        }
+
+        @Override
+        public boolean handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_SESSION_CREATED:
+                    mCallback.onCreated(msg.arg1);
+                    return true;
+                case MSG_SESSION_PROGRESS_CHANGED:
+                    mCallback.onProgressChanged(msg.arg1, (float) msg.obj);
+                    return true;
+                case MSG_SESSION_FINISHED:
+                    mCallback.onFinished(msg.arg1, msg.arg2 != 0);
+                    return true;
+            }
+            return false;
+        }
+
+        @Override
+        public void onSessionCreated(int sessionId) {
+            mHandler.obtainMessage(MSG_SESSION_CREATED, sessionId, 0).sendToTarget();
+        }
+
+        @Override
+        public void onSessionProgressChanged(int sessionId, float progress) {
+            mHandler.obtainMessage(MSG_SESSION_PROGRESS_CHANGED, sessionId, 0, progress)
+                    .sendToTarget();
+        }
+
+        @Override
+        public void onSessionFinished(int sessionId, boolean success) {
+            mHandler.obtainMessage(MSG_SESSION_FINISHED, sessionId, success ? 1 : 0)
+                    .sendToTarget();
         }
     }
 
     /**
-     * Unregister an existing observer.
+     * Register to watch for session lifecycle events. To succeed, the caller
+     * must be the current home app.
      */
-    public void unregisterSessionObserver(SessionObserver observer) {
-        try {
-            mInstaller.unregisterObserver(observer.getBinder(), mUserId);
-        } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+    public void addSessionCallback(@NonNull SessionCallback callback) {
+        addSessionCallback(callback, new Handler());
+    }
+
+    /**
+     * Register to watch for session lifecycle events. To succeed, the caller
+     * must be the current home app.
+     *
+     * @param handler to dispatch callback events through, otherwise uses
+     *            calling thread.
+     */
+    public void addSessionCallback(@NonNull SessionCallback callback, @NonNull Handler handler) {
+        synchronized (mDelegates) {
+            final SessionCallbackDelegate delegate = new SessionCallbackDelegate(callback,
+                    handler.getLooper());
+            try {
+                mInstaller.registerCallback(delegate, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowAsRuntimeException();
+            }
+            mDelegates.add(delegate);
+        }
+    }
+
+    /**
+     * Unregister an existing callback.
+     */
+    public void removeSessionCallback(@NonNull SessionCallback callback) {
+        synchronized (mDelegates) {
+            for (Iterator<SessionCallbackDelegate> i = mDelegates.iterator(); i.hasNext();) {
+                final SessionCallbackDelegate delegate = i.next();
+                if (delegate.mCallback == callback) {
+                    try {
+                        mInstaller.unregisterCallback(delegate);
+                    } catch (RemoteException e) {
+                        throw e.rethrowAsRuntimeException();
+                    }
+                    i.remove();
+                }
+            }
         }
     }
 
@@ -244,9 +307,9 @@ public class PackageInstaller {
      * A session may contain any number of split packages. If the application
      * does not yet exist, this session must include a base package.
      * <p>
-     * If a package included in this session is already defined by the existing
-     * installation (for example, the same split name), the package in this
-     * session will replace the existing package.
+     * If an APK included in this session is already defined by the existing
+     * installation (for example, the same split name), the APK in this session
+     * will replace the existing APK.
      */
     public static class Session implements Closeable {
         private IPackageInstallerSession mSession;
@@ -257,10 +320,9 @@ public class PackageInstaller {
         }
 
         /**
-         * Set current progress. Valid values are anywhere between 0 and
-         * {@link InstallSessionParams#setProgressMax(int)}.
+         * Set current progress. Valid values are anywhere between 0 and 1.
          */
-        public void setProgress(int progress) {
+        public void setProgress(float progress) {
             try {
                 mSession.setClientProgress(progress);
             } catch (RemoteException e) {
@@ -269,7 +331,7 @@ public class PackageInstaller {
         }
 
         /** {@hide} */
-        public void addProgress(int progress) {
+        public void addProgress(float progress) {
             try {
                 mSession.addClientProgress(progress);
             } catch (RemoteException e) {
@@ -278,15 +340,33 @@ public class PackageInstaller {
         }
 
         /**
-         * Open an APK file for writing, starting at the given offset. You can
-         * then stream data into the file, periodically calling
-         * {@link #fsync(OutputStream)} to ensure bytes have been written to
-         * disk.
+         * Open a stream to write an APK file into the session.
+         * <p>
+         * The returned stream will start writing data at the requested offset
+         * in the underlying file, which can be used to resume a partially
+         * written file. If a valid file length is specified, the system will
+         * preallocate the underlying disk space to optimize placement on disk.
+         * It's strongly recommended to provide a valid file length when known.
+         * <p>
+         * You can write data into the returned stream, optionally call
+         * {@link #fsync(OutputStream)} as needed to ensure bytes have been
+         * persisted to disk, and then close when finished. All streams must be
+         * closed before calling {@link #commit(CommitCallback)}.
+         *
+         * @param name arbitrary, unique name of your choosing to identify the
+         *            APK being written. You can open a file again for
+         *            additional writes (such as after a reboot) by using the
+         *            same name. This name is only meaningful within the context
+         *            of a single install session.
+         * @param offsetBytes offset into the file to begin writing at, or 0 to
+         *            start at the beginning of the file.
+         * @param lengthBytes total size of the file being written, used to
+         *            preallocate the underlying disk space, or -1 if unknown.
          */
-        public OutputStream openWrite(String splitName, long offsetBytes, long lengthBytes)
-                throws IOException {
+        public @NonNull OutputStream openWrite(@NonNull String name, long offsetBytes,
+                long lengthBytes) throws IOException {
             try {
-                final ParcelFileDescriptor clientSocket = mSession.openWrite(splitName,
+                final ParcelFileDescriptor clientSocket = mSession.openWrite(name,
                         offsetBytes, lengthBytes);
                 return new FileBridge.FileBridgeOutputStream(clientSocket.getFileDescriptor());
             } catch (RuntimeException e) {
@@ -302,7 +382,7 @@ public class PackageInstaller {
          * to disk. This is only valid for streams returned from
          * {@link #openWrite(String, long, long)}.
          */
-        public void fsync(OutputStream out) throws IOException {
+        public void fsync(@NonNull OutputStream out) throws IOException {
             if (out instanceof FileBridge.FileBridgeOutputStream) {
                 ((FileBridge.FileBridgeOutputStream) out).fsync();
             } else {
@@ -319,9 +399,9 @@ public class PackageInstaller {
          * on the session. If the device reboots before the session has been
          * finalized, you may commit the session again.
          */
-        public void commit(CommitResultCallback callback) {
+        public void commit(@NonNull CommitCallback callback) {
             try {
-                mSession.install(new CommitResultCallbackDelegate(callback).getBinder());
+                mSession.commit(new CommitCallbackDelegate(callback).getBinder());
             } catch (RemoteException e) {
                 throw e.rethrowAsRuntimeException();
             }
@@ -333,15 +413,20 @@ public class PackageInstaller {
          */
         @Override
         public void close() {
-            // No resources to release at the moment
+            try {
+                mSession.close();
+            } catch (RemoteException e) {
+                throw e.rethrowAsRuntimeException();
+            }
         }
 
         /**
-         * Completely destroy this session, rendering it invalid.
+         * Completely abandon this session, destroying all staged data and
+         * rendering it invalid.
          */
-        public void destroy() {
+        public void abandon() {
             try {
-                mSession.destroy();
+                mSession.abandon();
             } catch (RemoteException e) {
                 throw e.rethrowAsRuntimeException();
             }
@@ -351,30 +436,26 @@ public class PackageInstaller {
     /**
      * Final result of an uninstall request.
      */
-    public static abstract class UninstallResultCallback {
+    public static abstract class UninstallCallback {
         public abstract void onSuccess();
         public abstract void onFailure(String msg);
     }
 
     /** {@hide} */
-    private static class UninstallResultCallbackDelegate extends PackageUninstallObserver {
-        private final UninstallResultCallback target;
+    private static class UninstallCallbackDelegate extends PackageUninstallObserver {
+        private final UninstallCallback target;
 
-        public UninstallResultCallbackDelegate(UninstallResultCallback target) {
+        public UninstallCallbackDelegate(UninstallCallback target) {
             this.target = target;
         }
 
         @Override
         public void onUninstallFinished(String basePackageName, int returnCode) {
-            final String msg = null;
-
-            switch (returnCode) {
-                case PackageManager.DELETE_SUCCEEDED: target.onSuccess(); break;
-                case PackageManager.DELETE_FAILED_INTERNAL_ERROR: target.onFailure("DELETE_FAILED_INTERNAL_ERROR: " + msg); break;
-                case PackageManager.DELETE_FAILED_DEVICE_POLICY_MANAGER: target.onFailure("DELETE_FAILED_DEVICE_POLICY_MANAGER: " + msg); break;
-                case PackageManager.DELETE_FAILED_USER_RESTRICTED: target.onFailure("DELETE_FAILED_USER_RESTRICTED: " + msg); break;
-                case PackageManager.DELETE_FAILED_OWNER_BLOCKED: target.onFailure("DELETE_FAILED_OWNER_BLOCKED: " + msg); break;
-                default: target.onFailure(msg); break;
+            if (returnCode == PackageManager.DELETE_SUCCEEDED) {
+                target.onSuccess();
+            } else {
+                final String msg = PackageManager.deleteStatusToString(returnCode);
+                target.onFailure(msg);
             }
         }
     }
@@ -382,16 +463,13 @@ public class PackageInstaller {
     /**
      * Final result of a session commit request.
      */
-    public static abstract class CommitResultCallback {
-        public abstract void onSuccess();
-
+    public static abstract class CommitCallback {
         /**
-         * Generic failure occurred. You can override methods (such as
-         * {@link #onFailureInvalid(String)}) to handle more specific categories
-         * of failure. By default, those specific categories all flow into this
-         * generic failure.
+         * Generic unknown failure. The system will always try to provide a more
+         * specific failure reason, but in some rare cases this may be
+         * delivered.
          */
-        public abstract void onFailure(String msg);
+        public static final int FAILURE_UNKNOWN = 0;
 
         /**
          * One or more of the APKs included in the session was invalid. For
@@ -399,23 +477,19 @@ public class PackageInstaller {
          * mismatched, etc. The installer may want to try downloading and
          * installing again.
          */
-        public void onFailureInvalid(String msg) {
-            onFailure(msg);
-        }
+        public static final int FAILURE_INVALID = 1;
 
         /**
          * This install session conflicts (or is inconsistent with) with another
          * package already installed on the device. For example, an existing
          * permission, incompatible certificates, etc. The user may be able to
          * uninstall another app to fix the issue.
-         *
-         * @param otherPackageName if one specific package was identified as the
-         *            cause of the conflict, it's named here. If unknown, or
-         *            multiple packages, this may be {@code null}.
+         * <p>
+         * The extras bundle may contain {@link #EXTRA_PACKAGE_NAME} if one
+         * specific package was identified as the cause of the conflict. If
+         * unknown, or multiple packages, the extra may be {@code null}.
          */
-        public void onFailureConflict(String msg, String otherPackageName) {
-            onFailure(msg);
-        }
+        public static final int FAILURE_CONFLICT = 2;
 
         /**
          * This install session failed due to storage issues. For example,
@@ -423,9 +497,7 @@ public class PackageInstaller {
          * media may be unavailable. The user may be able to help free space
          * or insert the correct media.
          */
-        public void onFailureStorage(String msg) {
-            onFailure(msg);
-        }
+        public static final int FAILURE_STORAGE = 3;
 
         /**
          * This install session is fundamentally incompatible with this
@@ -434,66 +506,37 @@ public class PackageInstaller {
          * ABI, or it requires a newer SDK version, etc. This install would
          * never succeed.
          */
-        public void onFailureIncompatible(String msg) {
-            onFailure(msg);
-        }
+        public static final int FAILURE_INCOMPATIBLE = 4;
+
+        public static final String EXTRA_PACKAGE_NAME = "android.content.pm.extra.PACKAGE_NAME";
+
+        public abstract void onSuccess();
+        public abstract void onFailure(int failureReason, String msg, Bundle extras);
     }
 
     /** {@hide} */
-    private static class CommitResultCallbackDelegate extends PackageInstallObserver {
-        private final CommitResultCallback target;
+    private static class CommitCallbackDelegate extends PackageInstallObserver {
+        private final CommitCallback target;
 
-        public CommitResultCallbackDelegate(CommitResultCallback target) {
+        public CommitCallbackDelegate(CommitCallback target) {
             this.target = target;
         }
 
         @Override
         public void packageInstalled(String basePackageName, Bundle extras, int returnCode,
                 String msg) {
-            final String otherPackage = null;
+            if (returnCode == PackageManager.INSTALL_SUCCEEDED) {
+                target.onSuccess();
+            } else {
+                final int failureReason = PackageManager.installStatusToFailureReason(returnCode);
+                msg = PackageManager.installStatusToString(returnCode) + ": " + msg;
 
-            switch (returnCode) {
-                case PackageManager.INSTALL_SUCCEEDED: target.onSuccess(); break;
-                case PackageManager.INSTALL_FAILED_ALREADY_EXISTS: target.onFailureConflict("INSTALL_FAILED_ALREADY_EXISTS: " + msg, otherPackage); break;
-                case PackageManager.INSTALL_FAILED_INVALID_APK: target.onFailureInvalid("INSTALL_FAILED_INVALID_APK: " + msg); break;
-                case PackageManager.INSTALL_FAILED_INVALID_URI: target.onFailureInvalid("INSTALL_FAILED_INVALID_URI: " + msg); break;
-                case PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE: target.onFailureStorage("INSTALL_FAILED_INSUFFICIENT_STORAGE: " + msg); break;
-                case PackageManager.INSTALL_FAILED_DUPLICATE_PACKAGE: target.onFailureConflict("INSTALL_FAILED_DUPLICATE_PACKAGE: " + msg, otherPackage); break;
-                case PackageManager.INSTALL_FAILED_NO_SHARED_USER: target.onFailureConflict("INSTALL_FAILED_NO_SHARED_USER: " + msg, otherPackage); break;
-                case PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE: target.onFailureConflict("INSTALL_FAILED_UPDATE_INCOMPATIBLE: " + msg, otherPackage); break;
-                case PackageManager.INSTALL_FAILED_SHARED_USER_INCOMPATIBLE: target.onFailureConflict("INSTALL_FAILED_SHARED_USER_INCOMPATIBLE: " + msg, otherPackage); break;
-                case PackageManager.INSTALL_FAILED_MISSING_SHARED_LIBRARY: target.onFailureIncompatible("INSTALL_FAILED_MISSING_SHARED_LIBRARY: " + msg); break;
-                case PackageManager.INSTALL_FAILED_REPLACE_COULDNT_DELETE: target.onFailureConflict("INSTALL_FAILED_REPLACE_COULDNT_DELETE: " + msg, otherPackage); break;
-                case PackageManager.INSTALL_FAILED_DEXOPT: target.onFailureInvalid("INSTALL_FAILED_DEXOPT: " + msg); break;
-                case PackageManager.INSTALL_FAILED_OLDER_SDK: target.onFailureIncompatible("INSTALL_FAILED_OLDER_SDK: " + msg); break;
-                case PackageManager.INSTALL_FAILED_CONFLICTING_PROVIDER: target.onFailureConflict("INSTALL_FAILED_CONFLICTING_PROVIDER: " + msg, otherPackage); break;
-                case PackageManager.INSTALL_FAILED_NEWER_SDK: target.onFailureIncompatible("INSTALL_FAILED_NEWER_SDK: " + msg); break;
-                case PackageManager.INSTALL_FAILED_TEST_ONLY: target.onFailureInvalid("INSTALL_FAILED_TEST_ONLY: " + msg); break;
-                case PackageManager.INSTALL_FAILED_CPU_ABI_INCOMPATIBLE: target.onFailureIncompatible("INSTALL_FAILED_CPU_ABI_INCOMPATIBLE: " + msg); break;
-                case PackageManager.INSTALL_FAILED_MISSING_FEATURE: target.onFailureIncompatible("INSTALL_FAILED_MISSING_FEATURE: " + msg); break;
-                case PackageManager.INSTALL_FAILED_CONTAINER_ERROR: target.onFailureStorage("INSTALL_FAILED_CONTAINER_ERROR: " + msg); break;
-                case PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION: target.onFailureStorage("INSTALL_FAILED_INVALID_INSTALL_LOCATION: " + msg); break;
-                case PackageManager.INSTALL_FAILED_MEDIA_UNAVAILABLE: target.onFailureStorage("INSTALL_FAILED_MEDIA_UNAVAILABLE: " + msg); break;
-                case PackageManager.INSTALL_FAILED_VERIFICATION_TIMEOUT: target.onFailure("INSTALL_FAILED_VERIFICATION_TIMEOUT: " + msg); break;
-                case PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE: target.onFailure("INSTALL_FAILED_VERIFICATION_FAILURE: " + msg); break;
-                case PackageManager.INSTALL_FAILED_PACKAGE_CHANGED: target.onFailureInvalid("INSTALL_FAILED_PACKAGE_CHANGED: " + msg); break;
-                case PackageManager.INSTALL_FAILED_UID_CHANGED: target.onFailureInvalid("INSTALL_FAILED_UID_CHANGED: " + msg); break;
-                case PackageManager.INSTALL_FAILED_VERSION_DOWNGRADE: target.onFailureInvalid("INSTALL_FAILED_VERSION_DOWNGRADE: " + msg); break;
-                case PackageManager.INSTALL_PARSE_FAILED_NOT_APK: target.onFailureInvalid("INSTALL_PARSE_FAILED_NOT_APK: " + msg); break;
-                case PackageManager.INSTALL_PARSE_FAILED_BAD_MANIFEST: target.onFailureInvalid("INSTALL_PARSE_FAILED_BAD_MANIFEST: " + msg); break;
-                case PackageManager.INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION: target.onFailureInvalid("INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION: " + msg); break;
-                case PackageManager.INSTALL_PARSE_FAILED_NO_CERTIFICATES: target.onFailureInvalid("INSTALL_PARSE_FAILED_NO_CERTIFICATES: " + msg); break;
-                case PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES: target.onFailureInvalid("INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES: " + msg); break;
-                case PackageManager.INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING: target.onFailureInvalid("INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING: " + msg); break;
-                case PackageManager.INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME: target.onFailureInvalid("INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME: " + msg); break;
-                case PackageManager.INSTALL_PARSE_FAILED_BAD_SHARED_USER_ID: target.onFailureInvalid("INSTALL_PARSE_FAILED_BAD_SHARED_USER_ID: " + msg); break;
-                case PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED: target.onFailureInvalid("INSTALL_PARSE_FAILED_MANIFEST_MALFORMED: " + msg); break;
-                case PackageManager.INSTALL_PARSE_FAILED_MANIFEST_EMPTY: target.onFailureInvalid("INSTALL_PARSE_FAILED_MANIFEST_EMPTY: " + msg); break;
-                case PackageManager.INSTALL_FAILED_INTERNAL_ERROR: target.onFailure("INSTALL_FAILED_INTERNAL_ERROR: " + msg); break;
-                case PackageManager.INSTALL_FAILED_USER_RESTRICTED: target.onFailureIncompatible("INSTALL_FAILED_USER_RESTRICTED: " + msg); break;
-                case PackageManager.INSTALL_FAILED_DUPLICATE_PERMISSION: target.onFailureConflict("INSTALL_FAILED_DUPLICATE_PERMISSION: " + msg, otherPackage); break;
-                case PackageManager.INSTALL_FAILED_NO_MATCHING_ABIS: target.onFailureInvalid("INSTALL_FAILED_NO_MATCHING_ABIS: " + msg); break;
-                default: target.onFailure(msg); break;
+                if (extras != null) {
+                    extras.putString(CommitCallback.EXTRA_PACKAGE_NAME,
+                            extras.getString(PackageManager.EXTRA_FAILURE_EXISTING_PACKAGE));
+                }
+
+                target.onFailure(failureReason, msg, extras);
             }
         }
     }

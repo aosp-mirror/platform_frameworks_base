@@ -3872,6 +3872,11 @@
     <!-- Description of an application permission that lets it create media projection sessions. -->
     <string name="permdesc_createMediaProjection">Allows an application to create media projection sessions. These sessions can provide applications the ability to capture display and audio contents. Should never be needed by normal apps.</string>
 
+    <!-- Title of an application permission that lets it read install sessions. -->
+    <string name="permlab_readInstallSessions">Read install sessions</string>
+    <!-- Description of an application permission that lets it read install sessions. -->
+    <string name="permdesc_readInstallSessions">Allows an application to read install sessions. This allows it to see details about active package installations.</string>
+
     <!-- Shown in the tutorial for tap twice for zoom control. -->
     <string name="tutorial_double_tap_to_zoom_message_short">Touch twice for zoom control</string>
 

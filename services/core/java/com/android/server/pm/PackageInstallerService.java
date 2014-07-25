@@ -24,10 +24,11 @@ import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.IPackageDeleteObserver;
 import android.content.pm.IPackageInstaller;
-import android.content.pm.IPackageInstallerObserver;
+import android.content.pm.IPackageInstallerCallback;
 import android.content.pm.IPackageInstallerSession;
 import android.content.pm.InstallSessionInfo;
 import android.content.pm.InstallSessionParams;
+import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.FileUtils;
 import android.os.HandlerThread;
@@ -54,6 +55,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class PackageInstallerService extends IPackageInstaller.Stub {
     private static final String TAG = "PackageInstaller";
@@ -80,7 +82,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     @GuardedBy("mSessions")
     private final SparseArray<PackageInstallerSession> mHistoricalSessions = new SparseArray<>();
 
-    private RemoteCallbackList<IPackageInstallerObserver> mObservers = new RemoteCallbackList<>();
+    private RemoteCallbackList<IPackageInstallerCallback> mCallbacks = new RemoteCallbackList<>();
 
     private static final FilenameFilter sStageFilter = new FilenameFilter() {
         @Override
@@ -152,8 +154,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     }
 
     @Override
-    public int createSession(String installerPackageName, InstallSessionParams params,
-            int userId) {
+    public int createSession(InstallSessionParams params, String installerPackageName, int userId) {
         final int callingUid = Binder.getCallingUid();
         mPm.enforceCrossUserPermission(callingUid, userId, true, "createSession");
 
@@ -172,14 +173,18 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
             params.installFlags |= INSTALL_REPLACE_EXISTING;
         }
 
-        if (params.mode == InstallSessionParams.MODE_INVALID) {
-            throw new IllegalArgumentException("Params must have valid mode set");
+        switch (params.mode) {
+            case InstallSessionParams.MODE_FULL_INSTALL:
+            case InstallSessionParams.MODE_INHERIT_EXISTING:
+                break;
+            default:
+                throw new IllegalArgumentException("Params must have valid mode set");
         }
 
         // Sanity check that install could fit
-        if (params.deltaSize > 0) {
+        if (params.sizeBytes > 0) {
             try {
-                mPm.freeStorage(params.deltaSize);
+                mPm.freeStorage(params.sizeBytes);
             } catch (IOException e) {
                 throw ExceptionUtils.wrap(e);
             }
@@ -248,8 +253,22 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     }
 
     @Override
-    public List<InstallSessionInfo> getSessions(int userId) {
-        mPm.enforceCrossUserPermission(Binder.getCallingUid(), userId, true, "getSessions");
+    public InstallSessionInfo getSessionInfo(int sessionId) {
+        synchronized (mSessions) {
+            final PackageInstallerSession session = mSessions.get(sessionId);
+            final boolean isOwner = (session != null)
+                    && (session.installerUid == Binder.getCallingUid());
+            if (!isOwner) {
+                enforceCallerCanReadSessions();
+            }
+            return session != null ? session.generateInfo() : null;
+        }
+    }
+
+    @Override
+    public List<InstallSessionInfo> getAllSessions(int userId) {
+        mPm.enforceCrossUserPermission(Binder.getCallingUid(), userId, true, "getAllSessions");
+        enforceCallerCanReadSessions();
 
         final List<InstallSessionInfo> result = new ArrayList<>();
         synchronized (mSessions) {
@@ -264,9 +283,29 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     }
 
     @Override
+    public List<InstallSessionInfo> getMySessions(String installerPackageName, int userId) {
+        mPm.enforceCrossUserPermission(Binder.getCallingUid(), userId, true, "getMySessions");
+        mAppOps.checkPackage(Binder.getCallingUid(), installerPackageName);
+
+        final List<InstallSessionInfo> result = new ArrayList<>();
+        synchronized (mSessions) {
+            for (int i = 0; i < mSessions.size(); i++) {
+                final PackageInstallerSession session = mSessions.valueAt(i);
+                if (Objects.equals(session.installerPackageName, installerPackageName)
+                        && session.userId == userId) {
+                    result.add(session.generateInfo());
+                }
+            }
+        }
+        return result;
+    }
+
+    @Override
     public void uninstall(String packageName, int flags, IPackageDeleteObserver observer,
             int userId) {
         mPm.enforceCrossUserPermission(Binder.getCallingUid(), userId, true, "uninstall");
+
+        // TODO: enforce installer of record or permission
         mPm.deletePackageAsUser(packageName, observer, userId, flags);
     }
 
@@ -280,17 +319,16 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     }
 
     @Override
-    public void registerObserver(IPackageInstallerObserver observer, int userId) {
-        mPm.enforceCrossUserPermission(Binder.getCallingUid(), userId, true, "registerObserver");
+    public void registerCallback(IPackageInstallerCallback callback, int userId) {
+        mPm.enforceCrossUserPermission(Binder.getCallingUid(), userId, true, "registerCallback");
+        enforceCallerCanReadSessions();
 
-        // TODO: consider restricting to active launcher app only
-        mObservers.register(observer, new UserHandle(userId));
+        mCallbacks.register(callback, new UserHandle(userId));
     }
 
     @Override
-    public void unregisterObserver(IPackageInstallerObserver observer, int userId) {
-        mPm.enforceCrossUserPermission(Binder.getCallingUid(), userId, true, "unregisterObserver");
-        mObservers.unregister(observer);
+    public void unregisterCallback(IPackageInstallerCallback callback) {
+        mCallbacks.unregister(callback);
     }
 
     private int getSessionUserId(int sessionId) {
@@ -299,52 +337,68 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         }
     }
 
-    private void notifySessionCreated(InstallSessionInfo info) {
-        final int userId = getSessionUserId(info.sessionId);
-        final int n = mObservers.beginBroadcast();
-        for (int i = 0; i < n; i++) {
-            final IPackageInstallerObserver observer = mObservers.getBroadcastItem(i);
-            final UserHandle user = (UserHandle) mObservers.getBroadcastCookie(i);
-            if (userId == user.getIdentifier()) {
-                try {
-                    observer.onSessionCreated(info);
-                } catch (RemoteException ignored) {
-                }
-            }
+    /**
+     * We allow those with permission, or the current home app.
+     */
+    private void enforceCallerCanReadSessions() {
+        final boolean hasPermission = (mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.READ_INSTALL_SESSIONS)
+                == PackageManager.PERMISSION_GRANTED);
+        final boolean isHomeApp = mPm.checkCallerIsHomeApp();
+        if (hasPermission || isHomeApp) {
+            return;
+        } else {
+            throw new SecurityException("Caller must be current home app to read install sessions");
         }
-        mObservers.finishBroadcast();
     }
 
-    private void notifySessionProgress(int sessionId, int progress) {
-        final int userId = getSessionUserId(sessionId);
-        final int n = mObservers.beginBroadcast();
+    private void notifySessionCreated(InstallSessionInfo info) {
+        final int userId = getSessionUserId(info.sessionId);
+        final int n = mCallbacks.beginBroadcast();
         for (int i = 0; i < n; i++) {
-            final IPackageInstallerObserver observer = mObservers.getBroadcastItem(i);
-            final UserHandle user = (UserHandle) mObservers.getBroadcastCookie(i);
+            final IPackageInstallerCallback callback = mCallbacks.getBroadcastItem(i);
+            final UserHandle user = (UserHandle) mCallbacks.getBroadcastCookie(i);
+            // TODO: dispatch notifications for slave profiles
             if (userId == user.getIdentifier()) {
                 try {
-                    observer.onSessionProgress(sessionId, progress);
+                    callback.onSessionCreated(info.sessionId);
                 } catch (RemoteException ignored) {
                 }
             }
         }
-        mObservers.finishBroadcast();
+        mCallbacks.finishBroadcast();
+    }
+
+    private void notifySessionProgressChanged(int sessionId, float progress) {
+        final int userId = getSessionUserId(sessionId);
+        final int n = mCallbacks.beginBroadcast();
+        for (int i = 0; i < n; i++) {
+            final IPackageInstallerCallback callback = mCallbacks.getBroadcastItem(i);
+            final UserHandle user = (UserHandle) mCallbacks.getBroadcastCookie(i);
+            if (userId == user.getIdentifier()) {
+                try {
+                    callback.onSessionProgressChanged(sessionId, progress);
+                } catch (RemoteException ignored) {
+                }
+            }
+        }
+        mCallbacks.finishBroadcast();
     }
 
     private void notifySessionFinished(int sessionId, boolean success) {
         final int userId = getSessionUserId(sessionId);
-        final int n = mObservers.beginBroadcast();
+        final int n = mCallbacks.beginBroadcast();
         for (int i = 0; i < n; i++) {
-            final IPackageInstallerObserver observer = mObservers.getBroadcastItem(i);
-            final UserHandle user = (UserHandle) mObservers.getBroadcastCookie(i);
+            final IPackageInstallerCallback callback = mCallbacks.getBroadcastItem(i);
+            final UserHandle user = (UserHandle) mCallbacks.getBroadcastCookie(i);
             if (userId == user.getIdentifier()) {
                 try {
-                    observer.onSessionFinished(sessionId, success);
+                    callback.onSessionFinished(sessionId, success);
                 } catch (RemoteException ignored) {
                 }
             }
         }
-        mObservers.finishBroadcast();
+        mCallbacks.finishBroadcast();
     }
 
     void dump(IndentingPrintWriter pw) {
@@ -374,8 +428,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     }
 
     class Callback {
-        public void onSessionProgress(PackageInstallerSession session, int progress) {
-            notifySessionProgress(session.sessionId, progress);
+        public void onSessionProgressChanged(PackageInstallerSession session, float progress) {
+            notifySessionProgressChanged(session.sessionId, progress);
         }
 
         public void onSessionFinished(PackageInstallerSession session, boolean success) {
