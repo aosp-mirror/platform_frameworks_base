@@ -926,7 +926,7 @@ public abstract class Layout {
     public float getLineMax(int line) {
         float margin = getParagraphLeadingMargin(line);
         float signedExtent = getLineExtent(line, false);
-        return margin + signedExtent >= 0 ? signedExtent : -signedExtent;
+        return margin + (signedExtent >= 0 ? signedExtent : -signedExtent);
     }
 
     /**
@@ -936,7 +936,7 @@ public abstract class Layout {
     public float getLineWidth(int line) {
         float margin = getParagraphLeadingMargin(line);
         float signedExtent = getLineExtent(line, true);
-        return margin + signedExtent >= 0 ? signedExtent : -signedExtent;
+        return margin + (signedExtent >= 0 ? signedExtent : -signedExtent);
     }
 
     /**
@@ -1571,6 +1571,16 @@ public abstract class Layout {
             int len = mt.mLen;
             boolean hasTabs = false;
             TabStops tabStops = null;
+            // leading margins should be taken into account when measuring a paragraph
+            int margin = 0;
+            if (text instanceof Spanned) {
+                Spanned spanned = (Spanned) text;
+                LeadingMarginSpan[] spans = getParagraphSpans(spanned, start, end,
+                        LeadingMarginSpan.class);
+                for (LeadingMarginSpan lms : spans) {
+                    margin += lms.getLeadingMargin(true);
+                }
+            }
             for (int i = 0; i < len; ++i) {
                 if (chars[i] == '\t') {
                     hasTabs = true;
@@ -1588,7 +1598,7 @@ public abstract class Layout {
                 }
             }
             tl.set(paint, text, start, end, dir, directions, hasTabs, tabStops);
-            return tl.metrics(null);
+            return margin + tl.metrics(null);
         } finally {
             TextLine.recycle(tl);
             MeasuredText.recycle(mt);
