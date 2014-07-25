@@ -58,20 +58,18 @@ final class AccessibilityCache {
         }
     }
 
-    public void removeWindows(int[] windowIds) {
+    public void clearWindows() {
         synchronized (mLock) {
-            final int windowCount = windowIds.length;
-            for (int i = 0; i < windowCount; i++) {
-                final int windowId = windowIds[i];
-                AccessibilityWindowInfo window = mWindowCache.get(windowId);
+            final int windowCount = mWindowCache.size();
+            for (int i = windowCount - 1; i >= 0; i--) {
+                AccessibilityWindowInfo window = mWindowCache.valueAt(i);
                 if (window != null) {
                     if (DEBUG) {
-                        Log.i(LOG_TAG, "Removing window: " + windowId);
+                        Log.i(LOG_TAG, "Removing window: " + window.getId());
                     }
                     window.recycle();
-                    mWindowCache.remove(windowId);
+                    mWindowCache.removeAt(i);
                 }
-                clearNodesForWindowLocked(windowIds[i]);
             }
         }
     }
@@ -110,6 +108,10 @@ final class AccessibilityCache {
 
                 case AccessibilityEvent.TYPE_VIEW_SCROLLED: {
                     clearSubTreeLocked(event.getWindowId(), event.getSourceNodeId());
+                } break;
+
+                case AccessibilityEvent.TYPE_WINDOWS_CHANGED: {
+                    clearWindows();
                 } break;
             }
         }
