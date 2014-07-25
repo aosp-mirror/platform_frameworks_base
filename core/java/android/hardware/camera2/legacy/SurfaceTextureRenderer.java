@@ -28,6 +28,7 @@ import android.opengl.GLES20;
 import android.opengl.Matrix;
 import android.text.format.Time;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Size;
 import android.view.Surface;
 import android.os.SystemProperties;
@@ -599,41 +600,63 @@ public class SurfaceTextureRenderer {
 
     /**
      * Draw the current buffer in the {@link SurfaceTexture} returned from
-     * {@link #getSurfaceTexture()} into the given set of target surfaces.
+     * {@link #getSurfaceTexture()} into the set of target {@link Surface}s
+     * in the next request from the given {@link CaptureCollector}, or drop
+     * the frame if none is available.
      *
      * <p>
-     * The given surfaces must be a subset of the surfaces set in the last
-     * {@link #configureSurfaces(java.util.Collection)} call.
+     * Any {@link Surface}s targeted must be a subset of the {@link Surface}s
+     * set in the last {@link #configureSurfaces(java.util.Collection)} call.
      * </p>
      *
-     * @param targetSurfaces the surfaces to draw to.
+     * @param targetCollector the surfaces to draw to.
      */
-    public void drawIntoSurfaces(Collection<Surface> targetSurfaces) {
+    public void drawIntoSurfaces(CaptureCollector targetCollector) {
         if ((mSurfaces == null || mSurfaces.size() == 0)
                 && (mConversionSurfaces == null || mConversionSurfaces.size() == 0)) {
             return;
         }
 
+        boolean doTiming = targetCollector.hasPendingPreviewCaptures();
         checkGlError("before updateTexImage");
 
-        if (targetSurfaces == null) {
-            mSurfaceTexture.updateTexImage();
-            return;
+        if (doTiming) {
+            beginGlTiming();
         }
-
-        beginGlTiming();
 
         mSurfaceTexture.updateTexImage();
 
         long timestamp = mSurfaceTexture.getTimestamp();
-        addGlTimestamp(timestamp);
+
+        Pair<RequestHolder, Long> captureHolder = targetCollector.previewCaptured(timestamp);
+
+        // No preview request queued, drop frame.
+        if (captureHolder == null) {
+            Log.w(TAG, "Dropping preview frame.");
+            if (doTiming) {
+                endGlTiming();
+            }
+            return;
+        }
+
+        RequestHolder request = captureHolder.first;
+
+        Collection<Surface> targetSurfaces = request.getHolderTargets();
+        if (doTiming) {
+            addGlTimestamp(timestamp);
+        }
 
         List<Long> targetSurfaceIds = LegacyCameraDevice.getSurfaceIds(targetSurfaces);
         for (EGLSurfaceHolder holder : mSurfaces) {
             if (LegacyCameraDevice.containsSurfaceId(holder.surface, targetSurfaceIds)) {
                 makeCurrent(holder.eglSurface);
-                drawFrame(mSurfaceTexture, holder.width, holder.height);
-                swapBuffers(holder.eglSurface);
+                try {
+                    LegacyCameraDevice.setNextTimestamp(holder.surface, captureHolder.second);
+                    drawFrame(mSurfaceTexture, holder.width, holder.height);
+                    swapBuffers(holder.eglSurface);
+                } catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
+                    Log.w(TAG, "Surface abandoned, dropping frame. ", e);
+                }
             }
         }
         for (EGLSurfaceHolder holder : mConversionSurfaces) {
@@ -647,6 +670,7 @@ public class SurfaceTextureRenderer {
 
                 try {
                     int format = LegacyCameraDevice.detectSurfaceType(holder.surface);
+                    LegacyCameraDevice.setNextTimestamp(holder.surface, captureHolder.second);
                     LegacyCameraDevice.produceFrame(holder.surface, mPBufferPixels.array(),
                             holder.width, holder.height, format);
                     swapBuffers(holder.eglSurface);
@@ -655,8 +679,11 @@ public class SurfaceTextureRenderer {
                 }
             }
         }
+        targetCollector.previewProduced();
 
-        endGlTiming();
+        if (doTiming) {
+            endGlTiming();
+        }
     }
 
     /**
