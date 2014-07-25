@@ -48,6 +48,7 @@ import android.net.NetworkAgent;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
+import android.net.NetworkMisc;
 import android.net.NetworkUtils;
 import android.net.RouteInfo;
 import android.net.UidRange;
@@ -331,10 +332,14 @@ public class Vpn {
         lp.setDomains(buffer.toString().trim());
         mNetworkInfo.setIsAvailable(true);
         mNetworkInfo.setDetailedState(DetailedState.CONNECTED, null, null);
+        NetworkMisc networkMisc = new NetworkMisc();
+        if (mConfig.allowBypass) {
+            networkMisc.allowBypass = true;
+        }
         long token = Binder.clearCallingIdentity();
         try {
             mNetworkAgent = new NetworkAgent(mLooper, mContext, NETWORKTYPE,
-                    mNetworkInfo, mNetworkCapabilities, lp, 0) {
+                    mNetworkInfo, mNetworkCapabilities, lp, 0, networkMisc) {
                             public void unwanted() {
                                 // We are user controlled, not driven by NetworkRequest.
                             };
