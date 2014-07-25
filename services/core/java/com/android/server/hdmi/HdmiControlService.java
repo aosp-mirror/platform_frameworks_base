@@ -45,6 +45,7 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.provider.Settings.Global;
+import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -197,6 +198,12 @@ public final class HdmiControlService extends SystemService {
     // from being modified.
     private List<HdmiPortInfo> mPortInfo;
 
+    // Map from path(physical address) to port ID.
+    private SparseIntArray mPortIdMap = new SparseIntArray();
+
+    // Map from port ID to HdmiPortInfo.
+    private SparseArray<HdmiPortInfo> mPortInfoMap = new SparseArray<>();
+
     private HdmiCecMessageValidator mMessageValidator;
 
     private final PowerStateReceiver mPowerStateReceiver = new PowerStateReceiver();
@@ -238,7 +245,7 @@ public final class HdmiControlService extends SystemService {
         if (mMhlController == null) {
             Slog.i(TAG, "Device does not support MHL-control.");
         }
-        mPortInfo = initPortInfo();
+        initPortInfo();
         mMessageValidator = new HdmiCecMessageValidator(this);
         publishBinderService(Context.HDMI_CONTROL_SERVICE, new BinderService());
 
@@ -318,7 +325,7 @@ public final class HdmiControlService extends SystemService {
     // Initialize HDMI port information. Combine the information from CEC and MHL HAL and
     // keep them in one place.
     @ServiceThreadOnly
-    private List<HdmiPortInfo> initPortInfo() {
+    private void initPortInfo() {
         assertRunOnServiceThread();
         HdmiPortInfo[] cecPortInfo = null;
 
@@ -328,7 +335,12 @@ public final class HdmiControlService extends SystemService {
             cecPortInfo = mCecController.getPortInfos();
         }
         if (cecPortInfo == null) {
-            return Collections.emptyList();
+            return;
+        }
+
+        for (HdmiPortInfo info : cecPortInfo) {
+            mPortIdMap.put(info.getAddress(), info.getId());
+            mPortInfoMap.put(info.getId(), info);
         }
 
         HdmiPortInfo[] mhlPortInfo = new HdmiPortInfo[0];
@@ -337,27 +349,24 @@ public final class HdmiControlService extends SystemService {
             // mhlPortInfo = mMhlController.getPortInfos();
         }
 
-        // Use the id (port number) to find the matched info between CEC and MHL to combine them
-        // into one. Leave the field `mhlSupported` to false if matched MHL entry is not found.
-        ArrayList<HdmiPortInfo> result = new ArrayList<>(cecPortInfo.length);
-        for (int i = 0; i < cecPortInfo.length; ++i) {
-            HdmiPortInfo cec = cecPortInfo[i];
-            int id = cec.getId();
-            boolean mhlInfoFound = false;
-            for (HdmiPortInfo mhl : mhlPortInfo) {
-                if (id == mhl.getId()) {
-                    result.add(new HdmiPortInfo(id, cec.getType(), cec.getAddress(),
-                            cec.isCecSupported(), mhl.isMhlSupported(), cec.isArcSupported()));
-                    mhlInfoFound = true;
-                    break;
-                }
-            }
-            if (!mhlInfoFound) {
-                result.add(cec);
+        ArraySet<Integer> mhlSupportedPorts = new ArraySet<Integer>(mhlPortInfo.length);
+        for (HdmiPortInfo info : mhlPortInfo) {
+            if (info.isMhlSupported()) {
+                mhlSupportedPorts.add(info.getId());
             }
         }
 
-        return Collections.unmodifiableList(result);
+        // Build HDMI port info list with CEC port info plus MHL supported flag.
+        ArrayList<HdmiPortInfo> result = new ArrayList<>(cecPortInfo.length);
+        for (HdmiPortInfo info : cecPortInfo) {
+            if (mhlSupportedPorts.contains(info.getId())) {
+                result.add(new HdmiPortInfo(info.getId(), info.getType(), info.getAddress(),
+                        info.isCecSupported(), true, info.isArcSupported()));
+            } else {
+                result.add(info);
+            }
+        }
+        mPortInfo = Collections.unmodifiableList(result);
     }
 
     /**
@@ -366,22 +375,19 @@ public final class HdmiControlService extends SystemService {
      * @param portId HDMI port id
      * @return {@link HdmiPortInfo} for the given port
      */
+    @ServiceThreadOnly
     HdmiPortInfo getPortInfo(int portId) {
-        // mPortInfo is an unmodifiable list and the only reference to its inner list.
-        // No lock is necessary.
-        for (HdmiPortInfo info : mPortInfo) {
-            if (portId == info.getId()) {
-                return info;
-            }
-        }
-        return null;
+        assertRunOnServiceThread();
+        return mPortInfoMap.get(portId, null);
     }
 
     /**
      * Returns the routing path (physical address) of the HDMI port for the given
      * port id.
      */
+    @ServiceThreadOnly
     int portIdToPath(int portId) {
+        assertRunOnServiceThread();
         HdmiPortInfo portInfo = getPortInfo(portId);
         if (portInfo == null) {
             Slog.e(TAG, "Cannot find the port info: " + portId);
@@ -396,23 +402,17 @@ public final class HdmiControlService extends SystemService {
      * the port id to be returned is the ID associated with the port address
      * 0x1000 (1.0.0.0) which is the topmost path of the given routing path.
      */
+    @ServiceThreadOnly
     int pathToPortId(int path) {
+        assertRunOnServiceThread();
         int portAddress = path & Constants.ROUTING_PATH_TOP_MASK;
-        for (HdmiPortInfo info : mPortInfo) {
-            if (portAddress == info.getAddress()) {
-                return info.getId();
-            }
-        }
-        return Constants.INVALID_PORT_ID;
+        return mPortIdMap.get(portAddress, Constants.INVALID_PORT_ID);
     }
 
+    @ServiceThreadOnly
     boolean isValidPortId(int portId) {
-        for (HdmiPortInfo info : mPortInfo) {
-            if (portId == info.getId()) {
-                return true;
-            }
-        }
-        return false;
+        assertRunOnServiceThread();
+        return getPortInfo(portId) != null;
     }
 
     /**
@@ -468,12 +468,12 @@ public final class HdmiControlService extends SystemService {
     /**
      * Whether a device of the specified physical address is connected to ARC enabled port.
      */
+    @ServiceThreadOnly
     boolean isConnectedToArcPort(int physicalAddress) {
-        for (HdmiPortInfo portInfo : mPortInfo) {
-            if (hasSameTopPort(portInfo.getAddress(), physicalAddress)
-                    && portInfo.isArcSupported()) {
-                return true;
-            }
+        assertRunOnServiceThread();
+        int portId = mPortIdMap.get(physicalAddress);
+        if (portId != Constants.INVALID_PORT_ID) {
+            return mPortInfoMap.get(portId).isArcSupported();
         }
         return false;
     }
@@ -622,7 +622,8 @@ public final class HdmiControlService extends SystemService {
         // TODO: find better name instead of model name.
         String displayName = Build.MODEL;
         return new HdmiCecDeviceInfo(logicalAddress,
-                getPhysicalAddress(), deviceType, getVendorId(), displayName);
+                getPhysicalAddress(), pathToPortId(getPhysicalAddress()), deviceType,
+                getVendorId(), displayName);
     }
 
     // Record class that monitors the event of the caller of being killed. Used to clean up
