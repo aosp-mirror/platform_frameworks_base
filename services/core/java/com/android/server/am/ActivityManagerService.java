@@ -2034,7 +2034,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             mSystemThread.installSystemApplicationInfo(info);
 
             synchronized (this) {
-                ProcessRecord app = newProcessRecordLocked(info, info.processName, false);
+                ProcessRecord app = newProcessRecordLocked(info, info.processName, false, 0);
                 app.persistent = true;
                 app.pid = MY_PID;
                 app.maxAdj = ProcessList.SYSTEM_ADJ;
@@ -2838,6 +2838,16 @@ public final class ActivityManagerService extends ActivityManagerNative
             ApplicationInfo info, boolean knownToBeDead, int intentFlags,
             String hostingType, ComponentName hostingName, boolean allowWhileBooting,
             boolean isolated, boolean keepIfLarge) {
+        return startProcessLocked(processName, info, knownToBeDead, intentFlags, hostingType,
+                hostingName, allowWhileBooting, isolated, 0 /* isolatedUid */, keepIfLarge,
+                null /* ABI override */, null /* entryPoint */, null /* entryPointArgs */,
+                null /* crashHandler */);
+    }
+
+    final ProcessRecord startProcessLocked(String processName, ApplicationInfo info,
+            boolean knownToBeDead, int intentFlags, String hostingType, ComponentName hostingName,
+            boolean allowWhileBooting, boolean isolated, int isolatedUid, boolean keepIfLarge,
+            String abiOverride, String entryPoint, String[] entryPointArgs, Runnable crashHandler) {
         ProcessRecord app;
         if (!isolated) {
             app = getProcessRecordLocked(processName, info.uid, keepIfLarge);
@@ -2905,7 +2915,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         if (app == null) {
-            app = newProcessRecordLocked(info, processName, isolated);
+            app = newProcessRecordLocked(info, processName, isolated, isolatedUid);
+            app.crashHandler = crashHandler;
             if (app == null) {
                 Slog.w(TAG, "Failed making new process record for "
                         + processName + "/" + info.uid + " isolated=" + isolated);
@@ -2932,7 +2943,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             return app;
         }
 
-        startProcessLocked(app, hostingType, hostingNameStr, null /* ABI override */);
+        startProcessLocked(
+                app, hostingType, hostingNameStr, abiOverride, entryPoint, entryPointArgs);
         return (app.pid != 0) ? app : null;
     }
 
@@ -2940,8 +2952,10 @@ public final class ActivityManagerService extends ActivityManagerNative
         return (ai.flags&ApplicationInfo.FLAG_PERSISTENT) != 0;
     }
 
-    private final void startProcessLocked(ProcessRecord app,
-            String hostingType, String hostingNameStr, String abiOverride) {
+    private final void startProcessLocked(ProcessRecord app, String hostingType,
+            String hostingNameStr, String abiOverride, String entryPoint, String[] entryPointArgs) {
+        boolean isActivityProcess = (entryPoint == null);
+        if (entryPoint == null) entryPoint = "android.app.ActivityThread";
         if (app.pid > 0 && app.pid != MY_PID) {
             synchronized (mPidsSelfLocked) {
                 mPidsSelfLocked.remove(app.pid);
@@ -3034,9 +3048,9 @@ public final class ActivityManagerService extends ActivityManagerNative
 
             // Start the process.  It will either succeed and return a result containing
             // the PID of the new process, or else throw a RuntimeException.
-            Process.ProcessStartResult startResult = Process.start("android.app.ActivityThread",
+            Process.ProcessStartResult startResult = Process.start(entryPoint,
                     app.processName, uid, uid, gids, debugFlags, mountExternal,
-                    app.info.targetSdkVersion, app.info.seinfo, requiredAbi, null);
+                    app.info.targetSdkVersion, app.info.seinfo, requiredAbi, entryPointArgs);
 
             if (app.isolated) {
                 mBatteryStatsService.addIsolatedUid(app.uid, app.info.uid);
@@ -3056,6 +3070,11 @@ public final class ActivityManagerService extends ActivityManagerNative
             buf.setLength(0);
             buf.append("Start proc ");
             buf.append(app.processName);
+            if (!isActivityProcess) {
+                buf.append(" [");
+                buf.append(entryPoint);
+                buf.append("]");
+            }
             buf.append(" for ");
             buf.append(hostingType);
             if (hostingNameStr != null) {
@@ -3086,10 +3105,12 @@ public final class ActivityManagerService extends ActivityManagerNative
             app.killedByAm = false;
             synchronized (mPidsSelfLocked) {
                 this.mPidsSelfLocked.put(startResult.pid, app);
-                Message msg = mHandler.obtainMessage(PROC_START_TIMEOUT_MSG);
-                msg.obj = app;
-                mHandler.sendMessageDelayed(msg, startResult.usingWrapper
-                        ? PROC_START_TIMEOUT_WITH_WRAPPER : PROC_START_TIMEOUT);
+                if (isActivityProcess) {
+                    Message msg = mHandler.obtainMessage(PROC_START_TIMEOUT_MSG);
+                    msg.obj = app;
+                    mHandler.sendMessageDelayed(msg, startResult.usingWrapper
+                            ? PROC_START_TIMEOUT_WITH_WRAPPER : PROC_START_TIMEOUT);
+                }
             }
         } catch (RuntimeException e) {
             // XXX do better error recovery.
@@ -5359,7 +5380,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             app.deathRecipient = adr;
         } catch (RemoteException e) {
             app.resetPackageList(mProcessStats);
-            startProcessLocked(app, "link fail", processName, null /* ABI override */);
+            startProcessLocked(app, "link fail", processName, null /* ABI override */,
+                    null /* entryPoint */, null /* entryPointArgs */);
             return false;
         }
 
@@ -5452,7 +5474,8 @@ public final class ActivityManagerService extends ActivityManagerNative
 
             app.resetPackageList(mProcessStats);
             app.unlinkDeathRecipient();
-            startProcessLocked(app, "bind fail", processName, null /* ABI override */);
+            startProcessLocked(app, "bind fail", processName, null /* ABI override */,
+                    null /* entryPoint */, null /* entryPointArgs */);
             return false;
         }
 
@@ -5607,7 +5630,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 for (int ip=0; ip<NP; ip++) {
                     if (DEBUG_PROCESSES) Slog.v(TAG, "Starting process on hold: "
                             + procs.get(ip));
-                    startProcessLocked(procs.get(ip), "on-hold", null, null /* ABI override */);
+                    startProcessLocked(procs.get(ip), "on-hold", null, null /* ABI override */,
+                            null /* entryPoint */, null /* entryPointArgs */);
                 }
             }
             
@@ -8955,29 +8979,35 @@ public final class ActivityManagerService extends ActivityManagerNative
     // =========================================================
 
     final ProcessRecord newProcessRecordLocked(ApplicationInfo info, String customProcess,
-            boolean isolated) {
+            boolean isolated, int isolatedUid) {
         String proc = customProcess != null ? customProcess : info.processName;
         BatteryStatsImpl.Uid.Proc ps = null;
         BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
         int uid = info.uid;
         if (isolated) {
-            int userId = UserHandle.getUserId(uid);
-            int stepsLeft = Process.LAST_ISOLATED_UID - Process.FIRST_ISOLATED_UID + 1;
-            while (true) {
-                if (mNextIsolatedProcessUid < Process.FIRST_ISOLATED_UID
-                        || mNextIsolatedProcessUid > Process.LAST_ISOLATED_UID) {
-                    mNextIsolatedProcessUid = Process.FIRST_ISOLATED_UID;
+            if (isolatedUid == 0) {
+                int userId = UserHandle.getUserId(uid);
+                int stepsLeft = Process.LAST_ISOLATED_UID - Process.FIRST_ISOLATED_UID + 1;
+                while (true) {
+                    if (mNextIsolatedProcessUid < Process.FIRST_ISOLATED_UID
+                            || mNextIsolatedProcessUid > Process.LAST_ISOLATED_UID) {
+                        mNextIsolatedProcessUid = Process.FIRST_ISOLATED_UID;
+                    }
+                    uid = UserHandle.getUid(userId, mNextIsolatedProcessUid);
+                    mNextIsolatedProcessUid++;
+                    if (mIsolatedProcesses.indexOfKey(uid) < 0) {
+                        // No process for this uid, use it.
+                        break;
+                    }
+                    stepsLeft--;
+                    if (stepsLeft <= 0) {
+                        return null;
+                    }
                 }
-                uid = UserHandle.getUid(userId, mNextIsolatedProcessUid);
-                mNextIsolatedProcessUid++;
-                if (mIsolatedProcesses.indexOfKey(uid) < 0) {
-                    // No process for this uid, use it.
-                    break;
-                }
-                stepsLeft--;
-                if (stepsLeft <= 0) {
-                    return null;
-                }
+            } else {
+                // Special case for startIsolatedProcess (internal only), where
+                // the uid of the isolated process is specified by the caller.
+                uid = isolatedUid;
             }
         }
         return new ProcessRecord(stats, info, proc, uid);
@@ -8993,7 +9023,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         if (app == null) {
-            app = newProcessRecordLocked(info, null, isolated);
+            app = newProcessRecordLocked(info, null, isolated, 0);
             mProcessNames.put(info.processName, app.uid, app);
             if (isolated) {
                 mIsolatedProcesses.put(app.uid, app);
@@ -9019,8 +9049,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
         if (app.thread == null && mPersistentStartingProcesses.indexOf(app) < 0) {
             mPersistentStartingProcesses.add(app);
-            startProcessLocked(app, "added application", app.processName,
-                    abiOverride);
+            startProcessLocked(app, "added application", app.processName, abiOverride,
+                    null /* entryPoint */, null /* entryPointArgs */);
         }
 
         return app;
@@ -10519,6 +10549,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             mProcessCrashTimes.put(app.info.processName, app.uid, now);
         }
 
+        if (app.crashHandler != null) mHandler.post(app.crashHandler);
         return true;
     }
 
@@ -13517,7 +13548,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             // We have components that still need to be running in the
             // process, so re-launch it.
             mProcessNames.put(app.processName, app.uid, app);
-            startProcessLocked(app, "restart", app.processName, null /* ABI override */);
+            startProcessLocked(app, "restart", app.processName, null /* ABI override */,
+                    null /* entryPoint */, null /* entryPointArgs */);
         } else if (app.pid > 0 && app.pid != MY_PID) {
             // Goodbye!
             boolean removed;
@@ -17848,6 +17880,32 @@ public final class ActivityManagerService extends ActivityManagerNative
         @Override
         public void wakingUp() {
             ActivityManagerService.this.wakingUp();
+        }
+
+        @Override
+        public int startIsolatedProcess(String entryPoint, String[] entryPointArgs,
+                String processName, String abiOverride, int uid, Runnable crashHandler) {
+            synchronized(ActivityManagerService.this) {
+                ApplicationInfo info = new ApplicationInfo();
+                // In general the ApplicationInfo.uid isn't neccesarily equal to ProcessRecord.uid.
+                // For isolated processes, the former contains the parent's uid and the latter the
+                // actual uid of the isolated process.
+                // In the special case introduced by this method (which is, starting an isolated
+                // process directly from the SystemServer without an actual parent app process) the
+                // closest thing to a parent's uid is SYSTEM_UID.
+                // The only important thing here is to keep AI.uid != PR.uid, in order to trigger
+                // the |isolated| logic in the ProcessRecord constructor.
+                info.uid = Process.SYSTEM_UID;
+                info.processName = processName;
+                info.className = entryPoint;
+                info.packageName = "android";
+                startProcessLocked(processName, info /* info */, false /* knownToBeDead */,
+                        0 /* intentFlags */, ""  /* hostingType */, null /* hostingName */,
+                        true /* allowWhileBooting */, true /* isolated */, uid,
+                        true /* keepIfLarge */, abiOverride, entryPoint, entryPointArgs,
+                        crashHandler);
+                return 0;
+            }
         }
     }
 
