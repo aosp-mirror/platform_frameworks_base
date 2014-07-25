@@ -1367,7 +1367,7 @@ public final class DisplayManagerService extends SystemService {
             }
             if (mContext.checkCallingPermission(
                     android.Manifest.permission.CAPTURE_VIDEO_OUTPUT)
-                    != PackageManager.PERMISSION_GRANTED) {
+                    == PackageManager.PERMISSION_GRANTED) {
                 return true;
             }
             return canProjectSecureVideo(projection);
@@ -1385,7 +1385,7 @@ public final class DisplayManagerService extends SystemService {
             }
             return mContext.checkCallingPermission(
                     android.Manifest.permission.CAPTURE_SECURE_VIDEO_OUTPUT)
-                    != PackageManager.PERMISSION_GRANTED;
+                    == PackageManager.PERMISSION_GRANTED;
         }
     }
 
