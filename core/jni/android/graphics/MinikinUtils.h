@@ -45,8 +45,8 @@ class TypefaceImpl;
 
 class MinikinUtils {
 public:
-    static std::string setLayoutProperties(Layout* layout, const Paint* paint, int bidiFlags,
-            TypefaceImpl* typeface);
+    static void doLayout(Layout* layout, const Paint* paint, int bidiFlags, TypefaceImpl* typeface,
+            const uint16_t* buf, size_t start, size_t count, size_t bufSize);
 
     static float xOffsetForTextAlign(Paint* paint, const Layout& layout);
 
