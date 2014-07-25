@@ -16,10 +16,18 @@
 
 package com.android.server.hdmi;
 
+import static android.hardware.hdmi.HdmiControlManager.ONE_TOUCH_RECORD_CEC_DISABLED;
+import static android.hardware.hdmi.HdmiControlManager.ONE_TOUCH_RECORD_CHECK_RECORDER_CONNECTION;
+import static android.hardware.hdmi.HdmiControlManager.ONE_TOUCH_RECORD_FAIL_TO_RECORD_DISPLAYED_SCREEN;
+import static android.hardware.hdmi.HdmiControlManager.TIME_RECORDING_RESULT_EXTRA_CEC_DISABLED;
+import static android.hardware.hdmi.HdmiControlManager.TIME_RECORDING_RESULT_EXTRA_CHECK_RECORDER_CONNECTION;
+import static android.hardware.hdmi.HdmiControlManager.TIME_RECORDING_RESULT_EXTRA_FAIL_TO_RECORD_SELECTED_SOURCE;
+
 import android.content.Intent;
 import android.hardware.hdmi.HdmiCecDeviceInfo;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiRecordSources;
+import android.hardware.hdmi.HdmiTimerRecordSources;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.media.AudioManager;
 import android.media.AudioSystem;
@@ -47,7 +55,7 @@ import java.util.Locale;
 final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     private static final String TAG = "HdmiCecLocalDeviceTv";
 
-    // Whether ARC is available or not. "true" means that ARC is estabilished between TV and
+    // Whether ARC is available or not. "true" means that ARC is established between TV and
     // AVR as audio receiver.
     @ServiceThreadOnly
     private boolean mArcEstablished = false;
@@ -819,7 +827,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             // Assumes only one OneTouchRecordAction.
             OneTouchRecordAction action = actions.get(0);
             if (action.getRecorderAddress() != message.getSource()) {
-                displayOsd(HdmiControlManager.MESSAGE_NO_RECORDING_PREVIOUS_RECORDING_IN_PROGRESS);
+                announceOneTouchRecordResult(
+                        HdmiControlManager.ONE_TOUCH_RECORD_PREVIOUS_RECORDING_IN_PROGRESS);
             }
             return super.handleRecordTvScreen(message);
         }
@@ -828,6 +837,14 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         byte[] recordSource = mService.invokeRecordRequestListener(recorderAddress);
         startOneTouchRecord(recorderAddress, recordSource);
         return true;
+    }
+
+    void announceOneTouchRecordResult(int result) {
+        mService.invokeOneTouchRecordResult(result);
+    }
+
+    void announceTimerRecordingResult(int result) {
+        mService.invokeTimerRecordingResult(result);
     }
 
     private boolean isMessageForSystemAudio(HdmiCecMessage message) {
@@ -1241,16 +1258,19 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         assertRunOnServiceThread();
         if (!mService.isControlEnabled()) {
             Slog.w(TAG, "Can not start one touch record. CEC control is disabled.");
+            announceOneTouchRecordResult(ONE_TOUCH_RECORD_CEC_DISABLED);
             return;
         }
 
         if (!checkRecorder(recorderAddress)) {
             Slog.w(TAG, "Invalid recorder address:" + recorderAddress);
+            announceOneTouchRecordResult(ONE_TOUCH_RECORD_CHECK_RECORDER_CONNECTION);
             return;
         }
 
         if (!checkRecordSource(recordSource)) {
             Slog.w(TAG, "Invalid record source." + Arrays.toString(recordSource));
+            announceOneTouchRecordResult(ONE_TOUCH_RECORD_FAIL_TO_RECORD_DISPLAYED_SCREEN);
             return;
         }
 
@@ -1264,11 +1284,13 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         assertRunOnServiceThread();
         if (!mService.isControlEnabled()) {
             Slog.w(TAG, "Can not stop one touch record. CEC control is disabled.");
+            announceOneTouchRecordResult(ONE_TOUCH_RECORD_CEC_DISABLED);
             return;
         }
 
         if (!checkRecorder(recorderAddress)) {
             Slog.w(TAG, "Invalid recorder address:" + recorderAddress);
+            announceOneTouchRecordResult(ONE_TOUCH_RECORD_CHECK_RECORDER_CONNECTION);
             return;
         }
 
@@ -1292,8 +1314,35 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     void startTimerRecording(int recorderAddress, int sourceType, byte[] recordSource) {
         assertRunOnServiceThread();
+        if (!mService.isControlEnabled()) {
+            Slog.w(TAG, "Can not start one touch record. CEC control is disabled.");
+            announceTimerRecordingResult(TIME_RECORDING_RESULT_EXTRA_CEC_DISABLED);
+            return;
+        }
 
-        // TODO: implement this.
+        if (!checkRecorder(recorderAddress)) {
+            Slog.w(TAG, "Invalid recorder address:" + recorderAddress);
+            announceTimerRecordingResult(
+                    TIME_RECORDING_RESULT_EXTRA_CHECK_RECORDER_CONNECTION);
+            return;
+        }
+
+        if (!checkTimerRecordingSource(sourceType, recordSource)) {
+            Slog.w(TAG, "Invalid record source." + Arrays.toString(recordSource));
+            announceTimerRecordingResult(
+                    TIME_RECORDING_RESULT_EXTRA_FAIL_TO_RECORD_SELECTED_SOURCE);
+            return;
+        }
+
+        addAndStartAction(
+                new TimerRecordingAction(this, recorderAddress, sourceType, recordSource));
+        Slog.i(TAG, "Start [Timer Recording]-Target:" + recorderAddress + ", SourceType:"
+                + sourceType + ", RecordSource:" + Arrays.toString(recordSource));
+    }
+
+    private boolean checkTimerRecordingSource(int sourceType, byte[] recordSource) {
+        return (recordSource != null)
+                && HdmiTimerRecordSources.checkTimerRecordSource(sourceType, recordSource);
     }
 
     @ServiceThreadOnly

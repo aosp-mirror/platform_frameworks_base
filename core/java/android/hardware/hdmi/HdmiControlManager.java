@@ -69,75 +69,85 @@ public final class HdmiControlManager {
     public static final int RESULT_INCORRECT_MODE = 6;
     public static final int RESULT_COMMUNICATION_FAILED = 7;
 
-    // -- Message ids for display osd.
-
-    /** Place holder for recording status message. Indicates the status of a recording. */
-    public static final int MESSAGE_RECORDING_STATUS_MESSAGE_START = 0x100;
+    // --- One Touch Recording success result
     /** Recording currently selected source. Indicates the status of a recording. */
-    public static final int MESSAGE_RECORDING_CURRENTLY_SELECTED_SOURCE = 0x101;
+    public static final int ONE_TOUCH_RECORD_RECORDING_CURRENTLY_SELECTED_SOURCE = 0x01;
     /** Recording Digital Service. Indicates the status of a recording. */
-    public static final int MESSAGE_RECORDING_DIGITAL_SERVICE = 0x102;
+    public static final int ONE_TOUCH_RECORD_RECORDING_DIGITAL_SERVICE = 0x02;
     /** Recording Analogue Service. Indicates the status of a recording. */
-    public static final int MESSAGE_RECORDING_ANALOGUE_SERVICE = 0x103;
+    public static final int ONE_TOUCH_RECORD_RECORDING_ANALOGUE_SERVICE = 0x03;
     /** Recording External input. Indicates the status of a recording. */
-    public static final int MESSAGE_RECORDING_EXTERNAL_INPUT = 0x104;
+    public static final int ONE_TOUCH_RECORD_RECORDING_EXTERNAL_INPUT = 0x04;
+
+    // --- One Touch Record failure result
     /** No recording – unable to record Digital Service. No suitable tuner. */
-    public static final int MESSAGE_NO_RECORDNIG_UNABLE_DIGITAL_SERVICE = 0x105;
+    public static final int ONE_TOUCH_RECORD_UNABLE_DIGITAL_SERVICE = 0x05;
     /** No recording – unable to record Analogue Service. No suitable tuner. */
-    public static final int MESSAGE_NO_RECORDNIG_UNABLE_ANALOGUE_SERVICE = 0x106;
+    public static final int ONE_TOUCH_RECORD_UNABLE_ANALOGUE_SERVICE = 0x06;
     /**
      * No recording – unable to select required service. as suitable tuner, but the requested
      * parameters are invalid or out of range for that tuner.
      */
-    public static final int MESSAGE_NO_RECORDNIG_UNABLE_SELECTED_SERVICE = 0x107;
+    public static final int ONE_TOUCH_RECORD_UNABLE_SELECTED_SERVICE = 0x07;
     /** No recording – invalid External plug number */
-    public static final int MESSAGE_NO_RECORDNIG_INVALID_EXTERNAL_PLUG_NUMBER = 0x109;
+    public static final int ONE_TOUCH_RECORD_INVALID_EXTERNAL_PLUG_NUMBER = 0x09;
     /** No recording – invalid External Physical Address */
-    public static final int MESSAGE_NO_RECORDNIG_INVALID_EXTERNAL_PHYSICAL_ADDRESS = 0x10A;
+    public static final int ONE_TOUCH_RECORD_INVALID_EXTERNAL_PHYSICAL_ADDRESS = 0x0A;
     /** No recording – CA system not supported */
-    public static final int MESSAGE_NO_RECORDNIG_UNSUPPORTED_CA = 0x10B;
+    public static final int ONE_TOUCH_RECORD_UNSUPPORTED_CA = 0x0B;
     /** No Recording – No or Insufficient CA Entitlements” */
-    public static final int MESSAGE_NO_RECORDNIG_NO_OR_INSUFFICIENT_CA_ENTITLEMENTS = 0x10C;
+    public static final int ONE_TOUCH_RECORD_NO_OR_INSUFFICIENT_CA_ENTITLEMENTS = 0x0C;
     /** No recording – Not allowed to copy source. Source is “copy never”. */
-    public static final int MESSAGE_NO_RECORDNIG_DISALLOW_TO_COPY = 0x10D;
+    public static final int ONE_TOUCH_RECORD_DISALLOW_TO_COPY = 0x0D;
     /** No recording – No further copies allowed */
-    public static final int MESSAGE_NO_RECORDNIG_DISALLOW_TO_FUTHER_COPIES = 0x10E;
+    public static final int ONE_TOUCH_RECORD_DISALLOW_TO_FUTHER_COPIES = 0x0E;
     /** No recording – No media */
-    public static final int MESSAGE_NO_RECORDNIG_NO_MEDIA = 0x110;
+    public static final int ONE_TOUCH_RECORD_NO_MEDIA = 0x10;
     /** No recording – playing */
-    public static final int MESSAGE_NO_RECORDNIG_PLAYING = 0x111;
+    public static final int ONE_TOUCH_RECORD_PLAYING = 0x11;
     /** No recording – already recording */
-    public static final int MESSAGE_NO_RECORDNIG_ALREADY_RECORDING = 0x112;
+    public static final int ONE_TOUCH_RECORD_ALREADY_RECORDING = 0x12;
     /** No recording – media protected */
-    public static final int MESSAGE_NO_RECORDNIG_MEDIA_PROTECTED = 0x113;
+    public static final int ONE_TOUCH_RECORD_MEDIA_PROTECTED = 0x13;
     /** No recording – no source signal */
-    public static final int MESSAGE_NO_RECORDNIG_NO_SOURCE_SIGNAL = 0x114;
+    public static final int ONE_TOUCH_RECORD_NO_SOURCE_SIGNAL = 0x14;
     /** No recording – media problem */
-    public static final int MESSAGE_NO_RECORDNIG_MEDIA_PROBLEM = 0x115;
+    public static final int ONE_TOUCH_RECORD_MEDIA_PROBLEM = 0x15;
     /** No recording – not enough space available */
-    public static final int MESSAGE_NO_RECORDNIG_NOT_ENOUGH_SPACE = 0x116;
+    public static final int ONE_TOUCH_RECORD_NOT_ENOUGH_SPACE = 0x16;
     /** No recording – Parental Lock On */
-    public static final int MESSAGE_NO_RECORDNIG_PARENT_LOCK_ON = 0x117;
+    public static final int ONE_TOUCH_RECORD_PARENT_LOCK_ON = 0x17;
     /** Recording terminated normally */
-    public static final int MESSAGE_RECORDING_TERMINATED_NORMALLY = 0x11A;
+    public static final int ONE_TOUCH_RECORD_RECORDING_TERMINATED_NORMALLY = 0x1A;
     /** Recording has already terminated */
-    public static final int MESSAGE_RECORDING_ALREADY_TERMINATED = 0x11B;
+    public static final int ONE_TOUCH_RECORD_RECORDING_ALREADY_TERMINATED = 0x1B;
     /** No recording – other reason */
-    public static final int MESSAGE_NO_RECORDNIG_OTHER_REASON = 0x11F;
+    public static final int ONE_TOUCH_RECORD_OTHER_REASON = 0x1F;
     // From here extra message for recording that is not mentioned in CEC spec
     /** No recording. Previous recording request in progress. */
-    public static final int MESSAGE_NO_RECORDING_PREVIOUS_RECORDING_IN_PROGRESS = 0x130;
+    public static final int ONE_TOUCH_RECORD_PREVIOUS_RECORDING_IN_PROGRESS = 0x30;
     /** No recording. Please check recorder and connection. */
-    public static final int MESSAGE_NO_RECORDING_CHECK_RECORDER_CONNECTION = 0x131;
+    public static final int ONE_TOUCH_RECORD_CHECK_RECORDER_CONNECTION = 0x31;
     /** Cannot record currently displayed source. */
-    public static final int MESSAGE_NO_RECORDING_FAIL_TO_RECORD_DISPLAYED_SCREEN = 0x132;
+    public static final int ONE_TOUCH_RECORD_FAIL_TO_RECORD_DISPLAYED_SCREEN = 0x32;
+    /** CEC is disabled. */
+    public static final int ONE_TOUCH_RECORD_CEC_DISABLED = 0x33;
 
+    // --- Types for timer recording
     /** Timer recording type for digital service source. */
     public static final int TIMER_RECORDING_TYPE_DIGITAL = 1;
     /** Timer recording type for analogue service source. */
     public static final int TIMER_RECORDING_TYPE_ANALOGUE = 2;
     /** Timer recording type for external source. */
     public static final int TIMER_RECORDING_TYPE_EXTERNAL = 3;
+
+    // --- Extra result value for timer recording.
+    /** No timer recording - check recorder and connection. */
+    public static final int TIME_RECORDING_RESULT_EXTRA_CHECK_RECORDER_CONNECTION = 0x01;
+    /** No timer recording - cannot record selected source. */
+    public static final int TIME_RECORDING_RESULT_EXTRA_FAIL_TO_RECORD_SELECTED_SOURCE = 0x02;
+    /** CEC is disabled. */
+    public static final int TIME_RECORDING_RESULT_EXTRA_CEC_DISABLED = 0x33;
 
     // True if we have a logical device of type playback hosted in the system.
     private final boolean mHasPlaybackDevice;

@@ -15,10 +15,9 @@
  */
 package android.hardware.hdmi;
 
-import static android.hardware.hdmi.HdmiRecordSources.RecordSource;
-import static android.hardware.hdmi.HdmiTimerRecordSources.TimerRecordSource;
-
 import android.annotation.SystemApi;
+import android.hardware.hdmi.HdmiRecordSources.RecordSource;
+import android.hardware.hdmi.HdmiTimerRecordSources.TimerRecordSource;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -155,27 +154,15 @@ public final class HdmiTvClient extends HdmiClient {
     }
 
     /**
-     * Callback interface to used to get notified when a record request from recorder device.
+     * Set record listener
+     *
+     * @param listener
      */
-    public interface RecordRequestListener {
-        /**
-         * Called when tv receives request request from recorder device. When it's called,
-         * it should return record source in byte array so that hdmi control service
-         * can start recording with the given source info.
-         *
-         * @return {@link HdmiRecordSources} to be used to set recording info
-         */
-        RecordSource onRecordRequestReceived(int recorderAddress);
-    }
-
-    /**
-     * Set {@link RecordRequestListener} to hdmi control service.
-     */
-    public void setOneTouchRecordRequestListener(RecordRequestListener listener) {
+    public void setRecordListener(HdmiRecordListener listener) {
         try {
-            mService.setOneTouchRecordRequestListener(getCallbackWrapper(listener));
+            mService.setHdmiRecordListener(getListenerWrapper(listener));
         } catch (RemoteException e) {
-            Log.e(TAG, "failed to set record request listener: ", e);
+            Log.e(TAG, "failed to set record listener.", e);
         }
     }
 
@@ -282,19 +269,28 @@ public final class HdmiTvClient extends HdmiClient {
         };
     }
 
-    private static IHdmiRecordRequestListener getCallbackWrapper(
-            final RecordRequestListener listener) {
-        return new IHdmiRecordRequestListener.Stub() {
+    private static IHdmiRecordListener getListenerWrapper(final HdmiRecordListener callback) {
+        return new IHdmiRecordListener.Stub() {
             @Override
-            public byte[] onRecordRequestReceived(int recorderAddress) throws RemoteException {
+            public byte[] getOneTouchRecordSource(int recorderAddress) {
                 HdmiRecordSources.RecordSource source =
-                        listener.onRecordRequestReceived(recorderAddress);
+                        callback.getOneTouchRecordSource(recorderAddress);
                 if (source == null) {
                     return EmptyArray.BYTE;
                 }
                 byte[] data = new byte[source.getDataSize(true)];
                 source.toByteArray(true, data, 0);
                 return data;
+            }
+
+            @Override
+            public void onOneTouchRecordResult(int result) {
+                callback.onOneTouchRecordResult(result);
+            }
+
+            @Override
+            public void onTimerRecordingResult(int result) {
+                callback.onTimerRecordingResult(result);
             }
         };
     }
