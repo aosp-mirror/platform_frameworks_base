@@ -52,44 +52,6 @@ import java.util.Locale;
 class SimpleMonthView extends View {
     private static final String TAG = "SimpleMonthView";
 
-    /**
-     * These params can be passed into the view to control how it appears.
-     * {@link #VIEW_PARAMS_WEEK} is the only required field, though the default
-     * values are unlikely to fit most layouts correctly.
-     */
-    /**
-     * This sets the height of this week in pixels
-     */
-    static final String VIEW_PARAMS_HEIGHT = "height";
-    /**
-     * This specifies the position (or weeks since the epoch) of this week,
-     * calculated using
-     */
-    static final String VIEW_PARAMS_MONTH = "month";
-    /**
-     * This specifies the position (or weeks since the epoch) of this week,
-     * calculated using
-     */
-    static final String VIEW_PARAMS_YEAR = "year";
-    /**
-     * This sets one of the days in this view as selected {@link Time#SUNDAY}
-     * through {@link Time#SATURDAY}.
-     */
-    static final String VIEW_PARAMS_SELECTED_DAY = "selected_day";
-    /**
-     * Which day the week should start on. {@link Time#SUNDAY} through
-     * {@link Time#SATURDAY}.
-     */
-    static final String VIEW_PARAMS_WEEK_START = "week_start";
-    /**
-     * First enabled day.
-     */
-    static final String VIEW_PARAMS_ENABLEDDAYRANGE_START = "enabled_day_range_start";
-    /**
-     * Last enabled day.
-     */
-    static final String VIEW_PARAMS_ENABLEDDAYRANGE_END = "enabled_day_range_end";
-
     private static int DEFAULT_HEIGHT = 32;
     private static int MIN_HEIGHT = 10;
 
@@ -327,36 +289,38 @@ class SimpleMonthView extends View {
         drawDays(canvas);
     }
 
+    private static boolean isValidDay(int day) {
+        return (day >= Time.SUNDAY && day <= Time.SATURDAY);
+    }
+
     /**
-     * Sets all the parameters for displaying this week. The only required
-     * parameter is the week number. Other parameters have a default value and
-     * will only update if a new value is included, except for focus month,
-     * which will always default to no focus month if no value is passed in. See
-     * {@link #VIEW_PARAMS_HEIGHT} for more info on parameters.
+     * Sets all the parameters for displaying this week. Parameters have a default value and
+     * will only update if a new value is included, except for focus month, which will always
+     * default to no focus month if no value is passed in. The only required parameter is the
+     * week start.
      *
-     * @param params A map of the new parameters, see
-     *            {@link #VIEW_PARAMS_HEIGHT}
+     * @param selectedDay the selected day.
+     * @param month the month.
+     * @param year the year.
+     * @param weekStart which day the week should start on. {@link Time#SUNDAY} through
+     *        {@link Time#SATURDAY}.
+     * @param enabledDayStart the first enabled day.
+     * @param enabledDayEnd the last enabled day.
      */
-    void setMonthParams(HashMap<String, Integer> params) {
-        if (!params.containsKey(VIEW_PARAMS_MONTH) && !params.containsKey(VIEW_PARAMS_YEAR)) {
-            throw new InvalidParameterException(
-                    "You must specify the month and year for this view");
-        }
-        setTag(params);
-        // We keep the current value for any params not present
-        if (params.containsKey(VIEW_PARAMS_HEIGHT)) {
-            mRowHeight = params.get(VIEW_PARAMS_HEIGHT);
-            if (mRowHeight < MIN_HEIGHT) {
-                mRowHeight = MIN_HEIGHT;
-            }
-        }
-        if (params.containsKey(VIEW_PARAMS_SELECTED_DAY)) {
-            mSelectedDay = params.get(VIEW_PARAMS_SELECTED_DAY);
+    void setMonthParams(int selectedDay, int month, int year, int weekStart, int enabledDayStart,
+            int enabledDayEnd) {
+        if (mRowHeight < MIN_HEIGHT) {
+            mRowHeight = MIN_HEIGHT;
         }
 
-        // Allocate space for caching the day numbers and focus values
-        mMonth = params.get(VIEW_PARAMS_MONTH);
-        mYear = params.get(VIEW_PARAMS_YEAR);
+        if (isValidDay(selectedDay)) {
+            mSelectedDay = selectedDay;
+        }
+
+        if (month >= Calendar.JANUARY && month <= Calendar.DECEMBER) {
+            mMonth = month;
+        }
+        mYear = year;
 
         // Figure out what day today is
         final Time today = new Time(Time.getCurrentTimezone());
@@ -369,17 +333,17 @@ class SimpleMonthView extends View {
         mCalendar.set(Calendar.DAY_OF_MONTH, 1);
         mDayOfWeekStart = mCalendar.get(Calendar.DAY_OF_WEEK);
 
-        if (params.containsKey(VIEW_PARAMS_WEEK_START)) {
-            mWeekStart = params.get(VIEW_PARAMS_WEEK_START);
+        if (isValidDay(weekStart)) {
+            mWeekStart = weekStart;
         } else {
             mWeekStart = mCalendar.getFirstDayOfWeek();
         }
 
-        if (params.containsKey(VIEW_PARAMS_ENABLEDDAYRANGE_START)) {
-            mEnabledDayStart = params.get(VIEW_PARAMS_ENABLEDDAYRANGE_START);
+        if (enabledDayStart > 0 && enabledDayEnd < 32) {
+            mEnabledDayStart = enabledDayStart;
         }
-        if (params.containsKey(VIEW_PARAMS_ENABLEDDAYRANGE_END)) {
-            mEnabledDayEnd = params.get(VIEW_PARAMS_ENABLEDDAYRANGE_END);
+        if (enabledDayEnd > 0 && enabledDayEnd < 32 && enabledDayEnd >= enabledDayStart) {
+            mEnabledDayEnd = enabledDayEnd;
         }
 
         mNumCells = getDaysInMonth(mMonth, mYear);
