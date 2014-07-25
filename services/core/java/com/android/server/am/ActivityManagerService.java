@@ -3098,7 +3098,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         final BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
         if (resumed) {
             if (mUsageStatsService != null) {
-                mUsageStatsService.reportEvent(component.realActivity, System.currentTimeMillis(),
+                mUsageStatsService.reportEvent(component.realActivity, component.userId,
+                        System.currentTimeMillis(),
                         UsageStats.Event.MOVE_TO_FOREGROUND);
             }
             synchronized (stats) {
@@ -3106,7 +3107,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         } else {
             if (mUsageStatsService != null) {
-                mUsageStatsService.reportEvent(component.realActivity, System.currentTimeMillis(),
+                mUsageStatsService.reportEvent(component.realActivity, component.userId,
+                        System.currentTimeMillis(),
                         UsageStats.Event.MOVE_TO_BACKGROUND);
             }
             synchronized (stats) {
