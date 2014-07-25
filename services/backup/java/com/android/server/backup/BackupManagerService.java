@@ -6645,8 +6645,8 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
             UnifiedRestoreState nextState = UnifiedRestoreState.FINAL;
             try {
                 mRestoreDescription = mTransport.nextRestorePackage();
-                final int type = mRestoreDescription.getDataType();
-                final String pkgName = mRestoreDescription.getPackageName();
+                final String pkgName = (mRestoreDescription != null)
+                        ? mRestoreDescription.getPackageName() : null;
                 if (pkgName == null) {
                     Slog.e(TAG, "Failure getting next package name");
                     EventLog.writeEvent(EventLogTags.RESTORE_TRANSPORT_FAILURE);
@@ -6717,6 +6717,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
 
                 // Reset per-package preconditions and fire the appropriate next state
                 mWidgetData = null;
+                final int type = mRestoreDescription.getDataType();
                 if (type == RestoreDescription.TYPE_KEY_VALUE) {
                     nextState = UnifiedRestoreState.RESTORE_KEYVALUE;
                 } else if (type == RestoreDescription.TYPE_FULL_STREAM) {
@@ -8468,12 +8469,6 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                 Slog.w(TAG, "restorePackage: bad packageName=" + packageName
                         + " or calling uid=" + Binder.getCallingUid());
                 throw new SecurityException("No permission to restore other packages");
-            }
-
-            // If the package has no backup agent, we obviously cannot proceed
-            if (app.applicationInfo.backupAgentName == null) {
-                Slog.w(TAG, "Asked to restore package " + packageName + " with no agent");
-                return -1;
             }
 
             // So far so good; we're allowed to try to restore this package.  Now
