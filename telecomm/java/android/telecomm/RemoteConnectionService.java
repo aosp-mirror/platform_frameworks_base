@@ -27,9 +27,9 @@ import android.telephony.DisconnectCause;
 import android.text.TextUtils;
 
 import com.android.internal.os.SomeArgs;
-import com.android.internal.telecomm.ICallVideoProvider;
 import com.android.internal.telecomm.IConnectionService;
 import com.android.internal.telecomm.IConnectionServiceAdapter;
+import com.android.internal.telecomm.IVideoCallProvider;
 import com.android.internal.telecomm.RemoteServiceCallback;
 
 import java.util.LinkedList;
@@ -360,8 +360,8 @@ final class RemoteConnectionService implements DeathRecipient {
         }
 
         @Override
-        public void setCallVideoProvider(
-                String connectionId, ICallVideoProvider callVideoProvider) {
+        public void setVideoCallProvider(
+                String connectionId, IVideoCallProvider videoCallProvider) {
             // not supported for remote connections.
         }
 

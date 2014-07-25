@@ -18,9 +18,9 @@ package android.telecomm;
 
 import android.app.PendingIntent;
 import android.net.Uri;
-import android.os.RemoteException;
 import android.telephony.DisconnectCause;
 
+import java.lang.String;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -309,15 +309,13 @@ public final class Call {
         public void onPostDialWait(Call call, String remainingPostDialSequence) {}
 
         /**
-         * Invoked when the {@code RemoteCallVideoProvider} of the {@code Call} has changed.
+         * Invoked when the {@code Call.VideoCall} of the {@code Call} has changed.
          *
          * @param call The {@code Call} invoking this method.
-         * @param callVideoProvider The {@code RemoteCallVideoProvider} associated with the
-         * {@code Call}.
+         * @param videoCall The {@code Call.VideoCall} associated with the {@code Call}.
          */
 
-        public void onCallVideoProviderChanged(Call call,
-                RemoteCallVideoProvider callVideoProvider) {}
+        public void onVideoCallChanged(Call call, InCallService.VideoCall videoCall) {}
 
         /**
          * Launches an activity for this connection on top of the in-call UI.
@@ -348,7 +346,7 @@ public final class Call {
     private final List<Call> mUnmodifiableChildren = Collections.unmodifiableList(mChildren);
     private List<String> mCannedTextResponses = null;
     private String mRemainingPostDialSequence;
-    private RemoteCallVideoProvider mCallVideoProvider;
+    private InCallService.VideoCall mVideoCall;
     private Details mDetails;
     private final List<Listener> mListeners = new ArrayList<>();
 
@@ -533,10 +531,10 @@ public final class Call {
     /**
      * Obtains an object that can be used to display video from this {@code Call}.
      *
-     * @return An {@code ICallVideoProvider}.
+     * @return An {@code Call.VideoCall}.
      */
-    public RemoteCallVideoProvider getCallVideoProvider() {
-        return mCallVideoProvider;
+    public InCallService.VideoCall getVideoCall() {
+        return mVideoCall;
     }
 
     /**
@@ -609,14 +607,9 @@ public final class Call {
                     Collections.unmodifiableList(parcelableCall.getCannedSmsResponses());
         }
 
-        boolean callVideoProviderChanged = false;
-        try {
-            callVideoProviderChanged =
-                    !Objects.equals(mCallVideoProvider, parcelableCall.getCallVideoProvider());
-            if (callVideoProviderChanged) {
-                mCallVideoProvider = parcelableCall.getCallVideoProvider();
-            }
-        } catch (RemoteException e) {
+        boolean videoCallChanged = !Objects.equals(mVideoCall, parcelableCall.getVideoCall());
+        if (videoCallChanged) {
+            mVideoCall = parcelableCall.getVideoCall();
         }
 
         int state = stateFromParcelableCallState(parcelableCall.getState());
@@ -649,8 +642,8 @@ public final class Call {
         if (cannedTextResponsesChanged) {
             fireCannedTextResponsesLoaded(mCannedTextResponses);
         }
-        if (callVideoProviderChanged) {
-            fireCallVideoProviderChanged(mCallVideoProvider);
+        if (videoCallChanged) {
+            fireVideoCallChanged(mVideoCall);
         }
 
         // If we have transitioned to DISCONNECTED, that means we need to notify clients and
@@ -715,10 +708,10 @@ public final class Call {
         }
     }
 
-    private void fireCallVideoProviderChanged(RemoteCallVideoProvider callVideoProvider) {
+    private void fireVideoCallChanged(InCallService.VideoCall videoCall) {
         Listener[] listeners = mListeners.toArray(new Listener[mListeners.size()]);
         for (int i = 0; i < listeners.length; i++) {
-            listeners[i].onCallVideoProviderChanged(this, callVideoProvider);
+            listeners[i].onVideoCallChanged(this, videoCall);
         }
     }
 
