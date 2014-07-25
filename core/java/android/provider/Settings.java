@@ -4630,6 +4630,13 @@ public final class Settings {
         public static final String SKIP_FIRST_USE_HINTS = "skip_first_use_hints";
 
         /**
+         * Persisted playback time after a user confirmation of an unsafe volume level.
+         *
+         * @hide
+         */
+        public static final String UNSAFE_VOLUME_MUSIC_ACTIVE_MS = "unsafe_volume_music_active_ms";
+
+        /**
          * This are the settings to be backed up.
          *
          * NOTE: Settings are backed up and restored in the order they appear
