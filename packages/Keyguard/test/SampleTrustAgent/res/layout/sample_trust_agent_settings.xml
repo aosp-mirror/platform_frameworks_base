@@ -32,8 +32,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Crash" />
+    <CheckBox android:id="@+id/managing_trust"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:text="Managing trust" />
     <CheckBox android:id="@+id/report_unlock_attempts"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
             android:text="Report unlock attempts" />
 </LinearLayout>

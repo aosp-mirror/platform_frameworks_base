@@ -174,6 +174,11 @@ public class KeyguardUpdateMonitorCallback {
     public void onTrustChanged(int userId) { }
 
     /**
+     * Called when trust being managed changes for a user.
+     */
+    public void onTrustManagedChanged(int userId) { }
+
+    /**
      * Called when a fingerprint is recognized.
      * @param userId
      */
@@ -183,5 +188,4 @@ public class KeyguardUpdateMonitorCallback {
      * Called when fingerprint is acquired but not yet recognized
      */
     public void onFingerprintAcquired(int info) { }
-
 }

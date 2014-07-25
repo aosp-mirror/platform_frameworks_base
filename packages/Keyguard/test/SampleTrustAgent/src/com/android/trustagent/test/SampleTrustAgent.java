@@ -28,7 +28,8 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
-public class SampleTrustAgent extends TrustAgentService {
+public class SampleTrustAgent extends TrustAgentService
+        implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     LocalBroadcastManager mLocalBroadcastManager;
 
@@ -41,6 +42,8 @@ public class SampleTrustAgent extends TrustAgentService {
 
     private static final String PREFERENCE_REPORT_UNLOCK_ATTEMPTS
             = "preference.report_unlock_attempts";
+    private static final String PREFERENCE_MANAGING_TRUST
+            = "preference.managing_trust";
 
     private static final String TAG = "SampleTrustAgent";
 
@@ -52,6 +55,9 @@ public class SampleTrustAgent extends TrustAgentService {
         filter.addAction(ACTION_REVOKE_TRUST);
         mLocalBroadcastManager = LocalBroadcastManager.getInstance(this);
         mLocalBroadcastManager.registerReceiver(mReceiver, filter);
+        setManagingTrust(getIsManagingTrust(this));
+        PreferenceManager.getDefaultSharedPreferences(this)
+                .registerOnSharedPreferenceChangeListener(this);
     }
 
     @Override
@@ -73,6 +79,8 @@ public class SampleTrustAgent extends TrustAgentService {
     public void onDestroy() {
         super.onDestroy();
         mLocalBroadcastManager.unregisterReceiver(mReceiver);
+        PreferenceManager.getDefaultSharedPreferences(this)
+                .unregisterOnSharedPreferenceChangeListener(this);
     }
 
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
@@ -80,9 +88,14 @@ public class SampleTrustAgent extends TrustAgentService {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             if (ACTION_GRANT_TRUST.equals(action)) {
-                grantTrust(intent.getStringExtra(EXTRA_MESSAGE),
-                        intent.getLongExtra(EXTRA_DURATION, 0),
-                        false /* initiatedByUser */);
+                try {
+                    grantTrust(intent.getStringExtra(EXTRA_MESSAGE),
+                            intent.getLongExtra(EXTRA_DURATION, 0),
+                            false /* initiatedByUser */);
+                } catch (IllegalStateException e) {
+                    Toast.makeText(context,
+                            "IllegalStateException: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
             } else if (ACTION_REVOKE_TRUST.equals(action)) {
                 revokeTrust();
             }
@@ -113,5 +126,24 @@ public class SampleTrustAgent extends TrustAgentService {
         SharedPreferences sharedPreferences = PreferenceManager
                 .getDefaultSharedPreferences(context);
         return sharedPreferences.getBoolean(PREFERENCE_REPORT_UNLOCK_ATTEMPTS, false);
+    }
+
+    public static void setIsManagingTrust(Context context, boolean enabled) {
+        SharedPreferences sharedPreferences = PreferenceManager
+                .getDefaultSharedPreferences(context);
+        sharedPreferences.edit().putBoolean(PREFERENCE_MANAGING_TRUST, enabled).apply();
+    }
+
+    public static boolean getIsManagingTrust(Context context) {
+        SharedPreferences sharedPreferences = PreferenceManager
+                .getDefaultSharedPreferences(context);
+        return sharedPreferences.getBoolean(PREFERENCE_MANAGING_TRUST, false);
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (PREFERENCE_MANAGING_TRUST.equals(key)) {
+            setManagingTrust(getIsManagingTrust(this));
+        }
     }
 }

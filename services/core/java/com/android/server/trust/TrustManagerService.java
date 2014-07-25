@@ -153,6 +153,7 @@ public class TrustManagerService extends SystemService {
     }
 
     public void updateTrust(int userId) {
+        dispatchOnTrustManagedChanged(aggregateIsTrustManaged(userId), userId);
         dispatchOnTrustChanged(aggregateIsTrusted(userId), userId);
     }
 
@@ -211,7 +212,7 @@ public class TrustManagerService extends SystemService {
         boolean trustMayHaveChanged = false;
         for (int i = 0; i < obsoleteAgents.size(); i++) {
             AgentInfo info = obsoleteAgents.valueAt(i);
-            if (info.agent.isTrusted()) {
+            if (info.agent.isManagingTrust()) {
                 trustMayHaveChanged = true;
             }
             info.agent.unbind();
@@ -229,7 +230,7 @@ public class TrustManagerService extends SystemService {
             AgentInfo info = mActiveAgents.valueAt(i);
             if (packageName.equals(info.component.getPackageName())) {
                 Log.i(TAG, "Resetting agent " + info.component.flattenToShortString());
-                if (info.agent.isTrusted()) {
+                if (info.agent.isManagingTrust()) {
                     trustMayHaveChanged = true;
                 }
                 info.agent.unbind();
@@ -247,7 +248,7 @@ public class TrustManagerService extends SystemService {
             AgentInfo info = mActiveAgents.valueAt(i);
             if (name.equals(info.component) && userId == info.userId) {
                 Log.i(TAG, "Resetting agent " + info.component.flattenToShortString());
-                if (info.agent.isTrusted()) {
+                if (info.agent.isManagingTrust()) {
                     trustMayHaveChanged = true;
                 }
                 info.agent.unbind();
@@ -333,6 +334,21 @@ public class TrustManagerService extends SystemService {
         return false;
     }
 
+    private boolean aggregateIsTrustManaged(int userId) {
+        if (!mUserHasAuthenticatedSinceBoot.get(userId)) {
+            return false;
+        }
+        for (int i = 0; i < mActiveAgents.size(); i++) {
+            AgentInfo info = mActiveAgents.valueAt(i);
+            if (info.userId == userId) {
+                if (info.agent.isManagingTrust()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     private void dispatchUnlockAttempt(boolean successful, int userId) {
         for (int i = 0; i < mActiveAgents.size(); i++) {
             AgentInfo info = mActiveAgents.valueAt(i);
@@ -383,7 +399,21 @@ public class TrustManagerService extends SystemService {
             try {
                 mTrustListeners.get(i).onTrustChanged(enabled, userId);
             } catch (DeadObjectException e) {
-                if (DEBUG) Slog.d(TAG, "Removing dead TrustListener.");
+                Slog.d(TAG, "Removing dead TrustListener.");
+                mTrustListeners.remove(i);
+                i--;
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Exception while notifying TrustListener.", e);
+            }
+        }
+    }
+
+    private void dispatchOnTrustManagedChanged(boolean managed, int userId) {
+        for (int i = 0; i < mTrustListeners.size(); i++) {
+            try {
+                mTrustListeners.get(i).onTrustManagedChanged(managed, userId);
+            } catch (DeadObjectException e) {
+                Slog.d(TAG, "Removing dead TrustListener.");
                 mTrustListeners.remove(i);
                 i--;
             } catch (RemoteException e) {
@@ -472,6 +502,7 @@ public class TrustManagerService extends SystemService {
                 fout.print(" (current)");
             }
             fout.print(": trusted=" + dumpBool(aggregateIsTrusted(user.id)));
+            fout.print(", trustManaged=" + dumpBool(aggregateIsTrustManaged(user.id)));
             fout.println();
             fout.println("   Enabled agents:");
             boolean duplicateSimpleNames = false;
@@ -482,7 +513,9 @@ public class TrustManagerService extends SystemService {
                 fout.print("    "); fout.println(info.component.flattenToShortString());
                 fout.print("     bound=" + dumpBool(info.agent.isBound()));
                 fout.print(", connected=" + dumpBool(info.agent.isConnected()));
-                fout.println(", trusted=" + dumpBool(trusted));
+                fout.print(", managingTrust=" + dumpBool(info.agent.isManagingTrust()));
+                fout.print(", trusted=" + dumpBool(trusted));
+                fout.println();
                 if (trusted) {
                     fout.println("      message=\"" + info.agent.getMessage() + "\"");
                 }
