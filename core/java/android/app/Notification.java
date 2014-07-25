@@ -1732,6 +1732,20 @@ public class Notification implements Parcelable
     }
 
     /**
+     * @hide
+     */
+    public boolean isGroupSummary() {
+        return mGroupKey != null && (flags & FLAG_GROUP_SUMMARY) != 0;
+    }
+
+    /**
+     * @hide
+     */
+    public boolean isGroupChild() {
+        return mGroupKey != null && (flags & FLAG_GROUP_SUMMARY) == 0;
+    }
+
+    /**
      * Builder class for {@link Notification} objects.
      *
      * Provides a convenient way to set the various fields of a {@link Notification} and generate

@@ -36,7 +36,6 @@ import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.graphics.Rect;
-import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
@@ -96,7 +95,8 @@ import static com.android.keyguard.KeyguardHostView.OnDismissAction;
 
 public abstract class BaseStatusBar extends SystemUI implements
         CommandQueue.Callbacks, ActivatableNotificationView.OnActivatedListener,
-        RecentsComponent.Callbacks, ExpandableNotificationRow.ExpansionLogger {
+        RecentsComponent.Callbacks, ExpandableNotificationRow.ExpansionLogger,
+        NotificationData.Environment {
     public static final String TAG = "StatusBar";
     public static final boolean DEBUG = false;
     public static final boolean MULTIUSER_DEBUG = false;
@@ -132,7 +132,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected H mHandler = createHandler();
 
     // all notifications
-    protected NotificationData mNotificationData = new NotificationData();
+    protected NotificationData mNotificationData;
     protected NotificationStackScrollLayout mStackScroller;
 
     // for heads up notifications
@@ -201,6 +201,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected NotificationOverflowContainer mKeyguardIconOverflowContainer;
     protected DismissView mDismissView;
 
+    @Override  // NotificationData.Environment
     public boolean isDeviceProvisioned() {
         return mDeviceProvisioned;
     }
@@ -304,10 +305,6 @@ public abstract class BaseStatusBar extends SystemUI implements
                 @Override
                 public void run() {
                     for (StatusBarNotification sbn : notifications) {
-                        if (shouldFilterOut(sbn.getNotification())) {
-                            if (DEBUG) Log.d(TAG, "Ignoring notification: " + sbn);
-                            continue;
-                        }
                         addNotification(sbn, currentRanking);
                     }
                 }
@@ -322,20 +319,8 @@ public abstract class BaseStatusBar extends SystemUI implements
                 @Override
                 public void run() {
                     Notification n = sbn.getNotification();
-                    boolean isUpdate = mNotificationData.findByKey(sbn.getKey()) != null
+                    boolean isUpdate = mNotificationData.get(sbn.getKey()) != null
                             || isHeadsUp(sbn.getKey());
-                    if (shouldFilterOut(n)) {
-                        if (DEBUG) Log.d(TAG, "Ignoring notification: " + sbn);
-                        // If this is an update, i.e. the notification existed
-                        // before but wasn't filtered out, remove the old
-                        // instance. Otherwise just update the ranking.
-                        if (isUpdate) {
-                            removeNotification(sbn.getKey(), rankingMap);
-                        } else {
-                            updateNotificationRanking(rankingMap);
-                        }
-                        return;
-                    }
                     if (isUpdate) {
                         updateNotification(sbn, rankingMap);
                     } else {
@@ -368,11 +353,6 @@ public abstract class BaseStatusBar extends SystemUI implements
             });
         }
 
-        private boolean shouldFilterOut(Notification n) {
-            // Don't accept group children.
-            return n.getGroup() != null
-                    && (n.flags & Notification.FLAG_GROUP_SUMMARY) == 0;
-        }
     };
 
     private void updateCurrentProfilesCache() {
@@ -390,6 +370,8 @@ public abstract class BaseStatusBar extends SystemUI implements
         mWindowManager = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
         mWindowManagerService = WindowManagerGlobal.getWindowManagerService();
         mDisplay = mWindowManager.getDefaultDisplay();
+
+        mNotificationData = new NotificationData(this);
 
         mDreamManager = IDreamManager.Stub.asInterface(
                 ServiceManager.checkService(DreamService.DREAM_SERVICE));
@@ -499,7 +481,8 @@ public abstract class BaseStatusBar extends SystemUI implements
       return mHeadsUpNotificationView != null && mHeadsUpNotificationView.isShowing(key);
     }
 
-    public boolean notificationIsForCurrentProfiles(StatusBarNotification n) {
+    @Override  // NotificationData.Environment
+    public boolean isNotificationForCurrentProfiles(StatusBarNotification n) {
         final int thisUserId = mCurrentUserId;
         final int notificationUserId = n.getUserId();
         if (DEBUG && MULTIUSER_DEBUG) {
@@ -879,6 +862,16 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
 
         return mUsersAllowingPrivateNotifications.get(userHandle);
+    }
+
+    /**
+     * Returns true if we're on a secure lockscreen and the user wants to hide "sensitive"
+     * notification data. If so, private notifications should show their (possibly
+     * auto-generated) publicVersion, and secret notifications should be totally invisible.
+     */
+    @Override  // NotificationData.Environment
+    public boolean shouldHideSensitiveContents(int userid) {
+        return isLockscreenPublicMode() && !userAllowsPrivateNotificationsInPublic(userid);
     }
 
     public void onNotificationClear(StatusBarNotification notification) {
@@ -1381,11 +1374,14 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected void updateRowStates() {
         int maxKeyguardNotifications = getMaxKeyguardNotifications();
         mKeyguardIconOverflowContainer.getIconsView().removeAllViews();
-        final int N = mNotificationData.size();
+
+        ArrayList<Entry> activeNotifications = mNotificationData.getActiveNotifications();
+        final int N = activeNotifications.size();
+
         int visibleNotifications = 0;
         boolean onKeyguard = mState == StatusBarState.KEYGUARD;
         for (int i = 0; i < N; i++) {
-            NotificationData.Entry entry = mNotificationData.get(i);
+            NotificationData.Entry entry = activeNotifications.get(i);
             if (onKeyguard) {
                 entry.row.setExpansionDisabled(true);
             } else {
@@ -1461,7 +1457,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         if (wasHeadsUp) {
             oldEntry = mHeadsUpNotificationView.getEntry();
         } else {
-            oldEntry = mNotificationData.findByKey(key);
+            oldEntry = mNotificationData.get(key);
         }
         if (oldEntry == null) {
             return;
@@ -1620,6 +1616,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                             notification.getNotification().tickerText);
                     oldEntry.icon.set(ic);
                     inflateViews(oldEntry, mStackScroller, wasHeadsUp);
+                    mNotificationData.updateRanking(ranking);
                     updateNotifications();
                 }
             }
@@ -1630,7 +1627,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         updateNotificationVetoButton(oldEntry.row, notification);
 
         // Is this for you?
-        boolean isForCurrentUser = notificationIsForCurrentProfiles(notification);
+        boolean isForCurrentUser = isNotificationForCurrentProfiles(notification);
         if (DEBUG) Log.d(TAG, "notification is " + (isForCurrentUser ? "" : "not ") + "for you");
 
         // Restart the ticker if it's still running
@@ -1723,14 +1720,6 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
         if (DEBUG) Log.d(TAG, "interrupt: " + interrupt);
         return interrupt;
-    }
-
-    // Q: What kinds of notifications should show during setup?
-    // A: Almost none! Only things coming from the system (package is "android") that also
-    // have special "kind" tags marking them as relevant for setup (see below).
-    protected boolean showNotificationEvenIfUnprovisioned(StatusBarNotification sbn) {
-        return "android".equals(sbn.getPackageName())
-                && sbn.getNotification().extras.getBoolean(Notification.EXTRA_ALLOW_DURING_SETUP);
     }
 
     public boolean inKeyguardRestrictedInputMode() {
