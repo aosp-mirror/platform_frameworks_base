@@ -293,7 +293,6 @@ public class ImmersiveModeConfirmation {
 
         @Override
         public boolean onTouchEvent(MotionEvent motion) {
-            Slog.v(TAG, "ClingWindowView.onTouchEvent");
             return true;
         }
     }
