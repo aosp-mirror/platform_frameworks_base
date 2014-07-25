@@ -710,6 +710,9 @@ public abstract class AbsSeekBar extends ProgressBar {
         return mPositionAnimator != null && mPositionAnimator.isRunning();
     }
 
+    /**
+     * @hide
+     */
     @Override
     public void setProgress(int progress, boolean fromUser) {
         if (isAnimationRunning()) {
