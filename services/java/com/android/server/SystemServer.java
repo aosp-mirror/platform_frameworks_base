@@ -930,7 +930,9 @@ public final class SystemServer {
                 mSystemServiceManager.startService(HdmiControlService.class);
             }
 
-            mSystemServiceManager.startService(TvInputManagerService.class);
+            if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
+                mSystemServiceManager.startService(TvInputManagerService.class);
+            }
 
             if (!disableNonCoreServices) {
                 try {
