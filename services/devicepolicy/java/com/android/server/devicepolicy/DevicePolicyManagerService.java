@@ -4291,9 +4291,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (Settings.Secure.getIntForUser(resolver, Settings.Secure.USER_SETUP_COMPLETE, 0,
                     userHandle) != 0) {
                 DevicePolicyData policy = getUserData(userHandle);
-                policy.mUserSetupComplete = true;
-                synchronized (this) {
-                    saveSettingsLocked(userHandle);
+                if (!policy.mUserSetupComplete) {
+                    policy.mUserSetupComplete = true;
+                    synchronized (this) {
+                        saveSettingsLocked(userHandle);
+                    }
                 }
             }
         }
