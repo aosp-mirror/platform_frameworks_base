@@ -45,8 +45,6 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.stack.StackStateAnimator;
 
-import java.util.ArrayList;
-
 public class NotificationPanelView extends PanelView implements
         ExpandableView.OnHeightChangedListener, ObservableScrollView.Listener,
         View.OnClickListener, NotificationStackScrollLayout.OnOverscrollTopChangedListener,
@@ -112,6 +110,7 @@ public class NotificationPanelView extends PanelView implements
     private boolean mUnlockIconActive;
     private int mNotificationsHeaderCollideDistance;
     private int mUnlockMoveDistance;
+    private float mEmptyDragAmount;
 
     private Interpolator mFastOutSlowInInterpolator;
     private Interpolator mFastOutLinearInterpolator;
@@ -236,7 +235,8 @@ public class NotificationPanelView extends PanelView implements
                     getExpandedHeight(),
                     mNotificationStackScroller.getNotGoneChildCount(),
                     getHeight(),
-                    mKeyguardStatusView.getHeight());
+                    mKeyguardStatusView.getHeight(),
+                    mEmptyDragAmount);
             mClockPositionAlgorithm.run(mClockPositionResult);
             if (animate || mClockAnimator != null) {
                 startClockAnimation(mClockPositionResult.clockY);
@@ -1320,5 +1320,16 @@ public class NotificationPanelView extends PanelView implements
 
     public void setLaunchTransitionEndRunnable(Runnable r) {
         mLaunchAnimationEndRunnable = r;
+    }
+
+    public void setEmptyDragAmount(float amount) {
+        float factor = 1f;
+        if (mNotificationStackScroller.getNotGoneChildCount() > 0) {
+            factor = 0.6f;
+        } else if (!mStatusBar.hasNotifications()) {
+            factor = 0.4f;
+        }
+        mEmptyDragAmount = amount * factor;
+        positionClockAndNotifications();
     }
 }
