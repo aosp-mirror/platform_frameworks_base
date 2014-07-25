@@ -467,7 +467,7 @@ import java.util.HashMap;
  *
  *     static final int PICK_CONTACT_REQUEST = 0;
  *
- *     protected boolean onKeyDown(int keyCode, KeyEvent event) {
+ *     public boolean onKeyDown(int keyCode, KeyEvent event) {
  *         if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
  *             // When the user center presses, let them pick a contact.
  *             startActivityForResult(
