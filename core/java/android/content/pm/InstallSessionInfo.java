@@ -16,6 +16,7 @@
 
 package android.content.pm;
 
+import android.annotation.Nullable;
 import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -30,16 +31,18 @@ public class InstallSessionInfo implements Parcelable {
     /** {@hide} */
     public String installerPackageName;
     /** {@hide} */
-    public int progress;
+    public float progress;
 
     /** {@hide} */
     public int mode;
     /** {@hide} */
-    public String packageName;
+    public long sizeBytes;
     /** {@hide} */
-    public Bitmap icon;
+    public String appPackageName;
     /** {@hide} */
-    public CharSequence title;
+    public Bitmap appIcon;
+    /** {@hide} */
+    public CharSequence appLabel;
 
     /** {@hide} */
     public InstallSessionInfo() {
@@ -49,12 +52,13 @@ public class InstallSessionInfo implements Parcelable {
     public InstallSessionInfo(Parcel source) {
         sessionId = source.readInt();
         installerPackageName = source.readString();
-        progress = source.readInt();
+        progress = source.readFloat();
 
         mode = source.readInt();
-        packageName = source.readString();
-        icon = source.readParcelable(null);
-        title = source.readString();
+        sizeBytes = source.readLong();
+        appPackageName = source.readString();
+        appIcon = source.readParcelable(null);
+        appLabel = source.readString();
     }
 
     /**
@@ -67,19 +71,19 @@ public class InstallSessionInfo implements Parcelable {
     /**
      * Return the package name of the app that owns this session.
      */
-    public String getInstallerPackageName() {
+    public @Nullable String getInstallerPackageName() {
         return installerPackageName;
     }
 
     /**
-     * Return current overall progress of this session, between 0 and 100.
+     * Return current overall progress of this session, between 0 and 1.
      * <p>
      * Note that this progress may not directly correspond to the value reported
-     * by {@link PackageInstaller.Session#setProgress(int)}, as the system may
+     * by {@link PackageInstaller.Session#setProgress(float)}, as the system may
      * carve out a portion of the overall progress to represent its own internal
      * installation work.
      */
-    public int getProgress() {
+    public float getProgress() {
         return progress;
     }
 
@@ -87,24 +91,24 @@ public class InstallSessionInfo implements Parcelable {
      * Return the package name this session is working with. May be {@code null}
      * if unknown.
      */
-    public String getPackageName() {
-        return packageName;
+    public @Nullable String getAppPackageName() {
+        return appPackageName;
     }
 
     /**
      * Return an icon representing the app being installed. May be {@code null}
      * if unavailable.
      */
-    public Bitmap getIcon() {
-        return icon;
+    public @Nullable Bitmap getAppIcon() {
+        return appIcon;
     }
 
     /**
-     * Return a title representing the app being installed. May be {@code null}
+     * Return a label representing the app being installed. May be {@code null}
      * if unavailable.
      */
-    public CharSequence getTitle() {
-        return title;
+    public @Nullable CharSequence getAppLabel() {
+        return appLabel;
     }
 
     @Override
@@ -116,12 +120,13 @@ public class InstallSessionInfo implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(sessionId);
         dest.writeString(installerPackageName);
-        dest.writeInt(progress);
+        dest.writeFloat(progress);
 
         dest.writeInt(mode);
-        dest.writeString(packageName);
-        dest.writeParcelable(icon, flags);
-        dest.writeString(title != null ? title.toString() : null);
+        dest.writeLong(sizeBytes);
+        dest.writeString(appPackageName);
+        dest.writeParcelable(appIcon, flags);
+        dest.writeString(appLabel != null ? appLabel.toString() : null);
     }
 
     public static final Parcelable.Creator<InstallSessionInfo>

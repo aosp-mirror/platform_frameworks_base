@@ -2798,6 +2798,13 @@
         android:description="@string/permdesc_createMediaProjection"
         android:protectionLevel="signature" />
 
+    <!-- @SystemApi Allows an application to read install sessions
+         @hide This is not a third-party API (intended for system apps). -->
+    <permission android:name="android.permission.READ_INSTALL_SESSIONS"
+        android:label="@string/permlab_readInstallSessions"
+        android:description="@string/permdesc_readInstallSessions"
+        android:protectionLevel="signature|system" />
+
     <!-- The system process is explicitly the only one allowed to launch the
          confirmation UI for full backup/restore -->
     <uses-permission android:name="android.permission.CONFIRM_FULL_BACKUP"/>

@@ -17,6 +17,7 @@
 package android.content.pm;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
@@ -26,6 +27,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
+import android.content.pm.PackageInstaller.CommitCallback;
 import android.content.pm.PackageParser.PackageParserException;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
@@ -3723,7 +3725,7 @@ public abstract class PackageManager {
      * Return interface that offers the ability to install, upgrade, and remove
      * applications on the device.
      */
-    public abstract PackageInstaller getInstaller();
+    public abstract @NonNull PackageInstaller getPackageInstaller();
 
     /**
      * Returns the data directory for a particular user and package, given the uid of the package.
@@ -3772,4 +3774,109 @@ public abstract class PackageManager {
 
     /** {@hide} */
     public abstract boolean isPackageAvailable(String packageName);
+
+    /** {@hide} */
+    public static String installStatusToString(int status) {
+        switch (status) {
+            case INSTALL_SUCCEEDED: return "INSTALL_SUCCEEDED";
+            case INSTALL_FAILED_ALREADY_EXISTS: return "INSTALL_FAILED_ALREADY_EXISTS";
+            case INSTALL_FAILED_INVALID_APK: return "INSTALL_FAILED_INVALID_APK";
+            case INSTALL_FAILED_INVALID_URI: return "INSTALL_FAILED_INVALID_URI";
+            case INSTALL_FAILED_INSUFFICIENT_STORAGE: return "INSTALL_FAILED_INSUFFICIENT_STORAGE";
+            case INSTALL_FAILED_DUPLICATE_PACKAGE: return "INSTALL_FAILED_DUPLICATE_PACKAGE";
+            case INSTALL_FAILED_NO_SHARED_USER: return "INSTALL_FAILED_NO_SHARED_USER";
+            case INSTALL_FAILED_UPDATE_INCOMPATIBLE: return "INSTALL_FAILED_UPDATE_INCOMPATIBLE";
+            case INSTALL_FAILED_SHARED_USER_INCOMPATIBLE: return "INSTALL_FAILED_SHARED_USER_INCOMPATIBLE";
+            case INSTALL_FAILED_MISSING_SHARED_LIBRARY: return "INSTALL_FAILED_MISSING_SHARED_LIBRARY";
+            case INSTALL_FAILED_REPLACE_COULDNT_DELETE: return "INSTALL_FAILED_REPLACE_COULDNT_DELETE";
+            case INSTALL_FAILED_DEXOPT: return "INSTALL_FAILED_DEXOPT";
+            case INSTALL_FAILED_OLDER_SDK: return "INSTALL_FAILED_OLDER_SDK";
+            case INSTALL_FAILED_CONFLICTING_PROVIDER: return "INSTALL_FAILED_CONFLICTING_PROVIDER";
+            case INSTALL_FAILED_NEWER_SDK: return "INSTALL_FAILED_NEWER_SDK";
+            case INSTALL_FAILED_TEST_ONLY: return "INSTALL_FAILED_TEST_ONLY";
+            case INSTALL_FAILED_CPU_ABI_INCOMPATIBLE: return "INSTALL_FAILED_CPU_ABI_INCOMPATIBLE";
+            case INSTALL_FAILED_MISSING_FEATURE: return "INSTALL_FAILED_MISSING_FEATURE";
+            case INSTALL_FAILED_CONTAINER_ERROR: return "INSTALL_FAILED_CONTAINER_ERROR";
+            case INSTALL_FAILED_INVALID_INSTALL_LOCATION: return "INSTALL_FAILED_INVALID_INSTALL_LOCATION";
+            case INSTALL_FAILED_MEDIA_UNAVAILABLE: return "INSTALL_FAILED_MEDIA_UNAVAILABLE";
+            case INSTALL_FAILED_VERIFICATION_TIMEOUT: return "INSTALL_FAILED_VERIFICATION_TIMEOUT";
+            case INSTALL_FAILED_VERIFICATION_FAILURE: return "INSTALL_FAILED_VERIFICATION_FAILURE";
+            case INSTALL_FAILED_PACKAGE_CHANGED: return "INSTALL_FAILED_PACKAGE_CHANGED";
+            case INSTALL_FAILED_UID_CHANGED: return "INSTALL_FAILED_UID_CHANGED";
+            case INSTALL_FAILED_VERSION_DOWNGRADE: return "INSTALL_FAILED_VERSION_DOWNGRADE";
+            case INSTALL_PARSE_FAILED_NOT_APK: return "INSTALL_PARSE_FAILED_NOT_APK";
+            case INSTALL_PARSE_FAILED_BAD_MANIFEST: return "INSTALL_PARSE_FAILED_BAD_MANIFEST";
+            case INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION: return "INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION";
+            case INSTALL_PARSE_FAILED_NO_CERTIFICATES: return "INSTALL_PARSE_FAILED_NO_CERTIFICATES";
+            case INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES: return "INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES";
+            case INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING: return "INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING";
+            case INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME: return "INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME";
+            case INSTALL_PARSE_FAILED_BAD_SHARED_USER_ID: return "INSTALL_PARSE_FAILED_BAD_SHARED_USER_ID";
+            case INSTALL_PARSE_FAILED_MANIFEST_MALFORMED: return "INSTALL_PARSE_FAILED_MANIFEST_MALFORMED";
+            case INSTALL_PARSE_FAILED_MANIFEST_EMPTY: return "INSTALL_PARSE_FAILED_MANIFEST_EMPTY";
+            case INSTALL_FAILED_INTERNAL_ERROR: return "INSTALL_FAILED_INTERNAL_ERROR";
+            case INSTALL_FAILED_USER_RESTRICTED: return "INSTALL_FAILED_USER_RESTRICTED";
+            case INSTALL_FAILED_DUPLICATE_PERMISSION: return "INSTALL_FAILED_DUPLICATE_PERMISSION";
+            case INSTALL_FAILED_NO_MATCHING_ABIS: return "INSTALL_FAILED_NO_MATCHING_ABIS";
+            default: return Integer.toString(status);
+        }
+    }
+
+    /** {@hide} */
+    public static int installStatusToFailureReason(int status) {
+        switch (status) {
+            case INSTALL_FAILED_ALREADY_EXISTS: return CommitCallback.FAILURE_CONFLICT;
+            case INSTALL_FAILED_INVALID_APK: return CommitCallback.FAILURE_INVALID;
+            case INSTALL_FAILED_INVALID_URI: return CommitCallback.FAILURE_INVALID;
+            case INSTALL_FAILED_INSUFFICIENT_STORAGE: return CommitCallback.FAILURE_STORAGE;
+            case INSTALL_FAILED_DUPLICATE_PACKAGE: return CommitCallback.FAILURE_CONFLICT;
+            case INSTALL_FAILED_NO_SHARED_USER: return CommitCallback.FAILURE_CONFLICT;
+            case INSTALL_FAILED_UPDATE_INCOMPATIBLE: return CommitCallback.FAILURE_CONFLICT;
+            case INSTALL_FAILED_SHARED_USER_INCOMPATIBLE: return CommitCallback.FAILURE_CONFLICT;
+            case INSTALL_FAILED_MISSING_SHARED_LIBRARY: return CommitCallback.FAILURE_INCOMPATIBLE;
+            case INSTALL_FAILED_REPLACE_COULDNT_DELETE: return CommitCallback.FAILURE_CONFLICT;
+            case INSTALL_FAILED_DEXOPT: return CommitCallback.FAILURE_INVALID;
+            case INSTALL_FAILED_OLDER_SDK: return CommitCallback.FAILURE_INCOMPATIBLE;
+            case INSTALL_FAILED_CONFLICTING_PROVIDER: return CommitCallback.FAILURE_CONFLICT;
+            case INSTALL_FAILED_NEWER_SDK: return CommitCallback.FAILURE_INCOMPATIBLE;
+            case INSTALL_FAILED_TEST_ONLY: return CommitCallback.FAILURE_INVALID;
+            case INSTALL_FAILED_CPU_ABI_INCOMPATIBLE: return CommitCallback.FAILURE_INCOMPATIBLE;
+            case INSTALL_FAILED_MISSING_FEATURE: return CommitCallback.FAILURE_INCOMPATIBLE;
+            case INSTALL_FAILED_CONTAINER_ERROR: return CommitCallback.FAILURE_STORAGE;
+            case INSTALL_FAILED_INVALID_INSTALL_LOCATION: return CommitCallback.FAILURE_STORAGE;
+            case INSTALL_FAILED_MEDIA_UNAVAILABLE: return CommitCallback.FAILURE_STORAGE;
+            case INSTALL_FAILED_VERIFICATION_TIMEOUT: return CommitCallback.FAILURE_UNKNOWN;
+            case INSTALL_FAILED_VERIFICATION_FAILURE: return CommitCallback.FAILURE_UNKNOWN;
+            case INSTALL_FAILED_PACKAGE_CHANGED: return CommitCallback.FAILURE_INVALID;
+            case INSTALL_FAILED_UID_CHANGED: return CommitCallback.FAILURE_INVALID;
+            case INSTALL_FAILED_VERSION_DOWNGRADE: return CommitCallback.FAILURE_INVALID;
+            case INSTALL_PARSE_FAILED_NOT_APK: return CommitCallback.FAILURE_INVALID;
+            case INSTALL_PARSE_FAILED_BAD_MANIFEST: return CommitCallback.FAILURE_INVALID;
+            case INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION: return CommitCallback.FAILURE_INVALID;
+            case INSTALL_PARSE_FAILED_NO_CERTIFICATES: return CommitCallback.FAILURE_INVALID;
+            case INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES: return CommitCallback.FAILURE_INVALID;
+            case INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING: return CommitCallback.FAILURE_INVALID;
+            case INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME: return CommitCallback.FAILURE_INVALID;
+            case INSTALL_PARSE_FAILED_BAD_SHARED_USER_ID: return CommitCallback.FAILURE_INVALID;
+            case INSTALL_PARSE_FAILED_MANIFEST_MALFORMED: return CommitCallback.FAILURE_INVALID;
+            case INSTALL_PARSE_FAILED_MANIFEST_EMPTY: return CommitCallback.FAILURE_INVALID;
+            case INSTALL_FAILED_INTERNAL_ERROR: return CommitCallback.FAILURE_UNKNOWN;
+            case INSTALL_FAILED_USER_RESTRICTED: return CommitCallback.FAILURE_INCOMPATIBLE;
+            case INSTALL_FAILED_DUPLICATE_PERMISSION: return CommitCallback.FAILURE_CONFLICT;
+            case INSTALL_FAILED_NO_MATCHING_ABIS: return CommitCallback.FAILURE_INCOMPATIBLE;
+            default: return CommitCallback.FAILURE_UNKNOWN;
+        }
+    }
+
+    /** {@hide} */
+    public static String deleteStatusToString(int status) {
+        switch (status) {
+            case DELETE_SUCCEEDED: return "DELETE_SUCCEEDED";
+            case DELETE_FAILED_INTERNAL_ERROR: return "DELETE_FAILED_INTERNAL_ERROR";
+            case DELETE_FAILED_DEVICE_POLICY_MANAGER: return "DELETE_FAILED_DEVICE_POLICY_MANAGER";
+            case DELETE_FAILED_USER_RESTRICTED: return "DELETE_FAILED_USER_RESTRICTED";
+            case DELETE_FAILED_OWNER_BLOCKED: return "DELETE_FAILED_OWNER_BLOCKED";
+            default: return Integer.toString(status);
+        }
+    }
 }
