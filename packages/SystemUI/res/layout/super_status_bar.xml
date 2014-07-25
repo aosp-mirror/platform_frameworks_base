@@ -54,7 +54,8 @@
     <com.android.systemui.statusbar.phone.PanelHolder
         android:id="@+id/panel_holder"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
+        android:layout_height="match_parent"
+        android:background="@color/transparent" >
         <include layout="@layout/status_bar_expanded"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
