@@ -18,8 +18,8 @@
 
 #define LOG_NDEBUG 1
 
-#include "JNIHelp.h"
-#include "ScopedPrimitiveArray.h"
+#include <JNIHelp.h>
+#include <ScopedPrimitiveArray.h>
 
 #include <cstring>
 
