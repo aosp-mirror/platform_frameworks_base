@@ -3379,6 +3379,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             }
             mDecor.setWindowBackground(background);
 
+            // By default, clip content to the background outline.
+            mDecor.setClipToOutline(true);
+
             final Drawable frame;
             if (mFrameResource != 0) {
                 frame = getContext().getDrawable(mFrameResource);
