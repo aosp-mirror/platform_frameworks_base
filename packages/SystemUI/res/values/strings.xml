@@ -732,6 +732,9 @@
     <!-- Media projection permission dialog permanent grant check box. [CHAR LIMIT=NONE] -->
     <string name="media_projection_remember_text">Don\'t show again</string>
 
+    <!-- The text to clear all notifications. [CHAR LIMIT=60] -->
+    <string name="clear_all_notifications_text">Clear all</string>
+
     <!-- Media projection permission dialog action text. [CHAR LIMIT=60] -->
     <string name="media_projection_action_text">Start now</string>
 </resources>

@@ -176,11 +176,9 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
 
     @Override
     public void onAttachedToWindow() {
-        float densityScale = getResources().getDisplayMetrics().density;
         final ViewConfiguration viewConfiguration = ViewConfiguration.get(getContext());
-        float pagingTouchSlop = viewConfiguration.getScaledPagingTouchSlop();
         float touchSlop = viewConfiguration.getScaledTouchSlop();
-        mSwipeHelper = new SwipeHelper(SwipeHelper.X, this, densityScale, pagingTouchSlop);
+        mSwipeHelper = new SwipeHelper(SwipeHelper.X, this, getContext());
         mSwipeHelper.setMaxSwipeProgress(mMaxAlpha);
         mEdgeSwipeHelper = new EdgeSwipeHelper(touchSlop);
 

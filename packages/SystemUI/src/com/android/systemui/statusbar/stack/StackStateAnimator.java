@@ -159,7 +159,7 @@ public class StackStateAnimator {
         }
 
         // start alpha animation
-        if (alphaChanging) {
+        if (alphaChanging && child.getTranslationX() == 0) {
             startAlphaAnimation(child, viewState, delay);
         }
 
