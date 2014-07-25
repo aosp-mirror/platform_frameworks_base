@@ -21,38 +21,37 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * Bluetooth LE scan settings are passed to {@link BluetoothLeScanner#startScan}
- * to define the parameters for the scan.
+ * Bluetooth LE scan settings are passed to {@link BluetoothLeScanner#startScan} to define the
+ * parameters for the scan.
  */
 public final class ScanSettings implements Parcelable {
     /**
-     * Perform Bluetooth LE scan in low power mode.
-     * This is the default scan mode as it consumes the least power.
+     * Perform Bluetooth LE scan in low power mode. This is the default scan mode as it consumes the
+     * least power.
      */
     public static final int SCAN_MODE_LOW_POWER = 0;
 
     /**
-     * Perform Bluetooth LE scan in balanced power mode.
-     * Scan results are returned at a rate that provides a good trade-off between scan
-     * frequency and power consumption.
+     * Perform Bluetooth LE scan in balanced power mode. Scan results are returned at a rate that
+     * provides a good trade-off between scan frequency and power consumption.
      */
     public static final int SCAN_MODE_BALANCED = 1;
 
     /**
-     * Scan using highest duty cycle.
-     * It's recommended to only use this mode when the application is running in the foreground.
+     * Scan using highest duty cycle. It's recommended to only use this mode when the application is
+     * running in the foreground.
      */
     public static final int SCAN_MODE_LOW_LATENCY = 2;
 
     /**
-     * Trigger a callback for every Bluetooth advertisement found that matches the
-     * filter criteria. If no filter is active, all advertisement packets are reported.
+     * Trigger a callback for every Bluetooth advertisement found that matches the filter criteria.
+     * If no filter is active, all advertisement packets are reported.
      */
     public static final int CALLBACK_TYPE_ALL_MATCHES = 1;
 
     /**
-     * A result callback is only triggered for the first advertisement packet received that
-     * matches the filter criteria.
+     * A result callback is only triggered for the first advertisement packet received that matches
+     * the filter criteria.
      */
     public static final int CALLBACK_TYPE_FIRST_MATCH = 2;
 
@@ -63,15 +62,17 @@ public final class ScanSettings implements Parcelable {
     public static final int CALLBACK_TYPE_MATCH_LOST = 4;
 
     /**
-     * Request full scan results which contain the device, rssi, advertising data, scan response
-     * as well as the scan timestamp.
+     * Request full scan results which contain the device, rssi, advertising data, scan response as
+     * well as the scan timestamp.
      */
     public static final int SCAN_RESULT_TYPE_FULL = 0;
 
     /**
      * Request abbreviated scan results which contain the device, rssi and scan timestamp.
-     * <p><b>Note:</b> It is possible for an application to get more scan results than
-     * it asked for, if there are multiple apps using this type.
+     * <p>
+     * <b>Note:</b> It is possible for an application to get more scan results than it asked for, if
+     * there are multiple apps using this type.
+     *
      * @hide
      */
     @SystemApi
@@ -109,11 +110,11 @@ public final class ScanSettings implements Parcelable {
     }
 
     private ScanSettings(int scanMode, int callbackType, int scanResultType,
-            long reportDelaySeconds) {
+            long reportDelayMillis) {
         mScanMode = scanMode;
         mCallbackType = callbackType;
         mScanResultType = scanResultType;
-        mReportDelayMillis = reportDelaySeconds;
+        mReportDelayMillis = reportDelayMillis;
     }
 
     private ScanSettings(Parcel in) {
@@ -184,13 +185,22 @@ public final class ScanSettings implements Parcelable {
          * @throws IllegalArgumentException If the {@code callbackType} is invalid.
          */
         public Builder setCallbackType(int callbackType) {
-            if (callbackType < CALLBACK_TYPE_ALL_MATCHES
-             || callbackType > (CALLBACK_TYPE_FIRST_MATCH | CALLBACK_TYPE_MATCH_LOST)
-             || (callbackType & CALLBACK_TYPE_ALL_MATCHES) != CALLBACK_TYPE_ALL_MATCHES) {
+
+            if (!isValidCallbackType(callbackType)) {
                 throw new IllegalArgumentException("invalid callback type - " + callbackType);
             }
             mCallbackType = callbackType;
             return this;
+        }
+
+        // Returns true if the callbackType is valid.
+        private boolean isValidCallbackType(int callbackType) {
+            if (callbackType == CALLBACK_TYPE_ALL_MATCHES ||
+                    callbackType == CALLBACK_TYPE_FIRST_MATCH ||
+                    callbackType == CALLBACK_TYPE_MATCH_LOST) {
+                return true;
+            }
+            return callbackType == (CALLBACK_TYPE_FIRST_MATCH | CALLBACK_TYPE_MATCH_LOST);
         }
 
         /**
@@ -215,16 +225,15 @@ public final class ScanSettings implements Parcelable {
 
         /**
          * Set report delay timestamp for Bluetooth LE scan.
-         * @param reportDelayMillis Set to 0 to be notified of results immediately.
-         *                           Values &gt; 0 causes the scan results to be queued
-         *                           up and delivered after the requested delay or when
-         *                           the internal buffers fill up.
-         * @throws IllegalArgumentException If {@code reportDelaySeconds} &lt; 0.
          *
+         * @param reportDelayMillis Set to 0 to be notified of results immediately. Values &gt; 0
+         *            causes the scan results to be queued up and delivered after the requested
+         *            delay or when the internal buffers fill up.
+         * @throws IllegalArgumentException If {@code reportDelayMillis} &lt; 0.
          */
         public Builder setReportDelayMillis(long reportDelayMillis) {
             if (reportDelayMillis < 0) {
-                throw new IllegalArgumentException("reportDelaySeconds must be > 0");
+                throw new IllegalArgumentException("reportDelayMillis must be > 0");
             }
             mReportDelayMillis = reportDelayMillis;
             return this;
