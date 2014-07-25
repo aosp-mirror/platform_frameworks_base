@@ -3801,7 +3801,9 @@ final class ActivityStack {
                 if (r.app == app) {
                     Slog.w(TAG, "  Force finishing activity "
                             + r.intent.getComponent().flattenToShortString());
-                    finishActivityLocked(r, Activity.RESULT_CANCELED, null, "crashed", false);
+                    // Force the destroy to skip right to removal.
+                    r.app = null;
+                    finishCurrentActivityLocked(r, FINISH_IMMEDIATELY, false);
                 }
             }
         }
