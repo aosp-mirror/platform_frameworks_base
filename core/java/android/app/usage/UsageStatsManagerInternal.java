@@ -29,11 +29,13 @@ public abstract class UsageStatsManagerInternal {
      * Reports an event to the UsageStatsManager.
      *
      * @param component The component for which this event ocurred.
+     * @param userId The user id to which the component belongs to.
      * @param timeStamp The time at which this event ocurred.
      * @param eventType The event that occured. Valid values can be found at
      * {@link android.app.usage.UsageStats.Event}
      */
-    public abstract void reportEvent(ComponentName component, long timeStamp, int eventType);
+    public abstract void reportEvent(ComponentName component, int userId,
+            long timeStamp, int eventType);
 
     /**
      * Prepares the UsageStatsService for shutdown.

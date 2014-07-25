@@ -352,6 +352,9 @@ public final class SystemServer {
         mFirstBoot = mPackageManagerService.isFirstBoot();
         mPackageManager = mSystemContext.getPackageManager();
 
+        Slog.i(TAG, "User Service");
+        ServiceManager.addService(Context.USER_SERVICE, UserManagerService.getInstance());
+
         // Initialize attribute cache used to cache resources from packages.
         AttributeCache.init(mSystemContext);
 
@@ -433,10 +436,6 @@ public final class SystemServer {
 
             Slog.i(TAG, "Entropy Mixer");
             ServiceManager.addService("entropy", new EntropyMixer(context));
-
-            Slog.i(TAG, "User Service");
-            ServiceManager.addService(Context.USER_SERVICE,
-                    UserManagerService.getInstance());
 
             mContentResolver = context.getContentResolver();
 
