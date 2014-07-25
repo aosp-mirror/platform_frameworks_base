@@ -744,12 +744,12 @@ public abstract class TvInputService extends Service {
          * session.
          */
         void release() {
+            removeOverlayView(true);
             onRelease();
             if (mSurface != null) {
                 mSurface.release();
                 mSurface = null;
             }
-            removeOverlayView(true);
         }
 
         /**
