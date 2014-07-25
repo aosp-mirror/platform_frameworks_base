@@ -20,18 +20,21 @@ import android.app.ActivityManagerInternal;
 import android.app.Application;
 import android.app.AppGlobals;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.StrictMode;
+import android.text.TextUtils;
 import android.util.AndroidRuntimeException;
 import android.util.Log;
 import com.android.server.LocalServices;
 import dalvik.system.VMRuntime;
 
 import java.io.File;
+import java.util.Arrays;
 
 import com.android.internal.os.Zygote;
 
@@ -48,16 +51,17 @@ public final class WebViewFactory {
     private static final String NULL_WEBVIEW_FACTORY =
             "com.android.webview.nullwebview.NullWebViewFactoryProvider";
 
-    // TODO(torne): we need to use a system property instead of hardcoding the library paths to
-    // enable it to be changed when a webview update apk is installed.
-    private static final String CHROMIUM_WEBVIEW_NATIVE_LIB_32 =
-            "/system/lib/libwebviewchromium.so";
-    private static final String CHROMIUM_WEBVIEW_NATIVE_LIB_64 =
-            "/system/lib64/libwebviewchromium.so";
     private static final String CHROMIUM_WEBVIEW_NATIVE_RELRO_32 =
             "/data/misc/shared_relro/libwebviewchromium32.relro";
     private static final String CHROMIUM_WEBVIEW_NATIVE_RELRO_64 =
             "/data/misc/shared_relro/libwebviewchromium64.relro";
+
+    // TODO: remove the library paths below as we now query the package manager.
+    // The remaining step is to refactor address space reservation.
+    private static final String CHROMIUM_WEBVIEW_NATIVE_LIB_32 =
+            "/system/lib/libwebviewchromium.so";
+    private static final String CHROMIUM_WEBVIEW_NATIVE_LIB_64 =
+            "/system/lib64/libwebviewchromium.so";
 
     private static final String LOGTAG = "WebViewFactory";
 
@@ -157,14 +161,51 @@ public final class WebViewFactory {
         }
     }
 
+    private static String[] getWebViewNativeLibraryPaths()
+            throws PackageManager.NameNotFoundException {
+        final String NATIVE_LIB_FILE_NAME = "libwebviewchromium.so";
+
+        PackageManager pm = AppGlobals.getInitialApplication().getPackageManager();
+        ApplicationInfo ai = pm.getApplicationInfo(getWebViewPackageName(), 0);
+
+        String path32;
+        String path64;
+        boolean primaryArchIs64bit = VMRuntime.is64BitAbi(ai.primaryCpuAbi);
+        if (!TextUtils.isEmpty(ai.secondaryCpuAbi)) {
+            // Multi-arch case.
+            if (primaryArchIs64bit) {
+                // Primary arch: 64-bit, secondary: 32-bit.
+                path64 = ai.nativeLibraryDir;
+                path32 = ai.secondaryNativeLibraryDir;
+            } else {
+                // Primary arch: 32-bit, secondary: 64-bit.
+                path64 = ai.secondaryNativeLibraryDir;
+                path32 = ai.nativeLibraryDir;
+            }
+        } else if (primaryArchIs64bit) {
+            // Single-arch 64-bit.
+            path64 = ai.nativeLibraryDir;
+            path32 = "";
+        } else {
+            // Single-arch 32-bit.
+            path32 = ai.nativeLibraryDir;
+            path64 = "";
+        }
+        if (!TextUtils.isEmpty(path32)) path32 += "/" + NATIVE_LIB_FILE_NAME;
+        if (!TextUtils.isEmpty(path64)) path64 += "/" + NATIVE_LIB_FILE_NAME;
+        return new String[] { path32, path64 };
+    }
+
     private static void createRelroFile(final boolean is64Bit) {
-        String abi = is64Bit ? Build.SUPPORTED_64_BIT_ABIS[0] : Build.SUPPORTED_32_BIT_ABIS[0];
+        final String abi =
+                is64Bit ? Build.SUPPORTED_64_BIT_ABIS[0] : Build.SUPPORTED_32_BIT_ABIS[0];
 
         // crashHandler is invoked by the ActivityManagerService when the isolated process crashes.
         Runnable crashHandler = new Runnable() {
             @Override
             public void run() {
                 try {
+                    Log.e(LOGTAG, "relro file creator for " + abi + " crashed. Proceeding without");
                     getUpdateService().notifyRelroCreationCompleted(is64Bit, false);
                 } catch (RemoteException e) {
                     Log.e(LOGTAG, "Cannot reach WebViewUpdateService. " + e.getMessage());
@@ -173,7 +214,7 @@ public final class WebViewFactory {
         };
 
         try {
-            String[] args = null;  // TODO: plumb native library paths via args.
+            String[] args = getWebViewNativeLibraryPaths();
             LocalServices.getService(ActivityManagerInternal.class).startIsolatedProcess(
                     RelroFileCreator.class.getName(), args, "WebViewLoader-" + abi, abi,
                     Process.SHARED_RELRO_UID, crashHandler);
@@ -187,28 +228,37 @@ public final class WebViewFactory {
     private static class RelroFileCreator {
         // Called in an unprivileged child process to create the relro file.
         public static void main(String[] args) {
-            if (!sAddressSpaceReserved) {
-                Log.e(LOGTAG, "can't create relro file; address space not reserved");
-                return;
-            }
-            boolean result = nativeCreateRelroFile(CHROMIUM_WEBVIEW_NATIVE_LIB_32,
-                                                   CHROMIUM_WEBVIEW_NATIVE_LIB_64,
-                                                   CHROMIUM_WEBVIEW_NATIVE_RELRO_32,
-                                                   CHROMIUM_WEBVIEW_NATIVE_RELRO_64);
-            if (!result) {
-                Log.e(LOGTAG, "failed to create relro file");
-            } else if (DEBUG) {
-                Log.v(LOGTAG, "created relro file");
-            }
-            try {
-                getUpdateService().notifyRelroCreationCompleted(VMRuntime.getRuntime().is64Bit(),
-                                                                result);
-            } catch (RemoteException e) {
-                Log.e(LOGTAG, "error notifying update service", e);
-            }
+            try{
+                if (args.length != 2 || args[0] == null || args[1] == null) {
+                    Log.e(LOGTAG, "Invalid RelroFileCreator args: " + Arrays.toString(args));
+                    return;
+                }
 
-            // Must explicitly exit or else this process will just sit around after we return.
-            System.exit(0);
+                boolean is64Bit = VMRuntime.getRuntime().is64Bit();
+                Log.v(LOGTAG, "RelroFileCreator (64bit = " + is64Bit + "), " +
+                        " 32-bit lib: " + args[0] + ", 64-bit lib: " + args[1]);
+                if (!sAddressSpaceReserved) {
+                    Log.e(LOGTAG, "can't create relro file; address space not reserved");
+                    return;
+                }
+                boolean result = nativeCreateRelroFile(args[0] /* path32 */,
+                                                       args[1] /* path64 */,
+                                                       CHROMIUM_WEBVIEW_NATIVE_RELRO_32,
+                                                       CHROMIUM_WEBVIEW_NATIVE_RELRO_64);
+                if (!result) {
+                    Log.e(LOGTAG, "failed to create relro file");
+                } else if (DEBUG) {
+                    Log.v(LOGTAG, "created relro file");
+                }
+                try {
+                    getUpdateService().notifyRelroCreationCompleted(is64Bit, result);
+                } catch (RemoteException e) {
+                    Log.e(LOGTAG, "error notifying update service", e);
+                }
+            } finally {
+                // Must explicitly exit or else this process will just sit around after we return.
+                System.exit(0);
+            }
         }
     }
 
@@ -225,14 +275,19 @@ public final class WebViewFactory {
             return;
         }
 
-        boolean result = nativeLoadWithRelroFile(CHROMIUM_WEBVIEW_NATIVE_LIB_32,
-                                                 CHROMIUM_WEBVIEW_NATIVE_LIB_64,
-                                                 CHROMIUM_WEBVIEW_NATIVE_RELRO_32,
-                                                 CHROMIUM_WEBVIEW_NATIVE_RELRO_64);
-        if (!result) {
-            Log.w(LOGTAG, "failed to load with relro file, proceeding without");
-        } else if (DEBUG) {
-            Log.v(LOGTAG, "loaded with relro file");
+        try {
+            String[] args = getWebViewNativeLibraryPaths();
+            boolean result = nativeLoadWithRelroFile(args[0] /* path32 */,
+                                                     args[1] /* path64 */,
+                                                     CHROMIUM_WEBVIEW_NATIVE_RELRO_32,
+                                                     CHROMIUM_WEBVIEW_NATIVE_RELRO_64);
+            if (!result) {
+                Log.w(LOGTAG, "failed to load with relro file, proceeding without");
+            } else if (DEBUG) {
+                Log.v(LOGTAG, "loaded with relro file");
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.e(LOGTAG, "Failed to list WebView package libraries for loadNativeLibrary", e);
         }
     }
 
