@@ -46,17 +46,11 @@ public class RemoteConnectionManager {
 
     List<PhoneAccountHandle> getAccounts(Uri handle) {
         List<PhoneAccountHandle> accountHandles = new LinkedList<>();
-        Log.d(this, "Getting accountHandles: " + mRemoteConnectionServices.keySet());
-        for (RemoteConnectionService remoteService : mRemoteConnectionServices.values()) {
-            // TODO(santoscordon): Eventually this will be async.
-            accountHandles.addAll(remoteService.lookupAccounts(handle));
-        }
         return accountHandles;
     }
 
-    public void createRemoteConnection(
+    public RemoteConnection createRemoteConnection(
             ConnectionRequest request,
-            ConnectionService.CreateConnectionResponse response,
             boolean isIncoming) {
         PhoneAccountHandle accountHandle = request.getAccountHandle();
         if (accountHandle == null) {
@@ -67,9 +61,12 @@ public class RemoteConnectionManager {
         if (!mRemoteConnectionServices.containsKey(componentName)) {
             throw new UnsupportedOperationException("accountHandle not supported: "
                     + componentName);
-        } else {
-            RemoteConnectionService remoteService = mRemoteConnectionServices.get(componentName);
-            remoteService.createRemoteConnection(request, response, isIncoming);
         }
+
+        RemoteConnectionService remoteService = mRemoteConnectionServices.get(componentName);
+        if (remoteService != null) {
+            return remoteService.createRemoteConnection(request, isIncoming);
+        }
+        return null;
     }
 }

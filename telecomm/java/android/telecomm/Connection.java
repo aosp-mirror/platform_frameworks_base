@@ -48,17 +48,22 @@ public abstract class Connection {
         public void onAudioModeIsVoipChanged(Connection c, boolean isVoip) {}
         public void onStatusHintsChanged(Connection c, StatusHints statusHints) {}
         public void onStartActivityFromInCall(Connection c, PendingIntent intent) {}
+        public void onFailed(Connection c, int code, String msg) {}
     }
 
     public final class State {
         private State() {}
 
-        public static final int NEW = 0;
-        public static final int RINGING = 1;
-        public static final int DIALING = 2;
-        public static final int ACTIVE = 3;
-        public static final int HOLDING = 4;
-        public static final int DISCONNECTED = 5;
+        public static final int INITIALIZING = 0;
+        public static final int NEW = 1;
+        public static final int RINGING = 2;
+        public static final int DIALING = 3;
+        public static final int ACTIVE = 4;
+        public static final int HOLDING = 5;
+        public static final int DISCONNECTED = 6;
+        public static final int FAILED = 7;
+        public static final int CANCELED = 8;
+
     }
 
     private final Set<Listener> mListeners = new HashSet<>();
@@ -77,6 +82,9 @@ public abstract class Connection {
     private boolean mAudioModeIsVoip;
     private StatusHints mStatusHints;
     private int mVideoState;
+    private int mFailureCode;
+    private String mFailureMessage;
+    private boolean mIsCanceled;
 
     /**
      * Create a new Connection.
@@ -197,6 +205,20 @@ public abstract class Connection {
     }
 
     /**
+     * @return The failure code ({@see DisconnectCause}) associated with this failed connection.
+     */
+    public final int getFailureCode() {
+        return mFailureCode;
+    }
+
+    /**
+     * @return The reason for the connection failure. This will not be displayed to the user.
+     */
+    public final String getFailureMessage() {
+        return mFailureMessage;
+    }
+
+    /**
      * Inform this Connection that the state of its audio output has been changed externally.
      *
      * @param state The new audio state.
@@ -226,6 +248,10 @@ public abstract class Connection {
                 return "HOLDING";
             case State.DISCONNECTED:
                 return "DISCONNECTED";
+            case State.FAILED:
+                return "FAILED";
+            case State.CANCELED:
+                return "CANCELED";
             default:
                 Log.wtf(Connection.class, "Unknown state %d", state);
                 return "UNKNOWN";
@@ -300,6 +326,33 @@ public abstract class Connection {
     }
 
     /**
+     * Cancel the {@link Connection}. Once this is called, the {@link Connection} will not be used,
+     * and no subsequent {@link Connection}s will be attempted.
+     */
+    public final void setCanceled() {
+        Log.d(this, "setCanceled");
+        setState(State.CANCELED);
+    }
+
+    /**
+     * Move the {@link Connection} to the {@link State#FAILED} state, with the given code
+     * ({@see DisconnectCause}) and message. This message is not shown to the user, but is useful
+     * for logging and debugging purposes.
+     * <p>
+     * After calling this, the {@link Connection} will not be used.
+     *
+     * @param code The {@link android.telephony.DisconnectCause} indicating why the connection
+     *             failed.
+     * @param message A message explaining why the {@link Connection} failed.
+     */
+    public final void setFailed(int code, String message) {
+        Log.d(this, "setFailed (%d: %s)", code, message);
+        mFailureCode = code;
+        mFailureMessage = message;
+        setState(State.FAILED);
+    }
+
+    /**
      * Set the video state for the connection.
      * Valid values: {@link android.telecomm.VideoCallProfile#VIDEO_STATE_AUDIO_ONLY},
      * {@link android.telecomm.VideoCallProfile#VIDEO_STATE_BIDIRECTIONAL},
@@ -330,6 +383,20 @@ public abstract class Connection {
      */
     public final void setRinging() {
         setState(State.RINGING);
+    }
+
+    /**
+     * Sets state to initializing (this Connection is not yet ready to be used).
+     */
+    public final void setInitializing() {
+        setState(State.INITIALIZING);
+    }
+
+    /**
+     * Sets state to initialized (the Connection has been set up and is now ready to be used).
+     */
+    public final void setInitialized() {
+        setState(State.NEW);
     }
 
     /**
@@ -485,8 +552,8 @@ public abstract class Connection {
     public void onSetAudioState(CallAudioState state) {}
 
     /**
-     * Notifies this Connection of an internal state change. This method is called before the
-     * state is actually changed.
+     * Notifies this Connection of an internal state change. This method is called after the
+     * state is changed.
      *
      * @param state The new state, a {@link Connection.State} member.
      */
@@ -577,11 +644,50 @@ public abstract class Connection {
     }
 
     private void setState(int state) {
-        Log.d(this, "setState: %s", stateToString(state));
-        this.mState = state;
-        for (Listener l : mListeners) {
-            l.onStateChanged(this, state);
+        if (mState == State.FAILED || mState == State.CANCELED) {
+            Log.d(this, "Connection already %s; cannot transition out of this state.",
+                    stateToString(mState));
+            return;
         }
-        onSetState(state);
+        if (mState != state) {
+            Log.d(this, "setState: %s", stateToString(state));
+            mState = state;
+            for (Listener l : mListeners) {
+                l.onStateChanged(this, state);
+            }
+            onSetState(state);
+        }
+    }
+
+    /**
+     * Return a {@link Connection} which represents a failed connection attempt. The returned
+     * {@link Connection} will have {@link #getFailureCode()}, {@link #getFailureMessage()}, and
+     * {@link #getState()} set appropriately, but the {@link Connection} itself should not be used
+     * for anything.
+     *
+     * @param code The failure code ({@see DisconnectCause}).
+     * @param message A reason for why the connection failed (not intended to be shown to the user).
+     * @return A {@link Connection} which indicates failure.
+     */
+    public static Connection getFailedConnection(final int code, final String message) {
+        return new Connection() {{
+            setFailed(code, message);
+        }};
+    }
+
+    private static final Connection CANCELED_CONNECTION = new Connection() {{
+        setCanceled();
+    }};
+
+    /**
+     * Return a {@link Connection} which represents a canceled a connection attempt. The returned
+     * {@link Connection} will have state {@link State#CANCELED}, and cannot be moved out of that
+     * state. This connection should not be used for anything, and no other {@link Connection}s
+     * should be attempted.
+     *
+     * @return A {@link Connection} which indicates that the underlying call should be canceled.
+     */
+    public static Connection getCanceledConnection() {
+        return CANCELED_CONNECTION;
     }
 }
