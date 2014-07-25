@@ -163,6 +163,7 @@ class TaskBarView extends FrameLayout {
         } else if (t.applicationIcon != null) {
             mApplicationIcon.setImageDrawable(t.applicationIcon);
         }
+        mApplicationIcon.setContentDescription(t.activityLabel);
         if (!mActivityDescription.getText().toString().equals(t.activityLabel)) {
             mActivityDescription.setText(t.activityLabel);
         }
@@ -176,6 +177,9 @@ class TaskBarView extends FrameLayout {
                 mConfig.taskBarViewLightTextColor : mConfig.taskBarViewDarkTextColor);
         mDismissButton.setImageDrawable(t.useLightOnPrimaryColor ?
                 mLightDismissDrawable : mDarkDismissDrawable);
+        mDismissButton.setContentDescription(
+                getContext().getString(R.string.accessibility_recents_item_will_be_dismissed,
+                        t.activityLabel));
     }
 
     /** Unbinds the bar view from the task */
