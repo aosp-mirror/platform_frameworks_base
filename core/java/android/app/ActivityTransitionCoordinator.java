@@ -549,7 +549,7 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         Bundle bundle = new Bundle();
         RectF tempBounds = new RectF();
         Matrix tempMatrix = new Matrix();
-        for (int i = 0; i < mSharedElementNames.size(); i++) {
+        for (int i = 0; i < mSharedElements.size(); i++) {
             View sharedElement = mSharedElements.get(i);
             String name = mSharedElementNames.get(i);
             captureSharedElementState(sharedElement, name, bundle, tempMatrix, tempBounds);
