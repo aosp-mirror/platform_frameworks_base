@@ -741,4 +741,7 @@
 
     <!-- Media projection permission dialog action text. [CHAR LIMIT=60] -->
     <string name="media_projection_action_text">Start now</string>
+
+    <!-- Text which is shown in the notification shade when there are no notifications. [CHAR LIMIT=30] -->
+    <string name="empty_shade_text">No notifications</string>
 </resources>
