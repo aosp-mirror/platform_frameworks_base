@@ -27,11 +27,12 @@ import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageDeleteObserver;
 import android.content.pm.IPackageInstaller;
 import android.content.pm.IPackageManager;
+import android.content.pm.InstallSessionInfo;
 import android.content.pm.InstallSessionParams;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
-import android.content.pm.PackageInstaller.CommitResultCallback;
+import android.content.pm.PackageInstaller.CommitCallback;
 import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
@@ -157,8 +158,8 @@ public final class Pm {
             return;
         }
 
-        if ("install-destroy".equals(op)) {
-            runInstallDestroy();
+        if ("install-abandon".equals(op) || "install-destroy".equals(op)) {
+            runInstallAbandon();
             return;
         }
 
@@ -770,7 +771,7 @@ public final class Pm {
         }
     }
 
-    class LocalCommitResultCallback extends CommitResultCallback {
+    class LocalCommitCallback extends CommitCallback {
         boolean finished;
         boolean success;
         String msg;
@@ -790,7 +791,7 @@ public final class Pm {
         }
 
         @Override
-        public void onFailure(String msg) {
+        public void onFailure(int failureReason, String msg, Bundle extras) {
             setResult(false, msg);
         }
     }
@@ -996,10 +997,9 @@ public final class Pm {
     private void runInstallCreate() throws RemoteException {
         String installerPackageName = null;
 
-        final InstallSessionParams params = new InstallSessionParams();
+        final InstallSessionParams params = new InstallSessionParams(
+                InstallSessionParams.MODE_FULL_INSTALL);
         params.installFlags = PackageManager.INSTALL_ALL_USERS;
-        params.setModeFullInstall();
-        params.setProgressMax(-1);
 
         String opt;
         while ((opt = nextOption()) != null) {
@@ -1021,11 +1021,9 @@ public final class Pm {
             } else if (opt.equals("-d")) {
                 params.installFlags |= PackageManager.INSTALL_ALLOW_DOWNGRADE;
             } else if (opt.equals("-p")) {
-                params.setModeInheritExisting();
+                params.mode = InstallSessionParams.MODE_INHERIT_EXISTING;
             } else if (opt.equals("-S")) {
-                final long deltaSize = Long.parseLong(nextOptionData());
-                params.setDeltaSize(deltaSize);
-                params.setProgressMax((int) params.deltaSize);
+                params.setSize(Long.parseLong(nextOptionData()));
             } else if (opt.equals("--abi")) {
                 params.abiOverride = checkAbiArgument(nextOptionData());
             } else {
@@ -1033,7 +1031,7 @@ public final class Pm {
             }
         }
 
-        final int sessionId = mInstaller.createSession(installerPackageName, params,
+        final int sessionId = mInstaller.createSession(params, installerPackageName,
                 UserHandle.USER_OWNER);
 
         // NOTE: adb depends on parsing this string
@@ -1080,7 +1078,12 @@ public final class Pm {
 
             final int n = Streams.copy(in, out);
             session.fsync(out);
-            session.addProgress(n);
+
+            final InstallSessionInfo info = mInstaller.getSessionInfo(sessionId);
+            if (info.sizeBytes > 0) {
+                final float fraction = ((float) n / (float) info.sizeBytes);
+                session.addProgress(fraction);
+            }
 
             System.out.println("Success: streamed " + n + " bytes");
         } finally {
@@ -1097,7 +1100,7 @@ public final class Pm {
         try {
             session = new PackageInstaller.Session(mInstaller.openSession(sessionId));
 
-            final LocalCommitResultCallback callback = new LocalCommitResultCallback();
+            final LocalCommitCallback callback = new LocalCommitCallback();
             session.commit(callback);
 
             synchronized (callback) {
@@ -1118,13 +1121,13 @@ public final class Pm {
         }
     }
 
-    private void runInstallDestroy() throws RemoteException {
+    private void runInstallAbandon() throws RemoteException {
         final int sessionId = Integer.parseInt(nextArg());
 
         PackageInstaller.Session session = null;
         try {
             session = new PackageInstaller.Session(mInstaller.openSession(sessionId));
-            session.destroy();
+            session.abandon();
             System.out.println("Success");
         } finally {
             IoUtils.closeQuietly(session);
@@ -1743,7 +1746,7 @@ public final class Pm {
         System.err.println("       pm install-create [-lrtsfdp] [-i PACKAGE] [-S BYTES]");
         System.err.println("       pm install-write [-S BYTES] SESSION_ID SPLIT_NAME [PATH]");
         System.err.println("       pm install-commit SESSION_ID");
-        System.err.println("       pm install-destroy SESSION_ID");
+        System.err.println("       pm install-abandon SESSION_ID");
         System.err.println("       pm uninstall [-k] [--user USER_ID] PACKAGE");
         System.err.println("       pm set-installer PACKAGE INSTALLER");
         System.err.println("       pm clear [--user USER_ID] PACKAGE");
@@ -1813,7 +1816,7 @@ public final class Pm {
         System.err.println("    -S: size in bytes of package, required for stdin");
         System.err.println("");
         System.err.println("pm install-commit: perform install of fully staged session");
-        System.err.println("pm install-destroy: destroy session");
+        System.err.println("pm install-abandon: abandon session");
         System.err.println("");
         System.err.println("pm set-installer: set installer package name");
         System.err.println("");
