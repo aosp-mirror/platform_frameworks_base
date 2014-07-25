@@ -478,6 +478,78 @@ public class HdmiCecMessageBuilder {
         return buildCommand(src, dest, Constants.MESSAGE_RECORD_OFF);
     }
 
+    /**
+     * Build &lt;Set Digital Timer&gt; command.
+     *
+     * @param src source address of command
+     * @param dest destination address of command
+     * @param params byte array of timing information and digital service information to be recorded
+     * @return newly created {@link HdmiCecMessage}
+     */
+    static HdmiCecMessage buildSetDigitalTimer(int src, int dest, byte[] params) {
+        return buildCommand(src, dest, Constants.MESSAGE_SET_DIGITAL_TIMER, params);
+    }
+
+    /**
+     * Build &lt;Set Analogue Timer&gt; command.
+     *
+     * @param src source address of command
+     * @param dest destination address of command
+     * @param params byte array of timing information and analog service information to be recorded
+     * @return newly created {@link HdmiCecMessage}
+     */
+    static HdmiCecMessage buildSetAnalogueTimer(int src, int dest, byte[] params) {
+        return buildCommand(src, dest, Constants.MESSAGE_SET_ANALOG_TIMER, params);
+    }
+
+    /**
+     * Build &lt;Set External Timer&gt; command.
+     *
+     * @param src source address of command
+     * @param dest destination address of command
+     * @param params byte array of timing information and external source information to be recorded
+     * @return newly created {@link HdmiCecMessage}
+     */
+    static HdmiCecMessage buildSetExternalTimer(int src, int dest, byte[] params) {
+        return buildCommand(src, dest, Constants.MESSAGE_SET_EXTERNAL_TIMER, params);
+    }
+
+    /**
+     * Build &lt;Clear Digital Timer&gt; command.
+     *
+     * @param src source address of command
+     * @param dest destination address of command
+     * @param params byte array of timing information and digital service information to be cleared
+     * @return newly created {@link HdmiCecMessage}
+     */
+    static HdmiCecMessage buildClearDigitalTimer(int src, int dest, byte[] params) {
+        return buildCommand(src, dest, Constants.MESSAGE_CLEAR_DIGITAL_TIMER, params);
+    }
+
+    /**
+     * Build &lt;Clear Analog Timer&gt; command.
+     *
+     * @param src source address of command
+     * @param dest destination address of command
+     * @param params byte array of timing information and analog service information to be cleared
+     * @return newly created {@link HdmiCecMessage}
+     */
+    static HdmiCecMessage buildClearAnalogueTimer(int src, int dest, byte[] params) {
+        return buildCommand(src, dest, Constants.MESSAGE_CLEAR_ANALOG_TIMER, params);
+    }
+
+    /**
+     * Build &lt;Clear Digital Timer&gt; command.
+     *
+     * @param src source address of command
+     * @param dest destination address of command
+     * @param params byte array of timing information and external source information to be cleared
+     * @return newly created {@link HdmiCecMessage}
+     */
+    static HdmiCecMessage buildClearExternalTimer(int src, int dest, byte[] params) {
+        return buildCommand(src, dest, Constants.MESSAGE_CLEAR_EXTERNAL_TIMER, params);
+    }
+
     /***** Please ADD new buildXXX() methods above. ******/
 
     /**

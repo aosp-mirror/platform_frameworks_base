@@ -16,6 +16,10 @@
 
 package android.hardware.hdmi;
 
+import static android.hardware.hdmi.HdmiControlManager.TIMER_RECORDING_TYPE_ANALOGUE;
+import static android.hardware.hdmi.HdmiControlManager.TIMER_RECORDING_TYPE_DIGITAL;
+import static android.hardware.hdmi.HdmiControlManager.TIMER_RECORDING_TYPE_EXTERNAL;
+
 import android.annotation.SystemApi;
 import android.hardware.hdmi.HdmiRecordSources.AnalogueServiceSource;
 import android.hardware.hdmi.HdmiRecordSources.DigitalServiceSource;
@@ -418,6 +422,37 @@ public class HdmiTimerRecordSources {
             data[index] = (byte) mExternalSourceSpecifier;
             mRecordSource.toByteArray(false, data, index + 1);
             return getDataSize(false);
+        }
+    }
+
+    /**
+     * Check the byte array of timer record source.
+     * @param sourcetype
+     * @param recordSource
+     * @hide
+     */
+    @SystemApi
+    public static boolean checkTimerRecordSource(int sourcetype, byte[] recordSource) {
+        int recordSourceSize = recordSource.length - TimerInfo.BASIC_INFO_SIZE;
+        switch (sourcetype) {
+            case TIMER_RECORDING_TYPE_DIGITAL:
+                return DigitalServiceSource.EXTRA_DATA_SIZE == recordSourceSize;
+            case TIMER_RECORDING_TYPE_ANALOGUE:
+                return AnalogueServiceSource.EXTRA_DATA_SIZE == recordSourceSize;
+            case TIMER_RECORDING_TYPE_EXTERNAL:
+                int specifier = recordSource[TimerInfo.BASIC_INFO_SIZE];
+                if (specifier == EXTERNAL_SOURCE_SPECIFIER_EXTERNAL_PLUG) {
+                    // One byte for specifier.
+                    return ExternalPlugData.EXTRA_DATA_SIZE + 1 == recordSourceSize;
+                } else if (specifier == EXTERNAL_SOURCE_SPECIFIER_EXTERNAL_PHYSICAL_ADDRESS) {
+                    // One byte for specifier.
+                    return ExternalPhysicalAddress.EXTRA_DATA_SIZE + 1 == recordSourceSize;
+                } else {
+                    // Invalid specifier.
+                    return false;
+                }
+            default:
+                return false;
         }
     }
 }

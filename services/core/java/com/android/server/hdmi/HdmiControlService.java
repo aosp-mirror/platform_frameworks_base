@@ -32,7 +32,7 @@ import android.hardware.hdmi.IHdmiControlService;
 import android.hardware.hdmi.IHdmiDeviceEventListener;
 import android.hardware.hdmi.IHdmiHotplugEventListener;
 import android.hardware.hdmi.IHdmiInputChangeListener;
-import android.hardware.hdmi.IHdmiRecordRequestListener;
+import android.hardware.hdmi.IHdmiRecordListener;
 import android.hardware.hdmi.IHdmiSystemAudioModeChangeListener;
 import android.hardware.hdmi.IHdmiVendorCommandListener;
 import android.media.AudioManager;
@@ -160,10 +160,10 @@ public final class HdmiControlService extends SystemService {
     private InputChangeListenerRecord mInputChangeListenerRecord;
 
     @GuardedBy("mLock")
-    private IHdmiRecordRequestListener mRecordRequestListener;
+    private IHdmiRecordListener mRecordListener;
 
     @GuardedBy("mLock")
-    private HdmiRecordRequestListenerRecord mRecordRequestListenerRecord;
+    private HdmiRecordListenerRecord mRecordListenerRecord;
 
     // Set to true while HDMI control is enabled. If set to false, HDMI-CEC/MHL protocol
     // handling will be disabled and no request will be handled.
@@ -692,11 +692,11 @@ public final class HdmiControlService extends SystemService {
         }
     }
 
-    private class HdmiRecordRequestListenerRecord implements IBinder.DeathRecipient {
+    private class HdmiRecordListenerRecord implements IBinder.DeathRecipient {
         @Override
         public void binderDied() {
             synchronized (mLock) {
-                mRecordRequestListener = null;
+                mRecordListener = null;
             }
         }
     }
@@ -1027,11 +1027,11 @@ public final class HdmiControlService extends SystemService {
                     }
                 }
             });
-         }
+        }
 
         @Override
-        public void setOneTouchRecordRequestListener(IHdmiRecordRequestListener listener) {
-            HdmiControlService.this.setOneTouchRecordRequestListener(listener);
+        public void setHdmiRecordListener(IHdmiRecordListener listener) {
+            HdmiControlService.this.setHdmiRecordListener(listener);
         }
 
         @Override
@@ -1234,29 +1234,52 @@ public final class HdmiControlService extends SystemService {
         }
     }
 
-    private void setOneTouchRecordRequestListener(IHdmiRecordRequestListener listener) {
+    private void setHdmiRecordListener(IHdmiRecordListener listener) {
         synchronized (mLock) {
-            mRecordRequestListenerRecord = new HdmiRecordRequestListenerRecord();
+            mRecordListenerRecord = new HdmiRecordListenerRecord();
             try {
-                listener.asBinder().linkToDeath(mRecordRequestListenerRecord, 0);
+                listener.asBinder().linkToDeath(mRecordListenerRecord, 0);
             } catch (RemoteException e) {
-                Slog.w(TAG, "Listener already died", e);
-                return;
+                Slog.w(TAG, "Listener already died.", e);
             }
-            mRecordRequestListener = listener;
+            mRecordListener = listener;
         }
     }
 
     byte[] invokeRecordRequestListener(int recorderAddress) {
         synchronized (mLock) {
-            try {
-                if (mRecordRequestListener != null) {
-                    return mRecordRequestListener.onRecordRequestReceived(recorderAddress);
+            if (mRecordListener != null) {
+                try {
+                    return mRecordListener.getOneTouchRecordSource(recorderAddress);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Failed to start record.", e);
                 }
-            } catch (RemoteException e) {
-                Slog.w(TAG, "Failed to start record.", e);
             }
             return EmptyArray.BYTE;
+        }
+    }
+
+    void invokeOneTouchRecordResult(int result) {
+        synchronized (mLock) {
+            if (mRecordListener != null) {
+                try {
+                    mRecordListener.onOneTouchRecordResult(result);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Failed to call onOneTouchRecordResult.", e);
+                }
+            }
+        }
+    }
+
+    void invokeTimerRecordingResult(int result) {
+        synchronized (mLock) {
+            if (mRecordListener != null) {
+                try {
+                    mRecordListener.onTimerRecordingResult(result);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Failed to call onOneTouchRecordResult.", e);
+                }
+            }
         }
     }
 
