@@ -35,6 +35,10 @@ please see themes_device_defaults.xml.
     <style name="Theme.Material.DialogWhenLarge.NoActionBar" parent="@style/Theme.Material.Dialog.NoActionBar.FixedSize">
         <item name="preferencePanelStyle">@style/PreferencePanel.Dialog</item>
     </style>
-    <style name="Theme.Material.Light.DialogWhenLarge" parent="@style/Theme.Material.Light.Dialog.FixedSize" />
-    <style name="Theme.Material.Light.DialogWhenLarge.NoActionBar" parent="@style/Theme.Material.Light.Dialog.NoActionBar.FixedSize" />
+    <style name="Theme.Material.Light.DialogWhenLarge" parent="@style/Theme.Material.Light.Dialog.FixedSize">
+        <item name="preferencePanelStyle">@style/PreferencePanel.Dialog</item>
+    </style>
+    <style name="Theme.Material.Light.DialogWhenLarge.NoActionBar" parent="@style/Theme.Material.Light.Dialog.NoActionBar.FixedSize">
+        <item name="preferencePanelStyle">@style/PreferencePanel.Dialog</item>
+    </style>
 </resources>
