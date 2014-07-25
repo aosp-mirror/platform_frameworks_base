@@ -14991,6 +14991,7 @@ package android.media {
     field public static final java.lang.String KEY_AAC_SBR_MODE = "aac-sbr-mode";
     field public static final java.lang.String KEY_BITRATE_MODE = "bitrate-mode";
     field public static final java.lang.String KEY_BIT_RATE = "bitrate";
+    field public static final java.lang.String KEY_CAPTURE_RATE = "capture-rate";
     field public static final java.lang.String KEY_CHANNEL_COUNT = "channel-count";
     field public static final java.lang.String KEY_CHANNEL_MASK = "channel-mask";
     field public static final java.lang.String KEY_COLOR_FORMAT = "color-format";

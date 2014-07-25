@@ -43,7 +43,8 @@ import java.util.Map;
  * <tr><td>{@link #KEY_COLOR_FORMAT}</td><td>Integer</td><td>set by the user
  *         for encoders, readable in the output format of decoders</b></td></tr>
  * <tr><td>{@link #KEY_FRAME_RATE}</td><td>Integer or Float</td><td><b>encoder-only</b></td></tr>
- * <tr><td>{@link #KEY_I_FRAME_INTERVAL}</td><td>Integer</td><td><b>encoder-only</b></td></tr>
+ * <tr><td>{@link #KEY_CAPTURE_RATE}</td><td>Integer</td><td></td></tr>
+* <tr><td>{@link #KEY_I_FRAME_INTERVAL}</td><td>Integer</td><td><b>encoder-only</b></td></tr>
  * <tr><td>{@link #KEY_MAX_WIDTH}</td><td>Integer</td><td><b>decoder-only</b>, optional, max-resolution width</td></tr>
  * <tr><td>{@link #KEY_MAX_HEIGHT}</td><td>Integer</td><td><b>decoder-only</b>, optional, max-resolution height</td></tr>
  * <tr><td>{@link #KEY_REPEAT_PREVIOUS_FRAME_AFTER}</td><td>Long</td><td><b>video encoder in surface-mode only</b></td></tr>
@@ -204,6 +205,21 @@ public final class MediaFormat {
      * The associated value is an integer or a float.
      */
     public static final String KEY_FRAME_RATE = "frame-rate";
+
+    /**
+     * A key describing the capture rate of a video format in frames/sec.
+     * <p>
+     * When capture rate is different than the frame rate, it means that the
+     * video is acquired at a different rate than the playback, which produces
+     * slow motion or timelapse effect during playback. Application can use the
+     * value of this key to tell the relative speed ratio between capture and
+     * playback rates when the video was recorded.
+     * </p>
+     * <p>
+     * The associated value is an integer or a float.
+     * </p>
+     */
+    public static final String KEY_CAPTURE_RATE = "capture-rate";
 
     /**
      * A key describing the frequency of I frames expressed in secs
