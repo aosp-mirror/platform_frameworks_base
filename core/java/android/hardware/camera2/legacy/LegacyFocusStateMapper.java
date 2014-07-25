@@ -101,6 +101,7 @@ public class LegacyFocusStateMapper {
                 ++mAfRun;
                 mAfState = CONTROL_AF_STATE_INACTIVE;
             }
+            mCamera.cancelAutoFocus();
         }
 
         mAfModePrevious = afMode;
@@ -156,10 +157,25 @@ public class LegacyFocusStateMapper {
         // AF Locking
         switch (afTrigger) {
             case CONTROL_AF_TRIGGER_START:
+
+                int afStateAfterStart;
+                switch (afMode) {
+                    case Parameters.FOCUS_MODE_AUTO:
+                    case Parameters.FOCUS_MODE_MACRO:
+                        afStateAfterStart = CONTROL_AF_STATE_ACTIVE_SCAN;
+                        break;
+                    case Parameters.FOCUS_MODE_CONTINUOUS_PICTURE:
+                    case Parameters.FOCUS_MODE_CONTINUOUS_VIDEO:
+                        afStateAfterStart = CONTROL_AF_STATE_PASSIVE_SCAN;
+                    default:
+                        // EDOF, INFINITY
+                        afStateAfterStart = CONTROL_AF_STATE_INACTIVE;
+                }
+
                 final int currentAfRun;
                 synchronized (mLock) {
                     currentAfRun = ++mAfRun;
-                    mAfState = CONTROL_AF_STATE_ACTIVE_SCAN;
+                    mAfState = afStateAfterStart;
                 }
 
                 if (VERBOSE) {
@@ -211,11 +227,14 @@ public class LegacyFocusStateMapper {
                 break;
             case CONTROL_AF_TRIGGER_CANCEL:
                 synchronized (mLock) {
-                    int updatedAfRun = ++mAfRun;
-                    mCamera.cancelAutoFocus();
+                    int updatedAfRun;
 
-                    int newAfState = CONTROL_AF_STATE_INACTIVE;
-                    mAfState = newAfState;
+                    synchronized (mLock) {
+                        updatedAfRun = ++mAfRun;
+                        mAfState = CONTROL_AF_STATE_INACTIVE;
+                    }
+
+                    mCamera.cancelAutoFocus();
 
                     if (VERBOSE) {
                         Log.v(TAG, "processRequestTriggers - got AF_TRIGGER_CANCEL, " +

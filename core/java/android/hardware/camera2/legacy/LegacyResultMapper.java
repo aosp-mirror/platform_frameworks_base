@@ -57,22 +57,53 @@ public class LegacyResultMapper {
      *
      * @param legacyRequest a non-{@code null} legacy request containing the latest parameters
      * @param timestamp the timestamp to use for this result in nanoseconds.
+     * @param frameCounter a monotonically increasing frame counter for the result
      *
      * @return {@link CameraMetadataNative} object containing result metadata.
      */
     public CameraMetadataNative cachedConvertResultMetadata(
-            LegacyRequest legacyRequest, long timestamp) {
-        if (mCachedRequest != null && legacyRequest.parameters.same(mCachedRequest.parameters)) {
-            CameraMetadataNative newResult = new CameraMetadataNative(mCachedResult);
+            LegacyRequest legacyRequest, long timestamp, long frameCounter) {
+        CameraMetadataNative result;
+        boolean cached;
 
-            // sensor.timestamp
-            newResult.set(CaptureResult.SENSOR_TIMESTAMP, timestamp);
-            return newResult;
+        /*
+         * Attempt to look up the result from the cache if the parameters haven't changed
+         */
+        if (mCachedRequest != null && legacyRequest.parameters.same(mCachedRequest.parameters)) {
+            result = new CameraMetadataNative(mCachedResult);
+            cached = true;
+        } else {
+            result = convertResultMetadata(legacyRequest, timestamp);
+            cached = false;
+
+            // Always cache a *copy* of the metadata result,
+            // since api2's client side takes ownership of it after it receives a result
+            mCachedRequest = legacyRequest;
+            mCachedResult = new CameraMetadataNative(result);
         }
 
-        mCachedRequest = legacyRequest;
-        mCachedResult = convertResultMetadata(mCachedRequest, timestamp);
-        return mCachedResult;
+        /*
+         * Unconditionally set fields that change in every single frame
+         */
+        {
+            // request.frameCounter
+            result.set(REQUEST_FRAME_COUNT, (int)frameCounter);
+            // TODO: fix CaptureResult#getFrameNumber not to need this key
+
+            // sensor.timestamp
+            result.set(SENSOR_TIMESTAMP, timestamp);
+        }
+
+        if (VERBOSE) {
+            Log.v(TAG, "cachedConvertResultMetadata - cached? " + cached +
+                    " frameCounter = " + frameCounter + " timestamp = " + timestamp);
+
+            Log.v(TAG, "----- beginning of result dump ------");
+            result.dumpToLog();
+            Log.v(TAG, "----- end of result dump ------");
+        }
+
+        return result;
     }
 
     /**
@@ -83,7 +114,7 @@ public class LegacyResultMapper {
      *
      * @return a {@link CameraMetadataNative} object containing result metadata.
      */
-    public static CameraMetadataNative convertResultMetadata(LegacyRequest legacyRequest,
+    private static CameraMetadataNative convertResultMetadata(LegacyRequest legacyRequest,
                                                       long timestamp) {
         CameraCharacteristics characteristics = legacyRequest.characteristics;
         CaptureRequest request = legacyRequest.captureRequest;
@@ -148,6 +179,13 @@ public class LegacyResultMapper {
         result.set(CaptureResult.LENS_FOCAL_LENGTH, params.getFocalLength());
 
         /*
+         * request
+         */
+        // request.pipelineDepth
+        result.set(REQUEST_PIPELINE_DEPTH,
+                characteristics.get(CameraCharacteristics.REQUEST_PIPELINE_MAX_DEPTH));
+
+        /*
          * scaler
          */
         mapScaler(result, zoomData, /*out*/params);
@@ -155,8 +193,6 @@ public class LegacyResultMapper {
         /*
          * sensor
          */
-        // sensor.timestamp
-        result.set(CaptureResult.SENSOR_TIMESTAMP, timestamp);
 
         // TODO: Remaining result metadata tags conversions.
         return result;

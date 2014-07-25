@@ -614,6 +614,7 @@ public class RequestThreadManager {
                         }
 
                         // Unconditionally process AF triggers, since they're non-idempotent
+                        // - must be done after setting the most-up-to-date AF mode
                         mFocusStateMapper.processRequestTriggers(request, mParams);
 
                         try {
@@ -673,7 +674,7 @@ public class RequestThreadManager {
                         }
 
                         CameraMetadataNative result = mMapper.cachedConvertResultMetadata(
-                                mLastRequest, timestampMutable.value);
+                                mLastRequest, timestampMutable.value, holder.getFrameNumber());
                         // Update AF state
                         mFocusStateMapper.mapResultTriggers(result);
 
