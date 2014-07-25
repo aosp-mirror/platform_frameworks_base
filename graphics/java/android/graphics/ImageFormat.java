@@ -236,17 +236,17 @@ public class ImageFormat {
      * Android 10-bit raw format
      * </p>
      * <p>
-     * This is a single-plane, 10-bit per pixel, densely packed, unprocessed
-     * format, usually representing raw Bayer-pattern images coming from an image
-     * sensor.
+     * This is a single-plane, 10-bit per pixel, densely packed (in each row),
+     * unprocessed format, usually representing raw Bayer-pattern images coming
+     * from an image sensor.
      * </p>
      * <p>
-     * In an image buffer with this format, starting from the first pixel, each
-     * 4 consecutive pixels are packed into 5 bytes (40 bits). Each one of the
-     * first 4 bytes contains the top 8 bits of each pixel, The fifth byte
-     * contains the 2 least significant bits of the 4 pixels, the exact layout
-     * data for each 4 consecutive pixels is illustrated below (Pi[j] stands for
-     * the jth bit of the ith pixel):
+     * In an image buffer with this format, starting from the first pixel of
+     * each row, each 4 consecutive pixels are packed into 5 bytes (40 bits).
+     * Each one of the first 4 bytes contains the top 8 bits of each pixel, The
+     * fifth byte contains the 2 least significant bits of the 4 pixels, the
+     * exact layout data for each 4 consecutive pixels is illustrated below
+     * ({@code Pi[j]} stands for the jth bit of the ith pixel):
      * </p>
      * <table>
      * <thead>
@@ -327,23 +327,26 @@ public class ImageFormat {
      * </ul>
      * </p>
      *
-     * <pre>
-     * size = width * height * 10 / 8
-     * </pre>
-     * <p>
-     * Since this is a densely packed format, the pixel and row stride are always
-     * 0. The application must use the pixel data layout defined in above table
-     * to access data.
-     * </p>
+     * <pre>size = row stride * height</pre> where the row stride is in <em>bytes</em>,
+     * not pixels.
      *
      * <p>
+     * Since this is a densely packed format, the pixel stride is always 0. The
+     * application must use the pixel data layout defined in above table to
+     * access each row data. When row stride is equal to {@code width * (10 / 8)}, there
+     * will be no padding bytes at the end of each row, the entire image data is
+     * densely packed. When stride is larger than {@code width * (10 / 8)}, padding
+     * bytes will be present at the end of each row.
+     * </p>
+     * <p>
      * For example, the {@link android.media.Image} object can provide data in
-     * this format from a {@link android.hardware.camera2.CameraDevice} (if supported)
-     * through a {@link android.media.ImageReader} object. The
+     * this format from a {@link android.hardware.camera2.CameraDevice} (if
+     * supported) through a {@link android.media.ImageReader} object. The
      * {@link android.media.Image#getPlanes() Image#getPlanes()} will return a
-     * single plane containing the pixel data. The pixel stride and row stride
-     * are always 0 in {@link android.media.Image.Plane#getPixelStride()} and
-     * {@link android.media.Image.Plane#getRowStride()} respectively.
+     * single plane containing the pixel data. The pixel stride is always 0 in
+     * {@link android.media.Image.Plane#getPixelStride()}, and the
+     * {@link android.media.Image.Plane#getRowStride()} describes the vertical
+     * neighboring pixel distance (in bytes) between adjacent rows.
      * </p>
      *
      * @see android.media.Image
