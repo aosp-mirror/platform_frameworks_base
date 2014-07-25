@@ -1163,6 +1163,10 @@ public final class ActivityThread {
         public void scheduleBackgroundMediaPlayingChanged(IBinder token, boolean playing) {
             sendMessage(H.BACKGROUND_MEDIA_PLAYING_CHANGED, token, playing ? 1 : 0);
         }
+
+        public void scheduleEnterAnimationComplete(IBinder token) {
+            sendMessage(H.ENTER_ANIMATION_COMPLETE, token);
+        }
     }
 
     private class H extends Handler {
@@ -1215,6 +1219,7 @@ public final class ActivityThread {
         public static final int ON_NEW_ACTIVITY_OPTIONS = 146;
         public static final int STOP_MEDIA_PLAYING = 147;
         public static final int BACKGROUND_MEDIA_PLAYING_CHANGED = 148;
+        public static final int ENTER_ANIMATION_COMPLETE = 149;
 
         String codeToString(int code) {
             if (DEBUG_MESSAGES) {
@@ -1267,6 +1272,7 @@ public final class ActivityThread {
                     case ON_NEW_ACTIVITY_OPTIONS: return "ON_NEW_ACTIVITY_OPTIONS";
                     case STOP_MEDIA_PLAYING: return "STOP_MEDIA_PLAYING";
                     case BACKGROUND_MEDIA_PLAYING_CHANGED: return "BACKGROUND_MEDIA_PLAYING_CHANGED";
+                    case ENTER_ANIMATION_COMPLETE: return "ENTER_ANIMATION_COMPLETE";
                 }
             }
             return Integer.toString(code);
@@ -1490,6 +1496,9 @@ public final class ActivityThread {
                     break;
                 case BACKGROUND_MEDIA_PLAYING_CHANGED:
                     handleOnBackgroundMediaPlayingChanged((IBinder) msg.obj, msg.arg1 > 0);
+                    break;
+                case ENTER_ANIMATION_COMPLETE:
+                    handleEnterAnimationComplete((IBinder) msg.obj);
                     break;
             }
             if (DEBUG_MESSAGES) Slog.v(TAG, "<<< done: " + codeToString(msg.what));
@@ -2507,6 +2516,13 @@ public final class ActivityThread {
 
     public void handleInstallProvider(ProviderInfo info) {
         installContentProviders(mInitialApplication, Lists.newArrayList(info));
+    }
+
+    private void handleEnterAnimationComplete(IBinder token) {
+        ActivityClientRecord r = mActivities.get(token);
+        if (r != null) {
+            r.activity.onEnterAnimationComplete();
+        }
     }
 
     private static final ThreadLocal<Intent> sCurrentBroadcastIntent = new ThreadLocal<Intent>();

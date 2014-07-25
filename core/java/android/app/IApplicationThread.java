@@ -147,6 +147,7 @@ public interface IApplicationThread extends IInterface {
     void updateTimePrefs(boolean is24Hour) throws RemoteException;
     void scheduleStopMediaPlaying(IBinder token) throws RemoteException;
     void scheduleBackgroundMediaPlayingChanged(IBinder token, boolean enabled) throws RemoteException;
+    void scheduleEnterAnimationComplete(IBinder token) throws RemoteException;
 
     String descriptor = "android.app.IApplicationThread";
 
@@ -203,4 +204,5 @@ public interface IApplicationThread extends IInterface {
     int UPDATE_TIME_PREFS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+51;
     int STOP_MEDIA_PLAYING_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+52;
     int BACKGROUND_MEDIA_PLAYING_CHANGED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+53;
+    int ENTER_ANIMATION_COMPLETE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+54;
 }

@@ -666,6 +666,15 @@ public abstract class ApplicationThreadNative extends Binder
             reply.writeNoException();
             return true;
         }
+
+        case ENTER_ANIMATION_COMPLETE_TRANSACTION:
+        {
+            data.enforceInterface(IApplicationThread.descriptor);
+            IBinder token = data.readStrongBinder();
+            scheduleEnterAnimationComplete(token);
+            reply.writeNoException();
+            return true;
+        }
         }
 
         return super.onTransact(code, data, reply, flags);
@@ -1340,6 +1349,15 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.writeStrongBinder(token);
         data.writeInt(enabled ? 1 : 0);
         mRemote.transact(BACKGROUND_MEDIA_PLAYING_CHANGED_TRANSACTION, data, null, IBinder.FLAG_ONEWAY);
+        data.recycle();
+    }
+
+    @Override
+    public void scheduleEnterAnimationComplete(IBinder token) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        data.writeInterfaceToken(IApplicationThread.descriptor);
+        data.writeStrongBinder(token);
+        mRemote.transact(ENTER_ANIMATION_COMPLETE_TRANSACTION, data, null, IBinder.FLAG_ONEWAY);
         data.recycle();
     }
 }

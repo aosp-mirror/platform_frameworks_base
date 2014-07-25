@@ -448,6 +448,7 @@ public interface IActivityManager extends IInterface {
     public void mediaResourcesReleased(IBinder token) throws RemoteException;
 
     public void notifyLaunchTaskBehindComplete(IBinder token) throws RemoteException;
+    public void notifyEnterAnimationComplete(IBinder token) throws RemoteException;
 
     /*
      * Private non-Binder interfaces
@@ -758,4 +759,5 @@ public interface IActivityManager extends IInterface {
     int MEDIA_RESOURCES_RELEASED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+227;
     int NOTIFY_LAUNCH_TASK_BEHIND_COMPLETE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+228;
     int START_ACTIVITY_FROM_RECENTS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 229;
+    int NOTIFY_ENTER_ANIMATION_COMPLETE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+230;
 }

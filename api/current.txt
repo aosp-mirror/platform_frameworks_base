@@ -3392,6 +3392,7 @@ package android.app {
     method public android.view.View onCreateView(android.view.View, java.lang.String, android.content.Context, android.util.AttributeSet);
     method protected void onDestroy();
     method public void onDetachedFromWindow();
+    method public void onEnterAnimationComplete();
     method public boolean onGenericMotionEvent(android.view.MotionEvent);
     method public boolean onKeyDown(int, android.view.KeyEvent);
     method public boolean onKeyLongPress(int, android.view.KeyEvent);
