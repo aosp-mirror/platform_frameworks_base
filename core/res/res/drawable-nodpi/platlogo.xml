@@ -13,27 +13,28 @@
     limitations under the License.
 -->
 
-<vector xmlns:android="http://schemas.android.com/apk/res/android" >
-    <size android:width="400dp" android:height="400dp"/>
-
-    <viewport android:viewportHeight="25" android:viewportWidth="25" />
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+        android:width="400dp"
+        android:height="400dp"
+        android:viewportHeight="25"
+        android:viewportWidth="25" >
 
     <path
         android:name="torso"
         android:pathData="m2,2 l21,0 l0,21 l-21,0 z"
-        android:fill="#FFFFFFFF"
+        android:fillColor="#FFFFFFFF"
         />
 
     <path
         android:name="|"
         android:pathData="m4,4 l8,0 l0,17 l-8,0 z"
-        android:fill="#FF0000FF"
+        android:fillColor="#FF0000FF"
         />
 
     <path
         android:name="_"
         android:pathData="m5,14 l16,0 l0,6 l-16,0 z"
-        android:fill="#FFFF0000"
+        android:fillColor="#FFFF0000"
         />
 
 </vector>

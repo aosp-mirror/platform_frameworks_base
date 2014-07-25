@@ -13,45 +13,33 @@
      limitations under the License.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:autoMirrored="true">
-
-    <size
             android:width="64dp"
-            android:height="64dp"/>
-
-    <viewport
+            android:height="64dp"
             android:viewportWidth="7.30625"
-            android:viewportHeight="12.25"/>
+            android:viewportHeight="12.25">
 
     <group>
-        <path
+        <clip-path
                 android:name="clip1"
                 android:pathData="
                 M 3.65, 6.125
                 m-.001, 0
                 a .001,.001 0 1,0 .002,0
-                a .001,.001 0 1,0-.002,0z"
-                android:clipToPath="true"
-                android:fill="#112233"
-                />
-
+                a .001,.001 0 1,0-.002,0z"/>
         <path
                 android:name="one"
                 android:pathData="M 1.215625,9.5l 1.9375,0.0 0.0-6.671875-2.109375,0.421875 0.0-1.078125
                 l 2.09375-0.421875 1.1874998,0.0 0.0,7.75 1.9375,0.0 0.0,1.0
                 l-5.046875,0.0 0.0-1.0Z"
-                android:fill="#ff88ff"
-                />
-        <path
+                android:fillColor="#ff88ff"/>
+
+        <clip-path
                 android:name="clip2"
                 android:pathData="
                 M 3.65, 6.125
                 m-6, 0
                 a 6,6 0 1,0 12,0
-                a 6,6 0 1,0-12,0z"
-                android:clipToPath="true"
-                android:fill="#112233"
-                />
+                a 6,6 0 1,0-12,0z"/>
         <path
                 android:name="two"
                 android:pathData="M 2.534375,9.6875l 4.140625,0.0 0.0,1.0-5.5625,0.0 0.0-1.0q 0.671875-0.6875 1.828125-1.859375
@@ -63,7 +51,6 @@
                         q 0.8125,0.671875 0.8125,1.8125 0.0,0.53125-0.203125,1.015625
                         q-0.203125,0.484375-0.734375,1.140625-0.15625,0.171875-0.9375,0.984375
                         q-0.78125024,0.8125-2.2187502,2.265625Z"
-                android:fill="#ff88ff"
-                />
+                android:fillColor="#ff88ff"/>
     </group>
 </vector>
