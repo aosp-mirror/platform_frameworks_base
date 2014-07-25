@@ -118,6 +118,7 @@ import com.android.systemui.qs.QSTile;
 import com.android.systemui.statusbar.ActivatableNotificationView;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.DismissView;
 import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.GestureRecorder;
@@ -676,6 +677,15 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         SpeedBumpView speedBump = (SpeedBumpView) LayoutInflater.from(mContext).inflate(
                         R.layout.status_bar_notification_speed_bump, mStackScroller, false);
         mStackScroller.setSpeedBumpView(speedBump);
+        mDismissView = (DismissView) LayoutInflater.from(mContext).inflate(
+                R.layout.status_bar_notification_dismiss_all, mStackScroller, false);
+        mDismissView.setOnButtonClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                clearAllNotifications();
+            }
+        });
+        mStackScroller.setDismissView(mDismissView);
         mExpandedContents = mStackScroller;
 
         mScrimController = new ScrimController(mStatusBarWindow.findViewById(R.id.scrim_behind),
@@ -826,6 +836,73 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         startGlyphRasterizeHack();
         return mStatusBarView;
+    }
+
+    private void clearAllNotifications() {
+
+        // animate-swipe all dismissable notifications, then animate the shade closed
+        int numChildren = mStackScroller.getChildCount();
+
+        final ArrayList<View> viewsToHide = new ArrayList<View>(numChildren);
+        for (int i = 0; i < numChildren; i++) {
+            final View child = mStackScroller.getChildAt(i);
+            if (mStackScroller.canChildBeDismissed(child)) {
+                if (child.getVisibility() == View.VISIBLE) {
+                    viewsToHide.add(child);
+                }
+            }
+        }
+        if (viewsToHide.isEmpty()) {
+            animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE);
+            return;
+        }
+
+        mPostCollapseCleanup = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mBarService.onClearAllNotifications(mCurrentUserId);
+                } catch (Exception ex) { }
+            }
+        };
+
+        performDismissAllAnimations(viewsToHide);
+
+    }
+
+    private void performDismissAllAnimations(ArrayList<View> hideAnimatedList) {
+        Runnable animationFinishAction = new Runnable() {
+            @Override
+            public void run() {
+                mStackScroller.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mStackScroller.setDismissAllInProgress(false);
+                    }
+                });
+                animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE);
+            }
+        };
+
+        // let's disable our normal animations
+        mStackScroller.setDismissAllInProgress(true);
+
+        // Decrease the delay for every row we animate to give the sense of
+        // accelerating the swipes
+        int rowDelayDecrement = 10;
+        int currentDelay = 140;
+        int totalDelay = 0;
+        int numItems = hideAnimatedList.size();
+        for (int i = 0; i < numItems; i++) {
+            View view = hideAnimatedList.get(i);
+            Runnable endRunnable = null;
+            if (i == numItems - 1) {
+                endRunnable = animationFinishAction;
+            }
+            mStackScroller.dismissViewAnimated(view, endRunnable, totalDelay, 260);
+            currentDelay = Math.max(50, currentDelay - rowDelayDecrement);
+            totalDelay += currentDelay;
+        }
     }
 
     /**
@@ -1338,8 +1415,30 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
         updateRowStates();
         updateSpeedbump();
+        updateClearAll();
+
         mNotificationPanel.setQsExpansionEnabled(provisioned && mUserSetup);
         mShadeUpdates.check();
+    }
+
+    private void updateClearAll() {
+        boolean showDismissView = false;
+        if (mState != StatusBarState.KEYGUARD) {
+            for (int i = 0; i < mNotificationData.size(); i++) {
+                Entry entry = mNotificationData.get(i);
+                if (entry.row.getParent() == null) {
+                    // This view isn't even added, so the stack scroller doesn't
+                    // know about it. Ignore completely.
+                    continue;
+                }
+                if (entry.row.getVisibility() != View.GONE && entry.expanded != null
+                        && entry.notification.isClearable()) {
+                    showDismissView = true;
+                    break;
+                }
+            }
+        }
+        mStackScroller.updateDismissView(showDismissView);
     }
 
     private void updateSpeedbump() {
@@ -2021,6 +2120,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     public void animateCollapsePanels(int flags, boolean force) {
         if (!force &&
                 (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED)) {
+            if (mPostCollapseCleanup != null) {
+                mPostCollapseCleanup.run();
+                mPostCollapseCleanup = null;
+            }
             return;
         }
         if (SPEW) {
@@ -3444,6 +3547,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     public void onTrackingStarted() {
+        if (mPostCollapseCleanup != null) {
+            mPostCollapseCleanup.run();
+            mPostCollapseCleanup = null;
+        }
     }
 
     public void onUnlockHintStarted() {
