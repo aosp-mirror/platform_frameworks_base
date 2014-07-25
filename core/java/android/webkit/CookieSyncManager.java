@@ -24,7 +24,7 @@ import android.util.Log;
  * @deprecated The WebView now automatically syncs cookies as necessary.
  *             You no longer need to create or use the CookieSyncManager.
  *             To manually force a sync you can use the CookieManager
- *             method {@link CookieManager#flush} which is synchronous
+ *             method {@link CookieManager#flush} which is a synchronous
  *             replacement for {@link #sync}.
  *             <p>
  *
