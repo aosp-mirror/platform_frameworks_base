@@ -1934,7 +1934,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * android.sync.frameNumber to a non-negative value).</p>
      * <p>This defines the maximum distance (in number of metadata results),
      * between android.sync.frameNumber and the equivalent
-     * android.request.frameCount.</p>
+     * frame number for that result.</p>
      * <p>In other words this acts as an upper boundary for how many frames
      * must occur before the camera device knows for a fact that the new
      * submitted camera settings have been applied in outgoing frames.</p>

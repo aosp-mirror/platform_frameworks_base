@@ -17,6 +17,7 @@
 package android.hardware.camera2;
 
 import android.hardware.camera2.impl.CameraMetadataNative;
+import android.hardware.camera2.impl.CaptureResultExtras;
 import android.hardware.camera2.impl.PublicKey;
 import android.hardware.camera2.impl.SyntheticKey;
 import android.hardware.camera2.utils.TypeReference;
@@ -142,12 +143,16 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
     private final CameraMetadataNative mResults;
     private final CaptureRequest mRequest;
     private final int mSequenceId;
+    private final long mFrameNumber;
 
     /**
      * Takes ownership of the passed-in properties object
+     *
+     * <p>For internal use only</p>
      * @hide
      */
-    public CaptureResult(CameraMetadataNative results, CaptureRequest parent, int sequenceId) {
+    public CaptureResult(CameraMetadataNative results, CaptureRequest parent,
+            CaptureResultExtras extras) {
         if (results == null) {
             throw new IllegalArgumentException("results was null");
         }
@@ -156,12 +161,17 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
             throw new IllegalArgumentException("parent was null");
         }
 
+        if (extras == null) {
+            throw new IllegalArgumentException("extras was null");
+        }
+
         mResults = CameraMetadataNative.move(results);
         if (mResults.isEmpty()) {
             throw new AssertionError("Results must not be empty");
         }
         mRequest = parent;
-        mSequenceId = sequenceId;
+        mSequenceId = extras.getRequestId();
+        mFrameNumber = extras.getFrameNumber();
     }
 
     /**
@@ -190,6 +200,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
 
         mRequest = null;
         mSequenceId = sequenceId;
+        mFrameNumber = -1;
     }
 
     /**
@@ -288,11 +299,10 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * for every new result or failure; and the scope is the lifetime of the
      * {@link CameraDevice}.</p>
      *
-     * @return int frame number
+     * @return The frame number
      */
-    public int getFrameNumber() {
-        // TODO: @hide REQUEST_FRAME_COUNT
-        return get(REQUEST_FRAME_COUNT);
+    public long getFrameNumber() {
+        return mFrameNumber;
     }
 
     /**
@@ -2026,8 +2036,10 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * increases with every new result (that is, each new result has a unique
      * frameCount value).</p>
      * <p>Reset on release()</p>
+     * @deprecated
+     * @hide
      */
-    @PublicKey
+    @Deprecated
     public static final Key<Integer> REQUEST_FRAME_COUNT =
             new Key<Integer>("android.request.frameCount", int.class);
 

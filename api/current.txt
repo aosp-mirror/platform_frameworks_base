@@ -13031,7 +13031,7 @@ package android.hardware.camera2 {
 
   public class CaptureResult extends android.hardware.camera2.CameraMetadata {
     method public T get(android.hardware.camera2.CaptureResult.Key<T>);
-    method public int getFrameNumber();
+    method public long getFrameNumber();
     method public android.hardware.camera2.CaptureRequest getRequest();
     method public int getSequenceId();
     field public static final android.hardware.camera2.CaptureResult.Key BLACK_LEVEL_LOCK;
@@ -13077,7 +13077,6 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CaptureResult.Key LENS_OPTICAL_STABILIZATION_MODE;
     field public static final android.hardware.camera2.CaptureResult.Key LENS_STATE;
     field public static final android.hardware.camera2.CaptureResult.Key NOISE_REDUCTION_MODE;
-    field public static final android.hardware.camera2.CaptureResult.Key REQUEST_FRAME_COUNT;
     field public static final android.hardware.camera2.CaptureResult.Key REQUEST_PIPELINE_DEPTH;
     field public static final android.hardware.camera2.CaptureResult.Key SCALER_CROP_REGION;
     field public static final android.hardware.camera2.CaptureResult.Key SENSOR_EXPOSURE_TIME;
