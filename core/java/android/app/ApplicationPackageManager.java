@@ -61,7 +61,10 @@ import android.os.UserManager;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.view.Display;
+
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
+
 import dalvik.system.VMRuntime;
 
 import java.lang.ref.WeakReference;
@@ -74,13 +77,20 @@ final class ApplicationPackageManager extends PackageManager {
     private final static boolean DEBUG = false;
     private final static boolean DEBUG_ICONS = false;
 
-    UserManager mUserManager;
+    private final Object mLock = new Object();
+
+    @GuardedBy("mLock")
+    private UserManager mUserManager;
+    @GuardedBy("mLock")
+    private PackageInstaller mInstaller;
 
     UserManager getUserManager() {
-        if (mUserManager == null) {
-            mUserManager = UserManager.get(mContext);
+        synchronized (mLock) {
+            if (mUserManager == null) {
+                mUserManager = UserManager.get(mContext);
+            }
+            return mUserManager;
         }
-        return mUserManager;
     }
 
     @Override
@@ -1543,12 +1553,17 @@ final class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    public PackageInstaller getInstaller() {
-        try {
-            return new PackageInstaller(this, mPM.getPackageInstaller(), mContext.getPackageName(),
-                    mContext.getUserId());
-        } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+    public PackageInstaller getPackageInstaller() {
+        synchronized (mLock) {
+            if (mInstaller == null) {
+                try {
+                    mInstaller = new PackageInstaller(this, mPM.getPackageInstaller(),
+                            mContext.getPackageName(), mContext.getUserId());
+                } catch (RemoteException e) {
+                    throw e.rethrowAsRuntimeException();
+                }
+            }
+            return mInstaller;
         }
     }
 

@@ -750,7 +750,7 @@ public class MockPackageManager extends PackageManager {
     }
 
     /** {@hide} */
-    public PackageInstaller getInstaller() {
+    public PackageInstaller getPackageInstaller() {
         throw new UnsupportedOperationException();
     }
 

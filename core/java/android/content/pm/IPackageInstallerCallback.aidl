@@ -16,11 +16,9 @@
 
 package android.content.pm;
 
-import android.content.pm.InstallSessionInfo;
-
 /** {@hide} */
-oneway interface IPackageInstallerObserver {
-    void onSessionCreated(in InstallSessionInfo info);
-    void onSessionProgress(int sessionId, int progress);
+oneway interface IPackageInstallerCallback {
+    void onSessionCreated(int sessionId);
+    void onSessionProgressChanged(int sessionId, float progress);
     void onSessionFinished(int sessionId, boolean success);
 }

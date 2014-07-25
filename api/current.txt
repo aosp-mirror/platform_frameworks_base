@@ -8456,32 +8456,31 @@ package android.content.pm {
 
   public class InstallSessionInfo implements android.os.Parcelable {
     method public int describeContents();
-    method public android.graphics.Bitmap getIcon();
+    method public android.graphics.Bitmap getAppIcon();
+    method public java.lang.CharSequence getAppLabel();
+    method public java.lang.String getAppPackageName();
     method public java.lang.String getInstallerPackageName();
-    method public java.lang.String getPackageName();
-    method public int getProgress();
+    method public float getProgress();
     method public int getSessionId();
-    method public java.lang.CharSequence getTitle();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
   }
 
   public class InstallSessionParams implements android.os.Parcelable {
-    ctor public InstallSessionParams();
+    ctor public InstallSessionParams(int);
     method public int describeContents();
-    method public void setDeltaSize(long);
-    method public void setIcon(android.graphics.Bitmap);
+    method public void setAppIcon(android.graphics.Bitmap);
+    method public void setAppLabel(java.lang.CharSequence);
+    method public void setAppPackageName(java.lang.String);
     method public void setInstallLocation(int);
-    method public void setModeFullInstall();
-    method public void setModeInheritExisting();
     method public void setOriginatingUri(android.net.Uri);
-    method public void setPackageName(java.lang.String);
-    method public void setProgressMax(int);
     method public void setReferrerUri(android.net.Uri);
     method public void setSignatures(android.content.pm.Signature[]);
-    method public void setTitle(java.lang.CharSequence);
+    method public void setSize(long);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final int MODE_FULL_INSTALL = 1; // 0x1
+    field public static final int MODE_INHERIT_EXISTING = 2; // 0x2
   }
 
   public class InstrumentationInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {
@@ -8582,42 +8581,47 @@ package android.content.pm {
   }
 
   public class PackageInstaller {
+    method public void addSessionCallback(android.content.pm.PackageInstaller.SessionCallback);
+    method public void addSessionCallback(android.content.pm.PackageInstaller.SessionCallback, android.os.Handler);
     method public int createSession(android.content.pm.InstallSessionParams) throws java.io.IOException;
-    method public java.util.List<android.content.pm.InstallSessionInfo> getActiveSessions();
+    method public java.util.List<android.content.pm.InstallSessionInfo> getAllSessions();
+    method public java.util.List<android.content.pm.InstallSessionInfo> getMySessions();
+    method public android.content.pm.InstallSessionInfo getSessionInfo(int);
     method public android.content.pm.PackageInstaller.Session openSession(int);
-    method public void registerSessionObserver(android.content.pm.PackageInstaller.SessionObserver);
-    method public void uninstall(java.lang.String, android.content.pm.PackageInstaller.UninstallResultCallback);
-    method public void unregisterSessionObserver(android.content.pm.PackageInstaller.SessionObserver);
+    method public void removeSessionCallback(android.content.pm.PackageInstaller.SessionCallback);
+    method public void uninstall(java.lang.String, android.content.pm.PackageInstaller.UninstallCallback);
   }
 
-  public static abstract class PackageInstaller.CommitResultCallback {
-    ctor public PackageInstaller.CommitResultCallback();
-    method public abstract void onFailure(java.lang.String);
-    method public void onFailureConflict(java.lang.String, java.lang.String);
-    method public void onFailureIncompatible(java.lang.String);
-    method public void onFailureInvalid(java.lang.String);
-    method public void onFailureStorage(java.lang.String);
+  public static abstract class PackageInstaller.CommitCallback {
+    ctor public PackageInstaller.CommitCallback();
+    method public abstract void onFailure(int, java.lang.String, android.os.Bundle);
     method public abstract void onSuccess();
+    field public static final java.lang.String EXTRA_PACKAGE_NAME = "android.content.pm.extra.PACKAGE_NAME";
+    field public static final int FAILURE_CONFLICT = 2; // 0x2
+    field public static final int FAILURE_INCOMPATIBLE = 4; // 0x4
+    field public static final int FAILURE_INVALID = 1; // 0x1
+    field public static final int FAILURE_STORAGE = 3; // 0x3
+    field public static final int FAILURE_UNKNOWN = 0; // 0x0
   }
 
   public static class PackageInstaller.Session implements java.io.Closeable {
+    method public void abandon();
     method public void close();
-    method public void commit(android.content.pm.PackageInstaller.CommitResultCallback);
-    method public void destroy();
+    method public void commit(android.content.pm.PackageInstaller.CommitCallback);
     method public void fsync(java.io.OutputStream) throws java.io.IOException;
     method public java.io.OutputStream openWrite(java.lang.String, long, long) throws java.io.IOException;
-    method public void setProgress(int);
+    method public void setProgress(float);
   }
 
-  public static abstract class PackageInstaller.SessionObserver {
-    ctor public PackageInstaller.SessionObserver();
-    method public abstract void onCreated(android.content.pm.InstallSessionInfo);
-    method public abstract void onFinalized(int, boolean);
-    method public abstract void onProgress(int, int);
+  public static abstract class PackageInstaller.SessionCallback {
+    ctor public PackageInstaller.SessionCallback();
+    method public abstract void onCreated(int);
+    method public abstract void onFinished(int, boolean);
+    method public abstract void onProgressChanged(int, float);
   }
 
-  public static abstract class PackageInstaller.UninstallResultCallback {
-    ctor public PackageInstaller.UninstallResultCallback();
+  public static abstract class PackageInstaller.UninstallCallback {
+    ctor public PackageInstaller.UninstallCallback();
     method public abstract void onFailure(java.lang.String);
     method public abstract void onSuccess();
   }
@@ -8684,7 +8688,6 @@ package android.content.pm {
     method public abstract android.graphics.drawable.Drawable getDrawable(java.lang.String, int, android.content.pm.ApplicationInfo);
     method public abstract java.util.List<android.content.pm.ApplicationInfo> getInstalledApplications(int);
     method public abstract java.util.List<android.content.pm.PackageInfo> getInstalledPackages(int);
-    method public abstract android.content.pm.PackageInstaller getInstaller();
     method public abstract java.lang.String getInstallerPackageName(java.lang.String);
     method public abstract android.content.pm.InstrumentationInfo getInstrumentationInfo(android.content.ComponentName, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract android.content.pm.KeySet getKeySetByAlias(java.lang.String, java.lang.String);
@@ -8694,6 +8697,7 @@ package android.content.pm {
     method public android.content.pm.PackageInfo getPackageArchiveInfo(java.lang.String, int);
     method public abstract int[] getPackageGids(java.lang.String) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract android.content.pm.PackageInfo getPackageInfo(java.lang.String, int) throws android.content.pm.PackageManager.NameNotFoundException;
+    method public abstract android.content.pm.PackageInstaller getPackageInstaller();
     method public abstract java.lang.String[] getPackagesForUid(int);
     method public abstract java.util.List<android.content.pm.PackageInfo> getPackagesHoldingPermissions(java.lang.String[], int);
     method public abstract android.content.pm.PermissionGroupInfo getPermissionGroupInfo(java.lang.String, int) throws android.content.pm.PackageManager.NameNotFoundException;
@@ -30134,7 +30138,6 @@ package android.test.mock {
     method public android.graphics.drawable.Drawable getDrawable(java.lang.String, int, android.content.pm.ApplicationInfo);
     method public java.util.List<android.content.pm.ApplicationInfo> getInstalledApplications(int);
     method public java.util.List<android.content.pm.PackageInfo> getInstalledPackages(int);
-    method public android.content.pm.PackageInstaller getInstaller();
     method public java.lang.String getInstallerPackageName(java.lang.String);
     method public android.content.pm.InstrumentationInfo getInstrumentationInfo(android.content.ComponentName, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method public android.content.pm.KeySet getKeySetByAlias(java.lang.String, java.lang.String);
@@ -30143,6 +30146,7 @@ package android.test.mock {
     method public java.lang.String getNameForUid(int);
     method public int[] getPackageGids(java.lang.String) throws android.content.pm.PackageManager.NameNotFoundException;
     method public android.content.pm.PackageInfo getPackageInfo(java.lang.String, int) throws android.content.pm.PackageManager.NameNotFoundException;
+    method public android.content.pm.PackageInstaller getPackageInstaller();
     method public java.lang.String[] getPackagesForUid(int);
     method public java.util.List<android.content.pm.PackageInfo> getPackagesHoldingPermissions(java.lang.String[], int);
     method public android.content.pm.PermissionGroupInfo getPermissionGroupInfo(java.lang.String, int) throws android.content.pm.PackageManager.NameNotFoundException;
