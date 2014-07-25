@@ -390,9 +390,9 @@ public abstract class ConnectionService extends Service {
         }
 
         @Override
-        public void onCallVideoProviderChanged(Connection c, CallVideoProvider callVideoProvider) {
+        public void onVideoCallProviderChanged(Connection c, VideoCallProvider videoCallProvider) {
             String id = mIdByConnection.get(c);
-            mAdapter.setCallVideoProvider(id, callVideoProvider);
+            mAdapter.setVideoCallProvider(id, videoCallProvider);
         }
 
         @Override
@@ -443,8 +443,8 @@ public abstract class ConnectionService extends Service {
                                 connection.getHandlePresentation(),
                                 connection.getCallerDisplayName(),
                                 connection.getCallerDisplayNamePresentation(),
-                                connection.getCallVideoProvider() == null ?
-                                        null : connection.getCallVideoProvider().getInterface(),
+                                connection.getVideoCallProvider() == null ?
+                                        null : connection.getVideoCallProvider().getInterface(),
                                 connection.getVideoState()));
             }
 

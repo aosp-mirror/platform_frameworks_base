@@ -22,7 +22,7 @@ import android.telecomm.ConnectionRequest;
 import android.telecomm.ParcelableConnection;
 import android.telecomm.StatusHints;
 
-import com.android.internal.telecomm.ICallVideoProvider;
+import com.android.internal.telecomm.IVideoCallProvider;
 import com.android.internal.telecomm.RemoteServiceCallback;
 
 /**
@@ -65,7 +65,7 @@ oneway interface IConnectionServiceAdapter {
 
     void queryRemoteConnectionServices(RemoteServiceCallback callback);
 
-    void setCallVideoProvider(String callId, ICallVideoProvider callVideoProvider);
+    void setVideoCallProvider(String callId, IVideoCallProvider videoCallProvider);
 
     void setVideoState(String callId, int videoState);
 

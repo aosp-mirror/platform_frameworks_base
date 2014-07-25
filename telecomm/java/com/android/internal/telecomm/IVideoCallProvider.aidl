@@ -19,15 +19,13 @@ package com.android.internal.telecomm;
 import android.view.Surface;
 import android.telecomm.VideoCallProfile;
 
-import com.android.internal.telecomm.ICallVideoClient;
-
 /**
- * Internal remote interface for a call video provider.
- * @see android.telecomm.CallVideoProvider
+ * Internal remote interface for a video call provider.
+ * @see android.telecomm.VideoCallProvider
  * @hide
  */
-oneway interface ICallVideoProvider {
-    void setCallVideoClient(IBinder callVideoClient);
+oneway interface IVideoCallProvider {
+    void setVideoCallListener(IBinder videoCallListenerBinder);
 
     void setCamera(String cameraId);
 

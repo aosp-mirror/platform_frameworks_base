@@ -20,7 +20,7 @@ import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.android.internal.telecomm.ICallVideoProvider;
+import com.android.internal.telecomm.IVideoCallProvider;
 
 /**
  * Information about a connection that is used between Telecomm and the ConnectionService.
@@ -36,7 +36,7 @@ public final class ParcelableConnection implements Parcelable {
     private int mHandlePresentation;
     private String mCallerDisplayName;
     private int mCallerDisplayNamePresentation;
-    private ICallVideoProvider mCallVideoProvider;
+    private IVideoCallProvider mVideoCallProvider;
     private int mVideoState;
 
     /** @hide */
@@ -48,7 +48,7 @@ public final class ParcelableConnection implements Parcelable {
             int handlePresentation,
             String callerDisplayName,
             int callerDisplayNamePresentation,
-            ICallVideoProvider callVideoProvider,
+            IVideoCallProvider videoCallProvider,
             int videoState) {
         mPhoneAccount = phoneAccount;
         mState = state;
@@ -57,7 +57,7 @@ public final class ParcelableConnection implements Parcelable {
         mHandlePresentation = handlePresentation;
         mCallerDisplayName = callerDisplayName;
         mCallerDisplayNamePresentation = callerDisplayNamePresentation;
-        mCallVideoProvider = callVideoProvider;
+        mVideoCallProvider = videoCallProvider;
         mVideoState = videoState;
     }
 
@@ -90,8 +90,8 @@ public final class ParcelableConnection implements Parcelable {
         return mCallerDisplayNamePresentation;
     }
 
-    public ICallVideoProvider getCallVideoProvider() {
-        return mCallVideoProvider;
+    public IVideoCallProvider getVideoCallProvider() {
+        return mVideoCallProvider;
     }
 
     public int getVideoState() {
@@ -111,8 +111,8 @@ public final class ParcelableConnection implements Parcelable {
             int handlePresentation = source.readInt();
             String callerDisplayName = source.readString();
             int callerDisplayNamePresentation = source.readInt();
-            ICallVideoProvider callVideoProvider =
-                    ICallVideoProvider.Stub.asInterface(source.readStrongBinder());
+            IVideoCallProvider videoCallProvider =
+                    IVideoCallProvider.Stub.asInterface(source.readStrongBinder());
             int videoState = source.readInt();
 
             return new ParcelableConnection(
@@ -123,7 +123,7 @@ public final class ParcelableConnection implements Parcelable {
                     handlePresentation,
                     callerDisplayName,
                     callerDisplayNamePresentation,
-                    callVideoProvider,
+                    videoCallProvider,
                     videoState);
         }
 
@@ -150,7 +150,7 @@ public final class ParcelableConnection implements Parcelable {
         destination.writeString(mCallerDisplayName);
         destination.writeInt(mCallerDisplayNamePresentation);
         destination.writeStrongBinder(
-                mCallVideoProvider != null ? mCallVideoProvider.asBinder() : null);
+                mVideoCallProvider != null ? mVideoCallProvider.asBinder() : null);
         destination.writeInt(mVideoState);
     }
 }
