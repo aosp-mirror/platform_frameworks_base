@@ -16,10 +16,11 @@
 
 package com.android.server.hdmi;
 
+import static android.hardware.hdmi.HdmiControlManager.TIMER_RECORDING_RESULT_EXTRA_CHECK_RECORDER_CONNECTION;
+import static android.hardware.hdmi.HdmiControlManager.TIMER_RECORDING_RESULT_EXTRA_FAIL_TO_RECORD_SELECTED_SOURCE;
 import static android.hardware.hdmi.HdmiControlManager.TIMER_RECORDING_TYPE_ANALOGUE;
 import static android.hardware.hdmi.HdmiControlManager.TIMER_RECORDING_TYPE_DIGITAL;
 import static android.hardware.hdmi.HdmiControlManager.TIMER_RECORDING_TYPE_EXTERNAL;
-import static android.hardware.hdmi.HdmiControlManager.TIME_RECORDING_RESULT_EXTRA_CHECK_RECORDER_CONNECTION;
 
 import android.util.Slog;
 
@@ -74,7 +75,7 @@ public class TimerRecordingAction extends FeatureAction {
                 break;
             default:
                 tv().announceTimerRecordingResult(
-                        TIME_RECORDING_RESULT_EXTRA_CHECK_RECORDER_CONNECTION);
+                        TIMER_RECORDING_RESULT_EXTRA_FAIL_TO_RECORD_SELECTED_SOURCE);
                 finish();
                 return;
         }
@@ -138,7 +139,7 @@ public class TimerRecordingAction extends FeatureAction {
         }
         int reason = params[1];
         Slog.i(TAG, "[Feature Abort] for " + messageType + " reason:" + reason);
-        tv().announceTimerRecordingResult(TIME_RECORDING_RESULT_EXTRA_CHECK_RECORDER_CONNECTION);
+        tv().announceTimerRecordingResult(TIMER_RECORDING_RESULT_EXTRA_CHECK_RECORDER_CONNECTION);
         finish();
         return true;
     }
@@ -163,7 +164,7 @@ public class TimerRecordingAction extends FeatureAction {
             return;
         }
 
-        tv().announceTimerRecordingResult(TIME_RECORDING_RESULT_EXTRA_CHECK_RECORDER_CONNECTION);
+        tv().announceTimerRecordingResult(TIMER_RECORDING_RESULT_EXTRA_CHECK_RECORDER_CONNECTION);
         finish();
     }
 }

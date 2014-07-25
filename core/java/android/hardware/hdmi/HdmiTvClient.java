@@ -15,6 +15,7 @@
  */
 package android.hardware.hdmi;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.hardware.hdmi.HdmiRecordSources.RecordSource;
 import android.hardware.hdmi.HdmiTimerRecordSources.TimerRecordSource;
@@ -116,7 +117,11 @@ public final class HdmiTvClient extends HdmiClient {
      * @param logicalAddress
      * @param callback
      */
-    public void deviceSelect(int logicalAddress, SelectCallback callback) {
+    public void deviceSelect(int logicalAddress, @NonNull SelectCallback callback) {
+        if (callback == null) {
+            throw new IllegalArgumentException("callback must not be null.");
+        }
+
         // TODO: Replace SelectCallback with PartialResult.
         try {
             mService.deviceSelect(logicalAddress, getCallbackWrapper(callback));
@@ -158,7 +163,10 @@ public final class HdmiTvClient extends HdmiClient {
      *
      * @param listener
      */
-    public void setRecordListener(HdmiRecordListener listener) {
+    public void setRecordListener(@NonNull HdmiRecordListener listener) {
+        if (listener == null) {
+            throw new IllegalArgumentException("listener must not be null.");
+        }
         try {
             mService.setHdmiRecordListener(getListenerWrapper(listener));
         } catch (RemoteException e) {
@@ -177,7 +185,11 @@ public final class HdmiTvClient extends HdmiClient {
      * tvClient.startOneTouchRecord(recorderAddress, ownSource);
      * </pre>
      */
-    public void startOneTouchRecord(int recorderAddress, RecordSource source) {
+    public void startOneTouchRecord(int recorderAddress, @NonNull RecordSource source) {
+        if (source == null) {
+            throw new IllegalArgumentException("source must not be null.");
+        }
+
         try {
             byte[] data = new byte[source.getDataSize(true)];
             source.toByteArray(true, data, 0);
@@ -223,6 +235,10 @@ public final class HdmiTvClient extends HdmiClient {
      * @param source record source to be used
      */
     public void startTimerRecording(int recorderAddress, int sourceType, TimerRecordSource source) {
+        if (source == null) {
+            throw new IllegalArgumentException("source must not be null.");
+        }
+
         checkTimerRecordingSourceType(sourceType);
 
         try {
@@ -250,6 +266,10 @@ public final class HdmiTvClient extends HdmiClient {
      * For more details, please refer {@link #startTimerRecording(int, int, TimerRecordSource)}.
      */
     public void clearTimerRecording(int recorderAddress, int sourceType, TimerRecordSource source) {
+        if (source == null) {
+            throw new IllegalArgumentException("source must not be null.");
+        }
+
         checkTimerRecordingSourceType(sourceType);
         try {
             byte[] data = new byte[source.getDataSize()];
@@ -290,7 +310,13 @@ public final class HdmiTvClient extends HdmiClient {
 
             @Override
             public void onTimerRecordingResult(int result) {
-                callback.onTimerRecordingResult(result);
+                callback.onTimerRecordingResult(
+                        HdmiRecordListener.TimerStatusData.parseFrom(result));
+            }
+
+            @Override
+            public void onClearTimerRecordingResult(int result) {
+                callback.onClearTimerRecordingResult(result);
             }
         };
     }

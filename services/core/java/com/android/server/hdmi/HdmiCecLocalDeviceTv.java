@@ -16,12 +16,18 @@
 
 package com.android.server.hdmi;
 
+import static android.hardware.hdmi.HdmiControlManager.CLEAR_TIMER_STATUS_CEC_DISABLE;
+import static android.hardware.hdmi.HdmiControlManager.CLEAR_TIMER_STATUS_CHECK_RECORDER_CONNECTION;
+import static android.hardware.hdmi.HdmiControlManager.CLEAR_TIMER_STATUS_FAIL_TO_CLEAR_SELECTED_SOURCE;
 import static android.hardware.hdmi.HdmiControlManager.ONE_TOUCH_RECORD_CEC_DISABLED;
 import static android.hardware.hdmi.HdmiControlManager.ONE_TOUCH_RECORD_CHECK_RECORDER_CONNECTION;
 import static android.hardware.hdmi.HdmiControlManager.ONE_TOUCH_RECORD_FAIL_TO_RECORD_DISPLAYED_SCREEN;
-import static android.hardware.hdmi.HdmiControlManager.TIME_RECORDING_RESULT_EXTRA_CEC_DISABLED;
-import static android.hardware.hdmi.HdmiControlManager.TIME_RECORDING_RESULT_EXTRA_CHECK_RECORDER_CONNECTION;
-import static android.hardware.hdmi.HdmiControlManager.TIME_RECORDING_RESULT_EXTRA_FAIL_TO_RECORD_SELECTED_SOURCE;
+import static android.hardware.hdmi.HdmiControlManager.TIMER_RECORDING_RESULT_EXTRA_CEC_DISABLED;
+import static android.hardware.hdmi.HdmiControlManager.TIMER_RECORDING_RESULT_EXTRA_CHECK_RECORDER_CONNECTION;
+import static android.hardware.hdmi.HdmiControlManager.TIMER_RECORDING_RESULT_EXTRA_FAIL_TO_RECORD_SELECTED_SOURCE;
+import static android.hardware.hdmi.HdmiControlManager.TIMER_RECORDING_TYPE_ANALOGUE;
+import static android.hardware.hdmi.HdmiControlManager.TIMER_RECORDING_TYPE_DIGITAL;
+import static android.hardware.hdmi.HdmiControlManager.TIMER_RECORDING_TYPE_EXTERNAL;
 
 import android.content.Intent;
 import android.hardware.hdmi.HdmiCecDeviceInfo;
@@ -41,6 +47,7 @@ import android.util.SparseArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.hdmi.DeviceDiscoveryAction.DeviceDiscoveryCallback;
 import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
+import com.android.server.hdmi.HdmiControlService.SendMessageCallback;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -876,6 +883,14 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         return true;
     }
 
+    @Override
+    protected boolean handleTimerClearedStatus(HdmiCecMessage message) {
+        byte[] params = message.getParams();
+        int timerClearedStatusData = params[0];
+        announceTimerRecordingResult(timerClearedStatusData);
+        return true;
+    }
+
     void announceOneTouchRecordResult(int result) {
         mService.invokeOneTouchRecordResult(result);
     }
@@ -1347,21 +1362,21 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         assertRunOnServiceThread();
         if (!mService.isControlEnabled()) {
             Slog.w(TAG, "Can not start one touch record. CEC control is disabled.");
-            announceTimerRecordingResult(TIME_RECORDING_RESULT_EXTRA_CEC_DISABLED);
+            announceTimerRecordingResult(TIMER_RECORDING_RESULT_EXTRA_CEC_DISABLED);
             return;
         }
 
         if (!checkRecorder(recorderAddress)) {
             Slog.w(TAG, "Invalid recorder address:" + recorderAddress);
             announceTimerRecordingResult(
-                    TIME_RECORDING_RESULT_EXTRA_CHECK_RECORDER_CONNECTION);
+                    TIMER_RECORDING_RESULT_EXTRA_CHECK_RECORDER_CONNECTION);
             return;
         }
 
         if (!checkTimerRecordingSource(sourceType, recordSource)) {
             Slog.w(TAG, "Invalid record source." + Arrays.toString(recordSource));
             announceTimerRecordingResult(
-                    TIME_RECORDING_RESULT_EXTRA_FAIL_TO_RECORD_SELECTED_SOURCE);
+                    TIMER_RECORDING_RESULT_EXTRA_FAIL_TO_RECORD_SELECTED_SOURCE);
             return;
         }
 
@@ -1379,7 +1394,55 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     void clearTimerRecording(int recorderAddress, int sourceType, byte[] recordSource) {
         assertRunOnServiceThread();
+        if (!mService.isControlEnabled()) {
+            Slog.w(TAG, "Can not start one touch record. CEC control is disabled.");
+            announceTimerRecordingResult(CLEAR_TIMER_STATUS_CEC_DISABLE);
+            return;
+        }
 
-        // TODO: implement this.
+        if (!checkRecorder(recorderAddress)) {
+            Slog.w(TAG, "Invalid recorder address:" + recorderAddress);
+            announceTimerRecordingResult(CLEAR_TIMER_STATUS_CHECK_RECORDER_CONNECTION);
+            return;
+        }
+
+        if (!checkTimerRecordingSource(sourceType, recordSource)) {
+            Slog.w(TAG, "Invalid record source." + Arrays.toString(recordSource));
+            announceTimerRecordingResult(CLEAR_TIMER_STATUS_FAIL_TO_CLEAR_SELECTED_SOURCE);
+            return;
+        }
+
+        sendClearTimerMessage(recorderAddress, sourceType, recordSource);
+    }
+
+    private void sendClearTimerMessage(int recorderAddress, int sourceType, byte[] recordSource) {
+        HdmiCecMessage message = null;
+        switch (sourceType) {
+            case TIMER_RECORDING_TYPE_DIGITAL:
+                message = HdmiCecMessageBuilder.buildClearDigitalTimer(mAddress, recorderAddress,
+                        recordSource);
+                break;
+            case TIMER_RECORDING_TYPE_ANALOGUE:
+                message = HdmiCecMessageBuilder.buildClearAnalogueTimer(mAddress, recorderAddress,
+                        recordSource);
+                break;
+            case TIMER_RECORDING_TYPE_EXTERNAL:
+                message = HdmiCecMessageBuilder.buildClearExternalTimer(mAddress, recorderAddress,
+                        recordSource);
+                break;
+            default:
+                Slog.w(TAG, "Invalid source type:" + recorderAddress);
+                announceTimerRecordingResult(CLEAR_TIMER_STATUS_FAIL_TO_CLEAR_SELECTED_SOURCE);
+                return;
+
+        }
+        mService.sendCecCommand(message, new SendMessageCallback() {
+            @Override
+            public void onSendCompleted(int error) {
+                if (error != Constants.SEND_RESULT_SUCCESS) {
+                    announceTimerRecordingResult(CLEAR_TIMER_STATUS_FAIL_TO_CLEAR_SELECTED_SOURCE);
+                }
+            }
+        });
     }
 }
