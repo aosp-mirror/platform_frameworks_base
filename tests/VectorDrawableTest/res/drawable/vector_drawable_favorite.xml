@@ -13,15 +13,11 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<vector xmlns:android="http://schemas.android.com/apk/res/android" >
-
-    <size
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
         android:height="128dp"
-        android:width="128dp" />
-
-    <viewport
+        android:width="128dp"
         android:viewportHeight="480"
-        android:viewportWidth="480" />
+        android:viewportWidth="480" >
 
     <group
         android:name="root"
@@ -29,7 +25,7 @@
         android:translateY="240.0" >
         <path
             android:name="favorite"
-            android:fill="#ff000000"
+            android:fillColor="#ff000000"
             android:pathData="M2.100006104,-6
                 C0.1449127197,-6,1.600006104,-5.975006104,0,-5.975006104
                 C-1.574996948,-5.975006104,0.00309753418,-6-1.949996948-6

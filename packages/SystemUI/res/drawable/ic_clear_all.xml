@@ -13,16 +13,13 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
-<vector xmlns:android="http://schemas.android.com/apk/res/android" >
-    <size
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
         android:width="32dp"
-        android:height="32dp"/>
-
-    <viewport
+        android:height="32dp"
         android:viewportWidth="48.0"
-        android:viewportHeight="48.0"/>
+        android:viewportHeight="48.0">
 
     <path
-        android:fill="#FFFFFFFF"
+        android:fillColor="#FFFFFFFF"
         android:pathData="M10.0,26.0l28.0,0.0l0.0,-4.0L10.0,22.0L10.0,26.0zM6.0,34.0l28.0,0.0l0.0,-4.0L6.0,30.0L6.0,34.0zM14.0,14.0l0.0,4.0l28.0,0.0l0.0,-4.0L14.0,14.0z"/>
 </vector>

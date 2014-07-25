@@ -13,15 +13,11 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<vector xmlns:android="http://schemas.android.com/apk/res/android" >
-
-    <size
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
         android:height="64dp"
-        android:width="64dp" />
-
-    <viewport
+        android:width="64dp"
         android:viewportHeight="500"
-        android:viewportWidth="800" />
+        android:viewportWidth="800" >
 
     <group
         android:pivotX="90"
@@ -34,8 +30,8 @@
            a25,25 -30 0,1 100,-50 l 50,-25
            a25,37 -30 0,1 100,-50 l 50,-25
            a25,50 -30 0,1 100,-50 l 50,-25"
-            android:fill="#00000000"
-            android:stroke="#FF00FF00"
+            android:fillColor="#00000000"
+            android:strokeColor="#FF00FF00"
             android:strokeWidth="10" />
     </group>
 
