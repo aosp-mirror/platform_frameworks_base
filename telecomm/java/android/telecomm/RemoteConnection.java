@@ -18,7 +18,6 @@ package android.telecomm;
 
 import android.app.PendingIntent;
 import android.net.Uri;
-import android.os.Bundle;
 import android.os.RemoteException;
 import android.telephony.DisconnectCause;
 
@@ -31,23 +30,23 @@ import java.util.Set;
  * RemoteConnection object used by RemoteConnectionService.
  */
 public final class RemoteConnection {
-    public interface Listener {
-        void onStateChanged(RemoteConnection connection, int state);
-        void onDisconnected(RemoteConnection connection, int cause, String message);
-        void onRequestingRingback(RemoteConnection connection, boolean ringback);
-        void onCallCapabilitiesChanged(RemoteConnection connection, int callCapabilities);
-        void onPostDialWait(RemoteConnection connection, String remainingDigits);
-        void onAudioModeIsVoipChanged(RemoteConnection connection, boolean isVoip);
-        void onStatusHintsChanged(RemoteConnection connection, StatusHints statusHints);
-        void onHandleChanged(RemoteConnection connection, Uri handle, int presentation);
-        void onCallerDisplayNameChanged(
-                RemoteConnection connection, String callerDisplayName, int presentation);
-        void onVideoStateChanged(RemoteConnection connection, int videoState);
-        void onStartActivityFromInCall(RemoteConnection connection, PendingIntent intent);
-        void onDestroyed(RemoteConnection connection);
+    public static abstract class Listener {
+        public void onStateChanged(RemoteConnection connection, int state) {}
+        public void onDisconnected(RemoteConnection connection, int cause, String message) {}
+        public void onRequestingRingback(RemoteConnection connection, boolean ringback) {}
+        public void onCallCapabilitiesChanged(RemoteConnection connection, int callCapabilities) {}
+        public void onPostDialWait(RemoteConnection connection, String remainingDigits) {}
+        public void onAudioModeIsVoipChanged(RemoteConnection connection, boolean isVoip) {}
+        public void onStatusHintsChanged(RemoteConnection connection, StatusHints statusHints) {}
+        public void onHandleChanged(RemoteConnection connection, Uri handle, int presentation) {}
+        public void onCallerDisplayNameChanged(
+                RemoteConnection connection, String callerDisplayName, int presentation) {}
+        public void onVideoStateChanged(RemoteConnection connection, int videoState) {}
+        public void onStartActivityFromInCall(RemoteConnection connection, PendingIntent intent) {}
+        public void onDestroyed(RemoteConnection connection) {}
     }
 
-    private final IConnectionService mConnectionService;
+    private IConnectionService mConnectionService;
     private final String mConnectionId;
     private final Set<Listener> mListeners = new HashSet<>();
 
@@ -64,15 +63,35 @@ public final class RemoteConnection {
     private int mHandlePresentation;
     private String mCallerDisplayName;
     private int mCallerDisplayNamePresentation;
+    private int mFailureCode;
+    private String mFailureMessage;
 
     /**
      * @hide
      */
-    RemoteConnection(IConnectionService connectionService, String connectionId) {
+    RemoteConnection(IConnectionService connectionService, ConnectionRequest request,
+            boolean isIncoming) {
         mConnectionService = connectionService;
-        mConnectionId = connectionId;
+        mConnectionId = request.getCallId();
 
         mConnected = true;
+        mState = Connection.State.INITIALIZING;
+    }
+
+    /**
+     * Create a RemoteConnection which is used for failed connections. Note that using it for any
+     * "real" purpose will almost certainly fail. Callers should note the failure and act
+     * accordingly (moving on to another RemoteConnection, for example)
+     *
+     * @param failureCode
+     * @param failureMessage
+     */
+    private RemoteConnection(int failureCode, String failureMessage) {
+        this(null, null, true);
+        mConnected = false;
+        mState = Connection.State.FAILED;
+        mFailureCode = failureCode;
+        mFailureMessage = failureMessage;
     }
 
     public void addListener(Listener listener) {
@@ -125,6 +144,14 @@ public final class RemoteConnection {
 
     public int getVideoState() {
         return mVideoState;
+    }
+
+    public int getFailureCode() {
+        return mFailureCode;
+    }
+
+    public String getFailureMessage() {
+        return mFailureMessage;
     }
 
     public void abort() {
@@ -353,5 +380,25 @@ public final class RemoteConnection {
         for (Listener l : mListeners) {
             l.onStartActivityFromInCall(this, intent);
         }
+    }
+
+    /** @hide */
+    void setConnectionService(IConnectionService connectionService) {
+        mConnectionService = connectionService;
+        mConnectionService = null;
+        setState(Connection.State.NEW);
+    }
+
+    /**
+     * Create a RemoteConnection which is in the {@link Connection.State#FAILED} state. Attempting
+     * to use it for anything will almost certainly result in bad things happening. Do not do this.
+     *
+     * @return a failed {@link RemoteConnection}
+     *
+     * @hide
+     *
+     */
+    public static RemoteConnection failure(int failureCode, String failureMessage) {
+        return new RemoteConnection(failureCode, failureMessage);
     }
 }
