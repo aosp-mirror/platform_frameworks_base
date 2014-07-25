@@ -8532,6 +8532,7 @@ package android.content.pm {
     method public boolean isPackageEnabledForProfile(java.lang.String, android.os.UserHandle);
     method public void removeOnAppsChangedCallback(android.content.pm.LauncherApps.OnAppsChangedCallback);
     method public android.content.pm.LauncherActivityInfo resolveActivity(android.content.Intent, android.os.UserHandle);
+    method public void showAppDetailsForProfile(android.content.ComponentName, android.os.UserHandle, android.graphics.Rect, android.os.Bundle);
     method public void startActivityForProfile(android.content.ComponentName, android.os.UserHandle, android.graphics.Rect, android.os.Bundle);
   }
 

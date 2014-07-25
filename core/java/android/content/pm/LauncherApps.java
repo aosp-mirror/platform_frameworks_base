@@ -230,6 +230,24 @@ public class LauncherApps {
     }
 
     /**
+     * Starts the settings activity to show the application details for a
+     * package in the specified profile.
+     *
+     * @param component The ComponentName of the package to launch settings for.
+     * @param user The UserHandle of the profile
+     * @param sourceBounds The Rect containing the source bounds of the clicked icon
+     * @param opts Options to pass to startActivity
+     */
+    public void showAppDetailsForProfile(ComponentName component, UserHandle user,
+            Rect sourceBounds, Bundle opts) {
+        try {
+            mService.showAppDetailsAsUser(component, sourceBounds, opts, user);
+        } catch (RemoteException re) {
+            // Oops!
+        }
+    }
+
+    /**
      * Checks if the package is installed and enabled for a profile.
      *
      * @param packageName The package to check.
