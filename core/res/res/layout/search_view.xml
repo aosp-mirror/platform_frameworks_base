@@ -93,8 +93,7 @@
                 android:dropDownHeight="wrap_content"
                 android:dropDownAnchor="@id/search_edit_frame"
                 android:dropDownVerticalOffset="0dip"
-                android:dropDownHorizontalOffset="0dip"
-                android:contentDescription="@string/searchview_description_query" />
+                android:dropDownHorizontalOffset="0dip" />
 
             <ImageView
                 android:id="@+id/search_close_btn"
