@@ -76,9 +76,11 @@ public class SwipeHelper implements Gefingerpoken {
     private float mDensityScale;
 
     private boolean mLongPressSent;
-    private View.OnLongClickListener mLongPressListener;
+    private LongPressListener mLongPressListener;
     private Runnable mWatchLongPress;
     private long mLongPressTimeout;
+
+    final private int[] mTmpPos = new int[2];
 
     public SwipeHelper(int swipeDirection, Callback callback, Context context) {
         mCallback = callback;
@@ -93,7 +95,7 @@ public class SwipeHelper implements Gefingerpoken {
                 android.R.interpolator.fast_out_linear_in);
     }
 
-    public void setLongPressListener(View.OnLongClickListener listener) {
+    public void setLongPressListener(LongPressListener listener) {
         mLongPressListener = listener;
     }
 
@@ -215,7 +217,7 @@ public class SwipeHelper implements Gefingerpoken {
         }
     }
 
-    public boolean onInterceptTouchEvent(MotionEvent ev) {
+    public boolean onInterceptTouchEvent(final MotionEvent ev) {
         final int action = ev.getAction();
 
         switch (action) {
@@ -237,8 +239,12 @@ public class SwipeHelper implements Gefingerpoken {
                                 public void run() {
                                     if (mCurrView != null && !mLongPressSent) {
                                         mLongPressSent = true;
-                                        mCurrView.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_LONG_CLICKED);
-                                        mLongPressListener.onLongClick(mCurrView);
+                                        mCurrView.sendAccessibilityEvent(
+                                                AccessibilityEvent.TYPE_VIEW_LONG_CLICKED);
+                                        mCurrView.getLocationOnScreen(mTmpPos);
+                                        final int x = (int) ev.getRawX() - mTmpPos[0];
+                                        final int y = (int) ev.getRawY() - mTmpPos[1];
+                                        mLongPressListener.onLongPress(mCurrView, x, y);
                                     }
                                 }
                             };
@@ -267,14 +273,16 @@ public class SwipeHelper implements Gefingerpoken {
 
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
+                final boolean captured = (mDragging || mLongPressSent);
                 mDragging = false;
                 mCurrView = null;
                 mCurrAnimView = null;
                 mLongPressSent = false;
                 removeLongPressCallback();
+                if (captured) return true;
                 break;
         }
-        return mDragging;
+        return mDragging || mLongPressSent;
     }
 
     /**
@@ -459,5 +467,16 @@ public class SwipeHelper implements Gefingerpoken {
          * @return if true, prevents the default alpha fading.
          */
         boolean updateSwipeProgress(View animView, boolean dismissable, float swipeProgress);
+    }
+
+    /**
+     * Equivalent to View.OnLongClickListener with coordinates
+     */
+    public interface LongPressListener {
+        /**
+         * Equivalent to {@link View.OnLongClickListener#onLongClick(View)} with coordinates
+         * @return whether the longpress was handled
+         */
+        boolean onLongPress(View v, int x, int y);
     }
 }
