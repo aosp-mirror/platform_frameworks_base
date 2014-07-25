@@ -89,7 +89,7 @@ public class IntentForwarderActivity extends Activity  {
             Slog.e(TAG, "PackageManagerService is dead?");
         }
         if (canForward) {
-            newIntent.prepareToLeaveUser(callingUserId);
+            newIntent.setContentUserHint(callingUserId);
 
             final android.content.pm.ResolveInfo ri = getPackageManager().resolveActivityAsUser(
                         newIntent, MATCH_DEFAULT_ONLY, userDest.getIdentifier());
