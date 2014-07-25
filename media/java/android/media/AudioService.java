@@ -71,6 +71,7 @@ import android.provider.Settings.System;
 import android.telecomm.TelecommManager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.MathUtils;
 import android.util.Slog;
 import android.view.KeyEvent;
 import android.view.Surface;
@@ -197,6 +198,7 @@ public class AudioService extends IAudioService.Stub {
     private static final int MSG_BROADCAST_BT_CONNECTION_STATE = 19;
     private static final int MSG_UNLOAD_SOUND_EFFECTS = 20;
     private static final int MSG_SYSTEM_READY = 21;
+    private static final int MSG_PERSIST_MUSIC_ACTIVE_MS = 22;
     // start of messages handled under wakelock
     //   these messages can only be queued, i.e. sent with queueMsgUnderWakeLock(),
     //   and not with sendMsg(..., ..., SENDMSG_QUEUE, ...)
@@ -2147,6 +2149,9 @@ public class AudioService extends IAudioService.Stub {
         checkAllAliasStreamVolumes();
 
         synchronized (mSafeMediaVolumeState) {
+            mMusicActiveMs = MathUtils.constrain(Settings.Secure.getIntForUser(mContentResolver,
+                    Settings.Secure.UNSAFE_VOLUME_MUSIC_ACTIVE_MS, 0, UserHandle.USER_CURRENT),
+                    0, UNSAFE_VOLUME_MUSIC_ACTIVE_MS_MAX);
             if (mSafeMediaVolumeState == SAFE_MEDIA_VOLUME_ACTIVE) {
                 enforceSafeMediaVolume();
             }
@@ -2719,10 +2724,15 @@ public class AudioService extends IAudioService.Stub {
                             setSafeMediaVolumeEnabled(true);
                             mMusicActiveMs = 0;
                         }
+                        saveMusicActiveMs();
                     }
                 }
             }
         }
+    }
+
+    private void saveMusicActiveMs() {
+        mAudioHandler.obtainMessage(MSG_PERSIST_MUSIC_ACTIVE_MS, mMusicActiveMs, 0).sendToTarget();
     }
 
     private void onConfigureSafeVolume(boolean force) {
@@ -2745,8 +2755,13 @@ public class AudioService extends IAudioService.Stub {
                     // the 30 seconds timeout for forced configuration. In this case we don't reset
                     // it to "active".
                     if (mSafeMediaVolumeState != SAFE_MEDIA_VOLUME_INACTIVE) {
-                        mSafeMediaVolumeState = SAFE_MEDIA_VOLUME_ACTIVE;
-                        enforceSafeMediaVolume();
+                        if (mMusicActiveMs == 0) {
+                            mSafeMediaVolumeState = SAFE_MEDIA_VOLUME_ACTIVE;
+                            enforceSafeMediaVolume();
+                        } else {
+                            // We have existing playback time recorded, already confirmed.
+                            mSafeMediaVolumeState = SAFE_MEDIA_VOLUME_INACTIVE;
+                        }
                     }
                 } else {
                     persistedState = SAFE_MEDIA_VOLUME_DISABLED;
@@ -4074,6 +4089,13 @@ public class AudioService extends IAudioService.Stub {
                 case MSG_SYSTEM_READY:
                     onSystemReady();
                     break;
+
+                case MSG_PERSIST_MUSIC_ACTIVE_MS:
+                    final int musicActiveMs = msg.arg1;
+                    Settings.Secure.putIntForUser(mContentResolver,
+                            Settings.Secure.UNSAFE_VOLUME_MUSIC_ACTIVE_MS, musicActiveMs,
+                            UserHandle.USER_CURRENT);
+                    break;
             }
         }
     }
@@ -4901,7 +4923,8 @@ public class AudioService extends IAudioService.Stub {
                     enforceSafeMediaVolume();
                 } else if (!on && (mSafeMediaVolumeState == SAFE_MEDIA_VOLUME_ACTIVE)) {
                     mSafeMediaVolumeState = SAFE_MEDIA_VOLUME_INACTIVE;
-                    mMusicActiveMs = 0;
+                    mMusicActiveMs = 1;  // nonzero = confirmed
+                    saveMusicActiveMs();
                     sendMsg(mAudioHandler,
                             MSG_CHECK_MUSIC_ACTIVE,
                             SENDMSG_REPLACE,
@@ -5075,6 +5098,7 @@ public class AudioService extends IAudioService.Stub {
         pw.print("  mSafeMediaVolumeIndex="); pw.println(mSafeMediaVolumeIndex);
         pw.print("  mPendingVolumeCommand="); pw.println(mPendingVolumeCommand);
         pw.print("  mMusicActiveMs="); pw.println(mMusicActiveMs);
+        pw.print("  mMcc="); pw.println(mMcc);
     }
 
     private static String safeMediaVolumeStateToString(Integer state) {
