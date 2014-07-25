@@ -3638,6 +3638,27 @@ public final class ActivityManagerService extends ActivityManagerNative
         return ret;
     }
 
+    //explicitly remove thd old information in mRecentTasks when removing existing user.
+    private void removeRecentTasksForUser(int userId) {
+        if(userId <= 0) {
+            Slog.i(TAG, "Can't remove recent task on user " + userId);
+            return;
+        }
+
+        for (int i = mRecentTasks.size() - 1; i >= 0; --i) {
+            TaskRecord tr = mRecentTasks.get(i);
+            if (tr.userId == userId) {
+                if(DEBUG_TASKS) Slog.i(TAG, "remove RecentTask " + tr
+                        + " when finishing user" + userId);
+                tr.disposeThumbnail();
+                mRecentTasks.remove(i);
+            }
+        }
+
+        // Remove tasks from persistent storage.
+        mTaskPersister.wakeup(null, true);
+    }
+
     final void addRecentTaskLocked(TaskRecord task) {
         int N = mRecentTasks.size();
         // Quick case: check if the top-most recent task is the same.
@@ -17641,6 +17662,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 forceStopUserLocked(userId, "finish user");
             }
         }
+
+        // Explicitly remove the old information in mRecentTasks.
+        removeRecentTasksForUser(userId);
 
         for (int i=0; i<callbacks.size(); i++) {
             try {
