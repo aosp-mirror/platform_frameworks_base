@@ -93,11 +93,13 @@ import android.view.ViewPropertyAnimator;
 import android.view.ViewStub;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
+import android.view.animation.LinearInterpolator;
 import android.view.animation.PathInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -401,6 +403,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private boolean mDozing;
 
     private Interpolator mLinearOutSlowIn;
+    private Interpolator mLinearInterpolator = new LinearInterpolator();
+    private Interpolator mBackdropInterpolator = new AccelerateDecelerateInterpolator();
     private Interpolator mAlphaIn = new PathInterpolator(0f, 0.2f, 1f, 1f);
     private Interpolator mAlphaOut = new PathInterpolator(0f, 0f, 0.8f, 1f);
 
@@ -1701,7 +1705,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                                 + " to "
                                 + mBackdropBack.getDrawable());
                     }
-                    mBackdropFront.animate().withLayer()
+                    mBackdropFront.animate()
                             .setDuration(250)
                             .alpha(0f).withEndAction(mHideBackdropFront);
                 }
@@ -1713,16 +1717,29 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 if (DEBUG_MEDIA) {
                     Log.v(TAG, "DEBUG_MEDIA: Fading out album artwork");
                 }
-                mBackdrop.animate().withLayer()
-                        .alpha(0f).withEndAction(new Runnable() {
-                    @Override
-                    public void run() {
-                        mBackdrop.setVisibility(View.GONE);
-                        mBackdropFront.animate().cancel();
-                        mBackdropBack.animate().cancel();
-                        mHandler.post(mHideBackdropFront);
-                    }
-                });
+                mBackdrop.animate()
+                        .alpha(0f)
+                        .setInterpolator(mBackdropInterpolator)
+                        .setDuration(300)
+                        .setStartDelay(0)
+                        .withEndAction(new Runnable() {
+                            @Override
+                            public void run() {
+                                mBackdrop.setVisibility(View.GONE);
+                                mBackdropFront.animate().cancel();
+                                mBackdropBack.animate().cancel();
+                                mHandler.post(mHideBackdropFront);
+                            }
+                        });
+                if (mKeyguardFadingAway) {
+                    mBackdrop.animate()
+
+                            // Make it disappear faster, as the focus should be on the activity behind.
+                            .setDuration(mKeyguardFadingAwayDuration / 2)
+                            .setStartDelay(mKeyguardFadingAwayDelay)
+                            .setInterpolator(mLinearInterpolator)
+                            .start();
+                }
             }
         }
     }
