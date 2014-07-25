@@ -2847,7 +2847,7 @@
         </activity-alias>
         <activity-alias android:name="com.android.internal.app.ForwardIntentToManagedProfile"
                 android:targetActivity="com.android.internal.app.IntentForwarderActivity"
-                android:icon="@drawable/ic_afw_icon"
+                android:icon="@drawable/ic_corp_icon"
                 android:exported="true"
                 android:label="@string/managed_profile_label">
         </activity-alias>
