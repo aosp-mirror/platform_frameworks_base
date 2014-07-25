@@ -620,8 +620,7 @@ static void renderTextLayout(DisplayListRenderer* renderer, Layout* layout,
 static void renderText(DisplayListRenderer* renderer, const jchar* text, int count,
         jfloat x, jfloat y, int bidiFlags, Paint* paint, TypefaceImpl* typeface) {
     Layout layout;
-    std::string css = MinikinUtils::setLayoutProperties(&layout, paint, bidiFlags, typeface);
-    layout.doLayout(text, 0, count, count, css);
+    MinikinUtils::doLayout(&layout, paint, bidiFlags, typeface, text, 0, count, count);
     x += MinikinUtils::xOffsetForTextAlign(paint, layout);
     renderTextLayout(renderer, &layout, x, y, paint);
 }
@@ -655,8 +654,7 @@ static void renderTextOnPath(DisplayListRenderer* renderer, const jchar* text, i
         SkPath* path, jfloat hOffset, jfloat vOffset, int bidiFlags, Paint* paint,
         TypefaceImpl* typeface) {
     Layout layout;
-    std::string css = MinikinUtils::setLayoutProperties(&layout, paint, bidiFlags, typeface);
-    layout.doLayout(text, 0, count, count, css);
+    MinikinUtils::doLayout(&layout, paint, bidiFlags, typeface, text, 0, count, count);
     hOffset += MinikinUtils::hOffsetForTextAlign(paint, layout, *path);
     Paint::Align align = paint->getTextAlign();
     paint->setTextAlign(Paint::kLeft_Align);
@@ -670,8 +668,7 @@ static void renderTextRun(DisplayListRenderer* renderer, const jchar* text,
         jint start, jint count, jint contextCount, jfloat x, jfloat y,
         int bidiFlags, Paint* paint, TypefaceImpl* typeface) {
     Layout layout;
-    std::string css = MinikinUtils::setLayoutProperties(&layout, paint, bidiFlags, typeface);
-    layout.doLayout(text, start, count, contextCount, css);
+    MinikinUtils::doLayout(&layout, paint, bidiFlags, typeface, text, start, count, contextCount);
     x += MinikinUtils::xOffsetForTextAlign(paint, layout);
     renderTextLayout(renderer, &layout, x, y, paint);
 }
