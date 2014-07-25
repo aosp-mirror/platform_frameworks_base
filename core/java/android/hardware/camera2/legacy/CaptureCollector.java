@@ -73,10 +73,10 @@ public class CaptureCollector {
         }
 
         public void tryComplete() {
-            if (needsPreview && isPreviewCompleted()) {
-                CaptureCollector.this.onPreviewCompleted();
-            }
             if (isCompleted()) {
+                if (needsPreview && isPreviewCompleted()) {
+                    CaptureCollector.this.onPreviewCompleted();
+                }
                 CaptureCollector.this.onRequestCompleted(mRequest, mLegacy, mTimestamp);
             }
         }
