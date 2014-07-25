@@ -22,7 +22,7 @@ import android.hardware.hdmi.IHdmiControlCallback;
 import android.hardware.hdmi.IHdmiDeviceEventListener;
 import android.hardware.hdmi.IHdmiHotplugEventListener;
 import android.hardware.hdmi.IHdmiInputChangeListener;
-import android.hardware.hdmi.IHdmiRecordRequestListener;
+import android.hardware.hdmi.IHdmiRecordListener;
 import android.hardware.hdmi.IHdmiSystemAudioModeChangeListener;
 import android.hardware.hdmi.IHdmiVendorCommandListener;
 
@@ -62,7 +62,7 @@ interface IHdmiControlService {
     void sendVendorCommand(int deviceType, int targetAddress, in byte[] params,
             boolean hasVendorId);
     void addVendorCommandListener(IHdmiVendorCommandListener listener, int deviceType);
-    void setOneTouchRecordRequestListener(IHdmiRecordRequestListener listener);
+    void setHdmiRecordListener(IHdmiRecordListener callback);
     void startOneTouchRecord(int recorderAddress, in byte[] recordSource);
     void stopOneTouchRecord(int recorderAddress);
     void startTimerRecording(int recorderAddress, int sourceType, in byte[] recordSource);
