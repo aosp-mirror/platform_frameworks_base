@@ -775,7 +775,7 @@ class MountService extends IMountService.Stub
                  */
                 try {
                     final String[] vols = NativeDaemonEvent.filterMessageList(
-                            mConnector.executeForList("volume", "list"),
+                            mConnector.executeForList("volume", "list", "broadcast"),
                             VoldResponseCode.VolumeListResult);
                     for (String volstr : vols) {
                         String[] tok = volstr.split(" ");
