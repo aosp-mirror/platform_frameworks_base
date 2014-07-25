@@ -58,6 +58,7 @@ import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 
 import com.android.internal.R;
+import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.ZenModeController;
 
 import java.io.FileDescriptor;
@@ -89,6 +90,7 @@ public class VolumePanel extends Handler {
     private static final int TIMEOUT_DELAY = 3000;
     private static final int TIMEOUT_DELAY_SHORT = 1500;
     private static final int TIMEOUT_DELAY_COLLAPSED = 4500;
+    private static final int TIMEOUT_DELAY_SAFETY_WARNING = 5000;
     private static final int TIMEOUT_DELAY_EXPANDED = 10000;
 
     private static final int MSG_VOLUME_CHANGED = 0;
@@ -238,42 +240,61 @@ public class VolumePanel extends Handler {
     private ToneGenerator mToneGenerators[];
     private Vibrator mVibrator;
 
-    private static AlertDialog sConfirmSafeVolumeDialog;
-    private static Object sConfirmSafeVolumeLock = new Object();
+    private static AlertDialog sSafetyWarning;
+    private static Object sSafetyWarningLock = new Object();
 
-    private static class WarningDialogReceiver extends BroadcastReceiver
-            implements DialogInterface.OnDismissListener {
+    private static class SafetyWarning extends SystemUIDialog
+            implements DialogInterface.OnDismissListener, DialogInterface.OnClickListener {
         private final Context mContext;
-        private final Dialog mDialog;
         private final VolumePanel mVolumePanel;
+        private final AudioManager mAudioManager;
 
-        WarningDialogReceiver(Context context, Dialog dialog, VolumePanel volumePanel) {
+        SafetyWarning(Context context, VolumePanel volumePanel, AudioManager audioManager) {
+            super(context);
             mContext = context;
-            mDialog = dialog;
             mVolumePanel = volumePanel;
+            mAudioManager = audioManager;
+
+            setMessage(mContext.getString(com.android.internal.R.string.safe_media_volume_warning));
+            setButton(DialogInterface.BUTTON_POSITIVE,
+                    mContext.getString(com.android.internal.R.string.yes), this);
+            setButton(DialogInterface.BUTTON_NEGATIVE,
+                    mContext.getString(com.android.internal.R.string.no), (OnClickListener) null);
+            setOnDismissListener(this);
+
             IntentFilter filter = new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
-            context.registerReceiver(this, filter);
+            context.registerReceiver(mReceiver, filter);
         }
 
         @Override
-        public void onReceive(Context context, Intent intent) {
-            mDialog.cancel();
-            cleanUp();
+        public void onClick(DialogInterface dialog, int which) {
+            mAudioManager.disableSafeMediaVolume();
         }
 
         @Override
         public void onDismiss(DialogInterface unused) {
-            mContext.unregisterReceiver(this);
+            mContext.unregisterReceiver(mReceiver);
             cleanUp();
         }
 
         private void cleanUp() {
-            synchronized (sConfirmSafeVolumeLock) {
-                sConfirmSafeVolumeDialog = null;
+            synchronized (sSafetyWarningLock) {
+                sSafetyWarning = null;
             }
             mVolumePanel.forceTimeout(0);
             mVolumePanel.updateStates();
         }
+
+        private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(intent.getAction())) {
+                    if (LOGD) Log.d(TAG, "Received ACTION_CLOSE_SYSTEM_DIALOGS");
+                    cancel();
+                    cleanUp();
+                }
+            }
+        };
     }
 
     public VolumePanel(Context context, ZenModeController zenController) {
@@ -305,7 +326,7 @@ public class VolumePanel extends Handler {
             @Override
             public boolean onTouchEvent(MotionEvent event) {
                 if (isShowing() && event.getAction() == MotionEvent.ACTION_OUTSIDE &&
-                        sConfirmSafeVolumeDialog == null) {
+                        sSafetyWarning == null) {
                     forceTimeout(0);
                     return true;
                 }
@@ -389,7 +410,7 @@ public class VolumePanel extends Handler {
         pw.print("  isShowing()="); pw.println(isShowing());
         pw.print("  mCallback="); pw.println(mCallback);
         pw.print("  sConfirmSafeVolumeDialog=");
-        pw.println(sConfirmSafeVolumeDialog != null ? "<not null>" : null);
+        pw.println(sSafetyWarning != null ? "<not null>" : null);
         pw.print("  mActiveStreamType="); pw.println(mActiveStreamType);
         pw.print("  mStreamControls=");
         if (mStreamControls == null) {
@@ -640,7 +661,7 @@ public class VolumePanel extends Handler {
             sc.seekbarView.setEnabled(!fixedVolume);
         } else if (fixedVolume ||
                         (sc.streamType != mAudioManager.getMasterStreamType() && muted) ||
-                        (sConfirmSafeVolumeDialog != null)) {
+                        (sSafetyWarning != null)) {
             sc.seekbarView.setEnabled(false);
         } else if (isRinger && mAudioManager.getRingerMode() == AudioManager.RINGER_MODE_SILENT) {
             sc.seekbarView.setEnabled(false);
@@ -687,7 +708,8 @@ public class VolumePanel extends Handler {
     }
 
     private void updateTimeoutDelay() {
-        mTimeoutDelay = mActiveStreamType == AudioManager.STREAM_MUSIC ? TIMEOUT_DELAY_SHORT
+        mTimeoutDelay = sSafetyWarning != null ? TIMEOUT_DELAY_SAFETY_WARNING
+                : mActiveStreamType == AudioManager.STREAM_MUSIC ? TIMEOUT_DELAY_SHORT
                 : mZenPanelExpanded ? TIMEOUT_DELAY_EXPANDED
                 : isZenPanelVisible() ? TIMEOUT_DELAY_COLLAPSED
                 : TIMEOUT_DELAY;
@@ -1105,30 +1127,14 @@ public class VolumePanel extends Handler {
     }
 
     protected void onDisplaySafeVolumeWarning(int flags) {
-        if ((flags & AudioManager.FLAG_SHOW_UI) != 0 || isShowing()) {
-            synchronized (sConfirmSafeVolumeLock) {
-                if (sConfirmSafeVolumeDialog != null) {
+        if ((flags & (AudioManager.FLAG_SHOW_UI | AudioManager.FLAG_SHOW_UI_WARNINGS)) != 0
+                || isShowing()) {
+            synchronized (sSafetyWarningLock) {
+                if (sSafetyWarning != null) {
                     return;
                 }
-                sConfirmSafeVolumeDialog = new AlertDialog.Builder(mContext)
-                        .setMessage(com.android.internal.R.string.safe_media_volume_warning)
-                        .setPositiveButton(com.android.internal.R.string.yes,
-                                            new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                mAudioManager.disableSafeMediaVolume();
-                            }
-                        })
-                        .setNegativeButton(com.android.internal.R.string.no, null)
-                        .setIconAttribute(android.R.attr.alertDialogIcon)
-                        .create();
-                final WarningDialogReceiver warning = new WarningDialogReceiver(mContext,
-                        sConfirmSafeVolumeDialog, this);
-
-                sConfirmSafeVolumeDialog.setOnDismissListener(warning);
-                sConfirmSafeVolumeDialog.getWindow().setType(
-                                                WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
-                sConfirmSafeVolumeDialog.show();
+                sSafetyWarning = new SafetyWarning(mContext, this, mAudioManager);
+                sSafetyWarning.show();
             }
             updateStates();
         }
@@ -1232,9 +1238,10 @@ public class VolumePanel extends Handler {
                         mCallback.onVisible(false);
                     }
                 }
-                synchronized (sConfirmSafeVolumeLock) {
-                    if (sConfirmSafeVolumeDialog != null) {
-                        sConfirmSafeVolumeDialog.dismiss();
+                synchronized (sSafetyWarningLock) {
+                    if (sSafetyWarning != null) {
+                        if (LOGD) Log.d(mTag, "SafetyWarning timeout");
+                        sSafetyWarning.dismiss();
                     }
                 }
                 break;

@@ -249,6 +249,11 @@
         <item name="android:colorControlActivated">@color/system_accent_color</item>
     </style>
 
+    <style name="Theme.SystemUI.Dialog" parent="@android:style/Theme.DeviceDefault.Light.Dialog">
+        <item name="android:colorPrimary">@color/system_primary_color</item>
+        <item name="android:colorControlActivated">@color/system_accent_color</item>
+    </style>
+
     <style name="NotificationsQuickSettings">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">match_parent</item>
@@ -274,8 +279,5 @@
            parent="@*android:style/TextAppearance.StatusBar.Material.EventContent">
         <item name="android:textStyle">italic</item>
         <item name="android:textColor">#60000000</item>
-    </style>
-
-    <style name="Theme.SystemUI.Dialog" parent="@android:style/Theme.DeviceDefault.Light.Dialog">
     </style>
 </resources>
