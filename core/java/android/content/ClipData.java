@@ -810,20 +810,16 @@ public class ClipData implements Parcelable {
         }
     }
 
-    /**
-     * Prepare this {@link ClipData} to leave an app process.
-     *
-     * @hide
-     */
-    public void prepareToLeaveUser(int userId) {
+    /** @hide */
+    public void fixUris(int contentUserHint) {
         final int size = mItems.size();
         for (int i = 0; i < size; i++) {
             final Item item = mItems.get(i);
             if (item.mIntent != null) {
-                item.mIntent.prepareToLeaveUser(userId);
+                item.mIntent.fixUris(contentUserHint);
             }
             if (item.mUri != null) {
-                item.mUri = maybeAddUserId(item.mUri, userId);
+                item.mUri = maybeAddUserId(item.mUri, contentUserHint);
             }
         }
     }
