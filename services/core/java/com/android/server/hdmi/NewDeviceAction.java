@@ -153,6 +153,7 @@ final class NewDeviceAction extends FeatureAction {
         }
         tv().addCecDevice(new HdmiCecDeviceInfo(
                 mDeviceLogicalAddress, mDevicePhysicalAddress,
+                tv().getPortId(mDevicePhysicalAddress),
                 HdmiUtils.getTypeFromAddress(mDeviceLogicalAddress),
                 mVendorId, mDisplayName));
 
