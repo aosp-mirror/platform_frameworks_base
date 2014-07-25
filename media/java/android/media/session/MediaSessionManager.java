@@ -116,7 +116,7 @@ public final class MediaSessionManager {
             List<IBinder> binders = mService.getSessions(notificationListener, userId);
             int size = binders.size();
             for (int i = 0; i < size; i++) {
-                MediaController controller = new MediaController(ISessionController.Stub
+                MediaController controller = new MediaController(mContext, ISessionController.Stub
                         .asInterface(binders.get(i)));
                 controllers.add(controller);
             }
@@ -252,6 +252,11 @@ public final class MediaSessionManager {
      * using {@link #addActiveSessionsListener}.
      */
     public static abstract class SessionListener {
+        private final Context mContext;
+
+        public SessionListener(Context context) {
+            mContext = context;
+        }
         /**
          * Called when the list of active sessions has changed. This can be due
          * to a session being added or removed or the order of sessions
@@ -270,7 +275,7 @@ public final class MediaSessionManager {
                 ArrayList<MediaController> controllers = new ArrayList<MediaController>();
                 int size = tokens.size();
                 for (int i = 0; i < size; i++) {
-                    controllers.add(new MediaController(tokens.get(i)));
+                    controllers.add(new MediaController(mContext, tokens.get(i)));
                 }
                 SessionListener.this.onActiveSessionsChanged(controllers);
             }

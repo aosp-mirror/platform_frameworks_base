@@ -19,6 +19,7 @@ package android.media.session;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
@@ -66,6 +67,7 @@ public final class MediaController {
     private final ISessionController mSessionBinder;
 
     private final MediaSession.Token mToken;
+    private final Context mContext;
     private final CallbackStub mCbStub = new CallbackStub(this);
     private final ArrayList<MessageHandler> mCallbacks = new ArrayList<MessageHandler>();
     private final Object mLock = new Object();
@@ -82,22 +84,27 @@ public final class MediaController {
      *
      * @hide
      */
-    public MediaController(ISessionController sessionBinder) {
+    public MediaController(Context context, ISessionController sessionBinder) {
         if (sessionBinder == null) {
             throw new IllegalArgumentException("Session token cannot be null");
+        }
+        if (context == null) {
+            throw new IllegalArgumentException("Context cannot be null");
         }
         mSessionBinder = sessionBinder;
         mTransportControls = new TransportControls();
         mToken = new MediaSession.Token(sessionBinder);
+        mContext = context;
     }
 
     /**
      * Create a new MediaController from a session's token.
      *
+     * @param context The caller's context.
      * @param token The token for the session.
      */
-    public MediaController(@NonNull MediaSession.Token token) {
-        this(token.getBinder());
+    public MediaController(@NonNull Context context, @NonNull MediaSession.Token token) {
+        this(context, token.getBinder());
     }
 
     /**

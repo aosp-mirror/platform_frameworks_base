@@ -1629,7 +1629,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     final MediaSession.Token token = entry.notification.getNotification().extras
                             .getParcelable(Notification.EXTRA_MEDIA_SESSION);
                     if (token != null) {
-                        controller = new MediaController(token);
+                        controller = new MediaController(mContext, token);
                         if (controller != null) {
                             // we've got a live one, here
                             mediaNotification = entry;

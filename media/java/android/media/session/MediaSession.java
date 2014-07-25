@@ -120,6 +120,7 @@ public final class MediaSession {
     private final Object mLock = new Object();
 
     private final MediaSession.Token mSessionToken;
+    private final MediaController mController;
     private final ISession mBinder;
     private final CallbackStub mCbStub;
 
@@ -169,6 +170,7 @@ public final class MediaSession {
         try {
             mBinder = manager.createSession(mCbStub, tag, userId);
             mSessionToken = new Token(mBinder.getController());
+            mController = new MediaController(context, mSessionToken);
         } catch (RemoteException e) {
             throw new RuntimeException("Remote error creating session.", e);
         }
@@ -406,6 +408,16 @@ public final class MediaSession {
      */
     public @NonNull Token getSessionToken() {
         return mSessionToken;
+    }
+
+    /**
+     * Get a controller for this session. This is a convenience method to avoid
+     * having to cache your own controller in process.
+     *
+     * @return A controller for this session.
+     */
+    public @NonNull MediaController getController() {
+        return mController;
     }
 
     /**

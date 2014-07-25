@@ -16571,7 +16571,7 @@ package android.media.routing {
 package android.media.session {
 
   public final class MediaController {
-    ctor public MediaController(android.media.session.MediaSession.Token);
+    ctor public MediaController(android.content.Context, android.media.session.MediaSession.Token);
     method public void addCallback(android.media.session.MediaController.Callback);
     method public void addCallback(android.media.session.MediaController.Callback, android.os.Handler);
     method public void adjustVolume(int, int);
@@ -16634,6 +16634,7 @@ package android.media.session {
     method public void addCallback(android.media.session.MediaSession.Callback, android.os.Handler);
     method public void addTransportControlsCallback(android.media.session.MediaSession.TransportControlsCallback);
     method public void addTransportControlsCallback(android.media.session.MediaSession.TransportControlsCallback, android.os.Handler);
+    method public android.media.session.MediaController getController();
     method public android.media.session.MediaSession.Token getSessionToken();
     method public boolean isActive();
     method public void release();
@@ -16711,7 +16712,7 @@ package android.media.session {
   }
 
   public static abstract class MediaSessionManager.SessionListener {
-    ctor public MediaSessionManager.SessionListener();
+    ctor public MediaSessionManager.SessionListener(android.content.Context);
     method public abstract void onActiveSessionsChanged(java.util.List<android.media.session.MediaController>);
   }
 
