@@ -152,15 +152,9 @@ public class PackageItemInfo {
      * such as the default activity icon.
      */
     public Drawable loadIcon(PackageManager pm) {
-        if (icon != 0 || showUserIcon != UserHandle.USER_NULL) {
-            Drawable dr = pm.loadItemIcon(this, getApplicationInfo());
-            if (dr != null) {
-                return dr;
-            }
-        }
-        return loadDefaultIcon(pm);
+        return pm.loadItemIcon(this, getApplicationInfo());
     }
-    
+
     /**
      * Retrieve the current graphical banner associated with this item.  This
      * will call back on the given PackageManager to load the banner from
