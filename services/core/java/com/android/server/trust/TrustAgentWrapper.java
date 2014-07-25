@@ -24,6 +24,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.Log;
 import android.util.Slog;
@@ -41,6 +42,13 @@ public class TrustAgentWrapper {
     private static final int MSG_GRANT_TRUST = 1;
     private static final int MSG_REVOKE_TRUST = 2;
     private static final int MSG_TRUST_TIMEOUT = 3;
+    private static final int MSG_RESTART_TIMEOUT = 4;
+
+    /**
+     * Time in uptime millis that we wait for the service connection, both when starting
+     * and when the service disconnects.
+     */
+    private static final long RESTART_TIMEOUT_MILLIS = 5 * 60000;
 
     /**
      * Long extra for {@link #MSG_GRANT_TRUST}
@@ -53,6 +61,8 @@ public class TrustAgentWrapper {
     private final ComponentName mName;
 
     private ITrustAgentService mTrustAgentService;
+    private boolean mBound;
+    private long mScheduledRestartUptimeMillis;
 
     // Trust state
     private boolean mTrusted;
@@ -95,6 +105,10 @@ public class TrustAgentWrapper {
                     }
                     mTrustManagerService.updateTrust(mUserId);
                     break;
+                case MSG_RESTART_TIMEOUT:
+                    unbind();
+                    mTrustManagerService.resetAgent(mName, mUserId);
+                    break;
             }
         }
     };
@@ -123,6 +137,7 @@ public class TrustAgentWrapper {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             if (DEBUG) Log.v(TAG, "TrustAgent started : " + name.flattenToString());
+            mHandler.removeMessages(MSG_RESTART_TIMEOUT);
             mTrustAgentService = ITrustAgentService.Stub.asInterface(service);
             mTrustManagerService.mArchive.logAgentConnected(mUserId, name);
             setCallback(mCallback);
@@ -134,6 +149,9 @@ public class TrustAgentWrapper {
             mTrustAgentService = null;
             mTrustManagerService.mArchive.logAgentDied(mUserId, name);
             mHandler.sendEmptyMessage(MSG_REVOKE_TRUST);
+            if (mBound) {
+                scheduleRestart();
+            }
         }
     };
 
@@ -144,9 +162,12 @@ public class TrustAgentWrapper {
         mTrustManagerService = trustManagerService;
         mUserId = user.getIdentifier();
         mName = intent.getComponent();
-        if (!context.bindServiceAsUser(intent, mConnection, Context.BIND_AUTO_CREATE, user)) {
-            if (DEBUG) Log.v(TAG, "can't bind to TrustAgent " + mName.flattenToShortString());
-            // TODO: retry somehow?
+        // Schedules a restart for when connecting times out. If the connection succeeds,
+        // the restart is canceled in mCallback's onConnected.
+        scheduleRestart();
+        mBound = context.bindServiceAsUser(intent, mConnection, Context.BIND_AUTO_CREATE, user);
+        if (!mBound) {
+            Log.e(TAG, "Can't bind to TrustAgent " + mName.flattenToShortString());
         }
     }
 
@@ -184,14 +205,38 @@ public class TrustAgentWrapper {
     }
 
     public void unbind() {
+        if (!mBound) {
+            return;
+        }
         if (DEBUG) Log.v(TAG, "TrustAgent unbound : " + mName.flattenToShortString());
         mTrustManagerService.mArchive.logAgentStopped(mUserId, mName);
         mContext.unbindService(mConnection);
+        mBound = false;
         mTrustAgentService = null;
         mHandler.sendEmptyMessage(MSG_REVOKE_TRUST);
+        mHandler.removeMessages(MSG_RESTART_TIMEOUT);
     }
 
     public boolean isConnected() {
         return mTrustAgentService != null;
+    }
+
+    public boolean isBound() {
+        return mBound;
+    }
+
+    /**
+     * If not connected, returns the time at which the agent is restarted.
+     *
+     * @return restart time in uptime millis.
+     */
+    public long getScheduledRestartUptimeMillis() {
+        return mScheduledRestartUptimeMillis;
+    }
+
+    private void scheduleRestart() {
+        mHandler.removeMessages(MSG_RESTART_TIMEOUT);
+        mScheduledRestartUptimeMillis = SystemClock.uptimeMillis() + RESTART_TIMEOUT_MILLIS;
+        mHandler.sendEmptyMessageAtTime(MSG_RESTART_TIMEOUT, mScheduledRestartUptimeMillis);
     }
 }

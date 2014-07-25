@@ -130,7 +130,7 @@ public class TrustArchive {
         }
     }
 
-    private static String formatDuration(long duration) {
+    public static String formatDuration(long duration) {
         StringBuilder sb = new StringBuilder();
         TimeUtils.formatDuration(duration, sb);
         return sb.toString();
