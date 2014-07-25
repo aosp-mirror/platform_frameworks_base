@@ -16,6 +16,9 @@
 
 package com.android.systemui.statusbar;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.TimeInterpolator;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.Notification;
@@ -33,6 +36,7 @@ import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
@@ -57,18 +61,17 @@ import android.util.SparseBooleanArray;
 import android.view.Display;
 import android.view.IWindowManager;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
-import android.view.ViewStub;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
+import android.view.animation.AnimationUtils;
 import android.widget.DateTimeView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.PopupMenu;
 import android.widget.RemoteViews;
 import android.widget.TextView;
 
@@ -79,6 +82,7 @@ import com.android.internal.util.NotificationColorUtil;
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
 import com.android.systemui.SearchPanelView;
+import com.android.systemui.SwipeHelper;
 import com.android.systemui.SystemUI;
 import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.phone.KeyguardTouchDelegate;
@@ -141,8 +145,6 @@ public abstract class BaseStatusBar extends SystemUI implements
     // Search panel
     protected SearchPanelView mSearchPanelView;
 
-    protected PopupMenu mNotificationBlamePopup;
-
     protected int mCurrentUserId = 0;
     final protected SparseArray<UserInfo> mCurrentProfiles = new SparseArray<UserInfo>();
 
@@ -183,6 +185,11 @@ public abstract class BaseStatusBar extends SystemUI implements
     private RecentsComponent mRecents;
 
     protected int mZenMode;
+
+    // which notification is currently being longpress-examined by the user
+    private View mNotificationGutsExposed;
+
+    private TimeInterpolator mLinearOutSlowIn, mFastOutLinearIn;
 
     /**
      * The {@link StatusBarState} of the status bar.
@@ -416,6 +423,11 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
 
+        mLinearOutSlowIn = AnimationUtils.loadInterpolator(mContext,
+                android.R.interpolator.linear_out_slow_in);
+        mFastOutLinearIn = AnimationUtils.loadInterpolator(mContext,
+                android.R.interpolator.fast_out_linear_in);
+
         // Connect in to the status bar manager service
         StatusBarIconList iconList = new StatusBarIconList();
         mCommandQueue = new CommandQueue(this, iconList);
@@ -593,29 +605,61 @@ public abstract class BaseStatusBar extends SystemUI implements
                 null, UserHandle.CURRENT);
     }
 
-    protected View.OnLongClickListener getNotificationLongClicker() {
-        return new View.OnLongClickListener() {
+    private static final int max(int...args) {
+        switch (args.length) {
+            case 0:
+                return 0;
+            case 1:
+                return args[0];
+            case 2:
+                return args[1] > args[0] ? args[1] : args[0];
+            default:
+                int m = args[0];
+                for (int i = 0; i < args.length; i++) {
+                    if (args[i] > m) {
+                        m = args[i];
+                    }
+                }
+                return m;
+        }
+    }
+
+    protected SwipeHelper.LongPressListener getNotificationLongClicker() {
+        return new SwipeHelper.LongPressListener() {
             @Override
-            public boolean onLongClick(View v) {
+            public boolean onLongPress(View v, int x, int y) {
+                dismissPopups();
+
                 final String packageNameF = (String) v.getTag();
                 if (packageNameF == null) return false;
                 if (v.getWindowToken() == null) return false;
-                mNotificationBlamePopup = new PopupMenu(mContext, v);
-                mNotificationBlamePopup.getMenuInflater().inflate(
-                        R.menu.notification_popup_menu,
-                        mNotificationBlamePopup.getMenu());
-                mNotificationBlamePopup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                    public boolean onMenuItemClick(MenuItem item) {
-                        if (item.getItemId() == R.id.notification_inspect_item) {
-                            startApplicationDetailsActivity(packageNameF);
-                            animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE);
-                        } else {
-                            return false;
-                        }
-                        return true;
+
+                // Assume we are a status_bar_notification_row
+                final View guts = v.findViewById(R.id.notification_guts);
+                if (guts == null) return false;
+
+                // Already showing?
+                if (guts.getVisibility() == View.VISIBLE) return false;
+
+                final View button = guts.findViewById(R.id.notification_inspect_item);
+                button.setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View v) {
+                        startApplicationDetailsActivity(packageNameF);
+                        animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE);
                     }
                 });
-                mNotificationBlamePopup.show();
+
+                guts.setVisibility(View.VISIBLE);
+                final double horz = Math.max(v.getWidth() - x, x);
+                final double vert = Math.max(v.getHeight() - y, y);
+                final float r = (float) Math.hypot(horz, vert);
+                final Animator a
+                        = ViewAnimationUtils.createCircularReveal(guts, x, y, 0, r);
+                a.setDuration(400);
+                a.setInterpolator(mLinearOutSlowIn);
+                a.start();
+
+                mNotificationGutsExposed = guts;
 
                 return true;
             }
@@ -623,9 +667,24 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     public void dismissPopups() {
-        if (mNotificationBlamePopup != null) {
-            mNotificationBlamePopup.dismiss();
-            mNotificationBlamePopup = null;
+        if (mNotificationGutsExposed != null) {
+            final View v = mNotificationGutsExposed;
+            mNotificationGutsExposed = null;
+
+            final int x = (v.getLeft() + v.getRight()) / 2;
+            final int y = (v.getTop() + v.getBottom()) / 2;
+            final Animator a = ViewAnimationUtils.createCircularReveal(v,
+                    x, y, x, 0);
+            a.setDuration(200);
+            a.setInterpolator(mFastOutLinearIn);
+            a.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    super.onAnimationEnd(animation);
+                    v.setVisibility(View.GONE);
+                }
+            });
+            a.start();
         }
     }
 
@@ -910,6 +969,27 @@ public abstract class BaseStatusBar extends SystemUI implements
             return inflateViews(entry, parent, true);
     }
 
+    private Drawable loadPackageIconDrawable(String pkg, int userId) {
+        Drawable icon = null;
+        try {
+            icon = mContext.getPackageManager().getApplicationIcon(pkg);
+        } catch (PackageManager.NameNotFoundException e) {
+        }
+
+        return icon;
+    }
+
+    private CharSequence loadPackageName(String pkg) {
+        final PackageManager pm = mContext.getPackageManager();
+        try {
+            ApplicationInfo info = pm.getApplicationInfo(pkg,
+                    PackageManager.GET_UNINSTALLED_PACKAGES);
+            if (info != null) return pm.getApplicationLabel(info);
+        } catch (PackageManager.NameNotFoundException e) {
+        }
+        return pkg;
+    }
+
     private boolean inflateViews(NotificationData.Entry entry, ViewGroup parent, boolean isHeadsUp) {
         int maxHeight = mRowMaxHeight;
         StatusBarNotification sbn = entry.notification;
@@ -957,8 +1037,15 @@ public abstract class BaseStatusBar extends SystemUI implements
                     parent, false);
         }
 
-        // for blaming (see SwipeHelper.setLongPressListener)
+        // the notification inspector (see SwipeHelper.setLongPressListener)
         row.setTag(sbn.getPackageName());
+        final View guts = row.findViewById(R.id.notification_guts);
+        final Drawable pkgicon = loadPackageIconDrawable(entry.notification.getPackageName(),
+                entry.notification.getUserId());
+        final String pkgname = loadPackageName(entry.notification.getPackageName()).toString();
+        ((ImageView) row.findViewById(android.R.id.icon)).setImageDrawable(pkgicon);
+        ((DateTimeView) row.findViewById(R.id.timestamp)).setTime(entry.notification.getPostTime());
+        ((TextView) row.findViewById(R.id.pkgname)).setText(pkgname);
 
         workAroundBadLayerDrawableOpacity(row);
         View vetoButton = updateNotificationVetoButton(row, sbn);
@@ -1202,6 +1289,9 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected void visibilityChanged(boolean visible) {
         if (mPanelSlightlyVisible != visible) {
             mPanelSlightlyVisible = visible;
+            if (!visible) {
+                dismissPopups();
+            }
             try {
                 if (visible) {
                     mBarService.onPanelRevealed();
