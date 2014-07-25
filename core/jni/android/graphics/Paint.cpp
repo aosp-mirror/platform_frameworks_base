@@ -535,8 +535,7 @@ public:
 
         Layout layout;
         TypefaceImpl* typeface = GraphicsJNI::getNativeTypeface(env, jpaint);
-        std::string css = MinikinUtils::setLayoutProperties(&layout, paint, bidiFlags, typeface);
-        layout.doLayout(textArray, index, count, textLength, css);
+        MinikinUtils::doLayout(&layout, paint, bidiFlags, typeface, textArray, index, count, textLength);
         result = layout.getAdvance();
         env->ReleaseCharArrayElements(text, const_cast<jchar*>(textArray), JNI_ABORT);
         return result;
@@ -563,8 +562,7 @@ public:
 
         Layout layout;
         TypefaceImpl* typeface = GraphicsJNI::getNativeTypeface(env, jpaint);
-        std::string css = MinikinUtils::setLayoutProperties(&layout, paint, bidiFlags, typeface);
-        layout.doLayout(textArray, start, count, textLength, css);
+        MinikinUtils::doLayout(&layout, paint, bidiFlags, typeface, textArray, start, count, textLength);
         width = layout.getAdvance();
 
         env->ReleaseStringChars(text, textArray);
@@ -586,8 +584,7 @@ public:
 
         Layout layout;
         TypefaceImpl* typeface = GraphicsJNI::getNativeTypeface(env, jpaint);
-        std::string css = MinikinUtils::setLayoutProperties(&layout, paint, bidiFlags, typeface);
-        layout.doLayout(textArray, 0, textLength, textLength, css);
+        MinikinUtils::doLayout(&layout, paint, bidiFlags, typeface, textArray, 0, textLength, textLength);
         width = layout.getAdvance();
 
         env->ReleaseStringChars(text, textArray);
@@ -616,8 +613,7 @@ public:
         jfloat* widthsArray = autoWidths.ptr();
 
         Layout layout;
-        std::string css = MinikinUtils::setLayoutProperties(&layout, paint, bidiFlags, typeface);
-        layout.doLayout(text, 0, count, count, css);
+        MinikinUtils::doLayout(&layout, paint, bidiFlags, typeface, text, 0, count, count);
         layout.getAdvances(widthsArray);
 
         return count;
@@ -670,8 +666,7 @@ public:
         int bidiFlags = isRtl ? kBidi_Force_RTL : kBidi_Force_LTR;
 
         Layout layout;
-        std::string css = MinikinUtils::setLayoutProperties(&layout, paint, bidiFlags, typeface);
-        layout.doLayout(text, start, count, contextCount, css);
+        MinikinUtils::doLayout(&layout, paint, bidiFlags, typeface, text, start, count, contextCount);
         layout.getAdvances(advancesArray);
         totalAdvance = layout.getAdvance();
 
@@ -770,8 +765,7 @@ public:
     static void getTextPath(JNIEnv* env, Paint* paint, TypefaceImpl* typeface, const jchar* text,
             jint count, jint bidiFlags, jfloat x, jfloat y, SkPath* path) {
         Layout layout;
-        std::string css = MinikinUtils::setLayoutProperties(&layout, paint, bidiFlags, typeface);
-        layout.doLayout(text, 0, count, count, css);
+        MinikinUtils::doLayout(&layout, paint, bidiFlags, typeface, text, 0, count, count);
         size_t nGlyphs = layout.nGlyphs();
         uint16_t* glyphs = new uint16_t[nGlyphs];
         SkPoint* pos = new SkPoint[nGlyphs];
@@ -833,8 +827,7 @@ public:
         float measured = 0;
 
         Layout layout;
-        std::string css = MinikinUtils::setLayoutProperties(&layout, &paint, bidiFlags, typeface);
-        layout.doLayout(text, 0, count, count, css);
+        MinikinUtils::doLayout(&layout, &paint, bidiFlags, typeface, text, 0, count, count);
         float* advances = new float[count];
         layout.getAdvances(advances);
         const bool forwardScan = (textBufferDirection == Paint::kForward_TextBufferDirection);
@@ -914,8 +907,7 @@ public:
         SkIRect ir;
 
         Layout layout;
-        std::string css = MinikinUtils::setLayoutProperties(&layout, &paint, bidiFlags, typeface);
-        layout.doLayout(text, 0, count, count, css);
+        MinikinUtils::doLayout(&layout, &paint, bidiFlags, typeface, text, 0, count, count);
         MinikinRect rect;
         layout.getBounds(&rect);
         r.fLeft = rect.mLeft;
