@@ -149,10 +149,21 @@ public class DisconnectCause {
      */
     public static final int EXITED_ECM                     = 42;
 
+    /**
+     * The outgoing call failed with an unknown cause.
+     */
+    public static final int OUTGOING_FAILURE = 43;
+
+    /**
+     * The outgoing call was canceled by the {@link android.telecomm.ConnectionService}.
+     */
+    public static final int OUTGOING_CANCELED = 44;
+
     /** Smallest valid value for call disconnect codes. */
     public static final int MINIMUM_VALID_VALUE = NOT_DISCONNECTED;
+
     /** Largest valid value for call disconnect codes. */
-    public static final int MAXIMUM_VALID_VALUE = EXITED_ECM;
+    public static final int MAXIMUM_VALID_VALUE = OUTGOING_CANCELED;
 
     /** Private constructor to avoid class instantiation. */
     private DisconnectCause() {
@@ -246,6 +257,10 @@ public class DisconnectCause {
             return "EXITED_ECM";
         case ERROR_UNSPECIFIED:
             return "ERROR_UNSPECIFIED";
+        case OUTGOING_FAILURE:
+            return "OUTGOING_FAILURE";
+        case OUTGOING_CANCELED:
+            return "OUTGOING_CANCELED";
         default:
             return "INVALID";
         }
