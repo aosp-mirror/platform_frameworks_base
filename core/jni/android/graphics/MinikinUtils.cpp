@@ -40,8 +40,8 @@ static int snprintfcat(char* buf, int off, int size, const char* format, ...) {
     return off + n;
 }
 
-std::string MinikinUtils::setLayoutProperties(Layout* layout, const Paint* paint, int bidiFlags,
-        TypefaceImpl* typeface) {
+void MinikinUtils::doLayout(Layout* layout, const Paint* paint, int bidiFlags, TypefaceImpl* typeface,
+        const uint16_t* buf, size_t start, size_t count, size_t bufSize) {
     TypefaceImpl* resolvedFace = TypefaceImpl_resolveDefault(typeface);
     layout->setFontCollection(resolvedFace->fFontCollection);
     FontStyle style = resolvedFace->fStyle;
@@ -62,7 +62,7 @@ std::string MinikinUtils::setLayoutProperties(Layout* layout, const Paint* paint
     SkPaintOptionsAndroid::FontVariant var = paint->getPaintOptionsAndroid().getFontVariant();
     const char* varstr = var == SkPaintOptionsAndroid::kElegant_Variant ? "elegant" : "compact";
     off = snprintfcat(css, off, sizeof(css), " -minikin-variant: %s;", varstr);
-    return std::string(css);
+    layout->doLayout(buf, start, count, bufSize, std::string(css));
 }
 
 float MinikinUtils::xOffsetForTextAlign(Paint* paint, const Layout& layout) {
