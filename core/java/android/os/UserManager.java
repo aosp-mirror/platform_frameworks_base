@@ -229,8 +229,17 @@ public class UserManager {
     public static final String DISALLOW_CONFIG_MOBILE_NETWORKS = "no_config_mobile_networks";
 
     /**
-     * Key for user restrictions. Specifies if a user is disallowed from controlling
-     * applications in Settings. The default value is <code>false</code>.
+     * Key for user restrictions. Specifies if a user is disallowed from modifying
+     * applications in Settings or launchers. The following actions will not be allowed when this
+     * restriction is enabled:
+     * <li>uninstalling apps</li>
+     * <li>disabling apps</li>
+     * <li>clearing app caches</li>
+     * <li>clearing app data</li>
+     * <li>force stopping apps</li>
+     * <li>clearing app defaults</li>
+     * <p>
+     * The default value is <code>false</code>.
      * <p>
      * Type: Boolean
      * @see #setUserRestrictions(Bundle)
