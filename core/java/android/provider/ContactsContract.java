@@ -6802,6 +6802,21 @@ public final class ContactsContract {
                     default: return com.android.internal.R.string.eventTypeCustom;
                 }
             }
+
+            /**
+             * Return a {@link CharSequence} that best describes the given type,
+             * possibly substituting the given {@link #LABEL} value
+             * for {@link #TYPE_CUSTOM}.
+             */
+            public static final CharSequence getTypeLabel(Resources res, int type,
+                    CharSequence label) {
+                if (type == TYPE_CUSTOM && !TextUtils.isEmpty(label)) {
+                    return label;
+                } else {
+                    final int labelRes = getTypeResource(type);
+                    return res.getText(labelRes);
+                }
+            }
         }
 
         /**
