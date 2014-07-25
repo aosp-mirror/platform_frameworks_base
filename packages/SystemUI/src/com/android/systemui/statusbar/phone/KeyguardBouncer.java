@@ -100,7 +100,7 @@ public class KeyguardBouncer {
                     .withLayer()
 
                     // Make it disappear faster, as the focus should be on the activity behind.
-                    .setDuration(duration / 3)
+                    .setDuration(duration / 2)
                     .setInterpolator(mFadeOutInterpolator)
                     .setStartDelay(delay)
                     .withEndAction(new Runnable() {
