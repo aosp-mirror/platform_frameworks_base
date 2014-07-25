@@ -113,7 +113,8 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
     public boolean handleMessage(Message msg) {
         switch (msg.what) {
             case MSG_SET_STREAM_VOLUME:
-                mAudioManager.setStreamVolume(mStreamType, mLastProgress, 0);
+                mAudioManager.setStreamVolume(mStreamType, mLastProgress,
+                        AudioManager.FLAG_SHOW_UI_WARNINGS);
                 break;
             case MSG_START_SAMPLE:
                 onStartSample();

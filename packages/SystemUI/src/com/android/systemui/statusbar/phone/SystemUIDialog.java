@@ -29,12 +29,11 @@ public class SystemUIDialog extends AlertDialog {
 
     public SystemUIDialog(Context context) {
         super(context, R.style.Theme_SystemUI_Dialog);
-
         getWindow().setType(WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
                 | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
         WindowManager.LayoutParams attrs = getWindow().getAttributes();
-        attrs.setTitle("SystemUIDialog");
+        attrs.setTitle(getClass().getSimpleName());
         getWindow().setAttributes(attrs);
     }
 }
