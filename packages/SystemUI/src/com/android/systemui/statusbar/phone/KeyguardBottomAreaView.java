@@ -30,6 +30,7 @@ import android.provider.MediaStore;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -40,6 +41,7 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.FlashlightController;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
+import com.android.systemui.statusbar.policy.PreviewInflater;
 
 /**
  * Implementation for the bottom area of the Keyguard, including camera/phone affordance and status
@@ -61,6 +63,10 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private KeyguardAffordanceView mPhoneImageView;
     private KeyguardAffordanceView mLockIcon;
     private View mIndicationText;
+    private ViewGroup mPreviewContainer;
+
+    private View mPhonePreview;
+    private View mCameraPreview;
 
     private ActivityStarter mActivityStarter;
     private UnlockMethodCache mUnlockMethodCache;
@@ -88,6 +94,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     protected void onFinishInflate() {
         super.onFinishInflate();
         mLockPatternUtils = new LockPatternUtils(mContext);
+        mPreviewContainer = (ViewGroup) findViewById(R.id.preview_container);
         mCameraImageView = (KeyguardAffordanceView) findViewById(R.id.camera_button);
         mPhoneImageView = (KeyguardAffordanceView) findViewById(R.id.phone_button);
         mLockIcon = (KeyguardAffordanceView) findViewById(R.id.lock_icon);
@@ -101,6 +108,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         updateTrust();
         setClipChildren(false);
         setClipToPadding(false);
+        inflatePreviews();
     }
 
     public void setActivityStarter(ActivityStarter activityStarter) {
@@ -239,6 +247,14 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         return mCameraImageView;
     }
 
+    public View getPhonePreview() {
+        return mPhonePreview;
+    }
+
+    public View getCameraPreview() {
+        return mCameraPreview;
+    }
+
     public KeyguardAffordanceView getLockIcon() {
         return mLockIcon;
     }
@@ -256,6 +272,20 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     public void onMethodSecureChanged(boolean methodSecure) {
         updateTrust();
         updateCameraVisibility();
+    }
+
+    private void inflatePreviews() {
+        PreviewInflater inflater = new PreviewInflater(mContext, new LockPatternUtils(mContext));
+        mPhonePreview = inflater.inflatePreview(PHONE_INTENT);
+        mCameraPreview = inflater.inflatePreview(getCameraIntent());
+        if (mPhonePreview != null) {
+            mPreviewContainer.addView(mPhonePreview);
+            mPhonePreview.setVisibility(View.INVISIBLE);
+        }
+        if (mCameraPreview != null) {
+            mPreviewContainer.addView(mCameraPreview);
+            mCameraPreview.setVisibility(View.INVISIBLE);
+        }
     }
 
     private final BroadcastReceiver mDevicePolicyReceiver = new BroadcastReceiver() {
