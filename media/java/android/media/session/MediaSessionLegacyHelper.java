@@ -369,7 +369,7 @@ public class MediaSessionLegacyHelper {
         SessionHolder holder = mSessions.get(pi);
         if (holder == null && createIfMissing) {
             MediaSession session;
-            session = new MediaSession(mContext, TAG);
+            session = new MediaSession(mContext, TAG + "-" + pi.getCreatorPackage());
             session.setActive(true);
             holder = new SessionHolder(session, pi);
             mSessions.put(pi, holder);

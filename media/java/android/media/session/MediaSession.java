@@ -715,6 +715,7 @@ public final class MediaSession {
      * the session.
      */
     public static final class Token implements Parcelable {
+
         private ISessionController mBinder;
 
         /**
@@ -732,6 +733,31 @@ public final class MediaSession {
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeStrongBinder(mBinder.asBinder());
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((mBinder == null) ? 0 : mBinder.asBinder().hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            Token other = (Token) obj;
+            if (mBinder == null) {
+                if (other.mBinder != null)
+                    return false;
+            } else if (!mBinder.asBinder().equals(other.mBinder.asBinder()))
+                return false;
+            return true;
         }
 
         ISessionController getBinder() {

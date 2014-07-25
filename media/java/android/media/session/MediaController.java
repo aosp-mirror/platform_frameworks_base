@@ -71,7 +71,8 @@ public final class MediaController {
     private final Object mLock = new Object();
 
     private boolean mCbRegistered = false;
-    private MediaSessionInfo mInfo;
+    private String mPackageName;
+    private String mTag;
 
     private final TransportControls mTransportControls;
 
@@ -371,20 +372,36 @@ public final class MediaController {
     }
 
     /**
-     * Get the info for the session this controller is connected to.
+     * Get the session owner's package name.
      *
-     * @return The session info for the connected session.
-     * @hide
+     * @return The package name of of the session owner.
      */
-    public MediaSessionInfo getSessionInfo() {
-        if (mInfo == null) {
+    public String getPackageName() {
+        if (mPackageName == null) {
             try {
-                mInfo = mSessionBinder.getSessionInfo();
+                mPackageName = mSessionBinder.getPackageName();
             } catch (RemoteException e) {
-                Log.e(TAG, "Error in getSessionInfo.", e);
+                Log.d(TAG, "Dead object in getPackageName.", e);
             }
         }
-        return mInfo;
+        return mPackageName;
+    }
+
+    /**
+     * Get the session's tag for debugging purposes.
+     *
+     * @return The session's tag.
+     * @hide
+     */
+    public String getTag() {
+        if (mTag == null) {
+            try {
+                mTag = mSessionBinder.getTag();
+            } catch (RemoteException e) {
+                Log.d(TAG, "Dead object in getTag.", e);
+            }
+        }
+        return mTag;
     }
 
     /*

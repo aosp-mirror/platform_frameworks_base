@@ -23,12 +23,10 @@ import android.media.MediaMetadata;
 import android.media.session.ISessionController;
 import android.media.session.ISessionManager;
 import android.media.session.MediaController;
-import android.media.session.MediaSessionInfo;
 import android.media.session.PlaybackState;
 import android.os.Bundle;
 import android.os.HandlerThread;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -62,14 +60,14 @@ public class Media extends BaseCommand {
                 "usage: media [subcommand] [options]\n" +
                 "       media dispatch KEY\n" +
                 "       media list-sessions\n" +
-                "       media monitor <sessionId>\n" +
+                "       media monitor <tag>\n" +
                 "\n" +
                 "media dispatch: dispatch a media key to the system.\n" +
                 "                KEY may be: play, pause, play-pause, mute, headsethook,\n" +
                 "                stop, next, previous, rewind, record, fast-forword.\n" +
                 "media list-sessions: print a list of the current sessions.\n" +
                         "media monitor: monitor updates to the specified session.\n" +
-                "                       Use the sessionId from list-sessions.\n"
+                "                       Use the tag from list-sessions.\n"
         );
     }
 
@@ -116,7 +114,7 @@ public class Media extends BaseCommand {
             for (IBinder session : sessions) {
                 MediaController controller = new MediaController(ISessionController.Stub
                         .asInterface(session));
-                if (controller != null && controller.getSessionInfo().getId().equals(id)) {
+                if (controller != null && id.equals(controller.getTag())) {
                     ControllerMonitor monitor = new ControllerMonitor(controller);
                     monitor.run();
                     success = true;
@@ -192,7 +190,7 @@ public class Media extends BaseCommand {
         }
 
         void printUsageMessage() {
-            System.out.println("V2Monitoring session " + mController.getSessionInfo().getId()
+            System.out.println("V2Monitoring session " + mController.getTag()
                     + "...  available commands:");
             System.out.println("(q)uit: finish monitoring");
         }
@@ -251,9 +249,9 @@ public class Media extends BaseCommand {
                 MediaController controller = new MediaController(ISessionController.Stub
                         .asInterface(session));
                 if (controller != null) {
-                    MediaSessionInfo info = controller.getSessionInfo();
-                    System.out.println("  id=" + info.getId() + ", package="
-                            + info.getPackageName());
+                    String pkg = controller.getPackageName();
+                    System.out.println("  tag=" + controller.getTag()
+                            + ", package=" + pkg);
                 }
             }
         } catch (Exception e) {

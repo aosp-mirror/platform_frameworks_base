@@ -23,7 +23,6 @@ import android.media.Rating;
 import android.media.routing.IMediaRouterDelegate;
 import android.media.routing.IMediaRouterStateCallback;
 import android.media.session.ISessionControllerCallback;
-import android.media.session.MediaSessionInfo;
 import android.media.session.ParcelableVolumeInfo;
 import android.media.session.PlaybackState;
 import android.media.session.MediaSession;
@@ -44,7 +43,8 @@ interface ISessionController {
     void registerCallbackListener(in ISessionControllerCallback cb);
     void unregisterCallbackListener(in ISessionControllerCallback cb);
     boolean isTransportControlEnabled();
-    MediaSessionInfo getSessionInfo();
+    String getPackageName();
+    String getTag();
     PendingIntent getLaunchPendingIntent();
     long getFlags();
     ParcelableVolumeInfo getVolumeAttributes();

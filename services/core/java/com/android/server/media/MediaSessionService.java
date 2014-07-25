@@ -516,9 +516,9 @@ public class MediaSessionService extends SystemService implements Monitor {
             int size = mSessions.size();
             pw.println(indent + size + " Sessions:");
             for (int i = 0; i < size; i++) {
-                // Just print the session info, the full session dump will
+                // Just print the short version, the full session dump will
                 // already be in the list of all sessions.
-                pw.println(indent + mSessions.get(i).getSessionInfo());
+                pw.println(indent + mSessions.get(i).toString());
             }
         }
     }
@@ -759,9 +759,9 @@ public class MediaSessionService extends SystemService implements Monitor {
         private void dispatchAdjustVolumeLocked(int suggestedStream, int direction, int flags,
                 MediaSessionRecord session) {
             if (DEBUG) {
-                String sessionInfo = session == null ? null : session.getSessionInfo().toString();
-                Log.d(TAG, "Adjusting session " + sessionInfo + " by " + direction + ". flags=" + flags
-                        + ", suggestedStream=" + suggestedStream);
+                String description = session == null ? null : session.toString();
+                Log.d(TAG, "Adjusting session " + description + " by " + direction + ". flags="
+                        + flags + ", suggestedStream=" + suggestedStream);
 
             }
             if (session == null) {
@@ -824,7 +824,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                 MediaSessionRecord session) {
             if (session != null) {
                 if (DEBUG) {
-                    Log.d(TAG, "Sending media key to " + session.getSessionInfo());
+                    Log.d(TAG, "Sending media key to " + session.toString());
                 }
                 if (needWakeLock) {
                     mKeyEventReceiver.aquireWakeLockLocked();

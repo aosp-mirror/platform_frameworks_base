@@ -1659,7 +1659,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                                 continue;
                             default:
                                 // now to see if we have one like this
-                                final String pkg = aController.getSessionInfo().getPackageName();
+                                final String pkg = aController.getPackageName();
 
                                 for (int i = 0; i < N; i++) {
                                     final Entry entry = mNotificationData.get(i);

@@ -214,7 +214,7 @@ import java.util.List;
     public String getRemoteControlClientPackageName() {
         if (USE_SESSIONS) {
             synchronized (mInfoLock) {
-                return mCurrentSession != null ? mCurrentSession.getSessionInfo().getPackageName()
+                return mCurrentSession != null ? mCurrentSession.getPackageName()
                         : null;
             }
         } else {
@@ -980,8 +980,8 @@ import java.util.List;
                             0 /* genId */, 1 /* clearing */, null /* obj */, 0 /* delay */);
                 }
             } else if (mCurrentSession == null
-                    || !controller.getSessionInfo().getId()
-                            .equals(mCurrentSession.getSessionInfo().getId())) {
+                    || !controller.getSessionToken()
+                            .equals(mCurrentSession.getSessionToken())) {
                 if (mCurrentSession != null) {
                     mCurrentSession.removeCallback(mSessionCb);
                 }

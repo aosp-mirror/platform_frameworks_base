@@ -16580,6 +16580,7 @@ package android.media.session {
     method public long getFlags();
     method public android.app.PendingIntent getLaunchActivity();
     method public android.media.MediaMetadata getMetadata();
+    method public java.lang.String getPackageName();
     method public android.media.session.PlaybackState getPlaybackState();
     method public java.util.List<android.media.session.MediaSession.Track> getQueue();
     method public int getRatingType();
