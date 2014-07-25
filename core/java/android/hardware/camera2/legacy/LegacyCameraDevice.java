@@ -135,10 +135,9 @@ public class LegacyCameraDevice implements AutoCloseable {
         }
 
         @Override
-        public void onCaptureStarted(RequestHolder holder) {
+        public void onCaptureStarted(RequestHolder holder, final long timestamp) {
             final CaptureResultExtras extras = getExtrasFromRequest(holder);
 
-            final long timestamp = System.nanoTime();
             mResultHandler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -146,7 +145,6 @@ public class LegacyCameraDevice implements AutoCloseable {
                         Log.d(TAG, "doing onCaptureStarted callback.");
                     }
                     try {
-                        // TODO: Don't fake timestamp
                         mDeviceCallbacks.onCaptureStarted(extras, timestamp);
                     } catch (RemoteException e) {
                         throw new IllegalStateException(
@@ -167,7 +165,6 @@ public class LegacyCameraDevice implements AutoCloseable {
                         Log.d(TAG, "doing onCaptureResult callback.");
                     }
                     try {
-                        // TODO: Don't fake metadata
                         mDeviceCallbacks.onResultReceived(result, extras);
                     } catch (RemoteException e) {
                         throw new IllegalStateException(
@@ -483,6 +480,12 @@ public class LegacyCameraDevice implements AutoCloseable {
         return new Size(dimens[0], dimens[1]);
     }
 
+    static void setNextTimestamp(Surface surface, long timestamp)
+            throws BufferQueueAbandonedException {
+        checkNotNull(surface);
+        LegacyExceptionUtils.throwOnError(nativeSetNextTimestamp(surface, timestamp));
+    }
+
     private static native int nativeDetectSurfaceType(Surface surface);
 
     private static native int nativeDetectSurfaceDimens(Surface surface,
@@ -506,4 +509,5 @@ public class LegacyCameraDevice implements AutoCloseable {
     private static native int nativeDetectTextureDimens(SurfaceTexture surfaceTexture,
             /*out*/int[/*2*/] dimens);
 
+    private static native int nativeSetNextTimestamp(Surface surface, long timestamp);
 }

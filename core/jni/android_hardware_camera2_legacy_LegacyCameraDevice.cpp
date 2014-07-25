@@ -587,7 +587,7 @@ static jint LegacyCameraDevice_nativeSetSurfaceOrientation(JNIEnv* env, jobject 
 
     int32_t transform = 0;
 
-    if ((err = CameraUtils::getRotationTransform(staticMetadata, /*out*/&transform)) != OK) {
+    if ((err = CameraUtils::getRotationTransform(staticMetadata, /*out*/&transform)) != NO_ERROR) {
         ALOGE("%s: Invalid rotation transform %s (%d)", __FUNCTION__, strerror(-err),
                 err);
         return err;
@@ -595,12 +595,32 @@ static jint LegacyCameraDevice_nativeSetSurfaceOrientation(JNIEnv* env, jobject 
 
     ALOGV("%s: Setting buffer sticky transform to %d", __FUNCTION__, transform);
 
-    if ((err = native_window_set_buffers_sticky_transform(anw.get(), transform)) != OK) {
+    if ((err = native_window_set_buffers_sticky_transform(anw.get(), transform)) != NO_ERROR) {
         ALOGE("%s: Unable to configure surface transform, error %s (%d)", __FUNCTION__,
                 strerror(-err), err);
         return err;
     }
 
+    return NO_ERROR;
+}
+
+static jint LegacyCameraDevice_nativeSetNextTimestamp(JNIEnv* env, jobject thiz, jobject surface,
+        jlong timestamp) {
+    ALOGV("nativeSetNextTimestamp");
+    sp<ANativeWindow> anw;
+    if ((anw = getNativeWindow(env, surface)) == NULL) {
+        ALOGE("%s: Could not retrieve native window from surface.", __FUNCTION__);
+        return BAD_VALUE;
+    }
+
+    status_t err = NO_ERROR;
+
+    if ((err = native_window_set_buffers_timestamp(anw.get(), static_cast<int64_t>(timestamp))) !=
+            NO_ERROR) {
+        ALOGE("%s: Unable to set surface timestamp, error %s (%d)", __FUNCTION__, strerror(-err),
+                err);
+        return err;
+    }
     return NO_ERROR;
 }
 
@@ -634,6 +654,9 @@ static JNINativeMethod gCameraDeviceMethods[] = {
     { "nativeSetSurfaceOrientation",
     "(Landroid/view/Surface;II)I",
     (void *)LegacyCameraDevice_nativeSetSurfaceOrientation },
+    { "nativeSetNextTimestamp",
+    "(Landroid/view/Surface;J)I",
+    (void *)LegacyCameraDevice_nativeSetNextTimestamp },
 };
 
 // Get all the required offsets in java class and register native functions
