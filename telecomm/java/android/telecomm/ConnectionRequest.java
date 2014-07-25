@@ -20,6 +20,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.ResultReceiver;
+import android.telephony.DisconnectCause;
 
 /**
  * Simple data container encapsulating a request to some entity to
@@ -110,6 +112,7 @@ public final class ConnectionRequest implements Parcelable {
         return mVideoState;
     }
 
+    @Override
     public String toString() {
         return String.format("PhoneConnectionRequest %s %s",
                 mHandle == null

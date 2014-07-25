@@ -28593,7 +28593,11 @@ package android.telecomm {
     method public final int getCallCapabilities();
     method public final java.lang.String getCallerDisplayName();
     method public final int getCallerDisplayNamePresentation();
+    method public static android.telecomm.Connection getCanceledConnection();
     method public final java.util.List<android.telecomm.Connection> getChildConnections();
+    method public static android.telecomm.Connection getFailedConnection(int, java.lang.String);
+    method public final int getFailureCode();
+    method public final java.lang.String getFailureMessage();
     method public final android.net.Uri getHandle();
     method public final int getHandlePresentation();
     method public final android.telecomm.Connection getParentConnection();
@@ -28622,9 +28626,13 @@ package android.telecomm {
     method public final void setAudioModeIsVoip(boolean);
     method public final void setCallCapabilities(int);
     method public final void setCallerDisplayName(java.lang.String, int);
+    method public final void setCanceled();
     method public final void setDialing();
     method public final void setDisconnected(int, java.lang.String);
+    method public final void setFailed(int, java.lang.String);
     method public final void setHandle(android.net.Uri, int);
+    method public final void setInitialized();
+    method public final void setInitializing();
     method public final void setOnHold();
     method public final void setParentConnection(android.telecomm.Connection);
     method public final void setPostDialWait(java.lang.String);
@@ -28639,12 +28647,15 @@ package android.telecomm {
   }
 
   public final class Connection.State {
-    field public static final int ACTIVE = 3; // 0x3
-    field public static final int DIALING = 2; // 0x2
-    field public static final int DISCONNECTED = 5; // 0x5
-    field public static final int HOLDING = 4; // 0x4
-    field public static final int NEW = 0; // 0x0
-    field public static final int RINGING = 1; // 0x1
+    field public static final int ACTIVE = 4; // 0x4
+    field public static final int CANCELED = 8; // 0x8
+    field public static final int DIALING = 3; // 0x3
+    field public static final int DISCONNECTED = 6; // 0x6
+    field public static final int FAILED = 7; // 0x7
+    field public static final int HOLDING = 5; // 0x5
+    field public static final int INITIALIZING = 0; // 0x0
+    field public static final int NEW = 1; // 0x1
+    field public static final int RINGING = 2; // 0x2
   }
 
   public final class ConnectionRequest implements android.os.Parcelable {
@@ -28662,17 +28673,16 @@ package android.telecomm {
 
   public abstract class ConnectionService extends android.app.Service {
     ctor public ConnectionService();
-    method public final void createRemoteIncomingConnection(android.telecomm.ConnectionRequest, android.telecomm.ConnectionService.CreateConnectionResponse<android.telecomm.RemoteConnection>);
-    method public final void createRemoteOutgoingConnection(android.telecomm.ConnectionRequest, android.telecomm.ConnectionService.CreateConnectionResponse<android.telecomm.RemoteConnection>);
+    method public final android.telecomm.RemoteConnection createRemoteIncomingConnection(android.telecomm.ConnectionRequest);
+    method public final android.telecomm.RemoteConnection createRemoteOutgoingConnection(android.telecomm.ConnectionRequest);
     method public final java.util.Collection<android.telecomm.Connection> getAllConnections();
-    method public final void lookupRemoteAccounts(android.net.Uri, android.telecomm.SimpleResponse<android.net.Uri, java.util.List<android.telecomm.PhoneAccountHandle>>);
     method public final void maybeRespondToAccountLookup();
     method public final android.os.IBinder onBind(android.content.Intent);
     method public void onConnectionAdded(android.telecomm.Connection);
     method public void onConnectionRemoved(android.telecomm.Connection);
     method public void onCreateConferenceConnection(java.lang.String, android.telecomm.Connection, android.telecomm.Response<java.lang.String, android.telecomm.Connection>);
-    method public void onCreateIncomingConnection(android.telecomm.ConnectionRequest, android.telecomm.ConnectionService.CreateConnectionResponse<android.telecomm.Connection>);
-    method public void onCreateOutgoingConnection(android.telecomm.ConnectionRequest, android.telecomm.ConnectionService.CreateConnectionResponse<android.telecomm.Connection>);
+    method public android.telecomm.Connection onCreateIncomingConnection(android.telecomm.ConnectionRequest);
+    method public android.telecomm.Connection onCreateOutgoingConnection(android.telecomm.ConnectionRequest);
     field public static final java.lang.String SERVICE_INTERFACE = "android.telecomm.ConnectionService";
   }
 
@@ -28803,6 +28813,8 @@ package android.telecomm {
     method public int getCallerDisplayNamePresentation();
     method public int getDisconnectCause();
     method public java.lang.String getDisconnectMessage();
+    method public int getFailureCode();
+    method public java.lang.String getFailureMessage();
     method public android.net.Uri getHandle();
     method public int getHandlePresentation();
     method public int getState();
@@ -28819,19 +28831,20 @@ package android.telecomm {
     method public void unhold();
   }
 
-  public static abstract interface RemoteConnection.Listener {
-    method public abstract void onAudioModeIsVoipChanged(android.telecomm.RemoteConnection, boolean);
-    method public abstract void onCallCapabilitiesChanged(android.telecomm.RemoteConnection, int);
-    method public abstract void onCallerDisplayNameChanged(android.telecomm.RemoteConnection, java.lang.String, int);
-    method public abstract void onDestroyed(android.telecomm.RemoteConnection);
-    method public abstract void onDisconnected(android.telecomm.RemoteConnection, int, java.lang.String);
-    method public abstract void onHandleChanged(android.telecomm.RemoteConnection, android.net.Uri, int);
-    method public abstract void onPostDialWait(android.telecomm.RemoteConnection, java.lang.String);
-    method public abstract void onRequestingRingback(android.telecomm.RemoteConnection, boolean);
-    method public abstract void onStartActivityFromInCall(android.telecomm.RemoteConnection, android.app.PendingIntent);
-    method public abstract void onStateChanged(android.telecomm.RemoteConnection, int);
-    method public abstract void onStatusHintsChanged(android.telecomm.RemoteConnection, android.telecomm.StatusHints);
-    method public abstract void onVideoStateChanged(android.telecomm.RemoteConnection, int);
+  public static abstract class RemoteConnection.Listener {
+    ctor public RemoteConnection.Listener();
+    method public void onAudioModeIsVoipChanged(android.telecomm.RemoteConnection, boolean);
+    method public void onCallCapabilitiesChanged(android.telecomm.RemoteConnection, int);
+    method public void onCallerDisplayNameChanged(android.telecomm.RemoteConnection, java.lang.String, int);
+    method public void onDestroyed(android.telecomm.RemoteConnection);
+    method public void onDisconnected(android.telecomm.RemoteConnection, int, java.lang.String);
+    method public void onHandleChanged(android.telecomm.RemoteConnection, android.net.Uri, int);
+    method public void onPostDialWait(android.telecomm.RemoteConnection, java.lang.String);
+    method public void onRequestingRingback(android.telecomm.RemoteConnection, boolean);
+    method public void onStartActivityFromInCall(android.telecomm.RemoteConnection, android.app.PendingIntent);
+    method public void onStateChanged(android.telecomm.RemoteConnection, int);
+    method public void onStatusHintsChanged(android.telecomm.RemoteConnection, android.telecomm.StatusHints);
+    method public void onVideoStateChanged(android.telecomm.RemoteConnection, int);
   }
 
   public abstract interface Response {
