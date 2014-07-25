@@ -74,6 +74,9 @@ public class PathParser {
      * @return a deep copy of the <code>source</code>.
      */
     public static PathDataNode[] deepCopyNodes(PathDataNode[] source) {
+        if (source == null) {
+            return null;
+        }
         PathDataNode[] copy = new PathParser.PathDataNode[source.length];
         for (int i = 0; i < source.length; i ++) {
             copy[i] = new PathDataNode(source[i]);

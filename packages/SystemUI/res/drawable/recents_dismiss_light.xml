@@ -13,21 +13,17 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<vector xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <size
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
         android:height="16dp"
-        android:width="16dp" />
-
-    <viewport
+        android:width="16dp"
         android:viewportHeight="100"
-        android:viewportWidth="100" />
+        android:viewportWidth="100" >
 
 
     <path
         android:name="x"
         android:pathData="M0,0L100,100M0,100L100,0z"
-        android:stroke="@color/recents_task_bar_light_dismiss_color"
+        android:strokeColor="@color/recents_task_bar_light_dismiss_color"
         android:strokeWidth="8.0"
         android:strokeLineCap="square" />
 

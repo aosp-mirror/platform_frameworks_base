@@ -13,28 +13,24 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<vector xmlns:android="http://schemas.android.com/apk/res/android" >
-
-    <size
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
         android:height="64dp"
-        android:width="64dp" />
-
-    <viewport
+        android:width="64dp"
         android:viewportHeight="400"
-        android:viewportWidth="600" />
+        android:viewportWidth="600" >
 
     <group>
         <path
             android:name="pie1"
-            android:fill="#ffffffff"
+            android:fillColor="#ffffffff"
             android:pathData="M300,200 h-150 a150,150 0 1,0 150,-150 z"
-            android:stroke="#FF00FF00"
+            android:strokeColor="#FF00FF00"
             android:strokeWidth="1" />
         <path
             android:name="half"
-            android:fill="#FFFF0000"
+            android:fillColor="#FFFF0000"
             android:pathData="M275,175 v-150 a150,150 0 0,0 -150,150 z"
-            android:stroke="#FF0000FF"
+            android:strokeColor="#FF0000FF"
             android:strokeWidth="5" />
     </group>
 

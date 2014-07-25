@@ -49,13 +49,11 @@ import java.util.ArrayList;
  * </p>
  * <li>Here is a simple VectorDrawable in this vectordrawable.xml file.
  * <pre>
- * &lt;vector xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot; &gt;
- *     &lt;size
- *         android:height=&quot;64dp&quot;
- *         android:width=&quot;64dp&quot; /&gt;
- *     &lt;viewport
- *         android:viewportHeight=&quot;600&quot;
- *         android:viewportWidth=&quot;600&quot; /&gt;
+ * &lt;vector xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+ *     android:height=&quot;64dp&quot;
+ *     android:width=&quot;64dp&quot;
+ *     android:viewportHeight=&quot;600&quot;
+ *     android:viewportWidth=&quot;600&quot; &gt;
  *     &lt;group
  *         android:name=&quot;rotationGroup&quot;
  *         android:pivotX=&quot;300.0&quot;
@@ -63,7 +61,7 @@ import java.util.ArrayList;
  *         android:rotation=&quot;45.0&quot; &gt;
  *         &lt;path
  *             android:name=&quot;v&quot;
- *             android:fill=&quot;#000000&quot;
+ *             android:fillColor=&quot;#000000&quot;
  *             android:pathData=&quot;M300,70 l 0,-70 70,70 0,0 -70,70z&quot; /&gt;
  *     &lt;/group&gt;
  * &lt;/vector&gt;
