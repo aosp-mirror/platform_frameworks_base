@@ -371,7 +371,7 @@ public abstract class MediaBrowserService extends Service {
      * children are to be queried.
      * @return The list of children, or null if the uri is invalid.
      */
-    protected abstract void onLoadChildren(@NonNull Uri parentUri,
+    public abstract void onLoadChildren(@NonNull Uri parentUri,
             @NonNull Result<List<MediaBrowserItem>> result);
 
     /**
@@ -390,7 +390,7 @@ public abstract class MediaBrowserService extends Service {
      * @return The file descriptor of the thumbnail, which may then be loaded
      *          using a bitmap factory, or null if the item does not have a thumbnail.
      */
-    protected abstract void onLoadThumbnail(@NonNull Uri uri, int width, int height,
+    public abstract void onLoadThumbnail(@NonNull Uri uri, int width, int height,
             @NonNull Result<Bitmap> result);
 
     /**
