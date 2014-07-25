@@ -1006,6 +1006,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     @Override
     public void onTaskViewDismissed(TaskView tv) {
         Task task = tv.getTask();
+        // Announce for accessibility
+        tv.announceForAccessibility(getContext().getString(R.string.accessibility_recents_item_dismissed,
+                tv.getTask().activityLabel));
         // Remove the task from the view
         mStack.removeTask(task);
     }
