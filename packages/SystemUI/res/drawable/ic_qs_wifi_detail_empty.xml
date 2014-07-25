@@ -13,16 +13,13 @@ Copyright (C) 2014 The Android Open Source Project
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<vector xmlns:android="http://schemas.android.com/apk/res/android" >
-    <size
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
         android:width="56dp"
-        android:height="56dp"/>
-
-    <viewport
+        android:height="56dp"
         android:viewportWidth="48.0"
-        android:viewportHeight="48.0"/>
+        android:viewportHeight="48.0">
 
     <path
         android:pathData="M24.0,4.0C15.0,4.0 6.7,7.0 0.0,12.0l24.0,32.0l24.0,-32.0C41.3,7.0 33.0,4.0 24.0,4.0z"
-        android:fill="@color/qs_detail_empty" />
+        android:fillColor="@color/qs_detail_empty" />
 </vector>

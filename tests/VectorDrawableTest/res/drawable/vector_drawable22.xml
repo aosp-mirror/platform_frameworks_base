@@ -13,24 +13,20 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<vector xmlns:android="http://schemas.android.com/apk/res/android" >
-
-    <size
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
         android:height="64dp"
-        android:width="64dp" />
-
-    <viewport
+        android:width="64dp"
         android:viewportHeight="400"
-        android:viewportWidth="400" />
+        android:viewportWidth="400" >
 
     <group android:name="backgroundGroup" >
         <path
             android:name="background1"
-            android:fill="#80000000"
+            android:fillColor="#80000000"
             android:pathData="M 0,0 l 200,0 l 0, 200 l -200, 0 z" />
         <path
             android:name="background2"
-            android:fill="#80000000"
+            android:fillColor="#80000000"
             android:pathData="M 200,200 l 200,0 l 0, 200 l -200, 0 z" />
     </group>
     <group
@@ -40,7 +36,7 @@
         <path
             android:name="twoLines"
             android:pathData="M 0,0 v 100 M 0,0 h 100"
-            android:stroke="#FFFF0000"
+            android:strokeColor="#FFFF0000"
             android:strokeWidth="20" />
 
         <group
@@ -51,7 +47,7 @@
             <path
                 android:name="twoLines1"
                 android:pathData="M 0,0 v 100 M 0,0 h 100"
-                android:stroke="#FF00FF00"
+                android:strokeColor="#FF00FF00"
                 android:strokeWidth="20" />
 
             <group
@@ -62,7 +58,7 @@
                     <path
                         android:name="twoLines2"
                         android:pathData="M 0,0 v 100 M 0,0 h 100"
-                        android:stroke="#FF0000FF"
+                        android:strokeColor="#FF0000FF"
                         android:strokeWidth="20" />
                 </group>
             </group>

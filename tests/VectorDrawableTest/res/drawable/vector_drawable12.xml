@@ -13,15 +13,11 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<vector xmlns:android="http://schemas.android.com/apk/res/android" >
-
-    <size
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
         android:height="64dp"
-        android:width="64dp" />
-
-    <viewport
+        android:width="64dp"
         android:viewportHeight="600"
-        android:viewportWidth="600" />
+        android:viewportWidth="600" >
 
     <group
         android:name="rotationGroup"
@@ -30,16 +26,16 @@
         android:rotation="45.0" >
         <path
             android:name="pie1"
-            android:fill="#00000000"
+            android:fillColor="#00000000"
             android:pathData="M300,70 a230,230 0 1,0 1,0 z"
-            android:stroke="#FF777777"
+            android:strokeColor="#FF777777"
             android:strokeWidth="70"
             android:trimPathEnd=".75"
             android:trimPathOffset="0"
             android:trimPathStart="0" />
         <path
             android:name="v"
-            android:fill="#000000"
+            android:fillColor="#000000"
             android:pathData="M300,70 l 0,-70 70,70 0,0 -70,70z" />
 
         <group
@@ -55,7 +51,7 @@
                 <path
                     android:name="twoLines1"
                     android:pathData="@string/twoLinePathData"
-                    android:stroke="#FFFF0000"
+                    android:strokeColor="#FFFF0000"
                     android:strokeWidth="20" />
 
                 <group
@@ -69,9 +65,9 @@
                         android:rotation="-45.0" >
                         <path
                             android:name="twoLines2"
-                            android:fill="#FF00FF00"
+                            android:fillColor="#FF00FF00"
                             android:pathData="@string/twoLinePathData"
-                            android:stroke="#FF00FF00"
+                            android:strokeColor="#FF00FF00"
                             android:strokeWidth="20" />
 
                         <group
@@ -86,7 +82,7 @@
                                 <path
                                     android:name="twoLines3"
                                     android:pathData="@string/twoLinePathData"
-                                    android:stroke="#FF0000FF"
+                                    android:strokeColor="#FF0000FF"
                                     android:strokeWidth="20" />
                             </group>
                         </group>

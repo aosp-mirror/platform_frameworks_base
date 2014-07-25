@@ -13,15 +13,11 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<vector xmlns:android="http://schemas.android.com/apk/res/android" >
-
-    <size
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
         android:height="76dp"
-        android:width="76dp" />
-
-    <viewport
+        android:width="76dp"
         android:viewportHeight="48"
-        android:viewportWidth="48" />
+        android:viewportWidth="48" >
 
     <group
         android:name="root"
@@ -29,9 +25,9 @@
         android:translateY="24.0" >
         <path
             android:name="progressBar"
-            android:fill="#00000000"
+            android:fillColor="#00000000"
             android:pathData="M0, 0 m 0, -19 a 19,19 0 1,1 0,38 a 19,19 0 1,1 0,-38"
-            android:stroke="?attr/colorControlActivated"
+            android:strokeColor="?attr/colorControlActivated"
             android:strokeLineCap="round"
             android:strokeLineJoin="miter"
             android:strokeWidth="4"

@@ -5116,22 +5116,14 @@
         <!-- Indicates if the drawable needs to be mirrored when its layout direction is
              RTL (right-to-left). -->
         <attr name="autoMirrored" />
-    </declare-styleable>
-
-    <!-- Define the virtual size of the drawing surface paths will draw to. -->
-    <declare-styleable name="VectorDrawableViewport">
+        <!-- The intrinsic width of the Vector Drawable. -->
+        <attr name="width" />
+        <!-- The intrinsic height of the Vector Drawable. -->
+        <attr name="height" />
         <!-- The width of the canvas the drawing is on. -->
         <attr name="viewportWidth" format="float"/>
         <!-- The height of the canvas the drawing is on. -->
         <attr name="viewportHeight" format="float"/>
-    </declare-styleable>
-
-    <!-- Define the size of the drawable -->
-    <declare-styleable name="VectorDrawableSize">
-        <!-- Width of the Vector Drawable. -->
-        <attr name="width" />
-        <!-- Height of the Vector Drawable. -->
-        <attr name="height" />
     </declare-styleable>
 
     <!-- Defines the group used in VectorDrawables. -->
@@ -5165,9 +5157,9 @@
         <!-- The opacity of a path stroke -->
         <attr name="strokeOpacity" format="float" />
         <!-- The color to stroke the path if not defined implies no stroke-->
-        <attr name="stroke" format="color" />
+        <attr name="strokeColor" format="color" />
         <!-- The color to fill the path if not defined implies no fill-->
-        <attr name="fill" format="color" />
+        <attr name="fillColor" format="color" />
         <!-- The level of opacity of the filled area of the path -->
         <attr name="fillOpacity" format="float" />
         <!-- The specification of the operations that define the path  -->
@@ -5178,7 +5170,7 @@
         <attr name="trimPathEnd" format="float" />
         <!-- Shift trim region (allows visible region to include the start and end) from 0 to 1  -->
         <attr name="trimPathOffset" format="float" />
-        <!-- Path will set the current clip path -->
+        <!-- TODO: Remove this. Path will set the current clip path -->
         <attr name="clipToPath" format="boolean" />
         <!-- sets the linecap for a stroked path -->
         <attr name="strokeLineCap" format="enum">
@@ -5194,6 +5186,14 @@
         </attr>
         <!-- sets the Miter limit for a stroked path -->
         <attr name="strokeMiterLimit" format="float"/>
+    </declare-styleable>
+
+    <!-- Defines the clip path used in VectorDrawables. -->
+    <declare-styleable name="VectorDrawableClipPath">
+        <!-- The Name of this path -->
+        <attr name="name" />
+        <!-- The specification of the operations that define the path  -->
+        <attr name="pathData"/>
     </declare-styleable>
 
     <!-- ========================== -->
