@@ -116,12 +116,12 @@ public class BrowserService extends MediaBrowserService {
     }
 
     @Override
-    protected BrowserRoot onGetRoot(String clientPackageName, int clientUid, Bundle rootHints) {
+    public BrowserRoot onGetRoot(String clientPackageName, int clientUid, Bundle rootHints) {
         return new BrowserRoot(BROWSE_URI, null);
     }
 
     @Override
-    protected void onLoadChildren(final Uri parentUri,
+    public void onLoadChildren(final Uri parentUri,
             final Result<List<MediaBrowserItem>> result) {
         new Handler().postDelayed(new Runnable() {
                 public void run() {
@@ -142,7 +142,7 @@ public class BrowserService extends MediaBrowserService {
     }
 
     @Override
-    protected void onLoadThumbnail(Uri uri, int width, int height, Result<Bitmap> result) {
+    public void onLoadThumbnail(Uri uri, int width, int height, Result<Bitmap> result) {
         result.sendResult(null);
     }
 
