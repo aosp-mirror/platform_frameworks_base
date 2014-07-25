@@ -371,6 +371,8 @@ public class TransitionSet extends Transition {
 
     private TransitionValuesMaps removeExcludes(TransitionValuesMaps values) {
         if (mTargetIds.isEmpty() && mTargetIdExcludes == null && mTargetTypeExcludes == null
+                && mTargetNames == null && mTargetTypes == null
+                && mTargetExcludes == null && mTargetNameExcludes == null
                 && mTargets.isEmpty()) {
             return values;
         }
