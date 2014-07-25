@@ -39,6 +39,4 @@ import android.view.KeyEvent;
     void clearAccessibilityCache();
 
     void onKeyEvent(in KeyEvent event, int sequence);
-
-    void onWindowsChanged(in int[] changedWindowIds);
 }

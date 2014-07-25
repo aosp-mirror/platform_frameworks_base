@@ -62,7 +62,6 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.text.TextUtils.SimpleStringSplitter;
-import android.util.LongArray;
 import android.util.Pools.Pool;
 import android.util.Pools.SimplePool;
 import android.util.Slog;
@@ -114,8 +113,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * accessed only by the system. The task of this service is to be a centralized
  * event dispatch for {@link AccessibilityEvent}s generated across all processes
  * on the device. Events are dispatched to {@link AccessibilityService}s.
- *
- * @hide
  */
 public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
@@ -155,13 +152,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     private final Object mLock = new Object();
 
     private final Pool<PendingEvent> mPendingEventPool =
-            new SimplePool<PendingEvent>(MAX_POOL_SIZE);
+            new SimplePool<>(MAX_POOL_SIZE);
 
     private final SimpleStringSplitter mStringColonSplitter =
             new SimpleStringSplitter(COMPONENT_NAME_SEPARATOR);
 
     private final List<AccessibilityServiceInfo> mEnabledServicesForFeedbackTempList =
-            new ArrayList<AccessibilityServiceInfo>();
+            new ArrayList<>();
 
     private final Rect mTempRect = new Rect();
 
@@ -183,26 +180,24 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
     private boolean mHasInputFilter;
 
-    private final Set<ComponentName> mTempComponentNameSet = new HashSet<ComponentName>();
+    private final Set<ComponentName> mTempComponentNameSet = new HashSet<>();
 
     private final List<AccessibilityServiceInfo> mTempAccessibilityServiceInfoList =
-            new ArrayList<AccessibilityServiceInfo>();
+            new ArrayList<>();
 
     private final RemoteCallbackList<IAccessibilityManagerClient> mGlobalClients =
-            new RemoteCallbackList<IAccessibilityManagerClient>();
+            new RemoteCallbackList<>();
 
     private final SparseArray<AccessibilityConnectionWrapper> mGlobalInteractionConnections =
-            new SparseArray<AccessibilityConnectionWrapper>();
+            new SparseArray<>();
 
-    private final SparseArray<IBinder> mGlobalWindowTokens = new SparseArray<IBinder>();
+    private final SparseArray<IBinder> mGlobalWindowTokens = new SparseArray<>();
 
-    private final SparseArray<UserState> mUserStates = new SparseArray<UserState>();
+    private final SparseArray<UserState> mUserStates = new SparseArray<>();
 
     private final UserManager mUserManager;
 
     private int mCurrentUserId = UserHandle.USER_OWNER;
-
-    private final LongArray mTempLongArray = new LongArray();
 
     //TODO: Remove this hack
     private boolean mInitialized;
@@ -439,10 +434,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             // to clients as being installed - it really is not.
             UserState userState = getUserStateLocked(resolvedUserId);
             if (userState.mUiAutomationService != null) {
-                List<AccessibilityServiceInfo> installedServices =
-                        new ArrayList<AccessibilityServiceInfo>();
+                List<AccessibilityServiceInfo> installedServices = new ArrayList<>();
                 installedServices.addAll(userState.mInstalledServices);
-                installedServices.remove(userState.mUiAutomationService);
+                installedServices.remove(userState.mUiAutomationService.mAccessibilityServiceInfo);
                 return installedServices;
             }
             return userState.mInstalledServices;
@@ -655,7 +649,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             // Automation service is not bound, so pretend it died to perform clean up.
             if (userState.mUiAutomationService != null
                     && serviceClient != null
-                    && userState.mUiAutomationService != null
                     && userState.mUiAutomationService.mServiceInterface != null
                     && userState.mUiAutomationService.mServiceInterface.asBinder()
                     == serviceClient.asBinder()) {
@@ -907,16 +900,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
     }
 
-    private void notifyWindowsChangedLocked(List<AccessibilityWindowInfo> windows) {
-        UserState state = getCurrentUserStateLocked();
-        for (int i = state.mBoundServices.size() - 1; i >= 0; i--) {
-            Service service = state.mBoundServices.get(i);
-            if (mSecurityPolicy.canRetrieveWindowsLocked(service)) {
-                service.notifyWindowsChangedLocked(windows);
-            }
-        }
-    }
-
     /**
      * Removes an AccessibilityInteractionConnection.
      *
@@ -961,10 +944,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             try {
                 accessibilityServiceInfo = new AccessibilityServiceInfo(resolveInfo, mContext);
                 mTempAccessibilityServiceInfoList.add(accessibilityServiceInfo);
-            } catch (XmlPullParserException xppe) {
+            } catch (XmlPullParserException | IOException xppe) {
                 Slog.e(LOG_TAG, "Error while initializing AccessibilityServiceInfo", xppe);
-            } catch (IOException ioe) {
-                Slog.e(LOG_TAG, "Error while initializing AccessibilityServiceInfo", ioe);
             }
         }
 
@@ -1035,7 +1016,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             // An out of bounds exception can happen if services are going away
             // as the for loop is running. If that happens, just bail because
             // there are no more services to notify.
-            return;
         }
     }
 
@@ -1053,7 +1033,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
      * Removes a service.
      *
      * @param service The service.
-     * @return True if the service was removed, false otherwise.
      */
     private void removeServiceLocked(Service service, UserState userState) {
         userState.mBoundServices.remove(service);
@@ -1093,7 +1072,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
 
         Set<String> packageNames = service.mPackageNames;
-        CharSequence packageName = event.getPackageName();
+        String packageName = (event.getPackageName() != null)
+                ? event.getPackageName().toString() : null;
 
         if (packageNames.isEmpty() || packageNames.contains(packageName)) {
             int feedbackType = service.mFeedbackType;
@@ -1386,8 +1366,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
         if (mWindowsForAccessibilityCallback != null) {
             mWindowsForAccessibilityCallback = null;
-            mWindowManagerService.setWindowsForAccessibilityCallback(
-                    mWindowsForAccessibilityCallback);
+            mWindowManagerService.setWindowsForAccessibilityCallback(null);
         }
     }
 
@@ -1437,8 +1416,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     }
 
     private boolean readConfigurationForUserStateLocked(UserState userState) {
-        boolean somthingChanged = false;
-        somthingChanged |= readAccessibilityEnabledSettingLocked(userState);
+        boolean somthingChanged = readAccessibilityEnabledSettingLocked(userState);
         somthingChanged |= readInstalledAccessibilityServiceLocked(userState);
         somthingChanged |= readEnabledAccessibilityServicesLocked(userState);
         somthingChanged |= readTouchExplorationGrantedAccessibilityServicesLocked(userState);
@@ -1868,7 +1846,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
         int mFeedbackType;
 
-        Set<String> mPackageNames = new HashSet<String>();
+        Set<String> mPackageNames = new HashSet<>();
 
         boolean mIsDefault;
 
@@ -1890,20 +1868,16 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
         boolean mIsAutomation;
 
-        final Rect mTempBounds1 = new Rect();
-
-        final Rect mTempBounds2 = new Rect();
-
         final ResolveInfo mResolveInfo;
 
         // the events pending events to be dispatched to this service
         final SparseArray<AccessibilityEvent> mPendingEvents =
-            new SparseArray<AccessibilityEvent>();
+            new SparseArray<>();
 
         final KeyEventDispatcher mKeyEventDispatcher = new KeyEventDispatcher();
 
         final SparseArray<AccessibilityWindowInfo> mIntrospectedWindows =
-                new SparseArray<AccessibilityWindowInfo>();
+                new SparseArray<>();
 
         boolean mWasConnectedAndDied;
 
@@ -2106,7 +2080,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 if (!permissionGranted) {
                     return null;
                 }
-                List<AccessibilityWindowInfo> windows = new ArrayList<AccessibilityWindowInfo>();
+                List<AccessibilityWindowInfo> windows = new ArrayList<>();
                 final int windowCount = mSecurityPolicy.mWindows.size();
                 for (int i = 0; i < windowCount; i++) {
                     AccessibilityWindowInfo window = mSecurityPolicy.mWindows.get(i);
@@ -2646,51 +2620,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             }
         }
 
-        public void notifyWindowsChangedLocked(List<AccessibilityWindowInfo> windows) {
-            LongArray changedWindows = mTempLongArray;
-            changedWindows.clear();
-
-            // Figure out which windows the service cares about changed.
-            final int windowCount = windows.size();
-            for (int i = 0; i < windowCount; i++) {
-                AccessibilityWindowInfo newState = windows.get(i);
-                final int windowId = newState.getId();
-                AccessibilityWindowInfo oldState = mIntrospectedWindows.get(windowId);
-                if (oldState != null && oldState.changed(newState)) {
-                    oldState.recycle();
-                    mIntrospectedWindows.put(newState.getId(),
-                            AccessibilityWindowInfo.obtain(newState));
-                    changedWindows.add(windowId);
-                }
-            }
-
-            // Figure out which windows the service cares about went away.
-            final int introspectedWindowCount = mIntrospectedWindows.size();
-            for (int i = introspectedWindowCount - 1; i >= 0; i--) {
-                AccessibilityWindowInfo window = mIntrospectedWindows.valueAt(i);
-                if (changedWindows.indexOf(window.getId()) < 0 && !windows.contains(window)) {
-                    changedWindows.add(window.getId());
-                    mIntrospectedWindows.removeAt(i);
-                    window.recycle();
-                }
-            }
-
-            int[] windowIds = null;
-
-            final int changedWindowCount = changedWindows.size();
-            if (changedWindowCount > 0) {
-                windowIds = new int[changedWindowCount];
-                for (int i = 0; i < changedWindowCount; i++) {
-                    // Cast is fine as we use long array to cache ints.
-                    windowIds[i] = (int) changedWindows.get(i);
-                }
-                changedWindows.clear();
-            }
-
-            mInvocationHandler.obtainMessage(InvocationHandler.MSG_ON_WINDOWS_CHANGED,
-                    windowIds).sendToTarget();
-        }
-
         private void notifyGestureInternal(int gestureId) {
             final IAccessibilityServiceClient listener;
             synchronized (mLock) {
@@ -2721,20 +2650,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 } catch (RemoteException re) {
                     Slog.e(LOG_TAG, "Error during requesting accessibility info cache"
                             + " to be cleared.", re);
-                }
-            }
-        }
-
-        private void notifyWindowsChangedInternal(int[] windowIds) {
-            final IAccessibilityServiceClient listener;
-            synchronized (mLock) {
-                listener = mServiceInterface;
-            }
-            if (listener != null) {
-                try {
-                    listener.onWindowsChanged(windowIds);
-                } catch (RemoteException re) {
-                    Slog.e(LOG_TAG, "Error during sending windows to: " + mService, re);
                 }
             }
         }
@@ -2844,7 +2759,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             public static final int MSG_ON_KEY_EVENT = 2;
             public static final int MSG_CLEAR_ACCESSIBILITY_CACHE = 3;
             public static final int MSG_ON_KEY_EVENT_TIMEOUT = 4;
-            public static final int MSG_ON_WINDOWS_CHANGED = 5;
 
             public InvocationHandler(Looper looper) {
                 super(looper, null, true);
@@ -2872,11 +2786,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     case MSG_ON_KEY_EVENT_TIMEOUT: {
                         PendingEvent eventState = (PendingEvent) message.obj;
                         setOnKeyEventResult(false, eventState.sequence);
-                    } break;
-
-                    case MSG_ON_WINDOWS_CHANGED: {
-                        final int[] windowIds = (int[]) message.obj;
-                        notifyWindowsChangedInternal(windowIds);
                     } break;
 
                     default: {
@@ -3028,14 +2937,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         @Override
         public void onWindowsForAccessibilityChanged(List<WindowInfo> windows) {
             synchronized (mLock) {
-                List<WindowInfo> receivedWindows = (List<WindowInfo>) windows;
-
                 // Populate the windows to report.
-                List<AccessibilityWindowInfo> reportedWindows =
-                        new ArrayList<AccessibilityWindowInfo>();
-                final int receivedWindowCount = receivedWindows.size();
+                List<AccessibilityWindowInfo> reportedWindows = new ArrayList<>();
+                final int receivedWindowCount = windows.size();
                 for (int i = 0; i < receivedWindowCount; i++) {
-                    WindowInfo receivedWindow = receivedWindows.get(i);
+                    WindowInfo receivedWindow = windows.get(i);
                     AccessibilityWindowInfo reportedWindow = populateReportedWindow(
                             receivedWindow);
                     if (reportedWindow != null) {
@@ -3224,8 +3130,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             | AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED
             | AccessibilityEvent.TYPE_VIEW_TEXT_TRAVERSED_AT_MOVEMENT_GRANULARITY;
 
-        public final List<AccessibilityWindowInfo> mWindows =
-                new ArrayList<AccessibilityWindowInfo>();
+        public final List<AccessibilityWindowInfo> mWindows = new ArrayList<>();
 
         public int mActiveWindowId = INVALID_WINDOW_ID;
         public int mFocusedWindowId = INVALID_WINDOW_ID;
@@ -3265,7 +3170,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 case AccessibilityEvent.TYPE_TOUCH_INTERACTION_START:
                 case AccessibilityEvent.TYPE_TOUCH_INTERACTION_END:
                 case AccessibilityEvent.TYPE_VIEW_HOVER_ENTER:
-                case AccessibilityEvent.TYPE_VIEW_HOVER_EXIT: {
+                case AccessibilityEvent.TYPE_VIEW_HOVER_EXIT:
+                // Also windows changing should always be anounced.
+                case AccessibilityEvent.TYPE_WINDOWS_CHANGED: {
                     return true;
                 }
                 // All events for changes in window content should be
@@ -3327,7 +3234,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 }
             }
 
-            notifyWindowsChangedLocked(mWindows);
+            notifyWindowsChanged();
 
             // If we are delaying a window state change event as the window
             // source was showing when it was fired, now is the time to send.
@@ -3452,8 +3359,16 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     AccessibilityWindowInfo window = mWindows.get(i);
                     window.setActive(window.getId() == windowId);
                 }
-                notifyWindowsChangedLocked(mWindows);
+                notifyWindowsChanged();
             }
+        }
+
+        private void notifyWindowsChanged() {
+            // Let the client know the windows changed.
+            AccessibilityEvent event = AccessibilityEvent.obtain(
+                    AccessibilityEvent.TYPE_WINDOWS_CHANGED);
+            event.setEventTime(SystemClock.uptimeMillis());
+            sendAccessibilityEvent(event, mCurrentUserId);
         }
 
         public boolean canGetAccessibilityNodeInfoLocked(Service service, int windowId) {
@@ -3568,30 +3483,30 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         // Non-transient state.
 
         public final RemoteCallbackList<IAccessibilityManagerClient> mClients =
-            new RemoteCallbackList<IAccessibilityManagerClient>();
+            new RemoteCallbackList<>();
 
         public final SparseArray<AccessibilityConnectionWrapper> mInteractionConnections =
-                new SparseArray<AccessibilityConnectionWrapper>();
+                new SparseArray<>();
 
-        public final SparseArray<IBinder> mWindowTokens = new SparseArray<IBinder>();
+        public final SparseArray<IBinder> mWindowTokens = new SparseArray<>();
 
         // Transient state.
 
         public final CopyOnWriteArrayList<Service> mBoundServices =
-                new CopyOnWriteArrayList<Service>();
+                new CopyOnWriteArrayList<>();
 
         public final Map<ComponentName, Service> mComponentNameToServiceMap =
-                new HashMap<ComponentName, Service>();
+                new HashMap<>();
 
         public final List<AccessibilityServiceInfo> mInstalledServices =
-                new ArrayList<AccessibilityServiceInfo>();
+                new ArrayList<>();
 
-        public final Set<ComponentName> mBindingServices = new HashSet<ComponentName>();
+        public final Set<ComponentName> mBindingServices = new HashSet<>();
 
-        public final Set<ComponentName> mEnabledServices = new HashSet<ComponentName>();
+        public final Set<ComponentName> mEnabledServices = new HashSet<>();
 
         public final Set<ComponentName> mTouchExplorationGrantedServices =
-                new HashSet<ComponentName>();
+                new HashSet<>();
 
         public int mHandledFeedbackTypes = 0;
 
