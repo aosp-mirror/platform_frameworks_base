@@ -39758,8 +39758,6 @@ package android.widget {
     method public void setLogoDescription(java.lang.CharSequence);
     method public void setNavigationContentDescription(java.lang.CharSequence);
     method public void setNavigationContentDescription(int);
-    method public void setNavigationDescription(int);
-    method public void setNavigationDescription(java.lang.CharSequence);
     method public void setNavigationIcon(int);
     method public void setNavigationIcon(android.graphics.drawable.Drawable);
     method public void setNavigationOnClickListener(android.view.View.OnClickListener);
