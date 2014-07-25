@@ -25,7 +25,7 @@ import android.os.RemoteException;
 
 import com.android.internal.telecomm.IConnectionService;
 import com.android.internal.telecomm.IConnectionServiceAdapter;
-import com.android.internal.telecomm.ICallVideoProvider;
+import com.android.internal.telecomm.IVideoCallProvider;
 import com.android.internal.telecomm.RemoteServiceCallback;
 
 import java.util.ArrayList;
@@ -273,14 +273,14 @@ final class ConnectionServiceAdapter implements DeathRecipient {
      * Sets the call video provider for a call.
      *
      * @param callId The unique ID of the call to set with the given call video provider.
-     * @param callVideoProvider The call video provider instance to set on the call.
+     * @param videoCallProvider The call video provider instance to set on the call.
      */
-    void setCallVideoProvider(String callId, CallVideoProvider callVideoProvider) {
+    void setVideoCallProvider(String callId, VideoCallProvider videoCallProvider) {
         for (IConnectionServiceAdapter adapter : mAdapters) {
             try {
-                adapter.setCallVideoProvider(
+                adapter.setVideoCallProvider(
                         callId,
-                        callVideoProvider == null ? null : callVideoProvider.getInterface());
+                        videoCallProvider == null ? null : videoCallProvider.getInterface());
             } catch (RemoteException e) {
             }
         }

@@ -22,11 +22,11 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.view.Surface;
 
-import com.android.internal.telecomm.ICallVideoClient;
-import com.android.internal.telecomm.ICallVideoProvider;
+import com.android.internal.telecomm.IVideoCallCallback;
+import com.android.internal.telecomm.IVideoCallProvider;
 
-public abstract class CallVideoProvider {
-    private static final int MSG_SET_CALL_VIDEO_CLIENT = 1;
+public abstract class VideoCallProvider {
+    private static final int MSG_SET_VIDEO_CALL_LISTENER = 1;
     private static final int MSG_SET_CAMERA = 2;
     private static final int MSG_SET_PREVIEW_SURFACE = 3;
     private static final int MSG_SET_DISPLAY_SURFACE = 4;
@@ -38,23 +38,19 @@ public abstract class CallVideoProvider {
     private static final int MSG_REQUEST_CALL_DATA_USAGE = 10;
     private static final int MSG_SET_PAUSE_IMAGE = 11;
 
+    private final VideoCallProviderHandler mMessageHandler = new VideoCallProviderHandler();
+    private final VideoCallProviderBinder mBinder;
+    private IVideoCallCallback mVideoCallListener;
+
     /**
      * Default handler used to consolidate binder method calls onto a single thread.
      */
-    private final class CallVideoProviderHandler extends Handler {
+    private final class VideoCallProviderHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case MSG_SET_CALL_VIDEO_CLIENT:
-                    try {
-                        ICallVideoClient callVideoClient =
-                                ICallVideoClient.Stub.asInterface((IBinder) msg.obj);
-                        RemoteCallVideoClient remoteCallVideoClient =
-                                new RemoteCallVideoClient(callVideoClient);
-                        onSetCallVideoClient(remoteCallVideoClient);
-                    } catch (RemoteException ignored) {
-                    }
-                    break;
+                case MSG_SET_VIDEO_CALL_LISTENER:
+                    mVideoCallListener = IVideoCallCallback.Stub.asInterface((IBinder) msg.obj);
                 case MSG_SET_CAMERA:
                     onSetCamera((String) msg.obj);
                     break;
@@ -92,12 +88,12 @@ public abstract class CallVideoProvider {
     }
 
     /**
-     * Default ICallVideoProvider implementation.
+     * IVideoCallProvider stub implementation.
      */
-    private final class CallVideoProviderBinder extends ICallVideoProvider.Stub {
-        public void setCallVideoClient(IBinder callVideoClientBinder) {
+    private final class VideoCallProviderBinder extends IVideoCallProvider.Stub {
+        public void setVideoCallListener(IBinder videoCallListenerBinder) {
             mMessageHandler.obtainMessage(
-                    MSG_SET_CALL_VIDEO_CLIENT, callVideoClientBinder).sendToTarget();
+                    MSG_SET_VIDEO_CALL_LISTENER, videoCallListenerBinder).sendToTarget();
         }
 
         public void setCamera(String cameraId) {
@@ -143,28 +139,17 @@ public abstract class CallVideoProvider {
         }
     }
 
-    private final CallVideoProviderHandler mMessageHandler = new CallVideoProviderHandler();
-    private final CallVideoProviderBinder mBinder;
-
-    public CallVideoProvider() {
-        mBinder = new CallVideoProviderBinder();
+    public VideoCallProvider() {
+        mBinder = new VideoCallProviderBinder();
     }
 
     /**
      * Returns binder object which can be used across IPC methods.
      * @hide
      */
-    public final ICallVideoProvider getInterface() {
+    public final IVideoCallProvider getInterface() {
         return mBinder;
     }
-
-    /**
-     * Sets a remote interface for invoking callback methods in the InCallUI after performing
-     * telephony actions.
-     *
-     * @param callVideoClient The call video client.
-     */
-    public abstract void onSetCallVideoClient(RemoteCallVideoClient callVideoClient);
 
     /**
      * Sets the camera to be used for video recording in a video call.
@@ -207,7 +192,7 @@ public abstract class CallVideoProvider {
     /**
      * Issues a request to modify the properties of the current session.  The request is sent to
      * the remote device where it it handled by
-     * {@link CallVideoClient#onReceiveSessionModifyRequest}.
+     * {@link InCallService.VideoCall.Listener#onSessionModifyRequestReceived}.
      * Some examples of session modification requests: upgrade call from audio to video, downgrade
      * call from video to audio, pause video.
      *
@@ -215,13 +200,13 @@ public abstract class CallVideoProvider {
      */
     public abstract void onSendSessionModifyRequest(VideoCallProfile requestProfile);
 
-    /**
+    /**te
      * Provides a response to a request to change the current call session video
      * properties.
      * This is in response to a request the InCall UI has received via
-     * {@link CallVideoClient#onReceiveSessionModifyRequest}.
+     * {@link InCallService.VideoCall.Listener#onSessionModifyRequestReceived}.
      * The response is handled on the remove device by
-     * {@link CallVideoClient#onReceiveSessionModifyResponse}.
+     * {@link InCallService.VideoCall.Listener#onSessionModifyResponseReceived}.
      *
      * @param responseProfile The response call video properties.
      */
@@ -230,14 +215,14 @@ public abstract class CallVideoProvider {
     /**
      * Issues a request to the video provider to retrieve the camera capabilities.
      * Camera capabilities are reported back to the caller via
-     * {@link CallVideoClient#onHandleCameraCapabilitiesChange(CallCameraCapabilities)}.
+     * {@link InCallService.VideoCall.Listener#onCameraCapabilitiesChanged(CallCameraCapabilities)}.
      */
     public abstract void onRequestCameraCapabilities();
 
     /**
      * Issues a request to the video telephony framework to retrieve the cumulative data usage for
      * the current call.  Data usage is reported back to the caller via
-     * {@link CallVideoClient#onUpdateCallDataUsage}.
+     * {@link InCallService.VideoCall.Listener#onCallDataUsageChanged}.
      */
     public abstract void onRequestCallDataUsage();
 
@@ -248,4 +233,101 @@ public abstract class CallVideoProvider {
      * @param uri URI of image to display.
      */
     public abstract void onSetPauseImage(String uri);
+
+    /**
+     * Invokes callback method defined in {@link InCallService.VideoCall.Listener}.
+     *
+     * @param videoCallProfile The requested video call profile.
+     */
+    public void receiveSessionModifyRequest(VideoCallProfile videoCallProfile) {
+        if (mVideoCallListener != null) {
+            try {
+                mVideoCallListener.receiveSessionModifyRequest(videoCallProfile);
+            } catch (RemoteException ignored) {
+            }
+        }
+    }
+
+    /**
+     * Invokes callback method defined in {@link InCallService.VideoCall.Listener}.
+     *
+     * @param status Status of the session modify request.  Valid values are
+     *               {@link InCallService.VideoCall#SESSION_MODIFY_REQUEST_SUCCESS},
+     *               {@link InCallService.VideoCall#SESSION_MODIFY_REQUEST_FAIL},
+     *               {@link InCallService.VideoCall#SESSION_MODIFY_REQUEST_INVALID}
+     * @param requestedProfile The original request which was sent to the remote device.
+     * @param responseProfile The actual profile changes made by the remote device.
+     */
+    public void receiveSessionModifyResponse(int status,
+            VideoCallProfile requestedProfile, VideoCallProfile responseProfile) {
+        if (mVideoCallListener != null) {
+            try {
+                mVideoCallListener.receiveSessionModifyResponse(
+                    status, requestedProfile, responseProfile);
+            } catch (RemoteException ignored) {
+            }
+        }
+    }
+
+    /**
+     * Invokes callback method defined in {@link InCallService.VideoCall.Listener}.
+     *
+     * Valid values are: {@link InCallService.VideoCall#SESSION_EVENT_RX_PAUSE},
+     * {@link InCallService.VideoCall#SESSION_EVENT_RX_RESUME},
+     * {@link InCallService.VideoCall#SESSION_EVENT_TX_START},
+     * {@link InCallService.VideoCall#SESSION_EVENT_TX_STOP}
+     *
+     * @param event The event.
+     */
+    public void handleCallSessionEvent(int event) {
+        if (mVideoCallListener != null) {
+            try {
+                mVideoCallListener.handleCallSessionEvent(event);
+            } catch (RemoteException ignored) {
+            }
+        }
+    }
+
+    /**
+     * Invokes callback method defined in {@link InCallService.VideoCall.Listener}.
+     *
+     * @param width  The updated peer video width.
+     * @param height The updated peer video height.
+     */
+    public void changePeerDimensions(int width, int height) {
+        if (mVideoCallListener != null) {
+            try {
+                mVideoCallListener.changePeerDimensions(width, height);
+            } catch (RemoteException ignored) {
+            }
+        }
+    }
+
+    /**
+     * Invokes callback method defined in {@link InCallService.VideoCall.Listener}.
+     *
+     * @param dataUsage The updated data usage.
+     */
+    public void changeCallDataUsage(int dataUsage) {
+        if (mVideoCallListener != null) {
+            try {
+                mVideoCallListener.changeCallDataUsage(dataUsage);
+            } catch (RemoteException ignored) {
+            }
+        }
+    }
+
+    /**
+     * Invokes callback method defined in {@link InCallService.VideoCall.Listener}.
+     *
+     * @param callCameraCapabilities The changed camera capabilities.
+     */
+    public void changeCameraCapabilities(CallCameraCapabilities callCameraCapabilities) {
+        if (mVideoCallListener != null) {
+            try {
+                mVideoCallListener.changeCameraCapabilities(callCameraCapabilities);
+            } catch (RemoteException ignored) {
+            }
+        }
+    }
 }
