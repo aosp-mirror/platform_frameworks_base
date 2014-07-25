@@ -35,6 +35,8 @@ interface ILauncherApps {
     ResolveInfo resolveActivity(in Intent intent, in UserHandle user);
     void startActivityAsUser(in ComponentName component, in Rect sourceBounds,
             in Bundle opts, in UserHandle user);
+    void showAppDetailsAsUser(in ComponentName component, in Rect sourceBounds,
+            in Bundle opts, in UserHandle user);
     boolean isPackageEnabled(String packageName, in UserHandle user);
     boolean isActivityEnabled(in ComponentName component, in UserHandle user);
 }
