@@ -51,6 +51,7 @@ public abstract class VideoCallProvider {
             switch (msg.what) {
                 case MSG_SET_VIDEO_CALL_LISTENER:
                     mVideoCallListener = IVideoCallCallback.Stub.asInterface((IBinder) msg.obj);
+                    break;
                 case MSG_SET_CAMERA:
                     onSetCamera((String) msg.obj);
                     break;
