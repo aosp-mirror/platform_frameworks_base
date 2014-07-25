@@ -21,6 +21,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
+import android.content.Context;
 import android.graphics.RectF;
 import android.os.Handler;
 import android.util.Log;
@@ -29,6 +30,8 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.animation.AnimationUtils;
+import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 
 public class SwipeHelper implements Gefingerpoken {
@@ -44,6 +47,7 @@ public class SwipeHelper implements Gefingerpoken {
     public static final int Y = 1;
 
     private static LinearInterpolator sLinearInterpolator = new LinearInterpolator();
+    private final Interpolator mFastOutLinearInInterpolator;
 
     private float SWIPE_ESCAPE_VELOCITY = 100f; // dp/sec
     private int DEFAULT_ESCAPE_ANIMATION_DURATION = 200; // ms
@@ -76,16 +80,17 @@ public class SwipeHelper implements Gefingerpoken {
     private Runnable mWatchLongPress;
     private long mLongPressTimeout;
 
-    public SwipeHelper(int swipeDirection, Callback callback, float densityScale,
-            float pagingTouchSlop) {
+    public SwipeHelper(int swipeDirection, Callback callback, Context context) {
         mCallback = callback;
         mHandler = new Handler();
         mSwipeDirection = swipeDirection;
         mVelocityTracker = VelocityTracker.obtain();
-        mDensityScale = densityScale;
-        mPagingTouchSlop = pagingTouchSlop;
+        mDensityScale =  context.getResources().getDisplayMetrics().density;
+        mPagingTouchSlop = ViewConfiguration.get(context).getScaledPagingTouchSlop();
 
         mLongPressTimeout = (long) (ViewConfiguration.getLongPressTimeout() * 1.5f); // extra long-press!
+        mFastOutLinearInInterpolator = AnimationUtils.loadInterpolator(context,
+                android.R.interpolator.fast_out_linear_in);
     }
 
     public void setLongPressListener(View.OnLongClickListener listener) {
@@ -277,6 +282,19 @@ public class SwipeHelper implements Gefingerpoken {
      * @param velocity The desired pixels/second speed at which the view should move
      */
     public void dismissChild(final View view, float velocity) {
+        dismissChild(view, velocity, null, 0, false, 0);
+    }
+
+    /**
+     * @param view The view to be dismissed
+     * @param velocity The desired pixels/second speed at which the view should move
+     * @param endAction The action to perform at the end
+     * @param delay The delay after which we should start
+     * @param useAccelerateInterpolator Should an accelerating Interpolator be used
+     * @param fixedDuration If not 0, this exact duration will be taken
+     */
+    public void dismissChild(final View view, float velocity, final Runnable endAction,
+            long delay, boolean useAccelerateInterpolator, long fixedDuration) {
         final View animView = mCallback.getChildContentView(view);
         final boolean canAnimViewBeDismissed = mCallback.canChildBeDismissed(view);
         float newPos;
@@ -289,22 +307,38 @@ public class SwipeHelper implements Gefingerpoken {
         } else {
             newPos = getSize(animView);
         }
-        int duration = MAX_ESCAPE_ANIMATION_DURATION;
-        if (velocity != 0) {
-            duration = Math.min(duration,
-                                (int) (Math.abs(newPos - getTranslation(animView)) * 1000f / Math
-                                        .abs(velocity)));
+        long duration;
+        if (fixedDuration == 0) {
+            duration = MAX_ESCAPE_ANIMATION_DURATION;
+            if (velocity != 0) {
+                duration = Math.min(duration,
+                        (int) (Math.abs(newPos - getTranslation(animView)) * 1000f / Math
+                                .abs(velocity))
+                );
+            } else {
+                duration = DEFAULT_ESCAPE_ANIMATION_DURATION;
+            }
         } else {
-            duration = DEFAULT_ESCAPE_ANIMATION_DURATION;
+            duration = fixedDuration;
         }
 
         animView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
         ObjectAnimator anim = createTranslationAnimation(animView, newPos);
-        anim.setInterpolator(sLinearInterpolator);
+        if (useAccelerateInterpolator) {
+            anim.setInterpolator(mFastOutLinearInInterpolator);
+        } else {
+            anim.setInterpolator(sLinearInterpolator);
+        }
         anim.setDuration(duration);
+        if (delay > 0) {
+            anim.setStartDelay(delay);
+        }
         anim.addListener(new AnimatorListenerAdapter() {
             public void onAnimationEnd(Animator animation) {
                 mCallback.onChildDismissed(view);
+                if (endAction != null) {
+                    endAction.run();
+                }
                 animView.setLayerType(View.LAYER_TYPE_NONE, null);
             }
         });

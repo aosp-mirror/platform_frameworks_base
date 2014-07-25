@@ -35,6 +35,7 @@ import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
 import com.android.systemui.SwipeHelper;
 import com.android.systemui.statusbar.ActivatableNotificationView;
+import com.android.systemui.statusbar.DismissView;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.ExpandableView;
 import com.android.systemui.statusbar.SpeedBumpView;
@@ -139,6 +140,8 @@ public class NotificationStackScrollLayout extends ViewGroup
     private boolean mExpandingNotification;
     private boolean mExpandedInThisMotion;
     private boolean mScrollingEnabled;
+    private DismissView mDismissView;
+    private boolean mDismissAllInProgress;
 
     /**
      * Was the scroller scrolled to the top when the down motion was observed?
@@ -172,6 +175,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private boolean mInterceptDelegateEnabled;
     private boolean mDelegateToScrollView;
     private boolean mDisallowScrollingInThisMotion;
+    private boolean mDismissWillBeGone;
 
     private ViewTreeObserver.OnPreDrawListener mChildrenUpdater
             = new ViewTreeObserver.OnPreDrawListener() {
@@ -238,7 +242,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         mOverflingDistance = configuration.getScaledOverflingDistance();
         float densityScale = getResources().getDisplayMetrics().density;
         float pagingTouchSlop = ViewConfiguration.get(getContext()).getScaledPagingTouchSlop();
-        mSwipeHelper = new SwipeHelper(SwipeHelper.X, this, densityScale, pagingTouchSlop);
+        mSwipeHelper = new SwipeHelper(SwipeHelper.X, this, getContext());
         mSwipeHelper.setLongPressListener(mLongClickListener);
 
         mSidePaddings = context.getResources()
@@ -481,6 +485,9 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     public void onChildDismissed(View v) {
+        if (mDismissAllInProgress) {
+            return;
+        }
         if (DEBUG) Log.v(TAG, "onChildDismissed: " + v);
         final View veto = v.findViewById(R.id.veto);
         if (veto != null && veto.getVisibility() != View.GONE) {
@@ -627,8 +634,9 @@ public class NotificationStackScrollLayout extends ViewGroup
         initView(getContext());
     }
 
-    public void dismissRowAnimated(View child, int vel) {
-        mSwipeHelper.dismissChild(child, vel);
+    public void dismissViewAnimated(View child, Runnable endRunnable, int delay, long duration) {
+        child.setClipBounds(null);
+        mSwipeHelper.dismissChild(child, 0, endRunnable, delay, true, duration);
     }
 
     @Override
@@ -1526,12 +1534,13 @@ public class NotificationStackScrollLayout extends ViewGroup
      * @param newIndex the new index
      */
     public void changeViewPosition(View child, int newIndex) {
-        if (child != null && child.getParent() == this) {
+        int currentIndex = indexOfChild(child);
+        if (child != null && child.getParent() == this && currentIndex != newIndex) {
             mChangePositionInProgress = true;
             removeView(child);
             addView(child, newIndex);
             mChangePositionInProgress = false;
-            if (mIsExpanded && mAnimationsEnabled) {
+            if (mIsExpanded && mAnimationsEnabled && child.getVisibility() != View.GONE) {
                 mChildrenChangingPositions.add(child);
                 mNeedsAnimation = true;
             }
@@ -1918,7 +1927,8 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     public void goToFullShade() {
-        updateSpeedBump(true);
+        updateSpeedBump(true /* visibility */);
+        mDismissView.setInvisible();
     }
 
     public void cancelExpandHelper() {
@@ -1960,6 +1970,40 @@ public class NotificationStackScrollLayout extends ViewGroup
             mNeedsAnimation =  true;
         }
         requestChildrenUpdate();
+    }
+
+    public void setDismissView(DismissView dismissView) {
+        mDismissView = dismissView;
+        addView(mDismissView);
+    }
+
+    public void updateDismissView(boolean visible) {
+        int oldVisibility = mDismissWillBeGone ? GONE : mDismissView.getVisibility();
+        int newVisibility = visible ? VISIBLE : GONE;
+        if (oldVisibility != newVisibility) {
+            if (oldVisibility == GONE) {
+                if (mDismissWillBeGone) {
+                    mDismissView.cancelAnimation();
+                } else {
+                    mDismissView.setInvisible();
+                    mDismissView.setVisibility(newVisibility);
+                }
+                mDismissWillBeGone = false;
+            } else {
+                mDismissWillBeGone = true;
+                mDismissView.performVisibilityAnimation(false, new Runnable() {
+                    @Override
+                    public void run() {
+                        mDismissView.setVisibility(GONE);
+                        mDismissWillBeGone = false;
+                    }
+                });
+            }
+        }
+    }
+
+    public void setDismissAllInProgress(boolean dismissAllInProgress) {
+        mDismissAllInProgress = dismissAllInProgress;
     }
 
     /**
