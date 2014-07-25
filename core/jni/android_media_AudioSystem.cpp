@@ -246,7 +246,7 @@ android_media_AudioSystem_isSourceActive(JNIEnv *env, jobject thiz, jint source)
 static jint
 android_media_AudioSystem_newAudioSessionId(JNIEnv *env, jobject thiz)
 {
-    return AudioSystem::newAudioSessionId();
+    return AudioSystem::newAudioUniqueId();
 }
 
 static jint
