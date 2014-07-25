@@ -3755,7 +3755,7 @@
         <attr name="shadowRadius" format="float" />
         <!-- Elegant text height, especially for less compacted complex script text. -->
         <attr name="elegantTextHeight" format="boolean" />
-        <!-- @hide Text letter-spacing. -->
+        <!-- Text letter-spacing. -->
         <attr name="letterSpacing" format="float" />
     </declare-styleable>
     <declare-styleable name="TextClock">
@@ -4050,7 +4050,7 @@
         <attr name="textAllCaps" />
         <!-- Elegant text height, especially for less compacted complex script text. -->
         <attr name="elegantTextHeight" />
-        <!-- @hide Text letter-spacing. -->
+        <!-- Text letter-spacing. -->
         <attr name="letterSpacing" />
     </declare-styleable>
     <declare-styleable name="TextViewAppearance">
