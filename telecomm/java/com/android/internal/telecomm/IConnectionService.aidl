@@ -19,6 +19,7 @@ package com.android.internal.telecomm;
 import android.os.Bundle;
 import android.telecomm.CallAudioState;
 import android.telecomm.ConnectionRequest;
+import android.telecomm.PhoneAccountHandle;
 
 import com.android.internal.telecomm.IConnectionServiceAdapter;
 
@@ -32,7 +33,10 @@ import com.android.internal.telecomm.IConnectionServiceAdapter;
 oneway interface IConnectionService {
     void addConnectionServiceAdapter(in IConnectionServiceAdapter adapter);
 
-    void createConnection(in ConnectionRequest request, boolean isIncoming);
+    void createConnection(
+            in PhoneAccountHandle connectionManagerPhoneAccount,
+            in ConnectionRequest request,
+            boolean isIncoming);
 
     void abort(String callId);
 

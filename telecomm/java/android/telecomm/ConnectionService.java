@@ -121,9 +121,15 @@ public abstract class ConnectionService extends Service {
         }
 
         @Override
-        public void createConnection(ConnectionRequest request, boolean isIncoming) {
-            mHandler.obtainMessage(
-                    MSG_CREATE_CONNECTION, isIncoming ? 1 : 0, 0, request).sendToTarget();
+        public void createConnection(
+                PhoneAccountHandle connectionManagerPhoneAccount,
+                ConnectionRequest request,
+                boolean isIncoming) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = connectionManagerPhoneAccount;
+            args.arg2 = request;
+            args.argi1 = isIncoming ? 1 : 0;
+            mHandler.obtainMessage(MSG_CREATE_CONNECTION, args).sendToTarget();
         }
 
         @Override
@@ -217,9 +223,19 @@ public abstract class ConnectionService extends Service {
                     mAdapter.addAdapter((IConnectionServiceAdapter) msg.obj);
                     onAdapterAttached();
                     break;
-                case MSG_CREATE_CONNECTION:
-                    createConnection((ConnectionRequest) msg.obj, msg.arg1 == 1);
+                case MSG_CREATE_CONNECTION: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    try {
+                        PhoneAccountHandle connectionManagerPhoneAccount =
+                                (PhoneAccountHandle) args.arg1;
+                        ConnectionRequest request = (ConnectionRequest) args.arg2;
+                        boolean isIncoming = args.argi1 == 1;
+                        createConnection(connectionManagerPhoneAccount, request, isIncoming);
+                    } finally {
+                        args.recycle();
+                    }
                     break;
+                }
                 case MSG_ABORT:
                     abort((String) msg.obj);
                     break;
@@ -428,14 +444,17 @@ public abstract class ConnectionService extends Service {
      * incoming call. In either case, telecomm will cycle through a set of services and call
      * createConnection util a connection service cancels the process or completes it successfully.
      */
-    private void createConnection(final ConnectionRequest request, boolean isIncoming) {
+    private void createConnection(
+            final PhoneAccountHandle callManagerAccount,
+            final ConnectionRequest request,
+            boolean isIncoming) {
         Log.d(this, "call %s", request);
 
         final Connection createdConnection;
         if (isIncoming) {
-            createdConnection = onCreateIncomingConnection(request);
+            createdConnection = onCreateIncomingConnection(callManagerAccount, request);
         } else {
-            createdConnection = onCreateOutgoingConnection(request);
+            createdConnection = onCreateOutgoingConnection(callManagerAccount, request);
         }
 
         if (createdConnection != null) {
@@ -641,40 +660,94 @@ public abstract class ConnectionService extends Service {
         });
     }
 
-    public final RemoteConnection createRemoteIncomingConnection(ConnectionRequest request) {
-        return mRemoteConnectionManager.createRemoteConnection(request, true);
-    }
-
-    public final RemoteConnection createRemoteOutgoingConnection(ConnectionRequest request) {
-        return mRemoteConnectionManager.createRemoteConnection(request, false);
+    /**
+     * Ask some other {@code ConnectionService} to create a {@code RemoteConnection} given an
+     * incoming request. This is used to attach to existing incoming calls.
+     *
+     * @param connectionManagerPhoneAccount See description at
+     *         {@link #onCreateOutgoingConnection(PhoneAccountHandle, ConnectionRequest)}.
+     * @param request Details about the incoming call.
+     * @return The {@code Connection} object to satisfy this call, or {@code null} to
+     *         not handle the call.
+     */
+    public final RemoteConnection createRemoteIncomingConnection(
+            PhoneAccountHandle connectionManagerPhoneAccount,
+            ConnectionRequest request) {
+        return mRemoteConnectionManager.createRemoteConnection(
+                connectionManagerPhoneAccount, request, true);
     }
 
     /**
-     * Returns all connections currently associated with this connection service.
+     * Ask some other {@code ConnectionService} to create a {@code RemoteConnection} given an
+     * outgoing request. This is used to initiate new outgoing calls.
+     *
+     * @param connectionManagerPhoneAccount See description at
+     *         {@link #onCreateOutgoingConnection(PhoneAccountHandle, ConnectionRequest)}.
+     * @param request Details about the incoming call.
+     * @return The {@code Connection} object to satisfy this call, or {@code null} to
+     *         not handle the call.
+     */
+    public final RemoteConnection createRemoteOutgoingConnection(
+            PhoneAccountHandle connectionManagerPhoneAccount,
+            ConnectionRequest request) {
+        return mRemoteConnectionManager.createRemoteConnection(
+                connectionManagerPhoneAccount, request, false);
+    }
+
+    /**
+     * Returns all the active {@code Connection}s for which this {@code ConnectionService}
+     * has taken responsibility.
+     *
+     * @return A collection of {@code Connection}s created by this {@code ConnectionService}.
      */
     public final Collection<Connection> getAllConnections() {
         return mConnectionById.values();
     }
 
     /**
-     * Create a Connection given an incoming request. This is used to attach to existing incoming
-     * calls.
-     * @param request Details about the incoming call.
+     * Create a {@code Connection} given an incoming request. This is used to attach to existing
+     * incoming calls.
      *
-     * @return The {@link Connection} object to satisfy this call, or {@code null} to not handle
-     * the call.
+     * @param connectionManagerPhoneAccount See description at
+     *         {@link #onCreateOutgoingConnection(PhoneAccountHandle, ConnectionRequest)}.
+     * @param request Details about the incoming call.
+     * @return The {@code Connection} object to satisfy this call, or {@code null} to
+     *         not handle the call.
      */
-    public Connection onCreateIncomingConnection(ConnectionRequest request) { return null; }
+    public Connection onCreateIncomingConnection(
+            PhoneAccountHandle connectionManagerPhoneAccount,
+            ConnectionRequest request) {
+        return null;
+    }
 
     /**
-     * Create a Connection given an outgoing request. This is used to initiate new outgoing calls.
-     *  @param request Details about the outgoing call.
+     * Create a {@code Connection} given an outgoing request. This is used to initiate new
+     * outgoing calls.
      *
-     * @return The {@link Connection} object to satisfy this request,
-     * or null to not handle the call.
-     *
+     * @param connectionManagerPhoneAccount The connection manager account to use for managing
+     *         this call.
+     *         <p>
+     *         If this parameter is not {@code null}, it means that this {@code ConnectionService}
+     *         has registered one or more {@code PhoneAccount}s having
+     *         {@link PhoneAccount#CAPABILITY_CONNECTION_MANAGER}. This parameter will contain
+     *         one of these {@code PhoneAccount}s, while the {@code request} will contain another
+     *         (usually but not always distinct) {@code PhoneAccount} to be used for actually
+     *         making the connection.
+     *         <p>
+     *         If this parameter is {@code null}, it means that this {@code ConnectionService} is
+     *         being asked to make a direct connection. The
+     *         {@link ConnectionRequest#getAccountHandle()} of parameter {@code request} will be
+     *         a {@code PhoneAccount} registered by this {@code ConnectionService} to use for
+     *         making the connection.
+     * @param request Details about the outgoing call.
+     * @return The {@code Connection} object to satisfy this call, or the result of an invocation
+     *         of {@link Connection#getFailedConnection(int, String)} to not handle the call.
      */
-    public Connection onCreateOutgoingConnection(ConnectionRequest request) { return null; }
+    public Connection onCreateOutgoingConnection(
+            PhoneAccountHandle connectionManagerPhoneAccount,
+            ConnectionRequest request) {
+        return null;
+    }
 
     /**
      * Returns a new or existing conference connection when the the user elects to convert the
