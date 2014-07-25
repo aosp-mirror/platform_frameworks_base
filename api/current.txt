@@ -29097,7 +29097,7 @@ package android.telephony {
     field public static final int LIMIT_EXCEEDED = 15; // 0xf
     field public static final int LOCAL = 3; // 0x3
     field public static final int LOST_SIGNAL = 14; // 0xe
-    field public static final int MAXIMUM_VALID_VALUE = 42; // 0x2a
+    field public static final int MAXIMUM_VALID_VALUE = 44; // 0x2c
     field public static final int MINIMUM_VALID_VALUE = 0; // 0x0
     field public static final int MMI = 6; // 0x6
     field public static final int NORMAL = 2; // 0x2
@@ -29105,6 +29105,8 @@ package android.telephony {
     field public static final int NOT_VALID = -1; // 0xffffffff
     field public static final int NO_PHONE_NUMBER_SUPPLIED = 38; // 0x26
     field public static final int NUMBER_UNREACHABLE = 8; // 0x8
+    field public static final int OUTGOING_CANCELED = 44; // 0x2c
+    field public static final int OUTGOING_FAILURE = 43; // 0x2b
     field public static final int OUT_OF_NETWORK = 11; // 0xb
     field public static final int OUT_OF_SERVICE = 18; // 0x12
     field public static final int POWER_OFF = 17; // 0x11
