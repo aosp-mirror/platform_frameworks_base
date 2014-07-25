@@ -22,7 +22,6 @@ import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SHOWN;
 import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.app.StatusBarManager.windowStateToString;
-import static com.android.keyguard.KeyguardHostView.OnDismissAction;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_OPAQUE;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_SEMI_TRANSPARENT;
@@ -106,6 +105,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.internal.statusbar.StatusBarIcon;
+import com.android.keyguard.KeyguardHostView.OnDismissAction;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.DemoMode;
 import com.android.systemui.EventLogTags;
@@ -129,20 +129,21 @@ import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.SpeedBumpView;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
 import com.android.systemui.statusbar.policy.BluetoothControllerImpl;
 import com.android.systemui.statusbar.policy.CastControllerImpl;
 import com.android.systemui.statusbar.policy.FlashlightController;
 import com.android.systemui.statusbar.policy.HeadsUpNotificationView;
+import com.android.systemui.statusbar.policy.HotspotControllerImpl;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
-import com.android.systemui.statusbar.policy.HotspotControllerImpl;
-import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.LocationControllerImpl;
 import com.android.systemui.statusbar.policy.NetworkControllerImpl;
+import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.RotationLockControllerImpl;
+import com.android.systemui.statusbar.policy.SecurityControllerImpl;
+import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
@@ -212,6 +213,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     // These are no longer handled by the policy, because we need custom strategies for them
     BluetoothControllerImpl mBluetoothController;
+    SecurityControllerImpl mSecurityController;
     BatteryController mBatteryController;
     LocationControllerImpl mLocationController;
     NetworkControllerImpl mNetworkController;
@@ -736,6 +738,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mNetworkController = new NetworkControllerImpl(mContext);
         mHotspotController = new HotspotControllerImpl(mContext);
         mBluetoothController = new BluetoothControllerImpl(mContext);
+        mSecurityController = new SecurityControllerImpl(mContext);
         if (mContext.getResources().getBoolean(R.bool.config_showRotationLock)) {
             mRotationLockController = new RotationLockControllerImpl(mContext);
         }
@@ -797,7 +800,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     mBluetoothController, mLocationController, mRotationLockController,
                     mNetworkController, mZenModeController, mHotspotController,
                     mCastController, mFlashlightController,
-                    mUserSwitcherController, mKeyguardMonitor);
+                    mUserSwitcherController, mKeyguardMonitor,
+                    mSecurityController);
             mQSPanel.setHost(qsh);
             for (QSTile<?> tile : qsh.getTiles()) {
                 mQSPanel.addTile(tile);
@@ -2775,6 +2779,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
         if (mNextAlarmController != null) {
             mNextAlarmController.dump(fd, pw, args);
+        }
+        if (mSecurityController != null) {
+            mSecurityController.dump(fd, pw, args);
         }
     }
 

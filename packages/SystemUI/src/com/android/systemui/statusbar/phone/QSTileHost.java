@@ -41,6 +41,7 @@ import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.RotationLockController;
 import com.android.systemui.statusbar.policy.HotspotController;
+import com.android.systemui.statusbar.policy.SecurityController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 
@@ -65,13 +66,15 @@ public class QSTileHost implements QSTile.Host {
     private final FlashlightController mFlashlight;
     private final UserSwitcherController mUserSwitcherController;
     private final KeyguardMonitor mKeyguard;
+    private final SecurityController mSecurity;
 
     public QSTileHost(Context context, PhoneStatusBar statusBar,
             BluetoothController bluetooth, LocationController location,
             RotationLockController rotation, NetworkController network,
             ZenModeController zen, HotspotController hotspot,
             CastController cast, FlashlightController flashlight,
-            UserSwitcherController userSwitcher, KeyguardMonitor keyguard) {
+            UserSwitcherController userSwitcher, KeyguardMonitor keyguard,
+            SecurityController security) {
         mContext = context;
         mStatusBar = statusBar;
         mBluetooth = bluetooth;
@@ -84,6 +87,7 @@ public class QSTileHost implements QSTile.Host {
         mFlashlight = flashlight;
         mUserSwitcherController = userSwitcher;
         mKeyguard = keyguard;
+        mSecurity = security;
 
         final HandlerThread ht = new HandlerThread(QSTileHost.class.getSimpleName());
         ht.start();
@@ -188,5 +192,9 @@ public class QSTileHost implements QSTile.Host {
 
     public UserSwitcherController getUserSwitcherController() {
         return mUserSwitcherController;
+    }
+
+    public SecurityController getSecurityController() {
+        return mSecurity;
     }
 }
