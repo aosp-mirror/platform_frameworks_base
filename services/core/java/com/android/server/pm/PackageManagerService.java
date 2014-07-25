@@ -4728,6 +4728,28 @@ public class PackageManagerService extends IPackageManager.Stub {
         return allInstructionSets;
     }
 
+    @Override
+    public void forceDexOpt(String packageName) {
+        enforceSystemOrRoot("forceDexOpt");
+
+        PackageParser.Package pkg;
+        synchronized (mPackages) {
+            pkg = mPackages.get(packageName);
+            if (pkg == null) {
+                throw new IllegalArgumentException("Missing package: " + packageName);
+            }
+        }
+
+        synchronized (mInstallLock) {
+            final String[] instructionSets = new String[] {
+                    getPrimaryInstructionSet(pkg.applicationInfo) };
+            final int res = performDexOptLI(pkg, instructionSets, true, false, true);
+            if (res != DEX_OPT_PERFORMED) {
+                throw new IllegalStateException("Failed to dexopt: " + res);
+            }
+        }
+    }
+
     private int performDexOptLI(PackageParser.Package pkg, String[] instructionSets,
                                 boolean forceDex, boolean defer, boolean inclDependencies) {
         HashSet<String> done;

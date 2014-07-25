@@ -397,6 +397,8 @@ interface IPackageManager {
      */
     boolean performDexOptIfNeeded(String packageName, String instructionSet);
 
+    void forceDexOpt(String packageName);
+
     /**
      * Update status of external media on the package manager to scan and
      * install packages installed on the external media. Like say the

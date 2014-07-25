@@ -253,6 +253,11 @@ public final class Pm {
             return;
         }
 
+        if ("force-dex-opt".equals(op)) {
+            runForceDexOpt();
+            return;
+        }
+
         try {
             if (args.length == 1) {
                 if (args[0].equalsIgnoreCase("-l")) {
@@ -1246,6 +1251,15 @@ public final class Pm {
 
     public void runGetMaxUsers() {
         System.out.println("Maximum supported users: " + UserManager.getMaxSupportedUsers());
+    }
+
+    public void runForceDexOpt() {
+        final String packageName = nextArg();
+        try {
+            mPm.forceDexOpt(packageName);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
     }
 
     class PackageDeleteObserver extends IPackageDeleteObserver.Stub {
