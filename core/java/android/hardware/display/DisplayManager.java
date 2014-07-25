@@ -487,6 +487,8 @@ public final class DisplayManager {
      * {@link #VIRTUAL_DISPLAY_FLAG_SECURE}, {@link #VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY},
      * or {@link #VIRTUAL_DISPLAY_FLAG_SCREEN_SHARE}.
      * @param callbacks Callbacks to call when the state of the {@link VirtualDisplay} changes
+     * @param handler The handler on which the listener should be invoked, or null
+     * if the listener should be invoked on the calling thread's looper.
      * @return The newly created virtual display, or null if the application could
      * not create the virtual display.
      *
