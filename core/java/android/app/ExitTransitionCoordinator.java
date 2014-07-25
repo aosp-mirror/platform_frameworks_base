@@ -117,10 +117,16 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
         setTransitionAlpha(mTransitioningViews, 1);
         setTransitionAlpha(mSharedElements, 1);
         mIsHidden = true;
+        if (getDecor() != null) {
+            getDecor().suppressLayout(false);
+        }
         clearState();
     }
 
     private void sharedElementExitBack() {
+        if (getDecor() != null) {
+            getDecor().suppressLayout(true);
+        }
         if (!mSharedElements.isEmpty() && getSharedElementTransition() != null) {
             startTransition(new Runnable() {
                 public void run() {
@@ -136,18 +142,6 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
         Transition transition = getSharedElementExitTransition();
         final ArrayList<View> sharedElementSnapshots = createSnapshots(mExitSharedElementBundle,
                 mSharedElementNames);
-        transition.addListener(new ContinueTransitionListener() {
-            @Override
-            public void onTransitionEnd(Transition transition) {
-                transition.removeListener(this);
-                super.onTransitionEnd(transition);
-                int count = mSharedElements.size();
-                for (int i = 0; i < count; i++) {
-                    View sharedElement = mSharedElements.get(i);
-                    ((ViewGroup) sharedElement.getParent()).suppressLayout(true);
-                }
-            }
-        });
         getDecor().getViewTreeObserver()
                 .addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
                     @Override
@@ -172,6 +166,9 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
     public void startExit() {
         if (!mIsExitStarted) {
             mIsExitStarted = true;
+            if (getDecor() != null) {
+                getDecor().suppressLayout(true);
+            }
             startTransition(new Runnable() {
                 @Override
                 public void run() {
@@ -184,6 +181,9 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
     public void startExit(int resultCode, Intent data) {
         if (!mIsExitStarted) {
             mIsExitStarted = true;
+            if (getDecor() != null) {
+                getDecor().suppressLayout(true);
+            }
             mHandler = new Handler() {
                 @Override
                 public void handleMessage(Message msg) {
@@ -357,6 +357,9 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
                 mExitNotified = true;
                 mResultReceiver.send(MSG_EXIT_TRANSITION_COMPLETE, null);
                 mResultReceiver = null; // done talking
+                if (getDecor() != null) {
+                    getDecor().suppressLayout(false);
+                }
                 finishIfNecessary();
             }
         }
