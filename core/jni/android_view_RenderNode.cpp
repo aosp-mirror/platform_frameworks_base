@@ -117,6 +117,17 @@ static jboolean android_view_RenderNode_setClipToBounds(JNIEnv* env,
     return SET_AND_DIRTY(setClipToBounds, clipToBounds, RenderNode::GENERIC);
 }
 
+static jboolean android_view_RenderNode_setClipBounds(JNIEnv* env,
+        jobject clazz, jlong renderNodePtr, jint left, jint top, jint right, jint bottom) {
+    android::uirenderer::Rect clipBounds(left, top, right, bottom);
+    return SET_AND_DIRTY(setClipBounds, clipBounds, RenderNode::GENERIC);
+}
+
+static jboolean android_view_RenderNode_setClipBoundsEmpty(JNIEnv* env,
+        jobject clazz, jlong renderNodePtr) {
+    return SET_AND_DIRTY(setClipBoundsEmpty,, RenderNode::GENERIC);
+}
+
 static jboolean android_view_RenderNode_setProjectBackwards(JNIEnv* env,
         jobject clazz, jlong renderNodePtr, jboolean shouldProject) {
     return SET_AND_DIRTY(setProjectBackwards, shouldProject, RenderNode::GENERIC);
@@ -282,12 +293,12 @@ static jboolean android_view_RenderNode_setLeftTopRightBottom(JNIEnv* env,
 }
 
 static jboolean android_view_RenderNode_offsetLeftAndRight(JNIEnv* env,
-        jobject clazz, jlong renderNodePtr, float offset) {
+        jobject clazz, jlong renderNodePtr, jint offset) {
     return SET_AND_DIRTY(offsetLeftRight, offset, RenderNode::X);
 }
 
 static jboolean android_view_RenderNode_offsetTopAndBottom(JNIEnv* env,
-        jobject clazz, jlong renderNodePtr, float offset) {
+        jobject clazz, jlong renderNodePtr, jint offset) {
     return SET_AND_DIRTY(offsetTopBottom, offset, RenderNode::Y);
 }
 
@@ -311,30 +322,6 @@ static jfloat android_view_RenderNode_getAlpha(JNIEnv* env,
         jobject clazz, jlong renderNodePtr) {
     RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
     return renderNode->stagingProperties().getAlpha();
-}
-
-static jfloat android_view_RenderNode_getLeft(JNIEnv* env,
-        jobject clazz, jlong renderNodePtr) {
-    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
-    return renderNode->stagingProperties().getLeft();
-}
-
-static jfloat android_view_RenderNode_getTop(JNIEnv* env,
-        jobject clazz, jlong renderNodePtr) {
-    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
-    return renderNode->stagingProperties().getTop();
-}
-
-static jfloat android_view_RenderNode_getRight(JNIEnv* env,
-        jobject clazz, jlong renderNodePtr) {
-    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
-    return renderNode->stagingProperties().getRight();
-}
-
-static jfloat android_view_RenderNode_getBottom(JNIEnv* env,
-        jobject clazz, jlong renderNodePtr) {
-    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
-    return renderNode->stagingProperties().getBottom();
 }
 
 static jfloat android_view_RenderNode_getCameraDistance(JNIEnv* env,
@@ -488,6 +475,8 @@ static JNINativeMethod gMethods[] = {
     { "nSetStaticMatrix",      "(JJ)Z",  (void*) android_view_RenderNode_setStaticMatrix },
     { "nSetAnimationMatrix",   "(JJ)Z",  (void*) android_view_RenderNode_setAnimationMatrix },
     { "nSetClipToBounds",      "(JZ)Z",  (void*) android_view_RenderNode_setClipToBounds },
+    { "nSetClipBounds",        "(JIIII)Z", (void*) android_view_RenderNode_setClipBounds },
+    { "nSetClipBoundsEmpty",   "(J)Z",   (void*) android_view_RenderNode_setClipBoundsEmpty },
     { "nSetProjectBackwards",  "(JZ)Z",  (void*) android_view_RenderNode_setProjectBackwards },
     { "nSetProjectionReceiver","(JZ)Z",  (void*) android_view_RenderNode_setProjectionReceiver },
 
@@ -518,16 +507,12 @@ static JNINativeMethod gMethods[] = {
     { "nSetRight",             "(JI)Z",  (void*) android_view_RenderNode_setRight },
     { "nSetBottom",            "(JI)Z",  (void*) android_view_RenderNode_setBottom },
     { "nSetLeftTopRightBottom","(JIIII)Z", (void*) android_view_RenderNode_setLeftTopRightBottom },
-    { "nOffsetLeftAndRight",   "(JF)Z",  (void*) android_view_RenderNode_offsetLeftAndRight },
-    { "nOffsetTopAndBottom",   "(JF)Z",  (void*) android_view_RenderNode_offsetTopAndBottom },
+    { "nOffsetLeftAndRight",   "(JI)Z",  (void*) android_view_RenderNode_offsetLeftAndRight },
+    { "nOffsetTopAndBottom",   "(JI)Z",  (void*) android_view_RenderNode_offsetTopAndBottom },
 
     { "nHasOverlappingRendering", "(J)Z",  (void*) android_view_RenderNode_hasOverlappingRendering },
     { "nGetClipToOutline",        "(J)Z",  (void*) android_view_RenderNode_getClipToOutline },
     { "nGetAlpha",                "(J)F",  (void*) android_view_RenderNode_getAlpha },
-    { "nGetLeft",                 "(J)F",  (void*) android_view_RenderNode_getLeft },
-    { "nGetTop",                  "(J)F",  (void*) android_view_RenderNode_getTop },
-    { "nGetRight",                "(J)F",  (void*) android_view_RenderNode_getRight },
-    { "nGetBottom",               "(J)F",  (void*) android_view_RenderNode_getBottom },
     { "nGetCameraDistance",       "(J)F",  (void*) android_view_RenderNode_getCameraDistance },
     { "nGetScaleX",               "(J)F",  (void*) android_view_RenderNode_getScaleX },
     { "nGetScaleY",               "(J)F",  (void*) android_view_RenderNode_getScaleY },

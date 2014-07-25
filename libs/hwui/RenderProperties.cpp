@@ -75,7 +75,7 @@ LayerProperties& LayerProperties::operator=(const LayerProperties& other) {
 }
 
 RenderProperties::PrimitiveFields::PrimitiveFields()
-        : mClipToBounds(true)
+        : mClippingFlags(CLIP_TO_BOUNDS)
         , mProjectBackwards(false)
         , mProjectionReceiver(false)
         , mAlpha(1)
@@ -146,26 +146,34 @@ void RenderProperties::debugOutputProperties(const int level) const {
         }
     }
 
-    bool clipToBoundsNeeded = layerProperties().type() != kLayerTypeNone ? false : mPrimitiveFields.mClipToBounds;
+    const bool isLayer = layerProperties().type() != kLayerTypeNone;
+    int clipFlags = getClippingFlags();
     if (mPrimitiveFields.mAlpha < 1) {
-        if (layerProperties().type() != kLayerTypeNone) {
+        if (isLayer) {
+            clipFlags &= ~CLIP_TO_BOUNDS; // bounds clipping done by layer
+
             ALOGD("%*sSetOverrideLayerAlpha %.2f", level * 2, "", mPrimitiveFields.mAlpha);
         } else if (!mPrimitiveFields.mHasOverlappingRendering) {
             ALOGD("%*sScaleAlpha %.2f", level * 2, "", mPrimitiveFields.mAlpha);
         } else {
-            int flags = SkCanvas::kHasAlphaLayer_SaveFlag;
-            if (clipToBoundsNeeded) {
-                flags |= SkCanvas::kClipToLayer_SaveFlag;
-                clipToBoundsNeeded = false; // clipping done by save layer
+            Rect layerBounds(0, 0, getWidth(), getHeight());
+            int saveFlags = SkCanvas::kHasAlphaLayer_SaveFlag;
+            if (clipFlags) {
+                saveFlags |= SkCanvas::kClipToLayer_SaveFlag;
+                getClippingRectForFlags(clipFlags, &layerBounds);
+                clipFlags = 0; // all clipping done by saveLayer
             }
+
             ALOGD("%*sSaveLayerAlpha %d, %d, %d, %d, %d, 0x%x", level * 2, "",
-                    0, 0, getWidth(), getHeight(),
-                    (int)(mPrimitiveFields.mAlpha * 255), flags);
+                    (int)layerBounds.left, (int)layerBounds.top, (int)layerBounds.right, (int)layerBounds.bottom,
+                    (int)(mPrimitiveFields.mAlpha * 255), saveFlags);
         }
     }
-    if (clipToBoundsNeeded) {
+    if (clipFlags) {
+        Rect clipRect;
+        getClippingRectForFlags(clipFlags, &clipRect);
         ALOGD("%*sClipRect %d, %d, %d, %d", level * 2, "",
-                0, 0, getWidth(), getHeight());
+                (int)clipRect.left, (int)clipRect.top, (int)clipRect.right, (int)clipRect.bottom);
     }
 }
 

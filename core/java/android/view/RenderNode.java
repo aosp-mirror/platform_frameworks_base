@@ -17,9 +17,11 @@
 package android.view;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.graphics.Matrix;
 import android.graphics.Outline;
 import android.graphics.Paint;
+import android.graphics.Rect;
 
 /**
  * <p>A display list records a series of graphics related operations and can replay
@@ -294,19 +296,20 @@ public class RenderNode {
     // RenderProperty Setters
     ///////////////////////////////////////////////////////////////////////////
 
-    /**
-     * Set the caching property on the display list, which indicates whether the display list
-     * holds a layer. Layer display lists should avoid creating an alpha layer, since alpha is
-     * handled in the drawLayer operation directly (and more efficiently).
-     *
-     * @param caching true if the display list represents a hardware layer, false otherwise.
-     */
     public boolean setLayerType(int layerType) {
         return nSetLayerType(mNativeRenderNode, layerType);
     }
 
     public boolean setLayerPaint(Paint paint) {
         return nSetLayerPaint(mNativeRenderNode, paint != null ? paint.mNativePaint : 0);
+    }
+
+    public boolean setClipBounds(@Nullable Rect rect) {
+        if (rect == null) {
+            return nSetClipBoundsEmpty(mNativeRenderNode);
+        } else {
+            return nSetClipBounds(mNativeRenderNode, rect.left, rect.top, rect.right, rect.bottom);
+        }
     }
 
     /**
@@ -702,19 +705,9 @@ public class RenderNode {
      * @param left The left position, in pixels, of the display list
      *
      * @see View#setLeft(int)
-     * @see #getLeft()
      */
     public boolean setLeft(int left) {
         return nSetLeft(mNativeRenderNode, left);
-    }
-
-    /**
-     * Returns the left position for the display list in pixels.
-     *
-     * @see #setLeft(int)
-     */
-    public float getLeft() {
-        return nGetLeft(mNativeRenderNode);
     }
 
     /**
@@ -723,19 +716,9 @@ public class RenderNode {
      * @param top The top position, in pixels, of the display list
      *
      * @see View#setTop(int)
-     * @see #getTop()
      */
     public boolean setTop(int top) {
         return nSetTop(mNativeRenderNode, top);
-    }
-
-    /**
-     * Returns the top position for the display list in pixels.
-     *
-     * @see #setTop(int)
-     */
-    public float getTop() {
-        return nGetTop(mNativeRenderNode);
     }
 
     /**
@@ -744,19 +727,9 @@ public class RenderNode {
      * @param right The right position, in pixels, of the display list
      *
      * @see View#setRight(int)
-     * @see #getRight()
      */
     public boolean setRight(int right) {
         return nSetRight(mNativeRenderNode, right);
-    }
-
-    /**
-     * Returns the right position for the display list in pixels.
-     *
-     * @see #setRight(int)
-     */
-    public float getRight() {
-        return nGetRight(mNativeRenderNode);
     }
 
     /**
@@ -765,19 +738,9 @@ public class RenderNode {
      * @param bottom The bottom position, in pixels, of the display list
      *
      * @see View#setBottom(int)
-     * @see #getBottom()
      */
     public boolean setBottom(int bottom) {
         return nSetBottom(mNativeRenderNode, bottom);
-    }
-
-    /**
-     * Returns the bottom position for the display list in pixels.
-     *
-     * @see #setBottom(int)
-     */
-    public float getBottom() {
-        return nGetBottom(mNativeRenderNode);
     }
 
     /**
@@ -805,7 +768,7 @@ public class RenderNode {
      *
      * @see View#offsetLeftAndRight(int)
      */
-    public boolean offsetLeftAndRight(float offset) {
+    public boolean offsetLeftAndRight(int offset) {
         return nOffsetLeftAndRight(mNativeRenderNode, offset);
     }
 
@@ -817,7 +780,7 @@ public class RenderNode {
      *
      * @see View#offsetTopAndBottom(int)
      */
-    public boolean offsetTopAndBottom(float offset) {
+    public boolean offsetTopAndBottom(int offset) {
         return nOffsetTopAndBottom(mNativeRenderNode, offset);
     }
 
@@ -860,8 +823,8 @@ public class RenderNode {
 
     // Properties
 
-    private static native boolean nOffsetTopAndBottom(long renderNode, float offset);
-    private static native boolean nOffsetLeftAndRight(long renderNode, float offset);
+    private static native boolean nOffsetTopAndBottom(long renderNode, int offset);
+    private static native boolean nOffsetLeftAndRight(long renderNode, int offset);
     private static native boolean nSetLeftTopRightBottom(long renderNode, int left, int top,
             int right, int bottom);
     private static native boolean nSetBottom(long renderNode, int bottom);
@@ -874,6 +837,9 @@ public class RenderNode {
     private static native boolean nSetLayerType(long renderNode, int layerType);
     private static native boolean nSetLayerPaint(long renderNode, long paint);
     private static native boolean nSetClipToBounds(long renderNode, boolean clipToBounds);
+    private static native boolean nSetClipBounds(long renderNode, int left, int top,
+            int right, int bottom);
+    private static native boolean nSetClipBoundsEmpty(long renderNode);
     private static native boolean nSetProjectBackwards(long renderNode, boolean shouldProject);
     private static native boolean nSetProjectionReceiver(long renderNode, boolean shouldRecieve);
     private static native boolean nSetOutlineRoundRect(long renderNode, int left, int top,
@@ -902,10 +868,6 @@ public class RenderNode {
     private static native boolean nHasOverlappingRendering(long renderNode);
     private static native boolean nGetClipToOutline(long renderNode);
     private static native float nGetAlpha(long renderNode);
-    private static native float nGetLeft(long renderNode);
-    private static native float nGetTop(long renderNode);
-    private static native float nGetRight(long renderNode);
-    private static native float nGetBottom(long renderNode);
     private static native float nGetCameraDistance(long renderNode);
     private static native float nGetScaleX(long renderNode);
     private static native float nGetScaleY(long renderNode);

@@ -3015,6 +3015,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     @Override
     protected void dispatchDraw(Canvas canvas) {
+        boolean usingRenderNodeProperties = canvas.isRecordingFor(mRenderNode);
         final int childrenCount = mChildrenCount;
         final View[] children = mChildren;
         int flags = mGroupFlags;
@@ -3059,7 +3060,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         int clipSaveCount = 0;
         final boolean clipToPadding = (flags & CLIP_TO_PADDING_MASK) == CLIP_TO_PADDING_MASK;
-        boolean hasClipBounds = mClipBounds != null && !sIgnoreClipBoundsForChildren;
+        boolean hasClipBounds = mClipBounds != null && !usingRenderNodeProperties;
         boolean clippingNeeded = clipToPadding || hasClipBounds;
 
         if (clippingNeeded) {
@@ -3087,7 +3088,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         // Only use the preordered list if not HW accelerated, since the HW pipeline will do the
         // draw reordering internally
-        final ArrayList<View> preorderedList = canvas.isHardwareAccelerated()
+        final ArrayList<View> preorderedList = usingRenderNodeProperties
                 ? null : buildOrderedChildList();
         final boolean customOrder = preorderedList == null
                 && isChildrenDrawingOrderEnabled();

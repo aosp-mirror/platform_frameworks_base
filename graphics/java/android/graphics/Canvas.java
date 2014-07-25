@@ -52,6 +52,9 @@ public class Canvas {
         return mNativeCanvasWrapper;
     }
 
+    /** @hide */
+    public boolean isRecordingFor(Object o) { return false; }
+
     // may be null
     private Bitmap mBitmap;
 
