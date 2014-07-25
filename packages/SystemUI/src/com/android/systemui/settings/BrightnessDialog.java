@@ -31,29 +31,13 @@ import android.widget.ImageView;
 import com.android.systemui.R;
 
 /** A dialog that provides controls for adjusting the screen brightness. */
-public class BrightnessDialog extends Activity implements
-        BrightnessController.BrightnessStateChangeCallback {
-    private final Handler mHandler = new Handler();
+public class BrightnessDialog extends Activity {
 
     private BrightnessController mBrightnessController;
-    private int mBrightnessDialogLongTimeout;
-    private int mBrightnessDialogShortTimeout;
-
-    private final Runnable mDismissDialogRunnable = new Runnable() {
-        public void run() {
-            finish();
-        };
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        final Resources r = getResources();
-        mBrightnessDialogLongTimeout = r.getInteger(
-                R.integer.quick_settings_brightness_dialog_long_timeout);
-        mBrightnessDialogShortTimeout = r.getInteger(
-                R.integer.quick_settings_brightness_dialog_short_timeout);
 
         final Window window = getWindow();
         final WindowManager.LayoutParams lp = window.getAttributes();
@@ -79,33 +63,13 @@ public class BrightnessDialog extends Activity implements
         final ToggleSlider slider = (ToggleSlider) findViewById(R.id.brightness_slider);
         mBrightnessController = new BrightnessController(this, icon, slider);
         mBrightnessController.registerCallbacks();
-        mBrightnessController.addStateChangedCallback(this);
-
-        dismissBrightnessDialog(mBrightnessDialogLongTimeout);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
 
-        mBrightnessController.removeStateChangedCallback(this);
         mBrightnessController.unregisterCallbacks();
-
-        removeAllBrightnessDialogCallbacks();
-    }
-
-    public void onBrightnessLevelChanged() {
-        dismissBrightnessDialog(mBrightnessDialogShortTimeout);
-    }
-
-    private void dismissBrightnessDialog(int timeout) {
-        removeAllBrightnessDialogCallbacks();
-
-        mHandler.postDelayed(mDismissDialogRunnable, timeout);
-    }
-
-    private void removeAllBrightnessDialogCallbacks() {
-        mHandler.removeCallbacks(mDismissDialogRunnable);
     }
 
     @Override
