@@ -16,26 +16,24 @@
 
 package com.android.server.hdmi;
 
-import static android.hardware.hdmi.HdmiControlManager.MESSAGE_NO_RECORDING_CHECK_RECORDER_CONNECTION;
-import static android.hardware.hdmi.HdmiControlManager.MESSAGE_RECORDING_ANALOGUE_SERVICE;
-import static android.hardware.hdmi.HdmiControlManager.MESSAGE_RECORDING_CURRENTLY_SELECTED_SOURCE;
-import static android.hardware.hdmi.HdmiControlManager.MESSAGE_RECORDING_DIGITAL_SERVICE;
-import static android.hardware.hdmi.HdmiControlManager.MESSAGE_RECORDING_EXTERNAL_INPUT;
-import static android.hardware.hdmi.HdmiControlManager.MESSAGE_RECORDING_STATUS_MESSAGE_START;
+import static android.hardware.hdmi.HdmiControlManager.ONE_TOUCH_RECORD_CHECK_RECORDER_CONNECTION;
+import static android.hardware.hdmi.HdmiControlManager.ONE_TOUCH_RECORD_RECORDING_ANALOGUE_SERVICE;
+import static android.hardware.hdmi.HdmiControlManager.ONE_TOUCH_RECORD_RECORDING_CURRENTLY_SELECTED_SOURCE;
+import static android.hardware.hdmi.HdmiControlManager.ONE_TOUCH_RECORD_RECORDING_DIGITAL_SERVICE;
+import static android.hardware.hdmi.HdmiControlManager.ONE_TOUCH_RECORD_RECORDING_EXTERNAL_INPUT;
 
 import android.util.Slog;
 
 import com.android.server.hdmi.HdmiControlService.SendMessageCallback;
 
 /**
- * Feature action that performs one touch record. This class only provides a skeleton of one touch
- * play and has no detail implementation.
+ * Feature action that performs one touch record.
  */
 public class OneTouchRecordAction extends FeatureAction {
     private static final String TAG = "OneTouchRecordAction";
 
-    // Timer out for waiting <Record Status>
-    private static final int RECORD_STATUS_TIMEOUT = 120000;
+    // Timer out for waiting <Record Status> 120s
+    private static final int RECORD_STATUS_TIMEOUT_MS = 120000;
 
     // State that waits for <Record Status> once sending <Record On>
     private static final int STATE_WAITING_FOR_RECORD_STATUS = 1;
@@ -65,13 +63,14 @@ public class OneTouchRecordAction extends FeatureAction {
                     public void onSendCompleted(int error) {
                         // if failed to send <Record On>, display error message and finish action.
                         if (error != Constants.SEND_RESULT_SUCCESS) {
-                            tv().displayOsd(MESSAGE_NO_RECORDING_CHECK_RECORDER_CONNECTION);
+                            tv().announceOneTouchRecordResult(
+                                    ONE_TOUCH_RECORD_CHECK_RECORDER_CONNECTION);
                             finish();
                             return;
                         }
 
                         mState = STATE_WAITING_FOR_RECORD_STATUS;
-                        addTimer(mState, RECORD_STATUS_TIMEOUT);
+                        addTimer(mState, RECORD_STATUS_TIMEOUT_MS);
                     }
                 });
     }
@@ -97,18 +96,16 @@ public class OneTouchRecordAction extends FeatureAction {
         }
 
         int recordStatus = cmd.getParams()[0];
+        tv().announceOneTouchRecordResult(recordStatus);
         Slog.i(TAG, "Got record status:" + recordStatus + " from " + cmd.getSource());
-
-        int recordStatusMessageCode = recordStatus + MESSAGE_RECORDING_STATUS_MESSAGE_START;
-        tv().displayOsd(recordStatusMessageCode);
 
         // If recording started successfully, change state and keep this action until <Record Off>
         // received. Otherwise, finish action.
-        switch (recordStatusMessageCode) {
-            case MESSAGE_RECORDING_CURRENTLY_SELECTED_SOURCE:
-            case MESSAGE_RECORDING_DIGITAL_SERVICE:
-            case MESSAGE_RECORDING_ANALOGUE_SERVICE:
-            case MESSAGE_RECORDING_EXTERNAL_INPUT:
+        switch (recordStatus) {
+            case ONE_TOUCH_RECORD_RECORDING_CURRENTLY_SELECTED_SOURCE:
+            case ONE_TOUCH_RECORD_RECORDING_DIGITAL_SERVICE:
+            case ONE_TOUCH_RECORD_RECORDING_ANALOGUE_SERVICE:
+            case ONE_TOUCH_RECORD_RECORDING_EXTERNAL_INPUT:
                 mState = STATE_RECORDING_IN_PROGRESS;
                 mActionTimer.clearTimerMessage();
                 break;
@@ -126,7 +123,7 @@ public class OneTouchRecordAction extends FeatureAction {
             return;
         }
 
-        tv().displayOsd(MESSAGE_NO_RECORDING_CHECK_RECORDER_CONNECTION);
+        tv().announceOneTouchRecordResult(ONE_TOUCH_RECORD_CHECK_RECORDER_CONNECTION);
         finish();
     }
 
