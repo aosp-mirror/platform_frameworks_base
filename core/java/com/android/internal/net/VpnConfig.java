@@ -74,6 +74,7 @@ public class VpnConfig implements Parcelable {
     public long startTime = -1;
     public boolean legacy;
     public boolean blocking;
+    public boolean allowBypass;
 
     public void addLegacyRoutes(String routesStr) {
         if (routesStr.trim().equals("")) {
@@ -122,6 +123,7 @@ public class VpnConfig implements Parcelable {
         out.writeLong(startTime);
         out.writeInt(legacy ? 1 : 0);
         out.writeInt(blocking ? 1 : 0);
+        out.writeInt(allowBypass ? 1 : 0);
     }
 
     public static final Parcelable.Creator<VpnConfig> CREATOR =
@@ -141,6 +143,7 @@ public class VpnConfig implements Parcelable {
             config.startTime = in.readLong();
             config.legacy = in.readInt() != 0;
             config.blocking = in.readInt() != 0;
+            config.allowBypass = in.readInt() != 0;
             return config;
         }
 

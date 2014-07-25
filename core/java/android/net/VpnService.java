@@ -563,7 +563,7 @@ public class VpnService extends Service {
          * @return this {@link Builder} object to facilitate chaining of method calls.
          */
         public Builder allowBypass() {
-            // TODO
+            mConfig.allowBypass = true;
             return this;
         }
 

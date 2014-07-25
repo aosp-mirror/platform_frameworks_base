@@ -2068,9 +2068,9 @@ public class ConnectivityManager {
 
     /** {@hide} */
     public void registerNetworkAgent(Messenger messenger, NetworkInfo ni, LinkProperties lp,
-            NetworkCapabilities nc, int score) {
+            NetworkCapabilities nc, int score, NetworkMisc misc) {
         try {
-            mService.registerNetworkAgent(messenger, ni, lp, nc, score);
+            mService.registerNetworkAgent(messenger, ni, lp, nc, score, misc);
         } catch (RemoteException e) { }
     }
 

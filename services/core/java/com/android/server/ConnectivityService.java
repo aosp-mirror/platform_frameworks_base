@@ -74,6 +74,7 @@ import android.net.NetworkConfig;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkFactory;
+import android.net.NetworkMisc;
 import android.net.NetworkQuotaInfo;
 import android.net.NetworkRequest;
 import android.net.NetworkState;
@@ -5259,12 +5260,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     public void registerNetworkAgent(Messenger messenger, NetworkInfo networkInfo,
             LinkProperties linkProperties, NetworkCapabilities networkCapabilities,
-            int currentScore) {
+            int currentScore, NetworkMisc networkMisc) {
         enforceConnectivityInternalPermission();
 
         NetworkAgentInfo nai = new NetworkAgentInfo(messenger, new AsyncChannel(), nextNetId(),
             new NetworkInfo(networkInfo), new LinkProperties(linkProperties),
-            new NetworkCapabilities(networkCapabilities), currentScore, mContext, mTrackerHandler);
+            new NetworkCapabilities(networkCapabilities), currentScore, mContext, mTrackerHandler,
+            networkMisc);
         if (VDBG) log("registerNetworkAgent " + nai);
         mHandler.sendMessage(mHandler.obtainMessage(EVENT_REGISTER_NETWORK_AGENT, nai));
     }
@@ -5665,7 +5667,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 // to tell us whether we've already created this network or not.
                 if (networkAgent.isVPN()) {
                     mNetd.createVirtualNetwork(networkAgent.network.netId,
-                            !networkAgent.linkProperties.getDnsServers().isEmpty());
+                            !networkAgent.linkProperties.getDnsServers().isEmpty(),
+                            (networkAgent.networkMisc == null ||
+                                !networkAgent.networkMisc.allowBypass));
                 } else {
                     mNetd.createPhysicalNetwork(networkAgent.network.netId);
                 }

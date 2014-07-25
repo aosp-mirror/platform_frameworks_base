@@ -1947,11 +1947,12 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     @Override
-    public void createVirtualNetwork(int netId, boolean hasDNS) {
+    public void createVirtualNetwork(int netId, boolean hasDNS, boolean secure) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
         try {
-            mConnector.execute("network", "create", netId, "vpn", hasDNS ? "1" : "0");
+            mConnector.execute("network", "create", netId, "vpn", hasDNS ? "1" : "0",
+                    secure ? "1" : "0");
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
         }
