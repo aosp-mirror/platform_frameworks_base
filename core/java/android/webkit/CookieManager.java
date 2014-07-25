@@ -50,6 +50,12 @@ public class CookieManager {
     /**
      * Sets whether the application's {@link WebView} instances should send and
      * accept cookies.
+     * By default this is set to true and the WebView accepts cookies.
+     * <p>
+     * When this is true
+     * {@link CookieManager#setAcceptThirdPartyCookies setAcceptThirdPartyCookies} and
+     * {@link CookieManager#setAcceptFileSchemeCookies setAcceptFileSchemeCookies}
+     * can be used to control the policy for those specific types of cookie.
      *
      * @param accept whether {@link WebView} instances should send and accept
      *               cookies
@@ -291,9 +297,10 @@ public class CookieManager {
     /**
      * Sets whether the application's {@link WebView} instances should send and
      * accept cookies for file scheme URLs.
-     * Use of cookies with file scheme URLs is potentially insecure. Do not use
-     * this feature unless you can be sure that no unintentional sharing of
-     * cookie data can take place.
+     * Use of cookies with file scheme URLs is potentially insecure and turned
+     * off by default.
+     * Do not use this feature unless you can be sure that no unintentional
+     * sharing of cookie data can take place.
      * <p>
      * Note that calls to this method will have no effect if made after a
      * {@link WebView} or CookieManager instance has been created.
