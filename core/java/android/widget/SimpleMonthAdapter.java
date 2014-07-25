@@ -142,14 +142,10 @@ class SimpleMonthAdapter extends BaseAdapter implements SimpleMonthView.OnDayCli
             enabledDayRangeEnd = 31;
         }
 
-        drawingParams.put(SimpleMonthView.VIEW_PARAMS_SELECTED_DAY, selectedDay);
-        drawingParams.put(SimpleMonthView.VIEW_PARAMS_YEAR, year);
-        drawingParams.put(SimpleMonthView.VIEW_PARAMS_MONTH, month);
-        drawingParams.put(SimpleMonthView.VIEW_PARAMS_WEEK_START, mController.getFirstDayOfWeek());
-        drawingParams.put(SimpleMonthView.VIEW_PARAMS_ENABLEDDAYRANGE_START, enabledDayRangeStart);
-        drawingParams.put(SimpleMonthView.VIEW_PARAMS_ENABLEDDAYRANGE_END, enabledDayRangeEnd);
-        v.setMonthParams(drawingParams);
+        v.setMonthParams(selectedDay, month, year, mController.getFirstDayOfWeek(),
+                enabledDayRangeStart, enabledDayRangeEnd);
         v.invalidate();
+
         return v;
     }
 
