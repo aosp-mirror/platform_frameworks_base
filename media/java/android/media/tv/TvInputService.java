@@ -31,6 +31,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.InputChannel;
@@ -159,6 +160,8 @@ public abstract class TvInputService extends Service {
      * Returns a concrete implementation of {@link Session}.
      * <p>
      * May return {@code null} if this TV input service fails to create a session for some reason.
+     * If TV input represents an external device connected to a hardware TV input,
+     * {@link HardwareSession} should be returned.
      * </p>
      * @param inputId The ID of the TV input associated with the session.
      */
@@ -214,21 +217,6 @@ public abstract class TvInputService extends Service {
     @SystemApi
     public String onHdmiCecDeviceRemoved(HdmiCecDeviceInfo cecDeviceInfo) {
         return null;
-    }
-
-    /**
-     * Notify wrapped TV input ID of current input to TV input framework manager
-     *
-     * @param inputId The TV input ID of {@link TvInputPassthroughWrapperService}
-     * @param wrappedInputId The ID of the wrapped TV input such as external pass-though TV input
-     * @hide
-     */
-    public final void notifyWrappedInputId(String inputId, String wrappedInputId) {
-        SomeArgs args = SomeArgs.obtain();
-        args.arg1 = inputId;
-        args.arg2 = wrappedInputId;
-        mHandler.obtainMessage(TvInputService.ServiceHandler.DO_SET_WRAPPED_TV_INPUT_ID,
-                args).sendToTarget();
     }
 
     /**
@@ -382,7 +370,7 @@ public abstract class TvInputService extends Service {
          * Informs the application that video is not available, so the TV input cannot continue
          * playing the TV stream.
          *
-         * @param reason The reason why the TV input stopped the playback:
+         * @param reason The reason that the TV input stopped the playback:
          * <ul>
          * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_UNKNOWN}
          * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_TUNING}
@@ -994,6 +982,97 @@ public abstract class TvInputService extends Service {
         }
     }
 
+    /**
+     * Base class for a TV input session which represents an external device connected to a
+     * hardware TV input. Once TV input returns an implementation of this class on
+     * {@link #onCreateSession(String)}, the framework will create a hardware session and forward
+     * the application's surface to the hardware TV input.
+     * @see #onCreateSession(String)
+     */
+    public abstract class HardwareSession extends Session {
+
+        private TvInputManager.Session mHardwareSession;
+        private ITvInputSession mProxySession;
+        private ITvInputSessionCallback mProxySessionCallback;
+
+        /**
+         * Returns the hardware TV input ID the external device is connected to.
+         * <p>
+         * TV input is expected to provide {@link android.R.attr#setupActivity} so that
+         * the application can launch it before using this TV input. The setup activity may let
+         * the user select the hardware TV input to which the external device is connected. The ID
+         * of the selected one should be stored in the TV input so that it can be returned here.
+         * </p>
+         */
+        public abstract String getHardwareInputId();
+
+        private final TvInputManager.SessionCallback mHardwareSessionCallback =
+                new TvInputManager.SessionCallback() {
+            @Override
+            public void onSessionCreated(TvInputManager.Session session) {
+                mHardwareSession = session;
+                SomeArgs args = SomeArgs.obtain();
+                if (session != null) {
+                    args.arg1 = mProxySession;
+                    args.arg2 = mProxySessionCallback;
+                    args.arg3 = session.getToken();
+                } else {
+                    args.arg1 = null;
+                    args.arg2 = mProxySessionCallback;
+                    args.arg3 = null;
+                    onRelease();
+                }
+                mHandler.obtainMessage(ServiceHandler.DO_NOTIFY_SESSION_CREATED, args)
+                        .sendToTarget();
+            }
+
+            @Override
+            public void onVideoAvailable(final TvInputManager.Session session) {
+                if (mHardwareSession == session) {
+                    onHardwareVideoAvailable();
+                }
+            }
+
+            @Override
+            public void onVideoUnavailable(final TvInputManager.Session session,
+                    final int reason) {
+                if (mHardwareSession == session) {
+                    onHardwareVideoUnavailable(reason);
+                }
+            }
+        };
+
+        /**
+         * This method will not be called in {@link HardwareSession}. Framework will
+         * forward the application's surface to the hardware TV input.
+         */
+        @Override
+        public final boolean onSetSurface(Surface surface) {
+            Log.e(TAG, "onSetSurface() should not be called in HardwareProxySession.");
+            return false;
+        }
+
+        /**
+         * Called when the underlying hardware TV input session calls
+         * {@link TvInputService.Session#notifyVideoAvailable()}.
+         */
+        public void onHardwareVideoAvailable() { }
+
+        /**
+         * Called when the underlying hardware TV input session calls
+         * {@link TvInputService.Session#notifyVideoUnavailable(int)}.
+         *
+         * @param reason The reason that the hardware TV input stopped the playback:
+         * <ul>
+         * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_UNKNOWN}
+         * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_TUNING}
+         * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_WEAK_SIGNAL}
+         * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_BUFFERING}
+         * </ul>
+         */
+        public void onHardwareVideoUnavailable(int reason) { }
+    }
+
     /** @hide */
     public static boolean isNavigationKey(int keyCode) {
         switch (keyCode) {
@@ -1017,11 +1096,11 @@ public abstract class TvInputService extends Service {
     @SuppressLint("HandlerLeak")
     private final class ServiceHandler extends Handler {
         private static final int DO_CREATE_SESSION = 1;
-        private static final int DO_ADD_HARDWARE_TV_INPUT = 2;
-        private static final int DO_REMOVE_HARDWARE_TV_INPUT = 3;
-        private static final int DO_ADD_HDMI_CEC_TV_INPUT = 4;
-        private static final int DO_REMOVE_HDMI_CEC_TV_INPUT = 5;
-        private static final int DO_SET_WRAPPED_TV_INPUT_ID = 6;
+        private static final int DO_NOTIFY_SESSION_CREATED = 2;
+        private static final int DO_ADD_HARDWARE_TV_INPUT = 3;
+        private static final int DO_REMOVE_HARDWARE_TV_INPUT = 4;
+        private static final int DO_ADD_HDMI_CEC_TV_INPUT = 5;
+        private static final int DO_REMOVE_HDMI_CEC_TV_INPUT = 6;
 
         private void broadcastAddHardwareTvInput(int deviceId, TvInputInfo inputInfo) {
             int n = mCallbacks.beginBroadcast();
@@ -1060,18 +1139,6 @@ public abstract class TvInputService extends Service {
             mCallbacks.finishBroadcast();
         }
 
-        private void broadcastSetWrappedTvInputId(String inputId, String wrappedInputId) {
-            int n = mCallbacks.beginBroadcast();
-            for (int i = 0; i < n; ++i) {
-                try {
-                    mCallbacks.getBroadcastItem(i).setWrappedInputId(inputId, wrappedInputId);
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Error while broadcasting.", e);
-                }
-            }
-            mCallbacks.finishBroadcast();
-        }
-
         @Override
         public final void handleMessage(Message msg) {
             switch (msg.what) {
@@ -1080,17 +1147,58 @@ public abstract class TvInputService extends Service {
                     InputChannel channel = (InputChannel) args.arg1;
                     ITvInputSessionCallback cb = (ITvInputSessionCallback) args.arg2;
                     String inputId = (String) args.arg3;
-                    try {
-                        Session sessionImpl = onCreateSession(inputId);
-                        if (sessionImpl == null) {
+                    Session sessionImpl = onCreateSession(inputId);
+                    args.recycle();
+                    if (sessionImpl == null) {
+                        try {
                             // Failed to create a session.
-                            cb.onSessionCreated(null);
-                        } else {
-                            sessionImpl.setSessionCallback(cb);
-                            ITvInputSession stub = new ITvInputSessionWrapper(TvInputService.this,
-                                    sessionImpl, channel);
-                            cb.onSessionCreated(stub);
+                            cb.onSessionCreated(null, null);
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "error in onSessionCreated");
                         }
+                    } else {
+                        sessionImpl.setSessionCallback(cb);
+                        ITvInputSession stub = new ITvInputSessionWrapper(TvInputService.this,
+                                sessionImpl, channel);
+                        if (sessionImpl instanceof HardwareSession) {
+                            HardwareSession proxySession =
+                                    ((HardwareSession) sessionImpl);
+                            String harewareInputId = proxySession.getHardwareInputId();
+                            if (!TextUtils.isEmpty(harewareInputId)) {
+                                // TODO: check if the given ID is really hardware TV input.
+                                proxySession.mProxySession = stub;
+                                proxySession.mProxySessionCallback = cb;
+                                TvInputManager manager = (TvInputManager) getSystemService(
+                                        Context.TV_INPUT_SERVICE);
+                                manager.createSession(harewareInputId,
+                                        proxySession.mHardwareSessionCallback, mHandler);
+                            } else {
+                                sessionImpl.onRelease();
+                                Log.w(TAG, "Hardware input id is not setup yet.");
+                                try {
+                                    cb.onSessionCreated(null, null);
+                                } catch (RemoteException e) {
+                                    Log.e(TAG, "error in onSessionCreated");
+                                }
+                            }
+                        } else {
+                            SomeArgs someArgs = SomeArgs.obtain();
+                            someArgs.arg1 = stub;
+                            someArgs.arg2 = cb;
+                            someArgs.arg3 = null;
+                            mHandler.obtainMessage(ServiceHandler.DO_NOTIFY_SESSION_CREATED,
+                                    someArgs).sendToTarget();
+                        }
+                    }
+                    return;
+                }
+                case DO_NOTIFY_SESSION_CREATED: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    ITvInputSession stub = (ITvInputSession) args.arg1;
+                    ITvInputSessionCallback cb = (ITvInputSessionCallback) args.arg2;
+                    IBinder hardwareSessionToken = (IBinder) args.arg3;
+                    try {
+                        cb.onSessionCreated(stub, hardwareSessionToken);
                     } catch (RemoteException e) {
                         Log.e(TAG, "error in onSessionCreated");
                     }
@@ -1127,13 +1235,6 @@ public abstract class TvInputService extends Service {
                     if (inputId != null) {
                         broadcastRemoveTvInput(inputId);
                     }
-                    return;
-                }
-                case DO_SET_WRAPPED_TV_INPUT_ID: {
-                    SomeArgs args = (SomeArgs) msg.obj;
-                    String inputId = (String) args.arg1;
-                    String wrappedInputId = (String) args.arg2;
-                    broadcastSetWrappedTvInputId(inputId, wrappedInputId);
                     return;
                 }
                 default: {

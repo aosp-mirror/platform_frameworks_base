@@ -1404,6 +1404,10 @@ public final class TvInputManager {
             mPendingEventPool.release(p);
         }
 
+        IBinder getToken() {
+            return mToken;
+        }
+
         private void releaseInternal() {
             mToken = null;
             synchronized (mHandler) {
