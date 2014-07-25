@@ -58,6 +58,11 @@ enum LayerType {
     // TODO: LayerTypeSurfaceTexture? Maybe?
 };
 
+enum ClippingFlags {
+    CLIP_TO_BOUNDS =      0x1 << 0,
+    CLIP_TO_CLIP_BOUNDS = 0x1 << 1,
+};
+
 class ANDROID_API LayerProperties {
 public:
     bool setType(LayerType type) {
@@ -135,10 +140,35 @@ public:
     RenderProperties();
     virtual ~RenderProperties();
 
+    static bool setFlag(int flag, bool newValue, int* outFlags) {
+        if (newValue) {
+            if (!(flag & *outFlags)) {
+                *outFlags |= flag;
+                return true;
+            }
+            return false;
+        } else {
+            if (flag & *outFlags) {
+                *outFlags &= ~flag;
+                return true;
+            }
+            return false;
+        }
+    }
+
     RenderProperties& operator=(const RenderProperties& other);
 
     bool setClipToBounds(bool clipToBounds) {
-        return RP_SET(mPrimitiveFields.mClipToBounds, clipToBounds);
+        return setFlag(CLIP_TO_BOUNDS, clipToBounds, &mPrimitiveFields.mClippingFlags);
+    }
+
+    bool setClipBounds(const Rect& clipBounds) {
+        bool ret = setFlag(CLIP_TO_CLIP_BOUNDS, true, &mPrimitiveFields.mClippingFlags);
+        return RP_SET(mPrimitiveFields.mClipBounds, clipBounds) || ret;
+    }
+
+    bool setClipBoundsEmpty() {
+        return setFlag(CLIP_TO_CLIP_BOUNDS, false, &mPrimitiveFields.mClippingFlags);
     }
 
     bool setProjectBackwards(bool shouldProject) {
@@ -433,7 +463,7 @@ public:
         return false;
     }
 
-    bool offsetLeftRight(float offset) {
+    bool offsetLeftRight(int offset) {
         if (offset != 0) {
             mPrimitiveFields.mLeft += offset;
             mPrimitiveFields.mRight += offset;
@@ -442,7 +472,7 @@ public:
         return false;
     }
 
-    bool offsetTopBottom(float offset) {
+    bool offsetTopBottom(int offset) {
         if (offset != 0) {
             mPrimitiveFields.mTop += offset;
             mPrimitiveFields.mBottom += offset;
@@ -477,8 +507,23 @@ public:
         return mComputedFields.mTransformMatrix;
     }
 
+    int getClippingFlags() const {
+        return mPrimitiveFields.mClippingFlags;
+    }
+
     bool getClipToBounds() const {
-        return mPrimitiveFields.mClipToBounds;
+        return mPrimitiveFields.mClippingFlags & CLIP_TO_BOUNDS;
+    }
+
+    void getClippingRectForFlags(uint32_t flags, Rect* outRect) const {
+        if (flags & CLIP_TO_BOUNDS) {
+            outRect->set(0, 0, getWidth(), getHeight());
+            if (flags & CLIP_TO_CLIP_BOUNDS) {
+                outRect->intersect(mPrimitiveFields.mClipBounds);
+            }
+        } else {
+            outRect->set(mPrimitiveFields.mClipBounds);
+        }
     }
 
     bool getHasOverlappingRendering() const {
@@ -540,14 +585,13 @@ public:
     }
 
 private:
-
     // Rendering properties
     struct PrimitiveFields {
         PrimitiveFields();
 
         Outline mOutline;
         RevealClip mRevealClip;
-        bool mClipToBounds;
+        int mClippingFlags;
         bool mProjectBackwards;
         bool mProjectionReceiver;
         float mAlpha;
@@ -561,6 +605,7 @@ private:
         int mWidth, mHeight;
         bool mPivotExplicitlySet;
         bool mMatrixOrPivotDirty;
+        Rect mClipBounds;
     } mPrimitiveFields;
 
     SkMatrix* mStaticMatrix;
