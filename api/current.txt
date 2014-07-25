@@ -24345,6 +24345,7 @@ package android.provider {
   }
 
   public static final class ContactsContract.CommonDataKinds.Event implements android.provider.ContactsContract.CommonDataKinds.CommonColumns android.provider.ContactsContract.DataColumnsWithJoins {
+    method public static final java.lang.CharSequence getTypeLabel(android.content.res.Resources, int, java.lang.CharSequence);
     method public static int getTypeResource(java.lang.Integer);
     field public static final java.lang.String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/contact_event";
     field public static final java.lang.String START_DATE = "data1";
