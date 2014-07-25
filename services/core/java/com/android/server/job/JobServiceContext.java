@@ -285,7 +285,7 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
                 case MSG_CALLBACK:
                     if (DEBUG) {
                         Slog.d(TAG, "MSG_CALLBACK of : " + mRunningJob + " v:" +
-                                VERB_STRINGS[mVerb]);
+                                (mVerb >= 0 ? VERB_STRINGS[mVerb] : "[invalid]"));
                     }
                     removeMessages(MSG_TIMEOUT);
 
@@ -518,7 +518,7 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
                     EXECUTING_TIMESLICE_MILLIS : OP_TIMEOUT_MILLIS;
             if (DEBUG) {
                 Slog.d(TAG, "Scheduling time out for '" +
-                        mRunningJob.getServiceComponent().getShortClassName() + "' tId: " +
+                        mRunningJob.getServiceComponent().getShortClassName() + "' jId: " +
                         mParams.getJobId() + ", in " + (timeoutMillis / 1000) + " s");
             }
             Message m = mCallbackHandler.obtainMessage(MSG_TIMEOUT);

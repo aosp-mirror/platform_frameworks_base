@@ -137,6 +137,9 @@ public class IdleController extends StateController {
             filter.addAction(Intent.ACTION_DREAMING_STARTED);
             filter.addAction(Intent.ACTION_DREAMING_STOPPED);
 
+            // Debugging/instrumentation
+            filter.addAction(ACTION_TRIGGER_IDLE);
+
             mContext.registerReceiver(this, filter);
         }
 
