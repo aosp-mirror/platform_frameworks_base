@@ -25,4 +25,6 @@ public abstract class ActivityManagerInternal {
     // Called by the power manager.
     public abstract void goingToSleep();
     public abstract void wakingUp();
+    public abstract int startIsolatedProcess(String entryPoint, String[] mainArgs,
+            String processName, String abiOverride, int uid, Runnable crashHandler);
 }

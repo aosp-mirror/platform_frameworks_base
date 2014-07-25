@@ -16,6 +16,7 @@
 
 package android.webkit;
 
+import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -26,6 +27,7 @@ import android.os.ServiceManager;
 import android.os.StrictMode;
 import android.util.AndroidRuntimeException;
 import android.util.Log;
+import com.android.server.LocalServices;
 import dalvik.system.VMRuntime;
 
 import java.io.File;
@@ -129,9 +131,9 @@ public final class WebViewFactory {
             } else {
                 Log.e(LOGTAG, "reserving address space failed");
             }
-        } catch (Throwable e) {
+        } catch (Throwable t) {
             // Log and discard errors at this stage as we must not crash the zygote.
-            Log.e(LOGTAG, "error preparing native loader", e);
+            Log.e(LOGTAG, "error preparing native loader", t);
         }
     }
 
@@ -144,29 +146,37 @@ public final class WebViewFactory {
     public static void prepareWebViewInSystemServer() {
         if (DEBUG) Log.v(LOGTAG, "creating relro files");
         if (new File(CHROMIUM_WEBVIEW_NATIVE_LIB_64).exists()) {
-            createRelroFile(Build.SUPPORTED_64_BIT_ABIS[0]);
+            createRelroFile(true /* is64Bit */);
         }
         if (new File(CHROMIUM_WEBVIEW_NATIVE_LIB_32).exists()) {
-            createRelroFile(Build.SUPPORTED_32_BIT_ABIS[0]);
+            createRelroFile(false /* is64Bit */);
         }
     }
 
-    private static void createRelroFile(String abi) {
+    private static void createRelroFile(final boolean is64Bit) {
+        String abi = is64Bit ? Build.SUPPORTED_64_BIT_ABIS[0] : Build.SUPPORTED_32_BIT_ABIS[0];
+
+        // crashHandler is invoked by the ActivityManagerService when the isolated process crashes.
+        Runnable crashHandler = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    getUpdateService().notifyRelroCreationCompleted(is64Bit, false);
+                } catch (RemoteException e) {
+                    Log.e(LOGTAG, "Cannot reach WebViewUpdateService. " + e.getMessage());
+                }
+            }
+        };
+
         try {
-            Process.start("android.webkit.WebViewFactory$RelroFileCreator",
-                          "WebViewLoader-" + abi,
-                          Process.SHARED_RELRO_UID,
-                          Process.SHARED_RELRO_UID,
-                          null,
-                          0,                 // TODO(torne): do we need to set debug flags?
-                          Zygote.MOUNT_EXTERNAL_NONE,
-                          Build.VERSION.SDK_INT,
-                          null,
-                          abi,
-                          null);
-        } catch (Throwable e) {
+            String[] args = null;  // TODO: plumb native library paths via args.
+            LocalServices.getService(ActivityManagerInternal.class).startIsolatedProcess(
+                    RelroFileCreator.class.getName(), args, "WebViewLoader-" + abi, abi,
+                    Process.SHARED_RELRO_UID, crashHandler);
+        } catch (Throwable t) {
             // Log and discard errors as we must not crash the system server.
-            Log.e(LOGTAG, "error starting relro file creator for abi " + abi, e);
+            Log.e(LOGTAG, "error starting relro file creator for abi " + abi, t);
+            crashHandler.run();
         }
     }
 

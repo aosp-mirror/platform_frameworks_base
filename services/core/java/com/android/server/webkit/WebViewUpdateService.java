@@ -23,6 +23,7 @@ import android.content.IntentFilter;
 import android.os.Binder;
 import android.os.Process;
 import android.util.Log;
+import android.util.Slog;
 import android.webkit.IWebViewUpdateService;
 import android.webkit.WebViewFactory;
 
@@ -30,6 +31,8 @@ import android.webkit.WebViewFactory;
  * Private service to wait for the updatable WebView to be ready for use.
  * @hide
  */
+// TODO This should be implemented using the new pattern for system services.
+// See comments in CL 509840.
 public class WebViewUpdateService extends IWebViewUpdateService.Stub {
 
     private static final String TAG = "WebViewUpdateService";
@@ -57,11 +60,14 @@ public class WebViewUpdateService extends IWebViewUpdateService.Stub {
 
     /**
      * The shared relro process calls this to notify us that it's done trying to create a relro
-     * file.
+     * file. This method gets called even if the relro creation has failed or the process crashed.
      */
+    @Override // Binder call
     public void notifyRelroCreationCompleted(boolean is64Bit, boolean success) {
-        // Verify that the caller is the shared relro process.
-        if (Binder.getCallingUid() != Process.SHARED_RELRO_UID) {
+        // Verify that the caller is either the shared relro process (nominal case) or the system
+        // server (only in the case the relro process crashes and we get here via the crashHandler).
+        if (Binder.getCallingUid() != Process.SHARED_RELRO_UID &&
+                Binder.getCallingUid() != Process.SYSTEM_UID) {
             return;
         }
 
@@ -78,7 +84,13 @@ public class WebViewUpdateService extends IWebViewUpdateService.Stub {
     /**
      * WebViewFactory calls this to block WebView loading until the relro file is created.
      */
+    @Override // Binder call
     public void waitForRelroCreationCompleted(boolean is64Bit) {
+        if (Binder.getCallingUid() == Process.SYSTEM_UID) {
+            Slog.wtf(TAG, "Trying to load WebView from the SystemServer",
+                     new IllegalStateException());
+        }
+
         synchronized (this) {
             if (is64Bit) {
                 while (!mRelroReady64Bit) {
