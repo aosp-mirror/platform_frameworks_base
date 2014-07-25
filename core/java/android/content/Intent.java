@@ -17,6 +17,7 @@
 package android.content;
 
 import android.content.pm.ApplicationInfo;
+import android.provider.MediaStore;
 import android.util.ArraySet;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -38,6 +39,7 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.StrictMode;
+import android.os.UserHandle;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsProvider;
 import android.provider.OpenableColumns;
@@ -3937,6 +3939,7 @@ public class Intent implements Parcelable, Cloneable {
     private Rect mSourceBounds;
     private Intent mSelector;
     private ClipData mClipData;
+    private int mContentUserHint = UserHandle.USER_CURRENT;
 
     // ---------------------------------------------------------------------
 
@@ -3956,6 +3959,7 @@ public class Intent implements Parcelable, Cloneable {
         this.mPackage = o.mPackage;
         this.mComponent = o.mComponent;
         this.mFlags = o.mFlags;
+        this.mContentUserHint = o.mContentUserHint;
         if (o.mCategories != null) {
             this.mCategories = new ArraySet<String>(o.mCategories);
         }
@@ -4658,6 +4662,11 @@ public class Intent implements Parcelable, Cloneable {
      */
     public ClipData getClipData() {
         return mClipData;
+    }
+
+    /** @hide */
+    public int getContentUserHint() {
+        return mContentUserHint;
     }
 
     /**
@@ -5676,6 +5685,16 @@ public class Intent implements Parcelable, Cloneable {
      */
     public void setClipData(ClipData clip) {
         mClipData = clip;
+    }
+
+    /**
+     * This is NOT a secure mechanism to identify the user who sent the intent.
+     * When the intent is sent to a different user, it is used to fix uris by adding the userId
+     * who sent the intent.
+     * @hide
+     */
+    public void setContentUserHint(int contentUserHint) {
+        mContentUserHint = contentUserHint;
     }
 
     /**
@@ -6731,6 +6750,7 @@ public class Intent implements Parcelable, Cloneable {
     @FillInFlags
     public int fillIn(Intent other, @FillInFlags int flags) {
         int changes = 0;
+        boolean mayHaveCopiedUris = false;
         if (other.mAction != null
                 && (mAction == null || (flags&FILL_IN_ACTION) != 0)) {
             mAction = other.mAction;
@@ -6742,6 +6762,7 @@ public class Intent implements Parcelable, Cloneable {
             mData = other.mData;
             mType = other.mType;
             changes |= FILL_IN_DATA;
+            mayHaveCopiedUris = true;
         }
         if (other.mCategories != null
                 && (mCategories == null || (flags&FILL_IN_CATEGORIES) != 0)) {
@@ -6771,6 +6792,7 @@ public class Intent implements Parcelable, Cloneable {
                 && (mClipData == null || (flags&FILL_IN_CLIP_DATA) != 0)) {
             mClipData = other.mClipData;
             changes |= FILL_IN_CLIP_DATA;
+            mayHaveCopiedUris = true;
         }
         // Component is special: it can -only- be set if explicitly allowed,
         // since otherwise the sender could force the intent somewhere the
@@ -6788,12 +6810,14 @@ public class Intent implements Parcelable, Cloneable {
         if (mExtras == null) {
             if (other.mExtras != null) {
                 mExtras = new Bundle(other.mExtras);
+                mayHaveCopiedUris = true;
             }
         } else if (other.mExtras != null) {
             try {
                 Bundle newb = new Bundle(other.mExtras);
                 newb.putAll(mExtras);
                 mExtras = newb;
+                mayHaveCopiedUris = true;
             } catch (RuntimeException e) {
                 // Modifying the extras can cause us to unparcel the contents
                 // of the bundle, and if we do this in the system process that
@@ -6802,6 +6826,10 @@ public class Intent implements Parcelable, Cloneable {
                 // ignore it and keep the original contents. :(
                 Log.w("Intent", "Failure filling in extras", e);
             }
+        }
+        if (mayHaveCopiedUris && mContentUserHint == UserHandle.USER_CURRENT
+                && other.mContentUserHint != UserHandle.USER_CURRENT) {
+            mContentUserHint = other.mContentUserHint;
         }
         return changes;
     }
@@ -7030,8 +7058,15 @@ public class Intent implements Parcelable, Cloneable {
             first = false;
             b.append("(has extras)");
         }
+        if (mContentUserHint != UserHandle.USER_CURRENT) {
+            if (!first) {
+                b.append(' ');
+            }
+            first = false;
+            b.append("u=").append(mContentUserHint);
+        }
         if (mSelector != null) {
-            b.append(" sel={");
+            b.append(" sel=");
             mSelector.toShortString(b, secure, comp, extras, clip);
             b.append("}");
         }
@@ -7208,7 +7243,7 @@ public class Intent implements Parcelable, Cloneable {
         } else {
             out.writeInt(0);
         }
-
+        out.writeInt(mContentUserHint);
         out.writeBundle(mExtras);
     }
 
@@ -7257,7 +7292,7 @@ public class Intent implements Parcelable, Cloneable {
         if (in.readInt() != 0) {
             mClipData = new ClipData(in);
         }
-
+        mContentUserHint = in.readInt();
         mExtras = in.readBundle();
     }
 
@@ -7467,39 +7502,50 @@ public class Intent implements Parcelable, Cloneable {
     }
 
     /**
-     * Prepare this {@link Intent} to be sent to another user
-     *
      * @hide
      */
-    public void prepareToLeaveUser(int userId) {
+    public void prepareToEnterProcess() {
+        if (mContentUserHint != UserHandle.USER_CURRENT) {
+            fixUris(mContentUserHint);
+            mContentUserHint = UserHandle.USER_CURRENT;
+        }
+    }
+
+    /**
+     * @hide
+     */
+     public void fixUris(int contentUserHint) {
         Uri data = getData();
         if (data != null) {
-            mData = maybeAddUserId(data, userId);
-        }
-        if (mSelector != null) {
-            mSelector.prepareToLeaveUser(userId);
+            mData = maybeAddUserId(data, contentUserHint);
         }
         if (mClipData != null) {
-            mClipData.prepareToLeaveUser(userId);
+            mClipData.fixUris(contentUserHint);
         }
         String action = getAction();
         if (ACTION_SEND.equals(action)) {
             final Uri stream = getParcelableExtra(EXTRA_STREAM);
             if (stream != null) {
-                putExtra(EXTRA_STREAM, maybeAddUserId(stream, userId));
+                putExtra(EXTRA_STREAM, maybeAddUserId(stream, contentUserHint));
             }
-        }
-        if (ACTION_SEND_MULTIPLE.equals(action)) {
+        } else if (ACTION_SEND_MULTIPLE.equals(action)) {
             final ArrayList<Uri> streams = getParcelableArrayListExtra(EXTRA_STREAM);
             if (streams != null) {
                 ArrayList<Uri> newStreams = new ArrayList<Uri>();
                 for (int i = 0; i < streams.size(); i++) {
-                    newStreams.add(maybeAddUserId(streams.get(i), userId));
+                    newStreams.add(maybeAddUserId(streams.get(i), contentUserHint));
                 }
                 putParcelableArrayListExtra(EXTRA_STREAM, newStreams);
             }
+        } else if (MediaStore.ACTION_IMAGE_CAPTURE.equals(action)
+                || MediaStore.ACTION_IMAGE_CAPTURE_SECURE.equals(action)
+                || MediaStore.ACTION_VIDEO_CAPTURE.equals(action)) {
+            final Uri output = getParcelableExtra(MediaStore.EXTRA_OUTPUT);
+            if (output != null) {
+                putExtra(MediaStore.EXTRA_OUTPUT, maybeAddUserId(output, contentUserHint));
+            }
         }
-    }
+     }
 
     /**
      * Migrate any {@link #EXTRA_STREAM} in {@link #ACTION_SEND} and
@@ -7589,6 +7635,20 @@ public class Intent implements Parcelable, Cloneable {
                     return true;
                 }
             } catch (ClassCastException e) {
+            }
+        } else if (MediaStore.ACTION_IMAGE_CAPTURE.equals(action)
+                || MediaStore.ACTION_IMAGE_CAPTURE_SECURE.equals(action)
+                || MediaStore.ACTION_VIDEO_CAPTURE.equals(action)) {
+            final Uri output;
+            try {
+                output = getParcelableExtra(MediaStore.EXTRA_OUTPUT);
+            } catch (ClassCastException e) {
+                return false;
+            }
+            if (output != null) {
+                setClipData(ClipData.newRawUri("", output));
+                addFlags(FLAG_GRANT_WRITE_URI_PERMISSION|FLAG_GRANT_READ_URI_PERMISSION);
+                return true;
             }
         }
 
