@@ -65,7 +65,7 @@ public class CameraDeviceState {
         void onError(int errorCode, RequestHolder holder);
         void onConfiguring();
         void onIdle();
-        void onCaptureStarted(RequestHolder holder);
+        void onCaptureStarted(RequestHolder holder, long timestamp);
         void onCaptureResult(CameraMetadataNative result, RequestHolder holder);
     }
 
@@ -125,11 +125,12 @@ public class CameraDeviceState {
      * </p>
      *
      * @param request A {@link RequestHolder} containing the request for the current capture.
+     * @param timestamp The timestamp of the capture start in nanoseconds.
      * @return {@link CameraBinderDecorator#NO_ERROR}, or an error if one has occurred.
      */
-    public synchronized int setCaptureStart(final RequestHolder request) {
+    public synchronized int setCaptureStart(final RequestHolder request, long timestamp) {
         mCurrentRequest = request;
-        doStateTransition(STATE_CAPTURING);
+        doStateTransition(STATE_CAPTURING, timestamp);
         return mCurrentError;
     }
 
@@ -180,6 +181,10 @@ public class CameraDeviceState {
     }
 
     private void doStateTransition(int newState) {
+        doStateTransition(newState, /*timestamp*/0);
+    }
+
+    private void doStateTransition(int newState, final long timestamp) {
         if (DEBUG) {
             if (newState != mCurrentState) {
                 Log.d(TAG, "Transitioning to state " + newState);
@@ -250,7 +255,7 @@ public class CameraDeviceState {
                     mCurrentHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            mCurrentListener.onCaptureStarted(mCurrentRequest);
+                            mCurrentListener.onCaptureStarted(mCurrentRequest, timestamp);
                         }
                     });
                 }
