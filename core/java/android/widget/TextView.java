@@ -222,7 +222,6 @@ import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
  * @attr ref android.R.styleable#TextView_imeActionId
  * @attr ref android.R.styleable#TextView_editorExtras
  * @attr ref android.R.styleable#TextView_elegantTextHeight
- * @attr ref android.R.styleable#TextView_letterSpacing
  */
 @RemoteView
 public class TextView extends View implements ViewTreeObserver.OnPreDrawListener {
