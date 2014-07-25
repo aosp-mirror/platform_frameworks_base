@@ -980,10 +980,6 @@ public final class HdmiControlService extends SystemService {
             }
         }
 
-        private boolean isTvDevice() {
-            return tv() != null;
-        }
-
         @Override
         public void setProhibitMode(final boolean enabled) {
             enforceAccessPermission();
@@ -1302,6 +1298,10 @@ public final class HdmiControlService extends SystemService {
 
     private HdmiCecLocalDeviceTv tv() {
         return (HdmiCecLocalDeviceTv) mCecController.getLocalDevice(HdmiCecDeviceInfo.DEVICE_TV);
+    }
+
+    boolean isTvDevice() {
+        return tv() != null;
     }
 
     private HdmiCecLocalDevicePlayback playback() {
