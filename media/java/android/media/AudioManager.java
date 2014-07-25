@@ -354,6 +354,12 @@ public class AudioManager {
     public static final int FLAG_ACTIVE_MEDIA_ONLY = 1 << 9;
 
     /**
+     * Like FLAG_SHOW_UI, but only dialog warnings and confirmations, no sliders.
+     * @hide
+     */
+    public static final int FLAG_SHOW_UI_WARNINGS = 1 << 10;
+
+    /**
      * Ringer mode that will be silent and will not vibrate. (This overrides the
      * vibrate setting.)
      *
