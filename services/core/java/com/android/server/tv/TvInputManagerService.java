@@ -693,45 +693,6 @@ public final class TvInputManagerService extends SystemService {
         updateServiceConnectionLocked(sessionState.mInfo.getComponent(), userId);
     }
 
-    private void unregisterClientInternalLocked(IBinder clientToken, String inputId,
-            int userId) {
-        UserState userState = getUserStateLocked(userId);
-        ClientState clientState = userState.clientStateMap.get(clientToken);
-        if (clientState != null) {
-            clientState.mInputIds.remove(inputId);
-            if (clientState.isEmpty()) {
-                userState.clientStateMap.remove(clientToken);
-            }
-        }
-
-        TvInputInfo info = userState.inputMap.get(inputId).mInfo;
-        if (info == null) {
-            return;
-        }
-        ServiceState serviceState = userState.serviceStateMap.get(info.getComponent());
-        if (serviceState == null) {
-            return;
-        }
-
-        // Remove this client from the client list and unregister the callback.
-        serviceState.mClientTokens.remove(clientToken);
-        if (!serviceState.mClientTokens.isEmpty()) {
-            // We have other clients who want to keep the callback. Do this later.
-            return;
-        }
-        if (serviceState.mService == null || serviceState.mCallback == null) {
-            return;
-        }
-        try {
-            serviceState.mService.unregisterCallback(serviceState.mCallback);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "error in unregisterCallback", e);
-        } finally {
-            serviceState.mCallback = null;
-            updateServiceConnectionLocked(info.getComponent(), userId);
-        }
-    }
-
     private void notifyInputAddedLocked(UserState userState, String inputId) {
         if (DEBUG) {
             Slog.d(TAG, "notifyInputAdded: inputId = " + inputId);
@@ -1415,13 +1376,6 @@ public final class TvInputManagerService extends SystemService {
 
                         pw.increaseIndent();
 
-                        pw.println("mInputIds:");
-                        pw.increaseIndent();
-                        for (String inputId : client.mInputIds) {
-                            pw.println(inputId);
-                        }
-                        pw.decreaseIndent();
-
                         pw.println("mSessionTokens:");
                         pw.increaseIndent();
                         for (IBinder token : client.mSessionTokens) {
@@ -1545,7 +1499,6 @@ public final class TvInputManagerService extends SystemService {
     }
 
     private final class ClientState implements IBinder.DeathRecipient {
-        private final List<String> mInputIds = new ArrayList<String>();
         private final List<IBinder> mSessionTokens = new ArrayList<IBinder>();
 
         private IBinder mClientToken;
@@ -1557,7 +1510,7 @@ public final class TvInputManagerService extends SystemService {
         }
 
         public boolean isEmpty() {
-            return mInputIds.isEmpty() && mSessionTokens.isEmpty();
+            return mSessionTokens.isEmpty();
         }
 
         @Override
@@ -1565,16 +1518,12 @@ public final class TvInputManagerService extends SystemService {
             synchronized (mLock) {
                 UserState userState = getUserStateLocked(mUserId);
                 // DO NOT remove the client state of clientStateMap in this method. It will be
-                // removed in releaseSessionLocked() or unregisterClientInternalLocked().
+                // removed in releaseSessionLocked().
                 ClientState clientState = userState.clientStateMap.get(mClientToken);
                 if (clientState != null) {
                     while (clientState.mSessionTokens.size() > 0) {
                         releaseSessionLocked(
                                 clientState.mSessionTokens.get(0), Process.SYSTEM_UID, mUserId);
-                    }
-                    while (clientState.mInputIds.size() > 0) {
-                        unregisterClientInternalLocked(
-                                mClientToken, clientState.mInputIds.get(0), mUserId);
                     }
                 }
                 mClientToken = null;
