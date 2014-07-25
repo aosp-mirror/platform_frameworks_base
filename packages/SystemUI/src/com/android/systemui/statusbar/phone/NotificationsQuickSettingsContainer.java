@@ -17,17 +17,38 @@
 package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
+import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.view.View;
+import android.view.ViewStub;
 import android.widget.FrameLayout;
+
+import com.android.systemui.R;
 
 /**
  * The container with notification stack scroller and quick settings inside.
  */
-public class NotificationsQuickSettingsContainer extends FrameLayout {
+public class NotificationsQuickSettingsContainer extends FrameLayout
+        implements ViewStub.OnInflateListener {
+
+    private View mScrollView;
+    private View mUserSwitcher;
+    private View mStackScroller;
+    private boolean mInflated;
 
     public NotificationsQuickSettingsContainer(Context context, AttributeSet attrs) {
         super(context, attrs);
+    }
+
+    @Override
+    protected void onFinishInflate() {
+        super.onFinishInflate();
+        mScrollView = findViewById(R.id.scroll_view);
+        mStackScroller = findViewById(R.id.notification_stack_scroller);
+        ViewStub userSwitcher = (ViewStub) findViewById(R.id.keyguard_user_switcher);
+        userSwitcher.setOnInflateListener(this);
+        mUserSwitcher = userSwitcher;
     }
 
     @Override
@@ -35,5 +56,32 @@ public class NotificationsQuickSettingsContainer extends FrameLayout {
         setPadding(0, 0, 0, insets.bottom);
         insets.bottom = 0;
         return true;
+    }
+
+    @Override
+    protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
+        boolean userSwitcherVisible = mInflated && mUserSwitcher.getVisibility() == View.VISIBLE;
+
+        // Invert the order of the scroll view and user switcher such that the notifications receive
+        // touches first but the panel gets drawn above.
+        if (child == mScrollView) {
+            return super.drawChild(canvas, mStackScroller, drawingTime);
+        } else if (child == mStackScroller) {
+            return super.drawChild(canvas, userSwitcherVisible ? mUserSwitcher : mScrollView,
+                    drawingTime);
+        } else if (child == mUserSwitcher) {
+            return super.drawChild(canvas, userSwitcherVisible ? mScrollView : mUserSwitcher,
+                    drawingTime);
+        } else {
+            return super.drawChild(canvas, child, drawingTime);
+        }
+    }
+
+    @Override
+    public void onInflate(ViewStub stub, View inflated) {
+        if (stub == mUserSwitcher) {
+            mUserSwitcher = inflated;
+            mInflated = true;
+        }
     }
 }
