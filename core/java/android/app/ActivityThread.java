@@ -2205,6 +2205,7 @@ public final class ActivityThread {
                     cl, component.getClassName(), r.intent);
             StrictMode.incrementExpectedActivityCount(activity.getClass());
             r.intent.setExtrasClassLoader(cl);
+            r.intent.prepareToEnterProcess();
             if (r.state != null) {
                 r.state.setClassLoader(cl);
             }
@@ -2429,6 +2430,7 @@ public final class ActivityThread {
         for (int i=0; i<N; i++) {
             Intent intent = intents.get(i);
             intent.setExtrasClassLoader(r.activity.getClassLoader());
+            intent.prepareToEnterProcess();
             r.activity.mFragments.noteStateNotSaved();
             mInstrumentation.callActivityOnNewIntent(r.activity, intent);
         }
@@ -2552,6 +2554,7 @@ public final class ActivityThread {
         try {
             java.lang.ClassLoader cl = packageInfo.getClassLoader();
             data.intent.setExtrasClassLoader(cl);
+            data.intent.prepareToEnterProcess();
             data.setExtrasClassLoader(cl);
             receiver = (BroadcastReceiver)cl.loadClass(component).newInstance();
         } catch (Exception e) {
@@ -2753,6 +2756,7 @@ public final class ActivityThread {
         if (s != null) {
             try {
                 data.intent.setExtrasClassLoader(s.getClassLoader());
+                data.intent.prepareToEnterProcess();
                 try {
                     if (!data.rebind) {
                         IBinder binder = s.onBind(data.intent);
@@ -2781,6 +2785,7 @@ public final class ActivityThread {
         if (s != null) {
             try {
                 data.intent.setExtrasClassLoader(s.getClassLoader());
+                data.intent.prepareToEnterProcess();
                 boolean doRebind = s.onUnbind(data.intent);
                 try {
                     if (doRebind) {
@@ -2856,6 +2861,7 @@ public final class ActivityThread {
             try {
                 if (data.args != null) {
                     data.args.setExtrasClassLoader(s.getClassLoader());
+                    data.args.prepareToEnterProcess();
                 }
                 int res;
                 if (!data.taskRemoved) {
@@ -3506,6 +3512,7 @@ public final class ActivityThread {
             try {
                 if (ri.mData != null) {
                     ri.mData.setExtrasClassLoader(r.activity.getClassLoader());
+                    ri.mData.prepareToEnterProcess();
                 }
                 if (DEBUG_RESULTS) Slog.v(TAG,
                         "Delivering result to activity " + r + " : " + ri);
