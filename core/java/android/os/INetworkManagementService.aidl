@@ -367,7 +367,7 @@ interface INetworkManagementService
     /**
      * Setup a new VPN.
      */
-    void createVirtualNetwork(int netId, boolean hasDNS);
+    void createVirtualNetwork(int netId, boolean hasDNS, boolean secure);
 
     /**
      * Remove a network.
