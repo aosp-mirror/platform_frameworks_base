@@ -339,12 +339,13 @@ public abstract class InCallService extends Service {
         public static abstract class Listener {
             /**
              * Called when a session modification request is received from the remote device.
-             * The remote request is sent via {@link VideoCallProvider#onSendSessionModifyRequest}.
-             * The InCall UI is responsible for potentially prompting the user whether they wish to
-             * accept the new call profile (e.g. prompt user if they wish to accept an upgrade from
-             * an audio to a video call) and should call
-             * {@link VideoCallProvider#onSendSessionModifyResponse} to indicate the video settings
-             * the user has agreed to.
+             * The remote request is sent via
+             * {@link ConnectionService.VideoCallProvider#onSendSessionModifyRequest}. The InCall UI
+             * is responsible for potentially prompting the user whether they wish to accept the new
+             * call profile (e.g. prompt user if they wish to accept an upgrade from an audio to a
+             * video call) and should call
+             * {@link ConnectionService.VideoCallProvider#onSendSessionModifyResponse} to indicate
+             * the video settings the user has agreed to.
              *
              * @param videoCallProfile The requested video call profile.
              */
@@ -353,7 +354,7 @@ public abstract class InCallService extends Service {
             /**
              * Called when a response to a session modification request is received from the remote
              * device. The remote InCall UI sends the response using
-             * {@link VideoCallProvider#onSendSessionModifyResponse}.
+             * {@link ConnectionService.VideoCallProvider#onSendSessionModifyResponse}.
              *
              * @param status Status of the session modify request.  Valid values are
              *               {@link VideoCall#SESSION_MODIFY_REQUEST_SUCCESS},

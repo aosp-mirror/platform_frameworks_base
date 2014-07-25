@@ -275,7 +275,8 @@ final class ConnectionServiceAdapter implements DeathRecipient {
      * @param callId The unique ID of the call to set with the given call video provider.
      * @param videoCallProvider The call video provider instance to set on the call.
      */
-    void setVideoCallProvider(String callId, VideoCallProvider videoCallProvider) {
+    void setVideoCallProvider(
+            String callId, ConnectionService.VideoCallProvider videoCallProvider) {
         for (IConnectionServiceAdapter adapter : mAdapters) {
             try {
                 adapter.setVideoCallProvider(
