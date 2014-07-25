@@ -151,6 +151,7 @@ public final class BluetoothLeScanner {
         synchronized (mLeScanClients) {
             BleScanCallbackWrapper wrapper = mLeScanClients.remove(callback);
             if (wrapper == null) {
+                if (DBG) Log.d(TAG, "could not find callback wrapper");
                 return;
             }
             wrapper.stopLeScan();
@@ -266,7 +267,7 @@ public final class BluetoothLeScanner {
                 if (status == BluetoothGatt.GATT_SUCCESS) {
                     mClientIf = clientIf;
                     try {
-                        mBluetoothGatt.startScanWithFilters(mClientIf, false, mSettings, mFilters);
+                        mBluetoothGatt.startScan(mClientIf, false, mSettings, mFilters);
                     } catch (RemoteException e) {
                         Log.e(TAG, "fail to start le scan: " + e);
                         mClientIf = -1;

@@ -33,10 +33,8 @@ import android.bluetooth.IBluetoothGattServerCallback;
 interface IBluetoothGatt {
     List<BluetoothDevice> getDevicesMatchingConnectionStates(in int[] states);
 
-    void startScan(in int appIf, in boolean isServer);
-    void startScanWithUuids(in int appIf, in boolean isServer, in ParcelUuid[] ids);
-    void startScanWithFilters(in int appIf, in boolean isServer,
-                              in ScanSettings settings, in List<ScanFilter> filters);
+    void startScan(in int appIf, in boolean isServer, in ScanSettings settings,
+                   in List<ScanFilter> filters);
     void stopScan(in int appIf, in boolean isServer);
     void flushPendingBatchResults(in int appIf, in boolean isServer);
     void startMultiAdvertising(in int appIf,
