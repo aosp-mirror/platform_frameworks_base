@@ -518,6 +518,9 @@ public class RadialTimePickerView extends View implements View.OnTouchListener {
         if (mIs24HourMode) {
             if (mIsOnInnerCircle) {
                 hours = hours % 12;
+                if (hours == 0) {
+                    hours = 12;
+                }
             } else {
                 if (hours != 0) {
                     hours += 12;
