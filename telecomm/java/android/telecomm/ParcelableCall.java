@@ -22,7 +22,7 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.telephony.DisconnectCause;
 
-import com.android.internal.telecomm.ICallVideoProvider;
+import com.android.internal.telecomm.IVideoCallProvider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,8 +45,8 @@ public final class ParcelableCall implements Parcelable {
     private final int mCallerDisplayNamePresentation;
     private final GatewayInfo mGatewayInfo;
     private final PhoneAccountHandle mAccountHandle;
-    private final ICallVideoProvider mCallVideoProvider;
-    private RemoteCallVideoProvider mRemoteCallVideoProvider;
+    private final IVideoCallProvider mVideoCallProvider;
+    private InCallService.VideoCall mVideoCall;
     private final String mParentCallId;
     private final List<String> mChildCallIds;
     private final StatusHints mStatusHints;
@@ -67,7 +67,7 @@ public final class ParcelableCall implements Parcelable {
             int callerDisplayNamePresentation,
             GatewayInfo gatewayInfo,
             PhoneAccountHandle accountHandle,
-            ICallVideoProvider callVideoProvider,
+            IVideoCallProvider videoCallProvider,
             String parentCallId,
             List<String> childCallIds,
             StatusHints statusHints,
@@ -85,7 +85,7 @@ public final class ParcelableCall implements Parcelable {
         mCallerDisplayNamePresentation = callerDisplayNamePresentation;
         mGatewayInfo = gatewayInfo;
         mAccountHandle = accountHandle;
-        mCallVideoProvider = callVideoProvider;
+        mVideoCallProvider = videoCallProvider;
         mParentCallId = parentCallId;
         mChildCallIds = childCallIds;
         mStatusHints = statusHints;
@@ -166,19 +166,19 @@ public final class ParcelableCall implements Parcelable {
     }
 
     /**
-     * Returns an object for remotely communicating through the call video provider's binder.
-     * @return The call video provider.
+     * Returns an object for remotely communicating through the video call provider's binder.
+     * @return The video call.
      */
-    public RemoteCallVideoProvider getCallVideoProvider() throws RemoteException {
-        if (mRemoteCallVideoProvider == null && mCallVideoProvider != null) {
+    public InCallService.VideoCall getVideoCall() {
+        if (mVideoCall == null && mVideoCallProvider != null) {
             try {
-                mRemoteCallVideoProvider = new RemoteCallVideoProvider(mCallVideoProvider);
+                mVideoCall = new VideoCallImpl(mVideoCallProvider);
             } catch (RemoteException ignored) {
                 // Ignore RemoteException.
             }
         }
 
-        return mRemoteCallVideoProvider;
+        return mVideoCall;
     }
 
     /**
@@ -235,8 +235,8 @@ public final class ParcelableCall implements Parcelable {
             int callerDisplayNamePresentation = source.readInt();
             GatewayInfo gatewayInfo = source.readParcelable(classLoader);
             PhoneAccountHandle accountHandle = source.readParcelable(classLoader);
-            ICallVideoProvider callVideoProvider =
-                    ICallVideoProvider.Stub.asInterface(source.readStrongBinder());
+            IVideoCallProvider videoCallProvider =
+                    IVideoCallProvider.Stub.asInterface(source.readStrongBinder());
             String parentCallId = source.readString();
             List<String> childCallIds = new ArrayList<>();
             source.readList(childCallIds, classLoader);
@@ -245,7 +245,7 @@ public final class ParcelableCall implements Parcelable {
             return new ParcelableCall(id, state, disconnectCauseCode, disconnectCauseMsg,
                     cannedSmsResponses, capabilities, connectTimeMillis, handle, handlePresentation,
                     callerDisplayName, callerDisplayNamePresentation, gatewayInfo,
-                    accountHandle, callVideoProvider, parentCallId, childCallIds, statusHints,
+                    accountHandle, videoCallProvider, parentCallId, childCallIds, statusHints,
                     videoState);
         }
 
@@ -278,7 +278,7 @@ public final class ParcelableCall implements Parcelable {
         destination.writeParcelable(mGatewayInfo, 0);
         destination.writeParcelable(mAccountHandle, 0);
         destination.writeStrongBinder(
-                mCallVideoProvider != null ? mCallVideoProvider.asBinder() : null);
+                mVideoCallProvider != null ? mVideoCallProvider.asBinder() : null);
         destination.writeString(mParentCallId);
         destination.writeList(mChildCallIds);
         destination.writeParcelable(mStatusHints, 0);
