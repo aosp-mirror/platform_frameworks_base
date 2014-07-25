@@ -120,8 +120,22 @@ public class RippleDrawable extends LayerDrawable {
     /** The masking layer, e.g. the layer with id R.id.mask. */
     private Drawable mMask;
 
-    /** The current hotspot. May be actively animating or pending entry. */
-    private Ripple mHotspot;
+    /** The current background. May be actively animating or pending entry. */
+    private RippleBackground mBackground;
+
+    /** Whether we expect to draw a background when visible. */
+    private boolean mBackgroundActive;
+
+    /** The current ripple. May be actively animating or pending entry. */
+    private Ripple mRipple;
+
+    /** Whether we expect to draw a ripple when visible. */
+    private boolean mRippleActive;
+
+    // Hotspot coordinates that are awaiting activation.
+    private float mPendingX;
+    private float mPendingY;
+    private boolean mHasPending;
 
     /**
      * Lazily-created array of actively animating ripples. Inactive ripples are
@@ -141,9 +155,6 @@ public class RippleDrawable extends LayerDrawable {
 
     /** Whether bounds are being overridden. */
     private boolean mOverrideBounds;
-
-    /** Whether the hotspot is currently active (e.g. focused or pressed). */
-    private boolean mActive;
 
     /**
      * Constructor used for drawable inflation.
@@ -205,20 +216,26 @@ public class RippleDrawable extends LayerDrawable {
     protected boolean onStateChange(int[] stateSet) {
         super.onStateChange(stateSet);
 
-        // TODO: This would make more sense in a StateListDrawable.
-        boolean active = false;
         boolean enabled = false;
+        boolean pressed = false;
+        boolean focused = false;
+
         final int N = stateSet.length;
         for (int i = 0; i < N; i++) {
             if (stateSet[i] == R.attr.state_enabled) {
                 enabled = true;
             }
             if (stateSet[i] == R.attr.state_focused
-                    || stateSet[i] == R.attr.state_pressed) {
-                active = true;
+                    || stateSet[i] == R.attr.state_selected) {
+                focused = true;
+            }
+            if (stateSet[i] == R.attr.state_pressed) {
+                pressed = true;
             }
         }
-        setActive(active && enabled);
+
+        setRippleActive(enabled && pressed);
+        setBackgroundActive(focused || (enabled && pressed));
 
         // Update the paint color. Only applicable when animated in software.
         if (mRipplePaint != null && mState.mColor != null) {
@@ -235,14 +252,24 @@ public class RippleDrawable extends LayerDrawable {
         return false;
     }
 
-    private void setActive(boolean active) {
-        if (mActive != active) {
-            mActive = active;
-
+    private void setRippleActive(boolean active) {
+        if (mRippleActive != active) {
+            mRippleActive = active;
             if (active) {
-                activateHotspot();
+                activateRipple();
             } else {
-                removeHotspot();
+                removeRipple();
+            }
+        }
+    }
+
+    private void setBackgroundActive(boolean active) {
+        if (mBackgroundActive != active) {
+            mBackgroundActive = active;
+            if (active) {
+                activateBackground();
+            } else {
+                removeBackground();
             }
         }
     }
@@ -261,11 +288,23 @@ public class RippleDrawable extends LayerDrawable {
 
     @Override
     public boolean setVisible(boolean visible, boolean restart) {
+        final boolean changed = super.setVisible(visible, restart);
+
         if (!visible) {
             clearHotspots();
+        } else if (changed) {
+            // If we just became visible, ensure the background and ripple
+            // visibilities are consistent with their internal states.
+            if (mRippleActive) {
+                activateRipple();
+            }
+
+            if (mBackgroundActive) {
+                activateBackground();
+            }
         }
 
-        return super.setVisible(visible, restart);
+        return changed;
     }
 
     /**
@@ -399,54 +438,101 @@ public class RippleDrawable extends LayerDrawable {
 
     @Override
     public void setHotspot(float x, float y) {
-        if (mHotspot == null) {
-            mHotspot = new Ripple(this, mHotspotBounds, x, y);
+        if (mRipple == null || mBackground == null) {
+            mPendingX = x;
+            mPendingY = y;
+            mHasPending = true;
+        }
 
-            if (mActive) {
-                activateHotspot();
-            }
-        } else {
-            mHotspot.move(x, y);
+        if (mRipple != null) {
+            mRipple.move(x, y);
+        }
+
+        if (mBackground != null) {
+            mBackground.move(x, y);
         }
     }
 
     /**
      * Creates an active hotspot at the specified location.
      */
-    private void activateHotspot() {
+    private void activateBackground() {
+        if (mBackground == null) {
+            final float x;
+            final float y;
+            if (mHasPending) {
+                mHasPending = false;
+                x = mPendingX;
+                y = mPendingY;
+            } else {
+                x = mHotspotBounds.exactCenterX();
+                y = mHotspotBounds.exactCenterY();
+            }
+            mBackground = new RippleBackground(this, mHotspotBounds, x, y);
+        }
+
+        final int color = mState.mColor.getColorForState(getState(), Color.TRANSPARENT);
+        mBackground.setup(mState.mMaxRadius, color, mDensity);
+        mBackground.enter();
+    }
+
+    private void removeBackground() {
+        if (mBackground != null) {
+            // Don't null out the background, we need it to draw!
+            mBackground.exit();
+        }
+    }
+
+    /**
+     * Creates an active hotspot at the specified location.
+     */
+    private void activateRipple() {
         if (mAnimatingRipplesCount >= MAX_RIPPLES) {
             // This should never happen unless the user is tapping like a maniac
             // or there is a bug that's preventing ripples from being removed.
             return;
         }
 
-        if (mHotspot == null) {
-            final float x = mHotspotBounds.exactCenterX();
-            final float y = mHotspotBounds.exactCenterY();
-            mHotspot = new Ripple(this, mHotspotBounds, x, y);
+        if (mRipple == null) {
+            final float x;
+            final float y;
+            if (mHasPending) {
+                mHasPending = false;
+                x = mPendingX;
+                y = mPendingY;
+            } else {
+                x = mHotspotBounds.exactCenterX();
+                y = mHotspotBounds.exactCenterY();
+            }
+            mRipple = new Ripple(this, mHotspotBounds, x, y);
         }
 
         final int color = mState.mColor.getColorForState(getState(), Color.TRANSPARENT);
-        mHotspot.setup(mState.mMaxRadius, color, mDensity);
-        mHotspot.enter();
+        mRipple.setup(mState.mMaxRadius, color, mDensity);
+        mRipple.enter();
 
         if (mAnimatingRipples == null) {
             mAnimatingRipples = new Ripple[MAX_RIPPLES];
         }
-        mAnimatingRipples[mAnimatingRipplesCount++] = mHotspot;
+        mAnimatingRipples[mAnimatingRipplesCount++] = mRipple;
     }
 
-    private void removeHotspot() {
-        if (mHotspot != null) {
-            mHotspot.exit();
-            mHotspot = null;
+    private void removeRipple() {
+        if (mRipple != null) {
+            mRipple.exit();
+            mRipple = null;
         }
     }
 
     private void clearHotspots() {
-        if (mHotspot != null) {
-            mHotspot.cancel();
-            mHotspot = null;
+        if (mRipple != null) {
+            mRipple.cancel();
+            mRipple = null;
+        }
+
+        if (mBackground != null) {
+            mBackground.cancel();
+            mBackground = null;
         }
 
         final int count = mAnimatingRipplesCount;
@@ -486,6 +572,10 @@ public class RippleDrawable extends LayerDrawable {
         for (int i = 0; i < count; i++) {
             ripples[i].onHotspotBoundsChanged();
         }
+
+        if (mBackground != null) {
+            mBackground.onHotspotBoundsChanged();
+        }
     }
 
     /**
@@ -524,18 +614,28 @@ public class RippleDrawable extends LayerDrawable {
         // Next, try to draw the ripples (into a layer if necessary). If we need
         // to mask against the underlying content, set the xfermode to SRC_ATOP.
         final PorterDuffXfermode xfermode = (hasMask || !drawNonMaskContent) ? SRC_OVER : SRC_ATOP;
-        final int rippleLayer = drawRippleLayer(canvas, bounds, xfermode);
+
+        // If we have a background and a non-opaque mask, draw the masking layer.
+        final int backgroundLayer = drawBackgroundLayer(canvas, bounds, xfermode);
+        if (backgroundLayer >= 0) {
+            if (drawMask) {
+                drawMaskingLayer(canvas, bounds, DST_IN);
+            }
+            canvas.restoreToCount(backgroundLayer);
+        }
 
         // If we have ripples and a non-opaque mask, draw the masking layer.
-        if (rippleLayer >= 0 && drawMask) {
-            drawMaskingLayer(canvas, bounds, DST_IN);
+        final int rippleLayer = drawRippleLayer(canvas, bounds, xfermode);
+        if (rippleLayer >= 0) {
+            if (drawMask) {
+                drawMaskingLayer(canvas, bounds, DST_IN);
+            }
+            canvas.restoreToCount(rippleLayer);
         }
 
         // Composite the layers if needed.
         if (contentLayer >= 0) {
             canvas.restoreToCount(contentLayer);
-        } else if (rippleLayer >= 0) {
-            canvas.restoreToCount(rippleLayer);
         }
     }
 
@@ -550,11 +650,16 @@ public class RippleDrawable extends LayerDrawable {
         final int count = mAnimatingRipplesCount;
         final int index = getRippleIndex(ripple);
         if (index >= 0) {
-            for (int i = index + 1; i < count; i++) {
-                ripples[i - 1] = ripples[i];
-            }
+            System.arraycopy(ripples, index + 1, ripples, index + 1 - 1, count - (index + 1));
             ripples[count - 1] = null;
             mAnimatingRipplesCount--;
+            invalidateSelf();
+        }
+    }
+
+    void removeBackground(RippleBackground background) {
+        if (mBackground == background) {
+            mBackground = null;
             invalidateSelf();
         }
     }
@@ -577,7 +682,7 @@ public class RippleDrawable extends LayerDrawable {
         // We don't need a layer if we don't expect to draw any ripples, we have
         // an explicit mask, or if the non-mask content is all opaque.
         boolean needsLayer = false;
-        if (mAnimatingRipplesCount > 0 && mMask == null) {
+        if ((mAnimatingRipplesCount > 0 || mBackground != null) && mMask == null) {
             for (int i = 0; i < count; i++) {
                 if (array[i].mId != R.id.mask
                         && array[i].mDrawable.getOpacity() != PixelFormat.OPAQUE) {
@@ -601,12 +706,62 @@ public class RippleDrawable extends LayerDrawable {
         return restoreToCount;
     }
 
-    private int drawRippleLayer(Canvas canvas, Rect bounds, PorterDuffXfermode mode) {
-        final int count = mAnimatingRipplesCount;
-        if (count == 0) {
-            return -1;
+    private int drawBackgroundLayer(Canvas canvas, Rect bounds, PorterDuffXfermode mode) {
+        // Separate the ripple color and alpha channel. The alpha will be
+        // applied when we merge the ripples down to the canvas.
+        final int rippleARGB;
+        if (mState.mColor != null) {
+            rippleARGB = mState.mColor.getColorForState(getState(), Color.TRANSPARENT);
+        } else {
+            rippleARGB = Color.TRANSPARENT;
         }
 
+        if (mRipplePaint == null) {
+            mRipplePaint = new Paint();
+            mRipplePaint.setAntiAlias(true);
+        }
+
+        final int rippleAlpha = Color.alpha(rippleARGB);
+        final Paint ripplePaint = mRipplePaint;
+        ripplePaint.setColor(rippleARGB);
+        ripplePaint.setAlpha(0xFF);
+
+        boolean drewRipples = false;
+        int restoreToCount = -1;
+        int restoreTranslate = -1;
+
+        // Draw background.
+        final RippleBackground background = mBackground;
+        if (background != null) {
+            // If we're masking the ripple layer, make sure we have a layer
+            // first. This will merge SRC_OVER (directly) onto the canvas.
+            final Paint maskingPaint = getMaskingPaint(mode);
+            maskingPaint.setAlpha(rippleAlpha);
+            restoreToCount = canvas.saveLayer(bounds.left, bounds.top,
+                    bounds.right, bounds.bottom, maskingPaint);
+
+            restoreTranslate = canvas.save();
+            // Translate the canvas to the current hotspot bounds.
+            canvas.translate(mHotspotBounds.exactCenterX(), mHotspotBounds.exactCenterY());
+
+            drewRipples = background.draw(canvas, ripplePaint);
+        }
+
+        // Always restore the translation.
+        if (restoreTranslate >= 0) {
+            canvas.restoreToCount(restoreTranslate);
+        }
+
+        // If we created a layer with no content, merge it immediately.
+        if (restoreToCount >= 0 && !drewRipples) {
+            canvas.restoreToCount(restoreToCount);
+            restoreToCount = -1;
+        }
+
+        return restoreToCount;
+    }
+
+    private int drawRippleLayer(Canvas canvas, Rect bounds, PorterDuffXfermode mode) {
         // Separate the ripple color and alpha channel. The alpha will be
         // applied when we merge the ripples down to the canvas.
         final int rippleARGB;
@@ -631,6 +786,7 @@ public class RippleDrawable extends LayerDrawable {
         int restoreTranslate = -1;
 
         // Draw ripples and update the animating ripples array.
+        final int count = mAnimatingRipplesCount;
         final Ripple[] ripples = mAnimatingRipples;
         for (int i = 0; i < count; i++) {
             final Ripple ripple = ripples[i];
@@ -701,6 +857,13 @@ public class RippleDrawable extends LayerDrawable {
             final int N = mAnimatingRipplesCount;
             for (int i = 0; i < N; i++) {
                 activeRipples[i].getBounds(rippleBounds);
+                rippleBounds.offset(cX, cY);
+                drawingBounds.union(rippleBounds);
+            }
+
+            final RippleBackground background = mBackground;
+            if (background != null) {
+                background.getBounds(rippleBounds);
                 rippleBounds.offset(cX, cY);
                 drawingBounds.union(rippleBounds);
             }
