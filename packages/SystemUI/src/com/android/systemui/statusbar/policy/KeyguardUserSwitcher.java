@@ -88,7 +88,7 @@ public class KeyguardUserSwitcher {
         }
     }
 
-    private void hide() {
+    public void hide() {
         if (mUserSwitcher != null) {
             // TODO: animate
             mUserSwitcher.setVisibility(View.GONE);

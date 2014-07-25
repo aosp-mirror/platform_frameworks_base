@@ -98,7 +98,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     private ActivityStarter mActivityStarter;
     private BatteryController mBatteryController;
     private QSPanel mQSPanel;
-    private boolean mHasKeyguardUserSwitcher;
+    private KeyguardUserSwitcher mKeyguardUserSwitcher;
 
     private final Rect mClipBounds = new Rect();
     private final StatusIconClipper mStatusIconClipper = new StatusIconClipper();
@@ -300,6 +300,9 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
                 ? VISIBLE : GONE);
         mBatteryLevel.setVisibility(mKeyguardShowing && mCharging || mExpanded && !mOverscrolled
                 ? View.VISIBLE : View.GONE);
+        if (mExpanded && !mOverscrolled && mKeyguardUserSwitcherShowing) {
+            mKeyguardUserSwitcher.hide();
+        }
     }
 
     private void updateSystemIconsLayoutParams() {
@@ -377,7 +380,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         mDateTime.setClickable(mExpanded);
 
         boolean keyguardSwitcherAvailable =
-                mHasKeyguardUserSwitcher && mKeyguardShowing && !mExpanded;
+                mKeyguardUserSwitcher != null && mKeyguardShowing && !mExpanded;
         mMultiUserSwitch.setClickable(mExpanded || keyguardSwitcherAvailable);
         mMultiUserSwitch.setKeyguardMode(keyguardSwitcherAvailable);
         mSystemIconsSuperContainer.setClickable(mExpanded);
@@ -516,7 +519,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     }
 
     public void setKeyguarUserSwitcher(KeyguardUserSwitcher keyguardUserSwitcher) {
-        mHasKeyguardUserSwitcher = true;
+        mKeyguardUserSwitcher = keyguardUserSwitcher;
         mMultiUserSwitch.setKeyguardUserSwitcher(keyguardUserSwitcher);
     }
 
