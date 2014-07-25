@@ -98,9 +98,43 @@ public final class GeofenceHardwareRequestParcelable implements Parcelable {
     }
 
     /**
+     * Returns the source technologies to track this geofence.
+     */
+    int getSourceTechnologies() {
+        return mRequest.getSourceTechnologies();
+    }
+
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("id=");
+        builder.append(mId);
+        builder.append(", type=");
+        builder.append(mRequest.getType());
+        builder.append(", latitude=");
+        builder.append(mRequest.getLatitude());
+        builder.append(", longitude=");
+        builder.append(mRequest.getLongitude());
+        builder.append(", radius=");
+        builder.append(mRequest.getRadius());
+        builder.append(", lastTransition=");
+        builder.append(mRequest.getLastTransition());
+        builder.append(", unknownTimer=");
+        builder.append(mRequest.getUnknownTimer());
+        builder.append(", monitorTransitions=");
+        builder.append(mRequest.getMonitorTransitions());
+        builder.append(", notificationResponsiveness=");
+        builder.append(mRequest.getNotificationResponsiveness());
+        builder.append(", sourceTechnologies=");
+        builder.append(mRequest.getSourceTechnologies());
+        return builder.toString();
+    }
+
+    /**
      * Method definitions to support Parcelable operations.
      */
-    public static final Parcelable.Creator<GeofenceHardwareRequestParcelable> CREATOR = 
+    public static final Parcelable.Creator<GeofenceHardwareRequestParcelable> CREATOR =
             new Parcelable.Creator<GeofenceHardwareRequestParcelable>() {
         @Override
         public GeofenceHardwareRequestParcelable createFromParcel(Parcel parcel) {
@@ -120,7 +154,8 @@ public final class GeofenceHardwareRequestParcelable implements Parcelable {
             request.setMonitorTransitions(parcel.readInt());
             request.setUnknownTimer(parcel.readInt());
             request.setNotificationResponsiveness(parcel.readInt());
-            
+            request.setSourceTechnologies(parcel.readInt());
+
             int id = parcel.readInt();
             return new GeofenceHardwareRequestParcelable(id, request);
         }
@@ -146,6 +181,7 @@ public final class GeofenceHardwareRequestParcelable implements Parcelable {
         parcel.writeInt(getMonitorTransitions());
         parcel.writeInt(getUnknownTimer());
         parcel.writeInt(getNotificationResponsiveness());
+        parcel.writeInt(getSourceTechnologies());
         parcel.writeInt(getId());
     }
 }
