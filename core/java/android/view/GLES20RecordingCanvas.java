@@ -17,6 +17,7 @@
 package android.view;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.util.Pools.SynchronizedPool;
 
 /**
@@ -41,7 +42,6 @@ class GLES20RecordingCanvas extends GLES20Canvas {
 
     static GLES20RecordingCanvas obtain(@NonNull RenderNode node) {
         if (node == null) throw new IllegalArgumentException("node cannot be null");
-
         GLES20RecordingCanvas canvas = sPool.acquire();
         if (canvas == null) {
             canvas = new GLES20RecordingCanvas();
@@ -57,5 +57,10 @@ class GLES20RecordingCanvas extends GLES20Canvas {
 
     long finishRecording() {
         return nFinishRecording(mRenderer);
+    }
+
+    @Override
+    public boolean isRecordingFor(Object o) {
+        return o == mNode;
     }
 }

@@ -347,31 +347,35 @@ void RenderNode::setViewProperties(OpenGLRenderer& renderer, T& handler) {
         }
     }
     const bool isLayer = properties().layerProperties().type() != kLayerTypeNone;
-    bool clipToBoundsNeeded = isLayer ? false : properties().getClipToBounds();
+    int clipFlags = properties().getClippingFlags();
     if (properties().getAlpha() < 1) {
         if (isLayer) {
+            clipFlags &= ~CLIP_TO_BOUNDS; // bounds clipping done by layer
+
             renderer.setOverrideLayerAlpha(properties().getAlpha());
         } else if (!properties().getHasOverlappingRendering()) {
             renderer.scaleAlpha(properties().getAlpha());
         } else {
-            // TODO: should be able to store the size of a DL at record time and not
-            // have to pass it into this call. In fact, this information might be in the
-            // location/size info that we store with the new native transform data.
+            Rect layerBounds(0, 0, getWidth(), getHeight());
             int saveFlags = SkCanvas::kHasAlphaLayer_SaveFlag;
-            if (clipToBoundsNeeded) {
+            if (clipFlags) {
                 saveFlags |= SkCanvas::kClipToLayer_SaveFlag;
-                clipToBoundsNeeded = false; // clipping done by saveLayer
+                properties().getClippingRectForFlags(clipFlags, &layerBounds);
+                clipFlags = 0; // all clipping done by saveLayer
             }
 
             SaveLayerOp* op = new (handler.allocator()) SaveLayerOp(
-                    0, 0, properties().getWidth(), properties().getHeight(),
+                    layerBounds.left, layerBounds.top, layerBounds.right, layerBounds.bottom,
                     properties().getAlpha() * 255, saveFlags);
             handler(op, PROPERTY_SAVECOUNT, properties().getClipToBounds());
         }
     }
-    if (clipToBoundsNeeded) {
+    if (clipFlags) {
+        Rect clipRect;
+        properties().getClippingRectForFlags(clipFlags, &clipRect);
         ClipRectOp* op = new (handler.allocator()) ClipRectOp(
-                0, 0, properties().getWidth(), properties().getHeight(), SkRegion::kIntersect_Op);
+                clipRect.left, clipRect.top, clipRect.right, clipRect.bottom,
+                SkRegion::kIntersect_Op);
         handler(op, PROPERTY_SAVECOUNT, properties().getClipToBounds());
     }
 
