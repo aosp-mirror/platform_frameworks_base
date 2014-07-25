@@ -23,7 +23,6 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
-import android.os.SystemClock;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.accessibility.AccessibilityEvent;
@@ -659,16 +658,12 @@ public abstract class AccessibilityService extends Service {
      */
     public static class IAccessibilityServiceClientWrapper extends IAccessibilityServiceClient.Stub
             implements HandlerCaller.Callback {
-
-        static final int NO_ID = -1;
-
         private static final int DO_SET_SET_CONNECTION = 1;
         private static final int DO_ON_INTERRUPT = 2;
         private static final int DO_ON_ACCESSIBILITY_EVENT = 3;
         private static final int DO_ON_GESTURE = 4;
         private static final int DO_CLEAR_ACCESSIBILITY_CACHE = 5;
         private static final int DO_ON_KEY_EVENT = 6;
-        private static final int DO_ON_WINDOWS_CHANGED = 7;
 
         private final HandlerCaller mCaller;
 
@@ -711,12 +706,6 @@ public abstract class AccessibilityService extends Service {
         @Override
         public void onKeyEvent(KeyEvent event, int sequence) {
             Message message = mCaller.obtainMessageIO(DO_ON_KEY_EVENT, sequence, event);
-            mCaller.sendMessage(message);
-        }
-
-        @Override
-        public void onWindowsChanged(int[] windowIds) {
-            Message message = mCaller.obtainMessageO(DO_ON_WINDOWS_CHANGED, windowIds);
             mCaller.sendMessage(message);
         }
 
@@ -790,31 +779,6 @@ public abstract class AccessibilityService extends Service {
                         }
                     }
                 } return;
-
-                case DO_ON_WINDOWS_CHANGED: {
-                    final int[] windowIds = (int[]) message.obj;
-
-                    // Update the cached windows first.
-                    // NOTE: The cache will hold on to the windows so do not recycle.
-                    if (windowIds != null) {
-                        AccessibilityInteractionClient.getInstance().removeWindows(windowIds);
-                    }
-
-                    // Let the client know the windows changed.
-                    AccessibilityEvent event = AccessibilityEvent.obtain(
-                            AccessibilityEvent.TYPE_WINDOWS_CHANGED);
-                    event.setEventTime(SystemClock.uptimeMillis());
-                    event.setSealed(true);
-
-                    mCallback.onAccessibilityEvent(event);
-
-                    // Make sure the event is recycled.
-                    try {
-                        event.recycle();
-                    } catch (IllegalStateException ise) {
-                        /* ignore - best effort */
-                    }
-                } break;
 
                 default :
                     Log.w(LOG_TAG, "Unknown message type " + message.what);

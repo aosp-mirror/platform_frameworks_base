@@ -84,7 +84,7 @@ public final class AccessibilityInteractionClient
     private static final Object sStaticLock = new Object();
 
     private static final LongSparseArray<AccessibilityInteractionClient> sClients =
-        new LongSparseArray<AccessibilityInteractionClient>();
+        new LongSparseArray<>();
 
     private final AtomicInteger mInteractionIdCounter = new AtomicInteger();
 
@@ -101,7 +101,7 @@ public final class AccessibilityInteractionClient
     private Message mSameThreadMessage;
 
     private static final SparseArray<IAccessibilityServiceConnection> sConnectionCache =
-        new SparseArray<IAccessibilityServiceConnection>();
+        new SparseArray<>();
 
     private static final AccessibilityCache sAccessibilityCache =
         new AccessibilityCache();
@@ -163,19 +163,6 @@ public final class AccessibilityInteractionClient
     }
 
     /**
-     * Gets the root {@link AccessibilityNodeInfo} in a given window.
-     *
-     * @param connectionId The id of a connection for interacting with the system.
-     * @param windowId The window id.
-     * @return The root {@link AccessibilityNodeInfo} if found, null otherwise.
-     */
-    public AccessibilityNodeInfo getRootInWindow(int connectionId, int windowId) {
-        return findAccessibilityNodeInfoByAccessibilityId(connectionId, windowId,
-                AccessibilityNodeInfo.ROOT_NODE_ID, false,
-                AccessibilityNodeInfo.FLAG_PREFETCH_DESCENDANTS);
-    }
-
-    /**
      * Gets the info for a window.
      *
      * @param connectionId The id of a connection for interacting with the system.
@@ -225,11 +212,17 @@ public final class AccessibilityInteractionClient
         try {
             IAccessibilityServiceConnection connection = getConnection(connectionId);
             if (connection != null) {
-                // The system is just sending data for windows that we introspected
-                // and changed but not ones that appeared, so we have to always call
-                // into the system process. This is less expensice as opposed to
-                // sending all windows on every window change.
-                List<AccessibilityWindowInfo> windows = connection.getWindows();
+                List<AccessibilityWindowInfo> windows = sAccessibilityCache.getWindows();
+                if (windows != null) {
+                    if (DEBUG) {
+                        Log.i(LOG_TAG, "Windows cache hit");
+                    }
+                    return windows;
+                }
+                if (DEBUG) {
+                    Log.i(LOG_TAG, "Windows cache miss");
+                }
+                windows = connection.getWindows();
                 if (windows != null) {
                     final int windowCount = windows.size();
                     for (int i = 0; i < windowCount; i++) {
@@ -534,10 +527,6 @@ public final class AccessibilityInteractionClient
         sAccessibilityCache.onAccessibilityEvent(event);
     }
 
-    public void removeWindows(int[] windowIds) {
-        sAccessibilityCache.removeWindows(windowIds);
-    }
-
     /**
      * Gets the the result of an async request that returns an {@link AccessibilityNodeInfo}.
      *
@@ -603,8 +592,7 @@ public final class AccessibilityInteractionClient
                     // instantiate new result list to avoid passing internal instances to clients.
                     final boolean isIpcCall = (Binder.getCallingPid() != Process.myPid());
                     if (!isIpcCall) {
-                        mFindAccessibilityNodeInfosResult =
-                            new ArrayList<AccessibilityNodeInfo>(infos);
+                        mFindAccessibilityNodeInfosResult = new ArrayList<>(infos);
                     } else {
                         mFindAccessibilityNodeInfosResult = infos;
                     }
@@ -795,8 +783,8 @@ public final class AccessibilityInteractionClient
             Log.e(LOG_TAG, "No root.");
         }
         // Check for duplicates.
-        HashSet<AccessibilityNodeInfo> seen = new HashSet<AccessibilityNodeInfo>();
-        Queue<AccessibilityNodeInfo> fringe = new LinkedList<AccessibilityNodeInfo>();
+        HashSet<AccessibilityNodeInfo> seen = new HashSet<>();
+        Queue<AccessibilityNodeInfo> fringe = new LinkedList<>();
         fringe.add(root);
         while (!fringe.isEmpty()) {
             AccessibilityNodeInfo current = fringe.poll();
