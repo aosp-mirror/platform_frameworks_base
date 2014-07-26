@@ -34,6 +34,7 @@ oneway interface IStatusBar
             boolean showImeSwitcher);
     void setHardKeyboardStatus(boolean available, boolean enabled);
     void setWindowState(int window, int state);
+    void buzzBeepBlinked();
 
     void showRecentApps(boolean triggeredFromAltTab);
     void hideRecentApps(boolean triggeredFromAltTab);

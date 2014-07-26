@@ -111,6 +111,15 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         public void setNotificationDelegate(NotificationDelegate delegate) {
             mNotificationDelegate = delegate;
         }
+        @Override
+        public void buzzBeepBlinked() {
+            if (mBar != null) {
+                try {
+                    mBar.buzzBeepBlinked();
+                } catch (RemoteException ex) {
+                }
+            }
+        }
     };
 
     // ================================================================================

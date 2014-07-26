@@ -54,6 +54,7 @@ public class CommandQueue extends IStatusBar.Stub {
     private static final int MSG_SET_WINDOW_STATE           = 13 << MSG_SHIFT;
     private static final int MSG_SHOW_RECENT_APPS           = 14 << MSG_SHIFT;
     private static final int MSG_HIDE_RECENT_APPS           = 15 << MSG_SHIFT;
+    private static final int MSG_BUZZ_BEEP_BLINKED          = 16 << MSG_SHIFT;
 
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
@@ -93,6 +94,7 @@ public class CommandQueue extends IStatusBar.Stub {
         public void showSearchPanel();
         public void hideSearchPanel();
         public void setWindowState(int window, int state);
+        public void buzzBeepBlinked();
     }
 
     public CommandQueue(Callbacks callbacks, StatusBarIconList list) {
@@ -221,6 +223,12 @@ public class CommandQueue extends IStatusBar.Stub {
         }
     }
 
+    public void buzzBeepBlinked() {
+        synchronized (mList) {
+            mHandler.removeMessages(MSG_BUZZ_BEEP_BLINKED);
+            mHandler.sendEmptyMessage(MSG_BUZZ_BEEP_BLINKED);
+        }
+    }
 
     private final class H extends Handler {
         public void handleMessage(Message msg) {
@@ -294,6 +302,9 @@ public class CommandQueue extends IStatusBar.Stub {
                     break;
                 case MSG_SET_WINDOW_STATE:
                     mCallbacks.setWindowState(msg.arg1, msg.arg2);
+                    break;
+                case MSG_BUZZ_BEEP_BLINKED:
+                    mCallbacks.buzzBeepBlinked();
                     break;
 
             }
