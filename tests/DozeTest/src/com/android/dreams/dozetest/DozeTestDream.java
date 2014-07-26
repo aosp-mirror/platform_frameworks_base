@@ -24,7 +24,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.PowerManager;
-import android.service.dreams.DozeHardware;
 import android.service.dreams.DreamService;
 import android.text.format.DateFormat;
 import android.util.Log;
@@ -49,10 +48,6 @@ public class DozeTestDream extends DreamService {
     // refreshed once the dream has finished rendering a new frame.
     private static final int UPDATE_TIME_TIMEOUT = 100;
 
-    // A doze hardware message string we use for end-to-end testing.
-    // Doesn't mean anything.  Real hardware won't handle it.
-    private static final String TEST_PING_MESSAGE = "test.ping";
-
     // Not all hardware supports dozing.  We should use Display.STATE_DOZE but
     // for testing purposes it is convenient to use Display.STATE_ON so the
     // test still works on hardware that does not support dozing.
@@ -70,7 +65,6 @@ public class DozeTestDream extends DreamService {
     private java.text.DateFormat mTimeFormat;
 
     private boolean mDreaming;
-    private DozeHardware mDozeHardware;
 
     private long mLastTime = Long.MIN_VALUE;
 
@@ -121,17 +115,11 @@ public class DozeTestDream extends DreamService {
         super.onDreamingStarted();
 
         mDreaming = true;
-        mDozeHardware = getDozeHardware();
 
-        Log.d(TAG, "Dream started: canDoze=" + canDoze()
-                + ", dozeHardware=" + mDozeHardware);
+        Log.d(TAG, "Dream started: canDoze=" + canDoze());
 
         performTimeUpdate();
 
-        if (mDozeHardware != null) {
-            mDozeHardware.sendMessage(TEST_PING_MESSAGE, null);
-            mDozeHardware.setEnableMcu(true);
-        }
         startDozing();
     }
 
@@ -140,10 +128,6 @@ public class DozeTestDream extends DreamService {
         super.onDreamingStopped();
 
         mDreaming = false;
-        if (mDozeHardware != null) {
-            mDozeHardware.setEnableMcu(false);
-            mDozeHardware = null;
-        }
 
         Log.d(TAG, "Dream ended: isDozing=" + isDozing());
 
