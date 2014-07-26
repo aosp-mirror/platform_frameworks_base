@@ -246,6 +246,7 @@ public final class Parcel {
     private static native void nativeRestoreAllowFds(long nativePtr, boolean lastValue);
 
     private static native void nativeWriteByteArray(long nativePtr, byte[] b, int offset, int len);
+    private static native void nativeWriteBlob(long nativePtr, byte[] b, int offset, int len);
     private static native void nativeWriteInt(long nativePtr, int val);
     private static native void nativeWriteLong(long nativePtr, long val);
     private static native void nativeWriteFloat(long nativePtr, float val);
@@ -255,6 +256,7 @@ public final class Parcel {
     private static native void nativeWriteFileDescriptor(long nativePtr, FileDescriptor val);
 
     private static native byte[] nativeCreateByteArray(long nativePtr);
+    private static native byte[] nativeReadBlob(long nativePtr);
     private static native int nativeReadInt(long nativePtr);
     private static native long nativeReadLong(long nativePtr);
     private static native float nativeReadFloat(long nativePtr);
@@ -476,6 +478,16 @@ public final class Parcel {
         }
         Arrays.checkOffsetAndCount(b.length, offset, len);
         nativeWriteByteArray(mNativePtr, b, offset, len);
+    }
+
+    /**
+     * Write a blob of data into the parcel at the current {@link #dataPosition},
+     * growing {@link #dataCapacity} if needed.
+     * @param b Bytes to place into the parcel.
+     * {@hide}
+     */
+    public final void writeBlob(byte[] b) {
+        nativeWriteBlob(mNativePtr, b, 0, (b != null) ? b.length : 0);
     }
 
     /**
@@ -1697,6 +1709,14 @@ public final class Parcel {
         } else {
             throw new RuntimeException("bad array lengths");
         }
+    }
+
+    /**
+     * Read a blob of data from the parcel and return it as a byte array.
+     * {@hide}
+     */
+    public final byte[] readBlob() {
+        return nativeReadBlob(mNativePtr);
     }
 
     /**
