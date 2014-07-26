@@ -2346,6 +2346,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     @Override // CommandQueue
+    public void buzzBeepBlinked() {
+        if (mDozeServiceHost != null) {
+            mDozeServiceHost.fireBuzzBeepBlinked();
+        }
+    }
+
+    @Override // CommandQueue
     public void setSystemUiVisibility(int vis, int mask) {
         final int oldVal = mSystemUiVisibility;
         final int newVal = (oldVal&~mask) | (vis&mask);
@@ -3754,6 +3761,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         private final H mHandler = new H();
 
         private DozeService mCurrentDozeService;
+
+        public void fireBuzzBeepBlinked() {
+            for (Callback callback : mCallbacks) {
+                callback.onBuzzBeepBlinked();
+            }
+        }
 
         public void fireNewNotifications() {
             for (Callback callback : mCallbacks) {

@@ -95,6 +95,10 @@ public class TvStatusBar extends BaseStatusBar {
     public void setWindowState(int window, int state) {
     }
 
+    @Override // CommandQueue
+    public void buzzBeepBlinked() {
+    }
+
     @Override
     protected WindowManager.LayoutParams getSearchLayoutParams(
             LayoutParams layoutParams) {

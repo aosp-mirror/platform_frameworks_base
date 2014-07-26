@@ -740,6 +740,13 @@ public class NotificationManagerService extends SystemService {
     private SettingsObserver mSettingsObserver;
     private ZenModeHelper mZenModeHelper;
 
+    private final Runnable mBuzzBeepBlinked = new Runnable() {
+        @Override
+        public void run() {
+            mStatusBar.buzzBeepBlinked();
+        }
+    };
+
     static long[] getLongArray(Resources r, int resid, int maxlen, long[] def) {
         int[] ar = r.getIntArray(resid);
         if (ar == null) {
@@ -1645,6 +1652,7 @@ public class NotificationManagerService extends SystemService {
     }
 
     private void buzzBeepBlinkLocked(NotificationRecord record) {
+        boolean buzzBeepBlinked = false;
         final Notification notification = record.sbn.getNotification();
 
         // Should this notification make noise, vibe, or use the LED?
@@ -1726,6 +1734,7 @@ public class NotificationManagerService extends SystemService {
                                     + " on stream " + audioStreamType);
                             player.playAsync(soundUri, record.sbn.getUser(), looping,
                                     audioStreamType);
+                            buzzBeepBlinked = true;
                         }
                     } catch (RemoteException e) {
                     } finally {
@@ -1765,6 +1774,7 @@ public class NotificationManagerService extends SystemService {
                                 : mFallbackVibrationPattern,
                             ((notification.flags & Notification.FLAG_INSISTENT) != 0)
                                 ? 0: -1, audioAttributesForNotification(notification));
+                        buzzBeepBlinked = true;
                     } finally {
                         Binder.restoreCallingIdentity(identity);
                     }
@@ -1775,6 +1785,7 @@ public class NotificationManagerService extends SystemService {
                             notification.vibrate,
                         ((notification.flags & Notification.FLAG_INSISTENT) != 0)
                                 ? 0: -1, audioAttributesForNotification(notification));
+                    buzzBeepBlinked = true;
                 }
             }
         }
@@ -1791,8 +1802,12 @@ public class NotificationManagerService extends SystemService {
             if (mUseAttentionLight) {
                 mAttentionLight.pulse();
             }
+            buzzBeepBlinked = true;
         } else if (wasShowLights) {
             updateLightsLocked();
+        }
+        if (buzzBeepBlinked) {
+            mHandler.post(mBuzzBeepBlinked);
         }
     }
 
