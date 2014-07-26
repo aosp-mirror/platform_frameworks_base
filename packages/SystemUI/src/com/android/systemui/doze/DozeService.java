@@ -292,6 +292,11 @@ public class DozeService extends DreamService {
         @Override
         public void onNewNotifications() {
             if (DEBUG) Log.d(mTag, "onNewNotifications");
+            // noop for now
+        }
+        @Override
+        public void onBuzzBeepBlinked() {
+            if (DEBUG) Log.d(mTag, "onBuzzBeepBlinked");
             requestTease();
         }
     };
@@ -305,6 +310,7 @@ public class DozeService extends DreamService {
 
         public interface Callback {
             void onNewNotifications();
+            void onBuzzBeepBlinked();
         }
     }
 }
