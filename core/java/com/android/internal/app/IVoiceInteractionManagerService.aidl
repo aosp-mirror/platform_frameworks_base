@@ -33,18 +33,23 @@ interface IVoiceInteractionManagerService {
     void finish(IBinder token);
 
     /**
-     * Lists the registered Sound models for keyphrase detection.
+     * Lists the registered Sound model for keyphrase detection.
      * May be null if no matching sound models exist.
-     *
-     * @param service The current voice interaction service.
      */
-    List<SoundTrigger.KeyphraseSoundModel> listRegisteredKeyphraseSoundModels(
-            in IVoiceInteractionService service);
+    SoundTrigger.KeyphraseSoundModel getKeyphraseSoundModel(int keyphraseId);
     /**
      * Updates the given keyphrase sound model. Adds the model if it doesn't exist currently.
      */
     int updateKeyphraseSoundModel(in SoundTrigger.KeyphraseSoundModel model);
+    /**
+     * Deletes the given keyphrase sound model.
+     */
+    int deleteKeyphraseSoundModel(int keyphraseId);
 
+    /**
+     * Indicates if there's a keyphrase sound model available for the given keyphrase ID.
+     */
+    boolean isEnrolledForKeyphrase(IVoiceInteractionService service, int keyphraseId);
     /**
      * Gets the properties of the DSP hardware on this device, null if not present.
      */
@@ -53,7 +58,7 @@ interface IVoiceInteractionManagerService {
      * Starts a recognition for the given keyphrase.
      */
     int startRecognition(in IVoiceInteractionService service, int keyphraseId,
-            in SoundTrigger.KeyphraseSoundModel soundModel, in IRecognitionStatusCallback callback,
+            in IRecognitionStatusCallback callback,
             in SoundTrigger.RecognitionConfig recognitionConfig);
     /**
      * Stops a recognition for the given keyphrase.

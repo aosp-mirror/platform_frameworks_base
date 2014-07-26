@@ -133,10 +133,10 @@ public class AlwaysOnHotwordDetector {
     private final Handler mHandler;
 
     /**
-     * The sound model for the keyphrase, derived from the model management service
-     * (IVoiceInteractionManagerService). May be null if the keyphrase isn't enrolled yet.
+     * Indicates if there is a sound model enrolled for the keyphrase,
+     * derived from the model management service (IVoiceInteractionManagerService).
      */
-    private KeyphraseSoundModel mEnrolledSoundModel;
+    private boolean mIsEnrolledForDetection;
     private int mAvailability = STATE_NOT_READY;
 
     /**
@@ -257,7 +257,7 @@ public class AlwaysOnHotwordDetector {
         int code = STATUS_ERROR;
         try {
             code = mModelManagementService.startRecognition(mVoiceInteractionService,
-                    mKeyphraseMetadata.id, mEnrolledSoundModel, mInternalCallback,
+                    mKeyphraseMetadata.id, mInternalCallback,
                     new RecognitionConfig(
                             captureTriggerAudio, recognitionExtra, null /* additional data */));
         } catch (RemoteException e) {
@@ -417,14 +417,13 @@ public class AlwaysOnHotwordDetector {
         @Override
         public Void doInBackground(Void... params) {
             int availability = internalGetInitialAvailability();
-            KeyphraseSoundModel soundModel = null;
+            boolean enrolled = false;
             // Fetch the sound model if the availability is one of the supported ones.
             if (availability == STATE_NOT_READY
                     || availability == STATE_KEYPHRASE_UNENROLLED
                     || availability == STATE_KEYPHRASE_ENROLLED) {
-                soundModel =
-                        internalGetKeyphraseSoundModel(mKeyphraseMetadata.id);
-                if (soundModel == null) {
+                enrolled = internalGetIsEnrolled(mKeyphraseMetadata.id);
+                if (!enrolled) {
                     availability = STATE_KEYPHRASE_UNENROLLED;
                 } else {
                     availability = STATE_KEYPHRASE_ENROLLED;
@@ -436,8 +435,8 @@ public class AlwaysOnHotwordDetector {
                     Slog.d(TAG, "Hotword availability changed from " + mAvailability
                             + " -> " + availability);
                 }
+                mIsEnrolledForDetection = enrolled;
                 mAvailability = availability;
-                mEnrolledSoundModel = soundModel;
                 notifyStateChangedLocked();
             }
             return null;
@@ -475,31 +474,14 @@ public class AlwaysOnHotwordDetector {
         /**
          * @return The corresponding {@link KeyphraseSoundModel} or null if none is found.
          */
-        private KeyphraseSoundModel internalGetKeyphraseSoundModel(int keyphraseId) {
-            List<KeyphraseSoundModel> soundModels;
+        private boolean internalGetIsEnrolled(int keyphraseId) {
             try {
-                soundModels = mModelManagementService
-                        .listRegisteredKeyphraseSoundModels(mVoiceInteractionService);
-                if (soundModels == null || soundModels.isEmpty()) {
-                    Slog.i(TAG, "No available sound models for keyphrase ID: " + keyphraseId);
-                    return null;
-                }
-                for (int i = 0; i < soundModels.size(); i++) {
-                    KeyphraseSoundModel soundModel = soundModels.get(i);
-                    if (soundModel.keyphrases == null || soundModel.keyphrases.length == 0) {
-                        continue;
-                    }
-                    for (int j = 0; i < soundModel.keyphrases.length; j++) {
-                        Keyphrase keyphrase = soundModel.keyphrases[j];
-                        if (keyphrase.id == keyphraseId) {
-                            return soundModel;
-                        }
-                    }
-                }
+                return mModelManagementService.isEnrolledForKeyphrase(
+                        mVoiceInteractionService, keyphraseId);
             } catch (RemoteException e) {
                 Slog.w(TAG, "RemoteException in listRegisteredKeyphraseSoundModels!");
             }
-            return null;
+            return false;
         }
     }
 }

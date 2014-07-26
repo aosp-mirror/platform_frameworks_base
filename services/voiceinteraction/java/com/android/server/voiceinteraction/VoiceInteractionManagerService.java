@@ -50,6 +50,7 @@ import com.android.server.UiThread;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.UUID;
 
 
 /**
@@ -243,34 +244,18 @@ public class VoiceInteractionManagerService extends SystemService {
         //----------------- Model management APIs --------------------------------//
 
         @Override
-        public List<KeyphraseSoundModel> listRegisteredKeyphraseSoundModels(
-                IVoiceInteractionService service) {
-            // Allow the call if this is the current voice interaction service
-            // or the caller holds the MANAGE_VOICE_KEYPHRASES permission.
+        public KeyphraseSoundModel getKeyphraseSoundModel(int keyphraseId) {
             synchronized (this) {
-                boolean permissionGranted =
-                        mContext.checkCallingPermission(Manifest.permission.MANAGE_VOICE_KEYPHRASES)
-                        == PackageManager.PERMISSION_GRANTED;
-                boolean currentVoiceInteractionService = service != null
-                        && mImpl != null
-                        && mImpl.mService != null
-                        && service.asBinder() == mImpl.mService.asBinder();
-
-                if (!permissionGranted && !currentVoiceInteractionService) {
-                    if (!currentVoiceInteractionService) {
-                        throw new SecurityException(
-                                "Caller is not the current voice interaction service");
-                    }
-                    if (!permissionGranted) {
-                        throw new SecurityException("Caller does not hold the permission "
-                                + Manifest.permission.MANAGE_VOICE_KEYPHRASES);
-                    }
+                if (mContext.checkCallingPermission(Manifest.permission.MANAGE_VOICE_KEYPHRASES)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    throw new SecurityException("Caller does not hold the permission "
+                            + Manifest.permission.MANAGE_VOICE_KEYPHRASES);
                 }
             }
 
             final long caller = Binder.clearCallingIdentity();
             try {
-                return mDbHelper.getKephraseSoundModels();
+                return mDbHelper.getKeyphraseSoundModel(keyphraseId);
             } finally {
                 Binder.restoreCallingIdentity(caller);
             }
@@ -291,15 +276,35 @@ public class VoiceInteractionManagerService extends SystemService {
 
             final long caller = Binder.clearCallingIdentity();
             try {
-                boolean success = false;
-                if (model.keyphrases == null) {
-                    // If the keyphrases are not present in the model, delete the model.
-                    success = mDbHelper.deleteKeyphraseSoundModel(model.uuid);
+                if (mDbHelper.updateKeyphraseSoundModel(model)) {
+                    synchronized (this) {
+                        // Notify the voice interaction service of a change in sound models.
+                        if (mImpl != null && mImpl.mService != null) {
+                            mImpl.notifySoundModelsChangedLocked();
+                        }
+                    }
+                    return SoundTriggerHelper.STATUS_OK;
                 } else {
-                    // Else update the model.
-                    success = mDbHelper.addOrUpdateKeyphraseSoundModel(model);
+                    return SoundTriggerHelper.STATUS_ERROR;
                 }
-                if (success) {
+            } finally {
+                Binder.restoreCallingIdentity(caller);
+            }
+        }
+
+        @Override
+        public int deleteKeyphraseSoundModel(int keyphraseId) {
+            synchronized (this) {
+                if (mContext.checkCallingPermission(Manifest.permission.MANAGE_VOICE_KEYPHRASES)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    throw new SecurityException("Caller does not hold the permission "
+                            + Manifest.permission.MANAGE_VOICE_KEYPHRASES);
+                }
+            }
+
+            final long caller = Binder.clearCallingIdentity();
+            try {
+                if (mDbHelper.deleteKeyphraseSoundModel(keyphraseId)) {
                     synchronized (this) {
                         // Notify the voice interaction service of a change in sound models.
                         if (mImpl != null && mImpl.mService != null) {
@@ -316,6 +321,25 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         //----------------- SoundTrigger APIs --------------------------------//
+        @Override
+        public boolean isEnrolledForKeyphrase(IVoiceInteractionService service, int keyphraseId) {
+            synchronized (this) {
+                if (mImpl == null || mImpl.mService == null
+                        || service.asBinder() != mImpl.mService.asBinder()) {
+                    throw new SecurityException(
+                            "Caller is not the current voice interaction service");
+                }
+            }
+
+            final long caller = Binder.clearCallingIdentity();
+            try {
+                KeyphraseSoundModel model = mDbHelper.getKeyphraseSoundModel(keyphraseId);
+                return model != null;
+            } finally {
+                Binder.restoreCallingIdentity(caller);
+            }
+        }
+
         @Override
         public ModuleProperties getDspModuleProperties(IVoiceInteractionService service) {
             // Allow the call if this is the current voice interaction service.
@@ -337,8 +361,7 @@ public class VoiceInteractionManagerService extends SystemService {
 
         @Override
         public int startRecognition(IVoiceInteractionService service, int keyphraseId,
-                KeyphraseSoundModel soundModel, IRecognitionStatusCallback callback,
-                RecognitionConfig recognitionConfig) {
+                IRecognitionStatusCallback callback, RecognitionConfig recognitionConfig) {
             // Allow the call if this is the current voice interaction service.
             synchronized (this) {
                 if (mImpl == null || mImpl.mService == null
@@ -347,13 +370,25 @@ public class VoiceInteractionManagerService extends SystemService {
                             "Caller is not the current voice interaction service");
                 }
 
-                final long caller = Binder.clearCallingIdentity();
-                try {
+                if (callback == null || recognitionConfig == null) {
+                    throw new IllegalArgumentException("Illegal argument(s) in startRecognition");
+                }
+            }
+
+            final long caller = Binder.clearCallingIdentity();
+            try {
+                KeyphraseSoundModel soundModel = mDbHelper.getKeyphraseSoundModel(keyphraseId);
+                if (soundModel == null
+                        || soundModel.uuid == null
+                        || soundModel.keyphrases == null) {
+                    Slog.w(TAG, "No matching sound model found in startRecognition");
+                    return SoundTriggerHelper.STATUS_ERROR;
+                } else {
                     return mSoundTriggerHelper.startRecognition(
                             keyphraseId, soundModel, callback, recognitionConfig);
-                } finally {
-                    Binder.restoreCallingIdentity(caller);
                 }
+            } finally {
+                Binder.restoreCallingIdentity(caller);
             }
         }
 
@@ -367,13 +402,13 @@ public class VoiceInteractionManagerService extends SystemService {
                     throw new SecurityException(
                             "Caller is not the current voice interaction service");
                 }
+            }
 
-                final long caller = Binder.clearCallingIdentity();
-                try {
-                    return mSoundTriggerHelper.stopRecognition(keyphraseId, callback);
-                } finally {
-                    Binder.restoreCallingIdentity(caller);
-                }
+            final long caller = Binder.clearCallingIdentity();
+            try {
+                return mSoundTriggerHelper.stopRecognition(keyphraseId, callback);
+            } finally {
+                Binder.restoreCallingIdentity(caller);
             }
         }
 
