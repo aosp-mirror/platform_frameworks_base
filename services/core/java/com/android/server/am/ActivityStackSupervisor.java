@@ -2176,7 +2176,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         //mWindowManager.dump();
 
         if (enableScreen) {
-            mService.enableScreenAfterBoot();
+            mService.postEnableScreenAfterBootLocked();
         }
 
         if (activityRemoved) {
