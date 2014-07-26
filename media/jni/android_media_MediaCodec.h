@@ -26,6 +26,7 @@
 
 namespace android {
 
+struct ABuffer;
 struct ALooper;
 struct AMessage;
 struct AString;
@@ -121,10 +122,25 @@ private:
     jweak mObject;
     sp<Surface> mSurfaceTextureClient;
 
+    // java objects cached
+    jclass mByteBufferClass;
+    jobject mNativeByteOrderObj;
+    jmethodID mByteBufferOrderMethodID;
+    jmethodID mByteBufferPositionMethodID;
+    jmethodID mByteBufferLimitMethodID;
+    jmethodID mByteBufferAsReadOnlyBufferMethodID;
+
     sp<ALooper> mLooper;
     sp<MediaCodec> mCodec;
 
     sp<AMessage> mCallbackNotification;
+
+    status_t createByteBufferFromABuffer(
+            JNIEnv *env, bool readOnly, bool clearBuffer, const sp<ABuffer> &buffer,
+            jobject *buf) const;
+
+    void cacheJavaObjects(JNIEnv *env);
+    void deleteJavaObjects(JNIEnv *env);
 
     DISALLOW_EVIL_CONSTRUCTORS(JMediaCodec);
 };
