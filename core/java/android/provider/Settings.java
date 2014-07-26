@@ -4846,6 +4846,14 @@ public final class Settings {
         public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/global");
 
         /**
+         * Whether users are allowed to add more users or guest from lockscreen.
+         * <p>
+         * Type: int
+         * @hide
+         */
+        public static final String ADD_USERS_WHEN_LOCKED = "add_users_when_locked";
+
+        /**
          * Setting whether the global gesture for enabling accessibility is enabled.
          * If this gesture is enabled the user will be able to perfrom it to enable
          * the accessibility state without visiting the settings app.
