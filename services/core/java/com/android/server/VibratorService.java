@@ -55,6 +55,7 @@ import java.util.ListIterator;
 public class VibratorService extends IVibratorService.Stub
         implements InputManager.InputDeviceListener {
     private static final String TAG = "VibratorService";
+    private static final boolean DEBUG = false;
 
     private final LinkedList<Vibration> mVibrations;
     private Vibration mCurrentVibration;
@@ -205,6 +206,7 @@ public class VibratorService extends IVibratorService.Stub
         }
     }
 
+    @Override // Binder call
     public boolean hasVibrator() {
         return doVibratorExists();
     }
@@ -220,6 +222,7 @@ public class VibratorService extends IVibratorService.Stub
                 Binder.getCallingPid(), Binder.getCallingUid(), null);
     }
 
+    @Override // Binder call
     public void vibrate(int uid, String opPkg, long milliseconds, int usageHint,
             IBinder token) {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.VIBRATE)
@@ -235,6 +238,10 @@ public class VibratorService extends IVibratorService.Stub
             // Ignore this vibration since the current vibration will play for
             // longer than milliseconds.
             return;
+        }
+
+        if (DEBUG) {
+            Slog.d(TAG, "Vibrating for " + milliseconds + " ms.");
         }
 
         Vibration vib = new Vibration(token, milliseconds, usageHint, uid, opPkg);
@@ -262,6 +269,7 @@ public class VibratorService extends IVibratorService.Stub
         return true;
     }
 
+    @Override // Binder call
     public void vibratePattern(int uid, String packageName, long[] pattern, int repeat,
             int usageHint, IBinder token) {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.VIBRATE)
@@ -272,13 +280,13 @@ public class VibratorService extends IVibratorService.Stub
         // so wakelock calls will succeed
         long identity = Binder.clearCallingIdentity();
         try {
-            if (false) {
+            if (DEBUG) {
                 String s = "";
                 int N = pattern.length;
                 for (int i=0; i<N; i++) {
                     s += " " + pattern[i];
                 }
-                Slog.i(TAG, "vibrating with pattern: " + s);
+                Slog.d(TAG, "Vibrating with pattern:" + s);
             }
 
             // we're running in the server so we can't fail
@@ -314,6 +322,7 @@ public class VibratorService extends IVibratorService.Stub
         }
     }
 
+    @Override // Binder call
     public void cancelVibrate(IBinder token) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.VIBRATE,
@@ -325,6 +334,9 @@ public class VibratorService extends IVibratorService.Stub
             synchronized (mVibrations) {
                 final Vibration vib = removeVibrationLocked(token);
                 if (vib == mCurrentVibration) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "Canceling vibration.");
+                    }
                     doCancelVibrateLocked();
                     startNextVibrationLocked();
                 }
@@ -336,6 +348,7 @@ public class VibratorService extends IVibratorService.Stub
     }
 
     private final Runnable mVibrationRunnable = new Runnable() {
+        @Override
         public void run() {
             synchronized (mVibrations) {
                 doCancelVibrateLocked();
@@ -516,6 +529,9 @@ public class VibratorService extends IVibratorService.Stub
 
     private void doVibratorOn(long millis, int uid, int usageHint) {
         synchronized (mInputDeviceVibrators) {
+            if (DEBUG) {
+                Slog.d(TAG, "Turning vibrator on for " + millis + " ms.");
+            }
             try {
                 mBatteryStatsService.noteVibratorOn(uid, millis);
                 mCurVibUid = uid;
@@ -536,6 +552,9 @@ public class VibratorService extends IVibratorService.Stub
 
     private void doVibratorOff() {
         synchronized (mInputDeviceVibrators) {
+            if (DEBUG) {
+                Slog.d(TAG, "Turning vibrator off.");
+            }
             if (mCurVibUid >= 0) {
                 try {
                     mBatteryStatsService.noteVibratorOff(mCurVibUid);
