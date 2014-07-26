@@ -183,7 +183,6 @@ public class DreamService extends Service implements Window.Callback {
     private boolean mCanDoze;
     private boolean mDozing;
     private boolean mWindowless;
-    private DozeHardware mDozeHardware;
     private int mDozeScreenState = Display.STATE_UNKNOWN;
     private int mDozeScreenBrightness = PowerManager.BRIGHTNESS_DEFAULT;
 
@@ -658,29 +657,6 @@ public class DreamService extends Service implements Window.Callback {
     }
 
     /**
-     * Gets an object that may be used to access low-level hardware features that a
-     * dream may use to provide a richer user experience while dozing.
-     *
-     * @return An instance of {@link DozeHardware} or null if this device does not offer
-     * hardware support for dozing.
-     *
-     * @hide For use by system UI components only.
-     */
-    public DozeHardware getDozeHardware() {
-        if (mCanDoze && mDozeHardware == null && mWindowToken != null) {
-            try {
-                IDozeHardware hardware = mSandman.getDozeHardware(mWindowToken);
-                if (hardware != null) {
-                    mDozeHardware = new DozeHardware(hardware);
-                }
-            } catch (RemoteException ex) {
-                // system server died
-            }
-        }
-        return mDozeHardware;
-    }
-
-    /**
      * Gets the screen state to use while dozing.
      *
      * @return The screen state to use while dozing, such as {@link Display#STATE_ON},
@@ -1084,7 +1060,6 @@ public class DreamService extends Service implements Window.Callback {
         else if (canDoze()) pw.print(" candoze");
         pw.println();
         if (canDoze()) {
-            pw.println("  doze hardware: " + mDozeHardware);
             pw.println("  doze screen state: " + Display.stateToString(mDozeScreenState));
             pw.println("  doze screen brightness: " + mDozeScreenBrightness);
         }
