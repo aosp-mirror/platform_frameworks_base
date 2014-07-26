@@ -16,7 +16,10 @@
 
 package android.media;
 
+import android.graphics.ImageFormat;
+import android.graphics.Rect;
 import android.media.Image;
+import android.media.Image.Plane;
 import android.media.MediaCodecInfo;
 import android.media.MediaCodecList;
 import android.media.MediaCrypto;
@@ -29,6 +32,7 @@ import android.view.Surface;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.ReadOnlyBufferException;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -1537,4 +1541,175 @@ final public class MediaCodec {
     }
 
     private long mNativeContext;
+
+    /** @hide */
+    public static class MediaImage extends Image {
+        private final boolean mIsReadOnly;
+        private boolean mIsValid;
+        private final int mWidth;
+        private final int mHeight;
+        private final int mFormat;
+        private long mTimestamp;
+        private final Plane[] mPlanes;
+        private final ByteBuffer mBuffer;
+        private final ByteBuffer mInfo;
+        private final int mXOffset;
+        private final int mYOffset;
+
+        private final static int TYPE_YUV = 1;
+
+        public int getFormat() {
+            checkValid();
+            return mFormat;
+        }
+
+        public int getHeight() {
+            checkValid();
+            return mHeight;
+        }
+
+        public int getWidth() {
+            checkValid();
+            return mWidth;
+        }
+
+        public long getTimestamp() {
+            checkValid();
+            return mTimestamp;
+        }
+
+        public Plane[] getPlanes() {
+            checkValid();
+            return Arrays.copyOf(mPlanes, mPlanes.length);
+        }
+
+        public void close() {
+            if (mIsValid) {
+                java.nio.NioUtils.freeDirectBuffer(mBuffer);
+                mIsValid = false;
+            }
+        }
+
+        /**
+         * Set the crop rectangle associated with this frame.
+         * <p>
+         * The crop rectangle specifies the region of valid pixels in the image,
+         * using coordinates in the largest-resolution plane.
+         */
+        public void setCropRect(Rect cropRect) {
+            if (mIsReadOnly) {
+                throw new ReadOnlyBufferException();
+            }
+            super.setCropRect(cropRect);
+        }
+
+        private void checkValid() {
+            if (!mIsValid) {
+                throw new IllegalStateException("Image is already released");
+            }
+        }
+
+        private int readInt(ByteBuffer buffer, boolean asLong) {
+            if (asLong) {
+                return (int)buffer.getLong();
+            } else {
+                return buffer.getInt();
+            }
+        }
+
+        public MediaImage(
+                ByteBuffer buffer, ByteBuffer info, boolean readOnly,
+                long timestamp, int xOffset, int yOffset, Rect cropRect) {
+            mFormat = ImageFormat.YUV_420_888;
+            mTimestamp = timestamp;
+            mIsValid = true;
+            mIsReadOnly = buffer.isReadOnly();
+            mBuffer = buffer.duplicate();
+            if (cropRect != null) {
+                cropRect.offset(-xOffset, -yOffset);
+            }
+            mCropRect = cropRect;
+
+            // save offsets and info
+            mXOffset = xOffset;
+            mYOffset = yOffset;
+            mInfo = info;
+
+            // read media-info.  the size of media info can be 80 or 156 depending on
+            // whether it was created on a 32- or 64-bit process.  See MediaImage
+            if (info.remaining() == 80 || info.remaining() == 156) {
+                boolean sizeIsLong = info.remaining() == 156;
+                int type = info.getInt();
+                if (type != TYPE_YUV) {
+                    throw new UnsupportedOperationException("unsupported type: " + type);
+                }
+                int numPlanes = readInt(info, sizeIsLong);
+                if (numPlanes != 3) {
+                    throw new RuntimeException("unexpected number of planes: " + numPlanes);
+                }
+                mWidth = readInt(info, sizeIsLong);
+                mHeight = readInt(info, sizeIsLong);
+                if (mWidth < 1 || mHeight < 1) {
+                    throw new UnsupportedOperationException(
+                            "unsupported size: " + mWidth + "x" + mHeight);
+                }
+                int bitDepth = readInt(info, sizeIsLong);
+                if (bitDepth != 8) {
+                    throw new UnsupportedOperationException("unsupported bit depth: " + bitDepth);
+                }
+                mPlanes = new MediaPlane[numPlanes];
+                for (int ix = 0; ix < numPlanes; ix++) {
+                    int planeOffset = readInt(info, sizeIsLong);
+                    int colInc = readInt(info, sizeIsLong);
+                    int rowInc = readInt(info, sizeIsLong);
+                    int horiz = readInt(info, sizeIsLong);
+                    int vert = readInt(info, sizeIsLong);
+                    if (horiz != vert || horiz != (ix == 0 ? 1 : 2)) {
+                        throw new UnsupportedOperationException("unexpected subsampling: "
+                                + horiz + "x" + vert + " on plane " + ix);
+                    }
+
+                    buffer.clear();
+                    buffer.position(mBuffer.position() + planeOffset
+                            + (xOffset / horiz) * colInc + (yOffset / vert) * rowInc);
+                    buffer.limit(buffer.position() + Utils.divUp(bitDepth, 8)
+                            + (mHeight / vert - 1) * rowInc + (mWidth / horiz - 1) * colInc);
+                    mPlanes[ix] = new MediaPlane(buffer.slice(), rowInc, colInc);
+                }
+            } else {
+                throw new UnsupportedOperationException(
+                        "unsupported info length: " + info.remaining());
+            }
+        }
+
+        private class MediaPlane extends Plane {
+            public MediaPlane(ByteBuffer buffer, int rowInc, int colInc) {
+                mData = buffer;
+                mRowInc = rowInc;
+                mColInc = colInc;
+            }
+
+            @Override
+            public int getRowStride() {
+                checkValid();
+                return mRowInc;
+            }
+
+            @Override
+            public int getPixelStride() {
+                checkValid();
+                return mColInc;
+            }
+
+            @Override
+            public ByteBuffer getBuffer() {
+                checkValid();
+                return mData;
+            }
+
+            private final int mRowInc;
+            private final int mColInc;
+            private final ByteBuffer mData;
+        }
+    }
 }

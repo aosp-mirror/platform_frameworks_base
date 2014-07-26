@@ -90,6 +90,8 @@ JMediaCodec::JMediaCodec(
     mClass = (jclass)env->NewGlobalRef(clazz);
     mObject = env->NewWeakGlobalRef(thiz);
 
+    cacheJavaObjects(env);
+
     mLooper = new ALooper;
     mLooper->setName("MediaCodec_looper");
 
@@ -103,6 +105,45 @@ JMediaCodec::JMediaCodec(
     } else {
         mCodec = MediaCodec::CreateByComponentName(mLooper, name);
     }
+}
+
+void JMediaCodec::cacheJavaObjects(JNIEnv *env) {
+    jclass clazz = (jclass)env->FindClass("java/nio/ByteBuffer");
+    mByteBufferClass = (jclass)env->NewGlobalRef(clazz);
+    CHECK(mByteBufferClass != NULL);
+
+    ScopedLocalRef<jclass> byteOrderClass(
+            env, env->FindClass("java/nio/ByteOrder"));
+    CHECK(byteOrderClass.get() != NULL);
+
+    jmethodID nativeOrderID = env->GetStaticMethodID(
+            byteOrderClass.get(), "nativeOrder", "()Ljava/nio/ByteOrder;");
+    CHECK(nativeOrderID != NULL);
+
+    jobject nativeByteOrderObj =
+        env->CallStaticObjectMethod(byteOrderClass.get(), nativeOrderID);
+    mNativeByteOrderObj = env->NewGlobalRef(nativeByteOrderObj);
+    CHECK(mNativeByteOrderObj != NULL);
+    env->DeleteLocalRef(nativeByteOrderObj);
+    nativeByteOrderObj = NULL;
+
+    mByteBufferOrderMethodID = env->GetMethodID(
+            mByteBufferClass,
+            "order",
+            "(Ljava/nio/ByteOrder;)Ljava/nio/ByteBuffer;");
+    CHECK(mByteBufferOrderMethodID != NULL);
+
+    mByteBufferAsReadOnlyBufferMethodID = env->GetMethodID(
+            mByteBufferClass, "asReadOnlyBuffer", "()Ljava/nio/ByteBuffer;");
+    CHECK(mByteBufferAsReadOnlyBufferMethodID != NULL);
+
+    mByteBufferPositionMethodID = env->GetMethodID(
+            mByteBufferClass, "position", "(I)Ljava/nio/Buffer;");
+    CHECK(mByteBufferPositionMethodID != NULL);
+
+    mByteBufferLimitMethodID = env->GetMethodID(
+            mByteBufferClass, "limit", "(I)Ljava/nio/Buffer;");
+    CHECK(mByteBufferLimitMethodID != NULL);
 }
 
 status_t JMediaCodec::initCheck() const {
@@ -148,6 +189,19 @@ JMediaCodec::~JMediaCodec() {
     mObject = NULL;
     env->DeleteGlobalRef(mClass);
     mClass = NULL;
+    deleteJavaObjects(env);
+}
+
+void JMediaCodec::deleteJavaObjects(JNIEnv *env) {
+    env->DeleteGlobalRef(mByteBufferClass);
+    mByteBufferClass = NULL;
+    env->DeleteGlobalRef(mNativeByteOrderObj);
+    mNativeByteOrderObj = NULL;
+
+    mByteBufferOrderMethodID = NULL;
+    mByteBufferAsReadOnlyBufferMethodID = NULL;
+    mByteBufferPositionMethodID = NULL;
+    mByteBufferLimitMethodID = NULL;
 }
 
 status_t JMediaCodec::setCallback(jobject cb) {
@@ -298,80 +352,69 @@ status_t JMediaCodec::getBuffers(
         return err;
     }
 
-    ScopedLocalRef<jclass> byteBufferClass(
-            env, env->FindClass("java/nio/ByteBuffer"));
-
-    CHECK(byteBufferClass.get() != NULL);
-
-    jmethodID orderID = env->GetMethodID(
-            byteBufferClass.get(),
-            "order",
-            "(Ljava/nio/ByteOrder;)Ljava/nio/ByteBuffer;");
-
-    CHECK(orderID != NULL);
-
-    jmethodID asReadOnlyBufferID = env->GetMethodID(
-            byteBufferClass.get(), "asReadOnlyBuffer", "()Ljava/nio/ByteBuffer;");
-
-    CHECK(asReadOnlyBufferID != NULL);
-
-    ScopedLocalRef<jclass> byteOrderClass(
-            env, env->FindClass("java/nio/ByteOrder"));
-
-    CHECK(byteOrderClass.get() != NULL);
-
-    jmethodID nativeOrderID = env->GetStaticMethodID(
-            byteOrderClass.get(), "nativeOrder", "()Ljava/nio/ByteOrder;");
-    CHECK(nativeOrderID != NULL);
-
-    jobject nativeByteOrderObj =
-        env->CallStaticObjectMethod(byteOrderClass.get(), nativeOrderID);
-    CHECK(nativeByteOrderObj != NULL);
-
     *bufArray = (jobjectArray)env->NewObjectArray(
-            buffers.size(), byteBufferClass.get(), NULL);
+            buffers.size(), mByteBufferClass, NULL);
     if (*bufArray == NULL) {
-        env->DeleteLocalRef(nativeByteOrderObj);
         return NO_MEMORY;
     }
 
     for (size_t i = 0; i < buffers.size(); ++i) {
         const sp<ABuffer> &buffer = buffers.itemAt(i);
 
-        // if this is an ABuffer that doesn't actually hold any accessible memory,
-        // use a null ByteBuffer
-        if (buffer->base() == NULL) {
-            continue;
+        jobject byteBuffer = NULL;
+        err = createByteBufferFromABuffer(
+                env, !input /* readOnly */, true /* clearBuffer */, buffer, &byteBuffer);
+        if (err != OK) {
+            return err;
         }
-        jobject byteBuffer =
-            env->NewDirectByteBuffer(
-                buffer->base(),
-                buffer->capacity());
-        if (!input && byteBuffer != NULL) {
-            jobject readOnlyBuffer = env->CallObjectMethod(
-                    byteBuffer, asReadOnlyBufferID);
+        if (byteBuffer != NULL) {
+            env->SetObjectArrayElement(
+                    *bufArray, i, byteBuffer);
+
             env->DeleteLocalRef(byteBuffer);
-            byteBuffer = readOnlyBuffer;
+            byteBuffer = NULL;
         }
-        if (byteBuffer == NULL) {
-            env->DeleteLocalRef(nativeByteOrderObj);
-            return NO_MEMORY;
-        }
-        jobject me = env->CallObjectMethod(
-                byteBuffer, orderID, nativeByteOrderObj);
-        env->DeleteLocalRef(me);
-        me = NULL;
-
-        env->SetObjectArrayElement(
-                *bufArray, i, byteBuffer);
-
-        env->DeleteLocalRef(byteBuffer);
-        byteBuffer = NULL;
     }
 
-    env->DeleteLocalRef(nativeByteOrderObj);
-    nativeByteOrderObj = NULL;
+    return OK;
+}
 
+// static
+status_t JMediaCodec::createByteBufferFromABuffer(
+        JNIEnv *env, bool readOnly, bool clearBuffer, const sp<ABuffer> &buffer,
+        jobject *buf) const {
+    // if this is an ABuffer that doesn't actually hold any accessible memory,
+    // use a null ByteBuffer
+    *buf = NULL;
+    if (buffer->base() == NULL) {
+        return OK;
+    }
+
+    jobject byteBuffer =
+        env->NewDirectByteBuffer(buffer->base(), buffer->capacity());
+    if (readOnly && byteBuffer != NULL) {
+        jobject readOnlyBuffer = env->CallObjectMethod(
+                byteBuffer, mByteBufferAsReadOnlyBufferMethodID);
+        env->DeleteLocalRef(byteBuffer);
+        byteBuffer = readOnlyBuffer;
+    }
+    if (byteBuffer == NULL) {
+        return NO_MEMORY;
+    }
+    jobject me = env->CallObjectMethod(
+            byteBuffer, mByteBufferOrderMethodID, mNativeByteOrderObj);
+    env->DeleteLocalRef(me);
+    me = env->CallObjectMethod(
+            byteBuffer, mByteBufferLimitMethodID,
+            clearBuffer ? buffer->capacity() : (buffer->offset() + buffer->size()));
+    env->DeleteLocalRef(me);
+    me = env->CallObjectMethod(
+            byteBuffer, mByteBufferPositionMethodID,
+            clearBuffer ? 0 : buffer->offset());
+    env->DeleteLocalRef(me);
+    me = NULL;
+
+    *buf = byteBuffer;
     return OK;
 }
 
@@ -388,85 +431,8 @@ status_t JMediaCodec::getBuffer(
         return err;
     }
 
-    ScopedLocalRef<jclass> byteBufferClass(
-            env, env->FindClass("java/nio/ByteBuffer"));
-
-    CHECK(byteBufferClass.get() != NULL);
-
-    jmethodID orderID = env->GetMethodID(
-            byteBufferClass.get(),
-            "order",
-            "(Ljava/nio/ByteOrder;)Ljava/nio/ByteBuffer;");
-
-    CHECK(orderID != NULL);
-
-    jmethodID asReadOnlyBufferID = env->GetMethodID(
-            byteBufferClass.get(), "asReadOnlyBuffer", "()Ljava/nio/ByteBuffer;");
-
-    CHECK(asReadOnlyBufferID != NULL);
-
-    jmethodID positionID = env->GetMethodID(
-            byteBufferClass.get(), "position", "(I)Ljava/nio/Buffer;");
-
-    CHECK(positionID != NULL);
-
-    jmethodID limitID = env->GetMethodID(
-            byteBufferClass.get(), "limit", "(I)Ljava/nio/Buffer;");
-
-    CHECK(limitID != NULL);
-
-    ScopedLocalRef<jclass> byteOrderClass(
-            env, env->FindClass("java/nio/ByteOrder"));
-
-    CHECK(byteOrderClass.get() != NULL);
-
-    jmethodID nativeOrderID = env->GetStaticMethodID(
-            byteOrderClass.get(), "nativeOrder", "()Ljava/nio/ByteOrder;");
-    CHECK(nativeOrderID != NULL);
-
-    jobject nativeByteOrderObj =
-        env->CallStaticObjectMethod(byteOrderClass.get(), nativeOrderID);
-    CHECK(nativeByteOrderObj != NULL);
-
-    // if this is an ABuffer that doesn't actually hold any accessible memory,
-    // use a null ByteBuffer
-    if (buffer->base() == NULL) {
-        *buf = NULL;
-        return OK;
-    }
-
-    jobject byteBuffer =
-        env->NewDirectByteBuffer(
-            buffer->base(),
-            buffer->capacity());
-    if (!input && byteBuffer != NULL) {
-        jobject readOnlyBuffer = env->CallObjectMethod(
-                byteBuffer, asReadOnlyBufferID);
-        env->DeleteLocalRef(byteBuffer);
-        byteBuffer = readOnlyBuffer;
-    }
-    if (byteBuffer == NULL) {
-        env->DeleteLocalRef(nativeByteOrderObj);
-        return NO_MEMORY;
-    }
-    jobject me = env->CallObjectMethod(
-            byteBuffer, orderID, nativeByteOrderObj);
-    env->DeleteLocalRef(me);
-    me = env->CallObjectMethod(
-            byteBuffer, limitID,
-            input ? buffer->capacity() : (buffer->offset() + buffer->size()));
-    env->DeleteLocalRef(me);
-    me = env->CallObjectMethod(
-            byteBuffer, positionID,
-            input ? 0 : buffer->offset());
-    env->DeleteLocalRef(me);
-    me = NULL;
-
-    env->DeleteLocalRef(nativeByteOrderObj);
-    nativeByteOrderObj = NULL;
-
-    *buf = byteBuffer;
-    return OK;
+    return createByteBufferFromABuffer(
+            env, !input /* readOnly */, input /* clearBuffer */, buffer, buf);
 }
 
 status_t JMediaCodec::getImage(
@@ -490,14 +456,79 @@ status_t JMediaCodec::getImage(
     }
 
     // check if buffer is an image
-    AString imageData;
-    if (!buffer->meta()->findString("image-data", &imageData)) {
+    sp<ABuffer> imageData;
+    if (!buffer->meta()->findBuffer("image-data", &imageData)) {
         return OK;
     }
 
+    int64_t timestamp = 0;
+    if (!input && buffer->meta()->findInt64("timeUs", &timestamp)) {
+        timestamp *= 1000; // adjust to ns
+    }
+
+    jobject byteBuffer = NULL;
+    err = createByteBufferFromABuffer(
+            env, !input /* readOnly */, input /* clearBuffer */, buffer, &byteBuffer);
+    if (err != OK) {
+        return OK;
+    }
+
+    jobject infoBuffer = NULL;
+    err = createByteBufferFromABuffer(
+            env, true /* readOnly */, true /* clearBuffer */, imageData, &infoBuffer);
+    if (err != OK) {
+        env->DeleteLocalRef(byteBuffer);
+        byteBuffer = NULL;
+        return OK;
+    }
+
+    jobject cropRect = NULL;
+    int32_t left, top, right, bottom;
+    if (buffer->meta()->findRect("crop-rect", &left, &top, &right, &bottom)) {
+        ScopedLocalRef<jclass> rectClazz(
+                env, env->FindClass("android/graphics/Rect"));
+        CHECK(rectClazz.get() != NULL);
+
+        jmethodID rectConstructID = env->GetMethodID(
+                rectClazz.get(), "<init>", "(IIII)V");
+
+        cropRect = env->NewObject(
+                rectClazz.get(), rectConstructID, left, top, right + 1, bottom + 1);
+    }
+
+    ScopedLocalRef<jclass> imageClazz(
+            env, env->FindClass("android/media/MediaCodec$MediaImage"));
+    CHECK(imageClazz.get() != NULL);
+
+    jmethodID imageConstructID = env->GetMethodID(imageClazz.get(), "<init>",
+            "(Ljava/nio/ByteBuffer;Ljava/nio/ByteBuffer;ZJIILandroid/graphics/Rect;)V");
+
+    *buf = env->NewObject(imageClazz.get(), imageConstructID,
+            byteBuffer, infoBuffer,
+            (jboolean)!input /* readOnly */,
+            (jlong)timestamp,
+            (jint)0 /* xOffset */, (jint)0 /* yOffset */, cropRect);
+
+    // if MediaImage creation fails, return null
+    if (env->ExceptionCheck()) {
+        env->ExceptionDescribe();
+        env->ExceptionClear();
+        *buf = NULL;
+    }
+
+    if (cropRect != NULL) {
+        env->DeleteLocalRef(cropRect);
+        cropRect = NULL;
+    }
+
+    env->DeleteLocalRef(byteBuffer);
+    byteBuffer = NULL;
+
+    env->DeleteLocalRef(infoBuffer);
+    infoBuffer = NULL;
+
     return OK;
 }
-
 
 status_t JMediaCodec::getName(JNIEnv *env, jstring *nameStr) const {
     AString name;
