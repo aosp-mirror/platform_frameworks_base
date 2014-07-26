@@ -1847,6 +1847,9 @@
 
         <!-- Elevation to use for the window. -->
         <attr name="windowElevation" format="dimension" />
+
+        <!-- Whether to clip window content to the outline of the window background. -->
+        <attr name="windowClipToOutline" format="boolean" />
     </declare-styleable>
 
     <!-- The set of attributes that describe a AlertDialog's theme. -->

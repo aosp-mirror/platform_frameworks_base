@@ -211,6 +211,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     private float mElevation;
 
+    /** Whether window content should be clipped to the background outline. */
+    private boolean mClipToOutline;
+
     private int mFrameResource = 0;
 
     private int mTextColor = 0;
@@ -1173,7 +1176,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 mDecorContentParent != null) {
             final TypedValue outValue = new TypedValue();
             final Theme baseTheme = context.getTheme();
-            baseTheme.resolveAttribute(com.android.internal.R.attr.actionBarTheme, outValue, true);
+            baseTheme.resolveAttribute(R.attr.actionBarTheme, outValue, true);
 
             Theme widgetTheme = null;
             if (outValue.resourceId != 0) {
@@ -1181,10 +1184,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 widgetTheme.setTo(baseTheme);
                 widgetTheme.applyStyle(outValue.resourceId, true);
                 widgetTheme.resolveAttribute(
-                        com.android.internal.R.attr.actionBarWidgetTheme, outValue, true);
+                        R.attr.actionBarWidgetTheme, outValue, true);
             } else {
                 baseTheme.resolveAttribute(
-                        com.android.internal.R.attr.actionBarWidgetTheme, outValue, true);
+                        R.attr.actionBarWidgetTheme, outValue, true);
             }
 
             if (outValue.resourceId != 0) {
@@ -1305,6 +1308,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             mBackgroundDrawable = drawable;
             if (mDecor != null) {
                 mDecor.setWindowBackground(drawable);
+                mDecor.setClipToOutline(drawable != null && mClipToOutline);
             }
         }
     }
@@ -1428,7 +1432,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (featureId == FEATURE_PROGRESS || featureId == FEATURE_INDETERMINATE_PROGRESS) {
             updateProgressBars(value);
         } else if (featureId == FEATURE_CUSTOM_TITLE) {
-            FrameLayout titleContainer = (FrameLayout) findViewById(com.android.internal.R.id.title_container);
+            FrameLayout titleContainer = (FrameLayout) findViewById(R.id.title_container);
             if (titleContainer != null) {
                 mLayoutInflater.inflate(value, titleContainer);
             }
@@ -1546,7 +1550,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     private void hideProgressBars(ProgressBar horizontalProgressBar, ProgressBar spinnyProgressBar) {
         final int features = getLocalFeatures();
-        Animation anim = AnimationUtils.loadAnimation(getContext(), com.android.internal.R.anim.fade_out);
+        Animation anim = AnimationUtils.loadAnimation(getContext(), R.anim.fade_out);
         anim.setDuration(1000);
         if ((features & (1 << FEATURE_INDETERMINATE_PROGRESS)) != 0 &&
                 spinnyProgressBar != null &&
@@ -2440,7 +2444,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                             && getAttributes().height
                             == WindowManager.LayoutParams.MATCH_PARENT) {
                         mMenuBackground = getContext().getDrawable(
-                                com.android.internal.R.drawable.menu_background);
+                                R.drawable.menu_background);
                     }
                     if (mMenuBackground != null) {
                         mMenuBackground.setBounds(drawingBounds.left,
@@ -2606,7 +2610,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     if (isFloating()) {
                         mActionModeView = new ActionBarContextView(mContext);
                         mActionModePopup = new PopupWindow(mContext, null,
-                                com.android.internal.R.attr.actionModePopupWindowStyle);
+                                R.attr.actionModePopupWindowStyle);
                         mActionModePopup.setWindowLayoutType(
                                 WindowManager.LayoutParams.TYPE_APPLICATION);
                         mActionModePopup.setContentView(mActionModeView);
@@ -2614,7 +2618,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
                         TypedValue heightValue = new TypedValue();
                         mContext.getTheme().resolveAttribute(
-                                com.android.internal.R.attr.actionBarSize, heightValue, true);
+                                R.attr.actionBarSize, heightValue, true);
                         final int height = TypedValue.complexToDimensionPixelSize(heightValue.data,
                                 mContext.getResources().getDisplayMetrics());
                         mActionModeView.setContentHeight(height);
@@ -2628,7 +2632,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                         };
                     } else {
                         ViewStub stub = (ViewStub) findViewById(
-                                com.android.internal.R.id.action_mode_bar_stub);
+                                R.id.action_mode_bar_stub);
                         if (stub != null) {
                             mActionModeView = (ActionBarContextView) stub.inflate();
                         }
@@ -3093,14 +3097,14 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (false) {
             System.out.println("From style:");
             String s = "Attrs:";
-            for (int i = 0; i < com.android.internal.R.styleable.Window.length; i++) {
-                s = s + " " + Integer.toHexString(com.android.internal.R.styleable.Window[i]) + "="
+            for (int i = 0; i < R.styleable.Window.length; i++) {
+                s = s + " " + Integer.toHexString(R.styleable.Window[i]) + "="
                         + a.getString(i);
             }
             System.out.println(s);
         }
 
-        mIsFloating = a.getBoolean(com.android.internal.R.styleable.Window_windowIsFloating, false);
+        mIsFloating = a.getBoolean(R.styleable.Window_windowIsFloating, false);
         int flagsToUpdate = (FLAG_LAYOUT_IN_SCREEN|FLAG_LAYOUT_INSET_DECOR)
                 & (~getForcedWindowFlags());
         if (mIsFloating) {
@@ -3110,78 +3114,78 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             setFlags(FLAG_LAYOUT_IN_SCREEN|FLAG_LAYOUT_INSET_DECOR, flagsToUpdate);
         }
 
-        if (a.getBoolean(com.android.internal.R.styleable.Window_windowNoTitle, false)) {
+        if (a.getBoolean(R.styleable.Window_windowNoTitle, false)) {
             requestFeature(FEATURE_NO_TITLE);
-        } else if (a.getBoolean(com.android.internal.R.styleable.Window_windowActionBar, false)) {
+        } else if (a.getBoolean(R.styleable.Window_windowActionBar, false)) {
             // Don't allow an action bar if there is no title.
             requestFeature(FEATURE_ACTION_BAR);
         }
 
-        if (a.getBoolean(com.android.internal.R.styleable.Window_windowActionBarOverlay, false)) {
+        if (a.getBoolean(R.styleable.Window_windowActionBarOverlay, false)) {
             requestFeature(FEATURE_ACTION_BAR_OVERLAY);
         }
 
-        if (a.getBoolean(com.android.internal.R.styleable.Window_windowActionModeOverlay, false)) {
+        if (a.getBoolean(R.styleable.Window_windowActionModeOverlay, false)) {
             requestFeature(FEATURE_ACTION_MODE_OVERLAY);
         }
 
-        if (a.getBoolean(com.android.internal.R.styleable.Window_windowSwipeToDismiss, false)) {
+        if (a.getBoolean(R.styleable.Window_windowSwipeToDismiss, false)) {
             requestFeature(FEATURE_SWIPE_TO_DISMISS);
         }
 
-        if (a.getBoolean(com.android.internal.R.styleable.Window_windowFullscreen, false)) {
+        if (a.getBoolean(R.styleable.Window_windowFullscreen, false)) {
             setFlags(FLAG_FULLSCREEN, FLAG_FULLSCREEN & (~getForcedWindowFlags()));
         }
 
-        if (a.getBoolean(com.android.internal.R.styleable.Window_windowTranslucentStatus,
+        if (a.getBoolean(R.styleable.Window_windowTranslucentStatus,
                 false)) {
             setFlags(FLAG_TRANSLUCENT_STATUS, FLAG_TRANSLUCENT_STATUS
                     & (~getForcedWindowFlags()));
         }
 
-        if (a.getBoolean(com.android.internal.R.styleable.Window_windowTranslucentNavigation,
+        if (a.getBoolean(R.styleable.Window_windowTranslucentNavigation,
                 false)) {
             setFlags(FLAG_TRANSLUCENT_NAVIGATION, FLAG_TRANSLUCENT_NAVIGATION
                     & (~getForcedWindowFlags()));
         }
 
-        if (a.getBoolean(com.android.internal.R.styleable.Window_windowOverscan, false)) {
+        if (a.getBoolean(R.styleable.Window_windowOverscan, false)) {
             setFlags(FLAG_LAYOUT_IN_OVERSCAN, FLAG_LAYOUT_IN_OVERSCAN&(~getForcedWindowFlags()));
         }
 
-        if (a.getBoolean(com.android.internal.R.styleable.Window_windowShowWallpaper, false)) {
+        if (a.getBoolean(R.styleable.Window_windowShowWallpaper, false)) {
             setFlags(FLAG_SHOW_WALLPAPER, FLAG_SHOW_WALLPAPER&(~getForcedWindowFlags()));
         }
 
-        if (a.getBoolean(com.android.internal.R.styleable.Window_windowEnableSplitTouch,
+        if (a.getBoolean(R.styleable.Window_windowEnableSplitTouch,
                 getContext().getApplicationInfo().targetSdkVersion
                         >= android.os.Build.VERSION_CODES.HONEYCOMB)) {
             setFlags(FLAG_SPLIT_TOUCH, FLAG_SPLIT_TOUCH&(~getForcedWindowFlags()));
         }
 
-        a.getValue(com.android.internal.R.styleable.Window_windowMinWidthMajor, mMinWidthMajor);
-        a.getValue(com.android.internal.R.styleable.Window_windowMinWidthMinor, mMinWidthMinor);
-        if (a.hasValue(com.android.internal.R.styleable.Window_windowFixedWidthMajor)) {
+        a.getValue(R.styleable.Window_windowMinWidthMajor, mMinWidthMajor);
+        a.getValue(R.styleable.Window_windowMinWidthMinor, mMinWidthMinor);
+        if (a.hasValue(R.styleable.Window_windowFixedWidthMajor)) {
             if (mFixedWidthMajor == null) mFixedWidthMajor = new TypedValue();
-            a.getValue(com.android.internal.R.styleable.Window_windowFixedWidthMajor,
+            a.getValue(R.styleable.Window_windowFixedWidthMajor,
                     mFixedWidthMajor);
         }
-        if (a.hasValue(com.android.internal.R.styleable.Window_windowFixedWidthMinor)) {
+        if (a.hasValue(R.styleable.Window_windowFixedWidthMinor)) {
             if (mFixedWidthMinor == null) mFixedWidthMinor = new TypedValue();
-            a.getValue(com.android.internal.R.styleable.Window_windowFixedWidthMinor,
+            a.getValue(R.styleable.Window_windowFixedWidthMinor,
                     mFixedWidthMinor);
         }
-        if (a.hasValue(com.android.internal.R.styleable.Window_windowFixedHeightMajor)) {
+        if (a.hasValue(R.styleable.Window_windowFixedHeightMajor)) {
             if (mFixedHeightMajor == null) mFixedHeightMajor = new TypedValue();
-            a.getValue(com.android.internal.R.styleable.Window_windowFixedHeightMajor,
+            a.getValue(R.styleable.Window_windowFixedHeightMajor,
                     mFixedHeightMajor);
         }
-        if (a.hasValue(com.android.internal.R.styleable.Window_windowFixedHeightMinor)) {
+        if (a.hasValue(R.styleable.Window_windowFixedHeightMinor)) {
             if (mFixedHeightMinor == null) mFixedHeightMinor = new TypedValue();
-            a.getValue(com.android.internal.R.styleable.Window_windowFixedHeightMinor,
+            a.getValue(R.styleable.Window_windowFixedHeightMinor,
                     mFixedHeightMinor);
         }
-        if (a.getBoolean(com.android.internal.R.styleable.Window_windowContentTransitions, false)) {
+        if (a.getBoolean(R.styleable.Window_windowContentTransitions, false)) {
             requestFeature(FEATURE_CONTENT_TRANSITIONS);
         }
 
@@ -3190,9 +3194,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (windowService != null) {
             final Display display = windowService.getDefaultDisplay();
             if (display.getDisplayId() == Display.DEFAULT_DISPLAY &&
-                    a.hasValue(com.android.internal.R.styleable.Window_windowOutsetBottom)) {
+                    a.hasValue(R.styleable.Window_windowOutsetBottom)) {
                 if (mOutsetBottom == null) mOutsetBottom = new TypedValue();
-                a.getValue(com.android.internal.R.styleable.Window_windowOutsetBottom,
+                a.getValue(R.styleable.Window_windowOutsetBottom,
                         mOutsetBottom);
             }
         }
@@ -3203,7 +3207,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         final boolean targetPreIcs = targetSdk < android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH;
         final boolean targetPreL = targetSdk < android.os.Build.VERSION_CODES.L;
         final boolean targetHcNeedsOptions = context.getResources().getBoolean(
-                com.android.internal.R.bool.target_honeycomb_needs_options_menu);
+                R.bool.target_honeycomb_needs_options_menu);
         final boolean noActionBar = !hasFeature(FEATURE_ACTION_BAR) || hasFeature(FEATURE_NO_TITLE);
 
         if (targetPreHoneycomb || (targetPreIcs && targetHcNeedsOptions && noActionBar)) {
@@ -3216,7 +3220,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         // therefore must know about visibility changes of those.
         if (!mIsFloating && ActivityManager.isHighEndGfx()) {
             if (!targetPreL && a.getBoolean(
-                    com.android.internal.R.styleable.Window_windowDrawsSystemBarBackgrounds,
+                    R.styleable.Window_windowDrawsSystemBarBackgrounds,
                     false)) {
                 setFlags(FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS,
                         FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS & ~getForcedWindowFlags());
@@ -3233,7 +3237,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (mAlwaysReadCloseOnTouchAttr || getContext().getApplicationInfo().targetSdkVersion
                 >= android.os.Build.VERSION_CODES.HONEYCOMB) {
             if (a.getBoolean(
-                    com.android.internal.R.styleable.Window_windowCloseOnTouchOutside,
+                    R.styleable.Window_windowCloseOnTouchOutside,
                     false)) {
                 setCloseOnTouchOutsideIfNotSet(true);
             }
@@ -3243,11 +3247,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
         if (!hasSoftInputMode()) {
             params.softInputMode = a.getInt(
-                    com.android.internal.R.styleable.Window_windowSoftInputMode,
+                    R.styleable.Window_windowSoftInputMode,
                     params.softInputMode);
         }
 
-        if (a.getBoolean(com.android.internal.R.styleable.Window_backgroundDimEnabled,
+        if (a.getBoolean(R.styleable.Window_backgroundDimEnabled,
                 mIsFloating)) {
             /* All dialogs should have the window dimmed */
             if ((getForcedWindowFlags()&WindowManager.LayoutParams.FLAG_DIM_BEHIND) == 0) {
@@ -3261,7 +3265,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
         if (params.windowAnimations == 0) {
             params.windowAnimations = a.getResourceId(
-                    com.android.internal.R.styleable.Window_windowAnimationStyle, 0);
+                    R.styleable.Window_windowAnimationStyle, 0);
         }
 
         // The rest are only done if this window is not embedded; otherwise,
@@ -3270,10 +3274,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             if (mBackgroundDrawable == null) {
                 if (mBackgroundResource == 0) {
                     mBackgroundResource = a.getResourceId(
-                            com.android.internal.R.styleable.Window_windowBackground, 0);
+                            R.styleable.Window_windowBackground, 0);
                 }
                 if (mFrameResource == 0) {
-                    mFrameResource = a.getResourceId(com.android.internal.R.styleable.Window_windowFrame, 0);
+                    mFrameResource = a.getResourceId(R.styleable.Window_windowFrame, 0);
                 }
                 if (false) {
                     System.out.println("Background: "
@@ -3281,8 +3285,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                             + Integer.toHexString(mFrameResource));
                 }
             }
-            mElevation = a.getDimension(com.android.internal.R.styleable.Window_windowElevation, 0);
-            mTextColor = a.getColor(com.android.internal.R.styleable.Window_textColor, 0xFF000000);
+            mElevation = a.getDimension(R.styleable.Window_windowElevation, 0);
+            mClipToOutline = a.getBoolean(R.styleable.Window_windowClipToOutline, false);
+            mTextColor = a.getColor(R.styleable.Window_textColor, Color.TRANSPARENT);
         }
 
         // Inflate the window decor.
@@ -3291,15 +3296,15 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         int features = getLocalFeatures();
         // System.out.println("Features: 0x" + Integer.toHexString(features));
         if ((features & (1 << FEATURE_SWIPE_TO_DISMISS)) != 0) {
-            layoutResource = com.android.internal.R.layout.screen_swipe_dismiss;
+            layoutResource = R.layout.screen_swipe_dismiss;
         } else if ((features & ((1 << FEATURE_LEFT_ICON) | (1 << FEATURE_RIGHT_ICON))) != 0) {
             if (mIsFloating) {
                 TypedValue res = new TypedValue();
                 getContext().getTheme().resolveAttribute(
-                        com.android.internal.R.attr.dialogTitleIconsDecorLayout, res, true);
+                        R.attr.dialogTitleIconsDecorLayout, res, true);
                 layoutResource = res.resourceId;
             } else {
-                layoutResource = com.android.internal.R.layout.screen_title_icons;
+                layoutResource = R.layout.screen_title_icons;
             }
             // XXX Remove this once action bar supports these features.
             removeFeature(FEATURE_ACTION_BAR);
@@ -3308,7 +3313,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 && (features & (1 << FEATURE_ACTION_BAR)) == 0) {
             // Special case for a window with only a progress bar (and title).
             // XXX Need to have a no-title version of embedded windows.
-            layoutResource = com.android.internal.R.layout.screen_progress;
+            layoutResource = R.layout.screen_progress;
             // System.out.println("Progress!");
         } else if ((features & (1 << FEATURE_CUSTOM_TITLE)) != 0) {
             // Special case for a window with a custom title.
@@ -3316,10 +3321,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             if (mIsFloating) {
                 TypedValue res = new TypedValue();
                 getContext().getTheme().resolveAttribute(
-                        com.android.internal.R.attr.dialogCustomTitleDecorLayout, res, true);
+                        R.attr.dialogCustomTitleDecorLayout, res, true);
                 layoutResource = res.resourceId;
             } else {
-                layoutResource = com.android.internal.R.layout.screen_custom_title;
+                layoutResource = R.layout.screen_custom_title;
             }
             // XXX Remove this once action bar supports these features.
             removeFeature(FEATURE_ACTION_BAR);
@@ -3329,21 +3334,21 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             if (mIsFloating) {
                 TypedValue res = new TypedValue();
                 getContext().getTheme().resolveAttribute(
-                        com.android.internal.R.attr.dialogTitleDecorLayout, res, true);
+                        R.attr.dialogTitleDecorLayout, res, true);
                 layoutResource = res.resourceId;
             } else if ((features & (1 << FEATURE_ACTION_BAR)) != 0) {
                 layoutResource = a.getResourceId(
-                        com.android.internal.R.styleable.Window_windowActionBarFullscreenDecorLayout,
-                        com.android.internal.R.layout.screen_action_bar);
+                        R.styleable.Window_windowActionBarFullscreenDecorLayout,
+                        R.layout.screen_action_bar);
             } else {
-                layoutResource = com.android.internal.R.layout.screen_title;
+                layoutResource = R.layout.screen_title;
             }
             // System.out.println("Title!");
         } else if ((features & (1 << FEATURE_ACTION_MODE_OVERLAY)) != 0) {
-            layoutResource = com.android.internal.R.layout.screen_simple_overlay_action_mode;
+            layoutResource = R.layout.screen_simple_overlay_action_mode;
         } else {
             // Embedded, so no decoration is needed.
-            layoutResource = com.android.internal.R.layout.screen_simple;
+            layoutResource = R.layout.screen_simple;
             // System.out.println("Simple!");
         }
 
@@ -3379,8 +3384,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             }
             mDecor.setWindowBackground(background);
 
-            // By default, clip content to the background outline.
-            mDecor.setClipToOutline(true);
+            if (background != null) {
+                mDecor.setClipToOutline(mClipToOutline);
+            }
 
             final Drawable frame;
             if (mFrameResource != 0) {
@@ -3428,7 +3434,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             mDecor.makeOptionalFitsSystemWindows();
 
             final DecorContentParent decorContentParent = (DecorContentParent) mDecor.findViewById(
-                    com.android.internal.R.id.decor_content_parent);
+                    R.id.decor_content_parent);
 
             if (decorContentParent != null) {
                 mDecorContentParent = decorContentParent;
@@ -3472,12 +3478,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     }
                 });
             } else {
-                mTitleView = (TextView)findViewById(com.android.internal.R.id.title);
+                mTitleView = (TextView)findViewById(R.id.title);
                 if (mTitleView != null) {
                     mTitleView.setLayoutDirection(mDecor.getLayoutDirection());
                     if ((getLocalFeatures() & (1 << FEATURE_NO_TITLE)) != 0) {
                         View titleContainer = findViewById(
-                                com.android.internal.R.id.title_container);
+                                R.id.title_container);
                         if (titleContainer != null) {
                             titleContainer.setVisibility(View.GONE);
                         } else {
@@ -3497,7 +3503,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             if (hasFeature(FEATURE_CONTENT_TRANSITIONS)) {
                 if (mTransitionManager == null) {
                     final int transitionRes = getWindowStyle().getResourceId(
-                            com.android.internal.R.styleable.Window_windowContentTransitionManager,
+                            R.styleable.Window_windowContentTransitionManager,
                             0);
                     if (transitionRes != 0) {
                         final TransitionInflater inflater = TransitionInflater.from(getContext());
@@ -3509,26 +3515,26 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 }
 
                 mEnterTransition = getTransition(mEnterTransition,
-                        com.android.internal.R.styleable.Window_windowEnterTransition);
+                        R.styleable.Window_windowEnterTransition);
                 mExitTransition = getTransition(mExitTransition,
-                        com.android.internal.R.styleable.Window_windowExitTransition);
+                        R.styleable.Window_windowExitTransition);
                 mSharedElementEnterTransition = getTransition(mSharedElementEnterTransition,
-                        com.android.internal.R.styleable.Window_windowSharedElementEnterTransition);
+                        R.styleable.Window_windowSharedElementEnterTransition);
                 mSharedElementExitTransition = getTransition(mSharedElementExitTransition,
-                        com.android.internal.R.styleable.Window_windowSharedElementExitTransition);
+                        R.styleable.Window_windowSharedElementExitTransition);
                 if (mAllowEnterTransitionOverlap == null) {
                     mAllowEnterTransitionOverlap = getWindowStyle().getBoolean(
-                            com.android.internal.R.styleable.
+                            R.styleable.
                                     Window_windowAllowEnterTransitionOverlap, true);
                 }
                 if (mAllowExitTransitionOverlap == null) {
                     mAllowExitTransitionOverlap = getWindowStyle().getBoolean(
-                            com.android.internal.R.styleable.
+                            R.styleable.
                                     Window_windowAllowExitTransitionOverlap, true);
                 }
                 if (mBackgroundFadeDurationMillis < 0) {
                     mBackgroundFadeDurationMillis = getWindowStyle().getInteger(
-                            com.android.internal.R.styleable.
+                            R.styleable.
                                     Window_windowTransitionBackgroundFadeDuration,
                             DEFAULT_BACKGROUND_FADE_DURATION_MS);
                 }
@@ -3542,7 +3548,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
         int transitionId = getWindowStyle().getResourceId(id, -1);
         Transition transition = null;
-        if (transitionId != -1 && transitionId != com.android.internal.R.transition.no_transition) {
+        if (transitionId != -1 && transitionId != R.transition.no_transition) {
             TransitionInflater inflater = TransitionInflater.from(getContext());
             transition = inflater.inflateTransition(transitionId);
         }
@@ -3716,7 +3722,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (mContentParent == null) {
             installDecor();
         }
-        return (mLeftIconView = (ImageView)findViewById(com.android.internal.R.id.left_icon));
+        return (mLeftIconView = (ImageView)findViewById(R.id.left_icon));
     }
 
     @Override
@@ -3734,7 +3740,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (mContentParent == null && shouldInstallDecor) {
             installDecor();
         }
-        mCircularProgressBar = (ProgressBar) findViewById(com.android.internal.R.id.progress_circular);
+        mCircularProgressBar = (ProgressBar) findViewById(R.id.progress_circular);
         if (mCircularProgressBar != null) {
             mCircularProgressBar.setVisibility(View.INVISIBLE);
         }
@@ -3748,7 +3754,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (mContentParent == null && shouldInstallDecor) {
             installDecor();
         }
-        mHorizontalProgressBar = (ProgressBar) findViewById(com.android.internal.R.id.progress_horizontal);
+        mHorizontalProgressBar = (ProgressBar) findViewById(R.id.progress_horizontal);
         if (mHorizontalProgressBar != null) {
             mHorizontalProgressBar.setVisibility(View.INVISIBLE);
         }
@@ -3762,12 +3768,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (mContentParent == null) {
             installDecor();
         }
-        return (mRightIconView = (ImageView)findViewById(com.android.internal.R.id.right_icon));
+        return (mRightIconView = (ImageView)findViewById(R.id.right_icon));
     }
 
     private void registerSwipeCallbacks() {
         SwipeDismissLayout swipeDismiss =
-                (SwipeDismissLayout) findViewById(com.android.internal.R.id.content);
+                (SwipeDismissLayout) findViewById(R.id.content);
         swipeDismiss.setOnDismissedListener(new SwipeDismissLayout.OnDismissedListener() {
             @Override
             public void onDismissed(SwipeDismissLayout layout) {
@@ -3885,7 +3891,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private boolean isTranslucent() {
         TypedArray a = getWindowStyle();
         return a.getBoolean(a.getResourceId(
-                com.android.internal.R.styleable.Window_windowIsTranslucent, 0), false);
+                R.styleable.Window_windowIsTranslucent, 0), false);
     }
 
     @Override
@@ -4103,18 +4109,18 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
 
         void setStyle(Context context) {
-            TypedArray a = context.obtainStyledAttributes(com.android.internal.R.styleable.Theme);
+            TypedArray a = context.obtainStyledAttributes(R.styleable.Theme);
             background = a.getResourceId(
-                    com.android.internal.R.styleable.Theme_panelBackground, 0);
+                    R.styleable.Theme_panelBackground, 0);
             fullBackground = a.getResourceId(
-                    com.android.internal.R.styleable.Theme_panelFullBackground, 0);
+                    R.styleable.Theme_panelFullBackground, 0);
             windowAnimations = a.getResourceId(
-                    com.android.internal.R.styleable.Theme_windowAnimationStyle, 0);
+                    R.styleable.Theme_windowAnimationStyle, 0);
             isCompact = a.getBoolean(
-                    com.android.internal.R.styleable.Theme_panelMenuIsCompact, false);
+                    R.styleable.Theme_panelMenuIsCompact, false);
             listPresenterTheme = a.getResourceId(
-                    com.android.internal.R.styleable.Theme_panelMenuListTheme,
-                    com.android.internal.R.style.Theme_ExpandedMenu);
+                    R.styleable.Theme_panelMenuListTheme,
+                    R.style.Theme_ExpandedMenu);
             a.recycle();
         }
 
@@ -4141,9 +4147,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
             if (listMenuPresenter == null) {
                 listMenuPresenter = new ListMenuPresenter(
-                        com.android.internal.R.layout.list_menu_item_layout, listPresenterTheme);
+                        R.layout.list_menu_item_layout, listPresenterTheme);
                 listMenuPresenter.setCallback(cb);
-                listMenuPresenter.setId(com.android.internal.R.id.list_menu_presenter);
+                listMenuPresenter.setId(R.id.list_menu_presenter);
                 menu.addMenuPresenter(listMenuPresenter);
             }
 
@@ -4162,7 +4168,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             if (iconMenuPresenter == null) {
                 iconMenuPresenter = new IconMenuPresenter(context);
                 iconMenuPresenter.setCallback(cb);
-                iconMenuPresenter.setId(com.android.internal.R.id.icon_menu_presenter);
+                iconMenuPresenter.setId(R.id.icon_menu_presenter);
                 menu.addMenuPresenter(iconMenuPresenter);
             }
 
