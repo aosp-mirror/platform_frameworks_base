@@ -26,8 +26,8 @@
 
     <ImageView
         android:id="@+id/perm_icon"
-        android:layout_width="30dip"
-        android:layout_height="30dip"
+        android:layout_width="24dip"
+        android:layout_height="24dip"
         android:layout_alignParentStart="true"
         android:scaleType="fitCenter" />
 
