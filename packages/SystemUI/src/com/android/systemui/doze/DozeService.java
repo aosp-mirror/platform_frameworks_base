@@ -32,7 +32,6 @@ import android.os.Handler;
 import android.os.PowerManager;
 import android.os.SystemProperties;
 import android.os.Vibrator;
-import android.service.dreams.DozeHardware;
 import android.service.dreams.DreamService;
 import android.util.Log;
 import android.util.MathUtils;
@@ -55,7 +54,6 @@ public class DozeService extends DreamService {
     private final Handler mHandler = new Handler();
 
     private Host mHost;
-    private DozeHardware mDozeHardware;
     private SensorManager mSensors;
     private Sensor mSigMotionSensor;
     private PowerManager mPowerManager;
@@ -77,7 +75,6 @@ public class DozeService extends DreamService {
     protected void dumpOnHandler(FileDescriptor fd, PrintWriter pw, String[] args) {
         super.dumpOnHandler(fd, pw, args);
         pw.print("  mDreaming: "); pw.println(mDreaming);
-        pw.print("  mDozeHardware: "); pw.println(mDozeHardware);
         pw.print("  mTeaseReceiverRegistered: "); pw.println(mTeaseReceiverRegistered);
         pw.print("  mSigMotionSensor: "); pw.println(mSigMotionSensor);
         pw.print("  mSigMotionConfigured: "); pw.println(mSigMotionConfigured);
@@ -123,9 +120,7 @@ public class DozeService extends DreamService {
     @Override
     public void onDreamingStarted() {
         super.onDreamingStarted();
-        mDozeHardware = getDozeHardware();
-        if (DEBUG) Log.d(mTag, "onDreamingStarted canDoze=" + canDoze()
-                + " dozeHardware=" + mDozeHardware);
+        if (DEBUG) Log.d(mTag, "onDreamingStarted canDoze=" + canDoze());
         mDreaming = true;
         listenForTeaseSignals(true);
         requestDoze();
@@ -162,7 +157,6 @@ public class DozeService extends DreamService {
         super.onDreamingStopped();
 
         mDreaming = false;
-        mDozeHardware = null;
         if (mWakeLock.isHeld()) {
             mWakeLock.release();
         }
