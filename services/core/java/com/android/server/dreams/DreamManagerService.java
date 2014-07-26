@@ -45,7 +45,6 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.dreams.DreamManagerInternal;
 import android.service.dreams.DreamService;
-import android.service.dreams.IDozeHardware;
 import android.service.dreams.IDreamManager;
 import android.text.TextUtils;
 import android.util.Slog;
@@ -75,7 +74,6 @@ public final class DreamManagerService extends SystemService {
     private final PowerManager mPowerManager;
     private final PowerManagerInternal mPowerManagerInternal;
     private final PowerManager.WakeLock mDozeWakeLock;
-    private final McuHal mMcuHal; // synchronized on self
 
     private Binder mCurrentDreamToken;
     private ComponentName mCurrentDreamName;
@@ -86,7 +84,6 @@ public final class DreamManagerService extends SystemService {
     private boolean mCurrentDreamIsWaking;
     private int mCurrentDreamDozeScreenState = Display.STATE_UNKNOWN;
     private int mCurrentDreamDozeScreenBrightness = PowerManager.BRIGHTNESS_DEFAULT;
-    private DozeHardwareWrapper mCurrentDreamDozeHardware;
 
     public DreamManagerService(Context context) {
         super(context);
@@ -97,11 +94,6 @@ public final class DreamManagerService extends SystemService {
         mPowerManager = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
         mPowerManagerInternal = getLocalService(PowerManagerInternal.class);
         mDozeWakeLock = mPowerManager.newWakeLock(PowerManager.DOZE_WAKE_LOCK, TAG);
-
-        mMcuHal = McuHal.open();
-        if (mMcuHal != null) {
-            mMcuHal.reset();
-        }
     }
 
     @Override
@@ -130,9 +122,6 @@ public final class DreamManagerService extends SystemService {
     private void dumpInternal(PrintWriter pw) {
         pw.println("DREAM MANAGER (dumpsys dreams)");
         pw.println();
-
-        pw.println("mMcuHal=" + mMcuHal);
-        pw.println();
         pw.println("mCurrentDreamToken=" + mCurrentDreamToken);
         pw.println("mCurrentDreamName=" + mCurrentDreamName);
         pw.println("mCurrentDreamUserId=" + mCurrentDreamUserId);
@@ -143,7 +132,6 @@ public final class DreamManagerService extends SystemService {
         pw.println("mCurrentDreamDozeScreenState="
                 + Display.stateToString(mCurrentDreamDozeScreenState));
         pw.println("mCurrentDreamDozeScreenBrightness=" + mCurrentDreamDozeScreenBrightness);
-        pw.println("mCurrentDreamDozeHardware=" + mCurrentDreamDozeHardware);
         pw.println("getDozeComponent()=" + getDozeComponent());
         pw.println();
 
@@ -256,17 +244,6 @@ public final class DreamManagerService extends SystemService {
                 mPowerManagerInternal.setDozeOverrideFromDreamManager(
                         Display.STATE_UNKNOWN, PowerManager.BRIGHTNESS_DEFAULT);
             }
-        }
-    }
-
-    private IDozeHardware getDozeHardwareInternal(IBinder token) {
-        synchronized (mLock) {
-            if (mCurrentDreamToken == token && mCurrentDreamCanDoze
-                    && mCurrentDreamDozeHardware == null && mMcuHal != null) {
-                mCurrentDreamDozeHardware = new DozeHardwareWrapper();
-                return mCurrentDreamDozeHardware;
-            }
-            return null;
         }
     }
 
@@ -420,10 +397,6 @@ public final class DreamManagerService extends SystemService {
         }
         mCurrentDreamDozeScreenState = Display.STATE_UNKNOWN;
         mCurrentDreamDozeScreenBrightness = PowerManager.BRIGHTNESS_DEFAULT;
-        if (mCurrentDreamDozeHardware != null) {
-            mCurrentDreamDozeHardware.release();
-            mCurrentDreamDozeHardware = null;
-        }
     }
 
     private void checkPermission(String permission) {
@@ -642,21 +615,6 @@ public final class DreamManagerService extends SystemService {
                 Binder.restoreCallingIdentity(ident);
             }
         }
-
-        @Override // Binder call
-        public IDozeHardware getDozeHardware(IBinder token) {
-            // Requires no permission, called by Dream from an arbitrary process.
-            if (token == null) {
-                throw new IllegalArgumentException("token must not be null");
-            }
-
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                return getDozeHardwareInternal(token);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
-        }
     }
 
     private final class LocalService extends DreamManagerInternal {
@@ -673,40 +631,6 @@ public final class DreamManagerService extends SystemService {
         @Override
         public boolean isDreaming() {
             return isDreamingInternal();
-        }
-    }
-
-    private final class DozeHardwareWrapper extends IDozeHardware.Stub {
-        private boolean mReleased;
-
-        public void release() {
-            synchronized (mMcuHal) {
-                if (!mReleased) {
-                    mReleased = true;
-                    mMcuHal.reset();
-                }
-            }
-        }
-
-        @Override // Binder call
-        public byte[] sendMessage(String msg, byte[] arg) {
-            if (msg == null) {
-                throw new IllegalArgumentException("msg must not be null");
-            }
-
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                synchronized (mMcuHal) {
-                    if (mReleased) {
-                        Slog.w(TAG, "Ignoring message to MCU HAL because the dream "
-                                + "has already ended: " + msg);
-                        return null;
-                    }
-                    return mMcuHal.sendMessage(msg, arg);
-                }
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
         }
     }
 
