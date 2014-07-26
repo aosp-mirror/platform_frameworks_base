@@ -1159,6 +1159,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int SYSTEM_USER_START_MSG = 42;
     static final int SYSTEM_USER_CURRENT_MSG = 43;
     static final int ENTER_ANIMATION_COMPLETE_MSG = 44;
+    static final int ENABLE_SCREEN_AFTER_BOOT_MSG = 45;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
@@ -1824,6 +1825,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                         }
                     }
                 }
+                break;
+            }
+            case ENABLE_SCREEN_AFTER_BOOT_MSG: {
+                enableScreenAfterBoot();
                 break;
             }
             }
@@ -5523,6 +5528,10 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
         Binder.restoreCallingIdentity(origId);
+    }
+
+    void postEnableScreenAfterBootLocked() {
+        mHandler.sendEmptyMessage(ENABLE_SCREEN_AFTER_BOOT_MSG);
     }
 
     void enableScreenAfterBoot() {
