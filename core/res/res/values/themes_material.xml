@@ -146,6 +146,7 @@ please see themes_device_defaults.xml.
 
         <!-- Window attributes -->
         <item name="windowBackground">@color/background_material_dark</item>
+        <item name="windowClipToOutline">true</item>
         <item name="windowFrame">@null</item>
         <item name="windowNoTitle">false</item>
         <item name="windowFullscreen">false</item>
@@ -512,6 +513,7 @@ please see themes_device_defaults.xml.
 
         <!-- Window attributes -->
         <item name="windowBackground">@color/background_material_light</item>
+        <item name="windowClipToOutline">true</item>
         <item name="windowFrame">@null</item>
         <item name="windowNoTitle">false</item>
         <item name="windowFullscreen">false</item>

@@ -1388,6 +1388,7 @@ package android {
     field public static final int windowAllowExitTransitionOverlap = 16843837; // 0x101043d
     field public static final int windowAnimationStyle = 16842926; // 0x10100ae
     field public static final int windowBackground = 16842836; // 0x1010054
+    field public static final int windowClipToOutline = 16843953; // 0x10104b1
     field public static final int windowCloseOnTouchOutside = 16843611; // 0x101035b
     field public static final int windowContentOverlay = 16842841; // 0x1010059
     field public static final int windowContentTransitionManager = 16843795; // 0x1010413
