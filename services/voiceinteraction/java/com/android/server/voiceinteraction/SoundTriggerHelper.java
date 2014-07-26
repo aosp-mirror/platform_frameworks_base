@@ -38,7 +38,8 @@ import java.util.ArrayList;
  */
 public class SoundTriggerHelper implements SoundTrigger.StatusListener {
     static final String TAG = "SoundTriggerHelper";
-    static final boolean DBG = false;
+    // TODO: Set to false.
+    static final boolean DBG = true;
     // TODO: Remove this.
     static final int TEMP_KEYPHRASE_ID = 100;
 
