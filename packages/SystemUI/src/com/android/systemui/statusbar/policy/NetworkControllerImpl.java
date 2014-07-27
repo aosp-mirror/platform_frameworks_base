@@ -573,9 +573,11 @@ public class NetworkControllerImpl extends BroadcastReceiver
             switch(mServiceState.getVoiceRegState()) {
                 case ServiceState.STATE_POWER_OFF:
                     retVal = false;
+                    break;
                 case ServiceState.STATE_OUT_OF_SERVICE:
                 case ServiceState.STATE_EMERGENCY_ONLY:
                     retVal = mServiceState.getDataRegState() == ServiceState.STATE_IN_SERVICE;
+                    break;
                 default:
                     retVal = true;
             }
@@ -597,8 +599,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
 
     private final void updateTelephonySignalStrength() {
         Rlog.d(TAG, "updateTelephonySignalStrength: hasService=" + hasService() + " ss=" + mSignalStrength);
-        if (false/*!hasService()*/) {
-            if (CHATTY) Log.d(TAG, "updateTelephonySignalStrength: !hasService()");
+        if (!hasService()) {
+            if (true/*CHATTY*/) Log.d(TAG, "updateTelephonySignalStrength: !hasService()");
             mPhoneSignalIconId = R.drawable.stat_sys_signal_null;
             mQSPhoneSignalIconId = R.drawable.ic_qs_signal_no_signal;
             mDataSignalIconId = R.drawable.stat_sys_signal_null;
