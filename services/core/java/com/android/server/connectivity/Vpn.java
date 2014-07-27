@@ -495,9 +495,6 @@ public class Vpn {
             throw e;
         }
         Log.i(TAG, "Established by " + config.user + " on " + mInterface);
-
-        // TODO: ensure that contract class eventually marks as connected
-        updateState(DetailedState.AUTHENTICATING, "establish");
         return tun;
     }
 
