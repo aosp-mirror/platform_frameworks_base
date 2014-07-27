@@ -38,6 +38,7 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
 import android.provider.Settings.Global;
+import android.provider.Settings.Secure;
 import android.service.notification.ZenModeConfig;
 import android.telecomm.TelecommManager;
 import android.util.Slog;
@@ -53,11 +54,9 @@ import org.xmlpull.v1.XmlSerializer;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Objects;
 
 /**
  * NotificationManagerService helper for functionality related to zen mode.
@@ -83,17 +82,6 @@ public class ZenModeHelper {
     private ZenModeConfig mConfig;
     private AudioManager mAudioManager;
     private int mPreviousRingerMode = -1;
-
-    // temporary, until we update apps to provide metadata
-    private static final Set<String> MESSAGE_PACKAGES = new HashSet<String>(Arrays.asList(
-            "com.google.android.talk",
-            "com.android.mms",
-            "com.android.example.notificationshowcase"
-            ));
-    private static final Set<String> SYSTEM_PACKAGES = new HashSet<String>(Arrays.asList(
-            "android",
-            "com.android.systemui"
-            ));
 
     public ZenModeHelper(Context context, Handler handler) {
         mContext = context;
@@ -249,9 +237,7 @@ public class ZenModeHelper {
             allowDisable = mZenMode == Global.ZEN_MODE_OFF || mConfig.allowCalls;
             reason = mZenMode == Global.ZEN_MODE_OFF ? "zenOff" : "allowCalls";
         }
-        if (!SYSTEM_PACKAGES.contains(pkg)) {
-            ZenLog.traceAllowDisable(pkg, allowDisable, reason);
-        }
+        ZenLog.traceAllowDisable(pkg, allowDisable, reason);
         return allowDisable;
     }
 
@@ -305,8 +291,7 @@ public class ZenModeHelper {
     }
 
     private boolean isSystem(NotificationRecord record) {
-        return SYSTEM_PACKAGES.contains(record.sbn.getPackageName())
-                && record.isCategory(Notification.CATEGORY_SYSTEM);
+        return record.isCategory(Notification.CATEGORY_SYSTEM);
     }
 
     private boolean isAlarm(NotificationRecord record) {
@@ -330,8 +315,14 @@ public class ZenModeHelper {
                 && pkg.equals(mDefaultPhoneApp.getPackageName());
     }
 
+    private boolean isDefaultMessagingApp(NotificationRecord record) {
+        final String defaultApp = Secure.getStringForUser(mContext.getContentResolver(),
+                Secure.SMS_DEFAULT_APPLICATION, record.getUserId());
+        return Objects.equals(defaultApp, record.sbn.getPackageName());
+    }
+
     private boolean isMessage(NotificationRecord record) {
-        return MESSAGE_PACKAGES.contains(record.sbn.getPackageName());
+        return record.isCategory(Notification.CATEGORY_MESSAGE) || isDefaultMessagingApp(record);
     }
 
     private boolean audienceMatches(NotificationRecord record) {
