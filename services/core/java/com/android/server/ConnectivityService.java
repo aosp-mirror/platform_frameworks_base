@@ -817,13 +817,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         mDataConnectionStats = new DataConnectionStats(mContext);
         mDataConnectionStats.startMonitoring();
 
-        // start network sampling ..
-        Intent intent = new Intent(ACTION_PKT_CNT_SAMPLE_INTERVAL_ELAPSED, null);
-        mSampleIntervalElapsedIntent = PendingIntent.getBroadcast(mContext,
-                SAMPLE_INTERVAL_ELAPSED_REQUEST_CODE, intent, 0);
-
         mAlarmManager = (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
-        setAlarm(DEFAULT_START_SAMPLING_INTERVAL_IN_SECONDS * 1000, mSampleIntervalElapsedIntent);
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(ACTION_PKT_CNT_SAMPLE_INTERVAL_ELAPSED);
@@ -2145,6 +2139,14 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     void systemReady() {
+        // start network sampling ..
+        Intent intent = new Intent(ACTION_PKT_CNT_SAMPLE_INTERVAL_ELAPSED);
+        intent.setPackage(mContext.getPackageName());
+
+        mSampleIntervalElapsedIntent = PendingIntent.getBroadcast(mContext,
+                SAMPLE_INTERVAL_ELAPSED_REQUEST_CODE, intent, 0);
+        setAlarm(DEFAULT_START_SAMPLING_INTERVAL_IN_SECONDS * 1000, mSampleIntervalElapsedIntent);
+
         if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WIFI)) {
             mCaptivePortalTracker = CaptivePortalTracker.makeCaptivePortalTracker(mContext, this);
         }
