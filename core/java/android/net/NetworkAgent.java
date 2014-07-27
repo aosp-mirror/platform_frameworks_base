@@ -106,6 +106,20 @@ public abstract class NetworkAgent extends Handler {
      */
     public static final int EVENT_UID_RANGES_REMOVED = BASE + 6;
 
+    /**
+     * Sent by the NetworkAgent to ConnectivityService to block all routes for a certain address
+     * family (AF_INET or AF_INET6) on this Network. For VPNs only.
+     * obj = Integer representing the family (AF_INET or AF_INET6)
+     */
+    public static final int EVENT_BLOCK_ADDRESS_FAMILY = BASE + 7;
+
+    /**
+     * Sent by the NetworkAgent to ConnectivityService to unblock routes for a certain address
+     * family (AF_INET or AF_INET6) on this Network. For VPNs only.
+     * obj = Integer representing the family (AF_INET or AF_INET6)
+     */
+    public static final int EVENT_UNBLOCK_ADDRESS_FAMILY = BASE + 8;
+
     public NetworkAgent(Looper looper, Context context, String logTag, NetworkInfo ni,
             NetworkCapabilities nc, LinkProperties lp, int score) {
         this(looper, context, logTag, ni, nc, lp, score, null);
@@ -226,6 +240,21 @@ public abstract class NetworkAgent extends Handler {
      */
     public void removeUidRanges(UidRange[] ranges) {
         queueOrSendMessage(EVENT_UID_RANGES_REMOVED, ranges);
+    }
+
+    /**
+     * Called by the VPN code when it wants to block an address family from being routed, typically
+     * because the VPN network doesn't support that family.
+     */
+    public void blockAddressFamily(int family) {
+        queueOrSendMessage(EVENT_BLOCK_ADDRESS_FAMILY, family);
+    }
+
+    /**
+     * Called by the VPN code when it wants to unblock an address family from being routed.
+     */
+    public void unblockAddressFamily(int family) {
+        queueOrSendMessage(EVENT_UNBLOCK_ADDRESS_FAMILY, family);
     }
 
     /**
