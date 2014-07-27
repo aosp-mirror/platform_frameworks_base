@@ -24,7 +24,7 @@ public interface NetworkController {
     void setWifiEnabled(boolean enabled);
 
     public interface NetworkSignalChangedCallback {
-        void onWifiSignalChanged(boolean enabled, int wifiSignalIconId,
+        void onWifiSignalChanged(boolean enabled, boolean connected, int wifiSignalIconId,
                 boolean activityIn, boolean activityOut,
                 String wifiSignalContentDescriptionId, String description);
         void onMobileDataSignalChanged(boolean enabled, int mobileSignalIconId,

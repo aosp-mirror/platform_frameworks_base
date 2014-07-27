@@ -93,10 +93,10 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
         final Resources r = mContext.getResources();
         state.iconId = cb.noSim
                 ? R.drawable.stat_sys_no_sim
-                : cb.enabled && (cb.mobileSignalIconId > 0)
+                : cb.enabled && (cb.mobileSignalIconId > 0) && !cb.airplaneModeEnabled
                 ? cb.mobileSignalIconId
                 : R.drawable.ic_qs_signal_no_signal;
-        state.overlayIconId = cb.enabled && (cb.dataTypeIconId > 0) && !cb.wifiEnabled
+        state.overlayIconId = cb.enabled && (cb.dataTypeIconId > 0) && !cb.wifiConnected
                 ? cb.dataTypeIconId
                 : 0;
         state.filter = state.iconId != R.drawable.stat_sys_no_sim;
@@ -132,6 +132,8 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
     private static final class CallbackInfo {
         boolean enabled;
         boolean wifiEnabled;
+        boolean wifiConnected;
+        boolean airplaneModeEnabled;
         int mobileSignalIconId;
         String signalContentDescription;
         int dataTypeIconId;
@@ -144,12 +146,15 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
 
     private final NetworkSignalChangedCallback mCallback = new NetworkSignalChangedCallback() {
         private boolean mWifiEnabled;
+        private boolean mWifiConnected;
+        private boolean mAirplaneModeEnabled;
 
         @Override
-        public void onWifiSignalChanged(boolean enabled, int wifiSignalIconId,
+        public void onWifiSignalChanged(boolean enabled, boolean connected, int wifiSignalIconId,
                 boolean activityIn, boolean activityOut,
                 String wifiSignalContentDescriptionId, String description) {
             mWifiEnabled = enabled;
+            mWifiConnected = connected;
         }
 
         @Override
@@ -161,6 +166,8 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
             final CallbackInfo info = new CallbackInfo();  // TODO pool?
             info.enabled = enabled;
             info.wifiEnabled = mWifiEnabled;
+            info.wifiConnected = mWifiConnected;
+            info.airplaneModeEnabled = mAirplaneModeEnabled;
             info.mobileSignalIconId = mobileSignalIconId;
             info.signalContentDescription = mobileSignalContentDescriptionId;
             info.dataTypeIconId = dataTypeIconId;
@@ -174,7 +181,7 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
 
         @Override
         public void onAirplaneModeChanged(boolean enabled) {
-            // noop
+            mAirplaneModeEnabled = enabled;
         }
 
         public void onMobileDataEnabled(boolean enabled) {

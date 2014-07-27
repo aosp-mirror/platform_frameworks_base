@@ -401,7 +401,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         boolean wifiOut = wifiEnabled && mWifiSsid != null
                 && (mWifiActivity == WifiManager.DATA_ACTIVITY_INOUT
                 || mWifiActivity == WifiManager.DATA_ACTIVITY_OUT);
-        cb.onWifiSignalChanged(mWifiEnabled, mQSWifiIconId, wifiIn, wifiOut,
+        cb.onWifiSignalChanged(mWifiEnabled, mWifiConnected, mQSWifiIconId, wifiIn, wifiOut,
                 mContentDescriptionWifi, wifiDesc);
 
         boolean mobileIn = mDataConnected && (mDataActivity == TelephonyManager.DATA_ACTIVITY_INOUT
