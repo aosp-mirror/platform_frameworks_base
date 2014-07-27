@@ -37,6 +37,7 @@ import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.UserHandle;
 import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
 import android.service.notification.ZenModeConfig;
@@ -316,8 +317,10 @@ public class ZenModeHelper {
     }
 
     private boolean isDefaultMessagingApp(NotificationRecord record) {
+        final int userId = record.getUserId();
+        if (userId == UserHandle.USER_NULL || userId == UserHandle.USER_ALL) return false;
         final String defaultApp = Secure.getStringForUser(mContext.getContentResolver(),
-                Secure.SMS_DEFAULT_APPLICATION, record.getUserId());
+                Secure.SMS_DEFAULT_APPLICATION, userId);
         return Objects.equals(defaultApp, record.sbn.getPackageName());
     }
 
