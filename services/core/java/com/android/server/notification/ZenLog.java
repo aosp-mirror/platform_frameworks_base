@@ -30,6 +30,8 @@ import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 public class ZenLog {
     private static final String TAG = "ZenLog";
@@ -41,6 +43,10 @@ public class ZenLog {
     private static final String[] MSGS = new String[SIZE];
 
     private static final SimpleDateFormat FORMAT = new SimpleDateFormat("MM-dd HH:mm:ss.SSS");
+    private static final Set<String> SYSTEM_PACKAGES = new HashSet<String>(Arrays.asList(
+            "android",
+            "com.android.systemui"
+            ));
 
     private static final int TYPE_INTERCEPTED = 1;
     private static final int TYPE_ALLOW_DISABLE = 2;
@@ -61,6 +67,7 @@ public class ZenLog {
     }
 
     public static void traceAllowDisable(String pkg, boolean allowDisable, String reason) {
+        if (SYSTEM_PACKAGES.contains(pkg)) return;
         append(TYPE_ALLOW_DISABLE, allowDisable + "," + pkg + "," + reason);
     }
 
