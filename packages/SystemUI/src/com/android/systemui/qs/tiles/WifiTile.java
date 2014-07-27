@@ -143,6 +143,7 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
 
     private static final class CallbackInfo {
         boolean enabled;
+        boolean connected;
         int wifiSignalIconId;
         String enabledDesc;
         boolean activityIn;
@@ -153,6 +154,7 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
         public String toString() {
             return new StringBuilder("CallbackInfo[")
                 .append("enabled=").append(enabled)
+                .append(",connected=").append(connected)
                 .append(",wifiSignalIconId=").append(wifiSignalIconId)
                 .append(",enabledDesc=").append(enabledDesc)
                 .append(",activityIn=").append(activityIn)
@@ -164,12 +166,13 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
 
     private final NetworkSignalChangedCallback mCallback = new NetworkSignalChangedCallback() {
         @Override
-        public void onWifiSignalChanged(boolean enabled, int wifiSignalIconId,
+        public void onWifiSignalChanged(boolean enabled, boolean connected, int wifiSignalIconId,
                 boolean activityIn, boolean activityOut,
                 String wifiSignalContentDescriptionId, String description) {
             if (DEBUG) Log.d(TAG, "onWifiSignalChanged enabled=" + enabled);
             final CallbackInfo info = new CallbackInfo();
             info.enabled = enabled;
+            info.connected = connected;
             info.wifiSignalIconId = wifiSignalIconId;
             info.enabledDesc = description;
             info.activityIn = activityIn;
