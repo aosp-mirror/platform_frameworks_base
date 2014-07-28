@@ -9559,13 +9559,17 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (r == null) {
                     return false;
                 }
+                int index = r.task.mActivities.lastIndexOf(r);
+                if (index > 0) {
+                    ActivityRecord under = r.task.mActivities.get(index - 1);
+                    under.returningOptions = options;
+                }
                 if (r.changeWindowTranslucency(false)) {
-                    r.task.stack.convertToTranslucent(r, options);
+                    r.task.stack.convertToTranslucent(r);
                     mWindowManager.setAppFullscreen(token, false);
                     mStackSupervisor.ensureActivitiesVisibleLocked(null, 0);
                     return true;
                 } else {
-                    r.task.stack.mReturningActivityOptions = options;
                     mStackSupervisor.ensureActivitiesVisibleLocked(null, 0);
                     return false;
                 }

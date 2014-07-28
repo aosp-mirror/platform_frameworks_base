@@ -130,6 +130,7 @@ final class ActivityRecord {
     HashSet<WeakReference<PendingIntentRecord>> pendingResults; // all pending intents for this act
     ArrayList<Intent> newIntents; // any pending new intents for single-top mode
     ActivityOptions pendingOptions; // most recently given options
+    ActivityOptions returningOptions; // options that are coming back via convertToTranslucent
     HashSet<ConnectionRecord> connections; // All ConnectionRecord we hold
     UriPermissionOwner uriPermissions; // current special URI access perms.
     ProcessRecord app;      // if non-null, hosting application
