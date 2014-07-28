@@ -31,7 +31,6 @@ namespace uirenderer {
 
 DisplayListData::DisplayListData()
         : projectionReceiveIndex(-1)
-        , functorCount(0)
         , hasDrawOps(false) {
 }
 
@@ -41,7 +40,7 @@ DisplayListData::~DisplayListData() {
 
 void DisplayListData::cleanupResources() {
     Caches& caches = Caches::getInstance();
-    caches.unregisterFunctors(functorCount);
+    caches.unregisterFunctors(functors.size());
     caches.resourceCache.lock();
 
     for (size_t i = 0; i < bitmapResources.size(); i++) {

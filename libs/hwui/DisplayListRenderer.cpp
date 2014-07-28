@@ -88,7 +88,7 @@ void DisplayListRenderer::resume() {
 status_t DisplayListRenderer::callDrawGLFunction(Functor *functor, Rect& dirty) {
     // Ignore dirty during recording, it matters only when we replay
     addDrawOp(new (alloc()) DrawFunctorOp(functor));
-    mDisplayListData->functorCount++;
+    mDisplayListData->functors.add(functor);
     return DrawGlInfo::kStatusDone; // No invalidate needed at record-time
 }
 
