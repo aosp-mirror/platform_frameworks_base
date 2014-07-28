@@ -215,9 +215,10 @@ public final class WebViewFactory {
 
         try {
             String[] args = getWebViewNativeLibraryPaths();
-            LocalServices.getService(ActivityManagerInternal.class).startIsolatedProcess(
+            int pid = LocalServices.getService(ActivityManagerInternal.class).startIsolatedProcess(
                     RelroFileCreator.class.getName(), args, "WebViewLoader-" + abi, abi,
                     Process.SHARED_RELRO_UID, crashHandler);
+            if (pid <= 0) throw new Exception("Failed to start the isolated process");
         } catch (Throwable t) {
             // Log and discard errors as we must not crash the system server.
             Log.e(LOGTAG, "error starting relro file creator for abi " + abi, t);
@@ -228,34 +229,34 @@ public final class WebViewFactory {
     private static class RelroFileCreator {
         // Called in an unprivileged child process to create the relro file.
         public static void main(String[] args) {
+            boolean result = false;
+            boolean is64Bit = VMRuntime.getRuntime().is64Bit();
             try{
                 if (args.length != 2 || args[0] == null || args[1] == null) {
                     Log.e(LOGTAG, "Invalid RelroFileCreator args: " + Arrays.toString(args));
                     return;
                 }
-
-                boolean is64Bit = VMRuntime.getRuntime().is64Bit();
                 Log.v(LOGTAG, "RelroFileCreator (64bit = " + is64Bit + "), " +
                         " 32-bit lib: " + args[0] + ", 64-bit lib: " + args[1]);
                 if (!sAddressSpaceReserved) {
                     Log.e(LOGTAG, "can't create relro file; address space not reserved");
                     return;
                 }
-                boolean result = nativeCreateRelroFile(args[0] /* path32 */,
-                                                       args[1] /* path64 */,
-                                                       CHROMIUM_WEBVIEW_NATIVE_RELRO_32,
-                                                       CHROMIUM_WEBVIEW_NATIVE_RELRO_64);
-                if (!result) {
-                    Log.e(LOGTAG, "failed to create relro file");
-                } else if (DEBUG) {
-                    Log.v(LOGTAG, "created relro file");
-                }
+                result = nativeCreateRelroFile(args[0] /* path32 */,
+                                               args[1] /* path64 */,
+                                               CHROMIUM_WEBVIEW_NATIVE_RELRO_32,
+                                               CHROMIUM_WEBVIEW_NATIVE_RELRO_64);
+                if (DEBUG) Log.v(LOGTAG, "created relro file");
+            } finally {
+                // We must do our best to always notify the update service, even if something fails.
                 try {
                     getUpdateService().notifyRelroCreationCompleted(is64Bit, result);
                 } catch (RemoteException e) {
                     Log.e(LOGTAG, "error notifying update service", e);
                 }
-            } finally {
+
+                if (!result) Log.e(LOGTAG, "failed to create relro file");
+
                 // Must explicitly exit or else this process will just sit around after we return.
                 System.exit(0);
             }

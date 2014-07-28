@@ -2952,10 +2952,14 @@ public final class ActivityManagerService extends ActivityManagerNative
         return (ai.flags&ApplicationInfo.FLAG_PERSISTENT) != 0;
     }
 
+    private final void startProcessLocked(ProcessRecord app,
+            String hostingType, String hostingNameStr) {
+        startProcessLocked(app, hostingType, hostingNameStr, null /* abiOverride */,
+                null /* entryPoint */, null /* entryPointArgs */);
+    }
+
     private final void startProcessLocked(ProcessRecord app, String hostingType,
             String hostingNameStr, String abiOverride, String entryPoint, String[] entryPointArgs) {
-        boolean isActivityProcess = (entryPoint == null);
-        if (entryPoint == null) entryPoint = "android.app.ActivityThread";
         if (app.pid > 0 && app.pid != MY_PID) {
             synchronized (mPidsSelfLocked) {
                 mPidsSelfLocked.remove(app.pid);
@@ -3048,6 +3052,8 @@ public final class ActivityManagerService extends ActivityManagerNative
 
             // Start the process.  It will either succeed and return a result containing
             // the PID of the new process, or else throw a RuntimeException.
+            boolean isActivityProcess = (entryPoint == null);
+            if (entryPoint == null) entryPoint = "android.app.ActivityThread";
             Process.ProcessStartResult startResult = Process.start(entryPoint,
                     app.processName, uid, uid, gids, debugFlags, mountExternal,
                     app.info.targetSdkVersion, app.info.seinfo, requiredAbi, entryPointArgs);
@@ -5380,8 +5386,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             app.deathRecipient = adr;
         } catch (RemoteException e) {
             app.resetPackageList(mProcessStats);
-            startProcessLocked(app, "link fail", processName, null /* ABI override */,
-                    null /* entryPoint */, null /* entryPointArgs */);
+            startProcessLocked(app, "link fail", processName);
             return false;
         }
 
@@ -5474,8 +5479,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
             app.resetPackageList(mProcessStats);
             app.unlinkDeathRecipient();
-            startProcessLocked(app, "bind fail", processName, null /* ABI override */,
-                    null /* entryPoint */, null /* entryPointArgs */);
+            startProcessLocked(app, "bind fail", processName);
             return false;
         }
 
@@ -5630,8 +5634,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 for (int ip=0; ip<NP; ip++) {
                     if (DEBUG_PROCESSES) Slog.v(TAG, "Starting process on hold: "
                             + procs.get(ip));
-                    startProcessLocked(procs.get(ip), "on-hold", null, null /* ABI override */,
-                            null /* entryPoint */, null /* entryPointArgs */);
+                    startProcessLocked(procs.get(ip), "on-hold", null);
                 }
             }
             
@@ -13548,8 +13551,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             // We have components that still need to be running in the
             // process, so re-launch it.
             mProcessNames.put(app.processName, app.uid, app);
-            startProcessLocked(app, "restart", app.processName, null /* ABI override */,
-                    null /* entryPoint */, null /* entryPointArgs */);
+            startProcessLocked(app, "restart", app.processName);
         } else if (app.pid > 0 && app.pid != MY_PID) {
             // Goodbye!
             boolean removed;
@@ -17899,12 +17901,12 @@ public final class ActivityManagerService extends ActivityManagerNative
                 info.processName = processName;
                 info.className = entryPoint;
                 info.packageName = "android";
-                startProcessLocked(processName, info /* info */, false /* knownToBeDead */,
-                        0 /* intentFlags */, ""  /* hostingType */, null /* hostingName */,
-                        true /* allowWhileBooting */, true /* isolated */, uid,
-                        true /* keepIfLarge */, abiOverride, entryPoint, entryPointArgs,
+                ProcessRecord proc = startProcessLocked(processName, info /* info */,
+                        false /* knownToBeDead */, 0 /* intentFlags */, ""  /* hostingType */,
+                        null /* hostingName */, true /* allowWhileBooting */, true /* isolated */,
+                        uid, true /* keepIfLarge */, abiOverride, entryPoint, entryPointArgs,
                         crashHandler);
-                return 0;
+                return proc.pid;
             }
         }
     }
