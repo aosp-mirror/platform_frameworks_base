@@ -72,7 +72,7 @@ public class WebViewUpdateService extends SystemService {
             mRelroReady32Bit = false;
             mRelroReady64Bit = false;
         }
-        WebViewFactory.prepareWebViewInSystemServer();
+        WebViewFactory.onWebViewUpdateInstalled();
     }
 
     private class BinderService extends IWebViewUpdateService.Stub {
@@ -128,7 +128,6 @@ public class WebViewUpdateService extends SystemService {
                 }
             }
         }
-
     }
 
 }
