@@ -16,110 +16,111 @@
 
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/grid_height"
-    android:background="@drawable/item_doc_grid"
-    android:foreground="@drawable/item_background">
+    android:layout_height="@dimen/grid_item_height"
+    android:orientation="vertical"
+    android:background="@color/grid_item_background"
+    android:foreground="@drawable/item_activated">
+
+    <ImageView
+        android:id="@+id/icon_thumb"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:contentDescription="@null" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingBottom="6dp"
         android:orientation="vertical">
 
-        <FrameLayout
+        <ImageView
+            android:id="@+id/icon_mime"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:layout_marginBottom="6dp"
-            android:background="#fff"
-            android:foreground="@drawable/ic_grid_gradient_bg"
-            android:foregroundGravity="fill">
-
-            <ImageView
-                android:id="@+id/icon_mime"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:scaleType="centerInside"
-                android:contentDescription="@null" />
-
-            <ImageView
-                android:id="@+id/icon_thumb"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:scaleType="centerCrop"
-                android:contentDescription="@null" />
-
-        </FrameLayout>
+            android:scaleType="centerInside"
+            android:contentDescription="@null" />
 
         <LinearLayout
-            android:id="@+id/line1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:baselineAligned="false"
+            android:background="@drawable/grid_protect_background"
+            android:orientation="vertical"
             android:paddingStart="?android:attr/listPreferredItemPaddingStart"
-            android:paddingEnd="?android:attr/listPreferredItemPaddingEnd">
+            android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp">
 
-            <TextView
-                android:id="@android:id/title"
-                android:layout_width="0dp"
+            <LinearLayout
+                android:id="@+id/line1"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:singleLine="true"
-                android:ellipsize="middle"
-                android:textAlignment="viewStart"
-                style="@style/TextAppearance.Medium" />
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:baselineAligned="false">
 
-            <ImageView
-                android:id="@android:id/icon1"
-                android:layout_width="@dimen/root_icon_size"
-                android:layout_height="@dimen/root_icon_size"
-                android:layout_marginStart="8dp"
-                android:scaleType="centerInside"
-                android:contentDescription="@null" />
+                <TextView
+                    android:id="@android:id/title"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:singleLine="true"
+                    android:ellipsize="middle"
+                    android:textAlignment="viewStart"
+                    android:textAppearance="@android:style/TextAppearance.Material.Subhead"
+                    android:textColor="?android:attr/textColorPrimaryInverse" />
 
-        </LinearLayout>
+                <ImageView
+                    android:id="@android:id/icon1"
+                    android:layout_width="@dimen/root_icon_size"
+                    android:layout_height="@dimen/root_icon_size"
+                    android:layout_marginStart="8dp"
+                    android:scaleType="centerInside"
+                    android:contentDescription="@null" />
 
-        <LinearLayout
-            android:id="@+id/line2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:baselineAligned="false"
-            android:paddingStart="?android:attr/listPreferredItemPaddingStart"
-            android:paddingEnd="?android:attr/listPreferredItemPaddingEnd">
+            </LinearLayout>
 
-            <TextView
-                android:id="@+id/date"
-                android:layout_width="0dp"
+            <LinearLayout
+                android:id="@+id/line2"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="0.5"
-                android:singleLine="true"
-                android:ellipsize="end"
-                android:textAlignment="viewStart"
-                style="@style/TextAppearance.Small" />
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:baselineAligned="false">
 
-            <TextView
-                android:id="@+id/size"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="0.5"
-                android:layout_marginStart="8dp"
-                android:singleLine="true"
-                android:ellipsize="end"
-                android:textAlignment="viewStart"
-                style="@style/TextAppearance.Small" />
+                <TextView
+                    android:id="@+id/date"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.5"
+                    android:singleLine="true"
+                    android:ellipsize="end"
+                    android:textAlignment="viewStart"
+                    android:textAppearance="@android:style/TextAppearance.Material.Caption"
+                    android:textColor="?android:attr/textColorPrimaryInverse" />
 
-            <ImageView
-                android:id="@android:id/icon2"
-                android:layout_width="@dimen/root_icon_size"
-                android:layout_height="@dimen/root_icon_size"
-                android:layout_marginStart="8dp"
-                android:scaleType="centerInside"
-                android:contentDescription="@null"
-                android:visibility="gone" />
+                <TextView
+                    android:id="@+id/size"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.5"
+                    android:layout_marginStart="8dp"
+                    android:singleLine="true"
+                    android:ellipsize="end"
+                    android:textAlignment="viewStart"
+                    android:textAppearance="@android:style/TextAppearance.Material.Caption"
+                    android:textColor="?android:attr/textColorPrimaryInverse" />
+
+                <ImageView
+                    android:id="@android:id/icon2"
+                    android:layout_width="@dimen/root_icon_size"
+                    android:layout_height="@dimen/root_icon_size"
+                    android:layout_marginStart="8dp"
+                    android:scaleType="centerInside"
+                    android:contentDescription="@null"
+                    android:visibility="gone" />
+
+            </LinearLayout>
 
         </LinearLayout>
 

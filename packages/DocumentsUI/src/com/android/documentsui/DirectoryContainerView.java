@@ -29,12 +29,18 @@ public class DirectoryContainerView extends FrameLayout {
 
     public DirectoryContainerView(Context context) {
         super(context);
-        setClipChildren(false);
     }
 
     public DirectoryContainerView(Context context, AttributeSet attrs) {
         super(context, attrs);
+    }
+
+    @Override
+    protected void onFinishInflate() {
+        super.onFinishInflate();
         setClipChildren(false);
+        setClipToOutline(false);
+        setClipToPadding(false);
     }
 
     @Override
