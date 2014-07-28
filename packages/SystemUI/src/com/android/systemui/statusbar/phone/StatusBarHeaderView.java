@@ -95,7 +95,10 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     private int mClockMarginBottomCollapsed;
     private int mMultiUserSwitchWidthCollapsed;
     private int mMultiUserSwitchWidthExpanded;
+    private int mMultiUserSwitchWidthKeyguard;
     private int mBatteryPaddingEnd;
+    private int mBatteryMarginExpanded;
+    private int mBatteryMarginKeyguard;
 
     /**
      * In collapsed QS, the clock and avatar are scaled down a bit post-layout to allow for a nice
@@ -103,6 +106,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
      */
     private float mClockCollapsedScaleFactor;
     private float mAvatarCollapsedScaleFactor;
+    private float mAvatarKeyguardScaleFactor;
 
     private ActivityStarter mActivityStarter;
     private BatteryController mBatteryController;
@@ -194,14 +198,23 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
                 getResources().getDimensionPixelSize(R.dimen.multi_user_switch_width_collapsed);
         mMultiUserSwitchWidthExpanded =
                 getResources().getDimensionPixelSize(R.dimen.multi_user_switch_width_expanded);
+        mMultiUserSwitchWidthKeyguard =
+                getResources().getDimensionPixelSize(R.dimen.multi_user_switch_width_keyguard);
         mAvatarCollapsedScaleFactor =
                 getResources().getDimensionPixelSize(R.dimen.multi_user_avatar_collapsed_size)
                 / (float) mMultiUserAvatar.getLayoutParams().width;
+        mAvatarKeyguardScaleFactor =
+                getResources().getDimensionPixelSize(R.dimen.multi_user_avatar_keyguard_size)
+                        / (float) mMultiUserAvatar.getLayoutParams().width;
         mClockCollapsedScaleFactor =
                 (float) getResources().getDimensionPixelSize(R.dimen.qs_time_collapsed_size)
                 / (float) getResources().getDimensionPixelSize(R.dimen.qs_time_expanded_size);
         mBatteryPaddingEnd =
                 getResources().getDimensionPixelSize(R.dimen.battery_level_padding_end);
+        mBatteryMarginExpanded =
+                getResources().getDimensionPixelSize(R.dimen.header_battery_margin_expanded);
+        mBatteryMarginKeyguard =
+                getResources().getDimensionPixelSize(R.dimen.header_battery_margin_keyguard);
     }
 
     public void setActivityStarter(ActivityStarter activityStarter) {
@@ -253,6 +266,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
             updateAvatarScale();
             updateClockLp();
             updateBatteryLevelPaddingEnd();
+            updateBatteryLevelLp();
             mStatusIconClipper.update();
         }
     }
@@ -354,12 +368,15 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     }
 
     private void updateAvatarScale() {
-        if (!mExpanded || mOverscrolled) {
-            mMultiUserSwitch.setScaleX(mAvatarCollapsedScaleFactor);
-            mMultiUserSwitch.setScaleY(mAvatarCollapsedScaleFactor);
-        } else {
+        if (mExpanded && !mOverscrolled) {
             mMultiUserSwitch.setScaleX(1f);
             mMultiUserSwitch.setScaleY(1f);
+        } else if (mKeyguardShowing) {
+            mMultiUserSwitch.setScaleX(mAvatarKeyguardScaleFactor);
+            mMultiUserSwitch.setScaleY(mAvatarKeyguardScaleFactor);
+        } else {
+            mMultiUserSwitch.setScaleX(mAvatarCollapsedScaleFactor);
+            mMultiUserSwitch.setScaleY(mAvatarCollapsedScaleFactor);
         }
     }
 
@@ -453,21 +470,33 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
 
     private void updateMultiUserSwitch() {
         int marginEnd;
+        int width;
         if (mExpanded && !mOverscrolled) {
             marginEnd = mMultiUserExpandedMargin;
+            width = mMultiUserSwitchWidthExpanded;
         } else if (mKeyguardShowing) {
             marginEnd = mMultiUserKeyguardMargin;
+            width = mMultiUserSwitchWidthKeyguard;
         } else {
             marginEnd = mMultiUserCollapsedMargin;
+            width = mMultiUserSwitchWidthCollapsed;
         }
-        int width = mExpanded && !mOverscrolled
-                ? mMultiUserSwitchWidthExpanded
-                : mMultiUserSwitchWidthCollapsed;
         MarginLayoutParams lp = (MarginLayoutParams) mMultiUserSwitch.getLayoutParams();
         if (marginEnd != lp.getMarginEnd() || lp.width != width) {
             lp.setMarginEnd(marginEnd);
             lp.width = width;
             mMultiUserSwitch.setLayoutParams(lp);
+        }
+    }
+
+    private void updateBatteryLevelLp() {
+        int marginStart = mExpanded && !mOverscrolled
+                ? mBatteryMarginExpanded
+                : mBatteryMarginKeyguard;
+        MarginLayoutParams lp = (MarginLayoutParams) mBatteryLevel.getLayoutParams();
+        if (marginStart != lp.getMarginStart()) {
+            lp.setMarginStart(marginStart);
+            mBatteryLevel.setLayoutParams(lp);
         }
     }
 
@@ -517,6 +546,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         updateMultiUserSwitch();
         updateClickTargets();
         updateBatteryLevelPaddingEnd();
+        updateAvatarScale();
         mStatusIconClipper.update();
     }
 

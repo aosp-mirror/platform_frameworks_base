@@ -62,4 +62,22 @@
          keyguard_clock_height_fraction_* for the difference between min and max.-->
     <dimen name="keyguard_clock_notifications_margin_min">44dp</dimen>
     <dimen name="keyguard_clock_notifications_margin_max">44dp</dimen>
+
+    <!-- Height of the status bar header bar when on Keyguard -->
+    <dimen name="status_bar_header_height_keyguard">60dp</dimen>
+
+    <!-- The width of user avatar when on Keyguard -->
+    <dimen name="multi_user_switch_width_keyguard">48dp</dimen>
+
+    <!-- The width of user avatar when on Keyguard -->
+    <dimen name="multi_user_avatar_keyguard_size">30dp</dimen>
+
+    <!-- end margin for multi user switch in collapsed quick settings -->
+    <dimen name="multi_user_switch_keyguard_margin">6dp</dimen>
+
+    <!-- Margin on the left side of the carrier text on Keyguard -->
+    <dimen name="keyguard_carrier_text_margin">24dp</dimen>
+
+    <!-- end margin for system icons if multi user switch is hidden -->
+    <dimen name="system_icons_switcher_hidden_expanded_margin">20dp</dimen>
 </resources>
