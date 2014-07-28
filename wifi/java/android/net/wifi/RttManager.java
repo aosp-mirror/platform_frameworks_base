@@ -2,16 +2,20 @@ package android.net.wifi;
 
 import android.annotation.SystemApi;
 import android.content.Context;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.util.AsyncChannel;
+import com.android.internal.util.Protocol;
 
 import java.util.concurrent.CountDownLatch;
 
@@ -51,12 +55,15 @@ public class RttManager {
     public static final int RTT_STATUS_ABORTED                  = 8;
 
     public static final int REASON_UNSPECIFIED              = -1;
-    public static final int REASON_INVALID_LISTENER         = -2;
-    public static final int REASON_INVALID_REQUEST          = -3;
+    public static final int REASON_NOT_AVAILABLE            = -2;
+    public static final int REASON_INVALID_LISTENER         = -3;
+    public static final int REASON_INVALID_REQUEST          = -4;
+
+    public static final String DESCRIPTION_KEY  = "android.net.wifi.RttManager.Description";
 
     public class Capabilities {
-        int supportedType;
-        int supportedPeerType;
+        public int supportedType;
+        public int supportedPeerType;
     }
 
     public Capabilities getCapabilities() {
@@ -91,6 +98,73 @@ public class RttManager {
         public int num_retries;
     }
 
+    /** pseudo-private class used to parcel arguments */
+    public static class ParcelableRttParams implements Parcelable {
+
+        public RttParams mParams[];
+
+        ParcelableRttParams(RttParams[] params) {
+            mParams = params;
+        }
+
+        /** Implement the Parcelable interface {@hide} */
+        public int describeContents() {
+            return 0;
+        }
+
+        /** Implement the Parcelable interface {@hide} */
+        public void writeToParcel(Parcel dest, int flags) {
+            if (mParams != null) {
+                dest.writeInt(mParams.length);
+
+                for (RttParams params : mParams) {
+                    dest.writeInt(params.deviceType);
+                    dest.writeInt(params.requestType);
+                    dest.writeString(params.bssid);
+                    dest.writeInt(params.frequency);
+                    dest.writeInt(params.channelWidth);
+                    dest.writeInt(params.num_samples);
+                    dest.writeInt(params.num_retries);
+                }
+            } else {
+                dest.writeInt(0);
+            }
+        }
+
+        /** Implement the Parcelable interface {@hide} */
+        public static final Creator<ParcelableRttParams> CREATOR =
+                new Creator<ParcelableRttParams>() {
+                    public ParcelableRttParams createFromParcel(Parcel in) {
+
+                        int num = in.readInt();
+
+                        if (num == 0) {
+                            return new ParcelableRttParams(null);
+                        }
+
+                        RttParams params[] = new RttParams[num];
+                        for (int i = 0; i < num; i++) {
+                            params[i] = new RttParams();
+                            params[i].deviceType = in.readInt();
+                            params[i].requestType = in.readInt();
+                            params[i].bssid = in.readString();
+                            params[i].frequency = in.readInt();
+                            params[i].channelWidth = in.readInt();
+                            params[i].num_samples = in.readInt();
+                            params[i].num_retries = in.readInt();
+
+                        }
+
+                        ParcelableRttParams parcelableParams = new ParcelableRttParams(params);
+                        return parcelableParams;
+                    }
+
+                    public ParcelableRttParams[] newArray(int size) {
+                        return new ParcelableRttParams[size];
+                    }
+                };
+    }
+
     /** specifies RTT results */
     public static class RttResult {
         /** mac address of the device being ranged */
@@ -98,6 +172,9 @@ public class RttManager {
 
         /** status of the request */
         public int status;
+
+        /** type of the request used */
+        public int requestType;
 
         /** timestamp of completion, in microsecond since boot */
         public long ts;
@@ -121,24 +198,105 @@ public class RttManager {
         public long rtt_spread_ns;
 
         /** average distance in centimeter, computed based on rtt_ns */
-        public long distance_cm;
+        public int distance_cm;
 
         /** standard deviation observed in distance */
-        public long distance_sd_cm;
+        public int distance_sd_cm;
 
         /** spread (i.e. max - min) distance */
-        public long distance_spread_cm;
+        public int distance_spread_cm;
     }
 
+
+    /** pseudo-private class used to parcel results */
+    public static class ParcelableRttResults implements Parcelable {
+
+        public RttResult mResults[];
+
+        public ParcelableRttResults(RttResult[] results) {
+            mResults = results;
+        }
+
+        /** Implement the Parcelable interface {@hide} */
+        public int describeContents() {
+            return 0;
+        }
+
+        /** Implement the Parcelable interface {@hide} */
+        public void writeToParcel(Parcel dest, int flags) {
+            if (mResults != null) {
+                dest.writeInt(mResults.length);
+                for (RttResult result : mResults) {
+                    dest.writeString(result.bssid);
+                    dest.writeInt(result.status);
+                    dest.writeInt(result.requestType);
+                    dest.writeLong(result.ts);
+                    dest.writeInt(result.rssi);
+                    dest.writeInt(result.rssi_spread);
+                    dest.writeInt(result.tx_rate);
+                    dest.writeLong(result.rtt_ns);
+                    dest.writeLong(result.rtt_sd_ns);
+                    dest.writeLong(result.rtt_spread_ns);
+                    dest.writeInt(result.distance_cm);
+                    dest.writeInt(result.distance_sd_cm);
+                    dest.writeInt(result.distance_spread_cm);
+                }
+            } else {
+                dest.writeInt(0);
+            }
+        }
+
+        /** Implement the Parcelable interface {@hide} */
+        public static final Creator<ParcelableRttResults> CREATOR =
+                new Creator<ParcelableRttResults>() {
+                    public ParcelableRttResults createFromParcel(Parcel in) {
+
+                        int num = in.readInt();
+
+                        if (num == 0) {
+                            return new ParcelableRttResults(null);
+                        }
+
+                        RttResult results[] = new RttResult[num];
+                        for (int i = 0; i < num; i++) {
+                            results[i] = new RttResult();
+                            results[i].bssid = in.readString();
+                            results[i].status = in.readInt();
+                            results[i].requestType = in.readInt();
+                            results[i].ts = in.readLong();
+                            results[i].rssi = in.readInt();
+                            results[i].rssi_spread = in.readInt();
+                            results[i].tx_rate = in.readInt();
+                            results[i].rtt_ns = in.readLong();
+                            results[i].rtt_sd_ns = in.readLong();
+                            results[i].rtt_spread_ns = in.readLong();
+                            results[i].distance_cm = in.readInt();
+                            results[i].distance_sd_cm = in.readInt();
+                            results[i].distance_spread_cm = in.readInt();
+                        }
+
+                        ParcelableRttResults parcelableResults = new ParcelableRttResults(results);
+                        return parcelableResults;
+                    }
+
+                    public ParcelableRttResults[] newArray(int size) {
+                        return new ParcelableRttResults[size];
+                    }
+                };
+    }
+
+
     public static interface RttListener {
-        public void onSuccess(RttResult results[]);
+        public void onSuccess(RttResult[] results);
         public void onFailure(int reason, String description);
         public void onAborted();
     }
 
-    public void startRanging(RttParams params[], RttListener listener) {
+    public void startRanging(RttParams[] params, RttListener listener) {
         validateChannel();
-        sAsyncChannel.sendMessage(CMD_OP_START_RANGING, 0, removeListener(listener), params);
+        ParcelableRttParams parcelableParams = new ParcelableRttParams(params);
+        sAsyncChannel.sendMessage(CMD_OP_START_RANGING,
+                0, putListener(listener), parcelableParams);
     }
 
     public void stopRanging(RttListener listener) {
@@ -147,11 +305,13 @@ public class RttManager {
     }
 
     /* private methods */
-    public static final int CMD_OP_START_RANGING        = 0;
-    public static final int CMD_OP_STOP_RANGING         = 1;
-    public static final int CMD_OP_FAILED               = 2;
-    public static final int CMD_OP_SUCCEEDED            = 3;
-    public static final int CMD_OP_ABORTED              = 4;
+    public static final int BASE = Protocol.BASE_WIFI_RTT_MANAGER;
+
+    public static final int CMD_OP_START_RANGING        = BASE + 0;
+    public static final int CMD_OP_STOP_RANGING         = BASE + 1;
+    public static final int CMD_OP_FAILED               = BASE + 2;
+    public static final int CMD_OP_SUCCEEDED            = BASE + 3;
+    public static final int CMD_OP_ABORTED              = BASE + 4;
 
     private Context mContext;
     private IRttManager mService;
@@ -173,7 +333,7 @@ public class RttManager {
      * Create a new WifiScanner instance.
      * Applications will almost always want to use
      * {@link android.content.Context#getSystemService Context.getSystemService()} to retrieve
-     * the standard {@link android.content.Context#WIFI_SERVICE Context.WIFI_SERVICE}.
+     * the standard {@link android.content.Context#WIFI_RTT_SERVICE Context.WIFI_RTT_SERVICE}.
      * @param context the application context
      * @param service the Binder interface
      * @hide
@@ -190,6 +350,7 @@ public class RttManager {
             if (++sThreadRefCount == 1) {
                 Messenger messenger = null;
                 try {
+                    Log.d(TAG, "Get the messenger from " + mService);
                     messenger = mService.getMessenger();
                 } catch (RemoteException e) {
                     /* do nothing */
@@ -313,10 +474,11 @@ public class RttManager {
             switch (msg.what) {
                 /* ActionListeners grouped together */
                 case CMD_OP_SUCCEEDED :
-                    ((RttListener) listener).onSuccess((RttResult[])msg.obj);
+                    reportSuccess(listener, msg);
+                    removeListener(msg.arg2);
                     break;
                 case CMD_OP_FAILED :
-                    ((RttListener) listener).onFailure(msg.arg1, (String)msg.obj);
+                    reportFailure(listener, msg);
                     removeListener(msg.arg2);
                     break;
                 case CMD_OP_ABORTED :
@@ -327,6 +489,18 @@ public class RttManager {
                     if (DBG) Log.d(TAG, "Ignoring message " + msg.what);
                     return;
             }
+        }
+
+        void reportSuccess(Object listener, Message msg) {
+            RttListener rttListener = (RttListener) listener;
+            ParcelableRttResults parcelableResults = (ParcelableRttResults) msg.obj;
+            ((RttListener) listener).onSuccess(parcelableResults.mResults);
+        }
+
+        void reportFailure(Object listener, Message msg) {
+            RttListener rttListener = (RttListener) listener;
+            Bundle bundle = (Bundle) msg.obj;
+            ((RttListener) listener).onFailure(msg.arg1, bundle.getString(DESCRIPTION_KEY));
         }
     }
 
