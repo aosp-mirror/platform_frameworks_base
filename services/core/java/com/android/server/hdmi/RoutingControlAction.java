@@ -60,6 +60,12 @@ final class RoutingControlAction extends FeatureAction {
     // true if <Give Power Status> should be sent once the new active routing path is determined.
     private final boolean mQueryDevicePowerStatus;
 
+    // If set to true, call {@link HdmiControlService#invokeInputChangeListener()} when
+    // the routing control/active source change happens. The listener should be called if
+    // the events are triggered by external events such as manual switch port change or incoming
+    // <Inactive Source> command.
+    private final boolean mNotifyInputChange;
+
     @Nullable private final IHdmiControlCallback mCallback;
 
     // The latest routing path. Updated by each <Routing Information> from CEC switches.
@@ -71,6 +77,11 @@ final class RoutingControlAction extends FeatureAction {
         mCallback = callback;
         mCurrentRoutingPath = path;
         mQueryDevicePowerStatus = queryDevicePowerStatus;
+        // Callback is non-null when routing control action is brought up by binder API. Use
+        // this as an indicator for the input change notification. These API calls will get
+        // the result through this callback, not through notification. Any other events that
+        // trigger the routing control is external, for which notifcation is used.
+        mNotifyInputChange = (callback == null);
     }
 
     @Override
@@ -111,7 +122,7 @@ final class RoutingControlAction extends FeatureAction {
             if (isPowerOnOrTransient(devicePowerStatus)) {
                 sendSetStreamPath();
             } else {
-                tv().updateActivePortId(tv().pathToPortId(mCurrentRoutingPath));
+                tv().updateActiveInput(mCurrentRoutingPath, mNotifyInputChange);
             }
         }
         finishWithCallback(HdmiControlManager.RESULT_SUCCESS);
@@ -155,13 +166,13 @@ final class RoutingControlAction extends FeatureAction {
                         }
                     });
                 } else {
-                    tv().updateActivePortId(tv().pathToPortId(mCurrentRoutingPath));
+                    tv().updateActiveInput(mCurrentRoutingPath, mNotifyInputChange);
                     finishWithCallback(HdmiControlManager.RESULT_SUCCESS);
                 }
                 return;
             case STATE_WAIT_FOR_REPORT_POWER_STATUS:
                 if (isPowerOnOrTransient(getTvPowerStatus())) {
-                    tv().updateActivePortId(tv().pathToPortId(mCurrentRoutingPath));
+                    tv().updateActiveInput(mCurrentRoutingPath, mNotifyInputChange);
                     sendSetStreamPath();
                 }
                 finishWithCallback(HdmiControlManager.RESULT_SUCCESS);
@@ -179,7 +190,7 @@ final class RoutingControlAction extends FeatureAction {
             mState = STATE_WAIT_FOR_REPORT_POWER_STATUS;
             addTimer(mState, TIMEOUT_REPORT_POWER_STATUS_MS);
         } else {
-            tv().updateActivePortId(tv().pathToPortId(mCurrentRoutingPath));
+            tv().updateActiveInput(mCurrentRoutingPath, mNotifyInputChange);
             sendSetStreamPath();
             finishWithCallback(HdmiControlManager.RESULT_SUCCESS);
         }
