@@ -1583,7 +1583,8 @@ final class ApplicationPackageManager extends PackageManager {
     public void addCrossProfileIntentFilter(IntentFilter filter, int sourceUserId, int targetUserId,
             int flags) {
         try {
-            mPM.addCrossProfileIntentFilter(filter, sourceUserId, targetUserId, flags);
+            mPM.addCrossProfileIntentFilter(filter, mContext.getOpPackageName(),
+                    mContext.getUserId(), sourceUserId, targetUserId, flags);
         } catch (RemoteException e) {
             // Should never happen!
         }
@@ -1607,7 +1608,8 @@ final class ApplicationPackageManager extends PackageManager {
     @Override
     public void clearCrossProfileIntentFilters(int sourceUserId) {
         try {
-            mPM.clearCrossProfileIntentFilters(sourceUserId);
+            mPM.clearCrossProfileIntentFilters(sourceUserId, mContext.getOpPackageName(),
+                    mContext.getUserId());
         } catch (RemoteException e) {
             // Should never happen!
         }

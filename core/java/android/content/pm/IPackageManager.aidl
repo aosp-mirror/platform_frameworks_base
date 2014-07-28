@@ -244,13 +244,13 @@ interface IPackageManager {
 
     void clearPackagePersistentPreferredActivities(String packageName, int userId);
 
-    void addCrossProfileIntentFilter(in IntentFilter intentFilter, int sourceUserId, int targetUserId,
-            int flags);
+    void addCrossProfileIntentFilter(in IntentFilter intentFilter, String ownerPackage,
+            int ownerUserId, int sourceUserId, int targetUserId, int flags);
 
     void addCrossProfileIntentsForPackage(in String packageName, int sourceUserId,
             int targetUserId);
 
-    void clearCrossProfileIntentFilters(int sourceUserId);
+    void clearCrossProfileIntentFilters(int sourceUserId, String ownerPackage, int ownerUserId);
 
     /**
      * Report the set of 'Home' activity candidates, plus (if any) which of them
