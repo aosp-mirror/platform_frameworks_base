@@ -35,14 +35,20 @@ using namespace android;
 
 // ----------------------------------------------------------------------------
 static const char* const kClassPathName = "android/media/AudioRecord";
+static const char* const kAudioAttributesClassPathName = "android/media/AudioAttributes";
 
-struct fields_t {
+struct audio_record_fields_t {
     // these fields provide access from C++ to the...
     jmethodID postNativeEventInJava; //... event post callback method
     jfieldID  nativeRecorderInJavaObj; // provides access to the C++ AudioRecord object
     jfieldID  nativeCallbackCookie;    // provides access to the AudioRecord callback data
 };
-static fields_t javaAudioRecordFields;
+struct audio_attributes_fields_t {
+    jfieldID  fieldRecSource;    // AudioAttributes.mSource
+    jfieldID  fieldFormattedTags;// AudioAttributes.mFormattedTags
+};
+static audio_attributes_fields_t javaAudioAttrFields;
+static audio_record_fields_t     javaAudioRecordFields;
 
 struct audiorecord_callback_cookie {
     jclass      audioRecord_class;
@@ -138,13 +144,18 @@ static sp<AudioRecord> setAudioRecord(JNIEnv* env, jobject thiz, const sp<AudioR
 // ----------------------------------------------------------------------------
 static jint
 android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
-        jint source, jint sampleRateInHertz, jint channelMask,
+        jobject jaa, jint sampleRateInHertz, jint channelMask,
                 // Java channel masks map directly to the native definition
         jint audioFormat, jint buffSizeInBytes, jintArray jSession)
 {
     //ALOGV(">> Entering android_media_AudioRecord_setup");
     //ALOGV("sampleRate=%d, audioFormat=%d, channel mask=%x, buffSizeInBytes=%d",
     //     sampleRateInHertz, audioFormat, channelMask, buffSizeInBytes);
+
+    if (jaa == 0) {
+        ALOGE("Error creating AudioRecord: invalid audio attributes");
+        return (jint) AUDIO_JAVA_ERROR;
+    }
 
     if (!audio_is_input_channel(channelMask)) {
         ALOGE("Error creating AudioRecord: channel mask %#x is not valid.", channelMask);
@@ -167,11 +178,6 @@ android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
     }
     size_t frameSize = channelCount * bytesPerSample;
     size_t frameCount = buffSizeInBytes / frameSize;
-
-    if ((uint32_t(source) >= AUDIO_SOURCE_CNT) && (uint32_t(source) != AUDIO_SOURCE_HOTWORD)) {
-        ALOGE("Error creating AudioRecord: unknown source %d.", source);
-        return (jint) AUDIORECORD_ERROR_SETUP_INVALIDSOURCE;
-    }
 
     jclass clazz = env->GetObjectClass(thiz);
     if (clazz == NULL) {
@@ -196,6 +202,19 @@ android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
     // create an uninitialized AudioRecord object
     sp<AudioRecord> lpRecorder = new AudioRecord();
 
+    audio_attributes_t *paa = NULL;
+    // read the AudioAttributes values
+    paa = (audio_attributes_t *) calloc(1, sizeof(audio_attributes_t));
+    const jstring jtags =
+            (jstring) env->GetObjectField(jaa, javaAudioAttrFields.fieldFormattedTags);
+    const char* tags = env->GetStringUTFChars(jtags, NULL);
+    // copying array size -1, char array for tags was calloc'd, no need to NULL-terminate it
+    strncpy(paa->tags, tags, AUDIO_ATTRIBUTES_TAGS_MAX_SIZE - 1);
+    env->ReleaseStringUTFChars(jtags, tags);
+    paa->source = (audio_source_t) env->GetIntField(jaa, javaAudioAttrFields.fieldRecSource);
+
+    ALOGV("AudioRecord_setup for source=%d tags=%s", paa->source, paa->tags);
+
     // create the callback information:
     // this data will be passed with every AudioRecord callback
     audiorecord_callback_cookie *lpCallbackData = new audiorecord_callback_cookie;
@@ -204,7 +223,7 @@ android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
     lpCallbackData->audioRecord_ref = env->NewGlobalRef(weak_this);
     lpCallbackData->busy = false;
 
-    const status_t status = lpRecorder->set((audio_source_t) source,
+    const status_t status = lpRecorder->set(paa->source,
         sampleRateInHertz,
         format,        // word length, PCM
         channelMask,
@@ -545,7 +564,7 @@ static JNINativeMethod gMethods[] = {
     // name,               signature,  funcPtr
     {"native_start",         "(II)I",    (void *)android_media_AudioRecord_start},
     {"native_stop",          "()V",    (void *)android_media_AudioRecord_stop},
-    {"native_setup",         "(Ljava/lang/Object;IIIII[I)I",
+    {"native_setup",         "(Ljava/lang/Object;Ljava/lang/Object;IIII[I)I",
                                        (void *)android_media_AudioRecord_setup},
     {"native_finalize",      "()V",    (void *)android_media_AudioRecord_finalize},
     {"native_release",       "()V",    (void *)android_media_AudioRecord_release},
@@ -608,6 +627,23 @@ int register_android_media_AudioRecord(JNIEnv *env)
             JAVA_NATIVECALLBACKINFO_FIELD_NAME, "J");
     if (javaAudioRecordFields.nativeCallbackCookie == NULL) {
         ALOGE("Can't find AudioRecord.%s", JAVA_NATIVECALLBACKINFO_FIELD_NAME);
+        return -1;
+    }
+
+    // Get the AudioAttributes class and fields
+    jclass audioAttrClass = env->FindClass(kAudioAttributesClassPathName);
+    if (audioAttrClass == NULL) {
+        ALOGE("Can't find %s", kAudioAttributesClassPathName);
+        return -1;
+    }
+    jclass audioAttributesClassRef = (jclass)env->NewGlobalRef(audioAttrClass);
+    javaAudioAttrFields.fieldRecSource = env->GetFieldID(audioAttributesClassRef, "mSource", "I");
+    javaAudioAttrFields.fieldFormattedTags =
+            env->GetFieldID(audioAttributesClassRef, "mFormattedTags", "Ljava/lang/String;");
+    env->DeleteGlobalRef(audioAttributesClassRef);
+    if (javaAudioAttrFields.fieldRecSource == NULL
+            || javaAudioAttrFields.fieldFormattedTags == NULL) {
+        ALOGE("Can't initialize AudioAttributes fields");
         return -1;
     }
 
