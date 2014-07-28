@@ -1568,7 +1568,7 @@ public class DevicePolicyManager {
     public static final int KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS = 1 << 3;
 
     /**
-     * Ignore {@link TrustAgentService} state on secure keyguard screens
+     * Ignore trust agent state on secure keyguard screens
      * (e.g. PIN/Pattern/Password).
      */
     public static final int KEYGUARD_DISABLE_TRUST_AGENTS = 1 << 4;
