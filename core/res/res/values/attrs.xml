@@ -682,30 +682,6 @@
         <!-- The DatePicker style. -->
         <attr name="datePickerStyle" format="reference" />
 
-        <!-- The DatePicker Header day of week label background color . -->
-        <attr name="datePickerHeaderDayOfWeekLabelBackgroundColor" format="reference" />
-
-        <!-- The DatePicker Header day of week label text appearance -->
-        <attr name="datePickerHeaderDayOfWeekLabelTextAppearance" format="reference" />
-
-        <!-- The DatePicker Header selector background color . -->
-        <attr name="datePickerHeaderSelectorBackgroundColor" format="reference" />
-
-        <!-- The DatePicker Header selector month label text appearance -->
-        <attr name="datePickerHeaderSelectorMonthLabelTextAppearance" format="reference" />
-
-        <!-- The DatePicker Header selector day of month label text appearance -->
-        <attr name="datePickerHeaderSelectorDayOfMonthLabelTextAppearance" format="reference" />
-
-        <!-- The DatePicker Header selector year label text appearance -->
-        <attr name="datePickerHeaderSelectorYearLabelTextAppearance" format="reference" />
-
-        <!-- The DatePicker Header list year label text appearance -->
-        <attr name="datePickerHeaderListYearLabelTextAppearance" format="reference" />
-
-        <!-- DatePicker list year label circle background color -->
-        <attr name="datePickerHeaderListYearLabelCircleBackgroundColor" format="reference" />
-
         <!-- The DatePicker dialog theme. -->
         <attr name="datePickerDialogTheme" format="reference" />
 
@@ -4215,12 +4191,10 @@
 
     <declare-styleable name="DatePicker">
         <!-- The first year (inclusive), for example "1940".
-             {@deprecated Use minDate instead.}
-         -->
+             {@deprecated Use minDate instead.} -->
         <attr name="startYear" format="integer" />
         <!-- The last year (inclusive), for example "2010".
-             {@deprecated Use maxDate instead.}
-         -->
+             {@deprecated Use maxDate instead.} -->
         <attr name="endYear" format="integer" />
         <!-- Whether the spinners are shown. -->
         <attr name="spinnersShown" format="boolean" />
@@ -4236,24 +4210,32 @@
         <attr name="legacyLayout" />
         <!-- @hide Enables or disable the use of the legacy layout for the DatePicker. -->
         <attr name="legacyMode" />
-        <!-- The background color for the date selector 's day of week of the non legacy DatePicker. -->
-        <attr name="dateSelectorDayOfWeekBackgroundColor" format="color|reference" />
-        <!-- The text color for the date selector's day of week of the non legacy DatePicker. -->
-        <attr name="dateSelectorDayOfWeekTextAppearance" format="reference" />
-        <!-- The background color for the date selector of the non legacy DatePicker. -->
-        <attr name="dateSelectorBackgroundColor" format="color|reference" />
-        <!-- The month's text appearance in the date selector of the non legacy DatePicker. -->
-        <attr name="dateSelectorMonthTextAppearance" format="reference" />
-        <!-- The day of month's text appearance in the date selector of the non legacy DatePicker. -->
-        <attr name="dateSelectorDayOfMonthTextAppearance" format="reference" />
-        <!-- The year's text appearance in the date selector of the non legacy DatePicker. -->
-        <attr name="dateSelectorYearTextAppearance" format="reference" />
-        <!-- The list year's text appearance in the list of the non legacy DatePicker. -->
-        <attr name="dateSelectorYearListItemTextAppearance" format="reference" />
-        <!-- The list year's selected circle color in the list of the non legacy DatePicker. -->
-        <attr name="dateSelectorYearListSelectedCircleColor" format="color|reference" />
-        <!-- The text color list of the calendar of the non legacy DatePicker. -->
-        <attr name="calendarTextColor" format="color|reference" />
+        <!-- The background color for the date selector 's day of week. -->
+        <attr name="dayOfWeekBackgroundColor" format="color" />
+        <!-- The text color for the date selector's day of week. -->
+        <attr name="dayOfWeekTextAppearance" format="reference" />
+        <!-- The month's text appearance in the date selector. -->
+        <attr name="headerMonthTextAppearance" format="reference" />
+        <!-- The day of month's text appearance in the date selector. -->
+        <attr name="headerDayOfMonthTextAppearance" format="reference" />
+        <!-- The year's text appearance in the date selector. -->
+        <attr name="headerYearTextAppearance" format="reference" />
+        <!-- The background color for the date selector. -->
+        <attr name="headerBackgroundColor" />
+        <!-- @hide The selected text color for the date selector. Used as a
+             backup if the text appearance does not explicitly have a color
+             set for the selected state. -->
+        <attr name="headerSelectedTextColor" />
+        <!-- The list year's text appearance in the list. -->
+        <attr name="yearListItemTextAppearance" format="reference" />
+        <!-- The list year's selected circle color in the list. -->
+        <attr name="yearListSelectorColor" format="color" />
+        <!-- The text color list of the calendar. -->
+        <attr name="calendarTextColor" format="color" />
+        <!-- @hide The selected text color for the calendar. Used as a backup
+             if the text color does not explicitly have a color set for the
+             selected state. -->
+        <attr name="calendarSelectedTextColor" format="color" />
     </declare-styleable>
 
     <declare-styleable name="TwoLineListItem">
@@ -4533,8 +4515,9 @@
         <attr name="headerAmPmTextAppearance" format="reference" />
         <!-- The text appearance for the time header of the TimePicker. -->
         <attr name="headerTimeTextAppearance" format="reference" />
-        <!-- The text color for selected time header of the TimePicker. This
-             will override the value from the text appearance. -->
+        <!-- @hide The text color for selected time header of the TimePicker.
+             This will override the value from the text appearance if it does
+             not explicitly have a color set for the selected state. -->
         <attr name="headerSelectedTextColor" format="color" />
         <!-- The background color for the header of the TimePicker. -->
         <attr name="headerBackgroundColor" format="color" />
@@ -4544,9 +4527,11 @@
         <attr name="numbersBackgroundColor" format="color" />
         <!-- The color for the AM/PM selectors of the TimePicker. -->
         <attr name="amPmTextColor" format="color" />
-        <!-- The background color for the AM/PM selectors of the TimePicker when unselected. -->
-        <attr name="amPmUnselectedBackgroundColor" format="color" />
-        <!-- The background color for the AM/PM selectors of the TimePicker when selected. -->
+        <!-- The background color state list for the AM/PM selectors of the TimePicker. -->
+        <attr name="amPmBackgroundColor" format="color" />
+        <!-- @hide The background color for the AM/PM selectors of the
+             TimePicker when selected. Used if the background color does not
+             explicitly have a color set for the selected state. -->
         <attr name="amPmSelectedBackgroundColor" format="color" />
         <!-- The color for the hours/minutes selector of the TimePicker. -->
         <attr name="numbersSelectorColor" format="color" />

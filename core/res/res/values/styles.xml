@@ -573,7 +573,8 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.DatePicker">
-        <item name="legacyLayout">@android:layout/date_picker_legacy</item>
+        <item name="legacyMode">true</item>
+        <item name="legacyLayout">@layout/date_picker_legacy</item>
         <item name="calendarViewShown">false</item>
     </style>
 
@@ -947,9 +948,9 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="PreferenceFragment">
-        <item name="android:layout">@android:layout/preference_list_fragment</item>
-        <item name="android:paddingStart">0dp</item>
-        <item name="android:paddingEnd">0dp</item>
+        <item name="layout">@layout/preference_list_fragment</item>
+        <item name="paddingStart">0dp</item>
+        <item name="paddingEnd">0dp</item>
     </style>
 
     <style name="Preference.Information">
@@ -1333,9 +1334,6 @@ please see styles_device_defaults.xml.
         <item name="orientation">vertical</item>
     </style>
 
-    <style name="TextAppearance.TimePicker.TimeLabel" parent="TextAppearance" />
-    <style name="TextAppearance.TimePicker.AmPmLabel" parent="TextAppearance" />
-
     <style name="Widget.FastScroll">
         <item name="thumbDrawable">?attr/fastScrollThumbDrawable</item>
         <item name="trackDrawable">?attr/fastScrollTrackDrawable</item>
@@ -1357,24 +1355,6 @@ please see styles_device_defaults.xml.
         <item name="lightRadius">800dp</item>
         <item name="ambientShadowAlpha">0.0471</item>
         <item name="spotShadowAlpha">0.1765</item>
-    </style>
-
-    <style name="TextAppearance.DatePicker.DayOfWeekLabel" parent="TextAppearance">
-    </style>
-
-    <style name="TextAppearance.DatePicker.Selector" parent="TextAppearance">
-    </style>
-
-    <style name="TextAppearance.DatePicker.Selector.MonthLabel" parent="TextAppearance.DatePicker.Selector">
-    </style>
-
-    <style name="TextAppearance.DatePicker.Selector.DayOfMonthLabel" parent="TextAppearance.DatePicker.Selector">
-    </style>
-
-    <style name="TextAppearance.DatePicker.Selector.YearLabel" parent="TextAppearance.DatePicker.Selector">
-    </style>
-
-    <style name="TextAppearance.DatePicker.List.YearLabel" parent="TextAppearance">
     </style>
 
 </resources>
