@@ -361,13 +361,13 @@ public class SoundTrigger {
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeString(uuid.toString());
             dest.writeBlob(data);
-            dest.writeTypedArray(keyphrases, 0);
+            dest.writeTypedArray(keyphrases, flags);
         }
 
         @Override
         public String toString() {
             return "KeyphraseSoundModel [keyphrases=" + Arrays.toString(keyphrases) + ", uuid="
-                    + uuid + ", type=" + type + ", data? " + (data != null) + "]";
+                    + uuid + ", type=" + type + ", data=" + (data == null ? 0 : data.length) + "]";
         }
     }
 
@@ -504,6 +504,15 @@ public class SoundTrigger {
                 return false;
             return true;
         }
+
+        @Override
+        public String toString() {
+            return "RecognitionEvent [status=" + status + ", soundModelHandle=" + soundModelHandle
+                    + ", captureAvailable=" + captureAvailable + ", captureSession="
+                    + captureSession + ", captureDelayMs=" + captureDelayMs
+                    + ", capturePreambleMs=" + capturePreambleMs
+                    + ", data=" + (data == null ? 0 : data.length) + "]";
+        }
     }
 
     /**
@@ -551,7 +560,7 @@ public class SoundTrigger {
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeByte((byte) (captureRequested ? 1 : 0));
-            dest.writeTypedArray(keyphrases, 0);
+            dest.writeTypedArray(keyphrases, flags);
             dest.writeBlob(data);
         }
 
@@ -563,7 +572,8 @@ public class SoundTrigger {
         @Override
         public String toString() {
             return "RecognitionConfig [captureRequested=" + captureRequested + ", keyphrases="
-                    + Arrays.toString(keyphrases) + ", data? " + (data != null) + "]";
+                    + Arrays.toString(keyphrases)
+                    + ", data=" + (data == null ? 0 : data.length) + "]";
         }
     }
 
@@ -611,6 +621,37 @@ public class SoundTrigger {
         public int describeContents() {
             return 0;
         }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + confidenceLevel;
+            result = prime * result + userId;
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            ConfidenceLevel other = (ConfidenceLevel) obj;
+            if (confidenceLevel != other.confidenceLevel)
+                return false;
+            if (userId != other.userId)
+                return false;
+            return true;
+        }
+
+        @Override
+        public String toString() {
+            return "ConfidenceLevel [userId=" + userId
+                    + ", confidenceLevel=" + confidenceLevel + "]";
+        }
     }
 
     /**
@@ -657,12 +698,46 @@ public class SoundTrigger {
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(id);
             dest.writeInt(recognitionModes);
-            dest.writeTypedArray(confidenceLevels, 0);
+            dest.writeTypedArray(confidenceLevels, flags);
         }
 
         @Override
         public int describeContents() {
             return 0;
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + Arrays.hashCode(confidenceLevels);
+            result = prime * result + id;
+            result = prime * result + recognitionModes;
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            KeyphraseRecognitionExtra other = (KeyphraseRecognitionExtra) obj;
+            if (!Arrays.equals(confidenceLevels, other.confidenceLevels))
+                return false;
+            if (id != other.id)
+                return false;
+            if (recognitionModes != other.recognitionModes)
+                return false;
+            return true;
+        }
+
+        @Override
+        public String toString() {
+            return "KeyphraseRecognitionExtra [id=" + id + ", recognitionModes=" + recognitionModes
+                    + ", confidenceLevels=" + Arrays.toString(confidenceLevels) + "]";
         }
     }
 
@@ -676,13 +751,93 @@ public class SoundTrigger {
         /** Additional data available for each recognized key phrases in the model */
         public final boolean keyphraseInCapture;
 
-        KeyphraseRecognitionEvent(int status, int soundModelHandle, boolean captureAvailable,
+        public KeyphraseRecognitionEvent(int status, int soundModelHandle, boolean captureAvailable,
                int captureSession, int captureDelayMs, int capturePreambleMs, byte[] data,
                boolean keyphraseInCapture, KeyphraseRecognitionExtra[] keyphraseExtras) {
             super(status, soundModelHandle, captureAvailable, captureSession, captureDelayMs,
                   capturePreambleMs, data);
             this.keyphraseInCapture = keyphraseInCapture;
             this.keyphraseExtras = keyphraseExtras;
+        }
+
+        public static final Parcelable.Creator<KeyphraseRecognitionEvent> CREATOR
+                = new Parcelable.Creator<KeyphraseRecognitionEvent>() {
+            public KeyphraseRecognitionEvent createFromParcel(Parcel in) {
+                return KeyphraseRecognitionEvent.fromParcel(in);
+            }
+
+            public KeyphraseRecognitionEvent[] newArray(int size) {
+                return new KeyphraseRecognitionEvent[size];
+            }
+        };
+
+        private static KeyphraseRecognitionEvent fromParcel(Parcel in) {
+            int status = in.readInt();
+            int soundModelHandle = in.readInt();
+            boolean captureAvailable = in.readByte() == 1;
+            int captureSession = in.readInt();
+            int captureDelayMs = in.readInt();
+            int capturePreambleMs = in.readInt();
+            byte[] data = in.readBlob();
+            boolean keyphraseInCapture = in.readByte() == 1;
+            KeyphraseRecognitionExtra[] keyphraseExtras =
+                    in.createTypedArray(KeyphraseRecognitionExtra.CREATOR);
+            return new KeyphraseRecognitionEvent(status, soundModelHandle, captureAvailable,
+                    captureSession, captureDelayMs, capturePreambleMs, data, keyphraseInCapture,
+                    keyphraseExtras);
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(status);
+            dest.writeInt(soundModelHandle);
+            dest.writeByte((byte) (captureAvailable ? 1 : 0));
+            dest.writeInt(captureSession);
+            dest.writeInt(captureDelayMs);
+            dest.writeInt(capturePreambleMs);
+            dest.writeBlob(data);
+            dest.writeByte((byte) (keyphraseInCapture ? 1 : 0));
+            dest.writeTypedArray(keyphraseExtras, flags);
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = super.hashCode();
+            result = prime * result + Arrays.hashCode(keyphraseExtras);
+            result = prime * result + (keyphraseInCapture ? 1231 : 1237);
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (!super.equals(obj))
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            KeyphraseRecognitionEvent other = (KeyphraseRecognitionEvent) obj;
+            if (!Arrays.equals(keyphraseExtras, other.keyphraseExtras))
+                return false;
+            if (keyphraseInCapture != other.keyphraseInCapture)
+                return false;
+            return true;
+        }
+
+        @Override
+        public String toString() {
+            return "KeyphraseRecognitionEvent [keyphraseExtras=" + Arrays.toString(keyphraseExtras)
+                    + ", keyphraseInCapture=" + keyphraseInCapture + ", status=" + status
+                    + ", soundModelHandle=" + soundModelHandle + ", captureAvailable="
+                    + captureAvailable + ", captureSession=" + captureSession + ", captureDelayMs="
+                    + captureDelayMs + ", capturePreambleMs=" + capturePreambleMs
+                    + ", data=" + (data == null ? 0 : data.length) + "]";
         }
     }
 

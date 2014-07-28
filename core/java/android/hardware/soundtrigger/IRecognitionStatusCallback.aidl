@@ -26,10 +26,8 @@ oneway interface IRecognitionStatusCallback {
      * Called when the keyphrase is spoken.
      *
      * @param data Optional trigger audio data, if it was requested and is available.
-     *        TODO: See if the data being passed in works well, if not use shared memory.
-     *        This *MUST* not exceed 100K.
      */
-    void onDetected(in SoundTrigger.RecognitionEvent recognitionEvent);
+    void onDetected(in SoundTrigger.KeyphraseRecognitionEvent recognitionEvent);
     /**
      * Called when the detection for the associated keyphrase stops.
      */

@@ -18,8 +18,8 @@ package android.hardware.soundtrigger;
 
 parcelable SoundTrigger.ConfidenceLevel;
 parcelable SoundTrigger.Keyphrase;
+parcelable SoundTrigger.KeyphraseRecognitionEvent;
 parcelable SoundTrigger.KeyphraseRecognitionExtra;
 parcelable SoundTrigger.KeyphraseSoundModel;
 parcelable SoundTrigger.ModuleProperties;
 parcelable SoundTrigger.RecognitionConfig;
-parcelable SoundTrigger.RecognitionEvent;

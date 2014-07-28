@@ -19,6 +19,8 @@ package com.android.server.voiceinteraction;
 import android.hardware.soundtrigger.IRecognitionStatusCallback;
 import android.hardware.soundtrigger.SoundTrigger;
 import android.hardware.soundtrigger.SoundTrigger.Keyphrase;
+import android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionEvent;
+import android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra;
 import android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel;
 import android.hardware.soundtrigger.SoundTrigger.ModuleProperties;
 import android.hardware.soundtrigger.SoundTrigger.RecognitionConfig;
@@ -40,8 +42,6 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
     static final String TAG = "SoundTriggerHelper";
     // TODO: Set to false.
     static final boolean DBG = true;
-    // TODO: Remove this.
-    static final int TEMP_KEYPHRASE_ID = 100;
 
     /**
      * Return codes for {@link #startRecognition(int, KeyphraseSoundModel,
@@ -117,7 +117,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         }
 
         if (mCurrentSoundModelHandle != INVALID_SOUND_MODEL_HANDLE) {
-            Slog.w(TAG, "Canceling previous recognition");
+            Slog.w(TAG, "Unloading previous sound model");
             // TODO: Inspect the return codes here.
             mModule.unloadSoundModel(mCurrentSoundModelHandle);
             mCurrentSoundModelHandle = INVALID_SOUND_MODEL_HANDLE;
@@ -127,6 +127,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         // Notify them that it was stopped.
         IRecognitionStatusCallback oldListener = mActiveListeners.get(keyphraseId);
         if (oldListener != null && oldListener.asBinder() != listener.asBinder()) {
+            Slog.w(TAG, "Canceling previous recognition");
             try {
                 oldListener.onDetectionStopped();
             } catch (RemoteException e) {
@@ -221,33 +222,52 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
     //---- SoundTrigger.StatusListener methods
     @Override
     public void onRecognition(RecognitionEvent event) {
-        // Check which keyphrase triggered, and fire the appropriate event.
-        // TODO: Get the keyphrase out of the event and fire events on it.
-        // For now, as a nasty workaround, we fire all events to the listener for
-        // keyphrase with TEMP_KEYPHRASE_ID.
-        IRecognitionStatusCallback listener = null;
-        synchronized(this) {
-            // TODO: The keyphrase should come from the recognition event
-            // as it may be for a different keyphrase than the current one.
-            listener = mActiveListeners.get(TEMP_KEYPHRASE_ID);
-        }
-        if (listener == null) {
-            Slog.w(TAG, "received onRecognition event without any listener for it");
+        if (event == null) {
+            Slog.w(TAG, "Invalid recognition event!");
             return;
         }
 
+        if (DBG) Slog.d(TAG, "onRecognition: " + event);
         switch (event.status) {
-            case SoundTrigger.RECOGNITION_STATUS_SUCCESS:
-                try {
-                    listener.onDetected(event);
-                } catch (RemoteException e) {
-                    Slog.w(TAG, "RemoteException in onDetected");
-                }
-                break;
+            // Fire aborts/failures to all listeners since it's not tied to a keyphrase.
             case SoundTrigger.RECOGNITION_STATUS_ABORT: // fall-through
             case SoundTrigger.RECOGNITION_STATUS_FAILURE:
                 try {
-                    listener.onDetectionStopped();
+                    synchronized (this) {
+                        for (int i = 0; i < mActiveListeners.size(); i++) {
+                            mActiveListeners.valueAt(i).onDetectionStopped();
+                        }
+                    }
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "RemoteException in onDetectionStopped");
+                }
+                break;
+            case SoundTrigger.RECOGNITION_STATUS_SUCCESS:
+                if (!(event instanceof KeyphraseRecognitionEvent)) {
+                    Slog.w(TAG, "Invalid recognition event!");
+                    return;
+                }
+
+                KeyphraseRecognitionExtra[] keyphraseExtras =
+                        ((KeyphraseRecognitionEvent) event).keyphraseExtras;
+                if (keyphraseExtras == null || keyphraseExtras.length == 0) {
+                    Slog.w(TAG, "Invalid keyphrase recognition event!");
+                    return;
+                }
+                // TODO: Handle more than one keyphrase extras.
+                // TODO: Use keyphraseExtras[0].id here instead of 100.
+                int keyphraseId = 100;
+                try {
+                    synchronized(this) {
+                        // Check which keyphrase triggered, and fire the appropriate event.
+                        IRecognitionStatusCallback listener = mActiveListeners.get(keyphraseId);
+                        if (listener != null) {
+                            listener.onDetected((KeyphraseRecognitionEvent) event);
+                        } else {
+                            Slog.w(TAG, "received onRecognition event without any listener for it");
+                            return;
+                        }
+                    }
                 } catch (RemoteException e) {
                     Slog.w(TAG, "RemoteException in onDetectionStopped");
                 }
@@ -257,6 +277,17 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
 
     @Override
     public void onServiceDied() {
-        // TODO: Figure out how to restart the recognition here.
+        synchronized (this) {
+            try {
+                for (int i = 0; i < mActiveListeners.size(); i++) {
+                    mActiveListeners.valueAt(i).onDetectionStopped();
+                }
+            } catch (RemoteException e) {
+                Slog.w(TAG, "RemoteException in onDetectionStopped");
+            }
+            mCurrentSoundModelHandle = INVALID_SOUND_MODEL_HANDLE;
+            // Remove all listeners.
+            mActiveListeners.clear();
+        }
     }
 }
