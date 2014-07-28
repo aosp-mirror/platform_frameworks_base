@@ -72,11 +72,11 @@ public class BackupTransport {
      * may offer a UI for allowing the user to supply login credentials for the
      * transport's off-device backend.
      *
-     * If the transport does not supply any user-facing configuration UI, it should
-     * return null from this method.
+     * <p>If the transport does not supply any user-facing configuration UI, it should
+     * return {@code null} from this method.
      *
      * @return An Intent that can be passed to Context.startActivity() in order to
-     *         launch the transport's configuration UI.  This method will return null
+     *         launch the transport's configuration UI.  This method will return {@code null}
      *         if the transport does not offer any user-facing configuration UI.
      */
     public Intent configurationIntent() {
@@ -95,6 +95,43 @@ public class BackupTransport {
     public String currentDestinationString() {
         throw new UnsupportedOperationException(
                 "Transport currentDestinationString() not implemented");
+    }
+
+    /**
+     * Ask the transport for an Intent that can be used to launch a more detailed
+     * secondary data management activity.  For example, the configuration intent might
+     * be one for allowing the user to select which account they wish to associate
+     * their backups with, and the management intent might be one which presents a
+     * UI for managing the data on the backend.
+     *
+     * <p>In the Settings UI, the configuration intent will typically be invoked
+     * when the user taps on the preferences item labeled with the current
+     * destination string, and the management intent will be placed in an overflow
+     * menu labelled with the management label string.
+     *
+     * <p>If the transport does not supply any user-facing data management
+     * UI, then it should return {@code null} from this method.
+     *
+     * @return An intent that can be passed to Context.startActivity() in order to
+     *         launch the transport's data-management UI.  This method will return
+     *         {@code null} if the transport does not offer any user-facing data
+     *         management UI.
+     */
+    public Intent dataManagementIntent() {
+        return null;
+    }
+
+    /**
+     * On demand, supply a short string that can be shown to the user as the label
+     * on an overflow menu item used to invoked the data management UI.
+     *
+     * @return A string to be used as the label for the transport's data management
+     *         affordance.  If the transport supplies a data management intent, this
+     *         method must not return {@code null}.
+     */
+    public String dataManagementLabel() {
+        throw new UnsupportedOperationException(
+                "Transport dataManagementLabel() not implemented");
     }
 
     /**
@@ -443,6 +480,16 @@ public class BackupTransport {
         @Override
         public String currentDestinationString() throws RemoteException {
             return BackupTransport.this.currentDestinationString();
+        }
+
+        @Override
+        public Intent dataManagementIntent() {
+            return BackupTransport.this.dataManagementIntent();
+        }
+
+        @Override
+        public String dataManagementLabel() {
+            return BackupTransport.this.dataManagementLabel();
         }
 
         @Override
