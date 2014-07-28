@@ -491,6 +491,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                         mService.readDescriptor(mClientIf, address,
                             srvcType, srvcInstId, srvcUuid, charInstId, charUuid,
                             descrInstId, descrUuid, AUTHENTICATION_MITM);
+                        return;
                     } catch (RemoteException e) {
                         Log.e(TAG,"",e);
                     }
@@ -544,6 +545,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                             srvcType, srvcInstId, srvcUuid, charInstId, charUuid,
                             descrInstId, descrUuid, characteristic.getWriteType(),
                             AUTHENTICATION_MITM, descriptor.getValue());
+                        return;
                     } catch (RemoteException e) {
                         Log.e(TAG,"",e);
                     }
