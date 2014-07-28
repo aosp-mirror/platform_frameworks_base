@@ -184,6 +184,16 @@ public class IdleController extends StateController {
 
     @Override
     public void dumpControllerState(PrintWriter pw) {
-
+        synchronized (mTrackedTasks) {
+            pw.print("Idle: ");
+            pw.println(mIdleTracker.isIdle() ? "true" : "false");
+            pw.println(mTrackedTasks.size());
+            for (int i = 0; i < mTrackedTasks.size(); i++) {
+                final JobStatus js = mTrackedTasks.get(i);
+                pw.print("  ");
+                pw.print(String.valueOf(js.hashCode()).substring(0, 3));
+                pw.println("..");
+            }
+        }
     }
 }
