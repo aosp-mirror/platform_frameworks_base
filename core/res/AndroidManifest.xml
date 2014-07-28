@@ -3023,6 +3023,11 @@
                  android:permission="android.permission.BIND_JOB_SERVICE" >
         </service>
 
+        <service android:name="com.android.server.backup.FullBackupJob"
+                 android:exported="true"
+                 android:permission="android.permission.BIND_JOB_SERVICE" >
+        </service>
+
         <service
             android:name="com.android.server.pm.BackgroundDexOptService"
             android:exported="true"
