@@ -16,9 +16,6 @@
 
 package android.webkit;
 
-import android.app.AppGlobals;
-import android.content.Context;
-import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Process;
 import android.os.RemoteException;
@@ -103,14 +100,9 @@ public final class WebViewFactory {
 
     private static Class<WebViewFactoryProvider> getFactoryClass() throws ClassNotFoundException {
         try {
-            Context webViewContext = AppGlobals.getInitialApplication().createPackageContext(
-                    getWebViewPackageName(),
-                    Context.CONTEXT_INCLUDE_CODE | Context.CONTEXT_IGNORE_SECURITY);
-            ClassLoader clazzLoader = webViewContext.getClassLoader();
-            return (Class<WebViewFactoryProvider>) Class.forName(CHROMIUM_WEBVIEW_FACTORY, true,
-                                                                 clazzLoader);
-        } catch (PackageManager.NameNotFoundException e) {
-            Log.e(LOGTAG, "Chromium WebView package does not exist");
+            return (Class<WebViewFactoryProvider>) Class.forName(CHROMIUM_WEBVIEW_FACTORY);
+        } catch (ClassNotFoundException e) {
+            Log.e(LOGTAG, "Chromium WebView does not exist");
             return (Class<WebViewFactoryProvider>) Class.forName(NULL_WEBVIEW_FACTORY);
         }
     }
