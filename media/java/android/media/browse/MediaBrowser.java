@@ -67,8 +67,8 @@ public final class MediaBrowser {
     private final Handler mHandler = new Handler();
     private final ArrayMap<Uri,Subscription> mSubscriptions =
             new ArrayMap<Uri, MediaBrowser.Subscription>();
-    private final SparseArray<ThumbnailRequest> mThumbnailRequests =
-            new SparseArray<ThumbnailRequest>();
+    private final SparseArray<IconRequest> mIconRequests =
+            new SparseArray<IconRequest>();
 
     private int mState = CONNECT_STATE_DISCONNECTED;
     private MediaServiceConnection mServiceConnection;
@@ -352,42 +352,42 @@ public final class MediaBrowser {
     }
 
     /**
-     * Loads the thumbnail of a media item.
+     * Loads the icon of a media item.
      *
-     * @param uri The uri of the thumbnail.
+     * @param uri The uri of the Icon.
      * @param width The preferred width of the icon in dp.
      * @param height The preferred width of the icon in dp.
-     * @param callback The callback to receive the thumbnail.
+     * @param callback The callback to receive the icon.
      */
-    public void loadThumbnail(final @NonNull Uri uri, final int width, final int height,
-            final @NonNull ThumbnailCallback callback) {
+    public void loadIcon(final @NonNull Uri uri, final int width, final int height,
+            final @NonNull IconCallback callback) {
         if (uri == null) {
-            throw new IllegalArgumentException("thumbnail uri cannot be null");
+            throw new IllegalArgumentException("Icon uri cannot be null");
         }
         if (callback == null) {
-            throw new IllegalArgumentException("thumbnail callback cannot be null");
+            throw new IllegalArgumentException("Icon callback cannot be null");
         }
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                for (int i = 0; i < mThumbnailRequests.size(); i++) {
-                    ThumbnailRequest existingRequest = mThumbnailRequests.valueAt(i);
+                for (int i = 0; i < mIconRequests.size(); i++) {
+                    IconRequest existingRequest = mIconRequests.valueAt(i);
                     if (existingRequest.isSameRequest(uri, width, height)) {
                         existingRequest.addCallback(callback);
                         return;
                     }
                 }
                 final int seq = mNextSeq++;
-                ThumbnailRequest request = new ThumbnailRequest(seq, uri, width, height);
+                IconRequest request = new IconRequest(seq, uri, width, height);
                 request.addCallback(callback);
-                mThumbnailRequests.put(seq, request);
+                mIconRequests.put(seq, request);
                 if (mState == CONNECT_STATE_CONNECTED) {
                     try {
-                        mServiceBinder.loadThumbnail(seq, uri, width, height, mServiceCallbacks);
+                        mServiceBinder.loadIcon(seq, uri, width, height, mServiceCallbacks);
                     } catch (RemoteException e) {
                         // Process is crashing.  We will disconnect, and upon reconnect we will
-                        // automatically reload the thumbnails. So nothing to do here.
-                        Log.d(TAG, "loadThumbnail failed with RemoteException uri=" + uri);
+                        // automatically reload the icons. So nothing to do here.
+                        Log.d(TAG, "loadIcon failed with RemoteException uri=" + uri);
                     }
                 }
             }
@@ -451,15 +451,15 @@ public final class MediaBrowser {
                     }
                 }
 
-                for (int i = 0; i < mThumbnailRequests.size(); i++) {
-                    ThumbnailRequest request = mThumbnailRequests.valueAt(i);
+                for (int i = 0; i < mIconRequests.size(); i++) {
+                    IconRequest request = mIconRequests.valueAt(i);
                     try {
-                        mServiceBinder.loadThumbnail(request.mSeq, request.mUri,
+                        mServiceBinder.loadIcon(request.mSeq, request.mUri,
                                 request.mWidth, request.mHeight, mServiceCallbacks);
                     } catch (RemoteException e) {
                         // Process is crashing.  We will disconnect, and upon reconnect we will
                         // automatically reload. So nothing to do here.
-                        Log.d(TAG, "loadThumbnail failed with RemoteException request=" + request);
+                        Log.d(TAG, "loadIcon failed with RemoteException request=" + request);
                     }
                 }
             }
@@ -528,26 +528,26 @@ public final class MediaBrowser {
         });
     }
 
-    private final void onLoadThumbnail(final IMediaBrowserServiceCallbacks callback,
+    private final void onLoadIcon(final IMediaBrowserServiceCallbacks callback,
             final int seqNum, final Bitmap bitmap) {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
                 // Check that there hasn't been a disconnect or a different
                 // ServiceConnection.
-                if (!isCurrent(callback, "onLoadThumbnail")) {
+                if (!isCurrent(callback, "onLoadIcon")) {
                     return;
                 }
 
-                ThumbnailRequest request = mThumbnailRequests.get(seqNum);
+                IconRequest request = mIconRequests.get(seqNum);
                 if (request == null) {
-                    Log.d(TAG, "onLoadThumbnail called for seqNum=" + seqNum + " request="
+                    Log.d(TAG, "onLoadIcon called for seqNum=" + seqNum + " request="
                             + request + " but the request is not registered");
                     return;
                 }
-                mThumbnailRequests.delete(seqNum);
-                for (ThumbnailCallback thumbnailCallback : request.getCallbacks()) {
-                    thumbnailCallback.onThumbnailLoaded(request.mUri, bitmap);
+                mIconRequests.delete(seqNum);
+                for (IconCallback IconCallback : request.getCallbacks()) {
+                    IconCallback.onIconLoaded(request.mUri, bitmap);
                 }
             }
         });
@@ -636,13 +636,13 @@ public final class MediaBrowser {
     }
 
     /**
-     * Callbacks for thumbnail loading.
+     * Callbacks for icon loading.
      */
-    public static abstract class ThumbnailCallback {
+    public static abstract class IconCallback {
         /**
-         * Called when the thumbnail is loaded.
+         * Called when the icon is loaded.
          */
-        public void onThumbnailLoaded(@NonNull Uri uri, @NonNull Bitmap bitmap) {
+        public void onIconLoaded(@NonNull Uri uri, @NonNull Bitmap bitmap) {
         }
 
         /**
@@ -652,38 +652,38 @@ public final class MediaBrowser {
         }
     }
 
-    private static class ThumbnailRequest {
+    private static class IconRequest {
         final int mSeq;
         final Uri mUri;
         final int mWidth;
         final int mHeight;
-        final List<ThumbnailCallback> mCallbacks;
+        final List<IconCallback> mCallbacks;
 
         /**
-         * Constructs a thumbnail request.
+         * Constructs an icon request.
          * @param seq The unique sequence number assigned to the request by the media browser.
-         * @param uri The Uri for the thumbnail.
-         * @param width The width for the thumbnail.
-         * @param height The height for the thumbnail.
+         * @param uri The Uri for the icon.
+         * @param width The width for the icon.
+         * @param height The height for the icon.
          */
-        ThumbnailRequest(int seq, @NonNull Uri uri, int width, int height) {
+        IconRequest(int seq, @NonNull Uri uri, int width, int height) {
             if (uri == null) {
-                throw new IllegalArgumentException("thumbnail uri cannot be null");
+                throw new IllegalArgumentException("Icon uri cannot be null");
             }
             this.mSeq = seq;
             this.mUri = uri;
             this.mWidth = width;
             this.mHeight = height;
-            mCallbacks = new ArrayList<ThumbnailCallback>();
+            mCallbacks = new ArrayList<IconCallback>();
         }
 
         /**
-         * Adds a callback to the thumbnail request.
+         * Adds a callback to the icon request.
          * If the callback already exists, it will not be added again.
          */
-        public void addCallback(@NonNull ThumbnailCallback callback) {
+        public void addCallback(@NonNull IconCallback callback) {
             if (callback == null) {
-                throw new IllegalArgumentException("callback cannot be null in ThumbnailRequest");
+                throw new IllegalArgumentException("callback cannot be null in IconRequest");
             }
             if (!mCallbacks.contains(callback)) {
                 mCallbacks.add(callback);
@@ -691,7 +691,7 @@ public final class MediaBrowser {
         }
 
         /**
-         * Checks if the thumbnail request has the same uri, width, and height as the given values.
+         * Checks if the icon request has the same uri, width, and height as the given values.
          */
         public boolean isSameRequest(@Nullable Uri uri, int width, int height) {
             return Objects.equals(mUri, uri) && mWidth == width && mHeight == height;
@@ -699,7 +699,7 @@ public final class MediaBrowser {
 
         @Override
         public String toString() {
-            final StringBuilder sb = new StringBuilder("ThumbnailRequest{");
+            final StringBuilder sb = new StringBuilder("IconRequest{");
             sb.append("uri=").append(mUri);
             sb.append(", width=").append(mWidth);
             sb.append(", height=").append(mHeight);
@@ -711,7 +711,7 @@ public final class MediaBrowser {
         /**
          * Gets an unmodifiable view of the list of callbacks associated with the request.
          */
-        public List<ThumbnailCallback> getCallbacks() {
+        public List<IconCallback> getCallbacks() {
             return Collections.unmodifiableList(mCallbacks);
         }
     }
@@ -843,10 +843,10 @@ public final class MediaBrowser {
         }
 
         @Override
-        public void onLoadThumbnail(final int seqNum, final Bitmap bitmap) {
+        public void onLoadIcon(final int seqNum, final Bitmap bitmap) {
             MediaBrowser mediaBrowser = mMediaBrowser.get();
             if (mediaBrowser != null) {
-                mediaBrowser.onLoadThumbnail(this, seqNum, bitmap);
+                mediaBrowser.onLoadIcon(this, seqNum, bitmap);
             }
         }
     }

@@ -105,7 +105,7 @@ public abstract class MediaBrowserService extends Service {
      * be thrown.
      *
      * @see MediaBrowserService#onLoadChildren
-     * @see MediaBrowserService#onLoadThumbnail
+     * @see MediaBrowserService#onLoadIcon
      */
     public class Result<T> {
         private Object mDebug;
@@ -266,10 +266,10 @@ public abstract class MediaBrowserService extends Service {
         }
 
         @Override
-        public void loadThumbnail(final int seq, final Uri uri, final int width, final int height,
+        public void loadIcon(final int seq, final Uri uri, final int width, final int height,
                 final IMediaBrowserServiceCallbacks callbacks) {
             if (uri == null) {
-                throw new IllegalStateException("loadThumbnail sent null list for uri " + uri);
+                throw new IllegalStateException("loadIcon sent null list for uri " + uri);
             }
             mHandler.post(new Runnable() {
                 @Override
@@ -291,7 +291,7 @@ public abstract class MediaBrowserService extends Service {
                         void onResultSent(Bitmap bitmap) {
                             if (mConnections.get(connection.callbacks.asBinder()) != connection) {
                                 if (DBG) {
-                                    Log.d(TAG, "Not sending onLoadThumbnail result for connection"
+                                    Log.d(TAG, "Not sending onLoadIcon result for connection"
                                             + " that has been disconnected. pkg=" + connection.pkg
                                             + " uri=" + uri);
                                 }
@@ -299,18 +299,18 @@ public abstract class MediaBrowserService extends Service {
                             }
 
                             try {
-                                callbacks.onLoadThumbnail(seq, bitmap);
+                                callbacks.onLoadIcon(seq, bitmap);
                             } catch (RemoteException e) {
                                 // The other side is in the process of crashing.
-                                Log.w(TAG, "RemoteException in calling onLoadThumbnail", e);
+                                Log.w(TAG, "RemoteException in calling onLoadIcon", e);
                             }
                         }
                     };
 
-                    onLoadThumbnail(uri, width, height, result);
+                    onLoadIcon(uri, width, height, result);
 
                     if (!result.isDone()) {
-                        throw new IllegalStateException("onLoadThumbnail must call detach() or"
+                        throw new IllegalStateException("onLoadIcon must call detach() or"
                                 + " sendResult() before returning for package=" + connection.pkg
                                 + " uri=" + uri);
                     }
@@ -375,7 +375,7 @@ public abstract class MediaBrowserService extends Service {
             @NonNull Result<List<MediaBrowserItem>> result);
 
     /**
-     * Called to get the thumbnail of a particular media item.
+     * Called to get the icon of a particular media item.
      * <p>
      * Implementations must call result.{@link Result#sendResult result.sendResult} with the bitmap.
      * If loading the bitmap will be an expensive operation that should be performed
@@ -387,10 +387,10 @@ public abstract class MediaBrowserService extends Service {
      * @param width The requested width of the icon in dp.
      * @param height The requested height of the icon in dp.
      *
-     * @return The file descriptor of the thumbnail, which may then be loaded
-     *          using a bitmap factory, or null if the item does not have a thumbnail.
+     * @return The file descriptor of the icon, which may then be loaded
+     *          using a bitmap factory, or null if the item does not have an icon.
      */
-    public abstract void onLoadThumbnail(@NonNull Uri uri, int width, int height,
+    public abstract void onLoadIcon(@NonNull Uri uri, int width, int height,
             @NonNull Result<Bitmap> result);
 
     /**
