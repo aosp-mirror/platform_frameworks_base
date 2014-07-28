@@ -19,6 +19,7 @@ package com.android.systemui.statusbar;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.view.MotionEvent;
 import android.view.View;
@@ -46,22 +47,23 @@ public class DragDownHelper implements Gefingerpoken {
     private float mInitialTouchY;
     private boolean mDraggingDown;
     private float mTouchSlop;
-    private OnDragDownListener mOnDragDownListener;
+    private DragDownCallback mDragDownCallback;
     private View mHost;
     private final int[] mTemp2 = new int[2];
     private boolean mDraggedFarEnough;
     private ExpandableView mStartingChild;
     private Interpolator mInterpolator;
+    private float mLastHeight;
 
     public DragDownHelper(Context context, View host, ExpandHelper.Callback callback,
-            OnDragDownListener onDragDownListener) {
+            DragDownCallback dragDownCallback) {
         mMinDragDistance = context.getResources().getDimensionPixelSize(
                 R.dimen.keyguard_drag_down_min_distance);
         mInterpolator =
                 AnimationUtils.loadInterpolator(context, android.R.interpolator.fast_out_slow_in);
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
         mCallback = callback;
-        mOnDragDownListener = onDragDownListener;
+        mDragDownCallback = dragDownCallback;
         mHost = host;
     }
 
@@ -86,7 +88,7 @@ public class DragDownHelper implements Gefingerpoken {
                     captureStartingChild(mInitialTouchX, mInitialTouchY);
                     mInitialTouchY = y;
                     mInitialTouchX = x;
-                    mOnDragDownListener.onTouchSlopExceeded();
+                    mDragDownCallback.onTouchSlopExceeded();
                     return true;
                 }
                 break;
@@ -104,29 +106,32 @@ public class DragDownHelper implements Gefingerpoken {
 
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_MOVE:
-                final float h = y - mInitialTouchY;
+                mLastHeight = y - mInitialTouchY;
                 captureStartingChild(mInitialTouchX, mInitialTouchY);
                 if (mStartingChild != null) {
-                    handleExpansion(h, mStartingChild);
+                    handleExpansion(mLastHeight, mStartingChild);
+                } else {
+                    mDragDownCallback.setEmptyDragAmount(mLastHeight);
                 }
-                if (h > mMinDragDistance) {
+                if (mLastHeight > mMinDragDistance) {
                     if (!mDraggedFarEnough) {
                         mDraggedFarEnough = true;
-                        mOnDragDownListener.onThresholdReached();
+                        mDragDownCallback.onThresholdReached();
                     }
                 } else {
                     if (mDraggedFarEnough) {
                         mDraggedFarEnough = false;
-                        mOnDragDownListener.onDragDownReset();
+                        mDragDownCallback.onDragDownReset();
                     }
                 }
                 return true;
             case MotionEvent.ACTION_UP:
-                if (mDraggedFarEnough) {
+                if (mDraggedFarEnough && mDragDownCallback.onDraggedDown(mStartingChild)) {
                     if (mStartingChild != null) {
                         mCallback.setUserLockedChild(mStartingChild, false);
+                    } else {
+                        mDragDownCallback.setEmptyDragAmount(0f);
                     }
-                    mOnDragDownListener.onDraggedDown(mStartingChild);
                     mDraggingDown = false;
                 } else {
                     stopDragging();
@@ -183,12 +188,27 @@ public class DragDownHelper implements Gefingerpoken {
         anim.start();
     }
 
+    private void cancelExpansion() {
+        ValueAnimator anim = ValueAnimator.ofFloat(mLastHeight, 0);
+        anim.setInterpolator(mInterpolator);
+        anim.setDuration(SPRING_BACK_ANIMATION_LENGTH_MS);
+        anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                mDragDownCallback.setEmptyDragAmount((Float) animation.getAnimatedValue());
+            }
+        });
+        anim.start();
+    }
+
     private void stopDragging() {
         if (mStartingChild != null) {
             cancelExpansion(mStartingChild);
+        } else {
+            cancelExpansion();
         }
         mDraggingDown = false;
-        mOnDragDownListener.onDragDownReset();
+        mDragDownCallback.onDragDownReset();
     }
 
     private ExpandableView findView(float x, float y) {
@@ -198,10 +218,15 @@ public class DragDownHelper implements Gefingerpoken {
         return mCallback.getChildAtRawPosition(x, y);
     }
 
-    public interface OnDragDownListener {
-        void onDraggedDown(View startingChild);
+    public interface DragDownCallback {
+
+        /**
+         * @return true if the interaction is accepted, false if it should be cancelled
+         */
+        boolean onDraggedDown(View startingChild);
         void onDragDownReset();
         void onThresholdReached();
         void onTouchSlopExceeded();
+        void setEmptyDragAmount(float amount);
     }
 }
