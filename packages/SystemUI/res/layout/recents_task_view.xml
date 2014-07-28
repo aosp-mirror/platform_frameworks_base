@@ -57,31 +57,27 @@
             android:layout_height="48dp"
             android:layout_marginEnd="4dp"
             android:layout_gravity="center_vertical|end"
-            android:padding="18dp"
+            android:padding="12dp"
             android:background="@drawable/recents_button_bg"
             android:visibility="invisible"
             android:src="@drawable/recents_dismiss_light" />
     </com.android.systemui.recents.views.TaskBarView>
-    <com.android.systemui.recents.views.TaskFooterView
-        android:id="@+id/lock_to_app"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/recents_task_view_lock_to_app_button_height"
-        android:layout_gravity="center_horizontal|bottom"
+    <FrameLayout
+        android:id="@+id/lock_to_app_fab"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="bottom|right"
+        android:layout_marginRight="15dp"
+        android:layout_marginBottom="15dp"
+        android:translationZ="50dp"
+        android:contentDescription="@string/recents_lock_to_app_button_label"
         android:background="@drawable/recents_lock_to_task_button_bg">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_gravity="center_horizontal"
-            android:gravity="center"
-            android:drawableLeft="@drawable/ic_lock_to_app_24dp"
-            android:drawablePadding="8dp"
-            android:textSize="16sp"
-            android:textColor="@color/recents_task_view_lock_to_app_button_color"
-            android:text="@string/recents_lock_to_app_button_label"
-            android:fontFamily="sans-serif-medium"
-            android:singleLine="true"
-            android:textAllCaps="true" />
-    </com.android.systemui.recents.views.TaskFooterView>
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center"
+            android:src="@drawable/recents_lock_to_app_pin" />
+    </FrameLayout>
 </com.android.systemui.recents.views.TaskView>
 
 

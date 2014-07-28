@@ -17,7 +17,6 @@
 package com.android.systemui.recents.model;
 
 import com.android.systemui.recents.Constants;
-import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.misc.NamedCounter;
 
 import java.util.ArrayList;

@@ -15,6 +15,6 @@
 -->
 
 <ripple xmlns:android="http://schemas.android.com/apk/res/android"
-     android:color="#ffdadada">
-    <item android:drawable="@color/recents_task_view_lock_to_app_button_background_color" />
+     android:color="#ff9cdfd9">
+    <item android:drawable="@drawable/btn_fab_recents" />
 </ripple>
