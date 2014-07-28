@@ -238,20 +238,13 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
 
         switch (event.status) {
             case SoundTrigger.RECOGNITION_STATUS_SUCCESS:
-                // TODO: Pass the captured audio back.
                 try {
-                    listener.onDetected(null);
+                    listener.onDetected(event);
                 } catch (RemoteException e) {
                     Slog.w(TAG, "RemoteException in onDetected");
                 }
                 break;
-            case SoundTrigger.RECOGNITION_STATUS_ABORT:
-                try {
-                    listener.onDetectionStopped();
-                } catch (RemoteException e) {
-                    Slog.w(TAG, "RemoteException in onDetectionStopped");
-                }
-                break;
+            case SoundTrigger.RECOGNITION_STATUS_ABORT: // fall-through
             case SoundTrigger.RECOGNITION_STATUS_FAILURE:
                 try {
                     listener.onDetectionStopped();

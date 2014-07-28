@@ -194,6 +194,14 @@ static void android_os_Parcel_writeBlob(JNIEnv* env, jclass clazz, jlong nativeP
         return;
     }
 
+    if (data == NULL) {
+        const status_t err = parcel->writeInt32(-1);
+        if (err != NO_ERROR) {
+            signalExceptionForError(env, clazz, err);
+        }
+        return;
+    }
+
     const status_t err = parcel->writeInt32(length);
     if (err != NO_ERROR) {
         signalExceptionForError(env, clazz, err);
