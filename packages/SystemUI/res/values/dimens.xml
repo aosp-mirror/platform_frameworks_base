@@ -353,6 +353,9 @@
     <!-- The padding bottom of the clock group when QS is expanded. -->
     <dimen name="clock_expanded_bottom_margin">20dp</dimen>
 
+    <!-- The padding bottom of the clock group when QS is collapsed. -->
+    <dimen name="clock_collapsed_bottom_margin">10dp</dimen>
+
     <!-- The width of the multi user switch on keyguard and collapsed QS header. -->
     <dimen name="multi_user_switch_width_collapsed">34dp</dimen>
 

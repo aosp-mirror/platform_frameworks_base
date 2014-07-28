@@ -71,6 +71,11 @@ public class KeyguardStatusView extends GridLayout {
         public void onScreenTurnedOff(int why) {
             setEnableMarquee(false);
         }
+
+        @Override
+        public void onUserSwitchComplete(int userId) {
+            refresh();
+        }
     };
 
     public KeyguardStatusView(Context context) {
@@ -110,7 +115,8 @@ public class KeyguardStatusView extends GridLayout {
     }
 
     protected void refresh() {
-        Patterns.update(mContext);
+        AlarmClockInfo nextAlarm = mLockPatternUtils.getNextAlarm();
+        Patterns.update(mContext, nextAlarm != null);
 
         mDateView.setFormat24Hour(Patterns.dateView);
         mDateView.setFormat12Hour(Patterns.dateView);
@@ -118,25 +124,23 @@ public class KeyguardStatusView extends GridLayout {
         mClockView.setFormat12Hour(Patterns.clockView12);
         mClockView.setFormat24Hour(Patterns.clockView24);
 
-        refreshAlarmStatus();
+        refreshAlarmStatus(nextAlarm);
     }
 
-    void refreshAlarmStatus() {
-        // Update Alarm status
-        AlarmClockInfo nextAlarm = mLockPatternUtils.getNextAlarm();
+    void refreshAlarmStatus(AlarmClockInfo nextAlarm) {
         if (nextAlarm != null) {
-            mAlarmStatusView.setText(formatNextAlarm(nextAlarm));
+            mAlarmStatusView.setText(formatNextAlarm(mContext, nextAlarm));
             mAlarmStatusView.setVisibility(View.VISIBLE);
         } else {
             mAlarmStatusView.setVisibility(View.GONE);
         }
     }
 
-    String formatNextAlarm(AlarmClockInfo info) {
+    public static String formatNextAlarm(Context context, AlarmClockInfo info) {
         if (info == null) {
             return "";
         }
-        String skeleton = DateFormat.is24HourFormat(mContext) ? "EHm" : "Ehma";
+        String skeleton = DateFormat.is24HourFormat(context) ? "EHm" : "Ehma";
         String pattern = DateFormat.getBestDateTimePattern(Locale.getDefault(), skeleton);
         return DateFormat.format(pattern, info.getTriggerTime()).toString();
     }
@@ -191,10 +195,12 @@ public class KeyguardStatusView extends GridLayout {
         static String clockView24;
         static String cacheKey;
 
-        static void update(Context context) {
+        static void update(Context context, boolean hasAlarm) {
             final Locale locale = Locale.getDefault();
             final Resources res = context.getResources();
-            final String dateViewSkel = res.getString(R.string.abbrev_wday_month_day_no_year);
+            final String dateViewSkel = res.getString(hasAlarm
+                    ? R.string.abbrev_wday_month_day_no_year_alarm
+                    : R.string.abbrev_wday_month_day_no_year);
             final String clockView12Skel = res.getString(R.string.clock_12hr_format);
             final String clockView24Skel = res.getString(R.string.clock_24hr_format);
             final String key = locale.toString() + dateViewSkel + clockView12Skel + clockView24Skel;
