@@ -32,9 +32,7 @@ import android.os.UserHandle;
 import android.util.Pair;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.ViewStub;
-import android.widget.FrameLayout;
 import android.widget.Toast;
 import com.android.systemui.R;
 import com.android.systemui.recents.misc.DebugTrigger;
@@ -58,7 +56,8 @@ import java.util.ArrayList;
  * The main Recents activity that is started from AlternateRecentsComponent.
  */
 public class RecentsActivity extends Activity implements RecentsView.RecentsViewCallbacks,
-        RecentsAppWidgetHost.RecentsAppWidgetHostCallbacks {
+        RecentsAppWidgetHost.RecentsAppWidgetHostCallbacks,
+        DebugOverlayView.DebugOverlayViewCallbacks {
 
     // Actions and Extras sent from AlternateRecentsComponent
     final static String EXTRA_TRIGGERED_FROM_ALT_TAB = "extra_triggered_from_alt_tab";
@@ -73,6 +72,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     RecentsView mRecentsView;
     SystemBarScrimViews mScrimViews;
     ViewStub mEmptyViewStub;
+    ViewStub mDebugOverlayStub;
     View mEmptyView;
     DebugOverlayView mDebugOverlay;
 
@@ -368,6 +368,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                 View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
                 View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
         mEmptyViewStub = (ViewStub) findViewById(R.id.empty_view_stub);
+        mDebugOverlayStub = (ViewStub) findViewById(R.id.debug_overlay_stub);
         mScrimViews = new SystemBarScrimViews(this, mConfig);
         inflateDebugOverlay();
 
@@ -405,12 +406,9 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     /** Inflates the debug overlay if debug mode is enabled. */
     void inflateDebugOverlay() {
         if (mConfig.debugModeEnabled && mDebugOverlay == null) {
-            ViewGroup parent = (ViewGroup) findViewById(android.R.id.content).getRootView();
-            mDebugOverlay = new DebugOverlayView(this);
-            FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
-                            ViewGroup.LayoutParams.MATCH_PARENT,
-                            ViewGroup.LayoutParams.MATCH_PARENT);
-            parent.addView(mDebugOverlay, lp);
+            // Inflate the overlay and seek bars
+            mDebugOverlay = (DebugOverlayView) mDebugOverlayStub.inflate();
+            mDebugOverlay.setCallbacks(this);
             mRecentsView.setDebugOverlay(mDebugOverlay);
         }
     }
@@ -598,5 +596,17 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     public void refreshSearchWidget() {
         bindSearchBarAppWidget();
         addSearchBarAppWidgetView();
+    }
+
+    /**** DebugOverlayView.DebugOverlayViewCallbacks ****/
+
+    @Override
+    public void onPrimarySeekBarChanged(float progress) {
+        // Do nothing
+    }
+
+    @Override
+    public void onSecondarySeekBarChanged(float progress) {
+        // Do nothing
     }
 }
