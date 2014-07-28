@@ -38,6 +38,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Point;
@@ -187,6 +188,7 @@ public class DirectoryFragment extends Fragment {
     public View onCreateView(
             LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final Context context = inflater.getContext();
+        final Resources res = context.getResources();
         final View view = inflater.inflate(R.layout.fragment_directory, container, false);
 
         mEmptyView = view.findViewById(android.R.id.empty);
@@ -195,6 +197,16 @@ public class DirectoryFragment extends Fragment {
         mListView.setOnItemClickListener(mItemListener);
         mListView.setMultiChoiceModeListener(mMultiListener);
         mListView.setRecyclerListener(mRecycleListener);
+
+        // Indent our list divider to align with text
+        final Drawable divider = mListView.getDivider();
+        final boolean insetLeft = res.getBoolean(R.bool.list_divider_inset_left);
+        final int insetSize = res.getDimensionPixelSize(R.dimen.list_divider_inset);
+        if (insetLeft) {
+            mListView.setDivider(new InsetDrawable(divider, insetSize, 0, 0, 0));
+        } else {
+            mListView.setDivider(new InsetDrawable(divider, 0, 0, insetSize, 0));
+        }
 
         mGridView = (GridView) view.findViewById(R.id.grid);
         mGridView.setOnItemClickListener(mItemListener);
@@ -693,11 +705,11 @@ public class DirectoryFragment extends Fragment {
             if (extras != null) {
                 final String info = extras.getString(DocumentsContract.EXTRA_INFO);
                 if (info != null) {
-                    mFooters.add(new MessageFooter(2, R.drawable.ic_dialog_info, info));
+                    mFooters.add(new MessageFooter(2, R.drawable.ic_dialog_info_dark, info));
                 }
                 final String error = extras.getString(DocumentsContract.EXTRA_ERROR);
                 if (error != null) {
-                    mFooters.add(new MessageFooter(3, R.drawable.ic_dialog_alert, error));
+                    mFooters.add(new MessageFooter(3, R.drawable.ic_dialog_alert_dark, error));
                 }
                 if (extras.getBoolean(DocumentsContract.EXTRA_LOADING, false)) {
                     mFooters.add(new LoadingFooter());
@@ -706,7 +718,7 @@ public class DirectoryFragment extends Fragment {
 
             if (result != null && result.exception != null) {
                 mFooters.add(new MessageFooter(
-                        3, R.drawable.ic_dialog_alert, getString(R.string.query_error)));
+                        3, R.drawable.ic_dialog_alert_dark, getString(R.string.query_error)));
             }
 
             if (isEmpty()) {
@@ -748,21 +760,6 @@ public class DirectoryFragment extends Fragment {
                     convertView = inflater.inflate(R.layout.item_doc_list, parent, false);
                 } else if (state.derivedMode == MODE_GRID) {
                     convertView = inflater.inflate(R.layout.item_doc_grid, parent, false);
-
-                    // Apply padding to grid items
-                    final FrameLayout grid = (FrameLayout) convertView;
-                    final int gridPadding = getResources()
-                            .getDimensionPixelSize(R.dimen.grid_padding);
-
-                    // Tricksy hobbitses! We need to fully clear the drawable so
-                    // the view doesn't clobber the new InsetDrawable callback
-                    // when setting back later.
-                    final Drawable fg = grid.getForeground();
-                    final Drawable bg = grid.getBackground();
-                    grid.setForeground(null);
-                    grid.setBackground(null);
-                    grid.setForeground(new InsetDrawable(fg, gridPadding));
-                    grid.setBackground(new InsetDrawable(bg, gridPadding));
                 } else {
                     throw new IllegalStateException();
                 }
@@ -882,7 +879,8 @@ public class DirectoryFragment extends Fragment {
                 // hint to remind user they're a directory.
                 if (Document.MIME_TYPE_DIR.equals(docMimeType) && state.derivedMode == MODE_GRID
                         && showThumbnail) {
-                    iconDrawable = context.getResources().getDrawable(R.drawable.ic_root_folder);
+                    iconDrawable = context.getResources().getDrawable(
+                            R.drawable.ic_root_folder_dark);
                 }
 
                 if (summary != null) {
