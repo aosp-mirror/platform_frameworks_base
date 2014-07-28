@@ -225,20 +225,21 @@ public final class ScanRecord {
                         txPowerLevel = scanRecord[currentPos];
                         break;
                     case DATA_TYPE_SERVICE_DATA:
-                        serviceData = extractBytes(scanRecord, currentPos, dataLength);
-                        // The first two bytes of the service data are service data UUID.
+                        // The first two bytes of the service data are service data UUID in little
+                        // endian. The rest bytes are service data.
                         int serviceUuidLength = BluetoothUuid.UUID_BYTES_16_BIT;
                         byte[] serviceDataUuidBytes = extractBytes(scanRecord, currentPos,
                                 serviceUuidLength);
                         serviceDataUuid = BluetoothUuid.parseUuidFrom(serviceDataUuidBytes);
+                        serviceData = extractBytes(scanRecord, currentPos + 2, dataLength - 2);
                         break;
                     case DATA_TYPE_MANUFACTURER_SPECIFIC_DATA:
-                        manufacturerSpecificData = extractBytes(scanRecord, currentPos,
-                                dataLength);
                         // The first two bytes of the manufacturer specific data are
                         // manufacturer ids in little endian.
-                        manufacturerId = ((manufacturerSpecificData[1] & 0xFF) << 8) +
-                                (manufacturerSpecificData[0] & 0xFF);
+                        manufacturerId = ((scanRecord[currentPos + 1] & 0xFF) << 8) +
+                                (scanRecord[currentPos] & 0xFF);
+                        manufacturerSpecificData = extractBytes(scanRecord, currentPos + 2,
+                                dataLength - 2);
                         break;
                     default:
                         // Just ignore, we don't handle such data type.

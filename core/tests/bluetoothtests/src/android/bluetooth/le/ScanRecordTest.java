@@ -27,8 +27,7 @@ import java.util.Arrays;
 /**
  * Unit test cases for {@link ScanRecord}.
  * <p>
- * To run this test, use adb shell am instrument -e class
- * 'android.bluetooth.ScanRecordTest' -w
+ * To run this test, use adb shell am instrument -e class 'android.bluetooth.ScanRecordTest' -w
  * 'com.android.bluetooth.tests/android.bluetooth.BluetoothTestRunner'
  */
 public class ScanRecordTest extends TestCase {
@@ -54,13 +53,13 @@ public class ScanRecordTest extends TestCase {
         assertEquals("Ped", data.getDeviceName());
         assertEquals(-20, data.getTxPowerLevel());
 
-        assertEquals(224, data.getManufacturerId());
+        assertEquals(0x00e0, data.getManufacturerId());
         assertArrayEquals(new byte[] {
-                (byte) 0xe0, 0x00, 0x02, 0x15 }, data.getManufacturerSpecificData());
+                0x02, 0x15 }, data.getManufacturerSpecificData());
 
         assertEquals(uuid2, data.getServiceDataUuid());
         assertArrayEquals(new byte[] {
-                0x0b, 0x11, 0x50, 0x64 }, data.getServiceData());
+                0x50, 0x64 }, data.getServiceData());
     }
 
     // Assert two byte arrays are equal.

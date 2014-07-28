@@ -107,7 +107,7 @@ public final class ScanFilter implements Parcelable {
                 dest.writeParcelable(mServiceUuidMask, flags);
             }
         }
-        dest.writeInt(mServiceDataUuid == null? 0 : 1);
+        dest.writeInt(mServiceDataUuid == null ? 0 : 1);
         if (mServiceDataUuid != null) {
             dest.writeParcelable(mServiceDataUuid, flags);
             dest.writeInt(mServiceData == null ? 0 : mServiceData.length);
@@ -235,6 +235,14 @@ public final class ScanFilter implements Parcelable {
     }
 
     /**
+     * @hide
+     */
+    @Nullable
+    public ParcelUuid getServiceDataUuid() {
+        return mServiceDataUuid;
+    }
+
+    /**
      * Returns the manufacturer id. -1 if the manufacturer filter is not set.
      */
     public int getManufacturerId() {
@@ -287,15 +295,21 @@ public final class ScanFilter implements Parcelable {
         }
 
         // Service data match
-        if (mServiceData != null &&
-                !matchesPartialData(mServiceData, mServiceDataMask, scanRecord.getServiceData())) {
-            return false;
+        if (mServiceData != null) {
+            if (!Objects.equals(mServiceDataUuid, scanRecord.getServiceDataUuid()) ||
+                    !matchesPartialData(mServiceData, mServiceDataMask,
+                            scanRecord.getServiceData())) {
+                return false;
+            }
         }
 
         // Manufacturer data match.
-        if (mManufacturerData != null && !matchesPartialData(mManufacturerData,
-                mManufacturerDataMask, scanRecord.getManufacturerSpecificData())) {
-            return false;
+        if (mManufacturerData != null) {
+            if (mManufacturerId != scanRecord.getManufacturerId() ||
+                    !matchesPartialData(mManufacturerData,
+                            mManufacturerDataMask, scanRecord.getManufacturerSpecificData())) {
+                return false;
+            }
         }
         // All filters match.
         return true;
@@ -353,7 +367,8 @@ public final class ScanFilter implements Parcelable {
     public String toString() {
         return "BluetoothLeScanFilter [mDeviceName=" + mDeviceName + ", mDeviceAddress="
                 + mDeviceAddress
-                + ", mUuid=" + mServiceUuid + ", mUuidMask=" + mServiceUuidMask + ", mServiceData="
+                + ", mUuid=" + mServiceUuid + ", mUuidMask=" + mServiceUuidMask
+                + ", mServiceDataUuid=" + Objects.toString(mServiceDataUuid) + ", mServiceData="
                 + Arrays.toString(mServiceData) + ", mServiceDataMask="
                 + Arrays.toString(mServiceDataMask) + ", mManufacturerId=" + mManufacturerId
                 + ", mManufacturerData=" + Arrays.toString(mManufacturerData)
@@ -363,7 +378,7 @@ public final class ScanFilter implements Parcelable {
     @Override
     public int hashCode() {
         return Objects.hash(mDeviceName, mDeviceAddress, mManufacturerId, mManufacturerData,
-                mManufacturerDataMask, mServiceData, mServiceDataMask,
+                mManufacturerDataMask, mServiceDataUuid, mServiceData, mServiceDataMask,
                 mServiceUuid, mServiceUuidMask);
     }
 
@@ -381,6 +396,7 @@ public final class ScanFilter implements Parcelable {
                         mManufacturerId == other.mManufacturerId &&
                 Objects.deepEquals(mManufacturerData, other.mManufacturerData) &&
                 Objects.deepEquals(mManufacturerDataMask, other.mManufacturerDataMask) &&
+                Objects.deepEquals(mServiceDataUuid, other.mServiceDataUuid) &&
                 Objects.deepEquals(mServiceData, other.mServiceData) &&
                 Objects.deepEquals(mServiceDataMask, other.mServiceDataMask) &&
                 Objects.equals(mServiceUuid, other.mServiceUuid) &&
@@ -498,6 +514,7 @@ public final class ScanFilter implements Parcelable {
                             "size mismatch for service data and service data mask");
                 }
             }
+            mServiceDataUuid = serviceDataUuid;
             mServiceData = serviceData;
             mServiceDataMask = serviceDataMask;
             return this;
