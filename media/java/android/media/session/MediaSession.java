@@ -16,6 +16,7 @@
 
 package android.media.session;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.PendingIntent;
@@ -42,6 +43,8 @@ import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
@@ -94,6 +97,14 @@ public final class MediaSession {
      * @hide
      */
     public static final int FLAG_EXCLUSIVE_GLOBAL_PRIORITY = 1 << 16;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true, value = {
+            FLAG_HANDLES_MEDIA_BUTTONS,
+            FLAG_HANDLES_TRANSPORT_CONTROLS,
+            FLAG_EXCLUSIVE_GLOBAL_PRIORITY })
+    public @interface SessionFlags { }
 
     /**
      * The session uses local playback.
@@ -256,7 +267,7 @@ public final class MediaSession {
      *
      * @param flags The flags to set for this session.
      */
-    public void setFlags(int flags) {
+    public void setFlags(@SessionFlags int flags) {
         try {
             mBinder.setFlags(flags);
         } catch (RemoteException e) {
