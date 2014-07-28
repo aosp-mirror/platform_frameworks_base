@@ -11,7 +11,7 @@
 
         <activity
             android:name=".DocumentsActivity"
-            android:theme="@style/Theme"
+            android:theme="@style/DocumentsTheme"
             android:icon="@drawable/ic_doc_text">
             <intent-filter>
                 <action android:name="android.intent.action.OPEN_DOCUMENT" />

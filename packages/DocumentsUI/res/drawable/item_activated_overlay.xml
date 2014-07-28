@@ -14,12 +14,12 @@
      limitations under the License.
 -->
 
-<resources xmlns:android="http://schemas.android.com/apk/res/android">
-    <style name="Theme" parent="@android:style/Theme.DeviceDefault.Light">
-        <item name="android:actionOverflowButtonStyle">@style/DarkerOverflow</item>
-        <item name="android:windowBackground">@*android:drawable/dialog_full_holo_light</item>
-        <item name="android:colorBackgroundCacheHint">@null</item>
-        <item name="android:windowIsTranslucent">true</item>
-        <item name="android:windowAnimationStyle">@*android:style/Animation.DeviceDefault.Dialog</item>
-    </style>
-</resources>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_focused="true" android:state_activated="true">
+        <color android:color="@color/accent_color_overlay" />
+    </item>
+    <item android:state_focused="false" android:state_activated="true">
+        <color android:color="@color/accent_color_overlay" />
+    </item>
+    <item android:drawable="@android:color/transparent" />
+</selector>
