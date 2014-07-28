@@ -23,10 +23,15 @@ import android.os.Parcel;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.net.URL;
 import javax.net.SocketFactory;
+
+import com.android.okhttp.HostResolver;
+import com.android.okhttp.OkHttpClient;
 
 /**
  * Identifies a {@code Network}.  This is supplied to applications via
@@ -44,7 +49,11 @@ public class Network implements Parcelable {
      */
     public final int netId;
 
+    // Objects used to perform per-network operations such as getSocketFactory
+    // and getBoundURL, and a lock to protect access to them.
     private NetworkBoundSocketFactory mNetworkBoundSocketFactory = null;
+    private OkHttpClient mOkHttpClient = null;
+    private Object mLock = new Object();
 
     /**
      * @hide
@@ -166,10 +175,36 @@ public class Network implements Parcelable {
      *         {@code Network}.
      */
     public SocketFactory getSocketFactory() {
-        if (mNetworkBoundSocketFactory == null) {
-            mNetworkBoundSocketFactory = new NetworkBoundSocketFactory(netId);
+        synchronized (mLock) {
+            if (mNetworkBoundSocketFactory == null) {
+                mNetworkBoundSocketFactory = new NetworkBoundSocketFactory(netId);
+            }
         }
         return mNetworkBoundSocketFactory;
+    }
+
+    /**
+     * Returns a {@link URL} based on the given URL but bound to this {@code Network}.
+     * Note that if this {@code Network} ever disconnects, this factory and any URL object it
+     * produced in the past or future will cease to work.
+     *
+     * @return a {@link URL} bound to this {@code Network}.
+     */
+    public URL getBoundURL(URL url) throws MalformedURLException {
+        synchronized (mLock) {
+            if (mOkHttpClient == null) {
+                HostResolver hostResolver = new HostResolver() {
+                    @Override
+                    public InetAddress[] getAllByName(String host) throws UnknownHostException {
+                        return Network.this.getAllByName(host);
+                    }
+                };
+                mOkHttpClient = new OkHttpClient()
+                        .setSocketFactory(getSocketFactory())
+                        .setHostResolver(hostResolver);
+            }
+        }
+        return new URL(url, "", mOkHttpClient.createURLStreamHandler(url.getProtocol()));
     }
 
     // implement the Parcelable interface
