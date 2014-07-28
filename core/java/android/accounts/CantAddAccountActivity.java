@@ -19,7 +19,6 @@ package android.accounts;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.TextView;
 
 import com.android.internal.R;
 
@@ -29,25 +28,11 @@ import com.android.internal.R;
  */
 public class CantAddAccountActivity extends Activity {
     public static final String EXTRA_ERROR_CODE = "android.accounts.extra.ERROR_CODE";
-    public static final int MISSING = -1;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.app_not_authorized);
-
-        int errorCode = getIntent().getIntExtra(EXTRA_ERROR_CODE, MISSING);
-        if (errorCode != MISSING) {
-            TextView errorText = (TextView) findViewById(R.id.description);
-            switch (errorCode) {
-                case AccountManager.ERROR_CODE_USER_RESTRICTED:
-                    errorText.setText(R.string.app_no_restricted_accounts);
-                    break;
-                default:
-                    // TODO: Get better message. See: http://b/14642886
-                    errorText.setText(R.string.error_message_title);
-            }
-        }
     }
 
     public void onCancelButtonClicked(View view) {
