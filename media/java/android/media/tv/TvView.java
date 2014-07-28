@@ -484,8 +484,8 @@ public class TvView extends ViewGroup {
     }
 
     @Override
-    public void setVisibility(int visibility) {
-        super.setVisibility(visibility);
+    protected void onVisibilityChanged(View changedView, int visibility) {
+        super.onVisibilityChanged(changedView, visibility);
         mSurfaceView.setVisibility(visibility);
         if (visibility == View.VISIBLE) {
             createSessionOverlayView();
