@@ -25,16 +25,18 @@
     <string name="label_paper_size_summary" msgid="5668204981332138168">"कागजको आकार:"</string>
     <string name="label_color" msgid="1108690305218188969">"रङ्ग"</string>
     <string name="label_orientation" msgid="2853142581990496477">"अभिमुखिकरण"</string>
-    <string name="label_pages" msgid="6300874667546617333">"पृष्ठहरू (<xliff:g id="PAGE_COUNT">%1$s</xliff:g>)"</string>
+    <string name="label_pages" msgid="7768589729282182230">"पृष्ठहरू"</string>
+    <string name="template_all_pages" msgid="3322235982020148762">"सबै <xliff:g id="PAGE_COUNT">%1$s</xliff:g>"</string>
+    <string name="template_page_range" msgid="428638530038286328">"<xliff:g id="PAGE_COUNT">%1$s</xliff:g> को सीमा"</string>
     <string name="pages_range_example" msgid="8558694453556945172">"उदाहरण १-५,८,११-१३"</string>
     <string name="print_preview" msgid="8010217796057763343">"प्रिन्ट पूर्वावलोकन"</string>
     <string name="install_for_print_preview" msgid="6366303997385509332">"पूर्वावलोकनको लागि PDF भ्यूअर स्थापना गर्नुहोस्"</string>
     <string name="printing_app_crashed" msgid="854477616686566398">"मुद्रण अनुप्रयोग क्र्यास भयो"</string>
-    <string name="page_count_unknown" msgid="6058852665954511124">"पृष्ठहरू"</string>
     <string name="generating_print_job" msgid="3119608742651698916">"प्रिन्ट कार्य निर्माण गरिँदै"</string>
     <string name="save_as_pdf" msgid="5718454119847596853">"PDF को रूपमा सुरक्षित गर्नुहोस्"</string>
     <string name="all_printers" msgid="5018829726861876202">"सबै प्रिन्टरहरू..."</string>
     <string name="print_dialog" msgid="32628687461331979">"सम्वाद छाप्नुहोस्"</string>
+    <string name="current_page_template" msgid="1386638343571771292">"<xliff:g id="CURRENT_PAGE">%1$d</xliff:g> /<xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
     <string name="search" msgid="5421724265322228497">"खोज्नुहोस्"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"सबै प्रिन्टरहरू"</string>
     <string name="add_print_service_label" msgid="5356702546188981940">"सेवा थप्नुहोस्"</string>
@@ -71,13 +73,9 @@
     <item msgid="4061931020926489228">"पोट्रेट"</item>
     <item msgid="3199660090246166812">"परिदृश्य"</item>
   </string-array>
-  <string-array name="page_options_labels">
-    <item msgid="7421377442011699994">"सबै"</item>
-    <item msgid="6812869625222503603">"दायरा"</item>
-  </string-array>
     <string name="print_write_error_message" msgid="5787642615179572543">"फाइलमा लेख्न सकिएन"</string>
-    <string name="print_error_default_message" msgid="8568506918983980567">"मुद्रण कार्य उत्पन्न गर्न सकेन"</string>
+    <string name="print_error_default_message" msgid="8602678405502922346">"माफ गर्नुहोस्, त्यसले काम गरेन। पुनः प्रयास गर्नुहोस्।"</string>
     <string name="print_error_retry" msgid="1426421728784259538">"पुनःप्रयास गर्नुहोस्"</string>
-    <string name="print_error_printer_unavailable" msgid="6653128543854282851">"प्रिन्टर अनुपलब्ध"</string>
-    <string name="print_operation_canceling" msgid="5274571823242489160">"रद्द गर्दै..."</string>
+    <string name="print_error_printer_unavailable" msgid="8985614415253203381">"यो प्रिन्टर अहिले उपलब्ध छैन।"</string>
+    <string name="print_preparing_preview" msgid="3939930735671364712">"पूर्वावलोकन तयारी..."</string>
 </resources>

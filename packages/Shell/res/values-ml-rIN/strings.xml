@@ -18,7 +18,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"ഷെൽ"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"ബഗ് റിപ്പോർട്ട് ക്യാപ്‌ചർ ചെയ്‌തു"</string>
-    <string name="bugreport_finished_text" msgid="3559904746859400732">"നിങ്ങളുടെ ബഗ് റിപ്പോർട്ട് പങ്കിടാൻ സ്‌പർശിക്കുക"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"നിങ്ങളുടെ ബഗ് റിപ്പോർട്ട് പങ്കിടുന്നതിന് ഇടത്തേയ്‌ക്ക് സ്വൈപ്പുചെയ്യുക"</string>
+    <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"നിങ്ങളുടെ ബഗ് റിപ്പോർട്ട് പങ്കിടാൻ സ്‌പർശിക്കുക"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"വ്യക്തിഗതവും സ്വകാര്യവുമായ വിവരങ്ങൾ ഉൾപ്പെടെ, സിസ്റ്റത്തിന്റെ നിരവധി ലോഗ് ഫയലുകളിൽ നിന്നുള്ള ഡാറ്റ, ബഗ് റിപ്പോർട്ടുകളിൽ അടങ്ങിയിരിക്കുന്നു. നിങ്ങൾ വിശ്വസിക്കുന്ന അപ്ലിക്കേഷനുകൾക്കും ആളുകൾക്കും മാത്രം ബഗ് റിപ്പോർട്ടുകൾ പങ്കിടുക."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"ഈ സന്ദേശം അടുത്ത തവണ ദൃശ്യമാക്കുക"</string>
 </resources>

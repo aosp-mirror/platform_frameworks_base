@@ -18,7 +18,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Shell"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"Laporan pepijat telah ditangkap"</string>
-    <string name="bugreport_finished_text" msgid="3559904746859400732">"Sentuh untuk berkongsi laporan pepijat anda"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Leret ke kiri untuk berkongsi laporan pepijat anda"</string>
+    <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Sentuh untuk berkongsi laporan pepijat anda"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"Laporan pepijat mengandungi data dari pelbagai fail log sistem, termasuk maklumat peribadi dan sulit. Kongsikan laporan pepijat hanya dengan apl dan orang yang anda percayai."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Tunjukkan mesej ini pada masa akan datang"</string>
 </resources>

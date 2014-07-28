@@ -18,7 +18,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Shell"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"تم الحصول على تقرير الأخطاء"</string>
-    <string name="bugreport_finished_text" msgid="3559904746859400732">"المس لمشاركة تقرير الأخطاء"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"مرر بسرعة لليمين لمشاركة تقرير الخطأ"</string>
+    <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"المس لمشاركة تقرير الأخطاء"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"تحتوي تقارير الأخطاء على بيانات من ملفات سجلات النظام المتنوعة، بما في ذلك معلومات شخصية وخاصة. لا تشارك تقارير الأخطاء إلا مع التطبيقات والأشخاص الموثوق بهم."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"إظهار هذه الرسالة في المرة القادمة"</string>
 </resources>

@@ -1052,6 +1052,14 @@ final class ActivityStack {
         next.idle = false;
         next.results = null;
         next.newIntents = null;
+
+        if (next.isHomeActivity() && next.isNotResolverActivity()) {
+            ProcessRecord app = next.task.mActivities.get(0).app;
+            if (app != null && app != mService.mHomeProcess) {
+                mService.mHomeProcess = app;
+            }
+        }
+
         if (next.nowVisible) {
             // We won't get a call to reportActivityVisibleLocked() so dismiss lockscreen now.
             mStackSupervisor.dismissKeyguard();
@@ -2067,6 +2075,8 @@ final class ActivityStack {
         final int rootActivityNdx = task.findEffectiveRootIndex();
         for (int i = numActivities - 1; i > rootActivityNdx; --i ) {
             ActivityRecord target = activities.get(i);
+            if (target.frontOfTask)
+                break;
 
             final int flags = target.info.flags;
             final boolean finishOnTaskLaunch =
@@ -2223,6 +2233,8 @@ final class ActivityStack {
         // Do not operate on or below the effective root Activity.
         for (int i = numActivities - 1; i > rootActivityNdx; --i) {
             ActivityRecord target = activities.get(i);
+            if (target.frontOfTask)
+                break;
 
             final int flags = target.info.flags;
             boolean finishOnTaskLaunch = (flags & ActivityInfo.FLAG_FINISH_ON_TASK_LAUNCH) != 0;

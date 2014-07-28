@@ -25,16 +25,18 @@
     <string name="label_paper_size_summary" msgid="5668204981332138168">"የወረቀት መጠን፦"</string>
     <string name="label_color" msgid="1108690305218188969">"ቀለም"</string>
     <string name="label_orientation" msgid="2853142581990496477">"አቀማመጠ ገፅ"</string>
-    <string name="label_pages" msgid="6300874667546617333">"ገጾች (<xliff:g id="PAGE_COUNT">%1$s</xliff:g>)"</string>
+    <string name="label_pages" msgid="7768589729282182230">"ገፆች"</string>
+    <string name="template_all_pages" msgid="3322235982020148762">"ሁሉም <xliff:g id="PAGE_COUNT">%1$s</xliff:g>"</string>
+    <string name="template_page_range" msgid="428638530038286328">"የ<xliff:g id="PAGE_COUNT">%1$s</xliff:g> ክልል"</string>
     <string name="pages_range_example" msgid="8558694453556945172">"ለምሳሌ፦ 1–5,8,11–13"</string>
     <string name="print_preview" msgid="8010217796057763343">"የህትመት ቅድመ እይታ"</string>
     <string name="install_for_print_preview" msgid="6366303997385509332">"ለቅድመ-እይታ የፒ ዲ ኤፍ መመልከቻ ይጫኑ"</string>
     <string name="printing_app_crashed" msgid="854477616686566398">"የአታሚ መተግበሪያ ተበላሽቷል"</string>
-    <string name="page_count_unknown" msgid="6058852665954511124">"ገፆች"</string>
     <string name="generating_print_job" msgid="3119608742651698916">"የህትመት ስራን በማመንጨት ላይ"</string>
     <string name="save_as_pdf" msgid="5718454119847596853">"እንደ ፒዲኤፍ አስቀምጥ"</string>
     <string name="all_printers" msgid="5018829726861876202">"ሁሉም አታሚዎች…"</string>
     <string name="print_dialog" msgid="32628687461331979">"የህትመት መገናኛ"</string>
+    <string name="current_page_template" msgid="1386638343571771292">"<xliff:g id="CURRENT_PAGE">%1$d</xliff:g> /<xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
     <string name="search" msgid="5421724265322228497">"ፍለጋ"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"ሁሉም አታሚዎች"</string>
     <string name="add_print_service_label" msgid="5356702546188981940">"አገልግሎት አክል"</string>
@@ -71,13 +73,9 @@
     <item msgid="4061931020926489228">"የቁም"</item>
     <item msgid="3199660090246166812">"የወርድ"</item>
   </string-array>
-  <string-array name="page_options_labels">
-    <item msgid="7421377442011699994">"ሁሉም"</item>
-    <item msgid="6812869625222503603">"ምጥጥነ ገጽታ"</item>
-  </string-array>
     <string name="print_write_error_message" msgid="5787642615179572543">"ወደ ፋይል መጻፍ አልተቻለም"</string>
-    <string name="print_error_default_message" msgid="8568506918983980567">"የህትመት ስራን ማመንጨት አልተቻለም"</string>
+    <string name="print_error_default_message" msgid="8602678405502922346">"ይቅርታ፣ ያ አልሰራም። እንደገና ይሞክሩ።"</string>
     <string name="print_error_retry" msgid="1426421728784259538">"እንደገና ይሞክሩ"</string>
-    <string name="print_error_printer_unavailable" msgid="6653128543854282851">"አታሚ አይገኝም"</string>
-    <string name="print_operation_canceling" msgid="5274571823242489160">"በመሰረዝ ላይ…"</string>
+    <string name="print_error_printer_unavailable" msgid="8985614415253203381">"አታሚው አሁን አይገኝም።"</string>
+    <string name="print_preparing_preview" msgid="3939930735671364712">"ቅድመ እይታን በማዘጋጀት ላይ…"</string>
 </resources>

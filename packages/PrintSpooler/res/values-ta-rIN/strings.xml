@@ -25,16 +25,18 @@
     <string name="label_paper_size_summary" msgid="5668204981332138168">"காகித அளவு:"</string>
     <string name="label_color" msgid="1108690305218188969">"வண்ணம்"</string>
     <string name="label_orientation" msgid="2853142581990496477">"திசையமைப்பு"</string>
-    <string name="label_pages" msgid="6300874667546617333">"பக்கங்கள் (<xliff:g id="PAGE_COUNT">%1$s</xliff:g>)"</string>
+    <string name="label_pages" msgid="7768589729282182230">"பக்கங்கள்"</string>
+    <string name="template_all_pages" msgid="3322235982020148762">"எல்லாம்: <xliff:g id="PAGE_COUNT">%1$s</xliff:g>"</string>
+    <string name="template_page_range" msgid="428638530038286328">"வரம்பில்: <xliff:g id="PAGE_COUNT">%1$s</xliff:g>"</string>
     <string name="pages_range_example" msgid="8558694453556945172">"எ.கா. 1—5,8,11—13"</string>
     <string name="print_preview" msgid="8010217796057763343">"அச்சு மாதிரிக்காட்சி"</string>
     <string name="install_for_print_preview" msgid="6366303997385509332">"முன்னோட்டத்திற்காக PDF வியூவரை நிறுவுக"</string>
     <string name="printing_app_crashed" msgid="854477616686566398">"அச்சிடல் பயன்பாடு சிதைவடைந்தது"</string>
-    <string name="page_count_unknown" msgid="6058852665954511124">"பக்கங்கள்"</string>
     <string name="generating_print_job" msgid="3119608742651698916">"அச்சுப் பணியைத் தொடங்குகிறது"</string>
     <string name="save_as_pdf" msgid="5718454119847596853">"PDF ஆக சேமி"</string>
     <string name="all_printers" msgid="5018829726861876202">"எல்லா அச்சுப்பொறிகளும்…"</string>
     <string name="print_dialog" msgid="32628687461331979">"அச்சிடல் செய்தி"</string>
+    <string name="current_page_template" msgid="1386638343571771292">"<xliff:g id="CURRENT_PAGE">%1$d</xliff:g> /<xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
     <string name="search" msgid="5421724265322228497">"தேடு"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"எல்லா அச்சுப்பொறிகளும்"</string>
     <string name="add_print_service_label" msgid="5356702546188981940">"சேவையைச் சேர்"</string>
@@ -71,13 +73,9 @@
     <item msgid="4061931020926489228">"உறுவப்படம்"</item>
     <item msgid="3199660090246166812">"நிலத்தோற்றம்"</item>
   </string-array>
-  <string-array name="page_options_labels">
-    <item msgid="7421377442011699994">"எல்லாம்"</item>
-    <item msgid="6812869625222503603">"வரம்பு"</item>
-  </string-array>
     <string name="print_write_error_message" msgid="5787642615179572543">"கோப்பில் எழுத முடியவில்லை"</string>
-    <string name="print_error_default_message" msgid="8568506918983980567">"அச்சுப் பணியை உருவாக்க முடியவில்லை"</string>
+    <string name="print_error_default_message" msgid="8602678405502922346">"செயல்படவில்லை. மீண்டும் முயலவும்."</string>
     <string name="print_error_retry" msgid="1426421728784259538">"மீண்டும் முயலவும்"</string>
-    <string name="print_error_printer_unavailable" msgid="6653128543854282851">"பிரிண்டர் இல்லை"</string>
-    <string name="print_operation_canceling" msgid="5274571823242489160">"ரத்துசெய்கிறது…"</string>
+    <string name="print_error_printer_unavailable" msgid="8985614415253203381">"இப்போது பிரிண்டர் இல்லை."</string>
+    <string name="print_preparing_preview" msgid="3939930735671364712">"மாதிரிக்காட்சியைத் தயார்படுத்துகிறது…"</string>
 </resources>

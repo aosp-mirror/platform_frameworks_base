@@ -25,16 +25,18 @@
     <string name="label_paper_size_summary" msgid="5668204981332138168">"ಪೇಪರ್ ಗಾತ್ರ:"</string>
     <string name="label_color" msgid="1108690305218188969">"ಬಣ್ಣ"</string>
     <string name="label_orientation" msgid="2853142581990496477">"ಓರಿಯಂಟೇಶನ್"</string>
-    <string name="label_pages" msgid="6300874667546617333">"ಪುಟಗಳು (<xliff:g id="PAGE_COUNT">%1$s</xliff:g>)"</string>
+    <string name="label_pages" msgid="7768589729282182230">"ಪುಟಗಳು"</string>
+    <string name="template_all_pages" msgid="3322235982020148762">"ಎಲ್ಲಾ <xliff:g id="PAGE_COUNT">%1$s</xliff:g>"</string>
+    <string name="template_page_range" msgid="428638530038286328">"<xliff:g id="PAGE_COUNT">%1$s</xliff:g> ನ ಶ್ರೇಣಿ"</string>
     <string name="pages_range_example" msgid="8558694453556945172">"ಉದಾ. 1—5,8,11—13"</string>
     <string name="print_preview" msgid="8010217796057763343">"ಮುದ್ರಣ ಪೂರ್ವವೀಕ್ಷಣೆ"</string>
     <string name="install_for_print_preview" msgid="6366303997385509332">"ಪೂರ್ವವೀಕ್ಷಣೆಗಾಗಿ PDF ವೀಕ್ಷಕವನ್ನು ಸ್ಥಾಪಿಸಿ"</string>
     <string name="printing_app_crashed" msgid="854477616686566398">"ಮುದ್ರಣದ ಅಪ್ಲಿಕೇಶನ್ ಕ್ರ್ಯಾಶ್ ಆಗಿದೆ"</string>
-    <string name="page_count_unknown" msgid="6058852665954511124">"ಪುಟಗಳು"</string>
     <string name="generating_print_job" msgid="3119608742651698916">"ಮುದ್ರಣ ಕಾರ್ಯ ರಚಿಸಲಾಗುತ್ತಿದೆ"</string>
     <string name="save_as_pdf" msgid="5718454119847596853">"PDF ರೂಪದಲ್ಲಿ ಉಳಿಸಿ"</string>
     <string name="all_printers" msgid="5018829726861876202">"ಎಲ್ಲಾ ಮುದ್ರಕಗಳು…"</string>
     <string name="print_dialog" msgid="32628687461331979">"ಮುದ್ರಣ ಸಂವಾದ"</string>
+    <string name="current_page_template" msgid="1386638343571771292">"<xliff:g id="CURRENT_PAGE">%1$d</xliff:g> /<xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
     <string name="search" msgid="5421724265322228497">"ಹುಡುಕು"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"ಎಲ್ಲಾ ಮುದ್ರಕಗಳು"</string>
     <string name="add_print_service_label" msgid="5356702546188981940">"ಸೇವೆಯನ್ನು ಸೇರಿಸು"</string>
@@ -71,13 +73,9 @@
     <item msgid="4061931020926489228">"ಪೋಟ್ರೇಟ್"</item>
     <item msgid="3199660090246166812">"ಲ್ಯಾಂಡ್‌ಸ್ಕೇಪ್"</item>
   </string-array>
-  <string-array name="page_options_labels">
-    <item msgid="7421377442011699994">"ಎಲ್ಲಾ"</item>
-    <item msgid="6812869625222503603">"ವ್ಯಾಪ್ತಿ"</item>
-  </string-array>
     <string name="print_write_error_message" msgid="5787642615179572543">"ಫೈಲ್‌ಗೆ ರೈಟ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗುತ್ತಿಲ್ಲ"</string>
-    <string name="print_error_default_message" msgid="8568506918983980567">"ಮುದ್ರಣ ಕಾರ್ಯವನ್ನು ರಚಿಸಲು ಸಾಧ್ಯವಾಗುತ್ತಿಲ್ಲ"</string>
+    <string name="print_error_default_message" msgid="8602678405502922346">"ಕ್ಷಮಿಸಿ, ಅದು ಕೆಲಸ ಮಾಡುತ್ತಿಲ್ಲ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="print_error_retry" msgid="1426421728784259538">"ಮರುಪ್ರಯತ್ನಿಸು"</string>
-    <string name="print_error_printer_unavailable" msgid="6653128543854282851">"ಪ್ರಿಂಟರ್ ಲಭ್ಯವಿಲ್ಲ"</string>
-    <string name="print_operation_canceling" msgid="5274571823242489160">"ರದ್ದುಗೊಳಿಸಲಾಗುತ್ತಿದೆ…"</string>
+    <string name="print_error_printer_unavailable" msgid="8985614415253203381">"ಈ ಪ್ರಿಂಟರ್ ಸದ್ಯಕ್ಕೆ ಲಭ್ಯವಿಲ್ಲ."</string>
+    <string name="print_preparing_preview" msgid="3939930735671364712">"ಪೂರ್ವವೀಕ್ಷಣೆ ತಯಾರಾಗುತ್ತಿದೆ…"</string>
 </resources>

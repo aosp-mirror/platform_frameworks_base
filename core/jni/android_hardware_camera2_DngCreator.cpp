@@ -1173,8 +1173,8 @@ static void DngCreator_init(JNIEnv* env, jobject thiz, jobject characteristicsPt
             calibrationTransform1[ctr++] = entry1.data.r[i].denominator;
         }
 
-        BAIL_IF_INVALID(writer->addEntry(TAG_CAMERACALIBRATION1, entry1.count, calibrationTransform1,
-                TIFF_IFD_0), env, TAG_CAMERACALIBRATION1, writer);
+        BAIL_IF_INVALID(writer->addEntry(TAG_CAMERACALIBRATION1, entry1.count,
+                calibrationTransform1, TIFF_IFD_0), env, TAG_CAMERACALIBRATION1, writer);
 
         if (!singleIlluminant) {
             camera_metadata_entry entry2 =
@@ -1188,8 +1188,8 @@ static void DngCreator_init(JNIEnv* env, jobject thiz, jobject characteristicsPt
                 calibrationTransform2[ctr++] = entry2.data.r[i].denominator;
             }
 
-            BAIL_IF_INVALID(writer->addEntry(TAG_CAMERACALIBRATION2, entry2.count, calibrationTransform1,
-                    TIFF_IFD_0),  env, TAG_CAMERACALIBRATION2, writer);
+            BAIL_IF_INVALID(writer->addEntry(TAG_CAMERACALIBRATION2, entry2.count,
+                    calibrationTransform1, TIFF_IFD_0),  env, TAG_CAMERACALIBRATION2, writer);
         }
     }
 
@@ -1291,6 +1291,21 @@ static void DngCreator_init(JNIEnv* env, jobject thiz, jobject characteristicsPt
         BAIL_IF_INVALID(writer->addEntry(TAG_UNIQUECAMERAMODEL, cameraModel.size() + 1,
                 reinterpret_cast<const uint8_t*>(cameraModel.string()), TIFF_IFD_0), env,
                 TAG_UNIQUECAMERAMODEL, writer);
+    }
+
+    {
+        // Setup sensor noise model
+        camera_metadata_entry entry =
+            results.find(ANDROID_SENSOR_NOISE_PROFILE);
+
+        if (entry.count > 0) {
+            BAIL_IF_INVALID(writer->addEntry(TAG_NOISEPROFILE, entry.count,
+                    entry.data.d, TIFF_IFD_0), env,
+                    TAG_NOISEPROFILE, writer);
+        } else {
+            ALOGW("%s: No noise profile found in result metadata.  Image quality may be reduced.",
+                    __FUNCTION__);
+        }
     }
 
     {

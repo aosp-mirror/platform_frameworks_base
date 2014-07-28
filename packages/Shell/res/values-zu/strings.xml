@@ -18,7 +18,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"I-Shell"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"Umbiko wesiphazamisi uthwetshuliwe"</string>
-    <string name="bugreport_finished_text" msgid="3559904746859400732">"Thinta ukuze wabelane ngombiko wakho wesiphazamisi"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Swayiphela kwesokunxele ukuze wabelane umbiko wesiphazamiso sakho"</string>
+    <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Thinta ukuze wabelane ngombiko wakho wesiphazamisi"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"Imibiko yeziphazamisi iqukethe idatha yamafayela wokungena ahlukile wesistimu, afaka ulwazi lomuntu siqu noma lobumfihlo. Yabelana kuphela ngemibiko yeziphazamisi nezinhlelo zokusebenza nabantu obathembayo."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Bonisa lo mlayezo ngesikhathi esilandelayo"</string>
 </resources>
