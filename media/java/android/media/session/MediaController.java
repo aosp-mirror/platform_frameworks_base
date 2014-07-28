@@ -64,6 +64,7 @@ public final class MediaController {
 
     private final ISessionController mSessionBinder;
 
+    private final MediaSession.Token mToken;
     private final CallbackStub mCbStub = new CallbackStub(this);
     private final ArrayList<MessageHandler> mCallbacks = new ArrayList<MessageHandler>();
     private final Object mLock = new Object();
@@ -85,6 +86,7 @@ public final class MediaController {
         }
         mSessionBinder = sessionBinder;
         mTransportControls = new TransportControls();
+        mToken = new MediaSession.Token(sessionBinder);
     }
 
     /**
@@ -208,12 +210,11 @@ public final class MediaController {
     }
 
     /**
-     * Get the flags for this session.
+     * Get the flags for this session. Flags are defined in {@link MediaSession}.
      *
      * @return The current set of flags for the session.
-     * @hide
      */
-    public long getFlags() {
+    public @MediaSession.SessionFlags long getFlags() {
         try {
             return mSessionBinder.getFlags();
         } catch (RemoteException e) {
@@ -237,6 +238,15 @@ public final class MediaController {
             Log.wtf(TAG, "Error calling getVolumeInfo.", e);
         }
         return null;
+    }
+
+    /**
+     * Get the token for the session this is connected to.
+     *
+     * @return The token for the connected session.
+     */
+    public @NonNull MediaSession.Token getSessionToken() {
+        return mToken;
     }
 
     /**
