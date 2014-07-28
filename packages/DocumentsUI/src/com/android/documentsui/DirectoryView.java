@@ -40,8 +40,13 @@ public class DirectoryView extends FrameLayout {
     public void setBackground(Drawable background) {
         final Rect rect = new Rect();
         background.getPadding(rect);
-        final InsetDrawable inset = new InsetDrawable(background, -rect.left, 0, -rect.right, 0);
-        super.setBackground(inset);
+
+        final boolean insetLeft = getResources().getBoolean(R.bool.list_divider_inset_left);
+        if (insetLeft) {
+            super.setBackground(new InsetDrawable(background, -rect.left, 0, -rect.right, 0));
+        } else {
+            super.setBackground(new InsetDrawable(background, -rect.right, 0, -rect.left, 0));
+        }
     }
 
     @Override

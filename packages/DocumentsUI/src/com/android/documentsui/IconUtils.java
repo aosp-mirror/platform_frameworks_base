@@ -45,7 +45,7 @@ public class IconUtils {
         add("application/vnd.android.package-archive", icon);
 
         // Audio
-        icon = R.drawable.ic_doc_audio;
+        icon = R.drawable.ic_doc_audio_dark;
         add("application/ogg", icon);
         add("application/x-flac", icon);
 
@@ -132,7 +132,7 @@ public class IconUtils {
         add("application/x-font-ttf", icon);
 
         // Image
-        icon = R.drawable.ic_doc_image;
+        icon = R.drawable.ic_doc_image_dark;
         add("application/vnd.oasis.opendocument.graphics", icon);
         add("application/vnd.oasis.opendocument.graphics-template", icon);
         add("application/vnd.oasis.opendocument.image", icon);
@@ -186,7 +186,7 @@ public class IconUtils {
         add("application/x-kword", icon);
 
         // Video
-        icon = R.drawable.ic_doc_video;
+        icon = R.drawable.ic_doc_video_dark;
         add("application/x-quicktimeplayer", icon);
         add("application/x-shockwave-flash", icon);
     }
@@ -220,7 +220,7 @@ public class IconUtils {
             if (mode == DocumentsActivity.State.MODE_GRID) {
                 return res.getDrawable(R.drawable.ic_grid_folder);
             } else {
-                return res.getDrawable(R.drawable.ic_root_folder);
+                return res.getDrawable(R.drawable.ic_root_folder_dark);
             }
         }
 
@@ -232,7 +232,7 @@ public class IconUtils {
 
         if (Document.MIME_TYPE_DIR.equals(mimeType)) {
             // TODO: return a mipmap, since this is used for grid
-            return res.getDrawable(R.drawable.ic_root_folder);
+            return res.getDrawable(R.drawable.ic_root_folder_dark);
         }
 
         // Look for exact match first
@@ -249,13 +249,13 @@ public class IconUtils {
         // Otherwise look for partial match
         final String typeOnly = mimeType.split("/")[0];
         if ("audio".equals(typeOnly)) {
-            return res.getDrawable(R.drawable.ic_doc_audio);
+            return res.getDrawable(R.drawable.ic_doc_audio_dark);
         } else if ("image".equals(typeOnly)) {
-            return res.getDrawable(R.drawable.ic_doc_image);
+            return res.getDrawable(R.drawable.ic_doc_image_dark);
         } else if ("text".equals(typeOnly)) {
             return res.getDrawable(R.drawable.ic_doc_text);
         } else if ("video".equals(typeOnly)) {
-            return res.getDrawable(R.drawable.ic_doc_video);
+            return res.getDrawable(R.drawable.ic_doc_video_dark);
         } else {
             return res.getDrawable(R.drawable.ic_doc_generic);
         }
