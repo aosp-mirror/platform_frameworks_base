@@ -16,6 +16,8 @@
 
 package android.hardware.soundtrigger;
 
+import android.hardware.soundtrigger.SoundTrigger;
+
 /**
  * @hide
  */
@@ -27,7 +29,7 @@ oneway interface IRecognitionStatusCallback {
      *        TODO: See if the data being passed in works well, if not use shared memory.
      *        This *MUST* not exceed 100K.
      */
-    void onDetected(in byte[] data);
+    void onDetected(in SoundTrigger.RecognitionEvent recognitionEvent);
     /**
      * Called when the detection for the associated keyphrase stops.
      */

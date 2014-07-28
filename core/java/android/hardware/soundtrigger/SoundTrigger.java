@@ -347,12 +347,7 @@ public class SoundTrigger {
 
         private static KeyphraseSoundModel fromParcel(Parcel in) {
             UUID uuid = UUID.fromString(in.readString());
-            byte[] data = null;
-            int dataLength = in.readInt();
-            if (dataLength >= 0) {
-                data = new byte[dataLength];
-                in.readByteArray(data);
-            }
+            byte[] data = in.readBlob();
             Keyphrase[] keyphrases = in.createTypedArray(Keyphrase.CREATOR);
             return new KeyphraseSoundModel(uuid, data, keyphrases);
         }
@@ -365,12 +360,7 @@ public class SoundTrigger {
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeString(uuid.toString());
-            if (data != null) {
-                dest.writeInt(data.length);
-                dest.writeByteArray(data);
-            } else {
-                dest.writeInt(-1);
-            }
+            dest.writeBlob(data);
             dest.writeTypedArray(keyphrases, 0);
         }
 
@@ -406,7 +396,7 @@ public class SoundTrigger {
      *  {@link StatusListener#onRecognition(RecognitionEvent)}
      *  callback upon recognition success or failure.
      */
-    public static class RecognitionEvent {
+    public static class RecognitionEvent implements Parcelable {
         /** Recognition status e.g {@link #RECOGNITION_STATUS_SUCCESS} */
         public final int status;
         /** Sound Model corresponding to this event callback */
@@ -425,7 +415,7 @@ public class SoundTrigger {
          * typically during enrollment. */
         public final byte[] data;
 
-        RecognitionEvent(int status, int soundModelHandle, boolean captureAvailable,
+        public RecognitionEvent(int status, int soundModelHandle, boolean captureAvailable,
                 int captureSession, int captureDelayMs, int capturePreambleMs, byte[] data) {
             this.status = status;
             this.soundModelHandle = soundModelHandle;
@@ -434,6 +424,85 @@ public class SoundTrigger {
             this.captureDelayMs = captureDelayMs;
             this.capturePreambleMs = capturePreambleMs;
             this.data = data;
+        }
+
+        public static final Parcelable.Creator<RecognitionEvent> CREATOR
+                = new Parcelable.Creator<RecognitionEvent>() {
+            public RecognitionEvent createFromParcel(Parcel in) {
+                return RecognitionEvent.fromParcel(in);
+            }
+
+            public RecognitionEvent[] newArray(int size) {
+                return new RecognitionEvent[size];
+            }
+        };
+
+        private static RecognitionEvent fromParcel(Parcel in) {
+            int status = in.readInt();
+            int soundModelHandle = in.readInt();
+            boolean captureAvailable = in.readByte() == 1;
+            int captureSession = in.readInt();
+            int captureDelayMs = in.readInt();
+            int capturePreambleMs = in.readInt();
+            byte[] data = in.readBlob();
+            return new RecognitionEvent(status, soundModelHandle, captureAvailable, captureSession,
+                    captureDelayMs, capturePreambleMs, data);
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(status);
+            dest.writeInt(soundModelHandle);
+            dest.writeByte((byte) (captureAvailable ? 1 : 0));
+            dest.writeInt(captureSession);
+            dest.writeInt(captureDelayMs);
+            dest.writeInt(capturePreambleMs);
+            dest.writeBlob(data);
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + (captureAvailable ? 1231 : 1237);
+            result = prime * result + captureDelayMs;
+            result = prime * result + capturePreambleMs;
+            result = prime * result + captureSession;
+            result = prime * result + Arrays.hashCode(data);
+            result = prime * result + soundModelHandle;
+            result = prime * result + status;
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            RecognitionEvent other = (RecognitionEvent) obj;
+            if (captureAvailable != other.captureAvailable)
+                return false;
+            if (captureDelayMs != other.captureDelayMs)
+                return false;
+            if (capturePreambleMs != other.capturePreambleMs)
+                return false;
+            if (captureSession != other.captureSession)
+                return false;
+            if (!Arrays.equals(data, other.data))
+                return false;
+            if (soundModelHandle != other.soundModelHandle)
+                return false;
+            if (status != other.status)
+                return false;
+            return true;
         }
     }
 
@@ -475,12 +544,7 @@ public class SoundTrigger {
             boolean captureRequested = in.readByte() == 1;
             KeyphraseRecognitionExtra[] keyphrases =
                     in.createTypedArray(KeyphraseRecognitionExtra.CREATOR);
-            byte[] data = null;
-            int dataLength = in.readInt();
-            if (dataLength >= 0) {
-                data = new byte[dataLength];
-                in.readByteArray(data);
-            }
+            byte[] data = in.readBlob();
             return new RecognitionConfig(captureRequested, keyphrases, data);
         }
 
@@ -488,12 +552,7 @@ public class SoundTrigger {
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeByte((byte) (captureRequested ? 1 : 0));
             dest.writeTypedArray(keyphrases, 0);
-            if (data != null) {
-                dest.writeInt(data.length);
-                dest.writeByteArray(data);
-            } else {
-                dest.writeInt(-1);
-            }
+            dest.writeBlob(data);
         }
 
         @Override

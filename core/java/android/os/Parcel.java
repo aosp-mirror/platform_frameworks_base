@@ -485,6 +485,7 @@ public final class Parcel {
      * growing {@link #dataCapacity} if needed.
      * @param b Bytes to place into the parcel.
      * {@hide}
+     * {@SystemApi}
      */
     public final void writeBlob(byte[] b) {
         nativeWriteBlob(mNativePtr, b, 0, (b != null) ? b.length : 0);
@@ -1714,6 +1715,7 @@ public final class Parcel {
     /**
      * Read a blob of data from the parcel and return it as a byte array.
      * {@hide}
+     * {@SystemApi}
      */
     public final byte[] readBlob() {
         return nativeReadBlob(mNativePtr);
