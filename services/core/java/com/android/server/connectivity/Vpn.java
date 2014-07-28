@@ -17,6 +17,8 @@
 package com.android.server.connectivity;
 
 import static android.Manifest.permission.BIND_VPN_SERVICE;
+import static android.system.OsConstants.AF_INET;
+import static android.system.OsConstants.AF_INET6;
 
 import android.app.AppGlobals;
 import android.app.Notification;
@@ -107,6 +109,8 @@ public class Vpn {
     private String mPackage;
     private int mOwnerUID;
     private String mInterface;
+    private boolean mAllowIPv4;
+    private boolean mAllowIPv6;
     private Connection mConnection;
     private LegacyVpnRunner mLegacyVpnRunner;
     private PendingIntent mStatusIntent;
@@ -307,6 +311,7 @@ public class Vpn {
     private void agentConnect() {
         LinkProperties lp = new LinkProperties();
         lp.setInterfaceName(mInterface);
+
         boolean hasDefaultRoute = false;
         for (RouteInfo route : mConfig.routes) {
             lp.addRoute(route);
@@ -317,11 +322,19 @@ public class Vpn {
         } else {
             mNetworkCapabilities.removeCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
         }
+
         if (mConfig.dnsServers != null) {
             for (String dnsServer : mConfig.dnsServers) {
-                lp.addDnsServer(InetAddress.parseNumericAddress(dnsServer));
+                InetAddress address = InetAddress.parseNumericAddress(dnsServer);
+                lp.addDnsServer(address);
+                if (address instanceof Inet4Address) {
+                    mAllowIPv4 = true;
+                } else {
+                    mAllowIPv6 = true;
+                }
             }
         }
+
         // Concatenate search domains into a string.
         StringBuilder buffer = new StringBuilder();
         if (mConfig.searchDomains != null) {
@@ -330,12 +343,13 @@ public class Vpn {
             }
         }
         lp.setDomains(buffer.toString().trim());
+
         mNetworkInfo.setIsAvailable(true);
         mNetworkInfo.setDetailedState(DetailedState.CONNECTED, null, null);
+
         NetworkMisc networkMisc = new NetworkMisc();
-        if (mConfig.allowBypass) {
-            networkMisc.allowBypass = true;
-        }
+        networkMisc.allowBypass = mConfig.allowBypass;
+
         long token = Binder.clearCallingIdentity();
         try {
             mNetworkAgent = new NetworkAgent(mLooper, mContext, NETWORKTYPE,
@@ -347,6 +361,14 @@ public class Vpn {
         } finally {
             Binder.restoreCallingIdentity(token);
         }
+
+        if (!mAllowIPv4) {
+            mNetworkAgent.blockAddressFamily(AF_INET);
+        }
+        if (!mAllowIPv6) {
+            mNetworkAgent.blockAddressFamily(AF_INET6);
+        }
+
         addVpnUserLocked(mUserId);
         // If we are owner assign all Restricted Users to this VPN
         if (mUserId == UserHandle.USER_OWNER) {
@@ -432,6 +454,8 @@ public class Vpn {
         NetworkAgent oldNetworkAgent = mNetworkAgent;
         mNetworkAgent = null;
         List<UidRange> oldUsers = mVpnUsers;
+        boolean oldAllowIPv4 = mAllowIPv4;
+        boolean oldAllowIPv6 = mAllowIPv6;
 
         // Configure the interface. Abort if any of these steps fails.
         ParcelFileDescriptor tun = ParcelFileDescriptor.adoptFd(jniCreate(config.mtu));
@@ -464,6 +488,9 @@ public class Vpn {
 
             // Set up forwarding and DNS rules.
             mVpnUsers = new ArrayList<UidRange>();
+            mAllowIPv4 = mConfig.allowIPv4;
+            mAllowIPv6 = mConfig.allowIPv6;
+
             agentConnect();
 
             if (oldConnection != null) {
@@ -492,6 +519,8 @@ public class Vpn {
             mVpnUsers = oldUsers;
             mNetworkAgent = oldNetworkAgent;
             mInterface = oldInterface;
+            mAllowIPv4 = oldAllowIPv4;
+            mAllowIPv6 = oldAllowIPv6;
             throw e;
         }
         Log.i(TAG, "Established by " + config.user + " on " + mInterface);
@@ -1175,6 +1204,8 @@ public class Vpn {
                     // Now INetworkManagementEventObserver is watching our back.
                     mInterface = mConfig.interfaze;
                     mVpnUsers = new ArrayList<UidRange>();
+                    mAllowIPv4 = mConfig.allowIPv4;
+                    mAllowIPv6 = mConfig.allowIPv6;
 
                     agentConnect();
 
