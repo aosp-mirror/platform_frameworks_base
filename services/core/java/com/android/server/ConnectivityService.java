@@ -441,17 +441,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     NetworkConfig[] mNetConfigs;
     int mNetworksDefined;
 
-    private static class RadioAttributes {
-        public int mSimultaneity;
-        public int mType;
-        public RadioAttributes(String init) {
-            String fragments[] = init.split(",");
-            mType = Integer.parseInt(fragments[0]);
-            mSimultaneity = Integer.parseInt(fragments[1]);
-        }
-    }
-    RadioAttributes[] mRadioAttributes;
-
     // the set of network types that can only be enabled by system/sig apps
     List mProtectedNetworks;
 
@@ -581,16 +570,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
     private LegacyTypeTracker mLegacyTypeTracker = new LegacyTypeTracker();
 
-    public ConnectivityService(Context context, INetworkManagementService netd,
-            INetworkStatsService statsService, INetworkPolicyManager policyManager) {
-        // Currently, omitting a NetworkFactory will create one internally
-        // TODO: create here when we have cleaner WiMAX support
-        this(context, netd, statsService, policyManager, null);
-    }
-
     public ConnectivityService(Context context, INetworkManagementService netManager,
-            INetworkStatsService statsService, INetworkPolicyManager policyManager,
-            NetworkFactory netFactory) {
+            INetworkStatsService statsService, INetworkPolicyManager policyManager) {
         if (DBG) log("ConnectivityService starting up");
 
         NetworkCapabilities netCap = new NetworkCapabilities();
@@ -605,10 +586,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         handlerThread.start();
         mHandler = new InternalHandler(handlerThread.getLooper());
         mTrackerHandler = new NetworkStateTrackerHandler(handlerThread.getLooper());
-
-        if (netFactory == null) {
-            netFactory = new DefaultNetworkFactory(context, mTrackerHandler);
-        }
 
         // setup our unique device name
         if (TextUtils.isEmpty(SystemProperties.get("net.hostname"))) {
@@ -655,26 +632,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         mNetTrackers = new NetworkStateTracker[
                 ConnectivityManager.MAX_NETWORK_TYPE+1];
 
-        mRadioAttributes = new RadioAttributes[ConnectivityManager.MAX_RADIO_TYPE+1];
         mNetConfigs = new NetworkConfig[ConnectivityManager.MAX_NETWORK_TYPE+1];
-
-        // Load device network attributes from resources
-        String[] raStrings = context.getResources().getStringArray(
-                com.android.internal.R.array.radioAttributes);
-        for (String raString : raStrings) {
-            RadioAttributes r = new RadioAttributes(raString);
-            if (VDBG) log("raString=" + raString + " r=" + r);
-            if (r.mType > ConnectivityManager.MAX_RADIO_TYPE) {
-                loge("Error in radioAttributes - ignoring attempt to define type " + r.mType);
-                continue;
-            }
-            if (mRadioAttributes[r.mType] != null) {
-                loge("Error in radioAttributes - ignoring attempt to redefine type " +
-                        r.mType);
-                continue;
-            }
-            mRadioAttributes[r.mType] = r;
-        }
 
         // TODO: What is the "correct" way to do determine if this is a wifi only device?
         boolean wifiOnly = SystemProperties.getBoolean("ro.radio.noril", false);
@@ -698,11 +656,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 if (mNetConfigs[n.type] != null) {
                     loge("Error in networkAttributes - ignoring attempt to redefine type " +
                             n.type);
-                    continue;
-                }
-                if (mRadioAttributes[n.radio] == null) {
-                    loge("Error in networkAttributes - ignoring attempt to use undefined " +
-                            "radio " + n.radio + " in network type " + n.type);
                     continue;
                 }
                 mLegacyTypeTracker.addSupportedType(n.type);
@@ -757,25 +710,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
         mTestMode = SystemProperties.get("cm.test.mode").equals("true")
                 && SystemProperties.get("ro.build.type").equals("eng");
-
-        // Create and start trackers for hard-coded networks
-        for (int targetNetworkType : mPriorityList) {
-            final NetworkConfig config = mNetConfigs[targetNetworkType];
-            final NetworkStateTracker tracker;
-            try {
-                tracker = netFactory.createTracker(targetNetworkType, config);
-                mNetTrackers[targetNetworkType] = tracker;
-            } catch (IllegalArgumentException e) {
-                Slog.e(TAG, "Problem creating " + getNetworkTypeName(targetNetworkType)
-                        + " tracker: " + e);
-                continue;
-            }
-
-            tracker.startMonitoring(context, mTrackerHandler);
-            if (config.isDefault()) {
-                tracker.reconnect();
-            }
-        }
 
         mTethering = new Tethering(mContext, mNetd, statsService, mHandler.getLooper());
 
@@ -839,124 +773,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         int netId = mNextNetId;
         if (++mNextNetId > MAX_NET_ID) mNextNetId = MIN_NET_ID;
         return netId;
-    }
-
-    /**
-     * Factory that creates {@link NetworkStateTracker} instances using given
-     * {@link NetworkConfig}.
-     *
-     * TODO - this is obsolete and will be deleted.  It's replaced by the
-     * registerNetworkFactory call and protocol.
-     * @Deprecated in favor of registerNetworkFactory dynamic bindings
-     */
-    public interface NetworkFactory {
-        public NetworkStateTracker createTracker(int targetNetworkType, NetworkConfig config);
-    }
-
-    private static class DefaultNetworkFactory implements NetworkFactory {
-        private final Context mContext;
-        private final Handler mTrackerHandler;
-
-        public DefaultNetworkFactory(Context context, Handler trackerHandler) {
-            mContext = context;
-            mTrackerHandler = trackerHandler;
-        }
-
-        @Override
-        public NetworkStateTracker createTracker(int targetNetworkType, NetworkConfig config) {
-            switch (config.radio) {
-                case TYPE_WIMAX:
-                    return makeWimaxStateTracker(mContext, mTrackerHandler);
-                case TYPE_PROXY:
-                    return new ProxyDataTracker();
-                default:
-                    throw new IllegalArgumentException(
-                            "Trying to create a NetworkStateTracker for an unknown radio type: "
-                            + config.radio);
-            }
-        }
-    }
-
-    /**
-     * Loads external WiMAX library and registers as system service, returning a
-     * {@link NetworkStateTracker} for WiMAX. Caller is still responsible for
-     * invoking {@link NetworkStateTracker#startMonitoring(Context, Handler)}.
-     */
-    private static NetworkStateTracker makeWimaxStateTracker(
-            Context context, Handler trackerHandler) {
-        // Initialize Wimax
-        DexClassLoader wimaxClassLoader;
-        Class wimaxStateTrackerClass = null;
-        Class wimaxServiceClass = null;
-        Class wimaxManagerClass;
-        String wimaxJarLocation;
-        String wimaxLibLocation;
-        String wimaxManagerClassName;
-        String wimaxServiceClassName;
-        String wimaxStateTrackerClassName;
-
-        NetworkStateTracker wimaxStateTracker = null;
-
-        boolean isWimaxEnabled = context.getResources().getBoolean(
-                com.android.internal.R.bool.config_wimaxEnabled);
-
-        if (isWimaxEnabled) {
-            try {
-                wimaxJarLocation = context.getResources().getString(
-                        com.android.internal.R.string.config_wimaxServiceJarLocation);
-                wimaxLibLocation = context.getResources().getString(
-                        com.android.internal.R.string.config_wimaxNativeLibLocation);
-                wimaxManagerClassName = context.getResources().getString(
-                        com.android.internal.R.string.config_wimaxManagerClassname);
-                wimaxServiceClassName = context.getResources().getString(
-                        com.android.internal.R.string.config_wimaxServiceClassname);
-                wimaxStateTrackerClassName = context.getResources().getString(
-                        com.android.internal.R.string.config_wimaxStateTrackerClassname);
-
-                if (DBG) log("wimaxJarLocation: " + wimaxJarLocation);
-                wimaxClassLoader =  new DexClassLoader(wimaxJarLocation,
-                        new ContextWrapper(context).getCacheDir().getAbsolutePath(),
-                        wimaxLibLocation, ClassLoader.getSystemClassLoader());
-
-                try {
-                    wimaxManagerClass = wimaxClassLoader.loadClass(wimaxManagerClassName);
-                    wimaxStateTrackerClass = wimaxClassLoader.loadClass(wimaxStateTrackerClassName);
-                    wimaxServiceClass = wimaxClassLoader.loadClass(wimaxServiceClassName);
-                } catch (ClassNotFoundException ex) {
-                    loge("Exception finding Wimax classes: " + ex.toString());
-                    return null;
-                }
-            } catch(Resources.NotFoundException ex) {
-                loge("Wimax Resources does not exist!!! ");
-                return null;
-            }
-
-            try {
-                if (DBG) log("Starting Wimax Service... ");
-
-                Constructor wmxStTrkrConst = wimaxStateTrackerClass.getConstructor
-                        (new Class[] {Context.class, Handler.class});
-                wimaxStateTracker = (NetworkStateTracker) wmxStTrkrConst.newInstance(
-                        context, trackerHandler);
-
-                Constructor wmxSrvConst = wimaxServiceClass.getDeclaredConstructor
-                        (new Class[] {Context.class, wimaxStateTrackerClass});
-                wmxSrvConst.setAccessible(true);
-                IBinder svcInvoker = (IBinder)wmxSrvConst.newInstance(context, wimaxStateTracker);
-                wmxSrvConst.setAccessible(false);
-
-                ServiceManager.addService(WimaxManagerConstants.WIMAX_SERVICE, svcInvoker);
-
-            } catch(Exception ex) {
-                loge("Exception creating Wimax classes: " + ex.toString());
-                return null;
-            }
-        } else {
-            loge("Wimax is not enabled or not added to the network attributes!!! ");
-            return null;
-        }
-
-        return wimaxStateTracker;
     }
 
     private int getConnectivityChangeDelay() {
