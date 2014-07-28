@@ -36,7 +36,6 @@ public class KeyguardClockPositionAlgorithm {
     private static final float CLOCK_SCALE_FADE_END = 0.75f;
     private static final float CLOCK_SCALE_FADE_END_NO_NOTIFS = 0.5f;
 
-
     private static final float CLOCK_ADJ_TOP_PADDING_MULTIPLIER_MIN = 1.4f;
     private static final float CLOCK_ADJ_TOP_PADDING_MULTIPLIER_MAX = 3.2f;
 
@@ -50,6 +49,8 @@ public class KeyguardClockPositionAlgorithm {
     private int mNotificationCount;
     private int mHeight;
     private int mKeyguardStatusHeight;
+    private float mEmptyDragAmount;
+    private float mDensity;
 
     /**
      * The number (fractional) of notifications the "more" card counts when calculating how many
@@ -81,16 +82,18 @@ public class KeyguardClockPositionAlgorithm {
         mMoreCardNotificationAmount =
                 (float) res.getDimensionPixelSize(R.dimen.notification_summary_height) /
                         res.getDimensionPixelSize(R.dimen.notification_min_height);
+        mDensity = res.getDisplayMetrics().density;
     }
 
     public void setup(int maxKeyguardNotifications, int maxPanelHeight, float expandedHeight,
-            int notificationCount, int height, int keyguardStatusHeight) {
+            int notificationCount, int height, int keyguardStatusHeight, float emptyDragAmount) {
         mMaxKeyguardNotifications = maxKeyguardNotifications;
         mMaxPanelHeight = maxPanelHeight;
         mExpandedHeight = expandedHeight;
         mNotificationCount = notificationCount;
         mHeight = height;
         mKeyguardStatusHeight = keyguardStatusHeight;
+        mEmptyDragAmount = emptyDragAmount;
     }
 
     public void run(Result result) {
@@ -116,6 +119,7 @@ public class KeyguardClockPositionAlgorithm {
         float progress = distanceToScaleEnd / (startPadding - scaleEnd);
         progress = Math.max(0.0f, Math.min(progress, 1.0f));
         progress = mAccelerateInterpolator.getInterpolation(progress);
+        progress *= Math.pow(1 + mEmptyDragAmount / mDensity / 300, 0.3f);
         return progress;
     }
 

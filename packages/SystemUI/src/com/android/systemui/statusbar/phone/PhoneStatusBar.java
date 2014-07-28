@@ -159,7 +159,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
-        DragDownHelper.OnDragDownListener, ActivityStarter {
+        DragDownHelper.DragDownCallback, ActivityStarter {
     static final String TAG = "PhoneStatusBar";
     public static final boolean DEBUG = BaseStatusBar.DEBUG;
     public static final boolean SPEW = false;
@@ -452,6 +452,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private int mDrawCount;
     private Runnable mLaunchTransitionEndRunnable;
     private boolean mLaunchTransitionFadingAway;
+
+    private boolean mHasNotifications;
 
     private static final int VISIBLE_LOCATIONS = ViewState.LOCATION_FIRST_CARD
             | ViewState.LOCATION_TOP_STACK_PEEKING
@@ -1313,8 +1315,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
 
             if (CLOSE_PANEL_WHEN_EMPTIED && mNotificationData.size() == 0
-                    && !mNotificationPanel.isTracking() && mState != StatusBarState.KEYGUARD) {
-                animateCollapsePanels();
+                    && !mNotificationPanel.isTracking()) {
+                if (mState == StatusBarState.SHADE) {
+                    animateCollapsePanels();
+                } else if (mState == StatusBarState.SHADE_LOCKED) {
+                    goToKeyguard();
+                }
             }
         }
         setAreThereNotifications();
@@ -1610,6 +1616,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         findAndUpdateMediaNotifications();
 
         updateCarrierLabelVisibility(false);
+
+        // TODO: Multiuser handling!
+        mHasNotifications = any;
     }
 
     public void findAndUpdateMediaNotifications() {
@@ -3600,8 +3609,17 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     // ---------------------- DragDownHelper.OnDragDownListener ------------------------------------
 
     @Override
-    public void onDraggedDown(View startingChild) {
-        goToLockedShade(startingChild);
+    public boolean onDraggedDown(View startingChild) {
+        if (mHasNotifications) {
+
+            // We have notifications, go to locked shade.
+            goToLockedShade(startingChild);
+            return true;
+        } else {
+
+            // No notifications - abort gesture.
+            return false;
+        }
     }
 
     @Override
@@ -3609,6 +3627,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mStackScroller.setDimmed(true /* dimmed */, true /* animated */);
     }
 
+    @Override
     public void onThresholdReached() {
         mStackScroller.setDimmed(false /* dimmed */, true /* animate */);
     }
@@ -3616,6 +3635,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     @Override
     public void onTouchSlopExceeded() {
         mStackScroller.removeLongPressCallback();
+    }
+
+    @Override
+    public void setEmptyDragAmount(float amount) {
+        mNotificationPanel.setEmptyDragAmount(amount);
     }
 
     /**
@@ -3726,6 +3750,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mSystemUiVisibility &= ~View.RECENT_APPS_VISIBLE;
         }
         notifyUiVisibilityChanged(mSystemUiVisibility);
+    }
+
+    public boolean hasNotifications() {
+        return mHasNotifications;
     }
 
     private final class ShadeUpdates {
