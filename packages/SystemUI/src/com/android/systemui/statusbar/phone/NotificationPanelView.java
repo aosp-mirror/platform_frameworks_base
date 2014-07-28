@@ -1289,6 +1289,22 @@ public class NotificationPanelView extends PanelView implements
     }
 
     @Override
+    protected boolean fullyExpandedClearAllVisible() {
+        return mNotificationStackScroller.isDismissViewNotGone()
+                && mNotificationStackScroller.isScrolledToBottom();
+    }
+
+    @Override
+    protected boolean isClearAllVisible() {
+        return mNotificationStackScroller.isDismissViewVisible();
+    }
+
+    @Override
+    protected int getClearAllHeight() {
+        return mNotificationStackScroller.getDismissViewHeight();
+    }
+
+    @Override
     protected boolean isTrackingBlocked() {
         return mConflictingQsExpansionGesture && mQsExpanded;
     }
