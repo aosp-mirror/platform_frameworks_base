@@ -290,7 +290,7 @@ android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject weak_this,
     case MODE_STREAM:
 
         status = lpTrack->set(
-                AUDIO_STREAM_DEFAULT,// stream type
+                AUDIO_STREAM_DEFAULT,// stream type, but more info conveyed in paa (last argument)
                 sampleRateInHertz,
                 format,// word length, PCM
                 nativeChannelMask,
@@ -301,7 +301,7 @@ android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject weak_this,
                 0,// shared mem
                 true,// thread can call Java
                 sessionId,// audio session ID
-                AudioTrack::TRANSFER_DEFAULT, // default transfer mode
+                AudioTrack::TRANSFER_SYNC,
                 NULL,                         // default offloadInfo
                 -1, -1,                       // default uid, pid values
                 paa);
@@ -316,7 +316,7 @@ android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject weak_this,
         }
 
         status = lpTrack->set(
-                AUDIO_STREAM_DEFAULT,// stream type
+                AUDIO_STREAM_DEFAULT,// stream type, but more info conveyed in paa (last argument)
                 sampleRateInHertz,
                 format,// word length, PCM
                 nativeChannelMask,
@@ -327,7 +327,7 @@ android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject weak_this,
                 lpJniStorage->mMemBase,// shared mem
                 true,// thread can call Java
                 sessionId,// audio session ID
-                AudioTrack::TRANSFER_DEFAULT, // default transfer mode
+                AudioTrack::TRANSFER_SHARED,
                 NULL,                         // default offloadInfo
                 -1, -1,                       // default uid, pid values
                 paa);
