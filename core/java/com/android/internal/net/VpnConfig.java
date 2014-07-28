@@ -27,6 +27,7 @@ import android.os.UserHandle;
 import android.net.RouteInfo;
 import android.net.LinkAddress;
 
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.util.List;
 import java.util.ArrayList;
@@ -75,6 +76,16 @@ public class VpnConfig implements Parcelable {
     public boolean legacy;
     public boolean blocking;
     public boolean allowBypass;
+    public boolean allowIPv4;
+    public boolean allowIPv6;
+
+    public void updateAllowedFamilies(InetAddress address) {
+        if (address instanceof Inet4Address) {
+            allowIPv4 = true;
+        } else {
+            allowIPv6 = true;
+        }
+    }
 
     public void addLegacyRoutes(String routesStr) {
         if (routesStr.trim().equals("")) {
@@ -87,6 +98,7 @@ public class VpnConfig implements Parcelable {
             RouteInfo info = new RouteInfo(new LinkAddress
                     (InetAddress.parseNumericAddress(split[0]), Integer.parseInt(split[1])), null);
             this.routes.add(info);
+            updateAllowedFamilies(info.getDestination().getAddress());
         }
     }
 
@@ -101,6 +113,7 @@ public class VpnConfig implements Parcelable {
             LinkAddress addr = new LinkAddress(InetAddress.parseNumericAddress(split[0]),
                     Integer.parseInt(split[1]));
             this.addresses.add(addr);
+            updateAllowedFamilies(addr.getAddress());
         }
     }
 
@@ -124,6 +137,8 @@ public class VpnConfig implements Parcelable {
         out.writeInt(legacy ? 1 : 0);
         out.writeInt(blocking ? 1 : 0);
         out.writeInt(allowBypass ? 1 : 0);
+        out.writeInt(allowIPv4 ? 1 : 0);
+        out.writeInt(allowIPv6 ? 1 : 0);
     }
 
     public static final Parcelable.Creator<VpnConfig> CREATOR =
@@ -144,6 +159,8 @@ public class VpnConfig implements Parcelable {
             config.legacy = in.readInt() != 0;
             config.blocking = in.readInt() != 0;
             config.allowBypass = in.readInt() != 0;
+            config.allowIPv4 = in.readInt() != 0;
+            config.allowIPv6 = in.readInt() != 0;
             return config;
         }
 

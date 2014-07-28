@@ -373,6 +373,7 @@ public class VpnService extends Service {
                 throw new IllegalArgumentException("Bad address");
             }
             mAddresses.add(new LinkAddress(address, prefixLength));
+            mConfig.updateAllowedFamilies(address);
             return this;
         }
 
@@ -413,6 +414,7 @@ public class VpnService extends Service {
                 }
             }
             mRoutes.add(new RouteInfo(new LinkAddress(address, prefixLength), null));
+            mConfig.updateAllowedFamilies(address);
             return this;
         }
 
@@ -497,7 +499,14 @@ public class VpnService extends Service {
          * @return this {@link Builder} object to facilitate chaining of method calls.
          */
         public Builder allowFamily(int family) {
-            // TODO
+            if (family == AF_INET) {
+                mConfig.allowIPv4 = true;
+            } else if (family == AF_INET6) {
+                mConfig.allowIPv6 = true;
+            } else {
+                throw new IllegalArgumentException(family + " is neither " + AF_INET + " nor " +
+                        AF_INET6);
+            }
             return this;
         }
 

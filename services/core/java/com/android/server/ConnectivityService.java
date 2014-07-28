@@ -2940,7 +2940,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     }
                     try {
                         mNetd.addVpnUidRanges(nai.network.netId, (UidRange[])msg.obj);
-                    } catch (RemoteException e) {
+                    } catch (Exception e) {
+                        // Never crash!
+                        loge("Exception in addVpnUidRanges: " + e);
                     }
                     break;
                 }
@@ -2952,7 +2954,39 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     }
                     try {
                         mNetd.removeVpnUidRanges(nai.network.netId, (UidRange[])msg.obj);
-                    } catch (RemoteException e) {
+                    } catch (Exception e) {
+                        // Never crash!
+                        loge("Exception in removeVpnUidRanges: " + e);
+                    }
+                    break;
+                }
+                case NetworkAgent.EVENT_BLOCK_ADDRESS_FAMILY: {
+                    NetworkAgentInfo nai = mNetworkAgentInfos.get(msg.replyTo);
+                    if (nai == null) {
+                        loge("EVENT_BLOCK_ADDRESS_FAMILY from unknown NetworkAgent");
+                        break;
+                    }
+                    try {
+                        mNetd.blockAddressFamily((Integer) msg.obj, nai.network.netId,
+                                nai.linkProperties.getInterfaceName());
+                    } catch (Exception e) {
+                        // Never crash!
+                        loge("Exception in blockAddressFamily: " + e);
+                    }
+                    break;
+                }
+                case NetworkAgent.EVENT_UNBLOCK_ADDRESS_FAMILY: {
+                    NetworkAgentInfo nai = mNetworkAgentInfos.get(msg.replyTo);
+                    if (nai == null) {
+                        loge("EVENT_UNBLOCK_ADDRESS_FAMILY from unknown NetworkAgent");
+                        break;
+                    }
+                    try {
+                        mNetd.unblockAddressFamily((Integer) msg.obj, nai.network.netId,
+                                nai.linkProperties.getInterfaceName());
+                    } catch (Exception e) {
+                        // Never crash!
+                        loge("Exception in blockAddressFamily: " + e);
                     }
                     break;
                 }
