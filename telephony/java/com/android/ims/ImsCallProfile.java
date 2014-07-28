@@ -298,18 +298,18 @@ public class ImsCallProfile implements Parcelable {
     public static int getVideoStateFromCallType(int callType) {
         switch (callType) {
             case CALL_TYPE_VT_NODIR:
-                return VideoCallProfile.VIDEO_STATE_PAUSED |
-                        VideoCallProfile.VIDEO_STATE_BIDIRECTIONAL;
+                return VideoCallProfile.VideoState.PAUSED |
+                        VideoCallProfile.VideoState.BIDIRECTIONAL;
             case CALL_TYPE_VT_TX:
-                return VideoCallProfile.VIDEO_STATE_TX_ENABLED;
+                return VideoCallProfile.VideoState.TX_ENABLED;
             case CALL_TYPE_VT_RX:
-                return VideoCallProfile.VIDEO_STATE_RX_ENABLED;
+                return VideoCallProfile.VideoState.RX_ENABLED;
             case CALL_TYPE_VT:
-                return VideoCallProfile.VIDEO_STATE_BIDIRECTIONAL;
+                return VideoCallProfile.VideoState.BIDIRECTIONAL;
             case CALL_TYPE_VOICE:
-                return VideoCallProfile.VIDEO_STATE_AUDIO_ONLY;
+                return VideoCallProfile.VideoState.AUDIO_ONLY;
             default:
-                return VideoCallProfile.VIDEO_STATE_AUDIO_ONLY;
+                return VideoCallProfile.VideoState.AUDIO_ONLY;
         }
     }
 
@@ -321,9 +321,9 @@ public class ImsCallProfile implements Parcelable {
      * @return The call type.
      */
     public static int getCallTypeFromVideoState(int videoState) {
-        boolean videoTx = isVideoStateSet(videoState, VideoCallProfile.VIDEO_STATE_TX_ENABLED);
-        boolean videoRx = isVideoStateSet(videoState, VideoCallProfile.VIDEO_STATE_RX_ENABLED);
-        boolean isPaused = isVideoStateSet(videoState, VideoCallProfile.VIDEO_STATE_PAUSED);
+        boolean videoTx = isVideoStateSet(videoState, VideoCallProfile.VideoState.TX_ENABLED);
+        boolean videoRx = isVideoStateSet(videoState, VideoCallProfile.VideoState.RX_ENABLED);
+        boolean isPaused = isVideoStateSet(videoState, VideoCallProfile.VideoState.PAUSED);
         if (isPaused) {
             return ImsCallProfile.CALL_TYPE_VT_NODIR;
         } else if (videoTx && !videoRx) {

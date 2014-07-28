@@ -28996,11 +28996,20 @@ package android.telecomm {
     field public static final int QUALITY_HIGH = 1; // 0x1
     field public static final int QUALITY_LOW = 3; // 0x3
     field public static final int QUALITY_MEDIUM = 2; // 0x2
-    field public static final int VIDEO_STATE_AUDIO_ONLY = 0; // 0x0
-    field public static final int VIDEO_STATE_BIDIRECTIONAL = 3; // 0x3
-    field public static final int VIDEO_STATE_PAUSED = 4; // 0x4
-    field public static final int VIDEO_STATE_RX_ENABLED = 2; // 0x2
-    field public static final int VIDEO_STATE_TX_ENABLED = 1; // 0x1
+  }
+
+  public static class VideoCallProfile.VideoState {
+    ctor public VideoCallProfile.VideoState();
+    method public static boolean isAudioOnly(int);
+    method public static boolean isPaused(int);
+    method public static boolean isReceptionEnabled(int);
+    method public static boolean isBidirectional(int);
+    method public static boolean isTransmissionEnabled(int);
+    field public static final int AUDIO_ONLY = 0; // 0x0
+    field public static final int BIDIRECTIONAL = 3; // 0x3
+    field public static final int PAUSED = 4; // 0x4
+    field public static final int RX_ENABLED = 2; // 0x2
+    field public static final int TX_ENABLED = 1; // 0x1
   }
 
 }

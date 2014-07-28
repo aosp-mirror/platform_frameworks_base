@@ -72,10 +72,10 @@ public class TelecommManager {
      * Optional extra for {@link android.content.Intent#ACTION_CALL} containing an integer that
      * determines the desired video state for an outgoing call.
      * Valid options:
-     * {@link android.telecomm.VideoCallProfile#VIDEO_STATE_AUDIO_ONLY},
-     * {@link android.telecomm.VideoCallProfile#VIDEO_STATE_BIDIRECTIONAL},
-     * {@link android.telecomm.VideoCallProfile#VIDEO_STATE_RX_ENABLED},
-     * {@link android.telecomm.VideoCallProfile#VIDEO_STATE_TX_ENABLED}.
+     * {@link android.telecomm.VideoCallProfile.VideoState#AUDIO_ONLY},
+     * {@link android.telecomm.VideoCallProfile.VideoState#BIDIRECTIONAL},
+     * {@link android.telecomm.VideoCallProfile.VideoState#RX_ENABLED},
+     * {@link android.telecomm.VideoCallProfile.VideoState#TX_ENABLED}.
      */
     public static final String EXTRA_START_CALL_WITH_VIDEO_STATE =
             "android.intent.extra.START_CALL_WITH_VIDEO_STATE";

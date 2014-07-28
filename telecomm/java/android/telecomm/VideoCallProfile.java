@@ -24,32 +24,6 @@ import android.os.Parcelable;
  */
 public class VideoCallProfile implements Parcelable {
     /**
-     * Call is currently in an audio-only mode with no video transmission or receipt.
-     */
-    public static final int VIDEO_STATE_AUDIO_ONLY = 0x0;
-
-    /**
-     * Video transmission is enabled.
-     */
-    public static final int VIDEO_STATE_TX_ENABLED = 0x1;
-
-    /**
-     * Video reception is enabled.
-     */
-    public static final int VIDEO_STATE_RX_ENABLED = 0x2;
-
-    /**
-     * Video signal is bi-directional.
-     */
-    public static final int VIDEO_STATE_BIDIRECTIONAL =
-            VIDEO_STATE_TX_ENABLED | VIDEO_STATE_RX_ENABLED;
-
-    /**
-     * Video is paused.
-     */
-    public static final int VIDEO_STATE_PAUSED = 0x4;
-
-    /**
      * "High" video quality.
      */
     public static final int QUALITY_HIGH = 1;
@@ -94,13 +68,12 @@ public class VideoCallProfile implements Parcelable {
     }
 
     /**
-     * The video state of the call.  Stored as a bit-field describing whether video transmission and
-     * receipt it enabled, as well as whether the video is currently muted.
-     * Valid values: {@link VideoCallProfile#VIDEO_STATE_AUDIO_ONLY},
-     * {@link VideoCallProfile#VIDEO_STATE_BIDIRECTIONAL},
-     * {@link VideoCallProfile#VIDEO_STATE_TX_ENABLED},
-     * {@link VideoCallProfile#VIDEO_STATE_RX_ENABLED},
-     * {@link VideoCallProfile#VIDEO_STATE_PAUSED}.
+     * The video state of the call.
+     * Valid values: {@link VideoCallProfile.VideoState#AUDIO_ONLY},
+     * {@link VideoCallProfile.VideoState#BIDIRECTIONAL},
+     * {@link VideoCallProfile.VideoState#TX_ENABLED},
+     * {@link VideoCallProfile.VideoState#RX_ENABLED},
+     * {@link VideoCallProfile.VideoState#PAUSED}.
      */
     public int getVideoState() {
         return mVideoState;
@@ -164,5 +137,93 @@ public class VideoCallProfile implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mVideoState);
         dest.writeInt(mQuality);
+    }
+
+    /**
+    * The video state of the call, stored as a bit-field describing whether video transmission and
+    * receipt it enabled, as well as whether the video is currently muted.
+    */
+    public static class VideoState {
+        /**
+         * Call is currently in an audio-only mode with no video transmission or receipt.
+         */
+        public static final int AUDIO_ONLY = 0x0;
+
+        /**
+         * Video transmission is enabled.
+         */
+        public static final int TX_ENABLED = 0x1;
+
+        /**
+         * Video reception is enabled.
+         */
+        public static final int RX_ENABLED = 0x2;
+
+        /**
+         * Video signal is bi-directional.
+         */
+        public static final int BIDIRECTIONAL = TX_ENABLED | RX_ENABLED;
+
+        /**
+         * Video is paused.
+         */
+        public static final int PAUSED = 0x4;
+
+        /**
+         * Whether the video state is audio only.
+         * @param videoState The video state.
+         * @return Returns true if the video state is audio only.
+         */
+        public static boolean isAudioOnly(int videoState) {
+            return !hasState(videoState, TX_ENABLED) && !hasState(videoState, RX_ENABLED);
+        }
+
+        /**
+         * Whether the video transmission is enabled.
+         * @param videoState The video state.
+         * @return Returns true if the video transmission is enabled.
+         */
+        public static boolean isTransmissionEnabled(int videoState) {
+            return hasState(videoState, TX_ENABLED);
+        }
+
+        /**
+         * Whether the video reception is enabled.
+         * @param videoState The video state.
+         * @return Returns true if the video transmission is enabled.
+         */
+        public static boolean isReceptionEnabled(int videoState) {
+            return hasState(videoState, RX_ENABLED);
+        }
+
+        /**
+         * Whether the video signal is bi-directional.
+         * @param videoState
+         * @return Returns true if the video signal is bi-directional.
+         */
+        public static boolean isBidirectional(int videoState) {
+            return hasState(videoState, BIDIRECTIONAL);
+        }
+
+        /**
+         * Whether the video is paused.
+         * @param videoState The video state.
+         * @return Returns true if the video is paused.
+         */
+        public static boolean isPaused(int videoState) {
+            return hasState(videoState, PAUSED);
+        }
+
+        /**
+         * Determines if a specified state is set in a videoState bit-mask.
+         *
+         * @param videoState The video state bit-mask.
+         * @param state The state to check.
+         * @return {@code True} if the state is set.
+         * {@hide}
+         */
+        private static boolean hasState(int videoState, int state) {
+            return (videoState & state) == state;
+        }
     }
 }
