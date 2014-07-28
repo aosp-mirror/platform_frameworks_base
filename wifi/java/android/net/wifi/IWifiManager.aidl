@@ -24,6 +24,8 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.ScanSettings;
 import android.net.wifi.WifiChannel;
 import android.net.wifi.ScanResult;
+import android.net.wifi.WifiConnectionStatistics;
+
 import android.net.DhcpInfo;
 
 
@@ -146,5 +148,7 @@ interface IWifiManager
     int getAllowScansWithTraffic();
 
     void setAllowScansWithTraffic(int enabled);
+
+    WifiConnectionStatistics getConnectionStatistics();
 }
 
