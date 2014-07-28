@@ -18,6 +18,8 @@ package android.media.session;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
@@ -65,12 +67,14 @@ public final class MediaController {
     private final ISessionController mSessionBinder;
 
     private final MediaSession.Token mToken;
+    private final Context mContext;
     private final CallbackStub mCbStub = new CallbackStub(this);
     private final ArrayList<MessageHandler> mCallbacks = new ArrayList<MessageHandler>();
     private final Object mLock = new Object();
 
     private boolean mCbRegistered = false;
-    private MediaSessionInfo mInfo;
+    private String mPackageName;
+    private String mTag;
 
     private final TransportControls mTransportControls;
 
@@ -80,22 +84,27 @@ public final class MediaController {
      *
      * @hide
      */
-    public MediaController(ISessionController sessionBinder) {
+    public MediaController(Context context, ISessionController sessionBinder) {
         if (sessionBinder == null) {
             throw new IllegalArgumentException("Session token cannot be null");
+        }
+        if (context == null) {
+            throw new IllegalArgumentException("Context cannot be null");
         }
         mSessionBinder = sessionBinder;
         mTransportControls = new TransportControls();
         mToken = new MediaSession.Token(sessionBinder);
+        mContext = context;
     }
 
     /**
      * Create a new MediaController from a session's token.
      *
+     * @param context The caller's context.
      * @param token The token for the session.
      */
-    public MediaController(@NonNull MediaSession.Token token) {
-        this(token.getBinder());
+    public MediaController(@NonNull Context context, @NonNull MediaSession.Token token) {
+        this(context, token.getBinder());
     }
 
     /**
@@ -241,6 +250,21 @@ public final class MediaController {
     }
 
     /**
+     * Get an intent for launching UI associated with this session if one
+     * exists.
+     *
+     * @return A {@link PendingIntent} to launch UI or null.
+     */
+    public @Nullable PendingIntent getLaunchActivity() {
+        try {
+            return mSessionBinder.getLaunchPendingIntent();
+        } catch (RemoteException e) {
+            Log.wtf(TAG, "Error calling getPendingIntent.", e);
+        }
+        return null;
+    }
+
+    /**
      * Get the token for the session this is connected to.
      *
      * @return The token for the connected session.
@@ -355,20 +379,36 @@ public final class MediaController {
     }
 
     /**
-     * Get the info for the session this controller is connected to.
+     * Get the session owner's package name.
      *
-     * @return The session info for the connected session.
-     * @hide
+     * @return The package name of of the session owner.
      */
-    public MediaSessionInfo getSessionInfo() {
-        if (mInfo == null) {
+    public String getPackageName() {
+        if (mPackageName == null) {
             try {
-                mInfo = mSessionBinder.getSessionInfo();
+                mPackageName = mSessionBinder.getPackageName();
             } catch (RemoteException e) {
-                Log.e(TAG, "Error in getSessionInfo.", e);
+                Log.d(TAG, "Dead object in getPackageName.", e);
             }
         }
-        return mInfo;
+        return mPackageName;
+    }
+
+    /**
+     * Get the session's tag for debugging purposes.
+     *
+     * @return The session's tag.
+     * @hide
+     */
+    public String getTag() {
+        if (mTag == null) {
+            try {
+                mTag = mSessionBinder.getTag();
+            } catch (RemoteException e) {
+                Log.d(TAG, "Dead object in getTag.", e);
+            }
+        }
+        return mTag;
     }
 
     /*
