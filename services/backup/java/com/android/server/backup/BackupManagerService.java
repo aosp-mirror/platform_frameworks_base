@@ -8441,6 +8441,50 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         return null;
     }
 
+    // Supply the manage-data intent for the given transport.
+    public Intent getDataManagementIntent(String transportName) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
+                "getDataManagementIntent");
+
+        synchronized (mTransports) {
+            final IBackupTransport transport = mTransports.get(transportName);
+            if (transport != null) {
+                try {
+                    final Intent intent = transport.dataManagementIntent();
+                    if (MORE_DEBUG) Slog.d(TAG, "getDataManagementIntent() returning intent "
+                            + intent);
+                    return intent;
+                } catch (RemoteException e) {
+                    /* fall through to return null */
+                }
+            }
+        }
+
+        return null;
+    }
+
+    // Supply the menu label for affordances that fire the manage-data intent
+    // for the given transport.
+    public String getDataManagementLabel(String transportName) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
+                "getDataManagementLabel");
+
+        synchronized (mTransports) {
+            final IBackupTransport transport = mTransports.get(transportName);
+            if (transport != null) {
+                try {
+                    final String text = transport.dataManagementLabel();
+                    if (MORE_DEBUG) Slog.d(TAG, "getDataManagementLabel() returning " + text);
+                    return text;
+                } catch (RemoteException e) {
+                    /* fall through to return null */
+                }
+            }
+        }
+
+        return null;
+    }
+
     // Callback: a requested backup agent has been instantiated.  This should only
     // be called from the Activity Manager.
     public void agentConnected(String packageName, IBinder agentBinder) {
