@@ -170,7 +170,7 @@ public class ChangeBounds extends Transition {
             int endWidth = endRight - endLeft;
             int endHeight = endBottom - endTop;
             int numChanges = 0;
-            if (startWidth != 0 && startHeight != 0 && endWidth != 0 && endHeight != 0) {
+            if ((startWidth != 0 && startHeight != 0) || (endWidth != 0 && endHeight != 0)) {
                 if (startLeft != endLeft || startTop != endTop) ++numChanges;
                 if (startRight != endRight || startBottom != endBottom) ++numChanges;
             }
