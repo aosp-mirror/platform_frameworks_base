@@ -420,8 +420,11 @@ static void Image_getLockedBufferInfo(JNIEnv* env, CpuConsumer::LockedBuffer* bu
                                 "Width is not multiple of 4 %d", buffer->width);
             LOG_ALWAYS_FATAL_IF(buffer->height % 2,
                                 "Height is not even %d", buffer->height);
+            LOG_ALWAYS_FATAL_IF(buffer->stride < (buffer->width * 10 / 8),
+                                "stride (%d) should be at least %d",
+                                buffer->stride, buffer->width * 10 / 8);
             pData = buffer->data;
-            dataSize = buffer->width * buffer->height * 10 / 8;
+            dataSize = buffer->stride * buffer->height;
             break;
         case HAL_PIXEL_FORMAT_RGBA_8888:
         case HAL_PIXEL_FORMAT_RGBX_8888:
@@ -535,11 +538,14 @@ static jint Image_imageGetRowStride(JNIEnv* env, CpuConsumer::LockedBuffer* buff
             rowStride = (idx == 0) ? buffer->stride : ALIGN(buffer->stride / 2, 16);
             break;
         case HAL_PIXEL_FORMAT_BLOB:
-        case HAL_PIXEL_FORMAT_RAW10:
             // Blob is used for JPEG data, RAW10 is used for 10-bit raw data, they are
             // single plane, row and pixel strides are 0.
             ALOG_ASSERT(idx == 0, "Wrong index: %d", idx);
             rowStride = 0;
+            break;
+        case HAL_PIXEL_FORMAT_RAW10:
+            ALOG_ASSERT(idx == 0, "Wrong index: %d", idx);
+            rowStride = buffer->stride;
             break;
         case HAL_PIXEL_FORMAT_Y8:
             ALOG_ASSERT(idx == 0, "Wrong index: %d", idx);
