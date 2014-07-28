@@ -379,7 +379,7 @@ public class StaticLayout extends Layout {
                                 okBottom = fitBottom;
                         }
                     } else {
-                        final boolean moreChars;
+                        final boolean moreChars = (j + 1 < spanEnd);
                         int endPos;
                         int above, below, top, bottom;
                         float currentTextWidth;
@@ -391,7 +391,6 @@ public class StaticLayout extends Layout {
                             top = okTop;
                             bottom = okBottom;
                             currentTextWidth = okWidth;
-                            moreChars = (j + 1 < spanEnd);
                         } else if (fit != here) {
                             endPos = fit;
                             above = fitAscent;
@@ -399,21 +398,13 @@ public class StaticLayout extends Layout {
                             top = fitTop;
                             bottom = fitBottom;
                             currentTextWidth = fitWidth;
-                            moreChars = (j + 1 < spanEnd);
                         } else {
-                            // must make progress, so take next character
                             endPos = here + 1;
-                            // but to deal properly with clusters
-                            // take all zero width characters following that
-                            while (endPos < spanEnd && widths[endPos - paraStart] == 0) {
-                                endPos++;
-                            }
-                            above = fmAscent;
-                            below = fmDescent;
-                            top = fmTop;
-                            bottom = fmBottom;
+                            above = fm.ascent;
+                            below = fm.descent;
+                            top = fm.top;
+                            bottom = fm.bottom;
                             currentTextWidth = widths[here - paraStart];
-                            moreChars = (endPos < spanEnd);
                         }
 
                         v = out(source, here, endPos,
