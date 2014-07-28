@@ -126,7 +126,7 @@ public:
     SortedVector<const SkPath*> sourcePaths;
     Vector<const SkRegion*> regions;
     Vector<Layer*> layers;
-    uint32_t functorCount;
+    Vector<Functor*> functors;
     bool hasDrawOps;
 
     bool isEmpty() {

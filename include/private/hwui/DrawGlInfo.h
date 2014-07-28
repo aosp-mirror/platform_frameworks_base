@@ -58,7 +58,12 @@ struct DrawGlInfo {
         kModeProcess,
         // Same as kModeProcess, however there is no GL context because it was
         // lost or destroyed
-        kModeProcessNoContext
+        kModeProcessNoContext,
+        // Invoked every time the UI thread pushes over a frame to the render thread
+        // *and the owning view has a dirty display list*. This is a signal to sync
+        // any data that needs to be shared between the UI thread and the render thread.
+        // During this time the UI thread is blocked.
+        kModeSync
     };
 
     /**
