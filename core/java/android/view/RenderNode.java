@@ -597,6 +597,9 @@ public class RenderNode {
      * @see #getScaleX()
      */
     public boolean setScaleX(float scaleX) {
+        if (scaleX > 1000000) {
+            throw new IllegalArgumentException("Invalid scale: " + scaleX);
+        }
         return nSetScaleX(mNativeRenderNode, scaleX);
     }
 
@@ -618,6 +621,9 @@ public class RenderNode {
      * @see #getScaleY()
      */
     public boolean setScaleY(float scaleY) {
+        if (scaleY > 1000000) {
+            throw new IllegalArgumentException("Invalid scale: " + scaleY);
+        }
         return nSetScaleY(mNativeRenderNode, scaleY);
     }
 
