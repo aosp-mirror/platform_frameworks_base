@@ -1652,4 +1652,6 @@
 
     <bool name="config_networkSamplingWakesDevice">true</bool>
 
+    <string-array translatable="false" name="config_cdma_home_system" />
+
 </resources>
