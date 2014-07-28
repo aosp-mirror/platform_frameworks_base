@@ -87,24 +87,15 @@
         android:text="@*android:string/emergency_calls_only"
         android:gravity="center_vertical" />
 
-    <RelativeLayout
-        android:id="@+id/datetime"
+    <FrameLayout
+        android:id="@+id/date_group"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="start"
-        android:paddingTop="4dp"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:background="?android:attr/selectableItemBackground"
-        android:enabled="false"
-        >
-        <include layout="@layout/split_clock_view"
-            android:id="@+id/clock"
-            />
-
+        android:layout_alignParentBottom="true">
         <com.android.systemui.statusbar.policy.DateView android:id="@+id/date_collapsed"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
             android:singleLine="true"
             android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Date"
             android:layout_below="@id/clock"
@@ -113,12 +104,40 @@
         <com.android.systemui.statusbar.policy.DateView android:id="@+id/date_expanded"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
             android:singleLine="true"
             android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Date"
             android:layout_below="@id/clock"
             systemui:datePattern="eeeeMMMMd"
             />
-    </RelativeLayout>
+    </FrameLayout>
+
+    <include layout="@layout/split_clock_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_above="@id/date_group"
+        android:id="@+id/clock"
+        />
+
+    <Button android:id="@+id/alarm_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_toEndOf="@id/date_group"
+        android:layout_marginBottom="4dp"
+        android:drawablePadding="6dp"
+        android:drawableStart="@drawable/ic_access_alarms_small"
+        android:textColor="#64ffffff"
+        android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Date"
+        android:paddingEnd="6dp"
+        android:paddingStart="6dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp"
+        android:background="?android:attr/selectableItemBackground"
+        android:visibility="gone"
+        />
+
     <com.android.keyguard.CarrierText
         android:id="@+id/keyguard_carrier_text"
         android:layout_width="match_parent"

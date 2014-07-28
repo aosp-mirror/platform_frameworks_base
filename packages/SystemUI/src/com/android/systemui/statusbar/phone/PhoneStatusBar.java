@@ -70,7 +70,6 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.NotificationListenerService.RankingMap;
@@ -130,6 +129,7 @@ import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.SpeedBumpView;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
 import com.android.systemui.statusbar.policy.BluetoothControllerImpl;
@@ -224,6 +224,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     KeyguardUserSwitcher mKeyguardUserSwitcher;
     FlashlightController mFlashlightController;
     UserSwitcherController mUserSwitcherController;
+    NextAlarmController mNextAlarmController;
     KeyguardMonitor mKeyguardMonitor;
 
     int mNaturalBarHeight = -1;
@@ -282,7 +283,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private long mKeyguardFadingAwayDuration;
 
     int mKeyguardMaxNotificationCount;
-    View mDateTimeView;
 
     // carrier/wifi label
     private TextView mCarrierLabel;
@@ -702,12 +702,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 (KeyguardIndicationTextView) mStatusBarWindow.findViewById(
                         R.id.keyguard_indication_text));
 
-        mDateTimeView = mHeader.findViewById(R.id.datetime);
-        if (mDateTimeView != null) {
-            mDateTimeView.setOnClickListener(mClockClickListener);
-            mDateTimeView.setEnabled(true);
-        }
-
         mTickerEnabled = res.getBoolean(R.bool.enable_ticker);
         if (mTickerEnabled) {
             final ViewStub tickerStub = (ViewStub) mStatusBarView.findViewById(R.id.ticker_stub);
@@ -784,6 +778,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mFlashlightController = new FlashlightController(mContext);
         mKeyguardBottomArea.setFlashlightController(mFlashlightController);
         mUserSwitcherController = new UserSwitcherController(mContext);
+        mNextAlarmController = new NextAlarmController(mContext);
         mKeyguardMonitor = new KeyguardMonitor();
 
         mKeyguardUserSwitcher = new KeyguardUserSwitcher(mContext,
@@ -815,6 +810,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mUserInfoController.reloadUserInfo();
 
         mHeader.setBatteryController(mBatteryController);
+        mHeader.setNextAlarmController(mNextAlarmController);
 
         PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mBroadcastReceiver.onReceive(mContext,
@@ -2802,6 +2798,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         if (mBatteryController != null) {
             mBatteryController.dump(fd, pw, args);
         }
+        if (mNextAlarmController != null) {
+            mNextAlarmController.dump(fd, pw, args);
+        }
     }
 
     private String hunStateToString(Entry entry) {
@@ -2858,6 +2857,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     public void startActivityDismissingKeyguard(final Intent intent, boolean onlyProvisioned) {
         if (onlyProvisioned && !isDeviceProvisioned()) return;
 
+        final boolean keyguardShowing = mStatusBarKeyguardViewManager.isShowing();
         dismissKeyguardThenExecute(new OnDismissAction() {
             @Override
             public boolean onDismiss() {
@@ -2868,7 +2868,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                                     Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                             mContext.startActivityAsUser(
                                     intent, new UserHandle(UserHandle.USER_CURRENT));
-                            mWindowManagerService.overridePendingAppTransition(null, 0, 0, null);
+                            if (keyguardShowing) {
+                                mWindowManagerService.overridePendingAppTransition(
+                                        null, 0, 0, null);
+                            }
                         } catch (RemoteException e) {
                         }
                     }
