@@ -59,6 +59,7 @@ import com.android.server.hdmi.HdmiCecLocalDevice.PendingActionClearedCallback;
 import libcore.util.EmptyArray;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -343,30 +344,30 @@ public final class HdmiControlService extends SystemService {
             mPortInfoMap.put(info.getId(), info);
         }
 
-        HdmiPortInfo[] mhlPortInfo = new HdmiPortInfo[0];
-        if (mMhlController != null) {
-            // TODO: Implement plumbing logic to get MHL port information.
-            // mhlPortInfo = mMhlController.getPortInfos();
-        }
-
-        ArraySet<Integer> mhlSupportedPorts = new ArraySet<Integer>(mhlPortInfo.length);
-        for (HdmiPortInfo info : mhlPortInfo) {
-            if (info.isMhlSupported()) {
-                mhlSupportedPorts.add(info.getId());
+        if (mMhlController == null) {
+            mPortInfo = Collections.unmodifiableList(Arrays.asList(cecPortInfo));
+            return;
+        } else {
+            HdmiPortInfo[] mhlPortInfo = mMhlController.getPortInfos();
+            ArraySet<Integer> mhlSupportedPorts = new ArraySet<Integer>(mhlPortInfo.length);
+            for (HdmiPortInfo info : mhlPortInfo) {
+                if (info.isMhlSupported()) {
+                    mhlSupportedPorts.add(info.getId());
+                }
             }
-        }
 
-        // Build HDMI port info list with CEC port info plus MHL supported flag.
-        ArrayList<HdmiPortInfo> result = new ArrayList<>(cecPortInfo.length);
-        for (HdmiPortInfo info : cecPortInfo) {
-            if (mhlSupportedPorts.contains(info.getId())) {
-                result.add(new HdmiPortInfo(info.getId(), info.getType(), info.getAddress(),
-                        info.isCecSupported(), true, info.isArcSupported()));
-            } else {
-                result.add(info);
+            // Build HDMI port info list with CEC port info plus MHL supported flag.
+            ArrayList<HdmiPortInfo> result = new ArrayList<>(cecPortInfo.length);
+            for (HdmiPortInfo info : cecPortInfo) {
+                if (mhlSupportedPorts.contains(info.getId())) {
+                    result.add(new HdmiPortInfo(info.getId(), info.getType(), info.getAddress(),
+                            info.isCecSupported(), true, info.isArcSupported()));
+                } else {
+                    result.add(info);
+                }
             }
+            mPortInfo = Collections.unmodifiableList(result);
         }
-        mPortInfo = Collections.unmodifiableList(result);
     }
 
     /**
