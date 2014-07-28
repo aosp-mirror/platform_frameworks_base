@@ -64,6 +64,9 @@ public class LocalTransport extends BackupTransport {
     private static final String TRANSPORT_DESTINATION_STRING
             = "Backing up to debug-only private cache";
 
+    private static final String TRANSPORT_DATA_MANAGEMENT_LABEL
+            = "";
+
     private static final String INCREMENTAL_DIR = "_delta";
     private static final String FULL_DATA_DIR = "_full";
 
@@ -121,6 +124,17 @@ public class LocalTransport extends BackupTransport {
     @Override
     public String currentDestinationString() {
         return TRANSPORT_DESTINATION_STRING;
+    }
+
+    public Intent dataManagementIntent() {
+        // The local transport does not present a data-management UI
+        // TODO: consider adding simple UI to wipe the archives entirely,
+        // for cleaning up the cache partition.
+        return null;
+    }
+
+    public String dataManagementLabel() {
+        return TRANSPORT_DATA_MANAGEMENT_LABEL;
     }
 
     @Override

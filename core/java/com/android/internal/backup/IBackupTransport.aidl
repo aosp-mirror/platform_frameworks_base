@@ -57,6 +57,38 @@ interface IBackupTransport {
 	String currentDestinationString();
 
     /**
+     * Ask the transport for an Intent that can be used to launch a more detailed
+     * secondary data management activity.  For example, the configuration intent might
+     * be one for allowing the user to select which account they wish to associate
+     * their backups with, and the management intent might be one which presents a
+     * UI for managing the data on the backend.
+     *
+     * <p>In the Settings UI, the configuration intent will typically be invoked
+     * when the user taps on the preferences item labeled with the current
+     * destination string, and the management intent will be placed in an overflow
+     * menu labelled with the management label string.
+     *
+     * <p>If the transport does not supply any user-facing data management
+     * UI, then it should return {@code null} from this method.
+     *
+     * @return An intent that can be passed to Context.startActivity() in order to
+     *         launch the transport's data-management UI.  This method will return
+     *         {@code null} if the transport does not offer any user-facing data
+     *         management UI.
+     */
+    Intent dataManagementIntent();
+
+    /**
+     * On demand, supply a short string that can be shown to the user as the label
+     * on an overflow menu item used to invoked the data management UI.
+     *
+     * @return A string to be used as the label for the transport's data management
+     *         affordance.  If the transport supplies a data management intent, this
+     *         method must not return {@code null}.
+     */
+    String dataManagementLabel();
+
+    /**
      * Ask the transport where, on local device storage, to keep backup state blobs.
      * This is per-transport so that mock transports used for testing can coexist with
      * "live" backup services without interfering with the live bookkeeping.  The
