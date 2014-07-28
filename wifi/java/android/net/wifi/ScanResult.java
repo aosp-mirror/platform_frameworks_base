@@ -28,13 +28,19 @@ import android.os.Parcel;
  * but does not currently report them to external clients.
  */
 public class ScanResult implements Parcelable {
-    /** The network name. */
+    /**
+     * The network name.
+     */
     public String SSID;
 
-    /** Ascii encoded SSID. This will replace SSID when we deprecate it. @hide */
+    /**
+     * Ascii encoded SSID. This will replace SSID when we deprecate it. @hide
+     */
     public WifiSsid wifiSsid;
 
-    /** The address of the access point. */
+    /**
+     * The address of the access point.
+     */
     public String BSSID;
     /**
      * Describes the authentication, key management, and encryption schemes
@@ -63,6 +69,27 @@ public class ScanResult implements Parcelable {
      */
     public long seen;
 
+    /**
+     * @hide
+     * Update RSSI of the scan result
+     * @param previousRSSI
+     * @param previousSeen
+     * @param maxAge
+     */
+    public void averageRssi(int previousRssi, long previousSeen, int maxAge) {
+
+        if (seen == 0) {
+            seen = System.currentTimeMillis();
+        }
+        long age = seen - previousSeen;
+
+        if (previousSeen > 0 && age > 0 && age < maxAge/2) {
+            // Average the RSSI with previously seen instances of this scan result
+            double alpha = 0.5 - (double) age / (double) maxAge;
+            level = (int) ((double) level * (1 - alpha) + (double) previousRssi * alpha);
+        }
+    }
+
     /** @hide */
     public static final int ENABLED                                          = 0;
     /** @hide */
@@ -77,6 +104,25 @@ public class ScanResult implements Parcelable {
      * @hide
      */
     public int status;
+
+    /**
+     * Status: indicating the scan result is not a result
+     * that is part of user's saved configurations
+     * @hide
+     */
+    public boolean untrusted;
+
+    /**
+     * Number of time we connected to it
+     * @hide
+     */
+    public int numConnection;
+
+    /**
+     * Number of time autojoin used it
+     * @hide
+     */
+    public int numUsage;
 
     /**
      * The approximate distance to the AP in centimeter, if available.  Else
@@ -105,18 +151,32 @@ public class ScanResult implements Parcelable {
     public final static int UNSPECIFIED = -1;
     /**
      * @hide
-     * TODO: makes real freq boundaries
      */
     public boolean is24GHz() {
-        return frequency > 2400 && frequency < 2500;
+        return ScanResult.is24GHz(frequency);
     }
 
     /**
      * @hide
      * TODO: makes real freq boundaries
      */
+    public static boolean is24GHz(int freq) {
+        return freq > 2400 && freq < 2500;
+    }
+
+    /**
+     * @hide
+     */
     public boolean is5GHz() {
-        return frequency > 4900 && frequency < 5900;
+        return ScanResult.is24GHz(frequency);
+    }
+
+    /**
+     * @hide
+     * TODO: makes real freq boundaries
+     */
+    public static boolean is5GHz(int freq) {
+        return freq > 4900 && freq < 5900;
     }
 
     /** information element from beacon
@@ -175,6 +235,9 @@ public class ScanResult implements Parcelable {
             seen = source.seen;
             passpoint = source.passpoint;
             status = source.status;
+            untrusted = source.untrusted;
+            numConnection = source.numConnection;
+            numUsage = source.numUsage;
         }
     }
 
@@ -237,6 +300,9 @@ public class ScanResult implements Parcelable {
         dest.writeInt(distanceSdCm);
         dest.writeLong(seen);
         dest.writeInt(status);
+        dest.writeInt(untrusted ? 1 : 0);
+        dest.writeInt(numConnection);
+        dest.writeInt(numUsage);
         if (passpoint != null) {
             dest.writeInt(1);
             passpoint.writeToParcel(dest, flags);
@@ -275,6 +341,9 @@ public class ScanResult implements Parcelable {
                 );
                 sr.seen = in.readLong();
                 sr.status = in.readInt();
+                sr.untrusted = in.readInt() != 0;
+                sr.numConnection = in.readInt();
+                sr.numUsage = in.readInt();
                 if (in.readInt() == 1) {
                     sr.passpoint = WifiPasspointInfo.CREATOR.createFromParcel(in);
                 }
