@@ -18,7 +18,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"শেল"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"ত্রুটির প্রতিবেদন নেওয়া হয়েছে"</string>
-    <string name="bugreport_finished_text" msgid="3559904746859400732">"আপনার ত্রুটির প্রতিবেদন ভাগ করতে স্পর্শ করুন"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"আপনার বাগ রিপোর্ট শেয়ার করতে বামে সোয়াইপ করুন"</string>
+    <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"আপনার ত্রুটির প্রতিবেদন ভাগ করতে স্পর্শ করুন"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"ত্রুটির প্রতিবেদনগুলিতে থাকা ডেটা, সিস্টেমের বিভিন্ন লগ ফাইলগুলি থেকে আসে, যাতে ব্যক্তিগত এবং গোপনীয় তথ্য অন্তর্ভুক্ত থাকে৷ আপনি বিশ্বাস করেন শুধুমাত্র এমন অ্যাপ্লিকেশান এবং ব্যক্তিদের সাথে ত্রুটির প্রতিবেদনগুলি ভাগ করুন৷"</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"এই বার্তাটি পরের বার দেখান"</string>
 </resources>

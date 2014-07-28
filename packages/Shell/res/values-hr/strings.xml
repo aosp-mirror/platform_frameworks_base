@@ -18,7 +18,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Ljuska"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"Prijava programske pogreške snimljena je"</string>
-    <string name="bugreport_finished_text" msgid="3559904746859400732">"Dodirnite za dijeljenje prijave programske pogreške"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Prijeđite prstom ulijevo da biste poslali izvješće o programskim pogreškama"</string>
+    <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Dodirnite za dijeljenje prijave programske pogreške"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"Prijave programskih pogrešaka sadržavaju podatke iz različitih datoteka zapisnika sustava, uključujući osobne i privatne informacije. Prijave programskih pogrešaka dijelite samo s aplikacijama i osobama koje smatrate pouzdanima."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Prikaži tu poruku sljedeći put"</string>
 </resources>

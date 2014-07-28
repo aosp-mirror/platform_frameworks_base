@@ -25,16 +25,18 @@
     <string name="label_paper_size_summary" msgid="5668204981332138168">"Taille du papier :"</string>
     <string name="label_color" msgid="1108690305218188969">"Couleur"</string>
     <string name="label_orientation" msgid="2853142581990496477">"Orientation"</string>
-    <string name="label_pages" msgid="6300874667546617333">"Pages (<xliff:g id="PAGE_COUNT">%1$s</xliff:g>)"</string>
+    <string name="label_pages" msgid="7768589729282182230">"Pages"</string>
+    <string name="template_all_pages" msgid="3322235982020148762">"Toutes (<xliff:g id="PAGE_COUNT">%1$s</xliff:g>)"</string>
+    <string name="template_page_range" msgid="428638530038286328">"Plage de <xliff:g id="PAGE_COUNT">%1$s</xliff:g>"</string>
     <string name="pages_range_example" msgid="8558694453556945172">"p. ex. 1-5, 8, 11-13"</string>
     <string name="print_preview" msgid="8010217796057763343">"Aperçu avant impression"</string>
     <string name="install_for_print_preview" msgid="6366303997385509332">"Installer un lecteur PDF pour voir l\'aperçu"</string>
     <string name="printing_app_crashed" msgid="854477616686566398">"L\'application à l\'origine de l\'impression a planté"</string>
-    <string name="page_count_unknown" msgid="6058852665954511124">"Pages"</string>
     <string name="generating_print_job" msgid="3119608742651698916">"Génération tâche impression…"</string>
     <string name="save_as_pdf" msgid="5718454119847596853">"Enregistrer en format PDF"</string>
     <string name="all_printers" msgid="5018829726861876202">"Toutes les imprimantes…"</string>
     <string name="print_dialog" msgid="32628687461331979">"Boîte de dialogue d\'impression"</string>
+    <string name="current_page_template" msgid="1386638343571771292">"<xliff:g id="CURRENT_PAGE">%1$d</xliff:g> sur <xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
     <string name="search" msgid="5421724265322228497">"Rechercher"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"Toutes les imprimantes"</string>
     <string name="add_print_service_label" msgid="5356702546188981940">"Ajouter le service"</string>
@@ -71,13 +73,9 @@
     <item msgid="4061931020926489228">"Portrait"</item>
     <item msgid="3199660090246166812">"Paysage"</item>
   </string-array>
-  <string-array name="page_options_labels">
-    <item msgid="7421377442011699994">"Tous"</item>
-    <item msgid="6812869625222503603">"Plage"</item>
-  </string-array>
     <string name="print_write_error_message" msgid="5787642615179572543">"Impossible d\'écrire dans le fichier"</string>
-    <string name="print_error_default_message" msgid="8568506918983980567">"Impossible de générer la tâche d\'impression"</string>
+    <string name="print_error_default_message" msgid="8602678405502922346">"Échec de l\'action. Réessayez."</string>
     <string name="print_error_retry" msgid="1426421728784259538">"Réessayer"</string>
-    <string name="print_error_printer_unavailable" msgid="6653128543854282851">"Imprimante indisponible"</string>
-    <string name="print_operation_canceling" msgid="5274571823242489160">"Annulation en cours..."</string>
+    <string name="print_error_printer_unavailable" msgid="8985614415253203381">"Cette imprimante n\'est pas accessible pour le moment."</string>
+    <string name="print_preparing_preview" msgid="3939930735671364712">"Préparation de l\'aperçu en cours…"</string>
 </resources>
