@@ -669,6 +669,14 @@ public class WifiConfiguration implements Parcelable {
 
     /**
      * @hide
+     * Number of time we associated to this configuration.
+     */
+    @SystemApi
+    public int numAssociation;
+
+
+    /**
+     * @hide
      * Connect choices
      *
      * remember the keys identifying the known WifiConfiguration over which this configuration
@@ -1188,6 +1196,7 @@ public class WifiConfiguration implements Parcelable {
             numConnectionFailures = source.numConnectionFailures;
             numScorerOverride = source.numScorerOverride;
             numScorerOverrideAndSwitchedNetwork = source.numScorerOverrideAndSwitchedNetwork;
+            numAssociation = source.numAssociation;
         }
     }
 
@@ -1239,6 +1248,7 @@ public class WifiConfiguration implements Parcelable {
         dest.writeInt(numConnectionFailures);
         dest.writeInt(numScorerOverride);
         dest.writeInt(numScorerOverrideAndSwitchedNetwork);
+        dest.writeInt(numAssociation);
     }
 
     /** Implement the Parcelable interface {@hide} */
@@ -1286,6 +1296,7 @@ public class WifiConfiguration implements Parcelable {
                 config.numConnectionFailures = in.readInt();
                 config.numScorerOverride = in.readInt();
                 config.numScorerOverrideAndSwitchedNetwork = in.readInt();
+                config.numAssociation = in.readInt();
                 return config;
             }
 
