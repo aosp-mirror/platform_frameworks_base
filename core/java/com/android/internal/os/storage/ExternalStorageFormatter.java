@@ -59,6 +59,7 @@ public class ExternalStorageFormatter extends Service
     private boolean mFactoryReset = false;
     private boolean mAlwaysReset = false;
     private String mReason = null;
+    private boolean mIsFormatSuccess = false;
 
     StorageEventListener mStorageListener = new StorageEventListener() {
         @Override
@@ -199,6 +200,7 @@ public class ExternalStorageFormatter extends Service
                 || Environment.MEDIA_MOUNTED_READ_ONLY.equals(status)) {
             updateProgressDialog(R.string.progress_unmounting);
             try {
+                if(mIsFormatSuccess) return;
                 final IMountService mountService = getMountService();
                 final StorageVolume[] volumes = mountService.getVolumeList();
                 final ArrayList<StorageVolume> physicalVols = StorageManager.getPhysicalExternalVolume(volumes);
@@ -255,6 +257,7 @@ public class ExternalStorageFormatter extends Service
                                 extStoragePath = mStorageVolume.getPath();
                             }
                             mountService.formatVolume(extStoragePath);
+                            mIsFormatSuccess = true;
                             success = true;
                         } catch (Exception e) {
                             Toast.makeText(ExternalStorageFormatter.this,
