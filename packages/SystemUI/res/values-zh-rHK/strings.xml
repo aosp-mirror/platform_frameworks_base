@@ -73,8 +73,7 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"已擷取螢幕畫面。"</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"輕觸即可查看螢幕擷取畫面。"</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"無法擷取螢幕畫面。"</string>
-    <!-- no translation found for screenshot_failed_text (1260203058661337274) -->
-    <skip />
+    <string name="screenshot_failed_text" msgid="1260203058661337274">"由於儲存空間有限，或是被應用程式或貴機構禁止，因此無法擷取螢幕擷圖。"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB 檔案傳輸選項"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"掛接為媒體播放器 (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"掛接為相機 (PTP)"</string>
@@ -153,7 +152,11 @@
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"TeleTypewriter (TTY) 已啟用。"</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"鈴聲震動。"</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"鈴聲靜音。"</string>
+    <!-- no translation found for accessibility_recents_item_will_be_dismissed (395770242498031481) -->
+    <skip />
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"「<xliff:g id="APP">%s</xliff:g>」已關閉。"</string>
+    <!-- no translation found for accessibility_recents_item_launched (7616039892382525203) -->
+    <skip />
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"通知已關閉。"</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"通知欄。"</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"快速設定。"</string>
@@ -272,18 +275,12 @@
     <string name="guest_nickname" msgid="8059989128963789678">"訪客"</string>
     <string name="guest_new_guest" msgid="4259024453643879653">"新增訪客"</string>
     <string name="guest_exit_guest" msgid="1619100760451149682">"結束訪客模式"</string>
-    <!-- no translation found for guest_exit_guest_dialog_title (7587460301980067285) -->
-    <skip />
-    <!-- no translation found for guest_exit_guest_dialog_message (10255285459589280) -->
-    <skip />
-    <!-- no translation found for guest_wipe_session_title (6419439912885956132) -->
-    <skip />
-    <!-- no translation found for guest_wipe_session_message (5369763062345463297) -->
-    <skip />
-    <!-- no translation found for guest_wipe_session_wipe (9154291314115781448) -->
-    <skip />
-    <!-- no translation found for guest_wipe_session_dontwipe (850084868661344050) -->
-    <skip />
+    <string name="guest_exit_guest_dialog_title" msgid="7587460301980067285">"要結束訪客工作階段嗎？"</string>
+    <string name="guest_exit_guest_dialog_message" msgid="10255285459589280">"結束訪客工作階段後，本機資料將被移除。"</string>
+    <string name="guest_wipe_session_title" msgid="6419439912885956132">"訪客您好，歡迎回來！"</string>
+    <string name="guest_wipe_session_message" msgid="5369763062345463297">"您要開始新的工作階段嗎？"</string>
+    <string name="guest_wipe_session_wipe" msgid="9154291314115781448">"是"</string>
+    <string name="guest_wipe_session_dontwipe" msgid="850084868661344050">"不用了，謝謝"</string>
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"1 分鐘"</item>
     <item quantity="other" msgid="6924190729213550991">"%d 分鐘"</item>
@@ -299,5 +296,9 @@
     <string name="notification_hidden_text" msgid="1135169301897151909">"內容已隱藏"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> 將開始擷取您的螢幕上顯示的內容。"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"不用再顯示"</string>
+    <!-- no translation found for clear_all_notifications_text (814192889771462828) -->
+    <skip />
     <string name="media_projection_action_text" msgid="8470872969457985954">"立即開始"</string>
+    <!-- no translation found for empty_shade_text (708135716272867002) -->
+    <skip />
 </resources>

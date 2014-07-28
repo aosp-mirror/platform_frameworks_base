@@ -96,8 +96,7 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Скриншот тартылды."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"Тийип, скриншотту көрүңүз."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Скриншот кылынбай жатат."</string>
-    <!-- no translation found for screenshot_failed_text (1260203058661337274) -->
-    <skip />
+    <string name="screenshot_failed_text" msgid="1260203058661337274">"Сактагыч орду чектелүү болгондуктан скриншот тарта албайт, же буга колдонмо же ишканаңыз тарабынан уруксат жок."</string>
     <!-- no translation found for usb_preference_title (6551050377388882787) -->
     <skip />
     <!-- no translation found for use_mtp_button_title (4333504413563023626) -->
@@ -177,7 +176,11 @@
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"ТелеТайп терүүсү жандырылган."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Шыңгыраганда титирөө."</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Үнсүз шыңгыроо."</string>
+    <!-- no translation found for accessibility_recents_item_will_be_dismissed (395770242498031481) -->
+    <skip />
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> жок болду."</string>
+    <!-- no translation found for accessibility_recents_item_launched (7616039892382525203) -->
+    <skip />
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Эскертме жок кылынды."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"Эскертмелер көшөгөсү."</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Тез тууралоолор."</string>
@@ -323,5 +326,9 @@
     <string name="notification_hidden_text" msgid="1135169301897151909">"Мазмундар жашырылган"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> экранга чыккан нерсенин баарын сүрөткө тарта баштайт."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Экинчи көрсөтүлбөсүн"</string>
+    <!-- no translation found for clear_all_notifications_text (814192889771462828) -->
+    <skip />
     <string name="media_projection_action_text" msgid="8470872969457985954">"Азыр баштоо"</string>
+    <!-- no translation found for empty_shade_text (708135716272867002) -->
+    <skip />
 </resources>
