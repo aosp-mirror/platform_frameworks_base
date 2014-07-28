@@ -128,6 +128,15 @@ public class AudioFormat {
 
     /**
      * @hide
+     * Return the number of channels from an input channel mask
+     * @param mask a combination of the CHANNEL_IN_* definitions, even CHANNEL_IN_DEFAULT
+     * @return number of channels for the mask
+     */
+    public static int channelCountFromInChannelMask(int mask) {
+        return Integer.bitCount(mask);
+    }
+    /**
+     * @hide
      * Return the number of channels from an output channel mask
      * @param mask a combination of the CHANNEL_OUT_* definitions, but not CHANNEL_OUT_DEFAULT
      * @return number of channels for the mask

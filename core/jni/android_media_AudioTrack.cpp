@@ -50,10 +50,10 @@ struct audio_track_fields_t {
     jfieldID  fieldStreamType; // ... mStreamType field in the AudioTrack Java object
 };
 struct audio_attributes_fields_t {
-    jfieldID  fieldUsage;       // AudioAttributes.mUsage
-    jfieldID  fieldContentType; // AudioAttributes.mContentType
-    jfieldID  fieldFlags;       // AudioAttributes.mFlags
-    jfieldID  fieldTags;        // AudioAttributes.mTags
+    jfieldID  fieldUsage;        // AudioAttributes.mUsage
+    jfieldID  fieldContentType;  // AudioAttributes.mContentType
+    jfieldID  fieldFlags;        // AudioAttributes.mFlags
+    jfieldID  fieldFormattedTags;// AudioAttributes.mFormattedTags
 };
 static audio_track_fields_t      javaAudioTrackFields;
 static audio_attributes_fields_t javaAudioAttrFields;
@@ -263,7 +263,8 @@ android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject weak_this,
     audio_attributes_t *paa = NULL;
     // read the AudioAttributes values
     paa = (audio_attributes_t *) calloc(1, sizeof(audio_attributes_t));
-    const jstring jtags    = (jstring) env->GetObjectField(jaa, javaAudioAttrFields.fieldTags);
+    const jstring jtags =
+            (jstring) env->GetObjectField(jaa, javaAudioAttrFields.fieldFormattedTags);
     const char* tags = env->GetStringUTFChars(jtags, NULL);
     // copying array size -1, char array for tags was calloc'd, no need to NULL-terminate it
     strncpy(paa->tags, tags, AUDIO_ATTRIBUTES_TAGS_MAX_SIZE - 1);
@@ -1112,11 +1113,12 @@ int register_android_media_AudioTrack(JNIEnv *env)
     javaAudioAttrFields.fieldContentType
                                    = env->GetFieldID(audioAttributesClassRef, "mContentType", "I");
     javaAudioAttrFields.fieldFlags = env->GetFieldID(audioAttributesClassRef, "mFlags", "I");
-    javaAudioAttrFields.fieldTags  = env->GetFieldID(audioAttributesClassRef, "mFormattedTags",
-            "Ljava/lang/String;");
+    javaAudioAttrFields.fieldFormattedTags =
+            env->GetFieldID(audioAttributesClassRef, "mFormattedTags", "Ljava/lang/String;");
     env->DeleteGlobalRef(audioAttributesClassRef);
     if (javaAudioAttrFields.fieldUsage == NULL || javaAudioAttrFields.fieldContentType == NULL
-            || javaAudioAttrFields.fieldFlags == NULL || javaAudioAttrFields.fieldTags == NULL) {
+            || javaAudioAttrFields.fieldFlags == NULL
+            || javaAudioAttrFields.fieldFormattedTags == NULL) {
         ALOGE("Can't initialize AudioAttributes fields");
         return -1;
     }
