@@ -1392,6 +1392,10 @@
     <string name="permdesc_recovery" msgid="8511774533266359571">"Permite unei aplicații să interacționeze cu sistemul de recuperare și cu actualizările de sistem."</string>
     <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Creați sesiuni de proiecție media"</string>
     <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"Permite unei aplicații să creeze sesiuni de proiecție media. Aceste sesiuni pot permite aplicațiilor să captureze conținuturi vizuale și audio. Nu trebuie utilizată pentru aplicații obișnuite."</string>
+    <!-- no translation found for permlab_readInstallSessions (6165432407628065939) -->
+    <skip />
+    <!-- no translation found for permdesc_readInstallSessions (2049771699626019849) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Atingeţi de două ori pentru a mări/micşora"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Nu s-a putut adăuga widgetul."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Accesaţi"</string>
@@ -1410,6 +1414,10 @@
     <string name="deny" msgid="2081879885755434506">"Refuzaţi"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Permisiune solicitată"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Permisiune solicitată\npentru contul <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
+    <!-- no translation found for forward_intent_to_owner (570916783072215572) -->
+    <skip />
+    <!-- no translation found for forward_intent_to_work (8624579696577525279) -->
+    <skip />
     <string name="input_method_binding_label" msgid="1283557179944992649">"Metodă de intrare"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Sincronizare"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Accesibilitate"</string>
@@ -1619,14 +1627,16 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Aţi desenat incorect modelul pentru deblocare de <xliff:g id="NUMBER_0">%d</xliff:g> ori. După încă <xliff:g id="NUMBER_1">%d</xliff:g> încercări nereuşite, vi se va solicita să deblocaţi telefonul cu ajutorul unui cont de e-mail.\n\n Încercaţi din nou peste <xliff:g id="NUMBER_2">%d</xliff:g> (de) secunde."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Eliminaţi"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"Ridicați volumul mai sus de nivelul recomandat?\nAscultarea la volum ridicat pe perioade lungi de timp vă poate afecta auzul."</string>
+    <!-- no translation found for safe_media_volume_warning (2276318909314492312) -->
+    <skip />
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Menţineţi două degete pe ecran pentru a activa accesibilitatea."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"S-a activat accesibilitatea."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Accesibilitatea a fost anulată"</string>
     <string name="user_switched" msgid="3768006783166984410">"Utilizator curent: <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"Proprietar"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Eroare"</string>
-    <string name="app_no_restricted_accounts" msgid="5739463249673727736">"Această aplicație nu acceptă conturi pentru profilurile cu permisiuni limitate"</string>
+    <!-- no translation found for error_message_change_not_allowed (1347282344200417578) -->
+    <skip />
     <string name="app_not_found" msgid="3429141853498927379">"Nicio aplicație pentru gestionarea acestei acțiuni"</string>
     <string name="revoke" msgid="5404479185228271586">"Revocați"</string>
     <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>

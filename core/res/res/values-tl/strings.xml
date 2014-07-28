@@ -298,10 +298,8 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Pinapayagan ang app na makatanggap at makapagproseso ng mga mensahe ng Bluetooth MAP. Nangangahulugan ito na maaaring subaybayan o i-delete ng app ang mga mensaheng ipinapadala sa iyong device nang hindi ipinapakita ang mga ito sa iyo."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"bawiin ang tumatakbong apps"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Pinapayagan ang app na kumuha ng impormasyon tungkol sa mga kasalukuyan at kamakailang gumaganang gawain. Maaari nitong payagan ang app na tumuklas ng impormasyon tungkol sa kung aling mga application ang ginagamit sa device."</string>
-    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
-    <skip />
-    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
-    <skip />
+    <string name="permlab_startTasksFromRecents" msgid="8990073877885690623">"magsimula ng gawain mula sa mga kamakailang ginamit"</string>
+    <string name="permdesc_startTasksFromRecents" msgid="7382133554871222235">"Nagbibigay-daan sa app na gumamit ng isang ActivityManager.RecentTaskInfo object upang maglunsad ng isang hindi na umiiral na gawain na ibinalik mula sa ActivityManager.getRecentTaskList()."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"makipag-ugnayan sa kabuuan ng mga user"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Binibigyang-daan ang app upang magsagawa ng mga pagkilos sa kabuuan ng iba\'t ibang mga user sa device. Maaari itong gamitin ng nakakahamak na apps upang lumabag sa proteksyon sa pagitan ng mga user."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"ganap na lisensya upang makipag-ugnayan sa kabuuan ng mga user"</string>
@@ -1392,6 +1390,10 @@
     <string name="permdesc_recovery" msgid="8511774533266359571">"Binibigyang-daan ang isang application na makipag-ugnay sa system ng pagbawi at mga pag-update ng system."</string>
     <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Gumawa ng mga media projection session"</string>
     <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"Nagbibigay-daan sa isang application upang gumawa ng mga media projection session. Makakapagbigay ang mga session na ito ng kakayahan sa mga application na ma-capture ang mga nilalaman ng display at audio. Hindi kailanman dapat kailanganin ng mga normal na app."</string>
+    <!-- no translation found for permlab_readInstallSessions (6165432407628065939) -->
+    <skip />
+    <!-- no translation found for permdesc_readInstallSessions (2049771699626019849) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Pindutin nang dalawang beses para sa pagkontrol ng zoom"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Hindi maidagdag ang widget."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Pumunta"</string>
@@ -1410,6 +1412,10 @@
     <string name="deny" msgid="2081879885755434506">"Tanggihan"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Hiniling ang pahintulot"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Hiniling ang pahintulot\npara sa account na <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
+    <!-- no translation found for forward_intent_to_owner (570916783072215572) -->
+    <skip />
+    <!-- no translation found for forward_intent_to_work (8624579696577525279) -->
+    <skip />
     <string name="input_method_binding_label" msgid="1283557179944992649">"Pamamaraan ng pag-input"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"I-sync"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Kakayahang Ma-access"</string>
@@ -1559,8 +1565,7 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"System"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Audio sa Bluetooth"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Wireless display"</string>
-    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
-    <skip />
+    <string name="media_route_button_content_description" msgid="591703006349356016">"I-cast"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Kumonekta sa device"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"I-cast ang screen sa device"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Naghahanap ng mga device…"</string>
@@ -1619,14 +1624,16 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Naguhit mo nang hindi tama ang iyong pattern sa pag-unlock nang <xliff:g id="NUMBER_0">%d</xliff:g> (na) beses. Pagkatapos ng <xliff:g id="NUMBER_1">%d</xliff:g> pang hindi matagumpay na pagtatangka, hihilingin sa iyong i-unlock ang telepono mo gamit ang isang email account.\n\n Subukang muli sa loob ng <xliff:g id="NUMBER_2">%d</xliff:g> (na) segundo."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Alisin"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"Lakasan ang volume nang lagpas sa ligtas na antas?\nMaaaring mapinsala ng pakikinig sa malakas na volume sa loob ng mahahabang panahon ang iyong pandinig."</string>
+    <!-- no translation found for safe_media_volume_warning (2276318909314492312) -->
+    <skip />
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Panatilihing nakapindot nang matagal ang iyong dalawang daliri upang paganahin ang pagiging naa-access."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Pinagana ang accessibility."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Nakansela ang pagiging naa-access."</string>
     <string name="user_switched" msgid="3768006783166984410">"Kasalukuyang user <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"May-ari"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Error"</string>
-    <string name="app_no_restricted_accounts" msgid="5739463249673727736">"Hindi sinusuportahan ng app na ito ang mga account para sa mga pinaghihigpitang profile"</string>
+    <!-- no translation found for error_message_change_not_allowed (1347282344200417578) -->
+    <skip />
     <string name="app_not_found" msgid="3429141853498927379">"Walang nakitang application na mangangasiwa sa pagkilos na ito"</string>
     <string name="revoke" msgid="5404479185228271586">"Bawiin"</string>
     <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>

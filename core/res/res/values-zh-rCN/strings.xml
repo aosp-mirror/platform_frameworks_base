@@ -298,10 +298,8 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"允许此应用接收和处理蓝牙MAP信息。这意味着，该应用可能会监视发送或到您设备的信息，在您阅读发送到您设备的信息之前擅自删除信息。"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"检索正在运行的应用"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"允许该应用检索近期运行的和当前正在运行的任务的相关信息。此权限可让该应用了解设备上使用了哪些应用。"</string>
-    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
-    <skip />
-    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
-    <skip />
+    <string name="permlab_startTasksFromRecents" msgid="8990073877885690623">"从“最近用过的应用”发起任务"</string>
+    <string name="permdesc_startTasksFromRecents" msgid="7382133554871222235">"允许应用使用ActivityManager.RecentTaskInfo对象发起从ActivityManager.getRecentTaskList()返回的无效任务。"</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"用户间互动"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"允许该应用在设备上跨多个用户执行操作。恶意应用可能会借此破坏用户之间的保护措施。"</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"完全允许在用户之间进行互动"</string>
@@ -401,7 +399,7 @@
     <string name="permdesc_bindNfcService" msgid="6120647629174066862">"允许应用绑定到模拟 NFC 卡的应用。普通应用绝不需要此权限。"</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"绑定至文字服务"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"允许应用绑定至文本服务（如 SpellCheckerService）的顶级接口。普通应用绝不需要此权限。"</string>
-    <string name="permlab_bindVpnService" msgid="4708596021161473255">"绑定到 VPN 服务"</string>
+    <string name="permlab_bindVpnService" msgid="4708596021161473255">"绑定到VPN服务"</string>
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"允许应用绑定到VPN服务的顶级接口。普通应用绝不需要此权限。"</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"绑定到壁纸"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"允许应用绑定到壁纸的顶级接口。普通应用绝不需要此权限。"</string>
@@ -521,10 +519,10 @@
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"允许应用读取帧缓冲区的内容。"</string>
     <string name="permlab_accessInputFlinger" msgid="5348635270689553857">"使用 InputFlinger"</string>
     <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"允许应用使用 InputFlinger 底层功能。"</string>
-    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"配置 WLAN 显示设备"</string>
-    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"允许应用配置并连接到 WLAN 显示设备。"</string>
-    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"控制 WLAN 显示设备"</string>
-    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"允许应用控制 WLAN 显示设备的基础功能。"</string>
+    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"配置WLAN显示设备"</string>
+    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"允许应用配置并连接到WLAN显示设备。"</string>
+    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"控制WLAN显示设备"</string>
+    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"允许应用控制WLAN显示设备的基础功能。"</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"捕获音频输出"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"允许该应用捕获和重定向音频输出。"</string>
     <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"启动指令检测"</string>
@@ -649,13 +647,13 @@
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"允许应用更改绑定网络连接的状态。"</string>
     <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"更改后台流量设置"</string>
     <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"允许应用更改后台流量设置。"</string>
-    <string name="permlab_accessWifiState" msgid="5202012949247040011">"查看 WLAN 连接"</string>
-    <string name="permdesc_accessWifiState" msgid="5002798077387803726">"允许该应用查看 WLAN 网络的相关信息，例如是否启用了 WLAN 以及连接的 WLAN 设备的名称。"</string>
-    <string name="permlab_changeWifiState" msgid="6550641188749128035">"连接 WLAN 和断开连接"</string>
-    <string name="permdesc_changeWifiState" msgid="7137950297386127533">"允许该应用与 WLAN 接入点建立和断开连接，以及更改 WLAN 网络的设备配置。"</string>
-    <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"允许接收 WLAN 多播"</string>
-    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"允许该应用使用多播地址接收发送到 WLAN 网络上所有设备（而不仅仅是您的平板电脑）的数据包。该操作的耗电量比非多播模式要大。"</string>
-    <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"允许该应用使用多播地址接收发送到 WLAN 网络上所有设备（而不仅仅是您的手机）的数据包。该操作的耗电量比非多播模式要大。"</string>
+    <string name="permlab_accessWifiState" msgid="5202012949247040011">"查看WLAN连接"</string>
+    <string name="permdesc_accessWifiState" msgid="5002798077387803726">"允许该应用查看WLAN网络的相关信息，例如是否启用了WLAN以及连接的WLAN设备的名称。"</string>
+    <string name="permlab_changeWifiState" msgid="6550641188749128035">"连接WLAN网络和断开连接"</string>
+    <string name="permdesc_changeWifiState" msgid="7137950297386127533">"允许该应用与WLAN接入点建立和断开连接，以及更改WLAN网络的设备配置。"</string>
+    <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"允许接收WLAN多播"</string>
+    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"允许该应用使用多播地址接收发送到WLAN网络上所有设备（而不仅仅是您的平板电脑）的数据包。该操作的耗电量比非多播模式要大。"</string>
+    <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"允许该应用使用多播地址接收发送到WLAN网络上所有设备（而不仅仅是您的手机）的数据包。该操作的耗电量比非多播模式要大。"</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"访问蓝牙设置"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"允许应用配置本地蓝牙平板电脑，以及发现远程设备并进行配对。"</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"允许应用配置本地蓝牙手机，以及发现远程设备并进行配对。"</string>
@@ -1249,23 +1247,23 @@
     <string name="ringtone_picker_title" msgid="3515143939175119094">"铃声"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"未知铃声"</string>
   <plurals name="wifi_available">
-    <item quantity="one" msgid="6654123987418168693">"有可用的 WLAN 网络"</item>
-    <item quantity="other" msgid="4192424489168397386">"有可用的 WLAN 网络"</item>
+    <item quantity="one" msgid="6654123987418168693">"有可用的WLAN网络"</item>
+    <item quantity="other" msgid="4192424489168397386">"有可用的WLAN网络"</item>
   </plurals>
   <plurals name="wifi_available_detailed">
-    <item quantity="one" msgid="1634101450343277345">"打开可用的 WLAN 网络"</item>
-    <item quantity="other" msgid="7915895323644292768">"打开可用的 WLAN 网络"</item>
+    <item quantity="one" msgid="1634101450343277345">"打开可用的WLAN网络"</item>
+    <item quantity="other" msgid="7915895323644292768">"打开可用的WLAN网络"</item>
   </plurals>
-    <string name="wifi_available_sign_in" msgid="4029489716605255386">"登录到 WLAN 网络"</string>
+    <string name="wifi_available_sign_in" msgid="4029489716605255386">"登录到WLAN网络"</string>
     <string name="network_available_sign_in" msgid="8495155593358054676">"登录网络"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"无法连接到 WLAN"</string>
+    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"无法连接到WLAN"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" 互联网连接状况不佳。"</string>
-    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"WLAN 直连"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"启动 WLAN 直连。此操作将会关闭 WLAN 客户端/热点。"</string>
-    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"无法启动 WLAN 直连。"</string>
-    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"已启用 WLAN 直连"</string>
+    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"WLAN直连"</string>
+    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"启动WLAN直连。此操作将会关闭WLAN客户端/热点。"</string>
+    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"无法启动WLAN直连。"</string>
+    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"已启用WLAN直连"</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"通过触摸进行设置"</string>
     <string name="accept" msgid="1645267259272829559">"接受"</string>
     <string name="decline" msgid="2112225451706137894">"拒绝"</string>
@@ -1275,8 +1273,8 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"收件人："</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"键入所需的 PIN："</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN："</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"平板电脑连接到“<xliff:g id="DEVICE_NAME">%1$s</xliff:g>”时会暂时断开与 WLAN 的连接"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"手机连接到<xliff:g id="DEVICE_NAME">%1$s</xliff:g>时会暂时断开与 WLAN 的连接。"</string>
+    <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"平板电脑连接到“<xliff:g id="DEVICE_NAME">%1$s</xliff:g>”时会暂时断开与WLAN的连接"</string>
+    <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"手机连接到<xliff:g id="DEVICE_NAME">%1$s</xliff:g>时会暂时断开与WLAN的连接。"</string>
     <string name="select_character" msgid="3365550120617701745">"插入字符"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"正在发送短信"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;在发送大量短信。是否允许该应用继续发送短信？"</string>
@@ -1392,6 +1390,10 @@
     <string name="permdesc_recovery" msgid="8511774533266359571">"允许应用与恢复系统和系统更新互动。"</string>
     <string name="permlab_createMediaProjection" msgid="4941338725487978112">"创建媒体投影会话"</string>
     <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"允许应用创建媒体投影会话。这些会话可让应用截取显示内容和音频内容。普通应用绝不需要此权限。"</string>
+    <!-- no translation found for permlab_readInstallSessions (6165432407628065939) -->
+    <skip />
+    <!-- no translation found for permdesc_readInstallSessions (2049771699626019849) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"触摸两次可进行缩放控制"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"无法添加小部件。"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"开始"</string>
@@ -1410,6 +1412,10 @@
     <string name="deny" msgid="2081879885755434506">"拒绝"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"权限请求"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"应用对帐户 <xliff:g id="ACCOUNT">%s</xliff:g>\n 提出权限请求。"</string>
+    <!-- no translation found for forward_intent_to_owner (570916783072215572) -->
+    <skip />
+    <!-- no translation found for forward_intent_to_work (8624579696577525279) -->
+    <skip />
     <string name="input_method_binding_label" msgid="1283557179944992649">"输入法"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"同步"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"辅助功能"</string>
@@ -1417,13 +1423,13 @@
     <string name="chooser_wallpaper" msgid="7873476199295190279">"更改壁纸"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"通知侦听器"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"条件提供程序"</string>
-    <string name="vpn_title" msgid="19615213552042827">"VPN 已激活"</string>
-    <string name="vpn_title_long" msgid="6400714798049252294">"“<xliff:g id="APP">%s</xliff:g>”已激活 VPN"</string>
+    <string name="vpn_title" msgid="19615213552042827">"已激活VPN"</string>
+    <string name="vpn_title_long" msgid="6400714798049252294">"<xliff:g id="APP">%s</xliff:g>已激活VPN"</string>
     <string name="vpn_text" msgid="3011306607126450322">"触摸可管理网络。"</string>
     <string name="vpn_text_long" msgid="6407351006249174473">"已连接到“<xliff:g id="SESSION">%s</xliff:g>”。触摸可管理网络。"</string>
-    <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"正在连接到始终开启的 VPN…"</string>
-    <string name="vpn_lockdown_connected" msgid="8202679674819213931">"已连接到始终开启的 VPN"</string>
-    <string name="vpn_lockdown_error" msgid="6009249814034708175">"始终开启的 VPN 出现错误"</string>
+    <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"正在连接到始终开启的VPN…"</string>
+    <string name="vpn_lockdown_connected" msgid="8202679674819213931">"已连接到始终开启的VPN"</string>
+    <string name="vpn_lockdown_error" msgid="6009249814034708175">"始终开启的VPN出现错误"</string>
     <string name="vpn_lockdown_config" msgid="6415899150671537970">"触摸即可进行配置"</string>
     <string name="upload_file" msgid="2897957172366730416">"选择文件"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"未选定任何文件"</string>
@@ -1524,7 +1530,7 @@
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"已超出 2G-3G 数据流量限制"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"已超出 4G 数据使用上限"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"已超出移动数据流量上限"</string>
-    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"超出了 WLAN 数据流量上限"</string>
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"超出了WLAN数据流量上限"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"超出规定上限 <xliff:g id="SIZE">%s</xliff:g>。"</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"后台流量受限制"</string>
     <string name="data_usage_restricted_body" msgid="6741521330997452990">"触摸可去除限制。"</string>
@@ -1619,14 +1625,16 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"您已经 <xliff:g id="NUMBER_0">%d</xliff:g> 次错误地绘制了解锁图案。如果再尝试 <xliff:g id="NUMBER_1">%d</xliff:g> 次后仍不成功，系统就会要求您使用自己的电子邮件帐户解锁手机。\n\n请在 <xliff:g id="NUMBER_2">%d</xliff:g> 秒后重试。"</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"删除"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"将音量调高到推荐级别以上？\n长时间聆听高音量可能会损伤听力。"</string>
+    <!-- no translation found for safe_media_volume_warning (2276318909314492312) -->
+    <skip />
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"持续按住双指即可启用辅助功能。"</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"辅助功能已启用。"</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"已取消辅助功能。"</string>
     <string name="user_switched" msgid="3768006783166984410">"当前用户是<xliff:g id="NAME">%1$s</xliff:g>。"</string>
     <string name="owner_name" msgid="2716755460376028154">"机主"</string>
     <string name="error_message_title" msgid="4510373083082500195">"错误"</string>
-    <string name="app_no_restricted_accounts" msgid="5739463249673727736">"此应用不支持受限个人资料的帐户"</string>
+    <!-- no translation found for error_message_change_not_allowed (1347282344200417578) -->
+    <skip />
     <string name="app_not_found" msgid="3429141853498927379">"找不到可处理此操作的应用"</string>
     <string name="revoke" msgid="5404479185228271586">"撤消"</string>
     <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>

@@ -298,10 +298,8 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Bluetooth MAP စာများကို app မှလက်ခံကာ အလုပ်လုပ်ရန် ခွင့်ပြင်မည်။ ဆိုလိုသည်မှာ app သည်သင့်အား မပြသဘဲ သင့်ကိရိယာသို့ပို့လိုက်သည့် စာများကို ထိန်းချုပ်နိုင် သို့မဟုတ် ဖျက်နိုင်ပါသည်။"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"အလုပ်လုပ်နေကြသည့် appများကို ရယူခြင်း"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"အပလီကေးရှင်းအား လက်ရှိနဲ့ လတ်တလော လုပ်ဆောင်ခဲ့သော သတင်းအချက်အလက် အသေးစိတ်အား ထုတ်ယူခွင့်ပြုရန်။ အပလီကေးရှင်းမှ သင် ဘယ် အပလီကေးရှင်းများသုံးရှိကြောင့် တွေ့ရှိနိုင်ပါသည်"</string>
-    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
-    <skip />
-    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
-    <skip />
+    <string name="permlab_startTasksFromRecents" msgid="8990073877885690623">"မကြာမီ ထဲက တာဝန် တစ်ခုကို စတင်ရန်"</string>
+    <string name="permdesc_startTasksFromRecents" msgid="7382133554871222235">"appအား တက်ကြွမန်နေဂျာ။မကြာမီတာဝန်အင်ဖို အရာကို သုံးပြီး တက်ကြွမန်နေဂျာ။မကြာမီတာဝန်စာရင်းရယူ() ထံမှ ပြန်လာခဲ့သည့် ရပ်စဲခံလိုက်ရသည့် တာဝန်ကို ဖွင့်တင်ရန် အတွက် သုံးခွင့်ပြုသည်။"</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"အသုံးပြုသူများအကြား ဆက်ဆံခြင်း"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"အပလီကေးရှင်းအား စက်ပေါ်ရှိ တစ်ယောက်ထက်ပိုသော အသုံးပြုသူများအတွက် လုပ်ဆောင်ချက်များ ပြုလုပ်ခွင့်ပေးပါ။ အန္တရာယ်ရှိသော အပလီကေးရှင်းများမှ ဒီအရာကို သုံးပြီး အသုံးပြုသူများအတွင်း ကာကွယ်မှုကို ဖောက်ဖျက်နိုင်ပါသည်"</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"အသုံးပြုသူများအကြား ဆက်ဆံရန် လိုင်စင် အပြည့်"</string>
@@ -1392,6 +1390,10 @@
     <string name="permdesc_recovery" msgid="8511774533266359571">"အပလီကေးရှင်းအား စစ်စတန်အား ပြန်လည် ကယ်ဆယ်မှု နဲ့ အဆင့်မြှင့်ခြင်းများအား လုပ်ဆောင်ခွင့် ပေးခြင်း"</string>
     <string name="permlab_createMediaProjection" msgid="4941338725487978112">"မီဒီယာ အနာဂတ် ချိတ်ဆက်မှုများကို ဖန်တီးရန်"</string>
     <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"အပလီကေးရှင်း တစ်ခုအား မီဒီယာ အနာဂတ် ချိတ်ဆက်မှုများကို ဖန်တီးခွင့် ပြုသည်။ ယင်း ချိတ်ဆက်မှုများ ထဲမှာ အပလီကေးရှင်းအား ပြသမှု နှင့် အသံ အကြောင်းအရာများကို ဖမ်းယူခွင့် ပေးနိုင်သည်။ သာမန် appများ အတွက် ဘယ်တော့မှ မလိုအပ်နိုင်ပါ။."</string>
+    <!-- no translation found for permlab_readInstallSessions (6165432407628065939) -->
+    <skip />
+    <!-- no translation found for permdesc_readInstallSessions (2049771699626019849) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"ချုံ့ချဲ့မှုကို ထိန်းချုပ်ရန် အတွက် နှစ်ကြိမ် ထိပါ"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"ဝဒ်ဂျက်ထည့်လို့ မရပါ"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"သွားပါ"</string>
@@ -1410,6 +1412,10 @@
     <string name="deny" msgid="2081879885755434506">"ငြင်းပယ်သည်"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"ခွင့်ပြုချက် တောင်းခံထားခြင်း"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"အကောင့် <xliff:g id="ACCOUNT">%s</xliff:g> အတွက် \n ခွင့်ပြုချက် တောင်းခံထားပြီး"</string>
+    <!-- no translation found for forward_intent_to_owner (570916783072215572) -->
+    <skip />
+    <!-- no translation found for forward_intent_to_work (8624579696577525279) -->
+    <skip />
     <string name="input_method_binding_label" msgid="1283557179944992649">"ထည့်သွင်းရန်နည်းလမ်း"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"ထပ်တူ ကိုက်ညီခြင်း"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"အသုံးပြုခွင့်"</string>
@@ -1559,8 +1565,7 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"စနစ်"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"ဘလူးတုသ် အသံ"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"ကြိုးမဲ့ပြသခြင်း"</string>
-    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
-    <skip />
+    <string name="media_route_button_content_description" msgid="591703006349356016">"သရုပ်ဆောင်​များ"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"စက်တစ်ခုကို ချိတ်ဆက်ရန်"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"ဖန်သားပြင်ကို စက်ဆီ ပို့လွှတ်ပါ"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"စက်များကို ရှာဖွေနေပါသည် ..."</string>
@@ -1619,14 +1624,16 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"သင် ပုံဖော်၍သော့ဖွင့်ခြင်းကို <xliff:g id="NUMBER_0">%d</xliff:g> အကြိမ် မှန်ကန်စွာ မပြုလုပ်နိုင်ပါ။ နောက်ထပ် <xliff:g id="NUMBER_1">%d</xliff:g> အကြိမ် မမှန်ကန်ပါက သင့်ဖုန်းအား အီးမေးလ်အသုံးပြု၍ သော့ဖွင့်ရန် တောင်းဆိုပါလိမ့်မည်။ \n\n <xliff:g id="NUMBER_2">%d</xliff:g> စက္ကန့်အကြာတွင် ပြန်လည် ကြိုးစားပါ"</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"ဖယ်ရှားရန်"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"အသံထွက်ကို အကြံပေးထားသော အဆင့်ထက် ပိုမြင့်ပါမလား?\nအသံအကျယ်အား အကြာကြီး နားထောင်ခြင်းသည် သင့် အကြားအာရုံအား ထိခိုက်နိုင်ပါသည်။"</string>
+    <!-- no translation found for safe_media_volume_warning (2276318909314492312) -->
+    <skip />
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"လက်နှစ်ချောင်းကို ထိကိုင်ထားခြင်းဖြင့် သုံးစွဲနိုင်မှုကို ခွင့်ပြုပါ"</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"သုံးစွဲခွင့် ကို ဖွင့်ထားသည်"</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"အသုံးပြုခွင့် ဖျက်လိုက်သည်"</string>
     <string name="user_switched" msgid="3768006783166984410">"လက်ရှိအသုံးပြုနေသူ <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"ပိုင်ရှင်"</string>
     <string name="error_message_title" msgid="4510373083082500195">"အမှား"</string>
-    <string name="app_no_restricted_accounts" msgid="5739463249673727736">"ဤအပလီကေးရှင်း က ကန့်သတ်ထားသော ကိုယ်ရေးအကောင့်များကို ယူသုံးလို့မရပါ။"</string>
+    <!-- no translation found for error_message_change_not_allowed (1347282344200417578) -->
+    <skip />
     <string name="app_not_found" msgid="3429141853498927379">"ဤလုပ်ဆောင်ချက်ကို ပြုလုပ်ပေးမည့် အပလီကေးရှင်း မရှိပါ။"</string>
     <string name="revoke" msgid="5404479185228271586">"ပယ်ဖျက်ရန်"</string>
     <string name="mediasize_iso_a0" msgid="1994474252931294172">"အိုက်အက်စ်အို အေ ဝ"</string>

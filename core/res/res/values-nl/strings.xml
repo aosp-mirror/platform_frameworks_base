@@ -298,10 +298,8 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Hiermee kan de app Bluetooth MAP-berichten ontvangen en verwerken. Dit betekent dat de app berichten die naar uw apparaat zijn verzonden, kan controleren of verwijderen zonder ze aan u te laten zien."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"actieve apps ophalen"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Hiermee kan de app informatie ophalen over actieve en recent uitgevoerde taken. Zo kan de app informatie vinden over welke apps op het apparaat worden gebruikt."</string>
-    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
-    <skip />
-    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
-    <skip />
+    <string name="permlab_startTasksFromRecents" msgid="8990073877885690623">"een taak starten vanuit recente items"</string>
+    <string name="permdesc_startTasksFromRecents" msgid="7382133554871222235">"Hiermee kan de app een object ActivityManager.RecentTaskInfo gebruiken om een uitgeschakelde taak te starten die vanuit ActivityManager.getRecentTaskList() is geretourneerd."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"interactie tussen gebruikers"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Hiermee kan de app acties uitvoeren voor verschillende gebruikers van het apparaat. Schadelijke apps kunnen dit gebruiken om de beveiliging tussen gebruikers te schenden."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"volledige toestemming voor interactie tussen gebruikers"</string>
@@ -1205,7 +1203,7 @@
     <string name="anr_application_process" msgid="8941757607340481057">"<xliff:g id="APPLICATION">%1$s</xliff:g> reageert niet. Wilt u deze app sluiten?"</string>
     <string name="anr_process" msgid="6513209874880517125">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> reageert niet.\n\nWilt u het sluiten?"</string>
     <string name="force_close" msgid="8346072094521265605">"OK"</string>
-    <string name="report" msgid="4060218260984795706">"Rapport"</string>
+    <string name="report" msgid="4060218260984795706">"Melden"</string>
     <string name="wait" msgid="7147118217226317732">"Wachten"</string>
     <string name="webpage_unresponsive" msgid="3272758351138122503">"De pagina reageert niet meer.\n\nWilt u de pagina sluiten?"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"App verplaatst"</string>
@@ -1370,7 +1368,7 @@
     <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"USB-opslag verwijderd. Plaats nieuw medium."</string>
     <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"SD-kaart verwijderd. Plaats een nieuwe."</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Geen overeenkomende activiteiten gevonden."</string>
-    <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"gebruiksstatistieken van component bijwerken"</string>
+    <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"gebruiksstatistieken van component updaten"</string>
     <string name="permdesc_pkgUsageStats" msgid="1106612424254277630">"Hiermee kan de app verzamelde gebruiksstatistieken van componenten wijzigen. Niet voor gebruik door normale apps."</string>
     <string name="permlab_copyProtectedData" msgid="4341036311211406692">"inhoud kopiëren"</string>
     <string name="permdesc_copyProtectedData" msgid="4390697124288317831">"Hiermee kan de app de standaard containerservice aanroepen om inhoud te kopiëren. Niet voor gebruik door normale apps."</string>
@@ -1392,6 +1390,10 @@
     <string name="permdesc_recovery" msgid="8511774533266359571">"Hiermee kan een app interactie hebben met het herstelsysteem en systeemupdates."</string>
     <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Mediaprojectiesessies maken"</string>
     <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"Hiermee kan een app mediaprojectiesessies maken. Met deze sessies kunnen apps scherm- en audio-inhoud vastleggen. Nooit vereist voor normale apps."</string>
+    <!-- no translation found for permlab_readInstallSessions (6165432407628065939) -->
+    <skip />
+    <!-- no translation found for permdesc_readInstallSessions (2049771699626019849) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Raak twee keer aan voor zoomregeling"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Kan widget niet toevoegen."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Ga"</string>
@@ -1410,6 +1412,10 @@
     <string name="deny" msgid="2081879885755434506">"Weigeren"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Toestemming gevraagd"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Toestemming gevraagd\nvoor account <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
+    <!-- no translation found for forward_intent_to_owner (570916783072215572) -->
+    <skip />
+    <!-- no translation found for forward_intent_to_work (8624579696577525279) -->
+    <skip />
     <string name="input_method_binding_label" msgid="1283557179944992649">"Invoermethode"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Synchroniseren"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Toegankelijkheid"</string>
@@ -1559,8 +1565,7 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Systeem"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth-audio"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Draadloze weergave"</string>
-    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
-    <skip />
+    <string name="media_route_button_content_description" msgid="591703006349356016">"Casten"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Verbinding maken met apparaat"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Scherm casten naar apparaat"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Zoeken naar apparaten…"</string>
@@ -1619,14 +1624,16 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"U heeft uw ontgrendelingspatroon <xliff:g id="NUMBER_0">%d</xliff:g> keer onjuist getekend. Na nog eens <xliff:g id="NUMBER_1">%d</xliff:g> mislukte pogingen wordt u gevraagd uw telefoon te ontgrendelen via een e-mailaccount.\n\n Probeer het over <xliff:g id="NUMBER_2">%d</xliff:g> seconden opnieuw."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Verwijderen"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"Wilt u het volume verhogen tot boven het aanbevolen geluidsniveau?\nTe lang luisteren op een te hoog volume kan leiden tot gehoorbeschadiging."</string>
+    <!-- no translation found for safe_media_volume_warning (2276318909314492312) -->
+    <skip />
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Blijf het scherm met twee vingers aanraken om toegankelijkheid in te schakelen."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Toegankelijkheid ingeschakeld."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Toegankelijkheid geannuleerd."</string>
     <string name="user_switched" msgid="3768006783166984410">"Huidige gebruiker <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"Eigenaar"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Fout"</string>
-    <string name="app_no_restricted_accounts" msgid="5739463249673727736">"Deze app biedt geen ondersteuning voor accounts voor beperkte profielen"</string>
+    <!-- no translation found for error_message_change_not_allowed (1347282344200417578) -->
+    <skip />
     <string name="app_not_found" msgid="3429141853498927379">"Er is geen app gevonden om deze actie uit te voeren"</string>
     <string name="revoke" msgid="5404479185228271586">"Intrekken"</string>
     <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>

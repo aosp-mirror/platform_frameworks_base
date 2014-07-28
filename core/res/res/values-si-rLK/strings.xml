@@ -298,10 +298,8 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"බ්ලූටූත් MAP පණිවිඩ සොයා ලබාගැනීමට සහ ක්‍රියාත්මක කිරීමට යෙදුමට අවසර දෙන්න. යෙදුම නිරීක්ෂණය කරනු ලබන අතර ඔබට ලැබුන පණිවිඩ පෙන්වීමෙන් තොරවම මකා දැමිය හැකි බව මෙමඟින් අදහස් කරයි."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"ධාවනය වන යෙදුම් ලබාගැනීම"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"දැනට සහ මෑත ක්‍රියාත්මක කාර්යයන් පිළිබඳ විස්තරාත්මක තොරතුරු සොයා ලබාගැනීමට යෙදුමට ඉඩ දෙන්න. මෙය කුමන යෙදුම් උපාංගයේ භාවිතා කරන්නේද යන තොරතුරු යෙදුම්වලට සොයා ගැනීමට ඉඩ දිය හැක."</string>
-    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
-    <skip />
-    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
-    <skip />
+    <string name="permlab_startTasksFromRecents" msgid="8990073877885690623">"මෑත ක්‍රියා වෙතින් ක්‍රියා ආරම්භ කරන්න"</string>
+    <string name="permdesc_startTasksFromRecents" msgid="7382133554871222235">"ActivityManager.getRecentTaskList() වෙතින් ආපසු එවන අභාවයට ගිය කාර්යය දියත් කිරීමට ActivityManager.RecentTaskInfo වස්තුව භාවිතා කිරීමට යෙදුමට ඉඩ දෙන්න."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"පරිශීලකයන් අතර අන්තර්ක්‍රියාකාරී වන්න"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"උපාංගයේ විවිධ පරිශීලකයන් හරහා ක්‍රියාවන් දැක්වීමට යෙදුමට අවසර දෙන්න. පරිශීලකයන් අතර ආරක්ෂාව කඩකිරීමට අනිෂ්ට යෙදුම් විසින් මෙය භාවිතා කිරීමට ඉඩ ඇත."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"පරිශීලකයන් අතර අන්තර් ක්‍රියාකාරී වීමට සම්පූර්ණ බලපත්‍රය"</string>
@@ -723,8 +721,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"දැනුම්දීම් අසන්නාගේ සේවාවේ ඉහළ මට්ටමේ අතුරුමුහුණතට බැඳීමට දරන්නාට අවසර දේ. සාමාන්‍ය යෙදුම් සඳහා කිසිසේත් අවශ්‍ය නොවේ."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"තත්ත්වය සපයන්නාගේ සේවාවට බඳින්න"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"තත්ත්වය සපයන්නාගේ සේවාවට ඉහළ-මට්ටමේ අතුරු මුහුණතක් බැඳිමට ධාරකයාට අවසර දෙන්න. සාමාන්‍ය යෙදුම් සඳහා කවදාවත් අවශ්‍යය නොවෙයි."</string>
-    <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"bind to a media route service"</string>
-    <string name="permdesc_bindMediaRouteService" msgid="6436655024972496687">"*හඬ අන්තර් ක්‍රියාවේ සේවාවට ඉහළ-මට්ටමේ අතුරු මුහුණතක් බැඳිමට ධාරකයාට අවසර දෙන්න. සාමාන්‍ය යෙදුම් සඳහා කවදාවත් අවශ්‍යය නොවෙයි."</string>
+    <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"මාධ්‍ය ගමන් කරන සේවාව බඳින්න"</string>
+    <string name="permdesc_bindMediaRouteService" msgid="6436655024972496687">"මාධ්‍ය ගමන් කරන සේවාවට ඉහළ-මට්ටමේ අතුරු මුහුණතක් බැඳිමට ධාරකයාට අවසර දෙන්න. සාමාන්‍ය යෙදුම් සඳහා කවදාවත් අවශ්‍යය නොවෙයි."</string>
     <string name="permlab_bindDreamService" msgid="4153646965978563462">"ඩ්‍රීම් සේවාවකට බැඳීම"</string>
     <string name="permdesc_bindDreamService" msgid="7325825272223347863">"ඩ්‍රීම් සේවාව ඉහල මට්ටමේ අතුරු මුහුණතක් වෙත සම්බන්ධ කිරීමට ධාරකයාට අවසර දෙන්න. සාමාන්‍ය යෙදුම්වලට කිසි විටෙක අවශ්‍ය නොවෙයි."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"වාහකය සැපයු වින්‍යාසය යෙදුම ඉල්ලා සිටින්න"</string>
@@ -1185,11 +1183,11 @@
     <string name="capital_on" msgid="1544682755514494298">"සක්‍රීයයි"</string>
     <string name="capital_off" msgid="6815870386972805832">"අක්‍රිය කරන්න"</string>
     <string name="whichApplication" msgid="4533185947064773386">"පහත භාවිතයෙන් ක්‍රියාව සම්පූර්ණ කරන්න"</string>
-    <string name="whichApplicationNamed" msgid="8260158865936942783">"Complete action using %1$s"</string>
+    <string name="whichApplicationNamed" msgid="8260158865936942783">"%1$s භාවිතා කරමින් ක්‍රියාව සම්පුර්ණ කරන්න"</string>
     <string name="whichViewApplication" msgid="3272778576700572102">"සමඟ විවෘත කරන්න"</string>
-    <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Open with %1$s"</string>
+    <string name="whichViewApplicationNamed" msgid="2286418824011249620">"%1$s සමඟ විවෘත කරන්න"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"සමඟ සංස්කරණය කරන්න"</string>
-    <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Edit with %1$s"</string>
+    <string name="whichEditApplicationNamed" msgid="1775815530156447790">"%1$s සමඟ සංස්කරණය කරන්න"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"සමඟ බෙදාගන්න"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"%s සමඟ බෙදාගන්න"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"මුල්පිටු යෙදුමක් තෝරන්න"</string>
@@ -1395,6 +1393,10 @@
     <string name="permdesc_recovery" msgid="8511774533266359571">"යෙදුමකට ප්‍රතිසාධන පද්ධතිය සහ පද්ධති යාවත්කාලීන සමඟ කටයුතු කිරීමට ඉඩ දෙන්න."</string>
     <string name="permlab_createMediaProjection" msgid="4941338725487978112">"මාධ්‍ය ප්‍රක්ෂේපන සැසියන් සාදන්න"</string>
     <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"මාධ්‍ය ප්‍රක්ෂේපන සැසියන් සාදන්න යෙදුමට ඉඩ දෙන්න. ශ්‍රව්‍ය අන්තර්ගතයන් සහ දර්ශන ලබා ගැනීමට හැකියාව යෙදුම් වලට මෙම සැසියන් ලබාගත හැක. සමාන්‍ය යෙදුම් සඳහා කවදාවත් අවශ්‍ය නොවේ."</string>
+    <!-- no translation found for permlab_readInstallSessions (6165432407628065939) -->
+    <skip />
+    <!-- no translation found for permdesc_readInstallSessions (2049771699626019849) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"විශාලන පාලනය සඳහා දෙවරක් ස්පර්ශ කරන්න"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"විජටය එකතු කිරීමට නොහැකි විය."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"යන්න"</string>
@@ -1413,6 +1415,10 @@
     <string name="deny" msgid="2081879885755434506">"ප්‍රතික්ෂේප කරන්න"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"අවසර ඉල්ලා සිටී"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"<xliff:g id="ACCOUNT">%s</xliff:g> ගිණුම සඳහා\nඅවසර ඉල්ලන ලදි."</string>
+    <!-- no translation found for forward_intent_to_owner (570916783072215572) -->
+    <skip />
+    <!-- no translation found for forward_intent_to_work (8624579696577525279) -->
+    <skip />
     <string name="input_method_binding_label" msgid="1283557179944992649">"ආදාන ක්‍රමය"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"සමමුහුර්තය"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"ප්‍රවේශ්‍යතාව"</string>
@@ -1519,8 +1525,8 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"සංස්කරණය කරන්න"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"දත්ත භාවිතා අවවාදය"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"භාවිතය සහ සැකසීම් බැලීමට ස්පර්ශ කරන්න."</string>
-    <string name="data_usage_3g_limit_title" msgid="4462365924791862301">"2G-3G දත්ත නැත"</string>
-    <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"4G දත්ත නැත"</string>
+    <string name="data_usage_3g_limit_title" msgid="4462365924791862301">"2G-3G දත්ත අක්‍රියයි"</string>
+    <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"4G දත්ත අක්‍රියයි"</string>
     <string name="data_usage_mobile_limit_title" msgid="3393439305227911006">"සෙලියුලර් දත්ත අක්‍රියයි"</string>
     <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"Wi-Fi දත්ත අක්‍රියයි"</string>
     <string name="data_usage_limit_body" msgid="6131350187562939365">"සීමාව ළඟාවී ඇත"</string>
@@ -1622,14 +1628,16 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"ඔබ වැරදියට <xliff:g id="NUMBER_0">%d</xliff:g> වතාවක් ඔබගේ අගුළු හැරීමේ රටාව ඇඳ ඇත. අසාර්ථක උත්සහ කිරීම් <xliff:g id="NUMBER_1">%d</xliff:g> න් පසුව, ඔබගේ ඊ-තැපැල් ලිපිනය භාවිතයෙන් ඔබගේ දුරකථනය අගුළු හැරීමට ඔබගෙන් අසයි.\n\n තත්පර <xliff:g id="NUMBER_2">%d</xliff:g> න් පසුව නැවත උත්සහ කරන්න."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"ඉවත් කරන්න"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"නිර්දේශිත මට්ටමෙන් ඉහළට ශබ්දය වැඩි කරනවද?\nවැඩි කාලයක් ඉහළ ශබ්දයක් ශ්‍රවනය කිරීමෙන් ඔබගේ ශ්‍රවනයට හානි විය හැක."</string>
+    <!-- no translation found for safe_media_volume_warning (2276318909314492312) -->
+    <skip />
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"ප්‍රවේශ්‍යතාවය සබල කිරීමට ඇඟිලි දෙකක් පහළට රඳවා සිටින්න."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"ප‍්‍රවේශ්‍යතාව සබල කරන ලදි."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"ප‍්‍රවේශ්‍යතාව අවලංගු කර ඇත."</string>
     <string name="user_switched" msgid="3768006783166984410">"දැනට සිටින පරිශීලකයා <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"හිමිකරු"</string>
     <string name="error_message_title" msgid="4510373083082500195">"දෝෂය"</string>
-    <string name="app_no_restricted_accounts" msgid="5739463249673727736">"සීමා සහිත පැතිකඩ සඳහා වන ගිණුම් වෙත මෙම යෙදුම සහය නොදක්වයි"</string>
+    <!-- no translation found for error_message_change_not_allowed (1347282344200417578) -->
+    <skip />
     <string name="app_not_found" msgid="3429141853498927379">"මෙම ක්‍රියාව හසුරුවීමට යෙදුමක් සොයාගත්තේ නැත"</string>
     <string name="revoke" msgid="5404479185228271586">"අහෝසි කරන්න"</string>
     <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>

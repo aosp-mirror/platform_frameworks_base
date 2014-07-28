@@ -298,10 +298,8 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Bluetooth MAP বার্তা পেতে ও প্রক্রিয়া করতে অ্যাপ্লিকেশানটিকে অনুমতি দিন। এর অর্থ হলো, অ্যাপ্লিকেশানটি আপনাকে না দেখিয়েই আপনার ডিভাইসে পাঠানো বার্তা পর্যবেক্ষণ বা মুছতে পারবে।"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"চলমান অ্যাপ্লিকেশান উদ্ধার করে"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"বর্তমানে ও সাম্প্রতিককালের সক্রিয় ক্রিয়াগুলি সম্বন্ধে তথ্য পুনরুদ্ধার করতে অ্যাপ্লিকেশানটিকে মঞ্জুর করে৷ এছাড়া এটি ডিভাইসটিতে কোন অ্যাপ্লিকেশানগুলি ব্যবহৃত হচ্ছে তার বিষয়ে তথ্য খুঁজে বের করতে অ্যাপ্লিকেশানটিকে মঞ্জুর করতে পারে৷"</string>
-    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
-    <skip />
-    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
-    <skip />
+    <string name="permlab_startTasksFromRecents" msgid="8990073877885690623">"সাম্প্রতিক কার্যগুলি থেকে একটি কার্য শুরু করুন"</string>
+    <string name="permdesc_startTasksFromRecents" msgid="7382133554871222235">"ActivityManager.getRecentTaskList() থেকে ফেরত আসা একটি বাতিল করা কার্য লঞ্চ করতে অ্যাপ্লিকেশানটিকে ActivityManager.RecentTaskInfo অবজেক্ট ব্যবহার করার অনুমতি দেয়।"</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"সামগ্রী ব্যবহারকারীদের সাথে ইন্টারঅ্যাক্ট করুন"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"ডিভাইসটিতে থাকা বিভিন্ন ব্যবহারকারীর মধ্যে ক্রিয়াগুলির কার্য-সম্পাদনা করতে অ্যাপ্লিকেশানটিকে মঞ্জুর করে৷ ক্ষতিকারক অ্যাপ্লিকেশানগুলি এটিকে ব্যবহারকারীদের মধ্যে সুরক্ষা লঙ্ঘন করতে ব্যবহার করতে পারে৷"</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"ব্যবহারকারীদের সাথে ইন্টারঅ্যাক্ট করার সম্পূর্ণ লাইসেন্স"</string>
@@ -1392,6 +1390,10 @@
     <string name="permdesc_recovery" msgid="8511774533266359571">"একটি অ্যাপ্লিকেশানকে পুনরুদ্ধার সিস্টেম ও সিস্টেম আপডেটগুলির সঙ্গে ইন্টারঅ্যাক্ট করার অনুমতি দেয়৷"</string>
     <string name="permlab_createMediaProjection" msgid="4941338725487978112">"মিডিয়া অভিক্ষেপ সেশন তৈরি করুন"</string>
     <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"কোনো অ্যাপ্লিকেশানকে মিডিয়া অভিক্ষেপ সেশন তৈরি করার অনুমতি দেয়। এসব সেশন অ্যাপ্লিকেশানগুলিকে প্রদর্শন ও অডিও বিষয়বস্তু ক্যাপচার করার সক্ষমতা দিতে পারে। সাধারণ অ্যাপ্লিকেশানের জন্য কখনো এমন প্রয়োজন হয় না।"</string>
+    <!-- no translation found for permlab_readInstallSessions (6165432407628065939) -->
+    <skip />
+    <!-- no translation found for permdesc_readInstallSessions (2049771699626019849) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"জুম নিয়ন্ত্রণের জন্য দুবার স্পর্শ করুন"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"উইজেট যোগ করা যায়নি৷"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"যান"</string>
@@ -1410,6 +1412,10 @@
     <string name="deny" msgid="2081879885755434506">"আস্বীকার করুন"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"অনুমতির অনুরোধ করা হয়েছে"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"<xliff:g id="ACCOUNT">%s</xliff:g>অ্যাকাউন্টের জন্য\nঅনুমতির অনুরোধ করা হয়েছে৷"</string>
+    <!-- no translation found for forward_intent_to_owner (570916783072215572) -->
+    <skip />
+    <!-- no translation found for forward_intent_to_work (8624579696577525279) -->
+    <skip />
     <string name="input_method_binding_label" msgid="1283557179944992649">"ইনপুট পদ্ধতি"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"সিঙ্ক"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"অ্যাক্সেসযোগ্যতা"</string>
@@ -1559,8 +1565,7 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"সিস্টেম"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth অডিও"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"ওয়্যারলেস প্রদর্শন"</string>
-    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
-    <skip />
+    <string name="media_route_button_content_description" msgid="591703006349356016">"কাস্ট করুন"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"ডিভাইসে সংযোগ করুন"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"ডিভাইসে স্ক্রীণ কাস্ট করুন"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"ডিভাইসগুলি অনুসন্ধান করা হচ্ছে…"</string>
@@ -1619,14 +1624,16 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"আপনি আপনার আনলকের প্যাটার্ন আঁকার ক্ষেত্রে <xliff:g id="NUMBER_0">%d</xliff:g> বার ভুল করেছেন৷ আর <xliff:g id="NUMBER_1">%d</xliff:g> বার অসফল প্রচেষ্টা করা হলে আপনাকে একটি ইমেল অ্যাকাউন্ট মারফত আপনার ফোন আনলক করতে বলা হবে৷\n\n <xliff:g id="NUMBER_2">%d</xliff:g> সেকেন্ডের মধ্যে আবার চেষ্টা করুন৷"</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"সরান"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"প্রস্তাবিত স্তরের উপরে ভলিউম বাড়াবেন?\nদীর্ঘক্ষণ খুব জোর ভলিউমে শুনলে আপনার কানের ক্ষতি হতে পারে৷"</string>
+    <!-- no translation found for safe_media_volume_warning (2276318909314492312) -->
+    <skip />
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"অ্যাক্সেসযোগ্যতা সক্রিয় করতে দুইটি আঙ্গুলকে চেপে নীচে ধরে রাখুন৷"</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"অ্যাক্সেসযোগ্যতা সক্ষম করা হয়েছে৷"</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"অ্যাক্সেসযোগ্যতা বাতিল করা হয়েছে৷"</string>
     <string name="user_switched" msgid="3768006783166984410">"বর্তমান ব্যবহারকারী <xliff:g id="NAME">%1$s</xliff:g>৷"</string>
     <string name="owner_name" msgid="2716755460376028154">"মালিক"</string>
     <string name="error_message_title" msgid="4510373083082500195">"ত্রুটি"</string>
-    <string name="app_no_restricted_accounts" msgid="5739463249673727736">"বিধিনিষেধযুক্ত প্রোফাইলের অ্যাকাউন্টগুলিকে এই অ্যাপ্লিকেশানটি সমর্থন করে না"</string>
+    <!-- no translation found for error_message_change_not_allowed (1347282344200417578) -->
+    <skip />
     <string name="app_not_found" msgid="3429141853498927379">"এই ক্রিয়াটিকে চালনা করার জন্য কোনো অ্যাপ্লিকেশান পাওয়া যায়নি"</string>
     <string name="revoke" msgid="5404479185228271586">"প্রত্যাহার করুন"</string>
     <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>
