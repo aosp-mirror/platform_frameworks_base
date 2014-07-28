@@ -1624,6 +1624,16 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
+     * Enable drawing the entire HTML document at a significant performance
+     * cost. Call this to enable drawing and capturing HTML content outside of
+     * the WebView's viewport. This should be called before any WebViews are
+     * created.
+     */
+    public static void enableSlowWholeDocumentDraw() {
+        getFactory().getStatics().enableSlowWholeDocumentDraw();
+    }
+
+    /**
      * Clears the highlighting surrounding text matches created by
      * {@link #findAllAsync}.
      */
