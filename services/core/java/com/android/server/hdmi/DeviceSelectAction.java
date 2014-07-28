@@ -23,6 +23,7 @@ import android.hardware.hdmi.IHdmiControlCallback;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import com.android.server.hdmi.HdmiCecLocalDevice.ActiveSource;
 import com.android.server.hdmi.HdmiControlService.SendMessageCallback;
 
 /**
@@ -130,10 +131,10 @@ final class DeviceSelectAction extends FeatureAction {
                 return false;
             case STATE_WAIT_FOR_ACTIVE_SOURCE:
                 if (opcode == Constants.MESSAGE_ACTIVE_SOURCE) {
-                    int activePath = HdmiUtils.twoBytesToInt(params);
+                    int physicalAddress = HdmiUtils.twoBytesToInt(params);
                     ActiveSourceHandler
                             .create((HdmiCecLocalDeviceTv) localDevice(), mCallback)
-                            .process(cmd.getSource(), activePath);
+                            .process(ActiveSource.of(cmd.getSource(), physicalAddress));
                     finish();
                     return true;
                 }
