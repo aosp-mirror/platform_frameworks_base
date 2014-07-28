@@ -211,9 +211,6 @@ final class ActivityStack {
     ActivityRecord mTranslucentActivityWaiting = null;
     private ArrayList<ActivityRecord> mUndrawnActivitiesBelowTopTranslucent =
             new ArrayList<ActivityRecord>();
-    // Options passed from the caller of the convertToTranslucent to the activity that will
-    // appear below it.
-    ActivityOptions mReturningActivityOptions = null;
 
     /**
      * Set when we know we are going to be calling updateConfiguration()
@@ -1089,7 +1086,7 @@ final class ActivityStack {
         if (next == mLastScreenshotActivity) {
             invalidateLastScreenshot();
         }
-        mReturningActivityOptions = null;
+        next.returningOptions = null;
     }
 
     private void setVisibile(ActivityRecord r, boolean visible) {
@@ -1219,10 +1216,9 @@ final class ActivityStack {
                         if (DEBUG_VISBILITY) Slog.v(TAG, "Skipping: already visible at " + r);
                         r.stopFreezingScreenLocked(false);
                         try {
-                            if (mReturningActivityOptions != null && r == top && activityNdx > 0) {
-                                ActivityRecord under = activities.get(activityNdx - 1);
-                                under.app.thread.scheduleOnNewActivityOptions(under.appToken,
-                                        mReturningActivityOptions);
+                            if (r.returningOptions != null) {
+                                r.app.thread.scheduleOnNewActivityOptions(r.appToken,
+                                        r.returningOptions);
                             }
                         } catch(RemoteException e) {
                         }
@@ -1237,7 +1233,7 @@ final class ActivityStack {
                                     TAG, "Making visible and scheduling visibility: " + r);
                             try {
                                 if (mTranslucentActivityWaiting != null) {
-                                    r.updateOptionsLocked(mReturningActivityOptions);
+                                    r.updateOptionsLocked(r.returningOptions);
                                     mUndrawnActivitiesBelowTopTranslucent.add(r);
                                 }
                                 setVisibile(r, true);
@@ -1325,10 +1321,9 @@ final class ActivityStack {
         }
     }
 
-    void convertToTranslucent(ActivityRecord r, ActivityOptions options) {
+    void convertToTranslucent(ActivityRecord r) {
         mTranslucentActivityWaiting = r;
         mUndrawnActivitiesBelowTopTranslucent.clear();
-        mReturningActivityOptions = options;
         mHandler.sendEmptyMessageDelayed(TRANSLUCENT_TIMEOUT_MSG, TRANSLUCENT_CONVERSION_TIMEOUT);
     }
 
