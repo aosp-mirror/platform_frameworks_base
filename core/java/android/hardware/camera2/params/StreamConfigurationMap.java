@@ -30,6 +30,7 @@ import android.util.Size;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Objects;
+import java.util.Set;
 
 import static com.android.internal.util.Preconditions.*;
 
@@ -398,7 +399,8 @@ public final class StreamConfigurationMap {
      * @see #getHighSpeedVideoFpsRangesFor(Size)
      */
     public Size[] getHighSpeedVideoSizes() {
-        return (Size[]) mHighSpeedVideoSizeMap.keySet().toArray();
+        Set<Size> keySet = mHighSpeedVideoSizeMap.keySet();
+        return keySet.toArray(new Size[keySet.size()]);
     }
 
     /**
@@ -475,7 +477,8 @@ public final class StreamConfigurationMap {
      */
     @SuppressWarnings("unchecked")
     public Range<Integer>[] getHighSpeedVideoFpsRanges() {
-        return (Range<Integer>[]) mHighSpeedVideoFpsRangeMap.keySet().toArray();
+        Set<Range<Integer>> keySet = mHighSpeedVideoFpsRangeMap.keySet();
+        return keySet.toArray(new Range[keySet.size()]);
     }
 
     /**
