@@ -1859,10 +1859,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
     }
 
-    void removePendingActivityLaunchesLocked(ActivityRecord r) {
+    void removePendingActivityLaunchesLocked(ActivityStack stack) {
         for (int palNdx = mPendingActivityLaunches.size() - 1; palNdx >= 0; --palNdx) {
             PendingActivityLaunch pal = mPendingActivityLaunches.get(palNdx);
-            if (pal.r == r) {
+            if (pal.stack == stack) {
                 mPendingActivityLaunches.remove(palNdx);
             }
         }
@@ -3097,6 +3097,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 long origId = Binder.clearCallingIdentity();
                 try {
                     mStack.finishAllActivitiesLocked(false);
+                    removePendingActivityLaunchesLocked(mStack);
                 } finally {
                     Binder.restoreCallingIdentity(origId);
                 }
