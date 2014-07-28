@@ -346,6 +346,7 @@ public interface WindowManager extends ViewManager {
         /**
          * Window type: keyguard window.
          * In multiuser systems shows on all users' windows.
+         * @removed
          */
         public static final int TYPE_KEYGUARD           = FIRST_SYSTEM_WINDOW+4;
 
