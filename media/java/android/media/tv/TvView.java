@@ -258,7 +258,7 @@ public class TvView extends ViewGroup {
      * </p>
      *
      * @param unblockedRating A TvContentRating to unblock.
-     * @see TvInputService.Session#dispatchContentBlocked(TvContentRating)
+     * @see TvInputService.Session#notifyContentBlocked(TvContentRating)
      * @hide
      */
     @SystemApi
