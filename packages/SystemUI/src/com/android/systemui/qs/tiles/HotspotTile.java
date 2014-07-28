@@ -24,7 +24,6 @@ import android.content.SharedPreferences;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.statusbar.policy.HotspotController;
-import com.android.systemui.statusbar.policy.KeyguardMonitor;
 
 /** Quick settings tile: Hotspot **/
 public class HotspotTile extends QSTile<QSTile.BooleanState> {
@@ -32,14 +31,12 @@ public class HotspotTile extends QSTile<QSTile.BooleanState> {
     private static final long MILLIS_PER_DAY = 1000 * 60 * 60 * 24;
 
     private final HotspotController mController;
-    private final KeyguardMonitor mKeyguard;
     private final Callback mCallback = new Callback();
     private final long mTimeToShowTile;
 
     public HotspotTile(Host host) {
         super(host);
         mController = host.getHotspotController();
-        mKeyguard = host.getKeyguardMonitor();
 
         mTimeToShowTile = MILLIS_PER_DAY
                 * mContext.getResources().getInteger(R.integer.days_to_show_hotspot);
@@ -54,10 +51,8 @@ public class HotspotTile extends QSTile<QSTile.BooleanState> {
     public void setListening(boolean listening) {
         if (listening) {
             mController.addCallback(mCallback);
-            mKeyguard.addCallback(mCallback);
         } else {
             mController.removeCallback(mCallback);
-            mKeyguard.removeCallback(mCallback);
         }
     }
 
@@ -69,8 +64,7 @@ public class HotspotTile extends QSTile<QSTile.BooleanState> {
 
     @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
-        state.visible = !(mKeyguard.isSecure() && mKeyguard.isShowing())
-                && mController.isHotspotSupported() && isHotspotRecentlyUsed();
+        state.visible = mController.isHotspotSupported() && isHotspotRecentlyUsed();
         state.label = mContext.getString(R.string.quick_settings_hotspot_label);
 
         state.value = mController.isHotspotEnabled();
@@ -87,14 +81,9 @@ public class HotspotTile extends QSTile<QSTile.BooleanState> {
         return context.getSharedPreferences(context.getPackageName(), 0);
     }
 
-    private final class Callback implements HotspotController.Callback, KeyguardMonitor.Callback {
+    private final class Callback implements HotspotController.Callback {
         @Override
         public void onHotspotChanged(boolean enabled) {
-            refreshState();
-        }
-
-        @Override
-        public void onKeyguardChanged() {
             refreshState();
         }
     };
