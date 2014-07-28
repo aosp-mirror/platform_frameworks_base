@@ -23,6 +23,8 @@ import android.hardware.hdmi.HdmiControlManager;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import com.android.server.hdmi.HdmiCecLocalDevice.ActiveSource;
+
 /**
  * Handles CEC command &lt;Active Source&gt;.
  * <p>
@@ -54,44 +56,45 @@ final class ActiveSourceHandler {
     /**
      * Handles the incoming active source command.
      *
-     * @param activeAddress logical address of the device to be the active source
-     * @param activePath routing path of the device to be the active source
+     * @param newActive new active source information
      */
-    void process(int activeAddress, int activePath) {
+    void process(ActiveSource newActive) {
         // Seq #17
         HdmiCecLocalDeviceTv tv = mSource;
-        if (getSourcePath() == activePath && tv.getActiveSource() == getSourceAddress()) {
+        ActiveSource activeSource = tv.getActiveSource();
+        if (activeSource.equals(newActive)) {
             invokeCallback(HdmiControlManager.RESULT_SUCCESS);
             return;
         }
-        HdmiCecDeviceInfo device = mService.getDeviceInfo(activeAddress);
+        HdmiCecDeviceInfo device = mService.getDeviceInfo(newActive.logicalAddress);
         if (device == null) {
-            tv.startNewDeviceAction(activeAddress, activePath);
+            tv.startNewDeviceAction(newActive);
         }
 
-        int currentActive = tv.getActiveSource();
-        int currentPath = tv.getActivePath();
+        ActiveSource current = tv.getActiveSource();
         if (!tv.isProhibitMode()) {
-            tv.updateActiveSource(activeAddress, activePath);
-            if (currentActive != activeAddress && currentPath != activePath) {
-                tv.updateActivePortId(mService.pathToPortId(activePath));
+            tv.updateActiveSource(newActive);
+            if (!current.equals(newActive)) {
+                boolean notifyInputChange = (mCallback == null);
+                tv.updateActiveInput(newActive.physicalAddress, notifyInputChange);
             }
             invokeCallback(HdmiControlManager.RESULT_SUCCESS);
         } else {
             // TV is in a mode that should keep its current source/input from
             // being changed for its operation. Reclaim the active source
             // or switch the port back to the one used for the current mode.
-            if (currentActive == getSourceAddress()) {
-                HdmiCecMessage activeSource =
-                        HdmiCecMessageBuilder.buildActiveSource(currentActive, currentPath);
-                mService.sendCecCommand(activeSource);
-                tv.updateActiveSource(currentActive, currentPath);
+            if (current.logicalAddress == getSourceAddress()) {
+                HdmiCecMessage activeSourceCommand = HdmiCecMessageBuilder.buildActiveSource(
+                        current.logicalAddress, current.physicalAddress);
+                mService.sendCecCommand(activeSourceCommand);
+                tv.updateActiveSource(current);
                 invokeCallback(HdmiControlManager.RESULT_SUCCESS);
             } else {
                 HdmiCecMessage routingChange = HdmiCecMessageBuilder.buildRoutingChange(
-                        getSourceAddress(), activePath, currentPath);
+                        getSourceAddress(), newActive.physicalAddress, current.physicalAddress);
                 mService.sendCecCommand(routingChange);
-                tv.addAndStartAction(new RoutingControlAction(tv, currentPath, true, mCallback));
+                tv.addAndStartAction(
+                        new RoutingControlAction(tv, current.physicalAddress, true, mCallback));
             }
         }
     }

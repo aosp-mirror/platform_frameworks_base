@@ -49,9 +49,41 @@ abstract class HdmiCecLocalDevice {
     protected int mPreferredAddress;
     protected HdmiCecDeviceInfo mDeviceInfo;
 
+    static class ActiveSource {
+        int logicalAddress;
+        int physicalAddress;
+
+        public ActiveSource(int logical, int physical) {
+            logicalAddress = logical;
+            physicalAddress = physical;
+        }
+        public static ActiveSource of(int logical, int physical) {
+            return new ActiveSource(logical, physical);
+        }
+        public boolean isValid() {
+            return HdmiUtils.isValidAddress(logicalAddress);
+        }
+        public boolean equals(int logical, int physical) {
+            return logicalAddress == logical && physicalAddress == physical;
+        }
+        @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof ActiveSource) {
+                ActiveSource that = (ActiveSource) obj;
+                return that.logicalAddress == logicalAddress &&
+                       that.physicalAddress == physicalAddress;
+            }
+            return false;
+        }
+        @Override
+        public int hashCode() {
+            return logicalAddress * 29 + physicalAddress;
+        }
+    }
     // Logical address of the active source.
     @GuardedBy("mLock")
-    private int mActiveSource;
+    protected final ActiveSource mActiveSource =
+            new ActiveSource(-1, Constants.INVALID_PHYSICAL_ADDRESS);
 
     // Active routing path. Physical address of the active source but not all the time, such as
     // when the new active source does not claim itself to be one. Note that we don't keep
@@ -549,15 +581,24 @@ abstract class HdmiCecLocalDevice {
         return mService.isConnectedToArcPort(path);
     }
 
-    int getActiveSource() {
+    ActiveSource getActiveSource() {
         synchronized (mLock) {
             return mActiveSource;
         }
     }
 
-    void setActiveSource(int source) {
+    void setActiveSource(ActiveSource newActive) {
+        setActiveSource(newActive.logicalAddress, newActive.physicalAddress);
+    }
+
+    void setActiveSource(HdmiCecDeviceInfo info) {
+        setActiveSource(info.getLogicalAddress(), info.getPhysicalAddress());
+    }
+
+    void setActiveSource(int logicalAddress, int physicalAddress) {
         synchronized (mLock) {
-            mActiveSource = source;
+            mActiveSource.logicalAddress = logicalAddress;
+            mActiveSource.physicalAddress = physicalAddress;
         }
     }
 
@@ -593,13 +634,6 @@ abstract class HdmiCecLocalDevice {
             // We update active routing path instead, since we get the active port id from
             // the active routing path.
             mActiveRoutingPath = mService.portIdToPath(portId);
-        }
-    }
-
-    void updateActiveDevice(int logicalAddress, int physicalAddress) {
-        synchronized (mLock) {
-            mActiveSource = logicalAddress;
-            mActiveRoutingPath = physicalAddress;
         }
     }
 

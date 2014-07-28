@@ -724,6 +724,10 @@ public final class HdmiControlService extends SystemService {
             runOnServiceThread(new Runnable() {
                 @Override
                 public void run() {
+                    if (callback == null) {
+                        Slog.e(TAG, "Callback cannot be null");
+                        return;
+                    }
                     HdmiCecLocalDeviceTv tv = tv();
                     if (tv == null) {
                         Slog.w(TAG, "Local tv device not available");
@@ -741,6 +745,10 @@ public final class HdmiControlService extends SystemService {
             runOnServiceThread(new Runnable() {
                 @Override
                 public void run() {
+                    if (callback == null) {
+                        Slog.e(TAG, "Callback cannot be null");
+                        return;
+                    }
                     HdmiCecLocalDeviceTv tv = tv();
                     if (tv == null) {
                         Slog.w(TAG, "Local tv device not available");
@@ -1218,12 +1226,11 @@ public final class HdmiControlService extends SystemService {
         }
     }
 
-    void invokeInputChangeListener(int activeAddress) {
+    void invokeInputChangeListener(HdmiCecDeviceInfo info) {
         synchronized (mLock) {
             if (mInputChangeListener != null) {
-                HdmiCecDeviceInfo activeSource = getDeviceInfo(activeAddress);
                 try {
-                    mInputChangeListener.onChanged(activeSource);
+                    mInputChangeListener.onChanged(info);
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Exception thrown by IHdmiInputChangeListener: " + e);
                 }
