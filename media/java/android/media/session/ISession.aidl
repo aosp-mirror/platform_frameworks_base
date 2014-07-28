@@ -15,7 +15,7 @@
 
 package android.media.session;
 
-import android.content.ComponentName;
+import android.app.PendingIntent;
 import android.content.pm.ParceledListSlice;
 import android.media.AudioAttributes;
 import android.media.MediaMetadata;
@@ -36,7 +36,8 @@ interface ISession {
     void setFlags(int flags);
     void setActive(boolean active);
     void setMediaRouter(in IMediaRouter router);
-    void setMediaButtonReceiver(in ComponentName mbr);
+    void setMediaButtonReceiver(in PendingIntent mbr);
+    void setLaunchPendingIntent(in PendingIntent pi);
     void destroy();
 
     // These commands are for the TransportPerformer

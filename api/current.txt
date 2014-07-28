@@ -14144,10 +14144,10 @@ package android.media {
     method public void loadSoundEffects();
     method public void playSoundEffect(int);
     method public void playSoundEffect(int, float);
-    method public void registerMediaButtonEventReceiver(android.content.ComponentName);
-    method public void registerMediaButtonEventReceiver(android.app.PendingIntent);
-    method public void registerRemoteControlClient(android.media.RemoteControlClient);
-    method public boolean registerRemoteController(android.media.RemoteController);
+    method public deprecated void registerMediaButtonEventReceiver(android.content.ComponentName);
+    method public deprecated void registerMediaButtonEventReceiver(android.app.PendingIntent);
+    method public deprecated void registerRemoteControlClient(android.media.RemoteControlClient);
+    method public deprecated boolean registerRemoteController(android.media.RemoteController);
     method public int requestAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, int, int);
     method public deprecated void setBluetoothA2dpOn(boolean);
     method public void setBluetoothScoOn(boolean);
@@ -14166,10 +14166,10 @@ package android.media {
     method public void startBluetoothSco();
     method public void stopBluetoothSco();
     method public void unloadSoundEffects();
-    method public void unregisterMediaButtonEventReceiver(android.content.ComponentName);
-    method public void unregisterMediaButtonEventReceiver(android.app.PendingIntent);
-    method public void unregisterRemoteControlClient(android.media.RemoteControlClient);
-    method public void unregisterRemoteController(android.media.RemoteController);
+    method public deprecated void unregisterMediaButtonEventReceiver(android.content.ComponentName);
+    method public deprecated void unregisterMediaButtonEventReceiver(android.app.PendingIntent);
+    method public deprecated void unregisterRemoteControlClient(android.media.RemoteControlClient);
+    method public deprecated void unregisterRemoteController(android.media.RemoteController);
     field public static final java.lang.String ACTION_AUDIO_BECOMING_NOISY = "android.media.AUDIO_BECOMING_NOISY";
     field public static final deprecated java.lang.String ACTION_SCO_AUDIO_STATE_CHANGED = "android.media.SCO_AUDIO_STATE_CHANGED";
     field public static final java.lang.String ACTION_SCO_AUDIO_STATE_UPDATED = "android.media.ACTION_SCO_AUDIO_STATE_UPDATED";
@@ -16578,14 +16578,16 @@ package android.media.routing {
 package android.media.session {
 
   public final class MediaController {
-    ctor public MediaController(android.media.session.MediaSession.Token);
+    ctor public MediaController(android.content.Context, android.media.session.MediaSession.Token);
     method public void addCallback(android.media.session.MediaController.Callback);
     method public void addCallback(android.media.session.MediaController.Callback, android.os.Handler);
     method public void adjustVolume(int, int);
     method public android.media.routing.MediaRouter.Delegate createMediaRouterDelegate();
     method public boolean dispatchMediaButtonEvent(android.view.KeyEvent);
     method public long getFlags();
+    method public android.app.PendingIntent getLaunchActivity();
     method public android.media.MediaMetadata getMetadata();
+    method public java.lang.String getPackageName();
     method public android.media.session.PlaybackState getPlaybackState();
     method public java.util.List<android.media.session.MediaSession.Track> getQueue();
     method public int getRatingType();
@@ -16639,6 +16641,7 @@ package android.media.session {
     method public void addCallback(android.media.session.MediaSession.Callback, android.os.Handler);
     method public void addTransportControlsCallback(android.media.session.MediaSession.TransportControlsCallback);
     method public void addTransportControlsCallback(android.media.session.MediaSession.TransportControlsCallback, android.os.Handler);
+    method public android.media.session.MediaController getController();
     method public android.media.session.MediaSession.Token getSessionToken();
     method public boolean isActive();
     method public void release();
@@ -16648,7 +16651,8 @@ package android.media.session {
     method public void setActive(boolean);
     method public void setExtras(android.os.Bundle);
     method public void setFlags(int);
-    method public void setLaunchPendingIntent(android.app.PendingIntent);
+    method public void setLaunchActivity(android.app.PendingIntent);
+    method public void setMediaButtonReceiver(android.app.PendingIntent);
     method public void setMediaRouter(android.media.routing.MediaRouter);
     method public void setMetadata(android.media.MediaMetadata);
     method public void setPlaybackState(android.media.session.PlaybackState);
@@ -16711,10 +16715,11 @@ package android.media.session {
   public final class MediaSessionManager {
     method public void addActiveSessionsListener(android.media.session.MediaSessionManager.SessionListener, android.content.ComponentName);
     method public java.util.List<android.media.session.MediaController> getActiveSessions(android.content.ComponentName);
+    method public void removeActiveSessionsListener(android.media.session.MediaSessionManager.SessionListener);
   }
 
   public static abstract class MediaSessionManager.SessionListener {
-    ctor public MediaSessionManager.SessionListener();
+    ctor public MediaSessionManager.SessionListener(android.content.Context);
     method public abstract void onActiveSessionsChanged(java.util.List<android.media.session.MediaController>);
   }
 

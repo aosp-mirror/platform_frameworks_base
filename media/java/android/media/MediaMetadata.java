@@ -19,6 +19,7 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.format.Time;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.SparseArray;
@@ -73,7 +74,8 @@ public final class MediaMetadata implements Parcelable {
     public static final String METADATA_KEY_COMPILATION = "android.media.metadata.COMPILATION";
 
     /**
-     * The date the media was created or published as TODO determine format.
+     * The date the media was created or published. The format is unspecified
+     * but RFC 3339 is recommended.
      */
     public static final String METADATA_KEY_DATE = "android.media.metadata.DATE";
 

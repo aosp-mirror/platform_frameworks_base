@@ -16,6 +16,7 @@
 
 package com.android.server.media;
 
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -33,14 +34,9 @@ import android.media.session.ISessionController;
 import android.media.session.ISessionControllerCallback;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
-import android.media.session.MediaSessionInfo;
 import android.media.session.ParcelableVolumeInfo;
 import android.media.session.PlaybackState;
 import android.media.AudioAttributes;
-import android.media.AudioManager;
-import android.media.MediaMetadata;
-import android.media.Rating;
-import android.media.VolumeProvider;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -85,7 +81,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     private final int mOwnerPid;
     private final int mOwnerUid;
     private final int mUserId;
-    private final MediaSessionInfo mSessionInfo;
+    private final String mPackageName;
     private final String mTag;
     private final ControllerStub mController;
     private final SessionStub mSession;
@@ -98,7 +94,8 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
 
     private long mFlags;
     private IMediaRouter mMediaRouter;
-    private ComponentName mMediaButtonReceiver;
+    private PendingIntent mMediaButtonReceiver;
+    private PendingIntent mLaunchIntent;
 
     // TransportPerformer fields
 
@@ -129,8 +126,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         mOwnerPid = ownerPid;
         mOwnerUid = ownerUid;
         mUserId = userId;
-        mSessionInfo = new MediaSessionInfo(UUID.randomUUID().toString(), ownerPackageName,
-                ownerPid);
+        mPackageName = ownerPackageName;
         mTag = tag;
         mController = new ControllerStub();
         mSession = new SessionStub();
@@ -164,11 +160,25 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
      *
      * @return Info that identifies this session.
      */
-    public MediaSessionInfo getSessionInfo() {
-        return mSessionInfo;
+    public String getPackageName() {
+        return mPackageName;
     }
 
-    public ComponentName getMediaButtonReceiver() {
+    /**
+     * Get the tag for the session.
+     *
+     * @return The session's tag.
+     */
+    public String getTag() {
+        return mTag;
+    }
+
+    /**
+     * Get the intent the app set for their media button receiver.
+     *
+     * @return The pending intent set by the app or null.
+     */
+    public PendingIntent getMediaButtonReceiver() {
         return mMediaButtonReceiver;
     }
 
@@ -402,15 +412,21 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         pw.println(prefix + mTag + " " + this);
 
         final String indent = prefix + "  ";
+        // We print the hashcode for matching with the list in user records
         pw.println(indent + "ownerPid=" + mOwnerPid + ", ownerUid=" + mOwnerUid
                 + ", userId=" + mUserId);
-        pw.println(indent + "info=" + mSessionInfo.toString());
+        pw.println(indent + "package=" + mPackageName);
         pw.println(indent + "active=" + mIsActive);
         pw.println(indent + "flags=" + mFlags);
         pw.println(indent + "rating type=" + mRatingType);
         pw.println(indent + "controllers: " + mControllerCallbacks.size());
         pw.println(indent + "state=" + (mPlaybackState == null ? null : mPlaybackState.toString()));
         pw.println(indent + "metadata:" + getShortMetadataString());
+    }
+
+    @Override
+    public String toString() {
+        return mPackageName + "/" + mTag;
     }
 
     private String getShortMetadataString() {
@@ -646,8 +662,13 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
 
         @Override
-        public void setMediaButtonReceiver(ComponentName mbr) {
-            mMediaButtonReceiver = mbr;
+        public void setMediaButtonReceiver(PendingIntent pi) {
+            mMediaButtonReceiver = pi;
+        }
+
+        @Override
+        public void setLaunchPendingIntent(PendingIntent pi) {
+            mLaunchIntent = pi;
         }
 
         @Override
@@ -916,8 +937,18 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
 
         @Override
-        public MediaSessionInfo getSessionInfo() {
-            return mSessionInfo;
+        public String getPackageName() {
+            return mPackageName;
+        }
+
+        @Override
+        public String getTag() {
+            return mTag;
+        }
+
+        @Override
+        public PendingIntent getLaunchPendingIntent() {
+            return mLaunchIntent;
         }
 
         @Override

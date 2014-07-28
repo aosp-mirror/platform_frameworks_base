@@ -19,6 +19,7 @@ package android.media.session;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
@@ -119,6 +120,7 @@ public final class MediaSession {
     private final Object mLock = new Object();
 
     private final MediaSession.Token mSessionToken;
+    private final MediaController mController;
     private final ISession mBinder;
     private final CallbackStub mCbStub;
 
@@ -168,6 +170,7 @@ public final class MediaSession {
         try {
             mBinder = manager.createSession(mCbStub, tag, userId);
             mSessionToken = new Token(mBinder.getController());
+            mController = new MediaController(context, mSessionToken);
         } catch (RemoteException e) {
             throw new RuntimeException("Remote error creating session.", e);
         }
@@ -222,12 +225,17 @@ public final class MediaSession {
 
     /**
      * Set an intent for launching UI for this Session. This can be used as a
-     * quick link to an ongoing media screen.
+     * quick link to an ongoing media screen. The intent should be for an
+     * activity that may be started using {@link Activity#startActivity(Intent)}.
      *
      * @param pi The intent to launch to show UI for this Session.
      */
-    public void setLaunchPendingIntent(@Nullable PendingIntent pi) {
-        // TODO
+    public void setLaunchActivity(@Nullable PendingIntent pi) {
+        try {
+            mBinder.setLaunchPendingIntent(pi);
+        } catch (RemoteException e) {
+            Log.wtf(TAG, "Failure in setLaunchPendingIntent.", e);
+        }
     }
 
     /**
@@ -248,13 +256,14 @@ public final class MediaSession {
     }
 
     /**
-     * Set a media button event receiver component to use to restart playback
-     * after an app has been stopped.
+     * Set a pending intent for your media button receiver to allow restarting
+     * playback after the session has been stopped. If your app is started in
+     * this way an {@link Intent#ACTION_MEDIA_BUTTON} intent will be sent via
+     * the pending intent.
      *
-     * @param mbr The receiver component to send the media button event to.
-     * @hide
+     * @param mbr The {@link PendingIntent} to send the media button event to.
      */
-    public void setMediaButtonReceiver(@Nullable ComponentName mbr) {
+    public void setMediaButtonReceiver(@Nullable PendingIntent mbr) {
         try {
             mBinder.setMediaButtonReceiver(mbr);
         } catch (RemoteException e) {
@@ -399,6 +408,16 @@ public final class MediaSession {
      */
     public @NonNull Token getSessionToken() {
         return mSessionToken;
+    }
+
+    /**
+     * Get a controller for this session. This is a convenience method to avoid
+     * having to cache your own controller in process.
+     *
+     * @return A controller for this session.
+     */
+    public @NonNull MediaController getController() {
+        return mController;
     }
 
     /**
@@ -708,6 +727,7 @@ public final class MediaSession {
      * the session.
      */
     public static final class Token implements Parcelable {
+
         private ISessionController mBinder;
 
         /**
@@ -725,6 +745,31 @@ public final class MediaSession {
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeStrongBinder(mBinder.asBinder());
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((mBinder == null) ? 0 : mBinder.asBinder().hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            Token other = (Token) obj;
+            if (mBinder == null) {
+                if (other.mBinder != null)
+                    return false;
+            } else if (!mBinder.asBinder().equals(other.mBinder.asBinder()))
+                return false;
+            return true;
         }
 
         ISessionController getBinder() {
