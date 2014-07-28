@@ -274,7 +274,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     private void updateHeights() {
         boolean onKeyguardAndCollapsed = mKeyguardShowing && !mExpanded;
         int height;
-        if (mExpanded) {
+        if (mExpanded && !mOverscrolled) {
             height = mExpandedHeight;
         } else if (onKeyguardAndCollapsed) {
             height = mKeyguardHeight;
