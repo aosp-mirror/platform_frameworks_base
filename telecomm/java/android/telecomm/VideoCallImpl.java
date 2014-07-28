@@ -30,8 +30,8 @@ import com.android.internal.telecomm.IVideoCallProvider;
 
 /**
  * Implementation of a Video Call, which allows InCallUi to communicate commands to the underlying
- * {@link VideoCallProvider}, and direct callbacks from the {@link VideoCallProvider} to the
- * appropriate {@link VideoCall.Listener}.
+ * {@link ConnectionService.VideoCallProvider}, and direct callbacks from the
+ * {@link ConnectionService.VideoCallProvider} to the appropriate {@link VideoCall.Listener}.
  */
 public class VideoCallImpl extends VideoCall {
     private static final int MSG_RECEIVE_SESSION_MODIFY_REQUEST = 1;
