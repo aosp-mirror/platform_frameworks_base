@@ -294,8 +294,6 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
         final int code = failureCode;
         final boolean isError = failureIsError;
         synchronized(mInterfaceLock) {
-            if (mRemoteDevice == null) return; // Camera already closed, can't go to error state
-
             mInError = true;
             mDeviceHandler.post(new Runnable() {
                 @Override
