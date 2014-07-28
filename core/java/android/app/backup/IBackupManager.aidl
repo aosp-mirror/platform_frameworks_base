@@ -250,6 +250,18 @@ interface IBackupManager {
     String getDestinationString(String transport);
 
     /**
+     * Get the manage-data UI intent, if any, from the given transport.  Callers must
+     * hold the android.permission.BACKUP permission in order to use this method.
+     */
+    Intent getDataManagementIntent(String transport);
+
+    /**
+     * Get the manage-data menu label, if any, from the given transport.  Callers must
+     * hold the android.permission.BACKUP permission in order to use this method.
+     */
+    String getDataManagementLabel(String transport);
+
+    /**
      * Begin a restore session.  Either or both of packageName and transportID
      * may be null.  If packageName is non-null, then only the given package will be
      * considered for restore.  If transportID is null, then the restore will use
