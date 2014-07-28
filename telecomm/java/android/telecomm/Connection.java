@@ -44,7 +44,8 @@ public abstract class Connection {
         public void onDestroyed(Connection c) {}
         public void onCallCapabilitiesChanged(Connection c, int callCapabilities) {}
         public void onParentConnectionChanged(Connection c, Connection parent) {}
-        public void onVideoCallProviderChanged(Connection c, VideoCallProvider videoCallProvider) {}
+        public void onVideoCallProviderChanged(
+                Connection c, ConnectionService.VideoCallProvider videoCallProvider) {}
         public void onAudioModeIsVoipChanged(Connection c, boolean isVoip) {}
         public void onStatusHintsChanged(Connection c, StatusHints statusHints) {}
         public void onStartActivityFromInCall(Connection c, PendingIntent intent) {}
@@ -78,7 +79,7 @@ public abstract class Connection {
     private boolean mRequestingRingback = false;
     private int mCallCapabilities;
     private Connection mParentConnection;
-    private VideoCallProvider mVideoCallProvider;
+    private ConnectionService.VideoCallProvider mVideoCallProvider;
     private boolean mAudioModeIsVoip;
     private StatusHints mStatusHints;
     private int mVideoState;
@@ -417,14 +418,14 @@ public abstract class Connection {
      * Sets the video call provider.
      * @param videoCallProvider The video call provider.
      */
-    public final void setVideoCallProvider(VideoCallProvider videoCallProvider) {
+    public final void setVideoCallProvider(ConnectionService.VideoCallProvider videoCallProvider) {
         mVideoCallProvider = videoCallProvider;
         for (Listener l : mListeners) {
             l.onVideoCallProviderChanged(this, videoCallProvider);
         }
     }
 
-    public final VideoCallProvider getVideoCallProvider() {
+    public final ConnectionService.VideoCallProvider getVideoCallProvider() {
         return mVideoCallProvider;
     }
 
