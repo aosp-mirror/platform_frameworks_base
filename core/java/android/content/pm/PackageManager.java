@@ -205,13 +205,6 @@ public abstract class PackageManager {
     public static final int NO_CROSS_PROFILE = 0x00020000;
 
     /**
-     * Flag for {@link addCrossProfileIntentFilter}: if the cross-profile intent has been set by the
-     * profile owner.
-     * @hide
-     */
-    public static final int SET_BY_PROFILE_OWNER= 0x00000001;
-
-    /**
      * Flag for {@link addCrossProfileIntentFilter}: if this flag is set:
      * when resolving an intent that matches the {@link CrossProfileIntentFilter}, the current
      * profile will be skipped.
@@ -3744,9 +3737,10 @@ public abstract class PackageManager {
      * Adds a {@link CrossProfileIntentFilter}. After calling this method all intents sent from the
      * user with id sourceUserId can also be be resolved by activities in the user with id
      * targetUserId if they match the specified intent filter.
-     * @param filter the {@link IntentFilter} the intent has to match
-     * @param removable if set to false, {@link clearCrossProfileIntentFilters} will not remove this
-     * {@link CrossProfileIntentFilter}
+     * @param filter The {@link IntentFilter} the intent has to match
+     * @param sourceUserId The source user id.
+     * @param targetUserId The target user id.
+     * @param flags The only possible value is {@link SKIP_CURRENT_PROFILE}
      * @hide
      */
     public abstract void addCrossProfileIntentFilter(IntentFilter filter, int sourceUserId,
@@ -3754,8 +3748,8 @@ public abstract class PackageManager {
 
     /**
      * Clearing {@link CrossProfileIntentFilter}s which have the specified user as their
-     * source, and have been set by the profile owner
-     * @param sourceUserId
+     * source, and have been set by the app calling this method.
+     * @param sourceUserId The source user id.
      * @hide
      */
     public abstract void clearCrossProfileIntentFilters(int sourceUserId);
