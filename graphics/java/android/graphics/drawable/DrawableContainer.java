@@ -176,15 +176,29 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
     }
 
     @Override
-    public void setTint(ColorStateList tint, Mode tintMode) {
-        mDrawableContainerState.mHasTint = (tint != null && tintMode != null);
+    public void setTintList(ColorStateList tint) {
+        mDrawableContainerState.mHasTint = tint != null
+                && mDrawableContainerState.mTintMode != null;
 
-        if (mDrawableContainerState.mTint != tint || mDrawableContainerState.mTintMode != tintMode) {
+        if (mDrawableContainerState.mTint != tint) {
             mDrawableContainerState.mTint = tint;
+
+            if (mCurrDrawable != null) {
+                mCurrDrawable.mutate().setTintList(tint);
+            }
+        }
+    }
+
+    @Override
+    public void setTintMode(Mode tintMode) {
+        mDrawableContainerState.mHasTint = mDrawableContainerState.mTint != null
+                && tintMode != null;
+
+        if (mDrawableContainerState.mTintMode != tintMode) {
             mDrawableContainerState.mTintMode = tintMode;
 
             if (mCurrDrawable != null) {
-                mCurrDrawable.mutate().setTint(tint, tintMode);
+                mCurrDrawable.mutate().setTintMode(tintMode);
             }
         }
     }
@@ -437,7 +451,8 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
                 if (mDrawableContainerState.mHasColorFilter) {
                     d.setColorFilter(mDrawableContainerState.mColorFilter);
                 } else if (mDrawableContainerState.mHasTint) {
-                    d.setTint(mDrawableContainerState.mTint, mDrawableContainerState.mTintMode);
+                    d.setTintList(mDrawableContainerState.mTint);
+                    d.setTintMode(mDrawableContainerState.mTintMode);
                 }
                 d.setVisible(isVisible(), true);
                 d.setDither(mDrawableContainerState.mDither);

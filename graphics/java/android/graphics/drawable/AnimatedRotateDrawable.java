@@ -171,8 +171,13 @@ public class AnimatedRotateDrawable extends Drawable implements Drawable.Callbac
     }
 
     @Override
-    public void setTint(ColorStateList tint, Mode tintMode) {
-        mState.mDrawable.setTint(tint, tintMode);
+    public void setTintList(ColorStateList tint) {
+        mState.mDrawable.setTintList(tint);
+    }
+
+    @Override
+    public void setTintMode(Mode tintMode) {
+        mState.mDrawable.setTintMode(tintMode);
     }
 
     @Override
