@@ -2183,6 +2183,14 @@
         android:description="@string/permdesc_bindTvInput"
         android:protectionLevel="signature|system" />
 
+    <!-- @SystemApi Allows an application to modify parental controls
+         <p>Not for use by third-party applications.
+         @hide -->
+    <permission android:name="android.permission.MODIFY_PARENTAL_CONTROLS"
+        android:label="@string/permlab_modifyParentalControls"
+        android:description="@string/permdesc_modifyParentalControls"
+        android:protectionLevel="signature" />
+
     <!-- Must be required by a {@link android.media.routing.MediaRouteService}
          to ensure that only the system can interact with it.
          @hide -->
