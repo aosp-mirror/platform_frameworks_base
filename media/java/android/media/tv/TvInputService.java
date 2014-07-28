@@ -282,7 +282,7 @@ public abstract class TvInputService extends Service {
          * @param eventArgs Optional arguments of the event.
          * @hide
          */
-        public void dispatchSessionEvent(final String eventType, final Bundle eventArgs) {
+        public void notifySessionEvent(final String eventType, final Bundle eventArgs) {
             if (eventType == null) {
                 throw new IllegalArgumentException("eventType should not be null.");
             }
@@ -290,7 +290,7 @@ public abstract class TvInputService extends Service {
                 @Override
                 public void run() {
                     try {
-                        if (DEBUG) Log.d(TAG, "dispatchSessionEvent(" + eventType + ")");
+                        if (DEBUG) Log.d(TAG, "notifySessionEvent(" + eventType + ")");
                         mSessionCallback.onSessionEvent(eventType, eventArgs);
                     } catch (RemoteException e) {
                         Log.w(TAG, "error in sending event (event=" + eventType + ")");
@@ -304,15 +304,15 @@ public abstract class TvInputService extends Service {
          *
          * @param channelUri The URI of a channel.
          */
-        public void dispatchChannelRetuned(final Uri channelUri) {
+        public void notifyChannelRetuned(final Uri channelUri) {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        if (DEBUG) Log.d(TAG, "dispatchChannelRetuned");
+                        if (DEBUG) Log.d(TAG, "notifyChannelRetuned");
                         mSessionCallback.onChannelRetuned(channelUri);
                     } catch (RemoteException e) {
-                        Log.w(TAG, "error in dispatchChannelRetuned");
+                        Log.w(TAG, "error in notifyChannelRetuned");
                     }
                 }
             });
@@ -324,7 +324,7 @@ public abstract class TvInputService extends Service {
          *
          * @param tracks A list which includes track information.
          */
-        public void dispatchTrackInfoChanged(final List<TvTrackInfo> tracks) {
+        public void notifyTrackInfoChanged(final List<TvTrackInfo> tracks) {
             if (!TvTrackInfo.checkSanity(tracks)) {
                 throw new IllegalArgumentException(
                         "Two or more selected tracks for a track type.");
@@ -333,10 +333,10 @@ public abstract class TvInputService extends Service {
                 @Override
                 public void run() {
                     try {
-                        if (DEBUG) Log.d(TAG, "dispatchTrackInfoChanged");
+                        if (DEBUG) Log.d(TAG, "notifyTrackInfoChanged");
                         mSessionCallback.onTrackInfoChanged(tracks);
                     } catch (RemoteException e) {
-                        Log.w(TAG, "error in dispatchTrackInfoChanged");
+                        Log.w(TAG, "error in notifyTrackInfoChanged");
                     }
                 }
             });
@@ -346,15 +346,15 @@ public abstract class TvInputService extends Service {
          * Informs the application that video is available and the playback of the TV stream has
          * been started.
          */
-        public void dispatchVideoAvailable() {
+        public void notifyVideoAvailable() {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        if (DEBUG) Log.d(TAG, "dispatchVideoAvailable");
+                        if (DEBUG) Log.d(TAG, "notifyVideoAvailable");
                         mSessionCallback.onVideoAvailable();
                     } catch (RemoteException e) {
-                        Log.w(TAG, "error in dispatchVideoAvailable");
+                        Log.w(TAG, "error in notifyVideoAvailable");
                     }
                 }
             });
@@ -372,7 +372,7 @@ public abstract class TvInputService extends Service {
          * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_BUFFERING}
          * </ul>
          */
-        public void dispatchVideoUnavailable(final int reason) {
+        public void notifyVideoUnavailable(final int reason) {
             if (reason < TvInputManager.VIDEO_UNAVAILABLE_REASON_START
                     || reason > TvInputManager.VIDEO_UNAVAILABLE_REASON_END) {
                 throw new IllegalArgumentException("Unknown reason: " + reason);
@@ -381,10 +381,10 @@ public abstract class TvInputService extends Service {
                 @Override
                 public void run() {
                     try {
-                        if (DEBUG) Log.d(TAG, "dispatchVideoUnavailable");
+                        if (DEBUG) Log.d(TAG, "notifyVideoUnavailable");
                         mSessionCallback.onVideoUnavailable(reason);
                     } catch (RemoteException e) {
-                        Log.w(TAG, "error in dispatchVideoUnavailable");
+                        Log.w(TAG, "error in notifyVideoUnavailable");
                     }
                 }
             });
@@ -411,18 +411,18 @@ public abstract class TvInputService extends Service {
          * reevaluate the current program with the new parental control settings.
          * </p>
          *
-         * @see #dispatchContentBlocked
+         * @see #notifyContentBlocked
          * @see TvParentalControlManager
          */
-        public void dispatchContentAllowed() {
+        public void notifyContentAllowed() {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        if (DEBUG) Log.d(TAG, "dispatchContentAllowed");
+                        if (DEBUG) Log.d(TAG, "notifyContentAllowed");
                         mSessionCallback.onContentAllowed();
                     } catch (RemoteException e) {
-                        Log.w(TAG, "error in dispatchContentAllowed");
+                        Log.w(TAG, "error in notifyContentAllowed");
                     }
                 }
             });
@@ -451,18 +451,18 @@ public abstract class TvInputService extends Service {
          * </p>
          *
          * @param rating The content rating for the current TV program.
-         * @see #dispatchContentAllowed
+         * @see #notifyContentAllowed
          * @see TvParentalControlManager
          */
-        public void dispatchContentBlocked(final TvContentRating rating) {
+        public void notifyContentBlocked(final TvContentRating rating) {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        if (DEBUG) Log.d(TAG, "dispatchContentBlocked");
+                        if (DEBUG) Log.d(TAG, "notifyContentBlocked");
                         mSessionCallback.onContentBlocked(rating.flattenToString());
                     } catch (RemoteException e) {
-                        Log.w(TAG, "error in dispatchContentBlocked");
+                        Log.w(TAG, "error in notifyContentBlocked");
                     }
                 }
             });
@@ -529,8 +529,8 @@ public abstract class TvInputService extends Service {
         public abstract void onSetStreamVolume(float volume);
 
         /**
-         * Tunes to a given channel. When the video is available, {@link #dispatchVideoAvailable()}
-         * should be called. Also, {@link #dispatchVideoUnavailable(int)} should be called when the
+         * Tunes to a given channel. When the video is available, {@link #notifyVideoAvailable()}
+         * should be called. Also, {@link #notifyVideoUnavailable(int)} should be called when the
          * TV input cannot continue playing the given channel.
          *
          * @param channelUri The URI of the channel.
@@ -562,7 +562,7 @@ public abstract class TvInputService extends Service {
          *
          * @param unblockedRating An unblocked content rating
          */
-        public void onRequestUnblockContent(TvContentRating unblockedRating) {
+        public void onUnblockContent(TvContentRating unblockedRating) {
         }
 
         /**
@@ -571,12 +571,12 @@ public abstract class TvInputService extends Service {
          * If it is called multiple times on the same type of track (ie. Video, Audio, Text), the
          * track selected previously should be unselected in the implementation of this method.
          * Also, if the select operation was successful, the implementation should call
-         * {@link #dispatchTrackInfoChanged(List)} to report the updated track information.
+         * {@link #notifyTrackInfoChanged(List)} to report the updated track information.
          * </p>
          *
          * @param track The track to be selected.
          * @return {@code true} if the select operation was successful, {@code false} otherwise.
-         * @see #dispatchTrackInfoChanged
+         * @see #notifyTrackInfoChanged
          * @see TvTrackInfo#KEY_IS_SELECTED
          */
         public boolean onSelectTrack(TvTrackInfo track) {
@@ -587,12 +587,12 @@ public abstract class TvInputService extends Service {
          * Unselects a given track.
          * <p>
          * If the unselect operation was successful, the implementation should call
-         * {@link #dispatchTrackInfoChanged(List)} to report the updated track information.
+         * {@link #notifyTrackInfoChanged(List)} to report the updated track information.
          * </p>
          *
          * @param track The track to be unselected.
          * @return {@code true} if the unselect operation was successful, {@code false} otherwise.
-         * @see #dispatchTrackInfoChanged
+         * @see #notifyTrackInfoChanged
          * @see TvTrackInfo#KEY_IS_SELECTED
          */
         public boolean onUnselectTrack(TvTrackInfo track) {
@@ -821,10 +821,10 @@ public abstract class TvInputService extends Service {
         }
 
         /**
-         * Calls {@link #onRequestUnblockContent}.
+         * Calls {@link #onUnblockContent}.
          */
-        void requestUnblockContent(String unblockedRating) {
-            onRequestUnblockContent(TvContentRating.unflattenFromString(unblockedRating));
+        void unblockContent(String unblockedRating) {
+            onUnblockContent(TvContentRating.unflattenFromString(unblockedRating));
             // TODO: Handle failure.
         }
 

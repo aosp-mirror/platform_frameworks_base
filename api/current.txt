@@ -17014,12 +17014,12 @@ package android.media.tv {
 
   public abstract class TvInputService.Session implements android.view.KeyEvent.Callback {
     ctor public TvInputService.Session();
-    method public void dispatchChannelRetuned(android.net.Uri);
-    method public void dispatchContentAllowed();
-    method public void dispatchContentBlocked(android.media.tv.TvContentRating);
-    method public void dispatchTrackInfoChanged(java.util.List<android.media.tv.TvTrackInfo>);
-    method public void dispatchVideoAvailable();
-    method public void dispatchVideoUnavailable(int);
+    method public void notifyChannelRetuned(android.net.Uri);
+    method public void notifyContentAllowed();
+    method public void notifyContentBlocked(android.media.tv.TvContentRating);
+    method public void notifyTrackInfoChanged(java.util.List<android.media.tv.TvTrackInfo>);
+    method public void notifyVideoAvailable();
+    method public void notifyVideoUnavailable(int);
     method public android.view.View onCreateOverlayView();
     method public boolean onGenericMotionEvent(android.view.MotionEvent);
     method public boolean onKeyDown(int, android.view.KeyEvent);
@@ -17027,7 +17027,6 @@ package android.media.tv {
     method public boolean onKeyMultiple(int, int, android.view.KeyEvent);
     method public boolean onKeyUp(int, android.view.KeyEvent);
     method public abstract void onRelease();
-    method public void onRequestUnblockContent(android.media.tv.TvContentRating);
     method public boolean onSelectTrack(android.media.tv.TvTrackInfo);
     method public abstract void onSetCaptionEnabled(boolean);
     method public abstract void onSetStreamVolume(float);
@@ -17036,6 +17035,7 @@ package android.media.tv {
     method public boolean onTouchEvent(android.view.MotionEvent);
     method public boolean onTrackballEvent(android.view.MotionEvent);
     method public abstract boolean onTune(android.net.Uri);
+    method public void onUnblockContent(android.media.tv.TvContentRating);
     method public boolean onUnselectTrack(android.media.tv.TvTrackInfo);
     method public void setOverlayViewEnabled(boolean);
   }
