@@ -611,6 +611,18 @@ public class NotificationManagerService extends SystemService {
                 }
             }
         }
+
+        @Override
+        public void onNotificationExpansionChanged(String key,
+                boolean userAction, boolean expanded) {
+            EventLogTags.writeNotificationExpansion(key, userAction ? 1 : 0, expanded ? 1 : 0);
+            synchronized (mNotificationList) {
+                NotificationRecord r = mNotificationsByKey.get(key);
+                if (r != null) {
+                    r.stats.onExpansionChanged(userAction, expanded);
+                }
+            }
+        }
     };
 
     private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {

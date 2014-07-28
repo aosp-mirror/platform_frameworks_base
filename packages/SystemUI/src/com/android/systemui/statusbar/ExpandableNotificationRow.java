@@ -54,6 +54,12 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     private int mMaxExpandHeight;
     private View mVetoButton;
     private boolean mClearable;
+    private ExpansionLogger mLogger;
+    private String mLoggingKey;
+
+    public interface ExpansionLogger {
+        public void logNotificationExpansion(String key, boolean userAction, boolean expanded);
+    }
 
     public ExpandableNotificationRow(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -66,6 +72,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     public void reset() {
         super.reset();
         mRowMinHeight = 0;
+        final boolean wasExpanded = isExpanded();
         mRowMaxHeight = 0;
         mExpandable = false;
         mHasUserChangedExpansion = false;
@@ -76,6 +83,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         mPublicLayout.reset();
         mPrivateLayout.reset();
         mMaxExpandHeight = 0;
+        logExpansionEvent(false, wasExpanded);
     }
 
     @Override
@@ -131,8 +139,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
      */
     public void setUserExpanded(boolean userExpanded) {
         if (userExpanded && !mExpandable) return;
+        final boolean wasExpanded = isExpanded();
         mHasUserChangedExpansion = true;
         mUserExpanded = userExpanded;
+        logExpansionEvent(true, wasExpanded);
     }
 
     public boolean isUserLocked() {
@@ -156,15 +166,19 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
      * @param expand whether the system wants this notification to be expanded.
      */
     public void setSystemExpanded(boolean expand) {
+        final boolean wasExpanded = isExpanded();
         mIsSystemExpanded = expand;
         notifyHeightChanged();
+        logExpansionEvent(false, wasExpanded);
     }
 
     /**
      * @param expansionDisabled whether to prevent notification expansion
      */
     public void setExpansionDisabled(boolean expansionDisabled) {
+        final boolean wasExpanded = isExpanded();
         mExpansionDisabled = expansionDisabled;
+        logExpansionEvent(false, wasExpanded);
         notifyHeightChanged();
     }
 
@@ -301,5 +315,18 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     private NotificationContentView getShowingLayout() {
         return mShowingPublic ? mPublicLayout : mPrivateLayout;
+    }
+
+    public void setExpansionLogger(ExpansionLogger logger, String key) {
+        mLogger = logger;
+        mLoggingKey = key;
+    }
+
+
+    private void logExpansionEvent(boolean userAction, boolean wasExpanded) {
+        final boolean nowExpanded = isExpanded();
+        if (wasExpanded != nowExpanded && mLogger != null) {
+            mLogger.logNotificationExpansion(mLoggingKey, userAction, nowExpanded) ;
+        }
     }
 }
