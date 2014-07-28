@@ -3327,7 +3327,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     child.mRenderNode.setClipToBounds(clipChildren);
                 }
             }
-            invalidate();
+            invalidate(true);
         }
     }
 
@@ -3342,7 +3342,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     public void setClipToPadding(boolean clipToPadding) {
         if (hasBooleanFlag(FLAG_CLIP_TO_PADDING) != clipToPadding) {
             setBooleanFlag(FLAG_CLIP_TO_PADDING, clipToPadding);
-            invalidate();
+            invalidate(true);
         }
     }
 
