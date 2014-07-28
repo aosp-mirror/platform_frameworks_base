@@ -75,6 +75,7 @@ public class KeyguardStatusView extends GridLayout {
         @Override
         public void onUserSwitchComplete(int userId) {
             refresh();
+            updateOwnerInfo();
         }
     };
 
