@@ -1623,11 +1623,11 @@ final class ApplicationPackageManager extends PackageManager {
             return new BitmapDrawable(getUserManager().getUserIcon(itemInfo.showUserIcon));
         }
         Drawable dr = getDrawable(itemInfo.packageName, itemInfo.icon, appInfo);
-        if (dr != null) {
-            dr = getUserManager().getBadgedDrawableForUser(dr,
-                    new UserHandle(mContext.getUserId()));
+        if (dr == null) {
+            dr = getDefaultActivityIcon();
         }
-        return dr;
+        return getUserManager().getBadgedDrawableForUser(dr,
+                new UserHandle(mContext.getUserId()));
     }
 
     private static class LegacyPackageInstallObserver extends PackageInstallObserver {
