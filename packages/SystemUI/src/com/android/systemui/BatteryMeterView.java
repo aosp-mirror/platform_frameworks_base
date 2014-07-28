@@ -402,6 +402,11 @@ public class BatteryMeterView extends View implements DemoMode {
         }
     }
 
+    @Override
+    public boolean hasOverlappingRendering() {
+        return false;
+    }
+
     private boolean mDemoMode;
     private BatteryTracker mDemoTracker = new BatteryTracker();
 

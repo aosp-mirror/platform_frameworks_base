@@ -167,6 +167,11 @@ public class SignalClusterView
         apply();
     }
 
+    @Override
+    public boolean hasOverlappingRendering() {
+        return false;
+    }
+
     private void applyInetProblem(ImageView iv) {
         iv.setColorFilter(Build.IS_DEBUGGABLE && mInetProblem ? PROBLEM_FILTER : null);
     }
