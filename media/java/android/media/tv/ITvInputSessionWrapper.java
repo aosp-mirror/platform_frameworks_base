@@ -147,7 +147,7 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
                 return;
             }
             case DO_REQUEST_UNBLOCK_CONTENT: {
-                mTvInputSessionImpl.requestUnblockContent((String) msg.obj);
+                mTvInputSessionImpl.unblockContent((String) msg.obj);
                 return;
             }
             default: {
