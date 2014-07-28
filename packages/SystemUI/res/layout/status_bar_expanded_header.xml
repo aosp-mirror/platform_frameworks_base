@@ -68,7 +68,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="@dimen/header_battery_margin_keyguard"
             android:paddingEnd="@dimen/battery_level_padding_end"
             android:textColor="#ffffff"
             android:textSize="12sp"/>
@@ -142,7 +142,7 @@
         android:id="@+id/keyguard_carrier_text"
         android:layout_width="match_parent"
         android:layout_height="@dimen/status_bar_header_height_keyguard"
-        android:layout_marginLeft="16dp"
+        android:layout_marginStart="@dimen/keyguard_carrier_text_margin"
         android:layout_toStartOf="@id/system_icons_super_container"
         android:gravity="center_vertical"
         android:ellipsize="marquee"

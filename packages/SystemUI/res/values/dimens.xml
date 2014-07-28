@@ -362,8 +362,14 @@
     <!-- The width of the multi user switch in expanded QS header. -->
     <dimen name="multi_user_switch_width_expanded">48dp</dimen>
 
+    <!-- The width of user avatar when on Keyguard -->
+    <dimen name="multi_user_switch_width_keyguard">34dp</dimen>
+
     <!-- The width of user avatar when collapsed -->
     <dimen name="multi_user_avatar_collapsed_size">22dp</dimen>
+
+    <!-- The width of user avatar when on Keyguard -->
+    <dimen name="multi_user_avatar_keyguard_size">22dp</dimen>
 
     <!-- The font size of the time when collapsed in QS -->
     <dimen name="qs_time_collapsed_size">14sp</dimen>
@@ -380,4 +386,13 @@
     <!-- Largest size an avatar might need to be drawn in the user picker, status bar, or
          quick settings header -->
     <dimen name="max_avatar_size">48dp</dimen>
+
+    <!-- Margin on the left side of the carrier text on Keyguard -->
+    <dimen name="keyguard_carrier_text_margin">16dp</dimen>
+
+    <!-- Margin on the left side of the battery % in the header. -->
+    <dimen name="header_battery_margin_expanded">8dp</dimen>
+
+    <!-- Margin on the left side of the battery % when on Keyguard. -->
+    <dimen name="header_battery_margin_keyguard">6dp</dimen>
 </resources>
