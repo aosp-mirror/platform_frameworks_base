@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar;
 
+import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.view.ViewPropertyAnimator;
@@ -72,7 +73,7 @@ public class FlingAnimationUtils {
      * @param endValue the end value of the animator
      * @param velocity the current velocity of the motion
      */
-    public void apply(ValueAnimator animator, float currValue, float endValue, float velocity) {
+    public void apply(Animator animator, float currValue, float endValue, float velocity) {
         apply(animator, currValue, endValue, velocity, Math.abs(endValue - currValue));
     }
 
@@ -101,7 +102,7 @@ public class FlingAnimationUtils {
      * @param maxDistance the maximum distance for this interaction; the maximum animation length
      *                    gets multiplied by the ratio between the actual distance and this value
      */
-    public void apply(ValueAnimator animator, float currValue, float endValue, float velocity,
+    public void apply(Animator animator, float currValue, float endValue, float velocity,
             float maxDistance) {
         AnimatorProperties properties = getProperties(currValue, endValue, velocity,
                 maxDistance);
@@ -168,7 +169,7 @@ public class FlingAnimationUtils {
      * @param maxDistance the maximum distance for this interaction; the maximum animation length
      *                    gets multiplied by the ratio between the actual distance and this value
      */
-    public void applyDismissing(ValueAnimator animator, float currValue, float endValue,
+    public void applyDismissing(Animator animator, float currValue, float endValue,
             float velocity, float maxDistance) {
         AnimatorProperties properties = getDismissingProperties(currValue, endValue, velocity,
                 maxDistance);

@@ -67,7 +67,6 @@ public class KeyguardAffordanceHelper {
     private Animator mSwipeAnimator;
     private int mMinBackgroundRadius;
     private boolean mMotionPerformedByUser;
-    private PowerManager mPM;
     private AnimatorListenerAdapter mFlingEndListener = new AnimatorListenerAdapter() {
         @Override
         public void onAnimationEnd(Animator animation) {
@@ -89,11 +88,12 @@ public class KeyguardAffordanceHelper {
         mLeftIcon.setIsLeft(true);
         mCenterIcon = mCallback.getCenterIcon();
         mRightIcon = mCallback.getRightIcon();
+        mLeftIcon.setPreviewView(mCallback.getLeftPreview());
+        mRightIcon.setPreviewView(mCallback.getRightPreview());
         updateIcon(mLeftIcon, 0.0f, SWIPE_RESTING_ALPHA_AMOUNT, false);
         updateIcon(mCenterIcon, 0.0f, SWIPE_RESTING_ALPHA_AMOUNT, false);
         updateIcon(mRightIcon, 0.0f, SWIPE_RESTING_ALPHA_AMOUNT, false);
         initDimens();
-        mPM = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
     }
 
     private void initDimens() {
@@ -334,7 +334,6 @@ public class KeyguardAffordanceHelper {
         float absTranslation = Math.abs(translation);
         if (absTranslation > Math.abs(mTranslationOnDown) + mMinTranslationAmount ||
                 mMotionPerformedByUser) {
-            userActivity();
             mMotionPerformedByUser = true;
         }
         if (translation != mTranslation || isReset) {
@@ -385,11 +384,6 @@ public class KeyguardAffordanceHelper {
 
     private float getRadiusFromTranslation(float translation) {
         return translation * BACKGROUND_RADIUS_SCALE_FACTOR + mMinBackgroundRadius;
-    }
-
-
-    private void userActivity() {
-        mPM.userActivity(SystemClock.uptimeMillis(), false);
     }
 
     public void animateHideLeftRightIcon() {
@@ -475,5 +469,9 @@ public class KeyguardAffordanceHelper {
         KeyguardAffordanceView getCenterIcon();
 
         KeyguardAffordanceView getRightIcon();
+
+        View getLeftPreview();
+
+        View getRightPreview();
     }
 }

@@ -1257,6 +1257,20 @@ public class NotificationPanelView extends PanelView implements
     }
 
     @Override
+    public View getLeftPreview() {
+        return getLayoutDirection() == LAYOUT_DIRECTION_RTL
+                ? mKeyguardBottomArea.getCameraPreview()
+                : mKeyguardBottomArea.getPhonePreview();
+    }
+
+    @Override
+    public View getRightPreview() {
+        return getLayoutDirection() == LAYOUT_DIRECTION_RTL
+                ? mKeyguardBottomArea.getPhonePreview()
+                : mKeyguardBottomArea.getCameraPreview();
+    }
+
+    @Override
     protected float getPeekHeight() {
         if (mNotificationStackScroller.getNotGoneChildCount() > 0) {
             return mNotificationStackScroller.getPeekHeight();
