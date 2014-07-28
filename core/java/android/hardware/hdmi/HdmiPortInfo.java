@@ -161,4 +161,15 @@ public final class HdmiPortInfo implements Parcelable {
         dest.writeInt(mArcSupported ? 1 : 0);
         dest.writeInt(mMhlSupported ? 1 : 0);
     }
+
+    @Override
+    public String toString() {
+        StringBuffer s = new StringBuffer();
+        s.append("port_id: ").append(mId).append(", ");
+        s.append("address: ").append(mAddress).append(", ");
+        s.append("cec: ").append(mCecSupported).append(", ");
+        s.append("arc: ").append(mArcSupported).append(", ");
+        s.append("mhl: ").append(mMhlSupported);
+        return s.toString();
+    }
 }
