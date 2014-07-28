@@ -65,11 +65,6 @@ interface IConnectivityManager
     NetworkQuotaInfo getActiveNetworkQuotaInfo();
     boolean isActiveNetworkMetered();
 
-    int startUsingNetworkFeature(int networkType, in String feature,
-            in IBinder binder);
-
-    int stopUsingNetworkFeature(int networkType, in String feature);
-
     boolean requestRouteToHostAddress(int networkType, in byte[] hostAddress);
 
     /** Policy control over specific {@link NetworkStateTracker}. */
