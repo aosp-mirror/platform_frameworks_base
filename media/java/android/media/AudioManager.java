@@ -27,7 +27,10 @@ import android.content.Intent;
 import android.media.RemoteController.OnClientUpdateListener;
 import android.media.audiopolicy.AudioPolicy;
 import android.media.audiopolicy.AudioPolicyConfig;
+import android.media.session.MediaController;
+import android.media.session.MediaSession;
 import android.media.session.MediaSessionLegacyHelper;
+import android.media.session.MediaSessionManager;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -2218,7 +2221,9 @@ public class AudioManager {
      *      that will receive the media button intent. This broadcast receiver must be declared
      *      in the application manifest. The package of the component must match that of
      *      the context you're registering from.
+     * @deprecated Use {@link MediaSession#setMediaButtonReceiver(PendingIntent)} instead.
      */
+    @Deprecated
     public void registerMediaButtonEventReceiver(ComponentName eventReceiver) {
         if (eventReceiver == null) {
             return;
@@ -2244,9 +2249,12 @@ public class AudioManager {
      * you know you will continue running for the full time until unregistering the
      * PendingIntent.
      * @param eventReceiver target that will receive media button intents.  The PendingIntent
-     * will be sent as-is when a media button action occurs, with {@link Intent#EXTRA_KEY_EVENT}
-     * added and holding the key code of the media button that was pressed.
+     * will be sent an {@link Intent#ACTION_MEDIA_BUTTON} event when a media button action
+     * occurs, with {@link Intent#EXTRA_KEY_EVENT} added and holding the key code of the
+     * media button that was pressed.
+     * @deprecated Use {@link MediaSession#setMediaButtonReceiver(PendingIntent)} instead.
      */
+    @Deprecated
     public void registerMediaButtonEventReceiver(PendingIntent eventReceiver) {
         if (eventReceiver == null) {
             return;
@@ -2271,7 +2279,9 @@ public class AudioManager {
      * Unregister the receiver of MEDIA_BUTTON intents.
      * @param eventReceiver identifier of a {@link android.content.BroadcastReceiver}
      *      that was registered with {@link #registerMediaButtonEventReceiver(ComponentName)}.
+     * @deprecated Use {@link MediaSession} instead.
      */
+    @Deprecated
     public void unregisterMediaButtonEventReceiver(ComponentName eventReceiver) {
         if (eventReceiver == null) {
             return;
@@ -2289,7 +2299,9 @@ public class AudioManager {
      * Unregister the receiver of MEDIA_BUTTON intents.
      * @param eventReceiver same PendingIntent that was registed with
      *      {@link #registerMediaButtonEventReceiver(PendingIntent)}.
+     * @deprecated Use {@link MediaSession} instead.
      */
+    @Deprecated
     public void unregisterMediaButtonEventReceiver(PendingIntent eventReceiver) {
         if (eventReceiver == null) {
             return;
@@ -2311,7 +2323,9 @@ public class AudioManager {
      * @param rcClient The remote control client from which remote controls will receive
      *      information to display.
      * @see RemoteControlClient
+     * @deprecated Use {@link MediaSession} instead.
      */
+    @Deprecated
     public void registerRemoteControlClient(RemoteControlClient rcClient) {
         if ((rcClient == null) || (rcClient.getRcMediaIntent() == null)) {
             return;
@@ -2324,7 +2338,9 @@ public class AudioManager {
      * remote controls.
      * @param rcClient The remote control client to unregister.
      * @see #registerRemoteControlClient(RemoteControlClient)
+     * @deprecated Use {@link MediaSession} instead.
      */
+    @Deprecated
     public void unregisterRemoteControlClient(RemoteControlClient rcClient) {
         if ((rcClient == null) || (rcClient.getRcMediaIntent() == null)) {
             return;
@@ -2342,7 +2358,11 @@ public class AudioManager {
      * @param rctlr the object to register.
      * @return true if the {@link RemoteController} was successfully registered, false if an
      *     error occurred, due to an internal system error, or insufficient permissions.
+     * @deprecated Use
+     * {@link MediaSessionManager#addActiveSessionsListener(android.media.session.MediaSessionManager.SessionListener, ComponentName)}
+     * and {@link MediaController} instead.
      */
+    @Deprecated
     public boolean registerRemoteController(RemoteController rctlr) {
         if (rctlr == null) {
             return false;
@@ -2355,7 +2375,11 @@ public class AudioManager {
      * Unregisters a {@link RemoteController}, causing it to no longer receive media metadata and
      * playback state information, and no longer be capable of controlling playback.
      * @param rctlr the object to unregister.
+     * @deprecated Use
+     * {@link MediaSessionManager#removeActiveSessionsListener(android.media.session.MediaSessionManager.SessionListener)}
+     * instead.
      */
+    @Deprecated
     public void unregisterRemoteController(RemoteController rctlr) {
         if (rctlr == null) {
             return;

@@ -74,8 +74,7 @@ import java.util.List;
     private MetadataEditor mMetadataEditor;
 
     private MediaSessionManager mSessionManager;
-    private MediaSessionManager.SessionListener mSessionListener
-            = new TopTransportSessionListener();
+    private MediaSessionManager.SessionListener mSessionListener;
     private MediaController.Callback mSessionCb = new MediaControllerCallback();
 
     /**
@@ -141,6 +140,7 @@ import java.util.List;
         mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         mSessionManager = (MediaSessionManager) context
                 .getSystemService(Context.MEDIA_SESSION_SERVICE);
+        mSessionListener = new TopTransportSessionListener(context);
 
         if (ActivityManager.isLowRamDeviceStatic()) {
             mMaxBitmapDimension = MAX_BITMAP_DIMENSION;
@@ -214,7 +214,7 @@ import java.util.List;
     public String getRemoteControlClientPackageName() {
         if (USE_SESSIONS) {
             synchronized (mInfoLock) {
-                return mCurrentSession != null ? mCurrentSession.getSessionInfo().getPackageName()
+                return mCurrentSession != null ? mCurrentSession.getPackageName()
                         : null;
             }
         } else {
@@ -711,6 +711,11 @@ import java.util.List;
      * currently tracked session if it has changed.
      */
     private class TopTransportSessionListener extends MediaSessionManager.SessionListener {
+
+        public TopTransportSessionListener(Context context) {
+            super(context);
+        }
+
         @Override
         public void onActiveSessionsChanged(List<MediaController> controllers) {
             int size = controllers.size();
@@ -980,8 +985,8 @@ import java.util.List;
                             0 /* genId */, 1 /* clearing */, null /* obj */, 0 /* delay */);
                 }
             } else if (mCurrentSession == null
-                    || !controller.getSessionInfo().getId()
-                            .equals(mCurrentSession.getSessionInfo().getId())) {
+                    || !controller.getSessionToken()
+                            .equals(mCurrentSession.getSessionToken())) {
                 if (mCurrentSession != null) {
                     mCurrentSession.removeCallback(mSessionCb);
                 }

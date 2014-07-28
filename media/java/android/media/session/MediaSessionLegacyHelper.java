@@ -304,7 +304,7 @@ public class MediaSessionLegacyHelper {
 
         holder.mMediaButtonReceiver = new MediaButtonReceiver(pi, context);
         holder.mSession.addCallback(holder.mMediaButtonReceiver, mHandler);
-        holder.mSession.setMediaButtonReceiver(mbrComponent);
+        holder.mSession.setMediaButtonReceiver(pi);
         if (DEBUG) {
             Log.d(TAG, "addMediaButtonListener added " + pi);
         }
@@ -369,7 +369,7 @@ public class MediaSessionLegacyHelper {
         SessionHolder holder = mSessions.get(pi);
         if (holder == null && createIfMissing) {
             MediaSession session;
-            session = new MediaSession(mContext, TAG);
+            session = new MediaSession(mContext, TAG + "-" + pi.getCreatorPackage());
             session.setActive(true);
             holder = new SessionHolder(session, pi);
             mSessions.put(pi, holder);

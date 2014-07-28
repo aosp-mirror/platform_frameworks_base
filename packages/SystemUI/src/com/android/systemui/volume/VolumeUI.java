@@ -195,7 +195,7 @@ public class VolumeUI extends SystemUI {
         @Override
         public void remoteVolumeChanged(ISessionController binder, int flags)
                 throws RemoteException {
-            MediaController controller = new MediaController(binder);
+            MediaController controller = new MediaController(mContext, binder);
             mPanel.postRemoteVolumeChanged(controller, flags);
         }
 
