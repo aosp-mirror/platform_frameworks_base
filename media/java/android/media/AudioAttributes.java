@@ -153,6 +153,7 @@ public final class AudioAttributes implements Parcelable {
 
     private int mUsage = USAGE_UNKNOWN;
     private int mContentType = CONTENT_TYPE_UNKNOWN;
+    private int mSource = MediaRecorder.AudioSource.AUDIO_SOURCE_INVALID;
     private int mFlags = 0x0;
     private HashSet<String> mTags;
     private String mFormattedTags;
@@ -174,6 +175,17 @@ public final class AudioAttributes implements Parcelable {
      */
     public int getUsage() {
         return mUsage;
+    }
+
+    /**
+     * @hide
+     * CANDIDATE FOR PUBLIC API
+     * Return the capture preset.
+     * @return one of the values that can be set in {@link Builder#setCapturePreset(int)} or a
+     *    negative value if none has been set.
+     */
+    public int getCapturePreset() {
+        return mSource;
     }
 
     /**
@@ -210,6 +222,7 @@ public final class AudioAttributes implements Parcelable {
     public static class Builder {
         private int mUsage = USAGE_UNKNOWN;
         private int mContentType = CONTENT_TYPE_UNKNOWN;
+        private int mSource = MediaRecorder.AudioSource.AUDIO_SOURCE_INVALID;
         private int mFlags = 0x0;
         private HashSet<String> mTags = new HashSet<String>();
 
@@ -241,6 +254,7 @@ public final class AudioAttributes implements Parcelable {
             AudioAttributes aa = new AudioAttributes();
             aa.mContentType = mContentType;
             aa.mUsage = mUsage;
+            aa.mSource = mSource;
             aa.mFlags = mFlags;
             aa.mTags = (HashSet<String>) mTags.clone();
             final Iterator<String> tagIterator = mTags.iterator();
@@ -397,9 +411,52 @@ public final class AudioAttributes implements Parcelable {
                     mContentType = CONTENT_TYPE_SPEECH;
                     break;
                 default:
-                    Log.e(TAG, "Invalid stream type " + streamType + " in for AudioAttributes");
+                    Log.e(TAG, "Invalid stream type " + streamType + " for AudioAttributes");
             }
-            mUsage = usageForLegacyStreamType(streamType);
+            return this;
+        }
+
+        /**
+         * @hide
+         * CANDIDATE FOR PUBLIC API
+         * Sets the capture preset.
+         * Use this audio attributes configuration method when building an {@link AudioRecord}
+         * instance with {@link AudioRecord#AudioRecord(AudioAttributes, AudioFormat, int)}.
+         * @param preset one of {@link MediaRecorder.AudioSource#DEFAULT},
+         *     {@link MediaRecorder.AudioSource#MIC}, {@link MediaRecorder.AudioSource#CAMCORDER},
+         *     {@link MediaRecorder.AudioSource#VOICE_RECOGNITION} or
+         *     {@link MediaRecorder.AudioSource#VOICE_COMMUNICATION}.
+         * @return the same Builder instance.
+         */
+        public Builder setCapturePreset(int preset) {
+            switch (preset) {
+                case MediaRecorder.AudioSource.DEFAULT:
+                case MediaRecorder.AudioSource.MIC:
+                case MediaRecorder.AudioSource.CAMCORDER:
+                case MediaRecorder.AudioSource.VOICE_RECOGNITION:
+                case MediaRecorder.AudioSource.VOICE_COMMUNICATION:
+                    mSource = preset;
+                    break;
+                default:
+                    Log.e(TAG, "Invalid capture preset " + preset + " for AudioAttributes");
+            }
+            return this;
+        }
+
+        /**
+         * @hide
+         * Same as {@link #setCapturePreset(int)} but authorizes the use of HOTWORD and
+         * REMOTE_SUBMIX.
+         * @param preset
+         * @return the same Builder instance.
+         */
+        public Builder setInternalCapturePreset(int preset) {
+            if ((preset == MediaRecorder.AudioSource.HOTWORD)
+                    || (preset == MediaRecorder.AudioSource.REMOTE_SUBMIX)) {
+                mSource = preset;
+            } else {
+                setCapturePreset(preset);
+            }
             return this;
         }
     };
@@ -425,6 +482,7 @@ public final class AudioAttributes implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mUsage);
         dest.writeInt(mContentType);
+        dest.writeInt(mSource);
         dest.writeInt(mFlags);
         dest.writeInt(flags & ALL_PARCEL_FLAGS);
         if ((flags & FLATTEN_TAGS) == 0) {
@@ -439,6 +497,7 @@ public final class AudioAttributes implements Parcelable {
     private AudioAttributes(Parcel in) {
         mUsage = in.readInt();
         mContentType = in.readInt();
+        mSource = in.readInt();
         mFlags = in.readInt();
         boolean hasFlattenedTags = ((in.readInt() & FLATTEN_TAGS) == FLATTEN_TAGS);
         mTags = new HashSet<String>();
