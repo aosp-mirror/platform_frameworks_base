@@ -298,10 +298,8 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"புளூடூத் MAP செய்திகளைப் பெற மற்றும் செயல்படுத்த பயன்பாட்டை அனுமதிக்கிறது. அதாவது பயன்பாட்டால் சாதனத்திற்கு அனுப்பப்பட்ட செய்திகளை, உங்களிடம் காட்டாமலே கண்காணிக்கவோ, நீக்கவோ முடியும்."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"இயங்கும் பயன்பாடுகளை மீட்டெடுத்தல்"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"நடப்பில் மற்றும் சமீபத்தில் இயங்கும் காரியங்களின் தகவலைப் பெற பயன்பாட்டை அனுமதிக்கிறது. சாதனத்தில் எந்தப் பயன்பாடுகள் பயன்படுத்தப்படுகின்றன என்பது குறித்த தகவலைக் கண்டறிய பயன்பாட்டை இது அனுமதிக்கலாம்."</string>
-    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
-    <skip />
-    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
-    <skip />
+    <string name="permlab_startTasksFromRecents" msgid="8990073877885690623">"சமீபத்தியவற்றிலிருந்து செயலைத் தொடங்கு"</string>
+    <string name="permdesc_startTasksFromRecents" msgid="7382133554871222235">"ActivityManager.getRecentTaskList() இலிருந்து திரும்பிய செயல்படாத செயலைத் தொடங்க ActivityManager.RecentTaskInfo கூற்றைப் பயன்படுத்த பயன்பாட்டை அனுமதிக்கிறது."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"பிற பயனர்களுடன் தொடர்புகொள்ளுதல்"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"சாதனத்தில் உள்ள பல்வேறு பயனர்கள் அனைவரிலும் செயல்களைச் செய்ய பயன்பாட்டை அனுமதிக்கிறது. பயனர்கள் இடையேயான பாதுகாப்பை மீற தீங்கிழைக்கும் பயன்பாடுகள் இதைப் பயன்படுத்தலாம்."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"பிற பயனர்களுடன் தொடர்புகொள்வதற்கான முழு உரிமம்"</string>
@@ -1392,6 +1390,10 @@
     <string name="permdesc_recovery" msgid="8511774533266359571">"மீட்டெடுப்பு அமைப்பு மற்றும் முறைமை புதுப்பிப்புகளுடன் ஊடாடப் பயன்பாட்டை அனுமதிக்கிறது."</string>
     <string name="permlab_createMediaProjection" msgid="4941338725487978112">"மீடியா வெளிப்பாடு அமர்வுகளை உருவாக்கு"</string>
     <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"மீடியா வெளிப்பாடு அமர்வுகளை உருவாக்கப் பயன்பாட்டை அனுமதிக்கிறது. காட்சி மற்றும் ஆடியோ உள்ளடக்கத்தைப் அறிவதற்கான திறனை இந்த அமர்வுகள் பயன்பாடுகளுக்கு வழங்குகின்றன. சாதாரண பயன்பாடுகளுக்கு ஒருபோதும் தேவையில்லை."</string>
+    <!-- no translation found for permlab_readInstallSessions (6165432407628065939) -->
+    <skip />
+    <!-- no translation found for permdesc_readInstallSessions (2049771699626019849) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"அளவை மாற்றும் கட்டுப்பாடுகளுக்கு இருமுறை தொடவும்"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"விட்ஜெட்டைச் சேர்க்க முடியவில்லை."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"செல்"</string>
@@ -1410,6 +1412,10 @@
     <string name="deny" msgid="2081879885755434506">"நிராகரி"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"அனுமதிக் கோரப்பட்டது"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"<xliff:g id="ACCOUNT">%s</xliff:g> கணக்கிற்கான அனுமதி\nகோரப்பட்டது."</string>
+    <!-- no translation found for forward_intent_to_owner (570916783072215572) -->
+    <skip />
+    <!-- no translation found for forward_intent_to_work (8624579696577525279) -->
+    <skip />
     <string name="input_method_binding_label" msgid="1283557179944992649">"உள்ளீட்டு முறை"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"ஒத்திசை"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"அணுகல்தன்மை"</string>
@@ -1519,7 +1525,7 @@
     <string name="data_usage_3g_limit_title" msgid="4462365924791862301">"2G-3G தரவு முடக்கப்பட்டது"</string>
     <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"4G தரவு முடக்கப்பட்டது"</string>
     <string name="data_usage_mobile_limit_title" msgid="3393439305227911006">"செல்லுலார் தரவு முடக்கப்பட்டது"</string>
-    <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"Wi-Fi தரவு முடக்கப்பட்டது"</string>
+    <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"வைஃபை தரவு முடக்கப்பட்டது"</string>
     <string name="data_usage_limit_body" msgid="6131350187562939365">"வரம்பை அடைந்தது"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G தரவு வரம்பு கடந்தது"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G தரவு வரம்பு கடந்தது"</string>
@@ -1559,8 +1565,7 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"அமைப்பு"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"புளூடூத் ஆடியோ"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"வயர்லெஸ் காட்சி"</string>
-    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
-    <skip />
+    <string name="media_route_button_content_description" msgid="591703006349356016">"அனுப்பு"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"சாதனத்துடன் இணைக்கவும்"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"திரையிலிருந்து சாதனத்திற்கு அனுப்புக"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"சாதனங்களைத் தேடுகிறது..."</string>
@@ -1619,14 +1624,16 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"திறப்பதற்கான வடிவத்தை <xliff:g id="NUMBER_0">%d</xliff:g> முறை தவறாக வரைந்துள்ளீர்கள். மேலும் <xliff:g id="NUMBER_1">%d</xliff:g> தோல்வி முயற்சிகளுக்குப் பிறகு, மின்னஞ்சல் கணக்கைப் பயன்படுத்தி உங்கள் மொபைலைத் திறக்கக் கேட்கப்படுவீர்கள்.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> வினாடிகள் கழித்து முயற்சிக்கவும்."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"அகற்று"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"பரிந்துரைத்த அளவை விட ஒலியை அதிகரிக்கவா?\nஅதிக நேரத்திற்கு ஒலியின் அளவை அதிகமாகக் கேட்பது உங்கள் கேட்கும்திறனைப் பாதிக்கும்."</string>
+    <!-- no translation found for safe_media_volume_warning (2276318909314492312) -->
+    <skip />
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"அணுகல்தன்மையை இயக்க இரண்டு விரல்களைத் தொடர்ந்து வைக்கவும்."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"அணுகல்தன்மை இயக்கப்பட்டது."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"அணுகல்தன்மை ரத்துசெய்யப்பட்டது."</string>
     <string name="user_switched" msgid="3768006783166984410">"நடப்பு பயனர் <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"உரிமையாளர்"</string>
     <string name="error_message_title" msgid="4510373083082500195">"பிழை"</string>
-    <string name="app_no_restricted_accounts" msgid="5739463249673727736">"இந்தப் பயன்பாடானது, தடுக்கப்பட்ட சுயவிவரங்களுக்கான கணக்குகளை ஆதரிக்காது"</string>
+    <!-- no translation found for error_message_change_not_allowed (1347282344200417578) -->
+    <skip />
     <string name="app_not_found" msgid="3429141853498927379">"இந்தச் செயலைச் செய்ய பயன்பாடு எதுவுமில்லை"</string>
     <string name="revoke" msgid="5404479185228271586">"திரும்பப்பெறு"</string>
     <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>

@@ -298,10 +298,8 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Bluetooth MAP സന്ദേശങ്ങൾ സ്വീകരിക്കുന്നതിനും പ്രോസസ്സുചെയ്യുന്നതിനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഉപകരണത്തിലേക്ക് അയച്ച സന്ദേശങ്ങൾ നിങ്ങളെ കാണിക്കാതെ തന്നെ നിരീക്ഷിക്കാനോ ഇല്ലാതാക്കാനോ അപ്ലിക്കേഷനാവും."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"പ്രവർത്തിക്കുന്ന അപ്ലിക്കേഷനുകൾ വീണ്ടെടുക്കുക"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"നിലവിലും സമീപകാലത്തും പ്രവർത്തിക്കുന്ന ടാസ്‌ക്കുകളെക്കുറിച്ചുള്ള വവിവരങ്ങൾ വീണ്ടെടുക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഇത് ഉപകരണത്തിൽ ഉപയോഗിച്ച അപ്ലിക്കേഷനുകളെക്കുറിച്ചുള്ള വിവരം കണ്ടെത്താൻ അപ്ലിക്കേഷനെ അനുവദിക്കാനിടയുണ്ട്."</string>
-    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
-    <skip />
-    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
-    <skip />
+    <string name="permlab_startTasksFromRecents" msgid="8990073877885690623">"\'അടുത്തിടെയുള്ളവ\' എന്നതിൽ നിന്ന് ഒരു ടാസ്‌ക് ആരംഭിക്കുക"</string>
+    <string name="permdesc_startTasksFromRecents" msgid="7382133554871222235">"ActivityManager.getRecentTaskList() എന്നതിൽ നിന്ന് ലഭിച്ച ഒരു നിഷ്‌ക്രിയ ടാസ്‌ക് സമാരംഭിക്കുന്നതിനായി ActivityManager.RecentTaskInfo ഒബ്‌ജക്‌റ്റ് ഉപയോഗിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"എല്ലാ ഉപയോക്താക്കളുമായും സംവദിക്കുക"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"ഉപകരണത്തിലെ വ്യത്യസ്‌ത ഉപയോക്താക്കളിലുടനീളം പ്രവർത്തനങ്ങൾ നടത്താൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ക്ഷുദ്രകരമായ അപ്ലിക്കേഷനുകൾ ഉപയോക്താക്കൾക്കിടയിലുള്ള പരിരക്ഷ ലംഘിക്കാൻ ഇത് ഉപയോഗിക്കാനിടയുണ്ട്."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"എല്ലാ ഉപയോക്താക്കളുമായും സംവദിക്കാനുള്ള പൂർണ്ണ ലൈസൻസ്"</string>
@@ -1392,6 +1390,10 @@
     <string name="permdesc_recovery" msgid="8511774533266359571">"വീണ്ടെടുക്കൽ സിസ്റ്റവുമായും സിസ്റ്റം അപ്‌ഡേറ്റുകളുമായും സംവദിക്കാൻ ഒരു അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_createMediaProjection" msgid="4941338725487978112">"മീഡിയ പ്രൊജക്ഷൻ സെഷനുകൾ സൃഷ്‌ടിക്കുക"</string>
     <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"മീഡിയ പ്രൊജക്ഷൻ സെഷനുകൾ സൃഷ്‌ടിക്കുന്നതിന് ഒരു അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. അപ്ലിക്കേഷനുകൾക്ക് ഡിസ്‌പ്ലേയും ഓഡിയോ ഉള്ളടക്കങ്ങളും ക്യാപ്‌ചർചെയ്യുന്നതിനുള്ള കഴിവ് നൽകാൻ ഈ സെഷനുകൾക്കാവും. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
+    <!-- no translation found for permlab_readInstallSessions (6165432407628065939) -->
+    <skip />
+    <!-- no translation found for permdesc_readInstallSessions (2049771699626019849) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"സൂം ചെയ്യൽ നിയന്ത്രണങ്ങൾക്ക് രണ്ട് തവണ സ്‌പർശിക്കുക"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"വിജറ്റ് ചേർക്കാനായില്ല."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"പോവുക"</string>
@@ -1410,6 +1412,10 @@
     <string name="deny" msgid="2081879885755434506">"നിരസിക്കുക"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"അനുമതി ആവശ്യമാണ്"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"<xliff:g id="ACCOUNT">%s</xliff:g> എന്ന അക്കൗണ്ടിനായി\nഅനുമതി അഭ്യർത്ഥിച്ചു."</string>
+    <!-- no translation found for forward_intent_to_owner (570916783072215572) -->
+    <skip />
+    <!-- no translation found for forward_intent_to_work (8624579696577525279) -->
+    <skip />
     <string name="input_method_binding_label" msgid="1283557179944992649">"ടൈപ്പുചെയ്യൽ രീതി"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"സമന്വയിപ്പിക്കുക"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"പ്രവേശനക്ഷമത"</string>
@@ -1559,8 +1565,7 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"സിസ്റ്റം"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth ഓഡിയോ"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"വയർലെസ് ഡിസ്‌പ്ലേ"</string>
-    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
-    <skip />
+    <string name="media_route_button_content_description" msgid="591703006349356016">"കാസ്‌റ്റുചെയ്യുക"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"ഉപകരണത്തിലേക്ക് കണക്റ്റുചെയ്യുക"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"സ്‌ക്രീൻ ഉപകരണത്തിലേക്ക് കാസ്റ്റുചെയ്യുക"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"ഉപകരണങ്ങൾക്കായി തിരയുന്നു…"</string>
@@ -1619,14 +1624,16 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"നിങ്ങളുടെ അൺലോക്ക് പാറ്റേൺ <xliff:g id="NUMBER_0">%d</xliff:g> തവണ തെറ്റായി വരച്ചു. <xliff:g id="NUMBER_1">%d</xliff:g> ശ്രമങ്ങൾ കൂടി വിജയിച്ചില്ലെങ്കിൽ, ഒരു ഇമെയിൽ അക്കൗണ്ട് ഉപയോഗിച്ച് ഫോൺ അൺലോക്ക് ചെയ്യാൻ നിങ്ങളോട് ആവശ്യപ്പെടും.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> സെക്കൻഡിനുള്ള വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"നീക്കംചെയ്യുക"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"ശുപാർശചെയ്‌തിരിക്കുന്ന നിലയ്‌ക്കും മുകളിൽ വോളിയം വർദ്ധിപ്പിക്കണോ?\nദീർഘസമയത്തേക്ക് ഉയർന്ന വോളിയത്തിൽ കേൾക്കുന്നത് നിങ്ങളുടെ കേൾവിശക്തിയെ തകരാറിലാക്കാം."</string>
+    <!-- no translation found for safe_media_volume_warning (2276318909314492312) -->
+    <skip />
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"പ്രവേശനക്ഷമത പ്രവർത്തനക്ഷമമാക്കാൻ രണ്ട് വിരലുകൾ അമർത്തിപ്പിടിക്കുക."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"പ്രവേശനക്ഷമത പ്രവർത്തനക്ഷമമാക്കി."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"പ്രവേശനക്ഷമത റദ്ദാക്കി."</string>
     <string name="user_switched" msgid="3768006783166984410">"നിലവിലെ ഉപയോക്താവ് <xliff:g id="NAME">%1$s</xliff:g> ആണ്."</string>
     <string name="owner_name" msgid="2716755460376028154">"ഉടമ"</string>
     <string name="error_message_title" msgid="4510373083082500195">"പിശക്"</string>
-    <string name="app_no_restricted_accounts" msgid="5739463249673727736">"ഈ അപ്ലിക്കേഷൻ, നിയന്ത്രിത പ്രൊഫൈലുകൾക്കായുള്ള അക്കൗണ്ടുകളെ പിന്തുണയ്‌ക്കുന്നില്ല"</string>
+    <!-- no translation found for error_message_change_not_allowed (1347282344200417578) -->
+    <skip />
     <string name="app_not_found" msgid="3429141853498927379">"ഈ പ്രവർത്തനം കൈകാര്യം ചെയ്യുന്ന അപ്ലിക്കേഷനുകളൊന്നും കണ്ടെത്തിയില്ല"</string>
     <string name="revoke" msgid="5404479185228271586">"റദ്ദാക്കുക"</string>
     <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>

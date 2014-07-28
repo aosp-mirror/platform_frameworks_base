@@ -298,10 +298,8 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Membenarkan apl menerima dan memproses mesej MAP Bluetooth. Ini bermakna apl boleh memantau atau memadam mesej yang dihantar ke peranti anda tanpa menunjukkannya kepada anda."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"dapatkan semula apl yang sedang dijalankan"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Membenarkan apl mengambil maklumat tentang tugasan yang sedang dan baru berjalan. Ini boleh membenarkan apl untuk menemui maklumat tentang apl mana yang digunakan pada peranti."</string>
-    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
-    <skip />
-    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
-    <skip />
+    <string name="permlab_startTasksFromRecents" msgid="8990073877885690623">"memulakan tugas dari yang terbaru"</string>
+    <string name="permdesc_startTasksFromRecents" msgid="7382133554871222235">"Membenarkan apl menggunakan objek ActivityManager.RecentTaskInfo untuk melancarkan tugas tidak berfungsi yang dikembalikan daripada ActivityManager.getRecentTaskList()."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"berinteraksi sesama pengguna"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Membenarkan apl melakukan tindakan merentasi pengguna berbeza pada peranti. Apl hasad boleh menggunakan ini untuk melanggar perlindungan antara pengguna."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"lesen penuh untuk berinteraksi sesama pengguna"</string>
@@ -1392,6 +1390,10 @@
     <string name="permdesc_recovery" msgid="8511774533266359571">"Membenarkan aplikasi berinteraksi dengan sistem pemulihan dan kemas kini sistem."</string>
     <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Buat sesi unjuran media"</string>
     <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"Membenarkan aplikasi membuat sesi unjuran media. Sesi ini boleh memberikan aplikasi keupayaan untuk mengabadikan paparan dan kandungan audio. Tidak sekali-kali diperlukan oleh apl biasa."</string>
+    <!-- no translation found for permlab_readInstallSessions (6165432407628065939) -->
+    <skip />
+    <!-- no translation found for permdesc_readInstallSessions (2049771699626019849) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Sentuh dua kali untuk mendapatkan kawalan zum"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Tidak dapat menambahkan widget."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Pergi"</string>
@@ -1410,6 +1412,10 @@
     <string name="deny" msgid="2081879885755434506">"Nafi"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Kebenaran diminta"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Kebenaran diminta\nuntuk akaun <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
+    <!-- no translation found for forward_intent_to_owner (570916783072215572) -->
+    <skip />
+    <!-- no translation found for forward_intent_to_work (8624579696577525279) -->
+    <skip />
     <string name="input_method_binding_label" msgid="1283557179944992649">"Kaedah input"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Penyegerakan"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Kebolehaksesan"</string>
@@ -1619,14 +1625,16 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Anda telah tersilap lukis corak buka kunci sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%d</xliff:g> lagi percubaan yang tidak berjaya, anda akan diminta membuka kunci telefon anda menggunakan log masuk Google anda.\n\n Cuba lagi dalam <xliff:g id="NUMBER_2">%d</xliff:g> saat."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Alih keluar"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"Tingkatkan kelantangan melebihi aras yang dicadangkan?\nMendengar pada kelantangan tinggi untuk tempoh yang panjang boleh merosakkan pendengaran anda."</string>
+    <!-- no translation found for safe_media_volume_warning (2276318909314492312) -->
+    <skip />
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Teruskan menahan dengan dua jari untuk mendayakan kebolehcapaian."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Kebolehcapaian didayakan."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Kebolehcapaian dibatalkan."</string>
     <string name="user_switched" msgid="3768006783166984410">"Pengguna semasa <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"Pemilik"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Ralat"</string>
-    <string name="app_no_restricted_accounts" msgid="5739463249673727736">"Apl ini tidak menyokong akaun untuk profil yang disekat"</string>
+    <!-- no translation found for error_message_change_not_allowed (1347282344200417578) -->
+    <skip />
     <string name="app_not_found" msgid="3429141853498927379">"Tidak menemui aplikasi untuk mengendalikan tindakan ini"</string>
     <string name="revoke" msgid="5404479185228271586">"Batalkan"</string>
     <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>

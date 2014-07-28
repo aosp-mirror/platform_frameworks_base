@@ -298,10 +298,8 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Tillader, at appen kan modtage og behandle Bluetooth MAP-beskeder. Det betyder, at appen kan overvåge eller slette de beskeder, der sendes til din enhed, uden at vise dem til dig."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"hente kørende apps"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Tillader, at appen kan hente oplysninger om nuværende og seneste opgaver. Med denne tilladelse kan appen finde oplysninger om, hvilke applikationer der bruges på enheden."</string>
-    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
-    <skip />
-    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
-    <skip />
+    <string name="permlab_startTasksFromRecents" msgid="8990073877885690623">"påbegynd en opgave fra Seneste"</string>
+    <string name="permdesc_startTasksFromRecents" msgid="7382133554871222235">"Tillader, at appen bruger et ActivityManager.RecentTaskInfo-objekt til at påbegynde en ugyldig opgave fra ActivityManager.getRecentTaskList()."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"kommunikere på tværs af brugere"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Tillader, at appen udfører handlinger på tværs af forskellige brugere på enheden. Ondsindede apps kan bruge dette til at krænke beskyttelsen mellem brugere."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"fuld licens til at kommunikere på tværs af brugere"</string>
@@ -1392,6 +1390,10 @@
     <string name="permdesc_recovery" msgid="8511774533266359571">"Giver en applikation tilladelse til at interagere med gendannelsessystemet og systemopdateringerne."</string>
     <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Opret sessioner med medieprojektion"</string>
     <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"Tillader, at en app opretter sessioner med medieprojektion. Disse sessioner kan give applikationer mulighed for at optage billed- og lydindhold. Normale apps bør aldrig have brug for dette."</string>
+    <!-- no translation found for permlab_readInstallSessions (6165432407628065939) -->
+    <skip />
+    <!-- no translation found for permdesc_readInstallSessions (2049771699626019849) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Tryk to gange for zoomstyring"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Widget kunne ikke tilføjes."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Gå"</string>
@@ -1410,6 +1412,10 @@
     <string name="deny" msgid="2081879885755434506">"Afvis"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Der er anmodet om tilladelse"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Der er anmodet om tilladelse\nfor kontoen <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
+    <!-- no translation found for forward_intent_to_owner (570916783072215572) -->
+    <skip />
+    <!-- no translation found for forward_intent_to_work (8624579696577525279) -->
+    <skip />
     <string name="input_method_binding_label" msgid="1283557179944992649">"Inputmetode"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Synkroniser"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Hjælpefunktioner"</string>
@@ -1559,8 +1565,7 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"System"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth-lyd"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Trådløs skærm"</string>
-    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
-    <skip />
+    <string name="media_route_button_content_description" msgid="591703006349356016">"Cast"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Opret forbindelse til enheden"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Send skærm til enhed"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Søger efter enheder…"</string>
@@ -1619,14 +1624,16 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Du har tegnet dit oplåsningsmønster forkert <xliff:g id="NUMBER_0">%d</xliff:g> gange. Efter <xliff:g id="NUMBER_1">%d</xliff:g> yderligere mislykkede forsøg til vil du blive bedt om at låse din telefon op ved hjælp af en e-mailkonto.\n\n Prøv igen om <xliff:g id="NUMBER_2">%d</xliff:g> sekunder."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Fjern"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"Skal lydstyrken være over det anbefalede niveau?\nDu kan skade din hørelse ved at lytte ved høj lydstyrke i længere tid."</string>
+    <!-- no translation found for safe_media_volume_warning (2276318909314492312) -->
+    <skip />
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Bliv ved med at holde to fingre nede for at aktivere hjælpefunktioner."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Hjælpefunktioner er aktiveret."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Hjælpefunktioner er annulleret."</string>
     <string name="user_switched" msgid="3768006783166984410">"Nuværende bruger <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"Ejer"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Fejl"</string>
-    <string name="app_no_restricted_accounts" msgid="5739463249673727736">"Denne applikation understøtter ikke konti for begrænsede profiler"</string>
+    <!-- no translation found for error_message_change_not_allowed (1347282344200417578) -->
+    <skip />
     <string name="app_not_found" msgid="3429141853498927379">"Der blev ikke fundet nogen applikation, der kan håndtere denne handling"</string>
     <string name="revoke" msgid="5404479185228271586">"Tilbagekald"</string>
     <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>
