@@ -31,8 +31,7 @@
     <ListView
         android:id="@+id/list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:listSelector="@android:color/transparent" />
+        android:layout_height="match_parent" />
 
     <GridView
         android:id="@+id/grid"
@@ -40,11 +39,13 @@
         android:layout_height="match_parent"
         android:paddingStart="@dimen/grid_padding_horiz"
         android:paddingEnd="@dimen/grid_padding_horiz"
-        android:paddingTop="@dimen/grid_padding"
-        android:paddingBottom="@dimen/grid_padding"
+        android:paddingTop="@dimen/grid_padding_vert"
+        android:paddingBottom="@dimen/grid_padding_vert"
+        android:horizontalSpacing="@dimen/grid_item_padding"
+        android:verticalSpacing="@dimen/grid_item_padding"
         android:clipToPadding="false"
         android:scrollbarStyle="outsideOverlay"
-        android:listSelector="@android:color/transparent"
+        android:drawSelectorOnTop="true"
         android:visibility="gone" />
 
 </com.android.documentsui.DirectoryView>
