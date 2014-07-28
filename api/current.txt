@@ -16186,7 +16186,7 @@ package android.media.browse {
     method public android.net.Uri getRoot();
     method public android.media.session.MediaSession.Token getSessionToken();
     method public boolean isConnected();
-    method public void loadThumbnail(android.net.Uri, int, int, android.media.browse.MediaBrowser.ThumbnailCallback);
+    method public void loadIcon(android.net.Uri, int, int, android.media.browse.MediaBrowser.IconCallback);
     method public void subscribe(android.net.Uri, android.media.browse.MediaBrowser.SubscriptionCallback);
     method public void unsubscribe(android.net.Uri);
   }
@@ -16198,16 +16198,16 @@ package android.media.browse {
     method public void onConnectionSuspended();
   }
 
+  public static abstract class MediaBrowser.IconCallback {
+    ctor public MediaBrowser.IconCallback();
+    method public void onError(android.net.Uri);
+    method public void onIconLoaded(android.net.Uri, android.graphics.Bitmap);
+  }
+
   public static abstract class MediaBrowser.SubscriptionCallback {
     ctor public MediaBrowser.SubscriptionCallback();
     method public void onChildrenLoaded(android.net.Uri, java.util.List<android.media.browse.MediaBrowserItem>);
     method public void onError(android.net.Uri);
-  }
-
-  public static abstract class MediaBrowser.ThumbnailCallback {
-    ctor public MediaBrowser.ThumbnailCallback();
-    method public void onError(android.net.Uri);
-    method public void onThumbnailLoaded(android.net.Uri, android.graphics.Bitmap);
   }
 
   public final class MediaBrowserItem implements android.os.Parcelable {
@@ -16244,7 +16244,7 @@ package android.media.browse {
     method public android.os.IBinder onBind(android.content.Intent);
     method public abstract android.media.browse.MediaBrowserService.BrowserRoot onGetRoot(java.lang.String, int, android.os.Bundle);
     method public abstract void onLoadChildren(android.net.Uri, android.media.browse.MediaBrowserService.Result<java.util.List<android.media.browse.MediaBrowserItem>>);
-    method public abstract void onLoadThumbnail(android.net.Uri, int, int, android.media.browse.MediaBrowserService.Result<android.graphics.Bitmap>);
+    method public abstract void onLoadIcon(android.net.Uri, int, int, android.media.browse.MediaBrowserService.Result<android.graphics.Bitmap>);
     method public void setSessionToken(android.media.session.MediaSession.Token);
     field public static final java.lang.String SERVICE_ACTION = "android.media.browse.MediaBrowserService";
   }

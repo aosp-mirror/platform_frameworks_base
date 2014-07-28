@@ -142,7 +142,7 @@ public class BrowserService extends MediaBrowserService {
     }
 
     @Override
-    public void onLoadThumbnail(Uri uri, int width, int height, Result<Bitmap> result) {
+    public void onLoadIcon(Uri uri, int width, int height, Result<Bitmap> result) {
         result.sendResult(null);
     }
 
