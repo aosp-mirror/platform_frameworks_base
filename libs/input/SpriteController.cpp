@@ -370,7 +370,8 @@ sp<SurfaceControl> SpriteController::obtainSurface(int32_t width, int32_t height
 
     sp<SurfaceControl> surfaceControl = mSurfaceComposerClient->createSurface(
             String8("Sprite"), width, height, PIXEL_FORMAT_RGBA_8888,
-            ISurfaceComposerClient::eHidden);
+            ISurfaceComposerClient::eHidden |
+            ISurfaceComposerClient::eCursorWindow);
     if (surfaceControl == NULL || !surfaceControl->isValid()) {
         ALOGE("Error creating sprite surface.");
         return NULL;
