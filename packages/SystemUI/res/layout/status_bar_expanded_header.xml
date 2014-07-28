@@ -91,6 +91,7 @@
         android:id="@+id/date_group"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/clock_collapsed_bottom_margin"
         android:layout_alignParentBottom="true">
         <com.android.systemui.statusbar.policy.DateView android:id="@+id/date_collapsed"
             android:layout_width="wrap_content"

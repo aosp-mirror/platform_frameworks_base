@@ -462,6 +462,16 @@ public abstract class PanelView extends FrameLayout {
     protected void fling(float vel, boolean expand) {
         cancelPeek();
         float target = expand ? getMaxPanelHeight() : 0.0f;
+
+        // Hack to make the expand transition look nice when clear all button is visible - we make
+        // the animation only to the last notification, and then jump to the maximum panel height so
+        // clear all just fades in and the decelerating motion is towards the last notification.
+        final boolean clearAllExpandHack = expand && fullyExpandedClearAllVisible()
+                && mExpandedHeight < getMaxPanelHeight() - getClearAllHeight()
+                && !isClearAllVisible();
+        if (clearAllExpandHack) {
+            target = getMaxPanelHeight() - getClearAllHeight();
+        }
         if (target == mExpandedHeight || getOverExpansionAmount() > 0f && expand) {
             notifyExpandingFinished();
             return;
@@ -490,9 +500,32 @@ public abstract class PanelView extends FrameLayout {
 
             @Override
             public void onAnimationEnd(Animator animation) {
-                mHeightAnimator = null;
-                if (!mCancelled) {
-                    notifyExpandingFinished();
+                if (clearAllExpandHack && !mCancelled) {
+                    mHeightAnimator = createHeightAnimator(getMaxPanelHeight());
+                    mHeightAnimator.setInterpolator(mLinearOutSlowInInterpolator);
+                    mHeightAnimator.setDuration(350);
+                    mHeightAnimator.addListener(new AnimatorListenerAdapter() {
+                        private boolean mCancelled;
+
+                        @Override
+                        public void onAnimationCancel(Animator animation) {
+                            mCancelled = true;
+                        }
+
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            mHeightAnimator = null;
+                            if (!mCancelled) {
+                                notifyExpandingFinished();
+                            }
+                        }
+                    });
+                    mHeightAnimator.start();
+                } else {
+                    mHeightAnimator = null;
+                    if (!mCancelled) {
+                        notifyExpandingFinished();
+                    }
                 }
             }
         });
@@ -878,4 +911,16 @@ public abstract class PanelView extends FrameLayout {
     protected abstract float getPeekHeight();
 
     protected abstract float getCannedFlingDurationFactor();
+
+    /**
+     * @return whether "Clear all" button will be visible when the panel is fully expanded
+     */
+    protected abstract boolean fullyExpandedClearAllVisible();
+
+    protected abstract boolean isClearAllVisible();
+
+    /**
+     * @return the height of the clear all button, in pixels
+     */
+    protected abstract int getClearAllHeight();
 }
