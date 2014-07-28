@@ -3601,6 +3601,7 @@ package android.app {
     method public void readFromParcel(android.os.Parcel);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
+    field public int affiliatedTaskId;
     field public android.content.Intent baseIntent;
     field public java.lang.CharSequence description;
     field public int id;

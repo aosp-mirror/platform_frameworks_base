@@ -697,7 +697,6 @@ public class ActivityManager {
 
         /**
          * Task affiliation for grouping with other tasks.
-         * @hide
          */
         public int affiliatedTaskId;
 
