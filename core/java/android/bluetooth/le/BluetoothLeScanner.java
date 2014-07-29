@@ -80,6 +80,7 @@ public final class BluetoothLeScanner {
      * @throws IllegalArgumentException If {@code callback} is null.
      */
     public void startScan(final ScanCallback callback) {
+        checkAdapterState();
         if (callback == null) {
             throw new IllegalArgumentException("callback is null");
         }
@@ -98,6 +99,7 @@ public final class BluetoothLeScanner {
      */
     public void startScan(List<ScanFilter> filters, ScanSettings settings,
             final ScanCallback callback) {
+        checkAdapterState();
         if (settings == null || callback == null) {
             throw new IllegalArgumentException("settings or callback is null");
         }
@@ -148,6 +150,7 @@ public final class BluetoothLeScanner {
      * @param callback
      */
     public void stopScan(ScanCallback callback) {
+        checkAdapterState();
         synchronized (mLeScanClients) {
             BleScanCallbackWrapper wrapper = mLeScanClients.remove(callback);
             if (wrapper == null) {
@@ -167,6 +170,7 @@ public final class BluetoothLeScanner {
      *            used to start scan.
      */
     public void flushPendingScanResults(ScanCallback callback) {
+        checkAdapterState();
         if (callback == null) {
             throw new IllegalArgumentException("callback cannot be null!");
         }
@@ -442,6 +446,13 @@ public final class BluetoothLeScanner {
             } else {
                 mScanCallback.onScanResult(ScanSettings.CALLBACK_TYPE_MATCH_LOST, result);
             }
+        }
+    }
+
+    //TODO: move this api to a common util class.
+    private void checkAdapterState() {
+        if (mBluetoothAdapter.getState() != mBluetoothAdapter.STATE_ON) {
+            throw new IllegalStateException("BT Adapter is not turned ON");
         }
     }
 
