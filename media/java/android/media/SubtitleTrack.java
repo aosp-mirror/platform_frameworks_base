@@ -274,7 +274,10 @@ public abstract class SubtitleTrack implements MediaTimeProvider.OnMediaTimeList
         }
 
         mVisible = true;
-        getRenderingWidget().setVisible(true);
+        RenderingWidget renderingWidget = getRenderingWidget();
+        if (renderingWidget != null) {
+            renderingWidget.setVisible(true);
+        }
         if (mTimeProvider != null) {
             mTimeProvider.scheduleUpdate(this);
         }
@@ -289,7 +292,10 @@ public abstract class SubtitleTrack implements MediaTimeProvider.OnMediaTimeList
         if (mTimeProvider != null) {
             mTimeProvider.cancelNotifications(this);
         }
-        getRenderingWidget().setVisible(false);
+        RenderingWidget renderingWidget = getRenderingWidget();
+        if (renderingWidget != null) {
+            renderingWidget.setVisible(false);
+        }
         mVisible = false;
     }
 
@@ -601,6 +607,12 @@ public abstract class SubtitleTrack implements MediaTimeProvider.OnMediaTimeList
             }
         }
     }
+
+    /** @hide whether this is a text track who fires events instead getting rendered */
+    public boolean isTimedText() {
+        return getRenderingWidget() == null;
+    }
+
 
     /** @hide */
     private static class Run {

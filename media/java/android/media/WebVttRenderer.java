@@ -1098,7 +1098,9 @@ class WebVttTrack extends SubtitleTrack implements WebVttCueListener {
             }
         }
 
-        mRenderingWidget.setActiveCues(activeCues);
+        if (mRenderingWidget != null) {
+            mRenderingWidget.setActiveCues(activeCues);
+        }
     }
 }
 
