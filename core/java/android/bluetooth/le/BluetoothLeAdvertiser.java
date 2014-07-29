@@ -107,6 +107,7 @@ public final class BluetoothLeAdvertiser {
     public void startAdvertising(AdvertiseSettings settings,
             AdvertiseData advertiseData, AdvertiseData scanResponse,
             final AdvertiseCallback callback) {
+        checkAdapterState();
         if (callback == null) {
             throw new IllegalArgumentException("callback cannot be null");
         }
@@ -153,13 +154,13 @@ public final class BluetoothLeAdvertiser {
      * @param callback {@link AdvertiseCallback} identifies the advertising instance to stop.
      */
     public void stopAdvertising(final AdvertiseCallback callback) {
+        checkAdapterState();
         if (callback == null) {
             throw new IllegalArgumentException("callback cannot be null");
         }
         AdvertiseCallbackWrapper wrapper = mLeAdvertisers.get(callback);
         if (wrapper == null)
             return;
-
         try {
             IBluetoothGatt gatt = mBluetoothManager.getBluetoothGatt();
             if (gatt != null)
@@ -456,6 +457,13 @@ public final class BluetoothLeAdvertiser {
         public void onFoundOrLost(boolean onFound, String address, int rssi,
                 byte[] advData) {
             // no op
+        }
+    }
+
+    //TODO: move this api to a common util class.
+    private void checkAdapterState() {
+        if (mBluetoothAdapter.getState() != mBluetoothAdapter.STATE_ON) {
+            throw new IllegalStateException("BT Adapter is not turned ON");
         }
     }
 
