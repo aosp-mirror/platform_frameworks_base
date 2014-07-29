@@ -62,7 +62,7 @@ android {
     release {
       ...
       signingConfig signingConfigs.release
-    }d
+    }
   }
   ...
 }
