@@ -38,6 +38,8 @@ interface ITvInputManager {
     List<TvInputInfo> getTvInputList(int userId);
     TvInputInfo getTvInputInfo(in String inputId, int userId);
 
+    List<Uri> getTvContentRatingSystemXmls(int userId);
+
     void registerCallback(in ITvInputManagerCallback callback, int userId);
     void unregisterCallback(in ITvInputManagerCallback callback, int userId);
 

@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/*
+** Copyright 2014, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+-->
+<rating-system-definitions>
+    <rating-system-definition id="US_TVPG"
+        displayName="@string/display_name_ustvpg"
+        description="@string/description_ustvpg"
+        country="US">
+        <sub-rating-definition id="US_TVPG_D"
+            displayName="@string/display_name_ustvpg_d"
+            description="@string/description_ustvpg_d" />
+        <sub-rating-definition id="US_TVPG_L"
+            displayName="@string/display_name_ustvpg_l"
+            description="@string/description_ustvpg_l" />
+        <sub-rating-definition id="US_TVPG_S"
+            displayName="@string/display_name_ustvpg_s"
+            description="@string/description_ustvpg_s" />
+        <sub-rating-definition id="US_TVPG_V"
+            displayName="@string/display_name_ustvpg_v"
+            description="@string/description_ustvpg_v" />
+        <sub-rating-definition id="US_TVPG_FV"
+            displayName="@string/display_name_ustvpg_fv"
+            description="@string/description_ustvpg_fv" />
+
+        <rating-definition id="US_TVPG_TV_Y"
+            displayName="@string/display_name_ustvpg_y"
+            description="@string/description_ustvpg_y"
+            ageHint="0" />
+        <rating-definition id="US_TVPG_TV_Y7"
+            displayName="@string/display_name_ustvpg_y7"
+            description="@string/description_ustvpg_y7"
+            ageHint="7">
+            <sub-rating id="US_TVPG_FV" />
+        </rating-definition>
+        <rating-definition id="US_TVPG_TV_G"
+            displayName="@string/display_name_ustvpg_g"
+            description="@string/description_ustvpg_g"
+            ageHint="0" />
+        <rating-definition id="US_TVPG_TV_PG"
+            displayName="@string/display_name_ustvpg_pg"
+            description="@string/description_ustvpg_pg"
+            ageHint="14">
+            <sub-rating id="US_TVPG_D" />
+            <sub-rating id="US_TVPG_L" />
+            <sub-rating id="US_TVPG_S" />
+            <sub-rating id="US_TVPG_V" />
+        </rating-definition>
+        <rating-definition id="US_TVPG_TV_14"
+            displayName="@string/display_name_ustvpg_14"
+            description="@string/description_ustvpg_14"
+            ageHint="14">
+            <sub-rating id="US_TVPG_D" />
+            <sub-rating id="US_TVPG_L" />
+            <sub-rating id="US_TVPG_S" />
+            <sub-rating id="US_TVPG_V" />
+        </rating-definition>
+        <rating-definition id="US_TVPG_TV_MA"
+            displayName="@string/display_name_ustvpg_ma"
+            description="@string/description_ustvpg_ma"
+            ageHint="17">
+            <sub-rating id="US_TVPG_L" />
+            <sub-rating id="US_TVPG_S" />
+            <sub-rating id="US_TVPG_V" />
+        </rating-definition>
+        <order>
+            <rating id="US_TVPG_Y" />
+            <rating id="US_TVPG_Y7" />
+        </order>
+        <order>
+            <rating id="US_TVPG_TV_G" />
+            <rating id="US_TVPG_TV_PG" />
+            <rating id="US_TVPG_TV_14" />
+            <rating id="US_TVPG_TV_MA" />
+        </order>
+    </rating-system-definition>
+
+    <rating-system-definition id="KR_TV"
+        displayName="@string/display_name_krtv"
+        country="KR">
+        <rating-definition id="KR_TV_ALL"
+            displayName="@string/display_name_krtv_all"
+            description="@string/description_krtv_all"
+            ageHint="0" />
+        <rating-definition id="KR_TV_7"
+            displayName="@string/display_name_krtv_7"
+            description="@string/description_krtv_7"
+            ageHint="7">
+        </rating-definition>
+        <rating-definition id="KR_TV_12"
+            displayName="@string/display_name_krtv_12"
+            description="@string/description_krtv_12"
+            ageHint="12">
+        </rating-definition>
+        <rating-definition id="KR_TV_15"
+            displayName="@string/display_name_krtv_15"
+            description="@string/description_krtv_15"
+            ageHint="15">
+        </rating-definition>
+        <rating-definition id="KR_TV_19"
+            displayName="@string/display_name_krtv_19"
+            description="@string/description_krtv_19"
+            ageHint="19">
+        </rating-definition>
+        <order>
+            <rating id="KR_TV_ALL" />
+            <rating id="KR_TV_7" />
+            <rating id="KR_TV_12" />
+            <rating id="KR_TV_15" />
+            <rating id="KR_TV_19" />
+        </order>
+    </rating-system-definition>
+</rating-system-definitions>

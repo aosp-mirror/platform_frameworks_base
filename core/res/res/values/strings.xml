@@ -4841,4 +4841,41 @@
     <!-- Lock-to-app unlock password string -->
     <string name="lock_to_app_unlock_password">password</string>
 
+    <string name="display_name_ustvpg" translatable="false">US-TV</string>
+    <string name="description_ustvpg">The TV Parental Guidelines</string>
+    <string name="display_name_krtv" translatable="false">KR-TV</string>
+
+    <string name="display_name_ustvpg_d" translatable="false">D</string>
+    <string name="display_name_ustvpg_l" translatable="false">L</string>
+    <string name="display_name_ustvpg_s" translatable="false">S</string>
+    <string name="display_name_ustvpg_v" translatable="false">V</string>
+    <string name="display_name_ustvpg_fv" translatable="false">FV</string>
+    <string name="display_name_ustvpg_y" translatable="false">TV-Y</string>
+    <string name="display_name_ustvpg_y7" translatable="false">TV-Y7</string>
+    <string name="display_name_ustvpg_g" translatable="false">TV-G</string>
+    <string name="display_name_ustvpg_pg" translatable="false">TV-PG</string>
+    <string name="display_name_ustvpg_14" translatable="false">TV-14</string>
+    <string name="display_name_ustvpg_ma" translatable="false">TV-MA</string>
+    <string name="display_name_krtv_all" translatable="false">모든연령시청가</string>
+    <string name="display_name_krtv_7" translatable="false">7세이상시청가</string>
+    <string name="display_name_krtv_12" translatable="false">12세이상시청가</string>
+    <string name="display_name_krtv_15" translatable="false">15세이상시청가</string>
+    <string name="display_name_krtv_19" translatable="false">19세이상시청가</string>
+
+    <string name="description_ustvpg_d">Suggestive dialogue (Usually means talks about sex)</string>
+    <string name="description_ustvpg_l">Coarse language</string>
+    <string name="description_ustvpg_s">Sexual content</string>
+    <string name="description_ustvpg_v">Violence</string>
+    <string name="description_ustvpg_fv">Fantasy violence (Children\'s programming only)</string>
+    <string name="description_ustvpg_y">This program is designed to be appropriate for all children.</string>
+    <string name="description_ustvpg_y7">This program is designed for children age 7 and above.</string>
+    <string name="description_ustvpg_g">Most parents would find this program suitable for all ages.</string>
+    <string name="description_ustvpg_pg">This program contains material that parents may find unsuitable for younger children.</string>
+    <string name="description_ustvpg_14">This program contains some material that many parents would find unsuitable for children under 14 years of age.</string>
+    <string name="description_ustvpg_ma">This program is specifically designed to be viewed by adults and therefore may be unsuitable for children under 17.</string>
+    <string name="description_krtv_all">모든 연령의 시청자가 시청하기에 부적절한 내용이 없는 등급을 말한다.</string>
+    <string name="description_krtv_7">7세미만의 어린이가 시청하기에 부적절한 내용이 포함되어 있어 보호자의 시청지도가 필요한 등급을 말한다.</string>
+    <string name="description_krtv_12">12세미만의 청소년이 시청하기에 부적절한 내용이 포함되어 있어 보호자의 시청지도가 필요한 등급을 말한다.</string>
+    <string name="description_krtv_15">15세미만의 청소년이 시청하기에 부적절한 내용이 포함되어 있어 보호자의 시청지도가 필요한 등급을 말한다.</string>
+    <string name="description_krtv_19">19세미만의 청소년이 시청하기에 부적절한 내용이 포함되어 있어 청소년이 시청할 수 없는 등급을 말한다.</string>
 </resources>

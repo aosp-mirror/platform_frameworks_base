@@ -35,6 +35,7 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Rect;
 import android.hardware.hdmi.HdmiCecDeviceInfo;
@@ -281,6 +282,18 @@ public final class TvInputManagerService extends SystemService {
 
         userState.inputMap.clear();
         userState.inputMap = inputMap;
+
+        Resources r = Resources.getSystem();
+        userState.ratingSystemXmlUriSet.clear();
+        userState.ratingSystemXmlUriSet.add(TvContentRating.SYSTEM_CONTENT_RATING_SYSTEM_XML);
+        for (TvInputState state : userState.inputMap.values()) {
+            Uri ratingSystemXmlUri = state.mInfo.getRatingSystemXmlUri();
+            if (ratingSystemXmlUri != null) {
+                // TODO: need to check the validation of xml format and the duplication of rating
+                // systems.
+                userState.ratingSystemXmlUriSet.add(state.mInfo.getRatingSystemXmlUri());
+            }
+        }
     }
 
     private void switchUser(int userId) {
@@ -807,6 +820,23 @@ public final class TvInputManagerService extends SystemService {
                     UserState userState = getUserStateLocked(resolvedUserId);
                     TvInputState state = userState.inputMap.get(inputId);
                     return state == null ? null : state.mInfo;
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public List<Uri> getTvContentRatingSystemXmls(int userId) {
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(),
+                    Binder.getCallingUid(), userId, "getTvContentRatingSystemXmls");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    UserState userState = getUserStateLocked(resolvedUserId);
+                    List<Uri> ratingSystemXmlUriList = new ArrayList<Uri>();
+                    ratingSystemXmlUriList.addAll(userState.ratingSystemXmlUriSet);
+                    return ratingSystemXmlUriList;
                 }
             } finally {
                 Binder.restoreCallingIdentity(identity);
@@ -1603,6 +1633,9 @@ public final class TvInputManagerService extends SystemService {
 
         // A set of all TV input packages.
         private final Set<String> packageSet = new HashSet<String>();
+
+        // A set of all TV content rating system xml uris.
+        private final Set<Uri> ratingSystemXmlUriSet = new HashSet<Uri>();
 
         // A mapping from the token of a client to its state.
         private final Map<IBinder, ClientState> clientStateMap =
