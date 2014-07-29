@@ -67,11 +67,6 @@ public final class StreamConfigurationMap {
     private static final String TAG = "StreamConfigurationMap";
 
     /**
-     * Indicates that a minimum frame duration is not available for a particular configuration.
-     */
-    public static final long NO_MIN_FRAME_DURATION = 0;
-
-    /**
      * Create a new {@link StreamConfigurationMap}.
      *
      * <p>The array parameters ownership is passed to this object after creation; do not
@@ -536,7 +531,7 @@ public final class StreamConfigurationMap {
      *
      * <p>For devices that do not support manual sensor control
      * ({@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR}),
-     * this function may return {@link #NO_MIN_FRAME_DURATION}.</p>
+     * this function may return 0.</p>
      *
      * <!--
      * TODO: uncomment after adding input stream support
@@ -547,7 +542,7 @@ public final class StreamConfigurationMap {
      * @param format an image format from {@link ImageFormat} or {@link PixelFormat}
      * @param size an output-compatible size
      * @return a minimum frame duration {@code >} 0 in nanoseconds, or
-     *          {@link #NO_MIN_FRAME_DURATION} if the minimum frame duration is not available.
+     *          0 if the minimum frame duration is not available.
      *
      * @throws IllegalArgumentException if {@code format} or {@code size} was not supported
      * @throws NullPointerException if {@code size} was {@code null}
@@ -586,7 +581,7 @@ public final class StreamConfigurationMap {
      *
      * <p>For devices that do not support manual sensor control
      * ({@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR}),
-     * this function may return {@link #NO_MIN_FRAME_DURATION}.</p>
+     * this function may return 0.</p>
      *
      * <!--
      * TODO: uncomment after adding input stream support
@@ -599,7 +594,7 @@ public final class StreamConfigurationMap {
      *          non-empty array returned by {@link #getOutputSizes(Class)}
      * @param size an output-compatible size
      * @return a minimum frame duration {@code >} 0 in nanoseconds, or
-     *          {@link #NO_MIN_FRAME_DURATION} if the minimum frame duration is not available.
+     *          0 if the minimum frame duration is not available.
      *
      * @throws IllegalArgumentException if {@code klass} or {@code size} was not supported
      * @throws NullPointerException if {@code size} or {@code klass} was {@code null}
@@ -1065,8 +1060,8 @@ public final class StreamConfigurationMap {
                 return configurationDuration.getDuration();
             }
         }
-
-        return getDurationDefault(duration);
+        // Default duration is '0' (unsupported/no extra stall)
+        return 0;
     }
 
     /**
@@ -1081,17 +1076,6 @@ public final class StreamConfigurationMap {
                 return mMinFrameDurations;
             case DURATION_STALL:
                 return mStallDurations;
-            default:
-                throw new IllegalArgumentException("duration was invalid");
-        }
-    }
-
-    private long getDurationDefault(int duration) {
-        switch (duration) {
-            case DURATION_MIN_FRAME:
-                return NO_MIN_FRAME_DURATION;
-            case DURATION_STALL:
-                return 0L; // OK. A lack of a stall duration implies a 0 stall duration
             default:
                 throw new IllegalArgumentException("duration was invalid");
         }
