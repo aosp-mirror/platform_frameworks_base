@@ -48,6 +48,12 @@ interface INetworkScoreService
     boolean setActiveScorer(in String packageName);
 
     /**
+     * Disable the current active scorer and clear existing scores.
+     * @throws SecurityException if the caller is not the current scorer or the system.
+     */
+    void disableScoring();
+
+    /**
      * Register a network subsystem for scoring.
      *
      * @param networkType the type of network this cache can handle. See {@link NetworkKey#type}.
