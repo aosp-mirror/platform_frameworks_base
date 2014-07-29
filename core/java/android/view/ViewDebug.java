@@ -180,6 +180,13 @@ public class ViewDebug {
          * @return the category as String
          */
         String category() default "";
+
+        /**
+         * Indicates whether or not to format an {@code int} or {@code byte} value as a hex string.
+         *
+         * @return true if the supported values should be formatted as a hex string.
+         */
+        boolean formatToHexString() default false;
     }
 
     /**
@@ -507,76 +514,76 @@ public class ViewDebug {
 
         long durationMeasure =
                 (root || (view.mPrivateFlags & View.PFLAG_MEASURED_DIMENSION_SET) != 0)
-                ? profileViewOperation(view, new ViewOperation<Void>() {
-                            public Void[] pre() {
-                                forceLayout(view);
-                                return null;
-                            }
+                        ? profileViewOperation(view, new ViewOperation<Void>() {
+                    public Void[] pre() {
+                        forceLayout(view);
+                        return null;
+                    }
 
-                            private void forceLayout(View view) {
-                                view.forceLayout();
-                                if (view instanceof ViewGroup) {
-                                    ViewGroup group = (ViewGroup) view;
-                                    final int count = group.getChildCount();
-                                    for (int i = 0; i < count; i++) {
-                                        forceLayout(group.getChildAt(i));
-                                    }
-                                }
+                    private void forceLayout(View view) {
+                        view.forceLayout();
+                        if (view instanceof ViewGroup) {
+                            ViewGroup group = (ViewGroup) view;
+                            final int count = group.getChildCount();
+                            for (int i = 0; i < count; i++) {
+                                forceLayout(group.getChildAt(i));
                             }
+                        }
+                    }
 
-                            public void run(Void... data) {
-                                view.measure(view.mOldWidthMeasureSpec, view.mOldHeightMeasureSpec);
-                            }
+                    public void run(Void... data) {
+                        view.measure(view.mOldWidthMeasureSpec, view.mOldHeightMeasureSpec);
+                    }
 
-                            public void post(Void... data) {
-                            }
-                        })
+                    public void post(Void... data) {
+                    }
+                })
                         : 0;
         long durationLayout =
                 (root || (view.mPrivateFlags & View.PFLAG_LAYOUT_REQUIRED) != 0)
-                ? profileViewOperation(view, new ViewOperation<Void>() {
-                            public Void[] pre() {
-                                return null;
-                            }
+                        ? profileViewOperation(view, new ViewOperation<Void>() {
+                    public Void[] pre() {
+                        return null;
+                    }
 
-                            public void run(Void... data) {
-                                view.layout(view.mLeft, view.mTop, view.mRight, view.mBottom);
-                            }
+                    public void run(Void... data) {
+                        view.layout(view.mLeft, view.mTop, view.mRight, view.mBottom);
+                    }
 
-                            public void post(Void... data) {
-                            }
-                        }) : 0;
+                    public void post(Void... data) {
+                    }
+                }) : 0;
         long durationDraw =
                 (root || !view.willNotDraw() || (view.mPrivateFlags & View.PFLAG_DRAWN) != 0)
-                ? profileViewOperation(view, new ViewOperation<Object>() {
-                            public Object[] pre() {
-                                final DisplayMetrics metrics =
-                                        (view != null && view.getResources() != null) ?
-                                                view.getResources().getDisplayMetrics() : null;
-                                final Bitmap bitmap = metrics != null ?
-                                        Bitmap.createBitmap(metrics, metrics.widthPixels,
-                                                metrics.heightPixels, Bitmap.Config.RGB_565) : null;
-                                final Canvas canvas = bitmap != null ? new Canvas(bitmap) : null;
-                                return new Object[] {
-                                        bitmap, canvas
-                                };
-                            }
+                        ? profileViewOperation(view, new ViewOperation<Object>() {
+                    public Object[] pre() {
+                        final DisplayMetrics metrics =
+                                (view != null && view.getResources() != null) ?
+                                        view.getResources().getDisplayMetrics() : null;
+                        final Bitmap bitmap = metrics != null ?
+                                Bitmap.createBitmap(metrics, metrics.widthPixels,
+                                        metrics.heightPixels, Bitmap.Config.RGB_565) : null;
+                        final Canvas canvas = bitmap != null ? new Canvas(bitmap) : null;
+                        return new Object[] {
+                                bitmap, canvas
+                        };
+                    }
 
-                            public void run(Object... data) {
-                                if (data[1] != null) {
-                                    view.draw((Canvas) data[1]);
-                                }
-                            }
+                    public void run(Object... data) {
+                        if (data[1] != null) {
+                            view.draw((Canvas) data[1]);
+                        }
+                    }
 
-                            public void post(Object... data) {
-                                if (data[1] != null) {
-                                    ((Canvas) data[1]).setBitmap(null);
-                                }
-                                if (data[0] != null) {
-                                    ((Bitmap) data[0]).recycle();
-                                }
-                            }
-                        }) : 0;
+                    public void post(Object... data) {
+                        if (data[1] != null) {
+                            ((Canvas) data[1]).setBitmap(null);
+                        }
+                        if (data[0] != null) {
+                            ((Bitmap) data[0]).recycle();
+                        }
+                    }
+                }) : 0;
         out.write(String.valueOf(durationMeasure));
         out.write(' ');
         out.write(String.valueOf(durationLayout));
@@ -643,12 +650,12 @@ public class ViewDebug {
             } catch (RemoteException e) {
                 // Ignore
             }
-    
+
             clientStream.writeInt(outRect.width());
             clientStream.writeInt(outRect.height());
-    
+
             captureViewLayer(root, clientStream, true);
-            
+
             clientStream.write(2);
         } finally {
             clientStream.close();
@@ -666,19 +673,19 @@ public class ViewDebug {
             if (id != View.NO_ID) {
                 name = resolveId(view.getContext(), id).toString();
             }
-    
+
             clientStream.write(1);
             clientStream.writeUTF(name);
             clientStream.writeByte(localVisible ? 1 : 0);
-    
+
             int[] position = new int[2];
             // XXX: Should happen on the UI thread
             view.getLocationInWindow(position);
-    
+
             clientStream.writeInt(position[0]);
             clientStream.writeInt(position[1]);
             clientStream.flush();
-    
+
             Bitmap b = performViewCapture(view, true);
             if (b != null) {
                 ByteArrayOutputStream arrayOut = new ByteArrayOutputStream(b.getWidth() *
@@ -774,7 +781,7 @@ public class ViewDebug {
                 Thread.currentThread().interrupt();
             }
         }
-        
+
         return null;
     }
 
@@ -1008,10 +1015,10 @@ public class ViewDebug {
 
         final View view = (View) object;
         Callable<Object> callable = new Callable<Object>() {
-                @Override
-                public Object call() throws IllegalAccessException, InvocationTargetException {
-                    return method.invoke(view, (Object[]) null);
-                }
+            @Override
+            public Object call() throws IllegalAccessException, InvocationTargetException {
+                return method.invoke(view, (Object[]) null);
+            }
         };
         FutureTask<Object> future = new FutureTask<Object>(callable);
         // Try to use the handler provided by the view
@@ -1041,6 +1048,10 @@ public class ViewDebug {
         }
     }
 
+    private static String formatIntToHexString(int value) {
+        return "0x" + Integer.toHexString(value).toUpperCase();
+    }
+
     private static void exportMethods(Context context, Object view, BufferedWriter out,
             Class<?> klass, String prefix) throws IOException {
 
@@ -1058,7 +1069,6 @@ public class ViewDebug {
                         property.category().length() != 0 ? property.category() + ":" : "";
 
                 if (returnType == int.class) {
-
                     if (property.resolveId() && context != null) {
                         final int id = (Integer) methodValue;
                         methodValue = resolveId(context, id);
@@ -1160,6 +1170,15 @@ public class ViewDebug {
                                 fieldValue = intValue;
                             }
                         }
+
+                        if (property.formatToHexString()) {
+                            fieldValue = field.get(view);
+                            if (type == int.class) {
+                                fieldValue = formatIntToHexString((Integer) fieldValue);
+                            } else if (type == byte.class) {
+                                fieldValue = "0x" + Byte.toHexString((Byte) fieldValue, true);
+                            }
+                        }
                     }
                 } else if (type == int[].class) {
                     final int[] array = (int[]) field.get(view);
@@ -1210,7 +1229,7 @@ public class ViewDebug {
             final boolean test = maskResult == flagMapping.equals();
             if ((test && ifTrue) || (!test && !ifTrue)) {
                 final String name = flagMapping.name();
-                final String value = "0x" + Integer.toHexString(maskResult);
+                final String value = formatIntToHexString(maskResult);
                 writeEntry(out, prefix, name, "", value);
             }
         }
@@ -1276,7 +1295,7 @@ public class ViewDebug {
                 fieldValue = resources.getResourceTypeName(id) + '/' +
                         resources.getResourceEntryName(id);
             } catch (Resources.NotFoundException e) {
-                fieldValue = "id/0x" + Integer.toHexString(id);
+                fieldValue = "id/" + formatIntToHexString(id);
             }
         } else {
             fieldValue = "NO_ID";
@@ -1393,13 +1412,13 @@ public class ViewDebug {
                     }
                     sb.append("; ");
                 }
-              } catch (IllegalAccessException e) {
-                  //Exception IllegalAccess, it is OK here
-                  //we simply ignore this method
-              } catch (InvocationTargetException e) {
-                  //Exception InvocationTarget, it is OK here
-                  //we simply ignore this method
-              }
+            } catch (IllegalAccessException e) {
+                //Exception IllegalAccess, it is OK here
+                //we simply ignore this method
+            } catch (InvocationTargetException e) {
+                //Exception InvocationTarget, it is OK here
+                //we simply ignore this method
+            }
         }
         return sb.toString();
     }
@@ -1503,7 +1522,7 @@ public class ViewDebug {
         final Field f = p.getClass().getField(param);
         if (f.getType() != int.class) {
             throw new RuntimeException("Only integer layout parameters can be set. Field "
-                        + param + " is of type " + f.getType().getSimpleName());
+                    + param + " is of type " + f.getType().getSimpleName());
         }
 
         f.set(p, Integer.valueOf(value));
