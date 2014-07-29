@@ -113,8 +113,8 @@ public class AudioService extends IAudioService.Stub {
 
     private static final String TAG = "AudioService";
 
-    /** Debug remote control client/display feature */
-    protected static final boolean DEBUG_RC = Log.isLoggable(TAG + ".RC", Log.DEBUG);
+    /** Debug audio mode */
+    protected static final boolean DEBUG_MODE = Log.isLoggable(TAG + ".MOD", Log.DEBUG);
     /** Debug volumes */
     protected static final boolean DEBUG_VOL = Log.isLoggable(TAG + ".VOL", Log.DEBUG);
 
@@ -1788,6 +1788,7 @@ public class AudioService extends IAudioService.Stub {
 
     /** @see AudioManager#setMode(int) */
     public void setMode(int mode, IBinder cb) {
+        if (DEBUG_MODE) { Log.v(TAG, "setMode(mode=" + mode + ")"); }
         if (!checkAudioSettingsPermission("setMode()")) {
             return;
         }
@@ -1814,6 +1815,7 @@ public class AudioService extends IAudioService.Stub {
     // setModeInt() returns a valid PID if the audio mode was successfully set to
     // any mode other than NORMAL.
     int setModeInt(int mode, IBinder cb, int pid) {
+        if (DEBUG_MODE) { Log.v(TAG, "setModeInt(mode=" + mode + ", pid=" + pid + ")"); }
         int newModeOwnerPid = 0;
         if (cb == null) {
             Log.e(TAG, "setModeInt() called with null binder");
@@ -1840,6 +1842,10 @@ public class AudioService extends IAudioService.Stub {
                     hdlr = mSetModeDeathHandlers.get(0);
                     cb = hdlr.getBinder();
                     mode = hdlr.getMode();
+                    if (DEBUG_MODE) {
+                        Log.w(TAG, " using mode=" + mode + " instead due to death hdlr at pid="
+                                + hdlr.mPid);
+                    }
                 }
             } else {
                 if (hdlr == null) {
@@ -1862,6 +1868,7 @@ public class AudioService extends IAudioService.Stub {
             if (mode != mMode) {
                 status = AudioSystem.setPhoneState(mode);
                 if (status == AudioSystem.AUDIO_STATUS_OK) {
+                    if (DEBUG_MODE) { Log.v(TAG, " mode successfully set to " + mode); }
                     mMode = mode;
                 } else {
                     if (hdlr != null) {
@@ -1869,6 +1876,7 @@ public class AudioService extends IAudioService.Stub {
                         cb.unlinkToDeath(hdlr, 0);
                     }
                     // force reading new top of mSetModeDeathHandlers stack
+                    if (DEBUG_MODE) { Log.w(TAG, " mode set to MODE_NORMAL after phoneState pb"); }
                     mode = AudioSystem.MODE_NORMAL;
                 }
             } else {
