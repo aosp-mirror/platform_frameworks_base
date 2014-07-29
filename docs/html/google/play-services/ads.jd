@@ -31,6 +31,25 @@ header.hide=1
 </div>
 </div>
 
+<div style=
+"background-color:#fffdeb;width:100%;margin-bottom:1em;padding:.5em;" class=
+"caution">
+  <p><strong>Upgrade to the new AdMob</strong></p>
+  <p>Legacy AdMob will be shutting down on August 31, 2014. Beginning August 31,
+    you will no longer be able to use legacy AdMob to promote and monetize your
+    apps. Specifically, please be aware of the following:</p>
+  <ol style="margin-bottom:0;">
+    <li>Ads will stop serving to legacy ad units that are not updated with new
+    ad unit IDs.</li>
+    <li>Legacy house ad campaigns will stop serving.</li>
+    <li>You will not be able to access the legacy AdMob UI after August 31,
+    2014.</li>
+  </ol>
+  <p>If you are still using legacy AdMob, please upgrade your account to the new
+    AdMob as soon as possible. Upgrading takes only 5 minutes. <a href=
+    "https://apps.admob.com/admob/signup?">Start here</a>.</p>
+</div>
+
 <div class="landing-docs">
   <div class="col-6 normal-links">
     <h3 style="clear:left">Key Developer Features</h3>
