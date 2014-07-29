@@ -326,9 +326,8 @@ package android {
     field public static final int alphabeticShortcut = 16843235; // 0x10101e3
     field public static final int alwaysDrawnWithCache = 16842991; // 0x10100ef
     field public static final int alwaysRetainTaskState = 16843267; // 0x1010203
-    field public static final int amPmSelectedBackgroundColor = 16843947; // 0x10104ab
-    field public static final int amPmTextColor = 16843945; // 0x10104a9
-    field public static final int amPmUnselectedBackgroundColor = 16843946; // 0x10104aa
+    field public static final int amPmBackgroundColor = 16843944; // 0x10104a8
+    field public static final int amPmTextColor = 16843943; // 0x10104a7
     field public static final int angle = 16843168; // 0x10101a0
     field public static final int animateFirstView = 16843477; // 0x10102d5
     field public static final int animateLayoutChanges = 16843506; // 0x10102f2
@@ -389,7 +388,7 @@ package android {
     field public static final int buttonTint = 16843889; // 0x1010471
     field public static final int buttonTintMode = 16843890; // 0x1010472
     field public static final int cacheColorHint = 16843009; // 0x1010101
-    field public static final int calendarTextColor = 16843934; // 0x101049e
+    field public static final int calendarTextColor = 16843933; // 0x101049d
     field public static final int calendarViewShown = 16843596; // 0x101034c
     field public static final int calendarViewStyle = 16843613; // 0x101035d
     field public static final int canRequestEnhancedWebAccessibility = 16843736; // 0x10103d8
@@ -407,8 +406,8 @@ package android {
     field public static final int centerY = 16843171; // 0x10101a3
     field public static final int checkBoxPreferenceStyle = 16842895; // 0x101008f
     field public static final int checkMark = 16843016; // 0x1010108
-    field public static final int checkMarkTint = 16843949; // 0x10104ad
-    field public static final int checkMarkTintMode = 16843950; // 0x10104ae
+    field public static final int checkMarkTint = 16843946; // 0x10104aa
+    field public static final int checkMarkTintMode = 16843947; // 0x10104ab
     field public static final int checkable = 16843237; // 0x10101e5
     field public static final int checkableBehavior = 16843232; // 0x10101e0
     field public static final int checkboxStyle = 16842860; // 0x101006c
@@ -479,16 +478,11 @@ package android {
     field public static final int dashGap = 16843175; // 0x10101a7
     field public static final int dashWidth = 16843174; // 0x10101a6
     field public static final int data = 16842798; // 0x101002e
+    field public static final int datePickerDialogTheme = 16843951; // 0x10104af
     field public static final int datePickerStyle = 16843612; // 0x101035c
-    field public static final int dateSelectorBackgroundColor = 16843928; // 0x1010498
-    field public static final int dateSelectorDayOfMonthTextAppearance = 16843930; // 0x101049a
-    field public static final int dateSelectorDayOfWeekBackgroundColor = 16843926; // 0x1010496
-    field public static final int dateSelectorDayOfWeekTextAppearance = 16843927; // 0x1010497
-    field public static final int dateSelectorMonthTextAppearance = 16843929; // 0x1010499
-    field public static final int dateSelectorYearListItemTextAppearance = 16843932; // 0x101049c
-    field public static final int dateSelectorYearListSelectedCircleColor = 16843933; // 0x101049d
-    field public static final int dateSelectorYearTextAppearance = 16843931; // 0x101049b
     field public static final int dateTextAppearance = 16843593; // 0x1010349
+    field public static final int dayOfWeekBackgroundColor = 16843926; // 0x1010496
+    field public static final int dayOfWeekTextAppearance = 16843927; // 0x1010497
     field public static final int debuggable = 16842767; // 0x101000f
     field public static final int defaultValue = 16843245; // 0x10101ed
     field public static final int delay = 16843212; // 0x10101cc
@@ -658,12 +652,14 @@ package android {
     field public static final int hapticFeedbackEnabled = 16843358; // 0x101025e
     field public static final int hardwareAccelerated = 16843475; // 0x10102d3
     field public static final int hasCode = 16842764; // 0x101000c
-    field public static final int headerAmPmTextAppearance = 16843939; // 0x10104a3
+    field public static final int headerAmPmTextAppearance = 16843938; // 0x10104a2
     field public static final int headerBackground = 16843055; // 0x101012f
-    field public static final int headerBackgroundColor = 16843941; // 0x10104a5
+    field public static final int headerBackgroundColor = 16843939; // 0x10104a3
+    field public static final int headerDayOfMonthTextAppearance = 16843929; // 0x1010499
     field public static final int headerDividersEnabled = 16843310; // 0x101022e
-    field public static final int headerSelectedTextColor = 16843940; // 0x10104a4
-    field public static final int headerTimeTextAppearance = 16843938; // 0x10104a2
+    field public static final int headerMonthTextAppearance = 16843928; // 0x1010498
+    field public static final int headerTimeTextAppearance = 16843937; // 0x10104a1
+    field public static final int headerYearTextAppearance = 16843930; // 0x101049a
     field public static final int height = 16843093; // 0x1010155
     field public static final int hideOnContentScroll = 16843845; // 0x1010445
     field public static final int hint = 16843088; // 0x1010150
@@ -919,9 +915,9 @@ package android {
     field public static final int notificationTimeout = 16843651; // 0x1010383
     field public static final int numColumns = 16843032; // 0x1010118
     field public static final int numStars = 16843076; // 0x1010144
-    field public static final int numbersBackgroundColor = 16843943; // 0x10104a7
-    field public static final int numbersSelectorColor = 16843944; // 0x10104a8
-    field public static final int numbersTextColor = 16843942; // 0x10104a6
+    field public static final int numbersBackgroundColor = 16843941; // 0x10104a5
+    field public static final int numbersSelectorColor = 16843942; // 0x10104a6
+    field public static final int numbersTextColor = 16843940; // 0x10104a4
     field public static final deprecated int numeric = 16843109; // 0x1010165
     field public static final int numericShortcut = 16843236; // 0x10101e4
     field public static final int onClick = 16843375; // 0x101026f
@@ -975,7 +971,7 @@ package android {
     field public static final int popupKeyboard = 16843331; // 0x1010243
     field public static final int popupLayout = 16843323; // 0x101023b
     field public static final int popupMenuStyle = 16843520; // 0x1010300
-    field public static final int popupTheme = 16843951; // 0x10104af
+    field public static final int popupTheme = 16843948; // 0x10104ac
     field public static final int popupWindowStyle = 16842870; // 0x1010076
     field public static final int port = 16842793; // 0x1010029
     field public static final int positiveButtonText = 16843253; // 0x10101f5
@@ -1027,7 +1023,7 @@ package android {
     field public static final int ratingBarStyleIndicator = 16843280; // 0x1010210
     field public static final int ratingBarStyleSmall = 16842877; // 0x101007d
     field public static final int readPermission = 16842759; // 0x1010007
-    field public static final int recognitionService = 16843935; // 0x101049f
+    field public static final int recognitionService = 16843934; // 0x101049e
     field public static final int relinquishTaskIdentity = 16843896; // 0x1010478
     field public static final int repeatCount = 16843199; // 0x10101bf
     field public static final int repeatMode = 16843200; // 0x10101c0
@@ -1314,8 +1310,8 @@ package android {
     field public static final int tileMode = 16843265; // 0x1010201
     field public static final int tileModeX = 16843897; // 0x1010479
     field public static final int tileModeY = 16843898; // 0x101047a
-    field public static final int timePickerDialogTheme = 16843937; // 0x10104a1
-    field public static final int timePickerStyle = 16843936; // 0x10104a0
+    field public static final int timePickerDialogTheme = 16843936; // 0x10104a0
+    field public static final int timePickerStyle = 16843935; // 0x101049f
     field public static final int timeZone = 16843724; // 0x10103cc
     field public static final int tint = 16843041; // 0x1010121
     field public static final int tintMode = 16843797; // 0x1010415
@@ -1331,7 +1327,7 @@ package android {
     field public static final int toXScale = 16843203; // 0x10101c3
     field public static final int toYDelta = 16843209; // 0x10101c9
     field public static final int toYScale = 16843205; // 0x10101c5
-    field public static final int toolbarStyle = 16843952; // 0x10104b0
+    field public static final int toolbarStyle = 16843949; // 0x10104ad
     field public static final int top = 16843182; // 0x10101ae
     field public static final int topBright = 16842955; // 0x10100cb
     field public static final int topDark = 16842951; // 0x10100c7
@@ -1415,7 +1411,7 @@ package android {
     field public static final int windowAllowExitTransitionOverlap = 16843837; // 0x101043d
     field public static final int windowAnimationStyle = 16842926; // 0x10100ae
     field public static final int windowBackground = 16842836; // 0x1010054
-    field public static final int windowClipToOutline = 16843953; // 0x10104b1
+    field public static final int windowClipToOutline = 16843950; // 0x10104ae
     field public static final int windowCloseOnTouchOutside = 16843611; // 0x101035b
     field public static final int windowContentOverlay = 16842841; // 0x1010059
     field public static final int windowContentTransitionManager = 16843795; // 0x1010413
@@ -1454,6 +1450,8 @@ package android {
     field public static final int x = 16842924; // 0x10100ac
     field public static final int xlargeScreens = 16843455; // 0x10102bf
     field public static final int y = 16842925; // 0x10100ad
+    field public static final int yearListItemTextAppearance = 16843931; // 0x101049b
+    field public static final int yearListSelectorColor = 16843932; // 0x101049c
     field public static final int yesNoPreferenceStyle = 16842896; // 0x1010090
     field public static final int zAdjustment = 16843201; // 0x10101c1
   }
@@ -38017,16 +38015,8 @@ package android.widget {
     ctor public DatePicker(android.content.Context, android.util.AttributeSet);
     ctor public DatePicker(android.content.Context, android.util.AttributeSet, int);
     ctor public DatePicker(android.content.Context, android.util.AttributeSet, int, int);
-    method public android.content.res.ColorStateList getCalendarTextColor();
     method public android.widget.CalendarView getCalendarView();
     method public boolean getCalendarViewShown();
-    method public int getDateSelectorBackgroundColor();
-    method public int getDateSelectorDayOfMonthTextAppearance();
-    method public int getDateSelectorDayOfWeekBackgroundColor();
-    method public int getDateSelectorDayOfWeekTextAppearance();
-    method public int getDateSelectorMonthTextAppearance();
-    method public int getDateSelectorYearListItemTextAppearance();
-    method public int getDateSelectorYearTextAppearance();
     method public int getDayOfMonth();
     method public long getMaxDate();
     method public long getMinDate();
@@ -38034,15 +38024,7 @@ package android.widget {
     method public boolean getSpinnersShown();
     method public int getYear();
     method public void init(int, int, int, android.widget.DatePicker.OnDateChangedListener);
-    method public void setCalendarTextColor(android.content.res.ColorStateList);
     method public void setCalendarViewShown(boolean);
-    method public void setDateSelectorBackgroundColor(int);
-    method public void setDateSelectorDayOfMonthTextAppearance(int);
-    method public void setDateSelectorDayOfWeekBackgroundColor(int);
-    method public void setDateSelectorDayOfWeekTextAppearance(int);
-    method public void setDateSelectorMonthTextAppearance(int);
-    method public void setDateSelectorYearListItemTextAppearance(int);
-    method public void setDateSelectorYearTextAppearance(int);
     method public void setMaxDate(long);
     method public void setMinDate(long);
     method public void setSpinnersShown(boolean);

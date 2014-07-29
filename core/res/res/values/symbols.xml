@@ -1844,20 +1844,7 @@
   <java-symbol type="dimen" name="subtitle_shadow_offset" />
   <java-symbol type="dimen" name="subtitle_outline_width" />
 
-  <!-- From the new TimePicker and DatePicker -->
-  <java-symbol type="attr" name="timePickerDialogTheme" />
-  <java-symbol type="attr" name="headerSelectedTextColor" />
-  <java-symbol type="attr" name="numbersTextColor" />
-  <java-symbol type="attr" name="numbersBackgroundColor" />
-  <java-symbol type="attr" name="amPmTextColor" />
-  <java-symbol type="attr" name="amPmUnselectedBackgroundColor" />
-  <java-symbol type="attr" name="amPmSelectedBackgroundColor" />
-  <java-symbol type="attr" name="numbersSelectorColor" />
   <java-symbol type="attr" name="nestedScrollingEnabled" />
-  <java-symbol type="attr" name="datePickerDialogTheme" />
-  <java-symbol type="attr" name="datePickerHeaderSelectorBackgroundColor" />
-  <java-symbol type="attr" name="datePickerHeaderListYearLabelCircleBackgroundColor" />
-  <java-symbol type="attr" name="calendarTextColor" />
 
   <java-symbol type="style" name="TextAppearance.Holo.TimePicker.TimeLabel" />
 
@@ -1941,7 +1928,6 @@
   <java-symbol type="array" name="config_calendarDateVibePattern" />
 
   <!-- From various Material changes -->
-  <java-symbol type="attr" name="toolbarStyle" />
   <java-symbol type="attr" name="titleTextAppearance" />
   <java-symbol type="attr" name="subtitleTextAppearance" />
   <java-symbol type="attr" name="windowActionBarFullscreenDecorLayout" />
@@ -1975,6 +1961,7 @@
   <java-symbol type="attr" name="lightRadius" />
   <java-symbol type="attr" name="ambientShadowAlpha" />
   <java-symbol type="attr" name="spotShadowAlpha" />
-
   <java-symbol type="array" name="config_cdma_home_system" />
+  <java-symbol type="attr" name="headerSelectedTextColor" />
+  <java-symbol type="attr" name="amPmSelectedBackgroundColor" />
 </resources>
