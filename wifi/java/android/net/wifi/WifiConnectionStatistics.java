@@ -47,6 +47,15 @@ public class WifiConnectionStatistics implements Parcelable {
     // Number of time we polled the chip and were on 2.4GHz
     public int num24GhzConnected;
 
+    // Number autojoin attempts
+    public int numAutoJoinAttempt;
+
+    // Number auto-roam attempts
+    public int numAutoRoamAttempt;
+
+    // Number wifimanager join attempts
+    public int numWifiManagerJoinAttempt;
+
     public WifiConnectionStatistics() {
         untrustedNetworkHistory = new HashMap<String, WifiNetworkConnectionStatistics>();
     }
@@ -74,6 +83,9 @@ public class WifiConnectionStatistics implements Parcelable {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append("Connected on: 2.4Ghz=").append(num24GhzConnected);
         sbuf.append(" 5Ghz=").append(num5GhzConnected).append("\n");
+        sbuf.append(" join=").append(numWifiManagerJoinAttempt);
+        sbuf.append("\\").append(numAutoJoinAttempt).append("\n");
+        sbuf.append(" roam=").append(numAutoRoamAttempt).append("\n");
 
         for (String Key : untrustedNetworkHistory.keySet()) {
             WifiNetworkConnectionStatistics stats = untrustedNetworkHistory.get(Key);
@@ -102,6 +114,10 @@ public class WifiConnectionStatistics implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(num24GhzConnected);
         dest.writeInt(num5GhzConnected);
+        dest.writeInt(numAutoJoinAttempt);
+        dest.writeInt(numAutoRoamAttempt);
+        dest.writeInt(numWifiManagerJoinAttempt);
+
         dest.writeInt(untrustedNetworkHistory.size());
         for (String Key : untrustedNetworkHistory.keySet()) {
             WifiNetworkConnectionStatistics num = untrustedNetworkHistory.get(Key);
@@ -119,6 +135,9 @@ public class WifiConnectionStatistics implements Parcelable {
                 WifiConnectionStatistics stats = new WifiConnectionStatistics();
                 stats.num24GhzConnected = in.readInt();
                 stats.num5GhzConnected = in.readInt();
+                stats.numAutoJoinAttempt = in.readInt();
+                stats.numAutoRoamAttempt = in.readInt();
+                stats.numWifiManagerJoinAttempt = in.readInt();
                 int n = in.readInt();
                 while (n-- > 0) {
                     String Key = in.readString();
