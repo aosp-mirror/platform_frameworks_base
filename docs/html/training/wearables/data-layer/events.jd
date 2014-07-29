@@ -102,12 +102,12 @@ so the handheld app doesn't listen for any data events from the wearable app.</p
 <ul>
   <li><a href="{@docRoot}reference/com/google/android/gms/wearable/WearableListenerService.html#onDataChanged(com.google.android.gms.wearable.DataEventBuffer)"><code>onDataChanged()</code></a>
 - Called when data item objects are created, changed, or deleted. An event on one side of a connection
-triggers an this callback on both sides.</li>
+triggers this callback on both sides.</li>
   <li><a href="{@docRoot}reference/com/google/android/gms/wearable/WearableListenerService.html#onMessageReceived(com.google.android.gms.wearable.MessageEvent)"><code>onMessageReceived()</code></a>
 -  A message sent from one side of a connection triggers this callback on the other side of the connection.</li>
   <li><a href="{@docRoot}reference/com/google/android/gms/wearable/WearableListenerService.html#onMessageReceived(com.google.android.gms.wearable.MessageEvent)"><code>onPeerConnected()</code></a>
   and <a href="{@docRoot}reference/com/google/android/gms/wearable/WearableListenerService.html#onPeerDisconnected(com.google.android.gms.wearable.Node)"><code>onPeerDisconnected()</code></a> -
-  Called when connection with the handheld or wearable is connected or disconnected. 
+  Called when connection with the handheld or wearable is connected or disconnected.
   Changes in connection state on one side of the connection triggers these callbacks on both sides of the connection.
   </li>
 </ul>
@@ -174,7 +174,7 @@ public class DataLayerListenerService extends WearableListenerService {
         }
     }
 }
-</pre>  
+</pre>
 
 <p>Here's the corresponding intent filter in the Android manifest file:</p>
 
