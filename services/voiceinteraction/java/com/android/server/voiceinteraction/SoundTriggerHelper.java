@@ -255,8 +255,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
                     return;
                 }
                 // TODO: Handle more than one keyphrase extras.
-                // TODO: Use keyphraseExtras[0].id here instead of 100.
-                int keyphraseId = 100;
+                int keyphraseId = keyphraseExtras[0].id;
                 try {
                     synchronized(this) {
                         // Check which keyphrase triggered, and fire the appropriate event.
