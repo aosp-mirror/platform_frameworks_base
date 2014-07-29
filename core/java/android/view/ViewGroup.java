@@ -203,7 +203,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     name = "CLIP_TO_PADDING"),
             @ViewDebug.FlagToString(mask = FLAG_PADDING_NOT_NULL, equals = FLAG_PADDING_NOT_NULL,
                     name = "PADDING_NOT_NULL")
-    })
+    }, formatToHexString = true)
     protected int mGroupFlags;
 
     /**
@@ -6430,7 +6430,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                         equals = RTL_COMPATIBILITY_MODE_MASK, name = "RTL_COMPATIBILITY_MODE_MASK"),
                 @ViewDebug.FlagToString(mask = NEED_RESOLUTION_MASK,
                         equals = NEED_RESOLUTION_MASK, name = "NEED_RESOLUTION_MASK")
-        })
+        }, formatToHexString = true)
         byte mMarginFlags;
 
         private static final int LAYOUT_DIRECTION_MASK = 0x00000003;

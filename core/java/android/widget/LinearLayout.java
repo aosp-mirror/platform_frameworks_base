@@ -156,7 +156,7 @@ public class LinearLayout extends ViewGroup {
                 equals = Gravity.FILL, name = "FILL"),
             @ViewDebug.FlagToString(mask = Gravity.RELATIVE_LAYOUT_DIRECTION,
                 equals = Gravity.RELATIVE_LAYOUT_DIRECTION, name = "RELATIVE")
-        })
+        }, formatToHexString = true)
     private int mGravity = Gravity.START | Gravity.TOP;
 
     @ViewDebug.ExportedProperty(category = "measurement")
