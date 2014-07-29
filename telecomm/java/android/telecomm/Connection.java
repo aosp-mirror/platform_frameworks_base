@@ -237,6 +237,8 @@ public abstract class Connection {
      */
     public static String stateToString(int state) {
         switch (state) {
+            case State.INITIALIZING:
+                return "INITIALIZING";
             case State.NEW:
                 return "NEW";
             case State.RINGING:
