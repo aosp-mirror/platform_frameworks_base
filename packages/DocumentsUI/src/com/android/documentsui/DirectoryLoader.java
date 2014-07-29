@@ -69,11 +69,11 @@ public class DirectoryLoader extends AsyncTaskLoader<DirectoryResult> {
 
     private final ForceLoadContentObserver mObserver = new ForceLoadContentObserver();
 
-    private final int mType;
-    private final RootInfo mRoot;
+    private int mType;
+    private RootInfo mRoot;
     private DocumentInfo mDoc;
-    private final Uri mUri;
-    private final int mUserSortOrder;
+    private Uri mUri;
+    private int mUserSortOrder;
 
     private CancellationSignal mSignal;
     private DirectoryResult mResult;
@@ -81,6 +81,19 @@ public class DirectoryLoader extends AsyncTaskLoader<DirectoryResult> {
     public DirectoryLoader(Context context, int type, RootInfo root, DocumentInfo doc, Uri uri,
             int userSortOrder) {
         super(context, ProviderExecutor.forAuthority(root.authority));
+        mType = type;
+        mRoot = root;
+        mDoc = doc;
+        mUri = uri;
+        mUserSortOrder = userSortOrder;
+    }
+
+    public DirectoryLoader(Context context) {
+        super(context);
+    }
+
+    public void init(int type, RootInfo root, DocumentInfo doc, Uri uri,
+            int userSortOrder) {
         mType = type;
         mRoot = root;
         mDoc = doc;
