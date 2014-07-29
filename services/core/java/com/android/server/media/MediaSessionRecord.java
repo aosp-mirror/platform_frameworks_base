@@ -431,9 +431,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
 
     private String getShortMetadataString() {
         int fields = mMetadata == null ? 0 : mMetadata.size();
-        String title = mMetadata == null ? null : mMetadata
-                .getString(MediaMetadata.METADATA_KEY_TITLE);
-        return "size=" + fields + ", title=" + title;
+        MediaMetadata.Description description = mMetadata == null ? null : mMetadata
+                .getDescription();
+        return "size=" + fields + ", description=" + description;
     }
 
     private void pushPlaybackStateUpdate() {
