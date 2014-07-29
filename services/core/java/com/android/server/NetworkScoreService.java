@@ -27,6 +27,7 @@ import android.net.NetworkScoreManager;
 import android.net.NetworkScorerAppManager;
 import android.net.NetworkScorerAppManager.NetworkScorerAppData;
 import android.net.ScoredNetwork;
+import android.os.Binder;
 import android.os.RemoteException;
 import android.text.TextUtils;
 import android.util.Log;
@@ -131,17 +132,44 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
     @Override
     public boolean setActiveScorer(String packageName) {
         mContext.enforceCallingOrSelfPermission(permission.BROADCAST_SCORE_NETWORKS, TAG);
-        // Preemptively clear scores even though the set operation could fail. We do this for safety
-        // as scores should never be compared across apps; in practice, Settings should only be
-        // allowing valid apps to be set as scorers, so failure here should be rare.
-        clearInternal();
-        boolean result = NetworkScorerAppManager.setActiveScorer(mContext, packageName);
-        if (result) {
-            Intent intent = new Intent(NetworkScoreManager.ACTION_SCORER_CHANGED);
-            intent.putExtra(NetworkScoreManager.EXTRA_NEW_SCORER, packageName);
-            mContext.sendBroadcast(intent);
+        return setScorerInternal(packageName);
+    }
+
+    @Override
+    public void disableScoring() {
+        // Only the active scorer or the system (who can broadcast BROADCAST_SCORE_NETOWRKS) should
+        // be allowed to disable scoring.
+        if (NetworkScorerAppManager.isCallerActiveScorer(mContext, getCallingUid()) ||
+                mContext.checkCallingOrSelfPermission(permission.BROADCAST_SCORE_NETWORKS) ==
+                        PackageManager.PERMISSION_GRANTED) {
+            // The return value is discarded here because at this point, the call should always
+            // succeed. The only reason for failure is if the new package is not a valid scorer, but
+            // we're disabling scoring altogether here.
+            setScorerInternal(null /* packageName */);
+        } else {
+            throw new SecurityException(
+                    "Caller is neither the active scorer nor the scorer manager.");
         }
-        return result;
+    }
+
+    /** Set the active scorer. Callers are responsible for checking permissions as appropriate. */
+    private boolean setScorerInternal(String packageName) {
+        long token = Binder.clearCallingIdentity();
+        try {
+            // Preemptively clear scores even though the set operation could fail. We do this for
+            // safety as scores should never be compared across apps; in practice, Settings should
+            // only be allowing valid apps to be set as scorers, so failure here should be rare.
+            clearInternal();
+            boolean result = NetworkScorerAppManager.setActiveScorer(mContext, packageName);
+            if (result) {
+                Intent intent = new Intent(NetworkScoreManager.ACTION_SCORER_CHANGED);
+                intent.putExtra(NetworkScoreManager.EXTRA_NEW_SCORER, packageName);
+                mContext.sendBroadcast(intent);
+            }
+            return result;
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     /** Clear scores. Callers are responsible for checking permissions as appropriate. */
