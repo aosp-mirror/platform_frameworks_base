@@ -212,8 +212,12 @@ public class VpnService extends Service {
      * @see Builder#addAddress
      */
     public boolean addAddress(InetAddress address, int prefixLength) {
-        // TODO
-        return true;
+        check(address, prefixLength);
+        try {
+            return getService().addVpnAddress(address.getHostAddress(), prefixLength);
+        } catch (RemoteException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     /**
@@ -236,8 +240,12 @@ public class VpnService extends Service {
      * @return {@code true} on success.
      */
     public boolean removeAddress(InetAddress address, int prefixLength) {
-        // TODO
-        return true;
+        check(address, prefixLength);
+        try {
+            return getService().removeVpnAddress(address.getHostAddress(), prefixLength);
+        } catch (RemoteException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     /**
@@ -282,6 +290,26 @@ public class VpnService extends Service {
                 return true;
             }
             return false;
+        }
+    }
+
+    /**
+     * Private method to validate address and prefixLength.
+     */
+    private static void check(InetAddress address, int prefixLength) {
+        if (address.isLoopbackAddress()) {
+            throw new IllegalArgumentException("Bad address");
+        }
+        if (address instanceof Inet4Address) {
+            if (prefixLength < 0 || prefixLength > 32) {
+                throw new IllegalArgumentException("Bad prefixLength");
+            }
+        } else if (address instanceof Inet6Address) {
+            if (prefixLength < 0 || prefixLength > 128) {
+                throw new IllegalArgumentException("Bad prefixLength");
+            }
+        } else {
+            throw new IllegalArgumentException("Unsupported family");
         }
     }
 
@@ -334,26 +362,6 @@ public class VpnService extends Service {
             }
             mConfig.mtu = mtu;
             return this;
-        }
-
-        /**
-         * Private method to validate address and prefixLength.
-         */
-        private void check(InetAddress address, int prefixLength) {
-            if (address.isLoopbackAddress()) {
-                throw new IllegalArgumentException("Bad address");
-            }
-            if (address instanceof Inet4Address) {
-                if (prefixLength < 0 || prefixLength > 32) {
-                    throw new IllegalArgumentException("Bad prefixLength");
-                }
-            } else if (address instanceof Inet6Address) {
-                if (prefixLength < 0 || prefixLength > 128) {
-                    throw new IllegalArgumentException("Bad prefixLength");
-                }
-            } else {
-                throw new IllegalArgumentException("Unsupported family");
-            }
         }
 
         /**

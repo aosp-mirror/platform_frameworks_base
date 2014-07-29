@@ -18,6 +18,7 @@
 
 #define LOG_TAG "VpnJni"
 #include <cutils/log.h>
+#include "netutils/ifc.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -212,6 +213,40 @@ static int check_interface(const char *name)
     return ifr4.ifr_flags;
 }
 
+static bool modifyAddress(JNIEnv *env, jobject thiz, jstring jName, jstring jAddress,
+                          jint jPrefixLength, bool add)
+{
+    int error = SYSTEM_ERROR;
+    const char *name = jName ? env->GetStringUTFChars(jName, NULL) : NULL;
+    const char *address = jAddress ? env->GetStringUTFChars(jAddress, NULL) : NULL;
+
+    if (!name) {
+        jniThrowNullPointerException(env, "name");
+    } else if (!address) {
+        jniThrowNullPointerException(env, "address");
+    } else {
+        if (add) {
+            if (error = ifc_add_address(name, address, jPrefixLength)) {
+                ALOGE("Cannot add address %s/%d on interface %s (%s)", address, jPrefixLength, name,
+                      strerror(-error));
+            }
+        } else {
+            if (error = ifc_del_address(name, address, jPrefixLength)) {
+                ALOGE("Cannot del address %s/%d on interface %s (%s)", address, jPrefixLength, name,
+                      strerror(-error));
+            }
+        }
+    }
+
+    if (name) {
+        env->ReleaseStringUTFChars(jName, name);
+    }
+    if (address) {
+        env->ReleaseStringUTFChars(jAddress, address);
+    }
+    return !error;
+}
+
 //------------------------------------------------------------------------------
 
 static void throwException(JNIEnv *env, int error, const char *message)
@@ -301,6 +336,18 @@ static jint check(JNIEnv *env, jobject thiz, jstring jName)
     return flags;
 }
 
+static bool addAddress(JNIEnv *env, jobject thiz, jstring jName, jstring jAddress,
+                       jint jPrefixLength)
+{
+    return modifyAddress(env, thiz, jName, jAddress, jPrefixLength, true);
+}
+
+static bool delAddress(JNIEnv *env, jobject thiz, jstring jName, jstring jAddress,
+                       jint jPrefixLength)
+{
+    return modifyAddress(env, thiz, jName, jAddress, jPrefixLength, false);
+}
+
 //------------------------------------------------------------------------------
 
 static JNINativeMethod gMethods[] = {
@@ -309,6 +356,8 @@ static JNINativeMethod gMethods[] = {
     {"jniSetAddresses", "(Ljava/lang/String;Ljava/lang/String;)I", (void *)setAddresses},
     {"jniReset", "(Ljava/lang/String;)V", (void *)reset},
     {"jniCheck", "(Ljava/lang/String;)I", (void *)check},
+    {"jniAddAddress", "(Ljava/lang/String;Ljava/lang/String;I)Z", (void *)addAddress},
+    {"jniDelAddress", "(Ljava/lang/String;Ljava/lang/String;I)Z", (void *)delAddress},
 };
 
 int register_android_server_connectivity_Vpn(JNIEnv *env)

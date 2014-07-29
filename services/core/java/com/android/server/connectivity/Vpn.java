@@ -83,8 +83,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.InetAddress;
 import java.net.Inet4Address;
+import java.net.Inet6Address;
+import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -754,11 +755,53 @@ public class Vpn {
         }
     }
 
+    public synchronized boolean addAddress(String address, int prefixLength) {
+        if (Binder.getCallingUid() != mOwnerUID || mInterface == null || mNetworkAgent == null) {
+            return false;
+        }
+        boolean success = jniAddAddress(mInterface, address, prefixLength);
+        if (success && (!mAllowIPv4 || !mAllowIPv6)) {
+            try {
+                InetAddress inetAddress = InetAddress.parseNumericAddress(address);
+                if ((inetAddress instanceof Inet4Address) && !mAllowIPv4) {
+                    mAllowIPv4 = true;
+                    mNetworkAgent.unblockAddressFamily(AF_INET);
+                } else if ((inetAddress instanceof Inet6Address) && !mAllowIPv6) {
+                    mAllowIPv6 = true;
+                    mNetworkAgent.unblockAddressFamily(AF_INET6);
+                }
+            } catch (IllegalArgumentException e) {
+                // ignore
+            }
+        }
+        // Ideally, we'd call mNetworkAgent.sendLinkProperties() here to notify ConnectivityService
+        // that the LinkAddress has changed. But we don't do so for two reasons: (1) We don't set
+        // LinkAddresses on the LinkProperties we establish in the first place (see agentConnect())
+        // and (2) CS doesn't do anything with LinkAddresses anyway (see updateLinkProperties()).
+        // TODO: Maybe fix this.
+        return success;
+    }
+
+    public synchronized boolean removeAddress(String address, int prefixLength) {
+        if (Binder.getCallingUid() != mOwnerUID || mInterface == null || mNetworkAgent == null) {
+            return false;
+        }
+        boolean success = jniDelAddress(mInterface, address, prefixLength);
+        // Ideally, we'd call mNetworkAgent.sendLinkProperties() here to notify ConnectivityService
+        // that the LinkAddress has changed. But we don't do so for two reasons: (1) We don't set
+        // LinkAddresses on the LinkProperties we establish in the first place (see agentConnect())
+        // and (2) CS doesn't do anything with LinkAddresses anyway (see updateLinkProperties()).
+        // TODO: Maybe fix this.
+        return success;
+    }
+
     private native int jniCreate(int mtu);
     private native String jniGetName(int tun);
     private native int jniSetAddresses(String interfaze, String addresses);
     private native void jniReset(String interfaze);
     private native int jniCheck(String interfaze);
+    private native boolean jniAddAddress(String interfaze, String address, int prefixLen);
+    private native boolean jniDelAddress(String interfaze, String address, int prefixLen);
 
     private static RouteInfo findIPv4DefaultRoute(LinkProperties prop) {
         for (RouteInfo route : prop.getAllRoutes()) {
