@@ -2514,6 +2514,14 @@
   <public type="style" name="Widget.Material.Button.Borderless.Colored" />
   <public type="style" name="Widget.Material.Light.Button.Borderless.Colored" />
 
+  <public-padding type="string" name="l_resource_pad" end="0x01040030" />
+
+  <public type="string" name="config_webSettingsDefaultTextEncoding" />
+
+  <public-padding type="array" name="l_resource_pad" end="0x01070020" />
+
+  <public type="array" name="config_keySystemUuidMapping" />
+
   <public-padding type="interpolator" name="l_resource_pad" end="0x010c0010" />
 
   <public type="style" name="Theme.Leanback.FormWizard"/>
@@ -2547,4 +2555,9 @@
   <!-- A transition that moves views in or out of the scene to or from the left edge when
        a view visibility changes. -->
   <public type="transition" name="slide_left"/>
+
+  <!-- WebView error page for when the load fails. @hide @SystemApi -->
+  <public type="raw" name="loaderror" id="0x01100000"/>
+  <!-- WebView error page for when domain lookup fails. @hide @SystemApi -->
+  <public type="raw" name="nodomain"/>
 </resources>

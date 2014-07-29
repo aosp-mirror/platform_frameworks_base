@@ -501,7 +501,6 @@
   <java-symbol type="string" name="db_default_sync_mode" />
   <java-symbol type="string" name="db_wal_sync_mode" />
   <java-symbol type="string" name="decline" />
-  <java-symbol type="string" name="default_text_encoding" />
   <java-symbol type="string" name="description_target_unlock_tablet" />
   <java-symbol type="string" name="display_manager_built_in_display_name" />
   <java-symbol type="string" name="display_manager_hdmi_display_name" />
