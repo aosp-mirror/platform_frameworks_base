@@ -22,7 +22,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Binder;
 import android.os.Process;
-import android.util.Log;
 import android.util.Slog;
 import android.webkit.IWebViewUpdateService;
 import android.webkit.WebViewFactory;
@@ -36,6 +35,7 @@ import com.android.server.SystemService;
 public class WebViewUpdateService extends SystemService {
 
     private static final String TAG = "WebViewUpdateService";
+    private static final int WAIT_TIMEOUT_MS = 5000; // Same as KEY_DISPATCHING_TIMEOUT.
 
     private boolean mRelroReady32Bit = false;
     private boolean mRelroReady64Bit = false;
@@ -66,7 +66,7 @@ public class WebViewUpdateService extends SystemService {
     }
 
     private void onWebViewUpdateInstalled() {
-        Log.d(TAG, "WebView Package updated!");
+        Slog.d(TAG, "WebView Package updated!");
 
         synchronized (this) {
             mRelroReady32Bit = false;
@@ -107,26 +107,28 @@ public class WebViewUpdateService extends SystemService {
          */
         @Override // Binder call
         public void waitForRelroCreationCompleted(boolean is64Bit) {
-            if (Binder.getCallingUid() == Process.SYSTEM_UID) {
-                Slog.wtf(TAG, "Trying to load WebView from the SystemServer",
-                         new IllegalStateException());
+            // The WebViewUpdateService depends on the prepareWebViewInSystemServer call, which
+            // happens later (during the PHASE_ACTIVITY_MANAGER_READY) in SystemServer.java. If
+            // another service there tries to bring up a WebView in the between, the wait below
+            // would deadlock without the check below.
+            if (Binder.getCallingPid() == Process.myPid()) {
+                throw new IllegalStateException("Cannot create a WebView from the SystemServer");
             }
 
+            final long NS_PER_MS = 1000000;
+            final long timeoutTimeMs = System.nanoTime() / NS_PER_MS + WAIT_TIMEOUT_MS;
+            boolean relroReady = false;
             synchronized (WebViewUpdateService.this) {
-                if (is64Bit) {
-                    while (!mRelroReady64Bit) {
-                        try {
-                            WebViewUpdateService.this.wait();
-                        } catch (InterruptedException e) {}
-                    }
-                } else {
-                    while (!mRelroReady32Bit) {
-                        try {
-                            WebViewUpdateService.this.wait();
-                        } catch (InterruptedException e) {}
-                    }
+                while (!relroReady) {
+                    final long timeNowMs = System.nanoTime() / NS_PER_MS;
+                    if (timeNowMs >= timeoutTimeMs) break;
+                    try {
+                        WebViewUpdateService.this.wait(timeoutTimeMs - timeNowMs);
+                    } catch (InterruptedException e) {}
+                    relroReady = (is64Bit ? mRelroReady64Bit : mRelroReady32Bit);
                 }
             }
+            if (!relroReady) Slog.w(TAG, "creating relro file timed out");
         }
     }
 

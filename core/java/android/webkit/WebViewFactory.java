@@ -279,7 +279,7 @@ public final class WebViewFactory {
             int pid = LocalServices.getService(ActivityManagerInternal.class).startIsolatedProcess(
                     RelroFileCreator.class.getName(), nativeLibraryPaths, "WebViewLoader-" + abi, abi,
                     Process.SHARED_RELRO_UID, crashHandler);
-            if (pid <= 0) throw new Exception("Failed to start the isolated process");
+            if (pid <= 0) throw new Exception("Failed to start the relro file creator process");
         } catch (Throwable t) {
             // Log and discard errors as we must not crash the system server.
             Log.e(LOGTAG, "error starting relro file creator for abi " + abi, t);
@@ -307,7 +307,7 @@ public final class WebViewFactory {
                                                args[1] /* path64 */,
                                                CHROMIUM_WEBVIEW_NATIVE_RELRO_32,
                                                CHROMIUM_WEBVIEW_NATIVE_RELRO_64);
-                if (DEBUG) Log.v(LOGTAG, "created relro file");
+                if (result && DEBUG) Log.v(LOGTAG, "created relro file");
             } finally {
                 // We must do our best to always notify the update service, even if something fails.
                 try {
