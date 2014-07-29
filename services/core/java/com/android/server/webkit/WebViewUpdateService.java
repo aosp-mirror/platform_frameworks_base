@@ -27,13 +27,13 @@ import android.util.Slog;
 import android.webkit.IWebViewUpdateService;
 import android.webkit.WebViewFactory;
 
+import com.android.server.SystemService;
+
 /**
  * Private service to wait for the updatable WebView to be ready for use.
  * @hide
  */
-// TODO This should be implemented using the new pattern for system services.
-// See comments in CL 509840.
-public class WebViewUpdateService extends IWebViewUpdateService.Stub {
+public class WebViewUpdateService extends SystemService {
 
     private static final String TAG = "WebViewUpdateService";
 
@@ -43,6 +43,11 @@ public class WebViewUpdateService extends IWebViewUpdateService.Stub {
     private BroadcastReceiver mWebViewUpdatedReceiver;
 
     public WebViewUpdateService(Context context) {
+        super(context);
+    }
+
+    @Override
+    public void onStart() {
         mWebViewUpdatedReceiver = new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
@@ -55,57 +60,9 @@ public class WebViewUpdateService extends IWebViewUpdateService.Stub {
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_PACKAGE_REPLACED);
         filter.addDataScheme("package");
-        context.registerReceiver(mWebViewUpdatedReceiver, filter);
-    }
+        getContext().registerReceiver(mWebViewUpdatedReceiver, filter);
 
-    /**
-     * The shared relro process calls this to notify us that it's done trying to create a relro
-     * file. This method gets called even if the relro creation has failed or the process crashed.
-     */
-    @Override // Binder call
-    public void notifyRelroCreationCompleted(boolean is64Bit, boolean success) {
-        // Verify that the caller is either the shared relro process (nominal case) or the system
-        // server (only in the case the relro process crashes and we get here via the crashHandler).
-        if (Binder.getCallingUid() != Process.SHARED_RELRO_UID &&
-                Binder.getCallingUid() != Process.SYSTEM_UID) {
-            return;
-        }
-
-        synchronized (this) {
-            if (is64Bit) {
-                mRelroReady64Bit = true;
-            } else {
-                mRelroReady32Bit = true;
-            }
-            this.notifyAll();
-        }
-    }
-
-    /**
-     * WebViewFactory calls this to block WebView loading until the relro file is created.
-     */
-    @Override // Binder call
-    public void waitForRelroCreationCompleted(boolean is64Bit) {
-        if (Binder.getCallingUid() == Process.SYSTEM_UID) {
-            Slog.wtf(TAG, "Trying to load WebView from the SystemServer",
-                     new IllegalStateException());
-        }
-
-        synchronized (this) {
-            if (is64Bit) {
-                while (!mRelroReady64Bit) {
-                    try {
-                        this.wait();
-                    } catch (InterruptedException e) {}
-                }
-            } else {
-                while (!mRelroReady32Bit) {
-                    try {
-                        this.wait();
-                    } catch (InterruptedException e) {}
-                }
-            }
-        }
+        publishBinderService("webviewupdate", new BinderService());
     }
 
     private void onWebViewUpdateInstalled() {
@@ -117,4 +74,61 @@ public class WebViewUpdateService extends IWebViewUpdateService.Stub {
         }
         WebViewFactory.prepareWebViewInSystemServer();
     }
+
+    private class BinderService extends IWebViewUpdateService.Stub {
+
+        /**
+         * The shared relro process calls this to notify us that it's done trying to create a relro
+         * file. This method gets called even if the relro creation has failed or the process
+         * crashed.
+         */
+        @Override // Binder call
+        public void notifyRelroCreationCompleted(boolean is64Bit, boolean success) {
+            // Verify that the caller is either the shared relro process (nominal case) or the
+            // system server (only in the case the relro process crashes and we get here via the
+            // crashHandler).
+            if (Binder.getCallingUid() != Process.SHARED_RELRO_UID &&
+                    Binder.getCallingUid() != Process.SYSTEM_UID) {
+                return;
+            }
+
+            synchronized (WebViewUpdateService.this) {
+                if (is64Bit) {
+                    mRelroReady64Bit = true;
+                } else {
+                    mRelroReady32Bit = true;
+                }
+                WebViewUpdateService.this.notifyAll();
+            }
+        }
+
+        /**
+         * WebViewFactory calls this to block WebView loading until the relro file is created.
+         */
+        @Override // Binder call
+        public void waitForRelroCreationCompleted(boolean is64Bit) {
+            if (Binder.getCallingUid() == Process.SYSTEM_UID) {
+                Slog.wtf(TAG, "Trying to load WebView from the SystemServer",
+                         new IllegalStateException());
+            }
+
+            synchronized (WebViewUpdateService.this) {
+                if (is64Bit) {
+                    while (!mRelroReady64Bit) {
+                        try {
+                            WebViewUpdateService.this.wait();
+                        } catch (InterruptedException e) {}
+                    }
+                } else {
+                    while (!mRelroReady32Bit) {
+                        try {
+                            WebViewUpdateService.this.wait();
+                        } catch (InterruptedException e) {}
+                    }
+                }
+            }
+        }
+
+    }
+
 }
