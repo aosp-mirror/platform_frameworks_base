@@ -19,10 +19,12 @@ package android.service.trust;
 import android.Manifest;
 import android.annotation.SdkConstant;
 import android.app.Service;
+import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -74,6 +76,12 @@ public class TrustAgentService extends Service {
      */
     public static final String TRUST_AGENT_META_DATA = "android.service.trust.trustagent";
 
+    /**
+     * A white list of features that the given trust agent should support when otherwise disabled
+     * by device policy.
+     */
+    public static final String KEY_FEATURES = "trust_agent_features";
+
     private static final int MSG_UNLOCK_ATTEMPT = 1;
 
     private static final boolean DEBUG = false;
@@ -121,6 +129,26 @@ public class TrustAgentService extends Service {
 
     private void onError(String msg) {
         Slog.v(TAG, "Remote exception while " + msg);
+    }
+
+    /**
+     * Called when device policy wants to restrict features in the TrustAgent in response to
+     * {@link DevicePolicyManager#setTrustAgentFeaturesEnabled(ComponentName, ComponentName, java.util.List) }.
+     * TrustAgents that support this feature should overload this method and return 'true'.
+     *
+     * The list of options can be obtained by calling
+     * options.getStringArrayList({@link #KEY_FEATURES}). Presence of a feature string in the list
+     * means it should be enabled ("white-listed"). Absence of the feature means it should be
+     * disabled. An empty list means all features should be disabled.
+     *
+     * This function is only called if {@link DevicePolicyManager#KEYGUARD_DISABLE_TRUST_AGENTS} is
+     * set.
+     *
+     * @param options Option feature bundle.
+     * @return true if the {@link #TrustAgentService()} supports this feature.
+     */
+    public boolean onSetTrustAgentFeaturesEnabled(Bundle options) {
+        return false;
     }
 
     /**
@@ -185,6 +213,7 @@ public class TrustAgentService extends Service {
                     .sendToTarget();
         }
 
+        @Override
         public void setCallback(ITrustAgentServiceCallback callback) {
             synchronized (mLock) {
                 mCallback = callback;
@@ -192,6 +221,13 @@ public class TrustAgentService extends Service {
                     mPendingGrantTrustTask.run();
                     mPendingGrantTrustTask = null;
                 }
+            }
+        }
+
+        @Override
+        public boolean setTrustAgentFeaturesEnabled(Bundle features) {
+            synchronized (mLock) {
+                return onSetTrustAgentFeaturesEnabled(features);
             }
         }
     }

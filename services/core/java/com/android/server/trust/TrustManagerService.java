@@ -169,7 +169,7 @@ public class TrustManagerService extends SystemService {
         for (UserInfo userInfo : userInfos) {
             int disabledFeatures = lockPatternUtils.getDevicePolicyManager()
                     .getKeyguardDisabledFeatures(null, userInfo.id);
-            boolean disableTrustAgents =
+            final boolean disableTrustAgents =
                     (disabledFeatures & DevicePolicyManager.KEYGUARD_DISABLE_TRUST_AGENTS) != 0;
 
             List<ComponentName> enabledAgents = lockPatternUtils.getEnabledTrustAgents(userInfo.id);
