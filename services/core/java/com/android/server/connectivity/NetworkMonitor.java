@@ -617,8 +617,11 @@ public class NetworkMonitor extends StateMachine {
         int httpResponseCode = 599;
         try {
             URL url = new URL(urlString);
+            // TODO: check that standard HttpURLConnection doesn't choke on
+            // cruel and unusual captive portals, and then replace the
+            // hand-rolled HTTP code in the else branch with this code.
             if (false) {
-                // TODO: Need to add URLConnection.setNetwork() before we can enable.
+                url = mNetworkAgentInfo.network.getBoundURL(url);
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setInstanceFollowRedirects(false);
                 urlConnection.setConnectTimeout(SOCKET_TIMEOUT_MS);
