@@ -234,10 +234,10 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     void updateActiveInput(int path, boolean notifyInputChange) {
         assertRunOnServiceThread();
         // Seq #15
-        int portId = mService.pathToPortId(path);
-        if (portId == getActivePortId()) {
+        if (path == getActivePath()) {
             return;
         }
+        int portId = mService.pathToPortId(path);
         setActivePath(path);
         setPrevPortId(portId);
         // TODO: Handle PAP/PIP case.
@@ -265,7 +265,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             invokeCallback(callback, HdmiControlManager.RESULT_SUCCESS);
             return;
         }
-        setActiveSource(Constants.ADDR_INVALID, Constants.INVALID_PHYSICAL_ADDRESS);
+        mActiveSource.invalidate();
         if (!mService.isControlEnabled()) {
             setActivePortId(portId);
             invokeCallback(callback, HdmiControlManager.RESULT_INCORRECT_MODE);
@@ -480,9 +480,9 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         byte[] params = message.getParams();
         int currentPath = HdmiUtils.twoBytesToInt(params);
         if (HdmiUtils.isAffectingActiveRoutingPath(getActivePath(), currentPath)) {
-            int newPath = HdmiUtils.twoBytesToInt(params, 2);
-            setActivePath(newPath);
+            mActiveSource.invalidate();
             removeAction(RoutingControlAction.class);
+            int newPath = HdmiUtils.twoBytesToInt(params, 2);
             addAndStartAction(new RoutingControlAction(this, newPath, true, null));
         }
         return true;
