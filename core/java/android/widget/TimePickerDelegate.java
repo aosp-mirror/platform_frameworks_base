@@ -20,6 +20,7 @@ import android.animation.Keyframe;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -79,7 +80,6 @@ class TimePickerDelegate extends TimePicker.AbstractTimePickerDelegate implement
     // Duration in ms of the pulse animation
     private static final int PULSE_ANIMATOR_DURATION = 544;
 
-    private final View mMainView;
     private TextView mHourView;
     private TextView mMinuteView;
     private TextView mAmPmTextView;
@@ -88,8 +88,6 @@ class TimePickerDelegate extends TimePicker.AbstractTimePickerDelegate implement
 
     private ViewGroup mLayoutButtons;
 
-    private int mHeaderSelectedColor;
-    private int mHeaderUnselectedColor;
     private String mAmText;
     private String mPmText;
 
@@ -128,7 +126,8 @@ class TimePickerDelegate extends TimePicker.AbstractTimePickerDelegate implement
         // process style attributes
         final TypedArray a = mContext.obtainStyledAttributes(attrs,
                 R.styleable.TimePicker, defStyleAttr, defStyleRes);
-
+        final LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(
+                Context.LAYOUT_INFLATER_SERVICE);
         final Resources res = mContext.getResources();
 
         mHourPickerDescription = res.getString(R.string.hour_picker_description);
@@ -136,53 +135,52 @@ class TimePickerDelegate extends TimePicker.AbstractTimePickerDelegate implement
         mMinutePickerDescription = res.getString(R.string.minute_picker_description);
         mSelectMinutes = res.getString(R.string.select_minutes);
 
-        mHeaderSelectedColor = a.getColor(R.styleable.TimePicker_headerSelectedTextColor,
-                res.getColor(R.color.timepicker_default_selector_color_material));
+        final int layoutResourceId = a.getResourceId(R.styleable.TimePicker_internalLayout,
+                R.layout.time_picker_holo);
+        final View mainView = inflater.inflate(layoutResourceId, null);
+        mDelegator.addView(mainView);
 
-        final int headerTimeTextAppearance = a.getResourceId(
-                R.styleable.TimePicker_headerTimeTextAppearance, 0);
-        final int headerAmPmTextAppearance = a.getResourceId(
-                R.styleable.TimePicker_headerAmPmTextAppearance, 0);
-        final int headerBackgroundColor = a.getColor(
-                R.styleable.TimePicker_headerBackgroundColor, Color.TRANSPARENT);
-        final int layoutResourceId = a.getResourceId(
-                R.styleable.TimePicker_internalLayout, R.layout.time_picker_holo);
-
-        a.recycle();
-
-        final LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(
-                Context.LAYOUT_INFLATER_SERVICE);
-
-        mMainView = inflater.inflate(layoutResourceId, null);
-        mDelegator.addView(mMainView);
-
-        mHourView = (TextView) mMainView.findViewById(R.id.hours);
-        mSeparatorView = (TextView) mMainView.findViewById(R.id.separator);
-        mMinuteView = (TextView) mMainView.findViewById(R.id.minutes);
-        mAmPmTextView = (TextView) mMainView.findViewById(R.id.ampm_label);
-        mLayoutButtons = (ViewGroup) mMainView.findViewById(R.id.layout_buttons);
+        mHourView = (TextView) mainView.findViewById(R.id.hours);
+        mSeparatorView = (TextView) mainView.findViewById(R.id.separator);
+        mMinuteView = (TextView) mainView.findViewById(R.id.minutes);
+        mAmPmTextView = (TextView) mainView.findViewById(R.id.ampm_label);
+        mLayoutButtons = (ViewGroup) mainView.findViewById(R.id.layout_buttons);
 
         // Set up text appearances from style.
+        final int headerTimeTextAppearance = a.getResourceId(
+                R.styleable.TimePicker_headerTimeTextAppearance, 0);
         if (headerTimeTextAppearance != 0) {
             mHourView.setTextAppearance(context, headerTimeTextAppearance);
             mSeparatorView.setTextAppearance(context, headerTimeTextAppearance);
             mMinuteView.setTextAppearance(context, headerTimeTextAppearance);
         }
 
+        final int headerSelectedTextColor = a.getColor(
+                R.styleable.TimePicker_headerSelectedTextColor,
+                res.getColor(R.color.timepicker_default_selector_color_material));
+        mHourView.setTextColor(ColorStateList.addFirstIfMissing(mHourView.getTextColors(),
+                R.attr.state_selected, headerSelectedTextColor));
+        mMinuteView.setTextColor(ColorStateList.addFirstIfMissing(mMinuteView.getTextColors(),
+                R.attr.state_selected, headerSelectedTextColor));
+
+        final int headerAmPmTextAppearance = a.getResourceId(
+                R.styleable.TimePicker_headerAmPmTextAppearance, 0);
         if (headerAmPmTextAppearance != 0) {
             mAmPmTextView.setTextAppearance(context, headerAmPmTextAppearance);
         }
 
+        final int headerBackgroundColor = a.getColor(
+                R.styleable.TimePicker_headerBackgroundColor, Color.TRANSPARENT);
         if (headerBackgroundColor != Color.TRANSPARENT) {
             mLayoutButtons.setBackgroundColor(headerBackgroundColor);
-            mMainView.findViewById(R.id.time_header).setBackgroundColor(headerBackgroundColor);
+            mainView.findViewById(R.id.time_header).setBackgroundColor(headerBackgroundColor);
         }
 
-        // Load unselected header color from current state.
-        mHeaderUnselectedColor = mHourView.getCurrentTextColor();
+        a.recycle();
 
-        mRadialTimePickerView = (RadialTimePickerView) mMainView.findViewById(R.id.radial_picker);
-        mDoneButton = (Button) mMainView.findViewById(R.id.done_button);
+        mRadialTimePickerView = (RadialTimePickerView) mainView.findViewById(
+                R.id.radial_picker);
+        mDoneButton = (Button) mainView.findViewById(R.id.done_button);
 
         String[] amPmTexts = new DateFormatSymbols().getAmPmStrings();
         mAmText = amPmTexts[0];
@@ -785,7 +783,6 @@ class TimePickerDelegate extends TimePicker.AbstractTimePickerDelegate implement
             separatorText = Character.toString(bestDateTimePattern.charAt(hIndex + 1));
         }
         mSeparatorView.setText(separatorText);
-        mSeparatorView.setTextColor(mHeaderUnselectedColor);
     }
 
     static private int lastIndexOfAny(String str, char[] any) {
@@ -839,10 +836,8 @@ class TimePickerDelegate extends TimePicker.AbstractTimePickerDelegate implement
             labelToAnimate = mMinuteView;
         }
 
-        int hourColor = (index == HOUR_INDEX) ? mHeaderSelectedColor : mHeaderUnselectedColor;
-        int minuteColor = (index == MINUTE_INDEX) ? mHeaderSelectedColor : mHeaderUnselectedColor;
-        mHourView.setTextColor(hourColor);
-        mMinuteView.setTextColor(minuteColor);
+        mHourView.setSelected(index == HOUR_INDEX);
+        mMinuteView.setSelected(index == MINUTE_INDEX);
 
         ObjectAnimator pulseAnimator = getPulseAnimator(labelToAnimate, 0.85f, 1.1f);
         if (delayLabelAnimate) {
@@ -1064,9 +1059,9 @@ class TimePickerDelegate extends TimePicker.AbstractTimePickerDelegate implement
             String minuteStr = (values[1] == -1) ? mDoublePlaceholderText :
                     String.format(minuteFormat, values[1]).replace(' ', mPlaceholderText);
             mHourView.setText(hourStr);
-            mHourView.setTextColor(mHeaderUnselectedColor);
+            mHourView.setSelected(false);
             mMinuteView.setText(minuteStr);
-            mMinuteView.setTextColor(mHeaderUnselectedColor);
+            mMinuteView.setSelected(false);
             if (!mIs24HourView) {
                 updateAmPmDisplay(values[2]);
             }
@@ -1143,8 +1138,7 @@ class TimePickerDelegate extends TimePicker.AbstractTimePickerDelegate implement
             }
         }
 
-        int[] ret = {hour, minute, amOrPm};
-        return ret;
+        return new int[] { hour, minute, amOrPm };
     }
 
     /**

@@ -24,6 +24,7 @@ import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -103,6 +104,8 @@ public class RadialTimePickerView extends View implements View.OnTouchListener {
     private static final int[] MINUTES_NUMBERS = {0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55};
 
     private static final int CENTER_RADIUS = 2;
+
+    private static final int[] STATE_SET_SELECTED = new int[] { R.attr.state_selected };
 
     private static int[] sSnapPrefer30sMap = new int[361];
 
@@ -323,10 +326,20 @@ public class RadialTimePickerView extends View implements View.OnTouchListener {
         final TypedArray a = mContext.obtainStyledAttributes(attrs, R.styleable.TimePicker,
                 defStyle, 0);
 
-        mAmPmUnselectedColor = a.getColor(R.styleable.TimePicker_amPmUnselectedBackgroundColor,
-                res.getColor(R.color.timepicker_default_ampm_unselected_background_color_material));
-        mAmPmSelectedColor = a.getColor(R.styleable.TimePicker_amPmSelectedBackgroundColor,
+        ColorStateList amPmBackgroundColor = a.getColorStateList(
+                R.styleable.TimePicker_amPmBackgroundColor);
+        if (amPmBackgroundColor == null) {
+            amPmBackgroundColor = res.getColorStateList(
+                    R.color.timepicker_default_ampm_unselected_background_color_material);
+        }
+
+        // Obtain the backup selected color. If the background color state
+        // list doesn't have a state for selected, we'll use this color.
+        final int amPmSelectedColor = a.getColor(R.styleable.TimePicker_amPmSelectedBackgroundColor,
                 res.getColor(R.color.timepicker_default_ampm_selected_background_color_material));
+        mAmPmSelectedColor = amPmBackgroundColor.getColorForState(
+                STATE_SET_SELECTED, amPmSelectedColor);
+        mAmPmUnselectedColor = amPmBackgroundColor.getDefaultColor();
 
         mAmPmTextColor = a.getColor(R.styleable.TimePicker_amPmTextColor,
                 res.getColor(R.color.timepicker_default_text_color_material));

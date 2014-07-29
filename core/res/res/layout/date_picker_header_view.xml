@@ -18,9 +18,6 @@
           android:id="@+id/date_picker_header"
           android:layout_width="@dimen/datepicker_component_width"
           android:layout_height="@dimen/datepicker_header_height"
-          android:background="?android:attr/datePickerHeaderDayOfWeekLabelBackgroundColor"
           android:gravity="center"
-          android:textAppearance="?android:attr/datePickerHeaderDayOfWeekLabelTextAppearance"
           android:importantForAccessibility="no"
-          android:textAllCaps="true"
-          />
+          android:textAllCaps="true" />

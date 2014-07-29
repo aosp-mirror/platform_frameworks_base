@@ -112,15 +112,14 @@ public class DatePickerDialog extends AlertDialog implements OnClickListener,
 
         Context themeContext = getContext();
 
-        LayoutInflater inflater =
-                (LayoutInflater) themeContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View view = inflater.inflate(R.layout.date_picker_dialog, null);
+        final LayoutInflater inflater = (LayoutInflater) themeContext.getSystemService(
+                Context.LAYOUT_INFLATER_SERVICE);
+        final View view = inflater.inflate(R.layout.date_picker_dialog, null);
         setView(view);
         setButtonPanelLayoutHint(LAYOUT_HINT_SIDE);
-        mDatePicker = (DatePicker) view.findViewById(R.id.datePicker);
 
         // Initialize state
-        mDatePicker.setLegacyMode(false, null);
+        mDatePicker = (DatePicker) view.findViewById(R.id.datePicker);
         mDatePicker.setShowDoneButton(true);
         mDatePicker.setDismissCallback(new DatePicker.DatePickerDismissCallback() {
             @Override

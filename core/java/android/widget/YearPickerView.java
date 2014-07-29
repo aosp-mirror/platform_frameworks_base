@@ -33,8 +33,6 @@ import com.android.internal.R;
  */
 class YearPickerView extends ListView implements AdapterView.OnItemClickListener,
         OnDateChangedListener {
-    private static final String TAG = "YearPickerView";
-
     private DatePickerController mController;
     private YearAdapter mAdapter;
     private int mViewSize;
@@ -57,11 +55,11 @@ class YearPickerView extends ListView implements AdapterView.OnItemClickListener
     public YearPickerView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
 
-        ViewGroup.LayoutParams frame = new ViewGroup.LayoutParams(LayoutParams.MATCH_PARENT,
-                LayoutParams.WRAP_CONTENT);
+        final LayoutParams frame = new LayoutParams(
+                LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
         setLayoutParams(frame);
 
-        Resources res = context.getResources();
+        final Resources res = context.getResources();
         mViewSize = res.getDimensionPixelOffset(R.dimen.datepicker_view_animator_height);
         mChildSize = res.getDimensionPixelOffset(R.dimen.datepicker_year_label_height);
 
@@ -73,11 +71,9 @@ class YearPickerView extends ListView implements AdapterView.OnItemClickListener
         setPadding(0, paddingTop, 0, 0);
 
         // Use Theme attributes if possible
-        final TypedArray a = context.obtainStyledAttributes(attrs,
-                R.styleable.DatePicker, defStyleAttr, defStyleRes);
-
-        final int colorResId = a.getResourceId(
-                R.styleable.DatePicker_dateSelectorYearListSelectedCircleColor,
+        final TypedArray a = context.obtainStyledAttributes(
+                attrs, R.styleable.DatePicker, defStyleAttr, defStyleRes);
+        final int colorResId = a.getResourceId(R.styleable.DatePicker_yearListSelectorColor,
                 R.color.datepicker_default_circle_background_color_holo_light);
         mYearSelectedCircleColor = res.getColor(colorResId);
 

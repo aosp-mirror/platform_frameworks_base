@@ -19,5 +19,4 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/datepicker_year_label_height"
         android:layout_gravity="center"
-        android:gravity="center"
-        android:textAppearance="?android:attr/datePickerHeaderListYearLabelTextAppearance" />
+        android:gravity="center" />

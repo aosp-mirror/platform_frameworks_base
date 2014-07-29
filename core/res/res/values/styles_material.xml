@@ -355,57 +355,30 @@ please see styles_device_defaults.xml.
 
     <style name="TextAppearance.Material.DatePicker.DayOfWeekLabel" parent="TextAppearance.Material">
         <item name="includeFontPadding">false</item>
-        <item name="textColor">@color/black</item>
+        <item name="textColor">?attr/textColorPrimary</item>
         <item name="textSize">@dimen/datepicker_header_text_size</item>
     </style>
 
-    <style name="TextAppearance.Material.DatePicker.Selector" parent="TextAppearance.Material">
+    <style name="TextAppearance.Material.DatePicker.MonthLabel" parent="TextAppearance.Material">
         <item name="includeFontPadding">false</item>
-        <item name="textColor">@color/date_picker_selector_material_dark</item>
-    </style>
-
-    <style name="TextAppearance.Material.DatePicker.Selector.MonthLabel" parent="TextAppearance.Material.DatePicker.Selector">
+        <item name="textColor">?attr/textColorPrimary</item> <!-- selected should be accent -->
         <item name="textSize">@dimen/datepicker_selected_date_month_size</item>
     </style>
 
-    <style name="TextAppearance.Material.DatePicker.Selector.DayOfMonthLabel" parent="TextAppearance.Material.DatePicker.Selector">
+    <style name="TextAppearance.Material.DatePicker.DayOfMonthLabel" parent="TextAppearance.Material">
+        <item name="includeFontPadding">false</item>
+        <item name="textColor">?attr/textColorPrimary</item> <!-- selected should be accent -->
         <item name="textSize">@dimen/datepicker_selected_date_day_size</item>
     </style>
 
-    <style name="TextAppearance.Material.DatePicker.Selector.YearLabel" parent="TextAppearance.Material.DatePicker.Selector">
+    <style name="TextAppearance.Material.DatePicker.YearLabel" parent="TextAppearance.Material">
+        <item name="includeFontPadding">false</item>
+        <item name="textColor">?attr/textColorPrimary</item> <!-- selected should be accent -->
         <item name="textSize">@dimen/datepicker_selected_date_year_size</item>
     </style>
 
     <style name="TextAppearance.Material.DatePicker.List.YearLabel" parent="TextAppearance.Material">
-        <item name="textColor">@color/date_picker_year_selector_material_dark</item>
-        <item name="textSize">@dimen/datepicker_year_label_text_size</item>
-    </style>
-
-    <style name="TextAppearance.Material.Light.DatePicker.DayOfWeekLabel" parent="TextAppearance.Material">
-        <item name="includeFontPadding">false</item>
-        <item name="textColor">@color/white</item>
-        <item name="textSize">@dimen/datepicker_header_text_size</item>
-    </style>
-
-    <style name="TextAppearance.Material.Light.DatePicker.Selector" parent="TextAppearance.Material">
-        <item name="includeFontPadding">false</item>
-        <item name="textColor">@color/date_picker_selector_material_light</item>
-    </style>
-
-    <style name="TextAppearance.Material.Light.DatePicker.Selector.MonthLabel" parent="TextAppearance.Material.Light.DatePicker.Selector">
-        <item name="textSize">@dimen/datepicker_selected_date_month_size</item>
-    </style>
-
-    <style name="TextAppearance.Material.Light.DatePicker.Selector.DayOfMonthLabel" parent="TextAppearance.Material.Light.DatePicker.Selector">
-        <item name="textSize">@dimen/datepicker_selected_date_day_size</item>
-    </style>
-
-    <style name="TextAppearance.Material.Light.DatePicker.Selector.YearLabel" parent="TextAppearance.Material.Light.DatePicker.Selector">
-        <item name="textSize">@dimen/datepicker_selected_date_year_size</item>
-    </style>
-
-    <style name="TextAppearance.Material.Light.DatePicker.List.YearLabel" parent="TextAppearance.Material">
-        <item name="textColor">@color/date_picker_year_selector_material_light</item>
+        <item name="textColor">?attr/textColorSecondary</item> <!-- selected should be accent -->
         <item name="textSize">@dimen/datepicker_year_label_text_size</item>
     </style>
 
@@ -618,6 +591,8 @@ please see styles_device_defaults.xml.
 
     <style name="Widget.Material.TimePicker" parent="Widget.TimePicker">
         <item name="legacyMode">false</item>
+        <item name="legacyLayout">@layout/time_picker_legacy_holo</item>
+        <!-- Attributes for new-style TimePicker. -->
         <item name="internalLayout">@layout/time_picker_holo</item>
         <item name="headerTimeTextAppearance">@style/TextAppearance.Material.TimePicker.TimeLabel</item>
         <item name="headerAmPmTextAppearance">@style/TextAppearance.Material.TimePicker.AmPmLabel</item>
@@ -626,24 +601,28 @@ please see styles_device_defaults.xml.
         <item name="numbersTextColor">?attr/textColorSecondary</item>
         <item name="numbersBackgroundColor">@color/transparent</item>
         <item name="amPmTextColor">?attr/textColorSecondary</item>
-        <item name="amPmUnselectedBackgroundColor">@color/transparent</item>
+        <item name="amPmBackgroundColor">@color/transparent</item>
         <item name="amPmSelectedBackgroundColor">?attr/colorControlActivated</item>
         <item name="numbersSelectorColor">?attr/colorControlActivated</item>
     </style>
 
     <style name="Widget.Material.DatePicker" parent="Widget.DatePicker">
+        <item name="legacyMode">false</item>
         <item name="legacyLayout">@layout/date_picker_legacy_holo</item>
+        <!-- Attributes for new-style DatePicker. -->
         <item name="internalLayout">@layout/date_picker_holo</item>
         <item name="calendarViewShown">true</item>
-        <item name="dateSelectorDayOfWeekBackgroundColor">?attr/datePickerHeaderDayOfWeekLabelBackgroundColor</item>
-        <item name="dateSelectorDayOfWeekTextAppearance">?attr/datePickerHeaderDayOfWeekLabelTextAppearance</item>
-        <item name="dateSelectorBackgroundColor">?attr/datePickerHeaderSelectorBackgroundColor</item>
-        <item name="dateSelectorMonthTextAppearance">?attr/datePickerHeaderSelectorMonthLabelTextAppearance</item>
-        <item name="dateSelectorDayOfMonthTextAppearance">?attr/datePickerHeaderSelectorDayOfMonthLabelTextAppearance</item>
-        <item name="dateSelectorYearTextAppearance">?attr/datePickerHeaderSelectorYearLabelTextAppearance</item>
-        <item name="dateSelectorYearListItemTextAppearance">?attr/datePickerHeaderListYearLabelTextAppearance</item>
-        <item name="dateSelectorYearListSelectedCircleColor">?attr/datePickerHeaderListYearLabelCircleBackgroundColor</item>
-        <item name="calendarTextColor">@color/date_picker_calendar_holo_dark</item>
+        <item name="dayOfWeekBackgroundColor">@color/transparent</item>
+        <item name="dayOfWeekTextAppearance">@style/TextAppearance.Material.DatePicker.DayOfWeekLabel</item>
+        <item name="headerMonthTextAppearance">@style/TextAppearance.Material.DatePicker.MonthLabel</item>
+        <item name="headerDayOfMonthTextAppearance">@style/TextAppearance.Material.DatePicker.DayOfMonthLabel</item>
+        <item name="headerYearTextAppearance">@style/TextAppearance.Material.DatePicker.YearLabel</item>
+        <item name="headerSelectedTextColor">?attr/colorControlActivated</item>
+        <item name="headerBackgroundColor">@color/transparent</item>
+        <item name="yearListItemTextAppearance">@style/TextAppearance.Material.DatePicker.List.YearLabel</item>
+        <item name="yearListSelectorColor">?attr/colorControlActivated</item>
+        <item name="calendarTextColor">?attr/textColorSecondary</item>
+        <item name="calendarSelectedTextColor">?attr/colorControlActivated</item>
     </style>
 
     <style name="Widget.Material.ActivityChooserView" parent="Widget.ActivityChooserView">
@@ -961,22 +940,7 @@ please see styles_device_defaults.xml.
 
     <style name="Widget.Material.Light.NumberPicker" parent="Widget.Material.NumberPicker"/>
     <style name="Widget.Material.Light.TimePicker" parent="Widget.Material.TimePicker" />
-
-    <style name="Widget.Material.Light.DatePicker" parent="Widget.DatePicker">
-        <item name="legacyLayout">@layout/date_picker_legacy_holo</item>
-        <item name="internalLayout">@layout/date_picker_holo</item>
-        <item name="calendarViewShown">true</item>
-        <item name="dateSelectorDayOfWeekBackgroundColor">?attr/datePickerHeaderDayOfWeekLabelBackgroundColor</item>
-        <item name="dateSelectorDayOfWeekTextAppearance">?attr/datePickerHeaderDayOfWeekLabelTextAppearance</item>
-        <item name="dateSelectorBackgroundColor">?attr/datePickerHeaderSelectorBackgroundColor</item>
-        <item name="dateSelectorMonthTextAppearance">?attr/datePickerHeaderSelectorMonthLabelTextAppearance</item>
-        <item name="dateSelectorDayOfMonthTextAppearance">?attr/datePickerHeaderSelectorDayOfMonthLabelTextAppearance</item>
-        <item name="dateSelectorYearTextAppearance">?attr/datePickerHeaderSelectorYearLabelTextAppearance</item>
-        <item name="dateSelectorYearListItemTextAppearance">?attr/datePickerHeaderListYearLabelTextAppearance</item>
-        <item name="dateSelectorYearListSelectedCircleColor">?attr/datePickerHeaderListYearLabelCircleBackgroundColor</item>
-        <item name="calendarTextColor">@color/date_picker_calendar_holo_light</item>
-    </style>
-
+    <style name="Widget.Material.Light.DatePicker" parent="Widget.Material.DatePicker" />
     <style name="Widget.Material.Light.ActivityChooserView" parent="Widget.Material.ActivityChooserView" />
     <style name="Widget.Material.Light.ImageWell" parent="Widget.Material.ImageWell"/>
     <style name="Widget.Material.Light.ListView" parent="Widget.Material.ListView"/>
