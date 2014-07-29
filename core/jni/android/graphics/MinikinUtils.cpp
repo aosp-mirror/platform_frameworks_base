@@ -44,25 +44,25 @@ void MinikinUtils::doLayout(Layout* layout, const Paint* paint, int bidiFlags, T
         const uint16_t* buf, size_t start, size_t count, size_t bufSize) {
     TypefaceImpl* resolvedFace = TypefaceImpl_resolveDefault(typeface);
     layout->setFontCollection(resolvedFace->fFontCollection);
-    FontStyle style = resolvedFace->fStyle;
-    char css[512];
-    int off = snprintfcat(css, 0, sizeof(css),
-        "font-size: %d; font-scale-x: %f; font-skew-x: %f; -paint-flags: %d;"
-        " font-weight: %d; font-style: %s; -minikin-bidi: %d; letter-spacing: %f;",
-        (int)paint->getTextSize(),
-        paint->getTextScaleX(),
-        paint->getTextSkewX(),
-        MinikinFontSkia::packPaintFlags(paint),
-        style.getWeight() * 100,
-        style.getItalic() ? "italic" : "normal",
-        bidiFlags,
-        paint->getLetterSpacing());
-    SkString langString = paint->getPaintOptionsAndroid().getLanguage().getTag();
-    off = snprintfcat(css, off, sizeof(css), " lang: %s;", langString.c_str());
+    FontStyle resolved = resolvedFace->fStyle;
+
+    /* Prepare minikin FontStyle */
+    SkString langStr = paint->getPaintOptionsAndroid().getLanguage().getTag();
+    FontLanguage minikinLang(langStr.c_str(), langStr.size());
     SkPaintOptionsAndroid::FontVariant var = paint->getPaintOptionsAndroid().getFontVariant();
-    const char* varstr = var == SkPaintOptionsAndroid::kElegant_Variant ? "elegant" : "compact";
-    off = snprintfcat(css, off, sizeof(css), " -minikin-variant: %s;", varstr);
-    layout->doLayout(buf, start, count, bufSize, std::string(css));
+    FontVariant minikinVariant = var == SkPaintOptionsAndroid::kElegant_Variant ? VARIANT_ELEGANT
+            : VARIANT_COMPACT;
+    FontStyle minikinStyle(minikinLang, minikinVariant, resolved.getWeight(), resolved.getItalic());
+
+    /* Prepare minikin Paint */
+    MinikinPaint minikinPaint;
+    minikinPaint.size = (int)/*WHY?!*/paint->getTextSize();
+    minikinPaint.scaleX = paint->getTextScaleX();
+    minikinPaint.skewX = paint->getTextSkewX();
+    minikinPaint.letterSpacing = paint->getLetterSpacing();
+    minikinPaint.paintFlags = MinikinFontSkia::packPaintFlags(paint);
+
+    layout->doLayout(buf, start, count, bufSize, bidiFlags, minikinStyle, minikinPaint);
 }
 
 float MinikinUtils::xOffsetForTextAlign(Paint* paint, const Layout& layout) {
