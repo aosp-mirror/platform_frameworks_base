@@ -861,7 +861,7 @@ static JNINativeMethod gMethods[] = {
 
     {"_setDataSource",       "(Ljava/io/FileDescriptor;JJ)V",    (void *)android_media_MediaPlayer_setDataSourceFD},
     {"_setVideoSurface",    "(Landroid/view/Surface;)V",        (void *)android_media_MediaPlayer_setVideoSurface},
-    {"prepare",             "()V",                              (void *)android_media_MediaPlayer_prepare},
+    {"_prepare",            "()V",                              (void *)android_media_MediaPlayer_prepare},
     {"prepareAsync",        "()V",                              (void *)android_media_MediaPlayer_prepareAsync},
     {"_start",              "()V",                              (void *)android_media_MediaPlayer_start},
     {"_stop",               "()V",                              (void *)android_media_MediaPlayer_stop},
