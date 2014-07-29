@@ -19,6 +19,7 @@ package android.hardware.camera2.utils;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.hardware.camera2.CaptureRequest;
 import android.util.Rational;
 import android.util.Size;
 
@@ -173,6 +174,24 @@ public class ParamsUtils {
         destination.right = source.right;
         destination.bottom = source.bottom;
         destination.top = source.top;
+    }
+
+    /**
+     * Return the value set by the key, or the {@code defaultValue} if no value was set.
+     *
+     * @throws NullPointerException if any of the args were {@code null}
+     */
+    public static <T> T getOrDefault(CaptureRequest r, CaptureRequest.Key<T> key, T defaultValue) {
+        checkNotNull(r, "r must not be null");
+        checkNotNull(key, "key must not be null");
+        checkNotNull(defaultValue, "defaultValue must not be null");
+
+        T value = r.get(key);
+        if (value == null) {
+            return defaultValue;
+        } else {
+            return value;
+        }
     }
 
     private ParamsUtils() {
