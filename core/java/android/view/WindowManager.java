@@ -1020,7 +1020,7 @@ public interface WindowManager extends ViewManager {
                     name = "FLAG_TRANSLUCENT_NAVIGATION"),
             @ViewDebug.FlagToString(mask = FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS, equals = FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS,
                     name = "FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS")
-        })
+        }, formatToHexString = true)
         public int flags;
 
         /**
