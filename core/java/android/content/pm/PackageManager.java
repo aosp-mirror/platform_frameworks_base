@@ -3770,6 +3770,15 @@ public abstract class PackageManager {
      */
     public abstract void addCrossProfileIntentsForPackage(String packageName,
             int sourceUserId, int targetUserId);
+
+    /**
+     * Removes all intents for {@link packageName} for user {@link sourceUserId} to user
+     * {@link targetUserId}.
+     * @hide
+     */
+    public abstract void removeCrossProfileIntentsForPackage(String packageName,
+            int sourceUserId, int targetUserId);
+
     /**
      * @hide
      */
