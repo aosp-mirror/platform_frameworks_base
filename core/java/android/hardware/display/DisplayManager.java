@@ -198,10 +198,14 @@ public final class DisplayManager {
      * VIRTUAL_DISPLAY_FLAG_PRIVATE.  Other flags are not allowed (especially
      * not VIRTUAL_DISPLAY_FLAG_PUBLIC or PRESENTATION).
      *
+     * <p>
      * Requires screen share permission for use.
+     * </p>
      *
+     * <p>
      * While a display of this type exists, the system will show some sort of
      * notification to the user indicating that the screen is being shared.
+     * </p>
      *
      * @see #createVirtualDisplay
      */
