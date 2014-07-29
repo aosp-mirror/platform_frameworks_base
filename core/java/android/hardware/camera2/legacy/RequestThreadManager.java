@@ -674,7 +674,7 @@ public class RequestThreadManager {
                         }
 
                         CameraMetadataNative result = mMapper.cachedConvertResultMetadata(
-                                mLastRequest, timestampMutable.value, holder.getFrameNumber());
+                                mLastRequest, timestampMutable.value);
                         // Update AF state
                         mFocusStateMapper.mapResultTriggers(result);
 
