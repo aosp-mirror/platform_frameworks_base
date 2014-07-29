@@ -17,9 +17,7 @@
 package android.view;
 
 import android.animation.AnimatorInflater;
-import android.animation.RevealAnimator;
 import android.animation.StateListAnimator;
-import android.animation.ValueAnimator;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -3518,6 +3516,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private static final AtomicInteger sNextGeneratedId = new AtomicInteger(1);
 
     private int[] mTempNestedScrollConsumed;
+
+    /**
+     * An overlay is going to draw this View instead of being drawn as part of this
+     * View's parent. mGhostView is the View in the Overlay that must be invalidated
+     * when this view is invalidated.
+     */
+    GhostView mGhostView;
 
     /**
      * Simple constructor to use when creating a view from code.
@@ -10284,6 +10289,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @hide
      */
+    @ViewDebug.ExportedProperty(category = "drawing")
     public float getTransitionAlpha() {
         return mTransformationInfo != null ? mTransformationInfo.mTransitionAlpha : 1;
     }
@@ -11371,6 +11377,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     void invalidateInternal(int l, int t, int r, int b, boolean invalidateCache,
             boolean fullInvalidate) {
+        if (mGhostView != null) {
+            mGhostView.invalidate(invalidateCache);
+            return;
+        }
+
         if (skipInvalidate()) {
             return;
         }
@@ -11408,7 +11419,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 }
             }
 
-            // Damage the entire IsolatedZVolume recieving this view's shadow.
+            // Damage the entire IsolatedZVolume receiving this view's shadow.
             if (isHardwareAccelerated() && getZ() != 0) {
                 damageShadowReceiver();
             }
@@ -19397,6 +19408,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return The name used of the View to be used to identify Views in Transitions or null
      * if no name has been given.
      */
+    @ViewDebug.ExportedProperty
     public String getTransitionName() {
         return mTransitionName;
     }
