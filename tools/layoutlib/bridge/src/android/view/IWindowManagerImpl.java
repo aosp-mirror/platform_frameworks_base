@@ -360,7 +360,7 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
-    public void updateScreenCaptureDisabled(int userId) {
+    public void setScreenCaptureDisabled(int userId, boolean disabled) {
         // TODO Auto-generated method stub
     }
 
