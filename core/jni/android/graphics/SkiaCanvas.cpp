@@ -30,8 +30,6 @@
 #include "SkTArray.h"
 #include "SkTemplates.h"
 
-#include <minikin/Layout.h>
-#include "MinikinSkia.h"
 #include "MinikinUtils.h"
 
 #include "TypefaceImpl.h"

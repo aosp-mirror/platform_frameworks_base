@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+#ifndef ANDROID_MINIKIN_SKIA_H
+#define ANDROID_MINIKIN_SKIA_H
+
+#include <minikin/MinikinFont.h>
+
 namespace android {
 
 class MinikinFontSkia : public MinikinFont {
@@ -48,3 +53,5 @@ private:
 };
 
 }  // namespace android
+
+#endif  // ANDROID_MINIKIN_SKIA_H
