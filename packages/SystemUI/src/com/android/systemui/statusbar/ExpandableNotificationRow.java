@@ -62,7 +62,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     /**
      * Resets this view so it can be re-used for an updated notification.
      */
+    @Override
     public void reset() {
+        super.reset();
         mRowMinHeight = 0;
         mRowMaxHeight = 0;
         mExpandable = false;
