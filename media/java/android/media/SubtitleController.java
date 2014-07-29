@@ -420,6 +420,19 @@ public class SubtitleController {
         }
     }
 
+    /** @hide */
+    public boolean hasRendererFor(MediaFormat format) {
+        synchronized(mRenderers) {
+            // TODO how to get available renderers in the system
+            for (Renderer renderer: mRenderers) {
+                if (renderer.supports(format)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
     /**
      * Subtitle anchor, an object that is able to display a subtitle renderer,
      * e.g. a VideoView.

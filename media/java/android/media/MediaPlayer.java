@@ -18,6 +18,7 @@ package android.media;
 
 import android.app.ActivityThread;
 import android.app.AppOpsManager;
+import android.app.Application;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -36,6 +37,8 @@ import android.os.Process;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.system.ErrnoException;
+import android.system.OsConstants;
 import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
@@ -44,15 +47,22 @@ import android.media.AudioManager;
 import android.media.MediaFormat;
 import android.media.MediaTimeProvider;
 import android.media.SubtitleController;
+import android.media.SubtitleController.Anchor;
 import android.media.SubtitleData;
+import android.media.SubtitleTrack.RenderingWidget;
 
 import com.android.internal.app.IAppOpsService;
 
+import libcore.io.IoBridge;
+import libcore.io.Libcore;
+
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.Runnable;
 import java.net.InetSocketAddress;
 import java.util.Map;
@@ -1846,7 +1856,10 @@ public class MediaPlayer implements SubtitleController.Listener
         System.arraycopy(trackInfo, 0, allTrackInfo, 0, trackInfo.length);
         int i = trackInfo.length;
         for (SubtitleTrack track: mOutOfBandSubtitleTracks) {
-            allTrackInfo[i] = new TrackInfo(TrackInfo.MEDIA_TRACK_TYPE_SUBTITLE, track.getFormat());
+            int type = track.isTimedText()
+                    ? TrackInfo.MEDIA_TRACK_TYPE_TIMEDTEXT
+                    : TrackInfo.MEDIA_TRACK_TYPE_SUBTITLE;
+            allTrackInfo[i] = new TrackInfo(type, track.getFormat());
             ++i;
         }
         return allTrackInfo;
@@ -1891,7 +1904,7 @@ public class MediaPlayer implements SubtitleController.Listener
      * A helper function to check if the mime type is supported by media framework.
      */
     private static boolean availableMimeTypeForExternalSource(String mimeType) {
-        if (mimeType == MEDIA_MIMETYPE_TEXT_SUBRIP) {
+        if (MEDIA_MIMETYPE_TEXT_SUBRIP.equals(mimeType)) {
             return true;
         }
         return false;
@@ -2147,27 +2160,97 @@ public class MediaPlayer implements SubtitleController.Listener
      * @throws IllegalArgumentException if the mimeType is not supported.
      * @throws IllegalStateException if called in an invalid state.
      */
-    public void addTimedTextSource(FileDescriptor fd, long offset, long length, String mimeType)
+    public void addTimedTextSource(FileDescriptor fd, long offset, long length, String mime)
             throws IllegalArgumentException, IllegalStateException {
-        if (!availableMimeTypeForExternalSource(mimeType)) {
-            throw new IllegalArgumentException("Illegal mimeType for timed text source: " + mimeType);
-
+        if (!availableMimeTypeForExternalSource(mime)) {
+            throw new IllegalArgumentException("Illegal mimeType for timed text source: " + mime);
         }
 
-        Parcel request = Parcel.obtain();
-        Parcel reply = Parcel.obtain();
+        FileDescriptor fd2;
         try {
-            request.writeInterfaceToken(IMEDIA_PLAYER);
-            request.writeInt(INVOKE_ID_ADD_EXTERNAL_SOURCE_FD);
-            request.writeFileDescriptor(fd);
-            request.writeLong(offset);
-            request.writeLong(length);
-            request.writeString(mimeType);
-            invoke(request, reply);
-        } finally {
-            request.recycle();
-            reply.recycle();
+            fd2 = Libcore.os.dup(fd);
+        } catch (ErrnoException ex) {
+            Log.e(TAG, ex.getMessage(), ex);
+            throw new RuntimeException(ex);
         }
+
+        final MediaFormat fFormat = new MediaFormat();
+        fFormat.setString(MediaFormat.KEY_MIME, mime);
+        fFormat.setInteger(MediaFormat.KEY_IS_TIMED_TEXT, 1);
+
+        Context context = ActivityThread.currentApplication();
+        // A MediaPlayer created by a VideoView should already have its mSubtitleController set.
+        if (mSubtitleController == null) {
+            mSubtitleController = new SubtitleController(context, mTimeProvider, this);
+            mSubtitleController.setAnchor(new Anchor() {
+                @Override
+                public void setSubtitleWidget(RenderingWidget subtitleWidget) {
+                }
+
+                @Override
+                public Looper getSubtitleLooper() {
+                    return Looper.getMainLooper();
+                }
+            });
+        }
+
+        if (!mSubtitleController.hasRendererFor(fFormat)) {
+            // test and add not atomic
+            mSubtitleController.registerRenderer(new SRTRenderer(context, mEventHandler));
+        }
+        final SubtitleTrack track = mSubtitleController.addTrack(fFormat);
+        mOutOfBandSubtitleTracks.add(track);
+
+        final FileDescriptor fd3 = fd2;
+        final long offset2 = offset;
+        final long length2 = length;
+        final HandlerThread thread = new HandlerThread(
+                "TimedTextReadThread",
+                Process.THREAD_PRIORITY_BACKGROUND + Process.THREAD_PRIORITY_MORE_FAVORABLE);
+        thread.start();
+        Handler handler = new Handler(thread.getLooper());
+        handler.post(new Runnable() {
+            private int addTrack() {
+                InputStream is = null;
+                final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                try {
+                    Libcore.os.lseek(fd3, offset2, OsConstants.SEEK_SET);
+                    byte[] buffer = new byte[4096];
+                    for (int total = 0; total < length2;) {
+                        int remain = (int)length2 - total;
+                        int bytes = IoBridge.read(fd3, buffer, 0, Math.min(buffer.length, remain));
+                        if (bytes < 0) {
+                            break;
+                        } else {
+                            bos.write(buffer, 0, bytes);
+                            total += bytes;
+                        }
+                    }
+                    track.onData(bos.toByteArray(), true /* eos */, ~0 /* runID: keep forever */);
+                    return MEDIA_INFO_EXTERNAL_METADATA_UPDATE;
+                } catch (Exception e) {
+                    Log.e(TAG, e.getMessage(), e);
+                    return MEDIA_INFO_TIMED_TEXT_ERROR;
+                } finally {
+                    if (is != null) {
+                        try {
+                            is.close();
+                        } catch (IOException e) {
+                            Log.e(TAG, e.getMessage(), e);
+                        }
+                    }
+                }
+            }
+
+            public void run() {
+                int res = addTrack();
+                if (mEventHandler != null) {
+                    Message m = mEventHandler.obtainMessage(MEDIA_INFO, res, 0, null);
+                    mEventHandler.sendMessage(m);
+                }
+                thread.getLooper().quitSafely();
+            }
+        });
     }
 
     /**
@@ -2275,6 +2358,13 @@ public class MediaPlayer implements SubtitleController.Listener
 
         if (mSubtitleController != null && track != null) {
             if (select) {
+                if (track.isTimedText()) {
+                    int ttIndex = getSelectedTrack(TrackInfo.MEDIA_TRACK_TYPE_TIMEDTEXT);
+                    if (ttIndex >= 0 && ttIndex < mInbandSubtitleTracks.length) {
+                        // deselect inband counterpart
+                        selectOrDeselectInbandTrack(ttIndex, false);
+                    }
+                }
                 mSubtitleController.selectTrack(track);
             } else if (mSubtitleController.getSelectedTrack() == track) {
                 mSubtitleController.selectTrack(null);
