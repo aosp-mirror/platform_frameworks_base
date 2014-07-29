@@ -120,6 +120,10 @@ private:
                             char* buffer,
                             const char* runtimeArg,
                             const char* defaultArg = "");
+    bool parseCompilerOption(const char* property,
+                             char* buffer,
+                             const char* compilerArg,
+                             const char* quotingArg);
     bool parseCompilerRuntimeOption(const char* property,
                                     char* buffer,
                                     const char* runtimeArg,

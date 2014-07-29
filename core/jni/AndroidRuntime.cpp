@@ -469,6 +469,42 @@ bool AndroidRuntime::parseRuntimeOption(const char* property,
 
 /*
  * Reads a "property" into "buffer". If the property is non-empty, it
+ * is treated as a dex2oat compiler option that should be
+ * passed as a quoted option, e.g. "-Ximage-compiler-option --compiler-filter=verify-none".
+ *
+ * The "compilerArg" is a prefix for the option such as "--compiler-filter=".
+ *
+ * The "quotingArg" should be "-Ximage-compiler-option" or "-Xcompiler-option".
+ *
+ * If an option is found, it is added to mOptions and true is
+ * returned. Otherwise false is returned.
+ */
+bool AndroidRuntime::parseCompilerOption(const char* property,
+                                         char* buffer,
+                                         const char* compilerArg,
+                                         const char* quotingArg)
+{
+    strcpy(buffer, compilerArg);
+    size_t compilerArgLen = strlen(compilerArg);
+    property_get(property, buffer+compilerArgLen, "");
+    if (buffer[compilerArgLen] == '\0') {
+        return false;
+    }
+
+    JavaVMOption opt;
+    memset(&opt, 0, sizeof(opt));
+
+    opt.optionString = quotingArg;
+    mOptions.add(opt);
+
+    opt.optionString = buffer;
+    mOptions.add(opt);
+
+    return true;
+}
+
+/*
+ * Reads a "property" into "buffer". If the property is non-empty, it
  * is treated as a dex2oat compiler runtime option that should be
  * passed as a quoted option, e.g. "-Ximage-compiler-option
  * --runtime-arg -Ximage-compiler-option -Xmx32m".
@@ -550,6 +586,8 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     char dex2oatXmxImageFlagsBuf[sizeof("-Xmx")-1 + PROPERTY_VALUE_MAX];
     char dex2oatXmsFlagsBuf[sizeof("-Xms")-1 + PROPERTY_VALUE_MAX];
     char dex2oatXmxFlagsBuf[sizeof("-Xmx")-1 + PROPERTY_VALUE_MAX];
+    char dex2oatCompilerFilterBuf[sizeof("--compiler-filter=")-1 + PROPERTY_VALUE_MAX];
+    char dex2oatImageCompilerFilterBuf[sizeof("--compiler-filter=")-1 + PROPERTY_VALUE_MAX];
     char dex2oatFlagsBuf[PROPERTY_VALUE_MAX];
     char dex2oatImageFlagsBuf[PROPERTY_VALUE_MAX];
     char extraOptsBuf[PROPERTY_VALUE_MAX];
@@ -786,6 +824,8 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
                                    "-Xms", "-Ximage-compiler-option");
         parseCompilerRuntimeOption("dalvik.vm.image-dex2oat-Xmx", dex2oatXmxImageFlagsBuf,
                                    "-Xmx", "-Ximage-compiler-option");
+        parseCompilerOption("dalvik.vm.image-dex2oat-filter", dex2oatImageCompilerFilterBuf,
+                            "--compiler-filter=", "-Ximage-compiler-option");
         property_get("dalvik.vm.image-dex2oat-flags", dex2oatImageFlagsBuf, "");
         parseExtraOpts(dex2oatImageFlagsBuf, "-Ximage-compiler-option");
 
@@ -794,6 +834,8 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
                                    "-Xms", "-Xcompiler-option");
         parseCompilerRuntimeOption("dalvik.vm.dex2oat-Xmx", dex2oatXmxFlagsBuf,
                                    "-Xmx", "-Xcompiler-option");
+        parseCompilerOption("dalvik.vm.dex2oat-filter", dex2oatCompilerFilterBuf,
+                            "--compiler-filter=", "-Xcompiler-option");
         property_get("dalvik.vm.dex2oat-flags", dex2oatFlagsBuf, "");
         parseExtraOpts(dex2oatFlagsBuf, "-Xcompiler-option");
     }
