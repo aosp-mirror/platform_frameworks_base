@@ -1742,12 +1742,12 @@ void OpenGLRenderer::setupDrawProgram() {
     if (mDescription.hasRoundRectClip) {
         // TODO: avoid doing this repeatedly, stashing state pointer in program
         const RoundRectClipState* state = mSnapshot->roundRectClipState;
-        const Rect& innerRect = state->outlineInnerRect;
+        const Rect& innerRect = state->innerRect;
         glUniform4f(mCaches.currentProgram->getUniform("roundRectInnerRectLTRB"),
-                innerRect.left,  innerRect.top,
-                innerRect.right,  innerRect.bottom);
+                innerRect.left, innerRect.top,
+                innerRect.right, innerRect.bottom);
         glUniform1f(mCaches.currentProgram->getUniform("roundRectRadius"),
-                state->outlineRadius);
+                state->radius);
         glUniformMatrix4fv(mCaches.currentProgram->getUniform("roundRectInvTransform"),
                 1, GL_FALSE, &state->matrix.data[0]);
     }
