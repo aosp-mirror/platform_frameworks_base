@@ -219,9 +219,9 @@ public final class InCallAdapter {
      * @param callId The unique ID of the call.
      * @hide
      */
-    public void conference(String callId) {
+    public void conference(String callId, String otherCallId) {
         try {
-            mAdapter.conference(callId);
+            mAdapter.conference(callId, otherCallId);
         } catch (RemoteException ignored) {
         }
     }

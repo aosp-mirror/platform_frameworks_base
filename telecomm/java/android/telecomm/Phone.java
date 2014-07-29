@@ -100,7 +100,7 @@ public final class Phone {
         mCallByTelecommCallId.put(parcelableCall.getId(), call);
         mCalls.add(call);
         checkCallTree(parcelableCall);
-        call.internalUpdate(parcelableCall);
+        call.internalUpdate(parcelableCall, mCallByTelecommCallId);
         fireCallAdded(call);
      }
 
@@ -116,7 +116,7 @@ public final class Phone {
          Call call = mCallByTelecommCallId.get(parcelableCall.getId());
          if (call != null) {
              checkCallTree(parcelableCall);
-             call.internalUpdate(parcelableCall);
+             call.internalUpdate(parcelableCall, mCallByTelecommCallId);
          }
      }
 
