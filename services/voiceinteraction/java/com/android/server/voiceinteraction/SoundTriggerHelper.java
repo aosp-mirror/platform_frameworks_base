@@ -129,7 +129,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         if (oldListener != null && oldListener.asBinder() != listener.asBinder()) {
             Slog.w(TAG, "Canceling previous recognition");
             try {
-                oldListener.onDetectionStopped();
+                oldListener.onError(STATUS_ERROR);
             } catch (RemoteException e) {
                 Slog.w(TAG, "RemoteException in onDetectionStopped");
             }
@@ -235,7 +235,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
                 try {
                     synchronized (this) {
                         for (int i = 0; i < mActiveListeners.size(); i++) {
-                            mActiveListeners.valueAt(i).onDetectionStopped();
+                            mActiveListeners.valueAt(i).onError(STATUS_ERROR);
                         }
                     }
                 } catch (RemoteException e) {
@@ -279,7 +279,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         synchronized (this) {
             try {
                 for (int i = 0; i < mActiveListeners.size(); i++) {
-                    mActiveListeners.valueAt(i).onDetectionStopped();
+                    mActiveListeners.valueAt(i).onError(SoundTrigger.STATUS_DEAD_OBJECT);
                 }
             } catch (RemoteException e) {
                 Slog.w(TAG, "RemoteException in onDetectionStopped");
