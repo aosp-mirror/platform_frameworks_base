@@ -818,6 +818,17 @@ public class WifiConfiguration implements Parcelable {
                 append(" BSSID: ").append(this.BSSID).append(" FQDN: ").append(this.FQDN).
                 append(" REALM: ").append(this.naiRealm).append(" PRIO: ").append(this.priority).
                 append('\n');
+        if (this.numConnectionFailures > 0) {
+            sbuf.append(" numConnectFailures ").append(this.numConnectionFailures).append("\n");
+        }
+        if (this.autoJoinStatus > 0) {
+            sbuf.append(" autoJoinStatus ").append(this.numConnectionFailures).append("\n");
+        }
+        if (this.didSelfAdd || this.selfAdded) {
+            if (this.didSelfAdd) sbuf.append(" didSelfAdd ");
+            if (this.selfAdded) sbuf.append(" selfAdded ");
+            sbuf.append("\n");
+        }
         sbuf.append(" KeyMgmt:");
         for (int k = 0; k < this.allowedKeyManagement.size(); k++) {
             if (this.allowedKeyManagement.get(k)) {
