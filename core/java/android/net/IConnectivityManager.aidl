@@ -163,4 +163,7 @@ interface IConnectivityManager
     void releaseNetworkRequest(in NetworkRequest networkRequest);
 
     int getRestoreDefaultNetworkDelay(int networkType);
+
+    boolean addVpnAddress(String address, int prefixLength);
+    boolean removeVpnAddress(String address, int prefixLength);
 }

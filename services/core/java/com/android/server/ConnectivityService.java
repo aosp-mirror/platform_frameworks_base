@@ -5351,4 +5351,22 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
         return new NetworkCapabilities();
     }
+
+    @Override
+    public boolean addVpnAddress(String address, int prefixLength) {
+        throwIfLockdownEnabled();
+        int user = UserHandle.getUserId(Binder.getCallingUid());
+        synchronized (mVpns) {
+            return mVpns.get(user).addAddress(address, prefixLength);
+        }
+    }
+
+    @Override
+    public boolean removeVpnAddress(String address, int prefixLength) {
+        throwIfLockdownEnabled();
+        int user = UserHandle.getUserId(Binder.getCallingUid());
+        synchronized (mVpns) {
+            return mVpns.get(user).removeAddress(address, prefixLength);
+        }
+    }
 }

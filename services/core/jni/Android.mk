@@ -61,5 +61,6 @@ LOCAL_SHARED_LIBRARIES += \
     libusbhost \
     libsuspend \
     libEGL \
-    libGLESv2
+    libGLESv2 \
+    libnetutils \
 
