@@ -28,6 +28,7 @@
         android:id="@+id/subdir"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:paddingEnd="8dp"
         android:scaleType="centerInside"
         android:visibility="gone"
         android:src="@drawable/ic_subdirectory_arrow"
@@ -35,11 +36,13 @@
 
     <TextView
         android:id="@android:id/title"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
         android:singleLine="true"
         android:ellipsize="middle"
         android:textAlignment="viewStart"
-        style="@style/TextAppearance.Medium" />
+        android:textAppearance="@android:style/TextAppearance.Material.Subhead"
+        android:textColor="?android:attr/textColorPrimary" />
 
 </LinearLayout>

@@ -37,19 +37,6 @@ public class DirectoryView extends FrameLayout {
     }
 
     @Override
-    public void setBackground(Drawable background) {
-        final Rect rect = new Rect();
-        background.getPadding(rect);
-
-        final boolean insetLeft = getResources().getBoolean(R.bool.list_divider_inset_left);
-        if (insetLeft) {
-            super.setBackground(new InsetDrawable(background, -rect.left, 0, -rect.right, 0));
-        } else {
-            super.setBackground(new InsetDrawable(background, -rect.right, 0, -rect.left, 0));
-        }
-    }
-
-    @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
         mWidth = w;
@@ -63,5 +50,11 @@ public class DirectoryView extends FrameLayout {
     public void setPosition(float position) {
         mPosition = position;
         setX((mWidth > 0) ? (mPosition * mWidth) : 0);
+
+        if (mPosition != 0) {
+            setTranslationZ(getResources().getDimensionPixelSize(R.dimen.dir_elevation));
+        } else {
+            setTranslationZ(0);
+        }
     }
 }

@@ -17,25 +17,33 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:minHeight="?android:attr/listPreferredItemHeightSmall"
-    android:paddingStart="?android:attr/listPreferredItemPaddingStart"
-    android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
+    android:minHeight="48dp"
+    android:paddingStart="@dimen/list_item_padding"
+    android:paddingEnd="@dimen/list_item_padding"
     android:gravity="center_vertical"
     android:orientation="horizontal"
     android:baselineAligned="false"
-    android:background="@drawable/item_root">
+    android:background="@drawable/item_activated">
 
-    <ImageView
-        android:id="@android:id/icon"
+    <FrameLayout
         android:layout_width="@dimen/icon_size"
         android:layout_height="@dimen/icon_size"
-        android:layout_marginEnd="8dp"
-        android:scaleType="centerInside"
-        android:contentDescription="@null" />
+        android:layout_marginEnd="16dp">
+
+        <ImageView
+            android:id="@android:id/icon"
+            android:layout_width="@dimen/root_icon_size"
+            android:layout_height="match_parent"
+            android:scaleType="centerInside"
+            android:contentDescription="@null" />
+
+    </FrameLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
         android:orientation="vertical">
 
         <TextView
@@ -45,7 +53,8 @@
             android:singleLine="true"
             android:ellipsize="end"
             android:textAlignment="viewStart"
-            style="@style/TextAppearance.Medium" />
+            android:textAppearance="@android:style/TextAppearance.Material.Body1"
+            android:textColor="?android:attr/textColorPrimary" />
 
         <TextView
             android:id="@android:id/summary"
@@ -54,7 +63,8 @@
             android:singleLine="true"
             android:ellipsize="end"
             android:textAlignment="viewStart"
-            style="@style/TextAppearance.Small" />
+            android:textAppearance="@android:style/TextAppearance.Material.Body1"
+            android:textColor="?android:attr/textColorSecondary" />
 
     </LinearLayout>
 

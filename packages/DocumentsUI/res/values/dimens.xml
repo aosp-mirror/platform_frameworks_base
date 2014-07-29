@@ -37,4 +37,6 @@
     <bool name="show_as_dialog">false</bool>
     <bool name="always_show_summary">false</bool>
 
+    <dimen name="dir_elevation">8dp</dimen>
+
 </resources>
