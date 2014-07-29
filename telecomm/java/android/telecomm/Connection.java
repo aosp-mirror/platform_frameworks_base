@@ -130,10 +130,10 @@ public abstract class Connection {
 
     /**
      * Returns the video state of the call.
-     * Valid values: {@link android.telecomm.VideoCallProfile#VIDEO_STATE_AUDIO_ONLY},
-     * {@link android.telecomm.VideoCallProfile#VIDEO_STATE_BIDIRECTIONAL},
-     * {@link android.telecomm.VideoCallProfile#VIDEO_STATE_TX_ENABLED},
-     * {@link android.telecomm.VideoCallProfile#VIDEO_STATE_RX_ENABLED}.
+     * Valid values: {@link android.telecomm.VideoCallProfile.VideoState#AUDIO_ONLY},
+     * {@link android.telecomm.VideoCallProfile.VideoState#BIDIRECTIONAL},
+     * {@link android.telecomm.VideoCallProfile.VideoState#TX_ENABLED},
+     * {@link android.telecomm.VideoCallProfile.VideoState#RX_ENABLED}.
      *
      * @return The video state of the call.
      */
@@ -357,10 +357,10 @@ public abstract class Connection {
 
     /**
      * Set the video state for the connection.
-     * Valid values: {@link android.telecomm.VideoCallProfile#VIDEO_STATE_AUDIO_ONLY},
-     * {@link android.telecomm.VideoCallProfile#VIDEO_STATE_BIDIRECTIONAL},
-     * {@link android.telecomm.VideoCallProfile#VIDEO_STATE_TX_ENABLED},
-     * {@link android.telecomm.VideoCallProfile#VIDEO_STATE_RX_ENABLED}.
+     * Valid values: {@link android.telecomm.VideoCallProfile.VideoState#AUDIO_ONLY},
+     * {@link android.telecomm.VideoCallProfile.VideoState#BIDIRECTIONAL},
+     * {@link android.telecomm.VideoCallProfile.VideoState#TX_ENABLED},
+     * {@link android.telecomm.VideoCallProfile.VideoState#RX_ENABLED}.
      *
      * @param videoState The new video state.
      */
