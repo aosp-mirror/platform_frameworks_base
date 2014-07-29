@@ -17,7 +17,10 @@
 package android.hardware.soundtrigger;
 
 import android.hardware.soundtrigger.SoundTrigger;
+import android.hardware.soundtrigger.SoundTrigger.ConfidenceLevel;
 import android.hardware.soundtrigger.SoundTrigger.Keyphrase;
+import android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionEvent;
+import android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra;
 import android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel;
 import android.hardware.soundtrigger.SoundTrigger.RecognitionEvent;
 import android.os.Parcel;
@@ -249,6 +252,80 @@ public class SoundTriggerTest extends InstrumentationTestCase {
         // Read from it
         parcel.setDataPosition(0);
         RecognitionEvent unparceled = RecognitionEvent.CREATOR.createFromParcel(parcel);
+
+        // Verify that they are the same
+        assertEquals(re, unparceled);
+    }
+
+    @SmallTest
+    public void testKeyphraseRecognitionEventParcelUnparcel_noKeyphrases() throws Exception {
+        KeyphraseRecognitionEvent re = new KeyphraseRecognitionEvent(
+                SoundTrigger.RECOGNITION_STATUS_SUCCESS, 1, true, 2, 3, 4, null, false, null);
+
+        // Write to a parcel
+        Parcel parcel = Parcel.obtain();
+        re.writeToParcel(parcel, 0);
+
+        // Read from it
+        parcel.setDataPosition(0);
+        KeyphraseRecognitionEvent unparceled =
+                KeyphraseRecognitionEvent.CREATOR.createFromParcel(parcel);
+
+        // Verify that they are the same
+        assertEquals(re, unparceled);
+    }
+
+    @SmallTest
+    public void testKeyphraseRecognitionEventParcelUnparcel_zeroData() throws Exception {
+        KeyphraseRecognitionExtra[] kpExtra = new KeyphraseRecognitionExtra[0];
+        KeyphraseRecognitionEvent re = new KeyphraseRecognitionEvent(
+                SoundTrigger.RECOGNITION_STATUS_FAILURE, 2, true, 2, 3, 4, new byte[1],
+                true, kpExtra);
+
+        // Write to a parcel
+        Parcel parcel = Parcel.obtain();
+        re.writeToParcel(parcel, 0);
+
+        // Read from it
+        parcel.setDataPosition(0);
+        KeyphraseRecognitionEvent unparceled =
+                KeyphraseRecognitionEvent.CREATOR.createFromParcel(parcel);
+
+        // Verify that they are the same
+        assertEquals(re, unparceled);
+    }
+
+    @LargeTest
+    public void testKeyphraseRecognitionEventParcelUnparcel_largeData() throws Exception {
+        byte[] data = new byte[200 * 1024];
+        mRandom.nextBytes(data);
+        KeyphraseRecognitionExtra[] kpExtra = new KeyphraseRecognitionExtra[4];
+        ConfidenceLevel cl1 = new ConfidenceLevel(1, 90);
+        ConfidenceLevel cl2 = new ConfidenceLevel(2, 30);
+        kpExtra[0] = new KeyphraseRecognitionExtra(1,
+                SoundTrigger.RECOGNITION_MODE_USER_IDENTIFICATION,
+                new ConfidenceLevel[] {cl1, cl2});
+        kpExtra[1] = new KeyphraseRecognitionExtra(1,
+                SoundTrigger.RECOGNITION_MODE_VOICE_TRIGGER,
+                new ConfidenceLevel[] {cl2});
+        kpExtra[2] = new KeyphraseRecognitionExtra(1,
+                SoundTrigger.RECOGNITION_MODE_VOICE_TRIGGER, null);
+        kpExtra[3] = new KeyphraseRecognitionExtra(1,
+                SoundTrigger.RECOGNITION_MODE_VOICE_TRIGGER,
+                new ConfidenceLevel[0]);
+
+        KeyphraseRecognitionEvent re = new KeyphraseRecognitionEvent(
+                SoundTrigger.RECOGNITION_STATUS_FAILURE, 1, true, 2, 3, 4, data,
+                false, kpExtra);
+
+        // Write to a parcel
+        Parcel parcel = Parcel.obtain();
+        re.writeToParcel(parcel, 0);
+
+        // Read from it
+        parcel.setDataPosition(0);
+        KeyphraseRecognitionEvent unparceled =
+                KeyphraseRecognitionEvent.CREATOR.createFromParcel(parcel);
 
         // Verify that they are the same
         assertEquals(re, unparceled);

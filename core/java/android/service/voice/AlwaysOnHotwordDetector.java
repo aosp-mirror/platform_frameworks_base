@@ -23,6 +23,7 @@ import android.hardware.soundtrigger.KeyphraseMetadata;
 import android.hardware.soundtrigger.SoundTrigger;
 import android.hardware.soundtrigger.SoundTrigger.ConfidenceLevel;
 import android.hardware.soundtrigger.SoundTrigger.Keyphrase;
+import android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionEvent;
 import android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra;
 import android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel;
 import android.hardware.soundtrigger.SoundTrigger.ModuleProperties;
@@ -133,11 +134,6 @@ public class AlwaysOnHotwordDetector {
     private final Object mLock = new Object();
     private final Handler mHandler;
 
-    /**
-     * Indicates if there is a sound model enrolled for the keyphrase,
-     * derived from the model management service (IVoiceInteractionManagerService).
-     */
-    private boolean mIsEnrolledForDetection;
     private int mAvailability = STATE_NOT_READY;
 
     /**
@@ -381,10 +377,10 @@ public class AlwaysOnHotwordDetector {
         }
 
         @Override
-        public void onDetected(RecognitionEvent recognitionEvent) {
+        public void onDetected(KeyphraseRecognitionEvent event) {
             Slog.i(TAG, "onDetected");
             Message message = Message.obtain(mHandler, MSG_HOTWORD_DETECTED);
-            message.obj = recognitionEvent.data;
+            message.obj = event.data;
             message.sendToTarget();
         }
 
@@ -436,7 +432,6 @@ public class AlwaysOnHotwordDetector {
                     Slog.d(TAG, "Hotword availability changed from " + mAvailability
                             + " -> " + availability);
                 }
-                mIsEnrolledForDetection = enrolled;
                 mAvailability = availability;
                 notifyStateChangedLocked();
             }
