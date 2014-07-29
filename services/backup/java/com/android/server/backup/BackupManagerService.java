@@ -3151,6 +3151,13 @@ public class BackupManagerService extends IBackupManager.Stub {
             FileOutputStream outstream = new FileOutputStream(manifestFile);
             outstream.write(builder.toString().getBytes());
             outstream.close();
+
+            // We want the manifest block in the archive stream to be idempotent:
+            // each time we generate a backup stream for the app, we want the manifest
+            // block to be identical.  The underlying tar mechanism sees it as a file,
+            // though, and will propagate its mtime, causing the tar header to vary.
+            // Avoid this problem by pinning the mtime to zero.
+            manifestFile.setLastModified(0);
         }
 
         // Widget metadata format. All header entries are strings ending in LF:
@@ -3188,6 +3195,10 @@ public class BackupManagerService extends IBackupManager.Stub {
             }
             bout.flush();
             out.close();
+
+            // As with the manifest file, guarantee idempotence of the archive metadata
+            // for the widget block by using a fixed mtime on the transient file.
+            destination.setLastModified(0);
         }
 
         private void tearDown(PackageInfo pkg) {
