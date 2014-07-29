@@ -200,10 +200,10 @@ public final class HdmiControlService extends SystemService {
     private List<HdmiPortInfo> mPortInfo;
 
     // Map from path(physical address) to port ID.
-    private SparseIntArray mPortIdMap = new SparseIntArray();
+    private final SparseIntArray mPortIdMap = new SparseIntArray();
 
     // Map from port ID to HdmiPortInfo.
-    private SparseArray<HdmiPortInfo> mPortInfoMap = new SparseArray<>();
+    private final SparseArray<HdmiPortInfo> mPortInfoMap = new SparseArray<>();
 
     private HdmiCecMessageValidator mMessageValidator;
 
@@ -1414,8 +1414,8 @@ public final class HdmiControlService extends SystemService {
                 Slog.v(TAG, "On standby-action cleared:" + device.mDeviceType);
                 devices.remove(device);
                 if (devices.isEmpty()) {
-                    clearLocalDevices();
                     onStandbyCompleted();
+                    clearLocalDevices();
                 }
             }
         });
