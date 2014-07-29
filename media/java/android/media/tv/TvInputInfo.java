@@ -101,6 +101,11 @@ public final class TvInputInfo implements Parcelable {
     private static SparseIntArray sHardwareTypeToTvInputType = new SparseIntArray();
 
     private static final String XML_START_TAG_NAME = "tv-input";
+    private static final String DELIMITER_INFO_IN_ID = "/";
+    private static final String PREFIX_CEC_DEVICE = "CEC";
+    private static final String PREFIX_HARDWARE_DEVICE = "HW";
+    private static final int LENGTH_CEC_PHYSICAL_ADDRESS = 4;
+    private static final int LENGTH_CEC_LOGICAL_ADDRESS = 2;
 
     private final ResolveInfo mService;
     private final String mId;
@@ -112,6 +117,7 @@ public final class TvInputInfo implements Parcelable {
     private int mType = TYPE_TUNER;
     private String mLabel;
     private Uri mIconUri;
+    private boolean mIsConnectedToHdmiSwitch;
 
     static {
         sHardwareTypeToTvInputType.put(TvInputHardwareInfo.TV_INPUT_TYPE_OTHER_HARDWARE,
@@ -139,7 +145,7 @@ public final class TvInputInfo implements Parcelable {
             throws XmlPullParserException, IOException {
         return createTvInputInfo(context, service, generateInputIdForComponentName(
                 new ComponentName(service.serviceInfo.packageName, service.serviceInfo.name)),
-                null, TYPE_TUNER, null, null);
+                null, TYPE_TUNER, null, null, false);
     }
 
     /**
@@ -160,9 +166,10 @@ public final class TvInputInfo implements Parcelable {
     public static TvInputInfo createTvInputInfo(Context context, ResolveInfo service,
             HdmiCecDeviceInfo cecInfo, String parentId, String label, Uri iconUri)
                     throws XmlPullParserException, IOException {
+        boolean isConnectedToHdmiSwitch = (cecInfo.getPhysicalAddress() & 0x0FFF) != 0;
         return createTvInputInfo(context, service, generateInputIdForHdmiCec(
                 new ComponentName(service.serviceInfo.packageName, service.serviceInfo.name),
-                cecInfo), parentId, TYPE_HDMI, label, iconUri);
+                cecInfo), parentId, TYPE_HDMI, label, iconUri, isConnectedToHdmiSwitch);
     }
 
     /**
@@ -185,11 +192,12 @@ public final class TvInputInfo implements Parcelable {
         int inputType = sHardwareTypeToTvInputType.get(hardwareInfo.getType(), TYPE_TUNER);
         return createTvInputInfo(context, service, generateInputIdForHardware(
                 new ComponentName(service.serviceInfo.packageName, service.serviceInfo.name),
-                hardwareInfo), null, inputType, label, iconUri);
+                hardwareInfo), null, inputType, label, iconUri, false);
     }
 
     private static TvInputInfo createTvInputInfo(Context context, ResolveInfo service,
-            String id, String parentId, int inputType, String label, Uri iconUri)
+            String id, String parentId, int inputType, String label, Uri iconUri,
+            boolean isConnectedToHdmiSwitch)
                     throws XmlPullParserException, IOException {
         ServiceInfo si = service.serviceInfo;
         PackageManager pm = context.getPackageManager();
@@ -233,6 +241,7 @@ public final class TvInputInfo implements Parcelable {
 
             input.mLabel = label;
             input.mIconUri = iconUri;
+            input.mIsConnectedToHdmiSwitch = isConnectedToHdmiSwitch;
             return input;
         } catch (NameNotFoundException e) {
             throw new XmlPullParserException("Unable to create context for: " + si.packageName);
@@ -347,6 +356,16 @@ public final class TvInputInfo implements Parcelable {
     }
 
     /**
+     * Returns {@code true}, if a CEC device for this TV input is connected to an HDMI switch, i.e.,
+     * the device isn't directly connected to a HDMI port.
+     * @hide
+     */
+    @SystemApi
+    public boolean isConnectedToHdmiSwitch() {
+        return mIsConnectedToHdmiSwitch;
+    }
+
+    /**
      * Loads the user-displayed label for this TV input service.
      *
      * @param context Supplies a {@link Context} used to load the label.
@@ -432,6 +451,7 @@ public final class TvInputInfo implements Parcelable {
         dest.writeInt(mType);
         dest.writeString(mIconUri == null ? null : mIconUri.toString());
         dest.writeString(mLabel);
+        dest.writeByte(mIsConnectedToHdmiSwitch ? (byte) 1 : 0);
     }
 
     private Drawable loadDefaultIcon(Context context) {
@@ -457,7 +477,10 @@ public final class TvInputInfo implements Parcelable {
      */
     private static final String generateInputIdForHdmiCec(
             ComponentName name, HdmiCecDeviceInfo cecInfo) {
-        return name.flattenToShortString() + String.format("|CEC%08X%08X",
+        // Example of the format : "/CEC%04X%02X"
+        String format = String.format("%s%s%%0%sX%%0%sX", DELIMITER_INFO_IN_ID, PREFIX_CEC_DEVICE,
+                LENGTH_CEC_PHYSICAL_ADDRESS, LENGTH_CEC_LOGICAL_ADDRESS);
+        return name.flattenToShortString() + String.format(format,
                 cecInfo.getPhysicalAddress(), cecInfo.getLogicalAddress());
     }
 
@@ -470,7 +493,8 @@ public final class TvInputInfo implements Parcelable {
      */
     private static final String generateInputIdForHardware(
             ComponentName name, TvInputHardwareInfo hardwareInfo) {
-        return name.flattenToShortString() + String.format("|HW%d", hardwareInfo.getDeviceId());
+        return name.flattenToShortString() + String.format("%s%s%d",
+                DELIMITER_INFO_IN_ID, PREFIX_HARDWARE_DEVICE, hardwareInfo.getDeviceId());
     }
 
     /**
@@ -502,5 +526,6 @@ public final class TvInputInfo implements Parcelable {
             mIconUri = Uri.parse(mIconUriString);
         }
         mLabel = in.readString();
+        mIsConnectedToHdmiSwitch = in.readByte() == 1 ? true : false;
     }
 }
