@@ -2906,7 +2906,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         @ViewDebug.FlagToString(mask = PFLAG_DRAWN, equals = PFLAG_DRAWN, name = "NOT_DRAWN", outputIf = false),
         @ViewDebug.FlagToString(mask = PFLAG_DIRTY_MASK, equals = PFLAG_DIRTY_OPAQUE, name = "DIRTY_OPAQUE"),
         @ViewDebug.FlagToString(mask = PFLAG_DIRTY_MASK, equals = PFLAG_DIRTY, name = "DIRTY")
-    })
+    }, formatToHexString = true)
     int mPrivateFlags;
     int mPrivateFlags2;
     int mPrivateFlags3;
@@ -2925,7 +2925,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         @ViewDebug.FlagToString(mask = PUBLIC_STATUS_BAR_VISIBILITY_MASK,
                                 equals = SYSTEM_UI_FLAG_VISIBLE,
                                 name = "SYSTEM_UI_FLAG_VISIBLE", outputIf = true)
-    })
+    }, formatToHexString = true)
     int mSystemUiVisibility;
 
     /**
@@ -2951,7 +2951,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * The view flags hold various views states.
      * {@hide}
      */
-    @ViewDebug.ExportedProperty
+    @ViewDebug.ExportedProperty(formatToHexString = true)
     int mViewFlags;
 
     static class TransformationInfo {
@@ -16444,6 +16444,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (!hasIdentityMatrix()) {
             m.postConcat(getInverseMatrix());
         }
+    }
+
+    /**
+     * @hide
+     */
+    @ViewDebug.ExportedProperty(category = "layout", indexMapping = {
+            @ViewDebug.IntToString(from = 0, to = "x"),
+            @ViewDebug.IntToString(from = 1, to = "y")
+    })
+    public int[] getLocationOnScreen() {
+        int[] location = new int[2];
+        getLocationOnScreen(location);
+        return location;
     }
 
     /**
