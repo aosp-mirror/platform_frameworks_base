@@ -117,7 +117,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
         setTransitionAlpha(mTransitioningViews, 1);
         setTransitionAlpha(mSharedElements, 1);
         mIsHidden = true;
-        if (getDecor() != null) {
+        if (!mIsReturning && getDecor() != null) {
             getDecor().suppressLayout(false);
         }
         clearState();
@@ -357,7 +357,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
                 mExitNotified = true;
                 mResultReceiver.send(MSG_EXIT_TRANSITION_COMPLETE, null);
                 mResultReceiver = null; // done talking
-                if (getDecor() != null) {
+                if (!mIsReturning && getDecor() != null) {
                     getDecor().suppressLayout(false);
                 }
                 finishIfNecessary();
