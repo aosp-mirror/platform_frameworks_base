@@ -28694,7 +28694,6 @@ package android.telecomm {
     method public final android.telecomm.RemoteConnection createRemoteIncomingConnection(android.telecomm.ConnectionRequest);
     method public final android.telecomm.RemoteConnection createRemoteOutgoingConnection(android.telecomm.ConnectionRequest);
     method public final java.util.Collection<android.telecomm.Connection> getAllConnections();
-    method public final void maybeRespondToAccountLookup();
     method public final android.os.IBinder onBind(android.content.Intent);
     method public void onConnectionAdded(android.telecomm.Connection);
     method public void onConnectionRemoved(android.telecomm.Connection);
