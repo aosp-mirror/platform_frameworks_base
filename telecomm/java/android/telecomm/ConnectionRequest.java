@@ -101,10 +101,10 @@ public final class ConnectionRequest implements Parcelable {
 
     /**
      * Determines the video state for the connection.
-     * Valid values: {@link VideoCallProfile#VIDEO_STATE_AUDIO_ONLY},
-     * {@link VideoCallProfile#VIDEO_STATE_BIDIRECTIONAL},
-     * {@link VideoCallProfile#VIDEO_STATE_TX_ENABLED},
-     * {@link VideoCallProfile#VIDEO_STATE_RX_ENABLED}.
+     * Valid values: {@link VideoCallProfile.VideoState#AUDIO_ONLY},
+     * {@link VideoCallProfile.VideoState#BIDIRECTIONAL},
+     * {@link VideoCallProfile.VideoState#TX_ENABLED},
+     * {@link VideoCallProfile.VideoState#RX_ENABLED}.
      *
      * @return The video state for the connection.
      */
