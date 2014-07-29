@@ -65,6 +65,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     private ImageView mMultiUserAvatar;
     private View mDateCollapsed;
     private View mDateExpanded;
+    private LinearLayout mSystemIcons;
     private View mStatusIcons;
     private View mSignalCluster;
     private View mSettingsButton;
@@ -115,7 +116,14 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     private KeyguardUserSwitcher mKeyguardUserSwitcher;
 
     private final Rect mClipBounds = new Rect();
-    private final StatusIconClipper mStatusIconClipper = new StatusIconClipper();
+
+    private boolean mCaptureValues;
+    private boolean mSignalClusterDetached;
+    private final LayoutValues mCollapsedValues = new LayoutValues();
+    private final LayoutValues mExpandedValues = new LayoutValues();
+    private final LayoutValues mCurrentValues = new LayoutValues();
+
+    private float mCurrentT;
 
     public StatusBarHeaderView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -172,6 +180,27 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
                 outline.setRect(mClipBounds);
             }
         });
+        requestCaptureValues();
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        super.onLayout(changed, l, t, r, b);
+        if (mCaptureValues) {
+            if (mExpanded && !mOverscrolled) {
+                captureLayoutValues(mExpandedValues);
+            } else {
+                captureLayoutValues(mCollapsedValues);
+            }
+            mCaptureValues = false;
+            updateLayoutValues(mCurrentT);
+        }
+        mAlarmStatus.setX(mDateGroup.getLeft() + mDateCollapsed.getRight());
+    }
+
+    private void requestCaptureValues() {
+        mCaptureValues = true;
+        requestLayout();
     }
 
     private void loadDimens() {
@@ -267,7 +296,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
             updateClockLp();
             updateBatteryLevelPaddingEnd();
             updateBatteryLevelLp();
-            mStatusIconClipper.update();
+            requestCaptureValues();
         }
     }
 
@@ -319,18 +348,19 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         mClock.setVisibility(onKeyguardAndCollapsed ? View.INVISIBLE : View.VISIBLE);
         mKeyguardCarrierText.setVisibility(onKeyguardAndCollapsed ? View.VISIBLE : View.GONE);
         mDateCollapsed.setVisibility(mExpanded && !mOverscrolled && mAlarmShowing
-                ? View.VISIBLE : View.GONE);
+                ? View.VISIBLE : View.INVISIBLE);
         mDateExpanded.setVisibility(mExpanded && !mOverscrolled && mAlarmShowing
-                ? View.GONE : View.VISIBLE);
+                ? View.INVISIBLE : View.VISIBLE);
         mAlarmStatus.setVisibility(mExpanded && !mOverscrolled && mAlarmShowing
-                ? View.VISIBLE : View.GONE);
-        mSettingsButton.setVisibility(mExpanded && !mOverscrolled ? View.VISIBLE : View.GONE);
+                ? View.VISIBLE : View.INVISIBLE);
+        mSettingsButton.setVisibility(mExpanded && !mOverscrolled ? View.VISIBLE : View.INVISIBLE);
         mQsDetailHeader.setVisibility(mExpanded ? View.VISIBLE : View.GONE);
         if (mStatusIcons != null) {
-            mStatusIcons.setVisibility(!mExpanded || mOverscrolled ? View.VISIBLE : View.GONE);
+            mStatusIcons.setVisibility(mKeyguardShowing && (!mExpanded || mOverscrolled)
+                    ? View.VISIBLE : View.GONE);
         }
         if (mSignalCluster != null) {
-            mSignalCluster.setVisibility(!mExpanded || mOverscrolled ? View.VISIBLE : View.GONE);
+            updateSignalClusterDetachment();
         }
         mEmergencyCallsOnly.setVisibility(mExpanded && !mOverscrolled && mShowEmergencyCallsOnly
                 ? VISIBLE : GONE);
@@ -341,6 +371,19 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         if (mExpanded && !mOverscrolled && mKeyguardUserSwitcherShowing) {
             mKeyguardUserSwitcher.hide();
         }
+    }
+
+    private void updateSignalClusterDetachment() {
+        boolean detached = mExpanded && !mOverscrolled;
+        if (detached != mSignalClusterDetached) {
+            if (detached) {
+                getOverlay().add(mSignalCluster);
+            } else {
+                getOverlay().remove(mSignalCluster);
+                mSystemIcons.addView(mSignalCluster, 1);
+            }
+        }
+        mSignalClusterDetached = detached;
     }
 
     private void updateSystemIconsLayoutParams() {
@@ -369,28 +412,27 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
 
     private void updateAvatarScale() {
         if (mExpanded && !mOverscrolled) {
-            mMultiUserSwitch.setScaleX(1f);
-            mMultiUserSwitch.setScaleY(1f);
+            mMultiUserAvatar.setScaleX(1f);
+            mMultiUserAvatar.setScaleY(1f);
         } else if (mKeyguardShowing) {
-            mMultiUserSwitch.setScaleX(mAvatarKeyguardScaleFactor);
-            mMultiUserSwitch.setScaleY(mAvatarKeyguardScaleFactor);
+            mMultiUserAvatar.setScaleX(mAvatarKeyguardScaleFactor);
+            mMultiUserAvatar.setScaleY(mAvatarKeyguardScaleFactor);
         } else {
-            mMultiUserSwitch.setScaleX(mAvatarCollapsedScaleFactor);
-            mMultiUserSwitch.setScaleY(mAvatarCollapsedScaleFactor);
+            mMultiUserAvatar.setScaleX(mAvatarCollapsedScaleFactor);
+            mMultiUserAvatar.setScaleY(mAvatarCollapsedScaleFactor);
         }
     }
 
     private void updateClockScale() {
         mAmPm.setScaleX(mClockCollapsedScaleFactor);
         mAmPm.setScaleY(mClockCollapsedScaleFactor);
-        if (!mExpanded || mOverscrolled) {
-            mTime.setScaleX(mClockCollapsedScaleFactor);
-            mTime.setScaleY(mClockCollapsedScaleFactor);
-        } else {
-            mTime.setScaleX(1f);
-            mTime.setScaleY(1f);
-        }
+        mTime.setScaleX(getTimeScale());
+        mTime.setScaleY(getTimeScale());
         updateAmPmTranslation();
+    }
+
+    private float getTimeScale() {
+        return !mExpanded || mOverscrolled ? mClockCollapsedScaleFactor : 1f;
     }
 
     private void updateAmPmTranslation() {
@@ -410,6 +452,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         mCharging = charging;
         if (changed) {
             updateVisibilities();
+            requestCaptureValues();
         }
     }
 
@@ -426,6 +469,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         }
         mAlarmShowing = nextAlarm != null;
         updateVisibilities();
+        requestCaptureValues();
     }
 
 
@@ -501,6 +545,10 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     }
 
     public void setExpansion(float t) {
+        if (mOverscrolled) {
+            t = 0f;
+        }
+        mCurrentT = t;
         float height = mCollapsedHeight + t * (mExpandedHeight - mCollapsedHeight);
         if (height < mCollapsedHeight) {
             height = mCollapsedHeight;
@@ -509,6 +557,15 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
             height = mExpandedHeight;
         }
         setClipping(height);
+        updateLayoutValues(t);
+    }
+
+    private void updateLayoutValues(float t) {
+        if (mCaptureValues) {
+            return;
+        }
+        mCurrentValues.interpoloate(mCollapsedValues, mExpandedValues, t);
+        applyLayoutValues(mCurrentValues);
     }
 
     private void setClipping(float height) {
@@ -521,19 +578,24 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         mSystemIconsContainer.addView(systemIcons);
         mStatusIcons = systemIcons.findViewById(R.id.statusIcons);
         mSignalCluster = systemIcons.findViewById(R.id.signal_cluster);
-        mSignalCluster.addOnLayoutChangeListener(mStatusIconClipper);
+        mSystemIcons = systemIcons;
+        updateVisibilities();
     }
 
     public void onSystemIconsDetached() {
         if (mStatusIcons != null) {
             mStatusIcons.setVisibility(View.VISIBLE);
+            mStatusIcons.setAlpha(1f);
         }
         if (mSignalCluster != null) {
-            mSignalCluster.removeOnLayoutChangeListener(mStatusIconClipper);
             mSignalCluster.setVisibility(View.VISIBLE);
+            mSignalCluster.setAlpha(1f);
+            mSignalCluster.setTranslationX(0f);
+            mSignalCluster.setTranslationY(0f);
         }
         mStatusIcons = null;
         mSignalCluster = null;
+        mSystemIcons = null;
     }
 
     public void setKeyguardShowing(boolean keyguardShowing) {
@@ -547,7 +609,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         updateClickTargets();
         updateBatteryLevelPaddingEnd();
         updateAvatarScale();
-        mStatusIconClipper.update();
+        mCaptureValues = true;
     }
 
     public void setUserInfoController(UserInfoController userInfoController) {
@@ -623,23 +685,128 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         // here.
     }
 
-    private final class StatusIconClipper implements OnLayoutChangeListener {
-        private final Rect mClipBounds = new Rect();
+    private void captureLayoutValues(LayoutValues target) {
+        target.timeScale = mTime.getScaleX();
+        target.clockY = mClock.getTop();
+        target.dateY = mDateGroup.getTop();
+        target.emergencyCallsOnlyAlpha = getAlphaForVisibility(mEmergencyCallsOnly);
+        target.alarmStatusAlpha = getAlphaForVisibility(mAlarmStatus);
+        target.dateCollapsedAlpha = getAlphaForVisibility(mDateCollapsed);
+        target.dateExpandedAlpha = getAlphaForVisibility(mDateExpanded);
+        target.avatarScale = mMultiUserAvatar.getScaleX();
+        target.avatarX = mMultiUserSwitch.getLeft() + mMultiUserAvatar.getLeft();
+        target.avatarY = mMultiUserSwitch.getTop() + mMultiUserAvatar.getTop();
+        target.batteryX = mSystemIconsSuperContainer.getLeft() + mSystemIconsContainer.getRight();
+        target.batteryY = mSystemIconsSuperContainer.getTop() + mSystemIconsContainer.getTop();
+        target.batteryLevelAlpha = getAlphaForVisibility(mBatteryLevel);
+        target.settingsAlpha = getAlphaForVisibility(mSettingsButton);
+        target.settingsTranslation = mExpanded && !mOverscrolled
+                ? 0
+                : mMultiUserSwitch.getLeft() - mSettingsButton.getLeft();
+        target.signalClusterAlpha = mSignalClusterDetached ? 0f : 1f;
+        target.settingsRotation = !mExpanded || mOverscrolled ? 90f : 0f;
+    }
 
-        @Override
-        public void onLayoutChange(View v, int left, int top, int right,
-                int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
-            // Hide the statusIcons in the header by clipping them.  Can't touch visibility since
-            // they are mirrored to the real status bar.
-            mClipBounds.set(left, 0, mSystemIconsContainer.getWidth(),
-                    mSystemIconsContainer.getHeight());
-            update();
+    private float getAlphaForVisibility(View v) {
+        return v == null || v.getVisibility() == View.VISIBLE ? 1f : 0f;
+    }
+
+    private void applyAlpha(View v, float alpha) {
+        if (v == null) {
+            return;
         }
+        if (alpha == 0f) {
+            v.setVisibility(View.INVISIBLE);
+        } else {
+            v.setVisibility(View.VISIBLE);
+            v.setAlpha(alpha);
+        }
+    }
 
-        public void update() {
-            final boolean collapsedKeyguard = mKeyguardShowing && !mExpanded;
-            final boolean expanded = mExpanded && !mOverscrolled;
-            mSystemIconsContainer.setClipBounds(collapsedKeyguard || expanded ? null : mClipBounds);
+    private void applyLayoutValues(LayoutValues values) {
+        mTime.setScaleX(values.timeScale);
+        mTime.setScaleY(values.timeScale);
+        mClock.setY(values.clockY);
+        mDateGroup.setY(values.dateY);
+        mAlarmStatus.setY(values.dateY - mAlarmStatus.getPaddingTop());
+        mMultiUserAvatar.setScaleX(values.avatarScale);
+        mMultiUserAvatar.setScaleY(values.avatarScale);
+        mMultiUserAvatar.setX(values.avatarX - mMultiUserSwitch.getLeft());
+        mMultiUserAvatar.setY(values.avatarY - mMultiUserSwitch.getTop());
+        mSystemIconsSuperContainer.setX(values.batteryX - mSystemIconsContainer.getRight());
+        mSystemIconsSuperContainer.setY(values.batteryY - mSystemIconsContainer.getTop());
+        if (mSignalCluster != null && mExpanded && !mOverscrolled) {
+            mSignalCluster.setX(mSystemIconsSuperContainer.getX()
+                    - mSignalCluster.getWidth());
+            mSignalCluster.setY(
+                    mSystemIconsSuperContainer.getY() + mSystemIconsSuperContainer.getHeight()/2
+                            - mSignalCluster.getHeight()/2);
+        } else if (mSignalCluster != null) {
+            mSignalCluster.setTranslationX(0f);
+            mSignalCluster.setTranslationY(0f);
+        }
+        mSettingsButton.setTranslationY(mSystemIconsSuperContainer.getTranslationY());
+        mSettingsButton.setTranslationX(values.settingsTranslation);
+        mSettingsButton.setRotation(values.settingsRotation);
+        applyAlpha(mEmergencyCallsOnly, values.emergencyCallsOnlyAlpha);
+        applyAlpha(mAlarmStatus, values.alarmStatusAlpha);
+        applyAlpha(mDateCollapsed, values.dateCollapsedAlpha);
+        applyAlpha(mDateExpanded, values.dateExpandedAlpha);
+        applyAlpha(mBatteryLevel, values.batteryLevelAlpha);
+        applyAlpha(mSettingsButton, values.settingsAlpha);
+        applyAlpha(mSignalCluster, values.signalClusterAlpha);
+        updateAmPmTranslation();
+    }
+
+    /**
+     * Captures all layout values (position, visibility) for a certain state. This is used for
+     * animations.
+     */
+    private static final class LayoutValues {
+
+        float dateExpandedAlpha;
+        float dateCollapsedAlpha;
+        float emergencyCallsOnlyAlpha;
+        float alarmStatusAlpha;
+        float timeScale = 1f;
+        float clockY;
+        float dateY;
+        float avatarScale;
+        float avatarX;
+        float avatarY;
+        float batteryX;
+        float batteryY;
+        float batteryLevelAlpha;
+        float settingsAlpha;
+        float settingsTranslation;
+        float signalClusterAlpha;
+        float settingsRotation;
+
+        public void interpoloate(LayoutValues v1, LayoutValues v2, float t) {
+            timeScale = v1.timeScale * (1 - t) + v2.timeScale * t;
+            clockY = v1.clockY * (1 - t) + v2.clockY * t;
+            dateY = v1.dateY * (1 - t) + v2.dateY * t;
+            avatarScale = v1.avatarScale * (1 - t) + v2.avatarScale * t;
+            avatarX = v1.avatarX * (1 - t) + v2.avatarX * t;
+            avatarY = v1.avatarY * (1 - t) + v2.avatarY * t;
+            batteryX = v1.batteryX * (1 - t) + v2.batteryX * t;
+            batteryY = v1.batteryY * (1 - t) + v2.batteryY * t;
+            settingsTranslation = v1.settingsTranslation * (1 - t) + v2.settingsTranslation * t;
+
+            float t1 = Math.max(0, t - 0.5f) * 2;
+            settingsRotation = v1.settingsRotation * (1 - t1) + v2.settingsRotation * t1;
+            emergencyCallsOnlyAlpha =
+                    v1.emergencyCallsOnlyAlpha * (1 - t1) + v2.emergencyCallsOnlyAlpha * t1;
+
+            float t2 = Math.min(1, 2 * t);
+            signalClusterAlpha = v1.signalClusterAlpha * (1 - t2) + v2.signalClusterAlpha * t2;
+
+            float t3 = Math.max(0, t - 0.7f) / 0.3f;
+            batteryLevelAlpha = v1.batteryLevelAlpha * (1 - t3) + v2.batteryLevelAlpha * t3;
+            settingsAlpha = v1.settingsAlpha * (1 - t3) + v2.settingsAlpha * t3;
+            dateExpandedAlpha = v1.dateExpandedAlpha * (1 - t3) + v2.dateExpandedAlpha * t3;
+            dateCollapsedAlpha = v1.dateCollapsedAlpha * (1 - t3) + v2.dateCollapsedAlpha * t3;
+            alarmStatusAlpha = v1.alarmStatusAlpha * (1 - t3) + v2.alarmStatusAlpha * t3;
         }
     }
 
