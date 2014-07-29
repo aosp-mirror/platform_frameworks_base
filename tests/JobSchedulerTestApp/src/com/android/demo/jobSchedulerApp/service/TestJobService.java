@@ -20,16 +20,21 @@ import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
 import android.app.job.JobParameters;
 import android.app.job.JobService;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
+import android.util.SparseArray;
 
 import com.android.demo.jobSchedulerApp.MainActivity;
 
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Random;
 
 
 /**
@@ -75,39 +80,76 @@ public class TestJobService extends JobService {
 
     @Override
     public boolean onStartJob(JobParameters params) {
-        jobParamsMap.add(params);
+        Log.i(TAG, "on start job: " + params.getJobId());
+        currentId++;
+        jobParamsMap.put(currentId, params);
+        final int currId = this.currentId;
+        Log.d(TAG, "putting :" + currId + " for " + params.toString());
+        Log.d(TAG, " pulled: " + jobParamsMap.get(currId));
         if (mActivity != null) {
             mActivity.onReceivedStartJob(params);
         }
-        Log.i(TAG, "on start job: " + params.getJobId());
+
+        // Spin off a new task on a separate thread for a couple seconds.
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                try {
+                    Log.d(TAG, "Sleeping for 3 seconds.");
+                    Thread.sleep(3000L);
+                } catch (InterruptedException e) {}
+                final JobParameters params = jobParamsMap.get(currId);
+                Log.d(TAG, "Pulled :" + currId + " " + params);
+                jobFinished(params, false);
+
+                Log.d(TAG, "Rescheduling new job: " + params.getJobId());
+                scheduleJob(
+                        new JobInfo.Builder(params.getJobId(),
+                                new ComponentName(getBaseContext(), TestJobService.class))
+                                .setMinimumLatency(2000L)
+                                .setOverrideDeadline(3000L)
+                                .setRequiresCharging(true)
+                                .build()
+                );
+
+                return null;
+            }
+        }.execute();
         return true;
     }
+
 
     @Override
     public boolean onStopJob(JobParameters params) {
-        jobParamsMap.remove(params);
-        mActivity.onReceivedStopJob();
         Log.i(TAG, "on stop job: " + params.getJobId());
+        int ind = jobParamsMap.indexOfValue(params);
+        jobParamsMap.remove(ind);
+        mActivity.onReceivedStopJob();
         return true;
     }
 
+    static int currentId = 0;
     MainActivity mActivity;
-    private final LinkedList<JobParameters> jobParamsMap = new LinkedList<JobParameters>();
+    private final SparseArray<JobParameters> jobParamsMap = new SparseArray<JobParameters>();
+
 
     public void setUiCallback(MainActivity activity) {
         mActivity = activity;
     }
 
     /** Send job to the JobScheduler. */
-    public void scheduleJob(JobInfo t) {
-        Log.d(TAG, "Scheduling job");
+    public void scheduleJob(JobInfo job) {
+        Log.d(TAG, "Scheduling job " + job);
         JobScheduler tm =
                 (JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE);
-        tm.schedule(t);
+        tm.schedule(job);
     }
 
     public boolean callJobFinished() {
-        JobParameters params = jobParamsMap.poll();
+        if (jobParamsMap.size() == 0) {
+            return false;
+        }
+        JobParameters params = jobParamsMap.valueAt(0);
         if (params == null) {
             return false;
         } else {

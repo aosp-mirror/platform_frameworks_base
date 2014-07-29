@@ -34,7 +34,6 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.WorkSource;
-import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
@@ -45,8 +44,22 @@ import com.android.server.job.controllers.JobStatus;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Handles client binding and lifecycle of a job. A job will only execute one at a time on an
- * instance of this class.
+ * Handles client binding and lifecycle of a job. Jobs execute one at a time on an instance of this
+ * class.
+ *
+ * There are two important interactions into this class from the
+ * {@link com.android.server.job.JobSchedulerService}. To execute a job and to cancel a job.
+ * - Execution of a new job is handled by the {@link #mAvailable}. This bit is flipped once when a
+ * job lands, and again when it is complete.
+ * - Cancelling is trickier, because there are also interactions from the client. It's possible
+ * the {@link com.android.server.job.JobServiceContext.JobServiceHandler} tries to process a
+ * {@link #MSG_CANCEL} after the client has already finished. This is handled by having
+ * {@link com.android.server.job.JobServiceContext.JobServiceHandler#handleCancelH} check whether
+ * the context is still valid.
+ * To mitigate this, tearing down the context removes all messages from the handler, including any
+ * tardy {@link #MSG_CANCEL}s. Additionally, we avoid sending duplicate onStopJob()
+ * calls to the client after they've specified jobFinished().
+ *
  */
 public class JobServiceContext extends IJobCallback.Stub implements ServiceConnection {
     private static final boolean DEBUG = true;
@@ -60,7 +73,7 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
     private static final long OP_TIMEOUT_MILLIS = 8 * 1000;
 
     private static final String[] VERB_STRINGS = {
-            "VERB_STARTING", "VERB_EXECUTING", "VERB_STOPPING", "VERB_PENDING"
+            "VERB_BINDING", "VERB_STARTING", "VERB_EXECUTING", "VERB_STOPPING"
     };
 
     // States that a job occupies while interacting with the client.
@@ -101,7 +114,10 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
     IJobService service;
 
     private final Object mLock = new Object();
-    /** Whether this context is free. */
+    /**
+     * Whether this context is free. This is set to false at the start of execution, and reset to
+     * true when execution is complete.
+     */
     @GuardedBy("mLock")
     private boolean mAvailable;
     /** Track start time. */
@@ -164,9 +180,15 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
         }
     }
 
-    /** Used externally to query the running job. Will return null if there is no job running. */
+    /**
+     * Used externally to query the running job. Will return null if there is no job running.
+     * Be careful when using this function, at any moment it's possible that the job returned may
+     * stop executing.
+     */
     JobStatus getRunningJob() {
-        return mRunningJob;
+        synchronized (mLock) {
+            return mRunningJob;
+        }
     }
 
     /** Called externally when a job that was scheduled for execution should be cancelled. */
@@ -242,10 +264,7 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
         mCallbackHandler.obtainMessage(MSG_SERVICE_BOUND).sendToTarget();
     }
 
-    /**
-     * If the client service crashes we reschedule this job and clean up.
-     * @param name The concrete component name of the service whose
-     */
+    /** If the client service crashes we reschedule this job and clean up. */
     @Override
     public void onServiceDisconnected(ComponentName name) {
         mCallbackHandler.obtainMessage(MSG_SHUTDOWN_EXECUTION).sendToTarget();
@@ -312,7 +331,7 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
                     closeAndCleanupJobH(true /* needsReschedule */);
                     break;
                 default:
-                    Log.e(TAG, "Unrecognised message: " + message);
+                    Slog.e(TAG, "Unrecognised message: " + message);
             }
         }
 
@@ -337,7 +356,7 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
                 scheduleOpTimeOut();
                 service.startJob(mParams);
             } catch (RemoteException e) {
-                Log.e(TAG, "Error sending onStart message to '" +
+                Slog.e(TAG, "Error sending onStart message to '" +
                         mRunningJob.getServiceComponent().getShortClassName() + "' ", e);
             }
         }
@@ -359,6 +378,9 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
                         return;
                     }
                     if (mCancelled.get()) {
+                        if (DEBUG) {
+                            Slog.d(TAG, "Job cancelled while waiting for onStartJob to complete.");
+                        }
                         // Cancelled *while* waiting for acknowledgeStartMessage from client.
                         handleCancelH();
                         return;
@@ -366,7 +388,7 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
                     scheduleOpTimeOut();
                     break;
                 default:
-                    Log.e(TAG, "Handling started job but job wasn't starting! Was "
+                    Slog.e(TAG, "Handling started job but job wasn't starting! Was "
                             + VERB_STRINGS[mVerb] + ".");
                     return;
             }
@@ -396,16 +418,31 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
          *                    {@link #onServiceConnected(android.content.ComponentName, android.os.IBinder)}
          *     _STARTING   -> Mark as cancelled and wait for
          *                    {@link JobServiceContext#acknowledgeStartMessage(int, boolean)}
-         *     _EXECUTING  -> call {@link #sendStopMessageH}}.
+         *     _EXECUTING  -> call {@link #sendStopMessageH}}, but only if there are no callbacks
+         *                      in the message queue.
          *     _ENDING     -> No point in doing anything here, so we ignore.
          */
         private void handleCancelH() {
+            if (mRunningJob == null) {
+                if (DEBUG) {
+                    Slog.d(TAG, "Trying to process cancel for torn-down context, ignoring.");
+                }
+                return;
+            }
+            if (JobSchedulerService.DEBUG) {
+                Slog.d(TAG, "Handling cancel for: " + mRunningJob.getJobId() + " "
+                        + VERB_STRINGS[mVerb]);
+            }
             switch (mVerb) {
                 case VERB_BINDING:
                 case VERB_STARTING:
                     mCancelled.set(true);
                     break;
                 case VERB_EXECUTING:
+                    if (hasMessages(MSG_CALLBACK)) {
+                        // If the client has called jobFinished, ignore this cancel.
+                        return;
+                    }
                     sendStopMessageH();
                     break;
                 case VERB_STOPPING:
@@ -419,8 +456,8 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
 
         /** Process MSG_TIMEOUT here. */
         private void handleOpTimeoutH() {
-            if (Log.isLoggable(JobSchedulerService.TAG, Log.DEBUG)) {
-                Log.d(TAG, "MSG_TIMEOUT of " +
+            if (JobSchedulerService.DEBUG) {
+                Slog.d(TAG, "MSG_TIMEOUT of " +
                         mRunningJob.getServiceComponent().getShortClassName() + " : "
                         + mParams.getJobId());
             }
@@ -431,28 +468,28 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
                     // Client unresponsive - wedged or failed to respond in time. We don't really
                     // know what happened so let's log it and notify the JobScheduler
                     // FINISHED/NO-RETRY.
-                    Log.e(TAG, "No response from client for onStartJob '" +
-                            mRunningJob.getServiceComponent().getShortClassName() + "' tId: "
+                    Slog.e(TAG, "No response from client for onStartJob '" +
+                            mRunningJob.getServiceComponent().getShortClassName() + "' jId: "
                             + jobId);
                     closeAndCleanupJobH(false /* needsReschedule */);
                     break;
                 case VERB_STOPPING:
                     // At least we got somewhere, so fail but ask the JobScheduler to reschedule.
-                    Log.e(TAG, "No response from client for onStopJob, '" +
-                            mRunningJob.getServiceComponent().getShortClassName() + "' tId: "
+                    Slog.e(TAG, "No response from client for onStopJob, '" +
+                            mRunningJob.getServiceComponent().getShortClassName() + "' jId: "
                             + jobId);
                     closeAndCleanupJobH(true /* needsReschedule */);
                     break;
                 case VERB_EXECUTING:
                     // Not an error - client ran out of time.
-                    Log.i(TAG, "Client timed out while executing (no jobFinished received)." +
+                    Slog.i(TAG, "Client timed out while executing (no jobFinished received)." +
                             " sending onStop. "  +
-                            mRunningJob.getServiceComponent().getShortClassName() + "' tId: "
+                            mRunningJob.getServiceComponent().getShortClassName() + "' jId: "
                             + jobId);
                     sendStopMessageH();
                     break;
                 default:
-                    Log.e(TAG, "Handling timeout for an unknown active job state: "
+                    Slog.e(TAG, "Handling timeout for an unknown active job state: "
                             + mRunningJob);
                     return;
             }
@@ -465,7 +502,7 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
         private void sendStopMessageH() {
             mCallbackHandler.removeMessages(MSG_TIMEOUT);
             if (mVerb != VERB_EXECUTING) {
-                Log.e(TAG, "Sending onStopJob for a job that isn't started. " + mRunningJob);
+                Slog.e(TAG, "Sending onStopJob for a job that isn't started. " + mRunningJob);
                 closeAndCleanupJobH(false /* reschedule */);
                 return;
             }
@@ -474,7 +511,7 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
                 scheduleOpTimeOut();
                 service.stopJob(mParams);
             } catch (RemoteException e) {
-                Log.e(TAG, "Error sending onStopJob to client.", e);
+                Slog.e(TAG, "Error sending onStopJob to client.", e);
                 closeAndCleanupJobH(false /* reschedule */);
             }
         }
@@ -486,8 +523,7 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
          * we want to clean up internally.
          */
         private void closeAndCleanupJobH(boolean reschedule) {
-            removeMessages(MSG_TIMEOUT);
-            mCompletedListener.onJobCompleted(mRunningJob, reschedule);
+            final JobStatus completedJob = mRunningJob;
             synchronized (mLock) {
                 try {
                     mBatteryStats.noteJobFinish(mRunningJob.getName(), mRunningJob.getUid());
@@ -504,12 +540,18 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
                 service = null;
                 mAvailable = true;
             }
+            removeMessages(MSG_TIMEOUT);
+            removeMessages(MSG_CALLBACK);
+            removeMessages(MSG_SERVICE_BOUND);
+            removeMessages(MSG_CANCEL);
+            removeMessages(MSG_SHUTDOWN_EXECUTION);
+            mCompletedListener.onJobCompleted(completedJob, reschedule);
         }
 
         /**
-         * Called when sending a message to the client, over whose execution we have no control. If we
-         * haven't received a response in a certain amount of time, we want to give up and carry on
-         * with life.
+         * Called when sending a message to the client, over whose execution we have no control. If
+         * we haven't received a response in a certain amount of time, we want to give up and carry
+         * on with life.
          */
         private void scheduleOpTimeOut() {
             mCallbackHandler.removeMessages(MSG_TIMEOUT);
