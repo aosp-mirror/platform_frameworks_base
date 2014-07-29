@@ -6077,9 +6077,9 @@ public class Activity extends ContextThemeWrapper
      *
      * If {@link DevicePolicyManager#isLockTaskPermitted(String)} returns false
      * then the system will prompt the user with a dialog requesting permission to enter
-     * this mode.  When entered through this method the user can exit at any time by
-     * swiping down twice from the top of the screen.  Calling stopLockTask will also
-     * exit the mode.
+     * this mode.  When entered through this method the user can exit at any time through
+     * an action described by the request dialog.  Calling stopLockTask will also exit the
+     * mode.
      */
     public void startLockTask() {
         try {
