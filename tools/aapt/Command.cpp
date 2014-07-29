@@ -611,6 +611,8 @@ struct ImpliedFeature {
  * Represents a <feature-group> tag in the AndroidManifest.xml
  */
 struct FeatureGroup {
+    FeatureGroup() : openGLESVersion(-1) {}
+
     /**
      * Human readable label
      */
@@ -620,6 +622,11 @@ struct FeatureGroup {
      * Explicit features defined in the group
      */
     KeyedVector<String8, bool> features;
+
+    /**
+     * OpenGL ES version required
+     */
+    int openGLESVersion;
 };
 
 static void addImpliedFeature(KeyedVector<String8, ImpliedFeature>* impliedFeatures,
@@ -636,6 +643,10 @@ static void addImpliedFeature(KeyedVector<String8, ImpliedFeature>* impliedFeatu
 static void printFeatureGroup(const FeatureGroup& grp,
         const KeyedVector<String8, ImpliedFeature>* impliedFeatures = NULL) {
     printf("feature-group: label='%s'\n", grp.label.string());
+
+    if (grp.openGLESVersion > 0) {
+        printf("  uses-gl-es: '0x%x'\n", grp.openGLESVersion);
+    }
 
     const size_t numFeatures = grp.features.size();
     for (size_t i = 0; i < numFeatures; i++) {
@@ -688,6 +699,11 @@ static void addParentFeatures(FeatureGroup* grp, const String8& name) {
     } else if (name == "android.hardware.touchscreen.multitouch.distinct") {
         grp->features.add(String8("android.hardware.touchscreen.multitouch"), true);
         grp->features.add(String8("android.hardware.touchscreen"), true);
+    } else if (name == "android.hardware.opengles.aep") {
+        const int openGLESVersion31 = 0x00030001;
+        if (openGLESVersion31 > grp->openGLESVersion) {
+            grp->openGLESVersion = openGLESVersion31;
+        }
     }
 }
 
@@ -1316,14 +1332,16 @@ int doDump(Bundle* bundle)
                             int vers = getIntegerAttribute(tree,
                                     GL_ES_VERSION_ATTR, &error);
                             if (error == "") {
-                                printf("uses-gl-es:'0x%x'\n", vers);
+                                if (vers > commonFeatures.openGLESVersion) {
+                                    commonFeatures.openGLESVersion = vers;
+                                }
                             }
                         }
                     } else if (tag == "uses-permission") {
                         String8 name = getAttribute(tree, NAME_ATTR, &error);
                         if (name != "" && error == "") {
                             if (name == "android.permission.CAMERA") {
-                                addImpliedFeature(&impliedFeatures, "android.hardware.feature",
+                                addImpliedFeature(&impliedFeatures, "android.hardware.camera",
                                         String8::format("requested %s permission", name.string())
                                         .string());
                             } else if (name == "android.permission.ACCESS_FINE_LOCATION") {
@@ -1639,18 +1657,23 @@ int doDump(Bundle* bundle)
                             }
                         }
                     } else if (withinFeatureGroup && tag == "uses-feature") {
-                        String8 name = getResolvedAttribute(&res, tree, NAME_ATTR, &error);
-                        if (error != "") {
-                            fprintf(stderr, "ERROR getting 'android:name' attribute: %s\n",
-                                    error.string());
-                            goto bail;
-                        }
-
-                        int required = getIntegerAttribute(tree, REQUIRED_ATTR, NULL, 1);
                         FeatureGroup& top = featureGroups.editTop();
-                        top.features.add(name, required);
-                        if (required) {
-                            addParentFeatures(&top, name);
+
+                        String8 name = getResolvedAttribute(&res, tree, NAME_ATTR, &error);
+                        if (name != "" && error == "") {
+                            int required = getIntegerAttribute(tree, REQUIRED_ATTR, NULL, 1);
+                            top.features.add(name, required);
+                            if (required) {
+                                addParentFeatures(&top, name);
+                            }
+
+                        } else {
+                            int vers = getIntegerAttribute(tree, GL_ES_VERSION_ATTR, &error);
+                            if (error == "") {
+                                if (vers > top.openGLESVersion) {
+                                    top.openGLESVersion = vers;
+                                }
+                            }
                         }
                     }
                 } else if (depth == 4) {
@@ -1839,12 +1862,17 @@ int doDump(Bundle* bundle)
                 for (size_t i = 0; i < numFeatureGroups; i++) {
                     FeatureGroup& grp = featureGroups.editItemAt(i);
 
+                    if (commonFeatures.openGLESVersion > grp.openGLESVersion) {
+                        grp.openGLESVersion = commonFeatures.openGLESVersion;
+                    }
+
                     // Merge the features defined in the top level (not inside a <feature-group>)
                     // with this feature group.
                     const size_t numCommonFeatures = commonFeatures.features.size();
                     for (size_t j = 0; j < numCommonFeatures; j++) {
                         if (grp.features.indexOfKey(commonFeatures.features.keyAt(j)) < 0) {
-                            grp.features.add(commonFeatures.features.keyAt(j), commonFeatures.features[j]);
+                            grp.features.add(commonFeatures.features.keyAt(j),
+                                    commonFeatures.features[j]);
                         }
                     }
 
