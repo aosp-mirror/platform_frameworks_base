@@ -160,9 +160,10 @@ public final class MediaProjection {
     public static abstract class Callback {
         /**
          * Called when the MediaProjection session is no longer valid.
-         *
+         * <p>
          * Once a MediaProjection has been stopped, it's up to the application to release any
          * resources it may be holding (e.g. {@link android.hardware.display.VirtualDisplay}s).
+         * </p>
          */
         public void onStop() { }
     }
