@@ -96,6 +96,7 @@ public class ZenModeHelper {
         final IntentFilter filter = new IntentFilter();
         filter.addAction(ACTION_ENTER_ZEN);
         filter.addAction(ACTION_EXIT_ZEN);
+        filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
         mContext.registerReceiver(new ZenBroadcastReceiver(), filter);
     }
 
@@ -279,6 +280,27 @@ public class ZenModeHelper {
         return true;
     }
 
+    private void handleRingerModeChanged() {
+        if (mAudioManager != null) {
+            // follow ringer mode if necessary
+            final int ringerMode = mAudioManager.getRingerMode();
+            int newZen = -1;
+            if (ringerMode == AudioManager.RINGER_MODE_SILENT) {
+                if (mZenMode != Global.ZEN_MODE_NO_INTERRUPTIONS) {
+                    newZen = Global.ZEN_MODE_NO_INTERRUPTIONS;
+                }
+            } else if ((ringerMode == AudioManager.RINGER_MODE_NORMAL
+                    || ringerMode == AudioManager.RINGER_MODE_VIBRATE)
+                    && mZenMode == Global.ZEN_MODE_NO_INTERRUPTIONS) {
+                newZen = Global.ZEN_MODE_OFF;
+            }
+            if (newZen != -1) {
+                ZenLog.traceFollowRingerMode(ringerMode, mZenMode, newZen);
+                setZenMode(newZen);
+            }
+        }
+    }
+
     private void dispatchOnConfigChanged() {
         for (Callback callback : mCallbacks) {
             callback.onConfigChanged();
@@ -376,6 +398,13 @@ public class ZenModeHelper {
         return new Date(time) + " (" + time + ")";
     }
 
+    private final Runnable mRingerModeChanged = new Runnable() {
+        @Override
+        public void run() {
+            handleRingerModeChanged();
+        }
+    };
+
     private class SettingsObserver extends ContentObserver {
         private final Uri ZEN_MODE = Global.getUriFor(Global.ZEN_MODE);
 
@@ -410,6 +439,8 @@ public class ZenModeHelper {
                 setZenMode(intent, Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS);
             } else if (ACTION_EXIT_ZEN.equals(intent.getAction())) {
                 setZenMode(intent, Global.ZEN_MODE_OFF);
+            } else if (AudioManager.RINGER_MODE_CHANGED_ACTION.equals(intent.getAction())) {
+                mHandler.post(mRingerModeChanged);
             }
         }
 
