@@ -428,6 +428,16 @@ public:
         paint->setLetterSpacing(letterSpacing);
     }
 
+    static void setFontFeatureSettings(JNIEnv* env, jobject clazz, jlong paintHandle, jstring settings) {
+        Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+        if (!settings)
+            paint->setFontFeatureSettings(std::string());
+        else {
+            ScopedUtfChars settingsChars(env, settings);
+            paint->setFontFeatureSettings(std::string(settingsChars.c_str(), settingsChars.size()));
+        }
+    }
+
     static SkScalar getMetricsInternal(JNIEnv* env, jobject jpaint, Paint::FontMetrics *metrics) {
         const int kElegantTop = 2500;
         const int kElegantBottom = -1000;
@@ -987,6 +997,7 @@ static JNINativeMethod methods[] = {
     {"setTextSkewX","(F)V", (void*) PaintGlue::setTextSkewX},
     {"native_getLetterSpacing","(J)F", (void*) PaintGlue::getLetterSpacing},
     {"native_setLetterSpacing","(JF)V", (void*) PaintGlue::setLetterSpacing},
+    {"native_setFontFeatureSettings","(JLjava/lang/String;)V", (void*) PaintGlue::setFontFeatureSettings},
     {"ascent","()F", (void*) PaintGlue::ascent},
     {"descent","()F", (void*) PaintGlue::descent},
     {"getFontMetrics", "(Landroid/graphics/Paint$FontMetrics;)F", (void*)PaintGlue::getFontMetrics},
