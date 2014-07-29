@@ -16,10 +16,14 @@
 
 package com.android.server.trust;
 
+import android.app.admin.DevicePolicyManager;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -30,6 +34,10 @@ import android.util.Log;
 import android.util.Slog;
 import android.service.trust.ITrustAgentService;
 import android.service.trust.ITrustAgentServiceCallback;
+import android.service.trust.TrustAgentService;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A wrapper around a TrustAgentService interface. Coordinates communication between
@@ -43,6 +51,7 @@ public class TrustAgentWrapper {
     private static final int MSG_REVOKE_TRUST = 2;
     private static final int MSG_TRUST_TIMEOUT = 3;
     private static final int MSG_RESTART_TIMEOUT = 4;
+    private static final int MSG_DPM_CHANGED = 5;
 
     /**
      * Time in uptime millis that we wait for the service connection, both when starting
@@ -67,6 +76,7 @@ public class TrustAgentWrapper {
     // Trust state
     private boolean mTrusted;
     private CharSequence mMessage;
+    private boolean mTrustDisabledByDpm;
 
     private final Handler mHandler = new Handler() {
         @Override
@@ -109,6 +119,9 @@ public class TrustAgentWrapper {
                     unbind();
                     mTrustManagerService.resetAgent(mName, mUserId);
                     break;
+                case MSG_DPM_CHANGED:
+                    updateDevicePolicyFeatures(mName);
+                    break;
             }
         }
     };
@@ -141,6 +154,8 @@ public class TrustAgentWrapper {
             mTrustAgentService = ITrustAgentService.Stub.asInterface(service);
             mTrustManagerService.mArchive.logAgentConnected(mUserId, name);
             setCallback(mCallback);
+            updateDevicePolicyFeatures(name);
+            watchForDpmChanges(true);
         }
 
         @Override
@@ -152,9 +167,21 @@ public class TrustAgentWrapper {
             if (mBound) {
                 scheduleRestart();
             }
+            // mTrustDisabledByDpm maintains state
+            watchForDpmChanges(false);
         }
     };
 
+    private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED
+                    .equals(intent.getAction())) {
+                mHandler.sendEmptyMessage(MSG_DPM_CHANGED);
+            }
+        }
+    };
 
     public TrustAgentWrapper(Context context, TrustManagerService trustManagerService,
             Intent intent, UserHandle user) {
@@ -196,8 +223,62 @@ public class TrustAgentWrapper {
         }
     }
 
+    private void watchForDpmChanges(boolean start) {
+        if (start) {
+            final IntentFilter filter = new IntentFilter();
+            filter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
+            filter.addAction(Intent.ACTION_USER_REMOVED);
+            mContext.registerReceiver(mBroadcastReceiver, filter);
+        } else {
+            mContext.unregisterReceiver(mBroadcastReceiver);
+        }
+    }
+
+    private boolean updateDevicePolicyFeatures(ComponentName name) {
+        boolean trustDisabled = false;
+        if (DEBUG) Slog.v(TAG, "updateDevicePolicyFeatures(" + name + ")");
+        try {
+            if (mTrustAgentService != null) {
+                DevicePolicyManager dpm =
+                    (DevicePolicyManager) mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
+                if (dpm != null) {
+                    // If trust disabled, only enable it if the options bundle is set and
+                    // accepted by the TrustAgent.
+                    if ((dpm.getKeyguardDisabledFeatures(null)
+                            & DevicePolicyManager.KEYGUARD_DISABLE_TRUST_AGENTS) != 0) {
+                        List<String> features = dpm.getTrustAgentFeaturesEnabled(null, name);
+                        if (DEBUG) Slog.v(TAG, "Detected trust agents disabled. Features = " + features);
+                        if (features != null && features.size() > 0) {
+                            Bundle bundle = new Bundle();
+                            bundle.putStringArrayList(TrustAgentService.KEY_FEATURES,
+                                    (ArrayList<String>)features);
+                            if (DEBUG) {
+                                Slog.v(TAG, "TrustAgent " + name.flattenToShortString()
+                                        + " disabled except "+ features);
+                            }
+                            trustDisabled = mTrustAgentService.setTrustAgentFeaturesEnabled(bundle);
+                        } else {
+                            if (DEBUG) Slog.v(TAG, "TrustAgent " + name + " disabled by flag");
+                            trustDisabled = true; // trust agent should be disabled
+                        }
+                    }
+                } else {
+                    Log.e(TAG, "Can't get DevicePolicyManagerService: is it running?",
+                            new IllegalStateException("Stack trace:"));
+                }
+            }
+        } catch (RemoteException e) {
+            onError(e);
+        }
+        if (mTrustDisabledByDpm != trustDisabled) {
+            mTrustDisabledByDpm = trustDisabled;
+            mTrustManagerService.updateTrust(mUserId);
+        }
+        return trustDisabled;
+    }
+
     public boolean isTrusted() {
-        return mTrusted;
+        return mTrusted && !mTrustDisabledByDpm;
     }
 
     public CharSequence getMessage() {

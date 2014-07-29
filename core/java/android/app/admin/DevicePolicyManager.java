@@ -54,6 +54,7 @@ import java.net.Proxy;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -2324,6 +2325,51 @@ public class DevicePolicyManager {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }
         }
+    }
+
+    /**
+     * Sets a list of features to enable for a TrustAgentService component. This is meant to be
+     * used in conjunction with {@link #KEYGUARD_DISABLE_TRUST_AGENTS}, which will disable all
+     * trust agents but those with features enabled by this function call.
+     *
+     * <p>The calling device admin must have requested
+     * {@link DeviceAdminInfo#USES_POLICY_DISABLE_KEYGUARD_FEATURES} to be able to call
+     * this method; if it has not, a security exception will be thrown.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param agent Which component to enable features for.
+     * @param features List of features to enable. Consult specific TrustAgent documentation for
+     * the feature list.
+     */
+    public void setTrustAgentFeaturesEnabled(ComponentName admin, ComponentName agent,
+            List<String> features) {
+        if (mService != null) {
+            try {
+                mService.setTrustAgentFeaturesEnabled(admin, agent, features, UserHandle.myUserId());
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+    }
+
+    /**
+     * Gets list of enabled features for the given {@link TrustAgentService} agent. If admin is
+     * null, this will return the intersection of all features enabled for the given agent by all
+     * admins.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param agent Which component to get enabled features for.
+     * @return List of enabled features.
+     */
+    public List<String> getTrustAgentFeaturesEnabled(ComponentName admin, ComponentName agent) {
+        if (mService != null) {
+            try {
+                return mService.getTrustAgentFeaturesEnabled(admin, agent, UserHandle.myUserId());
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+        return new ArrayList<String>(); // empty list
     }
 
     /**

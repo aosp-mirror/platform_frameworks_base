@@ -22,7 +22,8 @@ import android.service.trust.ITrustAgentServiceCallback;
  * Communication channel from TrustManagerService to the TrustAgent.
  * @hide
  */
-oneway interface ITrustAgentService {
-    void onUnlockAttempt(boolean successful);
-    void setCallback(ITrustAgentServiceCallback callback);
+interface ITrustAgentService {
+    oneway void onUnlockAttempt(boolean successful);
+    oneway void setCallback(ITrustAgentServiceCallback callback);
+    boolean setTrustAgentFeaturesEnabled(in Bundle options);
 }

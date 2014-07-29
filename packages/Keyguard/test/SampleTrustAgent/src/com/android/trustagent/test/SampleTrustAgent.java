@@ -25,6 +25,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.service.trust.TrustAgentService;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 import android.widget.Toast;
 
 public class SampleTrustAgent extends TrustAgentService {
@@ -40,6 +41,8 @@ public class SampleTrustAgent extends TrustAgentService {
 
     private static final String PREFERENCE_REPORT_UNLOCK_ATTEMPTS
             = "preference.report_unlock_attempts";
+
+    private static final String TAG = "SampleTrustAgent";
 
     @Override
     public void onCreate() {
@@ -57,6 +60,13 @@ public class SampleTrustAgent extends TrustAgentService {
             Toast.makeText(this, "onUnlockAttempt(successful=" + successful + ")",
                     Toast.LENGTH_SHORT).show();
         }
+    }
+
+    @Override
+    public boolean onSetTrustAgentFeaturesEnabled(Bundle options) {
+        Log.v(TAG, "Policy options received: " + options.getStringArrayList(KEY_FEATURES));
+        // TODO: Handle options
+        return true; // inform DPM that we support it
     }
 
     @Override
