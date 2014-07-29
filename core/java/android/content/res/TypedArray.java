@@ -709,7 +709,33 @@ public class TypedArray {
     }
 
     /**
-     * Retrieve the Drawable for the attribute at <var>index</var>.
+     * Retrieve the theme attribute resource identifier for the attribute at
+     * <var>index</var>.
+     *
+     * @param index Index of attribute to retrieve.
+     * @param defValue Value to return if the attribute is not defined or not a
+     *            resource.
+     * @return Theme attribute resource identifier, or defValue if not defined.
+     * @hide
+     */
+    public int getThemeAttributeId(int index, int defValue) {
+        if (mRecycled) {
+            throw new RuntimeException("Cannot make calls to a recycled instance!");
+        }
+
+        index *= AssetManager.STYLE_NUM_ENTRIES;
+        final int[] data = mData;
+        if (data[index + AssetManager.STYLE_TYPE] == TypedValue.TYPE_ATTRIBUTE) {
+            return data[index + AssetManager.STYLE_DATA];
+        }
+        return defValue;
+    }
+
+    /**
+     * Retrieve the Drawable for the attribute at <var>index</var>.  This
+     * gets the resource ID of the selected attribute, and uses
+     * {@link Resources#getDrawable Resources.getDrawable} of the owning
+     * Resources object to retrieve its Drawable.
      *
      * @param index Index of attribute to retrieve.
      *
