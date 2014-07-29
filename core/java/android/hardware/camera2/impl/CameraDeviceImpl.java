@@ -313,6 +313,7 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
         return mCameraId;
     }
 
+    @Override
     public void configureOutputs(List<Surface> outputs) throws CameraAccessException {
         // Treat a null input the same an empty list
         if (outputs == null) {
@@ -448,6 +449,7 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
         }
     }
 
+    @Override
     public int capture(CaptureRequest request, CaptureListener listener, Handler handler)
             throws CameraAccessException {
         if (DEBUG) {
@@ -458,6 +460,7 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
         return submitCaptureRequest(requestList, listener, handler, /*streaming*/false);
     }
 
+    @Override
     public int captureBurst(List<CaptureRequest> requests, CaptureListener listener,
             Handler handler) throws CameraAccessException {
         if (requests == null || requests.isEmpty()) {
@@ -610,6 +613,7 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
         }
     }
 
+    @Override
     public int setRepeatingRequest(CaptureRequest request, CaptureListener listener,
             Handler handler) throws CameraAccessException {
         List<CaptureRequest> requestList = new ArrayList<CaptureRequest>();
@@ -617,6 +621,7 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
         return submitCaptureRequest(requestList, listener, handler, /*streaming*/true);
     }
 
+    @Override
     public int setRepeatingBurst(List<CaptureRequest> requests, CaptureListener listener,
             Handler handler) throws CameraAccessException {
         if (requests == null || requests.isEmpty()) {
@@ -625,6 +630,7 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
         return submitCaptureRequest(requests, listener, handler, /*streaming*/true);
     }
 
+    @Override
     public void stopRepeating() throws CameraAccessException {
 
         synchronized(mInterfaceLock) {
@@ -675,6 +681,7 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
         }
     }
 
+    @Override
     public void flush() throws CameraAccessException {
         synchronized(mInterfaceLock) {
             checkIfCameraClosedOrInError();
@@ -1031,8 +1038,10 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
                 CaptureResultExtras resultExtras) throws RemoteException {
 
             int requestId = resultExtras.getRequestId();
+            long frameNumber = resultExtras.getFrameNumber();
+
             if (DEBUG) {
-                Log.v(TAG, "Received result frame " + resultExtras.getFrameNumber() + " for id "
+                Log.v(TAG, "Received result frame " + frameNumber + " for id "
                         + requestId);
             }
 
@@ -1051,7 +1060,7 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
 
                 // Update tracker (increment counter) when it's not a partial result.
                 if (!isPartialResult) {
-                    mFrameNumberTracker.updateTracker(resultExtras.getFrameNumber(),
+                    mFrameNumberTracker.updateTracker(frameNumber,
                             /*error*/false);
                 }
 
@@ -1060,7 +1069,7 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
                     if (DEBUG) {
                         Log.d(TAG,
                                 "holder is null, early return at frame "
-                                        + resultExtras.getFrameNumber());
+                                        + frameNumber);
                     }
                     return;
                 }
@@ -1069,7 +1078,7 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
                     if (DEBUG) {
                         Log.d(TAG,
                                 "camera is closed, early return at frame "
-                                        + resultExtras.getFrameNumber());
+                                        + frameNumber);
                     }
                     return;
                 }
@@ -1082,7 +1091,7 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
                 // Either send a partial result or the final capture completed result
                 if (isPartialResult) {
                     final CaptureResult resultAsCapture =
-                            new CaptureResult(result, request, requestId);
+                            new CaptureResult(result, request, resultExtras);
 
                     // Partial result
                     resultDispatch = new Runnable() {
@@ -1098,7 +1107,7 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
                     };
                 } else {
                     final TotalCaptureResult resultAsCapture =
-                            new TotalCaptureResult(result, request, requestId);
+                            new TotalCaptureResult(result, request, resultExtras);
 
                     // Final capture result
                     resultDispatch = new Runnable() {
