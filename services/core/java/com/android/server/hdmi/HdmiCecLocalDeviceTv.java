@@ -1249,18 +1249,6 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         }
     }
 
-    @Override
-    @ServiceThreadOnly
-    protected boolean handleStandby(HdmiCecMessage message) {
-        assertRunOnServiceThread();
-        // Seq #12
-        // Tv accepts directly addressed <Standby> only.
-        if (message.getDestination() == mAddress) {
-            super.handleStandby(message);
-        }
-        return false;
-    }
-
     boolean isProhibitMode() {
         return mService.isProhibitMode();
     }
