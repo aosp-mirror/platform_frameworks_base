@@ -32,24 +32,24 @@ import java.util.MissingResourceException;
 public class PhoneAccount implements Parcelable {
 
     /**
-     * Flag indicating that this {@code PhoneAccount} can act as a call manager for
-     * traditional SIM-based telephony calls. The {@link ConnectionService} associated with this
-     * phone-account will be allowed to manage SIM-based phone calls including using its own
-     * proprietary phone-call implementation (like VoIP calling) to make calls instead of the
-     * telephony stack.
+     * Flag indicating that this {@code PhoneAccount} can act as a connection manager for
+     * other connections. The {@link ConnectionService} associated with this {@code PhoneAccount}
+     * will be allowed to manage phone calls including using its own proprietary phone-call
+     * implementation (like VoIP calling) to make calls instead of the telephony stack.
+     * <p>
      * When a user opts to place a call using the SIM-based telephony stack, the connection-service
      * associated with this phone-account will be attempted first if the user has explicitly
-     * selected it to be used as the default call-manager.
+     * selected it to be used as the default connection manager.
      * <p>
      * See {@link #getCapabilities}
      */
-    public static final int CAPABILITY_SIM_CALL_MANAGER = 0x1;
+    public static final int CAPABILITY_CONNECTION_MANAGER = 0x1;
 
     /**
      * Flag indicating that this {@code PhoneAccount} can make phone calls in place of
      * traditional SIM-based telephony calls. This account will be treated as a distinct method
      * for placing calls alongside the traditional SIM-based telephony stack. This flag is
-     * distinct from {@link #CAPABILITY_SIM_CALL_MANAGER} in that it is not allowed to manage
+     * distinct from {@link #CAPABILITY_CONNECTION_MANAGER} in that it is not allowed to manage
      * calls from or use the built-in telephony stack to place its calls.
      * <p>
      * See {@link #getCapabilities}
@@ -66,6 +66,11 @@ public class PhoneAccount implements Parcelable {
      */
     public static final int CAPABILITY_SIM_SUBSCRIPTION = 0x4;
 
+    /**
+     * Flag indicating that this {@code PhoneAccount} is capable of video calling.
+     */
+    public static final int CAPABILITY_VIDEO_CALLING = 0x8;
+
     private final PhoneAccountHandle mAccountHandle;
     private final Uri mHandle;
     private final String mSubscriptionNumber;
@@ -73,7 +78,6 @@ public class PhoneAccount implements Parcelable {
     private final int mIconResId;
     private final CharSequence mLabel;
     private final CharSequence mShortDescription;
-    private boolean mVideoCallingSupported;
 
     public PhoneAccount(
             PhoneAccountHandle account,
@@ -82,8 +86,7 @@ public class PhoneAccount implements Parcelable {
             int capabilities,
             int iconResId,
             CharSequence label,
-            CharSequence shortDescription,
-            boolean supportsVideoCalling) {
+            CharSequence shortDescription) {
         mAccountHandle = account;
         mHandle = handle;
         mSubscriptionNumber = subscriptionNumber;
@@ -91,7 +94,6 @@ public class PhoneAccount implements Parcelable {
         mIconResId = iconResId;
         mLabel = label;
         mShortDescription = shortDescription;
-        mVideoCallingSupported = supportsVideoCalling;
     }
 
     /**
@@ -189,15 +191,6 @@ public class PhoneAccount implements Parcelable {
         }
     }
 
-    /**
-     * Determines whether this {@code PhoneAccount} supports video calling.
-     *
-     * @return {@code true} if this {@code PhoneAccount} supports video calling.
-     */
-    public boolean isVideoCallingSupported() {
-        return mVideoCallingSupported;
-    }
-
     //
     // Parcelable implementation
     //
@@ -216,7 +209,6 @@ public class PhoneAccount implements Parcelable {
         out.writeInt(mIconResId);
         out.writeCharSequence(mLabel);
         out.writeCharSequence(mShortDescription);
-        out.writeInt(mVideoCallingSupported ? 1 : 0);
     }
 
     public static final Creator<PhoneAccount> CREATOR
@@ -240,6 +232,5 @@ public class PhoneAccount implements Parcelable {
         mIconResId = in.readInt();
         mLabel = in.readCharSequence();
         mShortDescription = in.readCharSequence();
-        mVideoCallingSupported = in.readInt() == 1;
     }
 }

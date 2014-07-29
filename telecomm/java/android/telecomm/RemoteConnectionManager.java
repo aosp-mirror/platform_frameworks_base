@@ -50,6 +50,7 @@ public class RemoteConnectionManager {
     }
 
     public RemoteConnection createRemoteConnection(
+            PhoneAccountHandle connectionManagerPhoneAccount,
             ConnectionRequest request,
             boolean isIncoming) {
         PhoneAccountHandle accountHandle = request.getAccountHandle();
@@ -65,7 +66,8 @@ public class RemoteConnectionManager {
 
         RemoteConnectionService remoteService = mRemoteConnectionServices.get(componentName);
         if (remoteService != null) {
-            return remoteService.createRemoteConnection(request, isIncoming);
+            return remoteService.createRemoteConnection(
+                    connectionManagerPhoneAccount, request, isIncoming);
         }
         return null;
     }
