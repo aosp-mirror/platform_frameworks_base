@@ -5332,6 +5332,7 @@ package android.app.admin {
     method public android.os.UserHandle createUser(android.content.ComponentName, java.lang.String);
     method public void enableSystemApp(android.content.ComponentName, java.lang.String);
     method public int enableSystemApp(android.content.ComponentName, android.content.Intent);
+    method public void setTrustAgentFeaturesEnabled(android.content.ComponentName, android.content.ComponentName, java.util.List<java.lang.String>);
     method public java.lang.String[] getAccountTypesWithManagementDisabled();
     method public java.util.List<android.content.ComponentName> getActiveAdmins();
     method public android.os.Bundle getApplicationRestrictions(android.content.ComponentName, java.lang.String);
@@ -5357,6 +5358,7 @@ package android.app.admin {
     method public boolean getScreenCaptureDisabled(android.content.ComponentName);
     method public boolean getStorageEncryption(android.content.ComponentName);
     method public int getStorageEncryptionStatus();
+    method public java.util.List<java.lang.String> getTrustAgentFeaturesEnabled(android.content.ComponentName, android.content.ComponentName);
     method public boolean hasAnyCaCertsInstalled();
     method public boolean hasCaCertInstalled(byte[]);
     method public boolean hasGrantedPolicy(android.content.ComponentName, int);
@@ -27414,8 +27416,10 @@ package android.service.trust {
     ctor public TrustAgentService();
     method public final void grantTrust(java.lang.CharSequence, long, boolean);
     method public final android.os.IBinder onBind(android.content.Intent);
+    method public boolean onSetTrustAgentFeaturesEnabled(android.os.Bundle);
     method public void onUnlockAttempt(boolean);
     method public final void revokeTrust();
+    field public static final java.lang.String KEY_FEATURES = "trust_agent_features";
     field public static final java.lang.String SERVICE_INTERFACE = "android.service.trust.TrustAgentService";
     field public static final java.lang.String TRUST_AGENT_META_DATA = "android.service.trust.trustagent";
   }

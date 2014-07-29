@@ -80,6 +80,7 @@ import android.security.Credentials;
 import android.security.IKeyChainService;
 import android.security.KeyChain;
 import android.security.KeyChain.KeyChainConnection;
+import android.service.trust.TrustAgentService;
 import android.util.Log;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
@@ -89,6 +90,11 @@ import android.util.Xml;
 import android.view.IWindowManager;
 
 import org.xmlpull.v1.XmlPullParser;
+
+import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
+import static org.xmlpull.v1.XmlPullParser.END_TAG;
+import static org.xmlpull.v1.XmlPullParser.TEXT;
+
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
@@ -111,6 +117,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 /**
@@ -260,6 +268,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         private static final String TAG_DISABLE_ACCOUNT_MANAGEMENT = "disable-account-management";
         private static final String TAG_ACCOUNT_TYPE = "account-type";
         private static final String TAG_ENCRYPTION_REQUESTED = "encryption-requested";
+        private static final String TAG_MANAGE_TRUST_AGENT_FEATURES = "manage-trust-agent-features";
+        private static final String TAG_TRUST_AGENT_FEATURE = "feature";
+        private static final String TAG_TRUST_AGENT_COMPONENT = "component";
         private static final String TAG_PASSWORD_EXPIRATION_DATE = "password-expiration-date";
         private static final String TAG_PASSWORD_EXPIRATION_TIMEOUT = "password-expiration-timeout";
         private static final String TAG_GLOBAL_PROXY_EXCLUSION_LIST = "global-proxy-exclusion-list";
@@ -333,6 +344,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         boolean specifiesGlobalProxy = false;
         String globalProxySpec = null;
         String globalProxyExclusionList = null;
+        HashMap<String, List<String>> trustAgentFeatures = new HashMap<String, List<String>>();
 
         ActiveAdmin(DeviceAdminInfo _info) {
             info = _info;
@@ -463,15 +475,30 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
                 out.endTag(null,  TAG_DISABLE_ACCOUNT_MANAGEMENT);
             }
+            if (!trustAgentFeatures.isEmpty()) {
+                Set<Entry<String, List<String>>> set = trustAgentFeatures.entrySet();
+                out.startTag(null, TAG_MANAGE_TRUST_AGENT_FEATURES);
+                for (Entry<String, List<String>> component : set) {
+                    out.startTag(null, TAG_TRUST_AGENT_COMPONENT);
+                    out.attribute(null, ATTR_VALUE, component.getKey());
+                    for (String feature : component.getValue()) {
+                        out.startTag(null, TAG_TRUST_AGENT_FEATURE);
+                        out.attribute(null, ATTR_VALUE, feature);
+                        out.endTag(null, TAG_TRUST_AGENT_FEATURE);
+                    }
+                    out.endTag(null, TAG_TRUST_AGENT_COMPONENT);
+                }
+                out.endTag(null, TAG_MANAGE_TRUST_AGENT_FEATURES);
+            }
         }
 
         void readFromXml(XmlPullParser parser)
                 throws XmlPullParserException, IOException {
             int outerDepth = parser.getDepth();
             int type;
-            while ((type=parser.next()) != XmlPullParser.END_DOCUMENT
-                   && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
-                if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
+            while ((type=parser.next()) != END_DOCUMENT
+                   && (type != END_TAG || parser.getDepth() > outerDepth)) {
+                if (type == END_TAG || type == TEXT) {
                     continue;
                 }
                 String tag = parser.getName();
@@ -541,27 +568,76 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     disabledKeyguardFeatures = Integer.parseInt(
                             parser.getAttributeValue(null, ATTR_VALUE));
                 } else if (TAG_DISABLE_ACCOUNT_MANAGEMENT.equals(tag)) {
-                    int outerDepthDAM = parser.getDepth();
-                    int typeDAM;
-                    while ((typeDAM=parser.next()) != XmlPullParser.END_DOCUMENT
-                            && (typeDAM != XmlPullParser.END_TAG
-                                    || parser.getDepth() > outerDepthDAM)) {
-                        if (typeDAM == XmlPullParser.END_TAG || typeDAM == XmlPullParser.TEXT) {
-                            continue;
-                        }
-                        String tagDAM = parser.getName();
-                        if (TAG_ACCOUNT_TYPE.equals(tagDAM)) {
-                            accountTypesWithManagementDisabled.add(
-                                    parser.getAttributeValue(null, ATTR_VALUE));
-                        } else {
-                            Slog.w(LOG_TAG, "Unknown tag under " + tag +  ": " + tagDAM);
-                        }
-                    }
+                    accountTypesWithManagementDisabled = readDisableAccountInfo(parser, tag);
+                } else if (TAG_MANAGE_TRUST_AGENT_FEATURES.equals(tag)) {
+                    trustAgentFeatures = getAllTrustAgentFeatures(parser, tag);
                 } else {
                     Slog.w(LOG_TAG, "Unknown admin tag: " + tag);
                 }
                 XmlUtils.skipCurrentTag(parser);
             }
+        }
+
+        private Set<String> readDisableAccountInfo(XmlPullParser parser, String tag)
+                throws XmlPullParserException, IOException {
+            int outerDepthDAM = parser.getDepth();
+            int typeDAM;
+            Set<String> result = new HashSet<String>();
+            while ((typeDAM=parser.next()) != END_DOCUMENT
+                    && (typeDAM != END_TAG || parser.getDepth() > outerDepthDAM)) {
+                if (typeDAM == END_TAG || typeDAM == TEXT) {
+                    continue;
+                }
+                String tagDAM = parser.getName();
+                if (TAG_ACCOUNT_TYPE.equals(tagDAM)) {
+                    result.add(parser.getAttributeValue(null, ATTR_VALUE));
+                } else {
+                    Slog.w(LOG_TAG, "Unknown tag under " + tag +  ": " + tagDAM);
+                }
+            }
+            return result;
+        }
+
+        private HashMap<String, List<String>> getAllTrustAgentFeatures(XmlPullParser parser,
+                String tag) throws XmlPullParserException, IOException {
+            int outerDepthDAM = parser.getDepth();
+            int typeDAM;
+            HashMap<String, List<String>> result = new HashMap<String, List<String>>();
+            while ((typeDAM=parser.next()) != END_DOCUMENT
+                    && (typeDAM != END_TAG || parser.getDepth() > outerDepthDAM)) {
+                if (typeDAM == END_TAG || typeDAM == TEXT) {
+                    continue;
+                }
+                String tagDAM = parser.getName();
+                if (TAG_TRUST_AGENT_COMPONENT.equals(tagDAM)) {
+                    final String component = parser.getAttributeValue(null, ATTR_VALUE);
+                    result.put(component, getTrustAgentFeatures(parser, tag));
+                } else {
+                    Slog.w(LOG_TAG, "Unknown tag under " + tag +  ": " + tagDAM);
+                }
+            }
+            return result;
+        }
+
+        private List<String> getTrustAgentFeatures(XmlPullParser parser, String tag)
+                throws XmlPullParserException, IOException  {
+            int outerDepthDAM = parser.getDepth();
+            int typeDAM;
+            ArrayList<String> result = new ArrayList<String>();
+            while ((typeDAM=parser.next()) != END_DOCUMENT
+                    && (typeDAM != END_TAG || parser.getDepth() > outerDepthDAM)) {
+                if (typeDAM == END_TAG || typeDAM == TEXT) {
+                    continue;
+                }
+                String tagDAM = parser.getName();
+                if (TAG_TRUST_AGENT_FEATURE.equals(tagDAM)) {
+                    final String feature = parser.getAttributeValue(null, ATTR_VALUE);
+                    result.add(feature);
+                } else {
+                    Slog.w(LOG_TAG, "Unknown tag under " + tag +  ": " + tagDAM);
+                }
+            }
+            return result;
         }
 
         void dump(String prefix, PrintWriter pw) {
@@ -3530,6 +3606,76 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             } finally {
                 restoreCallingIdentity(id);
             }
+        }
+    }
+
+    public void setTrustAgentFeaturesEnabled(ComponentName admin, ComponentName agent,
+            List<String>features, int userHandle) {
+        if (!mHasFeature) {
+            return;
+        }
+        enforceCrossUserPermission(userHandle);
+        enforceNotManagedProfile(userHandle, "manage trust agent features");
+        synchronized (this) {
+            if (admin == null) {
+                throw new NullPointerException("admin is null");
+            }
+            if (agent == null) {
+                throw new NullPointerException("agent is null");
+            }
+            ActiveAdmin ap = getActiveAdminForCallerLocked(admin,
+                    DeviceAdminInfo.USES_POLICY_DISABLE_KEYGUARD_FEATURES);
+            ap.trustAgentFeatures.put(agent.flattenToString(), features);
+            saveSettingsLocked(userHandle);
+            syncDeviceCapabilitiesLocked(getUserData(userHandle));
+        }
+    }
+
+    public List<String> getTrustAgentFeaturesEnabled(ComponentName admin, ComponentName agent,
+            int userHandle) {
+        if (!mHasFeature) {
+            return null;
+        }
+        enforceCrossUserPermission(userHandle);
+        synchronized (this) {
+            if (agent == null) {
+                throw new NullPointerException("agent is null");
+            }
+            final String componentName = agent.flattenToString();
+            if (admin != null) {
+                final ActiveAdmin ap = getActiveAdminUncheckedLocked(admin, userHandle);
+                return (ap != null) ? ap.trustAgentFeatures.get(componentName) : null;
+            }
+
+            // Return strictest policy for this user and profiles that are visible from this user.
+            List<UserInfo> profiles = mUserManager.getProfiles(userHandle);
+            List<String> result = null;
+            for (UserInfo userInfo : profiles) {
+                DevicePolicyData policy = getUserData(userInfo.getUserHandle().getIdentifier());
+                final int N = policy.mAdminList.size();
+                for (int i=0; i<N; i++) {
+                    ActiveAdmin ap = policy.mAdminList.get(i);
+                    // Compute the intersection of all features for active admins that disable
+                    // trust agents:
+                    if ((ap.disabledKeyguardFeatures
+                            & DevicePolicyManager.KEYGUARD_DISABLE_TRUST_AGENTS) != 0) {
+                        final List<String> features = ap.trustAgentFeatures.get(componentName);
+                        if (result == null) {
+                            if (features == null || features.size() == 0) {
+                                result = new ArrayList<String>();
+                                Slog.w(LOG_TAG, "admin " + ap.info.getPackageName()
+                                    + " has null trust agent feature set; all will be disabled");
+                            } else {
+                                result = new ArrayList<String>(features.size());
+                                result.addAll(features);
+                            }
+                        } else {
+                            result.retainAll(features);
+                        }
+                    }
+                }
+            }
+            return result;
         }
     }
 
