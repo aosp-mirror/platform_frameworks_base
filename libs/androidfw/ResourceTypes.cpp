@@ -504,19 +504,22 @@ status_t ResStringPool::setTo(const void* data, size_t size, bool copyData)
             charSize = sizeof(char16_t);
         }
 
-        mStrings = (const void*)
-            (((const uint8_t*)data)+mHeader->stringsStart);
-        if (mHeader->stringsStart >= (mHeader->header.size-sizeof(uint16_t))) {
+        // There should be at least space for the smallest string
+        // (2 bytes length, null terminator).
+        if (mHeader->stringsStart >= (mSize - sizeof(uint16_t))) {
             ALOGW("Bad string block: string pool starts at %d, after total size %d\n",
                     (int)mHeader->stringsStart, (int)mHeader->header.size);
             return (mError=BAD_TYPE);
         }
+
+        mStrings = (const void*)
+            (((const uint8_t*)data) + mHeader->stringsStart);
+
         if (mHeader->styleCount == 0) {
-            mStringPoolSize =
-                (mHeader->header.size-mHeader->stringsStart)/charSize;
+            mStringPoolSize = (mSize - mHeader->stringsStart) / charSize;
         } else {
             // check invariant: styles starts before end of data
-            if (mHeader->stylesStart >= (mHeader->header.size-sizeof(uint16_t))) {
+            if (mHeader->stylesStart >= (mSize - sizeof(uint16_t))) {
                 ALOGW("Bad style block: style block starts at %d past data size of %d\n",
                     (int)mHeader->stylesStart, (int)mHeader->header.size);
                 return (mError=BAD_TYPE);
@@ -3366,6 +3369,12 @@ status_t ResTable::addInternal(const void* data, size_t dataSize, const void* id
 {
     if (!data) {
         return NO_ERROR;
+    }
+
+    if (dataSize < sizeof(ResTable_header)) {
+        ALOGE("Invalid data. Size(%d) is smaller than a ResTable_header(%d).",
+                (int) dataSize, (int) sizeof(ResTable_header));
+        return UNKNOWN_ERROR;
     }
 
     Header* header = new Header(this);
