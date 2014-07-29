@@ -179,6 +179,8 @@ public class DocumentsActivity extends Activity {
                     android.R.style.TextAppearance_DeviceDefault_Widget_ActionBar_Title);
         }
 
+        setActionBar(mToolbar);
+
         // Hide roots when we're managing a specific root
         if (mState.action == ACTION_MANAGE) {
             if (mShowAsDialog) {
