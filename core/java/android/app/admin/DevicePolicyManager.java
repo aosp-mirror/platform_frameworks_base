@@ -2328,7 +2328,7 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Sets a list of features to enable for a TrustAgentService component. This is meant to be
+     * Sets a list of features to enable for a TrustAgent component. This is meant to be
      * used in conjunction with {@link #KEYGUARD_DISABLE_TRUST_AGENTS}, which will disable all
      * trust agents but those with features enabled by this function call.
      *
@@ -2353,7 +2353,7 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Gets list of enabled features for the given {@link TrustAgentService} agent. If admin is
+     * Gets list of enabled features for the given TrustAgent component. If admin is
      * null, this will return the intersection of all features enabled for the given agent by all
      * admins.
      *
