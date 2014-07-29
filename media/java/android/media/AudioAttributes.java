@@ -413,6 +413,7 @@ public final class AudioAttributes implements Parcelable {
                 default:
                     Log.e(TAG, "Invalid stream type " + streamType + " for AudioAttributes");
             }
+            mUsage = usageForLegacyStreamType(streamType);
             return this;
         }
 
