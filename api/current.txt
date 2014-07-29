@@ -35514,7 +35514,6 @@ package android.view {
     field public static final int TYPE_CHANGED = 2; // 0x2
     field public static final int TYPE_INPUT_METHOD = 2011; // 0x7db
     field public static final int TYPE_INPUT_METHOD_DIALOG = 2012; // 0x7dc
-    field public static final int TYPE_KEYGUARD = 2004; // 0x7d4
     field public static final int TYPE_KEYGUARD_DIALOG = 2009; // 0x7d9
     field public static final int TYPE_PHONE = 2002; // 0x7d2
     field public static final int TYPE_PRIORITY_PHONE = 2007; // 0x7d7
