@@ -168,7 +168,7 @@ public class ScanResult implements Parcelable {
      * @hide
      */
     public boolean is5GHz() {
-        return ScanResult.is24GHz(frequency);
+        return ScanResult.is5GHz(frequency);
     }
 
     /**
