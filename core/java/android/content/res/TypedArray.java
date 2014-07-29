@@ -400,6 +400,8 @@ public class TypedArray {
                 return csl.getDefaultColor();
             }
             return defValue;
+        } else if (type == TypedValue.TYPE_ATTRIBUTE) {
+            throw new RuntimeException("Failed to resolve attribute at index " + index);
         }
 
         throw new UnsupportedOperationException("Can't convert to color: type=0x"
@@ -422,6 +424,9 @@ public class TypedArray {
 
         final TypedValue value = mValue;
         if (getValueAt(index*AssetManager.STYLE_NUM_ENTRIES, value)) {
+            if (value.type == TypedValue.TYPE_ATTRIBUTE) {
+                throw new RuntimeException("Failed to resolve attribute at index " + index);
+            }
             return mResources.loadColorStateList(value, value.resourceId);
         }
         return null;
@@ -449,6 +454,8 @@ public class TypedArray {
         } else if (type >= TypedValue.TYPE_FIRST_INT
             && type <= TypedValue.TYPE_LAST_INT) {
             return data[index+AssetManager.STYLE_DATA];
+        } else if (type == TypedValue.TYPE_ATTRIBUTE) {
+            throw new RuntimeException("Failed to resolve attribute at index " + index);
         }
 
         throw new UnsupportedOperationException("Can't convert to integer: type=0x"
@@ -484,6 +491,8 @@ public class TypedArray {
         } else if (type == TypedValue.TYPE_DIMENSION) {
             return TypedValue.complexToDimension(
                 data[index+AssetManager.STYLE_DATA], mMetrics);
+        } else if (type == TypedValue.TYPE_ATTRIBUTE) {
+            throw new RuntimeException("Failed to resolve attribute at index " + index);
         }
 
         throw new UnsupportedOperationException("Can't convert to dimension: type=0x"
@@ -520,6 +529,8 @@ public class TypedArray {
         } else if (type == TypedValue.TYPE_DIMENSION) {
             return TypedValue.complexToDimensionPixelOffset(
                 data[index+AssetManager.STYLE_DATA], mMetrics);
+        } else if (type == TypedValue.TYPE_ATTRIBUTE) {
+            throw new RuntimeException("Failed to resolve attribute at index " + index);
         }
 
         throw new UnsupportedOperationException("Can't convert to dimension: type=0x"
@@ -557,6 +568,8 @@ public class TypedArray {
         } else if (type == TypedValue.TYPE_DIMENSION) {
             return TypedValue.complexToDimensionPixelSize(
                 data[index+AssetManager.STYLE_DATA], mMetrics);
+        } else if (type == TypedValue.TYPE_ATTRIBUTE) {
+            throw new RuntimeException("Failed to resolve attribute at index " + index);
         }
 
         throw new UnsupportedOperationException("Can't convert to dimension: type=0x"
@@ -589,6 +602,8 @@ public class TypedArray {
         } else if (type == TypedValue.TYPE_DIMENSION) {
             return TypedValue.complexToDimensionPixelSize(
                 data[index+AssetManager.STYLE_DATA], mMetrics);
+        } else if (type == TypedValue.TYPE_ATTRIBUTE) {
+            throw new RuntimeException("Failed to resolve attribute at index " + index);
         }
 
         throw new RuntimeException(getPositionDescription()
@@ -655,6 +670,8 @@ public class TypedArray {
         } else if (type == TypedValue.TYPE_FRACTION) {
             return TypedValue.complexToFraction(
                 data[index+AssetManager.STYLE_DATA], base, pbase);
+        } else if (type == TypedValue.TYPE_ATTRIBUTE) {
+            throw new RuntimeException("Failed to resolve attribute at index " + index);
         }
 
         throw new UnsupportedOperationException("Can't convert to fraction: type=0x"
@@ -692,33 +709,7 @@ public class TypedArray {
     }
 
     /**
-     * Retrieve the theme attribute resource identifier for the attribute at
-     * <var>index</var>.
-     *
-     * @param index Index of attribute to retrieve.
-     * @param defValue Value to return if the attribute is not defined or not a
-     *            resource.
-     * @return Theme attribute resource identifier, or defValue if not defined.
-     * @hide
-     */
-    public int getThemeAttributeId(int index, int defValue) {
-        if (mRecycled) {
-            throw new RuntimeException("Cannot make calls to a recycled instance!");
-        }
-
-        index *= AssetManager.STYLE_NUM_ENTRIES;
-        final int[] data = mData;
-        if (data[index + AssetManager.STYLE_TYPE] == TypedValue.TYPE_ATTRIBUTE) {
-            return data[index + AssetManager.STYLE_DATA];
-        }
-        return defValue;
-    }
-
-    /**
-     * Retrieve the Drawable for the attribute at <var>index</var>.  This
-     * gets the resource ID of the selected attribute, and uses
-     * {@link Resources#getDrawable Resources.getDrawable} of the owning
-     * Resources object to retrieve its Drawable.
+     * Retrieve the Drawable for the attribute at <var>index</var>.
      *
      * @param index Index of attribute to retrieve.
      *
@@ -731,14 +722,8 @@ public class TypedArray {
 
         final TypedValue value = mValue;
         if (getValueAt(index*AssetManager.STYLE_NUM_ENTRIES, value)) {
-            if (false) {
-                System.out.println("******************************************************************");
-                System.out.println("Got drawable resource: type="
-                                   + value.type
-                                   + " str=" + value.string
-                                   + " int=0x" + Integer.toHexString(value.data)
-                                   + " cookie=" + value.assetCookie);
-                System.out.println("******************************************************************");
+            if (value.type == TypedValue.TYPE_ATTRIBUTE) {
+                throw new RuntimeException("Failed to resolve attribute at index " + index);
             }
             return mResources.loadDrawable(value, value.resourceId, mTheme);
         }
@@ -762,15 +747,6 @@ public class TypedArray {
 
         final TypedValue value = mValue;
         if (getValueAt(index*AssetManager.STYLE_NUM_ENTRIES, value)) {
-            if (false) {
-                System.out.println("******************************************************************");
-                System.out.println("Got drawable resource: type="
-                                   + value.type
-                                   + " str=" + value.string
-                                   + " int=0x" + Integer.toHexString(value.data)
-                                   + " cookie=" + value.assetCookie);
-                System.out.println("******************************************************************");
-            }
             return mResources.getTextArray(value.resourceId);
         }
         return null;
