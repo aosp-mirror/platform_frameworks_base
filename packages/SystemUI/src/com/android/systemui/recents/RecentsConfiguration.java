@@ -16,7 +16,6 @@
 
 package com.android.systemui.recents;
 
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;

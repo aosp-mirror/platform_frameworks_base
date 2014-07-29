@@ -35,7 +35,6 @@ import android.widget.TextView;
 import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
-import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.Task;
 
 
@@ -115,7 +114,7 @@ class TaskBarView extends FrameLayout {
     protected void onDraw(Canvas canvas) {
         if (!mIsFullscreen) {
             // Draw the highlight at the top edge (but put the bottom edge just out of view)
-            float offset = mConfig.taskViewHighlightPx / 2f;
+            float offset = (float) Math.ceil(mConfig.taskViewHighlightPx / 2f);
             float radius = mConfig.taskViewRoundedCornerRadiusPx;
             canvas.drawRoundRect(-offset, 0f, (float) getMeasuredWidth() + offset,
                     getMeasuredHeight() + radius, radius, radius, sHighlightPaint);

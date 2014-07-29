@@ -27,9 +27,6 @@ import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.UserHandle;
-import android.provider.Settings;
-import android.provider.Settings.SettingNotFoundException;
-
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.misc.SystemServicesProxy;
