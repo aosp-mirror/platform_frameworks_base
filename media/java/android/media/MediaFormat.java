@@ -483,6 +483,9 @@ public final class MediaFormat {
      */
     public static final String KEY_IS_FORCED_SUBTITLE = "is-forced-subtitle";
 
+    /** @hide */
+    public static final String KEY_IS_TIMED_TEXT = "is-timed-text";
+
     /* package private */ MediaFormat(Map<String, Object> map) {
         mMap = map;
     }
