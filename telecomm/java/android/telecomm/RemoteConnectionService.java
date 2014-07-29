@@ -32,8 +32,6 @@ import com.android.internal.telecomm.IConnectionServiceAdapter;
 import com.android.internal.telecomm.IVideoCallProvider;
 import com.android.internal.telecomm.RemoteServiceCallback;
 
-import java.util.LinkedList;
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -421,7 +419,10 @@ final class RemoteConnectionService implements DeathRecipient {
         release();
     }
 
-    final RemoteConnection createRemoteConnection(ConnectionRequest request, boolean isIncoming) {
+    final RemoteConnection createRemoteConnection(
+            PhoneAccountHandle connectionManagerPhoneAccount,
+            ConnectionRequest request,
+            boolean isIncoming) {
         if (mConnectionId == null) {
             String id = UUID.randomUUID().toString();
             ConnectionRequest newRequest = new ConnectionRequest(
@@ -433,7 +434,10 @@ final class RemoteConnectionService implements DeathRecipient {
                     request.getVideoState());
             mConnection = new RemoteConnection(mConnectionService, request, isIncoming);
             try {
-                mConnectionService.createConnection(newRequest, isIncoming);
+                mConnectionService.createConnection(
+                        connectionManagerPhoneAccount,
+                        newRequest,
+                        isIncoming);
                 mConnectionId = id;
             } catch (RemoteException e) {
                 mConnection = RemoteConnection.failure(DisconnectCause.ERROR_UNSPECIFIED,
