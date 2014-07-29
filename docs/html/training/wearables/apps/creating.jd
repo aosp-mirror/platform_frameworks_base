@@ -112,7 +112,7 @@ Project</a>. As you follow the wizard, enter the following information:</p>
   name.</li>
   <li>In the <b>Form Factors</b> window:
     <ul>
-      <li>Select <b>Phone and Tablet</b> and select <b>API 8: Android 2.2 (Froyo)</b>
+      <li>Select <b>Phone and Tablet</b> and select <b>API 9: Android 2.3 (Gingerbread)</b>
       under <b>Minimum SDK</b>.</li>
       <li>Select <b>Wear</b> and select <b>API 20: Android 4.4 (KitKat Wear)</b>
       under <b>Minimum SDK</b>.</li>
