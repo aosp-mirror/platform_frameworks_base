@@ -178,6 +178,7 @@ bool StatefulBaseRenderer::clipPath(const SkPath* path, SkRegion::Op op) {
     SkRegion region;
     region.setPath(transformed, clip);
 
+    // region is the transformed input path, masked by the previous clip
     mDirtyClip |= mSnapshot->clipRegionTransformed(region, op);
     return !mSnapshot->clipRect->isEmpty();
 }
