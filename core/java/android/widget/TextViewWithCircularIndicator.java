@@ -50,20 +50,18 @@ class TextViewWithCircularIndicator extends TextView {
 
     public TextViewWithCircularIndicator(Context context, AttributeSet attrs,
             int defStyleAttr, int defStyleRes) {
-
         super(context, attrs);
-        Resources res = context.getResources();
+
 
         // Use Theme attributes if possible
         final TypedArray a = mContext.obtainStyledAttributes(attrs,
                 R.styleable.DatePicker, defStyleAttr, defStyleRes);
-
-        final int resId = a.getResourceId(
-                R.styleable.DatePicker_dateSelectorYearListItemTextAppearance, -1);
+        final int resId = a.getResourceId(R.styleable.DatePicker_yearListItemTextAppearance, -1);
         if (resId != -1) {
             setTextAppearance(context, resId);
         }
 
+        final Resources res = context.getResources();
         mItemIsSelectedText = res.getString(R.string.item_is_selected);
 
         a.recycle();

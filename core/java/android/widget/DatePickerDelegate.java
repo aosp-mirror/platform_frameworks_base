@@ -24,12 +24,14 @@ import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.format.DateFormat;
 import android.text.format.DateUtils;
 import android.util.AttributeSet;
 import android.util.SparseArray;
+import android.util.StateSet;
 import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -45,7 +47,6 @@ import com.android.internal.widget.AccessibleDateAnimator;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Locale;
 
 /**
@@ -76,9 +77,9 @@ class DatePickerDelegate extends DatePicker.AbstractDatePickerDelegate implement
     private TextView mDayOfWeekView;
     private LinearLayout mDateLayout;
     private LinearLayout mMonthAndDayLayout;
-    private TextView mSelectedMonthTextView;
-    private TextView mSelectedDayTextView;
-    private TextView mSelectedYearView;
+    private TextView mHeaderMonthTextView;
+    private TextView mHeaderDayOfMonthTextView;
+    private TextView mHeaderYearTextView;
     private DayPickerView mDayPickerView;
     private YearPickerView mYearPickerView;
 
@@ -112,21 +113,8 @@ class DatePickerDelegate extends DatePicker.AbstractDatePickerDelegate implement
 
     private HashSet<OnDateChangedListener> mListeners = new HashSet<OnDateChangedListener>();
 
-    private int mDayOfWeekTextAppearanceResId;
-    private int mMonthTextAppearanceResId;
-    private int mDayOfMonthTextAppearanceResId;
-    private int mYearTextAppearanceResId;
-
-    private int mYearListItemTextAppearanceResId;
-
-    private int mDayOfWeekBackgroundColor;
-    private int mMonthAndDayBackgroundColor;
-
-    private ColorStateList mCalendarTextColors;
-
     public DatePickerDelegate(DatePicker delegator, Context context, AttributeSet attrs,
             int defStyleAttr, int defStyleRes) {
-
         super(delegator, context);
 
         final Locale locale = Locale.getDefault();
@@ -139,17 +127,14 @@ class DatePickerDelegate extends DatePicker.AbstractDatePickerDelegate implement
         mMinDate.set(DEFAULT_START_YEAR, 1, 1);
         mMaxDate.set(DEFAULT_END_YEAR, 12, 31);
 
-        // process style attributes
+        final Resources res = mDelegator.getResources();
         final TypedArray a = mContext.obtainStyledAttributes(attrs,
                 R.styleable.DatePicker, defStyleAttr, defStyleRes);
-
         final LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
-
         final int layoutResourceId = a.getResourceId(
                 R.styleable.DatePicker_internalLayout, R.layout.date_picker_holo);
-
-        View mainView = inflater.inflate(layoutResourceId, null);
+        final View mainView = inflater.inflate(layoutResourceId, null);
         mDelegator.addView(mainView);
 
         mDayOfWeekView = (TextView) mainView.findViewById(R.id.date_picker_header);
@@ -157,54 +142,68 @@ class DatePickerDelegate extends DatePicker.AbstractDatePickerDelegate implement
         mMonthAndDayLayout = (LinearLayout) mainView.findViewById(
                 R.id.date_picker_month_and_day_layout);
         mMonthAndDayLayout.setOnClickListener(this);
-        mSelectedMonthTextView = (TextView) mainView.findViewById(R.id.date_picker_month);
-        mSelectedDayTextView = (TextView) mainView.findViewById(R.id.date_picker_day);
-        mSelectedYearView = (TextView) mainView.findViewById(R.id.date_picker_year);
-        mSelectedYearView.setOnClickListener(this);
+        mHeaderMonthTextView = (TextView) mainView.findViewById(R.id.date_picker_month);
+        mHeaderDayOfMonthTextView = (TextView) mainView.findViewById(R.id.date_picker_day);
+        mHeaderYearTextView = (TextView) mainView.findViewById(R.id.date_picker_year);
+        mHeaderYearTextView.setOnClickListener(this);
+
+        // Obtain default highlight color from the theme.
+        final int defaultHighlightColor = mHeaderYearTextView.getHighlightColor();
 
         // Use Theme attributes if possible
-        mDayOfWeekTextAppearanceResId = a.getResourceId(
-                R.styleable.DatePicker_dateSelectorDayOfWeekTextAppearance, -1);
-        if (mDayOfWeekTextAppearanceResId != -1) {
-            mDayOfWeekView.setTextAppearance(context, mDayOfWeekTextAppearanceResId);
+        final int dayOfWeekTextAppearanceResId = a.getResourceId(
+                R.styleable.DatePicker_dayOfWeekTextAppearance, -1);
+        if (dayOfWeekTextAppearanceResId != -1) {
+            mDayOfWeekView.setTextAppearance(context, dayOfWeekTextAppearanceResId);
         }
 
-        mMonthTextAppearanceResId = a.getResourceId(
-                R.styleable.DatePicker_dateSelectorMonthTextAppearance, -1);
-        if (mMonthTextAppearanceResId != -1) {
-            mSelectedMonthTextView.setTextAppearance(context, mMonthTextAppearanceResId);
+        final int dayOfWeekBackgroundColor = a.getColor(
+                R.styleable.DatePicker_dayOfWeekBackgroundColor, Color.TRANSPARENT);
+        mDayOfWeekView.setBackgroundColor(dayOfWeekBackgroundColor);
+
+        final int headerSelectedTextColor = a.getColor(
+                R.styleable.DatePicker_headerSelectedTextColor, defaultHighlightColor);
+        final int headerBackgroundColor = a.getColor(R.styleable.DatePicker_headerBackgroundColor,
+                Color.TRANSPARENT);
+        mMonthAndDayLayout.setBackgroundColor(headerBackgroundColor);
+
+        final int monthTextAppearanceResId = a.getResourceId(
+                R.styleable.DatePicker_headerMonthTextAppearance, -1);
+        if (monthTextAppearanceResId != -1) {
+            mHeaderMonthTextView.setTextAppearance(context, monthTextAppearanceResId);
         }
+        mHeaderMonthTextView.setTextColor(ColorStateList.addFirstIfMissing(
+                mHeaderMonthTextView.getTextColors(), R.attr.state_selected,
+                headerSelectedTextColor));
 
-        mDayOfMonthTextAppearanceResId = a.getResourceId(
-                R.styleable.DatePicker_dateSelectorDayOfMonthTextAppearance, -1);
-        if (mDayOfMonthTextAppearanceResId != -1) {
-            mSelectedDayTextView.setTextAppearance(context, mDayOfMonthTextAppearanceResId);
+        final int dayOfMonthTextAppearanceResId = a.getResourceId(
+                R.styleable.DatePicker_headerDayOfMonthTextAppearance, -1);
+        if (dayOfMonthTextAppearanceResId != -1) {
+            mHeaderDayOfMonthTextView.setTextAppearance(context, dayOfMonthTextAppearanceResId);
         }
+        mHeaderDayOfMonthTextView.setTextColor(ColorStateList.addFirstIfMissing(
+                mHeaderDayOfMonthTextView.getTextColors(), R.attr.state_selected,
+                headerSelectedTextColor));
 
-        mYearTextAppearanceResId = a.getResourceId(
-                R.styleable.DatePicker_dateSelectorYearTextAppearance, -1);
-        if (mYearTextAppearanceResId != -1) {
-            mSelectedYearView.setTextAppearance(context, mYearTextAppearanceResId);
+        final int yearTextAppearanceResId = a.getResourceId(
+                R.styleable.DatePicker_headerYearTextAppearance, -1);
+        if (yearTextAppearanceResId != -1) {
+            mHeaderYearTextView.setTextAppearance(context, yearTextAppearanceResId);
         }
-
-        Resources res = mDelegator.getResources();
-
-        mDayOfWeekBackgroundColor = a.getColor(
-                R.styleable.DatePicker_dateSelectorDayOfWeekBackgroundColor,
-                res.getColor(
-                        R.color.datepicker_default_header_dayofweek_background_color_holo_light));
-        mDayOfWeekView.setBackgroundColor(mDayOfWeekBackgroundColor);
-
-        mMonthAndDayBackgroundColor = a.getColor(R.styleable.DatePicker_dateSelectorBackgroundColor,
-                res.getColor(R.color.datepicker_default_header_selector_background_holo_light));
-        mMonthAndDayLayout.setBackgroundColor(mMonthAndDayBackgroundColor);
+        mHeaderYearTextView.setTextColor(ColorStateList.addFirstIfMissing(
+                mHeaderYearTextView.getTextColors(), R.attr.state_selected,
+                headerSelectedTextColor));
 
         mDayPickerView = new DayPickerView(mContext, this);
         mYearPickerView = new YearPickerView(mContext);
         mYearPickerView.init(this);
 
-        ColorStateList colors = a.getColorStateList(R.styleable.DatePicker_calendarTextColor);
-        setCalendarTextColor(colors);
+        final ColorStateList calendarTextColor = a.getColorStateList(
+                R.styleable.DatePicker_calendarTextColor);
+        final int calendarSelectedTextColor = a.getColor(
+                R.styleable.DatePicker_calendarSelectedTextColor, defaultHighlightColor);
+        mDayPickerView.setCalendarTextColor(ColorStateList.addFirstIfMissing(
+                calendarTextColor, R.attr.state_selected, calendarSelectedTextColor));
 
         mDayPickerDescription = res.getString(R.string.day_picker_description);
         mSelectDay = res.getString(R.string.select_day);
@@ -308,30 +307,30 @@ class DatePickerDelegate extends DatePicker.AbstractDatePickerDelegate implement
 
         // Restart from a clean state
         mMonthAndDayLayout.removeAllViews();
-        mDateLayout.removeView(mSelectedYearView);
+        mDateLayout.removeView(mHeaderYearTextView);
 
         // Position the Year View at the correct location
         if (viewIndices[YEAR_INDEX] == 0) {
-            mDateLayout.addView(mSelectedYearView, 0);
+            mDateLayout.addView(mHeaderYearTextView, 0);
         } else {
-            mDateLayout.addView(mSelectedYearView, 1);
+            mDateLayout.addView(mHeaderYearTextView, 1);
         }
 
         // Position Day and Month Views
         if (viewIndices[MONTH_INDEX] > viewIndices[DAY_INDEX]) {
             // Day View is first
-            mMonthAndDayLayout.addView(mSelectedDayTextView);
-            mMonthAndDayLayout.addView(mSelectedMonthTextView);
+            mMonthAndDayLayout.addView(mHeaderDayOfMonthTextView);
+            mMonthAndDayLayout.addView(mHeaderMonthTextView);
         } else {
             // Month View is first
-            mMonthAndDayLayout.addView(mSelectedMonthTextView);
-            mMonthAndDayLayout.addView(mSelectedDayTextView);
+            mMonthAndDayLayout.addView(mHeaderMonthTextView);
+            mMonthAndDayLayout.addView(mHeaderDayOfMonthTextView);
         }
 
-        mSelectedMonthTextView.setText(mCurrentDate.getDisplayName(Calendar.MONTH, Calendar.SHORT,
+        mHeaderMonthTextView.setText(mCurrentDate.getDisplayName(Calendar.MONTH, Calendar.SHORT,
                 Locale.getDefault()).toUpperCase(Locale.getDefault()));
-        mSelectedDayTextView.setText(mDayFormat.format(mCurrentDate.getTime()));
-        mSelectedYearView.setText(mYearFormat.format(mCurrentDate.getTime()));
+        mHeaderDayOfMonthTextView.setText(mDayFormat.format(mCurrentDate.getTime()));
+        mHeaderYearTextView.setText(mYearFormat.format(mCurrentDate.getTime()));
 
         // Accessibility.
         long millis = mCurrentDate.getTimeInMillis();
@@ -362,7 +361,7 @@ class DatePickerDelegate extends DatePicker.AbstractDatePickerDelegate implement
                 mDayPickerView.onDateChanged();
                 if (mCurrentView != viewIndex) {
                     mMonthAndDayLayout.setSelected(true);
-                    mSelectedYearView.setSelected(false);
+                    mHeaderYearTextView.setSelected(false);
                     mAnimator.setDisplayedChild(MONTH_AND_DAY_VIEW);
                     mCurrentView = viewIndex;
                 }
@@ -374,7 +373,7 @@ class DatePickerDelegate extends DatePicker.AbstractDatePickerDelegate implement
                 mAnimator.announceForAccessibility(mSelectDay);
                 break;
             case YEAR_VIEW:
-                pulseAnimator = getPulseAnimator(mSelectedYearView, 0.85f, 1.1f);
+                pulseAnimator = getPulseAnimator(mHeaderYearTextView, 0.85f, 1.1f);
                 if (mDelayAnimation) {
                     pulseAnimator.setStartDelay(ANIMATION_DELAY);
                     mDelayAnimation = false;
@@ -382,7 +381,7 @@ class DatePickerDelegate extends DatePicker.AbstractDatePickerDelegate implement
                 mYearPickerView.onDateChanged();
                 if (mCurrentView != viewIndex) {
                     mMonthAndDayLayout.setSelected(false);
-                    mSelectedYearView.setSelected(true);
+                    mHeaderYearTextView.setSelected(true);
                     mAnimator.setDisplayedChild(YEAR_VIEW);
                     mCurrentView = viewIndex;
                 }
@@ -509,7 +508,7 @@ class DatePickerDelegate extends DatePicker.AbstractDatePickerDelegate implement
     @Override
     public void setEnabled(boolean enabled) {
         mMonthAndDayLayout.setEnabled(enabled);
-        mSelectedYearView.setEnabled(enabled);
+        mHeaderYearTextView.setEnabled(enabled);
         mAnimator.setEnabled(enabled);
         mIsEnabled = enabled;
     }
@@ -517,123 +516,6 @@ class DatePickerDelegate extends DatePicker.AbstractDatePickerDelegate implement
     @Override
     public boolean isEnabled() {
         return mIsEnabled;
-    }
-
-    @Override
-    public void setDateSelectorDayOfWeekBackgroundColor(int color) {
-        if (mDayOfWeekBackgroundColor != color) {
-            mDayOfWeekBackgroundColor = color;
-            mDayOfWeekView.setBackgroundColor(color);
-        }
-    }
-
-    @Override
-    public int getDateSelectorDayOfWeekBackgroundColor() {
-        return mDayOfWeekBackgroundColor;
-    }
-
-    @Override
-    public void setDateSelectorDayOfWeekTextAppearance(int resId) {
-        if (mDayOfWeekTextAppearanceResId != resId && resId > 0) {
-            mDayOfWeekTextAppearanceResId = resId;
-            mDayOfWeekView.setTextAppearance(mContext, resId);
-        }
-    }
-
-    @Override
-    public int getDateSelectorDayOfWeekTextAppearance() {
-        return mDayOfWeekTextAppearanceResId;
-    }
-
-    @Override
-    public void setDateSelectorBackgroundColor(int color) {
-        if (mMonthAndDayBackgroundColor != color) {
-            mMonthAndDayBackgroundColor = color;
-            mMonthAndDayLayout.setBackgroundColor(color);
-        }
-    }
-
-    @Override
-    public int getDateSelectorBackgroundColor() {
-        return mMonthAndDayBackgroundColor;
-    }
-
-    @Override
-    public void setDateSelectorMonthTextAppearance(int resId) {
-        if (mMonthTextAppearanceResId != resId && resId > 0) {
-            mMonthTextAppearanceResId = resId;
-            mSelectedMonthTextView.setTextAppearance(mContext, resId);
-        }
-    }
-
-    @Override
-    public int getDateSelectorMonthTextAppearance() {
-        return mMonthTextAppearanceResId;
-    }
-
-    @Override
-    public void setDateSelectorDayOfMonthTextAppearance(int resId) {
-        if (mDayOfMonthTextAppearanceResId != resId && resId > 0) {
-            mDayOfMonthTextAppearanceResId = resId;
-            mSelectedDayTextView.setTextAppearance(mContext, resId);
-        }
-    }
-
-    @Override
-    public int getDateSelectorDayOfMonthTextAppearance() {
-        return mDayOfMonthTextAppearanceResId;
-    }
-
-    @Override
-    public void setDateSelectorYearTextAppearance(int resId) {
-        if (mYearTextAppearanceResId != resId && resId > 0) {
-            mYearTextAppearanceResId = resId;
-            mSelectedYearView.setTextAppearance(mContext, resId);
-        }
-    }
-
-    @Override
-    public int getDateSelectorYearTextAppearance() {
-        return mYearTextAppearanceResId;
-    }
-
-    @Override
-    public void setDateSelectorYearListItemTextAppearance(int resId) {
-        if (mYearListItemTextAppearanceResId != resId) {
-            mYearListItemTextAppearanceResId = resId;
-            mYearPickerView.setItemTextAppearance(resId);
-        }
-    }
-
-    @Override
-    public int getDateSelectorYearListItemTextAppearance() {
-        return mYearListItemTextAppearanceResId;
-    }
-
-    @Override
-    public void setDateSelectorYearListSelectedCircleColor(int color) {
-        mYearPickerView.setYearSelectedCircleColor(color);
-    }
-
-    @Override
-    public int getDateSelectorYearListSelectedCircleColor() {
-        return mYearPickerView.getYearSelectedCircleColor();
-    }
-
-    @Override
-    public void setCalendarTextColor(ColorStateList colors) {
-        if (colors == null) {
-            return;
-        }
-        if (mCalendarTextColors == null || !mCalendarTextColors.equals(colors)) {
-            mCalendarTextColors = colors;
-            mDayPickerView.setCalendarTextColor(colors);
-        }
-    }
-
-    @Override
-    public ColorStateList getCalendarTextColors() {
-        return mCalendarTextColors;
     }
 
     @Override
@@ -815,9 +697,8 @@ class DatePickerDelegate extends DatePicker.AbstractDatePickerDelegate implement
     }
 
     private void updatePickers() {
-        Iterator<OnDateChangedListener> iterator = mListeners.iterator();
-        while (iterator.hasNext()) {
-            iterator.next().onDateChanged();
+        for (OnDateChangedListener listener : mListeners) {
+            listener.onDateChanged();
         }
     }
 
