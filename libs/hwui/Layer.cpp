@@ -88,6 +88,8 @@ bool Layer::resize(const uint32_t width, const uint32_t height) {
         return true;
     }
 
+    ATRACE_NAME("resizeLayer");
+
     const uint32_t maxTextureSize = caches.maxTextureSize;
     if (desiredWidth > maxTextureSize || desiredHeight > maxTextureSize) {
         ALOGW("Layer exceeds max. dimensions supported by the GPU (%dx%d, max=%dx%d)",

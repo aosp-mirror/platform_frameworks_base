@@ -15,6 +15,7 @@
  */
 
 #define LOG_TAG "OpenGLRenderer"
+#define ATRACE_TAG ATRACE_TAG_VIEW
 
 #include <GLES2/gl2.h>
 
@@ -264,6 +265,8 @@ void TextureCache::generateTexture(const SkBitmap* bitmap, Texture* texture, boo
         ALOGE("Cannot generate texture from bitmap");
         return;
     }
+
+    ATRACE_CALL();
 
     // We could also enable mipmapping if both bitmap dimensions are powers
     // of 2 but we'd have to deal with size changes. Let's keep this simple
