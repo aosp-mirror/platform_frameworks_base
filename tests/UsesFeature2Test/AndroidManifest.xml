@@ -30,6 +30,7 @@
     </feature-group>
     <feature-group android:label="@string/gamepad">
         <uses-feature android:name="android.hardware.gamepad" />
+        <uses-feature android:name="android.hardware.opengles.aep" />
     </feature-group>
 
     <application android:label="@string/app_title">
