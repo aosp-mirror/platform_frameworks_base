@@ -2616,6 +2616,7 @@ public abstract class Context {
      *
      * @see #getSystemService
      */
+    @SystemApi
     public static final String BACKUP_SERVICE = "backup";
 
     /**
