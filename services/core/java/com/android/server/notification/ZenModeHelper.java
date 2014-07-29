@@ -33,6 +33,7 @@ import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.database.ContentObserver;
+import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Handler;
@@ -319,7 +320,9 @@ public class ZenModeHelper {
 
     private boolean isAlarm(NotificationRecord record) {
         return record.isCategory(Notification.CATEGORY_ALARM)
-                || record.isCategory(Notification.CATEGORY_EVENT);
+                || record.isCategory(Notification.CATEGORY_EVENT)
+                || record.isAudioStream(AudioManager.STREAM_ALARM)
+                || record.isAudioAttributesUsage(AudioAttributes.USAGE_ALARM);
     }
 
     private boolean isCall(NotificationRecord record) {

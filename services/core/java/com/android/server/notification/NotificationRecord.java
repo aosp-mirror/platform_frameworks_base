@@ -20,7 +20,9 @@ import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.media.AudioAttributes;
 import android.service.notification.StatusBarNotification;
+
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.PrintWriter;
@@ -105,6 +107,8 @@ public final class NotificationRecord {
         pw.println(prefix + String.format("  defaults=0x%08x flags=0x%08x",
                 notification.defaults, notification.flags));
         pw.println(prefix + "  sound=" + notification.sound);
+        pw.println(prefix + "  audioStreamType=" + notification.audioStreamType);
+        pw.println(prefix + "  audioAttributes=" + notification.audioAttributes);
         pw.println(prefix + String.format("  color=0x%08x", notification.color));
         pw.println(prefix + "  vibrate=" + Arrays.toString(notification.vibrate));
         pw.println(prefix + String.format("  led=0x%08x onMs=%d offMs=%d",
@@ -224,7 +228,16 @@ public final class NotificationRecord {
     }
 
     public boolean isCategory(String category) {
-        return Objects.equals(category, getNotification().category);
+        return Objects.equals(getNotification().category, category);
+    }
+
+    public boolean isAudioStream(int stream) {
+        return getNotification().audioStreamType == stream;
+    }
+
+    public boolean isAudioAttributesUsage(int usage) {
+        final AudioAttributes attributes = getNotification().audioAttributes;
+        return attributes != null && attributes.getUsage() == usage;
     }
 
     /**
