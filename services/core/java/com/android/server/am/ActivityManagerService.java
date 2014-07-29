@@ -3698,7 +3698,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // specified, then replace it with the existing recent task.
                 task = tr;
             }
-            mTaskPersister.notify(tr, false);
+            notifyTaskPersisterLocked(tr, false);
         }
         if (N >= MAX_RECENT_TASKS) {
             final TaskRecord tr = mRecentTasks.remove(N - 1);
@@ -7646,7 +7646,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             tr.removeTaskActivitiesLocked();
             cleanUpRemovedTaskLocked(tr, flags);
             if (tr.isPersistable) {
-                notifyTaskPersisterLocked(tr, true);
+                notifyTaskPersisterLocked(null, true);
             }
             return true;
         }
@@ -9089,7 +9089,11 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     void notifyTaskPersisterLocked(TaskRecord task, boolean flush) {
-        mTaskPersister.notify(task, flush);
+        if (task != null && task.stack != null && task.stack.isHomeStack()) {
+            // Never persist the home stack.
+            return;
+        }
+        mTaskPersister.wakeup(task, flush);
     }
 
     @Override
