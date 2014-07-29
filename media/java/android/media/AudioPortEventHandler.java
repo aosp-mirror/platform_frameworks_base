@@ -91,7 +91,7 @@ class AudioPortEventHandler {
                     case AUDIOPORT_EVENT_PORT_LIST_UPDATED:
                         AudioPort[] portList = ports.toArray(new AudioPort[0]);
                         for (int i = 0; i < listeners.size(); i++) {
-                            listeners.get(i).OnAudioPortListUpdate(portList);
+                            listeners.get(i).onAudioPortListUpdate(portList);
                         }
                         if (msg.what == AUDIOPORT_EVENT_PORT_LIST_UPDATED) {
                             break;
@@ -101,13 +101,13 @@ class AudioPortEventHandler {
                     case AUDIOPORT_EVENT_PATCH_LIST_UPDATED:
                         AudioPatch[] patchList = patches.toArray(new AudioPatch[0]);
                         for (int i = 0; i < listeners.size(); i++) {
-                            listeners.get(i).OnAudioPatchListUpdate(patchList);
+                            listeners.get(i).onAudioPatchListUpdate(patchList);
                         }
                         break;
 
                     case AUDIOPORT_EVENT_SERVICE_DIED:
                         for (int i = 0; i < listeners.size(); i++) {
-                            listeners.get(i).OnServiceDied();
+                            listeners.get(i).onServiceDied();
                         }
                         break;
 
