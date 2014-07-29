@@ -24,6 +24,8 @@ import android.os.Parcelable;
  * A class to encapsulate device information for HDMI-CEC. This container
  * include basic information such as logical address, physical address and
  * device type, and additional information like vendor id and osd name.
+ * Also used to keep the information of non-CEC devices for which only
+ * port ID, physical address are meaningful.
  *
  * @hide
  */
@@ -71,6 +73,7 @@ public final class HdmiCecDeviceInfo implements Parcelable {
     private final int mDeviceType;
     private final int mVendorId;
     private final String mDisplayName;
+    private final boolean mIsCecDevice;
 
     /**
      * A helper class to deserialize {@link HdmiCecDeviceInfo} for a parcel.
@@ -96,7 +99,7 @@ public final class HdmiCecDeviceInfo implements Parcelable {
             };
 
     /**
-     * Constructor.
+     * Constructor. Used to initialize the instance for CEC device.
      *
      * @param logicalAddress logical address of HDMI-CEC device
      * @param physicalAddress physical address of HDMI-CEC device
@@ -114,6 +117,24 @@ public final class HdmiCecDeviceInfo implements Parcelable {
         mDeviceType = deviceType;
         mDisplayName = displayName;
         mVendorId = vendorId;
+        mIsCecDevice = true;
+    }
+
+    /**
+     * Constructor. Used to initialize the instance for non-CEC device.
+     *
+     * @param physicalAddress physical address of HDMI device
+     * @param portId HDMI port ID (1 for HDMI1)
+     * @hide
+     */
+    public HdmiCecDeviceInfo(int physicalAddress, int portId) {
+        mLogicalAddress = -1;
+        mPhysicalAddress = physicalAddress;
+        mPortId = portId;
+        mDeviceType = DEVICE_RESERVED;
+        mDisplayName = null;
+        mVendorId = 0;
+        mIsCecDevice = false;
     }
 
     /**
@@ -152,6 +173,14 @@ public final class HdmiCecDeviceInfo implements Parcelable {
         return mDeviceType == DEVICE_PLAYBACK
                 || mDeviceType == DEVICE_RECORDER
                 || mDeviceType == DEVICE_TUNER;
+    }
+
+    /**
+     * Return {@code true} if the device represents an HDMI-CEC device. {@code false}
+     * if the device is either MHL or non-CEC device.
+     */
+    public boolean isCecDevice() {
+        return mIsCecDevice;
     }
 
     /**
@@ -199,12 +228,19 @@ public final class HdmiCecDeviceInfo implements Parcelable {
     @Override
     public String toString() {
         StringBuffer s = new StringBuffer();
-        s.append("logical_address: ").append(mLogicalAddress).append(", ");
-        s.append("physical_address: ").append(mPhysicalAddress).append(", ");
-        s.append("port_id: ").append(mPortId).append(", ");
-        s.append("device_type: ").append(mDeviceType).append(", ");
-        s.append("vendor_id: ").append(mVendorId).append(", ");
-        s.append("display_name: ").append(mDisplayName);
+        if (isCecDevice()) {
+            s.append("CEC: ");
+            s.append("logical_address: ").append(mLogicalAddress).append(", ");
+            s.append("physical_address: ").append(mPhysicalAddress).append(", ");
+            s.append("port_id: ").append(mPortId).append(", ");
+            s.append("device_type: ").append(mDeviceType).append(", ");
+            s.append("vendor_id: ").append(mVendorId).append(", ");
+            s.append("display_name: ").append(mDisplayName);
+        } else {
+            s.append("Non-CEC: ");
+            s.append("physical_address: ").append(mPhysicalAddress).append(", ");
+            s.append("port_id: ").append(mPortId).append(", ");
+        }
         return s.toString();
     }
 
