@@ -254,17 +254,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      */
     private CaptivePortalTracker mCaptivePortalTracker;
 
-    /**
-     * A per Net list of the PID's that requested access to the net
-     * used both as a refcount and for per-PID DNS selection
-     */
-    private List<Integer> mNetRequestersPids[];
-
-    // priority order of the nettrackers
-    // (excluding dynamically set mNetworkPreference)
-    // TODO - move mNetworkTypePreference into this
-    private int[] mPriorityList;
-
     private Context mContext;
     private int mNetworkPreference;
     private int mActiveDefaultNetwork = -1;
@@ -677,35 +666,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             } else {
                 if (DBG) loge("Ignoring protectedNetwork " + p);
             }
-        }
-
-        // high priority first
-        mPriorityList = new int[mNetworksDefined];
-        {
-            int insertionPoint = mNetworksDefined-1;
-            int currentLowest = 0;
-            int nextLowest = 0;
-            while (insertionPoint > -1) {
-                for (NetworkConfig na : mNetConfigs) {
-                    if (na == null) continue;
-                    if (na.priority < currentLowest) continue;
-                    if (na.priority > currentLowest) {
-                        if (na.priority < nextLowest || nextLowest == 0) {
-                            nextLowest = na.priority;
-                        }
-                        continue;
-                    }
-                    mPriorityList[insertionPoint--] = na.type;
-                }
-                currentLowest = nextLowest;
-                nextLowest = 0;
-            }
-        }
-
-        mNetRequestersPids =
-                (List<Integer> [])new ArrayList[ConnectivityManager.MAX_NETWORK_TYPE+1];
-        for (int i : mPriorityList) {
-            mNetRequestersPids[i] = new ArrayList<Integer>();
         }
 
         mTestMode = SystemProperties.get("cm.test.mode").equals("true")
@@ -1362,15 +1322,15 @@ public class ConnectivityService extends IConnectivityManager.Stub {
          * getting the disconnect for a network that we explicitly disabled
          * in accordance with network preference policies.
          */
-        if (!mNetConfigs[prevNetType].isDefault()) {
-            List<Integer> pids = mNetRequestersPids[prevNetType];
-            for (Integer pid : pids) {
-                // will remove them because the net's no longer connected
-                // need to do this now as only now do we know the pids and
-                // can properly null things that are no longer referenced.
-                reassessPidDns(pid.intValue(), false);
-            }
-        }
+//        if (!mNetConfigs[prevNetType].isDefault()) {
+//            List<Integer> pids = mNetRequestersPids[prevNetType];
+//            for (Integer pid : pids) {
+//                // will remove them because the net's no longer connected
+//                // need to do this now as only now do we know the pids and
+//                // can properly null things that are no longer referenced.
+//                reassessPidDns(pid.intValue(), false);
+//            }
+//        }
 
         Intent intent = new Intent(ConnectivityManager.CONNECTIVITY_ACTION);
         intent.putExtra(ConnectivityManager.EXTRA_NETWORK_INFO, new NetworkInfo(info));
@@ -2102,44 +2062,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
     }
 
-    /**
-     * Adjust the per-process dns entries (net.dns<x>.<pid>) based
-     * on the highest priority active net which this process requested.
-     * If there aren't any, clear it out
-     */
-    private void reassessPidDns(int pid, boolean doBump)
-    {
-        if (VDBG) log("reassessPidDns for pid " + pid);
-        Integer myPid = new Integer(pid);
-        for(int i : mPriorityList) {
-            if (mNetConfigs[i].isDefault()) {
-                continue;
-            }
-            NetworkStateTracker nt = mNetTrackers[i];
-            if (nt.getNetworkInfo().isConnected() &&
-                    !nt.isTeardownRequested()) {
-                LinkProperties p = nt.getLinkProperties();
-                if (p == null) continue;
-                if (mNetRequestersPids[i].contains(myPid)) {
-                    try {
-                        // TODO: Reimplement this via local variable in bionic.
-                        // mNetd.setDnsNetworkForPid(nt.getNetwork().netId, pid);
-                    } catch (Exception e) {
-                        Slog.e(TAG, "exception reasseses pid dns: " + e);
-                    }
-                    return;
-                }
-           }
-        }
-        // nothing found - delete
-        try {
-            // TODO: Reimplement this via local variable in bionic.
-            // mNetd.clearDnsNetworkForPid(pid);
-        } catch (Exception e) {
-            Slog.e(TAG, "exception clear interface from pid: " + e);
-        }
-    }
-
     private void flushVmDnsCache() {
         /*
          * Tell the VMs to toss their DNS caches
@@ -2210,15 +2132,15 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     if (DBG) loge("exception setting dns servers: " + e);
                 }
                 // set per-pid dns for attached secondary nets
-                List<Integer> pids = mNetRequestersPids[netType];
-                for (Integer pid : pids) {
-                    try {
+//                List<Integer> pids = mNetRequestersPids[netType];
+//                for (Integer pid : pids) {
+//                    try {
                         // TODO: Reimplement this via local variable in bionic.
                         // mNetd.setDnsNetworkForPid(netId, pid);
-                    } catch (Exception e) {
-                        Slog.e(TAG, "exception setting interface for pid: " + e);
-                    }
-                }
+//                    } catch (Exception e) {
+//                        Slog.e(TAG, "exception setting interface for pid: " + e);
+//                    }
+//                }
             }
             flushVmDnsCache();
         }
