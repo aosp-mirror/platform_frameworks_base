@@ -52,6 +52,7 @@ public class Explode extends Visibility {
 
     public Explode(Context context, AttributeSet attrs) {
         super(context, attrs);
+        setPropagation(new CircularPropagation());
     }
 
     private void captureValues(TransitionValues transitionValues) {
