@@ -19,6 +19,7 @@ page.title=Debugging with Android Studio
         <li><a href="#breakPointsDebug">Debug your app with breakpoints</a></li>
     </ol>
   </li>
+  <li><a href="#allocTracker">Track Object Allocation</a></li>
   <li><a href="#deviceMonitor">Analyze Runtime Metrics to Optimize your App</a></li>
   <li><a href="#screenCap">Capture Screenshots and Videos</a></li>
 </ol>
@@ -279,6 +280,47 @@ step:</p>
 
 <img src="{@docRoot}images/tools/as-variablesview.png" alt="" />
 <p class="img-caption"><strong>Figure 7.</strong> The Variables view in the Debug tool window.</p>
+
+
+<h2 id="allocTracker">Track Object Allocation</h2>
+
+<p>Android Studio lets you track objects that are being allocated on the Java heap and see which
+classes and threads are allocating these objects. This allows you to see the list of objects
+allocated during a period of interest. This information is valuable for assessing memory usage
+that can affect application performance.</p>
+
+<p>To track memory allocation of objects:</p>
+
+<ol>
+<li>Start your app as described in <a href="#runDebug">Run Your App in Debug Mode</a>.</li>
+<li>Click <strong>Android</strong> <img src="{@docRoot}images/tools/as-android.png" alt=""
+style="vertical-align:bottom;margin:0;height:20px"/> to open the <em>Android DDMS</em>
+tool window.</li>
+<li>On the <em>Android DDMS</em> tool window, select the <strong>Devices | logcat tab</strong>.</li>
+<li>Select your device from the dropdown list.</li>
+<li>Select your app by its package name from the list of running apps.</li>
+<li>Click <strong>Start Allocation Tracking</strong>
+<img src="{@docRoot}images/tools/as-allocstart.png" alt=""
+style="vertical-align:bottom;margin:0;height:20px"/></li>
+<li>Interact with your app on the device.</li>
+<li>Click <strong>Stop Allocation Tracking</strong>
+<img src="{@docRoot}images/tools/as-allocstop.png" alt=""
+style="vertical-align:bottom;margin:0;height:20px"/></li>
+</ol>
+
+<p>Android Studio shows the objects that the system allocated with the following information:</p>
+
+<ul>
+<li>Allocation order</li>
+<li>Allocated class</li>
+<li>Allocation size</li>
+<li>Thread ID</li>
+<li>Allocation method, class, and line number</li>
+<li>Stack trace at the point of allocation</li>
+</ul>
+
+<img src="{@docRoot}images/tools/as-alloctrack.png" alt="" width="750" height="252" />
+<p class="img-caption"><strong>Figure 8.</strong> Object allocation tracking in Android Studio.</p>
 
 
 <h2 id="deviceMonitor">Analyze Runtime Metrics to Optimize your App</h2>
