@@ -15,6 +15,7 @@
  */
 
 #define LOG_TAG "OpenGLRenderer"
+#define ATRACE_TAG ATRACE_TAG_VIEW
 
 #include <ui/Rect.h>
 
@@ -184,6 +185,7 @@ void LayerRenderer::generateMesh() {
 ///////////////////////////////////////////////////////////////////////////////
 
 Layer* LayerRenderer::createRenderLayer(RenderState& renderState, uint32_t width, uint32_t height) {
+    ATRACE_CALL();
     LAYER_RENDERER_LOGD("Requesting new render layer %dx%d", width, height);
 
     Caches& caches = Caches::getInstance();
@@ -309,6 +311,7 @@ void LayerRenderer::updateTextureLayer(Layer* layer, uint32_t width, uint32_t he
 
 void LayerRenderer::destroyLayer(Layer* layer) {
     if (layer) {
+        ATRACE_CALL();
         LAYER_RENDERER_LOGD("Recycling layer, %dx%d fbo = %d",
                 layer->getWidth(), layer->getHeight(), layer->getFbo());
 
