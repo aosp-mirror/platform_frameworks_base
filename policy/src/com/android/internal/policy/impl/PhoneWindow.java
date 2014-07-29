@@ -2285,8 +2285,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 int bottom = (int) mOutsetBottom.getDimension(metrics);
                 WindowInsets newInsets = insets.replaceSystemWindowInsets(
                         insets.getSystemWindowInsetLeft(), insets.getSystemWindowInsetTop(),
-                        insets.getSystemWindowInsetRight(),
-                        insets.getSystemWindowInsetBottom() + bottom);
+                        insets.getSystemWindowInsetRight(), bottom);
                 return super.dispatchApplyWindowInsets(newInsets);
             } else {
                 return super.dispatchApplyWindowInsets(insets);
