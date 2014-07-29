@@ -190,7 +190,7 @@ public class LauncherApps {
                 return info;
             }
         } catch (RemoteException re) {
-            return null;
+            throw new RuntimeException("Failed to call LauncherAppsService");
         }
         return null;
     }
@@ -259,7 +259,7 @@ public class LauncherApps {
         try {
             return mService.isPackageEnabled(packageName, user);
         } catch (RemoteException re) {
-            return false;
+            throw new RuntimeException("Failed to call LauncherAppsService");
         }
     }
 
@@ -275,7 +275,7 @@ public class LauncherApps {
         try {
             return mService.isActivityEnabled(component, user);
         } catch (RemoteException re) {
-            return false;
+            throw new RuntimeException("Failed to call LauncherAppsService");
         }
     }
 
