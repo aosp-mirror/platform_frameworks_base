@@ -19,7 +19,9 @@ package android.view;
 import android.animation.ValueAnimator;
 import android.app.ActivityManager;
 import android.content.ComponentCallbacks2;
+import android.content.Context;
 import android.content.res.Configuration;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -204,6 +206,14 @@ public final class WindowManagerGlobal {
         final WindowManager.LayoutParams wparams = (WindowManager.LayoutParams)params;
         if (parentWindow != null) {
             parentWindow.adjustLayoutParamsForSubWindow(wparams);
+        } else {
+            // If there's no parent and we're running on L or above (or in the
+            // system context), assume we want hardware acceleration.
+            final Context context = view.getContext();
+            if (context != null
+                    && context.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.L) {
+                wparams.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
+            }
         }
 
         ViewRootImpl root;
