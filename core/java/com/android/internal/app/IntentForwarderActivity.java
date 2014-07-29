@@ -83,7 +83,11 @@ public class IntentForwarderActivity extends Activity  {
         String resolvedType = newIntent.resolveTypeIfNeeded(getContentResolver());
         boolean canForward = false;
         try {
-            canForward = ipm.canForwardTo(newIntent, resolvedType, callingUserId,
+            Intent selector = newIntent.getSelector();
+            if (selector == null) {
+                selector = newIntent;
+            }
+            canForward = ipm.canForwardTo(selector, resolvedType, callingUserId,
                     userDest.getIdentifier());
         } catch (RemoteException e) {
             Slog.e(TAG, "PackageManagerService is dead?");
