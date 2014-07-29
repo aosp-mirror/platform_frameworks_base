@@ -33,7 +33,15 @@ that use custom card layouts by creating a wearable app that runs on the wearabl
 </div>
 
 <h2 id="Import">Import the necessary classes</h2>
-<p>Before you begin, import the necessary classes from the support library:</p>
+
+<p>To import the necessary packages, add this line to your <code>build.gradle</code>file:</p>
+
+<pre>
+compile "com.android.support:support-v4:20.0.+"
+</pre>
+
+<p>Now that your project has access to the necessary packages, import the necessary classes from
+the support library:</p>
 
 <pre style="clear:right">
 import android.support.v4.app.NotificationCompat;
@@ -190,7 +198,7 @@ bigStyle.bigText(eventDescription);
 NotificationCompat.Builder notificationBuilder =
         new NotificationCompat.Builder(this)
         .setSmallIcon(R.drawable.ic_event)
-        .setLargeIcon(BitmapFractory.decodeResource(
+        .setLargeIcon(BitmapFactory.decodeResource(
                 getResources(), R.drawable.notif_background))
         .setContentTitle(eventTitle)
         .setContentText(eventLocation)
