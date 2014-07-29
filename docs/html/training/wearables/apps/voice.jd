@@ -119,7 +119,7 @@ named <code>MyNoteActivity</code>:
     <td>
       <dl>
         <dt>Action</dt>
-        <dd><code>android.provider.AlarmClock.ACTION_SET_TIMER</code></dd>
+        <dd><code>android.intent.action.SET_TIMER</code></dd>
         <dt>Extras</dt>
         <dd><code>android.provider.AlarmClock.EXTRA_LENGTH</code> - an integer in the range of
         1 to 86400 (number of seconds in 24 hours) representing the length of the timer </dd>
@@ -244,7 +244,7 @@ from users and then process it, such as doing a search or sending it as a messag
 
 In your app, you call {@link android.app.Activity#startActivityForResult startActivityForResult()} using
 the {@link android.speech.RecognizerIntent#ACTION_RECOGNIZE_SPEECH} action. This starts the
- and then handle the result
+speech recognition activity, and you can then handle the result
 in {@link android.app.Activity#onActivityResult onActivityResult()}.
 <pre>
 private static final int SPEECH_REQUEST_CODE = 0;
