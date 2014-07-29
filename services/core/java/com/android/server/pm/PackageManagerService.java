@@ -5486,9 +5486,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                     // SDK tools. We must scan their APKs for renderscript bitcode and
                     // not launch them if it's present. Don't bother checking on devices
                     // that don't have 64 bit support.
+                    boolean needsRenderScriptOverride = false;
                     if (Build.SUPPORTED_64_BIT_ABIS.length > 0 && abiOverride == null &&
                             NativeLibraryHelper.hasRenderscriptBitcode(handle)) {
                         abiList = Build.SUPPORTED_32_BIT_ABIS;
+                        needsRenderScriptOverride = true;
                     }
 
                     final int copyRet;
@@ -5508,6 +5510,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                         pkg.applicationInfo.primaryCpuAbi = abiList[copyRet];
                     } else if (copyRet == PackageManager.NO_NATIVE_LIBRARIES && abiOverride != null) {
                         pkg.applicationInfo.primaryCpuAbi = abiOverride;
+                    } else if (needsRenderScriptOverride) {
+                        pkg.applicationInfo.primaryCpuAbi = abiList[0];
                     }
                 }
             } catch (IOException ioe) {
