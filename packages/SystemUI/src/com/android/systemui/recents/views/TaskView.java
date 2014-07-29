@@ -68,6 +68,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     TaskThumbnailView mThumbnailView;
     TaskBarView mBarView;
     TaskFooterView mFooterView;
+    View mActionButtonView;
     TaskViewCallbacks mCb;
 
     // Optimizations
@@ -122,11 +123,9 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         // Bind the views
         mBarView = (TaskBarView) findViewById(R.id.task_view_bar);
         mThumbnailView = (TaskThumbnailView) findViewById(R.id.task_view_thumbnail);
-        mFooterView = (TaskFooterView) findViewById(R.id.lock_to_app);
-        if (mConfig.lockToAppEnabled) {
+        mActionButtonView = findViewById(R.id.lock_to_app_fab);
+        if (mFooterView != null) {
             mFooterView.setCallbacks(this);
-        } else {
-            mFooterView.setVisibility(View.GONE);
         }
     }
 
@@ -138,9 +137,13 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         // Measure the bar view, thumbnail, and footer
         mBarView.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
                 MeasureSpec.makeMeasureSpec(mConfig.taskBarHeight, MeasureSpec.EXACTLY));
-        mFooterView.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
-                MeasureSpec.makeMeasureSpec(mConfig.taskViewLockToAppButtonHeight,
-                        MeasureSpec.EXACTLY));
+        if (mFooterView != null) {
+            mFooterView.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
+                    MeasureSpec.makeMeasureSpec(mConfig.taskViewLockToAppButtonHeight,
+                            MeasureSpec.EXACTLY));
+        }
+        mActionButtonView.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.AT_MOST),
+                MeasureSpec.makeMeasureSpec(height, MeasureSpec.AT_MOST));
         if (mIsFullScreenView) {
             // Measure the thumbnail height to be the full dimensions
             mThumbnailView.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
@@ -208,7 +211,9 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
             if (isTaskViewLaunchTargetTask) {
                 mBarView.prepareEnterRecentsAnimation();
                 // Hide the footer during the transition in, and animate it out afterwards?
-                mFooterView.animateFooterVisibility(false, 0);
+                if (mFooterView != null) {
+                    mFooterView.animateFooterVisibility(false, 0);
+                }
             } else {
                 // Don't do anything for the side views when animating in
             }
@@ -217,6 +222,8 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
             if (isTaskViewLaunchTargetTask) {
                 // Hide the front most task bar view so we can animate it in
                 mBarView.prepareEnterRecentsAnimation();
+                // Hide the action button if it exists
+                mActionButtonView.setAlpha(0f);
                 // Set the dim to 0 so we can animate it in
                 setDim(0);
             } else if (occludesLaunchTarget) {
@@ -334,6 +341,14 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
 
                 // Animate the footer into view
                 animateFooterVisibility(true, mConfig.taskBarEnterAnimDuration);
+
+                // Animate the action button in
+                mActionButtonView.animate().alpha(1f)
+                        .setStartDelay(mConfig.taskBarEnterAnimDelay)
+                        .setDuration(mConfig.taskBarEnterAnimDuration)
+                        .setInterpolator(mConfig.fastOutLinearInInterpolator)
+                        .withLayer()
+                        .start();
             } else {
                 // Enable the task bar clip
                 mThumbnailView.enableTaskBarClip(mBarView);
@@ -426,6 +441,14 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                 anim.setInterpolator(mConfig.fastOutLinearInInterpolator);
                 anim.start();
             }
+
+            // Animate the action button away
+            mActionButtonView.animate().alpha(0f)
+                    .setStartDelay(0)
+                    .setDuration(mConfig.taskBarExitAnimDuration)
+                    .setInterpolator(mConfig.fastOutLinearInInterpolator)
+                    .withLayer()
+                    .start();
         } else {
             // Hide the dismiss button
             mBarView.startLaunchTaskDismissAnimation();
@@ -514,7 +537,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
 
     /** Gets the max footer height. */
     public int getMaxFooterHeight() {
-        if (mConfig.lockToAppEnabled) {
+        if (mFooterView != null) {
             return mFooterView.mMaxFooterHeight;
         } else {
             return 0;
@@ -528,7 +551,9 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         // Hide the footer if the current task can not be locked to
         if (!mTask.lockToTaskEnabled || !mTask.lockToThisTask) return;
         // Otherwise, animate the visibility
-        mFooterView.animateFooterVisibility(visible, duration);
+        if (mFooterView != null) {
+            mFooterView.animateFooterVisibility(visible, duration);
+        }
     }
 
     /** Returns the current dim. */
@@ -608,6 +633,10 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         } else {
             animateFooterVisibility(t.lockToThisTask, mConfig.taskViewLockToAppLongAnimDuration);
         }
+        // Hide the action button if lock to app is disabled
+        if (!t.lockToTaskEnabled && mActionButtonView.getVisibility() != View.GONE) {
+            mActionButtonView.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -625,7 +654,10 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                 mBarView.mApplicationIcon.setOnClickListener(this);
             }
             mBarView.mDismissButton.setOnClickListener(this);
-            mFooterView.setOnClickListener(this);
+            if (mFooterView != null) {
+                mFooterView.setOnClickListener(this);
+            }
+            mActionButtonView.setOnClickListener(this);
             if (Constants.DebugFlags.App.EnableDevAppInfoOnLongPress) {
                 if (mConfig.developerOptionsEnabled) {
                     mBarView.mApplicationIcon.setOnLongClickListener(this);
@@ -647,7 +679,10 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                 mBarView.mApplicationIcon.setOnClickListener(null);
             }
             mBarView.mDismissButton.setOnClickListener(null);
-            mFooterView.setOnClickListener(null);
+            if (mFooterView != null) {
+                mFooterView.setOnClickListener(null);
+            }
+            mActionButtonView.setOnClickListener(null);
             if (Constants.DebugFlags.App.EnableDevAppInfoOnLongPress) {
                 mBarView.mApplicationIcon.setOnLongClickListener(null);
             }
@@ -694,8 +729,9 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                     });
                     // Hide the footer
                     tv.animateFooterVisibility(false, mConfig.taskViewRemoveAnimDuration);
-                } else if (v == tv || v == mFooterView) {
-                    mCb.onTaskViewClicked(tv, tv.getTask(), (v == mFooterView));
+                } else if (v == tv || (v == mFooterView || v == mActionButtonView)) {
+                    mCb.onTaskViewClicked(tv, tv.getTask(),
+                            (v == mFooterView || v == mActionButtonView));
                 }
             }
         }, 125);

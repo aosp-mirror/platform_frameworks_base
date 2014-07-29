@@ -208,7 +208,7 @@
     <dimen name="recents_task_view_remove_anim_translation_x">100dp</dimen>
 
     <!-- The amount of highlight to make on each task view. -->
-    <dimen name="recents_task_view_highlight">1dp</dimen>
+    <dimen name="recents_task_view_highlight">1.5dp</dimen>
 
     <!-- The height of the lock-to-app button. -->
     <dimen name="recents_task_view_lock_to_app_button_height">48dp</dimen>

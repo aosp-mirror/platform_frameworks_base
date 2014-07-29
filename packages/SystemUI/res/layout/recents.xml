@@ -39,9 +39,9 @@
            android:layout_width="match_parent"
            android:layout_height="match_parent" />
 
-    <!-- Fullscreen Transition View -->
-    <ViewStub android:id="@+id/fullscreen_overlay_stub"
-           android:layout="@layout/recents_fullscreen_overlay"
+    <!-- Debug Overlay View -->
+    <ViewStub android:id="@+id/debug_overlay_stub"
+           android:layout="@layout/recents_debug_overlay"
            android:layout_width="match_parent"
            android:layout_height="match_parent" />
 
