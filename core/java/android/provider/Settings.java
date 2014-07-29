@@ -884,6 +884,27 @@ public final class Settings {
     public static final String ACTION_HOME_SETTINGS
             = "android.settings.HOME_SETTINGS";
 
+    /**
+     * Activity Action: Show notification settings.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_NOTIFICATION_SETTINGS
+            = "android.settings.NOTIFICATION_SETTINGS";
+
+    /**
+     * Activity Action: Show notification settings for a single app.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_APP_NOTIFICATION_SETTINGS
+            = "android.settings.APP_NOTIFICATION_SETTINGS";
+
+    /** @hide */ public static final String EXTRA_APP_UID = "app_uid";
+    /** @hide */ public static final String EXTRA_APP_PACKAGE = "app_package";
+
     // End of Intent actions for Settings
 
     /**
