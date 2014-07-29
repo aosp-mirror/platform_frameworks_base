@@ -1812,7 +1812,14 @@ public class NotificationManagerService extends SystemService {
     }
 
     private static AudioAttributes audioAttributesForNotification(Notification n) {
-        return new AudioAttributes.Builder().setLegacyStreamType(n.audioStreamType).build();
+        if (n.audioAttributes != null
+                && !Notification.AUDIO_ATTRIBUTES_DEFAULT.equals(n.audioAttributes)) {
+            return n.audioAttributes;
+        }
+        return new AudioAttributes.Builder()
+                .setLegacyStreamType(n.audioStreamType)
+                .setUsage(AudioAttributes.usageForLegacyStreamType(n.audioStreamType))
+                .build();
     }
 
     void showNextToastLocked() {
