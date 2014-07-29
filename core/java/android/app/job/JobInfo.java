@@ -266,6 +266,11 @@ public class JobInfo implements Parcelable {
         }
     };
 
+    @Override
+    public String toString() {
+        return "(job:" + jobId + "/" + service.flattenToShortString() + ")";
+    }
+
     /** Builder class for constructing {@link JobInfo} objects. */
     public static final class Builder {
         private int mJobId;

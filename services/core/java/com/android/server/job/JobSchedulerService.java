@@ -224,6 +224,9 @@ public class JobSchedulerService extends com.android.server.SystemService
     }
 
     private void cancelJobLocked(JobStatus cancelled) {
+        if (DEBUG) {
+            Slog.d(TAG, "Cancelling: " + cancelled);
+        }
         // Remove from store.
         stopTrackingJob(cancelled);
         // Remove from pending queue.
@@ -447,8 +450,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
         if (!stopTrackingJob(jobStatus)) {
             if (DEBUG) {
-                Slog.e(TAG, "Error removing job: could not find job to remove. Was job " +
-                        "removed while executing?");
+                Slog.d(TAG, "Could not find job to remove. Was job removed while executing?");
             }
             return;
         }
@@ -611,7 +613,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                         final JobStatus running = jsc.getRunningJob();
                         if (running != null && running.matches(nextPending.getUid(),
                                 nextPending.getJobId())) {
-                            // Already running this tId for this uId, skip.
+                            // Already running this job for this uId, skip.
                             availableContext = null;
                             break;
                         }
@@ -691,7 +693,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         @Override
         public int schedule(JobInfo job) throws RemoteException {
             if (DEBUG) {
-                Slog.d(TAG, "Scheduling job: " + job);
+                Slog.d(TAG, "Scheduling job: " + job.toString());
             }
             final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();
