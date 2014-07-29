@@ -157,6 +157,11 @@ public class SurfaceControl {
     // 0x1000 is reserved for an independent DRM protected flag in framework
 
     /**
+     * Surface creation flag: Window represents a cursor glyph.
+     */
+    public static final int CURSOR_WINDOW = 0x00002000;
+
+    /**
      * Surface creation flag: Creates a normal surface.
      * This is the default.
      *
