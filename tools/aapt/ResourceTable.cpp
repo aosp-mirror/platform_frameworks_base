@@ -3846,22 +3846,30 @@ sp<ResourceTable::Type> ResourceTable::Package::getType(const String16& type,
 
 status_t ResourceTable::Package::setTypeStrings(const sp<AaptFile>& data)
 {
-    mTypeStringsData = data;
     status_t err = setStrings(data, &mTypeStrings, &mTypeStringsMapping);
     if (err != NO_ERROR) {
         fprintf(stderr, "ERROR: Type string data is corrupt!\n");
+        return err;
     }
-    return err;
+
+    // Retain a reference to the new data after we've successfully replaced
+    // all uses of the old reference (in setStrings() ).
+    mTypeStringsData = data;
+    return NO_ERROR;
 }
 
 status_t ResourceTable::Package::setKeyStrings(const sp<AaptFile>& data)
 {
-    mKeyStringsData = data;
     status_t err = setStrings(data, &mKeyStrings, &mKeyStringsMapping);
     if (err != NO_ERROR) {
         fprintf(stderr, "ERROR: Key string data is corrupt!\n");
+        return err;
     }
-    return err;
+
+    // Retain a reference to the new data after we've successfully replaced
+    // all uses of the old reference (in setStrings() ).
+    mKeyStringsData = data;
+    return NO_ERROR;
 }
 
 status_t ResourceTable::Package::setStrings(const sp<AaptFile>& data,
