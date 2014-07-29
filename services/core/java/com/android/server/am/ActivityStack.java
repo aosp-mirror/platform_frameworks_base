@@ -2870,7 +2870,6 @@ final class ActivityStack {
         // down to the max limit while they are still waiting to finish.
         mStackSupervisor.mFinishingActivities.remove(r);
         mStackSupervisor.mWaitingVisibleActivities.remove(r);
-        mStackSupervisor.removePendingActivityLaunchesLocked(r);
 
         // Remove any pending results.
         if (r.finishing && r.pendingResults != null) {
