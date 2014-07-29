@@ -80,8 +80,6 @@ public abstract class ConnectionService extends Service {
     private final Map<Connection, String> mIdByConnection = new HashMap<>();
     private final RemoteConnectionManager mRemoteConnectionManager = new RemoteConnectionManager();
 
-    private SimpleResponse<Uri, List<PhoneAccountHandle>> mAccountLookupResponse;
-    private Uri mAccountLookupHandle;
     private boolean mAreAccountsInitialized = false;
     private final ConnectionServiceAdapter mAdapter = new ConnectionServiceAdapter();
 
@@ -474,6 +472,9 @@ public abstract class ConnectionService extends Service {
             } else if (createdConnection.getState() == Connection.State.CANCELED) {
                 // Tell telecomm not to attempt any more services.
                 mAdapter.handleCreateConnectionCancelled(request);
+            } else if (createdConnection.getState() == Connection.State.FAILED) {
+                mAdapter.handleCreateConnectionFailed(request, createdConnection.getFailureCode(),
+                        createdConnection.getFailureMessage());
             } else {
                 connectionCreated(request, createdConnection);
             }
@@ -625,7 +626,6 @@ public abstract class ConnectionService extends Service {
                         }
                         mAreAccountsInitialized = true;
                         Log.d(this, "remote connection services found: " + services);
-                        maybeRespondToAccountLookup();
                     }
                 });
             }
@@ -635,22 +635,10 @@ public abstract class ConnectionService extends Service {
                 mHandler.post(new Runnable() {
                     @Override public void run() {
                         mAreAccountsInitialized = true;
-                        maybeRespondToAccountLookup();
                     }
                 });
             }
         });
-    }
-
-    public final void maybeRespondToAccountLookup() {
-        if (mAreAccountsInitialized && mAccountLookupResponse != null) {
-            mAccountLookupResponse.onResult(
-                    mAccountLookupHandle,
-                    mRemoteConnectionManager.getAccounts(mAccountLookupHandle));
-
-            mAccountLookupHandle = null;
-            mAccountLookupResponse = null;
-        }
     }
 
     public final RemoteConnection createRemoteIncomingConnection(ConnectionRequest request) {
