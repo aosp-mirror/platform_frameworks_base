@@ -256,6 +256,11 @@ public:
     void eventMark(const char* name) const;
 
     /**
+     * Inserts a formatted event marker in the stream of GL commands.
+     */
+    void eventMarkDEBUG(const char *fmt, ...) const;
+
+    /**
      * Inserts a named group marker in the stream of GL commands. This marker
      * can be used by tools to group commands into logical groups. A call to
      * this method must always be followed later on by a call to endMark().

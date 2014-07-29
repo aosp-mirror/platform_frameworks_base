@@ -45,6 +45,12 @@
 #include "Vector.h"
 #include "VertexBuffer.h"
 
+#if DEBUG_DETAILED_EVENTS
+    #define EVENT_LOGD(...) eventMarkDEBUG(__VA_ARGS__)
+#else
+    #define EVENT_LOGD(...)
+#endif
+
 namespace android {
 namespace uirenderer {
 
@@ -388,6 +394,21 @@ status_t OpenGLRenderer::callDrawGLFunction(Functor* functor, Rect& dirty) {
 ///////////////////////////////////////////////////////////////////////////////
 // Debug
 ///////////////////////////////////////////////////////////////////////////////
+
+void OpenGLRenderer::eventMarkDEBUG(const char* fmt, ...) const {
+#if DEBUG_DETAILED_EVENTS
+    const int BUFFER_SIZE = 256;
+    va_list ap;
+    char buf[BUFFER_SIZE];
+
+    va_start(ap, fmt);
+    vsnprintf(buf, BUFFER_SIZE, fmt, ap);
+    va_end(ap);
+
+    eventMark(buf);
+#endif
+}
+
 
 void OpenGLRenderer::eventMark(const char* name) const {
     mCaches.eventMark(0, name);
@@ -977,7 +998,13 @@ void OpenGLRenderer::drawTextureLayer(Layer* layer, const Rect& rect) {
 }
 
 void OpenGLRenderer::composeLayerRect(Layer* layer, const Rect& rect, bool swap) {
-    if (!layer->isTextureLayer()) {
+    if (layer->isTextureLayer()) {
+        EVENT_LOGD("composeTextureLayerRect");
+        resetDrawTextureTexCoords(0.0f, 1.0f, 1.0f, 0.0f);
+        drawTextureLayer(layer, rect);
+        resetDrawTextureTexCoords(0.0f, 0.0f, 1.0f, 1.0f);
+    } else {
+        EVENT_LOGD("composeHardwareLayerRect");
         const Rect& texCoords = layer->texCoords;
         resetDrawTextureTexCoords(texCoords.left, texCoords.top,
                 texCoords.right, texCoords.bottom);
@@ -1011,10 +1038,6 @@ void OpenGLRenderer::composeLayerRect(Layer* layer, const Rect& rect, bool swap)
                 &mMeshVertices[0].x, &mMeshVertices[0].u,
                 GL_TRIANGLE_STRIP, gMeshCount, swap, swap || simpleTransform);
 
-        resetDrawTextureTexCoords(0.0f, 0.0f, 1.0f, 1.0f);
-    } else {
-        resetDrawTextureTexCoords(0.0f, 1.0f, 1.0f, 0.0f);
-        drawTextureLayer(layer, rect);
         resetDrawTextureTexCoords(0.0f, 0.0f, 1.0f, 1.0f);
     }
 }
@@ -1115,6 +1138,7 @@ void OpenGLRenderer::composeLayerRegion(Layer* layer, const Rect& rect) {
         return;
     }
 
+    EVENT_LOGD("composeLayerRegion");
     // standard Region based draw
     size_t count;
     const android::Rect* rects;
@@ -1288,6 +1312,7 @@ void OpenGLRenderer::clearLayerRegions() {
     if (count == 0) return;
 
     if (!currentSnapshot()->isIgnored()) {
+        EVENT_LOGD("clearLayerRegions");
         // Doing several glScissor/glClear here can negatively impact
         // GPUs with a tiler architecture, instead we draw quads with
         // the Clear blending mode
@@ -1465,6 +1490,8 @@ void OpenGLRenderer::attachStencilBufferToLayer(Layer* layer) {
 void OpenGLRenderer::setStencilFromClip() {
     if (!mCaches.debugOverdraw) {
         if (!currentSnapshot()->clipRegion->isEmpty()) {
+            EVENT_LOGD("setStencilFromClip - enabling");
+
             // NOTE: The order here is important, we must set dirtyClip to false
             //       before any draw call to avoid calling back into this method
             mDirtyClip = false;
@@ -1510,6 +1537,7 @@ void OpenGLRenderer::setStencilFromClip() {
                 drawRegionRects(*(currentSnapshot()->clipRegion), paint);
             }
         } else {
+            EVENT_LOGD("setStencilFromClip - disabling");
             mCaches.stencil.disable();
         }
     }
@@ -1561,17 +1589,24 @@ void OpenGLRenderer::debugClip() {
 // Drawing commands
 ///////////////////////////////////////////////////////////////////////////////
 
-void OpenGLRenderer::setupDraw(bool clear) {
+void OpenGLRenderer::setupDraw(bool clearLayer) {
     // TODO: It would be best if we could do this before quickRejectSetupScissor()
     //       changes the scissor test state
-    if (clear) clearLayerRegions();
+    if (clearLayer) clearLayerRegions();
     // Make sure setScissor & setStencil happen at the beginning of
     // this method
     if (mDirtyClip) {
         if (mCaches.scissorEnabled) {
             setScissorFromClip();
         }
-        setStencilFromClip();
+
+        if (clearLayer) {
+            setStencilFromClip();
+        } else {
+            // While clearing layer, force disable stencil buffer, since
+            // it's invalid to stencil-clip *during* the layer clear
+            mCaches.stencil.disable();
+        }
     }
 
     mDescription.reset();
@@ -2963,6 +2998,9 @@ status_t OpenGLRenderer::drawLayer(Layer* layer, float x, float y) {
         }
         return DrawGlInfo::kStatusDone;
     }
+
+    EVENT_LOGD("drawLayer," RECT_STRING ", clipRequired %d", x, y,
+            x + layer->layer.getWidth(), y + layer->layer.getHeight(), clipRequired);
 
     updateLayer(layer, true);
 
