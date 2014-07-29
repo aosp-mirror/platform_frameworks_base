@@ -252,4 +252,28 @@ public final class InCallAdapter {
         } catch (RemoteException ignored) {
         }
     }
+
+    /**
+     * Instructs Telecomm to turn the proximity sensor on.
+     */
+    public void turnProximitySensorOn() {
+        try {
+            mAdapter.turnOnProximitySensor();
+        } catch (RemoteException ignored) {
+        }
+    }
+
+    /**
+     * Instructs Telecomm to turn the proximity sensor off.
+     *
+     * @param screenOnImmediately If true, the screen will be turned on immediately if it was
+     * previously off. Otherwise, the screen will only be turned on after the proximity sensor
+     * is no longer triggered.
+     */
+    public void turnProximitySensorOff(boolean screenOnImmediately) {
+        try {
+            mAdapter.turnOffProximitySensor(screenOnImmediately);
+        } catch (RemoteException ignored) {
+        }
+    }
 }

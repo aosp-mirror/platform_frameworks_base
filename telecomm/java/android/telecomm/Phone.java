@@ -210,6 +210,29 @@ public final class Phone {
     }
 
     /**
+     * Turns the proximity sensor on. When this request is made, the proximity sensor will
+     * become active, and the touch screen and display will be turned off when the user's face
+     * is detected to be in close proximity to the screen. This operation is a no-op on devices
+     * that do not have a proximity sensor.
+     */
+    public final void setProximitySensorOn() {
+        mInCallAdapter.turnProximitySensorOn();
+    }
+
+    /**
+     * Turns the proximity sensor off. When this request is made, the proximity sensor will
+     * become inactive, and no longer affect the touch screen and display. This operation is a
+     * no-op on devices that do not have a proximity sensor.
+     *
+     * @param screenOnImmediately If true, the screen will be turned on immediately if it was
+     * previously off. Otherwise, the screen will only be turned on after the proximity sensor
+     * is no longer triggered.
+     */
+    public final void setProximitySensorOff(boolean screenOnImmediately) {
+        mInCallAdapter.turnProximitySensorOff(screenOnImmediately);
+    }
+
+    /**
      * Obtains the current phone call audio state of the {@code Phone}.
      *
      * @return An object encapsulating the audio state.
