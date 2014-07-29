@@ -57,6 +57,7 @@ public class ZenLog {
     private static final int TYPE_SUBSCRIBE = 7;
     private static final int TYPE_UNSUBSCRIBE = 8;
     private static final int TYPE_CONFIG = 9;
+    private static final int TYPE_FOLLOW_RINGER_MODE = 10;
 
     private static int sNext;
     private static int sSize;
@@ -100,6 +101,11 @@ public class ZenLog {
         append(TYPE_CONFIG, newConfig != null ? newConfig.toString() : null);
     }
 
+    public static void traceFollowRingerMode(int ringerMode, int oldZen, int newZen) {
+        append(TYPE_FOLLOW_RINGER_MODE, ringerModeToString(ringerMode) + ", "
+                + zenModeToString(oldZen) + " -> " + zenModeToString(newZen));
+    }
+
     private static String subscribeResult(IConditionProvider provider, RemoteException e) {
         return provider == null ? "no provider" : e != null ? e.getMessage() : "ok";
     }
@@ -115,6 +121,7 @@ public class ZenLog {
             case TYPE_SUBSCRIBE: return "subscribe";
             case TYPE_UNSUBSCRIBE: return "unsubscribe";
             case TYPE_CONFIG: return "config";
+            case TYPE_FOLLOW_RINGER_MODE: return "follow_ringer_mode";
             default: return "unknown";
         }
     }
