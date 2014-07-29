@@ -25926,7 +25926,6 @@ package android.provider {
   }
 
   public static abstract interface Telephony.BaseMmsColumns implements android.provider.BaseColumns {
-    field public static final java.lang.String ARCHIVED = "archived";
     field public static final java.lang.String CONTENT_CLASS = "ct_cls";
     field public static final java.lang.String CONTENT_LOCATION = "ct_l";
     field public static final java.lang.String CONTENT_TYPE = "ct_t";
@@ -26153,7 +26152,6 @@ package android.provider {
 
   public static abstract interface Telephony.TextBasedSmsColumns {
     field public static final java.lang.String ADDRESS = "address";
-    field public static final java.lang.String ARCHIVED = "archived";
     field public static final java.lang.String BODY = "body";
     field public static final java.lang.String CREATOR = "creator";
     field public static final java.lang.String DATE = "date";
@@ -26191,6 +26189,7 @@ package android.provider {
   }
 
   public static abstract interface Telephony.ThreadsColumns implements android.provider.BaseColumns {
+    field public static final java.lang.String ARCHIVED = "archived";
     field public static final java.lang.String DATE = "date";
     field public static final java.lang.String ERROR = "error";
     field public static final java.lang.String HAS_ATTACHMENT = "has_attachment";
@@ -29399,6 +29398,7 @@ package android.telephony {
   public final class SmsManager {
     method public android.net.Uri addMultimediaMessageDraft(byte[]);
     method public android.net.Uri addTextMessageDraft(java.lang.String, java.lang.String);
+    method public boolean archiveStoredConversation(long, boolean);
     method public boolean deleteStoredConversation(long);
     method public boolean deleteStoredMessage(android.net.Uri);
     method public java.util.ArrayList<java.lang.String> divideMessage(java.lang.String);
@@ -29425,7 +29425,6 @@ package android.telephony {
     method public void updateMmsSendStatus(int, boolean);
     method public void updateSmsSendStatus(int, boolean);
     method public boolean updateStoredMessageStatus(android.net.Uri, android.content.ContentValues);
-    field public static final java.lang.String MESSAGE_STATUS_ARCHIVED = "archived";
     field public static final java.lang.String MESSAGE_STATUS_READ = "read";
     field public static final java.lang.String MESSAGE_STATUS_SEEN = "seen";
     field public static final int MMS_ERROR_HTTP_FAILURE = 4; // 0x4

@@ -183,6 +183,16 @@ interface IMms {
             in ContentValues statusValues);
 
     /**
+     * Archive or unarchive a stored conversation
+     *
+     * @param callingPkg the package name of the calling app
+     * @param conversationId the ID of the message conversation
+     * @param archived true to archive the conversation, false otherwise
+     * @return true if update is successful, false otherwise
+     */
+    boolean archiveStoredConversation(String callingPkg, long conversationId, boolean archived);
+
+    /**
      * Add a text message draft to system SMS store
      *
      * @param callingPkg the package name of the calling app
