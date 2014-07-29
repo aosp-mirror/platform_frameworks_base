@@ -525,16 +525,6 @@ public class RippleDrawable extends LayerDrawable {
     }
 
     private void clearHotspots() {
-        if (mRipple != null) {
-            mRipple.cancel();
-            mRipple = null;
-        }
-
-        if (mBackground != null) {
-            mBackground.cancel();
-            mBackground = null;
-        }
-
         final int count = mAnimatingRipplesCount;
         final Ripple[] ripples = mAnimatingRipples;
         for (int i = 0; i < count; i++) {
@@ -543,6 +533,21 @@ public class RippleDrawable extends LayerDrawable {
             final Ripple ripple = ripples[i];
             ripples[i] = null;
             ripple.cancel();
+
+            // The active ripple may also be animating. Don't cancel it twice.
+            if (mRipple == ripple) {
+                mRipple = null;
+            }
+        }
+
+        if (mRipple != null) {
+            mRipple.cancel();
+            mRipple = null;
+        }
+
+        if (mBackground != null) {
+            mBackground.cancel();
+            mBackground = null;
         }
 
         mAnimatingRipplesCount = 0;
