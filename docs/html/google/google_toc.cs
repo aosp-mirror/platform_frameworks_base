@@ -138,9 +138,6 @@
       <li><a href="<?cs var:toroot?>google/play/billing/billing_admin.html">
               <span class="en">Administering In-app Billing</span></a>
       </li>
-      <li><a href="<?cs var:toroot?>google/play/billing/gp-purchase-status-api.html">
-              <span class="en">Purchase Status API</span></a>
-      </li>
       <li><a href="<?cs var:toroot?>google/play/billing/versions.html">
               <span class="en">Version Notes</span></a>
       </li>
@@ -205,7 +202,9 @@
       <li><a href="<?cs var:toroot ?>google/play/filters.html">
           <span class="en">Filters on Google Play</span></a>
       </li>
-
+      <li><a href="<?cs var:toroot?>google/play/billing/gp-purchase-status-api.html">
+              <span class="en">Google Play Developer API</span></a>
+      </li>
       <li><a href="<?cs var:toroot ?>google/play/publishing/multiple-apks.html">
           <span class="en">Multiple APK Support</span></a>
       </li>
