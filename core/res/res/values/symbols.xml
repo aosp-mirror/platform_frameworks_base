@@ -1965,4 +1965,9 @@
   <java-symbol type="array" name="config_cdma_home_system" />
   <java-symbol type="attr" name="headerSelectedTextColor" />
   <java-symbol type="attr" name="amPmSelectedBackgroundColor" />
+
+  <!--From SmsMessage-->
+  <!--Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
+     string that's stored in 8-bit unpacked format) characters.-->
+  <java-symbol type="bool" name="config_sms_decode_gsm_8bit_data" />
 </resources>
