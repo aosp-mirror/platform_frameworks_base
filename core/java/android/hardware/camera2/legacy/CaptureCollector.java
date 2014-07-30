@@ -15,11 +15,12 @@
  */
 package android.hardware.camera2.legacy;
 
-import android.hardware.camera2.impl.CameraMetadataNative;
 import android.util.Log;
+import android.util.MutableLong;
 import android.util.Pair;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
@@ -77,7 +78,7 @@ public class CaptureCollector {
                 if (needsPreview && isPreviewCompleted()) {
                     CaptureCollector.this.onPreviewCompleted();
                 }
-                CaptureCollector.this.onRequestCompleted(mRequest, mLegacy, mTimestamp);
+                CaptureCollector.this.onRequestCompleted(this);
             }
         }
 
@@ -176,13 +177,13 @@ public class CaptureCollector {
     private final ArrayDeque<CaptureHolder> mJpegProduceQueue;
     private final ArrayDeque<CaptureHolder> mPreviewCaptureQueue;
     private final ArrayDeque<CaptureHolder> mPreviewProduceQueue;
+    private final ArrayList<CaptureHolder> mCompletedRequests = new ArrayList<>();
 
     private final ReentrantLock mLock = new ReentrantLock();
     private final Condition mIsEmpty;
     private final Condition mPreviewsEmpty;
     private final Condition mNotFull;
     private final CameraDeviceState mDeviceState;
-    private final LegacyResultMapper mMapper = new LegacyResultMapper();
     private int mInFlight = 0;
     private int mInFlightPreviews = 0;
     private final int mMaxInFlight;
@@ -320,6 +321,54 @@ public class CaptureCollector {
     }
 
     /**
+     * Wait for the specified request to be completed (all buffers available).
+     *
+     * <p>May not wait for the same request more than once, since a successful wait
+     * will erase the history of that request.</p>
+     *
+     * @param holder the {@link RequestHolder} for this request.
+     * @param timeout a timeout to use for this call.
+     * @param unit the units to use for the timeout.
+     * @param timestamp the timestamp of the request will be written out to here, in ns
+     *
+     * @return {@code false} if this method timed out.
+     *
+     * @throws InterruptedException if this thread is interrupted.
+     */
+    public boolean waitForRequestCompleted(RequestHolder holder, long timeout, TimeUnit unit,
+            MutableLong timestamp)
+            throws InterruptedException {
+        long nanos = unit.toNanos(timeout);
+        final ReentrantLock lock = this.mLock;
+        lock.lock();
+        try {
+            while (!removeRequestIfCompleted(holder, /*out*/timestamp)) {
+                if (nanos <= 0) {
+                    return false;
+                }
+                nanos = mNotFull.awaitNanos(nanos);
+            }
+            return true;
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    private boolean removeRequestIfCompleted(RequestHolder holder, MutableLong timestamp) {
+        int i = 0;
+        for (CaptureHolder h : mCompletedRequests) {
+            if (h.mRequest.equals(holder)) {
+                timestamp.value = h.mTimestamp;
+                mCompletedRequests.remove(i);
+                return true;
+            }
+            i++;
+        }
+
+        return false;
+    }
+
+    /**
      * Called to alert the {@link CaptureCollector} that the jpeg capture has begun.
      *
      * @param timestamp the time of the jpeg capture.
@@ -431,8 +480,9 @@ public class CaptureCollector {
         }
     }
 
-    private void onRequestCompleted(RequestHolder request, LegacyRequest legacyHolder,
-                                    long timestamp) {
+    private void onRequestCompleted(CaptureHolder capture) {
+        RequestHolder request = capture.mRequest;
+
         mInFlight--;
         if (DEBUG) {
             Log.d(TAG, "Completed request " + request.getRequestId() +
@@ -442,12 +492,12 @@ public class CaptureCollector {
             throw new IllegalStateException(
                     "More captures completed than requests queued.");
         }
+
+        mCompletedRequests.add(capture);
+
         mNotFull.signalAll();
         if (mInFlight == 0) {
             mIsEmpty.signalAll();
         }
-        CameraMetadataNative result = mMapper.cachedConvertResultMetadata(
-                legacyHolder, timestamp);
-        mDeviceState.setCaptureResult(request, result);
     }
 }
