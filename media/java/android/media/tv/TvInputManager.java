@@ -57,9 +57,9 @@ public final class TvInputManager {
      */
     public static final int VIDEO_UNAVAILABLE_REASON_UNKNOWN = VIDEO_UNAVAILABLE_REASON_START;
     /**
-     * Video is not available because the TV input is tuning to another channel.
+     * Video is not available because the TV input is in the middle of tuning to a new channel.
      */
-    public static final int VIDEO_UNAVAILABLE_REASON_TUNE = 1;
+    public static final int VIDEO_UNAVAILABLE_REASON_TUNING = 1;
     /**
      * Video is not available due to the weak TV signal.
      */
@@ -180,7 +180,7 @@ public final class TvInputManager {
          * @param reason The reason why the TV input stopped the playback:
          * <ul>
          * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_UNKNOWN}
-         * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_TUNE}
+         * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_TUNING}
          * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_WEAK_SIGNAL}
          * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_BUFFERING}
          * </ul>

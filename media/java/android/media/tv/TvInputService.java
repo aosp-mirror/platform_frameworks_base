@@ -367,7 +367,7 @@ public abstract class TvInputService extends Service {
          * @param reason The reason why the TV input stopped the playback:
          * <ul>
          * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_UNKNOWN}
-         * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_TUNE}
+         * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_TUNING}
          * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_WEAK_SIGNAL}
          * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_BUFFERING}
          * </ul>
