@@ -118,7 +118,7 @@
     <string name="kg_invalid_puk" msgid="3638289409676051243">"请重新输入正确的PUK码。如果尝试错误次数过多，SIM卡将永久停用。"</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN 码不匹配"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"图案尝试次数过多"</string>
-    <string name="kg_login_instructions" msgid="1100551261265506448">"要解锁，请登录您的 Google 帐户。"</string>
+    <string name="kg_login_instructions" msgid="1100551261265506448">"要解锁，请登录您的Google帐户。"</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"用户名（电子邮件地址）"</string>
     <string name="kg_login_password_hint" msgid="9057289103827298549">"密码"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"登录"</string>
