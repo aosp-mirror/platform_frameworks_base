@@ -17001,7 +17001,7 @@ package android.media.tv {
     field public static final int INPUT_STATE_CONNECTED_STANDBY = 1; // 0x1
     field public static final int INPUT_STATE_DISCONNECTED = 2; // 0x2
     field public static final int VIDEO_UNAVAILABLE_REASON_BUFFERING = 3; // 0x3
-    field public static final int VIDEO_UNAVAILABLE_REASON_TUNE = 1; // 0x1
+    field public static final int VIDEO_UNAVAILABLE_REASON_TUNING = 1; // 0x1
     field public static final int VIDEO_UNAVAILABLE_REASON_UNKNOWN = 0; // 0x0
     field public static final int VIDEO_UNAVAILABLE_REASON_WEAK_SIGNAL = 2; // 0x2
   }
@@ -17124,8 +17124,8 @@ package android.media.tv {
     method public void setTvInputListener(android.media.tv.TvView.TvInputListener);
     method public void tune(java.lang.String, android.net.Uri);
     method public void unselectTrack(android.media.tv.TvTrackInfo);
-    field public static final int ERROR_BUSY = 0; // 0x0
-    field public static final int ERROR_TV_INPUT_DISCONNECTED = 1; // 0x1
+    field public static final int ERROR_INPUT_DISCONNECTED = 1; // 0x1
+    field public static final int ERROR_INPUT_NOT_CONNECTED = 0; // 0x0
   }
 
   public static abstract interface TvView.OnUnhandledInputEventListener {
