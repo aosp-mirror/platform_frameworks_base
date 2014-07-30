@@ -13281,6 +13281,11 @@ package android.hardware.location {
     field public static final int MONITOR_CURRENTLY_AVAILABLE = 0; // 0x0
     field public static final int MONITOR_CURRENTLY_UNAVAILABLE = 1; // 0x1
     field public static final int MONITOR_UNSUPPORTED = 2; // 0x2
+    field public static final int SOURCE_TECHNOLOGY_BLUETOOTH = 16; // 0x10
+    field public static final int SOURCE_TECHNOLOGY_CELL = 8; // 0x8
+    field public static final int SOURCE_TECHNOLOGY_GNSS = 1; // 0x1
+    field public static final int SOURCE_TECHNOLOGY_SENSORS = 4; // 0x4
+    field public static final int SOURCE_TECHNOLOGY_WIFI = 2; // 0x2
   }
 
   public abstract class GeofenceHardwareCallback {
@@ -13294,7 +13299,19 @@ package android.hardware.location {
 
   public abstract class GeofenceHardwareMonitorCallback {
     ctor public GeofenceHardwareMonitorCallback();
-    method public void onMonitoringSystemChange(int, boolean, android.location.Location);
+    method public deprecated void onMonitoringSystemChange(int, boolean, android.location.Location);
+    method public void onMonitoringSystemChange(android.hardware.location.GeofenceHardwareMonitorEvent);
+  }
+
+  public class GeofenceHardwareMonitorEvent implements android.os.Parcelable {
+    ctor public GeofenceHardwareMonitorEvent(int, int, int, android.location.Location);
+    method public int describeContents();
+    method public android.location.Location getLocation();
+    method public int getMonitoringStatus();
+    method public int getMonitoringType();
+    method public int getSourceTechnologies();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
   }
 
   public final class GeofenceHardwareRequest {
@@ -13306,10 +13323,12 @@ package android.hardware.location {
     method public int getMonitorTransitions();
     method public int getNotificationResponsiveness();
     method public double getRadius();
+    method public int getSourceTechnologies();
     method public int getUnknownTimer();
     method public void setLastTransition(int);
     method public void setMonitorTransitions(int);
     method public void setNotificationResponsiveness(int);
+    method public void setSourceTechnologies(int);
     method public void setUnknownTimer(int);
   }
 

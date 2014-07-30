@@ -364,7 +364,9 @@ static void TranslateGeofenceFromGeofenceHardwareRequestParcelable(
       "()I");
   options->last_transition = env->CallIntMethod(geofenceRequestObject, getLastTransition);
 
-  // TODO: set data.sources_to_use when available
+  jmethodID getSourceTechnologies =
+      env->GetMethodID(geofenceRequestClass, "getSourceTechnologies", "()I");
+  options->sources_to_use = env->CallIntMethod(geofenceRequestObject, getSourceTechnologies);
 
   env->DeleteLocalRef(geofenceRequestClass);
 }
