@@ -18,21 +18,19 @@
     <item android:state_enabled="false" android:state_checked="true">
         <nine-patch android:src="@drawable/switch_track_mtrl_alpha"
             android:tint="?attr/colorControlActivated"
-            android:alpha="0.15" />
+            android:alpha="?attr/disabledAlpha" />
     </item>
     <item android:state_enabled="false">
         <nine-patch android:src="@drawable/switch_track_mtrl_alpha"
             android:tint="?attr/colorControlNormal"
-            android:alpha="0.15" />
+            android:alpha="?attr/disabledAlpha" />
     </item>
     <item android:state_checked="true">
         <nine-patch android:src="@drawable/switch_track_mtrl_alpha"
-            android:tint="?attr/colorControlActivated"
-            android:alpha="0.3" />
+            android:tint="?attr/colorControlActivated" />
     </item>
     <item>
         <nine-patch android:src="@drawable/switch_track_mtrl_alpha"
-            android:tint="?attr/colorControlNormal"
-            android:alpha="0.3" />
+            android:tint="?attr/colorControlNormal" />
     </item>
 </selector>
