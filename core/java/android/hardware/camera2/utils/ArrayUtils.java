@@ -156,6 +156,17 @@ public class ArrayUtils {
         return arr;
     }
 
+    /**
+     * Returns true if the given {@code array} contains the given element.
+     *
+     * @param array {@code array} to check for {@code elem}
+     * @param elem {@code elem} to test for
+     * @return {@code true} if the given element is contained
+     */
+    public static boolean contains(int[] array, int elem) {
+        return getArrayIndex(array, elem) != -1;
+    }
+
     private ArrayUtils() {
         throw new AssertionError();
     }

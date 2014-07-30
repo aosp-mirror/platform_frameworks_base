@@ -27,6 +27,7 @@ import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.impl.CameraMetadataNative;
+import android.hardware.camera2.params.MeteringRectangle;
 import android.hardware.camera2.params.StreamConfiguration;
 import android.hardware.camera2.params.StreamConfigurationDuration;
 import android.hardware.camera2.utils.ArrayUtils;
@@ -489,6 +490,9 @@ public class LegacyMetadataMapper {
              */
             m.set(LENS_INFO_MINIMUM_FOCUS_DISTANCE, LENS_INFO_MINIMUM_FOCUS_DISTANCE_FIXED_FOCUS);
         }
+
+        float[] focalLengths = new float[] { p.getFocalLength() };
+        m.set(LENS_INFO_AVAILABLE_FOCAL_LENGTHS, focalLengths);
     }
 
     private static void mapFlash(CameraMetadataNative m, Camera.Parameters p) {
@@ -877,6 +881,16 @@ public class LegacyMetadataMapper {
         LegacyRequestMapper.convertRequestMetadata(request);
     }
 
+    private static final int[] sAllowedTemplates = {
+            CameraDevice.TEMPLATE_PREVIEW,
+            CameraDevice.TEMPLATE_STILL_CAPTURE,
+            CameraDevice.TEMPLATE_RECORD,
+            // Disallowed templates in legacy mode:
+            // CameraDevice.TEMPLATE_VIDEO_SNAPSHOT,
+            // CameraDevice.TEMPLATE_ZERO_SHUTTER_LAG,
+            // CameraDevice.TEMPLATE_MANUAL
+    };
+
     /**
      * Create a request template
      *
@@ -891,7 +905,7 @@ public class LegacyMetadataMapper {
      */
     public static CameraMetadataNative createRequestTemplate(
             CameraCharacteristics c, int templateId) {
-        if (templateId < 0 || templateId > CameraDevice.TEMPLATE_MANUAL) {
+        if (!ArrayUtils.contains(sAllowedTemplates, templateId)) {
             throw new IllegalArgumentException("templateId out of range");
         }
 
@@ -903,15 +917,57 @@ public class LegacyMetadataMapper {
          * to create our own templates in the framework
          */
 
+        /*
+         * control.*
+         */
+
         if (LIE_ABOUT_AWB) {
             m.set(CaptureRequest.CONTROL_AWB_MODE, CameraMetadata.CONTROL_AWB_MODE_AUTO);
         } else {
             throw new AssertionError("Valid control.awbMode not implemented yet");
         }
 
+        // control.aeAntibandingMode
+        m.set(CaptureRequest.CONTROL_AE_ANTIBANDING_MODE, CONTROL_AE_ANTIBANDING_MODE_AUTO);
+
+        // control.aeExposureCompensation
+        m.set(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION, 0);
+
+        // control.aeLock
+        m.set(CaptureRequest.CONTROL_AE_LOCK, false);
+
+        // control.aePrecaptureTrigger
+        m.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CONTROL_AE_PRECAPTURE_TRIGGER_IDLE);
+
+        // control.afTrigger
+        m.set(CaptureRequest.CONTROL_AF_TRIGGER, CONTROL_AF_TRIGGER_IDLE);
+
+        // control.awbMode
+        m.set(CaptureRequest.CONTROL_AWB_MODE, CONTROL_AWB_MODE_AUTO);
+
+        // control.awbLock
+        m.set(CaptureRequest.CONTROL_AWB_LOCK, false);
+
+        // control.aeRegions, control.awbRegions, control.afRegions
+        {
+            Rect activeArray = c.get(SENSOR_INFO_ACTIVE_ARRAY_SIZE);
+            MeteringRectangle[] activeRegions =  new MeteringRectangle[] {
+                    new MeteringRectangle(/*x*/0, /*y*/0, /*width*/activeArray.width() - 1,
+                    /*height*/activeArray.height() - 1,/*weight*/1)};
+            m.set(CaptureRequest.CONTROL_AE_REGIONS, activeRegions);
+            m.set(CaptureRequest.CONTROL_AWB_REGIONS, activeRegions);
+            m.set(CaptureRequest.CONTROL_AF_REGIONS, activeRegions);
+        }
+
+        // control.captureIntent
+        m.set(CaptureRequest.CONTROL_CAPTURE_INTENT, templateId);
+
         // control.aeMode
         m.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
         // AE is always unconditionally available in API1 devices
+
+        // control.mode
+        m.set(CaptureRequest.CONTROL_MODE, CONTROL_MODE_AUTO);
 
         // control.afMode
         {
@@ -925,10 +981,64 @@ public class LegacyMetadataMapper {
             } else {
                 // If a minimum focus distance is reported; the camera must have AF
                 afMode = CameraMetadata.CONTROL_AF_MODE_AUTO;
+
+                if (templateId == CameraDevice.TEMPLATE_RECORD ||
+                        templateId == CameraDevice.TEMPLATE_VIDEO_SNAPSHOT) {
+                    if (ArrayUtils.contains(c.get(CONTROL_AF_AVAILABLE_MODES),
+                            CONTROL_AF_MODE_CONTINUOUS_VIDEO)) {
+                        afMode = CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_VIDEO;
+                    }
+                } else if (templateId == CameraDevice.TEMPLATE_PREVIEW ||
+                        templateId == CameraDevice.TEMPLATE_STILL_CAPTURE) {
+                    if (ArrayUtils.contains(c.get(CONTROL_AF_AVAILABLE_MODES),
+                            CONTROL_AF_MODE_CONTINUOUS_PICTURE)) {
+                        afMode = CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE;
+                    }
+                }
             }
 
             m.set(CaptureRequest.CONTROL_AF_MODE, afMode);
         }
+
+        {
+            // control.aeTargetFpsRange
+            Range<Integer>[] availableFpsRange = c.
+                    get(CameraCharacteristics.CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES);
+
+            // Pick FPS range with highest max value, tiebreak on higher min value
+            Range<Integer> bestRange = availableFpsRange[0];
+            for (Range<Integer> r : availableFpsRange) {
+                if (bestRange.getUpper() < r.getUpper()) {
+                    bestRange = r;
+                } else if (bestRange.getUpper() == r.getUpper() &&
+                        bestRange.getLower() < r.getLower()) {
+                    bestRange = r;
+                }
+            }
+            m.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, bestRange);
+        }
+
+        /*
+         * statistics.*
+         */
+
+        // statistics.faceDetectMode
+        m.set(CaptureRequest.STATISTICS_FACE_DETECT_MODE, STATISTICS_FACE_DETECT_MODE_OFF);
+
+        /*
+         * flash.*
+         */
+
+        // flash.mode
+        m.set(CaptureRequest.FLASH_MODE, FLASH_MODE_OFF);
+
+        /*
+         * lens.*
+         */
+
+        // lens.focalLength
+        m.set(CaptureRequest.LENS_FOCAL_LENGTH,
+                c.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS)[0]);
 
         // TODO: map other request template values
         return m;
