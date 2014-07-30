@@ -537,12 +537,9 @@ please see styles_device_defaults.xml.
     <style name="Widget.Material.CompoundButton.Switch">
         <item name="track">@drawable/switch_track_material</item>
         <item name="thumb">@drawable/switch_thumb_material_anim</item>
-        <item name="splitTrack">true</item>
         <item name="switchTextAppearance">@style/TextAppearance.Material.Widget.Switch</item>
         <item name="textOn">@string/capital_on</item>
         <item name="textOff">@string/capital_off</item>
-        <item name="switchMinWidth">4dip</item>
-        <item name="switchPadding">4dip</item>
         <item name="background">?attr/selectableItemBackgroundBorderless</item>
         <item name="showText">false</item>
     </style>
