@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 The Android Open Source Project
+ * Copyright (C) 2014 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,16 @@
 
 package com.android.server.display;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
+import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.graphics.SurfaceTexture;
 import android.hardware.display.DisplayManagerInternal;
@@ -30,9 +35,8 @@ import android.opengl.EGLConfig;
 import android.opengl.EGLContext;
 import android.opengl.EGLDisplay;
 import android.opengl.EGLSurface;
-import android.opengl.GLES10;
+import android.opengl.GLES20;
 import android.opengl.GLES11Ext;
-import android.os.Looper;
 import android.util.FloatMath;
 import android.util.Slog;
 import android.view.DisplayInfo;
@@ -41,10 +45,12 @@ import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 
+import libcore.io.Streams;
+
 import com.android.server.LocalServices;
+import com.android.internal.R;
 
 /**
- * Bzzzoooop!  *crackle*
  * <p>
  * Animates a screen transition from on to off or off to on by applying
  * some GL transformations to a screenshot.
@@ -53,20 +59,14 @@ import com.android.server.LocalServices;
  * that belongs to the {@link DisplayPowerController}.
  * </p>
  */
-final class ElectronBeam {
-    private static final String TAG = "ElectronBeam";
+final class ColorFade {
+    private static final String TAG = "ColorFade";
 
     private static final boolean DEBUG = false;
 
     // The layer for the electron beam surface.
     // This is currently hardcoded to be one layer above the boot animation.
-    private static final int ELECTRON_BEAM_LAYER = 0x40000001;
-
-    // The relative proportion of the animation to spend performing
-    // the horizontal stretch effect.  The remainder is spent performing
-    // the vertical stretch effect.
-    private static final float HSTRETCH_DURATION = 0.5f;
-    private static final float VSTRETCH_DURATION = 1.0f - HSTRETCH_DURATION;
+    private static final int COLOR_FADE_LAYER = 0x40000001;
 
     // The number of frames to draw when preparing the animation so that it will
     // be ready to run smoothly.  We use 3 frames because we are triple-buffered.
@@ -98,6 +98,11 @@ final class ElectronBeam {
     private final int[] mTexNames = new int[1];
     private boolean mTexNamesGenerated;
     private final float mTexMatrix[] = new float[16];
+    private final float mProjMatrix[] = new float[16];
+    private final int[] mGLBuffers = new int[2];
+    private int mTexCoordLoc, mVertexLoc, mTexUnitLoc, mProjMatrixLoc, mTexMatrixLoc;
+    private int mOpacityLoc, mScaleLoc, mGammaLoc, mSaturationLoc;
+    private int mProgram;
 
     // Vertex and corresponding texture coordinates.
     // We have 4 2D vertices, so 8 elements.  The vertices form a quad.
@@ -105,12 +110,12 @@ final class ElectronBeam {
     private final FloatBuffer mTexCoordBuffer = createNativeFloatBuffer(8);
 
     /**
-     * Animates an electron beam warming up.
+     * Animates an color fade warming up.
      */
     public static final int MODE_WARM_UP = 0;
 
     /**
-     * Animates an electron beam shutting off.
+     * Animates an color fade shutting off.
      */
     public static final int MODE_COOL_DOWN = 1;
 
@@ -119,19 +124,19 @@ final class ElectronBeam {
      */
     public static final int MODE_FADE = 2;
 
-    public ElectronBeam(int displayId) {
+    public ColorFade(int displayId) {
         mDisplayId = displayId;
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
     }
 
     /**
-     * Warms up the electron beam in preparation for turning on or off.
+     * Warms up the color fade in preparation for turning on or off.
      * This method prepares a GL context, and captures a screen shot.
      *
      * @param mode The desired mode for the upcoming animation.
-     * @return True if the electron beam is ready, false if it is uncontrollable.
+     * @return True if the color fade is ready, false if it is uncontrollable.
      */
-    public boolean prepare(int mode) {
+    public boolean prepare(Context context, int mode) {
         if (DEBUG) {
             Slog.d(TAG, "prepare: mode=" + mode);
         }
@@ -139,16 +144,31 @@ final class ElectronBeam {
         mMode = mode;
 
         // Get the display size and layer stack.
-        // This is not expected to change while the electron beam surface is showing.
+        // This is not expected to change while the color fade surface is showing.
         DisplayInfo displayInfo = mDisplayManagerInternal.getDisplayInfo(mDisplayId);
         mDisplayLayerStack = displayInfo.layerStack;
         mDisplayWidth = displayInfo.getNaturalWidth();
         mDisplayHeight = displayInfo.getNaturalHeight();
 
         // Prepare the surface for drawing.
-        if (!tryPrepare()) {
+        if (!(createSurface() && createEglContext() && createEglSurface() &&
+              captureScreenshotTextureAndSetViewport())) {
             dismiss();
             return false;
+        }
+
+        // Init GL
+        if (!attachEglContext()) {
+            return false;
+        }
+        try {
+            if(!initGLShaders(context) || !initGLBuffers() || checkGlErrors("prepare")) {
+                detachEglContext();
+                dismiss();
+                return false;
+            }
+        } finally {
+            detachEglContext();
         }
 
         // Done.
@@ -169,24 +189,125 @@ final class ElectronBeam {
         return true;
     }
 
-    private boolean tryPrepare() {
-        if (createSurface()) {
-            if (mMode == MODE_FADE) {
-                return true;
-            }
-            return createEglContext()
-                    && createEglSurface()
-                    && captureScreenshotTextureAndSetViewport();
+    private String readFile(Context context, int resourceId) {
+        try{
+            InputStream stream = context.getResources().openRawResource(resourceId);
+            return new String(Streams.readFully(new InputStreamReader(stream)));
         }
-        return false;
+        catch (IOException e) {
+            Slog.e(TAG, "Unrecognized shader " + Integer.toString(resourceId));
+            throw new RuntimeException(e);
+        }
+    }
+
+    private int loadShader(Context context, int resourceId, int type) {
+        String source = readFile(context, resourceId);
+
+        int shader = GLES20.glCreateShader(type);
+
+        GLES20.glShaderSource(shader, source);
+        GLES20.glCompileShader(shader);
+
+        int[] compiled = new int[1];
+        GLES20.glGetShaderiv(shader, GLES20.GL_COMPILE_STATUS, compiled, 0);
+        if (compiled[0] == 0) {
+            Slog.e(TAG, "Could not compile shader " + shader + ", " + type + ":");
+            Slog.e(TAG, GLES20.glGetShaderSource(shader));
+            Slog.e(TAG, GLES20.glGetShaderInfoLog(shader));
+            GLES20.glDeleteShader(shader);
+            shader = 0;
+        }
+
+        return shader;
+    }
+
+    private boolean initGLShaders(Context context) {
+        int vshader = loadShader(context, com.android.internal.R.raw.color_fade_vert,
+                GLES20.GL_VERTEX_SHADER);
+        int fshader = loadShader(context, com.android.internal.R.raw.color_fade_frag,
+                GLES20.GL_FRAGMENT_SHADER);
+        if (vshader == 0 || fshader == 0) return false;
+
+        mProgram = GLES20.glCreateProgram();
+
+        GLES20.glAttachShader(mProgram, vshader);
+        GLES20.glAttachShader(mProgram, fshader);
+
+        GLES20.glLinkProgram(mProgram);
+
+        mVertexLoc = GLES20.glGetAttribLocation(mProgram, "position");
+        mTexCoordLoc = GLES20.glGetAttribLocation(mProgram, "uv");
+
+        mProjMatrixLoc = GLES20.glGetUniformLocation(mProgram, "proj_matrix");
+        mTexMatrixLoc = GLES20.glGetUniformLocation(mProgram, "tex_matrix");
+
+        mOpacityLoc = GLES20.glGetUniformLocation(mProgram, "opacity");
+        mGammaLoc = GLES20.glGetUniformLocation(mProgram, "gamma");
+        mSaturationLoc = GLES20.glGetUniformLocation(mProgram, "saturation");
+        mScaleLoc = GLES20.glGetUniformLocation(mProgram, "scale");
+        mTexUnitLoc = GLES20.glGetUniformLocation(mProgram, "texUnit");
+
+        GLES20.glUseProgram(mProgram);
+        GLES20.glUniform1i(mTexUnitLoc, 0);
+        GLES20.glUseProgram(0);
+
+        return true;
+    }
+
+    private boolean initGLBuffers() {
+        //Fill vertices
+        setQuad(mVertexBuffer, 0, 0, mDisplayWidth, mDisplayHeight);
+
+        // Setup GL Textures
+        GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, mTexNames[0]);
+        GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_MAG_FILTER,
+                GLES20.GL_NEAREST);
+        GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_MIN_FILTER,
+                GLES20.GL_NEAREST);
+        GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_WRAP_S,
+                GLES20.GL_CLAMP_TO_EDGE);
+        GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_WRAP_T,
+                GLES20.GL_CLAMP_TO_EDGE);
+        GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, 0);
+
+        // Setup GL Buffers
+        GLES20.glGenBuffers(2, mGLBuffers, 0);
+
+        // fill vertex buffer
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mGLBuffers[0]);
+        GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, mVertexBuffer.capacity() * 4,
+                            mVertexBuffer, GLES20.GL_STATIC_DRAW);
+
+        // fill tex buffer
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mGLBuffers[1]);
+        GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, mTexCoordBuffer.capacity() * 4,
+                            mTexCoordBuffer, GLES20.GL_STATIC_DRAW);
+
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+
+        return true;
+    }
+
+    private static void setQuad(FloatBuffer vtx, float x, float y, float w, float h) {
+        if (DEBUG) {
+            Slog.d(TAG, "setQuad: x=" + x + ", y=" + y + ", w=" + w + ", h=" + h);
+        }
+        vtx.put(0, x);
+        vtx.put(1, y);
+        vtx.put(2, x);
+        vtx.put(3, y + h);
+        vtx.put(4, x + w);
+        vtx.put(5, y + h);
+        vtx.put(6, x + w);
+        vtx.put(7, y);
     }
 
     /**
-     * Dismisses the electron beam animation surface and cleans up.
+     * Dismisses the color fade animation surface and cleans up.
      *
-     * To prevent stray photons from leaking out after the electron beam has been
+     * To prevent stray photons from leaking out after the color fade has been
      * turned off, it is a good idea to defer dismissing the animation until the
-     * electron beam has been turned back on fully.
+     * color fade has been turned back on fully.
      */
     public void dismiss() {
         if (DEBUG) {
@@ -200,10 +321,10 @@ final class ElectronBeam {
     }
 
     /**
-     * Draws an animation frame showing the electron beam activated at the
+     * Draws an animation frame showing the color fade activated at the
      * specified level.
      *
-     * @param level The electron beam level.
+     * @param level The color fade level.
      * @return True if successful.
      */
     public boolean draw(float level) {
@@ -224,15 +345,18 @@ final class ElectronBeam {
         }
         try {
             // Clear frame to solid black.
-            GLES10.glClearColor(0f, 0f, 0f, 1f);
-            GLES10.glClear(GLES10.GL_COLOR_BUFFER_BIT);
+            GLES20.glClearColor(0f, 0f, 0f, 1f);
+            GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
 
             // Draw the frame.
-            if (level < HSTRETCH_DURATION) {
-                drawHStretch(1.0f - (level / HSTRETCH_DURATION));
-            } else {
-                drawVStretch(1.0f - ((level - HSTRETCH_DURATION) / VSTRETCH_DURATION));
-            }
+            float one_minus_level = 1 - level;
+            float cos = FloatMath.cos((float)Math.PI * one_minus_level);
+            float sign = cos < 0 ? -1 : 1;
+            float opacity = -FloatMath.pow(one_minus_level, 2) + 1;
+            float saturation = FloatMath.pow(level, 4);
+            float scale = (-FloatMath.pow(one_minus_level, 2) + 1) * 0.1f + 0.9f;
+            float gamma = (0.5f * sign * FloatMath.pow(cos, 2) + 0.5f) * 0.9f + 0.1f;
+            drawFaded(opacity, 1.f / gamma, saturation, scale);
             if (checkGlErrors("drawFrame")) {
                 return false;
             }
@@ -244,139 +368,59 @@ final class ElectronBeam {
         return showSurface(1.0f);
     }
 
-    /**
-     * Draws a frame where the content of the electron beam is collapsing inwards upon
-     * itself vertically with red / green / blue channels dispersing and eventually
-     * merging down to a single horizontal line.
-     *
-     * @param stretch The stretch factor.  0.0 is no collapse, 1.0 is full collapse.
-     */
-    private void drawVStretch(float stretch) {
-        // compute interpolation scale factors for each color channel
-        final float ar = scurve(stretch, 7.5f);
-        final float ag = scurve(stretch, 8.0f);
-        final float ab = scurve(stretch, 8.5f);
+    private void drawFaded(float opacity, float gamma, float saturation, float scale) {
         if (DEBUG) {
-            Slog.d(TAG, "drawVStretch: stretch=" + stretch
-                    + ", ar=" + ar + ", ag=" + ag + ", ab=" + ab);
+            Slog.d(TAG, "drawFaded: opacity=" + opacity + ", gamma=" + gamma +
+                        ", saturation=" + saturation + ", scale=" + scale);
         }
+        // Use shaders
+        GLES20.glUseProgram(mProgram);
 
-        // set blending
-        GLES10.glBlendFunc(GLES10.GL_ONE, GLES10.GL_ONE);
-        GLES10.glEnable(GLES10.GL_BLEND);
+        // Set Uniforms
+        GLES20.glUniformMatrix4fv(mProjMatrixLoc, 1, false, mProjMatrix, 0);
+        GLES20.glUniformMatrix4fv(mTexMatrixLoc, 1, false, mTexMatrix, 0);
+        GLES20.glUniform1f(mOpacityLoc, opacity);
+        GLES20.glUniform1f(mGammaLoc, gamma);
+        GLES20.glUniform1f(mSaturationLoc, saturation);
+        GLES20.glUniform1f(mScaleLoc, scale);
 
-        // bind vertex buffer
-        GLES10.glVertexPointer(2, GLES10.GL_FLOAT, 0, mVertexBuffer);
-        GLES10.glEnableClientState(GLES10.GL_VERTEX_ARRAY);
+        // Use textures
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+        GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, mTexNames[0]);
 
-        // set-up texturing
-        GLES10.glDisable(GLES10.GL_TEXTURE_2D);
-        GLES10.glEnable(GLES11Ext.GL_TEXTURE_EXTERNAL_OES);
+        // draw the plane
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mGLBuffers[0]);
+        GLES20.glEnableVertexAttribArray(mVertexLoc);
+        GLES20.glVertexAttribPointer(mVertexLoc, 2, GLES20.GL_FLOAT, false, 0, 0);
 
-        // bind texture and set blending for drawing planes
-        GLES10.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, mTexNames[0]);
-        GLES10.glTexEnvx(GLES10.GL_TEXTURE_ENV, GLES10.GL_TEXTURE_ENV_MODE,
-                mMode == MODE_WARM_UP ? GLES10.GL_MODULATE : GLES10.GL_REPLACE);
-        GLES10.glTexParameterx(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
-                GLES10.GL_TEXTURE_MAG_FILTER, GLES10.GL_LINEAR);
-        GLES10.glTexParameterx(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
-                GLES10.GL_TEXTURE_MIN_FILTER, GLES10.GL_LINEAR);
-        GLES10.glTexParameterx(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
-                GLES10.GL_TEXTURE_WRAP_S, GLES10.GL_CLAMP_TO_EDGE);
-        GLES10.glTexParameterx(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
-                GLES10.GL_TEXTURE_WRAP_T, GLES10.GL_CLAMP_TO_EDGE);
-        GLES10.glEnable(GLES11Ext.GL_TEXTURE_EXTERNAL_OES);
-        GLES10.glTexCoordPointer(2, GLES10.GL_FLOAT, 0, mTexCoordBuffer);
-        GLES10.glEnableClientState(GLES10.GL_TEXTURE_COORD_ARRAY);
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mGLBuffers[1]);
+        GLES20.glEnableVertexAttribArray(mTexCoordLoc);
+        GLES20.glVertexAttribPointer(mTexCoordLoc, 2, GLES20.GL_FLOAT, false, 0, 0);
 
-        // draw the red plane
-        setVStretchQuad(mVertexBuffer, mDisplayWidth, mDisplayHeight, ar);
-        GLES10.glColorMask(true, false, false, true);
-        GLES10.glDrawArrays(GLES10.GL_TRIANGLE_FAN, 0, 4);
-
-        // draw the green plane
-        setVStretchQuad(mVertexBuffer, mDisplayWidth, mDisplayHeight, ag);
-        GLES10.glColorMask(false, true, false, true);
-        GLES10.glDrawArrays(GLES10.GL_TRIANGLE_FAN, 0, 4);
-
-        // draw the blue plane
-        setVStretchQuad(mVertexBuffer, mDisplayWidth, mDisplayHeight, ab);
-        GLES10.glColorMask(false, false, true, true);
-        GLES10.glDrawArrays(GLES10.GL_TRIANGLE_FAN, 0, 4);
-
-        // clean up after drawing planes
-        GLES10.glDisable(GLES11Ext.GL_TEXTURE_EXTERNAL_OES);
-        GLES10.glDisableClientState(GLES10.GL_TEXTURE_COORD_ARRAY);
-        GLES10.glColorMask(true, true, true, true);
-
-        // draw the white highlight (we use the last vertices)
-        if (mMode == MODE_COOL_DOWN) {
-            GLES10.glColor4f(ag, ag, ag, 1.0f);
-            GLES10.glDrawArrays(GLES10.GL_TRIANGLE_FAN, 0, 4);
-        }
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLE_FAN, 0, 4);
 
         // clean up
-        GLES10.glDisableClientState(GLES10.GL_VERTEX_ARRAY);
-        GLES10.glDisable(GLES10.GL_BLEND);
+        GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, 0);
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
     }
 
-    /**
-     * Draws a frame where the electron beam has been stretched out into
-     * a thin white horizontal line that fades as it collapses inwards.
-     *
-     * @param stretch The stretch factor.  0.0 is maximum stretch / no fade,
-     * 1.0 is collapsed / maximum fade.
-     */
-    private void drawHStretch(float stretch) {
-        // compute interpolation scale factor
-        final float ag = scurve(stretch, 8.0f);
-        if (DEBUG) {
-            Slog.d(TAG, "drawHStretch: stretch=" + stretch + ", ag=" + ag);
-        }
-
-        if (stretch < 1.0f) {
-            // bind vertex buffer
-            GLES10.glVertexPointer(2, GLES10.GL_FLOAT, 0, mVertexBuffer);
-            GLES10.glEnableClientState(GLES10.GL_VERTEX_ARRAY);
-
-            // draw narrow fading white line
-            setHStretchQuad(mVertexBuffer, mDisplayWidth, mDisplayHeight, ag);
-            GLES10.glColor4f(1.0f - ag*0.75f, 1.0f - ag*0.75f, 1.0f - ag*0.75f, 1.0f);
-            GLES10.glDrawArrays(GLES10.GL_TRIANGLE_FAN, 0, 4);
-
-            // clean up
-            GLES10.glDisableClientState(GLES10.GL_VERTEX_ARRAY);
-        }
-    }
-
-    private static void setVStretchQuad(FloatBuffer vtx, float dw, float dh, float a) {
-        final float w = dw + (dw * a);
-        final float h = dh - (dh * a);
-        final float x = (dw - w) * 0.5f;
-        final float y = (dh - h) * 0.5f;
-        setQuad(vtx, x, y, w, h);
-    }
-
-    private static void setHStretchQuad(FloatBuffer vtx, float dw, float dh, float a) {
-        final float w = 2 * dw * (1.0f - a);
-        final float h = 1.0f;
-        final float x = (dw - w) * 0.5f;
-        final float y = (dh - h) * 0.5f;
-        setQuad(vtx, x, y, w, h);
-    }
-
-    private static void setQuad(FloatBuffer vtx, float x, float y, float w, float h) {
-        if (DEBUG) {
-            Slog.d(TAG, "setQuad: x=" + x + ", y=" + y + ", w=" + w + ", h=" + h);
-        }
-        vtx.put(0, x);
-        vtx.put(1, y);
-        vtx.put(2, x);
-        vtx.put(3, y + h);
-        vtx.put(4, x + w);
-        vtx.put(5, y + h);
-        vtx.put(6, x + w);
-        vtx.put(7, y);
+    private void ortho(float left, float right, float bottom, float top, float znear, float zfar) {
+        mProjMatrix[0] = 2f / (right - left);
+        mProjMatrix[1] = 0;
+        mProjMatrix[2] = 0;
+        mProjMatrix[3] = 0;
+        mProjMatrix[4] = 0;
+        mProjMatrix[5] = 2f / (top - bottom);
+        mProjMatrix[6] = 0;
+        mProjMatrix[7] = 0;
+        mProjMatrix[8] = 0;
+        mProjMatrix[9] = 0;
+        mProjMatrix[10] = -2f / (zfar - znear);
+        mProjMatrix[11] = 0;
+        mProjMatrix[12] = -(right + left) / (right - left);
+        mProjMatrix[13] = -(top + bottom) / (top - bottom);
+        mProjMatrix[14] = -(zfar + znear) / (zfar - znear);
+        mProjMatrix[15] = 1f;
     }
 
     private boolean captureScreenshotTextureAndSetViewport() {
@@ -385,7 +429,7 @@ final class ElectronBeam {
         }
         try {
             if (!mTexNamesGenerated) {
-                GLES10.glGenTextures(1, mTexNames, 0);
+                GLES20.glGenTextures(1, mTexNames, 0);
                 if (checkGlErrors("glGenTextures")) {
                     return false;
                 }
@@ -413,15 +457,8 @@ final class ElectronBeam {
             mTexCoordBuffer.put(6, 1f); mTexCoordBuffer.put(7, 0f);
 
             // Set up our viewport.
-            GLES10.glViewport(0, 0, mDisplayWidth, mDisplayHeight);
-            GLES10.glMatrixMode(GLES10.GL_PROJECTION);
-            GLES10.glLoadIdentity();
-            GLES10.glOrthof(0, mDisplayWidth, 0, mDisplayHeight, 0, 1);
-            GLES10.glMatrixMode(GLES10.GL_MODELVIEW);
-            GLES10.glLoadIdentity();
-            GLES10.glMatrixMode(GLES10.GL_TEXTURE);
-            GLES10.glLoadIdentity();
-            GLES10.glLoadMatrixf(mTexMatrix, 0);
+            GLES20.glViewport(0, 0, mDisplayWidth, mDisplayHeight);
+            ortho(0, mDisplayWidth, 0, mDisplayHeight, -1, 1);
         } finally {
             detachEglContext();
         }
@@ -433,7 +470,7 @@ final class ElectronBeam {
             mTexNamesGenerated = false;
             if (attachEglContext()) {
                 try {
-                    GLES10.glDeleteTextures(1, mTexNames, 0);
+                    GLES20.glDeleteTextures(1, mTexNames, 0);
                     checkGlErrors("glDeleteTextures");
                 } finally {
                     detachEglContext();
@@ -460,6 +497,8 @@ final class ElectronBeam {
 
         if (mEglConfig == null) {
             int[] eglConfigAttribList = new int[] {
+                    EGL14.EGL_RENDERABLE_TYPE,
+                    EGL14.EGL_OPENGL_ES2_BIT,
                     EGL14.EGL_RED_SIZE, 8,
                     EGL14.EGL_GREEN_SIZE, 8,
                     EGL14.EGL_BLUE_SIZE, 8,
@@ -478,6 +517,7 @@ final class ElectronBeam {
 
         if (mEglContext == null) {
             int[] eglContextAttribList = new int[] {
+                    EGL14.EGL_CONTEXT_CLIENT_VERSION, 2,
                     EGL14.EGL_NONE
             };
             mEglContext = EGL14.eglCreateContext(mEglDisplay, mEglConfig,
@@ -489,16 +529,6 @@ final class ElectronBeam {
         }
         return true;
     }
-
-    /* not used because it is too expensive to create / destroy contexts all of the time
-    private void destroyEglContext() {
-        if (mEglContext != null) {
-            if (!EGL14.eglDestroyContext(mEglDisplay, mEglContext)) {
-                logEglError("eglDestroyContext");
-            }
-            mEglContext = null;
-        }
-    }*/
 
     private boolean createSurface() {
         if (mSurfaceSession == null) {
@@ -516,7 +546,7 @@ final class ElectronBeam {
                         flags = SurfaceControl.OPAQUE | SurfaceControl.HIDDEN;
                     }
                     mSurfaceControl = new SurfaceControl(mSurfaceSession,
-                            "ElectronBeam", mDisplayWidth, mDisplayHeight,
+                            "ColorFade", mDisplayWidth, mDisplayHeight,
                             PixelFormat.OPAQUE, flags);
                 } catch (OutOfResourcesException ex) {
                     Slog.e(TAG, "Unable to create surface.", ex);
@@ -584,7 +614,7 @@ final class ElectronBeam {
         if (!mSurfaceVisible || mSurfaceAlpha != alpha) {
             SurfaceControl.openTransaction();
             try {
-                mSurfaceControl.setLayer(ELECTRON_BEAM_LAYER);
+                mSurfaceControl.setLayer(COLOR_FADE_LAYER);
                 mSurfaceControl.setAlpha(alpha);
                 mSurfaceControl.show();
             } finally {
@@ -614,34 +644,6 @@ final class ElectronBeam {
         }
     }
 
-    /**
-     * Interpolates a value in the range 0 .. 1 along a sigmoid curve
-     * yielding a result in the range 0 .. 1 scaled such that:
-     * scurve(0) == 0, scurve(0.5) == 0.5, scurve(1) == 1.
-     */
-    private static float scurve(float value, float s) {
-        // A basic sigmoid has the form y = 1.0f / FloatMap.exp(-x * s).
-        // Here we take the input datum and shift it by 0.5 so that the
-        // domain spans the range -0.5 .. 0.5 instead of 0 .. 1.
-        final float x = value - 0.5f;
-
-        // Next apply the sigmoid function to the scaled value
-        // which produces a value in the range 0 .. 1 so we subtract
-        // 0.5 to get a value in the range -0.5 .. 0.5 instead.
-        final float y = sigmoid(x, s) - 0.5f;
-
-        // To obtain the desired boundary conditions we need to scale
-        // the result so that it fills a range of -1 .. 1.
-        final float v = sigmoid(0.5f, s) - 0.5f;
-
-        // And finally remap the value back to a range of 0 .. 1.
-        return y / v * 0.5f + 0.5f;
-    }
-
-    private static float sigmoid(float x, float s) {
-        return 1.0f / (1.0f + FloatMath.exp(-x * s));
-    }
-
     private static FloatBuffer createNativeFloatBuffer(int size) {
         ByteBuffer bb = ByteBuffer.allocateDirect(size * 4);
         bb.order(ByteOrder.nativeOrder());
@@ -659,7 +661,7 @@ final class ElectronBeam {
     private static boolean checkGlErrors(String func, boolean log) {
         boolean hadError = false;
         int error;
-        while ((error = GLES10.glGetError()) != GLES10.GL_NO_ERROR) {
+        while ((error = GLES20.glGetError()) != GLES20.GL_NO_ERROR) {
             if (log) {
                 Slog.e(TAG, func + " failed: error " + error, new Throwable());
             }
@@ -670,7 +672,7 @@ final class ElectronBeam {
 
     public void dump(PrintWriter pw) {
         pw.println();
-        pw.println("Electron Beam State:");
+        pw.println("Color Fade State:");
         pw.println("  mPrepared=" + mPrepared);
         pw.println("  mMode=" + mMode);
         pw.println("  mDisplayLayerStack=" + mDisplayLayerStack);
@@ -685,7 +687,7 @@ final class ElectronBeam {
      * Updates the position and transformation of the matrix whenever the display
      * is rotated.  This is a little tricky because the display transaction
      * callback can be invoked on any thread, not necessarily the thread that
-     * owns the electron beam.
+     * owns the color fade.
      */
     private static final class NaturalSurfaceLayout implements DisplayTransactionListener {
         private final DisplayManagerInternal mDisplayManagerInternal;
@@ -725,7 +727,8 @@ final class ElectronBeam {
                         mSurfaceControl.setMatrix(0, -1, 1, 0);
                         break;
                     case Surface.ROTATION_180:
-                        mSurfaceControl.setPosition(displayInfo.logicalWidth, displayInfo.logicalHeight);
+                        mSurfaceControl.setPosition(displayInfo.logicalWidth,
+                                displayInfo.logicalHeight);
                         mSurfaceControl.setMatrix(-1, 0, 0, -1);
                         break;
                     case Surface.ROTATION_270:
