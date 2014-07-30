@@ -166,8 +166,7 @@ private:
         ASensorEvent buffer[16];
         while ((n = q->read(buffer, 16)) > 0) {
             for (int i=0 ; i<n ; i++) {
-                if (buffer[i].type == SENSOR_TYPE_STEP_COUNTER ||
-                    buffer[i].type == SENSOR_TYPE_WAKE_UP_STEP_COUNTER) {
+                if (buffer[i].type == SENSOR_TYPE_STEP_COUNTER) {
                     // step-counter returns a uint64, but the java API only deals with floats
                     float value = float(buffer[i].u64.step_counter);
                     env->SetFloatArrayRegion(mScratch, 0, 1, &value);
