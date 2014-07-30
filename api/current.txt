@@ -28594,9 +28594,11 @@ package android.telecomm {
   }
 
   public final class CallCameraCapabilities implements android.os.Parcelable {
-    ctor public CallCameraCapabilities(boolean, float);
+    ctor public CallCameraCapabilities(boolean, float, int, int);
     method public int describeContents();
+    method public int getHeight();
     method public float getMaxZoom();
+    method public int getWidth();
     method public boolean isZoomSupported();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;

@@ -36,14 +36,28 @@ public final class CallCameraCapabilities implements Parcelable {
     private final float mMaxZoom;
 
     /**
+     * The width of the camera video in pixels.
+     */
+    private final int mWidth;
+
+    /**
+     * The height of the camera video in pixels.
+     */
+    private final int mHeight;
+
+    /**
      * Create a call camera capabilities instance.
      *
      * @param zoomSupported True when camera supports zoom.
      * @param maxZoom Maximum zoom supported by camera.
+     * @param width The width of the camera video (in pixels).
+     * @param height The height of the camera video (in pixels).
      */
-    public CallCameraCapabilities(boolean zoomSupported, float maxZoom) {
+    public CallCameraCapabilities(boolean zoomSupported, float maxZoom, int width, int height) {
         mZoomSupported = zoomSupported;
         mMaxZoom = maxZoom;
+        mWidth = width;
+        mHeight = height;
     }
 
     /**
@@ -61,8 +75,10 @@ public final class CallCameraCapabilities implements Parcelable {
                 public CallCameraCapabilities createFromParcel(Parcel source) {
                     boolean supportsZoom = source.readByte() != 0;
                     float maxZoom = source.readFloat();
+                    int width = source.readInt();
+                    int height = source.readInt();
 
-                    return new CallCameraCapabilities(supportsZoom, maxZoom);
+                    return new CallCameraCapabilities(supportsZoom, maxZoom, width, height);
                 }
 
                 @Override
@@ -94,7 +110,8 @@ public final class CallCameraCapabilities implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeByte((byte) (isZoomSupported() ? 1 : 0));
         dest.writeFloat(getMaxZoom());
-
+        dest.writeInt(getWidth());
+        dest.writeInt(getHeight());
     }
 
     /**
@@ -109,5 +126,19 @@ public final class CallCameraCapabilities implements Parcelable {
      */
     public float getMaxZoom() {
         return mMaxZoom;
+    }
+
+    /**
+     * The width of the camera video in pixels.
+     */
+    public int getWidth() {
+        return mWidth;
+    }
+
+    /**
+     * The height of the camera video in pixels.
+     */
+    public int getHeight() {
+        return mHeight;
     }
 }
