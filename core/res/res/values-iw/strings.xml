@@ -23,7 +23,7 @@
     <string name="byteShort" msgid="8340973892742019101">"B"</string>
     <string name="kilobyteShort" msgid="5973789783504771878">"KB"</string>
     <string name="megabyteShort" msgid="6355851576770428922">"MB"</string>
-    <string name="gigabyteShort" msgid="3259882455212193214">"‏GB‏‏"</string>
+    <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
     <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
@@ -298,10 +298,8 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"‏הרשאה זו מאפשרת לאפליקציה לקבל ולעבד הודעות MAP של Bluetooth. משמעות הדבר היא שהאפליקציה יכולה לעקוב אחר הודעות הנשלחות למכשיר שלך או למחוק אותן מבלי להראות לך אותן."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"אחזור אפליקציות פעילות"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"מאפשר לאפליקציה לאחזר מידע לגבי משימות הפועלות כרגע ושפעלו לאחרונה. ייתכן שהדבר יתיר לאפליקציה לגלות מידע לגבי האפליקציות שבהן נעשה שימוש במכשיר."</string>
-    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
-    <skip />
-    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
-    <skip />
+    <string name="permlab_startTasksFromRecents" msgid="8990073877885690623">"הפעלת משימה מהמשימות האחרונות"</string>
+    <string name="permdesc_startTasksFromRecents" msgid="7382133554871222235">"‏מאפשרת לאפליקציה להשתמש באובייקט ActivityManager.RecentTaskInfo כדי להפעיל משימה מבוטלת שהוחזרה מ-ActivityManager.getRecentTaskList()‎."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"אינטראקציה בין משתמשים"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"מאפשר לאפליקציה לבצע פעולות בין משתמשים שונים במכשיר. אפליקציות זדוניות עשויות להשתמש ביכולת זו כדי לפרוץ את ההגנה בין משתמשים."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"רישיון מלא לבצע אינטראקציה בין משתמשים"</string>
@@ -1392,6 +1390,8 @@
     <string name="permdesc_recovery" msgid="8511774533266359571">"מאפשרת לאפליקציה ליצור אינטראקציה עם מערכת השחזור ועדכוני מערכת."</string>
     <string name="permlab_createMediaProjection" msgid="4941338725487978112">"יצירת פעילות של הקרנת מדיה"</string>
     <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"מאפשר לאפליקציה ליצור פעילות של הקרנת מדיה. ההפעלות האלה יכולות לתת לאפליקציות את האפשרות להקליט תוכן של מסך ואודיו. לעולם לא אמור להיות נחוץ עבור אפליקציות רגילות."</string>
+    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"קריאת פעילות התקנה"</string>
+    <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"מאפשר לאפליקציה לקרוא הפעלות התקנה. הרשאה זו מאפשרת לה לראות פרטים על התקנות פעילות של חבילות."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"גע פעמיים לבקרת מרחק מתצוגה"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"‏לא ניתן להוסיף widget."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"התחל"</string>
@@ -1410,6 +1410,8 @@
     <string name="deny" msgid="2081879885755434506">"דחה"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"בקשת הרשאה"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"נדרשת הרשאה\nלחשבון <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
+    <string name="forward_intent_to_owner" msgid="570916783072215572">"אתה משתמש באפליקציה הזו בסביבה האישית שלך"</string>
+    <string name="forward_intent_to_work" msgid="8624579696577525279">"אתה משתמש באפליקציה הזו בסביבת העבודה שלך"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"שיטת קלט"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"סינכרון"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"נגישות"</string>
@@ -1559,8 +1561,7 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"מערכת"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"‏אודיו Bluetooth"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"צג אלחוטי"</string>
-    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
-    <skip />
+    <string name="media_route_button_content_description" msgid="591703006349356016">"העבר"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"התחברות למכשיר"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"העברת מסך אל מכשיר"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"מחפש מכשירים…"</string>
@@ -1619,14 +1620,15 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"שרטטת את קו ביטול הנעילה באופן שגוי <xliff:g id="NUMBER_0">%d</xliff:g> פעמים. לאחר <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות כושלים נוספים, תתבקש לבטל את נעילת הטלפון באמצעות חשבון דוא\"ל‏.\n\nנסה שוב בעוד <xliff:g id="NUMBER_2">%d</xliff:g> שניות."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"הסר"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"האם להעלות את עוצמת הקול מעל לרמה המומלצת?\nהאזנה בעוצמת קול גבוהה למשך זמן ארוך עלולה לפגוע בשמיעה."</string>
+    <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"האם להעלות את עוצמת הקול מעל לרמה המומלצת?\n\nהאזנה בעוצמת קול גבוהה למשכי זמן ממושכים עלולה לפגוע בשמיעה."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"המשך לגעת בשתי אצבעות כדי להפעיל נגישות."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"נגישות הופעלה."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"נגישות בוטלה."</string>
     <string name="user_switched" msgid="3768006783166984410">"המשתמש הנוכחי <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"בעלים"</string>
     <string name="error_message_title" msgid="4510373083082500195">"שגיאה"</string>
-    <string name="app_no_restricted_accounts" msgid="5739463249673727736">"האפליקציה הזו לא תומכת בחשבונות עבור פרופילים מוגבלים"</string>
+    <!-- no translation found for error_message_change_not_allowed (1347282344200417578) -->
+    <skip />
     <string name="app_not_found" msgid="3429141853498927379">"לא נמצאה אפליקציה שתומכת בפעולה זו"</string>
     <string name="revoke" msgid="5404479185228271586">"בטל"</string>
     <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>

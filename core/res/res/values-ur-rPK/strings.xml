@@ -298,10 +298,8 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"‏ایپ کو بلوتوٹھ MAP پیغامات وصول اور ان پر کارروائی کرنے کی اجازت دیتی ہے۔ اس کا مطلب یہ ہے کہ ایپ آپ کے آلہ پر ارسال کردہ پیغامات آپ کو دکھائے بغیر ان پر نگاہ رکھ یا انہیں حذف کرسکتی ہے۔"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"چل رہی ایپس کی بازیافت کریں"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"ایپ کو موجودہ اور حالیہ چل رہے ٹاسکس کے بارے میں معلومات بازیافت کرنے کی اجازت دیتا ہے۔ یہ ایپ کو اس بارے میں معلومات دریافت کرنے کی اجازت دے سکتا ہے کہ آلہ پر کون سی ایپلیکیشنز استعمال کی جاتی ہیں۔"</string>
-    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
-    <skip />
-    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
-    <skip />
+    <string name="permlab_startTasksFromRecents" msgid="8990073877885690623">"حالیہ میں سے ایک کام شروع کریں"</string>
+    <string name="permdesc_startTasksFromRecents" msgid="7382133554871222235">"‏ایپ کو ActivityManager.getRecentTaskList()‎ سے واپس لوٹایا گیا ایک کالعدم کام شروع کرنے کیلئے ایک ActivityManager.RecentTaskInfo آبجیکٹ کو استعمال کرنے کی اجازت دیتی ہے۔"</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"سبھی صارفین کے ساتھ تعامل کریں"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"ایپ کو آلے پر موجود مختلف صارفین کے بیچ کارروائیاں انجام دینے کی اجازت دیتا ہے۔ نقصان دہ ایپس صارفین کے مابین تحفظ کی خلاف ورزی کرنے کیلئے اسے استعمال کرسکتی ہیں۔"</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"سبھی صارفین کے ساتھ تعامل کرنے کیلئے مکمل لائسنس"</string>
@@ -1015,7 +1013,7 @@
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"صوتی میل شامل کریں"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"ایپ کو آپ کے صوتی میل کے ان باکس میں پیغامات شامل کرنے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_readVoicemail" msgid="8415201752589140137">"صوتی میل پڑھیں"</string>
-    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"اپنے صوتی میلز پڑھنے کیلئے ایپ کو اجازت دیتا ہے۔"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"آپ کے صوتی میلز پڑھنے کیلئے ایپ کو اجازت دیتا ہے۔"</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"براؤزر کی جغرافیائی مقام کی اجازتوں میں ترمیم کریں"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"ایپ کو براؤزر کی جغرافیائی مقام کی اجازتوں میں ترمیم کرنے کی اجازت دیتا ہے۔ نقصان دہ ایپس متنازعہ ویب سائٹس پر مقام کی معلومات بھیجنے کی اجازت دینے کیلئے اس کا استعمال کر سکتی ہیں۔"</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"پیکیجز کی توثیق کریں"</string>
@@ -1392,6 +1390,8 @@
     <string name="permdesc_recovery" msgid="8511774533266359571">"کسی ایپ کو بازیابی سسٹم اور بازیابی اپ ڈیٹس کے ساتھ تعامل کرنے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_createMediaProjection" msgid="4941338725487978112">"میڈیا پروجیکشن سیشنز بنائیں"</string>
     <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"ایک ایپلیکیشن کو میڈیا پروجیکشن سیشنز بنانے کی اجازت دیتی ہے۔ یہ سیشنز ایپلیکیشنز کو ڈسپلے اور آڈیو مواد کو کیپچر کرنے کی اہلیت فراہم کر سکتے ہیں۔ عام ایپس کو کبھی بھی ان کی ضرورت نہیں ہونی چاہیے۔"</string>
+    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"انسٹال سیشنز پڑھیں"</string>
+    <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"ایک ایپلیکیشن کو انسٹال سیشنز پڑھنے کی اجازت دیتا ہے۔ یہ اسے فعال پیکیج انسٹالیشنز کے بارے میں تفصیلات دیکھنے کی اجازت دیتا ہے۔"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"زوم کے کنٹرول کیلئے دو بار ٹچ کریں"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"ویجٹس کو شامل نہیں کرسکا۔"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"جائیں"</string>
@@ -1410,6 +1410,8 @@
     <string name="deny" msgid="2081879885755434506">"مسترد کریں"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"اجازت طلب کی گئی"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"اکاؤنٹ <xliff:g id="ACCOUNT">%s</xliff:g> کیلئے\nاجازت طلب کی گئی۔"</string>
+    <string name="forward_intent_to_owner" msgid="570916783072215572">"آپ اس ایپ کو اپنی ذاتی جگہ میں استعمال کر رہے ہیں"</string>
+    <string name="forward_intent_to_work" msgid="8624579696577525279">"آپ اس ایپ کو اپنے کام کی جگہ میں استعمال کر رہے ہیں"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"اندراج کا طریقہ"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"مطابقت پذیری کریں"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Accessibility"</string>
@@ -1559,8 +1561,7 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"سسٹم"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"بلوٹوتھ آڈیو"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"وائرلیس ڈسپلے"</string>
-    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
-    <skip />
+    <string name="media_route_button_content_description" msgid="591703006349356016">"کاسٹ کریں"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"آلہ سے مربوط ہوں"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"اسکرین کو آلہ پر کاسٹ کریں"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"آلات تلاش کر رہا ہے…"</string>
@@ -1619,14 +1620,15 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"آپ نے اپنا غیر مقفل کرنے کا پیٹرن <xliff:g id="NUMBER_0">%d</xliff:g> بار غلط طریقے سے ڈرا کیا ہے۔ <xliff:g id="NUMBER_1">%d</xliff:g> مزید ناکام کوششوں کے بعد، آپ سے ایک ای میل اکاؤنٹ استعمال کرکے اپنا فون غیر مقفل کرنے کو کہا جائے گا۔\n\n <xliff:g id="NUMBER_2">%d</xliff:g> سیکنڈ میں دوبارہ کوشش کریں۔"</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"ہٹائیں"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"والیوم کو تجویز کردہ لیول سے زیادہ کریں؟\nزیادہ دیر تک اونچی آواز میں سننے سے آپ کی سماعت کو نقصان پہنچ سکتا ہے۔"</string>
+    <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"والیوم کو تجویز کردہ سطح سے زیادہ کریں؟\n\nزیادہ وقت تک اونچی آواز میں سننے سے آپ کی سماعت کو نقصان پہنچ سکتا ہے۔"</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"‏accessibility فعال کرنے کیلئے دو انگلیاں نیچے دبائے رکھیں۔"</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"‏Accessibility فعال۔"</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"‏Accessibility منسوخ ہوگئی۔"</string>
     <string name="user_switched" msgid="3768006783166984410">"موجودہ صارف <xliff:g id="NAME">%1$s</xliff:g>۔"</string>
     <string name="owner_name" msgid="2716755460376028154">"مالک"</string>
     <string name="error_message_title" msgid="4510373083082500195">"خرابی"</string>
-    <string name="app_no_restricted_accounts" msgid="5739463249673727736">"یہ ایپ محدود کردہ پروفائلز کیلئے اکاؤنٹس کا تعاون نہیں کرتا ہے"</string>
+    <!-- no translation found for error_message_change_not_allowed (1347282344200417578) -->
+    <skip />
     <string name="app_not_found" msgid="3429141853498927379">"اس عمل کو ہینڈل کرنے کیلئے کوئی ایپلیکیشن نہیں ملا"</string>
     <string name="revoke" msgid="5404479185228271586">"منسوخ کریں"</string>
     <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>

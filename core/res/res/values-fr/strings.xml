@@ -298,10 +298,8 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Permet à l\'application de recevoir et traiter des messages MAP Bluetooth. Cela signifie que l\'application peut contrôler ou supprimer les messages envoyés à votre appareil sans vous les montrer."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"récupérer les applications en cours d\'exécution"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Permet à l\'application de récupérer des informations sur des tâches en cours d\'exécution et récemment exécutées. L\'application est ainsi susceptible d\'obtenir des informations sur les applications utilisées sur l\'appareil."</string>
-    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
-    <skip />
-    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
-    <skip />
+    <string name="permlab_startTasksFromRecents" msgid="8990073877885690623">"lancer une tâche depuis les applications récentes"</string>
+    <string name="permdesc_startTasksFromRecents" msgid="7382133554871222235">"Permettre à l\'application d\'utiliser un objet ActivityManager.RecentTaskInfo pour lancer une tâche obsolète qui a été renvoyée depuis ActivityManager.getRecentTaskList()"</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"interagir entre les utilisateurs"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Permet à l\'application d\'effectuer des actions entre les différents utilisateurs de l\'appareil. Les applications malveillantes peuvent utiliser cette autorisation pour passer outre la protection entre les utilisateurs."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"autorisation totale d\'interagir entre les utilisateurs"</string>
@@ -1392,6 +1390,8 @@
     <string name="permdesc_recovery" msgid="8511774533266359571">"Permet à une application d\'interagir avec le système de récupération et les mises à jour du système."</string>
     <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Créer des séances de projection de contenus multimédias"</string>
     <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"Permet à une application de créer des séances de projection de contenus multimédias. Au cours de ces séances, les applications peuvent capturer des contenus audio ou affichés à l\'écran. Ne doit jamais être utilisé par des applications standards."</string>
+    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Accéder aux sessions d\'installation"</string>
+    <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Permet à une application d\'accéder aux sessions d\'installation. Cela lui permet de consulter les détails relatifs à l\'installation des packages actifs."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Appuyez deux fois pour régler le zoom."</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Impossible d\'ajouter le widget."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"OK"</string>
@@ -1410,6 +1410,8 @@
     <string name="deny" msgid="2081879885755434506">"Refuser"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Autorisation demandée"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Autorisation demandée\npour le compte \"<xliff:g id="ACCOUNT">%s</xliff:g>\""</string>
+    <string name="forward_intent_to_owner" msgid="570916783072215572">"Vous utilisez cette application dans votre espace personnel."</string>
+    <string name="forward_intent_to_work" msgid="8624579696577525279">"Vous utilisez cette application dans votre espace de travail."</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Mode de saisie"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Synchronisation"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Accessibilité"</string>
@@ -1559,8 +1561,7 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Système"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Audio Bluetooth"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Affichage sans fil"</string>
-    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
-    <skip />
+    <string name="media_route_button_content_description" msgid="591703006349356016">"Caster"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Connexion à l\'appareil"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Caster l\'écran sur l\'appareil"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Recherche d\'appareils en cours…"</string>
@@ -1619,14 +1620,15 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Vous avez dessiné un schéma de déverrouillage incorrect à <xliff:g id="NUMBER_0">%d</xliff:g> reprises. Si vous échouez encore <xliff:g id="NUMBER_1">%d</xliff:g> fois, vous devrez déverrouiller votre téléphone à l\'aide d\'un compte de messagerie électronique.\n\n Veuillez réessayer dans <xliff:g id="NUMBER_2">%d</xliff:g> secondes."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Supprimer"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"Augmenter le volume au-dessus du niveau recommandé ?\nL\'écoute à un volume élevé pendant des périodes prolongées peut endommager votre audition."</string>
+    <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Augmenter le volume au dessus du niveau recommandé ?\n\nL\'écoute prolongée à un volume élevé peut endommager vos facultés auditives."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Pour activer l\'accessibilité, appuyez de manière prolongée avec deux doigts."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"L\'accessibilité a bien été activée."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Accessibilité annulée."</string>
     <string name="user_switched" msgid="3768006783166984410">"Utilisateur actuel : <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="owner_name" msgid="2716755460376028154">"Propriétaire"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Erreur"</string>
-    <string name="app_no_restricted_accounts" msgid="5739463249673727736">"Les comptes des profils en accès limité ne sont pas compatibles avec cette application."</string>
+    <!-- no translation found for error_message_change_not_allowed (1347282344200417578) -->
+    <skip />
     <string name="app_not_found" msgid="3429141853498927379">"Aucune application trouvée pour gérer cette action."</string>
     <string name="revoke" msgid="5404479185228271586">"Révoquer"</string>
     <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>

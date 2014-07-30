@@ -298,10 +298,8 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"앱이 블루투스 MAP 메시지를 수신하고 처리하도록 허용합니다. 이는 앱이 나에게 보여주지 않고 내 기기에 전송된 메시지를 모니터링하거나 삭제할 수 있음을 의미합니다."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"실행 중인 앱 검색"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"앱이 현재 실행 중이거나 최근에 실행된 작업에 대한 정보를 검색할 수 있도록 허용합니다. 이 경우 앱이 기기에서 사용되는 다른 앱에 대한 정보를 검색할 수 있습니다."</string>
-    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
-    <skip />
-    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
-    <skip />
+    <string name="permlab_startTasksFromRecents" msgid="8990073877885690623">"최근 목록에서 작업 시작"</string>
+    <string name="permdesc_startTasksFromRecents" msgid="7382133554871222235">"앱에서 ActivityManager.RecentTaskInfo 개체를 사용하여 ActivityManager.getRecentTaskList()에서 반환한 무효한 작업을 실행하도록 허용합니다."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"여러 사용자와의 상호작용"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"앱이 기기에서 다양한 사용자에 대한 작업을 수행할 수 있도록 허용합니다. 이 경우 악성 앱이 사용자 간의 보호를 위반할 수 있습니다."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"여러 사용자와의 상호작용을 위한 정식 라이선스"</string>
@@ -1392,6 +1390,8 @@
     <string name="permdesc_recovery" msgid="8511774533266359571">"애플리케이션이 복구 시스템 및 시스템 업데이트와 상호작용할 수 있도록 허용합니다."</string>
     <string name="permlab_createMediaProjection" msgid="4941338725487978112">"미디어 프로젝션 세션 만들기"</string>
     <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"애플리케이션이 미디어 프로젝션 세션을 만드는 것을 허용합니다. 이 세션은 애플리케이션에 디스플레이 및 오디오 콘텐츠를 캡처하는 기능을 제공할 수 있습니다. 일반 앱에는 필요하지 않습니다."</string>
+    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"설치 세션 읽기"</string>
+    <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"애플리케이션의 설치 세션 읽기를 허용하면, 활성 패키지 설치에 대한 세부 정보를 볼 수 있습니다."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"확대/축소하려면 두 번 터치하세요."</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"위젯을 추가할 수 없습니다."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"이동"</string>
@@ -1410,6 +1410,8 @@
     <string name="deny" msgid="2081879885755434506">"거부"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"권한 요청됨"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"<xliff:g id="ACCOUNT">%s</xliff:g> 계정에 대해\n권한 요청"</string>
+    <string name="forward_intent_to_owner" msgid="570916783072215572">"현재 개인 공간에서 이 앱을 사용 중입니다."</string>
+    <string name="forward_intent_to_work" msgid="8624579696577525279">"현재 작업 공간에서 이 앱을 사용 중입니다."</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"입력 방법"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"동기화"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"접근성"</string>
@@ -1559,8 +1561,7 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"시스템"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"블루투스 오디오"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"무선 디스플레이"</string>
-    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
-    <skip />
+    <string name="media_route_button_content_description" msgid="591703006349356016">"전송"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"기기에 연결"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"기기로 화면 전송"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"기기 검색 중…"</string>
@@ -1619,14 +1620,15 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"잠금해제 패턴을 <xliff:g id="NUMBER_0">%d</xliff:g>회 잘못 그렸습니다. <xliff:g id="NUMBER_1">%d</xliff:g>회 더 실패하면 이메일 계정을 사용하여 휴대전화를 잠금해제해야 합니다.\n\n <xliff:g id="NUMBER_2">%d</xliff:g>초 후에 다시 시도해 주세요."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"삭제"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"안전한 수준 이상으로 볼륨을 높이시겠습니까?\n높은 볼륨으로 장시간 청취하면 청력에 손상이 올 수 있습니다."</string>
+    <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"권장 수준 이상으로 볼륨을 높이시겠습니까?\n\n높은 볼륨으로 장시간 청취하면 청력에 손상이 올 수 있습니다."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"두 손가락으로 길게 누르면 접근성을 사용하도록 설정됩니다."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"접근성을 사용 설정했습니다."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"접근성이 취소되었습니다."</string>
     <string name="user_switched" msgid="3768006783166984410">"현재 사용자는 <xliff:g id="NAME">%1$s</xliff:g>님입니다."</string>
     <string name="owner_name" msgid="2716755460376028154">"소유자"</string>
     <string name="error_message_title" msgid="4510373083082500195">"오류"</string>
-    <string name="app_no_restricted_accounts" msgid="5739463249673727736">"이 앱은 제한된 프로필의 계정을 지원하지 않습니다."</string>
+    <!-- no translation found for error_message_change_not_allowed (1347282344200417578) -->
+    <skip />
     <string name="app_not_found" msgid="3429141853498927379">"이 작업을 처리하는 애플리케이션을 찾을 수 없습니다."</string>
     <string name="revoke" msgid="5404479185228271586">"취소"</string>
     <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>

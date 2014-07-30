@@ -298,10 +298,8 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Antaa sovelluksen vastaanottaa ja käsitellä Bluetooth MAP -viestejä. Sovellus voi valvoa ja poistaa laitteeseesi lähetettyjä viestejä näyttämättä niitä sinulle."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"käynnissä olevien sovellusten noutaminen"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Antaa sovelluksen noutaa tietoja käynnissä olevista ja äskettäin suoritetuista tehtävistä. Sovellus voi saada tietoja laitteella käytetyistä sovelluksista."</string>
-    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
-    <skip />
-    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
-    <skip />
+    <string name="permlab_startTasksFromRecents" msgid="8990073877885690623">"tehtävän käynnistäminen Viimeaikaiset-valikosta"</string>
+    <string name="permdesc_startTasksFromRecents" msgid="7382133554871222235">"Antaa sovelluksen käyttää ActivityManager.RecentTaskInfo -objektia toiminnasta poistetun tehtävän käynnistämiseen, joka palautettiin kohteesta ActivityManager.getRecentTaskList()."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"suorita käyttäjien välisiä toimintoja"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Antaa sovelluksen suorittaa käyttäjien välisiä toimintoja laitteessa. Haitalliset sovellukset voivat vahingoittaa käyttäjien välistä suojausta."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"lupa suorittaa käyttäjien välisiä toimintoja"</string>
@@ -1392,6 +1390,8 @@
     <string name="permdesc_recovery" msgid="8511774533266359571">"Sallii sovelluksen vuorovaikutuksen palautusjärjestelmän ja järjestelmäpäivitysten kanssa."</string>
     <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Medialähetysistuntojen luominen"</string>
     <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"Antaa sovelluksen luoda medialähetysistuntoja. Nämä istunnot antavat sovellusten tallentaa näyttö- ja äänisisältöä. Ei tavallisten sovellusten käyttöön."</string>
+    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Lue asennusistuntoja"</string>
+    <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Sallii sovelluksen lukea asennusistuntoja. Toiminto sallii sovelluksen lukea aktiivisten asennuspakettien tietoja."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Ohjaa zoomausta napauttamalla kahdesti"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Widgetin lisääminen epäonnistui."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Siirry"</string>
@@ -1410,6 +1410,8 @@
     <string name="deny" msgid="2081879885755434506">"Kiellä"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Lupa pyydetty"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Pyydetään lupaa\ntilille <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
+    <string name="forward_intent_to_owner" msgid="570916783072215572">"Käytät sovellusta henkilökohtaisessa tilassa"</string>
+    <string name="forward_intent_to_work" msgid="8624579696577525279">"Käytät sovellusta työtilassa"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Syöttötapa"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Synkronointi"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Esteettömyys"</string>
@@ -1559,8 +1561,7 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Järjestelmä"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth-ääni"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Langaton näyttö"</string>
-    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
-    <skip />
+    <string name="media_route_button_content_description" msgid="591703006349356016">"Lähetä"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Yhdistä laitteeseen"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Lähetä näyttö laitteeseen"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Etsitään laitteita…"</string>
@@ -1619,14 +1620,15 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Piirsit lukituksenpoistokuvion väärin <xliff:g id="NUMBER_0">%d</xliff:g> kertaa. Jos piirrät kuvion väärin vielä <xliff:g id="NUMBER_1">%d</xliff:g> kertaa, sinua pyydetään poistamaan puhelimesi lukitus sähköpostitilin avulla.\n\n Yritä uudelleen <xliff:g id="NUMBER_2">%d</xliff:g> sekunnin kuluttua."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Poista"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"Nostetaanko äänenvoimakkuus suositeltua tasoa voimakkaammaksi?\nJos kuuntelet suurella äänenvoimakkuudella pitkiä aikoja, kuulosi voi vahingoittua."</string>
+    <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Nostetaanko äänenvoimakkuus suositellun tason yläpuolelle?\n\nPitkäkestoinen kova äänenvoimakkuus saattaa heikentää kuuloa."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Ota esteettömyystila käyttöön koskettamalla pitkään kahdella sormella."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Esteettömyystila käytössä."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Esteettömyystila peruutettu."</string>
     <string name="user_switched" msgid="3768006783166984410">"Nykyinen käyttäjä: <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"Omistaja"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Virhe"</string>
-    <string name="app_no_restricted_accounts" msgid="5739463249673727736">"Tämä sovellus ei tue rajoitettujen profiilien tilejä"</string>
+    <!-- no translation found for error_message_change_not_allowed (1347282344200417578) -->
+    <skip />
     <string name="app_not_found" msgid="3429141853498927379">"Tätä toimintoa käsittelevää sovellusta ei löydy"</string>
     <string name="revoke" msgid="5404479185228271586">"Peruuta"</string>
     <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>

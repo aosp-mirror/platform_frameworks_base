@@ -298,10 +298,8 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"బ్లూటూత్ MAP సందేశాలను స్వీకరించడానికి మరియు ప్రాసెస్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. అనువర్తనం మీ పరికరానికి పంపబడిన సందేశాలను పర్యవేక్షించగలదని లేదా మీకు చూపకుండానే తొలగించగలదని దీనర్థం."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"అమలవుతున్న అనువర్తనాలను పునరుద్ధరించడం"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"ప్రస్తుతం మరియు ఇటీవల అమలవుతున్న విధుల గురించి వివరణాత్మక సమాచారాన్ని తిరిగి పొందడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఇది పరికరంలో ఉపయోగించబడిన అనువర్తనాల గురించి సమాచారాన్ని కనుగొనడానికి అనువర్తనాన్ని అనుమతించవచ్చు."</string>
-    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
-    <skip />
-    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
-    <skip />
+    <string name="permlab_startTasksFromRecents" msgid="8990073877885690623">"ఇటీవలివి నుండి విధిని ప్రారంభించడం"</string>
+    <string name="permdesc_startTasksFromRecents" msgid="7382133554871222235">"ActivityManager.getRecentTaskList() నుండి అందించబడిన నిష్క్రియ విధిని ప్రారంభించడం కోసం ActivityManager.RecentTaskInfo ఆబ్జెక్ట్‌ను ఉపయోగించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"వినియోగదారుల మధ్య పరస్పర చర్య చేయడం"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"పరికరంలోని విభిన్న వినియోగదారుల తరపున చర్యలను అమలు చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. హానికరమైన అనువర్తనాలు వినియోగదారుల మధ్య రక్షణను ఉల్లంఘించడానికి దీన్ని ఉపయోగించవచ్చు."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"వినియోగదారుల మధ్య పరస్పర చర్య చేయడానికి పూర్తి లైసెన్స్"</string>
@@ -1392,6 +1390,8 @@
     <string name="permdesc_recovery" msgid="8511774533266359571">"పునరుద్ధరణ సిస్టమ్ మరియు సిస్టమ్ నవీకరణలతో పరస్పర చర్య చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_createMediaProjection" msgid="4941338725487978112">"మీడియా ప్రొజెక్షన్ సెషన్‌లను రూపొందించడం"</string>
     <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"మీడియా ప్రొజెక్షన్ సెషన్‌లను రూపొందించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఈ సెషన్‌లు ప్రదర్శన మరియు ఆడియో కంటెంట్‌లను క్యాప్చర్ చేయగల సామర్థ్యాన్ని అనువర్తనాలకు అందించగలవు. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
+    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"ఇన్‌స్టాల్ సెషన్‌లను చదవడం"</string>
+    <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"ఇన్‌స్టాల్ సెషన్‌లను చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఇది సక్రియ ప్యాకేజీ ఇన్‌స్టాలేషన్‌ల గురించి వివరాలను చూడటానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"జూమ్ నియంత్రణ కోసం రెండుసార్లు తాకండి"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"విడ్జెట్‌ను జోడించడం సాధ్యపడలేదు."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"వెళ్లు"</string>
@@ -1410,6 +1410,8 @@
     <string name="deny" msgid="2081879885755434506">"తిరస్కరించండి"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"అనుమతి అభ్యర్థించబడింది"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"ఖాతా <xliff:g id="ACCOUNT">%s</xliff:g> కోసం\nఅనుమతి అభ్యర్థించబడింది."</string>
+    <string name="forward_intent_to_owner" msgid="570916783072215572">"మీరు మీ వ్యక్తిగత స్థలంలో ఈ అనువర్తనాన్ని ఉపయోగిస్తున్నారు"</string>
+    <string name="forward_intent_to_work" msgid="8624579696577525279">"మీరు మీ కార్య స్థలంలో ఈ అనువర్తనాన్ని ఉపయోగిస్తున్నారు"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"ఇన్‌పుట్ పద్ధతి"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"సమకాలీకరణ"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"ప్రాప్యత"</string>
@@ -1559,8 +1561,7 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"సిస్టమ్"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"బ్లూటూత్ ఆడియో"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"వైర్‌లెస్ డిస్‌ప్లే"</string>
-    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
-    <skip />
+    <string name="media_route_button_content_description" msgid="591703006349356016">"ప్రసారం చేయండి"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"పరికరానికి కనెక్ట్ చేయండి"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"స్క్రీన్‌ను పరికరానికి ప్రసారం చేయండి"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"పరికరాల కోసం శోధిస్తోంది…"</string>
@@ -1619,14 +1620,15 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"మీరు మీ అన్‌లాక్ నమూనాను <xliff:g id="NUMBER_0">%d</xliff:g> సార్లు తప్పుగా గీసారు. మరో <xliff:g id="NUMBER_1">%d</xliff:g> విఫల ప్రయత్నాల తర్వాత, ఇమెయిల్ ఖాతాను ఉపయోగించి మీ ఫోన్‌ను అన్‌లాక్ చేయాల్సిందిగా మిమ్మల్ని అడుగుతారు.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"తీసివేయి"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"వాల్యూమ్‌ను సిఫార్సు చేసిన స్థాయి కంటే ఎక్కువకు పెంచాలా?\nదీర్ఘకాలం పాటు అధిక వాల్యూమ్‌లో వినడం వలన మీ వినికిడి శక్తి దెబ్బతినవచ్చు."</string>
+    <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"వాల్యూమ్‌ను సిఫార్సు చేయబడిన స్థాయి కంటే ఎక్కువగా పెంచాలా?\n\nసుదీర్ఘ వ్యవధుల పాటు అధిక వాల్యూమ్‌లో వినడం వలన మీ వినికిడి శక్తి దెబ్బ తినవచ్చు."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"ప్రాప్యతను ప్రారంభించడానికి రెండు వేళ్లను నొక్కి ఉంచండి."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"ప్రాప్యత ప్రారంభించబడింది."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"ప్రాప్యత రద్దు చేయబడింది."</string>
     <string name="user_switched" msgid="3768006783166984410">"ప్రస్తుత వినియోగదారు <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"యజమాని"</string>
     <string name="error_message_title" msgid="4510373083082500195">"లోపం"</string>
-    <string name="app_no_restricted_accounts" msgid="5739463249673727736">"ఈ అనువర్తనం పరిమిత ప్రొఫైల్‌ల కోసం ఖాతాలకు మద్దతు ఇవ్వదు"</string>
+    <!-- no translation found for error_message_change_not_allowed (1347282344200417578) -->
+    <skip />
     <string name="app_not_found" msgid="3429141853498927379">"ఈ చర్యను నిర్వహించడానికి అనువర్తనం ఏదీ కనుగొనబడలేదు"</string>
     <string name="revoke" msgid="5404479185228271586">"ఉపసంహరించండి"</string>
     <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>

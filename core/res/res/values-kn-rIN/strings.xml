@@ -298,10 +298,8 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"ಬ್ಲೂಟೂಟ್ MAP ಸಂದೇಶಗಳನ್ನು ಸ್ವೀಕರಿಸಲು ಮತ್ತು ಪ್ರಕ್ರಿಯೆಗೊಳಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ. ಇದರರ್ಥ, ನಿಮ್ಮ ಸಾಧನಕ್ಕೆ ಕಳುಹಿಸಲಾಗಿರುವ ಸಂದೇಶಗಳನ್ನು ನಿಮಗೆ ತೋರಿಸದೆಯೇ, ಅಪ್ಲಿಕೇಶನ್ ಅವುಗಳನ್ನು ಮಾನಿಟರ್ ಮಾಡಬಹುದು ಅಥವಾ ಅಳಿಸಬಹುದು."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"ರನ್‌ ಆಗುತ್ತಿರುವ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಹಿಂಪಡೆಯಿರಿ"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"ಪ್ರಸ್ತುತವಿರುವ ಮತ್ತು ಇತ್ತೀಚಿಗೆ ಚಾಲ್ತಿಯಾಗಿರುವ ಕಾರ್ಯಗಳ ಕುರಿತ ಮಾಹಿತಿಯನ್ನು ಮರುಪಡೆದುಕೊಳ್ಳಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ. ಇದು ಸಾಧನದಲ್ಲಿ ಯಾವ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಬಳಸಲಾಗಿದೆ ಎಂಬುದರ ಕುರಿತ ಮಾಹಿತಿಯನ್ನು ಅನ್ವೇಷಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸಬಹುದು."</string>
-    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
-    <skip />
-    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
-    <skip />
+    <string name="permlab_startTasksFromRecents" msgid="8990073877885690623">"ಇತ್ತೀಚಿನವುಗಳಿಂದ ಕಾರ್ಯವನ್ನು ಪ್ರಾರಂಭಿಸಿ"</string>
+    <string name="permdesc_startTasksFromRecents" msgid="7382133554871222235">"ActivityManager.getRecentTaskList() ರಿಂದ ಹಿಂತಿರುಗಿಸಲಾದಂತಹ ಕಾರ್ಯನಿರ್ವಹಿಸದಿರುವ ಕಾರ್ಯವನ್ನು ಪ್ರಾರಂಭಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ActivityManager.RecentTaskInfo ಆಬ್ಜೆಕ್ಟ್ ಬಳಸುವುದನ್ನು ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"ಬಳಕೆದಾರರ ಜೊತೆ ಸಂವಹನ ನಡೆಸಿ"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"ಸಾಧನದಲ್ಲಿರುವ ವಿವಿಧ ಬಳಕೆದಾರರಾದ್ಯಂತ ಕ್ರಿಯೆಗಳನ್ನು ನಿರ್ವಹಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ. ದುರುದ್ದೇಶಪೂರಿತ ಅಪ್ಲಿಕೇಶನ್‍‍ಗಳು ಇದನ್ನು ಬಳಕೆದಾರರ ನಡುವಿನ ರಕ್ಷಣೆಯನ್ನು ಉಲ್ಲಂಘಿಸಲು ಬಳಸಿಕೊಳ್ಳಬಹುದು."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"ಬಳಕೆದಾರರ ಜೊತೆಗೆ ಸಂವಹನ ನಡೆಸಲು ಪೂರ್ಣ ಪರವಾನಗಿ"</string>
@@ -1392,6 +1390,8 @@
     <string name="permdesc_recovery" msgid="8511774533266359571">"ಮರುಪ್ರಾಪ್ತಿ ಸಿಸ್ಟಂ ಮ್ತತು ಸಿಸ್ಟಂ ನವೀಕರಣಗಳೊಂದಿಗೆ ಸಂವಹನ ನಡೆಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ."</string>
     <string name="permlab_createMediaProjection" msgid="4941338725487978112">"ಮೀಡಿಯಾ ಪ್ರಕ್ಷೇಪಣ ಅವಧಿಗಳನ್ನು ರಚಿಸಿ"</string>
     <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಮಾಧ್ಯಮ ಪ್ರಕ್ಷೇಪಣ ಅವಧಿಗಳನ್ನು ರಚಿಸಲು ಅನುಮತಿಸುತ್ತದೆ. ಈ ಅವಧಿಗಳು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಪ್ರದರ್ಶನವನ್ನು ಮತ್ತು ಆಡಿಯೊ ವಿಷಯಗಳನ್ನು ಸೆರೆಹಿಡಿಯುವ ಸಾಮರ್ಥ್ಯವನ್ನು ಒದಗಿಸುತ್ತವೆ. ಸಾಮಾನ್ಯ ಅಪ್ಲಿಕೇಶನ್‌ಗಳಿಗೆ ಎಂದಿಗೂ ಅಗತ್ಯವಿರುವುದಿಲ್ಲ."</string>
+    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"ಸ್ಥಾಪನೆ ಸೆಷನ್‌ಗಳನ್ನು ಓದಿ"</string>
+    <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"ಸ್ಥಾಪಿತ ಸೆಷನ್‌ಗಳನ್ನು ಓದಲು ಅಪ್ಲಿಕೇಶನ್‌ ಅನ್ನು ಅನುಮತಿಸುತ್ತದೆ. ಸಕ್ರಿಯ ಪ್ಯಾಕೇಜ್‌ ಸ್ಥಾಪನೆಗಳ ಕುರಿತು ವಿವರಣೆಗಳನ್ನು ವೀಕ್ಷಿಸಲು ಇದು ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"ಜೂಮ್‌ ನಿಯಂತ್ರಿಸಲು ಎರಡು ಬಾರಿ ಸ್ಪರ್ಶಿಸಿ"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"ವಿಜೆಟ್ ಸೇರಿಸಲು ಸಾಧ್ಯವಾಗುತ್ತಿಲ್ಲ."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"ಹೋಗು"</string>
@@ -1410,6 +1410,8 @@
     <string name="deny" msgid="2081879885755434506">"ನಿರಾಕರಿಸು"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"ಅನುಮತಿ ವಿನಂತಿಸಲಾಗಿದೆ"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"<xliff:g id="ACCOUNT">%s</xliff:g> ಖಾತೆಗಾಗಿ\n ಅನುಮತಿಯನ್ನು ವಿನಂತಿಸಲಾಗಿದೆ."</string>
+    <string name="forward_intent_to_owner" msgid="570916783072215572">"ನೀವು ಈ ಅಪ್ಲಿಕೇಶನ್‌ ಅನ್ನು ನಿಮ್ಮ ವೈಯಕ್ತಿಕ ಸ್ಥಳದಲ್ಲಿ ಬಳಸುತ್ತಿರುವಿರಿ"</string>
+    <string name="forward_intent_to_work" msgid="8624579696577525279">"ನಿಮ್ಮ ಕಾರ್ಯ ಸ್ಥಳದಲ್ಲಿ ನೀವು ಈ ಅಪ್ಲಿಕೇಶನ್‌ ಅನ್ನು ಬಳಸುತ್ತಿರುವಿರಿ"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"ಇನ್‌ಪುಟ್ ವಿಧಾನ"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"ಸಿಂಕ್ ಮಾಡು"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"ಪ್ರವೇಶಿಸುವಿಕೆ"</string>
@@ -1559,8 +1561,7 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"ಸಿಸ್ಟಂ"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"ಬ್ಲೂಟೂತ್‌ ಆಡಿಯೊ"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"ವಯರ್‌ಲೆಸ್ ಪ್ರದರ್ಶನ"</string>
-    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
-    <skip />
+    <string name="media_route_button_content_description" msgid="591703006349356016">"ಪಾತ್ರ"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"ಸಾಧನಕ್ಕೆ ಸಂಪರ್ಕಪಡಿಸಿ"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"ಸಾಧನಕ್ಕೆ ಬಿತ್ತರಿಸುವ ಪರದೆ"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"ಸಾಧನಗಳನ್ನು ಹುಡುಕಲಾಗುತ್ತಿದೆ…"</string>
@@ -1619,14 +1620,15 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"ನಿಮ್ಮ ಅನ್‍‍ಲಾಕ್ ಪ್ಯಾಟರ್ನ್ ಅನ್ನು ನೀವು <xliff:g id="NUMBER_0">%d</xliff:g> ಬಾರಿ ತಪ್ಪಾಗಿ ಡ್ರಾ ಮಾಡಿರುವಿರಿ. <xliff:g id="NUMBER_1">%d</xliff:g> ಹೆಚ್ಚಿನ ವಿಫಲ ಪ್ರಯತ್ನಗಳ ಬಳಿಕ, ನಿಮ್ಮ ಇಮೇಲ್ ಖಾತೆಯನ್ನು ಬಳಸಿಕೊಂಡು ನಿಮ್ಮ ಫೋನ್ ಅನ್‌ಲಾಕ್ ಮಾಡುವಂತೆ ನಿಮ್ಮಲ್ಲಿ ಕೇಳಿಕೊಳ್ಳಲಾಗುತ್ತದೆ.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"ತೆಗೆದುಹಾಕು"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"ಶಿಫಾರಸು ಮಾಡಿರುವ ಮಟ್ಟಕ್ಕಿಂತ ಹೆಚ್ಚಾಗಿ ವಾಲ್ಯೂಮ್ ಹೆಚ್ಚಿಸುವುದೇ?\nಅಧಿಕ ಸಮಯದವರೆಗೆ ಹೆಚ್ಚು ವಾಲ್ಯೂಮ್‌ನಲ್ಲಿ ಆಲಿಸುವುದರಿಂದ ನಿಮ್ಮ ಶ್ರವಣ ಗ್ರಹಿಕೆಗೆ ಹಾನಿಯಾಗಬಹುದು."</string>
+    <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"ವಾಲ್ಯೂಮ್‌ ಅನ್ನು ಶಿಫಾರಸು ಮಾಡಲಾದ ಮಟ್ಟಕ್ಕಿಂತಲೂ ಹೆಚ್ಚು ಮಾಡುವುದೇ?\n\nದೀರ್ಘ ಅವಧಿಯವರೆಗೆ ಹೆಚ್ಚಿನ ವಾಲ್ಯೂಮ್‌ನಲ್ಲಿ ಆಲಿಸುವುದರಿಂದ ನಿಮ್ಮ ಆಲಿಸುವಿಕೆ ಸಾಮರ್ಥ್ಯಕ್ಕೆ ಹಾನಿಯುಂಟು ಮಾಡಬಹುದು."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"ಪ್ರವೇಶಿಸುವಿಕೆಯನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಲು ಎರಡೂ ಬೆರಳುಗಳನ್ನು ಕೆಳಮುಖವಾಗಿ ಹಿಡಿದಿಟ್ಟುಕೊಂಡಿರಿ."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"ಪ್ರವೇಶಿಸುವಿಕೆ ಸಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"ಪ್ರವೇಶಿಸುವಿಕೆಯನ್ನು ರದ್ದುಮಾಡಲಾಗಿದೆ."</string>
     <string name="user_switched" msgid="3768006783166984410">"ಪ್ರಸ್ತುತ ಬಳಕೆದಾರರು <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"ಮಾಲೀಕರು"</string>
     <string name="error_message_title" msgid="4510373083082500195">"ದೋಷ"</string>
-    <string name="app_no_restricted_accounts" msgid="5739463249673727736">"ಈ ಅಪ್ಲಿಕೇಶನ್ ನಿರ್ಬಂಧಿತ ಪ್ರೊಫೈಲ್‌ಗಳ ಖಾತೆಗಳನ್ನು ಬೆಂಬಲಿಸುವುದಿಲ್ಲ"</string>
+    <!-- no translation found for error_message_change_not_allowed (1347282344200417578) -->
+    <skip />
     <string name="app_not_found" msgid="3429141853498927379">"ಈ ಕ್ರಿಯೆಯನ್ನು ನಿರ್ವಹಿಸಲು ಯಾವುದೇ ಅಪ್ಲಿಕೇಶನ್ ಕಂಡುಬಂದಿಲ್ಲ"</string>
     <string name="revoke" msgid="5404479185228271586">"ಹಿಂತೆಗೆದುಕೊಳ್ಳಿ"</string>
     <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>

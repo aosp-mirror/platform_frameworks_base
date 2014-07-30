@@ -298,10 +298,8 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Inaruhusu programu kupokea na kuchakata ujumbe wa Bluetooth MAP. Hii inamaanisha programu inaweza kufuatilia au kufuta ujumbe unaotumwa kwenye kifaa chako pasipo kukuonyesha ujumbe huo."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"rudisha programu zinazoendeshwa"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Inaruhusu programu kurudisha taarifa kuhusu kazi zinazoendeshwa sasa na hivi karibuni. Hii inaweza kuruhusu programu kugundua taarifa kuhusu ni programu zipi zinazotumika kwenye kifaa."</string>
-    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
-    <skip />
-    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
-    <skip />
+    <string name="permlab_startTasksFromRecents" msgid="8990073877885690623">"anza kazi kutoka za hivi majuzi"</string>
+    <string name="permdesc_startTasksFromRecents" msgid="7382133554871222235">"Huruhusu programu kutumia ActivityManager.RecentTaskInfo kufungua kazi iliyoshindikana ambayo ilirejeshwa kutoka ActivityManager.RecentTaskInfo()."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"kuwasiliana na watumiaji wengine"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Inaruhusu programu kutenda vitendo kwa watumiaji tofauti kwenye kifaa. Programu hasidi huenda zikatumia hii ili kukiuka ulinzi kati ya watumiaji."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"leseni kamili ili kushirikiana na watumiaji"</string>
@@ -1392,6 +1390,8 @@
     <string name="permdesc_recovery" msgid="8511774533266359571">"Huruhusu programu kuingiliana na mfumo wa kurejesha na sasisho la mfumo."</string>
     <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Unda vipindi vya kuonyesha maudhui"</string>
     <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"Huruhusu programu kuunda vipindi vya kuonyesha maudhui. Vipindi hivi vinaweza kuipa programu uwezo wa kupiga picha maudhui ya onyesho na sauti. Haipaswi kuhitajika kamwe kwa programu za kawaida."</string>
+    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Soma vipindi vya kusanikisha"</string>
+    <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Huruhusu programu kusoma vipindi vya kusanikisha. Hii huiruhusu kuona maelezo kuhusu usanikishaji wa programu unaoendelea."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Gusa mara mbili kwa udhibiti cha kuza"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Haikuweza kuongeza wijeti."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Nenda"</string>
@@ -1410,6 +1410,8 @@
     <string name="deny" msgid="2081879885755434506">"Kataza"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Idhini imeitishwa"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Idhini imeombwa\nya akaunti<xliff:g id="ACCOUNT">%s</xliff:g>."</string>
+    <string name="forward_intent_to_owner" msgid="570916783072215572">"Unatumia programu hii kwenye nafasi yako ya binafsi"</string>
+    <string name="forward_intent_to_work" msgid="8624579696577525279">"Unatumia programu hii kwenye nafasi yako ya kufanyia kazi"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Mbinu ya uingizaji"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Sawazisha"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Ufikiaji"</string>
@@ -1559,8 +1561,7 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Mfumo"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Sauti ya Bluetooth"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Uonyeshaji usiotumia waya"</string>
-    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
-    <skip />
+    <string name="media_route_button_content_description" msgid="591703006349356016">"Tuma"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Unganisha kwenye kifaa"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Tuma skrini kwenye kifaa"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Inatafuta vifaa..."</string>
@@ -1619,14 +1620,15 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Umekosea kuchora mchoro wako wa kufungua mara <xliff:g id="NUMBER_0">%d</xliff:g>. Baada ya majaribio <xliff:g id="NUMBER_1">%d</xliff:g> yasiyofaulu, utaombwa kufungua simu yako kwa kutumia akaunti ya barua pepe.\n\n Jaribu tena baada ya sekunde <xliff:g id="NUMBER_2">%d</xliff:g>."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Ondoa"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"Ungependa kuongeza sauti kupita kiwango kinachopendekezwa?\nKusikiliza kwa sauti ya juu kwa muda mrefu kunaweza kuharibu uwezo wako wa kusikia."</string>
+    <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Ungependa kupandisha sauti zaidi ya kiwango kinachopendekezwa?\n\nKusikiliza kwa sauti ya juu kwa muda mrefu kunaweza kuharibu uwezo wako wa kusikia."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Endelea kushikilia chini kwa vidole vyako viwili ili kuwezesha ufikivu."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Ufikivu umewezeshwa."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Ufikivu umeghairiwa."</string>
     <string name="user_switched" msgid="3768006783166984410">"Mtumiaji wa sasa <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"Mmiliki"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Hitilafu"</string>
-    <string name="app_no_restricted_accounts" msgid="5739463249673727736">"Programu hii haiwezi kutumiwa na akaunti za wasifu zilizowekewa vikwazo"</string>
+    <!-- no translation found for error_message_change_not_allowed (1347282344200417578) -->
+    <skip />
     <string name="app_not_found" msgid="3429141853498927379">"Hakuna programu iliyopatikana ili kushughulikia kitendo hiki"</string>
     <string name="revoke" msgid="5404479185228271586">"Batilisha"</string>
     <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>

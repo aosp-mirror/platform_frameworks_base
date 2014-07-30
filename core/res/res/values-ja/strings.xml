@@ -298,10 +298,8 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Bluetooth MAPメッセージの受信と処理をアプリに許可します。これにより、端末に届いたメッセージをアプリが表示することなく監視または削除するおそれがあります。"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"実行中のアプリの取得"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"現在実行中または最近実行したタスクに関する情報の取得をアプリに許可します。これにより、その端末でどのアプリを使用しているかをアプリから識別できるようになる可能性があります。"</string>
-    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
-    <skip />
-    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
-    <skip />
+    <string name="permlab_startTasksFromRecents" msgid="8990073877885690623">"最近のタスクからタスクを開始"</string>
+    <string name="permdesc_startTasksFromRecents" msgid="7382133554871222235">"ActivityManager.RecentTaskInfoオブジェクトを使用して、ActivityManager.getRecentTaskList()から返されたゾンビタスクを起動することをアプリに許可します。"</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"ユーザー間の交流"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"端末上の各ユーザーに対して操作を実行することをアプリに許可します。この許可を悪意のあるアプリに利用されると、ユーザー間の保護が侵害される恐れがあります。"</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"ユーザー間で交流するための完全ライセンス"</string>
@@ -1392,6 +1390,8 @@
     <string name="permdesc_recovery" msgid="8511774533266359571">"回復システムとシステムアップデートへのアクセスをアプリに許可します。"</string>
     <string name="permlab_createMediaProjection" msgid="4941338725487978112">"メディアプロジェクションセッションの作成"</string>
     <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"メディアプロジェクションセッションの作成をアプリに許可します。これらのセッションでは、アプリがディスプレイ/オーディオコンテンツをキャプチャできます。通常のアプリでは不要です。"</string>
+    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"インストールセッションの読み取り"</string>
+    <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"インストールセッションの読み取りをアプリに許可します。これにより、アプリはアクティブパッケージのインストールに関する詳細情報を参照できるようになります。"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"ダブルタップでズームコントロール"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"ウィジェットを追加できませんでした。"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"移動"</string>
@@ -1410,6 +1410,8 @@
     <string name="deny" msgid="2081879885755434506">"拒否"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"権限がリクエストされました"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"次のアカウントにアクセスする権限が\nリクエストされました: <xliff:g id="ACCOUNT">%s</xliff:g>"</string>
+    <string name="forward_intent_to_owner" msgid="570916783072215572">"個人用スペースでこのアプリを使用しています"</string>
+    <string name="forward_intent_to_work" msgid="8624579696577525279">"ワークスペースでこのアプリを使用しています"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"入力方法"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"同期"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"ユーザー補助"</string>
@@ -1559,8 +1561,7 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"システム"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth音声"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"ワイヤレスディスプレイ"</string>
-    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
-    <skip />
+    <string name="media_route_button_content_description" msgid="591703006349356016">"キャスト"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"端末に接続"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"端末への画面のキャスト"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"端末を検索しています…"</string>
@@ -1619,14 +1620,15 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"ロック解除パターンの入力を<xliff:g id="NUMBER_0">%d</xliff:g>回間違えました。あと<xliff:g id="NUMBER_1">%d</xliff:g>回間違えると、携帯端末のロック解除にメールアカウントが必要になります。\n\n<xliff:g id="NUMBER_2">%d</xliff:g>秒後にもう一度お試しください。"</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" - "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"削除"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"推奨レベルを超えるまで音量を上げますか？\n大音量で長時間聞き続けると、聴力を損なう恐れがあります。"</string>
+    <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"推奨レベルを超えるまで音量を上げますか？\n\n大音量で長時間聞き続けると、聴力を損なう恐れがあります。"</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"ユーザー補助機能を有効にするには2本の指で押し続けてください。"</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"ユーザー補助が有効になりました。"</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"ユーザー補助をキャンセルしました。"</string>
     <string name="user_switched" msgid="3768006783166984410">"現在のユーザーは<xliff:g id="NAME">%1$s</xliff:g>です。"</string>
     <string name="owner_name" msgid="2716755460376028154">"所有者"</string>
     <string name="error_message_title" msgid="4510373083082500195">"エラー"</string>
-    <string name="app_no_restricted_accounts" msgid="5739463249673727736">"このアプリでは制限付きプロフィールのアカウントはサポートしていません"</string>
+    <!-- no translation found for error_message_change_not_allowed (1347282344200417578) -->
+    <skip />
     <string name="app_not_found" msgid="3429141853498927379">"この操作を行うアプリが見つかりません"</string>
     <string name="revoke" msgid="5404479185228271586">"取り消し"</string>
     <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>

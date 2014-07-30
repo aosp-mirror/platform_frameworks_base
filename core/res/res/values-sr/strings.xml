@@ -298,10 +298,8 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Дозвољава апликацији да прима и обрађује Bluetooth MAP поруке. То значи да апликација може да надгледа или брише поруке које се шаљу на уређај, а да вам их не прикаже."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"преузимање покренутих апликација"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Дозвољава апликацији да преузима информације о актуелним и недавно покренутим задацима. Ово може да омогући апликацији да открије информације о томе које се апликације користе на уређају."</string>
-    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
-    <skip />
-    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
-    <skip />
+    <string name="permlab_startTasksFromRecents" msgid="8990073877885690623">"покрени неки од недавних задатака"</string>
+    <string name="permdesc_startTasksFromRecents" msgid="7382133554871222235">"Дозвољава апликацији да користи објекат ActivityManager.RecentTaskInfo за покретање завршеног задатка који је враћен из објекта ActivityManager.getRecentTaskList()."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"интеракција између корисника"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Дозвољава апликацији да обавља радње између различитих корисника на уређају. Злонамерне апликације могу да користе ово да би угрозиле заштиту између корисника."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"пуна лиценца за интеракцију између корисника"</string>
@@ -1392,6 +1390,8 @@
     <string name="permdesc_recovery" msgid="8511774533266359571">"Дозвољава апликацији да ступа у интеракцију са системом за опоравак и ажурирањима система."</string>
     <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Прави сесије пројекција медија"</string>
     <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"Омогућава апликацији да прави сесије пројекција медија. Ове сесије могу да омогуће апликацијама да снимају садржај на екрану или аудио садржај. Никада не би требало да буде потребно за стандардне апликације."</string>
+    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Читај сесије инсталирања"</string>
+    <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Дозвољава апликацији да чита сесије инсталирања. То јој дозвољава да види детаље о активним инсталацијама пакета."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Додирните двапут да бисте контролисали зум"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Није могуће додати виџет."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Иди"</string>
@@ -1410,6 +1410,8 @@
     <string name="deny" msgid="2081879885755434506">"Одбиј"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Затражена је дозвола"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Затражена је дозвола\nза налог <xliff:g id="ACCOUNT">%s</xliff:g>"</string>
+    <string name="forward_intent_to_owner" msgid="570916783072215572">"Користите ову апликацију у личном простору"</string>
+    <string name="forward_intent_to_work" msgid="8624579696577525279">"Користите ову апликацију у простору за рад"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Метод уноса"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Синхронизација"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Приступачност"</string>
@@ -1559,8 +1561,7 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Систем"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth аудио"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Бежични екран"</string>
-    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
-    <skip />
+    <string name="media_route_button_content_description" msgid="591703006349356016">"Пребацуј"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Повежите са уређајем"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Пребаците екран на уређај"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Тражење уређаја…"</string>
@@ -1619,14 +1620,15 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Нацртали сте шаблон за откључавање неисправно <xliff:g id="NUMBER_0">%d</xliff:g> пута. После још <xliff:g id="NUMBER_1">%d</xliff:g> неуспешна(их) покушаја, од вас ће бити затражено да откључате телефон помоћу налога е-поште.\n\nПокушајте поново за <xliff:g id="NUMBER_2">%d</xliff:g> секунде(и)."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Уклони"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"Желите ли да појачате звук преко препорученог нивоа?\nАко слушате гласну музику током дужег периода, може да дође до оштећења слуха."</string>
+    <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Желите да појачате звук изнад препорученог нивоа?\n\nСлушање гласне музике дуже време може да вам оштети слух."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Држите са два прста да бисте омогућили приступачност."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Приступачност је омогућена."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Приступачност је отказана."</string>
     <string name="user_switched" msgid="3768006783166984410">"Актуелни корисник <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"Власник"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Грешка"</string>
-    <string name="app_no_restricted_accounts" msgid="5739463249673727736">"Ова апликација не подржава налоге за ограничене профиле"</string>
+    <!-- no translation found for error_message_change_not_allowed (1347282344200417578) -->
+    <skip />
     <string name="app_not_found" msgid="3429141853498927379">"Није пронађена ниједна апликација која би могла да обави ову радњу"</string>
     <string name="revoke" msgid="5404479185228271586">"Опозови"</string>
     <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>

@@ -298,10 +298,8 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Bluetooth नकाशा संदेश प्राप्त करण्यास आणि त्यावर प्रक्रिया करण्यास अॅप ला अनुमती देते. याचा अर्थ अॅप आपल्या डिव्हाइसवर पाठविलेले संदेश आपल्याला न दर्शवता त्यांचे परीक्षण करू किंवा ते हटवू शकतो."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"चालणारे अॅप्स पुनर्प्राप्त करा"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"सध्या आणि अलीकडे चालणार्‍या कार्यांविषयी माहिती पुनर्प्राप्त करण्यासाठी अॅप ला अनुमती देते. हे डिव्हाइसवर कोणते अनुप्रयोग वापरले जात आहेत त्याविषयी माहिती शोधण्यासाठी अॅप ला अनुमती देऊ शकतात."</string>
-    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
-    <skip />
-    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
-    <skip />
+    <string name="permlab_startTasksFromRecents" msgid="8990073877885690623">"अलीकडील वरील कार्य प्रारंभ करा"</string>
+    <string name="permdesc_startTasksFromRecents" msgid="7382133554871222235">"अ‍ॅपला ActivityManager.getRecentTaskList() वरून परत आलेले निष्क्रिय कार्य लाँच करण्‍यासाठी ActivityManager.RecentTaskInfo ऑब्जेक्‍ट वापरण्‍याची अनुमती देते."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"वापरकर्त्यांशी परस्परसंवाद साधा"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"डिव्हाइसवरील भिन्न वापरकर्त्यांवर कारवाई करण्यासाठी अॅप ला अनुमती देते. दुर्भावनापूर्ण अॅप्स वापरकर्त्यांमधील संरक्षणाचे उल्लंघन करण्यासाठी हे वापरू शकतात."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"वापरकर्त्यांशी परस्परसंवाद साधण्यासाठी पूर्ण परवाना"</string>
@@ -1392,6 +1390,8 @@
     <string name="permdesc_recovery" msgid="8511774533266359571">"अनुप्रयोगाला पुनर्प्राप्ती सिस्‍ट‍मसह आणि सिस्‍टम अद्यतनांसह परस्‍परसंवाद करण्‍याची अनुमती देते."</string>
     <string name="permlab_createMediaProjection" msgid="4941338725487978112">"मीडिया प्रोजेक्शन सत्र तयार करा"</string>
     <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"अनुप्रयोगास मीडिया प्रोजेक्‍शन सत्र तयार करण्‍याची अनुमती देते. हे सत्र अनुप्रयोगांना प्रदर्शन आणि ऑडिओ सामग्री कॅप्‍चर करण्‍याची क्षमता प्रदान करु शकतात. सामान्य अ‍ॅप्‍स द्वारे कधीही आवश्यकता नसावी."</string>
+    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"स्‍थापना सत्र वाचा"</string>
+    <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"अनुप्रयोगास स्‍थापना सत्र वाचण्‍याची अनुमती देते. हे सक्रिय पॅकेज स्‍थापनांविषयी तपशील पाहाण्‍याची यास अनुमती देते."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"झूम नियंत्रणासाठी दोनदा स्पर्श करा"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"विजेट जोडू शकलो नाही."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"जा"</string>
@@ -1410,6 +1410,8 @@
     <string name="deny" msgid="2081879885755434506">"नकार द्या"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"परवानगीची विनंती केली"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"<xliff:g id="ACCOUNT">%s</xliff:g> खात्यासाठी\nपरवानगीची विनंती केली."</string>
+    <string name="forward_intent_to_owner" msgid="570916783072215572">"आपण आपल्‍या वैयक्तिक स्‍थानामध्‍ये या अ‍ॅपचा वापर करीत आहात"</string>
+    <string name="forward_intent_to_work" msgid="8624579696577525279">"आपण आपल्‍या कार्य स्‍थानामध्‍ये या अ‍ॅपचा वापर करीत आहात"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"इनपुट पद्धत"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"संकालन करा"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"प्रवेशयोग्यता"</string>
@@ -1559,8 +1561,7 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"सिस्टम"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth ऑडिओ"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"वायरलेस प्रदर्शन"</string>
-    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
-    <skip />
+    <string name="media_route_button_content_description" msgid="591703006349356016">"कास्‍ट करा"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"डिव्हाइसला कनेक्ट करा"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"डिव्‍हाइसवर स्क्रीन कास्‍ट करा"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"डिव्‍हाइसेस शोधत आहे…"</string>
@@ -1619,14 +1620,15 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"आपण आपला अनलॉक नमुना <xliff:g id="NUMBER_0">%d</xliff:g> वेळा अयोग्यपणे काढला आहे. आणखी <xliff:g id="NUMBER_1">%d</xliff:g> अयशस्वी प्रयत्नांनंतर, आपल्याला ईमेल खाते वापरून आपला फोन अनलॉक करण्यास सांगितले जाईल.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"काढा"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"आवाज शिफारस केलेल्‍या पातळीपेक्षा जास्‍त वाढवायचा? \nदीर्घकाळ ऊच्च पातळीचा आवाज ऐकण्‍याने आपल्‍या श्रवणशक्तीची हानी होऊ शकते."</string>
+    <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"शिफारस केलेल्‍या पातळीच्या वर आवाज वाढवायचा?\n\nउच्च आवाजात दीर्घ काळ ऐकण्‍याने आपल्‍या श्रवणशक्तीची हानी होऊ शकते."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"प्रवेशयोग्यता सक्षम करण्यासाठी दोन बोटांनी खाली धरून ठेवा."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"प्रवेशयोग्यता सक्षम."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"प्रवेशयोग्यता रद्द."</string>
     <string name="user_switched" msgid="3768006783166984410">"वर्तमान वापरकर्ता <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"मालक"</string>
     <string name="error_message_title" msgid="4510373083082500195">"त्रुटी"</string>
-    <string name="app_no_restricted_accounts" msgid="5739463249673727736">"हा अ‍ॅप प्रतिबंधित प्रोफाईलसाठी खात्यांचे समर्थन करीत नाही"</string>
+    <!-- no translation found for error_message_change_not_allowed (1347282344200417578) -->
+    <skip />
     <string name="app_not_found" msgid="3429141853498927379">"ही क्रिया हाताळण्यासाठी कोणताही अनुप्रयोग आढळला नाही"</string>
     <string name="revoke" msgid="5404479185228271586">"मागे घ्‍या"</string>
     <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>

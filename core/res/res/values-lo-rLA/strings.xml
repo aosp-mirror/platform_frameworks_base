@@ -298,10 +298,8 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບຯ​ສາ​ມາດ​ຮັບ​ແລະ​ສົ່ງ​ຂໍ້​ຄວາມ Bluetooth MAP ໄດ້. ນີ້​ໝາຍ​ຄວາມ​ວ່າ​ແອັບຯ​ຈະ​ສາ​ມາດ​ກວດ​ເບິ່ງ ຫຼື​ລຶບ​ຂໍ້​ຄວາມ​ທີ່​ສົ່ງ​ຫາ​ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ​ໄດ້​ໂດຍ​ບໍ່​ສະ​ແດງ​ຂໍ້​ຄວາມ​ເຫຼົ່າ​ນັ້ນໃຫ້​ທ່ານ​ເຫັນ."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"ດຶງແອັບຯທີ່ເຮັດວຽກຢູ່ມາ"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"ອະນຸຍາດໃຫ້ແອັບຯດຶງຂໍ້ມູນກ່ຽວກັບການເຮັດວຽກໃນປັດຈຸບັນ ແລະຫາກໍຜ່ານມາ. ແອັບຯທີ່ເປັນອັນຕະລາຍອາດຄົ້ນພົບຂໍ້ມູນ ກ່ຽວກັບແອັບພລິເຄຊັນທີ່ໃຊ້ຢູ່ໃນອຸປະກອນໄດ້."</string>
-    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
-    <skip />
-    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
-    <skip />
+    <string name="permlab_startTasksFromRecents" msgid="8990073877885690623">"​ເລີ່ມ​ວຽກ​ຈາກ​ລາຍ​ການ​ທີ່​ຫາ​ກໍ​ໃຊ້"</string>
+    <string name="permdesc_startTasksFromRecents" msgid="7382133554871222235">"ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບຯ​ນຳ​ໃຊ້ອອບ​ເຈັກ ActivityManager.RecentTaskInfo ​ເພື່ອ​ເປີດ defunct task ທີ່​​ກັບ​ມາ​ຈາກ ActivityManager.getRecentTaskList()."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"ການຕອບໂຕ້ລະຫວ່າງຜູ່ໃຊ້"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"ອະນຸຍາດໃຫ້ແອັບຯດຳເນີນການ ສັ່ງງານຜ່ານຜູ່ໃຊ້ອື່ນໆໃນອຸປະກອນ. ແອັບຯທີ່ເປັນອັນຕະລາຍອາດໃຊ້ຄວາມສາມາດນີ້ ເພື່ອລະເມີດການປ້ອງກັນລະຫວ່າງຜູ່ໃຊ້."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"ໃບອະນຸຍາດສະບັບເຕັມໃນການໂຕ້ຕອບລະຫວ່າງຜູ່ໃຊ້"</string>
@@ -1392,6 +1390,8 @@
     <string name="permdesc_recovery" msgid="8511774533266359571">"ອະນຸຍາດໃຫ້ແອັບພລິເຄຊັນຕິດຕໍ່ກັບລະບົບກູ້ຂໍ້ມູນ ແລະການອັບເດດລະບົບ."</string>
     <string name="permlab_createMediaProjection" msgid="4941338725487978112">"ສ້າງ​ມີ​ເດຍ​ໂປ​ຣ​ເຈັກ​ຊັນ​ເຊດ​ຊັນ"</string>
     <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"​ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບ​ພ​ລິ​ເຄ​ຊັນ​ສ້າງ​​ມີ​ເດຍ​ໂປ​ຣ​ເຈັກ​ຊັນ​ເຊດ​ຊັນ. ເຊດ​ຊັນ​ເຫຼົ່າ​ນີ້​ສາ​ມາດ​ສະ​ໜອງ​ຄວາມ​ສາ​ມາດ​ໃນ​ການ​ຈັບ​ພາບ ແລະ​​ສຽງ​​ໄດ້. ແອັບຯ​ທົ່ວ​ໄປ​ບໍ່​ຄວນ​ໃຊ້."</string>
+    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"ອ່ານ​ເຊດ​ຊັນ​ການ​ຕິດ​ຕັ້ງ"</string>
+    <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"​ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບ​ພລິ​ເຄ​ຊັນ​ອ່ານ​ເຊດ​ຊັນ​ການ​ຕິດ​ຕັ້ງ​ໄດ້. ນີ້​ຈະ​ອະ​ນຸ​ຍາດ​ໃຫ້​ມັນ​ເບິ່ງ​ເຫັນ​ລາຍ​ລະ​ອຽດ​ກ່ຽວ​ກັບ​ການ​ຕິດ​ຕັ້ງ​ແພັກ​ເກດ​ທີ່​ເຮັດ​​ວຽກ​ຢູ່​ໄດ້."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"ແຕະສອງເທື່ອສຳລັບການຄວບຄຸມການຊູມ"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"ບໍ່ສາມາດເພີ່ມວິດເຈັດໄດ້."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"ໄປ"</string>
@@ -1410,6 +1410,8 @@
     <string name="deny" msgid="2081879885755434506">"ປະ​ຕິ​ເສດ"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"ຕ້ອງການການອະນຸຍາດ"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"ຮ້ອງຂໍການກຳນົດສິດ\nສຳລັບບັນຊີ <xliff:g id="ACCOUNT">%s</xliff:g> ແລ້ວ."</string>
+    <string name="forward_intent_to_owner" msgid="570916783072215572">"​ທ່ານ​ກຳ​ລັງ​ໃຊ້​ແອັບຯ​ນີ້​ໃນ​ພື້ນ​ທີ່​ສ່ວນ​ໂຕ​ຂອງ​ທ່ານ"</string>
+    <string name="forward_intent_to_work" msgid="8624579696577525279">"​ທ່ານ​ກຳ​ລັງ​ໃຊ້​ແອັບຯ​ນີ້​ໃນ​ພື້ນ​ທີ່​ບ່ອນ​ເຮັດ​ວຽກ​ຂອງ​ທ່ານ"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"ວິທີການປ້ອນຂໍ້ມູນ"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"ຊິ້ງຂໍ້ມູນ"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"ການຊ່ວຍເຂົ້າເຖິງ"</string>
@@ -1559,8 +1561,7 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"ລະບົບ"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"ສຽງ Bluetooth"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"ການສະແດງຜົນໄຮ້ສາຍ"</string>
-    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
-    <skip />
+    <string name="media_route_button_content_description" msgid="591703006349356016">"ສົ່ງ​ສັນ​ຍານ"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"ເຊື່ອມຕໍ່ຫາອຸປະກອນ"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"ສົ່ງພາບໜ້າຈໍໄປຫາອຸປະກອນ"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"ກຳລັງຊອກຫາອຸປະກອນ..."</string>
@@ -1619,14 +1620,15 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"ທ່ານແຕ້ມຮູບແບບປົດລັອກຂອງທ່ານຜິດ <xliff:g id="NUMBER_0">%d</xliff:g> ເທື່ອແລ້ວ. ຫຼັງຈາກຄວາມພະຍາຍາມອີກ <xliff:g id="NUMBER_1">%d</xliff:g> ເທື່ອ ທ່ານຈະຖືກຖາມໃຫ້ປົດລັອກໂທລະສັບຂອງທ່ານດ້ວຍບັນຊີອີເມວ.\n\n ລອງໃໝ່ອີກຄັ້ງໃນ <xliff:g id="NUMBER_2">%d</xliff:g> ວິນາທີ."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"ລຶບອອກ"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"ຕ້ອງການເພີ່ມລະດັບສຽງຈົນເກີນລະດັບທີ່ແນະນຳ?\nການຟັງໃນລະດັບສຽງດັງເປັນເວລາດົນ ອາດທຳລາຍການໄດ້ຍິນສຽງຂອງທ່ານໄດ້."</string>
+    <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"ເພີ່ມ​ລະ​ດັບ​ສຽງ​ໃຫ້​ເກີນກວ່າ​ລະ​ດັບ​ທີ່​ແນະ​ນຳ​ບໍ?\n\n​ການ​ຮັບ​ຟັງ​ສຽງ​ໃນ​ລະ​ດັບ​ທີ່​ສູງ​ເປັນ​ໄລ​ຍະ​ເວ​ລາ​ດົນ​​ອາດ​ເຮັດ​ໃຫ້​ການ​ຟັງ​ຂອງ​ທ່ານ​ມີ​ບັນ​ຫາ​ໄດ້."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"ກົດສອງນິ້ວຄ້າງໄວ້ເພື່ອເປີດໃຊ້ການຊ່ວຍເຂົ້າເຖິງ"</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"ເປີດການຊ່ວຍເຂົ້າເຖິງແລ້ວ."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"ຍົກເລີກໂຕຊ່ວຍການເຂົ້າເຖິງແລ້ວ."</string>
     <string name="user_switched" msgid="3768006783166984410">"ຜູ່ໃຊ້ປັດຈຸບັນ <xliff:g id="NAME">%1$s</xliff:g> ."</string>
     <string name="owner_name" msgid="2716755460376028154">"ເຈົ້າຂອງ"</string>
     <string name="error_message_title" msgid="4510373083082500195">"ຜິດພາດ"</string>
-    <string name="app_no_restricted_accounts" msgid="5739463249673727736">"ແອັບພລິເຄຊັນນີ້ບໍ່ຮອງຮັບບັນຊີຂອງໂປຣໄຟລ໌ທີ່ຖືກຈຳກັດ."</string>
+    <!-- no translation found for error_message_change_not_allowed (1347282344200417578) -->
+    <skip />
     <string name="app_not_found" msgid="3429141853498927379">"ບໍ່ພົບແອັບພລິເຄຊັນເພື່ອຈັດການເຮັດວຽກນີ້."</string>
     <string name="revoke" msgid="5404479185228271586">"ຖອນ"</string>
     <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>
@@ -1724,7 +1726,7 @@
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"PIN ປະ​ຈຸ​ບັນ"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"ລະຫັດ PIN ໃໝ່"</string>
     <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"ຢືນຢັນລະຫັດ PIN ໃໝ່"</string>
-    <string name="restr_pin_create_pin" msgid="8017600000263450337">"ສ້າງ PIN ສໍາ​ລັບ​ການ​ປັບ​ປຸງ​ຂໍ້ຈໍາ​ກັດ​"</string>
+    <string name="restr_pin_create_pin" msgid="8017600000263450337">"ສ້າງ PIN ສໍາ​ລັບ​ການ​ປັບ​ປຸງ​ຂໍ້ຈໍາ​ກັດ"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PIN ບໍ່​ກົງກັນ. ລອງໃໝ່ອີກຄັ້ງ​."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN ​ສັ້ນ​ເກີນ​ໄປ​. ຕ້ອງມີຢ່າງໜ້ອຍ 4 ຫຼັກ​."</string>
   <plurals name="restr_pin_countdown">

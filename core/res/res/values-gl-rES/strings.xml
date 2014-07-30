@@ -298,10 +298,8 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Permite que a aplicación reciba e procese as mensaxes de MAP por Bluetooth. Isto quere dicir que a aplicación podería controlar ou eliminar as mensaxes enviadas ao teu dispositivo sen mostrarchas."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"recuperar aplicacións en execución"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Permite á aplicación recuperar información acerca de tarefas que se están executando actualmente ou que se executaron recentemente. É posible que esta acción permita á aplicación descubrir información acerca de que aplicacións se utilizan no dispositivo."</string>
-    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
-    <skip />
-    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
-    <skip />
+    <string name="permlab_startTasksFromRecents" msgid="8990073877885690623">"iniciar unha tarefa desde as recentes"</string>
+    <string name="permdesc_startTasksFromRecents" msgid="7382133554871222235">"Permite que a aplicación use un obxecto ActivityManager.RecentTaskInfo para iniciar unha tarefa caducada que se devolveu desde ActivityManager.getRecentTaskList()."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"interactuar entre os usuarios"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Permite á aplicación levar a cabo accións nos diferentes usuarios do dispositivo. É posible que aplicacións maliciosas utilicen isto para vulnerar a protección entre os usuarios."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"licenza completa para interactuar entre os usuarios"</string>
@@ -1392,6 +1390,8 @@
     <string name="permdesc_recovery" msgid="8511774533266359571">"Permite a unha aplicación interactuar co sistema de recuperación e as actualizacións do sistema."</string>
     <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Crear sesións de proxeccións multimedia"</string>
     <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"Permite que unha aplicación cree sesións de proxeccións multimedia. Estas sesións poden proporcionarlles ás aplicacións a capacidade de capturar a pantalla e contidos de audio. Nunca debería ser necesario para as aplicacións normais."</string>
+    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Consultar sesións de instalación"</string>
+    <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Permite que unha aplicación consulte as sesións de instalación. Desta forma, pode ver os detalles acerca das instalacións de paquetes activas."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Toca dúas veces para controlar o zoom"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Non se puido engadir o widget."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Ir"</string>
@@ -1410,6 +1410,8 @@
     <string name="deny" msgid="2081879885755434506">"Rexeitar"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Permiso solicitado"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Permiso solicitado\npara a conta <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
+    <string name="forward_intent_to_owner" msgid="570916783072215572">"Estás usando esta aplicación no teu espazo persoal"</string>
+    <string name="forward_intent_to_work" msgid="8624579696577525279">"Estás usando esta aplicación no teu espazo de traballo"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Método de entrada"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Sincronizar"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Accesibilidade"</string>
@@ -1559,8 +1561,7 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Sistema"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Audio por Bluetooth"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Visualización sen fíos"</string>
-    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
-    <skip />
+    <string name="media_route_button_content_description" msgid="591703006349356016">"Emitir"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Conectar co dispositivo"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Emisión de pantalla no dispositivo"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Buscando dispositivos…"</string>
@@ -1619,14 +1620,15 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Debuxaches o padrón de desbloqueo incorrectamente <xliff:g id="NUMBER_0">%d</xliff:g> veces. Se realizas <xliff:g id="NUMBER_1">%d</xliff:g> intentos incorrectos máis, terás que desbloquear o teléfono a través dunha conta de correo electrónico.\n\n Téntao de novo dentro de <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Eliminar"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"Queres aumentar o volume por encima do nivel recomendado?\nEscoitar música a un volume elevado durante períodos de tempo prolongados pode danar a túa audición."</string>
+    <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Queres subir o volume máis do nivel recomendado?\n\nA reprodución de son a un volume elevado durante moito tempo pode provocar danos nos oídos."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Continúa premendo con dous dedos para activar a accesibilidade."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Accesibilidade activada"</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Accesibilidade cancelada"</string>
     <string name="user_switched" msgid="3768006783166984410">"Usuario actual <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"Propietario"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Erro"</string>
-    <string name="app_no_restricted_accounts" msgid="5739463249673727736">"Esta aplicación non admite contas de perfís restrinxidos"</string>
+    <!-- no translation found for error_message_change_not_allowed (1347282344200417578) -->
+    <skip />
     <string name="app_not_found" msgid="3429141853498927379">"Non se atopou ningunha aplicación para procesar esta acción"</string>
     <string name="revoke" msgid="5404479185228271586">"Revogar"</string>
     <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>

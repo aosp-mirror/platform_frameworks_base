@@ -298,10 +298,8 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"აპს შეეძლება Bluetooth MAP შეტყობინებების მიღება და დამუშავება. ეს ნიშნავს, რომ აპს შეეძლება შეტყობინებების მონიტორინგი და მათი წაშლა თქვენთვის ჩვენების გარეშე."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"მოქმედი აპების მოძიება"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"აპს შეეძლება მოიძიოს ინფორმაცია ამჟამად და უახლოეს წარსულში მიმდინარე ამოცანების შესახებ. ამგვარად, აპს აქვს შესაძლებლობა აღმოაჩინოს ინფორმაცია იმის შესახებ, თუ რომელი აპლიკაციებია გამოყენებული მოწყობილობაზე."</string>
-    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
-    <skip />
-    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
-    <skip />
+    <string name="permlab_startTasksFromRecents" msgid="8990073877885690623">"ამოცანის დაწყება ბოლო ამოცანებიდან"</string>
+    <string name="permdesc_startTasksFromRecents" msgid="7382133554871222235">"აპებისთვის ნების მიცემა გამოიყენოს ActivityManager.RecentTaskInfo object ნაგულისხმევი ამოცანის გასაშვებად, რომელიც დაბრუნდა ActivityManager.getRecentTaskList()-დან."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"მომხმარებლებს შორის ინტერაქცია"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"აპს შეეძლება, სხვადასხვა მომხმარებლის მოქმედებები შეასრულოს მოწყობილობაზე. მავნე აპებმა შეიძლება მომხმარებლებს შორის დაცვის დასარღვევად გამოიყენონ."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"მომხმარებლებთან ინტერაქციის სრული ლიცენზია"</string>
@@ -1392,6 +1390,8 @@
     <string name="permdesc_recovery" msgid="8511774533266359571">"საშუალებას აძლევს აპლიკაციას მოახდინოს აღდგენის სისტემასთან და სისტემის განახლებასთან ინტერაქცია."</string>
     <string name="permlab_createMediaProjection" msgid="4941338725487978112">"მედია პროეცირების სესიების შექმნა"</string>
     <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"საშუალებას აძლევს აპლიკაციას, შექმნას მედია პროეცირების სესიები. ამ სესიებმა შესაძლოა მისცეს აპლიკაციებს საშუალება, აღიბეჭდოს ეკრანისა და აუდიოს კონტენტი. ჩვეულებრივ აპს წესით ეს არასოდეს არ უნდა დასჭირდეს."</string>
+    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"ინსტალაციის სესიების წაკითხვა"</string>
+    <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"საშუალებას აძლევს აპლიკაციას წაიკითხოს ინსტალაციის სესიები. ამით მას საშუალება აქვს იხილოს პაკეტის აქტიური ინსტალაციები."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"მასშტაბის მართვისთვის შეეხეთ ორჯერ."</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"ვერ დაემატა ვიჯეტი."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"გადასვლა"</string>
@@ -1410,6 +1410,8 @@
     <string name="deny" msgid="2081879885755434506">"აკრძალვა"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"მოთხოვნილია ნებართვა"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"მოთხოვნილია ნებრათვა \nანგარიშისთვის: <xliff:g id="ACCOUNT">%s</xliff:g>"</string>
+    <string name="forward_intent_to_owner" msgid="570916783072215572">"ამ აპს თვენს პერსონალურ სივრცეში იყენებთ"</string>
+    <string name="forward_intent_to_work" msgid="8624579696577525279">"ამ აპს თვენს სამუშაო სივრცეში იყენებთ"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"შეყვანის მეთოდი"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"სინქრონიზაცია"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"წვდომა"</string>
@@ -1559,8 +1561,7 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"სისტემა"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth აუდიო"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"უსადენო ეკრანი"</string>
-    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
-    <skip />
+    <string name="media_route_button_content_description" msgid="591703006349356016">"მსახიობები"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"მოწყობილობასთან დაკავშირება"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"ეკრანის მოწყობილობაზე გადაცემა"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"მოწყობილობების ძიება…"</string>
@@ -1619,14 +1620,15 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"თქვენ არასწორად დახატეთ თქვენი განბლოკვის ნიმუში <xliff:g id="NUMBER_0">%d</xliff:g>-ჯერ. კიდევ <xliff:g id="NUMBER_1">%d</xliff:g> წარუმატებელი ცდის შემდეგ, დაგჭირდებათ თქვენი ტელეფონის განბლოკვა ელფოსტის ანგარიშის გამოყენებით.\n\n ხელახლა სცადეთ <xliff:g id="NUMBER_2">%d</xliff:g> წამში."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"ამოშლა"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"რეკომენდებულ დონეზე მაღლა გსურთ ხმის აწევა?\nდიდი ხნის განმავლობაში ძალიან ხმამაღლა მოსმენამ შესაძლოა სმენა დაგიზიანოთ."</string>
+    <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"გსურთ ხმის რეკომენდებულ დონეზე მაღლა აწევა?\n\nხანგრძლივად ხმამაღლა მოსმენით შესაძლოა სმენადობა დაიზიანოთ."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"გეჭიროთ ორი თითი მარტივი წვდომის ჩასართავად."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"მარტივი წვდომა ჩართულია."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"მარტივი წვდომა გაუქმდა."</string>
     <string name="user_switched" msgid="3768006783166984410">"ამჟამინდელი მომხმარებელი <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"მფლობელი"</string>
     <string name="error_message_title" msgid="4510373083082500195">"შეცდომა"</string>
-    <string name="app_no_restricted_accounts" msgid="5739463249673727736">"ამ აპს შეზღუდული პროფილების ანგარიშების მხარდაჭერა არ აქვს"</string>
+    <!-- no translation found for error_message_change_not_allowed (1347282344200417578) -->
+    <skip />
     <string name="app_not_found" msgid="3429141853498927379">"ამ მოქმედების შესასრულებლად აპლიკაცია ვერ მოიძებნა"</string>
     <string name="revoke" msgid="5404479185228271586">"გაუქმება"</string>
     <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>
@@ -1745,10 +1747,10 @@
     <string name="item_is_selected" msgid="949687401682476608">"არჩეულია <xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> წაიშალა"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"სამსახური <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="2126866321272822564">"თქვენ იმყოფებით აპის ფიქსაციის რეჟიმში. გამოსასვლელად, დააჭირეთ და დააყოვნეთ ბოლო აპების ღილაკზე"</string>
-    <string name="lock_to_app_toast_locked" msgid="4229650395479263497">"თქვენ იმყოფებით აპის ფიქსაციის რეჟიმში."</string>
-    <string name="lock_to_app_title" msgid="5895142291937470019">"გსურთ „აპში ჩაკეტვის“ გამოყენება?"</string>
-    <string name="lock_to_app_description" msgid="2800403592608529611">"„აპში ჩაკეტვა“ კეტავს ეკრანს ერთ აპში.\n\nგასასვლელად დააჭირეთ და არ აუშვათ ღილაკს „ბოლო აპები“."</string>
+    <string name="lock_to_app_toast" msgid="2126866321272822564">"თქვენ იმყოფებით აპზე ფიქსაციის რეჟიმში. გამოსასვლელად, დააჭირეთ და დააყოვნეთ ბოლო აპების ღილაკზე"</string>
+    <string name="lock_to_app_toast_locked" msgid="4229650395479263497">"თქვენ იმყოფებით აპზე ფიქსაციის რეჟიმში."</string>
+    <string name="lock_to_app_title" msgid="5895142291937470019">"გსურთ „აპზე ფიქსაციის“ გამოყენება?"</string>
+    <string name="lock_to_app_description" msgid="2800403592608529611">"„აპზე ფიქსაცია“ კეტავს ეკრანს ერთ აპში.\n\nგასასვლელად დააჭირეთ და არ აუშვათ ღილაკს „ბოლო აპები“."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"არა, გმადლობთ"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"დაწყება"</string>
     <string name="lock_to_app_start" msgid="3074665051586318340">"აპზე დაფიქსირებული"</string>

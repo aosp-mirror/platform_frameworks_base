@@ -298,10 +298,8 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Получение и обработка сообщений Bluetooth MAP. Отслеживание и удаление непрочитанных сообщений."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"Получение данных о запущенных приложениях"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Приложение сможет получать информацию о недавно запущенных и выполняемых задачах, а следовательно, и о приложениях, используемых на устройстве."</string>
-    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
-    <skip />
-    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
-    <skip />
+    <string name="permlab_startTasksFromRecents" msgid="8990073877885690623">"Запуск задач из списка недавних задач"</string>
+    <string name="permdesc_startTasksFromRecents" msgid="7382133554871222235">"Использование объекта ActivityManager.RecentTaskInfo для запуска неактивной задачи, возвращенной из списка ActivityManager.getRecentTaskList()."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"Взаимодействие с аккаунтами всех пользователей"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Приложение сможет выполнять действия во всех аккаунтах на этом устройстве. При этом защита от вредоносных приложений может быть недостаточной."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"Полное взаимодействие с аккаунтами всех пользователей"</string>
@@ -1392,6 +1390,8 @@
     <string name="permdesc_recovery" msgid="8511774533266359571">"Приложение сможет взаимодействовать с системой восстановления и обновлениями системы."</string>
     <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Создание сеансов трансляции контента"</string>
     <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"Создание сеансов трансляции контента, во время которых приложение получит доступ к изображению на экране и аудио. Это разрешение обычно используется только специальными приложениями."</string>
+    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Чтение данных сеансов установки"</string>
+    <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Чтение данных текущих сеансов установки пакетов."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Нажмите дважды для изменения масштаба"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Не удалось добавить виджет."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Выбрать"</string>
@@ -1410,6 +1410,8 @@
     <string name="deny" msgid="2081879885755434506">"Отклонить"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Разрешение запрошено"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Требуется разрешение\nдля аккаунта <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
+    <string name="forward_intent_to_owner" msgid="570916783072215572">"Вы перешли в хранилище личных данных."</string>
+    <string name="forward_intent_to_work" msgid="8624579696577525279">"Вы перешли в хранилище рабочих данных."</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Способ ввода"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Синхр."</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Спец. возможности"</string>
@@ -1559,8 +1561,7 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Система"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Воспроизведение звука через Bluetooth"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Беспроводной монитор"</string>
-    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
-    <skip />
+    <string name="media_route_button_content_description" msgid="591703006349356016">"Транслировать."</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Подключение к устройству"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Подключение к удаленному дисплею"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Поиск устройств…"</string>
@@ -1619,14 +1620,15 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Вы <xliff:g id="NUMBER_0">%d</xliff:g> раз неверно указали графический ключ. После <xliff:g id="NUMBER_1">%d</xliff:g> неверных попыток для разблокировки телефона потребуется войти в аккаунт Google.\n\nПовтор через <xliff:g id="NUMBER_2">%d</xliff:g> сек."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Удалить"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"Увеличить громкость до небезопасного уровня?\nДолговременное прослушивание на такой громкости может повредить слух."</string>
+    <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Установить громкость выше рекомендуемого уровня?\n\nВоздействие громкого звука в течение долгого времени может привести к повреждению слуха."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Чтобы включить специальные возможности, удерживайте пальцы на экране."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Специальные возможности включены."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Специальные возможности не будут включены."</string>
     <string name="user_switched" msgid="3768006783166984410">"Выбран аккаунт пользователя <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"Владелец"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Ошибка"</string>
-    <string name="app_no_restricted_accounts" msgid="5739463249673727736">"Это приложение не поддерживается в аккаунтах для профилей с ограниченным доступом"</string>
+    <!-- no translation found for error_message_change_not_allowed (1347282344200417578) -->
+    <skip />
     <string name="app_not_found" msgid="3429141853498927379">"Невозможно обработать это действие"</string>
     <string name="revoke" msgid="5404479185228271586">"Отменить"</string>
     <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0 (841 х 1189 мм)"</string>

@@ -298,10 +298,8 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Lehetővé teszi az alkalmazás számára, hogy Bluetooth MAP üzeneteket fogadjon és dolgozzon fel. Ez azt jelenti, hogy az alkalmazás anélkül figyelheti meg vagy törölheti a beérkező üzeneteket, hogy megjelenítené azokat Önnek."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"futó alkalmazások lekérése"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Lehetővé teszi az alkalmazás számára a jelenleg futó és nemrég befejezett feladatokkal kapcsolatos információk lekérését. Ezáltal az alkalmazás engedélyt kap az eszközön használt alkalmazásokkal kapcsolatos információk felderítésére."</string>
-    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
-    <skip />
-    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
-    <skip />
+    <string name="permlab_startTasksFromRecents" msgid="8990073877885690623">"feladat elindítása a legutóbbiak közül"</string>
+    <string name="permdesc_startTasksFromRecents" msgid="7382133554871222235">"Engedélyezi az alkalmazás számára egy ActivityManager.RecentTaskInfo objektum használatát egy olyan megszűnt feladat elindítására, amelyet az ActivityManager.getRecentTaskList() küldött vissza."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"felhasználók közötti interakció"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Lehetővé teszi az alkalmazás számára, hogy több felhasználó között végezzen különféle műveleteket az eszközön. A rosszindulatú alkalmazások arra használhatják ezt, hogy megsértsék a felhasználók biztonságát."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"teljes licenc a felhasználók közötti interakcióhoz"</string>
@@ -912,7 +910,7 @@
     <string name="lockscreen_transport_stop_description" msgid="4562318378766987601">"Leállítás gomb"</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"Csak segélyhívások"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"A hálózat lezárva"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"A SIM-kártya le van zárva a PUK-kóddal."</string>
+    <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"A SIM kártya le van zárva a PUK kóddal."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"Nézze meg a felhasználói útmutatót, vagy vegye fel a kapcsolatot az ügyfélszolgálattal."</string>
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"A SIM kártya le van zárva."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"SIM kártya feloldása..."</string>
@@ -1392,6 +1390,8 @@
     <string name="permdesc_recovery" msgid="8511774533266359571">"Lehetővé teszi egy alkalmazás számára, hogy kapcsolatba lépjen a helyreállítási rendszerrel és a rendszerfrissítésekkel."</string>
     <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Médiakivetítési munkamenetek létrehozása"</string>
     <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"Lehetővé teszi egy alkalmazásnak, hogy médiakivetítési munkameneteket hozzon létre. Az ilyen munkamenetek révén az alkalmazások rögzíthetik a vizuális és audiotartalmakat. A normál alkalmazásoknak erre soha nincs szükségük."</string>
+    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Telepítési munkamenetek olvasása"</string>
+    <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Engedélyezi az alkalmazásnak a telepítési munkamenetek olvasását. Ezáltal részleteket kaphat az egyes csomagok éppen folyamatban lévő telepítéséről."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Érintse meg kétszer a nagyítás beállításához"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Nem sikerült hozzáadni a modult."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Ugrás"</string>
@@ -1410,6 +1410,8 @@
     <string name="deny" msgid="2081879885755434506">"Elutasítás"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Az engedélykérés megtörtént"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Az engedélykérés megtörtént\na(z) <xliff:g id="ACCOUNT">%s</xliff:g> fiók számára."</string>
+    <string name="forward_intent_to_owner" msgid="570916783072215572">"Személyes területén használja az alkalmazást"</string>
+    <string name="forward_intent_to_work" msgid="8624579696577525279">"Munkaterületén használja az alkalmazást"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Beviteli mód"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Szinkronizálás"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Kisegítő lehetőségek"</string>
@@ -1559,8 +1561,7 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Rendszer"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth hang"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Vezeték nélküli kijelző"</string>
-    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
-    <skip />
+    <string name="media_route_button_content_description" msgid="591703006349356016">"Tartalomátküldés"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Csatlakozás adott eszközhöz"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Képernyő átküldése az eszközre"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Eszközkeresés…"</string>
@@ -1619,14 +1620,15 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"<xliff:g id="NUMBER_0">%d</xliff:g> alkalommal helytelenül rajzolta le a feloldási mintát. További <xliff:g id="NUMBER_1">%d</xliff:g> sikertelen kísérlet után egy e-mail fiók használatával kell feloldania a telefonját.\n\n Kérjük, próbálja újra <xliff:g id="NUMBER_2">%d</xliff:g> másodperc múlva."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Eltávolítás"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"A javasolt szint fölé emeli a hangerőt?\nHa hosszú ideig hangosan hallgatja a zenét, az károsíthatja a hallását."</string>
+    <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Az ajánlott szint fölé szeretné emelni a hangerőt?\n\nHa hosszú időn át teszi ki magát nagy hangerőnek, azzal károsíthatja a hallását."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Továbbra is tartsa lenyomva két ujját a hozzáférés engedélyezéséhez."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Hozzáférés engedélyezve"</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Hozzáférés megszakítva."</string>
     <string name="user_switched" msgid="3768006783166984410">"<xliff:g id="NAME">%1$s</xliff:g> az aktuális felhasználó."</string>
     <string name="owner_name" msgid="2716755460376028154">"Tulajdonos"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Hiba"</string>
-    <string name="app_no_restricted_accounts" msgid="5739463249673727736">"Ez az alkalmazás nem támogatja a korlátozott profilokkal rendelkező fiókokat"</string>
+    <!-- no translation found for error_message_change_not_allowed (1347282344200417578) -->
+    <skip />
     <string name="app_not_found" msgid="3429141853498927379">"Nincs megfelelő alkalmazás a művelet elvégzésére."</string>
     <string name="revoke" msgid="5404479185228271586">"Visszavonás"</string>
     <string name="mediasize_iso_a0" msgid="1994474252931294172">"„ISO A0” méret"</string>
