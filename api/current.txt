@@ -1123,6 +1123,7 @@ package android {
     field public static final int showDividers = 16843561; // 0x1010329
     field public static final int showOnLockScreen = 16843721; // 0x10103c9
     field public static final int showSilent = 16843259; // 0x10101fb
+    field public static final int showText = 16843952; // 0x10104b0
     field public static final int showWeekNumber = 16843582; // 0x101033e
     field public static final int shownWeekCount = 16843585; // 0x1010341
     field public static final int shrinkColumns = 16843082; // 0x101014a
@@ -39379,6 +39380,7 @@ package android.widget {
     ctor public Switch(android.content.Context, android.util.AttributeSet);
     ctor public Switch(android.content.Context, android.util.AttributeSet, int);
     ctor public Switch(android.content.Context, android.util.AttributeSet, int, int);
+    method public boolean getShowText();
     method public boolean getSplitTrack();
     method public int getSwitchMinWidth();
     method public int getSwitchPadding();
@@ -39388,6 +39390,7 @@ package android.widget {
     method public int getThumbTextPadding();
     method public android.graphics.drawable.Drawable getTrackDrawable();
     method public void onMeasure(int, int);
+    method public void setShowText(boolean);
     method public void setSplitTrack(boolean);
     method public void setSwitchMinWidth(int);
     method public void setSwitchPadding(int);
