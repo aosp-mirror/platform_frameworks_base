@@ -660,6 +660,12 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         mOnActivatedListener = onActivatedListener;
     }
 
+    public void reset() {
+        setTintColor(0);
+        setShowingLegacyBackground(false);
+        setBelowSpeedBump(false);
+    }
+
     public interface OnActivatedListener {
         void onActivated(ActivatableNotificationView view);
         void onActivationReset(ActivatableNotificationView view);
