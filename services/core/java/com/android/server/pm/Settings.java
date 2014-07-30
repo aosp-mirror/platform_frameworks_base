@@ -142,9 +142,6 @@ final class Settings {
     private static final String CROSS_PROFILE_PACKAGE_INFO_ATTR_TARGET_USER_ID = "target-user-id";
     private static final String CROSS_PROFILE_PACKAGE_INFO_TAG_PACKAGE_NAME = "package-name";
     private static final String CROSS_PROFILE_PACKAGE_INFO_ATTR_PACKAGE_NAME = "value";
-    //Old name. Kept for compatibility
-    static final String TAG_FORWARDING_INTENT_FILTERS =
-            "forwarding-intent-filters";
 
     private static final String ATTR_NAME = "name";
     private static final String ATTR_USER = "user";
@@ -1277,8 +1274,7 @@ final class Settings {
                     readPreferredActivitiesLPw(parser, userId);
                 } else if (tagName.equals(TAG_PERSISTENT_PREFERRED_ACTIVITIES)) {
                     readPersistentPreferredActivitiesLPw(parser, userId);
-                } else if (tagName.equals(TAG_FORWARDING_INTENT_FILTERS)
-                        || tagName.equals(TAG_CROSS_PROFILE_INTENT_FILTERS)) {
+                } else if (tagName.equals(TAG_CROSS_PROFILE_INTENT_FILTERS)) {
                     readCrossProfileIntentFiltersLPw(parser, userId);
                 } else if (tagName.equals(TAG_CROSS_PROFILE_PACKAGE_INFO)){
                     readCrossProfilePackageInfoLPw(parser, userId);
@@ -2154,8 +2150,7 @@ final class Settings {
                     // TODO: check whether this is okay! as it is very
                     // similar to how preferred-activities are treated
                     readPersistentPreferredActivitiesLPw(parser, 0);
-                } else if (tagName.equals(TAG_FORWARDING_INTENT_FILTERS)
-                        || tagName.equals(TAG_CROSS_PROFILE_INTENT_FILTERS)) {
+                } else if (tagName.equals(TAG_CROSS_PROFILE_INTENT_FILTERS)) {
                     // TODO: check whether this is okay! as it is very
                     // similar to how preferred-activities are treated
                     readCrossProfileIntentFiltersLPw(parser, 0);
