@@ -714,7 +714,6 @@ extern char CONSOLE_DATA[2925]; // see EOF
 int doDump(Bundle* bundle)
 {
     status_t result = UNKNOWN_ERROR;
-    Asset* asset = NULL;
 
     if (bundle->getFileSpecCount() < 1) {
         fprintf(stderr, "ERROR: no dump option specified\n");
@@ -758,11 +757,20 @@ int doDump(Bundle* bundle)
     const ResTable& res = assets.getResources(false);
     if (&res == NULL) {
         fprintf(stderr, "ERROR: dump failed because no resource table was found\n");
-        goto bail;
+        return 1;
     } else if (res.getError() != NO_ERROR) {
         fprintf(stderr, "ERROR: dump failed because the resource table is invalid/corrupt.\n");
-        goto bail;
+        return 1;
     }
+
+    const DynamicRefTable* dynamicRefTable = res.getDynamicRefTableForCookie(assetsCookie);
+    if (dynamicRefTable == NULL) {
+        fprintf(stderr, "ERROR: failed to find dynamic reference table for asset cookie %d\n",
+                assetsCookie);
+        return 1;
+    }
+
+    Asset* asset = NULL;
 
     if (strcmp("resources", option) == 0) {
 #ifndef HAVE_ANDROID_OS
@@ -781,8 +789,8 @@ int doDump(Bundle* bundle)
 
         for (int i=2; i<bundle->getFileSpecCount(); i++) {
             const char* resname = bundle->getFileSpecEntry(i);
-            ResXMLTree tree;
-            asset = assets.openNonAsset(resname, Asset::ACCESS_BUFFER);
+            ResXMLTree tree(dynamicRefTable);
+            asset = assets.openNonAsset(assetsCookie, resname, Asset::ACCESS_BUFFER);
             if (asset == NULL) {
                 fprintf(stderr, "ERROR: dump failed because resource %s found\n", resname);
                 goto bail;
@@ -808,13 +816,13 @@ int doDump(Bundle* bundle)
 
         for (int i=2; i<bundle->getFileSpecCount(); i++) {
             const char* resname = bundle->getFileSpecEntry(i);
-            ResXMLTree tree;
-            asset = assets.openNonAsset(resname, Asset::ACCESS_BUFFER);
+            asset = assets.openNonAsset(assetsCookie, resname, Asset::ACCESS_BUFFER);
             if (asset == NULL) {
                 fprintf(stderr, "ERROR: dump failed because resource %s found\n", resname);
                 goto bail;
             }
 
+            ResXMLTree tree(dynamicRefTable);
             if (tree.setTo(asset->getBuffer(true),
                            asset->getLength()) != NO_ERROR) {
                 fprintf(stderr, "ERROR: Resource %s is corrupt\n", resname);
@@ -826,14 +834,13 @@ int doDump(Bundle* bundle)
         }
 
     } else {
-        ResXMLTree tree;
-        asset = assets.openNonAsset("AndroidManifest.xml",
-                                            Asset::ACCESS_BUFFER);
+        asset = assets.openNonAsset(assetsCookie, "AndroidManifest.xml", Asset::ACCESS_BUFFER);
         if (asset == NULL) {
             fprintf(stderr, "ERROR: dump failed because no AndroidManifest.xml found\n");
             goto bail;
         }
 
+        ResXMLTree tree(dynamicRefTable);
         if (tree.setTo(asset->getBuffer(true),
                        asset->getLength()) != NO_ERROR) {
             fprintf(stderr, "ERROR: AndroidManifest.xml is corrupt\n");
