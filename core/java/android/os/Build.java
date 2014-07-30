@@ -96,8 +96,7 @@ public class Build {
      *
      * See {@link #SUPPORTED_32_BIT_ABIS} and {@link #SUPPORTED_64_BIT_ABIS}.
      */
-    public static final String[] SUPPORTED_ABIS = SystemProperties.get("ro.product.cpu.abilist")
-            .split(",");
+    public static final String[] SUPPORTED_ABIS = getStringList("ro.product.cpu.abilist", ",");
 
     /**
      * An ordered list of <b>32 bit</b> ABIs supported by this device. The most preferred ABI
@@ -106,7 +105,7 @@ public class Build {
      * See {@link #SUPPORTED_ABIS} and {@link #SUPPORTED_64_BIT_ABIS}.
      */
     public static final String[] SUPPORTED_32_BIT_ABIS =
-            SystemProperties.get("ro.product.cpu.abilist32").split(",");
+            getStringList("ro.product.cpu.abilist32", ",");
 
     /**
      * An ordered list of <b>64 bit</b> ABIs supported by this device. The most preferred ABI
@@ -115,7 +114,7 @@ public class Build {
      * See {@link #SUPPORTED_ABIS} and {@link #SUPPORTED_32_BIT_ABIS}.
      */
     public static final String[] SUPPORTED_64_BIT_ABIS =
-            SystemProperties.get("ro.product.cpu.abilist64").split(",");
+            getStringList("ro.product.cpu.abilist64", ",");
 
 
     /** Various version strings. */
@@ -155,7 +154,7 @@ public class Build {
         public static final String CODENAME = getString("ro.build.version.codename");
 
         private static final String[] ALL_CODENAMES
-                = getString("ro.build.version.all_codenames").split(",");
+                = getStringList("ro.build.version.all_codenames", ",");
 
         /**
          * @hide
@@ -612,6 +611,15 @@ public class Build {
 
     private static String getString(String property) {
         return SystemProperties.get(property, UNKNOWN);
+    }
+
+    private static String[] getStringList(String property, String separator) {
+        String value = SystemProperties.get(property);
+        if (value.isEmpty()) {
+            return new String[0];
+        } else {
+            return value.split(separator);
+        }
     }
 
     private static long getLong(String property) {
