@@ -16,20 +16,19 @@
 
 package android.bluetooth.le;
 
+import android.annotation.SystemApi;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallbackWrapper;
 import android.bluetooth.IBluetoothGatt;
-import android.bluetooth.IBluetoothGattCallback;
 import android.bluetooth.IBluetoothManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.ParcelUuid;
 import android.os.RemoteException;
-import android.os.SystemClock;
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -100,6 +99,11 @@ public final class BluetoothLeScanner {
      */
     public void startScan(List<ScanFilter> filters, ScanSettings settings,
             final ScanCallback callback) {
+        startScan(filters, settings, callback, null);
+    }
+
+    private void startScan(List<ScanFilter> filters, ScanSettings settings,
+            final ScanCallback callback, List<List<ResultStorageDescriptor>> resultStorages) {
         checkAdapterState();
         if (settings == null || callback == null) {
             throw new IllegalArgumentException("settings or callback is null");
@@ -125,7 +129,7 @@ public final class BluetoothLeScanner {
                 return;
             }
             BleScanCallbackWrapper wrapper = new BleScanCallbackWrapper(gatt, filters,
-                    settings, callback);
+                    settings, callback, resultStorages);
             try {
                 UUID uuid = UUID.randomUUID();
                 gatt.registerClient(new ParcelUuid(uuid), wrapper);
@@ -155,7 +159,8 @@ public final class BluetoothLeScanner {
         synchronized (mLeScanClients) {
             BleScanCallbackWrapper wrapper = mLeScanClients.remove(callback);
             if (wrapper == null) {
-                if (DBG) Log.d(TAG, "could not find callback wrapper");
+                if (DBG)
+                    Log.d(TAG, "could not find callback wrapper");
                 return;
             }
             wrapper.stopLeScan();
@@ -185,6 +190,25 @@ public final class BluetoothLeScanner {
     }
 
     /**
+     * Start truncated scan.
+     *
+     * @hide
+     */
+    @SystemApi
+    public void startTruncatedScan(List<TruncatedFilter> truncatedFilters, ScanSettings settings,
+            final ScanCallback callback) {
+        int filterSize = truncatedFilters.size();
+        List<ScanFilter> scanFilters = new ArrayList<ScanFilter>(filterSize);
+        List<List<ResultStorageDescriptor>> scanStorages =
+                new ArrayList<List<ResultStorageDescriptor>>(filterSize);
+        for (TruncatedFilter filter : truncatedFilters) {
+            scanFilters.add(filter.getFilter());
+            scanStorages.add(filter.getStorageDescriptors());
+        }
+        startScan(scanFilters, settings, callback, scanStorages);
+    }
+
+    /**
      * Bluetooth GATT interface callbacks
      */
     private static class BleScanCallbackWrapper extends BluetoothGattCallbackWrapper {
@@ -194,6 +218,7 @@ public final class BluetoothLeScanner {
         private final List<ScanFilter> mFilters;
         private ScanSettings mSettings;
         private IBluetoothGatt mBluetoothGatt;
+        private List<List<ResultStorageDescriptor>> mResultStorages;
 
         // mLeHandle 0: not registered
         // -1: scan stopped
@@ -202,12 +227,13 @@ public final class BluetoothLeScanner {
 
         public BleScanCallbackWrapper(IBluetoothGatt bluetoothGatt,
                 List<ScanFilter> filters, ScanSettings settings,
-                ScanCallback scanCallback) {
+                ScanCallback scanCallback, List<List<ResultStorageDescriptor>> resultStorages) {
             mBluetoothGatt = bluetoothGatt;
             mFilters = filters;
             mSettings = settings;
             mScanCallback = scanCallback;
             mClientIf = 0;
+            mResultStorages = resultStorages;
         }
 
         public boolean scanStarted() {
@@ -272,7 +298,8 @@ public final class BluetoothLeScanner {
                 if (status == BluetoothGatt.GATT_SUCCESS) {
                     mClientIf = clientIf;
                     try {
-                        mBluetoothGatt.startScan(mClientIf, false, mSettings, mFilters);
+                        mBluetoothGatt.startScan(mClientIf, false, mSettings, mFilters,
+                                mResultStorages);
                     } catch (RemoteException e) {
                         Log.e(TAG, "fail to start le scan: " + e);
                         mClientIf = -1;
@@ -330,23 +357,26 @@ public final class BluetoothLeScanner {
 
             // Check null in case the scan has been stopped
             synchronized (this) {
-                if (mClientIf <= 0) return;
+                if (mClientIf <= 0)
+                    return;
             }
             Handler handler = new Handler(Looper.getMainLooper());
             handler.post(new Runnable() {
                     @Override
                 public void run() {
                     if (onFound) {
-                        mScanCallback.onScanResult(ScanSettings.CALLBACK_TYPE_FIRST_MATCH, scanResult);
+                        mScanCallback.onScanResult(ScanSettings.CALLBACK_TYPE_FIRST_MATCH,
+                                scanResult);
                     } else {
-                        mScanCallback.onScanResult(ScanSettings.CALLBACK_TYPE_MATCH_LOST, scanResult);
+                        mScanCallback.onScanResult(ScanSettings.CALLBACK_TYPE_MATCH_LOST,
+                                scanResult);
                     }
                 }
             });
         }
     }
 
-    //TODO: move this api to a common util class.
+    // TODO: move this api to a common util class.
     private void checkAdapterState() {
         if (mBluetoothAdapter.getState() != mBluetoothAdapter.STATE_ON) {
             throw new IllegalStateException("BT Adapter is not turned ON");
