@@ -2575,6 +2575,15 @@ public class RemoteViews implements Parcelable, Filter {
         return c;
     }
 
+    /**
+     * Returns the number of actions in this RemoteViews. Can be used as a sequence number.
+     *
+     * @hide
+     */
+    public int getSequenceNumber() {
+        return (mActions == null) ? 0 : mActions.size();
+    }
+
     /* (non-Javadoc)
      * Used to restrict the views which can be inflated
      *

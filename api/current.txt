@@ -4637,6 +4637,7 @@ package android.app {
     field public static final int DEFAULT_SOUND = 1; // 0x1
     field public static final int DEFAULT_VIBRATE = 2; // 0x2
     field public static final java.lang.String EXTRA_BACKGROUND_IMAGE_URI = "android.backgroundImageUri";
+    field public static final java.lang.String EXTRA_BIG_TEXT = "android.bigText";
     field public static final java.lang.String EXTRA_COMPACT_ACTIONS = "android.compactActions";
     field public static final java.lang.String EXTRA_INFO_TEXT = "android.infoText";
     field public static final java.lang.String EXTRA_LARGE_ICON = "android.largeIcon";
@@ -4825,7 +4826,6 @@ package android.app {
   public static class Notification.MediaStyle extends android.app.Notification.Style {
     ctor public Notification.MediaStyle();
     ctor public Notification.MediaStyle(android.app.Notification.Builder);
-    method public android.app.Notification buildStyled(android.app.Notification);
     method public android.app.Notification.MediaStyle setMediaSession(android.media.session.MediaSession.Token);
     method public android.app.Notification.MediaStyle setShowActionsInCompactView(int...);
   }
