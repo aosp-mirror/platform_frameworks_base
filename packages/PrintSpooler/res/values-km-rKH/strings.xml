@@ -62,7 +62,7 @@
   </plurals>
     <string name="cancel" msgid="4373674107267141885">"បោះបង់"</string>
     <string name="restart" msgid="2472034227037808749">"ចាប់ផ្ដើម​ឡើងវិញ"</string>
-    <string name="no_connection_to_printer" msgid="2159246915977282728">"គ្មាន​​​ការ​ភ្ជាប់​ទៅ​ម៉ាស៊ីន​បោះពុម្ព​"</string>
+    <string name="no_connection_to_printer" msgid="2159246915977282728">"គ្មាន​​​ការ​ភ្ជាប់​ទៅ​ម៉ាស៊ីន​បោះពុម្ព"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"មិន​ស្គាល់"</string>
     <string name="printer_unavailable" msgid="2434170617003315690">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> – មិន​អាច​ប្រើ​បាន"</string>
   <string-array name="color_mode_labels">
