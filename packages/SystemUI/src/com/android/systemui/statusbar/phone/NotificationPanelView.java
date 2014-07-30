@@ -624,8 +624,8 @@ public class NotificationPanelView extends PanelView implements
         float rounded = amount >= 1f ? amount : 0f;
         mStackScrollerOverscrolling = rounded != 0f && isRubberbanded;
         mQsExpansionFromOverscroll = rounded != 0f;
-        setQsExpansion(mQsMinExpansionHeight + rounded);
         updateQsState();
+        setQsExpansion(mQsMinExpansionHeight + rounded);
     }
 
     @Override
