@@ -406,6 +406,7 @@ public final class SystemServer {
         TelephonyRegistry telephonyRegistry = null;
         ConsumerIrService consumerIr = null;
         AudioService audioService = null;
+        MmsServiceBroker mmsService = null;
 
         boolean disableStorage = SystemProperties.getBoolean("config.disable_storage", false);
         boolean disableMedia = SystemProperties.getBoolean("config.disable_media", false);
@@ -976,6 +977,9 @@ public final class SystemServer {
             VMRuntime.getRuntime().startJitCompilation();
         }
 
+        // MMS service broker
+        mmsService = mSystemServiceManager.startService(MmsServiceBroker.class);
+
         // It is now time to start up the app processes...
 
         try {
@@ -1057,6 +1061,7 @@ public final class SystemServer {
         final TelephonyRegistry telephonyRegistryF = telephonyRegistry;
         final MediaRouterService mediaRouterF = mediaRouter;
         final AudioService audioServiceF = audioService;
+        final MmsServiceBroker mmsServiceF = mmsService;
 
         // We now tell the activity manager it is okay to run third party
         // code.  It will call back into us once it has gotten to the state
@@ -1187,6 +1192,11 @@ public final class SystemServer {
                     reportWtf("Notifying MediaRouterService running", e);
                 }
 
+                try {
+                    if (mmsServiceF != null) mmsServiceF.systemRunning();
+                } catch (Throwable e) {
+                    reportWtf("Notifying MmsService running", e);
+                }
                 mSystemServiceManager.startBootPhase(SystemService.PHASE_BOOT_COMPLETE);
             }
         });
