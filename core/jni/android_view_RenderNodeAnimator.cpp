@@ -117,9 +117,8 @@ static jlong createCanvasPropertyPaintAnimator(JNIEnv* env, jobject clazz,
 }
 
 static jlong createRevealAnimator(JNIEnv* env, jobject clazz, jobject weakThis,
-        jint centerX, jint centerY, jboolean inverseClip, jfloat startRadius, jfloat endRadius) {
-    BaseRenderNodeAnimator* animator = new RevealAnimator(centerX, centerY, inverseClip,
-            startRadius, endRadius);
+        jint centerX, jint centerY, jfloat startRadius, jfloat endRadius) {
+    BaseRenderNodeAnimator* animator = new RevealAnimator(centerX, centerY, startRadius, endRadius);
     animator->setListener(new AnimationListenerBridge(env, weakThis));
     return reinterpret_cast<jlong>( animator );
 }
@@ -180,7 +179,7 @@ static JNINativeMethod gMethods[] = {
     { "nCreateAnimator", "(Ljava/lang/ref/WeakReference;IF)J", (void*) createAnimator },
     { "nCreateCanvasPropertyFloatAnimator", "(Ljava/lang/ref/WeakReference;JF)J", (void*) createCanvasPropertyFloatAnimator },
     { "nCreateCanvasPropertyPaintAnimator", "(Ljava/lang/ref/WeakReference;JIF)J", (void*) createCanvasPropertyPaintAnimator },
-    { "nCreateRevealAnimator", "(Ljava/lang/ref/WeakReference;IIZFF)J", (void*) createRevealAnimator },
+    { "nCreateRevealAnimator", "(Ljava/lang/ref/WeakReference;IIFF)J", (void*) createRevealAnimator },
     { "nSetStartValue", "(JF)V", (void*) setStartValue },
     { "nSetDuration", "(JJ)V", (void*) setDuration },
     { "nGetDuration", "(J)J", (void*) getDuration },

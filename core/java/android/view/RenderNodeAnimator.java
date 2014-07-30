@@ -125,10 +125,9 @@ public class RenderNodeAnimator extends Animator {
                 property.getNativeContainer(), paintField, finalValue));
     }
 
-    public RenderNodeAnimator(int x, int y, boolean inverseClip,
-            float startRadius, float endRadius) {
-        init(nCreateRevealAnimator(new WeakReference<>(this),
-                x, y, inverseClip, startRadius, endRadius));
+    public RenderNodeAnimator(int x, int y, float startRadius, float endRadius) {
+        init(nCreateRevealAnimator(new WeakReference<RenderNodeAnimator>(this),
+                x, y, startRadius, endRadius));
     }
 
     private void init(long ptr) {
@@ -333,7 +332,7 @@ public class RenderNodeAnimator extends Animator {
     private static native long nCreateCanvasPropertyPaintAnimator(WeakReference<RenderNodeAnimator> weakThis,
             long canvasProperty, int paintField, float finalValue);
     private static native long nCreateRevealAnimator(WeakReference<RenderNodeAnimator> weakThis,
-            int x, int y, boolean inverseClip, float startRadius, float endRadius);
+            int x, int y, float startRadius, float endRadius);
 
     private static native void nSetStartValue(long nativePtr, float startValue);
     private static native void nSetDuration(long nativePtr, long duration);

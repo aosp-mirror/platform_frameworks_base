@@ -378,9 +378,9 @@ public class RenderNode {
     /**
      * Controls the RenderNode's circular reveal clip.
      */
-    public boolean setRevealClip(boolean shouldClip, boolean inverseClip,
+    public boolean setRevealClip(boolean shouldClip,
             float x, float y, float radius) {
-        return nSetRevealClip(mNativeRenderNode, shouldClip, inverseClip, x, y, radius);
+        return nSetRevealClip(mNativeRenderNode, shouldClip, x, y, radius);
     }
 
     /**
@@ -855,7 +855,7 @@ public class RenderNode {
     private static native boolean nSetOutlineNone(long renderNode);
     private static native boolean nSetClipToOutline(long renderNode, boolean clipToOutline);
     private static native boolean nSetRevealClip(long renderNode,
-            boolean shouldClip, boolean inverseClip, float x, float y, float radius);
+            boolean shouldClip, float x, float y, float radius);
     private static native boolean nSetAlpha(long renderNode, float alpha);
     private static native boolean nSetHasOverlappingRendering(long renderNode,
             boolean hasOverlappingRendering);

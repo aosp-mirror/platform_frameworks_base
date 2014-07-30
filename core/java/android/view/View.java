@@ -10845,14 +10845,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         invalidateViewProperty(false, false);
     }
 
-    /**
-     * Private API to be used for reveal animation
-     *
-     * @hide
-     */
-    public void setRevealClip(boolean shouldClip, boolean inverseClip,
-            float x, float y, float radius) {
-        mRenderNode.setRevealClip(shouldClip, inverseClip, x, y, radius);
+    /** @hide */
+    public void setRevealClip(boolean shouldClip, float x, float y, float radius) {
+        mRenderNode.setRevealClip(shouldClip, x, y, radius);
         invalidateViewProperty(false, false);
     }
 

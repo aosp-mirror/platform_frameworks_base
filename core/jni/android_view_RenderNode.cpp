@@ -181,11 +181,11 @@ static jboolean android_view_RenderNode_setClipToOutline(JNIEnv* env,
 }
 
 static jboolean android_view_RenderNode_setRevealClip(JNIEnv* env,
-        jobject clazz, jlong renderNodePtr, jboolean shouldClip, jboolean inverseClip,
+        jobject clazz, jlong renderNodePtr, jboolean shouldClip,
         jfloat x, jfloat y, jfloat radius) {
     RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
     renderNode->mutateStagingProperties().mutableRevealClip().set(
-            shouldClip, inverseClip, x, y, radius);
+            shouldClip, x, y, radius);
     renderNode->setPropertyFieldsDirty(RenderNode::GENERIC);
     return true;
 }
@@ -485,7 +485,7 @@ static JNINativeMethod gMethods[] = {
     { "nSetOutlineEmpty",      "(J)Z",   (void*) android_view_RenderNode_setOutlineEmpty },
     { "nSetOutlineNone",       "(J)Z",   (void*) android_view_RenderNode_setOutlineNone },
     { "nSetClipToOutline",     "(JZ)Z",  (void*) android_view_RenderNode_setClipToOutline },
-    { "nSetRevealClip",        "(JZZFFF)Z", (void*) android_view_RenderNode_setRevealClip },
+    { "nSetRevealClip",        "(JZFFF)Z", (void*) android_view_RenderNode_setRevealClip },
 
     { "nSetAlpha",             "(JF)Z",  (void*) android_view_RenderNode_setAlpha },
     { "nSetHasOverlappingRendering", "(JZ)Z",

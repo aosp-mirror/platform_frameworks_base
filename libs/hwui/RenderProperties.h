@@ -546,19 +546,6 @@ public:
 
     void updateMatrix();
 
-    bool hasClippingPath() const {
-        return mPrimitiveFields.mRevealClip.willClip();
-    }
-
-    const SkPath* getClippingPath() const {
-        return mPrimitiveFields.mRevealClip.getPath();
-    }
-
-    SkRegion::Op getClippingPathOp() const {
-        return mPrimitiveFields.mRevealClip.isInverseClip()
-                ? SkRegion::kDifference_Op : SkRegion::kIntersect_Op;
-    }
-
     Outline& mutableOutline() {
         return mPrimitiveFields.mOutline;
     }

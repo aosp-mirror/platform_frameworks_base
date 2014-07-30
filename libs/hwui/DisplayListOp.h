@@ -1535,10 +1535,9 @@ private:
 class DrawShadowOp : public DrawOp {
 public:
     DrawShadowOp(const mat4& transformXY, const mat4& transformZ,
-            float casterAlpha, bool casterUnclipped,
-            const SkPath* casterOutline, const SkPath* revealClip)
+            float casterAlpha, const SkPath* casterOutline, const SkPath* revealClip)
             : DrawOp(NULL), mTransformXY(transformXY), mTransformZ(transformZ),
-            mCasterAlpha(casterAlpha), mCasterUnclipped(casterUnclipped) {
+            mCasterAlpha(casterAlpha) {
         mOutline = *casterOutline;
         if (revealClip) {
             // intersect the outline with the convex reveal clip
@@ -1572,12 +1571,11 @@ public:
     virtual const char* name() { return "DrawShadow"; }
 
 private:
-    bool isCasterOpaque() { return mCasterAlpha >= 1.0f && mCasterUnclipped; }
+    bool isCasterOpaque() { return mCasterAlpha >= 1.0f; }
 
     const mat4 mTransformXY;
     const mat4 mTransformZ;
     const float mCasterAlpha;
-    const bool mCasterUnclipped;
     SkPath mOutline;
 };
 
