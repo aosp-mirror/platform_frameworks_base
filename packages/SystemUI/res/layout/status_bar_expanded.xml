@@ -50,6 +50,10 @@
         android:visibility="gone"
         />
 
+    <include
+        layout="@layout/keyguard_status_bar"
+        android:visibility="invisible" />
+
     <com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer
         style="@style/NotificationsQuickSettings"
         android:id="@+id/notification_container_parent"
