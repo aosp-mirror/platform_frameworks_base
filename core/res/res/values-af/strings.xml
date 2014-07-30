@@ -417,6 +417,10 @@
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Laat die houer toe om bedoelings na \'n toesteladministrateur te stuur. Dit moet nooit vir normale programme nodig wees nie."</string>
     <string name="permlab_bindTvInput" msgid="5601264742478168987">"bind aan \'n TV-invoer"</string>
     <string name="permdesc_bindTvInput" msgid="2371008331852001924">"Laat die houer toe om aan die topvlak-koppelvlak van \'n TV-invoer te bind. Behoort nooit vir gewone programme nodig te wees nie."</string>
+    <!-- no translation found for permlab_modifyParentalControls (4611318225997592242) -->
+    <skip />
+    <!-- no translation found for permdesc_modifyParentalControls (7438482894162282039) -->
+    <skip />
     <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"voeg \'n toesteladministrateur by of verwyder een"</string>
     <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Laat die houer aktiewe toesteladministrateurs byvoeg of verwyder. Behoort nooit nodig te wees vir normale programme nie."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"verander skermoriëntasie"</string>
@@ -1390,10 +1394,8 @@
     <string name="permdesc_recovery" msgid="8511774533266359571">"Laat \'n program met die terugstellingstelsel en stelselopdaterings in wisselwerking tree."</string>
     <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Skep mediaprojeksiesessies"</string>
     <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"Laat \'n program toe om mediaprojeksiesessies te skep. Hierdie sessies kan programme die vermoë gee om skerm- en oudio-inhoud vas te vang. Behoort nooit nodig te wees vir normale programme nie."</string>
-    <!-- no translation found for permlab_readInstallSessions (6165432407628065939) -->
-    <skip />
-    <!-- no translation found for permdesc_readInstallSessions (2049771699626019849) -->
-    <skip />
+    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Lees installasiesessies"</string>
+    <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Laat \'n program toe om installasiesessies te lees. Dit laat dit toe om besonderhede van aktiewe pakketinstallasies te sien."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Raak twee keer vir zoembeheer"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Kon nie legstuk byvoeg nie."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Gaan"</string>
@@ -1412,10 +1414,8 @@
     <string name="deny" msgid="2081879885755434506">"Weier"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Toestemming versoek"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Toestemming versoek\nvir rekening <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
-    <!-- no translation found for forward_intent_to_owner (570916783072215572) -->
-    <skip />
-    <!-- no translation found for forward_intent_to_work (8624579696577525279) -->
-    <skip />
+    <string name="forward_intent_to_owner" msgid="570916783072215572">"Jy gebruik tans hierdie program in jou persoonlike spasie"</string>
+    <string name="forward_intent_to_work" msgid="8624579696577525279">"Jy gebruik hierdie program in jou werkspasie"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Invoermetode"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Sinkroniseer"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Toeganklikheid"</string>
@@ -1557,6 +1557,8 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"Aanvaar oproep?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Altyd"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Net een keer"</string>
+    <!-- no translation found for activity_resolver_work_profiles_support (5462991471861024343) -->
+    <skip />
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Tablet"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Foon"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Oorfone"</string>
@@ -1624,8 +1626,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Jy het jou ontsluitpatroon <xliff:g id="NUMBER_0">%d</xliff:g> keer verkeerdelik geteken. Na nog <xliff:g id="NUMBER_1">%d</xliff:g> onsuksesvolle pogings, sal jy gevra word om jou foon te ontsluit deur middel van \'n e-posrekening.\n\n Probeer weer oor <xliff:g id="NUMBER_2">%d</xliff:g> sekondes."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Verwyder"</string>
-    <!-- no translation found for safe_media_volume_warning (2276318909314492312) -->
-    <skip />
+    <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Verhoog volume bo aanbevole vlak?\n\nOm lang tydperke teen hoë volume te luister, kan jou gehoor beskadig."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Hou aan met twee vingers inhou om toeganklikheid te aktiveer."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Toeganklikheid geaktiveer."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Toeganklikheid gekanselleer."</string>

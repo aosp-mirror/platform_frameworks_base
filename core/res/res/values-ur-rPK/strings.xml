@@ -299,7 +299,7 @@
     <string name="permlab_getTasks" msgid="6466095396623933906">"چل رہی ایپس کی بازیافت کریں"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"ایپ کو موجودہ اور حالیہ چل رہے ٹاسکس کے بارے میں معلومات بازیافت کرنے کی اجازت دیتا ہے۔ یہ ایپ کو اس بارے میں معلومات دریافت کرنے کی اجازت دے سکتا ہے کہ آلہ پر کون سی ایپلیکیشنز استعمال کی جاتی ہیں۔"</string>
     <string name="permlab_startTasksFromRecents" msgid="8990073877885690623">"حالیہ میں سے ایک کام شروع کریں"</string>
-    <string name="permdesc_startTasksFromRecents" msgid="7382133554871222235">"‏ایپ کو ActivityManager.getRecentTaskList()‎ سے واپس لوٹایا گیا ایک پرانا کام شروع کرنے کیلئے ایک ActivityManager.RecentTaskInfo آبجیکٹ کو استعمال کرنے کی اجازت دیتی ہے۔"</string>
+    <string name="permdesc_startTasksFromRecents" msgid="7382133554871222235">"‏ایپ کو ActivityManager.getRecentTaskList()‎ سے واپس لوٹایا گیا ایک کالعدم کام شروع کرنے کیلئے ایک ActivityManager.RecentTaskInfo آبجیکٹ کو استعمال کرنے کی اجازت دیتی ہے۔"</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"سبھی صارفین کے ساتھ تعامل کریں"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"ایپ کو آلے پر موجود مختلف صارفین کے بیچ کارروائیاں انجام دینے کی اجازت دیتا ہے۔ نقصان دہ ایپس صارفین کے مابین تحفظ کی خلاف ورزی کرنے کیلئے اسے استعمال کرسکتی ہیں۔"</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"سبھی صارفین کے ساتھ تعامل کرنے کیلئے مکمل لائسنس"</string>
@@ -417,6 +417,10 @@
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"حامل کو ایک آلہ کے منتظم کو ارادے بھیجنے دیتا ہے۔ عام ایپس کیلئے کبھی بھی اس کی ضرورت نہيں ہونی چاہئے۔"</string>
     <string name="permlab_bindTvInput" msgid="5601264742478168987">"‏ایک TV ان پٹ کے پابند بنیں"</string>
     <string name="permdesc_bindTvInput" msgid="2371008331852001924">"‏حامل کو کسی TV کے ان پٹ کے اعلی سطحی انٹرفیس کا پابند ہونے کی اجازت دیتا ہے۔ عام ایپس کیلئے کبھی بھی اس کی ضرورت نہيں ہونی چاہئے۔"</string>
+    <!-- no translation found for permlab_modifyParentalControls (4611318225997592242) -->
+    <skip />
+    <!-- no translation found for permdesc_modifyParentalControls (7438482894162282039) -->
+    <skip />
     <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"آلہ کا منتظم شامل کریں یا ہٹائیں"</string>
     <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"حامل کو آلہ کے فعال منتظمین کو شامل کرنے یا ہٹانے کی اجازت دیتا ہے۔ عام ایپس کیلئے کبھی بھی اس کی ضرورت نہيں ہونی چاہئے۔"</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"اسکرین کی سمت بندی تبدیل کریں"</string>
@@ -1390,10 +1394,8 @@
     <string name="permdesc_recovery" msgid="8511774533266359571">"کسی ایپ کو بازیابی سسٹم اور بازیابی اپ ڈیٹس کے ساتھ تعامل کرنے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_createMediaProjection" msgid="4941338725487978112">"میڈیا پروجیکشن سیشنز بنائیں"</string>
     <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"ایک ایپلیکیشن کو میڈیا پروجیکشن سیشنز بنانے کی اجازت دیتی ہے۔ یہ سیشنز ایپلیکیشنز کو ڈسپلے اور آڈیو مواد کو کیپچر کرنے کی اہلیت فراہم کر سکتے ہیں۔ عام ایپس کو کبھی بھی ان کی ضرورت نہیں ہونی چاہیے۔"</string>
-    <!-- no translation found for permlab_readInstallSessions (6165432407628065939) -->
-    <skip />
-    <!-- no translation found for permdesc_readInstallSessions (2049771699626019849) -->
-    <skip />
+    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"انسٹال سیشنز پڑھیں"</string>
+    <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"ایک ایپلیکیشن کو انسٹال سیشنز پڑھنے کی اجازت دیتا ہے۔ یہ اسے فعال پیکیج انسٹالیشنز کے بارے میں تفصیلات دیکھنے کی اجازت دیتا ہے۔"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"زوم کے کنٹرول کیلئے دو بار ٹچ کریں"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"ویجٹس کو شامل نہیں کرسکا۔"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"جائیں"</string>
@@ -1412,10 +1414,8 @@
     <string name="deny" msgid="2081879885755434506">"مسترد کریں"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"اجازت طلب کی گئی"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"اکاؤنٹ <xliff:g id="ACCOUNT">%s</xliff:g> کیلئے\nاجازت طلب کی گئی۔"</string>
-    <!-- no translation found for forward_intent_to_owner (570916783072215572) -->
-    <skip />
-    <!-- no translation found for forward_intent_to_work (8624579696577525279) -->
-    <skip />
+    <string name="forward_intent_to_owner" msgid="570916783072215572">"آپ اس ایپ کو اپنی ذاتی جگہ میں استعمال کر رہے ہیں"</string>
+    <string name="forward_intent_to_work" msgid="8624579696577525279">"آپ اس ایپ کو اپنے کام کی جگہ میں استعمال کر رہے ہیں"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"اندراج کا طریقہ"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"مطابقت پذیری کریں"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Accessibility"</string>
@@ -1557,6 +1557,8 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"کال قبول کریں؟"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"ہمیشہ"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"بس ایک مرتبہ"</string>
+    <!-- no translation found for activity_resolver_work_profiles_support (5462991471861024343) -->
+    <skip />
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"ٹیبلیٹ"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"فون"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"ہیڈ فونز"</string>
@@ -1624,8 +1626,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"آپ نے اپنا غیر مقفل کرنے کا پیٹرن <xliff:g id="NUMBER_0">%d</xliff:g> بار غلط طریقے سے ڈرا کیا ہے۔ <xliff:g id="NUMBER_1">%d</xliff:g> مزید ناکام کوششوں کے بعد، آپ سے ایک ای میل اکاؤنٹ استعمال کرکے اپنا فون غیر مقفل کرنے کو کہا جائے گا۔\n\n <xliff:g id="NUMBER_2">%d</xliff:g> سیکنڈ میں دوبارہ کوشش کریں۔"</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"ہٹائیں"</string>
-    <!-- no translation found for safe_media_volume_warning (2276318909314492312) -->
-    <skip />
+    <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"والیوم کو تجویز کردہ سطح سے زیادہ کریں؟\n\nزیادہ وقت تک اونچی آواز میں سننے سے آپ کی سماعت کو نقصان پہنچ سکتا ہے۔"</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"‏accessibility فعال کرنے کیلئے دو انگلیاں نیچے دبائے رکھیں۔"</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"‏Accessibility فعال۔"</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"‏Accessibility منسوخ ہوگئی۔"</string>

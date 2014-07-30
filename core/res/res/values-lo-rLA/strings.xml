@@ -298,10 +298,8 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບຯ​ສາ​ມາດ​ຮັບ​ແລະ​ສົ່ງ​ຂໍ້​ຄວາມ Bluetooth MAP ໄດ້. ນີ້​ໝາຍ​ຄວາມ​ວ່າ​ແອັບຯ​ຈະ​ສາ​ມາດ​ກວດ​ເບິ່ງ ຫຼື​ລຶບ​ຂໍ້​ຄວາມ​ທີ່​ສົ່ງ​ຫາ​ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ​ໄດ້​ໂດຍ​ບໍ່​ສະ​ແດງ​ຂໍ້​ຄວາມ​ເຫຼົ່າ​ນັ້ນໃຫ້​ທ່ານ​ເຫັນ."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"ດຶງແອັບຯທີ່ເຮັດວຽກຢູ່ມາ"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"ອະນຸຍາດໃຫ້ແອັບຯດຶງຂໍ້ມູນກ່ຽວກັບການເຮັດວຽກໃນປັດຈຸບັນ ແລະຫາກໍຜ່ານມາ. ແອັບຯທີ່ເປັນອັນຕະລາຍອາດຄົ້ນພົບຂໍ້ມູນ ກ່ຽວກັບແອັບພລິເຄຊັນທີ່ໃຊ້ຢູ່ໃນອຸປະກອນໄດ້."</string>
-    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
-    <skip />
-    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
-    <skip />
+    <string name="permlab_startTasksFromRecents" msgid="8990073877885690623">"​ເລີ່ມ​ວຽກ​ຈາກ​ລາຍ​ການ​ທີ່​ຫາ​ກໍ​ໃຊ້"</string>
+    <string name="permdesc_startTasksFromRecents" msgid="7382133554871222235">"ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບຯ​ນຳ​ໃຊ້ອອບ​ເຈັກ ActivityManager.RecentTaskInfo ​ເພື່ອ​ເປີດ defunct task ທີ່​​ກັບ​ມາ​ຈາກ ActivityManager.getRecentTaskList()."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"ການຕອບໂຕ້ລະຫວ່າງຜູ່ໃຊ້"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"ອະນຸຍາດໃຫ້ແອັບຯດຳເນີນການ ສັ່ງງານຜ່ານຜູ່ໃຊ້ອື່ນໆໃນອຸປະກອນ. ແອັບຯທີ່ເປັນອັນຕະລາຍອາດໃຊ້ຄວາມສາມາດນີ້ ເພື່ອລະເມີດການປ້ອງກັນລະຫວ່າງຜູ່ໃຊ້."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"ໃບອະນຸຍາດສະບັບເຕັມໃນການໂຕ້ຕອບລະຫວ່າງຜູ່ໃຊ້"</string>
@@ -419,6 +417,10 @@
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"ອະນຸຍາດໃຫ້ເຈົ້າຂອງສົ່ງເຈດຕະນາຫາຜູ່ເບິ່ງແຍງລະບົບອຸປະກອນ. ແອັບຯທົ່ວໄປບໍ່ຄວນຈຳເປັນຕ້ອງໃຊ້."</string>
     <string name="permlab_bindTvInput" msgid="5601264742478168987">"ຜູກ​ກັບ​ການ​ປ້ອນ​ຂໍ້​ມູນ​ເຂົ້າ​ໂທ​ລະ​ທັດ"</string>
     <string name="permdesc_bindTvInput" msgid="2371008331852001924">"​ອະ​ນຸ​ຍາດ​ໃຫ້​ຜູ່​ຖື​ຜູກ​ຕິດ​ກັບ​ສ່ວ​ນ​ຕິດ​ຕໍ່​ລະ​ດັບ​ສູງ​ສຸດ​ຂອງ​ການ​ປ້ອນ​ຂໍ້​ມູນ​ເຂົ້າ​ໂທ​ລະ​ທັດ. ແອັບຯ​ທົ່ວ​ໄປ​ບໍ່​ຄວນ​ຈຳ​ເປັນ​ຕ້ອງ​ໃຊ້."</string>
+    <!-- no translation found for permlab_modifyParentalControls (4611318225997592242) -->
+    <skip />
+    <!-- no translation found for permdesc_modifyParentalControls (7438482894162282039) -->
+    <skip />
     <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"ເພີ່ມ ຫຼືລຶບຜູ່ເບິ່ງແຍງລະບົບອຸປະກອນ"</string>
     <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"ອະນຸຍາດໃຫ້ເຈົ້າຂອງສາມາດລຶບ ຫຼືລຶບຂໍ້ມູນອຸປະກອນທີ່ນຳໃຊ້ໄດ້. ແອັບຯທົ່ວໄປບໍ່ຈຳເປັນຕ້ອງໃຊ້."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"ປ່ຽນລວງຂອງໜ້າຈໍ"</string>
@@ -1555,6 +1557,8 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"ຮັບການໂທບໍ່?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"ທຸກຄັ້ງ"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"ຄັ້ງດຽວ"</string>
+    <!-- no translation found for activity_resolver_work_profiles_support (5462991471861024343) -->
+    <skip />
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"ແທັບເລັດ"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"ໂທລະສັບ"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"ຫູຟັງ"</string>
@@ -1728,7 +1732,7 @@
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"PIN ປະ​ຈຸ​ບັນ"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"ລະຫັດ PIN ໃໝ່"</string>
     <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"ຢືນຢັນລະຫັດ PIN ໃໝ່"</string>
-    <string name="restr_pin_create_pin" msgid="8017600000263450337">"ສ້າງ PIN ສໍາ​ລັບ​ການ​ປັບ​ປຸງ​ຂໍ້ຈໍາ​ກັດ​"</string>
+    <string name="restr_pin_create_pin" msgid="8017600000263450337">"ສ້າງ PIN ສໍາ​ລັບ​ການ​ປັບ​ປຸງ​ຂໍ້ຈໍາ​ກັດ"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PIN ບໍ່​ກົງກັນ. ລອງໃໝ່ອີກຄັ້ງ​."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN ​ສັ້ນ​ເກີນ​ໄປ​. ຕ້ອງມີຢ່າງໜ້ອຍ 4 ຫຼັກ​."</string>
   <plurals name="restr_pin_countdown">

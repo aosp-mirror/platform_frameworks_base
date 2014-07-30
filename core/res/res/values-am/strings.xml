@@ -417,6 +417,10 @@
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"ያዡ በይነመረብን ለመሣሪያ አስተዳዳሪ ለመላክ ይፈቅዳሉ። ለመደበኛ መተግበሪያዎች በፍፁም አያስፈልግም።"</string>
     <string name="permlab_bindTvInput" msgid="5601264742478168987">"ከአንድ የቴሌቪዥን ግብዓት ጋር እሰር"</string>
     <string name="permdesc_bindTvInput" msgid="2371008331852001924">"ባለቤቱ ከአንድ የቴሌቪዥን ግብዓት ከፍተኛ-ደረጃ በይነገጽ ጋር እንዲያስር ያስችለዋል። ለመደበኛ መተግበሪያዎች በጭራሽ አያስፈልግም።"</string>
+    <!-- no translation found for permlab_modifyParentalControls (4611318225997592242) -->
+    <skip />
+    <!-- no translation found for permdesc_modifyParentalControls (7438482894162282039) -->
+    <skip />
     <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"የመሣሪያ አስተዳዳሪ ያክሉ ወይም ያስወግዱ"</string>
     <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"ያዢው ንቁ የመሣሪያ አስተዳዳሪዎች እንዲያክል ወይም እንዲያስወግድ ያስችለዋል። ለመደበኛ መተግበሪያዎች ጭራሽ ሊያስፈልግ አይገባም።"</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"የማያ ገፀ አቀማመጥን ለውጥ"</string>
@@ -1390,10 +1394,8 @@
     <string name="permdesc_recovery" msgid="8511774533266359571">"መተግበሪያው ከመልሶ ማግኛ ስርዓት እና ከስርዓት ማዘመኛዎች ጋር እንዲገናኝ ይፈቅድለታል።"</string>
     <string name="permlab_createMediaProjection" msgid="4941338725487978112">"የማህደረ መረጃ ማሳየት ክፍለ ጊዜዎች ፍጠር"</string>
     <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"መተግበሪያው የማህደረ መረጃ ማሳያ ክፍለ ጊዜዎችን እንዲፈጥር ይፈቅድለታል። እነዚህ ክፍለ ጊዜዎች ለመተግበሪያዎች ማሳያንና የተሰሚ ይዘቶችን ይዘው እንዲያቆዩ ችሎታውን ይሰጧቸዋል። በመደበኛ መተግበሪያዎች መፈለግ የለበትም።"</string>
-    <!-- no translation found for permlab_readInstallSessions (6165432407628065939) -->
-    <skip />
-    <!-- no translation found for permdesc_readInstallSessions (2049771699626019849) -->
-    <skip />
+    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"የመጫን ክፍለ ጊዜዎችን አንብብ"</string>
+    <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"መተግበሪያው የመጫን ክፍለ ጊዜዎችን እንዲያነብ ይፈቅድለታል። ይህም ስለ ገቢር የጥቅል ጭነቶች ዝርዝር መረጃን እንዲያይ ይፈቅድለታል።"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"ለአጉላ መቆጣጠሪያ ሁለት ጊዜ ነካ አድርግ"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"ምግብር ማከል አልተቻለም።"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"ሂድ"</string>
@@ -1412,10 +1414,8 @@
     <string name="deny" msgid="2081879885755434506">"ያስተባብሉ"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"ፈቃድ ተጠይቋል"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">\n" ለ<xliff:g id="ACCOUNT">%s</xliff:g> መለያ ፈቃድ ተጠይቋል"</string>
-    <!-- no translation found for forward_intent_to_owner (570916783072215572) -->
-    <skip />
-    <!-- no translation found for forward_intent_to_work (8624579696577525279) -->
-    <skip />
+    <string name="forward_intent_to_owner" msgid="570916783072215572">"ይህንን መተግበሪያ እየተጠቀሙ ያሉት በግል ቦታዎ ውስጥ ብቻ ነው"</string>
+    <string name="forward_intent_to_work" msgid="8624579696577525279">"ይህንን መተግበሪያ እየተጠቀሙ ያሉት በግል ቦታዎ ውስጥ ነው"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"ግቤት ስልት"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"አስምር"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"ተደራሽነት"</string>
@@ -1557,6 +1557,8 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"ጥሪ ተቀበል?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"ዘወትር"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"አንዴ ብቻ"</string>
+    <!-- no translation found for activity_resolver_work_profiles_support (5462991471861024343) -->
+    <skip />
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"ጡባዊ ተኮ"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"ስልክ"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"የጆሮ ማዳመጫዎች"</string>
@@ -1624,8 +1626,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"የመክፈቻ ስርዓተ ጥለቱን <xliff:g id="NUMBER_0">%d</xliff:g> ጊዜ በትክክል አልሳሉትም። ከ<xliff:g id="NUMBER_1">%d</xliff:g> ተጨማሪ ያልተሳኩ ሙከራዎች በኋላ የኢሜይል መለያ ተጠቅመው ስልክዎን እንዲከፍቱ ይጠየቃሉ።\n\nእባክዎ ከ<xliff:g id="NUMBER_2">%d</xliff:g> ሰከንዶች በኋላ እንደገና ይሞክሩ።"</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"አስወግድ"</string>
-    <!-- no translation found for safe_media_volume_warning (2276318909314492312) -->
-    <skip />
+    <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"ድምጹ ከሚመከረው መጠን በላይ ከፍ ይበል?\n\nበከፍተኛ ድምጽ ለረጅም ጊዜ ማዳመጥ ጆሮዎን ሊጎዳው ይችላል።"</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"ተደራሽነትን ለማንቃት ሁለት ጣቶችዎን ባሉበት ያቆዩዋቸው።"</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"ተደራሽነት ነቅቷል።"</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"ተደራሽነት ተሰርዟል።"</string>

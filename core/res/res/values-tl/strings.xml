@@ -417,6 +417,10 @@
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Pinapayagan ang mga may-ari na magpadala ng mga layunin sa administrator ng device. Hindi kailanman dapat na kailanganin para sa normal na apps."</string>
     <string name="permlab_bindTvInput" msgid="5601264742478168987">"i-bind sa isang TV input"</string>
     <string name="permdesc_bindTvInput" msgid="2371008331852001924">"Pinapayagan ang may-hawak na mag-bind sa top-level na interface ng isang TV input. Hindi kailanman kakailanganin ng mga normal na app."</string>
+    <!-- no translation found for permlab_modifyParentalControls (4611318225997592242) -->
+    <skip />
+    <!-- no translation found for permdesc_modifyParentalControls (7438482894162282039) -->
+    <skip />
     <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"magdagdag o mag-alis ng admin ng device"</string>
     <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Pinapayagan ang may-ari na magdagdag o mag-alis ng mga aktibong administrator ng device. Hindi dapat kailanganin kailanman para sa normal na apps."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"baguhin ang orientation ng screen"</string>
@@ -1390,10 +1394,8 @@
     <string name="permdesc_recovery" msgid="8511774533266359571">"Binibigyang-daan ang isang application na makipag-ugnay sa system ng pagbawi at mga pag-update ng system."</string>
     <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Gumawa ng mga media projection session"</string>
     <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"Nagbibigay-daan sa isang application upang gumawa ng mga media projection session. Makakapagbigay ang mga session na ito ng kakayahan sa mga application na ma-capture ang mga nilalaman ng display at audio. Hindi kailanman dapat kailanganin ng mga normal na app."</string>
-    <!-- no translation found for permlab_readInstallSessions (6165432407628065939) -->
-    <skip />
-    <!-- no translation found for permdesc_readInstallSessions (2049771699626019849) -->
-    <skip />
+    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Basahin ang mga session ng pag-install"</string>
+    <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Pinapayagan ang isang application na magbasa ng mga session ng pag-install. Nagbibigay-daan ito upang makita ang mga detalye tungkol sa mga aktibong pag-install ng package."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Pindutin nang dalawang beses para sa pagkontrol ng zoom"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Hindi maidagdag ang widget."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Pumunta"</string>
@@ -1412,10 +1414,8 @@
     <string name="deny" msgid="2081879885755434506">"Tanggihan"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Hiniling ang pahintulot"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Hiniling ang pahintulot\npara sa account na <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
-    <!-- no translation found for forward_intent_to_owner (570916783072215572) -->
-    <skip />
-    <!-- no translation found for forward_intent_to_work (8624579696577525279) -->
-    <skip />
+    <string name="forward_intent_to_owner" msgid="570916783072215572">"Ginagamit mo ang app na ito sa iyong personal na espasyo"</string>
+    <string name="forward_intent_to_work" msgid="8624579696577525279">"Ginagamit mo ang app na ito sa iyong lugar ng trabaho"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Pamamaraan ng pag-input"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"I-sync"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Kakayahang Ma-access"</string>
@@ -1557,6 +1557,8 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"Tanggapin ang tawag?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Palagi"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Isang beses lang"</string>
+    <!-- no translation found for activity_resolver_work_profiles_support (5462991471861024343) -->
+    <skip />
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Tablet"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Telepono"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Mga Headphone"</string>
@@ -1624,8 +1626,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Naguhit mo nang hindi tama ang iyong pattern sa pag-unlock nang <xliff:g id="NUMBER_0">%d</xliff:g> (na) beses. Pagkatapos ng <xliff:g id="NUMBER_1">%d</xliff:g> pang hindi matagumpay na pagtatangka, hihilingin sa iyong i-unlock ang telepono mo gamit ang isang email account.\n\n Subukang muli sa loob ng <xliff:g id="NUMBER_2">%d</xliff:g> (na) segundo."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Alisin"</string>
-    <!-- no translation found for safe_media_volume_warning (2276318909314492312) -->
-    <skip />
+    <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Lakasan ang volume nang lagpas sa inirerekomendang antas?\n\nMaaaring mapinsala ng pakikinig sa malakas na volume sa loob ng mahahabang panahon ang iyong pandinig."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Panatilihing nakapindot nang matagal ang iyong dalawang daliri upang paganahin ang pagiging naa-access."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Pinagana ang accessibility."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Nakansela ang pagiging naa-access."</string>
