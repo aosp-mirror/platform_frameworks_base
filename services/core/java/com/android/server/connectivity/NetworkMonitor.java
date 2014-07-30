@@ -630,12 +630,13 @@ public class NetworkMonitor extends StateMachine {
                 urlConnection.getInputStream();
                 httpResponseCode = urlConnection.getResponseCode();
             } else {
-                socket = mNetworkAgentInfo.network.getSocketFactory().createSocket();
-                socket.setSoTimeout(SOCKET_TIMEOUT_MS);
                 // Lookup addresses only on this Network.
                 InetAddress[] hostAddresses = mNetworkAgentInfo.network.getAllByName(url.getHost());
                 // Try all addresses.
                 for (int i = 0; i < hostAddresses.length; i++) {
+                    // Create a new socket for every IP address. See http://b/16664129 .
+                    socket = mNetworkAgentInfo.network.getSocketFactory().createSocket();
+                    socket.setSoTimeout(SOCKET_TIMEOUT_MS);
                     if (DBG) log("Connecting to " + hostAddresses[i]);
                     try {
                         socket.connect(new InetSocketAddress(hostAddresses[i],
