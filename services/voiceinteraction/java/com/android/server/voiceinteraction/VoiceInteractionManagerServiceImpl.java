@@ -96,13 +96,6 @@ class VoiceInteractionManagerServiceImpl {
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            try {
-                if (mService != null) {
-                    mService.shutdown();
-                }
-            } catch (RemoteException e) {
-                Slog.w(TAG, "RemoteException in shutdown", e);
-            }
             mService = null;
         }
     };
@@ -307,6 +300,14 @@ class VoiceInteractionManagerServiceImpl {
     }
 
     void shutdownLocked() {
+        try {
+            if (mService != null) {
+                mService.shutdown();
+            }
+        } catch (RemoteException e) {
+            Slog.w(TAG, "RemoteException in shutdown", e);
+        }
+
         if (mBound) {
             mContext.unbindService(mConnection);
             mBound = false;
