@@ -21,6 +21,7 @@ import com.android.systemui.qs.QSTile;
 import com.android.systemui.qs.SecureSetting;
 import com.android.systemui.statusbar.policy.FlashlightController;
 
+import android.app.ActivityManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings.Secure;
@@ -52,6 +53,9 @@ public class FlashlightTile extends QSTile<QSTile.BooleanState> implements
 
     @Override
     protected void handleClick() {
+        if (ActivityManager.isUserAMonkey()) {
+            return;
+        }
         boolean newState = !mState.value;
         mFlashlightController.setFlashlight(newState);
         refreshState(newState);
