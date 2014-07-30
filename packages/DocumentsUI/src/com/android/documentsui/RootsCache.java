@@ -104,6 +104,7 @@ public class RootsCache {
         mRecentsRoot.authority = null;
         mRecentsRoot.rootId = null;
         mRecentsRoot.icon = R.drawable.ic_root_recent_dark;
+        mRecentsRoot.lightIcon = R.drawable.ic_root_recent_light;
         mRecentsRoot.flags = Root.FLAG_LOCAL_ONLY | Root.FLAG_SUPPORTS_CREATE
                 | Root.FLAG_SUPPORTS_IS_CHILD;
         mRecentsRoot.title = mContext.getString(R.string.root_recent);
