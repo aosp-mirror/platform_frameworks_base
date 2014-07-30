@@ -16,7 +16,6 @@
 
 package android.bluetooth;
 
-import android.bluetooth.le.ScanResult;
 import android.content.Context;
 import android.os.ParcelUuid;
 import android.os.RemoteException;
@@ -130,10 +129,10 @@ public final class BluetoothGatt implements BluetoothProfile {
     /*package*/ static final int AUTHENTICATION_MITM = 2;
 
     /**
-     * Bluetooth GATT interface callbacks
+     * Bluetooth GATT callbacks. Overrides the default BluetoothGattCallback implementation.
      */
     private final IBluetoothGattCallback mBluetoothGattCallback =
-        new IBluetoothGattCallback.Stub() {
+        new BluetoothGattCallbackWrapper() {
             /**
              * Application interface registered - app is ready to go
              * @hide
@@ -195,14 +194,6 @@ public final class BluetoothGatt implements BluetoothProfile {
                 synchronized(mDeviceBusy) {
                     mDeviceBusy = false;
                 }
-            }
-
-            /**
-             * Callback reporting an LE scan result.
-             * @hide
-             */
-            public void onScanResult(String address, int rssi, byte[] advData) {
-                // no op
             }
 
             /**
@@ -600,23 +591,6 @@ public final class BluetoothGatt implements BluetoothProfile {
             }
 
             /**
-             * Advertise state change callback
-             * @hide
-             */
-            public void onAdvertiseStateChange(int state, int status) {
-                if (DBG) Log.d(TAG, "onAdvertiseStateChange() - state = "
-                        + state + " status=" + status);
-            }
-
-            /**
-             * @hide
-             */
-            @Override
-            public void onMultiAdvertiseCallback(int status) {
-                // no op.
-            }
-
-            /**
              * Callback invoked when the MTU for a given connection changes
              * @hide
              */
@@ -646,20 +620,6 @@ public final class BluetoothGatt implements BluetoothProfile {
                 } catch (Exception ex) {
                     Log.w(TAG, "Unhandled exception in callback", ex);
                 }
-            }
-
-            @Override
-            public void onBatchScanResults(List<ScanResult> results) {
-                // no op
-            }
-
-            /**
-             * @hide
-             */
-            @Override
-            public void onFoundOrLost(boolean onFound, String address, int rssi,
-                    byte[] advData) {
-                // no op.
             }
         };
 
