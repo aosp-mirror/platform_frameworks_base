@@ -406,304 +406,6 @@ public final class Sensor {
     public static final String STRING_TYPE_HEART_RATE = "android.sensor.heart_rate";
 
     /**
-     * A non-wake up variant of proximity sensor.
-     *
-     * @see #TYPE_PROXIMITY
-     */
-    public static final int TYPE_NON_WAKE_UP_PROXIMITY_SENSOR = 22;
-
-    /**
-     * A constant string describing a non-wake up proximity sensor type.
-     *
-     * @see #TYPE_NON_WAKE_UP_PROXIMITY_SENSOR
-     */
-    public static final String SENSOR_STRING_TYPE_NON_WAKE_UP_PROXIMITY_SENSOR =
-            "android.sensor.non_wake_up_proximity_sensor";
-
-    /**
-     * A constant describing a wake up variant of accelerometer sensor type.
-     *
-     * @see #isWakeUpSensor()
-     * @see #TYPE_ACCELEROMETER
-     */
-    public static final int TYPE_WAKE_UP_ACCELEROMETER = 23;
-
-    /**
-     * A constant string describing a wake up accelerometer.
-     *
-     * @see #TYPE_WAKE_UP_ACCELEROMETER
-     */
-    public static final String STRING_TYPE_WAKE_UP_ACCELEROMETER =
-            "android.sensor.wake_up_accelerometer";
-
-    /**
-     * A constant describing a wake up variant of a magnetic field sensor type.
-     *
-     * @see #isWakeUpSensor()
-     * @see #TYPE_MAGNETIC_FIELD
-     */
-    public static final int TYPE_WAKE_UP_MAGNETIC_FIELD = 24;
-
-    /**
-     * A constant string describing a wake up magnetic field sensor.
-     *
-     * @see #TYPE_WAKE_UP_MAGNETIC_FIELD
-     */
-    public static final String STRING_TYPE_WAKE_UP_MAGNETIC_FIELD =
-            "android.sensor.wake_up_magnetic_field";
-
-    /**
-     * A constant describing a wake up variant of an orientation sensor type.
-     *
-     * @see #isWakeUpSensor()
-     * @see #TYPE_ORIENTATION
-     */
-    public static final int TYPE_WAKE_UP_ORIENTATION = 25;
-
-    /**
-     * A constant string describing a wake up orientation sensor.
-     *
-     * @see #TYPE_WAKE_UP_ORIENTATION
-     */
-    public static final String STRING_TYPE_WAKE_UP_ORIENTATION =
-            "android.sensor.wake_up_orientation";
-
-    /**
-     * A constant describing a wake up variant of a gyroscope sensor type.
-     *
-     * @see #isWakeUpSensor()
-     * @see #TYPE_GYROSCOPE
-     */
-    public static final int TYPE_WAKE_UP_GYROSCOPE = 26;
-
-    /**
-     * A constant string describing a wake up gyroscope sensor type.
-     *
-     * @see #TYPE_WAKE_UP_GYROSCOPE
-     */
-    public static final String STRING_TYPE_WAKE_UP_GYROSCOPE = "android.sensor.wake_up_gyroscope";
-
-    /**
-     * A constant describing a wake up variant of a light sensor type.
-     *
-     * @see #isWakeUpSensor()
-     * @see #TYPE_LIGHT
-     */
-    public static final int TYPE_WAKE_UP_LIGHT = 27;
-
-    /**
-     * A constant string describing a wake up light sensor type.
-     *
-     * @see #TYPE_WAKE_UP_LIGHT
-     */
-    public static final String STRING_TYPE_WAKE_UP_LIGHT = "android.sensor.wake_up_light";
-
-    /**
-     * A constant describing a wake up variant of a pressure sensor type.
-     *
-     * @see #isWakeUpSensor()
-     * @see #TYPE_PRESSURE
-     */
-    public static final int TYPE_WAKE_UP_PRESSURE = 28;
-
-    /**
-     * A constant string describing a wake up pressure sensor type.
-     *
-     * @see #TYPE_WAKE_UP_PRESSURE
-     */
-    public static final String STRING_TYPE_WAKE_UP_PRESSURE = "android.sensor.wake_up_pressure";
-
-    /**
-     * A constant describing a wake up variant of a gravity sensor type.
-     *
-     * @see #isWakeUpSensor()
-     * @see #TYPE_GRAVITY
-     */
-    public static final int TYPE_WAKE_UP_GRAVITY = 29;
-
-    /**
-     * A constant string describing a wake up gravity sensor type.
-     *
-     * @see #TYPE_WAKE_UP_GRAVITY
-     */
-    public static final String STRING_TYPE_WAKE_UP_GRAVITY = "android.sensor.wake_up_gravity";
-
-    /**
-     * A constant describing a wake up variant of a linear acceleration sensor type.
-     *
-     * @see #isWakeUpSensor()
-     * @see #TYPE_LINEAR_ACCELERATION
-     */
-    public static final int TYPE_WAKE_UP_LINEAR_ACCELERATION = 30;
-
-    /**
-     * A constant string describing a wake up linear acceleration sensor type.
-     *
-     * @see #TYPE_WAKE_UP_LINEAR_ACCELERATION
-     */
-    public static final String STRING_TYPE_WAKE_UP_LINEAR_ACCELERATION =
-            "android.sensor.wake_up_linear_acceleration";
-
-    /**
-     * A constant describing a wake up variant of a rotation vector sensor type.
-     *
-     * @see #isWakeUpSensor()
-     * @see #TYPE_ROTATION_VECTOR
-     */
-    public static final int TYPE_WAKE_UP_ROTATION_VECTOR = 31;
-
-    /**
-     * A constant string describing a wake up rotation vector sensor type.
-     *
-     * @see #TYPE_WAKE_UP_ROTATION_VECTOR
-     */
-    public static final String STRING_TYPE_WAKE_UP_ROTATION_VECTOR =
-            "android.sensor.wake_up_rotation_vector";
-
-    /**
-     * A constant describing a wake up variant of a relative humidity sensor type.
-     *
-     * @see #isWakeUpSensor()
-     * @see #TYPE_RELATIVE_HUMIDITY
-     */
-    public static final int TYPE_WAKE_UP_RELATIVE_HUMIDITY = 32;
-
-    /**
-     * A constant string describing a wake up relative humidity sensor type.
-     *
-     * @see #TYPE_WAKE_UP_RELATIVE_HUMIDITY
-     */
-    public static final String STRING_TYPE_WAKE_UP_RELATIVE_HUMIDITY =
-            "android.sensor.wake_up_relative_humidity";
-
-    /**
-     * A constant describing a wake up variant of an ambient temperature sensor type.
-     *
-     * @see #isWakeUpSensor()
-     * @see #TYPE_AMBIENT_TEMPERATURE
-     */
-    public static final int TYPE_WAKE_UP_AMBIENT_TEMPERATURE = 33;
-
-    /**
-     * A constant string describing a wake up ambient temperature sensor type.
-     *
-     * @see #TYPE_WAKE_UP_AMBIENT_TEMPERATURE
-     */
-    public static final String STRING_TYPE_WAKE_UP_AMBIENT_TEMPERATURE =
-            "android.sensor.wake_up_ambient_temperature";
-
-    /**
-     * A constant describing a wake up variant of an uncalibrated magnetic field sensor type.
-     *
-     * @see #isWakeUpSensor()
-     * @see #TYPE_MAGNETIC_FIELD_UNCALIBRATED
-     */
-    public static final int TYPE_WAKE_UP_MAGNETIC_FIELD_UNCALIBRATED = 34;
-
-    /**
-     * A constant string describing a wake up uncalibrated magnetic field sensor type.
-     *
-     * @see #TYPE_WAKE_UP_MAGNETIC_FIELD_UNCALIBRATED
-     */
-    public static final String STRING_TYPE_WAKE_UP_MAGNETIC_FIELD_UNCALIBRATED =
-            "android.sensor.wake_up_magnetic_field_uncalibrated";
-
-    /**
-     * A constant describing a wake up variant of a game rotation vector sensor type.
-     *
-     * @see #isWakeUpSensor()
-     * @see #TYPE_GAME_ROTATION_VECTOR
-     */
-    public static final int TYPE_WAKE_UP_GAME_ROTATION_VECTOR = 35;
-
-    /**
-     * A constant string describing a wake up game rotation vector sensor type.
-     *
-     * @see #TYPE_WAKE_UP_GAME_ROTATION_VECTOR
-     */
-    public static final String STRING_TYPE_WAKE_UP_GAME_ROTATION_VECTOR =
-            "android.sensor.wake_up_game_rotation_vector";
-
-    /**
-     * A constant describing a wake up variant of an uncalibrated gyroscope sensor type.
-     *
-     * @see #isWakeUpSensor()
-     * @see #TYPE_GYROSCOPE_UNCALIBRATED
-     */
-    public static final int TYPE_WAKE_UP_GYROSCOPE_UNCALIBRATED = 36;
-
-    /**
-     * A constant string describing a wake up uncalibrated gyroscope sensor type.
-     *
-     * @see #TYPE_WAKE_UP_GYROSCOPE_UNCALIBRATED
-     */
-    public static final String STRING_TYPE_WAKE_UP_GYROSCOPE_UNCALIBRATED =
-            "android.sensor.wake_up_gyroscope_uncalibrated";
-
-    /**
-     * A constant describing a wake up variant of a step detector sensor type.
-     *
-     * @see #isWakeUpSensor()
-     * @see #TYPE_STEP_DETECTOR
-     */
-    public static final int TYPE_WAKE_UP_STEP_DETECTOR = 37;
-
-    /**
-     * A constant string describing a wake up step detector sensor type.
-     *
-     * @see #TYPE_WAKE_UP_STEP_DETECTOR
-     */
-    public static final String STRING_TYPE_WAKE_UP_STEP_DETECTOR =
-            "android.sensor.wake_up_step_detector";
-
-    /**
-     * A constant describing a wake up variant of a step counter sensor type.
-     *
-     * @see #isWakeUpSensor()
-     * @see #TYPE_STEP_COUNTER
-     */
-    public static final int TYPE_WAKE_UP_STEP_COUNTER = 38;
-
-    /**
-     * A constant string describing a wake up step counter sensor type.
-     *
-     * @see #TYPE_WAKE_UP_STEP_COUNTER
-     */
-    public static final String STRING_TYPE_WAKE_UP_STEP_COUNTER =
-            "android.sensor.wake_up_step_counter";
-
-    /**
-     * A constant describing a wake up variant of a geomagnetic rotation vector sensor type.
-     *
-     * @see #isWakeUpSensor()
-     * @see #TYPE_GEOMAGNETIC_ROTATION_VECTOR
-     */
-    public static final int TYPE_WAKE_UP_GEOMAGNETIC_ROTATION_VECTOR = 39;
-
-    /**
-     * A constant string describing a wake up geomagnetic rotation vector sensor type.
-     *
-     * @see #TYPE_WAKE_UP_GEOMAGNETIC_ROTATION_VECTOR
-     */
-    public static final String STRING_TYPE_WAKE_UP_GEOMAGNETIC_ROTATION_VECTOR =
-            "android.sensor.wake_up_geomagnetic_rotation_vector";
-
-    /**
-     * A constant describing a wake up variant of a heart rate sensor type.
-     *
-     * @see #isWakeUpSensor()
-     * @see #TYPE_HEART_RATE
-     */
-    public static final int TYPE_WAKE_UP_HEART_RATE = 40;
-
-    /**
-     * A constant string describing a wake up heart rate sensor type.
-     *
-     * @see #TYPE_WAKE_UP_HEART_RATE
-     */
-    public static final String STRING_TYPE_WAKE_UP_HEART_RATE = "android.sensor.wake_up_heart_rate";
-
-    /**
      * A sensor of this type generates an event each time a tilt event is detected. A tilt event
      * is generated if the direction of the 2-seconds window average gravity changed by at
      * least 35 degrees since the activation of the sensor. It is a wake up sensor.
@@ -711,7 +413,7 @@ public final class Sensor {
      * @hide
      * @see #isWakeUpSensor()
      */
-    public static final int TYPE_WAKE_UP_TILT_DETECTOR = 41;
+    public static final int TYPE_TILT_DETECTOR = 22;
 
     /**
      * A constant string describing a wake up tilt detector sensor type.
@@ -719,8 +421,8 @@ public final class Sensor {
      * @hide
      * @see #TYPE_WAKE_UP_TILT_DETECTOR
      */
-    public static final String SENSOR_STRING_TYPE_WAKE_UP_TILT_DETECTOR =
-            "android.sensor.wake_up_tilt_detector";
+    public static final String SENSOR_STRING_TYPE_TILT_DETECTOR =
+            "android.sensor.tilt_detector";
 
     /**
      * A constant describing a wake gesture sensor.
@@ -739,7 +441,7 @@ public final class Sensor {
      * @see #isWakeUpSensor()
      * @hide This sensor is expected to only be used by the system ui
      */
-    public static final int TYPE_WAKE_GESTURE = 42;
+    public static final int TYPE_WAKE_GESTURE = 23;
 
     /**
      * A constant string describing a wake gesture sensor.
@@ -771,7 +473,7 @@ public final class Sensor {
      * @see #isWakeUpSensor()
      * @hide This sensor is expected to only be used by the system ui
      */
-    public static final int TYPE_GLANCE_GESTURE = 43;
+    public static final int TYPE_GLANCE_GESTURE = 24;
 
     /**
      * A constant string describing a wake gesture sensor.
@@ -790,7 +492,7 @@ public final class Sensor {
      *
      * @hide Expected to be used internally for always on display.
      */
-    public static final int TYPE_PICK_UP_GESTURE = 44;
+    public static final int TYPE_PICK_UP_GESTURE = 25;
 
     /**
      * A constant string describing a pick up sensor.
@@ -876,26 +578,6 @@ public final class Sensor {
             1, // SENSOR_TYPE_STEP_COUNTER
             5, // SENSOR_TYPE_GEOMAGNETIC_ROTATION_VECTOR
             1, // SENSOR_TYPE_HEART_RATE_MONITOR
-            3, // SENSOR_TYPE_NON_WAKE_UP_PROXIMITY_SENSOR
-            // wake up variants of base sensors
-            3, // SENSOR_TYPE_WAKE_UP_ACCELEROMETER
-            3, // SENSOR_TYPE_WAKE_UP_MAGNETIC_FIELD
-            3, // SENSOR_TYPE_WAKE_UP_ORIENTATION
-            3, // SENSOR_TYPE_WAKE_UP_GYROSCOPE
-            3, // SENSOR_TYPE_WAKE_UP_LIGHT
-            3, // SENSOR_TYPE_WAKE_UP_PRESSURE
-            3, // SENSOR_TYPE_WAKE_UP_GRAVITY
-            3, // SENSOR_TYPE_WAKE_UP_LINEAR_ACCELERATION
-            5, // SENSOR_TYPE_WAKE_UP_ROTATION_VECTOR
-            3, // SENSOR_TYPE_WAKE_UP_RELATIVE_HUMIDITY
-            3, // SENSOR_TYPE_WAKE_UP_AMBIENT_TEMPERATURE
-            6, // SENSOR_TYPE_WAKE_UP_MAGNETIC_FIELD_UNCALIBRATED
-            4, // SENSOR_TYPE_WAKE_UP_GAME_ROTATION_VECTOR
-            6, // SENSOR_TYPE_WAKE_UP_GYROSCOPE_UNCALIBRATED
-            1, // SENSOR_TYPE_WAKE_UP_STEP_DETECTOR
-            1, // SENSOR_TYPE_WAKE_UP_STEP_COUNTER
-            5, // SENSOR_TYPE_WAKE_UP_GEOMAGNETIC_ROTATION_VECTOR
-            1, // SENSOR_TYPE_WAKE_UP_HEART_RATE_MONITOR
             1, // SENSOR_TYPE_WAKE_UP_TILT_DETECTOR
             1, // SENSOR_TYPE_WAKE_GESTURE
             1, // SENSOR_TYPE_GLANCE_GESTURE
