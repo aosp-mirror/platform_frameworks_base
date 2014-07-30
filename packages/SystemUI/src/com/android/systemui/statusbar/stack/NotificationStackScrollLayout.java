@@ -470,6 +470,10 @@ public class NotificationStackScrollLayout extends ViewGroup
         return mBottomStackPeekSize;
     }
 
+    public int getCollapseSecondCardPadding() {
+        return mCollapseSecondCardPadding;
+    }
+
     public void setLongPressListener(SwipeHelper.LongPressListener listener) {
         mSwipeHelper.setLongPressListener(listener);
         mLongPressListener = listener;
@@ -1955,8 +1959,10 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     public void setScrimAlpha(float progress) {
-        mAmbientState.setScrimAmount(progress);
-        requestChildrenUpdate();
+        if (progress != mAmbientState.getScrimAmount()) {
+            mAmbientState.setScrimAmount(progress);
+            requestChildrenUpdate();
+        }
     }
 
     /**
