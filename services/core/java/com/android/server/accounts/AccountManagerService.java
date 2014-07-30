@@ -3144,6 +3144,9 @@ public class AccountManagerService
         DevicePolicyManager dpm = (DevicePolicyManager) mContext
                 .getSystemService(Context.DEVICE_POLICY_SERVICE);
         String[] typesArray = dpm.getAccountTypesWithManagementDisabledAsUser(userId);
+        if (typesArray == null) {
+            return true;
+        }
         for (String forbiddenType : typesArray) {
             if (forbiddenType.equals(accountType)) {
                 return false;
