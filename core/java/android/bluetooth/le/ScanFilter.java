@@ -110,21 +110,27 @@ public final class ScanFilter implements Parcelable {
         dest.writeInt(mServiceDataUuid == null ? 0 : 1);
         if (mServiceDataUuid != null) {
             dest.writeParcelable(mServiceDataUuid, flags);
-            dest.writeInt(mServiceData == null ? 0 : mServiceData.length);
+            dest.writeInt(mServiceData == null ? 0 : 1);
             if (mServiceData != null) {
+                dest.writeInt(mServiceData.length);
                 dest.writeByteArray(mServiceData);
-                dest.writeInt(mServiceDataMask == null ? 0 : mServiceDataMask.length);
+
+                dest.writeInt(mServiceDataMask == null ? 0 : 1);
                 if (mServiceDataMask != null) {
+                    dest.writeInt(mServiceDataMask.length);
                     dest.writeByteArray(mServiceDataMask);
                 }
             }
         }
         dest.writeInt(mManufacturerId);
-        dest.writeInt(mManufacturerData == null ? 0 : mManufacturerData.length);
+        dest.writeInt(mManufacturerData == null ? 0 : 1);
         if (mManufacturerData != null) {
+            dest.writeInt(mManufacturerData.length);
             dest.writeByteArray(mManufacturerData);
-            dest.writeInt(mManufacturerDataMask == null ? 0 : mManufacturerDataMask.length);
+
+            dest.writeInt(mManufacturerDataMask == null ? 0 : 1);
             if (mManufacturerDataMask != null) {
+                dest.writeInt(mManufacturerDataMask.length);
                 dest.writeByteArray(mManufacturerDataMask);
             }
         }
@@ -164,29 +170,31 @@ public final class ScanFilter implements Parcelable {
                     if (in.readInt() == 1) {
                         ParcelUuid servcieDataUuid =
                                 in.readParcelable(ParcelUuid.class.getClassLoader());
-                        int serviceDataLength = in.readInt();
-                        if (serviceDataLength > 0) {
+                        if (in.readInt() == 1) {
+                            int serviceDataLength = in.readInt();
                             byte[] serviceData = new byte[serviceDataLength];
                             in.readByteArray(serviceData);
-                            builder.setServiceData(servcieDataUuid, serviceData);
-                            int serviceDataMaskLength = in.readInt();
-                            if (serviceDataMaskLength > 0) {
+                            if (in.readInt() == 0) {
+                                builder.setServiceData(servcieDataUuid, serviceData);
+                            } else {
+                                int serviceDataMaskLength = in.readInt();
                                 byte[] serviceDataMask = new byte[serviceDataMaskLength];
                                 in.readByteArray(serviceDataMask);
                                 builder.setServiceData(
-                                        servcieDataUuid, serviceData, serviceDataMask);
+                                            servcieDataUuid, serviceData, serviceDataMask);
                             }
                         }
                     }
 
                     int manufacturerId = in.readInt();
-                    int manufacturerDataLength = in.readInt();
-                    if (manufacturerDataLength > 0) {
+                    if (in.readInt() == 1) {
+                        int manufacturerDataLength = in.readInt();
                         byte[] manufacturerData = new byte[manufacturerDataLength];
                         in.readByteArray(manufacturerData);
-                        builder.setManufacturerData(manufacturerId, manufacturerData);
-                        int manufacturerDataMaskLength = in.readInt();
-                        if (manufacturerDataMaskLength > 0) {
+                        if (in.readInt() == 0) {
+                            builder.setManufacturerData(manufacturerId, manufacturerData);
+                        } else {
+                            int manufacturerDataMaskLength = in.readInt();
                             byte[] manufacturerDataMask = new byte[manufacturerDataMaskLength];
                             in.readByteArray(manufacturerDataMask);
                             builder.setManufacturerData(manufacturerId, manufacturerData,
@@ -349,11 +357,16 @@ public final class ScanFilter implements Parcelable {
 
     // Check whether the data pattern matches the parsed data.
     private boolean matchesPartialData(byte[] data, byte[] dataMask, byte[] parsedData) {
-        if (dataMask == null) {
-            return Arrays.equals(data, parsedData);
-        }
-        if (parsedData == null) {
+        if (parsedData == null || parsedData.length < data.length) {
             return false;
+        }
+        if (dataMask == null) {
+            for (int i = 0; i < data.length; ++i) {
+                if (parsedData[i] != data[i]) {
+                    return false;
+                }
+            }
+            return true;
         }
         for (int i = 0; i < data.length; ++i) {
             if ((dataMask[i] & parsedData[i]) != (dataMask[i] & data[i])) {
