@@ -25,6 +25,9 @@ import android.content.pm.IOnAppsChangedListener;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -55,8 +58,8 @@ public class LauncherApps {
     private ILauncherApps mService;
     private PackageManager mPm;
 
-    private List<OnAppsChangedCallback> mCallbacks
-            = new ArrayList<OnAppsChangedCallback>();
+    private List<CallbackMessageHandler> mCallbacks
+            = new ArrayList<CallbackMessageHandler>();
 
     /**
      * Callbacks for package changes to this and related managed profiles.
@@ -64,6 +67,9 @@ public class LauncherApps {
     public static abstract class OnAppsChangedCallback {
         /**
          * Indicates that a package was removed from the specified profile.
+         *
+         * If a package is removed while being updated onPackageChanged will be
+         * called instead.
          *
          * @param packageName The name of the package that was removed.
          * @param user The UserHandle of the profile that generated the change.
@@ -73,6 +79,9 @@ public class LauncherApps {
         /**
          * Indicates that a package was added to the specified profile.
          *
+         * If a package is added while being updated then onPackageChanged will be
+         * called instead.
+         *
          * @param packageName The name of the package that was added.
          * @param user The UserHandle of the profile that generated the change.
          */
@@ -80,6 +89,8 @@ public class LauncherApps {
 
         /**
          * Indicates that a package was modified in the specified profile.
+         * This can happen, for example, when the package is updated or when
+         * one or more components are enabled or disabled.
          *
          * @param packageName The name of the package that has changed.
          * @param user The UserHandle of the profile that generated the change.
@@ -286,10 +297,21 @@ public class LauncherApps {
      * @param callback The callback to add.
      */
     public void addOnAppsChangedCallback(OnAppsChangedCallback callback) {
+        addOnAppsChangedCallback(callback, null);
+    }
+
+    /**
+     * Adds a callback for changes to packages in current and managed profiles.
+     *
+     * @param callback The callback to add.
+     * @param handler that should be used to post callbacks on, may be null.
+     */
+    public void addOnAppsChangedCallback(OnAppsChangedCallback callback, Handler handler) {
         synchronized (this) {
             if (callback != null && !mCallbacks.contains(callback)) {
-                mCallbacks.add(callback);
-                if (mCallbacks.size() == 1) {
+                boolean addedFirstCallback = mCallbacks.size() == 0;
+                addCallbackLocked(callback, handler);
+                if (addedFirstCallback) {
                     try {
                         mService.addOnAppsChangedListener(mAppsChangedListener);
                     } catch (RemoteException re) {
@@ -307,7 +329,7 @@ public class LauncherApps {
      */
     public void removeOnAppsChangedCallback(OnAppsChangedCallback callback) {
         synchronized (this) {
-            mCallbacks.remove(callback);
+            removeCallbackLocked(callback);
             if (mCallbacks.size() == 0) {
                 try {
                     mService.removeOnAppsChangedListener(mAppsChangedListener);
@@ -317,16 +339,40 @@ public class LauncherApps {
         }
     }
 
+    private void removeCallbackLocked(OnAppsChangedCallback callback) {
+        if (callback == null) {
+            throw new IllegalArgumentException("Callback cannot be null");
+        }
+        final int size = mCallbacks.size();
+        for (int i = 0; i < size; ++i) {
+            if (mCallbacks.get(i).mCallback == callback) {
+                mCallbacks.remove(i);
+                return;
+            }
+        }
+    }
+
+    private void addCallbackLocked(OnAppsChangedCallback callback, Handler handler) {
+        // Remove if already present.
+        removeCallbackLocked(callback);
+        if (handler == null) {
+            handler = new Handler();
+        }
+        CallbackMessageHandler toAdd = new CallbackMessageHandler(handler.getLooper(), callback);
+        mCallbacks.add(toAdd);
+    }
+
     private IOnAppsChangedListener.Stub mAppsChangedListener = new IOnAppsChangedListener.Stub() {
 
         @Override
-        public void onPackageRemoved(UserHandle user, String packageName) throws RemoteException {
+        public void onPackageRemoved(UserHandle user, String packageName)
+                throws RemoteException {
             if (DEBUG) {
                 Log.d(TAG, "onPackageRemoved " + user.getIdentifier() + "," + packageName);
             }
             synchronized (LauncherApps.this) {
-                for (OnAppsChangedCallback callback : mCallbacks) {
-                    callback.onPackageRemoved(packageName, user);
+                for (CallbackMessageHandler callback : mCallbacks) {
+                    callback.postOnPackageRemoved(packageName, user);
                 }
             }
         }
@@ -337,8 +383,8 @@ public class LauncherApps {
                 Log.d(TAG, "onPackageChanged " + user.getIdentifier() + "," + packageName);
             }
             synchronized (LauncherApps.this) {
-                for (OnAppsChangedCallback callback : mCallbacks) {
-                    callback.onPackageChanged(packageName, user);
+                for (CallbackMessageHandler callback : mCallbacks) {
+                    callback.postOnPackageChanged(packageName, user);
                 }
             }
         }
@@ -349,8 +395,8 @@ public class LauncherApps {
                 Log.d(TAG, "onPackageAdded " + user.getIdentifier() + "," + packageName);
             }
             synchronized (LauncherApps.this) {
-                for (OnAppsChangedCallback callback : mCallbacks) {
-                    callback.onPackageAdded(packageName, user);
+                for (CallbackMessageHandler callback : mCallbacks) {
+                    callback.postOnPackageAdded(packageName, user);
                 }
             }
         }
@@ -362,8 +408,8 @@ public class LauncherApps {
                 Log.d(TAG, "onPackagesAvailable " + user.getIdentifier() + "," + packageNames);
             }
             synchronized (LauncherApps.this) {
-                for (OnAppsChangedCallback callback : mCallbacks) {
-                    callback.onPackagesAvailable(packageNames, user, replacing);
+                for (CallbackMessageHandler callback : mCallbacks) {
+                    callback.postOnPackagesAvailable(packageNames, user, replacing);
                 }
             }
         }
@@ -375,10 +421,96 @@ public class LauncherApps {
                 Log.d(TAG, "onPackagesUnavailable " + user.getIdentifier() + "," + packageNames);
             }
             synchronized (LauncherApps.this) {
-                for (OnAppsChangedCallback callback : mCallbacks) {
-                    callback.onPackagesUnavailable(packageNames, user, replacing);
+                for (CallbackMessageHandler callback : mCallbacks) {
+                    callback.postOnPackagesUnavailable(packageNames, user, replacing);
                 }
            }
         }
     };
+
+    private static class CallbackMessageHandler extends Handler {
+        private static final int MSG_ADDED = 1;
+        private static final int MSG_REMOVED = 2;
+        private static final int MSG_CHANGED = 3;
+        private static final int MSG_AVAILABLE = 4;
+        private static final int MSG_UNAVAILABLE = 5;
+
+        private OnAppsChangedCallback mCallback;
+
+        private static class CallbackInfo {
+            String[] packageNames;
+            String packageName;
+            boolean replacing;
+            UserHandle user;
+        }
+
+        public CallbackMessageHandler(Looper looper, OnAppsChangedCallback callback) {
+            super(looper, null, true);
+            mCallback = callback;
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            if (mCallback == null || !(msg.obj instanceof CallbackInfo)) {
+                return;
+            }
+            CallbackInfo info = (CallbackInfo) msg.obj;
+            switch (msg.what) {
+                case MSG_ADDED:
+                    mCallback.onPackageAdded(info.packageName, info.user);
+                    break;
+                case MSG_REMOVED:
+                    mCallback.onPackageRemoved(info.packageName, info.user);
+                    break;
+                case MSG_CHANGED:
+                    mCallback.onPackageChanged(info.packageName, info.user);
+                    break;
+                case MSG_AVAILABLE:
+                    mCallback.onPackagesAvailable(info.packageNames, info.user, info.replacing);
+                    break;
+                case MSG_UNAVAILABLE:
+                    mCallback.onPackagesUnavailable(info.packageNames, info.user, info.replacing);
+                    break;
+            }
+        }
+
+        public void postOnPackageAdded(String packageName, UserHandle user) {
+            CallbackInfo info = new CallbackInfo();
+            info.packageName = packageName;
+            info.user = user;
+            obtainMessage(MSG_ADDED, info).sendToTarget();
+        }
+
+        public void postOnPackageRemoved(String packageName, UserHandle user) {
+            CallbackInfo info = new CallbackInfo();
+            info.packageName = packageName;
+            info.user = user;
+            obtainMessage(MSG_REMOVED, info).sendToTarget();
+        }
+
+        public void postOnPackageChanged(String packageName, UserHandle user) {
+            CallbackInfo info = new CallbackInfo();
+            info.packageName = packageName;
+            info.user = user;
+            obtainMessage(MSG_CHANGED, info).sendToTarget();
+        }
+
+        public void postOnPackagesAvailable(String[] packageNames, UserHandle user,
+                boolean replacing) {
+            CallbackInfo info = new CallbackInfo();
+            info.packageNames = packageNames;
+            info.replacing = replacing;
+            info.user = user;
+            obtainMessage(MSG_AVAILABLE, info).sendToTarget();
+        }
+
+        public void postOnPackagesUnavailable(String[] packageNames, UserHandle user,
+                boolean replacing) {
+            CallbackInfo info = new CallbackInfo();
+            info.packageNames = packageNames;
+            info.replacing = replacing;
+            info.user = user;
+            obtainMessage(MSG_UNAVAILABLE, info).sendToTarget();
+        }
+    }
 }
