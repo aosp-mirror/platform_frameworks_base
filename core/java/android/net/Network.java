@@ -25,6 +25,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.Socket;
+import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.net.URL;
@@ -106,27 +107,27 @@ public class Network implements Parcelable {
             mNetId = netId;
         }
 
-        private void connectToHost(Socket socket, String host, int port) throws IOException {
+        private Socket connectToHost(String host, int port, SocketAddress localAddress)
+                throws IOException {
             // Lookup addresses only on this Network.
             InetAddress[] hostAddresses = getAllByName(host);
-            // Try all but last address ignoring exceptions.
-            for (int i = 0; i < hostAddresses.length - 1; i++) {
+            // Try all addresses.
+            for (int i = 0; i < hostAddresses.length; i++) {
                 try {
+                    Socket socket = createSocket();
+                    if (localAddress != null) socket.bind(localAddress);
                     socket.connect(new InetSocketAddress(hostAddresses[i], port));
-                    return;
+                    return socket;
                 } catch (IOException e) {
+                    if (i == (hostAddresses.length - 1)) throw e;
                 }
             }
-            // Try last address.  Do throw exceptions.
-            socket.connect(new InetSocketAddress(hostAddresses[hostAddresses.length - 1], port));
+            throw new UnknownHostException(host);
         }
 
         @Override
         public Socket createSocket(String host, int port, InetAddress localHost, int localPort) throws IOException {
-            Socket socket = createSocket();
-            socket.bind(new InetSocketAddress(localHost, localPort));
-            connectToHost(socket, host, port);
-            return socket;
+            return connectToHost(host, port, new InetSocketAddress(localHost, localPort));
         }
 
         @Override
@@ -147,9 +148,7 @@ public class Network implements Parcelable {
 
         @Override
         public Socket createSocket(String host, int port) throws IOException {
-            Socket socket = createSocket();
-            connectToHost(socket, host, port);
-            return socket;
+            return connectToHost(host, port, null);
         }
 
         @Override
