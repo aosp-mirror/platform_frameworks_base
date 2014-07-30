@@ -95,7 +95,7 @@ final public class MediaCodecList {
             new MediaCodecInfo.CodecCapabilities[supportedTypes.length];
         int typeIx = 0;
         for (String type: supportedTypes) {
-            caps[typeIx] = getCodecCapabilities(index, type);
+            caps[typeIx++] = getCodecCapabilities(index, type);
         }
         return new MediaCodecInfo(
                 getCodecName(index), isEncoder(index), caps);
