@@ -51,6 +51,7 @@ public class Paint {
     private float       mInvCompatScaling;
 
     private Locale      mLocale;
+    private String      mFontFeatureSettings;
 
     /**
      * @hide
@@ -474,6 +475,7 @@ public class Paint {
         mBidiFlags = BIDI_DEFAULT_LTR;
         setTextLocale(Locale.getDefault());
         setElegantTextHeight(false);
+        mFontFeatureSettings = null;
     }
 
     /**
@@ -513,6 +515,7 @@ public class Paint {
 
         mBidiFlags = paint.mBidiFlags;
         mLocale = paint.mLocale;
+        mFontFeatureSettings = paint.mFontFeatureSettings;
     }
 
     /** @hide */
@@ -1280,6 +1283,34 @@ public class Paint {
      */
     public void setLetterSpacing(float letterSpacing) {
         native_setLetterSpacing(mNativePaint, letterSpacing);
+    }
+
+    /**
+     * Get font feature settings.  Default is null.
+     *
+     * @return the paint's currently set font feature settings.
+     * @hide
+     */
+    public String getFontFeatureSettings() {
+        return mFontFeatureSettings;
+    }
+
+    /**
+     * Set font feature settings.
+     *
+     * The format is the same as the CSS font-feature-settings attribute:
+     * http://dev.w3.org/csswg/css-fonts/#propdef-font-feature-settings
+     *
+     * @param settings the font feature settings string to use, may be null.
+     * @hide
+     */
+    public void setFontFeatureSettings(String settings) {
+        if (settings != null && settings.equals(""))
+            settings = null;
+        if ((settings == null && mFontFeatureSettings == null)
+                || (settings != null && settings.equals(mFontFeatureSettings))) return;
+        mFontFeatureSettings = settings;
+        native_setFontFeatureSettings(mNativePaint, settings);
     }
 
     /**
@@ -2259,4 +2290,6 @@ public class Paint {
     private static native float native_getLetterSpacing(long native_object);
     private static native void native_setLetterSpacing(long native_object,
                                                        float letterSpacing);
+    private static native void native_setFontFeatureSettings(long native_object,
+                                                             String settings);
 }
