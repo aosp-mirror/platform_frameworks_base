@@ -65,6 +65,8 @@ option java_package com.android.server
 27501 notification_panel_hidden
 # when notifications are newly displayed on screen, or disappear from screen
 27510 notification_visibility_changed (newlyVisibleKeys|3),(noLongerVisibleKeys|3)
+# when notifications are expanded, or contracted
+27511 notification_expansion (key|3),(user_action|1),(expanded|1)
 # when a notification has been clicked
 27520 notification_clicked (key|3)
 
