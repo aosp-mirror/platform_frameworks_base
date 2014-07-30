@@ -245,9 +245,8 @@ public class NinePatchDrawable extends Drawable {
 
         final int restoreAlpha;
         if (mNinePatchState.mBaseAlpha != 1.0f) {
-            final Paint p = getPaint();
-            restoreAlpha = p.getAlpha();
-            p.setAlpha((int) (restoreAlpha * mNinePatchState.mBaseAlpha + 0.5f));
+            restoreAlpha = mPaint.getAlpha();
+            mPaint.setAlpha((int) (restoreAlpha * mNinePatchState.mBaseAlpha + 0.5f));
         } else {
             restoreAlpha = -1;
         }
@@ -445,6 +444,16 @@ public class NinePatchDrawable extends Drawable {
             // Hey, now might be a good time to actually load optical bounds!
             bitmap.getOpticalInsets(opticalInsets);
 
+            // Sanity check for valid padding when we have optical insets.
+            if (padding.left < opticalInsets.left) {
+                padding.left = opticalInsets.left;
+                padding.right = opticalInsets.right;
+            }
+            if (padding.top < opticalInsets.top) {
+                padding.top = opticalInsets.top;
+                padding.bottom = opticalInsets.bottom;
+            }
+
             state.mNinePatch = new NinePatch(bitmap, bitmap.getNinePatchChunk());
             state.mPadding = padding;
             state.mOpticalInsets = Insets.of(opticalInsets);
@@ -611,6 +620,16 @@ public class NinePatchDrawable extends Drawable {
             mOpticalInsets = Insets.of(opticalInsets);
             mDither = dither;
             mAutoMirrored = autoMirror;
+
+            // Sanity check for valid padding when we have optical insets.
+            if (mPadding.left < mOpticalInsets.left) {
+                mPadding.left = mOpticalInsets.left;
+                mPadding.right = mOpticalInsets.right;
+            }
+            if (mPadding.top < mOpticalInsets.top) {
+                mPadding.top = mOpticalInsets.top;
+                mPadding.bottom = mOpticalInsets.bottom;
+            }
         }
 
         // Copy constructor
