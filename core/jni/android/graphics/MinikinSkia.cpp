@@ -20,7 +20,6 @@
 #define LOG_TAG "Minikin"
 #include <cutils/log.h>
 
-#include <minikin/MinikinFont.h>
 #include "MinikinSkia.h"
 
 namespace android {

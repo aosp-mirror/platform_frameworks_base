@@ -44,8 +44,6 @@
 #include <CanvasProperty.h>
 #include <Paint.h>
 
-#include <minikin/Layout.h>
-#include "MinikinSkia.h"
 #include "MinikinUtils.h"
 
 namespace android {
