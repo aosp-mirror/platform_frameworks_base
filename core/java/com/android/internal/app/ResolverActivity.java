@@ -34,17 +34,21 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.LabeledIntent;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
+import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.PatternMatcher;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -55,6 +59,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 import com.android.internal.widget.ResolverDrawerLayout;
 
 import java.text.Collator;
@@ -87,6 +92,7 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
     private int mIconSize;
     private int mMaxColumns;
     private int mLastSelected = ListView.INVALID_POSITION;
+    private boolean mResolvingHome = false;
 
     private UsageStatsManager mUsm;
     private UsageStats mStats;
@@ -162,6 +168,9 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
                 && categories.size() == 1
                 && categories.contains(Intent.CATEGORY_HOME)) {
             titleResource = com.android.internal.R.string.whichHomeApplication;
+
+            // Note: this field is not set to true in the compatibility version.
+            mResolvingHome = true;
         } else {
             titleResource = 0;
         }
@@ -397,6 +406,15 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        ResolveInfo resolveInfo = mAdapter.resolveInfoForPosition(position, true);
+        if (mResolvingHome && hasManagedProfile()
+                && !supportsManagedProfiles(resolveInfo)) {
+            Toast.makeText(this, String.format(getResources().getString(
+                    com.android.internal.R.string.activity_resolver_work_profiles_support),
+                    resolveInfo.activityInfo.loadLabel(getPackageManager()).toString()),
+                    Toast.LENGTH_LONG).show();
+            return;
+        }
         final int checkedPos = mGridView.getCheckedItemPosition();
         final boolean hasValidSelection = checkedPos != ListView.INVALID_POSITION;
         if (mAlwaysUseOption && (!hasValidSelection || mLastSelected != checkedPos)) {
@@ -409,6 +427,40 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
         } else {
             startSelected(position, false, true);
         }
+    }
+
+    private boolean hasManagedProfile() {
+        UserManager userManager = (UserManager) getSystemService(Context.USER_SERVICE);
+        if (userManager == null) {
+            return false;
+        }
+
+        try {
+            List<UserInfo> profiles = userManager.getProfiles(getUserId());
+            for (UserInfo userInfo : profiles) {
+                if (userInfo != null && userInfo.isManagedProfile()) {
+                    return true;
+                }
+            }
+        } catch (SecurityException e) {
+            return false;
+        }
+        return false;
+    }
+
+    private boolean supportsManagedProfiles(ResolveInfo resolveInfo) {
+        try {
+            ApplicationInfo appInfo = getPackageManager().getApplicationInfo(
+                    resolveInfo.activityInfo.packageName, 0 /* default flags */);
+            return versionNumberAtLeastL(appInfo.targetSdkVersion);
+        } catch (NameNotFoundException e) {
+            return false;
+        }
+    }
+
+    private boolean versionNumberAtLeastL(int versionNumber) {
+        // TODO: remove "|| true" once the build code for L is fixed.
+        return versionNumber >= Build.VERSION_CODES.L || true;
     }
 
     private void setAlwaysButtonEnabled(boolean hasValidSelection, int checkedPos,
