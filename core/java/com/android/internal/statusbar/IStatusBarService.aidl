@@ -49,6 +49,7 @@ interface IStatusBarService
     void onNotificationClear(String pkg, String tag, int id, int userId);
     void onNotificationVisibilityChanged(
             in String[] newlyVisibleKeys, in String[] noLongerVisibleKeys);
+    void onNotificationExpansionChanged(in String key, in boolean userAction, in boolean expanded);
     void setSystemUiVisibility(int vis, int mask);
     void setHardKeyboardEnabled(boolean enabled);
     void setWindowState(int window, int state);

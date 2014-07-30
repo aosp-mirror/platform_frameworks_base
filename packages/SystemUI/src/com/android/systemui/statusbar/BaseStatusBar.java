@@ -96,7 +96,7 @@ import static com.android.keyguard.KeyguardHostView.OnDismissAction;
 
 public abstract class BaseStatusBar extends SystemUI implements
         CommandQueue.Callbacks, ActivatableNotificationView.OnActivatedListener,
-        RecentsComponent.Callbacks {
+        RecentsComponent.Callbacks, ExpandableNotificationRow.ExpansionLogger {
     public static final String TAG = "StatusBar";
     public static final boolean DEBUG = false;
     public static final boolean MULTIUSER_DEBUG = false;
@@ -1035,6 +1035,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                     Context.LAYOUT_INFLATER_SERVICE);
             row = (ExpandableNotificationRow) inflater.inflate(R.layout.status_bar_notification_row,
                     parent, false);
+            row.setExpansionLogger(this, entry.notification.getKey());
         }
 
         // the notification inspector (see SwipeHelper.setLongPressListener)
@@ -1783,5 +1784,14 @@ public abstract class BaseStatusBar extends SystemUI implements
             }
         }
         return contextForUser.getPackageManager();
+    }
+
+    @Override
+    public void logNotificationExpansion(String key, boolean userAction, boolean expanded) {
+        try {
+            mBarService.onNotificationExpansionChanged(key, userAction, expanded);
+        } catch (RemoteException e) {
+            // Ignore.
+        }
     }
 }
