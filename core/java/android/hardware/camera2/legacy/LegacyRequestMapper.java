@@ -108,7 +108,12 @@ public class LegacyRequestMapper {
         {
             // aeRegions
             {
+                // Use aeRegions if available, fall back to using awbRegions if present
                 MeteringRectangle[] aeRegions = request.get(CONTROL_AE_REGIONS);
+                if (request.get(CONTROL_AWB_REGIONS) != null) {
+                    Log.w(TAG, "convertRequestMetadata - control.awbRegions setting is not " +
+                            "supported, ignoring value");
+                }
                 int maxNumMeteringAreas = params.getMaxNumMeteringAreas();
                 List<Camera.Area> meteringAreaList = convertMeteringRegionsToLegacy(
                         activeArray, zoomData, aeRegions, maxNumMeteringAreas,
