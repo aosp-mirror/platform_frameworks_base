@@ -426,7 +426,6 @@ package android {
     field public static final int clipChildren = 16842986; // 0x10100ea
     field public static final int clipOrientation = 16843274; // 0x101020a
     field public static final int clipToPadding = 16842987; // 0x10100eb
-    field public static final int clipToPath = 16843817; // 0x1010429
     field public static final int closeIcon = 16843907; // 0x1010483
     field public static final int codes = 16843330; // 0x1010242
     field public static final int collapseColumns = 16843083; // 0x101014b
@@ -1187,6 +1186,7 @@ package android {
     field public static final int strokeColor = 16843809; // 0x1010421
     field public static final int strokeLineCap = 16843815; // 0x1010427
     field public static final int strokeLineJoin = 16843816; // 0x1010428
+    field public static final int strokeMiterLimit = 16843817; // 0x1010429
     field public static final int strokeOpacity = 16843810; // 0x1010422
     field public static final int strokeWidth = 16843811; // 0x1010423
     field public static final int submitBackground = 16843914; // 0x101048a
@@ -29009,9 +29009,9 @@ package android.telecomm {
   public static class VideoCallProfile.VideoState {
     ctor public VideoCallProfile.VideoState();
     method public static boolean isAudioOnly(int);
+    method public static boolean isBidirectional(int);
     method public static boolean isPaused(int);
     method public static boolean isReceptionEnabled(int);
-    method public static boolean isBidirectional(int);
     method public static boolean isTransmissionEnabled(int);
     field public static final int AUDIO_ONLY = 0; // 0x0
     field public static final int BIDIRECTIONAL = 3; // 0x3

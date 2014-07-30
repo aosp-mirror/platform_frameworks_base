@@ -5158,8 +5158,6 @@
         <attr name="trimPathEnd" format="float" />
         <!-- Shift trim region (allows visible region to include the start and end) from 0 to 1  -->
         <attr name="trimPathOffset" format="float" />
-        <!-- TODO: Remove this. Path will set the current clip path -->
-        <attr name="clipToPath" format="boolean" />
         <!-- sets the linecap for a stroked path -->
         <attr name="strokeLineCap" format="enum">
             <enum name="butt" value="0"/>
