@@ -72,6 +72,22 @@ public class NotificationData {
         public boolean hasInterrupted() {
             return interruption;
         }
+
+        /**
+         * Resets the notification entry to be re-used.
+         */
+        public void reset() {
+            // NOTE: Icon needs to be preserved for now.
+            // We should fix this at some point.
+            expanded = null;
+            expandedPublic = null;
+            expandedBig = null;
+            autoRedacted = false;
+            legacy = false;
+            if (row != null) {
+                row.reset();
+            }
+        }
     }
 
     private final ArrayList<Entry> mEntries = new ArrayList<Entry>();

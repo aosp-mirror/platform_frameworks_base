@@ -1025,7 +1025,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             hasUserChangedExpansion = row.hasUserChangedExpansion();
             userExpanded = row.isUserExpanded();
             userLocked = row.isUserLocked();
-            row.reset();
+            entry.reset();
             if (hasUserChangedExpansion) {
                 row.setUserExpanded(userExpanded);
             }
@@ -1369,10 +1369,6 @@ public abstract class BaseStatusBar extends SystemUI implements
         updateNotifications();
     }
 
-    private void addNotificationViews(StatusBarNotification notification, RankingMap ranking) {
-        addNotificationViews(createNotificationViews(notification), ranking);
-    }
-
     /**
      * @return The number of notifications we show on Keyguard.
      */
@@ -1615,6 +1611,13 @@ public abstract class BaseStatusBar extends SystemUI implements
                 } else {
                     if (DEBUG) Log.d(TAG, "rebuilding update in place for key: " + key);
                     oldEntry.notification = notification;
+                    final StatusBarIcon ic = new StatusBarIcon(notification.getPackageName(),
+                            notification.getUser(),
+                            notification.getNotification().icon,
+                            notification.getNotification().iconLevel,
+                            notification.getNotification().number,
+                            notification.getNotification().tickerText);
+                    oldEntry.icon.set(ic);
                     inflateViews(oldEntry, mStackScroller, wasHeadsUp);
                     updateNotifications();
                 }
