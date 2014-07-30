@@ -5382,7 +5382,6 @@ package android.app.admin {
     method public android.os.UserHandle createUser(android.content.ComponentName, java.lang.String);
     method public void enableSystemApp(android.content.ComponentName, java.lang.String);
     method public int enableSystemApp(android.content.ComponentName, android.content.Intent);
-    method public void setTrustAgentFeaturesEnabled(android.content.ComponentName, android.content.ComponentName, java.util.List<java.lang.String>);
     method public java.lang.String[] getAccountTypesWithManagementDisabled();
     method public java.util.List<android.content.ComponentName> getActiveAdmins();
     method public android.os.Bundle getApplicationRestrictions(android.content.ComponentName, java.lang.String);
@@ -5454,6 +5453,7 @@ package android.app.admin {
     method public void setScreenCaptureDisabled(android.content.ComponentName, boolean);
     method public void setSecureSetting(android.content.ComponentName, java.lang.String, java.lang.String);
     method public int setStorageEncryption(android.content.ComponentName, boolean);
+    method public void setTrustAgentFeaturesEnabled(android.content.ComponentName, android.content.ComponentName, java.util.List<java.lang.String>);
     method public boolean switchUser(android.content.ComponentName, android.os.UserHandle);
     method public void uninstallCaCert(android.content.ComponentName, byte[]);
     method public void wipeData(int);
@@ -28728,15 +28728,15 @@ package android.telecomm {
 
   public abstract class ConnectionService extends android.app.Service {
     ctor public ConnectionService();
-    method public final android.telecomm.RemoteConnection createRemoteIncomingConnection(android.telecomm.ConnectionRequest);
-    method public final android.telecomm.RemoteConnection createRemoteOutgoingConnection(android.telecomm.ConnectionRequest);
+    method public final android.telecomm.RemoteConnection createRemoteIncomingConnection(android.telecomm.PhoneAccountHandle, android.telecomm.ConnectionRequest);
+    method public final android.telecomm.RemoteConnection createRemoteOutgoingConnection(android.telecomm.PhoneAccountHandle, android.telecomm.ConnectionRequest);
     method public final java.util.Collection<android.telecomm.Connection> getAllConnections();
     method public final android.os.IBinder onBind(android.content.Intent);
     method public void onConnectionAdded(android.telecomm.Connection);
     method public void onConnectionRemoved(android.telecomm.Connection);
     method public void onCreateConferenceConnection(java.lang.String, android.telecomm.Connection, android.telecomm.Response<java.lang.String, android.telecomm.Connection>);
-    method public android.telecomm.Connection onCreateIncomingConnection(android.telecomm.ConnectionRequest);
-    method public android.telecomm.Connection onCreateOutgoingConnection(android.telecomm.ConnectionRequest);
+    method public android.telecomm.Connection onCreateIncomingConnection(android.telecomm.PhoneAccountHandle, android.telecomm.ConnectionRequest);
+    method public android.telecomm.Connection onCreateOutgoingConnection(android.telecomm.PhoneAccountHandle, android.telecomm.ConnectionRequest);
     field public static final java.lang.String SERVICE_INTERFACE = "android.telecomm.ConnectionService";
   }
 
@@ -28854,7 +28854,7 @@ package android.telecomm {
   }
 
   public class PhoneAccount implements android.os.Parcelable {
-    ctor public PhoneAccount(android.telecomm.PhoneAccountHandle, android.net.Uri, java.lang.String, int, int, java.lang.CharSequence, java.lang.CharSequence, boolean);
+    ctor public PhoneAccount(android.telecomm.PhoneAccountHandle, android.net.Uri, java.lang.String, int, int, java.lang.CharSequence, java.lang.CharSequence);
     method public int describeContents();
     method public android.telecomm.PhoneAccountHandle getAccountHandle();
     method public int getCapabilities();
@@ -28864,10 +28864,10 @@ package android.telecomm {
     method public java.lang.CharSequence getLabel();
     method public java.lang.CharSequence getShortDescription();
     method public java.lang.String getSubscriptionNumber();
-    method public boolean isVideoCallingSupported();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final int CAPABILITY_SIM_CALL_MANAGER = 1; // 0x1
+    field public static final int CAPABILITY_CONNECTION_MANAGER = 1; // 0x1
     field public static final int CAPABILITY_SIM_SUBSCRIPTION = 4; // 0x4
+    field public static final int CAPABILITY_VIDEO_CALLING = 8; // 0x8
     field public static final android.os.Parcelable.Creator CREATOR;
   }
 
