@@ -56,6 +56,8 @@ import com.android.server.SystemService;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -74,13 +76,14 @@ class TvInputHardwareManager implements TvInputHal.Callback {
     private final Context mContext;
     private final Listener mListener;
     private final TvInputHal mHal = new TvInputHal(this);
-    private final SparseArray<Connection> mConnections = new SparseArray<Connection>();
-    private final List<TvInputHardwareInfo> mInfoList = new ArrayList<TvInputHardwareInfo>();
+    private final SparseArray<Connection> mConnections = new SparseArray<>();
+    private final List<TvInputHardwareInfo> mHardwareList = new ArrayList<>();
+    private List<HdmiCecDeviceInfo> mHdmiCecDeviceList = new LinkedList<>();
     /* A map from a device ID to the matching TV input ID. */
-    private final SparseArray<String> mHardwareInputIdMap = new SparseArray<String>();
+    private final SparseArray<String> mHardwareInputIdMap = new SparseArray<>();
     /* A map from a HDMI logical address to the matching TV input ID. */
-    private final SparseArray<String> mHdmiCecInputIdMap = new SparseArray<String>();
-    private final Map<String, TvInputInfo> mInputMap = new ArrayMap<String, TvInputInfo>();
+    private final SparseArray<String> mHdmiCecInputIdMap = new SparseArray<>();
+    private final Map<String, TvInputInfo> mInputMap = new ArrayMap<>();
 
     private final AudioManager mAudioManager;
     private IHdmiControlService mHdmiControlService;
@@ -88,8 +91,9 @@ class TvInputHardwareManager implements TvInputHal.Callback {
             new HdmiHotplugEventListener();
     private final IHdmiDeviceEventListener mHdmiDeviceEventListener = new HdmiDeviceEventListener();
     private final IHdmiInputChangeListener mHdmiInputChangeListener = new HdmiInputChangeListener();
-    // TODO: Should handle INACTIVE case.
+    // TODO: Should handle STANDBY case.
     private final SparseBooleanArray mHdmiStateMap = new SparseBooleanArray();
+    private final List<Message> mPendingHdmiDeviceEvents = new LinkedList<>();
 
     // Calls to mListener should happen here.
     private final Handler mHandler = new ListenerHandler();
@@ -111,6 +115,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                 try {
                     mHdmiControlService.addHotplugEventListener(mHdmiHotplugEventListener);
                     mHdmiControlService.addDeviceEventListener(mHdmiDeviceEventListener);
+                    mHdmiCecDeviceList.addAll(mHdmiControlService.getInputDevices());
                     mHdmiControlService.setInputChangeListener(mHdmiInputChangeListener);
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Error registering listeners to HdmiControlService:", e);
@@ -125,16 +130,19 @@ class TvInputHardwareManager implements TvInputHal.Callback {
             Connection connection = new Connection(info);
             connection.updateConfigsLocked(configs);
             mConnections.put(info.getDeviceId(), connection);
-            buildInfoListLocked();
+            buildHardwareListLocked();
             mHandler.obtainMessage(
                     ListenerHandler.HARDWARE_DEVICE_ADDED, 0, 0, info).sendToTarget();
+            if (info.getType() == TvInputHardwareInfo.TV_INPUT_TYPE_HDMI) {
+                processPendingHdmiDeviceEventsLocked();
+            }
         }
     }
 
-    private void buildInfoListLocked() {
-        mInfoList.clear();
+    private void buildHardwareListLocked() {
+        mHardwareList.clear();
         for (int i = 0; i < mConnections.size(); ++i) {
-            mInfoList.add(mConnections.valueAt(i).getHardwareInfoLocked());
+            mHardwareList.add(mConnections.valueAt(i).getHardwareInfoLocked());
         }
     }
 
@@ -148,8 +156,20 @@ class TvInputHardwareManager implements TvInputHal.Callback {
             }
             connection.resetLocked(null, null, null, null, null);
             mConnections.remove(deviceId);
-            buildInfoListLocked();
+            buildHardwareListLocked();
             TvInputHardwareInfo info = connection.getHardwareInfoLocked();
+            if (info.getType() == TvInputHardwareInfo.TV_INPUT_TYPE_HDMI) {
+                // Remove HDMI CEC devices linked with this hardware.
+                for (Iterator<HdmiCecDeviceInfo> it = mHdmiCecDeviceList.iterator();
+                        it.hasNext(); ) {
+                    HdmiCecDeviceInfo deviceInfo = it.next();
+                    if (deviceInfo.getPortId() == info.getHdmiPortId()) {
+                        mHandler.obtainMessage(ListenerHandler.HDMI_CEC_DEVICE_REMOVED, 0, 0,
+                                deviceInfo).sendToTarget();
+                        it.remove();
+                    }
+                }
+            }
             mHandler.obtainMessage(
                     ListenerHandler.HARDWARE_DEVICE_REMOVED, 0, 0, info).sendToTarget();
         }
@@ -192,19 +212,14 @@ class TvInputHardwareManager implements TvInputHal.Callback {
 
     public List<TvInputHardwareInfo> getHardwareList() {
         synchronized (mLock) {
-            return mInfoList;
+            return Collections.unmodifiableList(mHardwareList);
         }
     }
 
     public List<HdmiCecDeviceInfo> getHdmiCecInputDeviceList() {
-        if (mHdmiControlService != null) {
-            try {
-                return mHdmiControlService.getInputDevices();
-            } catch (RemoteException e) {
-                Slog.e(TAG, "error in getHdmiCecInputDeviceList", e);
-            }
+        synchronized (mLock) {
+            return Collections.unmodifiableList(mHdmiCecDeviceList);
         }
-        return Collections.emptyList();
     }
 
     private boolean checkUidChangedLocked(
@@ -240,7 +255,12 @@ class TvInputHardwareManager implements TvInputHal.Callback {
             mInputMap.put(info.getId(), info);
 
             for (int i = 0; i < mHdmiStateMap.size(); ++i) {
-                String inputId = findInputIdForHdmiPortLocked(mHdmiStateMap.keyAt(i));
+                TvInputHardwareInfo hardwareInfo =
+                        findHardwareInfoForHdmiPortLocked(mHdmiStateMap.keyAt(i));
+                if (hardwareInfo == null) {
+                    continue;
+                }
+                String inputId = mHardwareInputIdMap.get(hardwareInfo.getDeviceId());
                 if (inputId != null && inputId.equals(info.getId())) {
                     mHandler.obtainMessage(ListenerHandler.STATE_CHANGED,
                             convertConnectedToState(mHdmiStateMap.valueAt(i)), 0,
@@ -345,11 +365,11 @@ class TvInputHardwareManager implements TvInputHal.Callback {
         }
     }
 
-    private String findInputIdForHdmiPortLocked(int port) {
-        for (TvInputHardwareInfo hardwareInfo : mInfoList) {
+    private TvInputHardwareInfo findHardwareInfoForHdmiPortLocked(int port) {
+        for (TvInputHardwareInfo hardwareInfo : mHardwareList) {
             if (hardwareInfo.getType() == TvInputHardwareInfo.TV_INPUT_TYPE_HDMI
                     && hardwareInfo.getHdmiPortId() == port) {
-                return mHardwareInputIdMap.get(hardwareInfo.getDeviceId());
+                return hardwareInfo;
             }
         }
         return null;
@@ -421,6 +441,19 @@ class TvInputHardwareManager implements TvInputHal.Callback {
             }
         }
         return false;
+    }
+
+    private void processPendingHdmiDeviceEventsLocked() {
+        for (Iterator<Message> it = mPendingHdmiDeviceEvents.iterator(); it.hasNext(); ) {
+            Message msg = it.next();
+            HdmiCecDeviceInfo deviceInfo = (HdmiCecDeviceInfo) msg.obj;
+            TvInputHardwareInfo hardwareInfo =
+                    findHardwareInfoForHdmiPortLocked(deviceInfo.getPortId());
+            if (hardwareInfo != null) {
+                msg.sendToTarget();
+                it.remove();
+            }
+        }
     }
 
     private class Connection implements IBinder.DeathRecipient {
@@ -738,7 +771,12 @@ class TvInputHardwareManager implements TvInputHal.Callback {
         public void onReceived(HdmiHotplugEvent event) {
             synchronized (mLock) {
                 mHdmiStateMap.put(event.getPort(), event.isConnected());
-                String inputId = findInputIdForHdmiPortLocked(event.getPort());
+                TvInputHardwareInfo hardwareInfo =
+                        findHardwareInfoForHdmiPortLocked(event.getPort());
+                if (hardwareInfo == null) {
+                    return;
+                }
+                String inputId = mHardwareInputIdMap.get(hardwareInfo.getDeviceId());
                 if (inputId == null) {
                     return;
                 }
@@ -751,10 +789,30 @@ class TvInputHardwareManager implements TvInputHal.Callback {
     private final class HdmiDeviceEventListener extends IHdmiDeviceEventListener.Stub {
         @Override
         public void onStatusChanged(HdmiCecDeviceInfo deviceInfo, boolean activated) {
-            mHandler.obtainMessage(
-                    activated ? ListenerHandler.HDMI_CEC_DEVICE_ADDED
-                    : ListenerHandler.HDMI_CEC_DEVICE_REMOVED,
-                    0, 0, deviceInfo).sendToTarget();
+            synchronized (mLock) {
+                if (activated) {
+                    if (!mHdmiCecDeviceList.contains(deviceInfo)) {
+                        mHdmiCecDeviceList.add(deviceInfo);
+                    } else {
+                        Slog.w(TAG, "The list already contains " + deviceInfo + "; ignoring.");
+                        return;
+                    }
+                } else {
+                    if (!mHdmiCecDeviceList.remove(deviceInfo)) {
+                        Slog.w(TAG, "The list doesn't contain " + deviceInfo + "; ignoring.");
+                        return;
+                    }
+                }
+                Message msg = mHandler.obtainMessage(
+                        activated ? ListenerHandler.HDMI_CEC_DEVICE_ADDED
+                        : ListenerHandler.HDMI_CEC_DEVICE_REMOVED,
+                        0, 0, deviceInfo);
+                if (findHardwareInfoForHdmiPortLocked(deviceInfo.getPortId()) != null) {
+                    msg.sendToTarget();
+                } else {
+                    mPendingHdmiDeviceEvents.add(msg);
+                }
+            }
         }
     }
 
@@ -766,7 +824,10 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                 if (device.isCecDevice()) {
                     inputId = mHdmiCecInputIdMap.get(device.getLogicalAddress());
                 } else {
-                    inputId = findInputIdForHdmiPortLocked(device.getPortId());
+                    TvInputHardwareInfo hardwareInfo =
+                            findHardwareInfoForHdmiPortLocked(device.getPortId());
+                    inputId = (hardwareInfo == null) ? null
+                            : mHardwareInputIdMap.get(hardwareInfo.getDeviceId());
                 }
             }
             if (inputId != null) {
