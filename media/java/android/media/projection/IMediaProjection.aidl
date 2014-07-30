@@ -25,7 +25,7 @@ interface IMediaProjection {
     boolean canProjectAudio();
     boolean canProjectVideo();
     boolean canProjectSecureVideo();
-    int getVirtualDisplayFlags();
+    int applyVirtualDisplayFlags(int flags);
     void addCallback(IMediaProjectionCallback callback);
     void removeCallback(IMediaProjectionCallback callback);
 }

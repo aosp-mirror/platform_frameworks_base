@@ -1269,43 +1269,31 @@ public final class DisplayManagerService extends SystemService {
                         + "greater than 0");
             }
 
+            if ((flags & DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC) != 0) {
+                flags |= DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR;
+            }
+            if ((flags & DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY) != 0) {
+                flags &= ~DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR;
+            }
+
             if (projection != null) {
                 try {
                     if (!getProjectionService().isValidMediaProjection(projection)) {
                         throw new SecurityException("Invalid media projection");
                     }
+                    flags = projection.applyVirtualDisplayFlags(flags);
                 } catch (RemoteException e) {
-                    throw new SecurityException("unable to validate media projection");
-                }
-                flags &= DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE;
-                try {
-                    flags |= projection.getVirtualDisplayFlags();
-                } catch (RemoteException e) {
-                    throw new RuntimeException("unable to retrieve media projection flags");
+                    throw new SecurityException("unable to validate media projection or flags");
                 }
             }
 
-            if ((flags & DisplayManager.VIRTUAL_DISPLAY_FLAG_SCREEN_SHARE) != 0) {
-                if ((flags & DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC) != 0 ||
-                        (flags & DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION) != 0) {
-                    throw new IllegalArgumentException("screen sharing virtual displays must not "
-                            + "be public or presentation displays");
-                }
+            if (callingUid != Process.SYSTEM_UID &&
+                    (flags & DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR) != 0) {
                 if (!canProjectVideo(projection)) {
                     throw new SecurityException("Requires CAPTURE_VIDEO_OUTPUT or "
                             + "CAPTURE_SECURE_VIDEO_OUTPUT permission, or an appropriate "
                             + "MediaProjection token in order to create a screen sharing virtual "
                             + "display.");
-                }
-            }
-
-
-            if (callingUid != Process.SYSTEM_UID &&
-                    (flags & DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC) != 0) {
-                if (!canProjectVideo(projection)) {
-                    throw new SecurityException("Requires CAPTURE_VIDEO_OUTPUT or "
-                            + "CAPTURE_SECURE_VIDEO_OUTPUT permission, or an appropriate "
-                            + "MediaProjection token to create a public virtual display.");
                 }
             }
             if ((flags & DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE) != 0) {

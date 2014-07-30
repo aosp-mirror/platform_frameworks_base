@@ -262,14 +262,15 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
                 mInfo.presentationDeadlineNanos = 1000000000L / (int) mInfo.refreshRate; // 1 frame
                 mInfo.flags = 0;
                 if ((mFlags & DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC) == 0) {
-                    mInfo.flags |= DisplayDeviceInfo.FLAG_PRIVATE;
-                    if ((mFlags & DisplayManager.VIRTUAL_DISPLAY_FLAG_SCREEN_SHARE) == 0) {
-                        mInfo.flags |=  DisplayDeviceInfo.FLAG_OWN_CONTENT_ONLY
-                                | DisplayDeviceInfo.FLAG_NEVER_BLANK;
-                    }
-                } else if ((mFlags & DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY) != 0) {
+                    mInfo.flags |= DisplayDeviceInfo.FLAG_PRIVATE
+                            | DisplayDeviceInfo.FLAG_NEVER_BLANK;
+                }
+                if ((mInfo.flags & DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR) != 0) {
+                    mInfo.flags &= ~DisplayDeviceInfo.FLAG_NEVER_BLANK;
+                } else {
                     mInfo.flags |= DisplayDeviceInfo.FLAG_OWN_CONTENT_ONLY;
                 }
+
                 if ((mFlags & DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE) != 0) {
                     mInfo.flags |= DisplayDeviceInfo.FLAG_SECURE;
                 }
