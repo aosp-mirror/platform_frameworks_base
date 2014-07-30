@@ -326,6 +326,15 @@ public class MmsServiceBroker extends SystemService {
         }
 
         @Override
+        public boolean archiveStoredConversation(String callingPkg, long conversationId,
+                boolean archived) throws RemoteException {
+            mContext.enforceCallingPermission(Manifest.permission.WRITE_SMS,
+                    "Update SMS/MMS message");
+            return getServiceGuarded()
+                    .archiveStoredConversation(callingPkg, conversationId, archived);
+        }
+
+        @Override
         public Uri addTextMessageDraft(String callingPkg, String address, String text)
                 throws RemoteException {
             mContext.enforceCallingPermission(Manifest.permission.WRITE_SMS, "Add SMS draft");
