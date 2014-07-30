@@ -21,7 +21,7 @@ import android.net.IpConfiguration;
 import android.net.IpConfiguration.ProxySettings;
 import android.net.IpConfiguration.IpAssignment;
 import android.net.ProxyInfo;
-import android.net.LinkProperties;
+import android.net.StaticIpConfiguration;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -1096,13 +1096,13 @@ public class WifiConfiguration implements Parcelable {
     }
 
     /** @hide */
-    public LinkProperties getLinkProperties() {
-        return mIpConfiguration.linkProperties;
+    public StaticIpConfiguration getStaticIpConfiguration() {
+        return mIpConfiguration.getStaticIpConfiguration();
     }
 
     /** @hide */
-    public void setLinkProperties(LinkProperties linkProperties) {
-        mIpConfiguration.linkProperties = linkProperties;
+    public void setStaticIpConfiguration(StaticIpConfiguration staticIpConfiguration) {
+        mIpConfiguration.setStaticIpConfiguration(staticIpConfiguration);
     }
 
     /** @hide */
@@ -1126,9 +1126,19 @@ public class WifiConfiguration implements Parcelable {
     }
 
     /** @hide */
+    public ProxyInfo getHttpProxy() {
+        return mIpConfiguration.httpProxy;
+    }
+
+    /** @hide */
+    public void setHttpProxy(ProxyInfo httpProxy) {
+        mIpConfiguration.httpProxy = httpProxy;
+    }
+
+    /** @hide */
     public void setProxy(ProxySettings settings, ProxyInfo proxy) {
         mIpConfiguration.proxySettings = settings;
-        mIpConfiguration.linkProperties.setHttpProxy(proxy);
+        mIpConfiguration.httpProxy = proxy;
     }
 
     /** Implement the Parcelable interface {@hide} */
