@@ -24,7 +24,10 @@
 #ifndef ANDROID_MINIKIN_UTILS_H
 #define ANDROID_MINIKIN_UTILS_H
 
+#include <minikin/Layout.h>
 #include "Paint.h"
+#include "MinikinSkia.h"
+#include "TypefaceImpl.h"
 
 namespace android {
 
@@ -39,9 +42,6 @@ enum {
 
     kBidi_Mask = 0x7
 };
-
-class Layout;
-class TypefaceImpl;
 
 class MinikinUtils {
 public:
