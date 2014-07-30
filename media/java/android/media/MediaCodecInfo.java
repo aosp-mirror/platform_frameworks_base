@@ -1293,8 +1293,15 @@ public final class MediaCodecInfo {
                                         FR = 30; W = 22; H = 18; MBPS =  5940; FS = 396; BR = 128; break;
                                     case CodecProfileLevel.MPEG4Level3:
                                         FR = 30; W = 22; H = 18; MBPS = 11880; FS = 396; BR = 384; break;
-                                    // TODO while MPEG4 SP does not have level 4 or 5,
-                                    // some vendors report it
+                                    case CodecProfileLevel.MPEG4Level4:
+                                    case CodecProfileLevel.MPEG4Level4a:
+                                    case CodecProfileLevel.MPEG4Level5:
+                                        // While MPEG4 SP does not have level 4 or 5, some vendors
+                                        // report it. Use the same limits as level 3, but mark as
+                                        // unsupported.
+                                        FR = 30; W = 22; H = 18; MBPS = 11880; FS = 396; BR = 384;
+                                        supported = false;
+                                        break;
                                     default:
                                         Log.w(TAG, "Unrecognized profile/level "
                                                 + profileLevel.profile + "/"
@@ -1429,7 +1436,11 @@ public final class MediaCodecInfo {
                     mFrameRateRange = Range.create(1, maxRate);
                 } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_VIDEO_VP8) ||
                         mime.equalsIgnoreCase(MediaFormat.MIMETYPE_VIDEO_VP9)) {
-                    maxBlocks = maxBlocksPerSecond = maxBps = Integer.MAX_VALUE;
+                    maxBlocks = maxBlocksPerSecond = Integer.MAX_VALUE;
+
+                    // TODO: set to 100Mbps for now, need a number for VPX
+                    maxBps = 100000000;
+
                     // profile levels are not indicative for VPx, but verify
                     // them nonetheless
                     for (CodecProfileLevel profileLevel: profileLevels) {
@@ -1549,6 +1560,7 @@ public final class MediaCodecInfo {
                             maxBlocks, maxBlocksPerSecond, 8, 8, 1, 1);
                 } else {
                     Log.w(TAG, "Unsupported mime " + mime);
+                    maxBps = 64000;
                     errors |= ERROR_UNSUPPORTED;
                 }
                 mBitrateRange = Range.create(1, maxBps);
