@@ -28,6 +28,7 @@ import android.content.pm.ServiceInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.Slog;
@@ -94,6 +95,7 @@ public class TrustAgentService extends Service {
     public static final String KEY_FEATURES = "trust_agent_features";
 
     private static final int MSG_UNLOCK_ATTEMPT = 1;
+    private static final int MSG_SET_TRUST_AGENT_FEATURES_ENABLED = 2;
 
     private ITrustAgentServiceCallback mCallback;
 
@@ -110,8 +112,20 @@ public class TrustAgentService extends Service {
                 case MSG_UNLOCK_ATTEMPT:
                     onUnlockAttempt(msg.arg1 != 0);
                     break;
+                case MSG_SET_TRUST_AGENT_FEATURES_ENABLED:
+                    Bundle features = msg.peekData();
+                    IBinder token = (IBinder) msg.obj;
+                    boolean result = onSetTrustAgentFeaturesEnabled(features);
+                    try {
+                        synchronized (mLock) {
+                            mCallback.onSetTrustAgentFeaturesEnabledCompleted(result, token);
+                        }
+                    } catch (RemoteException e) {
+                        onError("calling onSetTrustAgentFeaturesEnabledCompleted()");
+                    }
+                    break;
             }
-        };
+        }
     };
 
     @Override
@@ -278,10 +292,10 @@ public class TrustAgentService extends Service {
         }
 
         @Override
-        public boolean setTrustAgentFeaturesEnabled(Bundle features) {
-            synchronized (mLock) {
-                return onSetTrustAgentFeaturesEnabled(features);
-            }
+        public void setTrustAgentFeaturesEnabled(Bundle features, IBinder token) {
+            Message msg = mHandler.obtainMessage(MSG_SET_TRUST_AGENT_FEATURES_ENABLED, token);
+            msg.setData(features);
+            msg.sendToTarget();
         }
     }
 

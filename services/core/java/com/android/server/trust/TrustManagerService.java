@@ -157,7 +157,7 @@ public class TrustManagerService extends SystemService {
         dispatchOnTrustChanged(aggregateIsTrusted(userId), userId);
     }
 
-    protected void refreshAgentList() {
+    void refreshAgentList() {
         if (DEBUG) Slog.d(TAG, "refreshAgentList()");
         PackageManager pm = mContext.getPackageManager();
 
@@ -168,13 +168,13 @@ public class TrustManagerService extends SystemService {
         obsoleteAgents.addAll(mActiveAgents);
 
         for (UserInfo userInfo : userInfos) {
-            int disabledFeatures = lockPatternUtils.getDevicePolicyManager()
-                    .getKeyguardDisabledFeatures(null, userInfo.id);
+            DevicePolicyManager dpm = lockPatternUtils.getDevicePolicyManager();
+            int disabledFeatures = dpm.getKeyguardDisabledFeatures(null, userInfo.id);
             final boolean disableTrustAgents =
                     (disabledFeatures & DevicePolicyManager.KEYGUARD_DISABLE_TRUST_AGENTS) != 0;
 
             List<ComponentName> enabledAgents = lockPatternUtils.getEnabledTrustAgents(userInfo.id);
-            if (disableTrustAgents || enabledAgents == null) {
+            if (enabledAgents == null) {
                 continue;
             }
             List<ResolveInfo> resolveInfos = pm.queryIntentServicesAsUser(TRUST_AGENT_INTENT,
@@ -192,6 +192,13 @@ public class TrustManagerService extends SystemService {
 
                 ComponentName name = getComponentName(resolveInfo);
                 if (!enabledAgents.contains(name)) continue;
+
+                if (disableTrustAgents) {
+                    List<String> features =
+                            dpm.getTrustAgentFeaturesEnabled(null /* admin */, name);
+                    // Disable agent if no features are enabled.
+                    if (features == null || features.isEmpty()) continue;
+                }
 
                 AgentInfo agentInfo = new AgentInfo();
                 agentInfo.component = name;
@@ -221,6 +228,15 @@ public class TrustManagerService extends SystemService {
 
         if (trustMayHaveChanged) {
             updateTrustAll();
+        }
+    }
+
+    void updateDevicePolicyFeatures(int userId) {
+        for (int i = 0; i < mActiveAgents.size(); i++) {
+            AgentInfo info = mActiveAgents.valueAt(i);
+            if (info.agent.isConnected()) {
+                info.agent.updateDevicePolicyFeatures();
+            }
         }
     }
 
@@ -587,6 +603,7 @@ public class TrustManagerService extends SystemService {
             if (DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED.equals(
                     intent.getAction())) {
                 refreshAgentList();
+                updateDevicePolicyFeatures(getSendingUserId());
             }
         }
 

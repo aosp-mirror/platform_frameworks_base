@@ -16,6 +16,7 @@
 package android.service.trust;
 
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.UserHandle;
 
 /**
@@ -26,4 +27,5 @@ oneway interface ITrustAgentServiceCallback {
     void grantTrust(CharSequence message, long durationMs, boolean initiatedByUser);
     void revokeTrust();
     void setManagingTrust(boolean managingTrust);
+    void onSetTrustAgentFeaturesEnabledCompleted(boolean result, IBinder token);
 }
