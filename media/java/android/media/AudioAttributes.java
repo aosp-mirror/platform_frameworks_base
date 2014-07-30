@@ -19,6 +19,7 @@ package android.media;
 import android.annotation.IntDef;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.lang.annotation.Retention;
@@ -257,12 +258,7 @@ public final class AudioAttributes implements Parcelable {
             aa.mSource = mSource;
             aa.mFlags = mFlags;
             aa.mTags = (HashSet<String>) mTags.clone();
-            final Iterator<String> tagIterator = mTags.iterator();
-            String allTagsInOne = new String();
-            while (tagIterator.hasNext()) {
-                allTagsInOne += tagIterator.next() + ";";
-            }
-            aa.mFormattedTags = allTagsInOne;
+            aa.mFormattedTags = TextUtils.join(";", mTags);
             return aa;
         }
 
@@ -503,12 +499,14 @@ public final class AudioAttributes implements Parcelable {
         boolean hasFlattenedTags = ((in.readInt() & FLATTEN_TAGS) == FLATTEN_TAGS);
         mTags = new HashSet<String>();
         if (hasFlattenedTags) {
-            mTags.add(in.readString());
+            mFormattedTags = new String(in.readString());
+            mTags.add(mFormattedTags);
         } else {
             String[] tagsArray = in.readStringArray();
             for (int i = tagsArray.length - 1 ; i >= 0 ; i--) {
                 mTags.add(tagsArray[i]);
             }
+            mFormattedTags = TextUtils.join(";", mTags);
         }
     }
 
@@ -535,7 +533,7 @@ public final class AudioAttributes implements Parcelable {
                 + " usage=" + mUsage
                 + " content=" + mContentType
                 + " flags=0x" + Integer.toHexString(mFlags).toUpperCase()
-                + " tags=" + mTags);
+                + " tags=" + mFormattedTags);
     }
 
     /** @hide */
