@@ -271,18 +271,12 @@
     <string name="guest_nickname" msgid="8059989128963789678">"ແຂກ"</string>
     <string name="guest_new_guest" msgid="4259024453643879653">"+ ແຂກ"</string>
     <string name="guest_exit_guest" msgid="1619100760451149682">"​ອອກ​ຈາກ​ຜູ່​ມາ​ຢາມ"</string>
-    <!-- no translation found for guest_exit_guest_dialog_title (7587460301980067285) -->
-    <skip />
-    <!-- no translation found for guest_exit_guest_dialog_message (10255285459589280) -->
-    <skip />
-    <!-- no translation found for guest_wipe_session_title (6419439912885956132) -->
-    <skip />
-    <!-- no translation found for guest_wipe_session_message (5369763062345463297) -->
-    <skip />
-    <!-- no translation found for guest_wipe_session_wipe (9154291314115781448) -->
-    <skip />
-    <!-- no translation found for guest_wipe_session_dontwipe (850084868661344050) -->
-    <skip />
+    <string name="guest_exit_guest_dialog_title" msgid="7587460301980067285">"ສິ້ນ​ສຸດ​ການ​ນຳ​ໃຊ້​ຂອງ​ຜູ່​ຢ້ຽມ​ຢາມບໍ່?"</string>
+    <string name="guest_exit_guest_dialog_message" msgid="10255285459589280">"​ການ​ອອກ​ຈາກ​ເຊດ​ຊັນ​ຜູ່​ຢ້ຽມ​ຢາມ​ຈະ​ເປັນ​ການ​ລຶບ​ຂໍ້​ມູນ​ໃນ​ເຄື່ອງອອ."</string>
+    <string name="guest_wipe_session_title" msgid="6419439912885956132">"ຍິນ​ດີ​ຕ້ອນ​ຮັບ​ກັບ​ມາ, ຜູ່​ຢ້ຽມ​ຢາມ!"</string>
+    <string name="guest_wipe_session_message" msgid="5369763062345463297">"ທ່ານ​ຕ້ອງ​ການ​ເລີ່ມ​ເຊດ​ຊັນ​ໃໝ່​ບໍ່?"</string>
+    <string name="guest_wipe_session_wipe" msgid="9154291314115781448">"​ແມ່ນ​ແລ້ວ"</string>
+    <string name="guest_wipe_session_dontwipe" msgid="850084868661344050">"ບໍ່, ຂອບໃຈ"</string>
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"ເປັນ​ເວລາ​ນຶ່ງ​ນາ​ທີ"</item>
     <item quantity="other" msgid="6924190729213550991">"ເປັນ​ເວລາ %d ນາ​ທີ"</item>

@@ -73,7 +73,7 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Pantaila-argazkia atera da."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"Pantaila-argazkia ikusteko, ukitu ezazu."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Ezin izan da pantaila-argazkia atera."</string>
-    <string name="screenshot_failed_text" msgid="1260203058661337274">"Ezin da pantaila-argazkia atera memorian tokirik geratzen ez delako edo aplikazioak edo erakundeak horrelakorik onartzen ez duelako."</string>
+    <string name="screenshot_failed_text" msgid="1260203058661337274">"Ezin da atera pantaila-argazkia tokirik geratzen ez delako edo horrelakorik onartzen ez delako."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB fitxategiak transferitzeko aukerak"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Muntatu multimedia-erreproduzigailu gisa (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Muntatu kamera gisa (PTP)"</string>
@@ -150,11 +150,9 @@
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"TeleTypewriter gaituta."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Tonu-jotzailea dardara moduan."</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Tonu-jotzailea isilik."</string>
-    <!-- no translation found for accessibility_recents_item_will_be_dismissed (395770242498031481) -->
-    <skip />
+    <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"Baztertu <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> baztertu da."</string>
-    <!-- no translation found for accessibility_recents_item_launched (7616039892382525203) -->
-    <skip />
+    <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"<xliff:g id="APP">%s</xliff:g> hasten."</string>
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Jakinarazpena baztertu da."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"Jakinarazpenen panela."</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Ezarpen bizkorrak."</string>
@@ -274,7 +272,7 @@
     <string name="guest_new_guest" msgid="4259024453643879653">"+ Gonbidatua"</string>
     <string name="guest_exit_guest" msgid="1619100760451149682">"Irten gonbidatuen modutik"</string>
     <string name="guest_exit_guest_dialog_title" msgid="7587460301980067285">"Gonbidatuentzako saiotik irten nahi duzu?"</string>
-    <string name="guest_exit_guest_dialog_message" msgid="10255285459589280">"Gonbidatuentzako saiotik irteten bazara, tokiko datuak kenduko dira."</string>
+    <string name="guest_exit_guest_dialog_message" msgid="10255285459589280">"Gonbidatuentzako saiotik irteten bazara, datu lokalak kenduko dira."</string>
     <string name="guest_wipe_session_title" msgid="6419439912885956132">"Ongi etorri berriro, gonbidatu hori!"</string>
     <string name="guest_wipe_session_message" msgid="5369763062345463297">"Beste saio bat hasi nahi duzu?"</string>
     <string name="guest_wipe_session_wipe" msgid="9154291314115781448">"Bai"</string>
@@ -294,9 +292,7 @@
     <string name="notification_hidden_text" msgid="1135169301897151909">"Edukiak ezkutatuta daude"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> aplikazioak pantailan bistaratzen den guztia grabatuko du."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Ez erakutsi berriro"</string>
-    <!-- no translation found for clear_all_notifications_text (814192889771462828) -->
-    <skip />
+    <string name="clear_all_notifications_text" msgid="814192889771462828">"Garbitu guztia"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Hasi"</string>
-    <!-- no translation found for empty_shade_text (708135716272867002) -->
-    <skip />
+    <string name="empty_shade_text" msgid="708135716272867002">"Ez dago jakinarazpenik"</string>
 </resources>

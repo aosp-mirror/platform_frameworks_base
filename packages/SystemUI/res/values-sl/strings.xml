@@ -150,11 +150,9 @@
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"TeleTypewriter omogočen."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Zvonjenje z vibriranjem."</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Zvonjenje izklopljeno."</string>
-    <!-- no translation found for accessibility_recents_item_will_be_dismissed (395770242498031481) -->
-    <skip />
+    <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"Opusti aplikacijo <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"Program <xliff:g id="APP">%s</xliff:g> je bil odstranjen."</string>
-    <!-- no translation found for accessibility_recents_item_launched (7616039892382525203) -->
-    <skip />
+    <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"Zaganjanje aplikacije <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Obvestilo je bilo odstranjeno."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"Zaslon z obvestili."</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Hitre nastavitve."</string>
@@ -294,9 +292,7 @@
     <string name="notification_hidden_text" msgid="1135169301897151909">"Vsebina je skrita"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"Aplikacija <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> bo začela zajemati vse, kar je prikazano na zaslonu."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Tega ne prikaži več"</string>
-    <!-- no translation found for clear_all_notifications_text (814192889771462828) -->
-    <skip />
+    <string name="clear_all_notifications_text" msgid="814192889771462828">"Izbriši vse"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Začni zdaj"</string>
-    <!-- no translation found for empty_shade_text (708135716272867002) -->
-    <skip />
+    <string name="empty_shade_text" msgid="708135716272867002">"Ni obvestil"</string>
 </resources>
