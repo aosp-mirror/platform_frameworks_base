@@ -66,6 +66,13 @@ import android.util.Slog;
 public class TrustAgentService extends Service {
     private final String TAG = TrustAgentService.class.getSimpleName() +
             "[" + getClass().getSimpleName() + "]";
+    private static final boolean DEBUG = false;
+
+    // Temporary workaround to allow current trust agent implementations to continue working.
+    // This and the code guarded by this should be removed before shipping.
+    // If true, calls setManagingTrust(true) after onCreate, if it wasn't already set.
+    // TODO: Remove this once all agents are updated.
+    private static final boolean SET_MANAGED_FOR_LEGACY_AGENTS = true;
 
     /**
      * The {@link Intent} that must be declared as handled by the service.
@@ -88,11 +95,11 @@ public class TrustAgentService extends Service {
 
     private static final int MSG_UNLOCK_ATTEMPT = 1;
 
-    private static final boolean DEBUG = false;
-
     private ITrustAgentServiceCallback mCallback;
 
     private Runnable mPendingGrantTrustTask;
+
+    private boolean mManagingTrust;
 
     // Lock used to access mPendingGrantTrustTask and mCallback.
     private final Object mLock = new Object();
@@ -109,6 +116,11 @@ public class TrustAgentService extends Service {
 
     @Override
     public void onCreate() {
+        // TODO: Remove this once all agents are updated.
+        if (SET_MANAGED_FOR_LEGACY_AGENTS) {
+            setManagingTrust(true);
+        }
+
         super.onCreate();
         ComponentName component = new ComponentName(this, getClass());
         try {
@@ -163,10 +175,15 @@ public class TrustAgentService extends Service {
      *                   for this agent will automatically be revoked when the timeout expires.
      * @param initiatedByUser indicates that the user has explicitly initiated an action that proves
      *                        the user is about to use the device.
+     * @throws IllegalStateException if the agent is not currently managing trust.
      */
     public final void grantTrust(
             final CharSequence message, final long durationMs, final boolean initiatedByUser) {
         synchronized (mLock) {
+            if (!mManagingTrust) {
+                throw new IllegalStateException("Cannot grant trust if agent is not managing trust."
+                        + " Call setManagingTrust(true) first.");
+            }
             if (mCallback != null) {
                 try {
                     mCallback.grantTrust(message.toString(), durationMs, initiatedByUser);
@@ -204,6 +221,29 @@ public class TrustAgentService extends Service {
         }
     }
 
+    /**
+     * Call to notify the system if the agent is ready to manage trust.
+     *
+     * This property is not persistent across recreating the service and defaults to false.
+     * Therefore this method is typically called when initializing the agent in {@link #onCreate}.
+     *
+     * @param managingTrust indicates if the agent would like to manage trust.
+     */
+    public final void setManagingTrust(boolean managingTrust) {
+        synchronized (mLock) {
+            if (mManagingTrust != managingTrust) {
+                mManagingTrust = managingTrust;
+                if (mCallback != null) {
+                    try {
+                        mCallback.setManagingTrust(managingTrust);
+                    } catch (RemoteException e) {
+                        onError("calling setManagingTrust()");
+                    }
+                }
+            }
+        }
+    }
+
     @Override
     public final IBinder onBind(Intent intent) {
         if (DEBUG) Slog.v(TAG, "onBind() intent = " + intent);
@@ -221,6 +261,15 @@ public class TrustAgentService extends Service {
         public void setCallback(ITrustAgentServiceCallback callback) {
             synchronized (mLock) {
                 mCallback = callback;
+                // The managingTrust property is false implicitly on the server-side, so we only
+                // need to set it here if the agent has decided to manage trust.
+                if (mManagingTrust) {
+                    try {
+                        mCallback.setManagingTrust(mManagingTrust);
+                    } catch (RemoteException e ) {
+                        onError("calling setManagingTrust()");
+                    }
+                }
                 if (mPendingGrantTrustTask != null) {
                     mPendingGrantTrustTask.run();
                     mPendingGrantTrustTask = null;

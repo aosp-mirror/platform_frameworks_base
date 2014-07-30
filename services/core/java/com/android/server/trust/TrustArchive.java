@@ -35,6 +35,7 @@ public class TrustArchive {
     private static final int TYPE_AGENT_DIED = 3;
     private static final int TYPE_AGENT_CONNECTED = 4;
     private static final int TYPE_AGENT_STOPPED = 5;
+    private static final int TYPE_MANAGING_TRUST = 6;
 
     private static final int HISTORY_LIMIT = 200;
 
@@ -49,8 +50,11 @@ public class TrustArchive {
         final long duration;
         final boolean userInitiated;
 
+        // managingTrust
+        final boolean managingTrust;
+
         private Event(int type, int userId, ComponentName agent, String message,
-                long duration, boolean userInitiated) {
+                long duration, boolean userInitiated, boolean managingTrust) {
             this.type = type;
             this.userId = userId;
             this.agent = agent;
@@ -58,6 +62,7 @@ public class TrustArchive {
             this.message = message;
             this.duration = duration;
             this.userInitiated = userInitiated;
+            this.managingTrust = managingTrust;
         }
     }
 
@@ -66,27 +71,31 @@ public class TrustArchive {
     public void logGrantTrust(int userId, ComponentName agent, String message,
             long duration, boolean userInitiated) {
         addEvent(new Event(TYPE_GRANT_TRUST, userId, agent, message, duration,
-                userInitiated));
+                userInitiated, false));
     }
 
     public void logRevokeTrust(int userId, ComponentName agent) {
-        addEvent(new Event(TYPE_REVOKE_TRUST, userId, agent, null, 0, false));
+        addEvent(new Event(TYPE_REVOKE_TRUST, userId, agent, null, 0, false, false));
     }
 
     public void logTrustTimeout(int userId, ComponentName agent) {
-        addEvent(new Event(TYPE_TRUST_TIMEOUT, userId, agent, null, 0, false));
+        addEvent(new Event(TYPE_TRUST_TIMEOUT, userId, agent, null, 0, false, false));
     }
 
     public void logAgentDied(int userId, ComponentName agent) {
-        addEvent(new Event(TYPE_AGENT_DIED, userId, agent, null, 0, false));
+        addEvent(new Event(TYPE_AGENT_DIED, userId, agent, null, 0, false, false));
     }
 
     public void logAgentConnected(int userId, ComponentName agent) {
-        addEvent(new Event(TYPE_AGENT_CONNECTED, userId, agent, null, 0, false));
+        addEvent(new Event(TYPE_AGENT_CONNECTED, userId, agent, null, 0, false, false));
     }
 
     public void logAgentStopped(int userId, ComponentName agent) {
-        addEvent(new Event(TYPE_AGENT_STOPPED, userId, agent, null, 0, false));
+        addEvent(new Event(TYPE_AGENT_STOPPED, userId, agent, null, 0, false, false));
+    }
+
+    public void logManagingTrust(int userId, ComponentName agent, boolean managing) {
+        addEvent(new Event(TYPE_MANAGING_TRUST, userId, agent, null, 0, false, managing));
     }
 
     private void addEvent(Event e) {
@@ -122,6 +131,9 @@ public class TrustArchive {
                 case TYPE_GRANT_TRUST:
                     writer.printf(", message=\"%s\", duration=%s",
                             ev.message, formatDuration(ev.duration));
+                    break;
+                case TYPE_MANAGING_TRUST:
+                    writer.printf(", managingTrust=" + ev.managingTrust);
                     break;
                 default:
             }
@@ -166,6 +178,8 @@ public class TrustArchive {
                 return "AgentConnected";
             case TYPE_AGENT_STOPPED:
                 return "AgentStopped";
+            case TYPE_MANAGING_TRUST:
+                return "ManagingTrust";
             default:
                 return "Unknown(" + type + ")";
         }

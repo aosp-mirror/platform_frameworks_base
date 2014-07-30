@@ -29,6 +29,7 @@ public class SampleTrustAgentSettings extends Activity implements View.OnClickLi
     private static final int TRUST_DURATION_MS = 30 * 1000;
 
     private CheckBox mReportUnlockAttempts;
+    private CheckBox mManagingTrust;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -41,12 +42,16 @@ public class SampleTrustAgentSettings extends Activity implements View.OnClickLi
 
         mReportUnlockAttempts = (CheckBox) findViewById(R.id.report_unlock_attempts);
         mReportUnlockAttempts.setOnCheckedChangeListener(this);
+
+        mManagingTrust = (CheckBox) findViewById(R.id.managing_trust);
+        mManagingTrust.setOnCheckedChangeListener(this);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         mReportUnlockAttempts.setChecked(SampleTrustAgent.getReportUnlockAttempts(this));
+        mManagingTrust.setChecked(SampleTrustAgent.getIsManagingTrust(this));
     }
 
     @Override
@@ -64,8 +69,10 @@ public class SampleTrustAgentSettings extends Activity implements View.OnClickLi
 
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        if (buttonView.getId() == R.id.report_unlock_attempts) {
+        if (buttonView == mReportUnlockAttempts) {
             SampleTrustAgent.setReportUnlockAttempts(this, isChecked);
+        } else if (buttonView == mManagingTrust) {
+            SampleTrustAgent.setIsManagingTrust(this, isChecked);
         }
     }
 }

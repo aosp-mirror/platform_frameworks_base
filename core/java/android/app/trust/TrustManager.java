@@ -31,6 +31,7 @@ import android.util.Log;
 public class TrustManager {
 
     private static final int MSG_TRUST_CHANGED = 1;
+    private static final int MSG_TRUST_MANAGED_CHANGED = 2;
 
     private static final String TAG = "TrustManager";
 
@@ -98,6 +99,13 @@ public class TrustManager {
                     mHandler.obtainMessage(MSG_TRUST_CHANGED, (enabled ? 1 : 0), userId,
                             trustListener).sendToTarget();
                 }
+
+                @Override
+                public void onTrustManagedChanged(boolean managed, int userId)
+                        throws RemoteException {
+                    mHandler.obtainMessage(MSG_TRUST_MANAGED_CHANGED, (managed ? 1 : 0), userId,
+                            trustListener).sendToTarget();
+                }
             };
             mService.registerTrustListener(iTrustListener);
             mTrustListeners.put(trustListener, iTrustListener);
@@ -133,6 +141,8 @@ public class TrustManager {
                 case MSG_TRUST_CHANGED:
                     ((TrustListener)msg.obj).onTrustChanged(msg.arg1 != 0, msg.arg2);
                     break;
+                case MSG_TRUST_MANAGED_CHANGED:
+                    ((TrustListener)msg.obj).onTrustManagedChanged(msg.arg1 != 0, msg.arg2);
             }
         }
     };
@@ -145,5 +155,12 @@ public class TrustManager {
          * @param userId the user, for which the trust changed.
          */
         void onTrustChanged(boolean enabled, int userId);
+
+        /**
+         * Reports that whether trust is managed has changed
+         * @param enabled if true, at least one trust agent is managing trust.
+         * @param userId the user, for which the state changed.
+         */
+        void onTrustManagedChanged(boolean enabled, int userId);
     }
 }

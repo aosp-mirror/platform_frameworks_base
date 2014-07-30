@@ -237,6 +237,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
                 ? R.drawable.ic_lock_open_24dp
                 : R.drawable.ic_lock_24dp;
         mLockIcon.setImageResource(iconRes);
+        boolean trustManaged = mUnlockMethodCache.isTrustManaged();
+        mLockIcon.setBackgroundResource(trustManaged ? R.drawable.trust_circle : 0);
     }
 
     public KeyguardAffordanceView getPhoneView() {
