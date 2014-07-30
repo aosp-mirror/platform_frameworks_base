@@ -28,6 +28,7 @@ import android.hardware.camera2.legacy.ParameterUtils.WeightedRectangle;
 import android.hardware.camera2.legacy.ParameterUtils.ZoomData;
 import android.hardware.camera2.params.MeteringRectangle;
 import android.hardware.camera2.utils.ListUtils;
+import android.hardware.camera2.utils.ParamsUtils;
 import android.util.Log;
 import android.util.Size;
 
@@ -151,6 +152,51 @@ public class LegacyResultMapper {
         if (LegacyMetadataMapper.LIE_ABOUT_AWB) {
             result.set(CaptureResult.CONTROL_AWB_MODE,
                     request.get(CaptureRequest.CONTROL_AWB_MODE));
+        }
+
+
+        /*
+         * control.mode
+         */
+        {
+            int controlMode = ParamsUtils.getOrDefault(request, CaptureRequest.CONTROL_MODE,
+                    CONTROL_MODE_AUTO);
+            if (controlMode == CaptureResult.CONTROL_MODE_USE_SCENE_MODE) {
+                result.set(CONTROL_MODE, CONTROL_MODE_USE_SCENE_MODE);
+            } else {
+                result.set(CONTROL_MODE, CONTROL_MODE_AUTO);
+            }
+        }
+
+        /*
+         * control.sceneMode
+         */
+        {
+            String legacySceneMode = params.getSceneMode();
+            int mode = LegacyMetadataMapper.convertSceneModeFromLegacy(legacySceneMode);
+            if (mode != LegacyMetadataMapper.UNKNOWN_MODE) {
+                result.set(CaptureResult.CONTROL_SCENE_MODE, mode);
+            }  else {
+                Log.w(TAG, "Unknown scene mode " + legacySceneMode +
+                        " returned by camera HAL, setting to disabled.");
+                result.set(CaptureResult.CONTROL_SCENE_MODE, CONTROL_SCENE_MODE_DISABLED);
+            }
+        }
+
+
+        /*
+         * control.effectMode
+         */
+        {
+            String legacyEffectMode = params.getColorEffect();
+            int mode = LegacyMetadataMapper.convertEffectModeFromLegacy(legacyEffectMode);
+            if (mode != LegacyMetadataMapper.UNKNOWN_MODE) {
+                result.set(CaptureResult.CONTROL_EFFECT_MODE, mode);
+            } else {
+                Log.w(TAG, "Unknown effect mode " + legacyEffectMode +
+                        " returned by camera HAL, setting to off.");
+                result.set(CaptureResult.CONTROL_EFFECT_MODE, CONTROL_EFFECT_MODE_OFF);
+            }
         }
 
         /*
