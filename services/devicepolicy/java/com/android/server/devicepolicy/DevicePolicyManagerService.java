@@ -2745,13 +2745,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (userHandle == UserHandle.USER_OWNER) {
             wipeDataLocked(flags);
         } else {
-            lockNowUnchecked();
             mHandler.post(new Runnable() {
                 public void run() {
                     try {
                         ActivityManagerNative.getDefault().switchUser(UserHandle.USER_OWNER);
-                        (mUserManager)
-                                .removeUser(userHandle);
+                        mUserManager.removeUser(userHandle);
                     } catch (RemoteException re) {
                         // Shouldn't happen
                     }
