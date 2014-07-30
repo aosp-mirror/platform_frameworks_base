@@ -5081,7 +5081,12 @@ public final class ActivityThread {
     }
 
     public static ActivityThread systemMain() {
-        HardwareRenderer.disable(true);
+        // The system process on low-memory devices do not get to use hardware
+        // accelerated drawing, since this can add too much overhead to the
+        // process.
+        if (!ActivityManager.isHighEndGfx()) {
+            HardwareRenderer.disable(true);
+        }
         ActivityThread thread = new ActivityThread();
         thread.attach(true);
         return thread;
