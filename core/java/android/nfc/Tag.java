@@ -196,7 +196,7 @@ public final class Tag implements Parcelable {
         return strings;
     }
 
-    static int[] techListFromStrings(String[] techStringList) throws IllegalArgumentException {
+    static int[] getTechCodesFromStrings(String[] techStringList) throws IllegalArgumentException {
         if (techStringList == null) {
             throw new IllegalArgumentException("List cannot be null");
         }
