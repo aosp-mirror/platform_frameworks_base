@@ -52,16 +52,16 @@ Android TV platform.</p>
 </p>
 <p>Unplug the included power cable from the back of ADT-1. The device does not have an on/off
   switch. However, ADT-1 will begin sleeping (daydream) based on user settings in
-  <strong>Settings &gt; Display &gt; Daydream</strong>.
+  <strong>Settings &gt; Device &gt; Display &gt; Daydream</strong>.
   </p>
 
 <p>
   <strong>How do I connect to the network?</strong>
 </p>
 <p>ADT-1 has both wireless and Ethernet for connecting to your network. To change your wireless
-  network, go to <strong>Settings -&gt; Wi-Fi</strong>. To use an Ethernet network connection,
-  simply plug an Ethernet cable (that is connected to your network) into the port on the back of
-  ADT-1.</p>
+  network, go to <strong>Settings &gt; Device &gt; Wi-Fi</strong>. To use an Ethernet network
+  connection, simply plug an Ethernet cable (that is connected to your network) into the port on
+  the back of ADT-1.</p>
 
 <p>
   <strong>How do I use the developer cable?</strong>
@@ -70,6 +70,35 @@ Android TV platform.</p>
   power port on the back of ADT-1, a standard male USB-A connector that connects your PC, and a
   small, female power connector that the included power supply plugs into.</p>
 
+<p class="note">
+  <strong>Note:</strong> Make sure you have enabled USB debugging in <strong>Settings &gt;
+  Preferences &gt; Developer options &gt; Debugging &gt; USB debugging</strong>, so that you can
+  use the Android Debug Bridge (adb) to connect with the ADT-1 device.
+</p>
+
+<p id="adb-tcp">
+  <strong>Can I connect without a developer cable?</strong>
+</p>
+<p>
+  Yes. The ADT-1 device is enabled for Android Debug Bridge (adb) connections over TCP/IP. To
+  connect to the ADT-1 device using this method:
+</p>
+<ol>
+  <li>Make sure that your development computer and the ADT-1 device are on the same network.</li>
+  <li>Determine the IP address of the ADT-1 device by navigating to <strong>Settings &gt;
+    Device &gt; Wi-Fi &gt; your-network-name &gt; Status info</strong>.</li>
+  <li>Connect to the ADT-1 device using the following adb command:
+<pre>
+$ adb connect &lt;ip-address-for-adt-1&gt;:4321
+</pre>
+  </li>
+</ol>
+
+<p class="note">
+  <strong>Note:</strong> Make sure you have enabled USB debugging in <strong>Settings &gt;
+  Preferences &gt; Developer options &gt; Debugging &gt; USB debugging</strong>, so that you can
+  use the Android Debug Bridge (adb) to connect with the ADT-1 device.
+</p>
 
 
 <h3 id="input">User Input</h3>
@@ -179,8 +208,8 @@ Android TV platform.</p>
   <strong>How do I register my ADT-1 in order to run my apps?</strong>
 </p>
 <ol>
-  <li>Go to <strong>Settings &gt; Google Cast</strong> and turn on developer support, allowing the
-    ADT-1 device to send its serial number to Google.</li>
+  <li>Go to <strong>Settings &gt; Device &gt; Google Cast</strong> and turn on developer support,
+    allowing the ADT-1 device to send its serial number to Google.</li>
   <li>Register your ADT-1 device in the Google Cast Developer Console, using the 12 character
     serial number engraved on the back of the ADT-1.</li>
 </ol>
@@ -203,8 +232,8 @@ Android TV platform.</p>
 <p>
   <strong>Why doesn't the on-screen keyboard come up?</strong>
 </p>
-<p>Enable the keyboard in the device Settings. Go to <strong>Settings &gt; Keyboard &gt; Current
-  keyboard</strong> and choose <strong>Leanback keyboard</strong>.
+<p>Enable the keyboard in the device Settings. Go to <strong>Settings &gt; Preferences &gt;
+  Keyboard &gt; Current keyboard</strong> and choose <strong>Leanback keyboard</strong>.
 
 <p>
   <strong>How do I perform a hardware reboot?</strong>
@@ -221,8 +250,8 @@ Android TV platform.</p>
   data, downloaded apps, app data, and account settings.
 </p>
 
-<p>From the home screen, go to <strong>Settings &gt; Device &gt; Factory data reset</strong>, and
-  select <strong>Reset device</strong>.
+<p>From the home screen, go to <strong>Settings &gt; Device &gt; Storage &amp; Reset</strong>, and
+  select <strong>Factory data reset</strong>.
 </p>
 
 <p>
@@ -279,4 +308,3 @@ read this information before using the device:</p>
   <li><a href="regulatory.html">Regulatory Disclosures</a></li>
   <li><a href="safety.html">Important Safety Information</a></li>
 </ul>
-
