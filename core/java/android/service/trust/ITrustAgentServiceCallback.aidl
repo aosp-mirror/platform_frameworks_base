@@ -25,4 +25,5 @@ import android.os.UserHandle;
 oneway interface ITrustAgentServiceCallback {
     void grantTrust(CharSequence message, long durationMs, boolean initiatedByUser);
     void revokeTrust();
+    void setManagingTrust(boolean managingTrust);
 }

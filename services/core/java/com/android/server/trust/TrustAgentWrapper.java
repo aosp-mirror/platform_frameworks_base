@@ -52,6 +52,7 @@ public class TrustAgentWrapper {
     private static final int MSG_TRUST_TIMEOUT = 3;
     private static final int MSG_RESTART_TIMEOUT = 4;
     private static final int MSG_DPM_CHANGED = 5;
+    private static final int MSG_MANAGING_TRUST = 6;
 
     /**
      * Time in uptime millis that we wait for the service connection, both when starting
@@ -77,6 +78,7 @@ public class TrustAgentWrapper {
     private boolean mTrusted;
     private CharSequence mMessage;
     private boolean mTrustDisabledByDpm;
+    private boolean mManagingTrust;
 
     private final Handler mHandler = new Handler() {
         @Override
@@ -122,6 +124,15 @@ public class TrustAgentWrapper {
                 case MSG_DPM_CHANGED:
                     updateDevicePolicyFeatures(mName);
                     break;
+                case MSG_MANAGING_TRUST:
+                    mManagingTrust = msg.arg1 != 0;
+                    if (!mManagingTrust) {
+                        mTrusted = false;
+                        mMessage = null;
+                    }
+                    mTrustManagerService.mArchive.logManagingTrust(mUserId, mName, mManagingTrust);
+                    mTrustManagerService.updateTrust(mUserId);
+                    break;
             }
         }
     };
@@ -144,6 +155,12 @@ public class TrustAgentWrapper {
             if (DEBUG) Slog.v(TAG, "revokeTrust()");
             mHandler.sendEmptyMessage(MSG_REVOKE_TRUST);
         }
+
+        @Override
+        public void setManagingTrust(boolean managingTrust) {
+            if (DEBUG) Slog.v(TAG, "managingTrust()");
+            mHandler.obtainMessage(MSG_MANAGING_TRUST, managingTrust ? 1 : 0, 0).sendToTarget();
+        }
     };
 
     private final ServiceConnection mConnection = new ServiceConnection() {
@@ -162,6 +179,7 @@ public class TrustAgentWrapper {
         public void onServiceDisconnected(ComponentName name) {
             if (DEBUG) Log.v(TAG, "TrustAgent disconnected : " + name.flattenToShortString());
             mTrustAgentService = null;
+            mManagingTrust = false;
             mTrustManagerService.mArchive.logAgentDied(mUserId, name);
             mHandler.sendEmptyMessage(MSG_REVOKE_TRUST);
             if (mBound) {
@@ -278,7 +296,11 @@ public class TrustAgentWrapper {
     }
 
     public boolean isTrusted() {
-        return mTrusted && !mTrustDisabledByDpm;
+        return mTrusted && mManagingTrust && !mTrustDisabledByDpm;
+    }
+
+    public boolean isManagingTrust() {
+        return mManagingTrust && !mTrustDisabledByDpm;
     }
 
     public CharSequence getMessage() {

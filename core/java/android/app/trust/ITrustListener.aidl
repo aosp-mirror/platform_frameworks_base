@@ -23,4 +23,5 @@ package android.app.trust;
  */
 oneway interface ITrustListener {
     void onTrustChanged(boolean enabled, int userId);
+    void onTrustManagedChanged(boolean managed, int userId);
 }

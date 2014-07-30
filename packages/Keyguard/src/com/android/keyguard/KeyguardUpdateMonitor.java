@@ -216,6 +216,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     };
 
     private SparseBooleanArray mUserHasTrust = new SparseBooleanArray();
+    private SparseBooleanArray mUserTrustIsManaged = new SparseBooleanArray();
     private SparseBooleanArray mUserFingerprintRecognized = new SparseBooleanArray();
 
     @Override
@@ -226,6 +227,18 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
                 cb.onTrustChanged(userId);
+            }
+        }
+    }
+
+    @Override
+    public void onTrustManagedChanged(boolean managed, int userId) {
+        mUserTrustIsManaged.put(userId, managed);
+
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+            if (cb != null) {
+                cb.onTrustManagedChanged(userId);
             }
         }
     }
@@ -303,6 +316,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     public boolean getUserHasTrust(int userId) {
         return !isTrustDisabled(userId) && mUserHasTrust.get(userId)
                 || mUserFingerprintRecognized.get(userId);
+    }
+
+    public boolean getUserTrustIsManaged(int userId) {
+        return mUserTrustIsManaged.get(userId) && !isTrustDisabled(userId);
     }
 
     static class DisplayClientState {
