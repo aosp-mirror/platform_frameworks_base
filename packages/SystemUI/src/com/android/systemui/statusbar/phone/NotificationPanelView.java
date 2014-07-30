@@ -937,12 +937,16 @@ public class NotificationPanelView extends PanelView implements
     }
     private void updateNotificationTranslucency() {
         float alpha = (getNotificationsTopY() + mNotificationStackScroller.getItemHeight())
-                / (mQsMinExpansionHeight + mNotificationStackScroller.getItemHeight() / 2);
+                / (mQsMinExpansionHeight + mNotificationStackScroller.getBottomStackPeekSize()
+                        + mNotificationStackScroller.getCollapseSecondCardPadding());
         alpha = Math.max(0, Math.min(alpha, 1));
         alpha = (float) Math.pow(alpha, 0.75);
-
-        // TODO: Draw a rect with DST_OUT over the notifications to achieve the same effect -
-        // this would be much more efficient.
+        if (alpha != 1f && mNotificationStackScroller.getLayerType() != LAYER_TYPE_HARDWARE) {
+            mNotificationStackScroller.setLayerType(LAYER_TYPE_HARDWARE, null);
+        } else if (alpha == 1f
+                && mNotificationStackScroller.getLayerType() == LAYER_TYPE_HARDWARE) {
+            mNotificationStackScroller.setLayerType(LAYER_TYPE_NONE, null);
+        }
         mNotificationStackScroller.setAlpha(alpha);
     }
 
