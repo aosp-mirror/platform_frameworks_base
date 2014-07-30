@@ -789,6 +789,10 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
             parseCompilerOption("dalvik.vm.image-dex2oat-filter", dex2oatImageCompilerFilterBuf,
                                 "--compiler-filter=", "-Ximage-compiler-option");
         }
+        addOption("-Ximage-compiler-option");
+        addOption("--image-classes-zip=/system/framework/framework.jar");
+        addOption("-Ximage-compiler-option");
+        addOption("--image-classes=preloaded-classes");
         property_get("dalvik.vm.image-dex2oat-flags", dex2oatImageFlagsBuf, "");
         parseExtraOpts(dex2oatImageFlagsBuf, "-Ximage-compiler-option");
 
