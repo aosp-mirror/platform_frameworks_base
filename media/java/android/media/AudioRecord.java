@@ -1,4 +1,7 @@
 /*
+ * Copyright (c) 2014, The Linux Foundation. All rights reserved.
+ * Not a Contribution.
+ *
  * Copyright (C) 2008 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,6 +24,8 @@ import java.nio.ByteBuffer;
 import java.util.Iterator;
 
 import android.os.Binder;
+import android.app.ActivityThread;
+import android.app.AppOpsManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -611,6 +616,10 @@ public class AudioRecord
         return mSessionId;
     }
 
+    private boolean isAudioRecordAllowed() {
+        String packageName = ActivityThread.currentPackageName();
+        return native_check_permission(packageName) == AppOpsManager.MODE_ALLOWED;
+    }
     //---------------------------------------------------------
     // Transport control methods
     //--------------------
@@ -620,6 +629,10 @@ public class AudioRecord
      */
     public void startRecording()
     throws IllegalStateException {
+        if (!isAudioRecordAllowed()) {
+            Log.e(TAG, "User permission denied!");
+            return;
+        }
         if (mState != STATE_INITIALIZED) {
             throw new IllegalStateException("startRecording() called on an "
                     + "uninitialized AudioRecord.");
@@ -643,6 +656,10 @@ public class AudioRecord
      */
     public void startRecording(MediaSyncEvent syncEvent)
     throws IllegalStateException {
+        if (!isAudioRecordAllowed()) {
+            Log.e(TAG, "User permission denied!");
+            return;
+        }
         if (mState != STATE_INITIALIZED) {
             throw new IllegalStateException("startRecording() called on an "
                     + "uninitialized AudioRecord.");
@@ -963,6 +980,8 @@ public class AudioRecord
 
     static private native final int native_get_min_buff_size(
             int sampleRateInHz, int channelCount, int audioFormat);
+
+    private native final int native_check_permission(String packageName);
 
 
     //---------------------------------------------------------

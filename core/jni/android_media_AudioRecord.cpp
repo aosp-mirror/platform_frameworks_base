@@ -1,4 +1,7 @@
 /*
+ * Copyright (c) 2014, The Linux Foundation. All rights reserved.
+ * Not a Contribution.
+ *
  * Copyright (C) 2008 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +20,9 @@
 //#define LOG_NDEBUG 0
 
 #define LOG_TAG "AudioRecord-JNI"
+
+#include <binder/AppOpsManager.h>
+#include <binder/IPCThreadState.h>
 
 #include <inttypes.h>
 #include <jni.h>
@@ -565,6 +571,23 @@ static jint android_media_AudioRecord_get_min_buff_size(JNIEnv *env,  jobject th
     return frameCount * channelCount * audio_bytes_per_sample(format);
 }
 
+// ----------------------------------------------------------------------------
+// returns the AppOps Permission of package
+static jint android_media_AudioRecord_check_permission(JNIEnv *env,  jobject thiz,
+    jstring packageName) {
+
+    // Convert client name jstring to String16
+    const char16_t *rawClientName = env->GetStringChars(packageName, NULL);
+    jsize rawClientNameLen = env->GetStringLength(packageName);
+    String16 clientName(rawClientName, rawClientNameLen);
+    env->ReleaseStringChars(packageName, rawClientName);
+
+    AppOpsManager appOpsManager;
+
+    // Get UID here for permission checking
+    uid_t clientUid = IPCThreadState::self()->getCallingUid();
+    return appOpsManager.noteOp(AppOpsManager::OP_RECORD_AUDIO, clientUid, clientName);
+}
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
@@ -590,6 +613,8 @@ static JNINativeMethod gMethods[] = {
                              "()I",    (void *)android_media_AudioRecord_get_pos_update_period},
     {"native_get_min_buff_size",
                              "(III)I",   (void *)android_media_AudioRecord_get_min_buff_size},
+    {"native_check_permission",
+                             "(Ljava/lang/String;)I", (void *)android_media_AudioRecord_check_permission},
 };
 
 // field names found in android/media/AudioRecord.java
