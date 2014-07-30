@@ -21,6 +21,7 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -50,6 +51,7 @@ import com.android.internal.util.NotificationColorUtil;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.reflect.Constructor;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -689,6 +691,13 @@ public class Notification implements Parcelable
      * {@link BigTextStyle#setSummaryText(CharSequence)}.
      */
     public static final String EXTRA_SUMMARY_TEXT = "android.summaryText";
+
+    /**
+     * {@link #extras} key: this is the longer text shown in the big form of a
+     * {@link BigTextStyle} notification, as supplied to
+     * {@link BigTextStyle#bigText(CharSequence)}.
+     */
+    public static final String EXTRA_BIG_TEXT = "android.bigText";
 
     /**
      * {@link #extras} key: this is the resource ID of the notification's main small icon, as
@@ -1714,6 +1723,15 @@ public class Notification implements Parcelable
     }
 
     /**
+     * @hide
+     */
+    public boolean isValid() {
+        // Would like to check for icon!=0 here, too, but NotificationManagerService accepts that
+        // for legacy reasons.
+        return contentView != null || extras.getBoolean(Builder.EXTRA_REBUILD_CONTENT_VIEW);
+    }
+
+    /**
      * Builder class for {@link Notification} objects.
      *
      * Provides a convenient way to set the various fields of a {@link Notification} and generate
@@ -1736,6 +1754,55 @@ public class Notification implements Parcelable
      */
     public static class Builder {
         private static final int MAX_ACTION_BUTTONS = 3;
+
+        /**
+         * @hide
+         */
+        public static final String EXTRA_NEEDS_REBUILD = "android.rebuild";
+
+        /**
+         * @hide
+         */
+        public static final String EXTRA_REBUILD_LARGE_ICON = "android.rebuild.largeIcon";
+        /**
+         * @hide
+         */
+        public static final String EXTRA_REBUILD_CONTENT_VIEW = "android.rebuild.contentView";
+        /**
+         * @hide
+         */
+        public static final String EXTRA_REBUILD_CONTENT_VIEW_ACTION_COUNT =
+                "android.rebuild.contentViewActionCount";
+        /**
+         * @hide
+         */
+        public static final String EXTRA_REBUILD_BIG_CONTENT_VIEW
+                = "android.rebuild.bigView";
+        /**
+         * @hide
+         */
+        public static final String EXTRA_REBUILD_BIG_CONTENT_VIEW_ACTION_COUNT
+                = "android.rebuild.bigViewActionCount";
+        /**
+         * @hide
+         */
+        public static final String EXTRA_REBUILD_HEADS_UP_CONTENT_VIEW
+                = "android.rebuild.hudView";
+        /**
+         * @hide
+         */
+        public static final String EXTRA_REBUILD_HEADS_UP_CONTENT_VIEW_ACTION_COUNT
+                = "android.rebuild.hudViewActionCount";
+
+        /**
+         * The package name of the context used to create the notification via a Builder.
+         */
+        private static final String EXTRA_REBUILD_CONTEXT_PACKAGE =
+                "android.rebuild.contextPackage";
+
+        // Whether to enable stripping (at post time) & rebuilding (at listener receive time) of
+        // memory intensive resources.
+        private static final boolean STRIP_AND_REBUILD = true;
 
         private Context mContext;
 
@@ -1781,6 +1848,17 @@ public class Notification implements Parcelable
         private ArrayList<String> mPeople;
         private int mColor = COLOR_DEFAULT;
 
+
+        /**
+         * Contains extras related to rebuilding during the build phase.
+         */
+        private Bundle mRebuildBundle = new Bundle();
+        /**
+         * Contains the notification to rebuild when this Builder is in "rebuild" mode.
+         * Null otherwise.
+         */
+        private Notification mRebuildNotification = null;
+
         /**
          * Constructs a new Builder with the defaults:
          *
@@ -1820,6 +1898,40 @@ public class Notification implements Parcelable
             mPeople = new ArrayList<String>();
 
             mColorUtil = NotificationColorUtil.getInstance();
+        }
+
+        /**
+         * Creates a Builder for rebuilding the given Notification.
+         * <p>
+         * Call {@link #rebuild()} to retrieve the rebuilt version of 'n'.
+         */
+        private Builder(Context context, Notification n) {
+            this(context);
+            mRebuildNotification = n;
+            restoreFromNotification(n);
+
+            Style style = null;
+            Bundle extras = n.extras;
+            String templateClass = extras.getString(EXTRA_TEMPLATE);
+            if (!TextUtils.isEmpty(templateClass)) {
+                Class<? extends Style> styleClass = getNotificationStyleClass(templateClass);
+                if (styleClass == null) {
+                    Log.d(TAG, "Unknown style class: " + styleClass);
+                    return;
+                }
+
+                try {
+                    Constructor<? extends Style> constructor = styleClass.getConstructor();
+                    style = constructor.newInstance();
+                    style.restoreFromExtras(extras);
+                } catch (Throwable t) {
+                    Log.e(TAG, "Could not create Style", t);
+                    return;
+                }
+            }
+            if (style != null) {
+                setStyle(style);
+            }
         }
 
         /**
@@ -2459,7 +2571,7 @@ public class Notification implements Parcelable
 
         private RemoteViews applyStandardTemplate(int resId, boolean fitIn1U) {
             Bitmap profileIcon = getProfileBadge();
-            RemoteViews contentView = new RemoteViews(mContext.getPackageName(), resId);
+            RemoteViews contentView = new BuilderRemoteViews(mContext.getPackageName(), resId);
             boolean showLine3 = false;
             boolean showLine2 = false;
 
@@ -2743,7 +2855,7 @@ public class Notification implements Parcelable
 
             n.color = sanitizeColor();
 
-            n.contentView = makeContentView();
+            setBuilderContentView(n, makeContentView());
             n.contentIntent = mContentIntent;
             n.deleteIntent = mDeleteIntent;
             n.fullScreenIntent = mFullScreenIntent;
@@ -2759,8 +2871,8 @@ public class Notification implements Parcelable
             n.ledOffMS = mLedOffMs;
             n.defaults = mDefaults;
             n.flags = mFlags;
-            n.bigContentView = makeBigContentView();
-            n.headsUpContentView = makeHeadsUpContentView();
+            setBuilderBigContentView(n, makeBigContentView());
+            setBuilderHeadsUpContentView(n, makeHeadsUpContentView());
             if (mLedOnMs != 0 || mLedOffMs != 0) {
                 n.flags |= FLAG_SHOW_LIGHTS;
             }
@@ -2781,7 +2893,7 @@ public class Notification implements Parcelable
                 n.publicVersion = new Notification();
                 mPublicVersion.cloneInto(n.publicVersion, true);
             }
-
+            // Note: If you're adding new fields, also update restoreFromNotitification().
             return n;
         }
 
@@ -2792,6 +2904,7 @@ public class Notification implements Parcelable
          */
         public void populateExtras(Bundle extras) {
             // Store original information used in the construction of this object
+            extras.putString(EXTRA_REBUILD_CONTEXT_PACKAGE, mContext.getPackageName());
             extras.putCharSequence(EXTRA_TITLE, mContentTitle);
             extras.putCharSequence(EXTRA_TEXT, mContentText);
             extras.putCharSequence(EXTRA_SUB_TEXT, mSubText);
@@ -2807,6 +2920,233 @@ public class Notification implements Parcelable
             }
             if (!mPeople.isEmpty()) {
                 extras.putStringArray(EXTRA_PEOPLE, mPeople.toArray(new String[mPeople.size()]));
+            }
+            // NOTE: If you're adding new extras also update restoreFromNotification().
+        }
+
+
+        /**
+         * @hide
+         */
+        public static void stripForDelivery(Notification n) {
+            if (!STRIP_AND_REBUILD) {
+                return;
+            }
+
+            String templateClass = n.extras.getString(EXTRA_TEMPLATE);
+            // Only strip views for known Styles because we won't know how to
+            // re-create them otherwise.
+            boolean stripViews = TextUtils.isEmpty(templateClass) ||
+                    getNotificationStyleClass(templateClass) != null;
+
+            boolean isStripped = false;
+
+            if (n.largeIcon != null && n.extras.containsKey(EXTRA_LARGE_ICON)) {
+                // TODO: Would like to check for equality here, but if the notification
+                // has been cloned, we can't.
+                n.largeIcon = null;
+                n.extras.putBoolean(EXTRA_REBUILD_LARGE_ICON, true);
+                isStripped = true;
+            }
+            // Get rid of unmodified BuilderRemoteViews.
+
+            if (stripViews &&
+                    n.contentView instanceof BuilderRemoteViews &&
+                    n.extras.getInt(EXTRA_REBUILD_CONTENT_VIEW_ACTION_COUNT, -1) ==
+                            n.contentView.getSequenceNumber()) {
+                n.contentView = null;
+                n.extras.putBoolean(EXTRA_REBUILD_CONTENT_VIEW, true);
+                n.extras.remove(EXTRA_REBUILD_CONTENT_VIEW_ACTION_COUNT);
+                isStripped = true;
+            }
+            if (stripViews &&
+                    n.bigContentView instanceof BuilderRemoteViews &&
+                    n.extras.getInt(EXTRA_REBUILD_BIG_CONTENT_VIEW_ACTION_COUNT, -1) ==
+                            n.bigContentView.getSequenceNumber()) {
+                n.bigContentView = null;
+                n.extras.putBoolean(EXTRA_REBUILD_BIG_CONTENT_VIEW, true);
+                n.extras.remove(EXTRA_REBUILD_BIG_CONTENT_VIEW_ACTION_COUNT);
+                isStripped = true;
+            }
+            if (stripViews &&
+                    n.headsUpContentView instanceof BuilderRemoteViews &&
+                    n.extras.getInt(EXTRA_REBUILD_HEADS_UP_CONTENT_VIEW_ACTION_COUNT, -1) ==
+                            n.headsUpContentView.getSequenceNumber()) {
+                n.headsUpContentView = null;
+                n.extras.putBoolean(EXTRA_REBUILD_HEADS_UP_CONTENT_VIEW, true);
+                n.extras.remove(EXTRA_REBUILD_HEADS_UP_CONTENT_VIEW_ACTION_COUNT);
+                isStripped = true;
+            }
+
+            if (isStripped) {
+                n.extras.putBoolean(EXTRA_NEEDS_REBUILD, true);
+            }
+        }
+
+        /**
+         * @hide
+         */
+        public static Notification rebuild(Context context, Notification n) {
+            Bundle extras = n.extras;
+            if (!extras.getBoolean(EXTRA_NEEDS_REBUILD)) return n;
+            extras.remove(EXTRA_NEEDS_REBUILD);
+
+            // Re-create notification context so we can access app resources.
+            String packageName = extras.getString(EXTRA_REBUILD_CONTEXT_PACKAGE);
+            Context builderContext;
+            try {
+                builderContext = context.createPackageContext(packageName,
+                        Context.CONTEXT_RESTRICTED);
+            } catch (NameNotFoundException e) {
+                Log.e(TAG, "Package name " + packageName + " not found");
+                builderContext = context;  // try with our context
+            }
+
+            Builder b = new Builder(builderContext, n);
+            return b.rebuild();
+        }
+
+        /**
+         * Rebuilds the notification passed in to the rebuild-constructor
+         * {@link #Builder(Context, Notification)}.
+         *
+         * <p>
+         * Throws IllegalStateException when invoked on a Builder that isn't in rebuild mode.
+         *
+         * @hide
+         */
+        private Notification rebuild() {
+            if (mRebuildNotification == null) {
+                throw new IllegalStateException("rebuild() only valid when in 'rebuild' mode.");
+            }
+
+            Bundle extras = mRebuildNotification.extras;
+
+            if (extras.getBoolean(EXTRA_REBUILD_LARGE_ICON)) {
+                mRebuildNotification.largeIcon = extras.getParcelable(EXTRA_LARGE_ICON);
+            }
+            extras.remove(EXTRA_REBUILD_LARGE_ICON);
+
+            if (extras.getBoolean(EXTRA_REBUILD_CONTENT_VIEW)) {
+                setBuilderContentView(mRebuildNotification, makeContentView());
+                if (mStyle != null) {
+                    mStyle.populateContentView(mRebuildNotification);
+                }
+            }
+            extras.remove(EXTRA_REBUILD_CONTENT_VIEW);
+
+            if (extras.getBoolean(EXTRA_REBUILD_BIG_CONTENT_VIEW)) {
+                setBuilderBigContentView(mRebuildNotification, makeBigContentView());
+                if (mStyle != null) {
+                    mStyle.populateBigContentView(mRebuildNotification);
+                }
+            }
+            extras.remove(EXTRA_REBUILD_BIG_CONTENT_VIEW);
+
+            if (extras.getBoolean(EXTRA_REBUILD_HEADS_UP_CONTENT_VIEW)) {
+                setBuilderHeadsUpContentView(mRebuildNotification, makeHeadsUpContentView());
+                if (mStyle != null) {
+                    mStyle.populateHeadsUpContentView(mRebuildNotification);
+                }
+            }
+            extras.remove(EXTRA_REBUILD_HEADS_UP_CONTENT_VIEW);
+
+            return mRebuildNotification;
+        }
+
+        private static Class<? extends Style> getNotificationStyleClass(String templateClass) {
+            Class<? extends Style>[] classes = new Class[]{
+                    BigTextStyle.class, BigPictureStyle.class, InboxStyle.class, MediaStyle.class};
+            for (Class<? extends Style> innerClass : classes) {
+                if (templateClass.equals(innerClass.getName())) {
+                    return innerClass;
+                }
+            }
+            return null;
+        }
+
+        private void setBuilderContentView(Notification n, RemoteViews contentView) {
+            n.contentView = contentView;
+            if (contentView instanceof BuilderRemoteViews) {
+                mRebuildBundle.putInt(Builder.EXTRA_REBUILD_CONTENT_VIEW_ACTION_COUNT,
+                        contentView.getSequenceNumber());
+            }
+        }
+
+        private void setBuilderBigContentView(Notification n, RemoteViews bigContentView) {
+            n.bigContentView = bigContentView;
+            if (bigContentView instanceof BuilderRemoteViews) {
+                mRebuildBundle.putInt(Builder.EXTRA_REBUILD_BIG_CONTENT_VIEW_ACTION_COUNT,
+                        bigContentView.getSequenceNumber());
+            }
+        }
+
+        private void setBuilderHeadsUpContentView(Notification n,
+                RemoteViews headsUpContentView) {
+            n.headsUpContentView = headsUpContentView;
+            if (headsUpContentView instanceof BuilderRemoteViews) {
+                mRebuildBundle.putInt(Builder.EXTRA_REBUILD_HEADS_UP_CONTENT_VIEW_ACTION_COUNT,
+                        headsUpContentView.getSequenceNumber());
+            }
+        }
+
+        private void restoreFromNotification(Notification n) {
+
+            // Notification fields.
+            mWhen = n.when;
+            mSmallIcon = n.icon;
+            mSmallIconLevel = n.iconLevel;
+            mNumber = n.number;
+
+            mColor = n.color;
+
+            mContentView = n.contentView;
+            mDeleteIntent = n.deleteIntent;
+            mFullScreenIntent = n.fullScreenIntent;
+            mTickerText = n.tickerText;
+            mTickerView = n.tickerView;
+            mLargeIcon = n.largeIcon;
+            mSound = n.sound;
+            mAudioStreamType = n.audioStreamType;
+            mAudioAttributes = n.audioAttributes;
+
+            mVibrate = n.vibrate;
+            mLedArgb = n.ledARGB;
+            mLedOnMs = n.ledOnMS;
+            mLedOffMs = n.ledOffMS;
+            mDefaults = n.defaults;
+            mFlags = n.flags;
+
+            mCategory = n.category;
+            mGroupKey = n.mGroupKey;
+            mSortKey = n.mSortKey;
+            mPriority = n.priority;
+            mActions.clear();
+            if (n.actions != null) {
+                Collections.addAll(mActions, n.actions);
+            }
+            mVisibility = n.visibility;
+
+            mPublicVersion = n.publicVersion;
+
+            // Extras.
+            Bundle extras = n.extras;
+            mContentTitle = extras.getCharSequence(EXTRA_TITLE);
+            mContentText = extras.getCharSequence(EXTRA_TEXT);
+            mSubText = extras.getCharSequence(EXTRA_SUB_TEXT);
+            mContentInfo = extras.getCharSequence(EXTRA_INFO_TEXT);
+            mSmallIcon = extras.getInt(EXTRA_SMALL_ICON);
+            mProgress = extras.getInt(EXTRA_PROGRESS);
+            mProgressMax = extras.getInt(EXTRA_PROGRESS_MAX);
+            mProgressIndeterminate = extras.getBoolean(EXTRA_PROGRESS_INDETERMINATE);
+            mUseChronometer = extras.getBoolean(EXTRA_SHOW_CHRONOMETER);
+            mShowWhen = extras.getBoolean(EXTRA_SHOW_WHEN);
+            if (extras.containsKey(EXTRA_LARGE_ICON)) {
+                mLargeIcon = extras.getParcelable(EXTRA_LARGE_ICON);
+            }
+            if (extras.containsKey(EXTRA_PEOPLE)) {
+                mPeople.clear();
+                Collections.addAll(mPeople, extras.getStringArray(EXTRA_PEOPLE));
             }
         }
 
@@ -2829,7 +3169,14 @@ public class Notification implements Parcelable
                 n = mStyle.buildStyled(n);
             }
 
-            n.extras = mExtras != null ? new Bundle(mExtras) : new Bundle();
+            if (mExtras != null) {
+                n.extras.putAll(mExtras);
+            }
+
+            if (mRebuildBundle.size() > 0) {
+                n.extras.putAll(mRebuildBundle);
+                mRebuildBundle.clear();
+            }
 
             populateExtras(n.extras);
             if (mStyle != null) {
@@ -2848,7 +3195,6 @@ public class Notification implements Parcelable
             build().cloneInto(n, true);
             return n;
         }
-
 
         private int getBaseLayoutResource() {
             return R.layout.notification_template_material_base;
@@ -2924,11 +3270,15 @@ public class Notification implements Parcelable
         protected RemoteViews getStandardView(int layoutId) {
             checkBuilder();
 
+            // Nasty.
+            CharSequence oldBuilderContentTitle = mBuilder.mContentTitle;
             if (mBigContentTitle != null) {
                 mBuilder.setContentTitle(mBigContentTitle);
             }
 
             RemoteViews contentView = mBuilder.applyStandardTemplateWithActions(layoutId);
+
+            mBuilder.mContentTitle = oldBuilderContentTitle;
 
             if (mBigContentTitle != null && mBigContentTitle.equals("")) {
                 contentView.setViewVisibility(R.id.line1, View.GONE);
@@ -2968,7 +3318,47 @@ public class Notification implements Parcelable
         /**
          * @hide
          */
-        public abstract Notification buildStyled(Notification wip);
+        protected void restoreFromExtras(Bundle extras) {
+            if (extras.containsKey(EXTRA_SUMMARY_TEXT)) {
+                mSummaryText = extras.getCharSequence(EXTRA_SUMMARY_TEXT);
+                mSummaryTextSet = true;
+            }
+            if (extras.containsKey(EXTRA_TITLE_BIG)) {
+                mBigContentTitle = extras.getCharSequence(EXTRA_TITLE_BIG);
+            }
+        }
+
+
+        /**
+         * @hide
+         */
+        public Notification buildStyled(Notification wip) {
+            populateTickerView(wip);
+            populateContentView(wip);
+            populateBigContentView(wip);
+            populateHeadsUpContentView(wip);
+            return wip;
+        }
+
+        // The following methods are split out so we can re-create notification partially.
+        /**
+         * @hide
+         */
+        protected void populateTickerView(Notification wip) {}
+        /**
+         * @hide
+         */
+        protected void populateContentView(Notification wip) {}
+
+        /**
+         * @hide
+         */
+        protected void populateBigContentView(Notification wip) {}
+
+        /**
+         * @hide
+         */
+        protected void populateHeadsUpContentView(Notification wip) {}
 
         /**
          * Calls {@link android.app.Notification.Builder#build()} on the Builder this Style is
@@ -3069,12 +3459,21 @@ public class Notification implements Parcelable
          * @hide
          */
         @Override
-        public Notification buildStyled(Notification wip) {
-            if (mBigLargeIconSet ) {
-                mBuilder.mLargeIcon = mBigLargeIcon;
+        protected void restoreFromExtras(Bundle extras) {
+            super.restoreFromExtras(extras);
+
+            if (extras.containsKey(EXTRA_LARGE_ICON_BIG)) {
+                mBigLargeIcon = extras.getParcelable(EXTRA_LARGE_ICON_BIG);
             }
-            wip.bigContentView = makeBigContentView();
-            return wip;
+            mPicture = extras.getParcelable(EXTRA_PICTURE);
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        public void populateBigContentView(Notification wip) {
+            mBuilder.setBuilderBigContentView(wip, makeBigContentView());
         }
     }
 
@@ -3137,15 +3536,30 @@ public class Notification implements Parcelable
         public void addExtras(Bundle extras) {
             super.addExtras(extras);
 
-            extras.putCharSequence(EXTRA_TEXT, mBigText);
+            extras.putCharSequence(EXTRA_BIG_TEXT, mBigText);
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        protected void restoreFromExtras(Bundle extras) {
+            super.restoreFromExtras(extras);
+
+            mBigText = extras.getCharSequence(EXTRA_BIG_TEXT);
         }
 
         private RemoteViews makeBigContentView() {
             // Remove the content text so line3 only shows if you have a summary
             final boolean hadThreeLines = (mBuilder.mContentText != null && mBuilder.mSubText != null);
+
+            // Nasty
+            CharSequence oldBuilderContentText = mBuilder.mContentText;
             mBuilder.mContentText = null;
 
             RemoteViews contentView = getStandardView(mBuilder.getBigTextLayoutResource());
+
+            mBuilder.mContentText = oldBuilderContentText;
 
             if (hadThreeLines) {
                 // vertical centering
@@ -3163,12 +3577,8 @@ public class Notification implements Parcelable
          * @hide
          */
         @Override
-        public Notification buildStyled(Notification wip) {
-            wip.bigContentView = makeBigContentView();
-
-            wip.extras.putCharSequence(EXTRA_TEXT, mBigText);
-
-            return wip;
+        public void populateBigContentView(Notification wip) {
+            mBuilder.setBuilderBigContentView(wip, makeBigContentView());
         }
     }
 
@@ -3232,14 +3642,34 @@ public class Notification implements Parcelable
          */
         public void addExtras(Bundle extras) {
             super.addExtras(extras);
+
             CharSequence[] a = new CharSequence[mTexts.size()];
             extras.putCharSequenceArray(EXTRA_TEXT_LINES, mTexts.toArray(a));
         }
 
+        /**
+         * @hide
+         */
+        @Override
+        protected void restoreFromExtras(Bundle extras) {
+            super.restoreFromExtras(extras);
+
+            mTexts.clear();
+            if (extras.containsKey(EXTRA_TEXT_LINES)) {
+                Collections.addAll(mTexts, extras.getCharSequenceArray(EXTRA_TEXT_LINES));
+            }
+        }
+
         private RemoteViews makeBigContentView() {
             // Remove the content text so line3 disappears unless you have a summary
+
+            // Nasty
+            CharSequence oldBuilderContentText = mBuilder.mContentText;
             mBuilder.mContentText = null;
+
             RemoteViews contentView = getStandardView(mBuilder.getInboxLayoutResource());
+
+            mBuilder.mContentText = oldBuilderContentText;
 
             contentView.setViewVisibility(R.id.text2, View.GONE);
 
@@ -3275,10 +3705,8 @@ public class Notification implements Parcelable
          * @hide
          */
         @Override
-        public Notification buildStyled(Notification wip) {
-            wip.bigContentView = makeBigContentView();
-
-            return wip;
+        public void populateBigContentView(Notification wip) {
+            mBuilder.setBuilderBigContentView(wip, makeBigContentView());
         }
     }
 
@@ -3353,14 +3781,32 @@ public class Notification implements Parcelable
             return this;
         }
 
+        /**
+         * @hide
+         */
         @Override
         public Notification buildStyled(Notification wip) {
-            wip.contentView = makeMediaContentView();
-            wip.bigContentView = makeMediaBigContentView();
+            super.buildStyled(wip);
             if (wip.category == null) {
                 wip.category = Notification.CATEGORY_TRANSPORT;
             }
             return wip;
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        public void populateContentView(Notification wip) {
+            mBuilder.setBuilderContentView(wip, makeMediaContentView());
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        public void populateBigContentView(Notification wip) {
+            mBuilder.setBuilderBigContentView(wip, makeMediaBigContentView());
         }
 
         /** @hide */
@@ -3373,6 +3819,21 @@ public class Notification implements Parcelable
             }
             if (mActionsToShowInCompact != null) {
                 extras.putIntArray(EXTRA_COMPACT_ACTIONS, mActionsToShowInCompact);
+            }
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        protected void restoreFromExtras(Bundle extras) {
+            super.restoreFromExtras(extras);
+
+            if (extras.containsKey(EXTRA_MEDIA_SESSION)) {
+                mToken = extras.getParcelable(EXTRA_MEDIA_SESSION);
+            }
+            if (extras.containsKey(EXTRA_COMPACT_ACTIONS)) {
+                mActionsToShowInCompact = extras.getIntArray(EXTRA_COMPACT_ACTIONS);
             }
         }
 
@@ -3428,6 +3889,9 @@ public class Notification implements Parcelable
             return big;
         }
     }
+
+    // When adding a new Style subclass here, don't forget to update
+    // Builder.getNotificationStyleClass.
 
     /**
      * Extender interface for use with {@link Builder#extend}. Extenders may be used to add
@@ -4095,5 +4559,25 @@ public class Notification implements Parcelable
                 Notification[].class);
         bundle.putParcelableArray(key, typedArray);
         return typedArray;
+    }
+
+    private static class BuilderRemoteViews extends RemoteViews {
+        public BuilderRemoteViews(Parcel parcel) {
+            super(parcel);
+        }
+
+        public BuilderRemoteViews(String packageName, int layoutId) {
+            super(packageName, layoutId);
+        }
+
+        @Override
+        public BuilderRemoteViews clone() {
+            Parcel p = Parcel.obtain();
+            writeToParcel(p, 0);
+            p.setDataPosition(0);
+            BuilderRemoteViews brv = new BuilderRemoteViews(p);
+            p.recycle();
+            return brv;
+        }
     }
 }

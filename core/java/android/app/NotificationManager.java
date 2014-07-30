@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.app.Notification.Builder;
 import android.content.Context;
 import android.os.Handler;
 import android.os.IBinder;
@@ -132,9 +133,11 @@ public class NotificationManager
             }
         }
         if (localLOGV) Log.v(TAG, pkg + ": notify(" + id + ", " + notification + ")");
+        Notification stripped = notification.clone();
+        Builder.stripForDelivery(stripped);
         try {
             service.enqueueNotificationWithTag(pkg, mContext.getOpPackageName(), tag, id,
-                    notification, idOut, UserHandle.myUserId());
+                    stripped, idOut, UserHandle.myUserId());
             if (id != idOut[0]) {
                 Log.w(TAG, "notify: id corrupted: sent " + id + ", got back " + idOut[0]);
             }
@@ -157,9 +160,11 @@ public class NotificationManager
             }
         }
         if (localLOGV) Log.v(TAG, pkg + ": notify(" + id + ", " + notification + ")");
+        Notification stripped = notification.clone();
+        Builder.stripForDelivery(stripped);
         try {
             service.enqueueNotificationWithTag(pkg, mContext.getOpPackageName(), tag, id,
-                    notification, idOut, user.getIdentifier());
+                    stripped, idOut, user.getIdentifier());
             if (id != idOut[0]) {
                 Log.w(TAG, "notify: id corrupted: sent " + id + ", got back " + idOut[0]);
             }

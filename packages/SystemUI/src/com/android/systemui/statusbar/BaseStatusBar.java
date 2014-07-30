@@ -462,7 +462,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         // Set up the initial notification state.
         try {
-            mNotificationListener.registerAsSystemService(
+            mNotificationListener.registerAsSystemService(mContext,
                     new ComponentName(mContext.getPackageName(), getClass().getCanonicalName()),
                     UserHandle.USER_ALL);
         } catch (RemoteException e) {
