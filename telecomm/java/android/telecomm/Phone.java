@@ -121,14 +121,6 @@ public final class Phone {
      }
 
     /** {@hide} */
-    final void internalSetPostDial(String telecommId, String remaining) {
-        Call call = mCallByTelecommCallId.get(telecommId);
-        if (call != null) {
-            call.internalSetPostDial(remaining);
-        }
-    }
-
-    /** {@hide} */
     final void internalSetPostDialWait(String telecommId, String remaining) {
         Call call = mCallByTelecommCallId.get(telecommId);
         if (call != null) {
