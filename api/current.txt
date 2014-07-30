@@ -27467,8 +27467,8 @@ package android.service.voice {
   public class AlwaysOnHotwordDetector {
     method public android.content.Intent getManageIntent(int);
     method public int getSupportedRecognitionModes();
-    method public int startRecognition(int);
-    method public int stopRecognition();
+    method public void startRecognition(int);
+    method public void stopRecognition();
     field public static final int MANAGE_ACTION_ENROLL = 0; // 0x0
     field public static final int MANAGE_ACTION_RE_ENROLL = 1; // 0x1
     field public static final int MANAGE_ACTION_UN_ENROLL = 2; // 0x2
@@ -27481,14 +27481,14 @@ package android.service.voice {
     field public static final int STATE_KEYPHRASE_ENROLLED = 2; // 0x2
     field public static final int STATE_KEYPHRASE_UNENROLLED = 1; // 0x1
     field public static final int STATE_KEYPHRASE_UNSUPPORTED = -1; // 0xffffffff
-    field public static final int STATUS_ERROR = -2147483648; // 0x80000000
-    field public static final int STATUS_OK = 0; // 0x0
   }
 
   public static abstract interface AlwaysOnHotwordDetector.Callback {
     method public abstract void onAvailabilityChanged(int);
     method public abstract void onDetected(byte[]);
+    method public abstract void onDetectionStarted();
     method public abstract void onDetectionStopped();
+    method public abstract void onError();
   }
 
   public class VoiceInteractionService extends android.app.Service {
