@@ -236,6 +236,7 @@ public class NetworkScoreManager {
         }
         Intent intent = new Intent(ACTION_SCORE_NETWORKS);
         intent.setPackage(activeScorer);
+        intent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
         intent.putExtra(EXTRA_NETWORKS_TO_SCORE, networks);
         mContext.sendBroadcast(intent);
         return true;
