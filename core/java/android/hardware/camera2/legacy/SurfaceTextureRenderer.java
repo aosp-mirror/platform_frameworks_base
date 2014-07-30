@@ -329,6 +329,9 @@ public class SurfaceTextureRenderer {
         mSurfaces.clear();
         mConversionSurfaces.clear();
         mPBufferPixels = null;
+        if (mSurfaceTexture != null) {
+            mSurfaceTexture.release();
+        }
         mSurfaceTexture = null;
     }
 
