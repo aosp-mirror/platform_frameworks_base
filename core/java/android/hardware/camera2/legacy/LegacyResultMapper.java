@@ -34,11 +34,13 @@ import android.util.Size;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.android.internal.util.Preconditions.*;
 import static android.hardware.camera2.CaptureResult.*;
 
 /**
  * Provide legacy-specific implementations of camera2 CaptureResult for legacy devices.
  */
+@SuppressWarnings("deprecation")
 public class LegacyResultMapper {
     private static final String TAG = "LegacyResultMapper";
     private static final boolean VERBOSE = Log.isLoggable(TAG, Log.VERBOSE);
@@ -55,22 +57,53 @@ public class LegacyResultMapper {
      *
      * @param legacyRequest a non-{@code null} legacy request containing the latest parameters
      * @param timestamp the timestamp to use for this result in nanoseconds.
+     * @param frameCounter a monotonically increasing frame counter for the result
      *
      * @return {@link CameraMetadataNative} object containing result metadata.
      */
     public CameraMetadataNative cachedConvertResultMetadata(
-            LegacyRequest legacyRequest, long timestamp) {
-        if (mCachedRequest != null && legacyRequest.parameters.same(mCachedRequest.parameters)) {
-            CameraMetadataNative newResult = new CameraMetadataNative(mCachedResult);
+            LegacyRequest legacyRequest, long timestamp, long frameCounter) {
+        CameraMetadataNative result;
+        boolean cached;
 
-            // sensor.timestamp
-            newResult.set(CaptureResult.SENSOR_TIMESTAMP, timestamp);
-            return newResult;
+        /*
+         * Attempt to look up the result from the cache if the parameters haven't changed
+         */
+        if (mCachedRequest != null && legacyRequest.parameters.same(mCachedRequest.parameters)) {
+            result = new CameraMetadataNative(mCachedResult);
+            cached = true;
+        } else {
+            result = convertResultMetadata(legacyRequest, timestamp);
+            cached = false;
+
+            // Always cache a *copy* of the metadata result,
+            // since api2's client side takes ownership of it after it receives a result
+            mCachedRequest = legacyRequest;
+            mCachedResult = new CameraMetadataNative(result);
         }
 
-        mCachedRequest = legacyRequest;
-        mCachedResult = convertResultMetadata(mCachedRequest, timestamp);
-        return mCachedResult;
+        /*
+         * Unconditionally set fields that change in every single frame
+         */
+        {
+            // request.frameCounter
+            result.set(REQUEST_FRAME_COUNT, (int)frameCounter);
+            // TODO: fix CaptureResult#getFrameNumber not to need this key
+
+            // sensor.timestamp
+            result.set(SENSOR_TIMESTAMP, timestamp);
+        }
+
+        if (VERBOSE) {
+            Log.v(TAG, "cachedConvertResultMetadata - cached? " + cached +
+                    " frameCounter = " + frameCounter + " timestamp = " + timestamp);
+
+            Log.v(TAG, "----- beginning of result dump ------");
+            result.dumpToLog();
+            Log.v(TAG, "----- end of result dump ------");
+        }
+
+        return result;
     }
 
     /**
@@ -81,7 +114,7 @@ public class LegacyResultMapper {
      *
      * @return a {@link CameraMetadataNative} object containing result metadata.
      */
-    public static CameraMetadataNative convertResultMetadata(LegacyRequest legacyRequest,
+    private static CameraMetadataNative convertResultMetadata(LegacyRequest legacyRequest,
                                                       long timestamp) {
         CameraCharacteristics characteristics = legacyRequest.characteristics;
         CaptureRequest request = legacyRequest.captureRequest;
@@ -98,16 +131,14 @@ public class LegacyResultMapper {
         /*
          * control
          */
-        // control.afState
-        if (LegacyMetadataMapper.LIE_ABOUT_AF) {
-            // TODO: Implement autofocus state machine
-            result.set(CaptureResult.CONTROL_AF_MODE, request.get(CaptureRequest.CONTROL_AF_MODE));
-        }
 
         /*
          * control.ae*
          */
         mapAe(result, characteristics, request, activeArraySize, zoomData, /*out*/params);
+
+        // control.afMode
+        result.set(CaptureResult.CONTROL_AF_MODE, convertLegacyAfMode(params.getFocusMode()));
 
         // control.awbLock
         result.set(CaptureResult.CONTROL_AWB_LOCK, params.getAutoWhiteBalanceLock());
@@ -137,8 +168,22 @@ public class LegacyResultMapper {
         /*
          * lens
          */
+        // lens.focusDistance
+        {
+            if (Parameters.FOCUS_MODE_INFINITY.equals(params.getFocusMode())) {
+                result.set(CaptureResult.LENS_FOCUS_DISTANCE, 0.0f);
+            }
+        }
+
         // lens.focalLength
         result.set(CaptureResult.LENS_FOCAL_LENGTH, params.getFocalLength());
+
+        /*
+         * request
+         */
+        // request.pipelineDepth
+        result.set(REQUEST_PIPELINE_DEPTH,
+                characteristics.get(CameraCharacteristics.REQUEST_PIPELINE_MAX_DEPTH));
 
         /*
          * scaler
@@ -148,8 +193,6 @@ public class LegacyResultMapper {
         /*
          * sensor
          */
-        // sensor.timestamp
-        result.set(CaptureResult.SENSOR_TIMESTAMP, timestamp);
 
         // TODO: Remaining result metadata tags conversions.
         return result;
@@ -299,6 +342,33 @@ public class LegacyResultMapper {
         m.set(FLASH_MODE, flashMode);
         // control.aeMode
         m.set(CONTROL_AE_MODE, aeMode);
+    }
+
+    private static int convertLegacyAfMode(String mode) {
+        if (mode == null) {
+            Log.w(TAG, "convertLegacyAfMode - no AF mode, default to OFF");
+            return CONTROL_AF_MODE_OFF;
+        }
+
+        switch (mode) {
+            case Parameters.FOCUS_MODE_AUTO:
+                return CONTROL_AF_MODE_AUTO;
+            case Parameters.FOCUS_MODE_CONTINUOUS_PICTURE:
+                return CONTROL_AF_MODE_CONTINUOUS_PICTURE;
+            case Parameters.FOCUS_MODE_CONTINUOUS_VIDEO:
+                return CONTROL_AF_MODE_CONTINUOUS_VIDEO;
+            case Parameters.FOCUS_MODE_EDOF:
+                return CONTROL_AF_MODE_EDOF;
+            case Parameters.FOCUS_MODE_MACRO:
+                return CONTROL_AF_MODE_MACRO;
+            case Parameters.FOCUS_MODE_FIXED:
+                return CONTROL_AF_MODE_OFF;
+            case Parameters.FOCUS_MODE_INFINITY:
+                return CONTROL_AF_MODE_OFF;
+            default:
+                Log.w(TAG, "convertLegacyAfMode - unknown mode " + mode + " , ignoring");
+                return CONTROL_AF_MODE_OFF;
+        }
     }
 
     /** Map results for scaler.* */

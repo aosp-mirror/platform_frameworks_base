@@ -23,6 +23,7 @@ import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.params.MeteringRectangle;
 import android.hardware.camera2.utils.ListUtils;
+import android.hardware.camera2.utils.ParamsUtils;
 import android.util.Log;
 import android.util.Range;
 import android.util.Size;
@@ -38,6 +39,7 @@ import static android.hardware.camera2.CaptureRequest.*;
 /**
  * Provide legacy-specific implementations of camera2 CaptureRequest for legacy devices.
  */
+@SuppressWarnings("deprecation")
 public class LegacyRequestMapper {
     private static final String TAG = "LegacyRequestMapper";
     private static final boolean VERBOSE = Log.isLoggable(TAG, Log.VERBOSE);
@@ -158,7 +160,7 @@ public class LegacyRequestMapper {
         {
             Range<Integer> compensationRange =
                     characteristics.get(CameraCharacteristics.CONTROL_AE_COMPENSATION_RANGE);
-            int compensation = getOrDefault(request,
+            int compensation = ParamsUtils.getOrDefault(request,
                     CONTROL_AE_EXPOSURE_COMPENSATION,
                     /*defaultValue*/0);
 
@@ -192,6 +194,23 @@ public class LegacyRequestMapper {
         // control.aeMode, flash.mode
         mapAeAndFlashMode(request, /*out*/params);
 
+        // control.afMode
+        {
+            int afMode = ParamsUtils.getOrDefault(request, CONTROL_AF_MODE,
+                    /*defaultValue*/CONTROL_AF_MODE_OFF);
+            String focusMode = LegacyMetadataMapper.convertAfModeToLegacy(afMode,
+                    params.getSupportedFocusModes());
+
+            if (focusMode != null) {
+                params.setFocusMode(focusMode);
+            }
+
+            if (VERBOSE) {
+                Log.v(TAG, "convertRequestToMetadata - control.afMode "
+                        + afMode + " mapped to " + focusMode);
+            }
+        }
+
         // control.awbLock
         {
             Boolean awbLock = getIfSupported(request, CONTROL_AWB_LOCK, /*defaultValue*/false,
@@ -203,6 +222,21 @@ public class LegacyRequestMapper {
             }
 
          // TODO: Don't add control.awbLock to availableRequestKeys if it's not supported
+        }
+
+        // lens.focusDistance
+        {
+            boolean infinityFocusSupported =
+                    ListUtils.listContains(params.getSupportedFocusModes(),
+                            Parameters.FOCUS_MODE_INFINITY);
+            Float focusDistance = getIfSupported(request, LENS_FOCUS_DISTANCE,
+                    /*defaultValue*/0f, infinityFocusSupported, /*allowedValue*/0f);
+
+            if (focusDistance == null || focusDistance != 0f) {
+                Log.w(TAG,
+                        "convertRequestToMetadata - Ignoring android.lens.focusDistance "
+                                + infinityFocusSupported + ", only 0.0f is supported");
+            }
         }
     }
 
@@ -253,8 +287,8 @@ public class LegacyRequestMapper {
     }
 
     private static void mapAeAndFlashMode(CaptureRequest r, /*out*/Parameters p) {
-        int flashMode = getOrDefault(r, FLASH_MODE, FLASH_MODE_OFF);
-        int aeMode = getOrDefault(r, CONTROL_AE_MODE, CONTROL_AE_MODE_ON);
+        int flashMode = ParamsUtils.getOrDefault(r, FLASH_MODE, FLASH_MODE_OFF);
+        int aeMode = ParamsUtils.getOrDefault(r, CONTROL_AE_MODE, CONTROL_AE_MODE_ON);
 
         List<String> supportedFlashModes = p.getSupportedFlashModes();
 
@@ -355,20 +389,6 @@ public class LegacyRequestMapper {
         return legacyFps;
     }
 
-    /** Return the value set by the key, or the {@code defaultValue} if no value was set. */
-    private static <T> T getOrDefault(CaptureRequest r, CaptureRequest.Key<T> key, T defaultValue) {
-        checkNotNull(r, "r must not be null");
-        checkNotNull(key, "key must not be null");
-        checkNotNull(defaultValue, "defaultValue must not be null");
-
-        T value = r.get(key);
-        if (value == null) {
-            return defaultValue;
-        } else {
-            return value;
-        }
-    }
-
     /**
      * Return {@code null} if the value is not supported, otherwise return the retrieved key's
      * value from the request (or the default value if it wasn't set).
@@ -382,7 +402,7 @@ public class LegacyRequestMapper {
     private static <T> T getIfSupported(
             CaptureRequest r, CaptureRequest.Key<T> key, T defaultValue, boolean isSupported,
             T allowedValue) {
-        T val = getOrDefault(r, key, defaultValue);
+        T val = ParamsUtils.getOrDefault(r, key, defaultValue);
 
         if (!isSupported) {
             if (!Objects.equals(val, allowedValue)) {

@@ -48,6 +48,7 @@ import static android.hardware.camera2.legacy.ParameterUtils.*;
  * Provide legacy-specific implementations of camera2 metadata for legacy devices, such as the
  * camera characteristics.
  */
+@SuppressWarnings("deprecation")
 public class LegacyMetadataMapper {
     private static final String TAG = "LegacyMetadataMapper";
     private static final boolean VERBOSE = Log.isLoggable(TAG, Log.VERBOSE);
@@ -87,8 +88,8 @@ public class LegacyMetadataMapper {
      */
     static final boolean LIE_ABOUT_AE_STATE = false;
     static final boolean LIE_ABOUT_AE_MAX_REGIONS = false;
-    static final boolean LIE_ABOUT_AF = true;
-    static final boolean LIE_ABOUT_AF_MAX_REGIONS = true;
+    static final boolean LIE_ABOUT_AF = false;
+    static final boolean LIE_ABOUT_AF_MAX_REGIONS = false;
     static final boolean LIE_ABOUT_AWB_STATE = false;
     static final boolean LIE_ABOUT_AWB = true;
 
@@ -161,6 +162,10 @@ public class LegacyMetadataMapper {
          * control.ae*
          */
         mapControlAe(m, p);
+        /*
+         * control.af*
+         */
+        mapControlAf(m, p);
         /*
          * control.awb*
          */
@@ -376,6 +381,54 @@ public class LegacyMetadataMapper {
             float step = p.getExposureCompensationStep();
 
             m.set(CONTROL_AE_COMPENSATION_STEP, ParamsUtils.createRational(step));
+        }
+    }
+
+
+    @SuppressWarnings({"unchecked"})
+    private static void mapControlAf(CameraMetadataNative m, Camera.Parameters p) {
+        /*
+         * control.afAvailableModes
+         */
+        {
+            List<String> focusModes = p.getSupportedFocusModes();
+
+            String[] focusModeStrings = new String[] {
+                    Camera.Parameters.FOCUS_MODE_AUTO,
+                    Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE,
+                    Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO,
+                    Camera.Parameters.FOCUS_MODE_EDOF,
+                    Camera.Parameters.FOCUS_MODE_INFINITY,
+                    Camera.Parameters.FOCUS_MODE_MACRO,
+                    Camera.Parameters.FOCUS_MODE_FIXED,
+            };
+
+            int[] focusModeInts = new int[] {
+                    CONTROL_AF_MODE_AUTO,
+                    CONTROL_AF_MODE_CONTINUOUS_PICTURE,
+                    CONTROL_AF_MODE_CONTINUOUS_VIDEO,
+                    CONTROL_AF_MODE_EDOF,
+                    CONTROL_AF_MODE_OFF,
+                    CONTROL_AF_MODE_MACRO,
+                    CONTROL_AF_MODE_OFF
+            };
+
+            List<Integer> afAvail = ArrayUtils.convertStringListToIntList(
+                    focusModes, focusModeStrings, focusModeInts);
+
+            // No AF modes supported? That's unpossible!
+            if (afAvail == null || afAvail.size() == 0) {
+                Log.w(TAG, "No AF modes supported (HAL bug); defaulting to AF_MODE_OFF only");
+                afAvail = new ArrayList<Integer>(/*capacity*/1);
+                afAvail.add(CONTROL_AF_MODE_OFF);
+            }
+
+            m.set(CONTROL_AF_AVAILABLE_MODES, ArrayUtils.toIntArray(afAvail));
+
+            if (VERBOSE) {
+                Log.v(TAG, "mapControlAf - control.afAvailableModes set to " +
+                        ListUtils.listToString(afAvail));
+            }
         }
     }
 
@@ -793,5 +846,56 @@ public class LegacyMetadataMapper {
         }
 
         return tags;
+    }
+
+    /**
+     * Convert the requested AF mode into its equivalent supported parameter.
+     *
+     * @param mode {@code CONTROL_AF_MODE}
+     * @param supportedFocusModes list of camera1's supported focus modes
+     * @return the stringified af mode, or {@code null} if its not supported
+     */
+    static String convertAfModeToLegacy(int mode, List<String> supportedFocusModes) {
+        if (supportedFocusModes == null || supportedFocusModes.isEmpty()) {
+            Log.w(TAG, "No focus modes supported; API1 bug");
+            return null;
+        }
+
+        String param = null;
+        switch (mode) {
+            case CONTROL_AF_MODE_AUTO:
+                param = Parameters.FOCUS_MODE_AUTO;
+                break;
+            case CONTROL_AF_MODE_CONTINUOUS_PICTURE:
+                param = Parameters.FOCUS_MODE_CONTINUOUS_PICTURE;
+                break;
+            case CONTROL_AF_MODE_CONTINUOUS_VIDEO:
+                param = Parameters.FOCUS_MODE_CONTINUOUS_VIDEO;
+                break;
+            case CONTROL_AF_MODE_EDOF:
+                param = Parameters.FOCUS_MODE_EDOF;
+                break;
+            case CONTROL_AF_MODE_MACRO:
+                param = Parameters.FOCUS_MODE_MACRO;
+                break;
+            case CONTROL_AF_MODE_OFF:
+                if (supportedFocusModes.contains(Parameters.FOCUS_MODE_FIXED)) {
+                    param = Parameters.FOCUS_MODE_FIXED;
+                } else {
+                    param = Parameters.FOCUS_MODE_INFINITY;
+                }
+        }
+
+        if (!supportedFocusModes.contains(param)) {
+            // Weed out bad user input by setting to the first arbitrary focus mode
+            String defaultMode = supportedFocusModes.get(0);
+            Log.w(TAG,
+                    String.format(
+                            "convertAfModeToLegacy - ignoring unsupported mode %d, " +
+                            "defaulting to %s", mode, defaultMode));
+            param = defaultMode;
+        }
+
+        return param;
     }
 }
