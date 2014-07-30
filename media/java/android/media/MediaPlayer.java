@@ -2161,7 +2161,7 @@ public class MediaPlayer implements SubtitleController.Listener
      * @param fd the FileDescriptor for the file you want to play
      * @param offset the offset into the file where the data to be played starts, in bytes
      * @param length the length in bytes of the data to be played
-     * @param mimeType The mime type of the file. Must be one of the mime types listed above.
+     * @param mime The mime type of the file. Must be one of the mime types listed above.
      * @throws IllegalArgumentException if the mimeType is not supported.
      * @throws IllegalStateException if called in an invalid state.
      */
