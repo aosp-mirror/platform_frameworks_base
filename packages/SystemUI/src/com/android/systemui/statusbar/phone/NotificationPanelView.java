@@ -1346,7 +1346,7 @@ public class NotificationPanelView extends PanelView implements
         float factor = 1f;
         if (mNotificationStackScroller.getNotGoneChildCount() > 0) {
             factor = 0.6f;
-        } else if (!mStatusBar.hasNotifications()) {
+        } else if (!mStatusBar.hasActiveNotifications()) {
             factor = 0.4f;
         }
         mEmptyDragAmount = amount * factor;
