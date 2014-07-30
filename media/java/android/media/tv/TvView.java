@@ -49,16 +49,17 @@ public class TvView extends ViewGroup {
     private static final boolean DEBUG = true;
 
     /**
-     * Passed with {@link TvInputListener#onError(String, int)}. Indicates that the requested TV
-     * input is busy and unable to handle the request.
+     * Passed with {@link TvInputListener#onError(String, int)}. Indicates that the connection to
+     * the requested TV input was not established thus the view is unable to handle the further
+     * operations.
      */
-    public static final int ERROR_BUSY = 0;
+    public static final int ERROR_INPUT_NOT_CONNECTED = 0;
 
     /**
      * Passed with {@link TvInputListener#onError(String, int)}. Indicates that the underlying TV
      * input has been disconnected.
      */
-    public static final int ERROR_TV_INPUT_DISCONNECTED = 1;
+    public static final int ERROR_INPUT_DISCONNECTED = 1;
 
     private static final int VIDEO_SIZE_VALUE_UNKNOWN = 0;
 
@@ -632,7 +633,7 @@ public class TvView extends ViewGroup {
          * @param reason The reason why the TV input stopped the playback:
          * <ul>
          * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_UNKNOWN}
-         * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_TUNE}
+         * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_TUNING}
          * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_WEAK_SIGNAL}
          * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_BUFFERING}
          * </ul>
@@ -729,7 +730,7 @@ public class TvView extends ViewGroup {
                 }
             } else {
                 if (mListener != null) {
-                    mListener.onError(mInputId, ERROR_BUSY);
+                    mListener.onError(mInputId, ERROR_INPUT_NOT_CONNECTED);
                 }
             }
         }
@@ -742,7 +743,7 @@ public class TvView extends ViewGroup {
             mSessionCallback = null;
             mSession = null;
             if (mListener != null) {
-                mListener.onError(mInputId, ERROR_TV_INPUT_DISCONNECTED);
+                mListener.onError(mInputId, ERROR_INPUT_DISCONNECTED);
             }
         }
 
