@@ -123,7 +123,18 @@ public class UiModeManager {
      * will switch to the car home activity even if we are already in car mode.
      */
     public static final int ENABLE_CAR_MODE_GO_CAR_HOME = 0x0001;
-    
+
+    /**
+     * Flag for use with {@link #enableCarMode(int)}: do not hold full wake lock
+     * while in car mode. By default, when this flag is not set, the system may hold
+     * a full wake lock to keep the screen turned on while in car mode.
+     * Setting this flag disables such behavior and the screen may be turned off if
+     * there is no other user activity and no other full wake lock held.
+     * Setting this flag can be relevant for a car dock application that does not require the
+     * screen kept on.
+     */
+    public static final int ENABLE_CAR_MODE_NO_WAKE_LOCK = 0x0002;
+
     /**
      * Force device into car mode, like it had been placed in the car dock.
      * This will cause the device to switch to the car home UI as part of
