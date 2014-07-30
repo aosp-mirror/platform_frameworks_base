@@ -26,6 +26,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -52,6 +53,9 @@ abstract class HdmiCecLocalDevice {
         int logicalAddress;
         int physicalAddress;
 
+        public ActiveSource() {
+            invalidate();
+        }
         public ActiveSource(int logical, int physical) {
             logicalAddress = logical;
             physicalAddress = physical;
@@ -61,6 +65,10 @@ abstract class HdmiCecLocalDevice {
         }
         public boolean isValid() {
             return HdmiUtils.isValidAddress(logicalAddress);
+        }
+        public void invalidate() {
+            logicalAddress = Constants.ADDR_INVALID;
+            physicalAddress = Constants.INVALID_PHYSICAL_ADDRESS;
         }
         public boolean equals(int logical, int physical) {
             return logicalAddress == logical && physicalAddress == physical;
@@ -81,8 +89,7 @@ abstract class HdmiCecLocalDevice {
     }
     // Logical address of the active source.
     @GuardedBy("mLock")
-    protected final ActiveSource mActiveSource =
-            new ActiveSource(-1, Constants.INVALID_PHYSICAL_ADDRESS);
+    protected final ActiveSource mActiveSource = new ActiveSource();
 
     // Active routing path. Physical address of the active source but not all the time, such as
     // when the new active source does not claim itself to be one. Note that we don't keep
@@ -504,9 +511,12 @@ abstract class HdmiCecLocalDevice {
     @ServiceThreadOnly
     <T extends FeatureAction> List<T> getActions(final Class<T> clazz) {
         assertRunOnServiceThread();
-        ArrayList<T> actions = new ArrayList<>();
+        List<T> actions = Collections.<T>emptyList();
         for (FeatureAction action : mActions) {
             if (action.getClass().equals(clazz)) {
+                if (actions.isEmpty()) {
+                    actions = new ArrayList<T>();
+                }
                 actions.add((T) action);
             }
         }
