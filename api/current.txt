@@ -8585,6 +8585,7 @@ package android.content.pm {
 
   public class LauncherApps {
     method public void addOnAppsChangedCallback(android.content.pm.LauncherApps.OnAppsChangedCallback);
+    method public void addOnAppsChangedCallback(android.content.pm.LauncherApps.OnAppsChangedCallback, android.os.Handler);
     method public java.util.List<android.content.pm.LauncherActivityInfo> getActivityList(java.lang.String, android.os.UserHandle);
     method public boolean isActivityEnabledForProfile(android.content.ComponentName, android.os.UserHandle);
     method public boolean isPackageEnabledForProfile(java.lang.String, android.os.UserHandle);
