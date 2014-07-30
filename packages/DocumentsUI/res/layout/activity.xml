@@ -24,6 +24,23 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
+        <Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?android:attr/actionBarSize"
+            android:background="?android:attr/colorPrimary"
+            android:elevation="8dp"
+            android:theme="?android:attr/actionBarTheme">
+
+            <Spinner
+                android:id="@+id/stack"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="4dp"
+                android:overlapAnchor="true" />
+
+        </Toolbar>
+
         <com.android.documentsui.DirectoryContainerView
             android:id="@+id/container_directory"
             android:layout_width="match_parent"
@@ -33,15 +50,35 @@
         <FrameLayout
             android:id="@+id/container_save"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:background="@*android:color/material_grey_50"
+            android:elevation="8dp" />
 
     </LinearLayout>
 
-    <FrameLayout
-        android:id="@+id/container_roots"
+    <LinearLayout
+        android:id="@+id/drawer_roots"
         android:layout_width="250dp"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:background="#fff" />
+        android:orientation="vertical"
+        android:elevation="16dp"
+        android:background="@*android:color/white">
+
+        <Toolbar
+            android:id="@+id/roots_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?android:attr/actionBarSize"
+            android:background="?android:attr/colorPrimary"
+            android:elevation="8dp"
+            android:theme="?android:attr/actionBarTheme" />
+
+        <FrameLayout
+            android:id="@+id/container_roots"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+    </LinearLayout>
 
 </android.support.v4.widget.DrawerLayout>

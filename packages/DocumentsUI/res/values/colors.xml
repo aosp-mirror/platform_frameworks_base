@@ -15,12 +15,10 @@
 -->
 
 <resources>
-    <color name="chip">#ddd</color>
-    <color name="item_root_pressed">#33cccccc</color>
-    <color name="item_root_focused">#66cccccc</color>
 
-    <color name="grid_item_background">#ffe1e1e0</color>
+    <!-- Half-alpha of material_teal_500 -->
+    <color name="accent_color_overlay">#8800bcd4</color>
 
-    <color name="accent_item_activated">#88009587</color>
+    <color name="grid_item_background">@*android:color/material_grey_300</color>
 
 </resources>

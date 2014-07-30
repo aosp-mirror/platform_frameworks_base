@@ -36,14 +36,6 @@ public class DirectoryContainerView extends FrameLayout {
     }
 
     @Override
-    protected void onFinishInflate() {
-        super.onFinishInflate();
-        setClipChildren(false);
-        setClipToOutline(false);
-        setClipToPadding(false);
-    }
-
-    @Override
     protected void dispatchDraw(Canvas canvas) {
         final ArrayList<View> disappearing = mDisappearingChildren;
         if (mDisappearingFirst && disappearing != null) {
