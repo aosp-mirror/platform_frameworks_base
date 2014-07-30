@@ -2,7 +2,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="8016145283189546017">"输入设备"</string>
-    <string name="keyboard_layouts_label" msgid="6688773268302087545">"Android 键盘"</string>
+    <string name="keyboard_layouts_label" msgid="6688773268302087545">"Android键盘"</string>
     <string name="keyboard_layout_english_uk_label" msgid="6664258463319999632">"英语（英国）"</string>
     <string name="keyboard_layout_english_us_label" msgid="8994890249649106291">"英语（美国）"</string>
     <string name="keyboard_layout_english_us_intl" msgid="3705168594034233583">"英语（美国），国际风格"</string>
