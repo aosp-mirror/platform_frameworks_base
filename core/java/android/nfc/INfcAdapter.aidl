@@ -27,7 +27,6 @@ import android.nfc.INfcAdapterExtras;
 import android.nfc.INfcTag;
 import android.nfc.INfcCardEmulation;
 import android.nfc.INfcLockscreenDispatch;
-import android.nfc.INfcUnlockHandler;
 import android.os.Bundle;
 
 /**
@@ -58,6 +57,4 @@ interface INfcAdapter
     void setP2pModes(int initatorModes, int targetModes);
 
     void registerLockscreenDispatch(INfcLockscreenDispatch lockscreenDispatch, in int[] techList);
-    void addNfcUnlockHandler(INfcUnlockHandler unlockHandler, in int[] techList);
-    void removeNfcUnlockHandler(IBinder b);
 }
