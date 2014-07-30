@@ -73,8 +73,7 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"ຖ່າຍຮູບໜ້າຈໍແລ້ວ"</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"ແຕະເພື່ອເບິ່ງພາບໜ້າຈໍຂອງທ່ານ."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"ບໍ່ສາມາດຖ່າຍຮູບໜ້າຈໍໄດ້"</string>
-    <!-- no translation found for screenshot_failed_text (1260203058661337274) -->
-    <skip />
+    <string name="screenshot_failed_text" msgid="1260203058661337274">"ບໍ່​ສາມາດ​ຖ່າຍ​ຮູບ​ໜ້າ​ຈໍ​ໄດ້​ເນື່ອງ​ຈາກ​ບ່ອນ​ຈັດ​ເກັບ​ຂໍ້ມູນ​ທີ່​ຈຳກັດ ຫຼື​ແອັບຯ ຫຼື​ອົງກອນ​ຂອງ​ທ່ານ​ບໍ່​ອະນຸຍາດ​ໃຫ້​ເຮັດ​ໄດ້."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB ໂຕເລືອກການຍ້າຍໄຟລ໌"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"ເຊື່ອມຕໍ່ເປັນ media player (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"ເຊື່ອມຕໍ່ເປັນກ້ອງຖ່າຍຮູບ (PTP)"</string>
@@ -151,7 +150,9 @@
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"TeleTypewriter ຖືກເປີດຢູ່."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"ສັ່ນເຕືອນພ້ອມສຽງເອີ້ນເຂົ້າ."</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"ປິດສຽງ."</string>
+    <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"ປິດ <xliff:g id="APP">%s</xliff:g> ໄວ້."</string>
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"ປິດ <xliff:g id="APP">%s</xliff:g> ແລ້ວ."</string>
+    <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"ກຳ​ລັງ​ເປີດ <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"ປິດການແຈ້ງເຕືອນແລ້ວ."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"ໜ້າຈໍແຈ້ງເຕືອນ."</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"ການຕັ້ງຄ່າດ່ວນ."</string>
@@ -270,18 +271,12 @@
     <string name="guest_nickname" msgid="8059989128963789678">"ແຂກ"</string>
     <string name="guest_new_guest" msgid="4259024453643879653">"+ ແຂກ"</string>
     <string name="guest_exit_guest" msgid="1619100760451149682">"​ອອກ​ຈາກ​ຜູ່​ມາ​ຢາມ"</string>
-    <!-- no translation found for guest_exit_guest_dialog_title (7587460301980067285) -->
-    <skip />
-    <!-- no translation found for guest_exit_guest_dialog_message (10255285459589280) -->
-    <skip />
-    <!-- no translation found for guest_wipe_session_title (6419439912885956132) -->
-    <skip />
-    <!-- no translation found for guest_wipe_session_message (5369763062345463297) -->
-    <skip />
-    <!-- no translation found for guest_wipe_session_wipe (9154291314115781448) -->
-    <skip />
-    <!-- no translation found for guest_wipe_session_dontwipe (850084868661344050) -->
-    <skip />
+    <string name="guest_exit_guest_dialog_title" msgid="7587460301980067285">"ສິ້ນ​ສຸດ​ການ​ນຳ​ໃຊ້​ຂອງ​ຜູ່​ຢ້ຽມ​ຢາມບໍ່?"</string>
+    <string name="guest_exit_guest_dialog_message" msgid="10255285459589280">"​ການ​ອອກ​ຈາກ​ເຊດ​ຊັນ​ຜູ່​ຢ້ຽມ​ຢາມ​ຈະ​ເປັນ​ການ​ລຶບ​ຂໍ້​ມູນ​ໃນ​ເຄື່ອງອອ."</string>
+    <string name="guest_wipe_session_title" msgid="6419439912885956132">"ຍິນ​ດີ​ຕ້ອນ​ຮັບ​ກັບ​ມາ, ຜູ່​ຢ້ຽມ​ຢາມ!"</string>
+    <string name="guest_wipe_session_message" msgid="5369763062345463297">"ທ່ານ​ຕ້ອງ​ການ​ເລີ່ມ​ເຊດ​ຊັນ​ໃໝ່​ບໍ່?"</string>
+    <string name="guest_wipe_session_wipe" msgid="9154291314115781448">"​ແມ່ນ​ແລ້ວ"</string>
+    <string name="guest_wipe_session_dontwipe" msgid="850084868661344050">"ບໍ່, ຂອບໃຈ"</string>
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"ເປັນ​ເວລາ​ນຶ່ງ​ນາ​ທີ"</item>
     <item quantity="other" msgid="6924190729213550991">"ເປັນ​ເວລາ %d ນາ​ທີ"</item>
@@ -297,5 +292,7 @@
     <string name="notification_hidden_text" msgid="1135169301897151909">"​ເນື້ອ​ຫາ​ຖືກ​ເຊື່ອງ​ແລ້ວ"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ​ຈະ​ເລີ່ມ​ບັນ​ທຶກ​ທຸກ​ຢ່າງ​ທີ່​ສະ​ແດງ​ຜົນ​ໃນ​ໜ້າ​ຈໍ​ທ່ານ."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"ບໍ່​ຕ້ອງ​ສະ​ແດງ​ອີກ"</string>
+    <string name="clear_all_notifications_text" msgid="814192889771462828">"ລຶບລ້າງທັງໝົດ"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"ເລີ່ມດຽວນີ້"</string>
+    <string name="empty_shade_text" msgid="708135716272867002">"ບໍ່ມີການແຈ້ງເຕືອນ"</string>
 </resources>

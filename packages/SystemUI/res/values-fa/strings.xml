@@ -73,8 +73,7 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"تصویر صفحه گرفته شد."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"برای مشاهده تصویر صفحه خود، لمس کنید."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"تصویر صفحه گرفته نشد."</string>
-    <!-- no translation found for screenshot_failed_text (1260203058661337274) -->
-    <skip />
+    <string name="screenshot_failed_text" msgid="1260203058661337274">"به دلیل فضای ذخیره‌سازی کم یا عدم اجازه برنامه یا سازمانتان، نمی‌توان از صفحه عکس گرفت."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"‏گزینه‌های انتقال فایل USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"‏نصب به‌عنوان دستگاه پخش رسانه (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"‏تصب به‌عنوان دوربین (PTP)"</string>
@@ -151,7 +150,9 @@
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"‏TeleTypewriter فعال شد."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"زنگ لرزشی."</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"زنگ بی‌صدا."</string>
+    <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"رد کردن <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> نادیده گرفته شد."</string>
+    <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"<xliff:g id="APP">%s</xliff:g> در حال شروع به کار است."</string>
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"اعلان ردشد."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"مجموعه اعلان."</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"تنظیمات سریع."</string>
@@ -270,18 +271,12 @@
     <string name="guest_nickname" msgid="8059989128963789678">"مهمان"</string>
     <string name="guest_new_guest" msgid="4259024453643879653">"+ مهمان"</string>
     <string name="guest_exit_guest" msgid="1619100760451149682">"خروج مهمان"</string>
-    <!-- no translation found for guest_exit_guest_dialog_title (7587460301980067285) -->
-    <skip />
-    <!-- no translation found for guest_exit_guest_dialog_message (10255285459589280) -->
-    <skip />
-    <!-- no translation found for guest_wipe_session_title (6419439912885956132) -->
-    <skip />
-    <!-- no translation found for guest_wipe_session_message (5369763062345463297) -->
-    <skip />
-    <!-- no translation found for guest_wipe_session_wipe (9154291314115781448) -->
-    <skip />
-    <!-- no translation found for guest_wipe_session_dontwipe (850084868661344050) -->
-    <skip />
+    <string name="guest_exit_guest_dialog_title" msgid="7587460301980067285">"از جلسه مهمان خارج می‌شوید؟"</string>
+    <string name="guest_exit_guest_dialog_message" msgid="10255285459589280">"خروج از جلسه مهمان، داده‌های محلی را حذف خواهد کرد."</string>
+    <string name="guest_wipe_session_title" msgid="6419439912885956132">"مهمان گرامی، بازگشتتان را خوش آمد می‌گوییم!"</string>
+    <string name="guest_wipe_session_message" msgid="5369763062345463297">"می‌خواهید یک جلسه جدید را شروع کنید؟"</string>
+    <string name="guest_wipe_session_wipe" msgid="9154291314115781448">"بله"</string>
+    <string name="guest_wipe_session_dontwipe" msgid="850084868661344050">"نه، متشکرم"</string>
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"برای یک دقیقه"</item>
     <item quantity="other" msgid="6924190729213550991">"‏برای %d دقیقه"</item>
@@ -297,5 +292,7 @@
     <string name="notification_hidden_text" msgid="1135169301897151909">"محتواها پنهان هستند"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> شروع به ضبط هر چیزی می‌کند که در صفحه‌نمایش شما نمایش داده می‌شود."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"دوباره نشان داده نشود"</string>
+    <string name="clear_all_notifications_text" msgid="814192889771462828">"پاک کردن همه موارد"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"اکنون شروع شود"</string>
+    <string name="empty_shade_text" msgid="708135716272867002">"اعلانی موجود نیست"</string>
 </resources>

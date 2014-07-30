@@ -44,13 +44,13 @@
     <string name="battery_saver_start_action" msgid="7245333922937402896">"बैटरी सेवर प्रारंभ करें"</string>
     <string name="battery_saver_confirmation_text" msgid="8417584516834617662">"बैटरी का जीवनकाल बेहतर बनाने में सहायता के लिए, बैटरी सेवर आपके उपकरण के प्रदर्शन को कम कर देगा.\n\nआपका उपकरण प्लग किए जाने पर बैटरी सेवर अक्षम हो जाएगा."</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"सेटिंग"</string>
-    <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
+    <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"वाई-फ़ाई"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"हवाई जहाज मोड"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"स्‍क्रीन अपनेआप घुमाएं"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"म्यूट करें"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"स्वत:"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"सूचनाएं"</string>
-    <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth टीदर किया गया"</string>
+    <string name="bluetooth_tethered" msgid="7094101612161133267">"ब्लूटूथ टीदर किया गया"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"इनपुट पद्धति सेट करें"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"भौतिक कीबोर्ड"</string>
     <string name="usb_device_permission_prompt" msgid="834698001271562057">"ऐप्स  <xliff:g id="APPLICATION">%1$s</xliff:g> को USB उपकरण तक पहुंचने दें?"</string>
@@ -73,8 +73,7 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"स्‍क्रीनशॉट कैप्‍चर किया गया."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"अपना स्‍क्रीनशॉट देखने के लिए स्‍पर्श करें."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"स्क्रीनशॉट को कैप्चर नहीं किया जा सका."</string>
-    <!-- no translation found for screenshot_failed_text (1260203058661337274) -->
-    <skip />
+    <string name="screenshot_failed_text" msgid="1260203058661337274">"सीमित संग्रहण स्थान के कारण स्क्रीनशॉट नहीं ले सकते, या ऐप्स या आपके संगठन द्वारा ऐसा अनुमत नहीं है."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB फ़ाइल स्थानांतरण विकल्प"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"मीडिया प्लेयर के रूप में माउंट करें (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"कैमरे के रूप में माउंट करें (PTP)"</string>
@@ -89,8 +88,8 @@
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"इनपुट पद्धति‍ बटन स्विच करें."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"संगतता ज़ूम बटन."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"छोटी से बड़ी स्‍क्रीन पर ज़ूम करें."</string>
-    <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth कनेक्ट किया गया."</string>
-    <string name="accessibility_bluetooth_disconnected" msgid="7416648669976870175">"Bluetooth डि‍स्‍कनेक्‍ट कि‍या गया."</string>
+    <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"ब्लूटूथ कनेक्ट किया गया."</string>
+    <string name="accessibility_bluetooth_disconnected" msgid="7416648669976870175">"ब्लूटूथ डि‍स्‍कनेक्‍ट कि‍या गया."</string>
     <string name="accessibility_no_battery" msgid="358343022352820946">"कोई बैटरी नहीं."</string>
     <string name="accessibility_battery_one_bar" msgid="7774887721891057523">"बैटरी एक बार."</string>
     <string name="accessibility_battery_two_bars" msgid="8500650438735009973">"बैटरी दो बार."</string>
@@ -138,9 +137,9 @@
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"रोमिंग"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"किनारा"</string>
-    <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
+    <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"वाई-फ़ाई"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"कोई सिम नहीं."</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth टेदरिंग."</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ब्लूटूथ टेदरिंग."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"हवाई जहाज मोड."</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"<xliff:g id="NUMBER">%d</xliff:g> प्रति‍शत बैटरी."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"सिस्टम सेटिंग."</string>
@@ -151,7 +150,9 @@
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"टेलीटाइपराइटर सक्षम."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"रिंगर कंपन."</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"रिंगर मौन."</string>
+    <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"<xliff:g id="APP">%s</xliff:g> को ख़ारिज करें."</string>
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> खा़रिज कर दिया गया."</string>
+    <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"<xliff:g id="APP">%s</xliff:g> प्रारंभ हो रहा है."</string>
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"सूचना खारिज की गई."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"सूचना शेड."</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"त्वरित सेटिंग."</string>
@@ -161,7 +162,7 @@
     <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"मोबाइल <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"बैटरी <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_airplane" msgid="4196876722090224753">"हवाई जहाज़ मोड <xliff:g id="STATE">%s</xliff:g>."</string>
-    <string name="accessibility_quick_settings_bluetooth" msgid="5749054971341882340">"Bluetooth <xliff:g id="STATE">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_bluetooth" msgid="5749054971341882340">"ब्लूटूथ <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_location" msgid="4577282329866813100">"स्थान <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"<xliff:g id="TIME">%s</xliff:g> के लिए अलार्म सेट किया गया."</string>
     <string name="accessibility_quick_settings_close" msgid="2571790856136835943">"फलक बंद करें"</string>
@@ -174,7 +175,7 @@
     <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"आपके उपकरण ने डेटा बंद कर दिया है क्योंकि आपके द्वारा सेट की गई सीमा पार हो गई है.\n\nइसे पुनः चालू करने से आपका वाहक शुल्क ले सकता है."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"डेटा चालू करें"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"कोई इंटरनेट कनेक्शन नहीं"</string>
-    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi कनेक्‍ट किया गया"</string>
+    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"वाई-फ़ाई  कनेक्‍ट किया गया"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"GPS को खोजा जा रहा है"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"GPS द्वारा सेट किया गया स्‍थान"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"स्थान अनुरोध सक्रिय"</string>
@@ -189,9 +190,9 @@
     <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"हवाई जहाज़ मोड"</string>
     <string name="quick_settings_battery_charging_label" msgid="490074774465309209">"चार्ज हो रही है, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="quick_settings_battery_charged_label" msgid="8865413079414246081">"चार्ज हो गई है"</string>
-    <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
-    <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> उपकरण)"</string>
-    <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth बंद"</string>
+    <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"ब्लूटूथ"</string>
+    <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"ब्लूटूथ (<xliff:g id="NUMBER">%d</xliff:g> उपकरण)"</string>
+    <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"ब्लूटूथ बंद"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"कोई भी युग्मित उपकरण उपलब्ध नहीं"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"स्क्रीन की रोशनी"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"स्वत: घुमाएं"</string>
@@ -209,10 +210,10 @@
     <string name="quick_settings_user_label" msgid="5238995632130897840">"मुझे"</string>
     <string name="quick_settings_user_title" msgid="4467690427642392403">"उपयोगकर्ता"</string>
     <string name="quick_settings_user_new_user" msgid="9030521362023479778">"नया उपयोगकर्ता"</string>
-    <string name="quick_settings_wifi_label" msgid="9135344704899546041">"Wi-Fi"</string>
+    <string name="quick_settings_wifi_label" msgid="9135344704899546041">"वाई-फ़ाई"</string>
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"कनेक्ट नहीं है"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"कोई नेटवर्क नहीं"</string>
-    <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi बंद"</string>
+    <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"वाई-फ़ाई  बंद"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="2831702993995222755">"कोई भी सहेजा गया नेटवर्क उपलब्ध नहीं"</string>
     <string name="quick_settings_cast_title" msgid="1893629685050355115">"स्क्रीन कास्ट करें"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"कास्टिंग"</string>
@@ -270,18 +271,12 @@
     <string name="guest_nickname" msgid="8059989128963789678">"अतिथि"</string>
     <string name="guest_new_guest" msgid="4259024453643879653">"+ अतिथि"</string>
     <string name="guest_exit_guest" msgid="1619100760451149682">"अतिथि मोड से बाहर निकलें"</string>
-    <!-- no translation found for guest_exit_guest_dialog_title (7587460301980067285) -->
-    <skip />
-    <!-- no translation found for guest_exit_guest_dialog_message (10255285459589280) -->
-    <skip />
-    <!-- no translation found for guest_wipe_session_title (6419439912885956132) -->
-    <skip />
-    <!-- no translation found for guest_wipe_session_message (5369763062345463297) -->
-    <skip />
-    <!-- no translation found for guest_wipe_session_wipe (9154291314115781448) -->
-    <skip />
-    <!-- no translation found for guest_wipe_session_dontwipe (850084868661344050) -->
-    <skip />
+    <string name="guest_exit_guest_dialog_title" msgid="7587460301980067285">"अतिथि सत्र से बाहर निकलना है?"</string>
+    <string name="guest_exit_guest_dialog_message" msgid="10255285459589280">"अतिथि सत्र से बाहर निकलने से स्थानीय डेटा निकल जाएगा."</string>
+    <string name="guest_wipe_session_title" msgid="6419439912885956132">"अतिथि, आपका पुन: स्वागत है!"</string>
+    <string name="guest_wipe_session_message" msgid="5369763062345463297">"क्या आप नया सत्र प्रारंभ करना चाहते हैं?"</string>
+    <string name="guest_wipe_session_wipe" msgid="9154291314115781448">"हां"</string>
+    <string name="guest_wipe_session_dontwipe" msgid="850084868661344050">"नहीं, धन्यवाद"</string>
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"एक मिनट के लिए"</item>
     <item quantity="other" msgid="6924190729213550991">"%d मिनट के लिए"</item>
@@ -297,5 +292,7 @@
     <string name="notification_hidden_text" msgid="1135169301897151909">"छिपी हुई सामग्री"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> आपके स्क्रीन पर प्रदर्शित प्रत्येक सामग्री को कैप्चर करना प्रारंभ कर देगी."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"फिर से न दिखाएं"</string>
+    <string name="clear_all_notifications_text" msgid="814192889771462828">"सभी साफ करें"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"अब प्रारंभ करें"</string>
+    <string name="empty_shade_text" msgid="708135716272867002">"कोई सूचना नहीं"</string>
 </resources>
