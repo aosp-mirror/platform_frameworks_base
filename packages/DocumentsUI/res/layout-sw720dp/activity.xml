@@ -31,7 +31,7 @@
             android:id="@+id/stack"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="4dp"
+            android:layout_marginStart="4dp"
             android:overlapAnchor="true" />
 
     </Toolbar>
@@ -45,7 +45,7 @@
 
         <FrameLayout
             android:id="@+id/container_roots"
-            android:layout_width="250dp"
+            android:layout_width="256dp"
             android:layout_height="match_parent" />
 
         <LinearLayout
