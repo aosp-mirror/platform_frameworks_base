@@ -24,6 +24,7 @@ directly from Google Play.</li>
     <li><a href="#administering">Configuring Subscriptions Items</a></li>
     <li><a href="#cancellation">Cancellation</a></li>
     <li><a href="#payment">Payment Processing</a></li>
+    <li><a href="#strategies">Purchase Verification Strategies</a></li>
   </ol>
   <h2>See also</h2>
   <ol>
@@ -324,6 +325,21 @@ each recurring transaction by appending an integer as follows: </p>
 <p>Google Play provides the order number as the value of the 
 {@code orderId} field of the {@code INAPP_PURCHASE_DATA} JSON field (in V3) 
 or the {@code PURCHASE_STATE_CHANGED} intent (in V2).</p>
+
+<h2 id="strategies">Purchase Verification Strategies</h2>
+
+<p>In a typical scenario, your app verifies the order status for new purchases
+to ensure that they are valid before granting access to the purchased
+content.</p>
+
+<p>To verify a purchase, the app passes the purchase token and other details up
+to your backend servers, which verifies them directly with Google Play using the
+Purchase Status API.  If the backend server determines that the purchase is
+valid, it notifies the app and grants access to the content.</p>
+
+<p>Keep in mind that users will want the ability to use your app at any time,
+including when there may be no network connection available. Make sure that your
+approach to purchase verification accounts for the offline use-case.</p>
 
 <h2 id="play-dev-api">Google Play Android Developer API</h2>
 
