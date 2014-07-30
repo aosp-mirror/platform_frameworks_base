@@ -88,8 +88,9 @@ class CrossProfileIntentFilter extends IntentFilter {
                 if (tagName.equals(ATTR_FILTER)) {
                     break;
                 } else {
-                    String msg = "Unknown element under " + Settings.TAG_FORWARDING_INTENT_FILTERS
-                            + ": " + tagName + " at " + parser.getPositionDescription();
+                    String msg = "Unknown element under "
+                            + Settings.TAG_CROSS_PROFILE_INTENT_FILTERS + ": " + tagName + " at "
+                            + parser.getPositionDescription();
                     PackageManagerService.reportSettingsProblem(Log.WARN, msg);
                     XmlUtils.skipCurrentTag(parser);
                 }
