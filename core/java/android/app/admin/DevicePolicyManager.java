@@ -397,6 +397,7 @@ public class DevicePolicyManager {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_SET_NEW_PASSWORD
             = "android.app.action.SET_NEW_PASSWORD";
+
     /**
      * Flag used by {@link #addCrossProfileIntentFilter} to allow access of certain intents from a
      * managed profile to its parent.
@@ -2328,6 +2329,26 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Called by a profile owner to register a listener for private key access.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param listener The {@link DeviceAdminReceiver} that should listen for private key access
+     * requests.
+     * @see DeviceAdminReceiver#onChoosePrivateKeyAlias
+     */
+    public void registerPrivateKeyAccessListener(ComponentName admin, ComponentName listener) {
+        if (mService != null) {
+            try {
+                mService.registerPrivateKeyAccessListener(admin, listener);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed to register private key access listener with device policy " +
+                        "service", e);
+            }
+        }
+    }
+
+    /**
+     * Sets a list of features to enable for a TrustAgentService component. This is meant to be
      * Sets a list of features to enable for a TrustAgent component. This is meant to be
      * used in conjunction with {@link #KEYGUARD_DISABLE_TRUST_AGENTS}, which will disable all
      * trust agents but those with features enabled by this function call.
