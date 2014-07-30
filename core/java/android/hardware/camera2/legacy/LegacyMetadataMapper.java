@@ -601,7 +601,6 @@ public class LegacyMetadataMapper {
                     CaptureResult.JPEG_QUALITY                                     ,
                     CaptureResult.JPEG_THUMBNAIL_QUALITY                           ,
                     CaptureResult.LENS_FOCAL_LENGTH                                ,
-                    CaptureResult.REQUEST_FRAME_COUNT                              ,
                     CaptureResult.REQUEST_PIPELINE_DEPTH                           ,
                     CaptureResult.SCALER_CROP_REGION                               ,
                     CaptureResult.SENSOR_TIMESTAMP                                 ,
