@@ -57,12 +57,11 @@ public class LegacyResultMapper {
      *
      * @param legacyRequest a non-{@code null} legacy request containing the latest parameters
      * @param timestamp the timestamp to use for this result in nanoseconds.
-     * @param frameCounter a monotonically increasing frame counter for the result
      *
      * @return {@link CameraMetadataNative} object containing result metadata.
      */
     public CameraMetadataNative cachedConvertResultMetadata(
-            LegacyRequest legacyRequest, long timestamp, long frameCounter) {
+            LegacyRequest legacyRequest, long timestamp) {
         CameraMetadataNative result;
         boolean cached;
 
@@ -86,17 +85,13 @@ public class LegacyResultMapper {
          * Unconditionally set fields that change in every single frame
          */
         {
-            // request.frameCounter
-            result.set(REQUEST_FRAME_COUNT, (int)frameCounter);
-            // TODO: fix CaptureResult#getFrameNumber not to need this key
-
             // sensor.timestamp
             result.set(SENSOR_TIMESTAMP, timestamp);
         }
 
         if (VERBOSE) {
             Log.v(TAG, "cachedConvertResultMetadata - cached? " + cached +
-                    " frameCounter = " + frameCounter + " timestamp = " + timestamp);
+                    " timestamp = " + timestamp);
 
             Log.v(TAG, "----- beginning of result dump ------");
             result.dumpToLog();
