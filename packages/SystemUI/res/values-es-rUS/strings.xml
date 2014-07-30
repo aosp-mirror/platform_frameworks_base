@@ -73,7 +73,7 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Se guardó la captura de pantalla."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"Toca para ver tu captura de pantalla."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"No se pudo guardar la captura de pantalla."</string>
-    <string name="screenshot_failed_text" msgid="1260203058661337274">"Error con captura por almacenamiento limitado o porque la aplicación u organización no lo permiten."</string>
+    <string name="screenshot_failed_text" msgid="1260203058661337274">"Error de captura por almacenamiento limitado o porque la aplicación u organización no lo permiten."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Opciones de transferencia de archivos por USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Activar como reproductor de medios (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Activar como cámara (PTP)"</string>
@@ -152,11 +152,9 @@
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"TeleTypewriter habilitado"</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Timbre en vibración"</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Timbre en silencio"</string>
-    <!-- no translation found for accessibility_recents_item_will_be_dismissed (395770242498031481) -->
-    <skip />
+    <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"Rechazar <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> descartada."</string>
-    <!-- no translation found for accessibility_recents_item_launched (7616039892382525203) -->
-    <skip />
+    <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"Iniciando <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Notificación ignorada"</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"Pantalla de notificaciones"</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Configuración rápida"</string>
@@ -296,9 +294,7 @@
     <string name="notification_hidden_text" msgid="1135169301897151909">"Contenidos ocultos"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> comenzará la captura de todo lo que se muestre en la pantalla."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"No volver a mostrar"</string>
-    <!-- no translation found for clear_all_notifications_text (814192889771462828) -->
-    <skip />
+    <string name="clear_all_notifications_text" msgid="814192889771462828">"Borrar todo"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Comenzar ahora"</string>
-    <!-- no translation found for empty_shade_text (708135716272867002) -->
-    <skip />
+    <string name="empty_shade_text" msgid="708135716272867002">"No hay notificaciones"</string>
 </resources>

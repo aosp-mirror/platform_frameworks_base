@@ -150,11 +150,9 @@
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"ಟೆಲಿಟೈಪ್‌ರೈಟರ್ ಸಕ್ರಿಯವಾಗಿದೆ."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"ರಿಂಗರ್ ಕಂಪನ."</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"ರಿಂಗರ್ ಶಾಂತ."</string>
-    <!-- no translation found for accessibility_recents_item_will_be_dismissed (395770242498031481) -->
-    <skip />
+    <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"<xliff:g id="APP">%s</xliff:g> ವಜಾಗೊಳಿಸು."</string>
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> ವಜಾಗೊಳಿಸಲಾಗಿದೆ."</string>
-    <!-- no translation found for accessibility_recents_item_launched (7616039892382525203) -->
-    <skip />
+    <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"<xliff:g id="APP">%s</xliff:g> ಪ್ರಾರಂಭಿಸಲಾಗುತ್ತಿದೆ."</string>
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"ಅಧಿಸೂಚನೆ ವಜಾಗೊಂಡಿದೆ."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"ಅಧಿಸೂಚನೆಯ ಛಾಯೆ."</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"ತ್ವರಿತ ಸೆಟ್ಟಿಂಗ್‍ಗಳು."</string>
@@ -294,9 +292,7 @@
     <string name="notification_hidden_text" msgid="1135169301897151909">"ವಿಷಯಗಳನ್ನು ಮರೆಮಾಡಲಾಗಿದೆ"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"ನಿಮ್ಮ ಪರದೆಯ ಮೇಲೆ ಪ್ರದರ್ಶಿಸಲಾಗುವ ಎಲ್ಲವನ್ನೂ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ಯು ಸೆರೆಹಿಡಿಯಲು ಪ್ರಾರಂಭಿಸುತ್ತದೆ."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"ಮತ್ತೊಮ್ಮೆ ತೋರಿಸದಿರಿ"</string>
-    <!-- no translation found for clear_all_notifications_text (814192889771462828) -->
-    <skip />
+    <string name="clear_all_notifications_text" msgid="814192889771462828">"ಎಲ್ಲವನ್ನೂ ತೆರವುಗೊಳಿಸು"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"ಈಗ ಪ್ರಾರಂಭಿಸಿ"</string>
-    <!-- no translation found for empty_shade_text (708135716272867002) -->
-    <skip />
+    <string name="empty_shade_text" msgid="708135716272867002">"ಯಾವುದೇ ಅಧಿಸೂಚನೆಗಳಿಲ್ಲ"</string>
 </resources>
