@@ -394,25 +394,26 @@ public abstract class TvInputService extends Service {
          * Informs the application that the user is allowed to watch the current program content.
          * <p>
          * Each TV input service is required to query the system whether the user is allowed to
-         * watch the current program before showing it to the user if the parental control is
-         * enabled (i.e. {@link TvParentalControlManager#isEnabled
-         * TvParentalControlManager.isEnabled()} returns {@code true}). Whether the TV input service
-         * should block the content or not is determined by invoking
-         * {@link TvParentalControlManager#isRatingBlocked
-         * TvParentalControlManager.isRatingBlocked(TvContentRating)} with the content rating for
-         * the current program. Then the {@link TvParentalControlManager} makes a judgment based on
-         * the user blocked ratings stored in the secure settings and returns the result. If the
-         * rating in question turns out to be allowed by the user, the TV input service must call
-         * this method to notify the application that is permitted to show the content.
+         * watch the current program before showing it to the user if the parental controls is
+         * enabled (i.e. {@link TvInputManager#isParentalControlsEnabled
+         * TvInputManager.isParentalControlsEnabled()} returns {@code true}). Whether the TV input
+         * service should block the content or not is determined by invoking
+         * {@link TvInputManager#isRatingBlocked TvInputManager.isRatingBlocked(TvContentRating)}
+         * with the content rating for the current program. Then the {@link TvInputManager} makes a
+         * judgment based on the user blocked ratings stored in the secure settings and returns the
+         * result. If the rating in question turns out to be allowed by the user, the TV input
+         * service must call this method to notify the application that is permitted to show the
+         * content.
          * </p><p>
          * Each TV input service also needs to continuously listen to any changes made to the
-         * parental control settings by registering a
-         * {@link TvParentalControlManager.ParentalControlListener} to the manager and immediately
-         * reevaluate the current program with the new parental control settings.
+         * parental controls settings by registering a broadcast receiver to receive
+         * {@link TvInputManager#ACTION_BLOCKED_RATINGS_CHANGED} and
+         * {@link TvInputManager#ACTION_PARENTAL_CONTROLS_ENABLED_CHANGED} and immediately
+         * reevaluate the current program with the new parental controls settings.
          * </p>
          *
          * @see #notifyContentBlocked
-         * @see TvParentalControlManager
+         * @see TvInputManager
          */
         public void notifyContentAllowed() {
             mHandler.post(new Runnable() {
@@ -432,27 +433,27 @@ public abstract class TvInputService extends Service {
          * Informs the application that the current program content is blocked by parent controls.
          * <p>
          * Each TV input service is required to query the system whether the user is allowed to
-         * watch the current program before showing it to the user if the parental control is
-         * enabled (i.e. {@link TvParentalControlManager#isEnabled
-         * TvParentalControlManager.isEnabled()} returns {@code true}). Whether the TV input service
-         * should block the content or not is determined by invoking
-         * {@link TvParentalControlManager#isRatingBlocked
-         * TvParentalControlManager.isRatingBlocked(TvContentRating)} with the content rating for
-         * the current program. Then the {@link TvParentalControlManager} makes a judgment based on
-         * the user blocked ratings stored in the secure settings and returns the result. If the
-         * rating in question turns out to be blocked, the TV input service must immediately block
-         * the content and call this method with the content rating of the current program to prompt
-         * the PIN verification screen.
+         * watch the current program before showing it to the user if the parental controls is
+         * enabled (i.e. {@link TvInputManager#isParentalControlsEnabled
+         * TvInputManager.isParentalControlsEnabled()} returns {@code true}). Whether the TV input
+         * service should block the content or not is determined by invoking
+         * {@link TvInputManager#isRatingBlocked TvInputManager.isRatingBlocked(TvContentRating)}
+         * with the content rating for the current program. Then the {@link TvInputManager} makes a
+         * judgment based on the user blocked ratings stored in the secure settings and returns the
+         * result. If the rating in question turns out to be blocked, the TV input service must
+         * immediately block the content and call this method with the content rating of the current
+         * program to prompt the PIN verification screen.
          * </p><p>
          * Each TV input service also needs to continuously listen to any changes made to the
-         * parental control settings by registering a
-         * {@link TvParentalControlManager.ParentalControlListener} to the manager and immediately
-         * reevaluate the current program with the new parental control settings.
+         * parental controls settings by registering a broadcast receiver to receive
+         * {@link TvInputManager#ACTION_BLOCKED_RATINGS_CHANGED} and
+         * {@link TvInputManager#ACTION_PARENTAL_CONTROLS_ENABLED_CHANGED} and immediately
+         * reevaluate the current program with the new parental controls settings.
          * </p>
          *
          * @param rating The content rating for the current TV program.
          * @see #notifyContentAllowed
-         * @see TvParentalControlManager
+         * @see TvInputManager
          */
         public void notifyContentBlocked(final TvContentRating rating) {
             mHandler.post(new Runnable() {

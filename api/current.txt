@@ -7325,7 +7325,6 @@ package android.content {
     field public static final java.lang.String TELEPHONY_SERVICE = "phone";
     field public static final java.lang.String TEXT_SERVICES_MANAGER_SERVICE = "textservices";
     field public static final java.lang.String TV_INPUT_SERVICE = "tv_input";
-    field public static final java.lang.String TV_PARENTAL_CONTROL_SERVICE = "tv_parental_control";
     field public static final java.lang.String UI_MODE_SERVICE = "uimode";
     field public static final java.lang.String USB_SERVICE = "usb";
     field public static final java.lang.String USER_SERVICE = "user";
@@ -16992,8 +16991,12 @@ package android.media.tv {
     method public int getInputState(java.lang.String);
     method public android.media.tv.TvInputInfo getTvInputInfo(java.lang.String);
     method public java.util.List<android.media.tv.TvInputInfo> getTvInputList();
+    method public boolean isParentalControlsEnabled();
+    method public boolean isRatingBlocked(android.media.tv.TvContentRating);
     method public void registerListener(android.media.tv.TvInputManager.TvInputListener, android.os.Handler);
     method public void unregisterListener(android.media.tv.TvInputManager.TvInputListener);
+    field public static final java.lang.String ACTION_BLOCKED_RATINGS_CHANGED = "android.media.tv.action.BLOCKED_RATINGS_CHANGED";
+    field public static final java.lang.String ACTION_PARENTAL_CONTROLS_ENABLED_CHANGED = "android.media.tv.action.PARENTAL_CONTROLS_ENABLED_CHANGED";
     field public static final int INPUT_STATE_CONNECTED = 0; // 0x0
     field public static final int INPUT_STATE_CONNECTED_STANDBY = 1; // 0x1
     field public static final int INPUT_STATE_DISCONNECTED = 2; // 0x2
@@ -17060,19 +17063,6 @@ package android.media.tv {
     method public void onUnblockContent(android.media.tv.TvContentRating);
     method public boolean onUnselectTrack(android.media.tv.TvTrackInfo);
     method public void setOverlayViewEnabled(boolean);
-  }
-
-  public final class TvParentalControlManager {
-    method public void addParentalControlListener(android.media.tv.TvParentalControlManager.ParentalControlListener, android.os.Handler);
-    method public final boolean isEnabled();
-    method public final boolean isRatingBlocked(android.media.tv.TvContentRating);
-    method public void removeParentalControlListener(android.media.tv.TvParentalControlManager.ParentalControlListener);
-  }
-
-  public static abstract class TvParentalControlManager.ParentalControlListener {
-    ctor public TvParentalControlManager.ParentalControlListener();
-    method public void onBlockedRatingsChanged();
-    method public void onEnabledChanged(boolean);
   }
 
   public final class TvTrackInfo implements android.os.Parcelable {

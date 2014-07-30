@@ -96,6 +96,20 @@ public final class TvInputManager {
      */
     public static final int INPUT_STATE_DISCONNECTED = 2;
 
+    /**
+     * Broadcast intent action when the user blocked content ratings change. For use with the
+     * {@link #isRatingBlocked}.
+     */
+    public static final String ACTION_BLOCKED_RATINGS_CHANGED =
+            "android.media.tv.action.BLOCKED_RATINGS_CHANGED";
+
+    /**
+     * Broadcast intent action when the parental controls enabled state changes. For use with the
+     * {@link #isParentalControlsEnabled}.
+     */
+    public static final String ACTION_PARENTAL_CONTROLS_ENABLED_CHANGED =
+            "android.media.tv.action.PARENTAL_CONTROLS_ENABLED_CHANGED";
+
     private final ITvInputManager mService;
 
     private final Object mLock = new Object();
@@ -572,6 +586,9 @@ public final class TvInputManager {
      * @return the {@link TvInputInfo} for a given TV input. {@code null} if not found.
      */
     public TvInputInfo getTvInputInfo(String inputId) {
+        if (inputId == null) {
+            throw new IllegalArgumentException("inputId cannot be null");
+        }
         try {
             return mService.getTvInputInfo(inputId, mUserId);
         } catch (RemoteException e) {
@@ -593,7 +610,7 @@ public final class TvInputManager {
      */
     public int getInputState(String inputId) {
         if (inputId == null) {
-            throw new IllegalArgumentException("id cannot be null");
+            throw new IllegalArgumentException("inputId cannot be null");
         }
         synchronized (mLock) {
             Integer state = mStateMap.get(inputId);
@@ -642,6 +659,112 @@ public final class TvInputManager {
                     break;
                 }
             }
+        }
+    }
+
+    /**
+     * Returns the user's parental controls enabled state.
+     *
+     * @return {@code true} if the user enabled the parental controls, {@code false} otherwise.
+     */
+    public boolean isParentalControlsEnabled() {
+        try {
+            return mService.isParentalControlsEnabled(mUserId);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Sets the user's parental controls enabled state.
+     *
+     * @param enabled The user's parental controls enabled state. {@code true} if the user enabled
+     *            the parental controls, {@code false} otherwise.
+     * @see #isParentalControlsEnabled
+     * @hide
+     */
+    @SystemApi
+    public void setParentalControlsEnabled(boolean enabled) {
+        try {
+            mService.setParentalControlsEnabled(enabled, mUserId);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Checks whether a given TV content rating is blocked by the user.
+     *
+     * @param rating The TV content rating to check.
+     * @return {@code true} if the given TV content rating is blocked, {@code false} otherwise.
+     */
+    public boolean isRatingBlocked(TvContentRating rating) {
+        if (rating == null) {
+            throw new IllegalArgumentException("rating cannot be null");
+        }
+        try {
+            return mService.isRatingBlocked(rating.flattenToString(), mUserId);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Returns the list of blocked content ratings.
+     *
+     * @return the list of content ratings blocked by the user.
+     * @hide
+     */
+    @SystemApi
+    public List<TvContentRating> getBlockedRatings() {
+        try {
+            List<TvContentRating> ratings = new ArrayList<TvContentRating>();
+            for (String rating : mService.getBlockedRatings(mUserId)) {
+                ratings.add(TvContentRating.unflattenFromString(rating));
+            }
+            return ratings;
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Adds a user blocked content rating.
+     *
+     * @param rating The content rating to block.
+     * @see #isRatingBlocked
+     * @see #removeBlockedRating
+     * @hide
+     */
+    @SystemApi
+    public void addBlockedRating(TvContentRating rating) {
+        if (rating == null) {
+            throw new IllegalArgumentException("rating cannot be null");
+        }
+        try {
+            mService.addBlockedRating(rating.flattenToString(), mUserId);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Removes a user blocked content rating.
+     *
+     * @param rating The content rating to unblock.
+     * @see #isRatingBlocked
+     * @see #addBlockedRating
+     * @hide
+     */
+    @SystemApi
+    public void removeBlockedRating(TvContentRating rating) {
+        if (rating == null) {
+            throw new IllegalArgumentException("rating cannot be null");
+        }
+        try {
+            mService.removeBlockedRating(rating.flattenToString(), mUserId);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
         }
     }
 
