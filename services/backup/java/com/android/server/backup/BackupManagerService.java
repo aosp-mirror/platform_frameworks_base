@@ -1266,10 +1266,13 @@ public class BackupManagerService extends IBackupManager.Stub {
         ArrayList<FullBackupEntry> schedule = null;
         synchronized (mQueueLock) {
             if (mFullBackupScheduleFile.exists()) {
+                FileInputStream fstream = null;
+                BufferedInputStream bufStream = null;
+                DataInputStream in = null;
                 try {
-                    FileInputStream fstream = new FileInputStream(mFullBackupScheduleFile);
-                    BufferedInputStream bufStream = new BufferedInputStream(fstream);
-                    DataInputStream in = new DataInputStream(bufStream);
+                    fstream = new FileInputStream(mFullBackupScheduleFile);
+                    bufStream = new BufferedInputStream(fstream);
+                    in = new DataInputStream(bufStream);
 
                     int version = in.readInt();
                     if (version != SCHEDULE_FILE_VERSION) {
@@ -1289,6 +1292,10 @@ public class BackupManagerService extends IBackupManager.Stub {
                     Slog.e(TAG, "Unable to read backup schedule", e);
                     mFullBackupScheduleFile.delete();
                     schedule = null;
+                } finally {
+                    IoUtils.closeQuietly(in);
+                    IoUtils.closeQuietly(bufStream);
+                    IoUtils.closeQuietly(fstream);
                 }
             }
 
