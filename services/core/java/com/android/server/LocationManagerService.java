@@ -482,33 +482,32 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
 
         // bind to fused hardware provider if supported
+        FlpHardwareProvider flpHardwareProvider = FlpHardwareProvider.getInstance(mContext);
         if (FlpHardwareProvider.isSupported()) {
-          FlpHardwareProvider flpHardwareProvider =
-              FlpHardwareProvider.getInstance(mContext);
-          FusedProxy fusedProxy = FusedProxy.createAndBind(
-                  mContext,
-                  mLocationHandler,
-                  flpHardwareProvider.getLocationHardware(),
-                  com.android.internal.R.bool.config_enableHardwareFlpOverlay,
-                  com.android.internal.R.string.config_hardwareFlpPackageName,
-                  com.android.internal.R.array.config_locationProviderPackageNames);
-          if(fusedProxy == null) {
-              Slog.e(TAG, "Unable to bind FusedProxy.");
-          }
-
-          // bind to geofence provider
-          GeofenceProxy provider = GeofenceProxy.createAndBind(mContext,
-                  com.android.internal.R.bool.config_enableGeofenceOverlay,
-                  com.android.internal.R.string.config_geofenceProviderPackageName,
-                  com.android.internal.R.array.config_locationProviderPackageNames,
-                  mLocationHandler,
-                  gpsProvider.getGpsGeofenceProxy(),
-                  flpHardwareProvider.getGeofenceHardware());
-          if (provider == null) {
-              Slog.e(TAG,  "Unable to bind FLP Geofence proxy.");
-          }
+            FusedProxy fusedProxy = FusedProxy.createAndBind(
+                    mContext,
+                    mLocationHandler,
+                    flpHardwareProvider.getLocationHardware(),
+                    com.android.internal.R.bool.config_enableHardwareFlpOverlay,
+                    com.android.internal.R.string.config_hardwareFlpPackageName,
+                    com.android.internal.R.array.config_locationProviderPackageNames);
+            if (fusedProxy == null) {
+                Slog.e(TAG, "Unable to bind FusedProxy.");
+            }
         } else {
-          Slog.e(TAG, "FLP HAL not supported.");
+            Slog.e(TAG, "FLP HAL not supported");
+        }
+
+        // bind to geofence provider
+        GeofenceProxy provider = GeofenceProxy.createAndBind(
+                mContext,com.android.internal.R.bool.config_enableGeofenceOverlay,
+                com.android.internal.R.string.config_geofenceProviderPackageName,
+                com.android.internal.R.array.config_locationProviderPackageNames,
+                mLocationHandler,
+                gpsProvider.getGpsGeofenceProxy(),
+                flpHardwareProvider.getGeofenceHardware());
+        if (provider == null) {
+            Slog.e(TAG,  "Unable to bind FLP Geofence proxy.");
         }
 
         // bind to the hardware activity recognition if supported

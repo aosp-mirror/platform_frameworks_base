@@ -16,6 +16,7 @@
 package android.hardware.location;
 
 import android.location.Location;
+import android.os.Build;
 import android.os.RemoteException;
 
 import java.lang.ref.WeakReference;
@@ -60,19 +61,19 @@ public final class GeofenceHardware {
     public static final int MONITORING_TYPE_FUSED_HARDWARE = 1;
 
     /**
-     * Constant to indiciate that the monitoring system is currently
+     * Constant to indicate that the monitoring system is currently
      * available for monitoring geofences.
      */
     public static final int MONITOR_CURRENTLY_AVAILABLE = 0;
 
     /**
-     * Constant to indiciate that the monitoring system is currently
+     * Constant to indicate that the monitoring system is currently
      * unavailable for monitoring geofences.
      */
     public static final int MONITOR_CURRENTLY_UNAVAILABLE = 1;
 
     /**
-     * Constant to indiciate that the monitoring system is unsupported
+     * Constant to indicate that the monitoring system is unsupported
      * for hardware geofence monitoring.
      */
     public static final int MONITOR_UNSUPPORTED = 2;
@@ -128,6 +129,33 @@ public final class GeofenceHardware {
      * The constant used to indicate that the operation failed due to insufficient memory.
      */
     public static final int GEOFENCE_ERROR_INSUFFICIENT_MEMORY = 6;
+
+    // the following values must match the definitions in fused_location.h
+
+    /**
+     * The constant used to indicate that the monitoring system supports GNSS.
+     */
+    public static final int SOURCE_TECHNOLOGY_GNSS = (1<<0);
+
+    /**
+     * The constant used to indicate that the monitoring system supports WiFi.
+     */
+    public static final int SOURCE_TECHNOLOGY_WIFI = (1<<1);
+
+    /**
+     * The constant used to indicate that the monitoring system supports Sensors.
+     */
+    public static final int SOURCE_TECHNOLOGY_SENSORS = (1<<2);
+
+    /**
+     * The constant used to indicate that the monitoring system supports Cell.
+     */
+    public static final int SOURCE_TECHNOLOGY_CELL = (1<<3);
+
+    /**
+     * The constant used to indicate that the monitoring system supports Bluetooth.
+     */
+    public static final int SOURCE_TECHNOLOGY_BLUETOOTH = (1<<4);
 
     private HashMap<GeofenceHardwareCallback, GeofenceHardwareCallbackWrapper>
             mCallbacks = new HashMap<GeofenceHardwareCallback, GeofenceHardwareCallbackWrapper>();
@@ -238,13 +266,9 @@ public final class GeofenceHardware {
             geofenceRequest, GeofenceHardwareCallback callback) {
         try {
             if (geofenceRequest.getType() == GeofenceHardwareRequest.GEOFENCE_TYPE_CIRCLE) {
-                return mService.addCircularFence(geofenceId, monitoringType,
-                        geofenceRequest.getLatitude(),
-                        geofenceRequest.getLongitude(), geofenceRequest.getRadius(),
-                        geofenceRequest.getLastTransition(),
-                        geofenceRequest.getMonitorTransitions(),
-                        geofenceRequest.getNotificationResponsiveness(),
-                        geofenceRequest.getUnknownTimer(),
+                return mService.addCircularFence(
+                        monitoringType,
+                        new GeofenceHardwareRequestParcelable(geofenceId, geofenceRequest),
                         getCallbackWrapper(callback));
             } else {
                 throw new IllegalArgumentException("Geofence Request type not supported");
@@ -452,10 +476,21 @@ public final class GeofenceHardware {
             mCallback = new WeakReference<GeofenceHardwareMonitorCallback>(c);
         }
 
-        public void onMonitoringSystemChange(int monitoringType, boolean available,
-                Location location) {
+        public void onMonitoringSystemChange(GeofenceHardwareMonitorEvent event) {
             GeofenceHardwareMonitorCallback c = mCallback.get();
-            if (c != null) c.onMonitoringSystemChange(monitoringType, available, location);
+            if (c == null) return;
+
+            // report the legacy event first, so older clients are not broken
+            c.onMonitoringSystemChange(
+                    event.getMonitoringType(),
+                    event.getMonitoringStatus() == GeofenceHardware.MONITOR_CURRENTLY_AVAILABLE,
+                    event.getLocation());
+
+            // and only call the updated callback on on L and above, this complies with the
+            // documentation of GeofenceHardwareMonitorCallback
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.L) {
+                c.onMonitoringSystemChange(event);
+            }
         }
     }
 
