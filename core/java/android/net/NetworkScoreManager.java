@@ -205,6 +205,20 @@ public class NetworkScoreManager {
     }
 
     /**
+     * Turn off network scoring.
+     *
+     * <p>May only be called by the current scorer app, or the system.
+     *
+     * @throws SecurityException if the caller is neither the active scorer nor the system.
+     */
+    public void disableScoring() throws SecurityException {
+        try {
+            mService.disableScoring();
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
      * Request scoring for networks.
      *
      * <p>Note that this is just a helper method to assemble the broadcast, and will run in the
