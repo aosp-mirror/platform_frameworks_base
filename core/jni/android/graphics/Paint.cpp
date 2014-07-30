@@ -64,10 +64,6 @@ static JMetricsID gFontMetricsInt_fieldID;
 static void defaultSettingsForAndroid(Paint* paint) {
     // GlyphID encoding is required because we are using Harfbuzz shaping
     paint->setTextEncoding(Paint::kGlyphID_TextEncoding);
-
-    SkPaintOptionsAndroid paintOpts = paint->getPaintOptionsAndroid();
-    paintOpts.setUseFontFallbacks(true);
-    paint->setPaintOptionsAndroid(paintOpts);
 }
 
 class PaintGlue {
