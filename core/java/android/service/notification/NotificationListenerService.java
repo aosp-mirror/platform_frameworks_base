@@ -29,8 +29,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Log;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -540,6 +543,8 @@ public abstract class NotificationListenerService extends Service {
      */
     public static class RankingMap implements Parcelable {
         private final NotificationRankingUpdate mRankingUpdate;
+        private ArrayMap<String,Integer> mRanks;
+        private ArraySet<Object> mIntercepted;
 
         private RankingMap(NotificationRankingUpdate rankingUpdate) {
             mRankingUpdate = rankingUpdate;
@@ -569,14 +574,13 @@ public abstract class NotificationListenerService extends Service {
         }
 
         private int getRank(String key) {
-            // TODO: Optimize.
-            String[] orderedKeys = mRankingUpdate.getOrderedKeys();
-            for (int i = 0; i < orderedKeys.length; i++) {
-                if (orderedKeys[i].equals(key)) {
-                    return i;
+            synchronized (this) {
+                if (mRanks == null) {
+                    buildRanksLocked();
                 }
             }
-            return -1;
+            Integer rank = mRanks.get(key);
+            return rank != null ? rank : -1;
         }
 
         private boolean isAmbient(String key) {
@@ -585,13 +589,29 @@ public abstract class NotificationListenerService extends Service {
         }
 
         private boolean isIntercepted(String key) {
-            // TODO: Optimize.
-            for (String interceptedKey : mRankingUpdate.getInterceptedKeys()) {
-                if (interceptedKey.equals(key)) {
-                    return true;
+            synchronized (this) {
+                if (mIntercepted == null) {
+                    buildInterceptedSetLocked();
                 }
             }
-            return false;
+            return mIntercepted.contains(key);
+        }
+
+        // Locked by 'this'
+        private void buildRanksLocked() {
+            String[] orderedKeys = mRankingUpdate.getOrderedKeys();
+            mRanks = new ArrayMap<>(orderedKeys.length);
+            for (int i = 0; i < orderedKeys.length; i++) {
+                String key = orderedKeys[i];
+                mRanks.put(key, i);
+            }
+        }
+
+        // Locked by 'this'
+        private void buildInterceptedSetLocked() {
+            String[] dndInterceptedKeys = mRankingUpdate.getInterceptedKeys();
+            mIntercepted = new ArraySet<>(dndInterceptedKeys.length);
+            Collections.addAll(mIntercepted, dndInterceptedKeys);
         }
 
         // ----------- Parcelable
