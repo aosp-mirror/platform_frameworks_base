@@ -41,8 +41,18 @@ public class MainInteractionService extends VoiceInteractionService {
         }
 
         @Override
+        public void onDetectionStarted() {
+            Log.i(TAG, "onDetectionStarted");
+        }
+
+        @Override
         public void onDetectionStopped() {
             Log.i(TAG, "onDetectionStopped");
+        }
+
+        @Override
+        public void onError() {
+            Log.i(TAG, "onError");
         }
     };
 
@@ -89,10 +99,9 @@ public class MainInteractionService extends VoiceInteractionService {
                 Log.i(TAG, "Need to enroll with " + enroll);
                 break;
             case AlwaysOnHotwordDetector.STATE_KEYPHRASE_ENROLLED:
-                Log.i(TAG, "STATE_KEYPHRASE_ENROLLED");
-                int status = mHotwordDetector.startRecognition(
+                Log.i(TAG, "STATE_KEYPHRASE_ENROLLED - starting recognition");
+                mHotwordDetector.startRecognition(
                         AlwaysOnHotwordDetector.RECOGNITION_FLAG_NONE);
-                Log.i(TAG, "startRecognition status = " + status);
                 break;
         }
     }
