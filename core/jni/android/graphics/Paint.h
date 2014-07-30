@@ -18,6 +18,7 @@
 #define ANDROID_GRAPHICS_PAINT_H
 
 #include <SkPaint.h>
+#include <string>
 
 namespace android {
 
@@ -42,8 +43,17 @@ public:
         return mLetterSpacing;
     }
 
+    void setFontFeatureSettings(const std::string &fontFeatureSettings) {
+        mFontFeatureSettings = fontFeatureSettings;
+    }
+
+    std::string getFontFeatureSettings() const {
+        return mFontFeatureSettings;
+    }
+
 private:
     float mLetterSpacing;
+    std::string mFontFeatureSettings;
 };
 
 }  // namespace android
