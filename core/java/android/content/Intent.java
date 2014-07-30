@@ -25,9 +25,12 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import android.annotation.IntDef;
 import android.annotation.SdkConstant;
+import android.annotation.SystemApi;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.content.pm.ActivityInfo;
+
 import static android.content.ContentProvider.maybeAddUserId;
+
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
@@ -47,6 +50,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 
 import com.android.internal.util.XmlUtils;
+
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
@@ -2894,6 +2898,12 @@ public class Intent implements Parcelable, Cloneable {
      */
     @SdkConstant(SdkConstantType.INTENT_CATEGORY)
     public static final String CATEGORY_LEANBACK_LAUNCHER = "android.intent.category.LEANBACK_LAUNCHER";
+    /**
+     * Indicates a Leanback settings activity to be displayed in the Leanback launcher.
+     * @hide
+     */
+    @SystemApi
+    public static final String CATEGORY_LEANBACK_SETTINGS = "android.intent.category.LEANBACK_SETTINGS";
     /**
      * Provides information about the package it is in; typically used if
      * a package does not contain a {@link #CATEGORY_LAUNCHER} to provide
