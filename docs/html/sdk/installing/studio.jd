@@ -234,7 +234,7 @@ download (or continue to use)
 
 
 <h4 style="margin-top: 20px;"><a href='' class="expandable"
-  onclick="toggleExpandable(this,'.pax');return false;"
+  onclick="toggleExpandable(this,'.pax');hideExpandable('.reqs');return false;"
   >VIEW ALL DOWNLOADS AND SIZES</a></h4>
 
 <div class="pax col-13 online" style="display:none;margin:0;">
@@ -284,6 +284,58 @@ download (or continue to use)
   </tr>
   </table>
 
+</div><!-- end pax -->
+
+
+<h4 style="margin-top: 20px;"><a href='' class="expandable"
+  onclick="toggleExpandable(this,'.reqs');hideExpandable('.pax');return false;"
+  >SYSTEM REQUIREMENTS</a></h4>
+
+<div class="reqs col-13 online" style="display:none;margin:0;">
+<table>
+<tr>
+<th>Windows</th>
+<th style="width:40%">Mac OS</th>
+<th>Linux</th>
+</tr>
+<tr>
+<td>
+<ul>
+  <li>Microsoft Windows 8, 7, Vista, 2003, or XP (32 or 64 bit)</li>
+  <li>1 GB of RAM minimum, 2 GB recommended</li>
+  <li>400 MB of disk space</li>
+  <li>At least 1 GB of additional disk space for the Android SDK, emulator system images, and caches</li>
+  <li>1280x800 minimum screen resolution</li>
+  <li>Java Development Kit (JDK) 6 or higher</li>
+</ul>
+</td>
+<td>
+<ul>
+  <li>Mac OS X 10.5 or higher, up to 10.9 (Mavericks)</li>
+  <li>1 GB of RAM minimum, 2 GB recommended</li>
+  <li>400 MB of disk space</li>
+  <li>At least 1 GB of additional disk space for the Android SDK, emulator system images, and caches</li>
+  <li>1280x800 minimum screen resolution</li>
+  <li>Java Runtime Environment (JRE) 6 *</li>
+  <li>Java Development Kit (JDK) 6 or JDK 7</li>
+</ul>
+<p>* On Mac OS, run Android Studio with Java Runtime Environment (JRE) 6 for optimized font
+rendering. You can then configure your project to use Java Development Kit (JDK) 6 or JDK 7.</p>
+</td>
+<td>
+<ul>
+  <li>GNOME or KDE desktop</li>
+  <li>1 GB of RAM minimum, 2 GB recommended</li>
+  <li>400 MB of disk space</li>
+  <li>At least 1 GB of additional disk space for the Android SDK, emulator system images, and caches</li>
+  <li>1280x800 minimum screen resolution</li>
+  <li>Oracle Java Development Kit (JDK) 6 or JDK 7</li>
+</ul>
+</td>
+</tr>
+</table>
+<p class="note"><strong>Note:</strong> Java Development Kit (JDK) 7 is required if you're targeting
+the Android L Developer Preview.</p>
 </div><!-- end pax -->
 
 
