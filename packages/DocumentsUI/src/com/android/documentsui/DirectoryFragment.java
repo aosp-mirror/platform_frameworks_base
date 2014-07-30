@@ -853,7 +853,11 @@ public class DirectoryFragment extends Fragment {
                 // We've already had to enumerate roots before any results can
                 // be shown, so this will never block.
                 final RootInfo root = roots.getRootBlocking(docAuthority, docRootId);
-                iconDrawable = root.loadIcon(context);
+                if (state.derivedMode == MODE_GRID) {
+                    iconDrawable = root.loadLightIcon(context);
+                } else {
+                    iconDrawable = root.loadIcon(context);
+                }
 
                 if (summary != null) {
                     final boolean alwaysShowSummary = getResources()
@@ -880,7 +884,7 @@ public class DirectoryFragment extends Fragment {
                 if (Document.MIME_TYPE_DIR.equals(docMimeType) && state.derivedMode == MODE_GRID
                         && showThumbnail) {
                     iconDrawable = context.getResources().getDrawable(
-                            R.drawable.ic_root_folder_dark);
+                            R.drawable.ic_root_folder_light);
                 }
 
                 if (summary != null) {
