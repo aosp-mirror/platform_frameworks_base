@@ -116,6 +116,7 @@ public:
 
 private:
     static int startReg(JNIEnv* env);
+    void addOption(const char* optionString, void* extra_info = NULL);
     bool parseRuntimeOption(const char* property,
                             char* buffer,
                             const char* runtimeArg,
