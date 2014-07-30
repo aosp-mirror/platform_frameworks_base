@@ -19,10 +19,8 @@
 #include <string>
 
 #include "SkPathMeasure.h"
-#include "minikin/Layout.h"
 #include "Paint.h"
 #include "TypefaceImpl.h"
-#include "MinikinSkia.h"
 
 #include "MinikinUtils.h"
 

@@ -36,7 +36,6 @@
 #include "utils/Blur.h"
 
 #include <minikin/GraphemeBreak.h>
-#include <minikin/Layout.h>
 #include "MinikinSkia.h"
 #include "MinikinUtils.h"
 #include "Paint.h"

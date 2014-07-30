@@ -25,8 +25,6 @@
 #include "Paint.h"
 #include "TypefaceImpl.h"
 
-#include <minikin/Layout.h>
-#include "MinikinSkia.h"
 #include "MinikinUtils.h"
 
 namespace android {
