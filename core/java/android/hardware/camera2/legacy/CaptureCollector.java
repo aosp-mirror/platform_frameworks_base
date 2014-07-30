@@ -236,6 +236,11 @@ public class CaptureCollector {
                 Log.d(TAG, "queueRequest  for request " + holder.getRequestId() +
                         " - " + mInFlight + " requests remain in flight.");
             }
+
+            if (!(h.needsJpeg || h.needsPreview)) {
+                throw new IllegalStateException("Request must target at least one output surface!");
+            }
+
             if (h.needsJpeg) {
                 // Wait for all current requests to finish before queueing jpeg.
                 while (mInFlight > 0) {
@@ -259,9 +264,6 @@ public class CaptureCollector {
                 mInFlightPreviews++;
             }
 
-            if (!(h.needsJpeg || h.needsPreview)) {
-                throw new IllegalStateException("Request must target at least one output surface!");
-            }
 
             mInFlight++;
             return true;
