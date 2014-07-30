@@ -19,7 +19,8 @@
     android:versionCode="2">
     <application android:label="SharedLibrary">
         <library android:name="com.google.android.test.shared_library" />
-        <activity android:name="ActivityMain">
+        <activity android:name="ActivityMain"
+                  android:icon="@drawable/size_48x48">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
