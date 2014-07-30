@@ -417,6 +417,10 @@
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Gailu-administratzaileei xedeak bidaltzea baimentzen die titularrei. Aplikazio normalek ez lukete beharko."</string>
     <string name="permlab_bindTvInput" msgid="5601264742478168987">"Lotu telebista-sarrerei"</string>
     <string name="permdesc_bindTvInput" msgid="2371008331852001924">"Telebista-sarrera baten goi-mailako interfazeari lotzea baimentzen die titularrei. Aplikazio normalek ez lukete beharko."</string>
+    <!-- no translation found for permlab_modifyParentalControls (4611318225997592242) -->
+    <skip />
+    <!-- no translation found for permdesc_modifyParentalControls (7438482894162282039) -->
+    <skip />
     <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"Gehitu edo kendu gailu-administratzaileak"</string>
     <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Gailu-administratzaile aktiboak gehitzeko eta kentzeko aukera ematen die aplikazioei. Aplikazio normalek ez dute baimen hau behar."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"aldatu pantailaren orientazioa"</string>
@@ -1390,10 +1394,8 @@
     <string name="permdesc_recovery" msgid="8511774533266359571">"Eskuratze-sistemarekin nahiz sistema-eguneratzeekin interaktuatzeko aukera ematen die aplikazioei."</string>
     <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Sortu multimedia-edukia proiektatzeko saioak"</string>
     <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"Multimedia-elementuak proiektatzeko saioak sortzea baimentzen die aplikazioei. Saio horiekin, aplikazioek pantailan bistaratutakoa eta audioa graba ditzakete. Aplikazio normalek ez lukete behar."</string>
-    <!-- no translation found for permlab_readInstallSessions (6165432407628065939) -->
-    <skip />
-    <!-- no translation found for permdesc_readInstallSessions (2049771699626019849) -->
-    <skip />
+    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Irakurri instalazio-saioak"</string>
+    <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Instalazio-saioak irakurtzea baimentzen die aplikazioei. Horrela, pakete-instalazio aktiboei buruzko xehetasunak ikus ditzakete."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Ukitu birritan zooma kontrolatzeko"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Ezin izan da widgeta gehitu."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Joan"</string>
@@ -1412,10 +1414,8 @@
     <string name="deny" msgid="2081879885755434506">"Ukatu"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Baimena eskatu da"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Baimena eskatu da \n<xliff:g id="ACCOUNT">%s</xliff:g> konturako."</string>
-    <!-- no translation found for forward_intent_to_owner (570916783072215572) -->
-    <skip />
-    <!-- no translation found for forward_intent_to_work (8624579696577525279) -->
-    <skip />
+    <string name="forward_intent_to_owner" msgid="570916783072215572">"Aplikazioa eremu pertsonalean erabiltzen ari zara"</string>
+    <string name="forward_intent_to_work" msgid="8624579696577525279">"Aplikazioa lan-eremuan erabiltzen ari zara"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Idazketa-metodoa"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Sinkronizatuta"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Erabilerraztasuna"</string>
@@ -1557,6 +1557,8 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"Deia onartu nahi duzu?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Beti"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Behin soilik"</string>
+    <!-- no translation found for activity_resolver_work_profiles_support (5462991471861024343) -->
+    <skip />
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Tableta"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Telefonoa"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Aurikularrak"</string>
@@ -1624,8 +1626,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Desblokeatzeko eredua oker marraztu duzu <xliff:g id="NUMBER_0">%d</xliff:g> aldiz. Beste <xliff:g id="NUMBER_1">%d</xliff:g> aldiz oker marrazten baduzu, telefonoa posta-kontu baten bidez desblokeatzeko eskatuko dizugu.\n\n Saiatu berriro <xliff:g id="NUMBER_2">%d</xliff:g> segundo barru."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Kendu"</string>
-    <!-- no translation found for safe_media_volume_warning (2276318909314492312) -->
-    <skip />
+    <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Bolumena gomendatutako mailatik gora igo nahi duzu?\n\nMusika bolumen handian eta denbora luzez entzuteak entzumena kalte diezazuke."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Erabilerraztasuna gaitzeko eduki pantaila bi hatzekin sakatuta."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Erabilerraztasuna gaitu da."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Erabilerraztasuna bertan behera utzi da."</string>

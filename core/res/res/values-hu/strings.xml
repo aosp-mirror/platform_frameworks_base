@@ -417,6 +417,10 @@
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Lehetővé teszi a tulajdonos számára, hogy célokat küldjön egy eszközkezelőnek. A normál alkalmazásoknak erre soha nincs szüksége."</string>
     <string name="permlab_bindTvInput" msgid="5601264742478168987">"csatlakozás tévébemenethez"</string>
     <string name="permdesc_bindTvInput" msgid="2371008331852001924">"Lehetővé teszi, hogy a tulajdonos kapcsolódjon egy tévébemenet legfelső szintű kezelőfelületéhez. A normál alkalmazásoknak erre soha nincs szükségük."</string>
+    <!-- no translation found for permlab_modifyParentalControls (4611318225997592242) -->
+    <skip />
+    <!-- no translation found for permdesc_modifyParentalControls (7438482894162282039) -->
+    <skip />
     <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"eszközrendszergazda hozzáadása vagy eltávolítása"</string>
     <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Lehetővé teszi a tulajdonos számára, hogy aktív eszközrendszergazdákat adjon meg vagy távolítson el. A normál alkalmazásoknál erre soha nincs szükség."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"képernyő irányának módosítása"</string>
@@ -1390,10 +1394,8 @@
     <string name="permdesc_recovery" msgid="8511774533266359571">"Lehetővé teszi egy alkalmazás számára, hogy kapcsolatba lépjen a helyreállítási rendszerrel és a rendszerfrissítésekkel."</string>
     <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Médiakivetítési munkamenetek létrehozása"</string>
     <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"Lehetővé teszi egy alkalmazásnak, hogy médiakivetítési munkameneteket hozzon létre. Az ilyen munkamenetek révén az alkalmazások rögzíthetik a vizuális és audiotartalmakat. A normál alkalmazásoknak erre soha nincs szükségük."</string>
-    <!-- no translation found for permlab_readInstallSessions (6165432407628065939) -->
-    <skip />
-    <!-- no translation found for permdesc_readInstallSessions (2049771699626019849) -->
-    <skip />
+    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Telepítési munkamenetek olvasása"</string>
+    <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Engedélyezi az alkalmazásnak a telepítési munkamenetek olvasását. Ezáltal részleteket kaphat az egyes csomagok éppen folyamatban lévő telepítéséről."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Érintse meg kétszer a nagyítás beállításához"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Nem sikerült hozzáadni a modult."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Ugrás"</string>
@@ -1412,10 +1414,8 @@
     <string name="deny" msgid="2081879885755434506">"Elutasítás"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Az engedélykérés megtörtént"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Az engedélykérés megtörtént\na(z) <xliff:g id="ACCOUNT">%s</xliff:g> fiók számára."</string>
-    <!-- no translation found for forward_intent_to_owner (570916783072215572) -->
-    <skip />
-    <!-- no translation found for forward_intent_to_work (8624579696577525279) -->
-    <skip />
+    <string name="forward_intent_to_owner" msgid="570916783072215572">"Személyes területén használja az alkalmazást"</string>
+    <string name="forward_intent_to_work" msgid="8624579696577525279">"Munkaterületén használja az alkalmazást"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Beviteli mód"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Szinkronizálás"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Kisegítő lehetőségek"</string>
@@ -1557,6 +1557,8 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"Fogadja a hívást?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Mindig"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Csak egyszer"</string>
+    <!-- no translation found for activity_resolver_work_profiles_support (5462991471861024343) -->
+    <skip />
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Táblagép"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Telefon"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Fejhallgató"</string>
@@ -1624,8 +1626,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"<xliff:g id="NUMBER_0">%d</xliff:g> alkalommal helytelenül rajzolta le a feloldási mintát. További <xliff:g id="NUMBER_1">%d</xliff:g> sikertelen kísérlet után egy e-mail fiók használatával kell feloldania a telefonját.\n\n Kérjük, próbálja újra <xliff:g id="NUMBER_2">%d</xliff:g> másodperc múlva."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Eltávolítás"</string>
-    <!-- no translation found for safe_media_volume_warning (2276318909314492312) -->
-    <skip />
+    <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Az ajánlott szint fölé szeretné emelni a hangerőt?\n\nHa hosszú időn át teszi ki magát nagy hangerőnek, azzal károsíthatja a hallását."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Továbbra is tartsa lenyomva két ujját a hozzáférés engedélyezéséhez."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Hozzáférés engedélyezve"</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Hozzáférés megszakítva."</string>

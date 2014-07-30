@@ -299,7 +299,7 @@
     <string name="permlab_getTasks" msgid="6466095396623933906">"चलिरहेका अनुप्रयोगहरू पुनःबहाली गर्नुहोस्"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"वर्तमानमा र भरखरै चलिरहेका कार्यहरू बारेको सूचना पुनःबहाली गर्न अनुप्रयोगलाई अनुमित दिन्छ। यसले उपकरणमा प्रयोग भएका अनुप्रयोगहरूको बारेमा सूचना पत्ता लगाउन अनुप्रयोगलाई अनुमति दिन सक्छ।"</string>
     <string name="permlab_startTasksFromRecents" msgid="8990073877885690623">"हालैका देखि कार्य सुरु गर्नुहोस्"</string>
-    <string name="permdesc_startTasksFromRecents" msgid="7382133554871222235">"अनुप्रयोगलाई सकृय प्रबन्धक प्रयोग गर्न अनुमति दिन्छ। हालैको कार्य जानकारी सकृय प्रबन्धक बाट फिर्ता गर्न निष्क्रिय सुरु गर्न वस्तुकारी छ। हालैको कार्यसुची प्राप्त गर्नुहोस्()।"</string>
+    <string name="permdesc_startTasksFromRecents" msgid="7382133554871222235">"अनुप्रयोगलाई ActivityManager.RecentTaskInfo वस्तु डिफङ्क्ट कार्य सुरूआत गर्न अनुमति दिन्छ जुन ActivityManager.getRecentTaskList() बाट फर्किएको थियो।"</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"प्रयोगकर्ताहरू तर्फ अन्तर्क्रिया गर्नुहोस्"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"अनुप्रयोगलाई उपकरणमा विभिन्न प्रयोगकर्ताहरू मार्फत कार्यहरू गर्न अनुमति दिन्छ। खराब अनुप्रयोगहरूले यो प्रयोगकर्ताहरू बिच सुरक्षा बिथोल्न प्रयोग गर्न सक्ने छन्।"</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"कुराकानी प्रयोगकर्ताहरू बिच अन्तर्क्रिया गर्न पूर्ण अनुमति"</string>
@@ -417,6 +417,10 @@
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"उपकरण प्रशासक लाई आशय पठाउन समाती राख्‍नेलाई अनुमति दिन्छ। साधारण अनुप्रयोहरूको लागि कहिल्यै पनी आवश्यक पर्दैन।"</string>
     <string name="permlab_bindTvInput" msgid="5601264742478168987">"टिभि निवेशलाई आबद्ध"</string>
     <string name="permdesc_bindTvInput" msgid="2371008331852001924">"टिभि निवेशको उच्च स्तरको इन्टरफेसलाई आबद्ध गर्न पकडको अनुमति दिन्छ। सामान्य अनुप्रयोगहरूलाई कहिल्यै आवश्यक पर्ने छैन।"</string>
+    <!-- no translation found for permlab_modifyParentalControls (4611318225997592242) -->
+    <skip />
+    <!-- no translation found for permdesc_modifyParentalControls (7438482894162282039) -->
+    <skip />
     <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"एउटा उपकरण व्यवस्थापक थप गर्नुहोस् वा हटाउनुहोस्"</string>
     <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"होल्डरलाई सक्रिय उपकरण व्यवस्थापकहरू थप गर्न वा हटाउन अनुमति दिन्छ। साधारण अनुप्रयोगहरूको लागि कहिल्यै पनि आवश्यक नहुन सक्दछ।"</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"स्क्रिन अभिमुखिकरण परिवर्तन गर्नुहोस्"</string>
@@ -1399,7 +1403,7 @@
     <string name="permlab_createMediaProjection" msgid="4941338725487978112">"मिडिया प्रक्षेपण सत्रहरू सिर्जना गर्नुहोस्"</string>
     <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"मिडिया प्रक्षेपण सत्र सिर्जना गर्न अनुप्रयोगलाई अनुमति दिन्छ। यी सत्रले प्रदर्शन र अडियो सामग्री खिच्ने क्षमताका अनुप्रयोगहरू प्रदान गर्न सक्छन्। सामान्य अनुप्रयोगहरूको कहिल्यै पनि आवश्यक पर्दैन।"</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"स्थापना सत्रहरू पढ्नुहोस्"</string>
-    <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"स्थापित सत्र पढ्न अनुप्रयोग लाई अनुमति दिनुहोस्। यसले सक्रिय प्याकेज प्रतिष्ठानहरु बारेमा विवरण हेर्ने अनुमति दिन्छ।"</string>
+    <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"स्थापित सत्र पढ्न अनुप्रयोगलाई अनुमति दिनुहोस्। यसले सक्रिय प्याकेज प्रतिष्ठानहरू बारेमा विवरण हेर्ने अनुमति दिन्छ।"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"जुम नियन्त्रणको लागि दुई चोटि टच गर्नुहोस्"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"विजेट थप गर्न सकिँदैन।"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"जानुहोस्"</string>
@@ -1418,8 +1422,8 @@
     <string name="deny" msgid="2081879885755434506">"अस्वीकार गर्नुहोस्"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"अनुरोध गरिएको अनुमति"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">\n"खाता <xliff:g id="ACCOUNT">%s</xliff:g>को लागि अनुरोध गरिएको अनुमति।"</string>
-    <string name="forward_intent_to_owner" msgid="570916783072215572">"तपाईं आफ्नो व्यक्तिगत ठाँउमा यो अनुप्रयोग प्रयोग गरिरहनु भएकोछ"</string>
-    <string name="forward_intent_to_work" msgid="8624579696577525279">"तपाईं आफ्नो कार्य ठाँउमा यो अनुप्रयोग प्रयोग गरिरहनु भएकोछ"</string>
+    <string name="forward_intent_to_owner" msgid="570916783072215572">"तपाईँ आफ्नो व्यक्तिगत ठाउँमा यो अनुप्रयोग प्रयोग गरिरहनु भएको छ"</string>
+    <string name="forward_intent_to_work" msgid="8624579696577525279">"तपाईँ आफ्नो कार्य ठाउँमा यो अनुप्रयोग प्रयोग गरिरहनु भएको छ"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"इनपुट विधि"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"सिङ्क गर्नुहोस्"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"उपलब्धता"</string>
@@ -1561,6 +1565,8 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"कल स्वीकार गर्नुहुन्छ?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"सधैँ"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"एउटा मात्र"</string>
+    <!-- no translation found for activity_resolver_work_profiles_support (5462991471861024343) -->
+    <skip />
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"ट्याब्लेट"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"फोन"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"हेडफोनहरू"</string>
@@ -1569,7 +1575,7 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"प्रणाली"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"ब्लुटुथ अडियो"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"ताररहित प्रदर्शन"</string>
-    <string name="media_route_button_content_description" msgid="591703006349356016">"सुरूआत"</string>
+    <string name="media_route_button_content_description" msgid="591703006349356016">"कास्ट"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"उपकरणमा जडान गर्नुहोस्"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"उपकरणलाई स्क्रिनमा कास्ट गर्नुहोस्"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"उपकरणको खोजी गरिँदै..."</string>
@@ -1628,7 +1634,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"तपाईँले आफ्नो अनलक ढाँचा गलत रूपमा <xliff:g id="NUMBER_0">%d</xliff:g> पटक तान्नु भएको छ। <xliff:g id="NUMBER_1">%d</xliff:g> धेरै असफल प्रयासहरूपछि, तपाईँलाई एउटा इमेल खाताको प्रयोग गरेर तपाईँको फोन अनलक गर्न सोधिने छ।\n\n फेरि <xliff:g id="NUMBER_2">%d</xliff:g> सेकेन्डमा प्रयास गर्नुहोस्।"</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"हटाउनुहोस्"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"सिफारिश तह भन्दा आवाज ठुलोगर्ने?\n\nलामो समय सम्म उच्च आवाजमा सुन्दा तपाईंको सुन्ने शक्तिलाई हानि गर्न सक्छ।"</string>
+    <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"सिफारिस तहभन्दा आवाज ठुलो गर्नुहुन्छ?\n\nलामो समय सम्म उच्च आवाजमा सुन्दा तपाईँको सुन्ने शक्तिलाई हानी गर्न सक्छ।"</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"उपलब्धता सक्षम पार्न दुईवटा औंलाहरूले थिचिरहनुहोस्।"</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"पहुँच सक्षम गरिएको।"</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"पहुँचयोग्यता रद्द गरियो।"</string>

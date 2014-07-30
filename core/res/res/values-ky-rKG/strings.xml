@@ -430,10 +430,8 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Колдонмого Bluetooth MAP билдирүүлөрүн алуу жана иштеп чыгуу мүмкүнчүлүгүн берет. Демек, колдонмо түзмөгүңүздөгү билдирүүлөрдү сизге көрсөтпөстөн тескеп же жок кыла алат."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"иштеп жаткан колдонмолорду түшүрүп алуу"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Колдонмого учурдагы жана акыркы убакытта пайдаланылган колдонмолор тууралуу  маалымат алууга уруксат берет. Бул колдонмого түзмөктө кандай колдонмолор колдонулаарын билип алууга жол бериши мүмкүн."</string>
-    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
-    <skip />
-    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
-    <skip />
+    <string name="permlab_startTasksFromRecents" msgid="8990073877885690623">"тапшырманы акыркылардан баштаңыз"</string>
+    <string name="permdesc_startTasksFromRecents" msgid="7382133554871222235">"Колдонмого ActivityManager.getRecentTaskList() кайрылып келген жансыз тапшырманы ишке киргизүү үчүн ActivityManager.RecentTaskInfo объектин пайдалануу мүмкүнчүлүгүн берет."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"колдонуучулар менен иштешүү"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Колдонмого түзмөктөгү ар кандай колдонуучулардын атынан кыймыл-аракеттерди жүргүзүү уруксатын берет. Зыяндуу колдонмолор, муну менен колдонуучулар аарсындагы коргонду бузуп салышы мүмкүн."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"колдонуучулар менен иштешүү үчүн толук лицензия"</string>
@@ -571,6 +569,10 @@
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Кармоочуга түзмөк администраторуна ниетин билдирүү мүмкүнчүлүгүн берет. Кадимки колдонмолорго эч качан талап кылынбайт."</string>
     <string name="permlab_bindTvInput" msgid="5601264742478168987">"TV берүүсүнө жалгаштыруу"</string>
     <string name="permdesc_bindTvInput" msgid="2371008331852001924">"Кармоочуга теле сигналдын жогорку деңгээлдеги интерфейсине жалгашуу мүмкүнчүлүгүн берет. Кадимки колдонмолорго эч качан талап кылынбайт."</string>
+    <!-- no translation found for permlab_modifyParentalControls (4611318225997592242) -->
+    <skip />
+    <!-- no translation found for permdesc_modifyParentalControls (7438482894162282039) -->
+    <skip />
     <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"түзмөк админдерин кошуу же алып салуу"</string>
     <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Түзмөктүн ээсине учурдагы администраторлорду кошуу же алып салуу мүмкүнчүлүгүн берет. Жалпыга багышталган колдонмолордо эч качан колдонулбашы керек."</string>
     <!-- no translation found for permlab_setOrientation (3365947717163866844) -->
@@ -1811,10 +1813,8 @@
     <string name="permdesc_recovery" msgid="8511774533266359571">"Колдонмого калыбына келтирүү системасы жана система жаңыртуулары менен карым-катнашуу мүмкүнчүлүгүн берет."</string>
     <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Медиа чагылдыруу сеанстарын түзүү"</string>
     <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"Колдонмого медиа чагылдыруу сеанстарын түзүү мүмкүнчүлүгүн берет. Мындай сеанстардын жардамы менен, колдонмолор дисплей жана видео мазмунду сүрөткө тартып турушат. Кадимки колдонмолор үчүн талап кылынбайт."</string>
-    <!-- no translation found for permlab_readInstallSessions (6165432407628065939) -->
-    <skip />
-    <!-- no translation found for permdesc_readInstallSessions (2049771699626019849) -->
-    <skip />
+    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Орнотуу сеанстарын окуу"</string>
+    <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Колдонмого орнотуу сеанстарын окуу мүмкүнчүлүгүн берет. Ушуну менен, ал жигердүү топтом орнотууларынын чоо-жайын көрө алат."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Чен өлчөмүн көзөмөлдөө үчүн эки жолу тийип коюңуз"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Виджетти кошуу мүмкүн болбоду."</string>
     <!-- no translation found for ime_action_go (8320845651737369027) -->
@@ -1845,10 +1845,8 @@
     <skip />
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Уруксат талап кылуу"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Кийинки эсепке\nуруксат талап кылынууда: <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
-    <!-- no translation found for forward_intent_to_owner (570916783072215572) -->
-    <skip />
-    <!-- no translation found for forward_intent_to_work (8624579696577525279) -->
-    <skip />
+    <string name="forward_intent_to_owner" msgid="570916783072215572">"Бул колдонмону жеке мейкиндигиңизде пайдаланып жатасыз"</string>
+    <string name="forward_intent_to_work" msgid="8624579696577525279">"Бул колдонмону жумуш мейкиндигиңизде пайдаланып жатасыз"</string>
     <!-- no translation found for input_method_binding_label (1283557179944992649) -->
     <skip />
     <!-- no translation found for sync_binding_label (3687969138375092423) -->
@@ -2041,6 +2039,8 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"Чалуу кабыл алынсынбы?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Дайыма"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Бир жолу гана"</string>
+    <!-- no translation found for activity_resolver_work_profiles_support (5462991471861024343) -->
+    <skip />
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Планшет"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Телефон"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Кулакчын"</string>
@@ -2108,8 +2108,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Сиз бөгөттөн чыгаруу үлгүсүн <xliff:g id="NUMBER_0">%d</xliff:g> жолу туура эмес көрсөттүңүз. Дагы <xliff:g id="NUMBER_1">%d</xliff:g> ийгиликсиз аракеттен кийин, телефонуңузду эмейл эсебиңиз аркылуу бөгөттөн чыгаруу талап кылынат.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> секундадан кийин кайра аракеттениңиз."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Алып салуу"</string>
-    <!-- no translation found for safe_media_volume_warning (2276318909314492312) -->
-    <skip />
+    <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Сунушталган деңгээлден да катуулатып уккуңуз келеби?\n\nМузыканы узакка чейин катуу уксаңыз, угууңуз начарлап кетиши мүмкүн."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Атайын мүмкүнчүлүктөрдү иштетиш үчүн, эки манжаңыз менен басып туруңуз."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Жеткиликтүүлүк иштетилди."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Атайын мүмкүнчүлүктөр иштетилген жок."</string>
