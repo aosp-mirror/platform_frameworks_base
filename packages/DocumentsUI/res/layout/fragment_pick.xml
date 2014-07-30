@@ -17,32 +17,16 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:orientation="horizontal"
+    android:baselineAligned="false"
+    android:gravity="center_vertical"
+    android:minHeight="?android:attr/listPreferredItemHeightSmall">
 
-    <!-- Le sigh, this really should be an asset -->
-    <View
+    <Button
+        android:id="@android:id/button1"
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#ccc" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:baselineAligned="false"
-        android:gravity="center_vertical"
-        android:background="#ddd"
-        android:minHeight="?android:attr/listPreferredItemHeightSmall">
-
-        <Button
-            android:id="@android:id/button1"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="?android:attr/selectableItemBackground"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:textAllCaps="false"
-            android:padding="8dp" />
-
-    </LinearLayout>
+        android:layout_height="match_parent"
+        android:textAllCaps="false"
+        style="?android:attr/buttonBarPositiveButtonStyle" />
 
 </LinearLayout>

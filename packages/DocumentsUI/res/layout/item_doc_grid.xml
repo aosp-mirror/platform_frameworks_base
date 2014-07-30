@@ -19,7 +19,7 @@
     android:layout_height="@dimen/grid_item_height"
     android:orientation="vertical"
     android:background="@color/grid_item_background"
-    android:foreground="@drawable/item_activated">
+    android:foreground="@drawable/item_activated_overlay">
 
     <ImageView
         android:id="@+id/icon_thumb"

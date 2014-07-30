@@ -15,6 +15,29 @@
 -->
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <style name="DocumentsTheme" parent="@android:style/Theme.DeviceDefault.Light.DialogWhenLarge">
+        <item name="android:actionBarWidgetTheme">@null</item>
+        <item name="android:actionBarTheme">@*android:style/ThemeOverlay.Material.Dark.ActionBar</item>
+        <item name="android:actionBarPopupTheme">@*android:style/ThemeOverlay.Material.Light</item>
+
+        <item name="android:colorPrimaryDark">@*android:color/material_blue_grey_900</item>
+        <item name="android:colorPrimary">@*android:color/material_blue_grey_800</item>
+        <item name="android:colorAccent">@*android:color/material_teal_500</item>
+
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+
+        <item name="*android:windowFixedWidthMajor">@null</item>
+        <item name="*android:windowFixedWidthMinor">@null</item>
+        <item name="*android:windowMinWidthMajor">@null</item>
+        <item name="*android:windowMinWidthMinor">@null</item>
+        <item name="*android:windowFixedHeightMajor">80%</item>
+        <item name="*android:windowFixedHeightMinor">90%</item>
+
+        <item name="android:windowSoftInputMode">stateUnspecified|adjustUnspecified</item>
+    </style>
+
     <style name="TextAppearance" />
 
     <style name="TextAppearance.Medium">
@@ -25,16 +48,6 @@
     <style name="TextAppearance.Small">
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
         <item name="android:textColor">?android:attr/textColorTertiary</item>
-    </style>
-
-    <!-- Normally just a redirection, but this is used to make ourselves a
-         dialog on large tablets -->
-    <style name="Theme" parent="@android:style/Theme.DeviceDefault.Light">
-        <item name="android:actionOverflowButtonStyle">@style/DarkerOverflow</item>
-    </style>
-    
-    <style name="DarkerOverflow" parent="@android:style/Widget.DeviceDefault.Light.ActionButton.Overflow">
-        <item name="android:src">@drawable/ic_menu_overflow</item>
     </style>
 
 </resources>
