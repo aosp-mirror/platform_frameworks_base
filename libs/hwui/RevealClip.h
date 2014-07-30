@@ -27,14 +27,12 @@ class RevealClip {
 public:
     RevealClip()
             : mShouldClip(false)
-            , mInverseClip(false)
             , mX(0)
             , mY(0)
             , mRadius(0) {}
 
-    void set(bool shouldClip, bool inverseClip, float x, float y, float radius) {
+    void set(bool shouldClip, float x, float y, float radius) {
         mShouldClip = shouldClip;
-        mInverseClip = inverseClip;
         mX = x;
         mY = y;
         mRadius = radius;
@@ -45,21 +43,15 @@ public:
         }
     }
 
-    bool hasConvexClip() const {
-        return mShouldClip && !mInverseClip;
-    }
-
-    bool isInverseClip() const {
-        return mInverseClip;
-    }
-
     bool willClip() const {
         return mShouldClip;
     }
 
-    float radius() const {
-        return mRadius;
+    void getBounds(Rect* outBounds) const {
+        outBounds->set(mX - mRadius, mY - mRadius,
+                mX + mRadius, mY + mRadius);
     }
+    float getRadius() const { return mRadius; }
 
     const SkPath* getPath() const {
         if (!mShouldClip) return NULL;
@@ -69,7 +61,6 @@ public:
 
 private:
     bool mShouldClip;
-    bool mInverseClip;
     float mX;
     float mY;
     float mRadius;

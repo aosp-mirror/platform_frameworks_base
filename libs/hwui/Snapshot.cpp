@@ -20,8 +20,6 @@
 
 #include <SkCanvas.h>
 
-#include "utils/MathUtils.h"
-
 namespace android {
 namespace uirenderer {
 
@@ -207,23 +205,22 @@ void Snapshot::resetTransform(float x, float y, float z) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Clipping outline
+// Clipping round rect
 ///////////////////////////////////////////////////////////////////////////////
 
-void Snapshot::setClippingOutline(LinearAllocator& allocator, const Outline* outline) {
-    Rect bounds;
-    float radius;
-    if (!outline->getAsRoundRect(&bounds, &radius)) return; // only RR supported
-
-    if (!MathUtils::isPositive(radius)) return; // leave clipping up to rect clipping
+void Snapshot::setClippingRoundRect(LinearAllocator& allocator, const Rect& bounds, float radius) {
+    if (bounds.isEmpty()) {
+        clipRect->setEmpty();
+        return;
+    }
 
     RoundRectClipState* state = new (allocator) RoundRectClipState;
 
     // store the inverse drawing matrix
-    Matrix4 outlineDrawingMatrix;
-    outlineDrawingMatrix.load(getOrthoMatrix());
-    outlineDrawingMatrix.multiply(*transform);
-    state->matrix.loadInverse(outlineDrawingMatrix);
+    Matrix4 roundRectDrawingMatrix;
+    roundRectDrawingMatrix.load(getOrthoMatrix());
+    roundRectDrawingMatrix.multiply(*transform);
+    state->matrix.loadInverse(roundRectDrawingMatrix);
 
     // compute area under rounded corners - only draws overlapping these rects need to be clipped
     for (int i = 0 ; i < 4; i++) {
@@ -241,9 +238,9 @@ void Snapshot::setClippingOutline(LinearAllocator& allocator, const Outline* out
     }
 
     // store RR area
-    bounds.inset(radius);
-    state->outlineInnerRect = bounds;
-    state->outlineRadius = radius;
+    state->innerRect = bounds;
+    state->innerRect.inset(radius);
+    state->radius = radius;
 
     // store as immutable so, for this frame, pointer uniquely identifies this bundle of shader info
     roundRectClipState = state;
