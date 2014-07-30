@@ -41,6 +41,13 @@ interface ITvInputManager {
     void registerCallback(in ITvInputManagerCallback callback, int userId);
     void unregisterCallback(in ITvInputManagerCallback callback, int userId);
 
+    boolean isParentalControlsEnabled(int userId);
+    void setParentalControlsEnabled(boolean enabled, int userId);
+    boolean isRatingBlocked(in String rating, int userId);
+    List<String> getBlockedRatings(int userId);
+    void addBlockedRating(in String rating, int userId);
+    void removeBlockedRating(in String rating, int userId);
+
     void createSession(in ITvInputClient client, in String inputId, int seq, int userId);
     void releaseSession(in IBinder sessionToken, int userId);
 

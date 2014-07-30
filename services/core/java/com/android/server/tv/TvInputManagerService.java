@@ -47,6 +47,7 @@ import android.media.tv.ITvInputService;
 import android.media.tv.ITvInputServiceCallback;
 import android.media.tv.ITvInputSession;
 import android.media.tv.ITvInputSessionCallback;
+import android.media.tv.TvContentRating;
 import android.media.tv.TvContract;
 import android.media.tv.TvInputHardwareInfo;
 import android.media.tv.TvInputInfo;
@@ -119,7 +120,7 @@ public final class TvInputManagerService extends SystemService {
         mTvInputHardwareManager = new TvInputHardwareManager(context, new HardwareListener());
 
         synchronized (mLock) {
-            mUserStates.put(mCurrentUserId, new UserState());
+            mUserStates.put(mCurrentUserId, new UserState(mContext, mCurrentUserId));
         }
     }
 
@@ -293,7 +294,7 @@ public final class TvInputManagerService extends SystemService {
 
             UserState userState = mUserStates.get(userId);
             if (userState == null) {
-                userState = new UserState();
+                userState = new UserState(mContext, userId);
             }
             mUserStates.put(userId, userState);
             buildTvInputListLocked(userId);
@@ -825,6 +826,116 @@ public final class TvInputManagerService extends SystemService {
                 }
             } finally {
                 Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public boolean isParentalControlsEnabled(int userId) {
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(),
+                    Binder.getCallingUid(), userId, "isParentalControlsEnabled");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    UserState userState = getUserStateLocked(resolvedUserId);
+                    return userState.persistentDataStore.isParentalControlsEnabled();
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void setParentalControlsEnabled(boolean enabled, int userId) {
+            ensureParentalControlsPermission();
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(),
+                    Binder.getCallingUid(), userId, "setParentalControlsEnabled");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    UserState userState = getUserStateLocked(resolvedUserId);
+                    userState.persistentDataStore.setParentalControlsEnabled(enabled);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public boolean isRatingBlocked(String rating, int userId) {
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(),
+                    Binder.getCallingUid(), userId, "isRatingBlocked");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    UserState userState = getUserStateLocked(resolvedUserId);
+                    return userState.persistentDataStore.isRatingBlocked(
+                            TvContentRating.unflattenFromString(rating));
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public List<String> getBlockedRatings(int userId) {
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(),
+                    Binder.getCallingUid(), userId, "getBlockedRatings");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    UserState userState = getUserStateLocked(resolvedUserId);
+                    List<String> ratings = new ArrayList<String>();
+                    for (TvContentRating rating
+                            : userState.persistentDataStore.getBlockedRatings()) {
+                        ratings.add(rating.flattenToString());
+                    }
+                    return ratings;
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void addBlockedRating(String rating, int userId) {
+            ensureParentalControlsPermission();
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(),
+                    Binder.getCallingUid(), userId, "addBlockedRating");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    UserState userState = getUserStateLocked(resolvedUserId);
+                    userState.persistentDataStore.addBlockedRating(
+                            TvContentRating.unflattenFromString(rating));
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void removeBlockedRating(String rating, int userId) {
+            ensureParentalControlsPermission();
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(),
+                    Binder.getCallingUid(), userId, "removeBlockedRating");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    UserState userState = getUserStateLocked(resolvedUserId);
+                    userState.persistentDataStore.removeBlockedRating(
+                            TvContentRating.unflattenFromString(rating));
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        private void ensureParentalControlsPermission() {
+            if (mContext.checkCallingPermission(
+                    android.Manifest.permission.MODIFY_PARENTAL_CONTROLS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException(
+                        "The caller does not have parental controls permission");
             }
         }
 
@@ -1496,6 +1607,14 @@ public final class TvInputManagerService extends SystemService {
 
         // The token of a "main" TV input session.
         private IBinder mainSessionToken = null;
+
+        // Persistent data store for all internal settings maintained by the TV input manager
+        // service.
+        private final PersistentDataStore persistentDataStore;
+
+        private UserState(Context context, int userId) {
+            persistentDataStore = new PersistentDataStore(context, userId);
+        }
     }
 
     private final class ClientState implements IBinder.DeathRecipient {
