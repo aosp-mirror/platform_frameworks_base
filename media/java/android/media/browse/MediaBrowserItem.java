@@ -135,6 +135,19 @@ public final class MediaBrowserItem implements Parcelable {
         }
     }
 
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("MediaBrowserItem{");
+        sb.append("mUri=").append(mUri);
+        sb.append(", mFlags=").append(mFlags);
+        sb.append(", mTitle=").append(mTitle);
+        sb.append(", mSummary=").append(mSummary);
+        sb.append(", mIconUri=").append(mIconUri);
+        sb.append(", mIconResourceId=").append(mIconResourceId);
+        sb.append('}');
+        return sb.toString();
+    }
+
     public static final Parcelable.Creator<MediaBrowserItem> CREATOR =
             new Parcelable.Creator<MediaBrowserItem>() {
                 @Override
