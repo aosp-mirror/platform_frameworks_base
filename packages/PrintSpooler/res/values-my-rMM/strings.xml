@@ -77,5 +77,5 @@
     <string name="print_error_default_message" msgid="8602678405502922346">"ဆော်ရီး၊ အဲဒါ အလုပ်မဖြစ်ခဲ့ပါ။ ထပ် စမ်းပါ။"</string>
     <string name="print_error_retry" msgid="1426421728784259538">"ထပ်စမ်း"</string>
     <string name="print_error_printer_unavailable" msgid="8985614415253203381">"ဒီပရင်တာမှာ ယခုအချိန်မှာ မရနိုင်ပါ။"</string>
-    <string name="print_preparing_preview" msgid="3939930735671364712">"အစမ်းကြည့်ရန် ပြင်ဆင်နေ…"</string>
+    <string name="print_preparing_preview" msgid="3939930735671364712">"အစမ်းကြည့်ရန် ပြင်ဆင်နေ…"</string>
 </resources>
