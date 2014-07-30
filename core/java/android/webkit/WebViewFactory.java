@@ -72,8 +72,8 @@ public final class WebViewFactory {
     private static boolean sAddressSpaceReserved = false;
 
     public static String getWebViewPackageName() {
-        // TODO: Make this dynamic based on resource configuration.
-        return "com.android.webview";
+        return AppGlobals.getInitialApplication().getString(
+                com.android.internal.R.string.config_webViewPackageName);
     }
 
     static WebViewFactoryProvider getProvider() {
