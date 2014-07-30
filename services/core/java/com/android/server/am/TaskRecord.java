@@ -122,9 +122,6 @@ final class TaskRecord {
      * (positive) or back (negative). Absolute value indicates time. */
     long mLastTimeMoved = System.currentTimeMillis();
 
-    /** True if persistable, has changed, and has not yet been persisted */
-    boolean needsPersisting = false;
-
     /** Indication of what to run next when task exits. Use ActivityRecord types.
      * ActivityRecord.APPLICATION_ACTIVITY_TYPE indicates to resume the task below this one in the
      * task stack. */
@@ -362,6 +359,9 @@ final class TaskRecord {
     void getLastThumbnail(TaskThumbnail thumbs) {
         thumbs.mainThumbnail = mLastThumbnail;
         thumbs.thumbnailFileDescriptor = null;
+        if (mLastThumbnail == null) {
+            thumbs.mainThumbnail = mService.mTaskPersister.getThumbnail(mFilename);
+        }
         if (mLastThumbnailFile.exists()) {
             try {
                 thumbs.thumbnailFileDescriptor = ParcelFileDescriptor.open(mLastThumbnailFile,
