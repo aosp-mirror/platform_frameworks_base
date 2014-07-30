@@ -1661,4 +1661,8 @@
     <!--Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
         string that's stored in 8-bit unpacked format) characters.-->
     <bool translatable="false" name="config_sms_decode_gsm_8bit_data">false</bool>
+
+    <!-- Package name providing WebView implementation. -->
+    <string name="config_webViewPackageName" translatable="false">com.android.webview</string>
+
 </resources>
