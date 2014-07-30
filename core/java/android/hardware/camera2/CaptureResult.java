@@ -2221,18 +2221,18 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p>The timestamps are also included in all image
      * buffers produced for the same capture, and will be identical
      * on all the outputs.</p>
-     * <p>When {@link CameraCharacteristics#SENSOR_INFO_TIMESTAMP_CALIBRATION android.sensor.info.timestampCalibration} <code>==</code> UNCALIBRATED,
+     * <p>When {@link CameraCharacteristics#SENSOR_INFO_TIMESTAMP_SOURCE android.sensor.info.timestampSource} <code>==</code> UNKNOWN,
      * the timestamps measure time since an unspecified starting point,
      * and are monotonically increasing. They can be compared with the
      * timestamps for other captures from the same camera device, but are
      * not guaranteed to be comparable to any other time source.</p>
-     * <p>When {@link CameraCharacteristics#SENSOR_INFO_TIMESTAMP_CALIBRATION android.sensor.info.timestampCalibration} <code>==</code> CALIBRATED,
+     * <p>When {@link CameraCharacteristics#SENSOR_INFO_TIMESTAMP_SOURCE android.sensor.info.timestampSource} <code>==</code> REALTIME,
      * the timestamps measure time in the same timebase as
      * android.os.SystemClock#elapsedRealtimeNanos(), and they can be
      * compared to other timestamps from other subsystems that are using
      * that base.</p>
      *
-     * @see CameraCharacteristics#SENSOR_INFO_TIMESTAMP_CALIBRATION
+     * @see CameraCharacteristics#SENSOR_INFO_TIMESTAMP_SOURCE
      */
     @PublicKey
     public static final Key<Long> SENSOR_TIMESTAMP =
