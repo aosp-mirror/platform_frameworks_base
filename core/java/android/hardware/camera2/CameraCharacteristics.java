@@ -1551,17 +1551,17 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
             new Key<Integer>("android.sensor.info.whiteLevel", int.class);
 
     /**
-     * <p>The sensor timestamp calibration quality.</p>
-     * <p>The sensor timestamp calibration quality determines the reliability of
-     * {@link CaptureResult#SENSOR_TIMESTAMP android.sensor.timestamp} provided by the camera device.</p>
-     *
-     * @see CaptureResult#SENSOR_TIMESTAMP
-     * @see #SENSOR_INFO_TIMESTAMP_CALIBRATION_UNCALIBRATED
-     * @see #SENSOR_INFO_TIMESTAMP_CALIBRATION_CALIBRATED
+     * <p>The time base source for sensor capture start timestamps.</p>
+     * <p>The timestamps provided for captures are always in nanoseconds and monotonic, but
+     * may not based on a time source that can be compared to other system time sources.</p>
+     * <p>This characteristic defines the source for the timestamps, and therefore whether they
+     * can be compared against other system time sources/timestamps.</p>
+     * @see #SENSOR_INFO_TIMESTAMP_SOURCE_UNKNOWN
+     * @see #SENSOR_INFO_TIMESTAMP_SOURCE_REALTIME
      */
     @PublicKey
-    public static final Key<Integer> SENSOR_INFO_TIMESTAMP_CALIBRATION =
-            new Key<Integer>("android.sensor.info.timestampCalibration", int.class);
+    public static final Key<Integer> SENSOR_INFO_TIMESTAMP_SOURCE =
+            new Key<Integer>("android.sensor.info.timestampSource", int.class);
 
     /**
      * <p>The standard reference illuminant used as the scene light source when
