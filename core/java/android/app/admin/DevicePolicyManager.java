@@ -2296,9 +2296,10 @@ public class DevicePolicyManager {
     public boolean isProfileOwnerApp(String packageName) {
         if (mService != null) {
             try {
-                String profileOwnerPackage = mService.getProfileOwner(
-                        Process.myUserHandle().getIdentifier()).getPackageName();
-                return profileOwnerPackage != null && profileOwnerPackage.equals(packageName);
+                ComponentName profileOwner = mService.getProfileOwner(
+                        Process.myUserHandle().getIdentifier());
+                return profileOwner != null
+                        && profileOwner.getPackageName().equals(packageName);
             } catch (RemoteException re) {
                 Log.w(TAG, "Failed to check profile owner");
             }
