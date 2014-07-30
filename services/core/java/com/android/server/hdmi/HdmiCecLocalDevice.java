@@ -20,7 +20,6 @@ import android.hardware.hdmi.HdmiCecDeviceInfo;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.os.SystemProperties;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
@@ -552,7 +551,10 @@ abstract class HdmiCecLocalDevice {
 
     protected void checkIfPendingActionsCleared() {
         if (mActions.isEmpty() && mPendingActionClearedCallback != null) {
-            mPendingActionClearedCallback.onCleared(this);
+            PendingActionClearedCallback callback = mPendingActionClearedCallback;
+            // To prevent from calling the callback again during handling the callback itself.
+            mPendingActionClearedCallback = null;
+            callback.onCleared(this);
         }
     }
 
