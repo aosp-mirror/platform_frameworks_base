@@ -2830,6 +2830,31 @@ public final class ActivityManagerService extends ActivityManagerNative
                 || transit == AppTransition.TRANSIT_TASK_TO_FRONT;
     }
 
+    int startIsolatedProcess(String entryPoint, String[] entryPointArgs,
+            String processName, String abiOverride, int uid, Runnable crashHandler) {
+        synchronized(this) {
+            ApplicationInfo info = new ApplicationInfo();
+            // In general the ApplicationInfo.uid isn't neccesarily equal to ProcessRecord.uid.
+            // For isolated processes, the former contains the parent's uid and the latter the
+            // actual uid of the isolated process.
+            // In the special case introduced by this method (which is, starting an isolated
+            // process directly from the SystemServer without an actual parent app process) the
+            // closest thing to a parent's uid is SYSTEM_UID.
+            // The only important thing here is to keep AI.uid != PR.uid, in order to trigger
+            // the |isolated| logic in the ProcessRecord constructor.
+            info.uid = Process.SYSTEM_UID;
+            info.processName = processName;
+            info.className = entryPoint;
+            info.packageName = "android";
+            ProcessRecord proc = startProcessLocked(processName, info /* info */,
+                    false /* knownToBeDead */, 0 /* intentFlags */, ""  /* hostingType */,
+                    null /* hostingName */, true /* allowWhileBooting */, true /* isolated */,
+                    uid, true /* keepIfLarge */, abiOverride, entryPoint, entryPointArgs,
+                    crashHandler);
+            return proc != null ? proc.pid : 0;
+        }
+    }
+
     final ProcessRecord startProcessLocked(String processName,
             ApplicationInfo info, boolean knownToBeDead, int intentFlags,
             String hostingType, ComponentName hostingName, boolean allowWhileBooting,
@@ -17853,27 +17878,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         @Override
         public int startIsolatedProcess(String entryPoint, String[] entryPointArgs,
                 String processName, String abiOverride, int uid, Runnable crashHandler) {
-            synchronized(ActivityManagerService.this) {
-                ApplicationInfo info = new ApplicationInfo();
-                // In general the ApplicationInfo.uid isn't neccesarily equal to ProcessRecord.uid.
-                // For isolated processes, the former contains the parent's uid and the latter the
-                // actual uid of the isolated process.
-                // In the special case introduced by this method (which is, starting an isolated
-                // process directly from the SystemServer without an actual parent app process) the
-                // closest thing to a parent's uid is SYSTEM_UID.
-                // The only important thing here is to keep AI.uid != PR.uid, in order to trigger
-                // the |isolated| logic in the ProcessRecord constructor.
-                info.uid = Process.SYSTEM_UID;
-                info.processName = processName;
-                info.className = entryPoint;
-                info.packageName = "android";
-                ProcessRecord proc = startProcessLocked(processName, info /* info */,
-                        false /* knownToBeDead */, 0 /* intentFlags */, ""  /* hostingType */,
-                        null /* hostingName */, true /* allowWhileBooting */, true /* isolated */,
-                        uid, true /* keepIfLarge */, abiOverride, entryPoint, entryPointArgs,
-                        crashHandler);
-                return proc.pid;
-            }
+            return ActivityManagerService.this.startIsolatedProcess(entryPoint, entryPointArgs,
+                    processName, abiOverride, uid, crashHandler);
         }
     }
 
