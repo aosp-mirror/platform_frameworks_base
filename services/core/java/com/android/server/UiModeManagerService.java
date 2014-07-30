@@ -73,6 +73,7 @@ final class UiModeManagerService extends SystemService {
     private boolean mTelevision;
     private boolean mWatch;
     private boolean mComputedNightMode;
+    private int mCarModeEnableFlags;
 
     int mCurUiMode = 0;
     private int mSetUiMode = 0;
@@ -193,7 +194,7 @@ final class UiModeManagerService extends SystemService {
             final long ident = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
-                    setCarModeLocked(true);
+                    setCarModeLocked(true, flags);
                     if (mSystemReady) {
                         updateLocked(flags, 0);
                     }
@@ -208,7 +209,7 @@ final class UiModeManagerService extends SystemService {
             final long ident = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
-                    setCarModeLocked(false);
+                    setCarModeLocked(false, 0);
                     if (mSystemReady) {
                         updateLocked(0, flags);
                     }
@@ -285,7 +286,8 @@ final class UiModeManagerService extends SystemService {
                     pw.print(" mLastBroadcastState="); pw.println(mLastBroadcastState);
             pw.print("  mNightMode="); pw.print(mNightMode);
                     pw.print(" mCarModeEnabled="); pw.print(mCarModeEnabled);
-                    pw.print(" mComputedNightMode="); pw.println(mComputedNightMode);
+                    pw.print(" mComputedNightMode="); pw.print(mComputedNightMode);
+                    pw.print(" mCarModeEnableFlags="); pw.println(mCarModeEnableFlags);
             pw.print("  mCurUiMode=0x"); pw.print(Integer.toHexString(mCurUiMode));
                     pw.print(" mSetUiMode=0x"); pw.println(Integer.toHexString(mSetUiMode));
             pw.print("  mHoldingConfiguration="); pw.print(mHoldingConfiguration);
@@ -311,17 +313,18 @@ final class UiModeManagerService extends SystemService {
         return mCarModeEnabled || mDockState != Intent.EXTRA_DOCK_STATE_UNDOCKED;
     }
 
-    void setCarModeLocked(boolean enabled) {
+    void setCarModeLocked(boolean enabled, int flags) {
         if (mCarModeEnabled != enabled) {
             mCarModeEnabled = enabled;
         }
+        mCarModeEnableFlags = flags;
     }
 
     private void updateDockState(int newState) {
         synchronized (mLock) {
             if (newState != mDockState) {
                 mDockState = newState;
-                setCarModeLocked(mDockState == Intent.EXTRA_DOCK_STATE_CAR);
+                setCarModeLocked(mDockState == Intent.EXTRA_DOCK_STATE_CAR, 0);
                 if (mSystemReady) {
                     updateLocked(UiModeManager.ENABLE_CAR_MODE_GO_CAR_HOME, 0);
                 }
@@ -475,7 +478,8 @@ final class UiModeManagerService extends SystemService {
 
         // keep screen on when charging and in car mode
         boolean keepScreenOn = mCharging &&
-                ((mCarModeEnabled && mCarModeKeepsScreenOn) ||
+                ((mCarModeEnabled && mCarModeKeepsScreenOn &&
+                  (mCarModeEnableFlags & UiModeManager.ENABLE_CAR_MODE_NO_WAKE_LOCK) == 0) ||
                  (mCurUiMode == Configuration.UI_MODE_TYPE_DESK && mDeskModeKeepsScreenOn));
         if (keepScreenOn != mWakeLock.isHeld()) {
             if (keepScreenOn) {
