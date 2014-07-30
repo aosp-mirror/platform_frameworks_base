@@ -281,7 +281,7 @@ public final class HdmiControlService extends SystemService {
         // A container for [Logical Address, Local device info].
         final SparseArray<HdmiCecLocalDevice> devices = new SparseArray<>();
         final SparseIntArray finished = new SparseIntArray();
-        mCecController.clearLogicalAddress();
+        clearLocalDevices();
         for (int type : deviceTypes) {
             final HdmiCecLocalDevice localDevice = HdmiCecLocalDevice.create(this, type);
             localDevice.init();
@@ -1415,7 +1415,9 @@ public final class HdmiControlService extends SystemService {
                 devices.remove(device);
                 if (devices.isEmpty()) {
                     onStandbyCompleted();
-                    clearLocalDevices();
+                    // We will not clear local devices here, since some OEM/SOC will keep passing
+                    // the received packets until the application processor enters to the sleep
+                    // actually.
                 }
             }
         });
