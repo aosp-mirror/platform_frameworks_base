@@ -59,6 +59,7 @@ void MinikinUtils::doLayout(Layout* layout, const Paint* paint, int bidiFlags, T
     minikinPaint.skewX = paint->getTextSkewX();
     minikinPaint.letterSpacing = paint->getLetterSpacing();
     minikinPaint.paintFlags = MinikinFontSkia::packPaintFlags(paint);
+    minikinPaint.fontFeatureSettings = paint->getFontFeatureSettings();
 
     layout->doLayout(buf, start, count, bufSize, bidiFlags, minikinStyle, minikinPaint);
 }
