@@ -453,8 +453,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private Runnable mLaunchTransitionEndRunnable;
     private boolean mLaunchTransitionFadingAway;
 
-    private boolean mHasNotifications;
-
     private static final int VISIBLE_LOCATIONS = ViewState.LOCATION_FIRST_CARD
             | ViewState.LOCATION_TOP_STACK_PEEKING
             | ViewState.LOCATION_MAIN_AREA
@@ -498,9 +496,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             //    notifications.
             // 3. Report newly visible and no-longer visible notifications.
             // 4. Keep currently visible notifications for next report.
-            int N = mNotificationData.size();
+            ArrayList<Entry> activeNotifications = mNotificationData.getActiveNotifications();
+            int N = activeNotifications.size();
             for (int i = 0; i < N; i++) {
-                Entry entry = mNotificationData.get(i);
+                Entry entry = activeNotifications.get(i);
                 String key = entry.notification.getKey();
                 boolean previouslyVisible = mCurrentlyVisibleNotifications.contains(key);
                 boolean currentlyVisible =
@@ -1314,7 +1313,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             // Recalculate the position of the sliding windows and the titles.
             updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
 
-            if (CLOSE_PANEL_WHEN_EMPTIED && mNotificationData.size() == 0
+            if (CLOSE_PANEL_WHEN_EMPTIED && !hasActiveNotifications()
                     && !mNotificationPanel.isTracking()) {
                 if (mState == StatusBarState.SHADE) {
                     animateCollapsePanels();
@@ -1342,27 +1341,15 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private void updateNotificationShade() {
         if (mStackScroller == null) return;
 
-        int N = mNotificationData.size();
-
-        ArrayList<View> toShow = new ArrayList<View>();
-
-        final boolean provisioned = isDeviceProvisioned();
-        // If the device hasn't been through Setup, we only show system notifications
+        ArrayList<Entry> activeNotifications = mNotificationData.getActiveNotifications();
+        ArrayList<ExpandableNotificationRow> toShow = new ArrayList<>(activeNotifications.size());
+        final int N = activeNotifications.size();
         for (int i=0; i<N; i++) {
-            Entry ent = mNotificationData.get(i);
-            if (!(provisioned || showNotificationEvenIfUnprovisioned(ent.notification))) continue;
+            Entry ent = activeNotifications.get(i);
+            int vis = ent.notification.getNotification().visibility;
 
-            if (!notificationIsForCurrentProfiles(ent.notification)) continue;
-
+            // Display public version of the notification if we need to redact.
             final boolean hideSensitive = shouldHideSensitiveContents(ent.notification.getUserId());
-            final int vis = ent.notification.getNotification().visibility;
-
-            // when isLockscreenPublicMode() we suppress VISIBILITY_SECRET notifications
-            if (vis == Notification.VISIBILITY_SECRET && hideSensitive) {
-                continue;
-            }
-
-            // when isLockscreenPublicMode() we show the public form of VISIBILITY_PRIVATE notifications
             boolean showingPublic = vis == Notification.VISIBILITY_PRIVATE && hideSensitive;
             ent.row.setShowingPublic(showingPublic);
             if (ent.autoRedacted && ent.legacy) {
@@ -1419,40 +1406,24 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         updateSpeedbump();
         updateClearAll();
 
-        mNotificationPanel.setQsExpansionEnabled(provisioned && mUserSetup);
+        mNotificationPanel.setQsExpansionEnabled(isDeviceProvisioned() && mUserSetup);
         mShadeUpdates.check();
     }
 
     private void updateClearAll() {
-        boolean showDismissView = false;
-        if (mState != StatusBarState.KEYGUARD) {
-            for (int i = 0; i < mNotificationData.size(); i++) {
-                Entry entry = mNotificationData.get(i);
-                if (entry.row.getParent() == null) {
-                    // This view isn't even added, so the stack scroller doesn't
-                    // know about it. Ignore completely.
-                    continue;
-                }
-                if (entry.row.getVisibility() != View.GONE && entry.expanded != null
-                        && entry.notification.isClearable()) {
-                    showDismissView = true;
-                    break;
-                }
-            }
-        }
+        boolean showDismissView =
+                mState != StatusBarState.KEYGUARD &&
+                mNotificationData.hasActiveClearableNotifications();
         mStackScroller.updateDismissView(showDismissView);
     }
 
     private void updateSpeedbump() {
         int speedbumpIndex = -1;
         int currentIndex = 0;
-        for (int i = 0; i < mNotificationData.size(); i++) {
-            Entry entry = mNotificationData.get(i);
-            if (entry.row.getParent() == null) {
-                // This view isn't even added, so the stack scroller doesn't
-                // know about it. Ignore completely.
-                continue;
-            }
+        ArrayList<Entry> activeNotifications = mNotificationData.getActiveNotifications();
+        final int N = activeNotifications.size();
+        for (int i = 0; i < N; i++) {
+            Entry entry = activeNotifications.get(i);
             if (entry.row.getVisibility() != View.GONE &&
                     mNotificationData.isAmbient(entry.key)) {
                 speedbumpIndex = currentIndex;
@@ -1468,45 +1439,33 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         // TODO: Move this into updateNotificationIcons()?
         if (mNotificationIcons == null) return;
 
+        mNotificationData.filterAndSort();
+
         updateNotificationShade();
         updateNotificationIcons();
-    }
-
-    /**
-     * Returns true if we're on a secure lockscreen and the user wants to hide "sensitive"
-     * notification data. If so, private notifications should show their (possibly
-     * auto-generated) publicVersion, and secret notifications should be totally invisible.
-     */
-    private boolean shouldHideSensitiveContents(int userid) {
-        return isLockscreenPublicMode() && !userAllowsPrivateNotificationsInPublic(userid);
     }
 
     private void updateNotificationIcons() {
         final LinearLayout.LayoutParams params
             = new LinearLayout.LayoutParams(mIconSize + 2*mIconHPadding, mNaturalBarHeight);
 
-        int N = mNotificationData.size();
+        ArrayList<Entry> activeNotifications = mNotificationData.getActiveNotifications();
+        final int N = activeNotifications.size();
+        ArrayList<StatusBarIconView> toShow = new ArrayList<>(N);
 
-        if (DEBUG) {
-            Log.d(TAG, "refreshing icons: " + N + " notifications, mNotificationIcons=" +
-                    mNotificationIcons);
-        }
-
-        ArrayList<View> toShow = new ArrayList<View>();
-
-        final boolean provisioned = isDeviceProvisioned();
-        // If the device hasn't been through Setup, we only show system notifications
-        for (int i=0; i<N; i++) {
-            Entry ent = mNotificationData.get(i);
-            if (!((provisioned && ent.notification.getScore() >= HIDE_ICONS_BELOW_SCORE)
-                    || showNotificationEvenIfUnprovisioned(ent.notification))) continue;
-            if (!notificationIsForCurrentProfiles(ent.notification)) continue;
-            if (ent.notification.getNotification().visibility == Notification.VISIBILITY_SECRET
-                    && shouldHideSensitiveContents(ent.notification.getUserId())) {
-                // in "public" mode (atop a secure keyguard), secret notifs are totally hidden
+        // Filter out notifications with low scores.
+        for (int i = 0; i < N; i++) {
+            Entry ent = activeNotifications.get(i);
+            if (ent.notification.getScore() < HIDE_ICONS_BELOW_SCORE &&
+                    !NotificationData.showNotificationEvenIfUnprovisioned(ent.notification)) {
                 continue;
             }
             toShow.add(ent.icon);
+        }
+
+        if (DEBUG) {
+            Log.d(TAG, "refreshing icons: " + toShow.size() +
+                    " notifications, mNotificationIcons=" + mNotificationIcons);
         }
 
         ArrayList<View> toRemove = new ArrayList<View>();
@@ -1584,17 +1543,17 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     @Override
     protected void setAreThereNotifications() {
-        final boolean any = mNotificationData.size() > 0;
-
-        final boolean clearable = any && mNotificationData.hasClearableItems();
 
         if (SPEW) {
-            Log.d(TAG, "setAreThereNotifications: N=" + mNotificationData.size()
-                    + " any=" + any + " clearable=" + clearable);
+            final boolean clearable = hasActiveNotifications() &&
+                    mNotificationData.hasActiveClearableNotifications();
+            Log.d(TAG, "setAreThereNotifications: N=" +
+                    mNotificationData.getActiveNotifications().size() + " any=" +
+                    hasActiveNotifications() + " clearable=" + clearable);
         }
 
         final View nlo = mStatusBarView.findViewById(R.id.notification_lights_out);
-        final boolean showDot = (any&&!areLightsOn());
+        final boolean showDot = hasActiveNotifications() && !areLightsOn();
         if (showDot != (nlo.getAlpha() == 1.0f)) {
             if (showDot) {
                 nlo.setAlpha(0f);
@@ -1616,20 +1575,18 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         findAndUpdateMediaNotifications();
 
         updateCarrierLabelVisibility(false);
-
-        // TODO: Multiuser handling!
-        mHasNotifications = any;
     }
 
     public void findAndUpdateMediaNotifications() {
         boolean metaDataChanged = false;
 
         synchronized (mNotificationData) {
-            final int N = mNotificationData.size();
+            ArrayList<Entry> activeNotifications = mNotificationData.getActiveNotifications();
+            final int N = activeNotifications.size();
             Entry mediaNotification = null;
             MediaController controller = null;
-            for (int i=0; i<N; i++) {
-                final Entry entry = mNotificationData.get(i);
+            for (int i = 0; i < N; i++) {
+                final Entry entry = activeNotifications.get(i);
                 if (isMediaNotification(entry)) {
                     final MediaSession.Token token = entry.notification.getNotification().extras
                             .getParcelable(Notification.EXTRA_MEDIA_SESSION);
@@ -1667,7 +1624,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                                 final String pkg = aController.getPackageName();
 
                                 for (int i = 0; i < N; i++) {
-                                    final Entry entry = mNotificationData.get(i);
+                                    final Entry entry = activeNotifications.get(i);
                                     if (entry.notification.getPackageName().equals(pkg)) {
                                         if (DEBUG_MEDIA) {
                                             Log.v(TAG, "DEBUG_MEDIA: found controller matching "
@@ -2602,7 +2559,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         if (!isDeviceProvisioned()) return;
 
         // not for you
-        if (!notificationIsForCurrentProfiles(n)) return;
+        if (!isNotificationForCurrentProfiles(n)) return;
 
         // Show the ticker if one is requested. Also don't do this
         // until status bar window is attached to the window manager,
@@ -2753,16 +2710,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         if (DUMPTRUCK) {
             synchronized (mNotificationData) {
-                int N = mNotificationData.size();
-                pw.println("  notification icons: " + N);
-                for (int i=0; i<N; i++) {
-                    NotificationData.Entry e = mNotificationData.get(i);
-                    pw.println("    [" + i + "] key=" + e.key + " icon=" + e.icon);
-                    StatusBarNotification n = e.notification;
-                    pw.println("         pkg=" + n.getPackageName() + " id=" + n.getId() + " score=" + n.getScore());
-                    pw.println("         notification=" + n.getNotification());
-                    pw.println("         tickerText=\"" + n.getNotification().tickerText + "\"");
-                }
+                mNotificationData.dump(pw, "  ");
             }
 
             int N = mStatusIcons.getChildCount();
@@ -3610,7 +3558,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     @Override
     public boolean onDraggedDown(View startingChild) {
-        if (mHasNotifications) {
+        if (hasActiveNotifications()) {
 
             // We have notifications, go to locked shade.
             goToLockedShade(startingChild);
@@ -3752,8 +3700,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         notifyUiVisibilityChanged(mSystemUiVisibility);
     }
 
-    public boolean hasNotifications() {
-        return mHasNotifications;
+    public boolean hasActiveNotifications() {
+        return !mNotificationData.getActiveNotifications().isEmpty();
     }
 
     private final class ShadeUpdates {
@@ -3762,8 +3710,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         public void check() {
             mNewVisibleNotifications.clear();
-            for (int i = 0; i < mNotificationData.size(); i++) {
-                final Entry entry = mNotificationData.get(i);
+            ArrayList<Entry> activeNotifications = mNotificationData.getActiveNotifications();
+            for (int i = 0; i < activeNotifications.size(); i++) {
+                final Entry entry = activeNotifications.get(i);
                 final boolean visible = entry.row != null
                         && entry.row.getVisibility() == View.VISIBLE;
                 if (visible) {
