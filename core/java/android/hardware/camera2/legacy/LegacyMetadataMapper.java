@@ -94,7 +94,7 @@ public class LegacyMetadataMapper {
     static final boolean LIE_ABOUT_AF = false;
     static final boolean LIE_ABOUT_AF_MAX_REGIONS = false;
     static final boolean LIE_ABOUT_AWB_STATE = false;
-    static final boolean LIE_ABOUT_AWB = true;
+    static final boolean LIE_ABOUT_AWB = false;
 
     /**
      * Create characteristics for a legacy device by mapping the {@code parameters}
@@ -436,8 +436,52 @@ public class LegacyMetadataMapper {
     }
 
     private static void mapControlAwb(CameraMetadataNative m, Camera.Parameters p) {
-        if (!LIE_ABOUT_AWB) {
-            throw new AssertionError("Not implemented yet");
+        /*
+         * control.awbAvailableModes
+         */
+
+        {
+            List<String> wbModes = p.getSupportedWhiteBalance();
+
+            String[] wbModeStrings = new String[] {
+                    Camera.Parameters.WHITE_BALANCE_AUTO                    ,
+                    Camera.Parameters.WHITE_BALANCE_INCANDESCENT            ,
+                    Camera.Parameters.WHITE_BALANCE_FLUORESCENT             ,
+                    Camera.Parameters.WHITE_BALANCE_WARM_FLUORESCENT        ,
+                    Camera.Parameters.WHITE_BALANCE_DAYLIGHT                ,
+                    Camera.Parameters.WHITE_BALANCE_CLOUDY_DAYLIGHT         ,
+                    Camera.Parameters.WHITE_BALANCE_TWILIGHT                ,
+                    Camera.Parameters.WHITE_BALANCE_SHADE                   ,
+            };
+
+            int[] wbModeInts = new int[] {
+                    CONTROL_AWB_MODE_AUTO,
+                    CONTROL_AWB_MODE_INCANDESCENT            ,
+                    CONTROL_AWB_MODE_FLUORESCENT             ,
+                    CONTROL_AWB_MODE_WARM_FLUORESCENT        ,
+                    CONTROL_AWB_MODE_DAYLIGHT                ,
+                    CONTROL_AWB_MODE_CLOUDY_DAYLIGHT         ,
+                    CONTROL_AWB_MODE_TWILIGHT                ,
+                    CONTROL_AWB_MODE_SHADE                   ,
+                    // Note that CONTROL_AWB_MODE_OFF is unsupported
+            };
+
+            List<Integer> awbAvail = ArrayUtils.convertStringListToIntList(
+                        wbModes, wbModeStrings, wbModeInts);
+
+            // No AWB modes supported? That's unpossible!
+            if (awbAvail == null || awbAvail.size() == 0) {
+                Log.w(TAG, "No AWB modes supported (HAL bug); defaulting to AWB_MODE_AUTO only");
+                awbAvail = new ArrayList<Integer>(/*capacity*/1);
+                awbAvail.add(CONTROL_AWB_MODE_AUTO);
+            }
+
+            m.set(CONTROL_AWB_AVAILABLE_MODES, ArrayUtils.toIntArray(awbAvail));
+
+            if (VERBOSE) {
+                Log.v(TAG, "mapControlAwb - control.awbAvailableModes set to " +
+                        ListUtils.listToString(awbAvail));
+            }
         }
     }
 
@@ -650,6 +694,11 @@ public class LegacyMetadataMapper {
         m.set(REQUEST_MAX_NUM_INPUT_STREAMS, REQUEST_MAX_NUM_INPUT_STREAMS_COUNT);
 
         /*
+         * request.partialResultCount
+         */
+        m.set(REQUEST_PARTIAL_RESULT_COUNT, 1); // No partial results supported
+
+        /*
          * request.pipelineMaxDepth
          */
         m.set(REQUEST_PIPELINE_MAX_DEPTH,
@@ -677,6 +726,14 @@ public class LegacyMetadataMapper {
         {
             Rect activeArrayRect = ParamsUtils.createRect(largestJpegSize);
             m.set(SENSOR_INFO_ACTIVE_ARRAY_SIZE, activeArrayRect);
+        }
+
+        /*
+         * sensor.availableTestPatternModes
+         */
+        {
+            // Only "OFF" test pattern mode is available
+            m.set(SENSOR_AVAILABLE_TEST_PATTERN_MODES, new int[] { SENSOR_TEST_PATTERN_MODE_OFF });
         }
 
         /*
@@ -921,11 +978,9 @@ public class LegacyMetadataMapper {
          * control.*
          */
 
-        if (LIE_ABOUT_AWB) {
-            m.set(CaptureRequest.CONTROL_AWB_MODE, CameraMetadata.CONTROL_AWB_MODE_AUTO);
-        } else {
-            throw new AssertionError("Valid control.awbMode not implemented yet");
-        }
+        // control.awbMode
+        m.set(CaptureRequest.CONTROL_AWB_MODE, CameraMetadata.CONTROL_AWB_MODE_AUTO);
+        // AWB is always unconditionally available in API1 devices
 
         // control.aeAntibandingMode
         m.set(CaptureRequest.CONTROL_AE_ANTIBANDING_MODE, CONTROL_AE_ANTIBANDING_MODE_AUTO);
