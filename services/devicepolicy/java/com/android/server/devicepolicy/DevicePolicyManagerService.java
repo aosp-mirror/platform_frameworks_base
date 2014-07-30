@@ -2582,33 +2582,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
-    public void installKeyPair(ComponentName who, byte[] privKey, byte[] cert, String alias) {
-        if (who == null) {
-            throw new NullPointerException("ComponentName is null");
-        }
-        synchronized (this) {
-            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-        }
-        final UserHandle userHandle = new UserHandle(UserHandle.getCallingUserId());
-        final long id = Binder.clearCallingIdentity();
-        try {
-          final KeyChainConnection keyChainConnection = KeyChain.bindAsUser(mContext, userHandle);
-          try {
-              IKeyChainService keyChain = keyChainConnection.getService();
-              keyChain.installKeyPair(privKey, cert, alias);
-          } catch (RemoteException e) {
-              Log.e(LOG_TAG, "Installing certificate", e);
-          } finally {
-              keyChainConnection.close();
-          }
-        } catch (InterruptedException e) {
-            Log.w(LOG_TAG, "Interrupted while installing certificate", e);
-            Thread.currentThread().interrupt();
-        } finally {
-            Binder.restoreCallingIdentity(id);
-        }
-    }
-
     public void registerPrivateKeyAccessListener(ComponentName who, ComponentName listener) {
         if (who == null) {
             throw new NullPointerException("ComponentName is null");
