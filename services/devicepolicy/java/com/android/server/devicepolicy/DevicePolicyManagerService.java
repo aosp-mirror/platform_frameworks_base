@@ -911,7 +911,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         for (ActiveAdmin admin : candidates) {
             boolean ownsDevice = isDeviceOwner(admin.info.getPackageName());
             boolean ownsProfile = (getProfileOwner(userHandle) != null
-                    && getProfileOwner(userHandle).equals(admin.info.getPackageName()));
+                    && getProfileOwner(userHandle).getPackageName()
+                        .equals(admin.info.getPackageName()));
 
             if (reqPolicy == DeviceAdminInfo.USES_POLICY_DEVICE_OWNER) {
                 if (ownsDevice) {
@@ -3443,7 +3444,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public boolean setProfileOwner(String packageName, String ownerName, int userHandle) {
+    public boolean setProfileOwner(ComponentName who, String ownerName, int userHandle) {
         if (!mHasFeature) {
             return false;
         }
@@ -3455,30 +3456,64 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     "Attempted to set profile owner for invalid userId: " + userHandle);
         }
 
-        if (packageName == null
-                || !DeviceOwner.isInstalledForUser(packageName, userHandle)) {
-            throw new IllegalArgumentException("Package name " + packageName
+        if (who == null
+                || !DeviceOwner.isInstalledForUser(who.getPackageName(), userHandle)) {
+            throw new IllegalArgumentException("Component " + who
                     + " not installed for userId:" + userHandle);
         }
         synchronized (this) {
-            if (isUserSetupComplete(userHandle)) {
+            // Only SYSTEM_UID can override the userSetupComplete
+            if (UserHandle.getAppId(Binder.getCallingUid()) != Process.SYSTEM_UID
+                    && isUserSetupComplete(userHandle)) {
                 throw new IllegalStateException(
                         "Trying to set profile owner but user is already set-up.");
             }
 
             if (mDeviceOwner == null) {
                 // Device owner state does not exist, create it.
-                mDeviceOwner = DeviceOwner.createWithProfileOwner(packageName, ownerName,
+                mDeviceOwner = DeviceOwner.createWithProfileOwner(who, ownerName,
                         userHandle);
                 mDeviceOwner.writeOwnerFile();
                 return true;
             } else {
                 // Device owner already exists, update it.
-                mDeviceOwner.setProfileOwner(packageName, ownerName, userHandle);
+                mDeviceOwner.setProfileOwner(who, ownerName, userHandle);
                 mDeviceOwner.writeOwnerFile();
                 return true;
             }
         }
+    }
+
+    @Override
+    public void clearProfileOwner(ComponentName who) {
+        if (!mHasFeature) {
+            return;
+        }
+        UserHandle callingUser = Binder.getCallingUserHandle();
+        // Check if this is the profile owner who is calling
+        getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+        synchronized (this) {
+            long ident = Binder.clearCallingIdentity();
+            try {
+                mUserManager.setUserRestrictions(new Bundle(), callingUser);
+                if (mDeviceOwner != null) {
+                    mDeviceOwner.removeProfileOwner(callingUser.getIdentifier());
+                    mDeviceOwner.writeOwnerFile();
+                }
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+    }
+
+    @Override
+    public boolean hasUserSetupCompleted() {
+        if (!mHasFeature) {
+            return true;
+        }
+        DevicePolicyData policy = getUserData(UserHandle.getCallingUserId());
+        // If policy is null, return true, else check if the setup has completed.
+        return policy == null || policy.mUserSetupComplete;
     }
 
     @Override
@@ -3530,14 +3565,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public String getProfileOwner(int userHandle) {
+    public ComponentName getProfileOwner(int userHandle) {
         if (!mHasFeature) {
             return null;
         }
 
         synchronized (this) {
             if (mDeviceOwner != null) {
-                return mDeviceOwner.getProfileOwnerPackageName(userHandle);
+                return mDeviceOwner.getProfileOwnerComponent(userHandle);
             }
         }
         return null;
@@ -3546,8 +3581,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     // Returns the active profile owner for this user or null if the current user has no
     // profile owner.
     private ActiveAdmin getProfileOwnerAdmin(int userHandle) {
-        String profileOwnerPackage = getProfileOwner(userHandle);
-        if (profileOwnerPackage == null) {
+        ComponentName profileOwner =
+                mDeviceOwner != null ? mDeviceOwner.getProfileOwnerComponent(userHandle) : null;
+        if (profileOwner == null) {
             return null;
         }
 
@@ -3555,7 +3591,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         final int n = policy.mAdminList.size();
         for (int i = 0; i < n; i++) {
             ActiveAdmin admin = policy.mAdminList.get(i);
-            if (profileOwnerPackage.equals(admin.info.getPackageName())) {
+            if (profileOwner.equals(admin.info)) {
                 return admin;
             }
         }
@@ -3933,7 +3969,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
 
             setActiveAdmin(profileOwnerComponent, true, user.getIdentifier(), adminExtras);
-            setProfileOwner(profileOwnerPkg, ownerName, user.getIdentifier());
+            setProfileOwner(profileOwnerComponent, ownerName, user.getIdentifier());
             return user;
         } finally {
             restoreCallingIdentity(id);

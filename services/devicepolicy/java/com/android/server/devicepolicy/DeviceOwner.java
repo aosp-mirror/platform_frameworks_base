@@ -17,6 +17,7 @@
 package com.android.server.devicepolicy;
 
 import android.app.AppGlobals;
+import android.content.ComponentName;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -53,6 +54,7 @@ public class DeviceOwner {
     private static final String TAG_PROFILE_OWNER = "profile-owner";
     private static final String ATTR_NAME = "name";
     private static final String ATTR_PACKAGE = "package";
+    private static final String ATTR_COMPONENT_NAME = "component";
     private static final String ATTR_USERID = "userId";
 
     private AtomicFile fileForWriting;
@@ -100,11 +102,21 @@ public class DeviceOwner {
     }
 
     /**
+     * @deprecated Use a component name instead of package name
      * Creates an instance of the device owner object with the profile owner set.
      */
     static DeviceOwner createWithProfileOwner(String packageName, String ownerName, int userId) {
         DeviceOwner owner = new DeviceOwner();
         owner.mProfileOwners.put(userId, new OwnerInfo(ownerName, packageName));
+        return owner;
+    }
+
+    /**
+     * Creates an instance of the device owner object with the profile owner set.
+     */
+    static DeviceOwner createWithProfileOwner(ComponentName admin, String ownerName, int userId) {
+        DeviceOwner owner = new DeviceOwner();
+        owner.mProfileOwners.put(userId, new OwnerInfo(ownerName, admin));
         return owner;
     }
 
@@ -124,17 +136,34 @@ public class DeviceOwner {
         mDeviceOwner = null;
     }
 
+    /**
+     * @deprecated
+     */
     void setProfileOwner(String packageName, String ownerName, int userId) {
         mProfileOwners.put(userId, new OwnerInfo(ownerName, packageName));
+    }
+
+    void setProfileOwner(ComponentName admin, String ownerName, int userId) {
+        mProfileOwners.put(userId, new OwnerInfo(ownerName, admin));
     }
 
     void removeProfileOwner(int userId) {
         mProfileOwners.remove(userId);
     }
 
+    /**
+     * @deprecated Use getProfileOwnerComponent
+     * @param userId
+     * @return
+     */
     String getProfileOwnerPackageName(int userId) {
         OwnerInfo profileOwner = mProfileOwners.get(userId);
         return profileOwner != null ? profileOwner.packageName : null;
+    }
+
+    ComponentName getProfileOwnerComponent(int userId) {
+        OwnerInfo profileOwner = mProfileOwners.get(userId);
+        return profileOwner != null ? profileOwner.admin : null;
     }
 
     String getProfileOwnerName(int userId) {
@@ -191,15 +220,23 @@ public class DeviceOwner {
 
                 String tag = parser.getName();
                 if (tag.equals(TAG_DEVICE_OWNER)) {
-                    mDeviceOwner = new OwnerInfo(
-                            parser.getAttributeValue(null, ATTR_NAME),
-                            parser.getAttributeValue(null, ATTR_PACKAGE));
+                    String name = parser.getAttributeValue(null, ATTR_NAME);
+                    String packageName = parser.getAttributeValue(null, ATTR_PACKAGE);
+                    mDeviceOwner = new OwnerInfo(name, packageName);
                 } else if (tag.equals(TAG_PROFILE_OWNER)) {
                     String profileOwnerPackageName = parser.getAttributeValue(null, ATTR_PACKAGE);
                     String profileOwnerName = parser.getAttributeValue(null, ATTR_NAME);
+                    String profileOwnerComponentStr =
+                            parser.getAttributeValue(null, ATTR_COMPONENT_NAME);
                     int userId = Integer.parseInt(parser.getAttributeValue(null, ATTR_USERID));
-                    mProfileOwners.put(userId,
-                            new OwnerInfo(profileOwnerName, profileOwnerPackageName));
+                    OwnerInfo profileOwnerInfo;
+                    if (profileOwnerComponentStr != null) {
+                        profileOwnerInfo = new OwnerInfo(profileOwnerName,
+                                ComponentName.unflattenFromString(profileOwnerComponentStr));
+                    } else {
+                        profileOwnerInfo = new OwnerInfo(profileOwnerName, profileOwnerPackageName);
+                    }
+                    mProfileOwners.put(userId, profileOwnerInfo);
                 } else {
                     throw new XmlPullParserException(
                             "Unexpected tag in device owner file: " + tag);
@@ -230,9 +267,6 @@ public class DeviceOwner {
             if (mDeviceOwner != null) {
                 out.startTag(null, TAG_DEVICE_OWNER);
                 out.attribute(null, ATTR_PACKAGE, mDeviceOwner.packageName);
-                if (mDeviceOwner.packageName != null) {
-                    out.attribute(null, ATTR_NAME, mDeviceOwner.packageName);
-                }
                 out.endTag(null, TAG_DEVICE_OWNER);
             }
 
@@ -240,9 +274,13 @@ public class DeviceOwner {
             if (mProfileOwners.size() > 0) {
                 for (HashMap.Entry<Integer, OwnerInfo> owner : mProfileOwners.entrySet()) {
                     out.startTag(null, TAG_PROFILE_OWNER);
-                    out.attribute(null, ATTR_PACKAGE, owner.getValue().packageName);
-                    out.attribute(null, ATTR_NAME, owner.getValue().name);
+                    OwnerInfo ownerInfo = owner.getValue();
+                    out.attribute(null, ATTR_PACKAGE, ownerInfo.packageName);
+                    out.attribute(null, ATTR_NAME, ownerInfo.name);
                     out.attribute(null, ATTR_USERID, Integer.toString(owner.getKey()));
+                    if (ownerInfo.admin != null) {
+                        out.attribute(null, ATTR_COMPONENT_NAME, ownerInfo.admin.flattenToString());
+                    }
                     out.endTag(null, TAG_PROFILE_OWNER);
                 }
             }
@@ -282,10 +320,18 @@ public class DeviceOwner {
     static class OwnerInfo {
         public String name;
         public String packageName;
+        public ComponentName admin;
 
         public OwnerInfo(String name, String packageName) {
             this.name = name;
             this.packageName = packageName;
+            this.admin = new ComponentName(packageName, "");
+        }
+
+        public OwnerInfo(String name, ComponentName admin) {
+            this.name = name;
+            this.admin = admin;
+            this.packageName = admin.getPackageName();
         }
     }
 }

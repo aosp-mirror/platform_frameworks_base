@@ -361,6 +361,40 @@ public class DevicePolicyManager {
             = "android.app.action.ADD_DEVICE_ADMIN";
 
     /**
+     * @hide
+     * Activity action: ask the user to add a new device administrator as the profile owner
+     * for this user. Only system privileged apps that have MANAGE_USERS and MANAGE_DEVICE_ADMINS
+     * permission can call this API.
+     *
+     * <p>The ComponentName of the profile owner admin is pass in {@link #EXTRA_DEVICE_ADMIN} extra
+     * field. This will invoke a UI to bring the user through adding the profile owner admin
+     * to remotely control restrictions on the user.
+     *
+     * <p>The intent must be invoked via {@link Activity#startActivityForResult()} to receive the
+     * result of whether or not the user approved the action. If approved, the result will
+     * be {@link Activity#RESULT_OK} and the component will be set as an active admin as well
+     * as a profile owner.
+     *
+     * <p>You can optionally include the {@link #EXTRA_ADD_EXPLANATION}
+     * field to provide the user with additional explanation (in addition
+     * to your component's description) about what is being added.
+     *
+     * <p>If there is already a profile owner active or the caller doesn't have the required
+     * permissions, the operation will return a failure result.
+     */
+    @SystemApi
+    public static final String ACTION_SET_PROFILE_OWNER
+            = "android.app.action.SET_PROFILE_OWNER";
+
+    /**
+     * @hide
+     * Name of the profile owner admin that controls the user.
+     */
+    @SystemApi
+    public static final String EXTRA_PROFILE_OWNER_NAME
+            = "android.app.extra.PROFILE_OWNER_NAME";
+
+    /**
      * Activity action: send when any policy admin changes a policy.
      * This is generally used to find out when a new policy is in effect.
      *
@@ -2019,7 +2053,6 @@ public class DevicePolicyManager {
         return false;
     }
 
-
     /**
      * Used to determine if a particular package has been registered as a Device Owner app.
      * A device owner app is a special device admin that cannot be deactivated by the user, once
@@ -2097,6 +2130,7 @@ public class DevicePolicyManager {
 
     /**
      * @hide
+     * @deprecated Use #ACTION_SET_PROFILE_OWNER
      * Sets the given component as an active admin and registers the package as the profile
      * owner for this user. The package must already be installed and there shouldn't be
      * an existing profile owner registered for this user. Also, this method must be called
@@ -2117,7 +2151,7 @@ public class DevicePolicyManager {
             try {
                 final int myUserId = UserHandle.myUserId();
                 mService.setActiveAdmin(admin, false, myUserId);
-                return mService.setProfileOwner(admin.getPackageName(), ownerName, myUserId);
+                return mService.setProfileOwner(admin, ownerName, myUserId);
             } catch (RemoteException re) {
                 Log.w(TAG, "Failed to set profile owner " + re);
                 throw new IllegalArgumentException("Couldn't set profile owner.", re);
@@ -2127,6 +2161,42 @@ public class DevicePolicyManager {
     }
 
     /**
+     * @hide
+     * Clears the active profile owner and removes all user restrictions. The caller must
+     * be from the same package as the active profile owner for this user, otherwise a
+     * SecurityException will be thrown.
+     *
+     * @param admin The component to remove as the profile owner.
+     * @return
+     */
+    @SystemApi
+    public void clearProfileOwner(ComponentName admin) {
+        if (mService != null) {
+            try {
+                mService.clearProfileOwner(admin);
+            } catch (RemoteException re) {
+                Log.w(TAG, "Failed to clear profile owner " + admin + re);
+            }
+        }
+    }
+
+    /**
+     * @hide
+     * Checks if the user was already setup.
+     */
+    public boolean hasUserSetupCompleted() {
+        if (mService != null) {
+            try {
+                return mService.hasUserSetupCompleted();
+            } catch (RemoteException re) {
+                Log.w(TAG, "Failed to check if user setup has completed");
+            }
+        }
+        return true;
+    }
+
+    /**
+     * @deprecated Use setProfileOwner(ComponentName ...)
      * @hide
      * Sets the given package as the profile owner of the given user profile. The package must
      * already be installed and there shouldn't be an existing profile owner registered for this
@@ -2140,9 +2210,35 @@ public class DevicePolicyManager {
      */
     public boolean setProfileOwner(String packageName, String ownerName, int userHandle)
             throws IllegalArgumentException {
+        if (packageName == null) {
+            throw new NullPointerException("packageName cannot be null");
+        }
+        return setProfileOwner(new ComponentName(packageName, ""), ownerName, userHandle);
+    }
+
+    /**
+     * @hide
+     * Sets the given component as the profile owner of the given user profile. The package must
+     * already be installed and there shouldn't be an existing profile owner registered for this
+     * user. Only the system can call this API if the user has already completed setup.
+     * @param admin the component name to be registered as profile owner.
+     * @param ownerName the human readable name of the organisation associated with this DPM.
+     * @param userHandle the userId to set the profile owner for.
+     * @return whether the component was successfully registered as the profile owner.
+     * @throws IllegalArgumentException if admin is null, the package isn't installed, or
+     *         the user has already been set up.
+     */
+    public boolean setProfileOwner(ComponentName admin, String ownerName, int userHandle)
+            throws IllegalArgumentException {
+        if (admin == null) {
+            throw new NullPointerException("admin cannot be null");
+        }
         if (mService != null) {
             try {
-                return mService.setProfileOwner(packageName, ownerName, userHandle);
+                if (ownerName == null) {
+                    ownerName = "";
+                }
+                return mService.setProfileOwner(admin, ownerName, userHandle);
             } catch (RemoteException re) {
                 Log.w(TAG, "Failed to set profile owner", re);
                 throw new IllegalArgumentException("Couldn't set profile owner.", re);
@@ -2201,7 +2297,7 @@ public class DevicePolicyManager {
         if (mService != null) {
             try {
                 String profileOwnerPackage = mService.getProfileOwner(
-                        Process.myUserHandle().getIdentifier());
+                        Process.myUserHandle().getIdentifier()).getPackageName();
                 return profileOwnerPackage != null && profileOwnerPackage.equals(packageName);
             } catch (RemoteException re) {
                 Log.w(TAG, "Failed to check profile owner");
@@ -2216,7 +2312,7 @@ public class DevicePolicyManager {
      * owner has been set for that user.
      * @throws IllegalArgumentException if the userId is invalid.
      */
-    public String getProfileOwner() throws IllegalArgumentException {
+    public ComponentName getProfileOwner() throws IllegalArgumentException {
         if (mService != null) {
             try {
                 return mService.getProfileOwner(Process.myUserHandle().getIdentifier());
