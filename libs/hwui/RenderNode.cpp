@@ -384,11 +384,15 @@ void RenderNode::setViewProperties(OpenGLRenderer& renderer, T& handler) {
         handler(op, PROPERTY_SAVECOUNT, properties().getClipToBounds());
     }
 
-    if (CC_UNLIKELY(properties().hasClippingPath())) {
-        ClipPathOp* op = new (handler.allocator()) ClipPathOp(
-                properties().getClippingPath(), properties().getClippingPathOp());
-        handler(op, PROPERTY_SAVECOUNT, properties().getClipToBounds());
+    // TODO: support both reveal clip and outline clip simultaneously
+    if (mProperties.getRevealClip().willClip()) {
+        Rect bounds;
+        mProperties.getRevealClip().getBounds(&bounds);
+        renderer.setClippingRoundRect(handler.allocator(), bounds, mProperties.getRevealClip().getRadius());
+    } else if (mProperties.getOutline().willClip()) {
+        renderer.setClippingOutline(handler.allocator(), &(mProperties.getOutline()));
     }
+
 }
 
 /**
@@ -600,23 +604,11 @@ void RenderNode::issueDrawShadowOperation(const Matrix4& transformFromParent, T&
     applyViewPropertyTransforms(shadowMatrixZ, true);
 
     const SkPath* outlinePath = properties().getOutline().getPath();
-    const RevealClip& revealClip = properties().getRevealClip();
-    const SkPath* revealClipPath = revealClip.hasConvexClip()
-            ?  revealClip.getPath() : NULL; // only pass the reveal clip's path if it's convex
-
+    const SkPath* revealClipPath = properties().getRevealClip().getPath();
     if (revealClipPath && revealClipPath->isEmpty()) return;
 
-    /**
-     * The drawing area of the caster is always the same as the its perimeter (which
-     * the shadow system uses) *except* in the inverse clip case. Inform the shadow
-     * system that the caster's drawing area (as opposed to its perimeter) has been
-     * clipped, so that it knows the caster can't be opaque.
-     */
-    bool casterUnclipped = !revealClip.willClip() || revealClip.hasConvexClip();
-
     DisplayListOp* shadowOp  = new (handler.allocator()) DrawShadowOp(
-            shadowMatrixXY, shadowMatrixZ,
-            properties().getAlpha(), casterUnclipped,
+            shadowMatrixXY, shadowMatrixZ, properties().getAlpha(),
             outlinePath, revealClipPath);
     handler(shadowOp, PROPERTY_SAVECOUNT, properties().getClipToBounds());
 }
@@ -828,10 +820,6 @@ void RenderNode::issueOperations(OpenGLRenderer& renderer, T& handler) {
     bool quickRejected = properties().getClipToBounds()
             && renderer.quickRejectConservative(0, 0, properties().getWidth(), properties().getHeight());
     if (!quickRejected) {
-        if (mProperties.getOutline().willClip()) {
-            renderer.setClippingOutline(alloc, &(mProperties.getOutline()));
-        }
-
         if (drawLayer) {
             handler(new (alloc) DrawLayerOp(mLayer, 0, 0),
                     renderer.getSaveCount() - 1, properties().getClipToBounds());

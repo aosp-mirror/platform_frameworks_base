@@ -20,6 +20,8 @@
 
 #include "StatefulBaseRenderer.h"
 
+#include "utils/MathUtils.h"
+
 namespace android {
 namespace uirenderer {
 
@@ -189,8 +191,23 @@ bool StatefulBaseRenderer::clipRegion(const SkRegion* region, SkRegion::Op op) {
 }
 
 void StatefulBaseRenderer::setClippingOutline(LinearAllocator& allocator, const Outline* outline) {
-    mSnapshot->setClippingOutline(allocator, outline);
+    Rect bounds;
+    float radius;
+    if (!outline->getAsRoundRect(&bounds, &radius)) return; // only RR supported
+
+    if (!MathUtils::isPositive(radius)) {
+        // TODO: consider storing this rect separately, so that this can't be replaced with clip ops
+        clipRect(bounds.left, bounds.top, bounds.right, bounds.bottom, SkRegion::kIntersect_Op);
+        return;
+    }
+    setClippingRoundRect(allocator, bounds, radius);
 }
+
+void StatefulBaseRenderer::setClippingRoundRect(LinearAllocator& allocator,
+        const Rect& rect, float radius) {
+    mSnapshot->setClippingRoundRect(allocator, rect, radius);
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // Quick Rejection

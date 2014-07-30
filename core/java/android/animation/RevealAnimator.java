@@ -30,7 +30,6 @@ public class RevealAnimator extends ValueAnimator {
 
     private View mClipView;
     private int mX, mY;
-    private boolean mInverseClip;
     private float mStartRadius, mEndRadius;
     private float mDelta;
     private boolean mMayRunAsync;
@@ -41,14 +40,13 @@ public class RevealAnimator extends ValueAnimator {
     private RenderNodeAnimator mRtAnimator;
 
     public RevealAnimator(View clipView, int x, int y,
-            float startRadius, float endRadius, boolean inverseClip) {
+            float startRadius, float endRadius) {
         mClipView = clipView;
         mStartRadius = startRadius;
         mEndRadius = endRadius;
         mDelta = endRadius - startRadius;
         mX = x;
         mY = y;
-        mInverseClip = inverseClip;
         super.setValues(PropertyValuesHolder.ofFloat("radius", startRadius, endRadius));
     }
 
@@ -57,12 +55,12 @@ public class RevealAnimator extends ValueAnimator {
         super.animateValue(fraction);
         fraction = getAnimatedFraction();
         float radius = mStartRadius + (mDelta * fraction);
-        mClipView.setRevealClip(true, mInverseClip, mX, mY, radius);
+        mClipView.setRevealClip(true, mX, mY, radius);
     }
 
     @Override
     protected void endAnimation(AnimationHandler handler) {
-        mClipView.setRevealClip(false, false, 0, 0, 0);
+        mClipView.setRevealClip(false, 0, 0, 0);
         super.endAnimation(handler);
     }
 
@@ -92,7 +90,7 @@ public class RevealAnimator extends ValueAnimator {
             mRtAnimator = null;
         }
         if (canRunAsync()) {
-            mRtAnimator = new RenderNodeAnimator(mX, mY, mInverseClip, mStartRadius, mEndRadius);
+            mRtAnimator = new RenderNodeAnimator(mX, mY, mStartRadius, mEndRadius);
             mRtAnimator.setDuration(getDuration());
             mRtAnimator.setInterpolator(getInterpolator());
             mRtAnimator.setTarget(mClipView);

@@ -96,6 +96,8 @@ public:
      * The clipping outline is independent from the regular clip.
      */
     void setClippingOutline(LinearAllocator& allocator, const Outline* outline);
+    void setClippingRoundRect(LinearAllocator& allocator,
+            const Rect& rect, float radius);
 
 protected:
     const Rect& getRenderTargetClipBounds() const { return mSnapshot->getRenderTargetClip(); }

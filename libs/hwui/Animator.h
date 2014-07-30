@@ -171,7 +171,7 @@ private:
 
 class RevealAnimator : public BaseRenderNodeAnimator {
 public:
-    ANDROID_API RevealAnimator(int centerX, int centerY, bool inverseClip,
+    ANDROID_API RevealAnimator(int centerX, int centerY,
             float startValue, float finalValue);
 protected:
     virtual float getValue(RenderNode* target) const;

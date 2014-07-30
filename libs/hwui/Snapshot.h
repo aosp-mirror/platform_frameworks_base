@@ -57,8 +57,8 @@ public:
 
     Matrix4 matrix;
     Rect dangerRects[4];
-    Rect outlineInnerRect;
-    float outlineRadius;
+    Rect innerRect;
+    float radius;
 };
 
 /**
@@ -164,7 +164,7 @@ public:
     /**
      * Sets (and replaces) the current clipping outline
      */
-    void setClippingOutline(LinearAllocator& allocator, const Outline* outline);
+    void setClippingRoundRect(LinearAllocator& allocator, const Rect& bounds, float radius);
 
     /**
      * Indicates whether this snapshot should be ignored. A snapshot
