@@ -22,13 +22,11 @@ import android.hardware.soundtrigger.KeyphraseEnrollmentInfo;
 import android.hardware.soundtrigger.KeyphraseMetadata;
 import android.hardware.soundtrigger.SoundTrigger;
 import android.hardware.soundtrigger.SoundTrigger.ConfidenceLevel;
-import android.hardware.soundtrigger.SoundTrigger.Keyphrase;
 import android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionEvent;
 import android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra;
 import android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel;
 import android.hardware.soundtrigger.SoundTrigger.ModuleProperties;
 import android.hardware.soundtrigger.SoundTrigger.RecognitionConfig;
-import android.hardware.soundtrigger.SoundTrigger.RecognitionEvent;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
@@ -36,8 +34,6 @@ import android.os.RemoteException;
 import android.util.Slog;
 
 import com.android.internal.app.IVoiceInteractionManagerService;
-
-import java.util.List;
 
 /**
  * A class that lets a VoiceInteractionService implementation interact with
@@ -82,12 +78,6 @@ public class AlwaysOnHotwordDetector {
     /** Indicates that we need to un-enroll. */
     public static final int MANAGE_ACTION_UN_ENROLL = 2;
 
-    /**
-     * Return codes for {@link #startRecognition(int)}, {@link #stopRecognition()}
-     */
-    public static final int STATUS_ERROR = SoundTrigger.STATUS_ERROR;
-    public static final int STATUS_OK = SoundTrigger.STATUS_OK;
-
     //-- Flags for startRecogntion    ----//
     /** Empty flag for {@link #startRecognition(int)}. */
     public static final int RECOGNITION_FLAG_NONE = 0;
@@ -115,9 +105,19 @@ public class AlwaysOnHotwordDetector {
     // TODO: Set to false.
     static final boolean DBG = true;
 
+    private static final int STATUS_ERROR = SoundTrigger.STATUS_ERROR;
+    private static final int STATUS_OK = SoundTrigger.STATUS_OK;
+
     private static final int MSG_STATE_CHANGED = 1;
     private static final int MSG_HOTWORD_DETECTED = 2;
-    private static final int MSG_DETECTION_STOPPED = 3;
+    private static final int MSG_DETECTION_STARTED = 3;
+    private static final int MSG_DETECTION_STOPPED = 4;
+    private static final int MSG_DETECTION_ERROR = 5;
+
+    private static final int FLAG_REQUESTED = 0x1;
+    private static final int FLAG_STARTED = 0x2;
+    private static final int FLAG_CALL_ACTIVE = 0x4;
+    private static final int FLAG_MICROPHONE_OPEN = 0x8;
 
     private final String mText;
     private final String mLocale;
@@ -135,6 +135,8 @@ public class AlwaysOnHotwordDetector {
     private final Handler mHandler;
 
     private int mAvailability = STATE_NOT_READY;
+    private int mInternalState = 0;
+    private int mRecognitionFlags = RECOGNITION_FLAG_NONE;
 
     /**
      * Callbacks for always-on hotword detection.
@@ -161,15 +163,30 @@ public class AlwaysOnHotwordDetector {
         void onAvailabilityChanged(int status);
         /**
          * Called when the keyphrase is spoken.
+         * This implicitly stops listening for the keyphrase once it's detected.
+         * Clients should start a recognition again once they are done handling this
+         * detection.
          *
          * @param data Optional trigger audio data, if it was requested during
          *        {@link AlwaysOnHotwordDetector#startRecognition(int)}.
          */
         void onDetected(byte[] data);
         /**
+         * Called when the detection for the associated keyphrase starts.
+         * This is called as a result of a successful call to
+         * {@link AlwaysOnHotwordDetector#startRecognition(int)}.
+         */
+        void onDetectionStarted();
+        /**
          * Called when the detection for the associated keyphrase stops.
+         * This is called as a result of a successful call to
+         * {@link AlwaysOnHotwordDetector#stopRecognition()}.
          */
         void onDetectionStopped();
+        /**
+         * Called when the detection fails due to an error.
+         */
+        void onError();
     }
 
     /**
@@ -227,78 +244,43 @@ public class AlwaysOnHotwordDetector {
      * @param recognitionFlags The flags to control the recognition properties.
      *        The allowed flags are {@link #RECOGNITION_FLAG_NONE} and
      *        {@link #RECOGNITION_FLAG_CAPTURE_TRIGGER_AUDIO}.
-     * @return {@link #STATUS_OK} if the call succeeds, an error code otherwise.
      * @throws UnsupportedOperationException if the recognition isn't supported.
      *         Callers should only call this method after a supported state callback on
      *         {@link Callback#onAvailabilityChanged(int)} to avoid this exception.
      */
-    public int startRecognition(int recognitionFlags) {
+    public void startRecognition(int recognitionFlags) {
         synchronized (mLock) {
-            return startRecognitionLocked(recognitionFlags);
-        }
-    }
+            // Check if we can start/stop a recognition.
+            if (mAvailability != STATE_KEYPHRASE_ENROLLED) {
+                throw new UnsupportedOperationException(
+                        "Recognition for the given keyphrase is not supported");
+            }
 
-    private int startRecognitionLocked(int recognitionFlags) {
-        // This method only makes sense if we can start a recognition.
-        if (mAvailability != STATE_KEYPHRASE_ENROLLED) {
-            throw new UnsupportedOperationException(
-                    "Recognition for the given keyphrase is not supported");
+            mInternalState |= FLAG_REQUESTED;
+            mRecognitionFlags = recognitionFlags;
+            updateRecognitionLocked();
         }
-
-        KeyphraseRecognitionExtra[] recognitionExtra = new KeyphraseRecognitionExtra[1];
-        // TODO: Do we need to do something about the confidence level here?
-        recognitionExtra[0] = new KeyphraseRecognitionExtra(mKeyphraseMetadata.id,
-                mKeyphraseMetadata.recognitionModeFlags, new ConfidenceLevel[0]);
-        boolean captureTriggerAudio =
-                (recognitionFlags & RECOGNITION_FLAG_CAPTURE_TRIGGER_AUDIO) != 0;
-        int code = STATUS_ERROR;
-        try {
-            code = mModelManagementService.startRecognition(mVoiceInteractionService,
-                    mKeyphraseMetadata.id, mInternalCallback,
-                    new RecognitionConfig(
-                            captureTriggerAudio, recognitionExtra, null /* additional data */));
-        } catch (RemoteException e) {
-            Slog.w(TAG, "RemoteException in startRecognition!");
-        }
-        if (code != STATUS_OK) {
-            Slog.w(TAG, "startRecognition() failed with error code " + code);
-        }
-        return code;
     }
 
     /**
      * Stops recognition for the associated keyphrase.
      *
-     * @return {@link #STATUS_OK} if the call succeeds, an error code otherwise.
      * @throws UnsupportedOperationException if the recognition isn't supported.
      *         Callers should only call this method after a supported state callback on
      *         {@link Callback#onAvailabilityChanged(int)} to avoid this exception.
      */
-    public int stopRecognition() {
+    public void stopRecognition() {
         synchronized (mLock) {
-            return stopRecognitionLocked();
-        }
-    }
+            // Check if we can start/stop a recognition.
+            if (mAvailability != STATE_KEYPHRASE_ENROLLED) {
+                throw new UnsupportedOperationException(
+                        "Recognition for the given keyphrase is not supported");
+            }
 
-    private int stopRecognitionLocked() {
-        // This method only makes sense if we can start a recognition.
-        if (mAvailability != STATE_KEYPHRASE_ENROLLED) {
-            throw new UnsupportedOperationException(
-                    "Recognition for the given keyphrase is not supported");
+            mInternalState &= ~FLAG_REQUESTED;
+            mRecognitionFlags = RECOGNITION_FLAG_NONE;
+            updateRecognitionLocked();
         }
-
-        int code = STATUS_ERROR;
-        try {
-            code = mModelManagementService.stopRecognition(
-                    mVoiceInteractionService, mKeyphraseMetadata.id, mInternalCallback);
-        } catch (RemoteException e) {
-            Slog.w(TAG, "RemoteException in stopRecognition!");
-        }
-
-        if (code != STATUS_OK) {
-            Slog.w(TAG, "stopRecognition() failed with error code " + code);
-        }
-        return code;
     }
 
     /**
@@ -362,6 +344,113 @@ public class AlwaysOnHotwordDetector {
         }
     }
 
+    @SuppressWarnings("unused")
+    private void onCallStateChanged(boolean active) {
+        synchronized (mLock) {
+            if (active) {
+                mInternalState |= FLAG_CALL_ACTIVE;
+            } else {
+                mInternalState &= ~FLAG_CALL_ACTIVE;
+            }
+
+            updateRecognitionLocked();
+        }
+    }
+
+    @SuppressWarnings("unused")
+    private void onMicrophoneStateChanged(boolean open) {
+        synchronized (mLock) {
+            if (open) {
+                mInternalState |= FLAG_MICROPHONE_OPEN;
+            } else {
+                mInternalState &= ~FLAG_MICROPHONE_OPEN;
+            }
+
+            updateRecognitionLocked();
+        }
+    }
+
+    private void updateRecognitionLocked() {
+        // Don't attempt to update the recognition state if keyphrase isn't enrolled.
+        if (mAvailability != STATE_KEYPHRASE_ENROLLED) {
+            return;
+        }
+
+        // Start recognition if requested and not in a call/reading from the microphone
+        boolean start = (mInternalState&FLAG_REQUESTED) != 0
+                && (mInternalState&FLAG_CALL_ACTIVE) == 0
+                && (mInternalState&FLAG_MICROPHONE_OPEN) == 0;
+        boolean requested = (mInternalState&FLAG_REQUESTED) != 0;
+
+        if (start && (mInternalState&FLAG_STARTED) == 0) {
+            // Start recognition.
+            if (DBG) Slog.d(TAG, "starting recognition...");
+            int status = startRecognitionLocked();
+            if (status == STATUS_OK) {
+                mInternalState |= FLAG_STARTED;
+                mHandler.sendEmptyMessage(MSG_DETECTION_STARTED);
+            } else {
+                if (DBG) Slog.d(TAG, "failed to start recognition: " + status);
+                mHandler.sendEmptyMessage(MSG_DETECTION_ERROR);
+            }
+            // Post the callback
+            return;
+        }
+
+        if (!start && (mInternalState&FLAG_STARTED) != 0) {
+            // Stop recognition
+            // Only notify the callback if a recognition was *not* requested.
+            // For internal stoppages, don't notify the callback.
+            if (DBG) Slog.d(TAG, "stopping recognition...");
+            int status = stopRecognitionLocked();
+            if (status == STATUS_OK) {
+                mInternalState &= ~FLAG_STARTED;
+                if (!requested) mHandler.sendEmptyMessage(MSG_DETECTION_STOPPED);
+            } else {
+                if (!requested) mHandler.sendEmptyMessage(MSG_DETECTION_ERROR);
+                if (DBG) Slog.d(TAG, "failed to stop recognition: " + status);
+            }
+            return;
+        }
+    }
+
+    private int startRecognitionLocked() {
+        KeyphraseRecognitionExtra[] recognitionExtra = new KeyphraseRecognitionExtra[1];
+        // TODO: Do we need to do something about the confidence level here?
+        recognitionExtra[0] = new KeyphraseRecognitionExtra(mKeyphraseMetadata.id,
+                mKeyphraseMetadata.recognitionModeFlags, new ConfidenceLevel[0]);
+        boolean captureTriggerAudio =
+                (mRecognitionFlags&RECOGNITION_FLAG_CAPTURE_TRIGGER_AUDIO) != 0;
+        int code = STATUS_ERROR;
+        try {
+            code = mModelManagementService.startRecognition(mVoiceInteractionService,
+                    mKeyphraseMetadata.id, mInternalCallback,
+                    new RecognitionConfig(
+                            captureTriggerAudio, recognitionExtra, null /* additional data */));
+        } catch (RemoteException e) {
+            Slog.w(TAG, "RemoteException in startRecognition!");
+        }
+        if (code != STATUS_OK) {
+            Slog.w(TAG, "startRecognition() failed with error code " + code);
+        }
+        return code;
+    }
+
+    private int stopRecognitionLocked() {
+        int code = STATUS_ERROR;
+        try {
+            code = mModelManagementService.stopRecognition(
+                    mVoiceInteractionService, mKeyphraseMetadata.id, mInternalCallback);
+        } catch (RemoteException e) {
+            Slog.w(TAG, "RemoteException in stopRecognition!");
+        }
+
+        if (code != STATUS_OK) {
+            Slog.w(TAG, "stopRecognition() failed with error code " + code);
+        }
+        return code;
+    }
+
     private void notifyStateChangedLocked() {
         Message message = Message.obtain(mHandler, MSG_STATE_CHANGED);
         message.arg1 = mAvailability;
@@ -385,9 +474,9 @@ public class AlwaysOnHotwordDetector {
         }
 
         @Override
-        public void onDetectionStopped() {
-            Slog.i(TAG, "onDetectionStopped");
-            mHandler.sendEmptyMessage(MSG_DETECTION_STOPPED);
+        public void onError(int status) {
+            Slog.i(TAG, "onError: " + status);
+            mHandler.sendEmptyMessage(MSG_DETECTION_ERROR);
         }
     }
 
@@ -401,8 +490,15 @@ public class AlwaysOnHotwordDetector {
                 case MSG_HOTWORD_DETECTED:
                     mExternalCallback.onDetected((byte[]) msg.obj);
                     break;
+                case MSG_DETECTION_STARTED:
+                    mExternalCallback.onDetectionStarted();
+                    break;
                 case MSG_DETECTION_STOPPED:
                     mExternalCallback.onDetectionStopped();
+                    break;
+                case MSG_DETECTION_ERROR:
+                    mExternalCallback.onError();
+                    break;
                 default:
                     super.handleMessage(msg);
             }

@@ -29,7 +29,9 @@ oneway interface IRecognitionStatusCallback {
      */
     void onDetected(in SoundTrigger.KeyphraseRecognitionEvent recognitionEvent);
     /**
-     * Called when the detection for the associated keyphrase stops.
+     * Called when the detection fails due to an error.
+     *
+     * @param status The error code that was seen.
      */
-    void onDetectionStopped();
+    void onError(int status);
 }
