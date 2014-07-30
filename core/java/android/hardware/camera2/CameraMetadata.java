@@ -664,7 +664,7 @@ public abstract class CameraMetadata<TKey> {
     /**
      * <p>Every frame has the requests immediately applied.</p>
      * <p>Furthermore for all results,
-     * <code>android.sync.frameNumber == android.request.frameCount</code></p>
+     * <code>android.sync.frameNumber == CaptureResult#getFrameNumber()</code></p>
      * <p>Changing controls over multiple requests one after another will
      * produce results that have those controls applied atomically
      * each frame.</p>
@@ -679,6 +679,7 @@ public abstract class CameraMetadata<TKey> {
      * <p>By submitting a series of identical requests, the camera device
      * will eventually have the camera settings applied, but it is
      * unknown when that exact point will be.</p>
+     * <p>All LEGACY capability devices will have this as their maxLatency.</p>
      * @see CameraCharacteristics#SYNC_MAX_LATENCY
      */
     public static final int SYNC_MAX_LATENCY_UNKNOWN = -1;

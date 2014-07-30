@@ -17,6 +17,7 @@
 package android.hardware.camera2;
 
 import android.hardware.camera2.impl.CameraMetadataNative;
+import android.hardware.camera2.impl.CaptureResultExtras;
 
 import java.util.Collections;
 import java.util.List;
@@ -51,8 +52,9 @@ public final class TotalCaptureResult extends CaptureResult {
      * Takes ownership of the passed-in properties object
      * @hide
      */
-    public TotalCaptureResult(CameraMetadataNative results, CaptureRequest parent, int sequenceId) {
-        super(results, parent, sequenceId);
+    public TotalCaptureResult(CameraMetadataNative results, CaptureRequest parent,
+            CaptureResultExtras extras) {
+        super(results, parent, extras);
     }
 
     /**
