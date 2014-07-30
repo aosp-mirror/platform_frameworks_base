@@ -1708,6 +1708,9 @@ public class Notification implements Parcelable
         if (headsUpContentView != null) {
             headsUpContentView.setUser(user);
         }
+        if (publicVersion != null) {
+            publicVersion.setUser(user);
+        }
     }
 
     /**
