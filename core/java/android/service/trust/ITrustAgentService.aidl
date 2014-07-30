@@ -25,5 +25,5 @@ import android.service.trust.ITrustAgentServiceCallback;
 interface ITrustAgentService {
     oneway void onUnlockAttempt(boolean successful);
     oneway void setCallback(ITrustAgentServiceCallback callback);
-    boolean setTrustAgentFeaturesEnabled(in Bundle options);
+    oneway void setTrustAgentFeaturesEnabled(in Bundle options, IBinder token);
 }
