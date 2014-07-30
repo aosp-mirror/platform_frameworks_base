@@ -684,6 +684,11 @@ public class Vpn {
             if (((app.flags & ApplicationInfo.FLAG_SYSTEM) != 0) && (appId == app.uid)) {
                 return;
             }
+            // SystemUI dialogs are also allowed to control VPN.
+            ApplicationInfo sysUiApp = pm.getApplicationInfo("com.android.systemui", 0);
+            if (((sysUiApp.flags & ApplicationInfo.FLAG_SYSTEM) != 0) && (appId == sysUiApp.uid)) {
+                return;
+            }
         } catch (Exception e) {
             // ignore
         } finally {
