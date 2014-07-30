@@ -21,6 +21,7 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_APK;
 import static android.content.pm.PackageManager.INSTALL_FAILED_PACKAGE_CHANGED;
 import static android.system.OsConstants.O_CREAT;
+import static android.system.OsConstants.O_RDONLY;
 import static android.system.OsConstants.O_WRONLY;
 
 import android.content.pm.ApplicationInfo;
@@ -40,7 +41,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.system.ErrnoException;
@@ -52,6 +52,7 @@ import android.util.ExceptionUtils;
 import android.util.MathUtils;
 import android.util.Slog;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
@@ -62,10 +63,13 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final String TAG = "PackageInstaller";
     private static final boolean LOGD = true;
+
+    private static final int MSG_COMMIT = 0;
 
     // TODO: enforce INSTALL_ALLOW_TEST
     // TODO: enforce INSTALL_ALLOW_DOWNGRADE
@@ -73,22 +77,50 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     // TODO: treat INHERIT_EXISTING as installExistingPackage()
 
-    private final PackageInstallerService.Callback mCallback;
+    private final PackageInstallerService.InternalCallback mCallback;
     private final PackageManagerService mPm;
     private final Handler mHandler;
 
-    public final int sessionId;
-    public final int userId;
-    public final String installerPackageName;
-    /** UID not persisted */
-    public final int installerUid;
-    public final InstallSessionParams params;
-    public final long createdMillis;
-    public final File sessionStageDir;
+    final int sessionId;
+    final int userId;
+    final String installerPackageName;
+    final InstallSessionParams params;
+    final long createdMillis;
+    final File sessionStageDir;
 
-    private static final int MSG_COMMIT = 0;
+    /** Note that UID is not persisted; it's always derived at runtime. */
+    final int installerUid;
 
-    private Handler.Callback mHandlerCallback = new Handler.Callback() {
+    AtomicInteger openCount = new AtomicInteger();
+
+    private final Object mLock = new Object();
+
+    @GuardedBy("mLock")
+    private float mClientProgress = 0;
+    @GuardedBy("mLock")
+    private float mProgress = 0;
+    @GuardedBy("mLock")
+    private float mReportedProgress = -1;
+
+    @GuardedBy("mLock")
+    private boolean mSealed = false;
+    @GuardedBy("mLock")
+    private boolean mPermissionsConfirmed = false;
+    @GuardedBy("mLock")
+    private boolean mDestroyed = false;
+
+    @GuardedBy("mLock")
+    private ArrayList<FileBridge> mBridges = new ArrayList<>();
+
+    @GuardedBy("mLock")
+    private IPackageInstallObserver2 mRemoteObserver;
+
+    /** Fields derived from commit parsing */
+    private String mPackageName;
+    private int mVersionCode;
+    private Signature[] mSignatures;
+
+    private final Handler.Callback mHandlerCallback = new Handler.Callback() {
         @Override
         public boolean handleMessage(Message msg) {
             synchronized (mLock) {
@@ -114,27 +146,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     };
 
-    private final Object mLock = new Object();
-
-    private float mClientProgress;
-    private float mProgress = 0;
-
-    private String mPackageName;
-    private int mVersionCode;
-    private Signature[] mSignatures;
-
-    private boolean mMutationsAllowed;
-    private boolean mPermissionsConfirmed;
-    private boolean mInvalid;
-
-    private ArrayList<FileBridge> mBridges = new ArrayList<>();
-
-    private IPackageInstallObserver2 mRemoteObserver;
-
-    public PackageInstallerSession(PackageInstallerService.Callback callback,
-            PackageManagerService pm, int sessionId, int userId, String installerPackageName,
-            int installerUid, InstallSessionParams params, long createdMillis, File sessionStageDir,
-            Looper looper) {
+    public PackageInstallerSession(PackageInstallerService.InternalCallback callback,
+            PackageManagerService pm, Looper looper, int sessionId, int userId,
+            String installerPackageName, InstallSessionParams params, long createdMillis,
+            File sessionStageDir, boolean sealed) {
         mCallback = callback;
         mPm = pm;
         mHandler = new Handler(looper, mHandlerCallback);
@@ -142,24 +157,23 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         this.sessionId = sessionId;
         this.userId = userId;
         this.installerPackageName = installerPackageName;
-        this.installerUid = installerUid;
         this.params = params;
         this.createdMillis = createdMillis;
         this.sessionStageDir = sessionStageDir;
 
-        // Check against any explicitly provided signatures
-        mSignatures = params.signatures;
+        mSealed = sealed;
 
-        // TODO: splice in flag when restoring persisted session
-        mMutationsAllowed = true;
+        // Always derived at runtime
+        installerUid = mPm.getPackageUid(installerPackageName, userId);
 
-        if (pm.checkPermission(android.Manifest.permission.INSTALL_PACKAGES, installerPackageName)
-                == PackageManager.PERMISSION_GRANTED) {
+        if (mPm.checkPermission(android.Manifest.permission.INSTALL_PACKAGES,
+                installerPackageName) == PackageManager.PERMISSION_GRANTED) {
             mPermissionsConfirmed = true;
+        } else {
+            mPermissionsConfirmed = false;
         }
-        if (installerUid == Process.SHELL_UID || installerUid == 0) {
-            mPermissionsConfirmed = true;
-        }
+
+        computeProgressLocked();
     }
 
     public InstallSessionInfo generateInfo() {
@@ -168,6 +182,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         info.sessionId = sessionId;
         info.installerPackageName = installerPackageName;
         info.progress = mProgress;
+        info.open = openCount.get() > 0;
 
         info.mode = params.mode;
         info.sizeBytes = params.sizeBytes;
@@ -178,16 +193,48 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         return info;
     }
 
+    private void assertNotSealed(String cookie) {
+        synchronized (mLock) {
+            if (mSealed) {
+                throw new SecurityException(cookie + " not allowed after commit");
+            }
+        }
+    }
+
     @Override
     public void setClientProgress(float progress) {
-        mClientProgress = progress;
-        mProgress = MathUtils.constrain(mClientProgress * 0.8f, 0f, 0.8f);
-        mCallback.onSessionProgressChanged(this, mProgress);
+        synchronized (mLock) {
+            mClientProgress = progress;
+            computeProgressLocked();
+        }
+        maybePublishProgress();
     }
 
     @Override
     public void addClientProgress(float progress) {
-        setClientProgress(mClientProgress + progress);
+        synchronized (mLock) {
+            mClientProgress += progress;
+            computeProgressLocked();
+        }
+        maybePublishProgress();
+    }
+
+    private void computeProgressLocked() {
+        mProgress = MathUtils.constrain(mClientProgress * 0.8f, 0f, 0.8f);
+    }
+
+    private void maybePublishProgress() {
+        // Only publish when meaningful change
+        if (Math.abs(mProgress - mReportedProgress) > 0.01) {
+            mReportedProgress = mProgress;
+            mCallback.onSessionProgressChanged(this, mProgress);
+        }
+    }
+
+    @Override
+    public String[] list() {
+        assertNotSealed("list");
+        return sessionStageDir.list();
     }
 
     @Override
@@ -208,9 +255,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         // will block any attempted install transitions.
         final FileBridge bridge;
         synchronized (mLock) {
-            if (!mMutationsAllowed) {
-                throw new IllegalStateException("Mutations not allowed");
-            }
+            assertNotSealed("openWrite");
 
             bridge = new FileBridge();
             mBridges.add(bridge);
@@ -252,25 +297,51 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     @Override
+    public ParcelFileDescriptor openRead(String name) {
+        try {
+            return openReadInternal(name);
+        } catch (IOException e) {
+            throw ExceptionUtils.wrap(e);
+        }
+    }
+
+    private ParcelFileDescriptor openReadInternal(String name) throws IOException {
+        assertNotSealed("openRead");
+
+        try {
+            if (!FileUtils.isValidExtFilename(name)) {
+                throw new IllegalArgumentException("Invalid name: " + name);
+            }
+            final File target = new File(sessionStageDir, name);
+
+            final FileDescriptor targetFd = Libcore.os.open(target.getAbsolutePath(), O_RDONLY, 0);
+            return new ParcelFileDescriptor(targetFd);
+
+        } catch (ErrnoException e) {
+            throw e.rethrowAsIOException();
+        }
+    }
+
+    @Override
     public void commit(IPackageInstallObserver2 observer) {
         Preconditions.checkNotNull(observer);
         mHandler.obtainMessage(MSG_COMMIT, observer).sendToTarget();
     }
 
     private void commitLocked() throws PackageManagerException {
-        if (mInvalid) {
+        if (mDestroyed) {
             throw new PackageManagerException(INSTALL_FAILED_ALREADY_EXISTS, "Invalid session");
         }
 
         // Verify that all writers are hands-off
-        if (mMutationsAllowed) {
+        if (!mSealed) {
             for (FileBridge bridge : mBridges) {
                 if (!bridge.isClosed()) {
                     throw new PackageManagerException(INSTALL_FAILED_PACKAGE_CHANGED,
                             "Files still open");
                 }
             }
-            mMutationsAllowed = false;
+            mSealed = true;
 
             // TODO: persist disabled mutations before going forward, since
             // beyond this point we may have hardlinks to the valid install
@@ -331,6 +402,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private void validateInstallLocked() throws PackageManagerException {
         mPackageName = null;
         mVersionCode = -1;
+        mSignatures = null;
 
         final File[] files = sessionStageDir.listFiles();
         if (ArrayUtils.isEmpty(files)) {
@@ -461,7 +533,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     @Override
     public void close() {
-        // Currently ignored
+        if (openCount.decrementAndGet() == 0) {
+            mCallback.onSessionClosed(this);
+        }
     }
 
     @Override
@@ -475,7 +549,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     private void destroyInternal() {
         synchronized (mLock) {
-            mInvalid = true;
+            mSealed = true;
+            mDestroyed = true;
         }
         FileUtils.deleteContents(sessionStageDir);
         sessionStageDir.delete();
@@ -496,11 +571,26 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         pw.printPair("mClientProgress", mClientProgress);
         pw.printPair("mProgress", mProgress);
-        pw.printPair("mMutationsAllowed", mMutationsAllowed);
+        pw.printPair("mSealed", mSealed);
         pw.printPair("mPermissionsConfirmed", mPermissionsConfirmed);
+        pw.printPair("mDestroyed", mDestroyed);
         pw.printPair("mBridges", mBridges.size());
         pw.println();
 
         pw.decreaseIndent();
+    }
+
+    Snapshot snapshot() {
+        return new Snapshot(this);
+    }
+
+    static class Snapshot {
+        final float clientProgress;
+        final boolean sealed;
+
+        public Snapshot(PackageInstallerSession session) {
+            clientProgress = session.mClientProgress;
+            sealed = session.mSealed;
+        }
     }
 }

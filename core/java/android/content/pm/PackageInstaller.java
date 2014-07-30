@@ -18,9 +18,10 @@ package android.content.pm;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SdkConstant;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.app.PackageInstallObserver;
 import android.app.PackageUninstallObserver;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.os.FileBridge;
 import android.os.Handler;
@@ -32,7 +33,9 @@ import android.util.ExceptionUtils;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -63,6 +66,27 @@ import java.util.List;
  * </ul>
  */
 public class PackageInstaller {
+    /**
+     * Activity Action: Show details about a particular install session. This
+     * may surface actions such as pause, resume, or cancel.
+     * <p>
+     * This should always be scoped to the installer package that owns the
+     * session. Clients should use {@link InstallSessionInfo#getDetailsIntent()}
+     * to build this intent correctly.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you safeguard
+     * against this.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_SESSION_DETAILS = "android.content.pm.action.SESSION_DETAILS";
+
+    /**
+     * An integer session ID.
+     *
+     * @see #ACTION_SESSION_DETAILS
+     */
+    public static final String EXTRA_SESSION_ID = "android.content.pm.extra.SESSION_ID";
+
     private final PackageManager mPm;
     private final IPackageInstaller mInstaller;
     private final int mUserId;
@@ -180,12 +204,30 @@ public class PackageInstaller {
 
     /**
      * Events for observing session lifecycle.
+     * <p>
+     * A typical session lifecycle looks like this:
+     * <ul>
+     * <li>An installer creates a session to indicate pending app delivery. All
+     * install details are available at this point.
+     * <li>The installer opens the session to deliver APK data. Note that a
+     * session may be opened and closed multiple times as network connectivity
+     * changes. The installer may deliver periodic progress updates.
+     * <li>The installer commits or abandons the session, resulting in the
+     * session being finished.
+     * </ul>
      */
     public static abstract class SessionCallback {
         /**
-         * New session has been created.
+         * New session has been created. Details about the session can be
+         * obtained from {@link PackageInstaller#getSessionInfo(int)}.
          */
         public abstract void onCreated(int sessionId);
+
+        /**
+         * Session has been opened. A session is usually opened when the
+         * installer is actively writing data.
+         */
+        public abstract void onOpened(int sessionId);
 
         /**
          * Progress for given session has been updated.
@@ -198,6 +240,11 @@ public class PackageInstaller {
         public abstract void onProgressChanged(int sessionId, float progress);
 
         /**
+         * Session has been closed.
+         */
+        public abstract void onClosed(int sessionId);
+
+        /**
          * Session has completely finished, either with success or failure.
          */
         public abstract void onFinished(int sessionId, boolean success);
@@ -207,8 +254,10 @@ public class PackageInstaller {
     private static class SessionCallbackDelegate extends IPackageInstallerCallback.Stub implements
             Handler.Callback {
         private static final int MSG_SESSION_CREATED = 1;
-        private static final int MSG_SESSION_PROGRESS_CHANGED = 2;
-        private static final int MSG_SESSION_FINISHED = 3;
+        private static final int MSG_SESSION_OPENED = 2;
+        private static final int MSG_SESSION_PROGRESS_CHANGED = 3;
+        private static final int MSG_SESSION_CLOSED = 4;
+        private static final int MSG_SESSION_FINISHED = 5;
 
         final SessionCallback mCallback;
         final Handler mHandler;
@@ -224,8 +273,14 @@ public class PackageInstaller {
                 case MSG_SESSION_CREATED:
                     mCallback.onCreated(msg.arg1);
                     return true;
+                case MSG_SESSION_OPENED:
+                    mCallback.onOpened(msg.arg1);
+                    return true;
                 case MSG_SESSION_PROGRESS_CHANGED:
                     mCallback.onProgressChanged(msg.arg1, (float) msg.obj);
+                    return true;
+                case MSG_SESSION_CLOSED:
+                    mCallback.onClosed(msg.arg1);
                     return true;
                 case MSG_SESSION_FINISHED:
                     mCallback.onFinished(msg.arg1, msg.arg2 != 0);
@@ -240,9 +295,19 @@ public class PackageInstaller {
         }
 
         @Override
+        public void onSessionOpened(int sessionId) {
+            mHandler.obtainMessage(MSG_SESSION_OPENED, sessionId, 0).sendToTarget();
+        }
+
+        @Override
         public void onSessionProgressChanged(int sessionId, float progress) {
             mHandler.obtainMessage(MSG_SESSION_PROGRESS_CHANGED, sessionId, 0, progress)
                     .sendToTarget();
+        }
+
+        @Override
+        public void onSessionClosed(int sessionId) {
+            mHandler.obtainMessage(MSG_SESSION_CLOSED, sessionId, 0).sendToTarget();
         }
 
         @Override
@@ -373,7 +438,7 @@ public class PackageInstaller {
                 ExceptionUtils.maybeUnwrapIOException(e);
                 throw e;
             } catch (RemoteException e) {
-                throw new IOException(e);
+                throw e.rethrowAsRuntimeException();
             }
         }
 
@@ -387,6 +452,40 @@ public class PackageInstaller {
                 ((FileBridge.FileBridgeOutputStream) out).fsync();
             } else {
                 throw new IllegalArgumentException("Unrecognized stream");
+            }
+        }
+
+        /**
+         * List all APK names contained in this session.
+         * <p>
+         * This returns all names which have been previously written through
+         * {@link #openWrite(String, long, long)} as part of this session.
+         */
+        public @NonNull String[] list() {
+            try {
+                return mSession.list();
+            } catch (RemoteException e) {
+                throw e.rethrowAsRuntimeException();
+            }
+        }
+
+        /**
+         * Open a stream to read an APK file from the session.
+         * <p>
+         * This is only valid for names which have been previously written
+         * through {@link #openWrite(String, long, long)} as part of this
+         * session. For example, this stream may be used to calculate a
+         * {@link MessageDigest} of a written APK before committing.
+         */
+        public @NonNull InputStream openRead(@NonNull String name) throws IOException {
+            try {
+                final ParcelFileDescriptor pfd = mSession.openRead(name);
+                return new ParcelFileDescriptor.AutoCloseInputStream(pfd);
+            } catch (RuntimeException e) {
+                ExceptionUtils.maybeUnwrapIOException(e);
+                throw e;
+            } catch (RemoteException e) {
+                throw e.rethrowAsRuntimeException();
             }
         }
 
