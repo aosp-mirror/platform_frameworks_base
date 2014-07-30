@@ -368,36 +368,30 @@
        <item>@drawable/btn_rating_star_off_mtrl_alpha</item>
        <item>@drawable/btn_rating_star_on_mtrl_alpha</item>
        <item>@drawable/btn_star_mtrl_alpha</item>
-       <item>@drawable/btn_switch_to_off_mtrl_000</item>
-       <item>@drawable/btn_switch_to_off_mtrl_001</item>
-       <item>@drawable/btn_switch_to_off_mtrl_002</item>
-       <item>@drawable/btn_switch_to_off_mtrl_003</item>
-       <item>@drawable/btn_switch_to_off_mtrl_004</item>
-       <item>@drawable/btn_switch_to_off_mtrl_005</item>
-       <item>@drawable/btn_switch_to_off_mtrl_006</item>
-       <item>@drawable/btn_switch_to_off_mtrl_007</item>
-       <item>@drawable/btn_switch_to_off_mtrl_008</item>
-       <item>@drawable/btn_switch_to_off_mtrl_009</item>
-       <item>@drawable/btn_switch_to_off_mtrl_010</item>
-       <item>@drawable/btn_switch_to_off_mtrl_011</item>
-       <item>@drawable/btn_switch_to_off_mtrl_012</item>
-       <item>@drawable/btn_switch_to_off_mtrl_013</item>
-       <item>@drawable/btn_switch_to_off_mtrl_014</item>
-       <item>@drawable/btn_switch_to_on_mtrl_000</item>
-       <item>@drawable/btn_switch_to_on_mtrl_001</item>
-       <item>@drawable/btn_switch_to_on_mtrl_002</item>
-       <item>@drawable/btn_switch_to_on_mtrl_003</item>
-       <item>@drawable/btn_switch_to_on_mtrl_004</item>
-       <item>@drawable/btn_switch_to_on_mtrl_005</item>
-       <item>@drawable/btn_switch_to_on_mtrl_006</item>
-       <item>@drawable/btn_switch_to_on_mtrl_007</item>
-       <item>@drawable/btn_switch_to_on_mtrl_008</item>
-       <item>@drawable/btn_switch_to_on_mtrl_009</item>
-       <item>@drawable/btn_switch_to_on_mtrl_010</item>
-       <item>@drawable/btn_switch_to_on_mtrl_011</item>
-       <item>@drawable/btn_switch_to_on_mtrl_012</item>
-       <item>@drawable/btn_switch_to_on_mtrl_013</item>
-       <item>@drawable/btn_switch_to_on_mtrl_014</item>
+       <item>@drawable/btn_switch_to_off_mtrl_00001</item>
+       <item>@drawable/btn_switch_to_off_mtrl_00002</item>
+       <item>@drawable/btn_switch_to_off_mtrl_00003</item>
+       <item>@drawable/btn_switch_to_off_mtrl_00004</item>
+       <item>@drawable/btn_switch_to_off_mtrl_00005</item>
+       <item>@drawable/btn_switch_to_off_mtrl_00006</item>
+       <item>@drawable/btn_switch_to_off_mtrl_00007</item>
+       <item>@drawable/btn_switch_to_off_mtrl_00008</item>
+       <item>@drawable/btn_switch_to_off_mtrl_00009</item>
+       <item>@drawable/btn_switch_to_off_mtrl_00010</item>
+       <item>@drawable/btn_switch_to_off_mtrl_00011</item>
+       <item>@drawable/btn_switch_to_off_mtrl_00012</item>
+       <item>@drawable/btn_switch_to_on_mtrl_00001</item>
+       <item>@drawable/btn_switch_to_on_mtrl_00002</item>
+       <item>@drawable/btn_switch_to_on_mtrl_00003</item>
+       <item>@drawable/btn_switch_to_on_mtrl_00004</item>
+       <item>@drawable/btn_switch_to_on_mtrl_00005</item>
+       <item>@drawable/btn_switch_to_on_mtrl_00006</item>
+       <item>@drawable/btn_switch_to_on_mtrl_00007</item>
+       <item>@drawable/btn_switch_to_on_mtrl_00008</item>
+       <item>@drawable/btn_switch_to_on_mtrl_00009</item>
+       <item>@drawable/btn_switch_to_on_mtrl_00010</item>
+       <item>@drawable/btn_switch_to_on_mtrl_00011</item>
+       <item>@drawable/btn_switch_to_on_mtrl_00012</item>
        <item>@drawable/btn_toggle_indicator_mtrl_alpha</item>
        <item>@drawable/expander_close_mtrl_alpha</item>
        <item>@drawable/expander_open_mtrl_alpha</item>
