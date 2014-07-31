@@ -36,8 +36,6 @@ public class KeyguardUserSwitcher {
 
     private static final String TAG = "KeyguardUserSwitcher";
     private static final boolean ALWAYS_ON = false;
-    private static final String SIMPLE_USER_SWITCHER_GLOBAL_SETTING =
-            "lockscreenSimpleUserSwitcher";
 
     private final ViewGroup mUserSwitcher;
     private final KeyguardStatusBarView mStatusBarView;
@@ -52,8 +50,7 @@ public class KeyguardUserSwitcher {
             mStatusBarView.setKeyguardUserSwitcher(this);
             mAdapter = new Adapter(context, userSwitcherController);
             mAdapter.registerDataSetObserver(mDataSetObserver);
-            mSimpleUserSwitcher = Settings.Global.getInt(context.getContentResolver(),
-                    SIMPLE_USER_SWITCHER_GLOBAL_SETTING, 0) != 0;
+            mSimpleUserSwitcher = userSwitcherController.isSimpleUserSwitcher();
         } else {
             mUserSwitcher = null;
             mStatusBarView = null;
