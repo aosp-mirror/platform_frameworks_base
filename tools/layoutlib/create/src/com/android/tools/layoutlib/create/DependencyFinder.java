@@ -316,9 +316,7 @@ public class DependencyFinder {
 
             // Add it to the dependency set for the currently visited class, as needed.
             assert mCurrentDepSet != null;
-            if (mCurrentDepSet != null) {
-                mCurrentDepSet.add(className);
-            }
+            mCurrentDepSet.add(className);
         }
 
         /**

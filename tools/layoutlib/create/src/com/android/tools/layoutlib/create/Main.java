@@ -63,7 +63,7 @@ public class Main {
         String[] osDestJar = { null };
 
         if (!processArgs(log, args, osJarPath, osDestJar)) {
-            log.error("Usage: layoutlib_create [-v] [-p] output.jar input.jar ...");
+            log.error("Usage: layoutlib_create [-v] output.jar input.jar ...");
             log.error("Usage: layoutlib_create [-v] [--list-deps|--missing-deps] input.jar ...");
             System.exit(1);
         }

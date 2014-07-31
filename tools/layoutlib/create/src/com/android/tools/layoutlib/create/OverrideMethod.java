@@ -36,6 +36,7 @@ public final class OverrideMethod {
      * Sets the default listener for all methods not specifically handled.
      * Null means to do nothing.
      */
+    @SuppressWarnings("UnusedDeclaration") // Used by Bridge by reflection for debug purposes.
     public static void setDefaultListener(MethodListener listener) {
         sDefaultListener = listener;
     }

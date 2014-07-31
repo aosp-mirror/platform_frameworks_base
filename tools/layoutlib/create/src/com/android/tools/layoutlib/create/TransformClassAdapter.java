@@ -17,7 +17,6 @@
 package com.android.tools.layoutlib.create;
 
 import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
@@ -134,13 +133,6 @@ class TransformClassAdapter extends ClassVisitor {
             mLog.debug("  Keep: %s %s", name, desc);
             return super.visitMethod(access, name, desc, signature, exceptions);
         }
-    }
-
-    /* Visits a field. Makes it public. */
-    @Override
-    public FieldVisitor visitField(int access, String name, String desc, String signature,
-            Object value) {
-        return super.visitField(access, name, desc, signature, value);
     }
 
     /**
