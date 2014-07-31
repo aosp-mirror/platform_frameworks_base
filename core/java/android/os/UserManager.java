@@ -625,8 +625,9 @@ public class UserManager {
             Settings.Secure.putStringForUser(context.getContentResolver(),
                     Settings.Secure.SKIP_FIRST_USE_HINTS, "1", guest.id);
             try {
-                mService.setUserRestrictions(
-                        mService.getDefaultGuestRestrictions(), guest.id);
+                Bundle guestRestrictions = mService.getDefaultGuestRestrictions();
+                guestRestrictions.putBoolean(DISALLOW_SMS, true);
+                mService.setUserRestrictions(guestRestrictions, guest.id);
             } catch (RemoteException re) {
                 Log.w(TAG, "Could not update guest restrictions");
             }
