@@ -366,10 +366,8 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         requestCaptureValues();
     }
 
-
     private void updateClickTargets() {
-        setClickable(mExpanded);
-
+        mMultiUserSwitch.setClickable(mExpanded);
         mSystemIconsSuperContainer.setClickable(mExpanded);
         mAlarmStatus.setClickable(mNextAlarm != null && mNextAlarm.getShowIntent() != null);
     }
