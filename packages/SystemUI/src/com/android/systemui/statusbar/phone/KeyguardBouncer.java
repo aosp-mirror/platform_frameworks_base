@@ -47,7 +47,6 @@ public class KeyguardBouncer {
     private StatusBarWindowManager mWindowManager;
     private KeyguardViewBase mKeyguardView;
     private ViewGroup mRoot;
-    private Interpolator mFadeOutInterpolator = new LinearInterpolator();
     private boolean mFadingOut;
 
     public KeyguardBouncer(Context context, ViewMediatorCallback callback,
@@ -101,7 +100,7 @@ public class KeyguardBouncer {
 
                     // Make it disappear faster, as the focus should be on the activity behind.
                     .setDuration(duration / 2)
-                    .setInterpolator(mFadeOutInterpolator)
+                    .setInterpolator(PhoneStatusBar.ALPHA_OUT)
                     .setStartDelay(delay)
                     .withEndAction(new Runnable() {
                         @Override
@@ -109,7 +108,8 @@ public class KeyguardBouncer {
                             mFadingOut = false;
                             hide(true /* destroyView */);
                         }
-                    });
+                    })
+                    .start();
         } else {
             hide(true /* destroyView */);
         }
