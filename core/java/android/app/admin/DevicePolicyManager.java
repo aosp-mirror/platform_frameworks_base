@@ -25,11 +25,10 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.RestrictionsManager;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.content.RestrictionsManager;
-import android.media.AudioService;
 import android.net.ProxyInfo;
 import android.os.Bundle;
 import android.os.Handler;
@@ -40,6 +39,7 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.security.Credentials;
 import android.service.trust.TrustAgentService;
 import android.util.Log;
 
@@ -51,6 +51,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
+import java.security.PrivateKey;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -1765,6 +1767,31 @@ public class DevicePolicyManager {
             Log.w(TAG, "Could not parse certificate", ce);
         }
         return false;
+    }
+
+    /**
+     * Silently installs a certificate and private key pair.
+     *
+     * @param who Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param privKey The private key to install.
+     * @param cert The certificate to install.
+     * @param alias The private key alias under which to install the certificate. If a certificate
+     * with that alias already exists, it will be overwritten.
+     */
+    public void installKeyPair(ComponentName who, PrivateKey privKey, Certificate cert,
+            String alias) {
+        try {
+            Log.d(TAG, "PEM: " + Credentials.convertToPem(cert));
+            Log.d(TAG, "Encoded: " + cert.getEncoded());
+            mService.installKeyPair(who, privKey.getEncoded(), Credentials.convertToPem(cert),
+                    alias);
+        } catch (CertificateException e) {
+            Log.w(TAG, "Error encoding certificate", e);
+        } catch (IOException e) {
+            Log.w(TAG, "Error writing certificate", e);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed talking with device policy service", e);
+        }
     }
 
     /**

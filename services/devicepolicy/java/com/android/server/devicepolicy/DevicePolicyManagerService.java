@@ -18,16 +18,6 @@ package com.android.server.devicepolicy;
 
 import static android.Manifest.permission.MANAGE_CA_CERTIFICATES;
 
-import com.android.internal.R;
-import com.android.internal.app.IAppOpsService;
-import com.android.internal.os.storage.ExternalStorageFormatter;
-import com.android.internal.util.FastXmlSerializer;
-import com.android.internal.util.JournaledFile;
-import com.android.internal.util.XmlUtils;
-import com.android.internal.widget.LockPatternUtils;
-import com.android.org.conscrypt.TrustedCertificateStore;
-import com.android.server.SystemService;
-
 import android.app.Activity;
 import android.app.ActivityManagerNative;
 import android.app.AlarmManager;
@@ -46,18 +36,17 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
+import android.database.ContentObserver;
 import android.media.AudioManager;
 import android.media.IAudioService;
 import android.net.ConnectivityManager;
 import android.net.Uri;
-import android.content.pm.PackageManager.NameNotFoundException;
-import android.database.ContentObserver;
 import android.net.ProxyInfo;
 import android.os.AsyncTask;
 import android.os.Binder;
@@ -91,6 +80,16 @@ import android.util.SparseArray;
 import android.util.Xml;
 import android.view.IWindowManager;
 
+import com.android.internal.R;
+import com.android.internal.app.IAppOpsService;
+import com.android.internal.os.storage.ExternalStorageFormatter;
+import com.android.internal.util.FastXmlSerializer;
+import com.android.internal.util.JournaledFile;
+import com.android.internal.util.XmlUtils;
+import com.android.internal.widget.LockPatternUtils;
+import com.android.org.conscrypt.TrustedCertificateStore;
+import com.android.server.SystemService;
+
 import org.xmlpull.v1.XmlPullParser;
 
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
@@ -108,12 +107,12 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -2576,6 +2575,33 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
         } catch (InterruptedException ie) {
             Log.w(LOG_TAG, "CaCertUninstaller: ", ie);
+            Thread.currentThread().interrupt();
+        } finally {
+            Binder.restoreCallingIdentity(id);
+        }
+    }
+
+    public void installKeyPair(ComponentName who, byte[] privKey, byte[] cert, String alias) {
+        if (who == null) {
+            throw new NullPointerException("ComponentName is null");
+        }
+        synchronized (this) {
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+        }
+        final UserHandle userHandle = new UserHandle(UserHandle.getCallingUserId());
+        final long id = Binder.clearCallingIdentity();
+        try {
+          final KeyChainConnection keyChainConnection = KeyChain.bindAsUser(mContext, userHandle);
+          try {
+              IKeyChainService keyChain = keyChainConnection.getService();
+              keyChain.installKeyPair(privKey, cert, alias);
+          } catch (RemoteException e) {
+              Log.e(LOG_TAG, "Installing certificate", e);
+          } finally {
+              keyChainConnection.close();
+          }
+        } catch (InterruptedException e) {
+            Log.w(LOG_TAG, "Interrupted while installing certificate", e);
             Thread.currentThread().interrupt();
         } finally {
             Binder.restoreCallingIdentity(id);

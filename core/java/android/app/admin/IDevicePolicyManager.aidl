@@ -125,6 +125,8 @@ interface IDevicePolicyManager {
     boolean installCaCert(in ComponentName admin, in byte[] certBuffer);
     void uninstallCaCert(in ComponentName admin, in String alias);
 
+    void installKeyPair(in ComponentName who, in byte[] privKeyBuffer, in byte[] certBuffer, String alias);
+
     void registerPrivateKeyAccessListener(in ComponentName who, in ComponentName admin);
 
     void choosePrivateKeyAlias(in PendingIntent sender, in String host, int port, in String url, in String alias, IBinder aliasCallback);
