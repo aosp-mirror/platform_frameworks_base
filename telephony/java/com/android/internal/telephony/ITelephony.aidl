@@ -18,9 +18,10 @@ package com.android.internal.telephony;
 
 import android.content.Intent;
 import android.os.Bundle;
-import java.util.List;
-import android.telephony.NeighboringCellInfo;
 import android.telephony.CellInfo;
+import android.telephony.IccOpenLogicalChannelResponse;
+import android.telephony.NeighboringCellInfo;
+import java.util.List;
 
 
 /**
@@ -499,9 +500,9 @@ interface ITelephony {
      * Input parameters equivalent to TS 27.007 AT+CCHO command.
      *
      * @param AID Application id. See ETSI 102.221 and 101.220.
-     * @return The logical channel id which is set to -1 on error.
+     * @return an IccOpenLogicalChannelResponse object.
      */
-    int iccOpenLogicalChannel(String AID);
+    IccOpenLogicalChannelResponse iccOpenLogicalChannel(String AID);
 
     /**
      * Closes a previously opened logical channel to the ICC card.
@@ -533,6 +534,38 @@ interface ITelephony {
      */
     String iccTransmitApduLogicalChannel(int channel, int cla, int instruction,
             int p1, int p2, int p3, String data);
+
+    /**
+     * Transmit an APDU to the ICC card over the basic channel.
+     *
+     * Input parameters equivalent to TS 27.007 AT+CSIM command.
+     *
+     * @param cla Class of the APDU command.
+     * @param instruction Instruction of the APDU command.
+     * @param p1 P1 value of the APDU command.
+     * @param p2 P2 value of the APDU command.
+     * @param p3 P3 value of the APDU command. If p3 is negative a 4 byte APDU
+     *            is sent to the SIM.
+     * @param data Data to be sent with the APDU.
+     * @return The APDU response from the ICC card with the status appended at
+     *            the end. If an error occurs, an empty string is returned.
+     */
+    String iccTransmitApduBasicChannel(int cla, int instruction,
+            int p1, int p2, int p3, String data);
+
+    /**
+     * Returns the response APDU for a command APDU sent through SIM_IO.
+     *
+     * @param fileID
+     * @param command
+     * @param p1 P1 value of the APDU command.
+     * @param p2 P2 value of the APDU command.
+     * @param p3 P3 value of the APDU command.
+     * @param filePath
+     * @return The APDU response.
+     */
+    byte[] iccExchangeSimIO(int fileID, int command, int p1, int p2, int p3,
+            String filePath);
 
     /**
      * Send ENVELOPE to the SIM and returns the response.
