@@ -39,7 +39,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import static com.android.internal.util.Preconditions.*;
@@ -55,18 +54,23 @@ import static com.android.internal.util.Preconditions.*;
  * - An {@link CameraDeviceState} state machine that manages the callbacks for various operations.
  * </p>
  */
+@SuppressWarnings("deprecation")
 public class RequestThreadManager {
     private final String TAG;
     private final int mCameraId;
     private final RequestHandlerThread mRequestThread;
 
     private static final boolean DEBUG = Log.isLoggable(LegacyCameraDevice.DEBUG_PROP, Log.DEBUG);
+    // For slightly more spammy messages that will get repeated every frame
+    private static final boolean VERBOSE =
+            Log.isLoggable(LegacyCameraDevice.DEBUG_PROP, Log.VERBOSE);
     private final Camera mCamera;
     private final CameraCharacteristics mCharacteristics;
 
     private final CameraDeviceState mDeviceState;
     private final CaptureCollector mCaptureCollector;
     private final LegacyFocusStateMapper mFocusStateMapper;
+    private final LegacyFaceDetectMapper mFaceDetectMapper;
 
     private static final int MSG_CONFIGURE_OUTPUTS = 1;
     private static final int MSG_SUBMIT_CAPTURE_REQUEST = 2;
@@ -219,6 +223,9 @@ public class RequestThreadManager {
             };
 
     private void stopPreview() {
+        if (VERBOSE) {
+            Log.v(TAG, "stopPreview - preview running? " + mPreviewRunning);
+        }
         if (mPreviewRunning) {
             mCamera.stopPreview();
             mPreviewRunning = false;
@@ -226,14 +233,18 @@ public class RequestThreadManager {
     }
 
     private void startPreview() {
+        if (VERBOSE) {
+            Log.v(TAG, "startPreview - preview running? " + mPreviewRunning);
+        }
         if (!mPreviewRunning) {
+            // XX: CameraClient:;startPreview is not getting called after a stop
             mCamera.startPreview();
             mPreviewRunning = true;
         }
     }
 
-    private void doJpegCapture(RequestHolder request) throws IOException {
-        if (DEBUG) Log.d(TAG, "doJpegCapture");
+    private void doJpegCapturePrepare(RequestHolder request) throws IOException {
+        if (DEBUG) Log.d(TAG, "doJpegCapturePrepare - preview running? " + mPreviewRunning);
 
         if (!mPreviewRunning) {
             if (DEBUG) Log.d(TAG, "doJpegCapture - create fake surface");
@@ -242,11 +253,20 @@ public class RequestThreadManager {
             mCamera.setPreviewTexture(mDummyTexture);
             startPreview();
         }
+    }
+
+    private void doJpegCapture(RequestHolder request) {
+        if (DEBUG) Log.d(TAG, "doJpegCapturePrepare");
+
         mCamera.takePicture(mJpegShutterCallback, /*raw*/null, mJpegCallback);
         mPreviewRunning = false;
     }
 
     private void doPreviewCapture(RequestHolder request) throws IOException {
+        if (VERBOSE) {
+            Log.v(TAG, "doPreviewCapture - preview running? " + mPreviewRunning);
+        }
+
         if (mPreviewRunning) {
             return; // Already running
         }
@@ -264,7 +284,20 @@ public class RequestThreadManager {
     }
 
     private void configureOutputs(Collection<Surface> outputs) throws IOException {
+        if (DEBUG) {
+            String outputsStr = outputs == null ? "null" : (outputs.size() + " surfaces");
+
+            Log.d(TAG, "configureOutputs with " + outputsStr);
+        }
+
         stopPreview();
+        /*
+         * Try to release the previous preview's surface texture earlier if we end up
+         * using a different one; this also reduces the likelihood of getting into a deadlock
+         * when disconnecting from the old previous texture at a later time.
+         */
+        mCamera.setPreviewTexture(/*surfaceTexture*/null);
+
         if (mGLThreadManager != null) {
             mGLThreadManager.waitUntilStarted();
             mGLThreadManager.ignoreNewFrames();
@@ -305,7 +338,6 @@ public class RequestThreadManager {
         }
         mParams.setPreviewFpsRange(bestRange[Camera.Parameters.PREVIEW_FPS_MIN_INDEX],
                 bestRange[Camera.Parameters.PREVIEW_FPS_MAX_INDEX]);
-        mParams.setRecordingHint(true);
 
         if (mPreviewOutputs.size() > 0) {
             List<Size> outputSizes = new ArrayList<>(outputs.size());
@@ -613,10 +645,6 @@ public class RequestThreadManager {
                             }
                         }
 
-                        // Unconditionally process AF triggers, since they're non-idempotent
-                        // - must be done after setting the most-up-to-date AF mode
-                        mFocusStateMapper.processRequestTriggers(request, mParams);
-
                         try {
                             boolean success = mCaptureCollector.queueRequest(holder,
                                     mLastRequest, JPEG_FRAME_TIMEOUT, TimeUnit.MILLISECONDS);
@@ -624,6 +652,8 @@ public class RequestThreadManager {
                             if (!success) {
                                 Log.e(TAG, "Timed out while queueing capture request.");
                             }
+                            // Starting the preview needs to happen before enabling
+                            // face detection or auto focus
                             if (holder.hasPreviewTargets()) {
                                 doPreviewCapture(holder);
                             }
@@ -635,12 +665,33 @@ public class RequestThreadManager {
                                     Log.e(TAG, "Timed out waiting for prior requests to complete.");
                                 }
                                 mReceivedJpeg.close();
+                                doJpegCapturePrepare(holder);
+                                if (!mReceivedJpeg.block(JPEG_FRAME_TIMEOUT)) {
+                                    // TODO: report error to CameraDevice
+                                    Log.e(TAG, "Hit timeout for jpeg callback!");
+                                }
+                            }
+
+                            /*
+                             * Do all the actions that require a preview to have been started
+                             */
+
+                            // Toggle face detection on/off
+                            // - do this before AF to give AF a chance to use faces
+                            mFaceDetectMapper.processFaceDetectMode(request, /*in*/mParams);
+
+                            // Unconditionally process AF triggers, since they're non-idempotent
+                            // - must be done after setting the most-up-to-date AF mode
+                            mFocusStateMapper.processRequestTriggers(request, mParams);
+
+                            if (holder.hasJpegTargets()) {
                                 doJpegCapture(holder);
                                 if (!mReceivedJpeg.block(JPEG_FRAME_TIMEOUT)) {
                                     // TODO: report error to CameraDevice
                                     Log.e(TAG, "Hit timeout for jpeg callback!");
                                 }
                             }
+
                         } catch (IOException e) {
                             // TODO: report error to CameraDevice
                             throw new IOError(e);
@@ -677,6 +728,8 @@ public class RequestThreadManager {
                                 mLastRequest, timestampMutable.value);
                         // Update AF state
                         mFocusStateMapper.mapResultTriggers(result);
+                        // Update detected faces list
+                        mFaceDetectMapper.mapResultFaces(result, mLastRequest);
 
                         mDeviceState.setCaptureResult(holder, result);
                     }
@@ -731,6 +784,7 @@ public class RequestThreadManager {
         TAG = name;
         mDeviceState = checkNotNull(deviceState, "deviceState must not be null");
         mFocusStateMapper = new LegacyFocusStateMapper(mCamera);
+        mFaceDetectMapper = new LegacyFaceDetectMapper(mCamera, mCharacteristics);
         mCaptureCollector = new CaptureCollector(MAX_IN_FLIGHT_REQUESTS, mDeviceState);
         mRequestThread = new RequestHandlerThread(name, mRequestHandlerCb);
     }
