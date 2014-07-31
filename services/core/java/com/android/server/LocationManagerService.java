@@ -482,8 +482,11 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
 
         // bind to fused hardware provider if supported
-        FlpHardwareProvider flpHardwareProvider = FlpHardwareProvider.getInstance(mContext);
+        // in devices without support, requesting an instance of FlpHardwareProvider will raise an
+        // exception, so make sure we only do that when supported
+        FlpHardwareProvider flpHardwareProvider;
         if (FlpHardwareProvider.isSupported()) {
+            flpHardwareProvider = FlpHardwareProvider.getInstance(mContext);
             FusedProxy fusedProxy = FusedProxy.createAndBind(
                     mContext,
                     mLocationHandler,
@@ -495,6 +498,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                 Slog.e(TAG, "Unable to bind FusedProxy.");
             }
         } else {
+            flpHardwareProvider = null;
             Slog.e(TAG, "FLP HAL not supported");
         }
 
@@ -505,7 +509,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                 com.android.internal.R.array.config_locationProviderPackageNames,
                 mLocationHandler,
                 gpsProvider.getGpsGeofenceProxy(),
-                flpHardwareProvider.getGeofenceHardware());
+                flpHardwareProvider != null ? flpHardwareProvider.getGeofenceHardware() : null);
         if (provider == null) {
             Slog.e(TAG,  "Unable to bind FLP Geofence proxy.");
         }
