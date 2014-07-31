@@ -23,6 +23,8 @@ import android.os.HandlerThread;
 import android.os.Message;
 import android.view.Surface;
 import android.util.Slog;
+import android.util.SparseArray;
+import android.util.SparseIntArray;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -62,58 +64,70 @@ final class TvInputHal implements Handler.Callback {
             int generation);
     private static native void nativeClose(long ptr);
 
+    private Object mLock = new Object();
     private long mPtr = 0;
     private final Callback mCallback;
     private final Handler mHandler;
-    private int mStreamConfigGeneration = 0;
-    private TvStreamConfig[] mStreamConfigs;
+    private SparseIntArray mStreamConfigGenerations = new SparseIntArray();
+    private SparseArray<TvStreamConfig[]> mStreamConfigs = new SparseArray<>();;
 
     public TvInputHal(Callback callback) {
         mCallback = callback;
         mHandler = new Handler(this);
     }
 
-    public synchronized void init() {
-        mPtr = nativeOpen();
-    }
-
-    public synchronized int addStream(int deviceId, Surface surface, TvStreamConfig streamConfig) {
-        if (mPtr == 0) {
-            return ERROR_NO_INIT;
-        }
-        if (mStreamConfigGeneration != streamConfig.getGeneration()) {
-            return ERROR_STALE_CONFIG;
-        }
-        if (nativeAddStream(mPtr, deviceId, streamConfig.getStreamId(), surface) == 0) {
-            return SUCCESS;
-        } else {
-            return ERROR_UNKNOWN;
+    public void init() {
+        synchronized (mLock) {
+            mPtr = nativeOpen();
         }
     }
 
-    public synchronized int removeStream(int deviceId, TvStreamConfig streamConfig) {
-        if (mPtr == 0) {
-            return ERROR_NO_INIT;
-        }
-        if (mStreamConfigGeneration != streamConfig.getGeneration()) {
-            return ERROR_STALE_CONFIG;
-        }
-        if (nativeRemoveStream(mPtr, deviceId, streamConfig.getStreamId()) == 0) {
-            return SUCCESS;
-        } else {
-            return ERROR_UNKNOWN;
-        }
-    }
-
-    public synchronized void close() {
-        if (mPtr != 0l) {
-            nativeClose(mPtr);
+    public int addStream(int deviceId, Surface surface, TvStreamConfig streamConfig) {
+        synchronized (mLock) {
+            if (mPtr == 0) {
+                return ERROR_NO_INIT;
+            }
+            int generation = mStreamConfigGenerations.get(deviceId, 0);
+            if (generation != streamConfig.getGeneration()) {
+                return ERROR_STALE_CONFIG;
+            }
+            if (nativeAddStream(mPtr, deviceId, streamConfig.getStreamId(), surface) == 0) {
+                return SUCCESS;
+            } else {
+                return ERROR_UNKNOWN;
+            }
         }
     }
 
-    private synchronized void retrieveStreamConfigs(int deviceId) {
-        ++mStreamConfigGeneration;
-        mStreamConfigs = nativeGetStreamConfigs(mPtr, deviceId, mStreamConfigGeneration);
+    public int removeStream(int deviceId, TvStreamConfig streamConfig) {
+        synchronized (mLock) {
+            if (mPtr == 0) {
+                return ERROR_NO_INIT;
+            }
+            int generation = mStreamConfigGenerations.get(deviceId, 0);
+            if (generation != streamConfig.getGeneration()) {
+                return ERROR_STALE_CONFIG;
+            }
+            if (nativeRemoveStream(mPtr, deviceId, streamConfig.getStreamId()) == 0) {
+                return SUCCESS;
+            } else {
+                return ERROR_UNKNOWN;
+            }
+        }
+    }
+
+    public void close() {
+        synchronized (mLock) {
+            if (mPtr != 0l) {
+                nativeClose(mPtr);
+            }
+        }
+    }
+
+    private void retrieveStreamConfigsLocked(int deviceId) {
+        int generation = mStreamConfigGenerations.get(deviceId, 0) + 1;
+        mStreamConfigs.put(deviceId, nativeGetStreamConfigs(mPtr, deviceId, generation));
+        mStreamConfigGenerations.put(deviceId, generation);
     }
 
     // Called from native
@@ -145,12 +159,16 @@ final class TvInputHal implements Handler.Callback {
     public boolean handleMessage(Message msg) {
         switch (msg.what) {
             case EVENT_DEVICE_AVAILABLE: {
+                TvStreamConfig[] configs;
                 TvInputHardwareInfo info = (TvInputHardwareInfo)msg.obj;
-                retrieveStreamConfigs(info.getDeviceId());
-                if (DEBUG) {
-                    Slog.d(TAG, "EVENT_DEVICE_AVAILABLE: info = " + info);
+                synchronized (mLock) {
+                    retrieveStreamConfigsLocked(info.getDeviceId());
+                    if (DEBUG) {
+                        Slog.d(TAG, "EVENT_DEVICE_AVAILABLE: info = " + info);
+                    }
+                    configs = mStreamConfigs.get(info.getDeviceId());
                 }
-                mCallback.onDeviceAvailable(info, mStreamConfigs);
+                mCallback.onDeviceAvailable(info, configs);
                 break;
             }
 
@@ -164,12 +182,16 @@ final class TvInputHal implements Handler.Callback {
             }
 
             case EVENT_STREAM_CONFIGURATION_CHANGED: {
+                TvStreamConfig[] configs;
                 int deviceId = msg.arg1;
-                if (DEBUG) {
-                    Slog.d(TAG, "EVENT_STREAM_CONFIGURATION_CHANGED: deviceId = " + deviceId);
+                synchronized (mLock) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "EVENT_STREAM_CONFIGURATION_CHANGED: deviceId = " + deviceId);
+                    }
+                    retrieveStreamConfigsLocked(deviceId);
+                    configs = mStreamConfigs.get(deviceId);
                 }
-                retrieveStreamConfigs(deviceId);
-                mCallback.onStreamConfigurationChanged(deviceId, mStreamConfigs);
+                mCallback.onStreamConfigurationChanged(deviceId, configs);
                 break;
             }
 
