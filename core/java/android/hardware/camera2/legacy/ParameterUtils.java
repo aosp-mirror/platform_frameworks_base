@@ -253,6 +253,33 @@ public class ParameterUtils {
     }
 
     /**
+     * Convert a camera API1 list of sizes into an array of sizes
+     */
+    public static Size[] convertSizeListToArray(List<Camera.Size> sizeList) {
+        checkNotNull(sizeList, "sizeList must not be null");
+
+        Size[] array = new Size[sizeList.size()];
+        int ctr = 0;
+        for (Camera.Size s : sizeList) {
+            array[ctr++] = new Size(s.width, s.height);
+        }
+        return array;
+    }
+
+    /**
+     * Check if the camera API1 list of sizes contains a size with the given dimens.
+     */
+    public static boolean containsSize(List<Camera.Size> sizeList, int width, int height) {
+        checkNotNull(sizeList, "sizeList must not be null");
+        for (Camera.Size s : sizeList) {
+            if (s.height == height && s.width == width) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Returns the largest supported picture size, as compared by its area.
      */
     public static Size getLargestSupportedJpegSizeByArea(Camera.Parameters params) {

@@ -24,6 +24,7 @@ import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.params.MeteringRectangle;
 import android.hardware.camera2.utils.ListUtils;
 import android.hardware.camera2.utils.ParamsUtils;
+import android.location.Location;
 import android.util.Log;
 import android.util.Range;
 import android.util.Size;
@@ -43,6 +44,8 @@ import static android.hardware.camera2.CaptureRequest.*;
 public class LegacyRequestMapper {
     private static final String TAG = "LegacyRequestMapper";
     private static final boolean VERBOSE = Log.isLoggable(TAG, Log.VERBOSE);
+
+    private static final byte DEFAULT_JPEG_QUALITY = 85;
 
     /**
      * Set the legacy parameters using the {@link LegacyRequest legacy request}.
@@ -350,6 +353,70 @@ public class LegacyRequestMapper {
                         + testPatternMode + "; only OFF is supported");
             }
         }
+
+        /*
+         * jpeg.*
+         */
+
+        // jpeg.gpsLocation
+        {
+            Location location = request.get(JPEG_GPS_LOCATION);
+            if (location != null) {
+                if (checkForCompleteGpsData(location)) {
+                    params.setGpsAltitude(location.getAltitude());
+                    params.setGpsLatitude(location.getLatitude());
+                    params.setGpsLongitude(location.getLongitude());
+                    params.setGpsProcessingMethod(location.getProvider().toUpperCase());
+                    params.setGpsTimestamp(location.getTime());
+                } else {
+                    Log.w(TAG, "Incomplete GPS parameters provided in location " + location);
+                }
+            } else {
+                params.removeGpsData();
+            }
+        }
+
+        // jpeg.orientation
+        {
+            int orientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
+            params.setRotation(ParamsUtils.getOrDefault(request, JPEG_ORIENTATION, orientation));
+        }
+
+        // jpeg.quality
+        {
+            params.setJpegQuality(0xFF & ParamsUtils.getOrDefault(request, JPEG_QUALITY,
+                    DEFAULT_JPEG_QUALITY));
+        }
+
+        // jpeg.thumbnailQuality
+        {
+            params.setJpegQuality(0xFF & ParamsUtils.getOrDefault(request, JPEG_THUMBNAIL_QUALITY,
+                    DEFAULT_JPEG_QUALITY));
+        }
+
+        // jpeg.thumbnailSize
+        {
+            List<Camera.Size> sizes = params.getSupportedJpegThumbnailSizes();
+
+            if (sizes != null && sizes.size() > 0) {
+                Size s = request.get(JPEG_THUMBNAIL_SIZE);
+                boolean invalidSize = (s == null) ? false : !ParameterUtils.containsSize(sizes,
+                        s.getWidth(), s.getHeight());
+                if (invalidSize) {
+                    Log.w(TAG, "Invalid JPEG thumbnail size set " + s + ", skipping thumbnail...");
+                }
+                if (s == null || invalidSize) {
+                    // (0,0) = "no thumbnail" in Camera API 1
+                    params.setJpegThumbnailSize(/*width*/0, /*height*/0);
+                } else {
+                    params.setJpegThumbnailSize(s.getWidth(), s.getHeight());
+                }
+            }
+        }
+    }
+
+    private static boolean checkForCompleteGpsData(Location location) {
+        return location != null && location.getProvider() != null && location.getTime() != 0;
     }
 
     static int filterSupportedCaptureIntent(int captureIntent) {

@@ -33,6 +33,7 @@ import android.hardware.camera2.params.StreamConfigurationDuration;
 import android.hardware.camera2.utils.ArrayUtils;
 import android.hardware.camera2.utils.ListUtils;
 import android.hardware.camera2.utils.ParamsUtils;
+import android.hardware.camera2.utils.SizeAreaComparator;
 import android.util.Log;
 import android.util.Range;
 import android.util.Size;
@@ -40,6 +41,8 @@ import android.util.SizeF;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import static com.android.internal.util.Preconditions.*;
@@ -187,8 +190,10 @@ public class LegacyMetadataMapper {
          * flash.*
          */
         mapFlash(m, p);
-
-        // TODO: map other fields
+        /*
+         * jpeg.*
+         */
+        mapJpeg(m, p);
 
         /*
          * scaler.*
@@ -593,6 +598,16 @@ public class LegacyMetadataMapper {
          * flash.info.available
          */
         m.set(FLASH_INFO_AVAILABLE, flashAvailable);
+    }
+
+    private static void mapJpeg(CameraMetadataNative m, Camera.Parameters p) {
+        List<Camera.Size> thumbnailSizes = p.getSupportedJpegThumbnailSizes();
+
+        if (thumbnailSizes != null) {
+            Size[] sizes = convertSizeListToArray(thumbnailSizes);
+            Arrays.sort(sizes, new SizeAreaComparator());
+            m.set(JPEG_AVAILABLE_THUMBNAIL_SIZES, sizes);
+        }
     }
 
     private static void mapRequest(CameraMetadataNative m, Parameters p) {
