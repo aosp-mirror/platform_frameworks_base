@@ -43,7 +43,7 @@ import android.view.ViewGroup;
  */
 public abstract class Visibility extends Transition {
 
-    private static final String PROPNAME_VISIBILITY = "android:visibility:visibility";
+    static final String PROPNAME_VISIBILITY = "android:visibility:visibility";
     private static final String PROPNAME_PARENT = "android:visibility:parent";
     private static final String PROPNAME_SCREEN_LOCATION = "android:visibility:screenLocation";
 
