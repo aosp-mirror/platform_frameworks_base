@@ -185,6 +185,14 @@ public class ScanResult implements Parcelable {
     public static class InformationElement {
         public int id;
         public byte[] bytes;
+
+        public InformationElement() {
+        }
+
+        public InformationElement(InformationElement rhs) {
+            this.id = rhs.id;
+            this.bytes = rhs.bytes.clone();
+        }
     }
 
     /** information elements found in the beacon

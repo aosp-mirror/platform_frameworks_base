@@ -145,6 +145,8 @@ public class WifiScanner {
         public int periodInMs;
         /** must have a valid REPORT_EVENT value */
         public int reportEvents;
+        /** defines number of bssids to cache from each scan */
+        public int numBssidsPerScan;
 
         /** Implement the Parcelable interface {@hide} */
         public int describeContents() {
@@ -267,13 +269,6 @@ public class WifiScanner {
         public void onFullResult(ScanResult fullScanResult);
     }
 
-    /** @hide */
-    public void scan(ScanSettings settings, ScanListener listener) {
-        validateChannel();
-        settings.periodInMs = 0;
-        sAsyncChannel.sendMessage(CMD_SCAN, 0, putListener(listener), settings);
-    }
-
     /** start wifi scan in background
      * @param settings specifies various parameters for the scan; for more information look at
      * {@link ScanSettings}
@@ -305,7 +300,7 @@ public class WifiScanner {
     }
 
     /** specifies information about an access point of interest */
-    public static class HotspotInfo {
+    public static class BssidInfo {
         /** bssid of the access point; in XX:XX:XX:XX:XX:XX format */
         public String bssid;
         /** low signal strength threshold; more information at {@link ScanResult#level} */
@@ -324,7 +319,7 @@ public class WifiScanner {
         public int unchangedSampleSize;                     /* samples to confirm no change */
         public int minApsBreachingThreshold;                /* change threshold to trigger event */
         public int periodInMs;                              /* scan period in millisecond */
-        public HotspotInfo[] hotspotInfos;
+        public BssidInfo[] bssidInfos;
 
         /** Implement the Parcelable interface {@hide} */
         public int describeContents() {
@@ -338,10 +333,10 @@ public class WifiScanner {
             dest.writeInt(unchangedSampleSize);
             dest.writeInt(minApsBreachingThreshold);
             dest.writeInt(periodInMs);
-            if (hotspotInfos != null) {
-                dest.writeInt(hotspotInfos.length);
-                for (int i = 0; i < hotspotInfos.length; i++) {
-                    HotspotInfo info = hotspotInfos[i];
+            if (bssidInfos != null) {
+                dest.writeInt(bssidInfos.length);
+                for (int i = 0; i < bssidInfos.length; i++) {
+                    BssidInfo info = bssidInfos[i];
                     dest.writeString(info.bssid);
                     dest.writeInt(info.low);
                     dest.writeInt(info.high);
@@ -363,14 +358,14 @@ public class WifiScanner {
                         settings.minApsBreachingThreshold = in.readInt();
                         settings.periodInMs = in.readInt();
                         int len = in.readInt();
-                        settings.hotspotInfos = new HotspotInfo[len];
+                        settings.bssidInfos = new BssidInfo[len];
                         for (int i = 0; i < len; i++) {
-                            HotspotInfo info = new HotspotInfo();
+                            BssidInfo info = new BssidInfo();
                             info.bssid = in.readString();
                             info.low = in.readInt();
                             info.high = in.readInt();
                             info.frequencyHint = in.readInt();
-                            settings.hotspotInfos[i] = info;
+                            settings.bssidInfos[i] = info;
                         }
                         return settings;
                     }
@@ -389,7 +384,7 @@ public class WifiScanner {
      * @param minApsBreachingThreshold minimum number of access points that need to be
      *                                 out of range to detect WifiChange
      * @param periodInMs indicates period of scan to find changes
-     * @param hotspotInfos access points to watch
+     * @param bssidInfos access points to watch
      */
     public void configureWifiChange(
             int rssiSampleSize,                             /* sample size for RSSI averaging */
@@ -397,7 +392,7 @@ public class WifiScanner {
             int unchangedSampleSize,                        /* samples to confirm no change */
             int minApsBreachingThreshold,                   /* change threshold to trigger event */
             int periodInMs,                                 /* period of scan */
-            HotspotInfo[] hotspotInfos                      /* signal thresholds to crosss */
+            BssidInfo[] bssidInfos                          /* signal thresholds to crosss */
             )
     {
         validateChannel();
@@ -408,7 +403,7 @@ public class WifiScanner {
         settings.unchangedSampleSize = unchangedSampleSize;
         settings.minApsBreachingThreshold = minApsBreachingThreshold;
         settings.periodInMs = periodInMs;
-        settings.hotspotInfos = hotspotInfos;
+        settings.bssidInfos = bssidInfos;
 
         configureWifiChange(settings);
     }
@@ -455,7 +450,7 @@ public class WifiScanner {
     }
 
     /** interface to receive hotlist events on; use this on {@link #setHotlist} */
-    public static interface HotspotListener extends ActionListener {
+    public static interface BssidListener extends ActionListener {
         /** indicates that access points were found by on going scans
          * @param results list of scan results, one for each access point visible currently
          */
@@ -465,7 +460,7 @@ public class WifiScanner {
     /** @hide */
     @SystemApi
     public static class HotlistSettings implements Parcelable {
-        public HotspotInfo[] hotspotInfos;
+        public BssidInfo[] bssidInfos;
         public int apLostThreshold;
 
         /** Implement the Parcelable interface {@hide} */
@@ -477,10 +472,10 @@ public class WifiScanner {
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(apLostThreshold);
 
-            if (hotspotInfos != null) {
-                dest.writeInt(hotspotInfos.length);
-                for (int i = 0; i < hotspotInfos.length; i++) {
-                    HotspotInfo info = hotspotInfos[i];
+            if (bssidInfos != null) {
+                dest.writeInt(bssidInfos.length);
+                for (int i = 0; i < bssidInfos.length; i++) {
+                    BssidInfo info = bssidInfos[i];
                     dest.writeString(info.bssid);
                     dest.writeInt(info.low);
                     dest.writeInt(info.high);
@@ -498,14 +493,14 @@ public class WifiScanner {
                         HotlistSettings settings = new HotlistSettings();
                         settings.apLostThreshold = in.readInt();
                         int n = in.readInt();
-                        settings.hotspotInfos = new HotspotInfo[n];
+                        settings.bssidInfos = new BssidInfo[n];
                         for (int i = 0; i < n; i++) {
-                            HotspotInfo info = new HotspotInfo();
+                            BssidInfo info = new BssidInfo();
                             info.bssid = in.readString();
                             info.low = in.readInt();
                             info.high = in.readInt();
                             info.frequencyHint = in.readInt();
-                            settings.hotspotInfos[i] = info;
+                            settings.bssidInfos[i] = info;
                         }
                         return settings;
                     }
@@ -518,24 +513,24 @@ public class WifiScanner {
 
     /**
      * set interesting access points to find
-     * @param hotspots access points of interest
+     * @param bssidInfos access points of interest
      * @param apLostThreshold number of scans needed to indicate that AP is lost
      * @param listener object provided to report events on; this object must be unique and must
-     *                 also be provided on {@link #stopTrackingHotspots}
+     *                 also be provided on {@link #stopTrackingBssids}
      */
-    public void startTrackingHotspots(HotspotInfo[] hotspots,
-            int apLostThreshold, HotspotListener listener) {
+    public void startTrackingBssids(BssidInfo[] bssidInfos,
+                                    int apLostThreshold, BssidListener listener) {
         validateChannel();
         HotlistSettings settings = new HotlistSettings();
-        settings.hotspotInfos = hotspots;
+        settings.bssidInfos = bssidInfos;
         sAsyncChannel.sendMessage(CMD_SET_HOTLIST, 0, putListener(listener), settings);
     }
 
     /**
      * remove tracking of interesting access points
-     * @param listener same object provided in {@link #startTrackingHotspots}
+     * @param listener same object provided in {@link #startTrackingBssids}
      */
-    public void stopTrackingHotspots(HotspotListener listener) {
+    public void stopTrackingBssids(BssidListener listener) {
         validateChannel();
         sAsyncChannel.sendMessage(CMD_RESET_HOTLIST, 0, removeListener(listener));
     }
@@ -802,7 +797,7 @@ public class WifiScanner {
                     ((ScanListener) listener).onPeriodChanged(msg.arg1);
                     return;
                 case CMD_AP_FOUND:
-                    ((HotspotListener) listener).onFound(
+                    ((BssidListener) listener).onFound(
                             ((ParcelableScanResults) msg.obj).getResults());
                     return;
                 case CMD_WIFI_CHANGE_DETECTED:
