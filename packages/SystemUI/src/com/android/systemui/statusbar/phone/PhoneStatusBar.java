@@ -537,12 +537,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     };
 
     @Override
-    protected void setShowLockscreenNotifications(boolean show) {
-        super.setShowLockscreenNotifications(show);
-        updateStackScrollerState();
-    }
-
-    @Override
     public void start() {
         mDisplay = ((WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE))
                 .getDefaultDisplay();
@@ -3435,8 +3429,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         if (mStackScroller == null) return;
         boolean onKeyguard = mState == StatusBarState.KEYGUARD;
         mStackScroller.setDimmed(onKeyguard, false /* animate */);
-        mStackScroller.setVisibility(!mShowLockscreenNotifications && onKeyguard
-                ? View.INVISIBLE : View.VISIBLE);
         mStackScroller.setExpandingEnabled(!onKeyguard);
         ActivatableNotificationView activatedChild = mStackScroller.getActivatedChild();
         mStackScroller.setActivatedChild(null);
