@@ -395,7 +395,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
     @Override
     protected Transition getViewsTransition() {
         if (mIsReturning) {
-            return getWindow().getEnterTransition();
+            return getWindow().getReturnTransition();
         } else {
             return getWindow().getExitTransition();
         }
@@ -403,7 +403,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
 
     protected Transition getSharedElementTransition() {
         if (mIsReturning) {
-            return getWindow().getSharedElementEnterTransition();
+            return getWindow().getSharedElementReturnTransition();
         } else {
             return getWindow().getSharedElementExitTransition();
         }
