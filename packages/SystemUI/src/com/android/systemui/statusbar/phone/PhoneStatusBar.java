@@ -409,8 +409,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private Interpolator mLinearOutSlowIn;
     private Interpolator mLinearInterpolator = new LinearInterpolator();
     private Interpolator mBackdropInterpolator = new AccelerateDecelerateInterpolator();
-    private Interpolator mAlphaIn = new PathInterpolator(0f, 0.2f, 1f, 1f);
-    private Interpolator mAlphaOut = new PathInterpolator(0f, 0f, 0.8f, 1f);
+    public static final Interpolator ALPHA_IN = new PathInterpolator(0.4f, 0f, 1f, 1f);
+    public static final Interpolator ALPHA_OUT = new PathInterpolator(0f, 0f, 0.8f, 1f);
 
     private FrameLayout mBackdrop;
     private ImageView mBackdropFront, mBackdropBack;
@@ -1937,7 +1937,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 .alpha(0f)
                 .setDuration(160)
                 .setStartDelay(0)
-                .setInterpolator(mAlphaOut)
+                .setInterpolator(ALPHA_OUT)
                 .withEndAction(new Runnable() {
                     @Override
                     public void run() {
@@ -1959,7 +1959,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         v.animate()
                 .alpha(1f)
                 .setDuration(320)
-                .setInterpolator(mAlphaIn)
+                .setInterpolator(ALPHA_IN)
                 .setStartDelay(50);
 
         // Synchronize the motion with the Keyguard fading if necessary.
@@ -3414,20 +3414,18 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     private void updateDozingState() {
-        final boolean bottomGone = mKeyguardBottomArea.getVisibility() == View.GONE;
+        if (mState != StatusBarState.KEYGUARD) {
+            return;
+        }
         if (mDozing) {
             mNotificationPanel.setBackgroundColor(0xff000000);
             mKeyguardStatusBar.setVisibility(View.INVISIBLE);
-            if (!bottomGone) {
-                mKeyguardBottomArea.setVisibility(View.INVISIBLE);
-            }
+            mKeyguardBottomArea.setVisibility(View.INVISIBLE);
             mStackScroller.setDark(true, false /*animate*/);
         } else {
             mNotificationPanel.setBackground(null);
             mKeyguardStatusBar.setVisibility(View.VISIBLE);
-            if (!bottomGone) {
                 mKeyguardBottomArea.setVisibility(View.VISIBLE);
-            }
             mStackScroller.setDark(false, false /*animate*/);
         }
         mScrimController.setDozing(mDozing);

@@ -286,11 +286,15 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
             if (detached) {
                 getOverlay().add(mSignalCluster);
             } else {
-                getOverlay().remove(mSignalCluster);
-                mSystemIcons.addView(mSignalCluster, 1);
+                reattachSignalCluster();
             }
         }
         mSignalClusterDetached = detached;
+    }
+
+    private void reattachSignalCluster() {
+        getOverlay().remove(mSignalCluster);
+        mSystemIcons.addView(mSignalCluster, 1);
     }
 
     private void updateSystemIconsLayoutParams() {
@@ -441,9 +445,12 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     }
 
     public void onSystemIconsDetached() {
+        if (mSignalClusterDetached) {
+            reattachSignalCluster();
+            mSignalClusterDetached = false;
+        }
         if (mStatusIcons != null) {
             mStatusIcons.setVisibility(View.VISIBLE);
-            mStatusIcons.setAlpha(1f);
         }
         if (mSignalCluster != null) {
             mSignalCluster.setVisibility(View.VISIBLE);
@@ -504,6 +511,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         mShowEmergencyCallsOnly = show;
         if (mExpanded) {
             updateVisibilities();
+            requestCaptureValues();
         }
     }
 
