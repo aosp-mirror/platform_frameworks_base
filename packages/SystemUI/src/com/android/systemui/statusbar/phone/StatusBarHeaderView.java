@@ -38,7 +38,6 @@ import com.android.systemui.R;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.statusbar.policy.BatteryController;
-import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.UserInfoController;
 
@@ -50,9 +49,6 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
 
     private boolean mExpanded;
     private boolean mListening;
-    private boolean mOverscrolled;
-    private boolean mKeyguardShowing;
-    private boolean mCharging;
 
     private ViewGroup mSystemIconsContainer;
     private View mSystemIconsSuperContainer;
@@ -60,7 +56,6 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     private View mClock;
     private View mTime;
     private View mAmPm;
-    private View mKeyguardCarrierText;
     private MultiUserSwitch mMultiUserSwitch;
     private ImageView mMultiUserAvatar;
     private View mDateCollapsed;
@@ -77,29 +72,19 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     private TextView mAlarmStatus;
 
     private boolean mShowEmergencyCallsOnly;
-    private boolean mKeyguardUserSwitcherShowing;
     private boolean mAlarmShowing;
     private AlarmClockInfo mNextAlarm;
 
     private int mCollapsedHeight;
     private int mExpandedHeight;
-    private int mKeyguardHeight;
 
-    private int mKeyguardWidth = ViewGroup.LayoutParams.MATCH_PARENT;
-    private int mNormalWidth;
-    private int mPadding;
     private int mMultiUserExpandedMargin;
     private int mMultiUserCollapsedMargin;
-    private int mMultiUserKeyguardMargin;
-    private int mSystemIconsSwitcherHiddenExpandedMargin;
+
     private int mClockMarginBottomExpanded;
     private int mClockMarginBottomCollapsed;
     private int mMultiUserSwitchWidthCollapsed;
     private int mMultiUserSwitchWidthExpanded;
-    private int mMultiUserSwitchWidthKeyguard;
-    private int mBatteryPaddingEnd;
-    private int mBatteryMarginExpanded;
-    private int mBatteryMarginKeyguard;
 
     /**
      * In collapsed QS, the clock and avatar are scaled down a bit post-layout to allow for a nice
@@ -107,13 +92,12 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
      */
     private float mClockCollapsedScaleFactor;
     private float mAvatarCollapsedScaleFactor;
-    private float mAvatarKeyguardScaleFactor;
 
     private ActivityStarter mActivityStarter;
     private BatteryController mBatteryController;
     private NextAlarmController mNextAlarmController;
     private QSPanel mQSPanel;
-    private KeyguardUserSwitcher mKeyguardUserSwitcher;
+
 
     private final Rect mClipBounds = new Rect();
 
@@ -139,7 +123,6 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         mClock = findViewById(R.id.clock);
         mTime = findViewById(R.id.time_view);
         mAmPm = findViewById(R.id.am_pm_view);
-        mKeyguardCarrierText = findViewById(R.id.keyguard_carrier_text);
         mMultiUserSwitch = (MultiUserSwitch) findViewById(R.id.multi_user_switch);
         mMultiUserAvatar = (ImageView) findViewById(R.id.multi_user_avatar);
         mDateCollapsed = findViewById(R.id.date_collapsed);
@@ -187,7 +170,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
         if (mCaptureValues) {
-            if (mExpanded && !mOverscrolled) {
+            if (mExpanded) {
                 captureLayoutValues(mExpandedValues);
             } else {
                 captureLayoutValues(mCollapsedValues);
@@ -207,18 +190,11 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         mCollapsedHeight = getResources().getDimensionPixelSize(R.dimen.status_bar_header_height);
         mExpandedHeight = getResources().getDimensionPixelSize(
                 R.dimen.status_bar_header_height_expanded);
-        mKeyguardHeight = getResources().getDimensionPixelSize(
-                R.dimen.status_bar_header_height_keyguard);
-        mNormalWidth = getLayoutParams().width;
-        mPadding = getResources().getDimensionPixelSize(R.dimen.notification_side_padding);
         mMultiUserExpandedMargin =
                 getResources().getDimensionPixelSize(R.dimen.multi_user_switch_expanded_margin);
         mMultiUserCollapsedMargin =
                 getResources().getDimensionPixelSize(R.dimen.multi_user_switch_collapsed_margin);
-        mMultiUserKeyguardMargin =
-                getResources().getDimensionPixelSize(R.dimen.multi_user_switch_keyguard_margin);
-        mSystemIconsSwitcherHiddenExpandedMargin = getResources().getDimensionPixelSize(
-                R.dimen.system_icons_switcher_hidden_expanded_margin);
+
         mClockMarginBottomExpanded =
                 getResources().getDimensionPixelSize(R.dimen.clock_expanded_bottom_margin);
         mClockMarginBottomCollapsed =
@@ -227,23 +203,12 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
                 getResources().getDimensionPixelSize(R.dimen.multi_user_switch_width_collapsed);
         mMultiUserSwitchWidthExpanded =
                 getResources().getDimensionPixelSize(R.dimen.multi_user_switch_width_expanded);
-        mMultiUserSwitchWidthKeyguard =
-                getResources().getDimensionPixelSize(R.dimen.multi_user_switch_width_keyguard);
         mAvatarCollapsedScaleFactor =
                 getResources().getDimensionPixelSize(R.dimen.multi_user_avatar_collapsed_size)
                 / (float) mMultiUserAvatar.getLayoutParams().width;
-        mAvatarKeyguardScaleFactor =
-                getResources().getDimensionPixelSize(R.dimen.multi_user_avatar_keyguard_size)
-                        / (float) mMultiUserAvatar.getLayoutParams().width;
         mClockCollapsedScaleFactor =
                 (float) getResources().getDimensionPixelSize(R.dimen.qs_time_collapsed_size)
                 / (float) getResources().getDimensionPixelSize(R.dimen.qs_time_expanded_size);
-        mBatteryPaddingEnd =
-                getResources().getDimensionPixelSize(R.dimen.battery_level_padding_end);
-        mBatteryMarginExpanded =
-                getResources().getDimensionPixelSize(R.dimen.header_battery_margin_expanded);
-        mBatteryMarginKeyguard =
-                getResources().getDimensionPixelSize(R.dimen.header_battery_margin_keyguard);
     }
 
     public void setActivityStarter(ActivityStarter activityStarter) {
@@ -259,7 +224,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     }
 
     public int getCollapsedHeight() {
-        return mKeyguardShowing ? mKeyguardHeight : mCollapsedHeight;
+        return mCollapsedHeight;
     }
 
     public int getExpandedHeight() {
@@ -274,107 +239,49 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         updateListeners();
     }
 
-    public void setExpanded(boolean expanded, boolean overscrolled) {
+    public void setExpanded(boolean expanded) {
         boolean changed = expanded != mExpanded;
-        boolean overscrollChanged = overscrolled != mOverscrolled;
         mExpanded = expanded;
-        mOverscrolled = overscrolled;
-        if (changed || overscrollChanged) {
+        if (changed) {
             updateHeights();
             updateVisibilities();
             updateSystemIconsLayoutParams();
-            updateZTranslation();
             updateClickTargets();
-            updateWidth();
-            updatePadding();
             updateMultiUserSwitch();
             if (mQSPanel != null) {
-                mQSPanel.setExpanded(expanded && !overscrolled);
+                mQSPanel.setExpanded(expanded);
             }
             updateClockScale();
             updateAvatarScale();
             updateClockLp();
-            updateBatteryLevelPaddingEnd();
-            updateBatteryLevelLp();
             requestCaptureValues();
         }
     }
 
     private void updateHeights() {
-        boolean onKeyguardAndCollapsed = mKeyguardShowing && !mExpanded;
-        int height;
-        if (mExpanded && !mOverscrolled) {
-            height = mExpandedHeight;
-        } else if (onKeyguardAndCollapsed) {
-            height = mKeyguardHeight;
-        } else {
-            height = mCollapsedHeight;
-        }
+        int height = mExpanded ? mExpandedHeight : mCollapsedHeight;
         ViewGroup.LayoutParams lp = getLayoutParams();
         if (lp.height != height) {
             lp.height = height;
             setLayoutParams(lp);
         }
-        int systemIconsContainerHeight = onKeyguardAndCollapsed ? mKeyguardHeight : mCollapsedHeight;
-        lp = mSystemIconsSuperContainer.getLayoutParams();
-        if (lp.height != systemIconsContainerHeight) {
-            lp.height = systemIconsContainerHeight;
-            mSystemIconsSuperContainer.setLayoutParams(lp);
-        }
-        lp = mMultiUserSwitch.getLayoutParams();
-        if (lp.height != systemIconsContainerHeight) {
-            lp.height = systemIconsContainerHeight;
-            mMultiUserSwitch.setLayoutParams(lp);
-        }
-    }
-
-    private void updateWidth() {
-        int width = (mKeyguardShowing && !mExpanded) ? mKeyguardWidth : mNormalWidth;
-        ViewGroup.LayoutParams lp = getLayoutParams();
-        if (width != lp.width) {
-            lp.width = width;
-            setLayoutParams(lp);
-        }
     }
 
     private void updateVisibilities() {
-        boolean onKeyguardAndCollapsed = mKeyguardShowing && !mExpanded;
-        if (onKeyguardAndCollapsed) {
-            setBackground(null);
-        } else {
-            setBackgroundResource(R.drawable.notification_header_bg);
-        }
-        mDateGroup.setVisibility(onKeyguardAndCollapsed ? View.INVISIBLE : View.VISIBLE);
-        mClock.setVisibility(onKeyguardAndCollapsed ? View.INVISIBLE : View.VISIBLE);
-        mKeyguardCarrierText.setVisibility(onKeyguardAndCollapsed ? View.VISIBLE : View.GONE);
-        mDateCollapsed.setVisibility(mExpanded && !mOverscrolled && mAlarmShowing
-                ? View.VISIBLE : View.INVISIBLE);
-        mDateExpanded.setVisibility(mExpanded && !mOverscrolled && mAlarmShowing
-                ? View.INVISIBLE : View.VISIBLE);
-        mAlarmStatus.setVisibility(mExpanded && !mOverscrolled && mAlarmShowing
-                ? View.VISIBLE : View.INVISIBLE);
-        mSettingsButton.setVisibility(mExpanded && !mOverscrolled ? View.VISIBLE : View.INVISIBLE);
+        mDateCollapsed.setVisibility(mExpanded && mAlarmShowing ? View.VISIBLE : View.INVISIBLE);
+        mDateExpanded.setVisibility(mExpanded && mAlarmShowing ? View.INVISIBLE : View.VISIBLE);
+        mAlarmStatus.setVisibility(mExpanded && mAlarmShowing ? View.VISIBLE : View.INVISIBLE);
+        mSettingsButton.setVisibility(mExpanded ? View.VISIBLE : View.INVISIBLE);
         mQsDetailHeader.setVisibility(mExpanded ? View.VISIBLE : View.GONE);
-        if (mStatusIcons != null) {
-            mStatusIcons.setVisibility(mKeyguardShowing && (!mExpanded || mOverscrolled)
-                    ? View.VISIBLE : View.GONE);
-        }
         if (mSignalCluster != null) {
             updateSignalClusterDetachment();
         }
-        mEmergencyCallsOnly.setVisibility(mExpanded && !mOverscrolled && mShowEmergencyCallsOnly
-                ? VISIBLE : GONE);
-        mMultiUserSwitch.setVisibility(mExpanded || !mKeyguardUserSwitcherShowing
-                ? VISIBLE : GONE);
-        mBatteryLevel.setVisibility(mKeyguardShowing && mCharging || mExpanded && !mOverscrolled
-                ? View.VISIBLE : View.GONE);
-        if (mExpanded && !mOverscrolled && mKeyguardUserSwitcherShowing) {
-            mKeyguardUserSwitcher.hide();
-        }
+        mEmergencyCallsOnly.setVisibility(mExpanded && mShowEmergencyCallsOnly ? VISIBLE : GONE);
+        mBatteryLevel.setVisibility(mExpanded ? View.VISIBLE : View.GONE);
     }
 
     private void updateSignalClusterDetachment() {
-        boolean detached = mExpanded && !mOverscrolled;
+        boolean detached = mExpanded;
         if (detached != mSignalClusterDetached) {
             if (detached) {
                 getOverlay().add(mSignalCluster);
@@ -388,16 +295,13 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
 
     private void updateSystemIconsLayoutParams() {
         RelativeLayout.LayoutParams lp = (LayoutParams) mSystemIconsSuperContainer.getLayoutParams();
-        lp.addRule(RelativeLayout.START_OF, mExpanded && !mOverscrolled
+        int rule = mExpanded
                 ? mSettingsButton.getId()
-                : mMultiUserSwitch.getId());
-        lp.removeRule(ALIGN_PARENT_START);
-        if (mMultiUserSwitch.getVisibility() == GONE) {
-            lp.setMarginEnd(mSystemIconsSwitcherHiddenExpandedMargin);
-        } else {
-            lp.setMarginEnd(0);
+                : mMultiUserSwitch.getId();
+        if (rule != lp.getRules()[RelativeLayout.START_OF]) {
+            lp.addRule(RelativeLayout.START_OF, rule);
+            mSystemIconsSuperContainer.setLayoutParams(lp);
         }
-        mSystemIconsSuperContainer.setLayoutParams(lp);
     }
 
     private void updateListeners() {
@@ -411,12 +315,9 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     }
 
     private void updateAvatarScale() {
-        if (mExpanded && !mOverscrolled) {
+        if (mExpanded) {
             mMultiUserAvatar.setScaleX(1f);
             mMultiUserAvatar.setScaleY(1f);
-        } else if (mKeyguardShowing) {
-            mMultiUserAvatar.setScaleX(mAvatarKeyguardScaleFactor);
-            mMultiUserAvatar.setScaleY(mAvatarKeyguardScaleFactor);
         } else {
             mMultiUserAvatar.setScaleX(mAvatarCollapsedScaleFactor);
             mMultiUserAvatar.setScaleY(mAvatarCollapsedScaleFactor);
@@ -432,7 +333,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     }
 
     private float getTimeScale() {
-        return !mExpanded || mOverscrolled ? mClockCollapsedScaleFactor : 1f;
+        return !mExpanded ? mClockCollapsedScaleFactor : 1f;
     }
 
     private void updateAmPmTranslation() {
@@ -440,20 +341,9 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         mAmPm.setTranslationX((rtl ? 1 : -1) * mTime.getWidth() * (1 - mTime.getScaleX()));
     }
 
-    private void updateBatteryLevelPaddingEnd() {
-        mBatteryLevel.setPaddingRelative(0, 0,
-                mKeyguardShowing && !mExpanded ? 0 : mBatteryPaddingEnd, 0);
-    }
-
     @Override
     public void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging) {
         mBatteryLevel.setText(getResources().getString(R.string.battery_level_template, level));
-        boolean changed = mCharging != charging;
-        mCharging = charging;
-        if (changed) {
-            updateVisibilities();
-            requestCaptureValues();
-        }
     }
 
     @Override
@@ -474,35 +364,14 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
 
 
     private void updateClickTargets() {
-        setClickable(!mKeyguardShowing || mExpanded);
+        setClickable(mExpanded);
 
-        boolean keyguardSwitcherAvailable =
-                mKeyguardUserSwitcher != null && mKeyguardShowing && !mExpanded;
-        mMultiUserSwitch.setClickable(mExpanded || keyguardSwitcherAvailable);
-        mMultiUserSwitch.setKeyguardMode(keyguardSwitcherAvailable);
         mSystemIconsSuperContainer.setClickable(mExpanded);
         mAlarmStatus.setClickable(mNextAlarm != null && mNextAlarm.getShowIntent() != null);
     }
 
-    private void updateZTranslation() {
-
-        // If we are on the Keyguard, we need to set our z position to zero, so we don't get
-        // shadows.
-        if (mKeyguardShowing && !mExpanded) {
-            setZ(0);
-        } else {
-            setTranslationZ(0);
-        }
-    }
-
-    private void updatePadding() {
-        boolean padded = !mKeyguardShowing || mExpanded;
-        int padding = padded ? mPadding : 0;
-        setPaddingRelative(padding, 0, padding, 0);
-    }
-
     private void updateClockLp() {
-        int marginBottom = mExpanded && !mOverscrolled
+        int marginBottom = mExpanded
                 ? mClockMarginBottomExpanded
                 : mClockMarginBottomCollapsed;
         LayoutParams lp = (LayoutParams) mDateGroup.getLayoutParams();
@@ -515,12 +384,9 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     private void updateMultiUserSwitch() {
         int marginEnd;
         int width;
-        if (mExpanded && !mOverscrolled) {
+        if (mExpanded) {
             marginEnd = mMultiUserExpandedMargin;
             width = mMultiUserSwitchWidthExpanded;
-        } else if (mKeyguardShowing) {
-            marginEnd = mMultiUserKeyguardMargin;
-            width = mMultiUserSwitchWidthKeyguard;
         } else {
             marginEnd = mMultiUserCollapsedMargin;
             width = mMultiUserSwitchWidthCollapsed;
@@ -533,19 +399,8 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         }
     }
 
-    private void updateBatteryLevelLp() {
-        int marginStart = mExpanded && !mOverscrolled
-                ? mBatteryMarginExpanded
-                : mBatteryMarginKeyguard;
-        MarginLayoutParams lp = (MarginLayoutParams) mBatteryLevel.getLayoutParams();
-        if (marginStart != lp.getMarginStart()) {
-            lp.setMarginStart(marginStart);
-            mBatteryLevel.setLayoutParams(lp);
-        }
-    }
-
     public void setExpansion(float t) {
-        if (mOverscrolled) {
+        if (!mExpanded) {
             t = 0f;
         }
         mCurrentT = t;
@@ -580,6 +435,9 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         mSignalCluster = systemIcons.findViewById(R.id.signal_cluster);
         mSystemIcons = systemIcons;
         updateVisibilities();
+        if (mStatusIcons != null) {
+            mStatusIcons.setVisibility(View.GONE);
+        }
     }
 
     public void onSystemIconsDetached() {
@@ -596,20 +454,6 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         mStatusIcons = null;
         mSignalCluster = null;
         mSystemIcons = null;
-    }
-
-    public void setKeyguardShowing(boolean keyguardShowing) {
-        mKeyguardShowing = keyguardShowing;
-        updateHeights();
-        updateWidth();
-        updateVisibilities();
-        updateZTranslation();
-        updatePadding();
-        updateMultiUserSwitch();
-        updateClickTargets();
-        updateBatteryLevelPaddingEnd();
-        updateAvatarScale();
-        mCaptureValues = true;
     }
 
     public void setUserInfoController(UserInfoController userInfoController) {
@@ -651,11 +495,6 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         mMultiUserSwitch.setQsPanel(qsp);
     }
 
-    public void setKeyguarUserSwitcher(KeyguardUserSwitcher keyguardUserSwitcher) {
-        mKeyguardUserSwitcher = keyguardUserSwitcher;
-        mMultiUserSwitch.setKeyguardUserSwitcher(keyguardUserSwitcher);
-    }
-
     @Override
     public boolean shouldDelayChildPressedState() {
         return true;
@@ -666,17 +505,6 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         if (mExpanded) {
             updateVisibilities();
         }
-    }
-
-    public void setKeyguardUserSwitcherShowing(boolean showing) {
-        mKeyguardUserSwitcherShowing = showing;
-        updateVisibilities();
-        updateSystemIconsLayoutParams();
-    }
-
-    @Override
-    public boolean hasOverlappingRendering() {
-        return !mKeyguardShowing || mExpanded;
     }
 
     @Override
@@ -700,11 +528,11 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         target.batteryY = mSystemIconsSuperContainer.getTop() + mSystemIconsContainer.getTop();
         target.batteryLevelAlpha = getAlphaForVisibility(mBatteryLevel);
         target.settingsAlpha = getAlphaForVisibility(mSettingsButton);
-        target.settingsTranslation = mExpanded && !mOverscrolled
+        target.settingsTranslation = mExpanded
                 ? 0
                 : mMultiUserSwitch.getLeft() - mSettingsButton.getLeft();
         target.signalClusterAlpha = mSignalClusterDetached ? 0f : 1f;
-        target.settingsRotation = !mExpanded || mOverscrolled ? 90f : 0f;
+        target.settingsRotation = !mExpanded ? 90f : 0f;
     }
 
     private float getAlphaForVisibility(View v) {
@@ -735,7 +563,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         mMultiUserAvatar.setY(values.avatarY - mMultiUserSwitch.getTop());
         mSystemIconsSuperContainer.setX(values.batteryX - mSystemIconsContainer.getRight());
         mSystemIconsSuperContainer.setY(values.batteryY - mSystemIconsContainer.getTop());
-        if (mSignalCluster != null && mExpanded && !mOverscrolled) {
+        if (mSignalCluster != null && mExpanded) {
             mSignalCluster.setX(mSystemIconsSuperContainer.getX()
                     - mSignalCluster.getWidth());
             mSignalCluster.setY(
