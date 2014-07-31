@@ -187,7 +187,7 @@ public class PackageItemInfo {
      * 
      * @hide
      */
-    protected Drawable loadDefaultIcon(PackageManager pm) {
+    public Drawable loadDefaultIcon(PackageManager pm) {
         return pm.getDefaultActivityIcon();
     }
 

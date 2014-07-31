@@ -1624,7 +1624,7 @@ final class ApplicationPackageManager extends PackageManager {
         }
         Drawable dr = getDrawable(itemInfo.packageName, itemInfo.icon, appInfo);
         if (dr == null) {
-            dr = getDefaultActivityIcon();
+            dr = itemInfo.loadDefaultIcon(this);
         }
         return getUserManager().getBadgedDrawableForUser(dr,
                 new UserHandle(mContext.getUserId()));
