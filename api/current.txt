@@ -29241,6 +29241,20 @@ package android.telephony {
     field public static final int VOICEMAIL_NUMBER_MISSING = 40; // 0x28
   }
 
+  public class IccOpenLogicalChannelResponse implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getChannel();
+    method public byte[] getSelectResponse();
+    method public int getStatus();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static int INVALID_CHANNEL;
+    field public static int MISSING_RESOURCE;
+    field public static int NO_ERROR;
+    field public static int NO_SUCH_ELEMENT;
+    field public static int UNKNOWN_ERROR;
+  }
+
   public class MessagingConfigurationManager {
     method public boolean getCarrierConfigBoolean(java.lang.String, boolean);
     method public int getCarrierConfigInt(java.lang.String, int);
@@ -29563,7 +29577,8 @@ package android.telephony {
     method public int hasCarrierPrivileges();
     method public boolean hasIccCard();
     method public boolean iccCloseLogicalChannel(int);
-    method public int iccOpenLogicalChannel(java.lang.String);
+    method public android.telephony.IccOpenLogicalChannelResponse iccOpenLogicalChannel(java.lang.String);
+    method public java.lang.String iccTransmitApduBasicChannel(int, int, int, int, int, java.lang.String);
     method public java.lang.String iccTransmitApduLogicalChannel(int, int, int, int, int, int, java.lang.String);
     method public boolean isNetworkRoaming();
     method public boolean isSmsCapable();
