@@ -791,6 +791,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             policyFile.delete();
             Slog.i(LOG_TAG, "Removed device policy file " + policyFile.getAbsolutePath());
         }
+        updateScreenCaptureDisabledInWindowManager(userHandle, false /* default value */);
     }
 
     void loadDeviceOwner() {
@@ -1367,6 +1368,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         new SetupContentObserver(mHandler).register(mContext.getContentResolver());
         // Initialize the user setup state, to handle the upgrade case.
         updateUserSetupComplete();
+
+        // Update the screen capture disabled cache in the window manager
+        List<UserInfo> users = mUserManager.getUsers(true);
+        final int N = users.size();
+        for (int i = 0; i < N; i++) {
+            int userHandle = users.get(i).id;
+            updateScreenCaptureDisabledInWindowManager(userHandle,
+                    getScreenCaptureDisabled(null, userHandle));
+        }
+
     }
 
     private void cleanUpOldUsers() {
@@ -3062,11 +3073,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (ap.disableScreenCapture != disabled) {
                 ap.disableScreenCapture = disabled;
                 saveSettingsLocked(userHandle);
-                try {
-                    getWindowManager().updateScreenCaptureDisabled(userHandle);
-                } catch (RemoteException e) {
-                    Log.w(LOG_TAG, "Unable to notify WindowManager.", e);
-                }
+                updateScreenCaptureDisabledInWindowManager(userHandle, disabled);
             }
         }
     }
@@ -3094,6 +3101,17 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
             }
             return false;
+        }
+    }
+
+    private void updateScreenCaptureDisabledInWindowManager(int userHandle, boolean disabled) {
+        long ident = Binder.clearCallingIdentity();
+        try {
+            getWindowManager().setScreenCaptureDisabled(userHandle, disabled);
+        } catch (RemoteException e) {
+            Log.w(LOG_TAG, "Unable to notify WindowManager.", e);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
