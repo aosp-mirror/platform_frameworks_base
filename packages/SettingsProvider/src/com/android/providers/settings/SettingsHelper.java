@@ -190,33 +190,34 @@ public class SettingsHelper {
         String localeString = loc.getLanguage();
         String country = loc.getCountry();
         if (!TextUtils.isEmpty(country)) {
-            localeString += "_" + country;
+            localeString += "-" + country;
         }
         return localeString.getBytes();
     }
 
     /**
-     * Sets the locale specified. Input data is the equivalent of "ll_cc".getBytes(), where
-     * "ll" is the language code and "cc" is the country code.
+     * Sets the locale specified. Input data is the byte representation of a
+     * BCP-47 language tag. For backwards compatibility, strings of the form
+     * {@code ll_CC} are also accepted, where {@code ll} is a two letter language
+     * code and {@code CC} is a two letter country code.
+     *
      * @param data the locale string in bytes.
      */
     void setLocaleData(byte[] data, int size) {
         // Check if locale was set by the user:
         Configuration conf = mContext.getResources().getConfiguration();
-        Locale loc = conf.locale;
         // TODO: The following is not working as intended because the network is forcing a locale
         // change after registering. Need to find some other way to detect if the user manually
         // changed the locale
         if (conf.userSetLocale) return; // Don't change if user set it in the SetupWizard
 
         final String[] availableLocales = mContext.getAssets().getLocales();
-        String localeCode = new String(data, 0, size);
-        String language = new String(data, 0, 2);
-        String country = size > 4 ? new String(data, 3, 2) : "";
-        loc = null;
+        // Replace "_" with "-" to deal with older backups.
+        String localeCode = new String(data, 0, size).replace('_', '-');
+        Locale loc = null;
         for (int i = 0; i < availableLocales.length; i++) {
             if (availableLocales[i].equals(localeCode)) {
-                loc = new Locale(language, country);
+                loc = Locale.forLanguageTag(localeCode);
                 break;
             }
         }
