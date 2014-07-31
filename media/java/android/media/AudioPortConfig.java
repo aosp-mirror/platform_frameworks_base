@@ -90,4 +90,14 @@ public class AudioPortConfig {
     public AudioGainConfig gain() {
         return mGain;
     }
+
+    @Override
+    public String toString() {
+        return "{mPort:" + mPort
+                + ", mSamplingRate:" + mSamplingRate
+                + ", mChannelMask: " + mChannelMask
+                + ", mFormat:" + mFormat
+                + ", mGain:" + mGain
+                + "}";
+    }
 }

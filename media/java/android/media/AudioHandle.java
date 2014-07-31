@@ -46,4 +46,9 @@ class AudioHandle {
     public int hashCode() {
         return mId;
     }
+
+    @Override
+    public String toString() {
+        return Integer.toString(mId);
+    }
 }

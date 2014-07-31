@@ -173,5 +173,11 @@ public class AudioPort {
     public int hashCode() {
         return mHandle.hashCode();
     }
-}
 
+    @Override
+    public String toString() {
+        return "{mHandle:" + mHandle
+                + ", mRole:" + mRole
+                + "}";
+    }
+}

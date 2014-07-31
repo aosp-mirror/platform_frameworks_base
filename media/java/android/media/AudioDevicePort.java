@@ -82,4 +82,12 @@ public class AudioDevicePort extends AudioPort {
         }
         return super.equals(o);
     }
+
+    @Override
+    public String toString() {
+        return "{" + super.toString()
+                + ", mType:" + mType
+                + ", mAddress: " + mAddress
+                + "}";
+    }
 }
