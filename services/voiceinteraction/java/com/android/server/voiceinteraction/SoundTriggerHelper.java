@@ -31,6 +31,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 /**
  * Helper for {@link SoundTrigger} APIs.
@@ -63,6 +64,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
     private final SparseArray<IRecognitionStatusCallback> mActiveListeners;
 
     private int mCurrentSoundModelHandle = INVALID_SOUND_MODEL_HANDLE;
+    private UUID mCurrentSoundModelUuid = null;
 
     SoundTriggerHelper() {
         ArrayList <ModuleProperties> modules = new ArrayList<>();
@@ -109,18 +111,25 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
                     + ", recognitionConfig=" + recognitionConfig);
             Slog.d(TAG, "moduleProperties=" + moduleProperties);
             Slog.d(TAG, "# of current listeners=" + mActiveListeners.size());
-            Slog.d(TAG, "mCurrentSoundModelHandle=" + mCurrentSoundModelHandle);
+            Slog.d(TAG, "current SoundModel handle=" + mCurrentSoundModelHandle);
+            Slog.d(TAG, "current SoundModel UUID="
+                    + (mCurrentSoundModelUuid == null ? null : mCurrentSoundModelUuid));
         }
         if (moduleProperties == null || mModule == null) {
             Slog.w(TAG, "Attempting startRecognition without the capability");
             return STATUS_ERROR;
         }
 
-        if (mCurrentSoundModelHandle != INVALID_SOUND_MODEL_HANDLE) {
+        if (mCurrentSoundModelHandle != INVALID_SOUND_MODEL_HANDLE
+                && !soundModel.uuid.equals(mCurrentSoundModelUuid)) {
             Slog.w(TAG, "Unloading previous sound model");
-            // TODO: Inspect the return codes here.
-            mModule.unloadSoundModel(mCurrentSoundModelHandle);
+            int status = mModule.unloadSoundModel(mCurrentSoundModelHandle);
+            if (status != SoundTrigger.STATUS_OK) {
+                Slog.w(TAG, "unloadSoundModel call failed with " + status);
+                return status;
+            }
             mCurrentSoundModelHandle = INVALID_SOUND_MODEL_HANDLE;
+            mCurrentSoundModelUuid = null;
         }
 
         // If the previous recognition was by a different listener,
@@ -136,26 +145,35 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             mActiveListeners.remove(keyphraseId);
         }
 
-        int[] handle = new int[] { INVALID_SOUND_MODEL_HANDLE };
-        int status = mModule.loadSoundModel(soundModel, handle);
-        if (status != SoundTrigger.STATUS_OK) {
-            Slog.w(TAG, "loadSoundModel call failed with " + status);
-            return STATUS_ERROR;
-        }
-        if (handle[0] == INVALID_SOUND_MODEL_HANDLE) {
-            Slog.w(TAG, "loadSoundModel call returned invalid sound model handle");
-            return STATUS_ERROR;
+        // Load the sound model if the current one is null.
+        int soundModelHandle = mCurrentSoundModelHandle;
+        if (mCurrentSoundModelHandle == INVALID_SOUND_MODEL_HANDLE
+                || mCurrentSoundModelUuid == null) {
+            int[] handle = new int[] { INVALID_SOUND_MODEL_HANDLE };
+            int status = mModule.loadSoundModel(soundModel, handle);
+            if (status != SoundTrigger.STATUS_OK) {
+                Slog.w(TAG, "loadSoundModel call failed with " + status);
+                return status;
+            }
+            if (handle[0] == INVALID_SOUND_MODEL_HANDLE) {
+                Slog.w(TAG, "loadSoundModel call returned invalid sound model handle");
+                return STATUS_ERROR;
+            }
+            soundModelHandle = handle[0];
+        } else {
+            if (DBG) Slog.d(TAG, "Reusing previously loaded sound model");
         }
 
         // Start the recognition.
-        status = mModule.startRecognition(handle[0], recognitionConfig);
+        int status = mModule.startRecognition(soundModelHandle, recognitionConfig);
         if (status != SoundTrigger.STATUS_OK) {
             Slog.w(TAG, "startRecognition failed with " + status);
-            return STATUS_ERROR;
+            return status;
         }
 
         // Everything went well!
-        mCurrentSoundModelHandle = handle[0];
+        mCurrentSoundModelHandle = soundModelHandle;
+        mCurrentSoundModelUuid = soundModel.uuid;
         // Register the new listener. This replaces the old one.
         // There can only be a maximum of one active listener for a keyphrase
         // at any given time.
@@ -194,14 +212,12 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             Slog.w(TAG, "Attempting stopRecognition without a successful startRecognition");
             return STATUS_ERROR;
         } else if (currentListener.asBinder() != listener.asBinder()) {
-            // TODO: Figure out if this should match the listener that was passed in during
-            // startRecognition, or should we allow a different listener to stop the recognition,
-            // in which case we don't need to pass in a listener here.
+            // We don't allow a different listener to stop the recognition than the one
+            // that started it.
             Slog.w(TAG, "Attempting stopRecognition for another recognition");
             return STATUS_ERROR;
         } else {
             // Stop recognition if it's the current one, ignore otherwise.
-            // TODO: Inspect the return codes here.
             int status = mModule.stopRecognition(mCurrentSoundModelHandle);
             if (status != SoundTrigger.STATUS_OK) {
                 Slog.w(TAG, "stopRecognition call failed with " + status);
@@ -214,6 +230,8 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             }
 
             mCurrentSoundModelHandle = INVALID_SOUND_MODEL_HANDLE;
+            mCurrentSoundModelUuid = null;
+
             mActiveListeners.remove(keyphraseId);
             return STATUS_OK;
         }
@@ -285,6 +303,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
                 Slog.w(TAG, "RemoteException in onDetectionStopped");
             }
             mCurrentSoundModelHandle = INVALID_SOUND_MODEL_HANDLE;
+            mCurrentSoundModelUuid = null;
             // Remove all listeners.
             mActiveListeners.clear();
         }
