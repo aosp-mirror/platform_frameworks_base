@@ -839,7 +839,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     /**
      * @hide
      */
-    @Override protected Drawable loadDefaultIcon(PackageManager pm) {
+    @Override
+    public Drawable loadDefaultIcon(PackageManager pm) {
         if ((flags & FLAG_EXTERNAL_STORAGE) != 0
                 && isPackageUnavailable(pm)) {
             return Resources.getSystem().getDrawable(
