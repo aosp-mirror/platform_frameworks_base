@@ -50,7 +50,6 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.session.MediaController;
-import android.media.session.MediaSession;
 import android.media.session.MediaSessionLegacyHelper;
 import android.net.Uri;
 import android.os.Bundle;
@@ -63,6 +62,7 @@ import android.transition.Scene;
 import android.transition.Transition;
 import android.transition.TransitionInflater;
 import android.transition.TransitionManager;
+import android.transition.TransitionSet;
 import android.util.AndroidRuntimeException;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
@@ -125,6 +125,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             (1 << FEATURE_CUSTOM_TITLE) |
             (1 << FEATURE_CONTENT_TRANSITIONS) |
             (1 << FEATURE_ACTION_MODE_OVERLAY);
+
+    private static final Transition USE_DEFAULT_TRANSITION = new TransitionSet();
 
     /**
      * Simple callback used by the context menu and its submenus. The options
@@ -254,10 +256,14 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
     };
 
-    private Transition mEnterTransition;
-    private Transition mExitTransition;
-    private Transition mSharedElementEnterTransition;
-    private Transition mSharedElementExitTransition;
+    private Transition mEnterTransition = null;
+    private Transition mReturnTransition = USE_DEFAULT_TRANSITION;
+    private Transition mExitTransition = null;
+    private Transition mReenterTransition = USE_DEFAULT_TRANSITION;
+    private Transition mSharedElementEnterTransition = null;
+    private Transition mSharedElementReturnTransition = USE_DEFAULT_TRANSITION;
+    private Transition mSharedElementExitTransition = null;
+    private Transition mSharedElementReenterTransition = USE_DEFAULT_TRANSITION;
     private Boolean mAllowExitTransitionOverlap;
     private Boolean mAllowEnterTransitionOverlap;
     private long mBackgroundFadeDurationMillis = -1;
@@ -3513,40 +3519,47 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     }
                 }
 
-                mEnterTransition = getTransition(mEnterTransition,
+                mEnterTransition = getTransition(mEnterTransition, null,
                         R.styleable.Window_windowEnterTransition);
-                mExitTransition = getTransition(mExitTransition,
+                mReturnTransition = getTransition(mReturnTransition, USE_DEFAULT_TRANSITION,
+                        R.styleable.Window_windowReturnTransition);
+                mExitTransition = getTransition(mExitTransition, null,
                         R.styleable.Window_windowExitTransition);
-                mSharedElementEnterTransition = getTransition(mSharedElementEnterTransition,
+                mReenterTransition = getTransition(mReenterTransition, USE_DEFAULT_TRANSITION,
+                        R.styleable.Window_windowReenterTransition);
+                mSharedElementEnterTransition = getTransition(mSharedElementEnterTransition, null,
                         R.styleable.Window_windowSharedElementEnterTransition);
-                mSharedElementExitTransition = getTransition(mSharedElementExitTransition,
+                mSharedElementReturnTransition = getTransition(mSharedElementReturnTransition,
+                        USE_DEFAULT_TRANSITION,
+                        R.styleable.Window_windowSharedElementReturnTransition);
+                mSharedElementExitTransition = getTransition(mSharedElementExitTransition, null,
                         R.styleable.Window_windowSharedElementExitTransition);
+                mSharedElementReenterTransition = getTransition(mSharedElementReenterTransition,
+                        USE_DEFAULT_TRANSITION,
+                        R.styleable.Window_windowSharedElementReenterTransition);
                 if (mAllowEnterTransitionOverlap == null) {
                     mAllowEnterTransitionOverlap = getWindowStyle().getBoolean(
-                            R.styleable.
-                                    Window_windowAllowEnterTransitionOverlap, true);
+                            R.styleable.Window_windowAllowEnterTransitionOverlap, true);
                 }
                 if (mAllowExitTransitionOverlap == null) {
                     mAllowExitTransitionOverlap = getWindowStyle().getBoolean(
-                            R.styleable.
-                                    Window_windowAllowExitTransitionOverlap, true);
+                            R.styleable.Window_windowAllowExitTransitionOverlap, true);
                 }
                 if (mBackgroundFadeDurationMillis < 0) {
                     mBackgroundFadeDurationMillis = getWindowStyle().getInteger(
-                            R.styleable.
-                                    Window_windowTransitionBackgroundFadeDuration,
+                            R.styleable.Window_windowTransitionBackgroundFadeDuration,
                             DEFAULT_BACKGROUND_FADE_DURATION_MS);
                 }
             }
         }
     }
 
-    private Transition getTransition(Transition currentValue, int id) {
-        if (currentValue != null) {
+    private Transition getTransition(Transition currentValue, Transition defaultValue, int id) {
+        if (currentValue != defaultValue) {
             return currentValue;
         }
         int transitionId = getWindowStyle().getResourceId(id, -1);
-        Transition transition = null;
+        Transition transition = defaultValue;
         if (transitionId != -1 && transitionId != R.transition.no_transition) {
             TransitionInflater inflater = TransitionInflater.from(getContext());
             transition = inflater.inflateTransition(transitionId);
@@ -3899,8 +3912,18 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     }
 
     @Override
+    public void setReturnTransition(Transition transition) {
+        mReturnTransition = transition;
+    }
+
+    @Override
     public void setExitTransition(Transition exitTransition) {
         mExitTransition = exitTransition;
+    }
+
+    @Override
+    public void setReenterTransition(Transition transition) {
+        mReenterTransition = transition;
     }
 
     @Override
@@ -3909,8 +3932,18 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     }
 
     @Override
+    public void setSharedElementReturnTransition(Transition transition) {
+        mSharedElementReturnTransition = transition;
+    }
+
+    @Override
     public void setSharedElementExitTransition(Transition sharedElementExitTransition) {
         mSharedElementExitTransition = sharedElementExitTransition;
+    }
+
+    @Override
+    public void setSharedElementReenterTransition(Transition transition) {
+        mSharedElementReenterTransition = transition;
     }
 
     @Override
@@ -3919,8 +3952,20 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     }
 
     @Override
+    public Transition getReturnTransition() {
+        return mReturnTransition == USE_DEFAULT_TRANSITION ? getEnterTransition()
+                : mReturnTransition;
+    }
+
+    @Override
     public Transition getExitTransition() {
         return mExitTransition;
+    }
+
+    @Override
+    public Transition getReenterTransition() {
+        return mReenterTransition == USE_DEFAULT_TRANSITION ? getExitTransition()
+                : mReenterTransition;
     }
 
     @Override
@@ -3929,8 +3974,20 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     }
 
     @Override
+    public Transition getSharedElementReturnTransition() {
+        return mSharedElementReturnTransition == USE_DEFAULT_TRANSITION
+                ? getSharedElementEnterTransition() : mSharedElementReturnTransition;
+    }
+
+    @Override
     public Transition getSharedElementExitTransition() {
         return mSharedElementExitTransition;
+    }
+
+    @Override
+    public Transition getSharedElementReenterTransition() {
+        return mSharedElementReenterTransition == USE_DEFAULT_TRANSITION
+                ? getSharedElementExitTransition() : mSharedElementReenterTransition;
     }
 
     @Override

@@ -1425,6 +1425,21 @@ public abstract class Window {
     public void setEnterTransition(Transition transition) {}
 
     /**
+     * Sets the Transition that will be used to move Views out of the scene when the Window is
+     * preparing to close, for example after a call to
+     * {@link android.app.Activity#finishAfterTransition()}. The exiting
+     * Views will be those that are regular Views or ViewGroups that have
+     * {@link ViewGroup#isTransitionGroup} return true. Typical Transitions will extend
+     * {@link android.transition.Visibility} as entering is governed by changing visibility from
+     * {@link View#VISIBLE} to {@link View#INVISIBLE}. If <code>transition</code> is null,
+     * entering Views will remain unaffected. If nothing is set, the default will be to
+     * use the same value as set in {@link #setEnterTransition(android.transition.Transition)}.
+     * @param transition The Transition to use to move Views out of the Scene when the Window
+     *                   is preparing to close.
+     */
+    public void setReturnTransition(Transition transition) {}
+
+    /**
      * Sets the Transition that will be used to move Views out of the scene when starting a
      * new Activity. The exiting Views will be those that are regular Views or ViewGroups that
      * have {@link ViewGroup#isTransitionGroup} return true. Typical Transitions will extend
@@ -1435,6 +1450,20 @@ public abstract class Window {
      *                   new Activity.
      */
     public void setExitTransition(Transition transition) {}
+
+    /**
+     * Sets the Transition that will be used to move Views in to the scene when returning from
+     * a previously-started Activity. The entering Views will be those that are regular Views
+     * or ViewGroups that have {@link ViewGroup#isTransitionGroup} return true. Typical Transitions
+     * will extend {@link android.transition.Visibility} as exiting is governed by changing
+     * visibility from {@link View#VISIBLE} to {@link View#INVISIBLE}. If transition is null,
+     * the views will remain unaffected. If nothing is set, the default will be to use the same
+     * transition as {@link #setExitTransition(android.transition.Transition)}.
+     * Requires {@link #FEATURE_CONTENT_TRANSITIONS}.
+     * @param transition The Transition to use to move Views into the scene when reentering from a
+     *                   previously-started Activity.
+     */
+    public void setReenterTransition(Transition transition) {}
 
     /**
      * Returns the transition used to move Views into the initial scene. The entering
@@ -1449,6 +1478,19 @@ public abstract class Window {
     public Transition getEnterTransition() { return null; }
 
     /**
+     * Returns he Transition that will be used to move Views out of the scene when the Window is
+     * preparing to close, for example after a call to
+     * {@link android.app.Activity#finishAfterTransition()}. The exiting
+     * Views will be those that are regular Views or ViewGroups that have
+     * {@link ViewGroup#isTransitionGroup} return true. Typical Transitions will extend
+     * {@link android.transition.Visibility} as entering is governed by changing visibility from
+     * {@link View#VISIBLE} to {@link View#INVISIBLE}.
+     * @return The Transition to use to move Views out of the Scene when the Window
+     *         is preparing to close.
+     */
+    public Transition getReturnTransition() { return null; }
+
+    /**
      * Returns the Transition that will be used to move Views out of the scene when starting a
      * new Activity. The exiting Views will be those that are regular Views or ViewGroups that
      * have {@link ViewGroup#isTransitionGroup} return true. Typical Transitions will extend
@@ -1459,6 +1501,18 @@ public abstract class Window {
      * new Activity.
      */
     public Transition getExitTransition() { return null; }
+
+    /**
+     * Returns the Transition that will be used to move Views in to the scene when returning from
+     * a previously-started Activity. The entering Views will be those that are regular Views
+     * or ViewGroups that have {@link ViewGroup#isTransitionGroup} return true. Typical Transitions
+     * will extend {@link android.transition.Visibility} as exiting is governed by changing
+     * visibility from {@link View#VISIBLE} to {@link View#INVISIBLE}.
+     * Requires {@link #FEATURE_CONTENT_TRANSITIONS}.
+     * @return The Transition to use to move Views into the scene when reentering from a
+     *         previously-started Activity.
+     */
+    public Transition getReenterTransition() { return null; }
 
     /**
      * Sets the Transition that will be used for shared elements transferred into the content
@@ -1472,11 +1526,31 @@ public abstract class Window {
     public void setSharedElementEnterTransition(Transition transition) {}
 
     /**
+     * Sets the Transition that will be used for shared elements transferred back to a
+     * calling Activity. Typical Transitions will affect size and location, such as
+     * {@link android.transition.ChangeBounds}. A null
+     * value will cause transferred shared elements to blink to the final position.
+     * If no value is set, the default will be to use the same value as
+     * {@link #setSharedElementEnterTransition(android.transition.Transition)}.
+     * Requires {@link #FEATURE_CONTENT_TRANSITIONS}.
+     * @param transition The Transition to use for shared elements transferred out of the content
+     *                   Scene.
+     */
+    public void setSharedElementReturnTransition(Transition transition) {}
+
+    /**
      * Returns the Transition that will be used for shared elements transferred into the content
      * Scene. Requires {@link #FEATURE_CONTENT_TRANSITIONS}.
      * @return Transition to use for sharend elements transferred into the content Scene.
      */
     public Transition getSharedElementEnterTransition() { return null; }
+
+    /**
+     * Returns the Transition that will be used for shared elements transferred back to a
+     * calling Activity. Requires {@link #FEATURE_CONTENT_TRANSITIONS}.
+     * @return Transition to use for sharend elements transferred into the content Scene.
+     */
+    public Transition getSharedElementReturnTransition() { return null; }
 
     /**
      * Sets the Transition that will be used for shared elements after starting a new Activity
@@ -1490,6 +1564,17 @@ public abstract class Window {
     public void setSharedElementExitTransition(Transition transition) {}
 
     /**
+     * Sets the Transition that will be used for shared elements reentering from a started
+     * Activity after it has returned the shared element to it start location. If no value
+     * is set, this will default to
+     * {@link #setSharedElementExitTransition(android.transition.Transition)}.
+     * Requires {@link #FEATURE_CONTENT_TRANSITIONS}.
+     * @param transition The Transition to use for shared elements in the launching Window
+     *                   after the shared element has returned to the Window.
+     */
+    public void setSharedElementReenterTransition(Transition transition) {}
+
+    /**
      * Returns the Transition to use for shared elements in the launching Window prior
      * to transferring to the launched Activity's Window.
      * Requires {@link #FEATURE_CONTENT_TRANSITIONS}.
@@ -1498,6 +1583,16 @@ public abstract class Window {
      * to transferring to the launched Activity's Window.
      */
     public Transition getSharedElementExitTransition() { return null; }
+
+    /**
+     * Returns the Transition that will be used for shared elements reentering from a started
+     * Activity after it has returned the shared element to it start location.
+     * Requires {@link #FEATURE_CONTENT_TRANSITIONS}.
+     *
+     * @return the Transition that will be used for shared elements reentering from a started
+     * Activity after it has returned the shared element to it start location.
+     */
+    public Transition getSharedElementReenterTransition() { return null; }
 
     /**
      * Controls how the transition set in

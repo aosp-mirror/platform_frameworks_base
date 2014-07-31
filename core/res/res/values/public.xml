@@ -2265,6 +2265,10 @@
   <public type="attr" name="windowClipToOutline" />
   <public type="attr" name="datePickerDialogTheme" />
   <public type="attr" name="showText" />
+  <public type="attr" name="windowReturnTransition" />
+  <public type="attr" name="windowReenterTransition" />
+  <public type="attr" name="windowSharedElementReturnTransition" />
+  <public type="attr" name="windowSharedElementReenterTransition" />
 
   <public-padding type="dimen" name="l_resource_pad" end="0x01050010" />
 
