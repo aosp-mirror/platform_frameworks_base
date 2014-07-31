@@ -220,7 +220,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             setZenMode(mode);
             final boolean show = Settings.Global.getInt(mContext.getContentResolver(),
                     Settings.Global.LOCK_SCREEN_SHOW_NOTIFICATIONS, 1) != 0;
-            setShowLockscreenNotifications(show);
+            mShowLockscreenNotifications = show;
         }
     };
 
@@ -1423,17 +1423,14 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     private boolean shouldShowOnKeyguard(StatusBarNotification sbn) {
-        return sbn.getNotification().priority >= Notification.PRIORITY_LOW;
+        return mShowLockscreenNotifications &&
+                sbn.getNotification().priority >= Notification.PRIORITY_LOW;
     }
 
     protected void setZenMode(int mode) {
         if (!isDeviceProvisioned()) return;
         mZenMode = mode;
         updateNotifications();
-    }
-
-    protected void setShowLockscreenNotifications(boolean show) {
-        mShowLockscreenNotifications = show;
     }
 
     protected abstract void haltTicker();
