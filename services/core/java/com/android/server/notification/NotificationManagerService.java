@@ -2333,7 +2333,7 @@ public class NotificationManagerService extends SystemService {
     private void cancelGroupChildrenLocked(NotificationRecord r, int callingUid, int callingPid,
             String listenerName) {
         Notification n = r.getNotification();
-        if (n.getGroup() == null || (n.flags & Notification.FLAG_GROUP_SUMMARY) == 0) {
+        if (!n.isGroupSummary()) {
             return;
         }
 
@@ -2508,8 +2508,7 @@ public class NotificationManagerService extends SystemService {
             return false;
         }
         Notification n = sbn.getNotification();
-        if (listener.targetSdkVersion < Build.VERSION_CODES.L &&
-                n.getGroup() != null && (n.flags & Notification.FLAG_GROUP_SUMMARY) == 0)  {
+        if (listener.targetSdkVersion < Build.VERSION_CODES.L && n.isGroupChild())  {
             return false;
         }
         return true;
