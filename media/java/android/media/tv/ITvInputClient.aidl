@@ -34,6 +34,7 @@ oneway interface ITvInputClient {
     void onSessionEvent(in String name, in Bundle args, int seq);
     void onChannelRetuned(in Uri channelUri, int seq);
     void onTrackInfoChanged(in List<TvTrackInfo> tracks, int seq);
+    void onTrackSelectionChanged(in List<TvTrackInfo> selectedTracks, int seq);
     void onVideoAvailable(int seq);
     void onVideoUnavailable(int reason, int seq);
     void onContentAllowed(int seq);

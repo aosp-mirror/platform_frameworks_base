@@ -16,171 +16,121 @@
 
 package android.media.tv;
 
-import android.media.MediaFormat;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import java.util.List;
 
 /**
  * Encapsulates the format of tracks played in {@link TvInputService}.
  */
 public final class TvTrackInfo implements Parcelable {
     /**
-     * A key describing the type of this track. The associated value is an integer and it should be
-     * one of {@link #VALUE_TYPE_AUDIO}, {@link #VALUE_TYPE_VIDEO}, and {@link #VALUE_TYPE_SUBTITLE}.
-     * <p>
-     * This is a required key.
-     * </p>
+     * The type value for audio tracks.
      */
-    public static final String KEY_TYPE = "type";
+    public static final int TYPE_AUDIO = 0;
 
     /**
-     * A key describing the language of the track, using either ISO 639-1 or 639-2/T codes.
-     * If the language is unknown or could not be determined, the corresponding value will be "und".
-     * The associated value is a string.
-     * <p>
-     * This is a required key.
-     * </p>
+     * The type value for video tracks.
      */
-    public static final String KEY_LANGUAGE = MediaFormat.KEY_LANGUAGE;
+    public static final int TYPE_VIDEO = 1;
 
     /**
-     * A key describing whether this track is selected for the playback.
-     * The associated value is a boolean.
-     * <p>
-     * This is a required key.
-     * </p>
+     * The type value for subtitle tracks.
      */
-    public static final String KEY_IS_SELECTED = "is-selected";
+    public static final int TYPE_SUBTITLE = 2;
 
-    /**
-     * A key describing the sample rate of an audio track.
-     * The associated value is an integer.
-     */
-    public static final String KEY_SAMPLE_RATE = MediaFormat.KEY_SAMPLE_RATE;
+    private final int mType;
+    private final String mLanguage;
+    private final int mAudioChannelCount;
+    private final int mAudioSampleRate;
+    private final int mVideoWidth;
+    private final int mVideoHeight;
+    private final Bundle mExtra;
 
-    /**
-     * A key describing the number of channels in an audio track.
-     * The associated value is an integer.
-     */
-    public static final String KEY_CHANNEL_COUNT = MediaFormat.KEY_CHANNEL_COUNT;
-
-    /**
-     * A key describing the width of the content in a video track.
-     * The associated value is an integer.
-     */
-    public static final String KEY_WIDTH = MediaFormat.KEY_WIDTH;
-
-    /**
-     * A key describing the height of the content in a video track.
-     * The associated value is an integer.
-     */
-    public static final String KEY_HEIGHT = MediaFormat.KEY_HEIGHT;
-
-    /**
-     * A key describing a tag associated with this track. Expected to be used as an identifier with
-     * in a session. The associated value is a string.
-     */
-    public static final String KEY_TAG = "tag";
-
-    /**
-     * The type value for audio track.
-     */
-    public static final int VALUE_TYPE_AUDIO = 0;
-
-    /**
-     * The type value for video track.
-     */
-    public static final int VALUE_TYPE_VIDEO = 1;
-
-    /**
-     * The type value for subtitle track.
-     */
-    public static final int VALUE_TYPE_SUBTITLE = 2;
-
-    private final Bundle mBundle;
-
-    private TvTrackInfo(Bundle bundle) {
-        mBundle = new Bundle(bundle);
+    private TvTrackInfo(int type, String language, int audioChannelCount,
+            int audioSampleRate, int videoWidth, int videoHeight, Bundle extra) {
+        mType = type;
+        mLanguage = language;
+        mAudioChannelCount = audioChannelCount;
+        mAudioSampleRate = audioSampleRate;
+        mVideoWidth = videoWidth;
+        mVideoHeight = videoHeight;
+        mExtra = extra;
     }
 
     private TvTrackInfo(Parcel in) {
-        mBundle = in.readBundle();
+        mType = in.readInt();
+        mLanguage = in.readString();
+        mAudioChannelCount = in.readInt();
+        mAudioSampleRate = in.readInt();
+        mVideoWidth = in.readInt();
+        mVideoHeight = in.readInt();
+        mExtra = in.readBundle();
     }
 
     /**
-     * Checks if there is only one or zero selected track per track type.
-     *
-     * @param tracks a list including tracks which will be checked.
-     * @return true if there is only one or zero selected track per track type, false otherwise
-     * @hide
+     * Returns the type of the track. The type should be one of the followings:
+     * {@link #TYPE_AUDIO}, {@link #TYPE_VIDEO} and {@link #TYPE_SUBTITLE}.
      */
-    public static boolean checkSanity(List<TvTrackInfo> tracks) {
-        int selectedAudioTracks = 0;
-        int selectedVideoTracks = 0;
-        int selectedSubtitleTracks = 0;
-        for (TvTrackInfo track : tracks) {
-            if (track.getBoolean(KEY_IS_SELECTED)) {
-                int type = track.getInt(KEY_TYPE);
-                if (type == VALUE_TYPE_AUDIO) {
-                    selectedAudioTracks++;
-                } else if (type == VALUE_TYPE_VIDEO) {
-                    selectedVideoTracks++;
-                } else if (type == VALUE_TYPE_SUBTITLE) {
-                    selectedSubtitleTracks++;
-                }
-            }
+    public final int getType() {
+        return mType;
+    }
+
+    /**
+     * Returns the language information encoded by either ISO 639-1 or ISO 639-2/T. If the language
+     * is unknown or could not be determined, the corresponding value will be {@code null}.
+     */
+    public final String getLanguage() {
+        return mLanguage;
+    }
+
+    /**
+     * Returns the audio channel count. Valid for {@link #TYPE_AUDIO} tracks only.
+     */
+    public final int getAudioChannelCount() {
+        if (mType != TYPE_AUDIO) {
+            throw new IllegalStateException("Not an audio track");
         }
-        if (selectedAudioTracks > 1 || selectedVideoTracks > 1 || selectedSubtitleTracks > 1) {
-            return false;
+        return mAudioChannelCount;
+    }
+
+    /**
+     * Returns the audio sample rate, in the unit of Hz. Valid for {@link #TYPE_AUDIO} tracks only.
+     */
+    public final int getAudioSampleRate() {
+        if (mType != TYPE_AUDIO) {
+            throw new IllegalStateException("Not an audio track");
         }
-        return true;
+        return mAudioSampleRate;
     }
 
     /**
-     * Returns true if the given key is contained in the metadata
-     *
-     * @param key A String key
-     * @return true If the key exists in this metadata, false otherwise
+     * Returns the width of the video, in the unit of pixels. Valid for {@link #TYPE_VIDEO} tracks
+     * only.
      */
-    public boolean containsKey(String key) {
-        return mBundle.containsKey(key);
+    public final int getVideoWidth() {
+        if (mType != TYPE_VIDEO) {
+            throw new IllegalStateException("Not a video track");
+        }
+        return mVideoWidth;
     }
 
     /**
-     * Returns the value associated with the given key, or null if no mapping of
-     * the desired type exists for the given key or a null value is explicitly
-     * associated with the key.
-     *
-     * @param key The key the value is stored under
-     * @return A String value, or null
+     * Returns the height of the video, in the unit of pixels. Valid for {@link #TYPE_VIDEO} tracks
+     * only.
      */
-    public String getString(String key) {
-        return mBundle.getString(key);
+    public final int getVideoHeight() {
+        if (mType != TYPE_VIDEO) {
+            throw new IllegalStateException("Not a video track");
+        }
+        return mVideoHeight;
     }
 
     /**
-     * Returns the value associated with the given key, or 0L if no integer exists
-     * for the given key.
-     *
-     * @param key The key the value is stored under
-     * @return An integer value
+     * Returns the extra information about the current track.
      */
-    public int getInt(String key) {
-        return mBundle.getInt(key, 0);
-    }
-
-    /**
-     * Returns the value associated with the given key, or false if no integer exists
-     * for the given key.
-     *
-     * @param key The key the value is stored under
-     * @return A boolean value
-     */
-    public boolean getBoolean(String key) {
-        return mBundle.getBoolean(key, false);
+    public final Bundle getExtra() {
+        return mExtra;
     }
 
     @Override
@@ -188,13 +138,25 @@ public final class TvTrackInfo implements Parcelable {
         return 0;
     }
 
+    /**
+     * Used to package this object into a {@link Parcel}.
+     *
+     * @param dest The {@link Parcel} to be written.
+     * @param flags The flags used for parceling.
+     */
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeBundle(mBundle);
+        dest.writeInt(mType);
+        dest.writeString(mLanguage);
+        dest.writeInt(mAudioChannelCount);
+        dest.writeInt(mAudioSampleRate);
+        dest.writeInt(mVideoWidth);
+        dest.writeInt(mVideoHeight);
+        dest.writeBundle(mExtra);
     }
 
-    public static final Parcelable.Creator<TvTrackInfo> CREATOR
-            = new Parcelable.Creator<TvTrackInfo>() {
+    public static final Parcelable.Creator<TvTrackInfo> CREATOR =
+            new Parcelable.Creator<TvTrackInfo>() {
                 @Override
                 public TvTrackInfo createFromParcel(Parcel in) {
                     return new TvTrackInfo(in);
@@ -210,73 +172,100 @@ public final class TvTrackInfo implements Parcelable {
      * A builder class for creating {@link TvTrackInfo} objects.
      */
     public static final class Builder {
-        private final Bundle mBundle;
+        private int mType;
+        private String mLanguage;
+        private int mAudioChannelCount;
+        private int mAudioSampleRate;
+        private int mVideoWidth;
+        private int mVideoHeight;
+        private Bundle mExtra;
 
         /**
-         * Create a {@link Builder}. Any field that should be included in the
-         * {@link TvTrackInfo} must be added.
+         * Create a {@link Builder}. Any field that should be included in the {@link TvTrackInfo}
+         * must be added.
          *
          * @param type The type of the track.
-         * @param language The language of the track, using either ISO 639-1 or 639-2/T codes.
-         *         "und" if the language is unknown.
-         * @param isSelected Whether this track is selected for the playback or not.
          */
-        public Builder(int type, String language, boolean isSelected) {
-            if (type != VALUE_TYPE_AUDIO
-                    && type != VALUE_TYPE_VIDEO
-                    && type != VALUE_TYPE_SUBTITLE) {
+        public Builder(int type) {
+            if (type != TYPE_AUDIO
+                    && type != TYPE_VIDEO
+                    && type != TYPE_SUBTITLE) {
                 throw new IllegalArgumentException("Unknown type: " + type);
             }
-            mBundle = new Bundle();
-            putInt(KEY_TYPE, type);
-            putString(KEY_LANGUAGE, language);
-            putBoolean(KEY_IS_SELECTED, isSelected);
+            mType = type;
         }
 
         /**
-         * Create a Builder using a {@link TvTrackInfo} instance to set the
-         * initial values. All fields in the source metadata will be included in
-         * the new metadata. Fields can be overwritten by adding the same key.
+         * Sets the language information of the current track.
          *
-         * @param source The source {@link TvTrackInfo} instance
+         * @param language The language string encoded by either ISO 639-1 or ISO 639-2/T.
          */
-        public Builder(TvTrackInfo source) {
-            mBundle = new Bundle(source.mBundle);
-        }
-
-        /**
-         * Put a String value into the track.
-         *
-         * @param key The key for referencing this value
-         * @param value The String value to store
-         * @return The Builder to allow chaining
-         */
-        public Builder putString(String key, String value) {
-            mBundle.putString(key, value);
+        public final Builder setLanguage(String language) {
+            mLanguage = language;
             return this;
         }
 
         /**
-         * Put an integer value into the track.
+         * Sets the audio channel count. Valid for {@link #TYPE_AUDIO} tracks only.
          *
-         * @param key The key for referencing this value
-         * @param value The integer value to store
-         * @return The Builder to allow chaining
+         * @param audioChannelCount The audio channel count.
          */
-        public Builder putInt(String key, int value) {
-            mBundle.putInt(key, value);
+        public final Builder setAudioChannelCount(int audioChannelCount) {
+            if (mType != TYPE_AUDIO) {
+                throw new IllegalStateException("Not an audio track");
+            }
+            mAudioChannelCount = audioChannelCount;
             return this;
         }
 
         /**
-         * Put a boolean value into the track.
+         * Sets the audio sample rate, in the unit of Hz. Valid for {@link #TYPE_AUDIO} tracks only.
          *
-         * @param key The key for referencing this value
-         * @param value The boolean value to store
-         * @return The Builder to allow chaining
+         * @param audioSampleRate The audio sample rate.
          */
-        public Builder putBoolean(String key, boolean value) {
-            mBundle.putBoolean(key, value);
+        public final Builder setAudioSampleRate(int audioSampleRate) {
+            if (mType != TYPE_AUDIO) {
+                throw new IllegalStateException("Not an audio track");
+            }
+            mAudioSampleRate = audioSampleRate;
+            return this;
+        }
+
+        /**
+         * Sets the width of the video, in the unit of pixels. Valid for {@link #TYPE_VIDEO} tracks
+         * only.
+         *
+         * @param videoWidth The width of the video.
+         */
+        public final Builder setVideoWidth(int videoWidth) {
+            if (mType != TYPE_VIDEO) {
+                throw new IllegalStateException("Not a video track");
+            }
+            mVideoWidth = videoWidth;
+            return this;
+        }
+
+        /**
+         * Sets the height of the video, in the unit of pixels. Valid for {@link #TYPE_VIDEO} tracks
+         * only.
+         *
+         * @param videoHeight The height of the video.
+         */
+        public final Builder setVideoHeight(int videoHeight) {
+            if (mType != TYPE_VIDEO) {
+                throw new IllegalStateException("Not a video track");
+            }
+            mVideoHeight = videoHeight;
+            return this;
+        }
+
+        /**
+         * Sets the extra information about the current track.
+         *
+         * @param extra The extra information.
+         */
+        public final Builder setExtra(Bundle extra) {
+            mExtra = new Bundle(extra);
             return this;
         }
 
@@ -286,7 +275,8 @@ public final class TvTrackInfo implements Parcelable {
          * @return The new {@link TvTrackInfo} instance
          */
         public TvTrackInfo build() {
-            return new TvTrackInfo(mBundle);
+            return new TvTrackInfo(mType, mLanguage, mAudioChannelCount,
+                    mAudioSampleRate, mVideoWidth, mVideoHeight, mExtra);
         }
     }
 }

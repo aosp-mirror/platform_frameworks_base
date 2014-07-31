@@ -164,7 +164,7 @@ public final class TvInputManager {
          * This is called when the channel of this session is changed by the underlying TV input
          * with out any {@link TvInputManager.Session#tune(Uri)} request.
          *
-         * @param session A {@link TvInputManager.Session} associated with this callback
+         * @param session A {@link TvInputManager.Session} associated with this callback.
          * @param channelUri The URI of a channel.
          */
         public void onChannelRetuned(Session session, Uri channelUri) {
@@ -173,16 +173,25 @@ public final class TvInputManager {
         /**
          * This is called when the track information of the session has been changed.
          *
-         * @param session A {@link TvInputManager.Session} associated with this callback
+         * @param session A {@link TvInputManager.Session} associated with this callback.
          * @param tracks A list which includes track information.
          */
         public void onTrackInfoChanged(Session session, List<TvTrackInfo> tracks) {
         }
 
         /**
-         * This is called when the video is available, so the TV input starts the playback.
+         * This is called when there is a change on the selected tracks in this session.
          *
          * @param session A {@link TvInputManager.Session} associated with this callback
+         * @param selectedTracks A list of selected tracks.
+         */
+        public void onTrackSelectionChanged(Session session, List<TvTrackInfo> selectedTracks) {
+        }
+
+        /**
+         * This is called when the video is available, so the TV input starts the playback.
+         *
+         * @param session A {@link TvInputManager.Session} associated with this callback.
          */
         public void onVideoAvailable(Session session) {
         }
@@ -277,8 +286,18 @@ public final class TvInputManager {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    mSession.setTracks(tracks);
+                    mSession.mTracks = tracks;
                     mSessionCallback.onTrackInfoChanged(mSession, tracks);
+                }
+            });
+        }
+
+        public void postTrackSelectionChanged(final List<TvTrackInfo> selectedTracks) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSession.mSelectedTracks = selectedTracks;
+                    mSessionCallback.onTrackSelectionChanged(mSession, selectedTracks);
                 }
             });
         }
@@ -465,6 +484,18 @@ public final class TvInputManager {
                         return;
                     }
                     record.postTrackInfoChanged(tracks);
+                }
+            }
+
+            @Override
+            public void onTrackSelectionChanged(List<TvTrackInfo> selectedTracks, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postTrackSelectionChanged(selectedTracks);
                 }
             }
 
@@ -868,6 +899,7 @@ public final class TvInputManager {
         private TvInputEventSender mSender;
         private InputChannel mChannel;
         private List<TvTrackInfo> mTracks;
+        private List<TvTrackInfo> mSelectedTracks;
 
         private Session(IBinder token, InputChannel channel, ITvInputManager service, int userId,
                 int seq, SparseArray<SessionCallbackRecord> sessionCallbackRecordMap) {
@@ -1067,8 +1099,17 @@ public final class TvInputManager {
             return new ArrayList<TvTrackInfo>(mTracks);
         }
 
-        private void setTracks(List<TvTrackInfo> tracks) {
-            mTracks = tracks;
+        /**
+         * Returns a list of selected tracks May return {@code null} if the information is not
+         * available.
+         * @see #selectTrack(TvTrackInfo)
+         * @see #unselectTrack(TvTrackInfo)
+         */
+        public List<TvTrackInfo> getSelectedTracks() {
+            if (mSelectedTracks == null) {
+                return null;
+            }
+            return new ArrayList<TvTrackInfo>(mSelectedTracks);
         }
 
         /**
