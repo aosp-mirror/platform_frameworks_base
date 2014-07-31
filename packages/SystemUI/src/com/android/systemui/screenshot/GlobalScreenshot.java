@@ -74,6 +74,8 @@ class SaveImageInBackgroundData {
     Runnable finisher;
     int iconSize;
     int result;
+    int previewWidth;
+    int previewheight;
 
     void clearImage() {
         image = null;
@@ -131,17 +133,19 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
         mImageWidth = data.image.getWidth();
         mImageHeight = data.image.getHeight();
         int iconSize = data.iconSize;
+        int previewWidth = data.previewWidth;
+        int previewHeight = data.previewheight;
 
         final int shortSide = mImageWidth < mImageHeight ? mImageWidth : mImageHeight;
-        Bitmap preview = Bitmap.createBitmap(shortSide, shortSide, data.image.getConfig());
+        Bitmap preview = Bitmap.createBitmap(previewWidth, previewHeight, data.image.getConfig());
         Canvas c = new Canvas(preview);
         Paint paint = new Paint();
         ColorMatrix desat = new ColorMatrix();
         desat.setSaturation(0.25f);
         paint.setColorFilter(new ColorMatrixColorFilter(desat));
         Matrix matrix = new Matrix();
-        matrix.postTranslate((shortSide - mImageWidth) / 2,
-                            (shortSide - mImageHeight) / 2);
+        matrix.postTranslate((previewWidth - mImageWidth) / 2,
+                            (previewHeight - mImageHeight) / 2);
         c.drawBitmap(data.image, matrix, paint);
         c.drawColor(0x40FFFFFF);
         c.setBitmap(null);
@@ -343,6 +347,8 @@ class GlobalScreenshot {
     private static final float SCREENSHOT_DROP_OUT_MIN_SCALE = SCREENSHOT_SCALE * 0.45f;
     private static final float SCREENSHOT_FAST_DROP_OUT_MIN_SCALE = SCREENSHOT_SCALE * 0.6f;
     private static final float SCREENSHOT_DROP_OUT_MIN_SCALE_OFFSET = 0f;
+    private final int mPreviewWidth;
+    private final int mPreviewHeight;
 
     private Context mContext;
     private WindowManager mWindowManager;
@@ -418,6 +424,16 @@ class GlobalScreenshot {
         mBgPadding = (float) r.getDimensionPixelSize(R.dimen.global_screenshot_bg_padding);
         mBgPaddingScale = mBgPadding /  mDisplayMetrics.widthPixels;
 
+        // determine the optimal preview size
+        int panelWidth = 0;
+        try {
+            panelWidth = r.getDimensionPixelSize(R.dimen.notification_panel_width);
+        } catch (Resources.NotFoundException e) {
+            panelWidth = mDisplayMetrics.widthPixels;
+        }
+        mPreviewWidth = panelWidth;
+        mPreviewHeight = r.getDimensionPixelSize(R.dimen.notification_max_height);
+
         // Setup the Camera shutter sound
         mCameraSound = new MediaActionSound();
         mCameraSound.load(MediaActionSound.SHUTTER_CLICK);
@@ -432,6 +448,8 @@ class GlobalScreenshot {
         data.image = mScreenBitmap;
         data.iconSize = mNotificationIconSize;
         data.finisher = finisher;
+        data.previewWidth = mPreviewWidth;
+        data.previewheight = mPreviewHeight;
         if (mSaveInBgTask != null) {
             mSaveInBgTask.cancel(false);
         }
