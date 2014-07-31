@@ -30,8 +30,8 @@ oneway interface ITvInputSessionCallback {
     void onSessionCreated(ITvInputSession session);
     void onSessionEvent(in String name, in Bundle args);
     void onChannelRetuned(in Uri channelUri);
-    void onTrackInfoChanged(in List<TvTrackInfo> tracks);
-    void onTrackSelectionChanged(in List<TvTrackInfo> selectedTracks);
+    void onTracksChanged(in List<TvTrackInfo> tracks);
+    void onTrackSelected(int type, in String trackId);
     void onVideoAvailable();
     void onVideoUnavailable(int reason);
     void onContentAllowed();
