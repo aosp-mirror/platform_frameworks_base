@@ -78,7 +78,7 @@ public class ReplaceMethodCallsAdapter extends ClassVisitor {
                 assert isNeeded(owner, name, desc) && output.length == 3
                         && opcodeOut.length == 1;
                 opcodeOut[0] = Opcodes.INVOKESTATIC;
-                output[0] = "com.android.layoutlib.bridge.android.AndroidLocale";
+                output[0] = "com/android/layoutlib/bridge/android/AndroidLocale";
                 output[1] = name;
                 output[2] = "(Ljava/util/Locale;)Ljava/lang/String;";
             }
