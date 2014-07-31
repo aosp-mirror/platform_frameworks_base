@@ -543,9 +543,7 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
 
         // Need a valid handler, or current thread needs to have a looper, if
         // listener is valid
-        if (listener != null) {
-            handler = checkHandler(handler);
-        }
+        handler = checkHandler(handler, listener);
 
         // Make sure that there all requests have at least 1 surface; all surfaces are non-null
         for (CaptureRequest request : requestList) {
@@ -1151,6 +1149,18 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
                     "No handler given, and current thread has no looper!");
             }
             handler = new Handler(looper);
+        }
+        return handler;
+    }
+
+    /**
+     * Default handler management, conditional on there being a listener.
+     *
+     * <p>If the listener isn't null, check the handler, otherwise pass it through.</p>
+     */
+    static <T> Handler checkHandler(Handler handler, T listener) {
+        if (listener != null) {
+            return checkHandler(handler);
         }
         return handler;
     }

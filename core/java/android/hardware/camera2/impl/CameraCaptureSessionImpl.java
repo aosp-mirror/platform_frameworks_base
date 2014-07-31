@@ -141,7 +141,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
         checkNotClosed();
         checkLegalToCapture();
 
-        handler = checkHandler(handler);
+        handler = checkHandler(handler, listener);
 
         if (VERBOSE) {
             Log.v(TAG, "capture - request " + request + ", listener " + listener + " handler" +
@@ -164,7 +164,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
         checkNotClosed();
         checkLegalToCapture();
 
-        handler = checkHandler(handler);
+        handler = checkHandler(handler, listener);
 
         if (VERBOSE) {
             CaptureRequest[] requestArray = requests.toArray(new CaptureRequest[0]);
@@ -186,7 +186,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
         checkNotClosed();
         checkLegalToCapture();
 
-        handler = checkHandler(handler);
+        handler = checkHandler(handler, listener);
 
         if (VERBOSE) {
             Log.v(TAG, "setRepeatingRequest - request " + request + ", listener " + listener +
@@ -209,7 +209,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
         checkNotClosed();
         checkLegalToCapture();
 
-        handler = checkHandler(handler);
+        handler = checkHandler(handler, listener);
 
         if (VERBOSE) {
             CaptureRequest[] requestArray = requests.toArray(new CaptureRequest[0]);
@@ -379,15 +379,18 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
          * - then forward the call to a handler
          * - then finally invoke the destination method on the session listener object
          */
-        Dispatchable<CaptureListener> userListenerSink;
-        if (listener == null) { // OK: API allows the user to not specify a listener
-            userListenerSink = new NullDispatcher<>();
-        } else {
-            userListenerSink = new InvokeDispatcher<>(listener);
+        if (listener == null) {
+            // OK: API allows the user to not specify a listener, and the handler may
+            // also be null in that case. Collapse whole dispatch chain to only call the local
+            // listener
+            return localListener;
         }
 
         InvokeDispatcher<CameraDevice.CaptureListener> localSink =
                 new InvokeDispatcher<>(localListener);
+
+        InvokeDispatcher<CaptureListener> userListenerSink =
+                new InvokeDispatcher<>(listener);
         HandlerDispatcher<CaptureListener> handlerPassthrough =
                 new HandlerDispatcher<>(userListenerSink, handler);
         DuckTypingDispatcher<CameraDevice.CaptureListener, CaptureListener> duckToSession
