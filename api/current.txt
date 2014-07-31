@@ -31748,7 +31748,7 @@ package android.text.style {
     field public static final int WEEKDAY_WEDNESDAY = 4; // 0x4
   }
 
-  public static abstract class TtsSpan.Builder {
+  public static class TtsSpan.Builder {
     ctor public TtsSpan.Builder(java.lang.String);
     method public android.text.style.TtsSpan build();
     method public C setIntArgument(java.lang.String, int);
