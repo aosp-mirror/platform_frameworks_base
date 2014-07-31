@@ -37,9 +37,8 @@ public final class Outline {
     public Rect mRect;
     /** @hide */
     public float mRadius;
-
     /** @hide */
-    public boolean mIsFilled;
+    public float mAlpha;
 
     /**
      * Constructs an empty Outline. Call one of the setter methods to make
@@ -63,7 +62,6 @@ public final class Outline {
         mPath = null;
         mRect = null;
         mRadius = 0;
-        mIsFilled = true;
     }
 
     /**
@@ -92,24 +90,24 @@ public final class Outline {
     }
 
     /**
-     * Sets whether the outline represents a fully opaque area.
+     * Sets the alpha represented by the Outline.
      *
-     * A filled outline is assumed, by the drawing system, to fully cover content beneath it,
-     * meaning content beneath may be optimized away.
+     * Content producing a fully opaque (alpha = 1.0f) outline is assumed, by the drawing system,
+     * to fully cover content beneath it, meaning content beneath may be optimized away.
      *
      * @hide
      */
-    public void setFilled(boolean isFilled) {
-        mIsFilled = isFilled;
+    public void setAlpha(float alpha) {
+        mAlpha = alpha;
     }
 
     /**
-     * Returns whether the outline represents a fully opaque area.
+     * Sets the alpha represented by the Outline.
      *
      * @hide
      */
-    public boolean isFilled() {
-        return !isEmpty() && mIsFilled;
+    public float getAlpha() {
+        return mAlpha;
     }
 
     /**
@@ -132,7 +130,7 @@ public final class Outline {
             mRect.set(src.mRect);
         }
         mRadius = src.mRadius;
-        mIsFilled = src.mIsFilled;
+        mAlpha = src.mAlpha;
     }
 
     /**
@@ -164,7 +162,6 @@ public final class Outline {
         mRect.set(left, top, right, bottom);
         mRadius = radius;
         mPath = null;
-        mIsFilled = true;
     }
 
     /**
@@ -193,7 +190,6 @@ public final class Outline {
         mPath.reset();
         mPath.addOval(left, top, right, bottom, Path.Direction.CW);
         mRect = null;
-        mIsFilled = true;
     }
 
     /**
@@ -220,6 +216,5 @@ public final class Outline {
         mPath.set(convexPath);
         mRect = null;
         mRadius = -1.0f;
-        mIsFilled = true;
     }
 }
