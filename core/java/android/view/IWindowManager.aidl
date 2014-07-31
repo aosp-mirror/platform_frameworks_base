@@ -150,10 +150,9 @@ interface IWindowManager
     void setStrictModeVisualIndicatorPreference(String enabled);
 
     /**
-     * Update the windowmanagers cached value of
-     * {@link android.app.admin.DevicePolicyManager#getScreenCaptureDisabled(null, userId)}
+     * Set whether screen capture is disabled for all windows of a specific user
      */
-    void updateScreenCaptureDisabled(int userId);
+    void setScreenCaptureDisabled(int userId, boolean disabled);
 
     // These can only be called with the SET_ORIENTATION permission.
     /**
