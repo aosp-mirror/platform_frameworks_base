@@ -17065,6 +17065,7 @@ package android.media.tv {
     method public void notifyContentAllowed();
     method public void notifyContentBlocked(android.media.tv.TvContentRating);
     method public void notifyTrackInfoChanged(java.util.List<android.media.tv.TvTrackInfo>);
+    method public void notifyTrackSelectionChanged(java.util.List<android.media.tv.TvTrackInfo>);
     method public void notifyVideoAvailable();
     method public void notifyVideoUnavailable(int);
     method public android.view.View onCreateOverlayView();
@@ -17088,33 +17089,30 @@ package android.media.tv {
   }
 
   public final class TvTrackInfo implements android.os.Parcelable {
-    method public boolean containsKey(java.lang.String);
     method public int describeContents();
-    method public boolean getBoolean(java.lang.String);
-    method public int getInt(java.lang.String);
-    method public java.lang.String getString(java.lang.String);
+    method public final int getAudioChannelCount();
+    method public final int getAudioSampleRate();
+    method public final android.os.Bundle getExtra();
+    method public final java.lang.String getLanguage();
+    method public final int getType();
+    method public final int getVideoHeight();
+    method public final int getVideoWidth();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
-    field public static final java.lang.String KEY_CHANNEL_COUNT = "channel-count";
-    field public static final java.lang.String KEY_HEIGHT = "height";
-    field public static final java.lang.String KEY_IS_SELECTED = "is-selected";
-    field public static final java.lang.String KEY_LANGUAGE = "language";
-    field public static final java.lang.String KEY_SAMPLE_RATE = "sample-rate";
-    field public static final java.lang.String KEY_TAG = "tag";
-    field public static final java.lang.String KEY_TYPE = "type";
-    field public static final java.lang.String KEY_WIDTH = "width";
-    field public static final int VALUE_TYPE_AUDIO = 0; // 0x0
-    field public static final int VALUE_TYPE_SUBTITLE = 2; // 0x2
-    field public static final int VALUE_TYPE_VIDEO = 1; // 0x1
+    field public static final int TYPE_AUDIO = 0; // 0x0
+    field public static final int TYPE_SUBTITLE = 2; // 0x2
+    field public static final int TYPE_VIDEO = 1; // 0x1
   }
 
   public static final class TvTrackInfo.Builder {
-    ctor public TvTrackInfo.Builder(int, java.lang.String, boolean);
-    ctor public TvTrackInfo.Builder(android.media.tv.TvTrackInfo);
+    ctor public TvTrackInfo.Builder(int);
     method public android.media.tv.TvTrackInfo build();
-    method public android.media.tv.TvTrackInfo.Builder putBoolean(java.lang.String, boolean);
-    method public android.media.tv.TvTrackInfo.Builder putInt(java.lang.String, int);
-    method public android.media.tv.TvTrackInfo.Builder putString(java.lang.String, java.lang.String);
+    method public final android.media.tv.TvTrackInfo.Builder setAudioChannelCount(int);
+    method public final android.media.tv.TvTrackInfo.Builder setAudioSampleRate(int);
+    method public final android.media.tv.TvTrackInfo.Builder setExtra(android.os.Bundle);
+    method public final android.media.tv.TvTrackInfo.Builder setLanguage(java.lang.String);
+    method public final android.media.tv.TvTrackInfo.Builder setVideoHeight(int);
+    method public final android.media.tv.TvTrackInfo.Builder setVideoWidth(int);
   }
 
   public class TvView extends android.view.ViewGroup {
@@ -17122,6 +17120,7 @@ package android.media.tv {
     ctor public TvView(android.content.Context, android.util.AttributeSet);
     ctor public TvView(android.content.Context, android.util.AttributeSet, int);
     method public boolean dispatchUnhandledInputEvent(android.view.InputEvent);
+    method public java.util.List<android.media.tv.TvTrackInfo> getSelectedTracks();
     method public java.util.List<android.media.tv.TvTrackInfo> getTracks();
     method protected void onLayout(boolean, int, int, int, int);
     method public boolean onUnhandledInputEvent(android.view.InputEvent);
@@ -17148,6 +17147,7 @@ package android.media.tv {
     method public void onContentBlocked(java.lang.String, android.media.tv.TvContentRating);
     method public void onError(java.lang.String, int);
     method public void onTrackInfoChanged(java.lang.String, java.util.List<android.media.tv.TvTrackInfo>);
+    method public void onTrackSelectionChanged(java.lang.String, java.util.List<android.media.tv.TvTrackInfo>);
     method public void onVideoAvailable(java.lang.String);
     method public void onVideoSizeChanged(java.lang.String, int, int);
     method public void onVideoUnavailable(java.lang.String, int);
