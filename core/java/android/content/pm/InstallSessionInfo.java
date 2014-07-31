@@ -16,7 +16,9 @@
 
 package android.content.pm;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -32,6 +34,8 @@ public class InstallSessionInfo implements Parcelable {
     public String installerPackageName;
     /** {@hide} */
     public float progress;
+    /** {@hide} */
+    public boolean open;
 
     /** {@hide} */
     public int mode;
@@ -53,6 +57,7 @@ public class InstallSessionInfo implements Parcelable {
         sessionId = source.readInt();
         installerPackageName = source.readString();
         progress = source.readFloat();
+        open = source.readInt() != 0;
 
         mode = source.readInt();
         sizeBytes = source.readLong();
@@ -88,6 +93,13 @@ public class InstallSessionInfo implements Parcelable {
     }
 
     /**
+     * Return if this session is currently open.
+     */
+    public boolean isOpen() {
+        return open;
+    }
+
+    /**
      * Return the package name this session is working with. May be {@code null}
      * if unknown.
      */
@@ -111,6 +123,23 @@ public class InstallSessionInfo implements Parcelable {
         return appLabel;
     }
 
+    /**
+     * Return an Intent that can be started to view details about this install
+     * session. This may surface actions such as pause, resume, or cancel.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you safeguard
+     * against this.
+     *
+     * @see PackageInstaller#ACTION_SESSION_DETAILS
+     */
+    public @Nullable Intent getDetailsIntent() {
+        final Intent intent = new Intent(PackageInstaller.ACTION_SESSION_DETAILS);
+        intent.putExtra(PackageInstaller.EXTRA_SESSION_ID, sessionId);
+        intent.setPackage(installerPackageName);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        return intent;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -121,6 +150,7 @@ public class InstallSessionInfo implements Parcelable {
         dest.writeInt(sessionId);
         dest.writeString(installerPackageName);
         dest.writeFloat(progress);
+        dest.writeInt(open ? 1 : 0);
 
         dest.writeInt(mode);
         dest.writeLong(sizeBytes);

@@ -24,7 +24,9 @@ interface IPackageInstallerSession {
     void setClientProgress(float progress);
     void addClientProgress(float progress);
 
+    String[] list();
     ParcelFileDescriptor openWrite(String name, long offsetBytes, long lengthBytes);
+    ParcelFileDescriptor openRead(String name);
 
     void close();
     void commit(in IPackageInstallObserver2 observer);
