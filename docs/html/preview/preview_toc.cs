@@ -68,6 +68,8 @@
             Recommendations</a></li>
         </ul>
       </li>
+      <li><a href="<?cs var:toroot ?>preview/tv/tif/index.html">
+        TV Input Framework</a></li>
       <li><a href="<?cs var:toroot ?>preview/tv/games/index.html">
         Games on TV</a></li>
       <li><a href="<?cs var:toroot ?>preview/tv/start/hardware-features.html">
