@@ -341,6 +341,7 @@ public class AsmAnalyzer {
                     inOutKeepClasses.size(), deps.size());
 
             for (ClassReader cr : temp.values()) {
+                visitor.setClassName(cr.getClassName());
                 cr.accept(visitor, 0 /* flags */);
             }
         }
