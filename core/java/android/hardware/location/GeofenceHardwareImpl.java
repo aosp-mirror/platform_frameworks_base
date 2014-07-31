@@ -139,8 +139,8 @@ public final class GeofenceHardwareImpl {
     private void updateFusedHardwareAvailability() {
         boolean fusedSupported;
         try {
-            fusedSupported = mFusedService.isSupported();
-        } catch(RemoteException e) {
+            fusedSupported = (mFusedService != null ? mFusedService.isSupported() : false);
+        } catch (RemoteException e) {
             Log.e(TAG, "RemoteException calling LocationManagerService");
             fusedSupported = false;
         }
