@@ -1324,31 +1324,30 @@ public abstract class BaseStatusBar extends SystemUI implements
         return entry.notification;
     }
 
-    protected NotificationData.Entry createNotificationViews(StatusBarNotification notification) {
+    protected NotificationData.Entry createNotificationViews(StatusBarNotification sbn) {
         if (DEBUG) {
-            Log.d(TAG, "createNotificationViews(notification=" + notification);
+            Log.d(TAG, "createNotificationViews(notification=" + sbn);
         }
         // Construct the icon.
+        Notification n = sbn.getNotification();
         final StatusBarIconView iconView = new StatusBarIconView(mContext,
-                notification.getPackageName() + "/0x" + Integer.toHexString(notification.getId()),
-                notification.getNotification());
+                sbn.getPackageName() + "/0x" + Integer.toHexString(sbn.getId()), n);
         iconView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
 
-        final StatusBarIcon ic = new StatusBarIcon(notification.getPackageName(),
-                notification.getUser(),
-                    notification.getNotification().icon,
-                    notification.getNotification().iconLevel,
-                    notification.getNotification().number,
-                    notification.getNotification().tickerText);
+        final StatusBarIcon ic = new StatusBarIcon(sbn.getPackageName(),
+                sbn.getUser(),
+                    n.icon,
+                    n.iconLevel,
+                    n.number,
+                    n.tickerText);
         if (!iconView.set(ic)) {
-            handleNotificationError(notification, "Couldn't create icon: " + ic);
+            handleNotificationError(sbn, "Couldn't create icon: " + ic);
             return null;
         }
         // Construct the expanded view.
-        NotificationData.Entry entry = new NotificationData.Entry(notification, iconView);
+        NotificationData.Entry entry = new NotificationData.Entry(sbn, iconView);
         if (!inflateViews(entry, mStackScroller)) {
-            handleNotificationError(notification, "Couldn't expand RemoteViews for: "
-                    + notification);
+            handleNotificationError(sbn, "Couldn't expand RemoteViews for: " + sbn);
             return null;
         }
         return entry;
@@ -1464,15 +1463,16 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         // XXX: modify when we do something more intelligent with the two content views
         final RemoteViews oldContentView = oldNotification.getNotification().contentView;
-        final RemoteViews contentView = notification.getNotification().contentView;
+        Notification n = notification.getNotification();
+        final RemoteViews contentView = n.contentView;
         final RemoteViews oldBigContentView = oldNotification.getNotification().bigContentView;
-        final RemoteViews bigContentView = notification.getNotification().bigContentView;
+        final RemoteViews bigContentView = n.bigContentView;
         final RemoteViews oldHeadsUpContentView = oldNotification.getNotification().headsUpContentView;
-        final RemoteViews headsUpContentView = notification.getNotification().headsUpContentView;
+        final RemoteViews headsUpContentView = n.headsUpContentView;
         final Notification oldPublicNotification = oldNotification.getNotification().publicVersion;
         final RemoteViews oldPublicContentView = oldPublicNotification != null
                 ? oldPublicNotification.contentView : null;
-        final Notification publicNotification = notification.getNotification().publicVersion;
+        final Notification publicNotification = n.publicVersion;
         final RemoteViews publicContentView = publicNotification != null
                 ? publicNotification.contentView : null;
 
@@ -1484,7 +1484,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                     + " bigContentView=" + oldBigContentView
                     + " publicView=" + oldPublicContentView
                     + " rowParent=" + oldEntry.row.getParent());
-            Log.d(TAG, "new notification: when=" + notification.getNotification().when
+            Log.d(TAG, "new notification: when=" + n.when
                     + " ongoing=" + oldNotification.isOngoing()
                     + " contentView=" + contentView
                     + " bigContentView=" + bigContentView
@@ -1521,8 +1521,8 @@ public abstract class BaseStatusBar extends SystemUI implements
                         && oldPublicContentView.getPackage() != null
                         && oldPublicContentView.getPackage().equals(publicContentView.getPackage())
                         && oldPublicContentView.getLayoutId() == publicContentView.getLayoutId());
-        boolean updateTicker = notification.getNotification().tickerText != null
-                && !TextUtils.equals(notification.getNotification().tickerText,
+        boolean updateTicker = n.tickerText != null
+                && !TextUtils.equals(n.tickerText,
                 oldEntry.notification.getNotification().tickerText);
 
         final boolean shouldInterrupt = shouldInterrupt(notification);
@@ -1537,10 +1537,11 @@ public abstract class BaseStatusBar extends SystemUI implements
                     // Update the icon
                     final StatusBarIcon ic = new StatusBarIcon(notification.getPackageName(),
                             notification.getUser(),
-                            notification.getNotification().icon,
-                            notification.getNotification().iconLevel,
-                            notification.getNotification().number,
-                            notification.getNotification().tickerText);
+                            n.icon,
+                            n.iconLevel,
+                            n.number,
+                            n.tickerText);
+                    oldEntry.icon.setNotification(n);
                     if (!oldEntry.icon.set(ic)) {
                         handleNotificationError(notification, "Couldn't update icon: " + ic);
                         return;
@@ -1607,10 +1608,11 @@ public abstract class BaseStatusBar extends SystemUI implements
                     oldEntry.notification = notification;
                     final StatusBarIcon ic = new StatusBarIcon(notification.getPackageName(),
                             notification.getUser(),
-                            notification.getNotification().icon,
-                            notification.getNotification().iconLevel,
-                            notification.getNotification().number,
-                            notification.getNotification().tickerText);
+                            n.icon,
+                            n.iconLevel,
+                            n.number,
+                            n.tickerText);
+                    oldEntry.icon.setNotification(n);
                     oldEntry.icon.set(ic);
                     inflateViews(oldEntry, mStackScroller, wasHeadsUp);
                     mNotificationData.updateRanking(ranking);
