@@ -42,7 +42,11 @@ public abstract class VisibilityPropagation extends TransitionPropagation {
     @Override
     public void captureValues(TransitionValues values) {
         View view = values.view;
-        values.values.put(PROPNAME_VISIBILITY, view.getVisibility());
+        Integer visibility = (Integer) values.values.get(Visibility.PROPNAME_VISIBILITY);
+        if (visibility == null) {
+            visibility = view.getVisibility();
+        }
+        values.values.put(PROPNAME_VISIBILITY, visibility);
         int[] loc = new int[2];
         view.getLocationOnScreen(loc);
         loc[0] += Math.round(view.getTranslationX());
