@@ -45,7 +45,8 @@ public class AlwaysOnHotwordDetector {
      * Indicates that this hotword detector is no longer valid for any recognition
      * and should not be used anymore.
      */
-    public static final int STATE_INVALID = -3;
+    private static final int STATE_INVALID = -3;
+
     /**
      * Indicates that recognition for the given keyphrase is not available on the system
      * because of the hardware configuration.
@@ -156,9 +157,6 @@ public class AlwaysOnHotwordDetector {
          * If it is {@link #STATE_KEYPHRASE_UNENROLLED} the caller may choose to begin
          * an enrollment flow for the keyphrase. <br/>
          * and for {@link #STATE_KEYPHRASE_ENROLLED} a recognition can be started as desired. <p/>
-         *
-         * If the return code is {@link #STATE_INVALID}, this detector is stale.
-         * A new detector should be obtained for use in the future.
          */
         void onAvailabilityChanged(int status);
         /**
@@ -220,6 +218,9 @@ public class AlwaysOnHotwordDetector {
      * @throws UnsupportedOperationException if the keyphrase itself isn't supported.
      *         Callers should only call this method after a supported state callback on
      *         {@link Callback#onAvailabilityChanged(int)} to avoid this exception.
+     * @throws IllegalStateException if the detector is in an invalid state.
+     *         This may happen if another detector has been instantiated or the
+     *         {@link VoiceInteractionService} hosting this detector has been shut down.
      */
     public int getSupportedRecognitionModes() {
         synchronized (mLock) {
@@ -228,6 +229,11 @@ public class AlwaysOnHotwordDetector {
     }
 
     private int getSupportedRecognitionModesLocked() {
+        if (mAvailability == STATE_INVALID) {
+            throw new IllegalStateException(
+                    "getSupportedRecognitionModes called on an invalid detector");
+        }
+
         // This method only makes sense if we can actually support a recognition.
         if (mAvailability != STATE_KEYPHRASE_ENROLLED
                 && mAvailability != STATE_KEYPHRASE_UNENROLLED) {
@@ -247,9 +253,16 @@ public class AlwaysOnHotwordDetector {
      * @throws UnsupportedOperationException if the recognition isn't supported.
      *         Callers should only call this method after a supported state callback on
      *         {@link Callback#onAvailabilityChanged(int)} to avoid this exception.
+     * @throws IllegalStateException if the detector is in an invalid state.
+     *         This may happen if another detector has been instantiated or the
+     *         {@link VoiceInteractionService} hosting this detector has been shut down.
      */
     public void startRecognition(int recognitionFlags) {
         synchronized (mLock) {
+            if (mAvailability == STATE_INVALID) {
+                throw new IllegalStateException("startRecognition called on an invalid detector");
+            }
+
             // Check if we can start/stop a recognition.
             if (mAvailability != STATE_KEYPHRASE_ENROLLED) {
                 throw new UnsupportedOperationException(
@@ -268,9 +281,16 @@ public class AlwaysOnHotwordDetector {
      * @throws UnsupportedOperationException if the recognition isn't supported.
      *         Callers should only call this method after a supported state callback on
      *         {@link Callback#onAvailabilityChanged(int)} to avoid this exception.
+     * @throws IllegalStateException if the detector is in an invalid state.
+     *         This may happen if another detector has been instantiated or the
+     *         {@link VoiceInteractionService} hosting this detector has been shut down.
      */
     public void stopRecognition() {
         synchronized (mLock) {
+            if (mAvailability == STATE_INVALID) {
+                throw new IllegalStateException("stopRecognition called on an invalid detector");
+            }
+
             // Check if we can start/stop a recognition.
             if (mAvailability != STATE_KEYPHRASE_ENROLLED) {
                 throw new UnsupportedOperationException(
@@ -293,14 +313,28 @@ public class AlwaysOnHotwordDetector {
      * @throws UnsupportedOperationException if managing they keyphrase isn't supported.
      *         Callers should only call this method after a supported state callback on
      *         {@link Callback#onAvailabilityChanged(int)} to avoid this exception.
+     * @throws IllegalStateException if the detector is in an invalid state.
+     *         This may happen if another detector has been instantiated or the
+     *         {@link VoiceInteractionService} hosting this detector has been shut down.
      */
     public Intent getManageIntent(int action) {
+        synchronized (mLock) {
+            return getManageIntentLocked(action);
+        }
+    }
+
+    private Intent getManageIntentLocked(int action) {
+        if (mAvailability == STATE_INVALID) {
+            throw new IllegalStateException("getManageIntent called on an invalid detector");
+        }
+
         // This method only makes sense if we can actually support a recognition.
         if (mAvailability != STATE_KEYPHRASE_ENROLLED
                 && mAvailability != STATE_KEYPHRASE_UNENROLLED) {
             throw new UnsupportedOperationException(
                     "Managing the given keyphrase is not supported");
         }
+
         if (action != MANAGE_ACTION_ENROLL
                 && action != MANAGE_ACTION_RE_ENROLL
                 && action != MANAGE_ACTION_UN_ENROLL) {
@@ -387,7 +421,6 @@ public class AlwaysOnHotwordDetector {
             if (DBG) Slog.d(TAG, "starting recognition...");
             int status = startRecognitionLocked();
             if (status == STATUS_OK) {
-                mInternalState |= FLAG_STARTED;
                 mHandler.sendEmptyMessage(MSG_DETECTION_STARTED);
             } else {
                 if (DBG) Slog.d(TAG, "failed to start recognition: " + status);
@@ -404,7 +437,6 @@ public class AlwaysOnHotwordDetector {
             if (DBG) Slog.d(TAG, "stopping recognition...");
             int status = stopRecognitionLocked();
             if (status == STATUS_OK) {
-                mInternalState &= ~FLAG_STARTED;
                 if (!requested) mHandler.sendEmptyMessage(MSG_DETECTION_STOPPED);
             } else {
                 if (!requested) mHandler.sendEmptyMessage(MSG_DETECTION_ERROR);
@@ -483,20 +515,42 @@ public class AlwaysOnHotwordDetector {
     class MyHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
+            synchronized (mLock) {
+                if (mAvailability == STATE_INVALID) {
+                    Slog.w(TAG, "Received message: " + msg.what + " for an invalid detector");
+                    return;
+                }
+            }
+
             switch (msg.what) {
                 case MSG_STATE_CHANGED:
                     mExternalCallback.onAvailabilityChanged(msg.arg1);
                     break;
                 case MSG_HOTWORD_DETECTED:
+                    synchronized (mLock) {
+                        mInternalState &= ~FLAG_REQUESTED;
+                        mInternalState &= ~FLAG_STARTED;
+                    }
                     mExternalCallback.onDetected((byte[]) msg.obj);
                     break;
                 case MSG_DETECTION_STARTED:
+                    synchronized (mLock) {
+                        mInternalState |= FLAG_STARTED;
+                    }
                     mExternalCallback.onDetectionStarted();
                     break;
                 case MSG_DETECTION_STOPPED:
+                    synchronized (mLock) {
+                        mInternalState &= ~FLAG_REQUESTED;
+                        mInternalState &= ~FLAG_STARTED;
+                    }
                     mExternalCallback.onDetectionStopped();
                     break;
                 case MSG_DETECTION_ERROR:
+                    synchronized (mLock) {
+                        mInternalState &= ~FLAG_REQUESTED;
+                        mInternalState &= ~FLAG_STARTED;
+                    }
                     mExternalCallback.onError();
                     break;
                 default:
