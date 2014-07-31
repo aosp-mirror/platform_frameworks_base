@@ -26,6 +26,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.util.Log;
+import android.util.Pair;
 
 import com.android.internal.telecomm.ITelecommService;
 import com.android.internal.telephony.IPhoneSubInfo;
@@ -2348,15 +2349,15 @@ public class TelephonyManager {
      * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
      *
      * @param AID Application id. See ETSI 102.221 and 101.220.
-     * @return The logical channel id which is negative on error.
+     * @return an IccOpenLogicalChannelResponse object.
      */
-    public int iccOpenLogicalChannel(String AID) {
+    public IccOpenLogicalChannelResponse iccOpenLogicalChannel(String AID) {
         try {
             return getITelephony().iccOpenLogicalChannel(AID);
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
         }
-        return -1;
+        return null;
     }
 
     /**
@@ -2411,6 +2412,62 @@ public class TelephonyManager {
         } catch (NullPointerException ex) {
         }
         return "";
+    }
+
+    /**
+     * Transmit an APDU to the ICC card over the basic channel.
+     *
+     * Input parameters equivalent to TS 27.007 AT+CSIM command.
+     *
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
+     *
+     * @param cla Class of the APDU command.
+     * @param instruction Instruction of the APDU command.
+     * @param p1 P1 value of the APDU command.
+     * @param p2 P2 value of the APDU command.
+     * @param p3 P3 value of the APDU command. If p3 is negative a 4 byte APDU
+     *            is sent to the SIM.
+     * @param data Data to be sent with the APDU.
+     * @return The APDU response from the ICC card with the status appended at
+     *            the end. If an error occurs, an empty string is returned.
+     */
+    public String iccTransmitApduBasicChannel(int cla,
+            int instruction, int p1, int p2, int p3, String data) {
+        try {
+            return getITelephony().iccTransmitApduBasicChannel(cla,
+                    instruction, p1, p2, p3, data);
+        } catch (RemoteException ex) {
+        } catch (NullPointerException ex) {
+        }
+        return "";
+    }
+
+    /**
+     * Returns the response APDU for a command APDU sent through SIM_IO.
+     *
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
+     *
+     * @param fileID
+     * @param command
+     * @param p1 P1 value of the APDU command.
+     * @param p2 P2 value of the APDU command.
+     * @param p3 P3 value of the APDU command.
+     * @param filePath
+     * @return The APDU response.
+     */
+    byte[] iccExchangeSimIO(int fileID, int command, int p1, int p2, int p3,
+            String filePath) {
+        try {
+            return getITelephony().iccExchangeSimIO(fileID, command, p1, p2,
+                p3, filePath);
+        } catch (RemoteException ex) {
+        } catch (NullPointerException ex) {
+        }
+        return null;
     }
 
     /**
