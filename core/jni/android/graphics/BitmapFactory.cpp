@@ -353,7 +353,7 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
         ninePatchInsets = env->NewObject(gInsetStruct_class, gInsetStruct_constructorMethodID,
                 peeker.mOpticalInsets[0], peeker.mOpticalInsets[1], peeker.mOpticalInsets[2], peeker.mOpticalInsets[3],
                 peeker.mOutlineInsets[0], peeker.mOutlineInsets[1], peeker.mOutlineInsets[2], peeker.mOutlineInsets[3],
-                peeker.mOutlineRadius, peeker.mOutlineFilled, scale);
+                peeker.mOutlineRadius, peeker.mOutlineAlpha, scale);
         if (javaBitmap != NULL) {
             env->SetObjectField(javaBitmap, gBitmap_ninePatchInsetsFieldID, ninePatchInsets);
         }
@@ -589,7 +589,7 @@ int register_android_graphics_BitmapFactory(JNIEnv* env) {
             "Landroid/graphics/NinePatch$InsetStruct;");
 
     gInsetStruct_class = (jclass) env->NewGlobalRef(env->FindClass("android/graphics/NinePatch$InsetStruct"));
-    gInsetStruct_constructorMethodID = env->GetMethodID(gInsetStruct_class, "<init>", "(IIIIIIIIFZF)V");
+    gInsetStruct_constructorMethodID = env->GetMethodID(gInsetStruct_class, "<init>", "(IIIIIIIIFIF)V");
 
     int ret = AndroidRuntime::registerNativeMethods(env,
                                     "android/graphics/BitmapFactory$Options",

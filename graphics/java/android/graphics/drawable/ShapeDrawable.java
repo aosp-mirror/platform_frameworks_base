@@ -470,6 +470,7 @@ public class ShapeDrawable extends Drawable {
     public void getOutline(Outline outline) {
         if (mShapeState.mShape != null) {
             mShapeState.mShape.getOutline(outline);
+            outline.setAlpha(getAlpha() / 255.0f);
         }
     }
 
