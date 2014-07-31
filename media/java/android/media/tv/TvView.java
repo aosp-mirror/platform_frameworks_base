@@ -68,7 +68,7 @@ public class TvView extends ViewGroup {
 
     private final Handler mHandler = new Handler();
     private Session mSession;
-    private final SurfaceView mSurfaceView;
+    private SurfaceView mSurfaceView;
     private Surface mSurface;
     private boolean mOverlayViewCreated;
     private Rect mOverlayViewFrame;
@@ -84,6 +84,8 @@ public class TvView extends ViewGroup {
     private int mSurfaceFormat;
     private int mSurfaceWidth;
     private int mSurfaceHeight;
+    private final AttributeSet mAttrs;
+    private final int mDefStyleAttr;
 
     private final SurfaceHolder.Callback mSurfaceHolderCallback = new SurfaceHolder.Callback() {
         @Override
@@ -143,14 +145,9 @@ public class TvView extends ViewGroup {
 
     public TvView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        mSurfaceView = new SurfaceView(context, attrs, defStyleAttr) {
-                @Override
-                protected void updateWindow(boolean force, boolean redrawNeeded) {
-                    super.updateWindow(force, redrawNeeded);
-                    relayoutSessionOverlayView();
-                }};
-        mSurfaceView.getHolder().addCallback(mSurfaceHolderCallback);
-        addView(mSurfaceView);
+        mAttrs = attrs;
+        mDefStyleAttr = defStyleAttr;
+        resetSurfaceView();
         mTvInputManager = (TvInputManager) getContext().getSystemService(Context.TV_INPUT_SERVICE);
     }
 
@@ -228,9 +225,7 @@ public class TvView extends ViewGroup {
                 mSessionCallback.mChannelUri = channelUri;
             }
         } else {
-            if (mSession != null) {
-                release();
-            }
+            reset();
             // When createSession() is called multiple times before the callback is called,
             // only the callback of the last createSession() call will be actually called back.
             // The previous callbacks will be ignored. For the logic, mSessionCallback
@@ -249,6 +244,7 @@ public class TvView extends ViewGroup {
     public void reset() {
         if (mSession != null) {
             release();
+            resetSurfaceView();
         }
     }
 
@@ -493,6 +489,21 @@ public class TvView extends ViewGroup {
         } else {
             removeSessionOverlayView();
         }
+    }
+
+    private void resetSurfaceView() {
+        if (mSurfaceView != null) {
+            mSurfaceView.getHolder().removeCallback(mSurfaceHolderCallback);
+            removeView(mSurfaceView);
+        }
+        mSurfaceView = new SurfaceView(getContext(), mAttrs, mDefStyleAttr) {
+            @Override
+            protected void updateWindow(boolean force, boolean redrawNeeded) {
+                super.updateWindow(force, redrawNeeded);
+                relayoutSessionOverlayView();
+            }};
+        mSurfaceView.getHolder().addCallback(mSurfaceHolderCallback);
+        addView(mSurfaceView);
     }
 
     private void release() {
