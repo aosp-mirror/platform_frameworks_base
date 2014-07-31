@@ -24,7 +24,13 @@ LOCAL_JAVA_RESOURCE_DIRS := res
 LOCAL_MODULE := layoutlib-tests
 LOCAL_MODULE_TAGS := optional
 
-LOCAL_JAVA_LIBRARIES := layoutlib kxml2-2.3.0 junit
+LOCAL_JAVA_LIBRARIES := layoutlib \
+			kxml2-2.3.0 \
+			icu4j \
+			layoutlib_api-prebuilt \
+			tools-common-prebuilt \
+			sdk-common \
+			junit
 
 include $(BUILD_HOST_JAVA_LIBRARY)
 
