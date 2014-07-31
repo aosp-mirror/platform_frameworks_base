@@ -351,6 +351,8 @@ int JTvInputHal::addStream(int deviceId, int streamId, const sp<Surface>& surfac
             ALOGE("Cannot find a config with given stream ID: %d", streamId);
             return BAD_VALUE;
         }
+        connection.mStreamType = configs[configIndex].type;
+
         tv_stream_t stream;
         stream.stream_id = configs[configIndex].stream_id;
         if (connection.mStreamType == TV_STREAM_TYPE_BUFFER_PRODUCER) {
