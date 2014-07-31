@@ -1084,6 +1084,22 @@ public class Paint_Delegate {
         sManager.removeJavaReferenceFor(nativePaint);
     }
 
+    @LayoutlibDelegate
+    /*package*/ static float native_getLetterSpacing(long nativePaint) {
+        // TODO: throw a fidelity warning.
+        return 0;
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static void native_setLetterSpacing(long nativePaint, float letterSpacing) {
+        // pass.
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static void native_setFontFeatureSettings(long nativePaint, String settings) {
+        // pass.
+    }
+
     // ---- Private delegate/helper methods ----
 
     /*package*/ Paint_Delegate() {

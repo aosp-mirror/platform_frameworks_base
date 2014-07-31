@@ -177,12 +177,6 @@ public class ICU_Delegate {
         return Locale.getISOCountries();
     }
 
-
-    @LayoutlibDelegate
-    /*package*/ static String localeForLanguageTag(String languageTag, boolean strict) {
-        return "";
-    }
-
     @LayoutlibDelegate
     /*package*/ static boolean initLocaleDataNative(String locale, LocaleData result) {
 
