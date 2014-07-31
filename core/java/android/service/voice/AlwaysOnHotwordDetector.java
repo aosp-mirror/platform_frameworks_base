@@ -50,14 +50,17 @@ public class AlwaysOnHotwordDetector {
     /**
      * Indicates that recognition for the given keyphrase is not available on the system
      * because of the hardware configuration.
+     * No further interaction should be performed with the detector that returns this availability.
      */
     public static final int STATE_HARDWARE_UNAVAILABLE = -2;
     /**
      * Indicates that recognition for the given keyphrase is not supported.
+     * No further interaction should be performed with the detector that returns this availability.
      */
     public static final int STATE_KEYPHRASE_UNSUPPORTED = -1;
     /**
      * Indicates that the given keyphrase is not enrolled.
+     * The caller may choose to begin an enrollment flow for the keyphrase.
      */
     public static final int STATE_KEYPHRASE_UNENROLLED = 1;
     /**
@@ -92,12 +95,14 @@ public class AlwaysOnHotwordDetector {
     // Must be kept in sync with the related attribute defined as searchKeyphraseRecognitionFlags.
 
     /**
-     * Simple recognition of the key phrase. Returned by {@link #getSupportedRecognitionModes()}
+     * Simple recognition of the key phrase.
+     * Returned by {@link #getSupportedRecognitionModes()}
      */
     public static final int RECOGNITION_MODE_VOICE_TRIGGER
             = SoundTrigger.RECOGNITION_MODE_VOICE_TRIGGER;
     /**
-     * Trigger only if one user is identified. Returned by {@link #getSupportedRecognitionModes()}
+     * User identification performed with the keyphrase recognition.
+     * Returned by {@link #getSupportedRecognitionModes()}
      */
     public static final int RECOGNITION_MODE_USER_IDENTIFICATION
             = SoundTrigger.RECOGNITION_MODE_USER_IDENTIFICATION;
@@ -150,13 +155,11 @@ public class AlwaysOnHotwordDetector {
          *
          * Availability implies whether the hardware on this system is capable of listening for
          * the given keyphrase or not. <p/>
-         * If the return code is one of {@link #STATE_HARDWARE_UNAVAILABLE} or
-         * {@link #STATE_KEYPHRASE_UNSUPPORTED},
-         * detection is not possible and no further interaction should be
-         * performed with this detector. <br/>
-         * If it is {@link #STATE_KEYPHRASE_UNENROLLED} the caller may choose to begin
-         * an enrollment flow for the keyphrase. <br/>
-         * and for {@link #STATE_KEYPHRASE_ENROLLED} a recognition can be started as desired. <p/>
+         *
+         * @see AlwaysOnHotwordDetector#STATE_HARDWARE_UNAVAILABLE
+         * @see AlwaysOnHotwordDetector#STATE_KEYPHRASE_UNSUPPORTED
+         * @see AlwaysOnHotwordDetector#STATE_KEYPHRASE_UNENROLLED
+         * @see AlwaysOnHotwordDetector#STATE_KEYPHRASE_ENROLLED
          */
         void onAvailabilityChanged(int status);
         /**
@@ -214,6 +217,9 @@ public class AlwaysOnHotwordDetector {
 
     /**
      * Gets the recognition modes supported by the associated keyphrase.
+     *
+     * @see #RECOGNITION_MODE_USER_IDENTIFICATION
+     * @see #RECOGNITION_MODE_VOICE_TRIGGER
      *
      * @throws UnsupportedOperationException if the keyphrase itself isn't supported.
      *         Callers should only call this method after a supported state callback on
