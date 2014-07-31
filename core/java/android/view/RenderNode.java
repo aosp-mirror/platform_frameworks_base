@@ -355,9 +355,10 @@ public class RenderNode {
             return nSetOutlineEmpty(mNativeRenderNode);
         } else if (outline.mRect != null) {
             return nSetOutlineRoundRect(mNativeRenderNode, outline.mRect.left, outline.mRect.top,
-                    outline.mRect.right, outline.mRect.bottom, outline.mRadius);
+                    outline.mRect.right, outline.mRect.bottom, outline.mRadius, outline.mAlpha);
         } else if (outline.mPath != null) {
-            return nSetOutlineConvexPath(mNativeRenderNode, outline.mPath.mNativePath);
+            return nSetOutlineConvexPath(mNativeRenderNode, outline.mPath.mNativePath,
+                    outline.mAlpha);
         }
         throw new IllegalArgumentException("Unrecognized outline?");
     }
@@ -849,8 +850,9 @@ public class RenderNode {
     private static native boolean nSetProjectBackwards(long renderNode, boolean shouldProject);
     private static native boolean nSetProjectionReceiver(long renderNode, boolean shouldRecieve);
     private static native boolean nSetOutlineRoundRect(long renderNode, int left, int top,
-            int right, int bottom, float radius);
-    private static native boolean nSetOutlineConvexPath(long renderNode, long nativePath);
+            int right, int bottom, float radius, float alpha);
+    private static native boolean nSetOutlineConvexPath(long renderNode, long nativePath,
+            float alpha);
     private static native boolean nSetOutlineEmpty(long renderNode);
     private static native boolean nSetOutlineNone(long renderNode);
     private static native boolean nSetClipToOutline(long renderNode, boolean clipToOutline);

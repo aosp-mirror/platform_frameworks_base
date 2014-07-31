@@ -16,10 +16,12 @@
 
 package com.android.internal.widget;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
+import android.graphics.Outline;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.ActionMode;
@@ -324,17 +326,35 @@ public class ActionBarContainer extends FrameLayout {
      * projection surfaces.
      */
     private class ActionBarBackgroundDrawable extends Drawable {
-        @Override
-        public void draw(Canvas canvas) {
+        private Drawable getDrawable() {
             if (mIsSplit) {
-                if (mSplitBackground != null) mSplitBackground.draw(canvas);
+                if (mSplitBackground != null) {
+                    return mSplitBackground;
+                }
             } else {
                 if (mBackground != null) {
-                    mBackground.draw(canvas);
+                    return mBackground;
                 }
                 if (mStackedBackground != null && mIsStacked) {
-                    mStackedBackground.draw(canvas);
+                    return mStackedBackground;
                 }
+            }
+            return null;
+        }
+
+        @Override
+        public void draw(Canvas canvas) {
+            final Drawable drawable = getDrawable();
+            if (drawable != null) {
+                drawable.draw(canvas);
+            }
+        }
+
+        @Override
+        public void getOutline(@NonNull Outline outline) {
+            final Drawable drawable = getDrawable();
+            if (drawable != null) {
+                drawable.getOutline(outline);
             }
         }
 

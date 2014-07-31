@@ -594,7 +594,12 @@ void RenderNode::buildZSortedChildList(Vector<ZDrawRenderNodeOpPair>& zTranslate
 
 template <class T>
 void RenderNode::issueDrawShadowOperation(const Matrix4& transformFromParent, T& handler) {
-    if (properties().getAlpha() <= 0.0f || !properties().getOutline().getPath()) return;
+    if (properties().getAlpha() <= 0.0f
+            || properties().getOutline().getAlpha() <= 0.0f
+            || !properties().getOutline().getPath()) {
+        // no shadow to draw
+        return;
+    }
 
     mat4 shadowMatrixXY(transformFromParent);
     applyViewPropertyTransforms(shadowMatrixXY);
@@ -607,8 +612,9 @@ void RenderNode::issueDrawShadowOperation(const Matrix4& transformFromParent, T&
     const SkPath* revealClipPath = properties().getRevealClip().getPath();
     if (revealClipPath && revealClipPath->isEmpty()) return;
 
+    float casterAlpha = properties().getAlpha() * properties().getOutline().getAlpha();
     DisplayListOp* shadowOp  = new (handler.allocator()) DrawShadowOp(
-            shadowMatrixXY, shadowMatrixZ, properties().getAlpha(),
+            shadowMatrixXY, shadowMatrixZ, casterAlpha,
             outlinePath, revealClipPath);
     handler(shadowOp, PROPERTY_SAVECOUNT, properties().getClipToBounds());
 }

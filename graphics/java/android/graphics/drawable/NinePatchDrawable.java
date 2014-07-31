@@ -296,7 +296,7 @@ public class NinePatchDrawable extends Drawable {
                         bounds.right - outlineInsets.right,
                         bounds.bottom - outlineInsets.bottom,
                         insets.outlineRadius);
-                outline.setFilled(insets.outlineFilled);
+                outline.setAlpha(insets.outlineAlpha * (getAlpha() / 255.0f));
                 return;
             }
         }

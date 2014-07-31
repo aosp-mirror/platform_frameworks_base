@@ -83,7 +83,7 @@ struct image_info
     int32_t outlineInsetsRight;
     int32_t outlineInsetsBottom;
     float outlineRadius;
-    bool outlineFilled;
+    uint8_t outlineAlpha;
 
     png_uint_32 allocHeight;
     png_bytepp allocRows;
@@ -410,12 +410,12 @@ static void find_max_opacity(png_byte** rows,
                              int* out_inset)
 {
     bool opaque_within_inset = true;
-    unsigned char max_opacity = 0;
+    uint8_t max_opacity = 0;
     int inset = 0;
     *out_inset = 0;
     for (int x = startX, y = startY; x != endX && y != endY; x += dX, y += dY, inset++) {
         png_byte* color = rows[y] + x * 4;
-        unsigned char opacity = color[3];
+        uint8_t opacity = color[3];
         if (opacity > max_opacity) {
             max_opacity = opacity;
             *out_inset = inset;
@@ -424,22 +424,24 @@ static void find_max_opacity(png_byte** rows,
     }
 }
 
-static bool is_opaque_over_row(png_byte* row, int startX, int endX)
+static uint8_t max_alpha_over_row(png_byte* row, int startX, int endX)
 {
+    uint8_t max_alpha = 0;
     for (int x = startX; x < endX; x++) {
-        png_byte* color = row + x * 4;
-        if (color[3] != 0xff) return false;
+        uint8_t alpha = (row + x * 4)[3];
+        if (alpha > max_alpha) max_alpha = alpha;
     }
-    return true;
+    return max_alpha;
 }
 
-static bool is_opaque_over_col(png_byte** rows, int offsetX, int startY, int endY)
+static uint8_t max_alpha_over_col(png_byte** rows, int offsetX, int startY, int endY)
 {
+    uint8_t max_alpha = 0;
     for (int y = startY; y < endY; y++) {
-        png_byte* color = rows[y] + offsetX * 4;
-        if (color[3] != 0xff) return false;
+        uint8_t alpha = (rows[y] + offsetX * 4)[3];
+        if (alpha > max_alpha) max_alpha = alpha;
     }
-    return true;
+    return max_alpha;
 }
 
 static void get_outline(image_info* image)
@@ -476,8 +478,8 @@ static void get_outline(image_info* image)
 
     // assuming the image is a round rect, compute the radius by marching
     // diagonally from the top left corner towards the center
-    image->outlineFilled = is_opaque_over_row(image->rows[innerMidY], innerStartX, innerEndX)
-            && is_opaque_over_col(image->rows, innerMidX, innerStartY, innerStartY);
+    image->outlineAlpha = max(max_alpha_over_row(image->rows[innerMidY], innerStartX, innerEndX),
+            max_alpha_over_col(image->rows, innerMidX, innerStartY, innerStartY));
 
     int diagonalInset = 0;
     find_max_opacity(image->rows, innerStartX, innerStartY, innerMidX, innerMidY, 1, 1,
@@ -487,14 +489,13 @@ static void get_outline(image_info* image)
     // radius = 1 / (sqrt(2) - 1) * inset
     image->outlineRadius = 2.4142f * diagonalInset;
 
-    NOISY(printf("outline insets %d %d %d %d, rad %f, filled %d\n",
-            image->outlineFilled,
+    NOISY(printf("outline insets %d %d %d %d, rad %f, alpha %x\n",
             image->outlineInsetsLeft,
             image->outlineInsetsTop,
             image->outlineInsetsRight,
             image->outlineInsetsBottom,
             image->outlineRadius,
-            image->outlineFilled));
+            image->outlineAlpha));
 }
 
 
@@ -691,8 +692,8 @@ static status_t do_9patch(const char* imageName, image_info* image)
     }
 
     NOISY(printf("Size ticks for %s: x0=%d, x1=%d, y0=%d, y1=%d\n", imageName,
-                 image->info9Patch.xDivs[0], image->info9Patch.xDivs[1],
-                 image->info9Patch.yDivs[0], image->info9Patch.yDivs[1]));
+                 xDivs[0], xDivs[1],
+                 yDivs[0], yDivs[1]));
     NOISY(printf("padding ticks for %s: l=%d, r=%d, t=%d, b=%d\n", imageName,
                  image->info9Patch.paddingLeft, image->info9Patch.paddingRight,
                  image->info9Patch.paddingTop, image->info9Patch.paddingBottom));
@@ -1167,7 +1168,7 @@ static void write_png(const char* imageName,
         png_byte outputData[chunk_size];
         memcpy(&outputData, &imageInfo.outlineInsetsLeft, 4 * sizeof(png_uint_32));
         ((float*) outputData)[4] = imageInfo.outlineRadius;
-        ((png_uint_32*) outputData)[5] = imageInfo.outlineFilled ? 1 : 0;
+        ((png_uint_32*) outputData)[5] = imageInfo.outlineAlpha;
         memcpy(unknowns[o_index].data, &outputData, chunk_size);
         unknowns[o_index].size = chunk_size;
 

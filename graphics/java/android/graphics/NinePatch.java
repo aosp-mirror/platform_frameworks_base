@@ -43,7 +43,7 @@ public class NinePatch {
         @SuppressWarnings({"UnusedDeclaration"}) // called from JNI
         InsetStruct(int opticalLeft, int opticalTop, int opticalRight, int opticalBottom,
                 int outlineLeft, int outlineTop, int outlineRight, int outlineBottom,
-                float outlineRadius, boolean outlineFilled, float decodeScale) {
+                float outlineRadius, int outlineAlpha, float decodeScale) {
             opticalRect = new Rect(opticalLeft, opticalTop, opticalRight, opticalBottom);
             outlineRect = new Rect(outlineLeft, outlineTop, outlineRight, outlineBottom);
 
@@ -55,13 +55,13 @@ public class NinePatch {
                 outlineRect.scaleRoundIn(decodeScale);
             }
             this.outlineRadius = outlineRadius * decodeScale;
-            this.outlineFilled = outlineFilled;
+            this.outlineAlpha = outlineAlpha / 255.0f;
         }
 
         public final Rect opticalRect;
         public final Rect outlineRect;
         public final float outlineRadius;
-        public final boolean outlineFilled;
+        public final float outlineAlpha;
     }
 
     private final Bitmap mBitmap;
