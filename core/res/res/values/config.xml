@@ -1975,6 +1975,9 @@
     <bool name="config_switch_phone_on_voice_reg_state_change">true</bool>
 
     <bool name="config_sms_force_7bit_encoding">false</bool>
+    <!-- Configuartion to support 7bit Ascii encoding and decoding
+         for long messages. -->
+    <bool name="config_ascii_7bit_support_for_long_message">false</bool>
 
     <!-- Flag indicating whether strict threshold is used, or lenient threshold is used,
           when evaluating RSRP for LTE antenna bar display
