@@ -139,7 +139,7 @@ public class NotificationPanelView extends PanelView implements
     private boolean mIsLaunchTransitionRunning;
     private Runnable mLaunchAnimationEndRunnable;
     private boolean mOnlyAffordanceInThisMotion;
-    private boolean mKeyguardStatusBarAnimatingIn;
+    private boolean mKeyguardStatusViewAnimating;
 
     public NotificationPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -285,7 +285,9 @@ public class NotificationPanelView extends PanelView implements
     }
 
     private void updateClock(float alpha, float scale) {
-        mKeyguardStatusView.setAlpha(alpha);
+        if (!mKeyguardStatusViewAnimating) {
+            mKeyguardStatusView.setAlpha(alpha);
+        }
         mKeyguardStatusView.setScaleX(scale);
         mKeyguardStatusView.setScaleY(scale);
     }
@@ -671,7 +673,7 @@ public class NotificationPanelView extends PanelView implements
         }
     }
 
-    public void setBarState(int statusBarState) {
+    public void setBarState(int statusBarState, boolean keyguardFadingAway) {
         boolean keyguardShowing = statusBarState == StatusBarState.KEYGUARD
                 || statusBarState == StatusBarState.SHADE_LOCKED;
         mKeyguardStatusBar.setAlpha(1f);
@@ -680,9 +682,57 @@ public class NotificationPanelView extends PanelView implements
             setQsTranslation(mQsExpansionHeight);
             mHeader.setTranslationY(0f);
         }
+        setKeyguardStatusViewVisibility(statusBarState, keyguardFadingAway);
         mStatusBarState = statusBarState;
         mKeyguardShowing = keyguardShowing;
         updateQsState();
+    }
+
+    private final Runnable mAnimateKeyguardStatusViewInvisibleEndRunnable = new Runnable() {
+        @Override
+        public void run() {
+            mKeyguardStatusViewAnimating = false;
+            mKeyguardStatusView.setVisibility(View.GONE);
+        }
+    };
+
+    private final Runnable mAnimateKeyguardStatusViewVisibleEndRunnable = new Runnable() {
+        @Override
+        public void run() {
+            mKeyguardStatusViewAnimating = false;
+        }
+    };
+
+    private void setKeyguardStatusViewVisibility(int statusBarState, boolean keyguardFadingAway) {
+        if (!keyguardFadingAway && mStatusBarState == StatusBarState.KEYGUARD
+                && statusBarState != StatusBarState.KEYGUARD) {
+            mKeyguardStatusView.animate().cancel();
+            mKeyguardStatusViewAnimating = true;
+            mKeyguardStatusView.animate()
+                    .alpha(0f)
+                    .setDuration(160)
+                    .setInterpolator(PhoneStatusBar.ALPHA_OUT)
+                    .withEndAction(mAnimateKeyguardStatusViewInvisibleEndRunnable);
+        } else if (mStatusBarState == StatusBarState.SHADE_LOCKED
+                && statusBarState == StatusBarState.KEYGUARD) {
+            mKeyguardStatusView.animate().cancel();
+            mKeyguardStatusView.setVisibility(View.VISIBLE);
+            mKeyguardStatusViewAnimating = true;
+            mKeyguardStatusView.setAlpha(0f);
+            mKeyguardStatusView.animate()
+                    .alpha(1f)
+                    .setDuration(320)
+                    .setInterpolator(PhoneStatusBar.ALPHA_IN)
+                    .withEndAction(mAnimateKeyguardStatusViewVisibleEndRunnable);
+        } else if (statusBarState == StatusBarState.KEYGUARD) {
+            mKeyguardStatusView.animate().cancel();
+            mKeyguardStatusView.setVisibility(View.VISIBLE);
+            mKeyguardStatusView.setAlpha(1f);
+        } else {
+            mKeyguardStatusView.animate().cancel();
+            mKeyguardStatusView.setVisibility(View.GONE);
+            mKeyguardStatusView.setAlpha(1f);
+        }
     }
 
     private void updateQsState() {
@@ -1076,7 +1126,7 @@ public class NotificationPanelView extends PanelView implements
         }
         alpha = Math.max(0, Math.min(alpha, 1));
         alpha = (float) Math.pow(alpha, 0.75);
-        if (!mQsExpanded && !mKeyguardStatusBarAnimatingIn) {
+        if (!mQsExpanded) {
             mKeyguardStatusBar.setAlpha(alpha);
         }
         mKeyguardBottomArea.setAlpha(alpha);
