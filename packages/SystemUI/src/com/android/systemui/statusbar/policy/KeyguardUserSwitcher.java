@@ -16,10 +16,6 @@
 
 package com.android.systemui.statusbar.policy;
 
-import com.android.systemui.R;
-import com.android.systemui.statusbar.phone.StatusBarHeaderView;
-import com.android.systemui.statusbar.phone.UserAvatarView;
-
 import android.content.Context;
 import android.database.DataSetObserver;
 import android.provider.Settings;
@@ -28,6 +24,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewStub;
 import android.widget.TextView;
+
+import com.android.systemui.R;
+import com.android.systemui.statusbar.phone.KeyguardStatusBarView;
+import com.android.systemui.statusbar.phone.UserAvatarView;
 
 /**
  * Manages the user switcher on the Keyguard.
@@ -40,23 +40,23 @@ public class KeyguardUserSwitcher {
             "lockscreenSimpleUserSwitcher";
 
     private final ViewGroup mUserSwitcher;
-    private final StatusBarHeaderView mHeader;
+    private final KeyguardStatusBarView mStatusBarView;
     private final Adapter mAdapter;
     private final boolean mSimpleUserSwitcher;
 
     public KeyguardUserSwitcher(Context context, ViewStub userSwitcher,
-            StatusBarHeaderView header, UserSwitcherController userSwitcherController) {
+            KeyguardStatusBarView statusBarView, UserSwitcherController userSwitcherController) {
         if (context.getResources().getBoolean(R.bool.config_keyguardUserSwitcher) || ALWAYS_ON) {
             mUserSwitcher = (ViewGroup) userSwitcher.inflate();
-            mHeader = header;
-            mHeader.setKeyguarUserSwitcher(this);
+            mStatusBarView = statusBarView;
+            mStatusBarView.setKeyguardUserSwitcher(this);
             mAdapter = new Adapter(context, userSwitcherController);
             mAdapter.registerDataSetObserver(mDataSetObserver);
             mSimpleUserSwitcher = Settings.Global.getInt(context.getContentResolver(),
                     SIMPLE_USER_SWITCHER_GLOBAL_SETTING, 0) != 0;
         } else {
             mUserSwitcher = null;
-            mHeader = null;
+            mStatusBarView = null;
             mAdapter = null;
             mSimpleUserSwitcher = false;
         }
@@ -84,7 +84,7 @@ public class KeyguardUserSwitcher {
         if (mUserSwitcher != null) {
             // TODO: animate
             mUserSwitcher.setVisibility(View.VISIBLE);
-            mHeader.setKeyguardUserSwitcherShowing(true);
+            mStatusBarView.setKeyguardUserSwitcherShowing(true);
         }
     }
 
@@ -92,7 +92,7 @@ public class KeyguardUserSwitcher {
         if (mUserSwitcher != null) {
             // TODO: animate
             mUserSwitcher.setVisibility(View.GONE);
-            mHeader.setKeyguardUserSwitcherShowing(false);
+            mStatusBarView.setKeyguardUserSwitcherShowing(false);
         }
     }
 

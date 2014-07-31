@@ -252,6 +252,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     // left-hand icons
     LinearLayout mStatusIcons;
+    LinearLayout mStatusIconsKeyguard;
+
     // the icons themselves
     IconMerger mNotificationIcons;
     View mNotificationIconArea;
@@ -273,6 +275,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     // top bar
     StatusBarHeaderView mHeader;
+    KeyguardStatusBarView mKeyguardStatusBar;
     View mKeyguardStatusView;
     KeyguardBottomAreaView mKeyguardBottomArea;
     boolean mLeaveOpenOnKeyguardHide;
@@ -695,6 +698,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         mHeader = (StatusBarHeaderView) mStatusBarWindow.findViewById(R.id.header);
         mHeader.setActivityStarter(this);
+        mKeyguardStatusBar = (KeyguardStatusBarView) mStatusBarWindow.findViewById(R.id.keyguard_header);
+        mStatusIconsKeyguard = (LinearLayout) mKeyguardStatusBar.findViewById(R.id.statusIcons);
         mKeyguardStatusView = mStatusBarWindow.findViewById(R.id.keyguard_status_view);
         mKeyguardBottomArea =
                 (KeyguardBottomAreaView) mStatusBarWindow.findViewById(R.id.keyguard_bottom_area);
@@ -744,10 +749,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mZenModeController = mVolumeComponent.getZenController();
         mCastController = new CastControllerImpl(mContext);
         final SignalClusterView signalCluster =
-                (SignalClusterView)mStatusBarView.findViewById(R.id.signal_cluster);
-
+                (SignalClusterView) mStatusBarView.findViewById(R.id.signal_cluster);
+        final SignalClusterView signalClusterKeyguard =
+                (SignalClusterView) mKeyguardStatusBar.findViewById(R.id.signal_cluster);
         mNetworkController.addSignalCluster(signalCluster);
+        mNetworkController.addSignalCluster(signalClusterKeyguard);
         signalCluster.setNetworkController(mNetworkController);
+        signalClusterKeyguard.setNetworkController(mNetworkController);
         final boolean isAPhone = mNetworkController.hasVoiceCallingFeature();
         if (isAPhone) {
             mNetworkController.addEmergencyLabelView(mHeader);
@@ -783,8 +791,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mKeyguardMonitor = new KeyguardMonitor();
 
         mKeyguardUserSwitcher = new KeyguardUserSwitcher(mContext,
-                (ViewStub) mStatusBarWindow.findViewById(R.id.keyguard_user_switcher), mHeader,
-                mUserSwitcherController);
+                (ViewStub) mStatusBarWindow.findViewById(R.id.keyguard_user_switcher),
+                mKeyguardStatusBar, mUserSwitcherController);
 
 
         // Set up the quick settings tile panel
@@ -808,9 +816,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         // User info. Trigger first load.
         mHeader.setUserInfoController(mUserInfoController);
+        mKeyguardStatusBar.setUserInfoController(mUserInfoController);
         mUserInfoController.reloadUserInfo();
 
         mHeader.setBatteryController(mBatteryController);
+        mKeyguardStatusBar.setBatteryController(mBatteryController);
         mHeader.setNextAlarmController(mNextAlarmController);
 
         PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
@@ -1167,6 +1177,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     public void refreshAllStatusBarIcons() {
         refreshAllIconsForLayout(mStatusIcons);
+        refreshAllIconsForLayout(mStatusIconsKeyguard);
         refreshAllIconsForLayout(mNotificationIcons);
     }
 
@@ -1186,19 +1197,26 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         StatusBarIconView view = new StatusBarIconView(mContext, slot, null);
         view.set(icon);
         mStatusIcons.addView(view, viewIndex, new LinearLayout.LayoutParams(mIconSize, mIconSize));
+        view = new StatusBarIconView(mContext, slot, null);
+        view.set(icon);
+        mStatusIconsKeyguard.addView(view, viewIndex,
+                new LinearLayout.LayoutParams(mIconSize, mIconSize));
     }
 
     public void updateIcon(String slot, int index, int viewIndex,
             StatusBarIcon old, StatusBarIcon icon) {
         if (SPEW) Log.d(TAG, "updateIcon slot=" + slot + " index=" + index + " viewIndex=" + viewIndex
                 + " old=" + old + " icon=" + icon);
-        StatusBarIconView view = (StatusBarIconView)mStatusIcons.getChildAt(viewIndex);
+        StatusBarIconView view = (StatusBarIconView) mStatusIcons.getChildAt(viewIndex);
+        view.set(icon);
+        view = (StatusBarIconView) mStatusIconsKeyguard.getChildAt(viewIndex);
         view.set(icon);
     }
 
     public void removeIcon(String slot, int index, int viewIndex) {
         if (SPEW) Log.d(TAG, "removeIcon slot=" + slot + " index=" + index + " viewIndex=" + viewIndex);
         mStatusIcons.removeViewAt(viewIndex);
+        mStatusIconsKeyguard.removeViewAt(viewIndex);
     }
 
     public UserHandle getCurrentUserHandle() {
@@ -3378,11 +3396,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
         if (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED) {
             mKeyguardBottomArea.setVisibility(View.VISIBLE);
-            mHeader.setKeyguardShowing(true);
             mScrimController.setKeyguardShowing(true);
         } else {
             mKeyguardBottomArea.setVisibility(View.GONE);
-            mHeader.setKeyguardShowing(false);
             mScrimController.setKeyguardShowing(false);
         }
         mNotificationPanel.setBarState(mState);
@@ -3401,14 +3417,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         final boolean bottomGone = mKeyguardBottomArea.getVisibility() == View.GONE;
         if (mDozing) {
             mNotificationPanel.setBackgroundColor(0xff000000);
-            mHeader.setVisibility(View.INVISIBLE);
+            mKeyguardStatusBar.setVisibility(View.INVISIBLE);
             if (!bottomGone) {
                 mKeyguardBottomArea.setVisibility(View.INVISIBLE);
             }
             mStackScroller.setDark(true, false /*animate*/);
         } else {
             mNotificationPanel.setBackground(null);
-            mHeader.setVisibility(View.VISIBLE);
+            mKeyguardStatusBar.setVisibility(View.VISIBLE);
             if (!bottomGone) {
                 mKeyguardBottomArea.setVisibility(View.VISIBLE);
             }
