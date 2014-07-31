@@ -556,6 +556,19 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 }
             }
         }
+
+        public void dump(IndentingPrintWriter pw) {
+            for (int type = 0; type < mTypeLists.length; type++) {
+                if (mTypeLists[type] == null) continue;
+                pw.print(type + " ");
+                pw.increaseIndent();
+                if (mTypeLists[type].size() == 0) pw.println("none");
+                for (NetworkAgentInfo nai : mTypeLists[type]) {
+                    pw.println(nai.name());
+                }
+                pw.decreaseIndent();
+            }
+        }
     }
     private LegacyTypeTracker mLegacyTypeTracker = new LegacyTypeTracker();
 
@@ -1679,6 +1692,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
         pw.println();
         pw.decreaseIndent();
+
+        pw.println("mActiveDefaultNetwork:" + mActiveDefaultNetwork);
+        pw.println("mLegacyTypeTracker:");
+        pw.increaseIndent();
+        mLegacyTypeTracker.dump(pw);
+        pw.decreaseIndent();
+        pw.println();
 
         synchronized (this) {
             pw.println("NetworkTranstionWakeLock is currently " +
