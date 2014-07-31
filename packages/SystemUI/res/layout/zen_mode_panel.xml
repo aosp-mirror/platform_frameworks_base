@@ -78,7 +78,7 @@
             android:clickable="true"
             android:contentDescription="@null"
             android:scaleType="center"
-            android:src="@drawable/ic_settings_24dp" />
+            android:src="@drawable/ic_settings" />
     </FrameLayout>
 
     <LinearLayout
