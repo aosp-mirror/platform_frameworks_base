@@ -31,6 +31,7 @@ public class AnimationFilter {
     boolean animateDimmed;
     boolean animateDark;
     boolean hasDelays;
+    boolean hasGoToFullShadeEvent;
 
     public AnimationFilter animateAlpha() {
         animateAlpha = true;
@@ -87,6 +88,10 @@ public class AnimationFilter {
         int size = events.size();
         for (int i = 0; i < size; i++) {
             combineFilter(events.get(i).filter);
+            if (events.get(i).animationType ==
+                    NotificationStackScrollLayout.AnimationEvent.ANIMATION_TYPE_GO_TO_FULL_SHADE) {
+                hasGoToFullShadeEvent = true;
+            }
         }
     }
 
@@ -112,5 +117,6 @@ public class AnimationFilter {
         animateDimmed = false;
         animateDark = false;
         hasDelays = false;
+        hasGoToFullShadeEvent = false;
     }
 }

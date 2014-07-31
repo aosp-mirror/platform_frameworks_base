@@ -220,6 +220,7 @@ public abstract class ExpandableView extends FrameLayout {
     /**
      * Perform a remove animation on this view.
      *
+     * @param duration The duration of the remove animation.
      * @param translationDirection The direction value from [-1 ... 1] indicating in which the
      *                             animation should be performed. A value of -1 means that The
      *                             remove animation should be performed upwards,
@@ -227,10 +228,10 @@ public abstract class ExpandableView extends FrameLayout {
      *                             Should mean the opposite.
      * @param onFinishedRunnable A runnable which should be run when the animation is finished.
      */
-    public abstract void performRemoveAnimation(float translationDirection,
+    public abstract void performRemoveAnimation(long duration, float translationDirection,
             Runnable onFinishedRunnable);
 
-    public abstract void performAddAnimation(long delay);
+    public abstract void performAddAnimation(long delay, long duration);
 
     public abstract void setScrimAmount(float scrimAmount);
 
