@@ -168,10 +168,20 @@ public class ApplicationErrorReport implements Parcelable {
         PackageManager pm = context.getPackageManager();
 
         // look for receiver in the installer package
-        String candidate = pm.getInstallerPackageName(packageName);
-        ComponentName result = getErrorReportReceiver(pm, packageName, candidate);
-        if (result != null) {
-            return result;
+        String candidate = null;
+        ComponentName result = null;
+
+        try {
+            candidate = pm.getInstallerPackageName(packageName);
+        } catch (IllegalArgumentException e) {
+            // the package could already removed
+        }
+
+        if (candidate != null) {
+            result = getErrorReportReceiver(pm, packageName, candidate);
+            if (result != null) {
+                return result;
+            }
         }
 
         // if the error app is on the system image, look for system apps
