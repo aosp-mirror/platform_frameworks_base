@@ -100,12 +100,15 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     // If true, TV wakes itself up when receiving <Text/Image View On>.
     private boolean mAutoWakeup;
 
+    private final HdmiCecStandbyModeHandler mStandbyHandler;
+
     HdmiCecLocalDeviceTv(HdmiControlService service) {
         super(service, HdmiCecDeviceInfo.DEVICE_TV);
         mPrevPortId = Constants.INVALID_PORT_ID;
         mAutoDeviceOff = mService.readBooleanSetting(Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED,
                 true);
         mAutoWakeup = mService.readBooleanSetting(Global.HDMI_CONTROL_AUTO_WAKEUP_ENABLED, true);
+        mStandbyHandler = new HdmiCecStandbyModeHandler(service, this);
     }
 
     @Override
@@ -133,6 +136,16 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     protected void setPreferredAddress(int addr) {
         assertRunOnServiceThread();
         SystemProperties.set(Constants.PROPERTY_PREFERRED_ADDRESS_TV, String.valueOf(addr));
+    }
+
+    @Override
+    @ServiceThreadOnly
+    boolean dispatchMessage(HdmiCecMessage message) {
+        assertRunOnServiceThread();
+        if (mService.isPowerStandby() && mStandbyHandler.handleCommand(message)) {
+            return true;
+        }
+        return super.onMessage(message);
     }
 
     /**
@@ -787,8 +800,6 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     }
 
     private boolean isSystemAudioOn() {
-
-
         synchronized (mLock) {
             return mSystemAudioActivated;
         }
@@ -1181,6 +1192,12 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         assertRunOnServiceThread();
         mAutoWakeup = enabled;
         mService.writeBooleanSetting(Global.HDMI_CONTROL_AUTO_WAKEUP_ENABLED, enabled);
+    }
+
+    @ServiceThreadOnly
+    boolean getAutoWakeup() {
+        assertRunOnServiceThread();
+        return mAutoWakeup;
     }
 
     @Override

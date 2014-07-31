@@ -162,7 +162,7 @@ final class Constants {
     // Constants related to operands of HDMI CEC commands.
     // Refer to CEC Table 29 in HDMI Spec v1.4b.
     // [Abort Reason]
-    static final int ABORT_UNRECOGNIZED_MODE = 0;
+    static final int ABORT_UNRECOGNIZED_OPCODE = 0;
     static final int ABORT_NOT_IN_CORRECT_MODE = 1;
     static final int ABORT_CANNOT_PROVIDE_SOURCE = 2;
     static final int ABORT_INVALID_OPERAND = 3;
