@@ -537,6 +537,24 @@ public final class TvInputManagerService extends SystemService {
             }
 
             @Override
+            public void onTrackSelectionChanged(List<TvTrackInfo> selectedTracks) {
+                synchronized (mLock) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "onTrackSelectionChanged(" + selectedTracks + ")");
+                    }
+                    if (sessionState.mSession == null || sessionState.mClient == null) {
+                        return;
+                    }
+                    try {
+                        sessionState.mClient.onTrackSelectionChanged(selectedTracks,
+                                sessionState.mSeq);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "error in onTrackSelectionChanged");
+                    }
+                }
+            }
+
+            @Override
             public void onVideoAvailable() {
                 synchronized (mLock) {
                     if (DEBUG) {

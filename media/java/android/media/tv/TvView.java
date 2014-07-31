@@ -321,6 +321,17 @@ public class TvView extends ViewGroup {
     }
 
     /**
+     * Returns a list of selected tracks. May return {@code null} if the information is not
+     * available.
+     */
+    public List<TvTrackInfo> getSelectedTracks() {
+        if (mSession == null) {
+            return null;
+        }
+        return mSession.getSelectedTracks();
+    }
+
+    /**
      * Call {@link TvInputService.Session#appPrivateCommand(String, Bundle)
      * TvInputService.Session.appPrivateCommand()} on the current TvView.
      *
@@ -569,10 +580,9 @@ public class TvView extends ViewGroup {
 
     private void updateVideoSize(List<TvTrackInfo> tracks) {
         for (TvTrackInfo track : tracks) {
-            if (track.getBoolean(TvTrackInfo.KEY_IS_SELECTED)
-                    && track.getInt(TvTrackInfo.KEY_TYPE) == TvTrackInfo.VALUE_TYPE_VIDEO) {
-                int width = track.getInt(TvTrackInfo.KEY_WIDTH);
-                int height = track.getInt(TvTrackInfo.KEY_HEIGHT);
+            if (track.getType() == TvTrackInfo.TYPE_VIDEO) {
+                int width = track.getVideoWidth();
+                int height = track.getVideoHeight();
                 if (width != mVideoWidth || height != mVideoHeight) {
                     mVideoWidth = width;
                     mVideoHeight = height;
@@ -627,6 +637,15 @@ public class TvView extends ViewGroup {
          * @param tracks A list which includes track information.
          */
         public void onTrackInfoChanged(String inputId, List<TvTrackInfo> tracks) {
+        }
+
+        /**
+         * This is called when there is a change on the selected tracks.
+         *
+         * @param inputId The ID of the TV input bound to this view.
+         * @param selectedTracks A list which includes track information.
+         */
+        public void onTrackSelectionChanged(String inputId, List<TvTrackInfo> selectedTracks) {
         }
 
         /**
@@ -779,9 +798,22 @@ public class TvView extends ViewGroup {
             if (DEBUG) {
                 Log.d(TAG, "onTrackInfoChanged()");
             }
-            updateVideoSize(tracks);
             if (mListener != null) {
                 mListener.onTrackInfoChanged(mInputId, tracks);
+            }
+        }
+
+        @Override
+        public void onTrackSelectionChanged(Session session, List<TvTrackInfo> selectedTracks) {
+            if (this != mSessionCallback) {
+                return;
+            }
+            if (DEBUG) {
+                Log.d(TAG, "onTrackInfoChanged()");
+            }
+            updateVideoSize(selectedTracks);
+            if (mListener != null) {
+                mListener.onTrackSelectionChanged(mInputId, selectedTracks);
             }
         }
 
