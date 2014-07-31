@@ -401,7 +401,7 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
     
     /**
      * This flag is set in {@link #onStartCommand} if the Intent is a
-     * a retry because the original attempt never got to or returned from
+     * retry because the original attempt never got to or returned from
      * {@link #onStartCommand(Intent, int, int)}.
      */
     public static final int START_FLAG_RETRY = 0x0002;
