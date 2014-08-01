@@ -1402,7 +1402,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                 entry.row.setVisibility(View.VISIBLE);
                 if (wasGone) {
                     // notify the scroller of a child addition
-                    mStackScroller.generateAddAnimation(entry.row);
+                    mStackScroller.generateAddAnimation(entry.row, true /* fromMoreCard */);
                 }
                 visibleNotifications++;
             }
