@@ -178,8 +178,8 @@ final class Constants {
     static final int ROUTING_PATH_TOP_MASK = 0xF000;
     static final int ROUTING_PATH_TOP_SHIFT = 12;
 
-    static final int INVALID_PORT_ID = -1;
-    static final int INVALID_PHYSICAL_ADDRESS = 0xFFFF;
+    static final int INVALID_PORT_ID = HdmiCecDeviceInfo.PORT_INVALID;
+    static final int INVALID_PHYSICAL_ADDRESS = HdmiCecDeviceInfo.PATH_INVALID;
 
     // Send result codes. It should be consistent with hdmi_cec.h's send_message error code.
     static final int SEND_RESULT_SUCCESS = 0;
