@@ -1305,10 +1305,13 @@ public class Paint {
      * @hide
      */
     public void setFontFeatureSettings(String settings) {
-        if (settings != null && settings.equals(""))
+        if (settings != null && settings.equals("")) {
             settings = null;
+        }
         if ((settings == null && mFontFeatureSettings == null)
-                || (settings != null && settings.equals(mFontFeatureSettings))) return;
+                || (settings != null && settings.equals(mFontFeatureSettings))) {
+            return;
+        }
         mFontFeatureSettings = settings;
         native_setFontFeatureSettings(mNativePaint, settings);
     }
