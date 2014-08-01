@@ -19,6 +19,7 @@ package android.bluetooth.le;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
+import android.bluetooth.BluetoothGattCallbackWrapper;
 import android.bluetooth.IBluetoothGatt;
 import android.bluetooth.IBluetoothGattCallback;
 import android.bluetooth.IBluetoothManager;
@@ -186,7 +187,7 @@ public final class BluetoothLeScanner {
     /**
      * Bluetooth GATT interface callbacks
      */
-    private static class BleScanCallbackWrapper extends IBluetoothGattCallback.Stub {
+    private static class BleScanCallbackWrapper extends BluetoothGattCallbackWrapper {
         private static final int REGISTRATION_CALLBACK_TIMEOUT_SECONDS = 5;
 
         private final ScanCallback mScanCallback;
@@ -284,37 +285,26 @@ public final class BluetoothLeScanner {
             }
         }
 
-        @Override
-        public void onClientConnectionState(int status, int clientIf,
-                boolean connected, String address) {
-            // no op
-        }
-
         /**
          * Callback reporting an LE scan result.
          *
          * @hide
          */
         @Override
-        public void onScanResult(String address, int rssi, byte[] advData) {
+        public void onScanResult(final ScanResult scanResult) {
             if (DBG)
-                Log.d(TAG, "onScanResult() - Device=" + address + " RSSI=" + rssi);
+                Log.d(TAG, "onScanResult() - " + scanResult.toString());
 
             // Check null in case the scan has been stopped
             synchronized (this) {
                 if (mClientIf <= 0)
                     return;
             }
-            BluetoothDevice device = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(
-                    address);
-            long scanNanos = SystemClock.elapsedRealtimeNanos();
-            final ScanResult result = new ScanResult(device, ScanRecord.parseFromBytes(advData),
-                    rssi, scanNanos);
             Handler handler = new Handler(Looper.getMainLooper());
             handler.post(new Runnable() {
                     @Override
                 public void run() {
-                    mScanCallback.onScanResult(ScanSettings.CALLBACK_TYPE_ALL_MATCHES, result);
+                    mScanCallback.onScanResult(ScanSettings.CALLBACK_TYPE_ALL_MATCHES, scanResult);
                 }
             });
 
@@ -329,104 +319,6 @@ public final class BluetoothLeScanner {
                     mScanCallback.onBatchScanResults(results);
                 }
             });
-        }
-
-        @Override
-        public void onGetService(String address, int srvcType,
-                int srvcInstId, ParcelUuid srvcUuid) {
-            // no op
-        }
-
-        @Override
-        public void onGetIncludedService(String address, int srvcType,
-                int srvcInstId, ParcelUuid srvcUuid,
-                int inclSrvcType, int inclSrvcInstId,
-                ParcelUuid inclSrvcUuid) {
-            // no op
-        }
-
-        @Override
-        public void onGetCharacteristic(String address, int srvcType,
-                int srvcInstId, ParcelUuid srvcUuid,
-                int charInstId, ParcelUuid charUuid,
-                int charProps) {
-            // no op
-        }
-
-        @Override
-        public void onGetDescriptor(String address, int srvcType,
-                int srvcInstId, ParcelUuid srvcUuid,
-                int charInstId, ParcelUuid charUuid,
-                int descInstId, ParcelUuid descUuid) {
-            // no op
-        }
-
-        @Override
-        public void onSearchComplete(String address, int status) {
-            // no op
-        }
-
-        @Override
-        public void onCharacteristicRead(String address, int status, int srvcType,
-                int srvcInstId, ParcelUuid srvcUuid,
-                int charInstId, ParcelUuid charUuid, byte[] value) {
-            // no op
-        }
-
-        @Override
-        public void onCharacteristicWrite(String address, int status, int srvcType,
-                int srvcInstId, ParcelUuid srvcUuid,
-                int charInstId, ParcelUuid charUuid) {
-            // no op
-        }
-
-        @Override
-        public void onNotify(String address, int srvcType,
-                int srvcInstId, ParcelUuid srvcUuid,
-                int charInstId, ParcelUuid charUuid,
-                byte[] value) {
-            // no op
-        }
-
-        @Override
-        public void onDescriptorRead(String address, int status, int srvcType,
-                int srvcInstId, ParcelUuid srvcUuid,
-                int charInstId, ParcelUuid charUuid,
-                int descInstId, ParcelUuid descrUuid, byte[] value) {
-            // no op
-        }
-
-        @Override
-        public void onDescriptorWrite(String address, int status, int srvcType,
-                int srvcInstId, ParcelUuid srvcUuid,
-                int charInstId, ParcelUuid charUuid,
-                int descInstId, ParcelUuid descrUuid) {
-            // no op
-        }
-
-        @Override
-        public void onExecuteWrite(String address, int status) {
-            // no op
-        }
-
-        @Override
-        public void onReadRemoteRssi(String address, int rssi, int status) {
-            // no op
-        }
-
-        @Override
-        public void onMultiAdvertiseCallback(int status) {
-            // no op
-        }
-
-        @Override
-        public void onConfigureMTU(String address, int mtu, int status) {
-            // no op
-        }
-
-        @Override
-        public void onConnectionCongested(String address, boolean congested) {
-            // no op
         }
 
         @Override
