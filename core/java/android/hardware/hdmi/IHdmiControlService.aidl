@@ -37,6 +37,7 @@ import java.util.List;
  */
 interface IHdmiControlService {
     int[] getSupportedTypes();
+    HdmiCecDeviceInfo getActiveSource();
     void oneTouchPlay(IHdmiControlCallback callback);
     void queryDisplayStatus(IHdmiControlCallback callback);
     void addHotplugEventListener(IHdmiHotplugEventListener listener);
