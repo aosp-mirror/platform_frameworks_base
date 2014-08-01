@@ -14,10 +14,9 @@ Copyright (C) 2014 The Android Open Source Project
     limitations under the License.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-        android:autoMirrored="true"
-        android:width="18dp"
+        android:width="9.75dp"
         android:height="18dp"
-        android:viewportWidth="24.0"
+        android:viewportWidth="13.0"
         android:viewportHeight="24.0">
     <path
         android:fillColor="#FFFFFFFF"
