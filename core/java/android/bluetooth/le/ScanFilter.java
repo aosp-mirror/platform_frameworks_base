@@ -181,7 +181,7 @@ public final class ScanFilter implements Parcelable {
                                 byte[] serviceDataMask = new byte[serviceDataMaskLength];
                                 in.readByteArray(serviceDataMask);
                                 builder.setServiceData(
-                                            servcieDataUuid, serviceData, serviceDataMask);
+                                        servcieDataUuid, serviceData, serviceDataMask);
                             }
                         }
                     }
@@ -242,9 +242,6 @@ public final class ScanFilter implements Parcelable {
         return mServiceDataMask;
     }
 
-    /**
-     * @hide
-     */
     @Nullable
     public ParcelUuid getServiceDataUuid() {
         return mServiceDataUuid;
@@ -303,19 +300,17 @@ public final class ScanFilter implements Parcelable {
         }
 
         // Service data match
-        if (mServiceData != null) {
-            if (!Objects.equals(mServiceDataUuid, scanRecord.getServiceDataUuid()) ||
-                    !matchesPartialData(mServiceData, mServiceDataMask,
-                            scanRecord.getServiceData())) {
+        if (mServiceDataUuid != null) {
+            if (!matchesPartialData(mServiceData, mServiceDataMask,
+                    scanRecord.getServiceData(mServiceDataUuid))) {
                 return false;
             }
         }
 
         // Manufacturer data match.
-        if (mManufacturerData != null) {
-            if (mManufacturerId != scanRecord.getManufacturerId() ||
-                    !matchesPartialData(mManufacturerData,
-                            mManufacturerDataMask, scanRecord.getManufacturerSpecificData())) {
+        if (mManufacturerId >= 0) {
+            if (!matchesPartialData(mManufacturerData, mManufacturerDataMask,
+                    scanRecord.getManufacturerSpecificData(mManufacturerId))) {
                 return false;
             }
         }
