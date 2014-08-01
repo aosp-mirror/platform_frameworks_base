@@ -395,4 +395,8 @@
 
     <!-- Margin on the left side of the battery % when on Keyguard. -->
     <dimen name="header_battery_margin_keyguard">6dp</dimen>
+
+    <!-- Additional translation (downwards) for appearing notifications when going to the full shade
+         from Keyguard. -->
+    <dimen name="go_to_full_shade_appearing_translation">200dp</dimen>
 </resources>
