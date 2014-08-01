@@ -239,7 +239,7 @@ public class PhoneStateListener {
         mHandler = new Handler(looper) {
             public void handleMessage(Message msg) {
                 if (DBG) {
-                    if (DBG) log("mSubId=" + mSubId + " what=0x" + Integer.toHexString(msg.what)
+                    log("mSubId=" + mSubId + " what=0x" + Integer.toHexString(msg.what)
                             + " msg=" + msg);
                 }
                 switch (msg.what) {
