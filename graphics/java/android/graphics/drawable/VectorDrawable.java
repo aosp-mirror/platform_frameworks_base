@@ -436,10 +436,10 @@ public class VectorDrawable extends Drawable {
 
         if (pathRenderer.mViewportWidth <= 0) {
             throw new XmlPullParserException(a.getPositionDescription() +
-                    "<viewport> tag requires viewportWidth > 0");
+                    "<vector> tag requires viewportWidth > 0");
         } else if (pathRenderer.mViewportHeight <= 0) {
             throw new XmlPullParserException(a.getPositionDescription() +
-                    "<viewport> tag requires viewportHeight > 0");
+                    "<vector> tag requires viewportHeight > 0");
         }
 
         pathRenderer.mBaseWidth = a.getDimension(
@@ -449,10 +449,10 @@ public class VectorDrawable extends Drawable {
 
         if (pathRenderer.mBaseWidth <= 0) {
             throw new XmlPullParserException(a.getPositionDescription() +
-                    "<size> tag requires width > 0");
+                    "<vector> tag requires width > 0");
         } else if (pathRenderer.mBaseHeight <= 0) {
             throw new XmlPullParserException(a.getPositionDescription() +
-                    "<size> tag requires height > 0");
+                    "<vector> tag requires height > 0");
         }
     }
 
