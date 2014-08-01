@@ -3382,12 +3382,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     private void updateKeyguardState() {
         if (mState == StatusBarState.KEYGUARD) {
-            mKeyguardStatusView.setVisibility(View.VISIBLE);
             mKeyguardIndicationController.setVisible(true);
             mNotificationPanel.resetViews();
             mKeyguardUserSwitcher.setKeyguard(true);
         } else {
-            mKeyguardStatusView.setVisibility(View.GONE);
             mKeyguardIndicationController.setVisible(false);
             mKeyguardUserSwitcher.setKeyguard(false);
         }
@@ -3398,7 +3396,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mKeyguardBottomArea.setVisibility(View.GONE);
             mScrimController.setKeyguardShowing(false);
         }
-        mNotificationPanel.setBarState(mState);
+        mNotificationPanel.setBarState(mState, mKeyguardFadingAway);
         updateDozingState();
         updateStackScrollerState();
         updatePublicMode();
