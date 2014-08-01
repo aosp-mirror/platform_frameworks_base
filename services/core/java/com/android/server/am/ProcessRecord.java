@@ -127,7 +127,8 @@ final class ProcessRecord {
     Object adjSource;           // Debugging: option dependent object.
     int adjSourceProcState;     // Debugging: proc state of adjSource's process.
     Object adjTarget;           // Debugging: target component impacting oom_adj.
-    
+    Runnable crashHandler;      // Optional local handler to be invoked in the process crash.
+
     // contains HistoryRecord objects
     final ArrayList<ActivityRecord> activities = new ArrayList<ActivityRecord>();
     // all ServiceRecord running in this process

@@ -376,6 +376,9 @@ public final class SystemServer {
         mSystemServiceManager.startService(UsageStatsService.class);
         mActivityManagerService.setUsageStatsManager(
                 LocalServices.getService(UsageStatsManagerInternal.class));
+
+        // Tracks whether the updatable WebView is in a ready state and watches for update installs.
+        mSystemServiceManager.startService(WebViewUpdateService.class);
     }
 
     /**
@@ -421,12 +424,6 @@ public final class SystemServer {
         try {
             Slog.i(TAG, "Reading configuration...");
             SystemConfig.getInstance();
-
-            Slog.i(TAG, "WebView Update Service");
-            ServiceManager.addService("webviewupdate", new WebViewUpdateService(context));
-
-            Slog.i(TAG, "WebViewFactory preparation");
-            WebViewFactory.prepareWebViewInSystemServer();
 
             Slog.i(TAG, "Scheduling Policy");
             ServiceManager.addService("scheduling_policy", new SchedulingPolicyService());
@@ -1080,6 +1077,10 @@ public final class SystemServer {
                 } catch (Throwable e) {
                     reportWtf("observing native crashes", e);
                 }
+
+                Slog.i(TAG, "WebViewFactory preparation");
+                WebViewFactory.prepareWebViewInSystemServer();
+
                 try {
                     startSystemUi(context);
                 } catch (Throwable e) {
