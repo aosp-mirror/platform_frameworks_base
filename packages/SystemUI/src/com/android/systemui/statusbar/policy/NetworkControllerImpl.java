@@ -163,10 +163,9 @@ public class NetworkControllerImpl extends BroadcastReceiver
     boolean mDataAndWifiStacked = false;
 
     public interface SignalCluster {
-        void setWifiIndicators(boolean visible, int strengthIcon, boolean problem,
-                String contentDescription);
-        void setMobileDataIndicators(boolean visible, int strengthIcon, boolean problem,
-                int typeIcon, String contentDescription, String typeContentDescription);
+        void setWifiIndicators(boolean visible, int strengthIcon, String contentDescription);
+        void setMobileDataIndicators(boolean visible, int strengthIcon, int typeIcon,
+                String contentDescription, String typeContentDescription);
         void setIsAirplaneMode(boolean is, int airplaneIcon);
     }
 
@@ -365,7 +364,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 // only show wifi in the cluster if connected or if wifi-only
                 mWifiEnabled && (mWifiConnected || !mHasMobileDataFeature),
                 mWifiIconId,
-                mInetCondition == 0,
                 mContentDescriptionWifi);
 
         if (mIsWimaxEnabled && mWimaxConnected) {
@@ -373,7 +371,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
             cluster.setMobileDataIndicators(
                     true,
                     mAlwaysShowCdmaRssi ? mPhoneSignalIconId : mWimaxIconId,
-                    mInetCondition == 0,
                     mDataTypeIconId,
                     mContentDescriptionWimax,
                     mContentDescriptionDataType);
@@ -382,7 +379,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
             cluster.setMobileDataIndicators(
                     mHasMobileDataFeature,
                     mShowPhoneRSSIForData ? mPhoneSignalIconId : mDataSignalIconId,
-                    mInetCondition == 0,
                     mDataTypeIconId,
                     mContentDescriptionPhoneSignal,
                     mContentDescriptionDataType);
@@ -599,6 +595,12 @@ public class NetworkControllerImpl extends BroadcastReceiver
 
     private final void updateTelephonySignalStrength() {
         Rlog.d(TAG, "updateTelephonySignalStrength: hasService=" + hasService() + " ss=" + mSignalStrength);
+        if (mDemoMode) {
+            mQSPhoneSignalIconId = mDemoMobileLevel < 0 ? R.drawable.ic_qs_signal_no_signal :
+                    TelephonyIcons.QS_TELEPHONY_SIGNAL_STRENGTH[mDemoInetCondition][mDemoMobileLevel];
+            mQSDataTypeIconId = mDemoQSDataTypeIconId;
+            return;
+        }
         if (!hasService()) {
             if (true/*CHATTY*/) Log.d(TAG, "updateTelephonySignalStrength: !hasService()");
             mPhoneSignalIconId = R.drawable.stat_sys_signal_null;
@@ -948,6 +950,11 @@ public class NetworkControllerImpl extends BroadcastReceiver
     }
 
     private void updateWifiIcons() {
+        if (mDemoMode) {
+            mQSWifiIconId = mDemoWifiLevel < 0 ? R.drawable.ic_qs_wifi_no_network
+                    : WifiIcons.QS_WIFI_SIGNAL_STRENGTH[mDemoInetCondition][mDemoWifiLevel];
+            return;
+        }
         if (mWifiConnected) {
             mWifiIconId = WifiIcons.WIFI_SIGNAL_STRENGTH[mInetCondition][mWifiLevel];
             mQSWifiIconId = WifiIcons.QS_WIFI_SIGNAL_STRENGTH[mInetCondition][mWifiLevel];
@@ -1473,6 +1480,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
     private int mDemoInetCondition;
     private int mDemoWifiLevel;
     private int mDemoDataTypeIconId;
+    private int mDemoQSDataTypeIconId;
     private int mDemoMobileLevel;
 
     @Override
@@ -1482,12 +1490,16 @@ public class NetworkControllerImpl extends BroadcastReceiver
             mDemoWifiLevel = mWifiLevel;
             mDemoInetCondition = mInetCondition;
             mDemoDataTypeIconId = mDataTypeIconId;
+            mDemoQSDataTypeIconId = mQSDataTypeIconId;
             mDemoMobileLevel = mLastSignalLevel;
         } else if (mDemoMode && command.equals(COMMAND_EXIT)) {
             mDemoMode = false;
             for (SignalCluster cluster : mSignalClusters) {
                 refreshSignalCluster(cluster);
             }
+            updateWifiIcons();
+            updateTelephonySignalStrength();
+            refreshViews();
         } else if (mDemoMode && command.equals(COMMAND_NETWORK)) {
             String airplane = args.getString("airplane");
             if (airplane != null) {
@@ -1514,9 +1526,10 @@ public class NetworkControllerImpl extends BroadcastReceiver
                     cluster.setWifiIndicators(
                             show,
                             iconId,
-                            mDemoInetCondition == 0,
                             "Demo");
                 }
+                updateWifiIcons();
+                refreshViews();
             }
             String mobile = args.getString("mobile");
             if (mobile != null) {
@@ -1534,6 +1547,16 @@ public class NetworkControllerImpl extends BroadcastReceiver
                             datatype.equals("roam")
                                     ? R.drawable.stat_sys_data_fully_connected_roam :
                             0;
+                    mDemoQSDataTypeIconId =
+                            datatype.equals("1x") ? R.drawable.ic_qs_signal_1x :
+                            datatype.equals("3g") ? R.drawable.ic_qs_signal_3g :
+                            datatype.equals("4g") ? R.drawable.ic_qs_signal_4g :
+                            datatype.equals("e") ? R.drawable.ic_qs_signal_e :
+                            datatype.equals("g") ? R.drawable.ic_qs_signal_g :
+                            datatype.equals("h") ? R.drawable.ic_qs_signal_h :
+                            datatype.equals("lte") ? R.drawable.ic_qs_signal_lte :
+                            datatype.equals("roam") ? R.drawable.ic_qs_signal_r :
+                            0;
                 }
                 int[][] icons = TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH;
                 String level = args.getString("level");
@@ -1547,11 +1570,12 @@ public class NetworkControllerImpl extends BroadcastReceiver
                     cluster.setMobileDataIndicators(
                             show,
                             iconId,
-                            mDemoInetCondition == 0,
                             mDemoDataTypeIconId,
                             "Demo",
                             "Demo");
                 }
+                updateTelephonySignalStrength();
+                refreshViews();
             }
         }
     }
