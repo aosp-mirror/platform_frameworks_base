@@ -8257,11 +8257,11 @@ public class PackageManagerService extends IPackageManager.Stub {
 
                 // A restore should be performed at this point if (a) the install
                 // succeeded, (b) the operation is not an update, and (c) the new
-                // package has a backupAgent defined.
+                // package has not opted out of backup participation.
                 final boolean update = res.removedInfo.removedPackage != null;
-                boolean doRestore = (!update
-                        && res.pkg != null
-                        && res.pkg.applicationInfo.backupAgentName != null);
+                final int flags = (res.pkg == null) ? 0 : res.pkg.applicationInfo.flags;
+                boolean doRestore = !update
+                        && ((flags & ApplicationInfo.FLAG_ALLOW_BACKUP) != 0);
 
                 // Set up the post-install work request bookkeeping.  This will be used
                 // and cleaned up by the post-install event handling regardless of whether
