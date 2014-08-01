@@ -66,7 +66,7 @@ public class AdvertiseDataTest extends TestCase {
         byte[] manufacturerData = new byte[0];
         AdvertiseData data =
                 mAdvertiseDataBuilder.setIncludeDeviceName(true)
-                        .setManufacturerData(manufacturerId, manufacturerData).build();
+                        .addManufacturerData(manufacturerId, manufacturerData).build();
         data.writeToParcel(parcel, 0);
         parcel.setDataPosition(0);
         AdvertiseData dataFromParcel =
@@ -81,7 +81,7 @@ public class AdvertiseDataTest extends TestCase {
         byte[] serviceData = new byte[0];
         AdvertiseData data =
                 mAdvertiseDataBuilder.setIncludeDeviceName(true)
-                        .setServiceData(uuid, serviceData).build();
+                        .addServiceData(uuid, serviceData).build();
         data.writeToParcel(parcel, 0);
         parcel.setDataPosition(0);
         AdvertiseData dataFromParcel =
@@ -117,7 +117,7 @@ public class AdvertiseDataTest extends TestCase {
         AdvertiseData data =
                 mAdvertiseDataBuilder.setIncludeDeviceName(true)
                         .addServiceUuid(uuid).addServiceUuid(uuid2)
-                        .setManufacturerData(manufacturerId, manufacturerData).build();
+                        .addManufacturerData(manufacturerId, manufacturerData).build();
 
         data.writeToParcel(parcel, 0);
         parcel.setDataPosition(0);
@@ -134,7 +134,7 @@ public class AdvertiseDataTest extends TestCase {
                 (byte) 0xF0, 0x00, 0x02, 0x15 };
         AdvertiseData data =
                 mAdvertiseDataBuilder.setIncludeDeviceName(true)
-                        .setServiceData(uuid, serviceData).build();
+                        .addServiceData(uuid, serviceData).build();
         data.writeToParcel(parcel, 0);
         parcel.setDataPosition(0);
         AdvertiseData dataFromParcel =

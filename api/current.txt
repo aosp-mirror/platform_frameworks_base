@@ -6586,22 +6586,20 @@ package android.bluetooth.le {
     method public int describeContents();
     method public boolean getIncludeDeviceName();
     method public boolean getIncludeTxPowerLevel();
-    method public int getManufacturerId();
-    method public byte[] getManufacturerSpecificData();
-    method public byte[] getServiceData();
-    method public android.os.ParcelUuid getServiceDataUuid();
+    method public android.util.SparseArray<byte[]> getManufacturerSpecificData();
+    method public java.util.Map<android.os.ParcelUuid, byte[]> getServiceData();
     method public java.util.List<android.os.ParcelUuid> getServiceUuids();
     method public void writeToParcel(android.os.Parcel, int);
   }
 
   public static final class AdvertiseData.Builder {
     ctor public AdvertiseData.Builder();
+    method public android.bluetooth.le.AdvertiseData.Builder addManufacturerData(int, byte[]);
+    method public android.bluetooth.le.AdvertiseData.Builder addServiceData(android.os.ParcelUuid, byte[]);
     method public android.bluetooth.le.AdvertiseData.Builder addServiceUuid(android.os.ParcelUuid);
     method public android.bluetooth.le.AdvertiseData build();
     method public android.bluetooth.le.AdvertiseData.Builder setIncludeDeviceName(boolean);
     method public android.bluetooth.le.AdvertiseData.Builder setIncludeTxPowerLevel(boolean);
-    method public android.bluetooth.le.AdvertiseData.Builder setManufacturerData(int, byte[]);
-    method public android.bluetooth.le.AdvertiseData.Builder setServiceData(android.os.ParcelUuid, byte[]);
   }
 
   public final class AdvertiseSettings implements android.os.Parcelable {
@@ -6662,6 +6660,7 @@ package android.bluetooth.le {
     method public int getManufacturerId();
     method public byte[] getServiceData();
     method public byte[] getServiceDataMask();
+    method public android.os.ParcelUuid getServiceDataUuid();
     method public android.os.ParcelUuid getServiceUuid();
     method public android.os.ParcelUuid getServiceUuidMask();
     method public boolean matches(android.bluetooth.le.ScanResult);
@@ -6685,10 +6684,10 @@ package android.bluetooth.le {
     method public int getAdvertiseFlags();
     method public byte[] getBytes();
     method public java.lang.String getDeviceName();
-    method public int getManufacturerId();
-    method public byte[] getManufacturerSpecificData();
-    method public byte[] getServiceData();
-    method public android.os.ParcelUuid getServiceDataUuid();
+    method public android.util.SparseArray<byte[]> getManufacturerSpecificData();
+    method public byte[] getManufacturerSpecificData(int);
+    method public java.util.Map<android.os.ParcelUuid, byte[]> getServiceData();
+    method public byte[] getServiceData(android.os.ParcelUuid);
     method public java.util.List<android.os.ParcelUuid> getServiceUuids();
     method public int getTxPowerLevel();
   }
