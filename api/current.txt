@@ -4697,6 +4697,7 @@ package android.app {
     field public android.os.Bundle extras;
     field public int flags;
     field public android.app.PendingIntent fullScreenIntent;
+    field public android.widget.RemoteViews headsUpContentView;
     field public int icon;
     field public int iconLevel;
     field public android.graphics.Bitmap largeIcon;
