@@ -19,6 +19,9 @@ package android.telecomm;
 import android.app.PendingIntent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import com.android.internal.os.SomeArgs;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -29,6 +32,32 @@ import java.util.Set;
  * Represents a connection to a remote endpoint that carries voice traffic.
  */
 public abstract class Connection {
+
+    private static final int MSG_ADD_CONNECTION_LISTENER = 1;
+    private static final int MSG_REMOVE_CONNECTION_LISTENER = 2;
+    private static final int MSG_SET_AUDIO_STATE = 3;
+    private static final int MSG_SET_PARENT_CONNECTION = 4;
+    private static final int MSG_SET_HANDLE = 5;
+    private static final int MSG_SET_CALLER_DISPLAY_NAME = 6;
+    private static final int MSG_SET_CANCELED = 7;
+    private static final int MSG_SET_FAILED = 8;
+    private static final int MSG_SET_VIDEO_STATE = 9;
+    private static final int MSG_SET_ACTIVE = 10;
+    private static final int MSG_SET_RINGING = 11;
+    private static final int MSG_SET_INITIALIZING = 12;
+    private static final int MSG_SET_INITIALIZED = 13;
+    private static final int MSG_SET_DIALING = 14;
+    private static final int MSG_SET_ON_HOLD = 15;
+    private static final int MSG_SET_VIDEO_CALL_PROVIDER = 16;
+    private static final int MSG_SET_DISCONNECTED = 17;
+    private static final int MSG_SET_POST_DIAL_WAIT = 18;
+    private static final int MSG_SET_REQUESTING_RINGBACK = 19;
+    private static final int MSG_SET_CALL_CAPABILITIES = 20;
+    private static final int MSG_DESTROY = 21;
+    private static final int MSG_SET_SIGNAL = 22;
+    private static final int MSG_SET_AUDIO_MODE_IS_VOIP = 23;
+    private static final int MSG_SET_STATUS_HINTS = 24;
+    private static final int MSG_START_ACTIVITY_FROM_IN_CALL = 25;
 
     /** @hide */
     public abstract static class Listener {
@@ -49,7 +78,6 @@ public abstract class Connection {
         public void onAudioModeIsVoipChanged(Connection c, boolean isVoip) {}
         public void onStatusHintsChanged(Connection c, StatusHints statusHints) {}
         public void onStartActivityFromInCall(Connection c, PendingIntent intent) {}
-        public void onFailed(Connection c, int code, String msg) {}
     }
 
     public final class State {
@@ -86,6 +114,220 @@ public abstract class Connection {
     private int mFailureCode;
     private String mFailureMessage;
     private boolean mIsCanceled;
+
+    private final Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_ADD_CONNECTION_LISTENER: {
+                    Listener listener = (Listener) msg.obj;
+                    mListeners.add(listener);
+                }
+                break;
+                case MSG_REMOVE_CONNECTION_LISTENER: {
+                    Listener listener = (Listener) msg.obj;
+                    mListeners.remove(listener);
+                }
+                break;
+                case MSG_SET_AUDIO_STATE: {
+                    CallAudioState state = (CallAudioState) msg.obj;
+                    mCallAudioState = state;
+                    onSetAudioState(state);
+                }
+                break;
+                case MSG_SET_PARENT_CONNECTION: {
+                    Connection parentConnection = (Connection) msg.obj;
+                    if (mParentConnection != parentConnection) {
+                        if (mParentConnection != null) {
+                            mParentConnection.removeChild(Connection.this);
+                        }
+                        mParentConnection = parentConnection;
+                        if (mParentConnection != null) {
+                            mParentConnection.addChild(Connection.this);
+                            // do something if the child connections goes down to ZERO.
+                        }
+                        for (Listener l : mListeners) {
+                            l.onParentConnectionChanged(Connection.this, mParentConnection);
+                        }
+                    }
+                }
+                break;
+                case MSG_SET_HANDLE: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    try {
+                        Uri handle = (Uri) args.arg1;
+                        int presentation = args.argi1;
+                        mHandle = handle;
+                        mHandlePresentation = presentation;
+                        for (Listener l : mListeners) {
+                            l.onHandleChanged(Connection.this, handle, presentation);
+                        }
+                    } finally {
+                        args.recycle();
+                    }
+                }
+                break;
+                case MSG_SET_CALLER_DISPLAY_NAME: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    try {
+                        String callerDisplayName = (String) args.arg1;
+                        int presentation = args.argi1;
+                        mCallerDisplayName = callerDisplayName;
+                        mCallerDisplayNamePresentation = presentation;
+                        for (Listener l : mListeners) {
+                            l.onCallerDisplayNameChanged(Connection.this, callerDisplayName,
+                                    presentation);
+                        }
+                    } finally {
+                        args.recycle();
+                    }
+                }
+                break;
+                case MSG_SET_CANCELED: {
+                    setState(State.CANCELED);
+                }
+                break;
+                case MSG_SET_FAILED: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    try {
+                        int code = args.argi1;
+                        String message = (String) args.arg1;
+                        mFailureCode = code;
+                        mFailureMessage = message;
+                        setState(State.FAILED);
+                    } finally {
+                        args.recycle();
+                    }
+                }
+                break;
+                case MSG_SET_VIDEO_STATE: {
+                    int videoState = ((Integer) msg.obj).intValue();
+                    mVideoState = videoState;
+                    for (Listener l : mListeners) {
+                        l.onVideoStateChanged(Connection.this, mVideoState);
+                    }
+                }
+                break;
+                case MSG_SET_ACTIVE: {
+                    setRequestingRingback(false);
+                    setState(State.ACTIVE);
+                }
+                break;
+                case MSG_SET_RINGING: {
+                    setState(State.RINGING);
+                }
+                break;
+                case MSG_SET_INITIALIZING: {
+                    setState(State.INITIALIZING);
+                }
+                break;
+                case MSG_SET_INITIALIZED: {
+                    setState(State.NEW);
+                }
+                break;
+                case MSG_SET_DIALING: {
+                    setState(State.DIALING);
+                }
+                break;
+                case MSG_SET_ON_HOLD: {
+                    setState(State.HOLDING);
+                }
+                break;
+                case MSG_SET_VIDEO_CALL_PROVIDER: {
+                    ConnectionService.VideoCallProvider videoCallProvider =
+                            (ConnectionService.VideoCallProvider) msg.obj;
+                    mVideoCallProvider = videoCallProvider;
+                    for (Listener l : mListeners) {
+                        l.onVideoCallProviderChanged(Connection.this, videoCallProvider);
+                    }
+                }
+                break;
+                case MSG_SET_DISCONNECTED: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    try {
+                        int cause = args.argi1;
+                        String message = (String) args.arg1;
+                        setState(State.DISCONNECTED);
+                        Log.d(this, "Disconnected with cause %d message %s", cause, message);
+                        for (Listener l : mListeners) {
+                            l.onDisconnected(Connection.this, cause, message);
+                        }
+                    } finally {
+                        args.recycle();
+                    }
+                }
+                break;
+                case MSG_SET_POST_DIAL_WAIT: {
+                    String remaining = (String) msg.obj;
+                    for (Listener l : mListeners) {
+                        l.onPostDialWait(Connection.this, remaining);
+                    }
+                }
+                break;
+                case MSG_SET_REQUESTING_RINGBACK: {
+                    boolean ringback = ((Boolean) msg.obj).booleanValue();
+                    if (mRequestingRingback != ringback) {
+                        mRequestingRingback = ringback;
+                        for (Listener l : mListeners) {
+                            l.onRequestingRingback(Connection.this, ringback);
+                        }
+                    }
+                } break;
+                case MSG_SET_CALL_CAPABILITIES: {
+                    int callCapabilities = ((Integer) msg.obj).intValue();
+                    if (mCallCapabilities != callCapabilities) {
+                        mCallCapabilities = callCapabilities;
+                        for (Listener l : mListeners) {
+                            l.onCallCapabilitiesChanged(Connection.this, mCallCapabilities);
+                        }
+                    }
+                }
+                break;
+                case MSG_DESTROY: {
+                    // TODO: Is this still relevant because everything is on the main thread now.
+                    // It is possible that onDestroy() will trigger the listener to remove itself
+                    // which will result in a concurrent modification exception. To counteract
+                    // this we make a copy of the listeners and iterate on that.
+                    for (Listener l : new ArrayList<>(mListeners)) {
+                        if (mListeners.contains(l)) {
+                            l.onDestroyed(Connection.this);
+                        }
+                    }
+                }
+                break;
+                case MSG_SET_SIGNAL: {
+                    Bundle details = (Bundle) msg.obj;
+                    for (Listener l : mListeners) {
+                        l.onSignalChanged(Connection.this, details);
+                    }
+                }
+                break;
+                case MSG_SET_AUDIO_MODE_IS_VOIP: {
+                    boolean isVoip = ((Boolean) msg.obj).booleanValue();
+                    mAudioModeIsVoip = isVoip;
+                    for (Listener l : mListeners) {
+                        l.onAudioModeIsVoipChanged(Connection.this, isVoip);
+                    }
+                }
+                break;
+                case MSG_SET_STATUS_HINTS: {
+                    StatusHints statusHints = (StatusHints) msg.obj;
+                    mStatusHints = statusHints;
+                    for (Listener l : mListeners) {
+                        l.onStatusHintsChanged(Connection.this, statusHints);
+                    }
+                }
+                break;
+                case MSG_START_ACTIVITY_FROM_IN_CALL: {
+                    PendingIntent intent = (PendingIntent) msg.obj;
+                    for (Listener l : mListeners) {
+                        l.onStartActivityFromInCall(Connection.this, intent);
+                    }
+                }
+                break;
+            }
+        }
+    };
 
     /**
      * Create a new Connection.
@@ -188,7 +430,7 @@ public abstract class Connection {
      * @hide
      */
     public final Connection addConnectionListener(Listener l) {
-        mListeners.add(l);
+        mHandler.obtainMessage(MSG_ADD_CONNECTION_LISTENER, l).sendToTarget();
         return this;
     }
 
@@ -201,7 +443,7 @@ public abstract class Connection {
      * @hide
      */
     public final Connection removeConnectionListener(Listener l) {
-        mListeners.remove(l);
+        mHandler.obtainMessage(MSG_REMOVE_CONNECTION_LISTENER, l).sendToTarget();
         return this;
     }
 
@@ -227,8 +469,7 @@ public abstract class Connection {
      */
     final void setAudioState(CallAudioState state) {
         Log.d(this, "setAudioState %s", state);
-        mCallAudioState = state;
-        onSetAudioState(state);
+        mHandler.obtainMessage(MSG_SET_AUDIO_STATE, state).sendToTarget();
     }
 
     /**
@@ -266,19 +507,7 @@ public abstract class Connection {
      */
     public final void setParentConnection(Connection parentConnection) {
         Log.d(this, "parenting %s to %s", this, parentConnection);
-        if (mParentConnection != parentConnection) {
-            if (mParentConnection != null) {
-                mParentConnection.removeChild(this);
-            }
-            mParentConnection = parentConnection;
-            if (mParentConnection != null) {
-                mParentConnection.addChild(this);
-                // do something if the child connections goes down to ZERO.
-            }
-            for (Listener l : mListeners) {
-                l.onParentConnectionChanged(this, mParentConnection);
-            }
-        }
+        mHandler.obtainMessage(MSG_SET_PARENT_CONNECTION, parentConnection).sendToTarget();
     }
 
     public final Connection getParentConnection() {
@@ -305,11 +534,10 @@ public abstract class Connection {
      */
     public final void setHandle(Uri handle, int presentation) {
         Log.d(this, "setHandle %s", handle);
-        mHandle = handle;
-        mHandlePresentation = presentation;
-        for (Listener l : mListeners) {
-            l.onHandleChanged(this, handle, presentation);
-        }
+        SomeArgs args = SomeArgs.obtain();
+        args.arg1 = handle;
+        args.argi1 = presentation;
+        mHandler.obtainMessage(MSG_SET_HANDLE, args).sendToTarget();
     }
 
     /**
@@ -321,11 +549,10 @@ public abstract class Connection {
      */
     public final void setCallerDisplayName(String callerDisplayName, int presentation) {
         Log.d(this, "setCallerDisplayName %s", callerDisplayName);
-        mCallerDisplayName = callerDisplayName;
-        mCallerDisplayNamePresentation = presentation;
-        for (Listener l : mListeners) {
-            l.onCallerDisplayNameChanged(this, callerDisplayName, presentation);
-        }
+        SomeArgs args = SomeArgs.obtain();
+        args.arg1 = callerDisplayName;
+        args.argi1 = presentation;
+        mHandler.obtainMessage(MSG_SET_CALLER_DISPLAY_NAME, args).sendToTarget();
     }
 
     /**
@@ -334,7 +561,7 @@ public abstract class Connection {
      */
     public final void setCanceled() {
         Log.d(this, "setCanceled");
-        setState(State.CANCELED);
+        mHandler.obtainMessage(MSG_SET_CANCELED).sendToTarget();
     }
 
     /**
@@ -350,9 +577,10 @@ public abstract class Connection {
      */
     public final void setFailed(int code, String message) {
         Log.d(this, "setFailed (%d: %s)", code, message);
-        mFailureCode = code;
-        mFailureMessage = message;
-        setState(State.FAILED);
+        SomeArgs args = SomeArgs.obtain();
+        args.argi1 = code;
+        args.arg1 = message;
+        mHandler.obtainMessage(MSG_SET_FAILED, args).sendToTarget();
     }
 
     /**
@@ -366,10 +594,7 @@ public abstract class Connection {
      */
     public final void setVideoState(int videoState) {
         Log.d(this, "setVideoState %d", videoState);
-        mVideoState = videoState;
-        for (Listener l : mListeners) {
-            l.onVideoStateChanged(this, mVideoState);
-        }
+        mHandler.obtainMessage(MSG_SET_VIDEO_STATE, Integer.valueOf(videoState)).sendToTarget();
     }
 
     /**
@@ -377,28 +602,28 @@ public abstract class Connection {
      * communicate).
      */
     public final void setActive() {
-        setRequestingRingback(false);
-        setState(State.ACTIVE);
+        mHandler.obtainMessage(MSG_SET_ACTIVE).sendToTarget();
     }
 
     /**
      * Sets state to ringing (e.g., an inbound ringing call).
      */
     public final void setRinging() {
-        setState(State.RINGING);
+        mHandler.obtainMessage(MSG_SET_RINGING).sendToTarget();
     }
 
     /**
      * Sets state to initializing (this Connection is not yet ready to be used).
      */
     public final void setInitializing() {
-        setState(State.INITIALIZING);
+        mHandler.obtainMessage(MSG_SET_INITIALIZING).sendToTarget();
     }
 
     /**
      * Sets state to initialized (the Connection has been set up and is now ready to be used).
      */
     public final void setInitialized() {
+        mHandler.obtainMessage(MSG_SET_INITIALIZED).sendToTarget();
         setState(State.NEW);
     }
 
@@ -406,14 +631,14 @@ public abstract class Connection {
      * Sets state to dialing (e.g., dialing an outbound call).
      */
     public final void setDialing() {
-        setState(State.DIALING);
+        mHandler.obtainMessage(MSG_SET_DIALING).sendToTarget();
     }
 
     /**
      * Sets state to be on hold.
      */
     public final void setOnHold() {
-        setState(State.HOLDING);
+        mHandler.obtainMessage(MSG_SET_ON_HOLD).sendToTarget();
     }
 
     /**
@@ -421,10 +646,7 @@ public abstract class Connection {
      * @param videoCallProvider The video call provider.
      */
     public final void setVideoCallProvider(ConnectionService.VideoCallProvider videoCallProvider) {
-        mVideoCallProvider = videoCallProvider;
-        for (Listener l : mListeners) {
-            l.onVideoCallProviderChanged(this, videoCallProvider);
-        }
+        mHandler.obtainMessage(MSG_SET_VIDEO_CALL_PROVIDER, videoCallProvider).sendToTarget();
     }
 
     public final ConnectionService.VideoCallProvider getVideoCallProvider() {
@@ -439,20 +661,17 @@ public abstract class Connection {
      * @param message Optional call-service-provided message about the disconnect.
      */
     public final void setDisconnected(int cause, String message) {
-        setState(State.DISCONNECTED);
-        Log.d(this, "Disconnected with cause %d message %s", cause, message);
-        for (Listener l : mListeners) {
-            l.onDisconnected(this, cause, message);
-        }
+        SomeArgs args = SomeArgs.obtain();
+        args.argi1 = cause;
+        args.arg1 = message;
+        mHandler.obtainMessage(MSG_SET_DISCONNECTED, args).sendToTarget();
     }
 
     /**
      * TODO(santoscordon): Needs documentation.
      */
     public final void setPostDialWait(String remaining) {
-        for (Listener l : mListeners) {
-            l.onPostDialWait(this, remaining);
-        }
+        mHandler.obtainMessage(MSG_SET_POST_DIAL_WAIT, remaining).sendToTarget();
     }
 
     /**
@@ -462,12 +681,8 @@ public abstract class Connection {
      * @param ringback Whether the ringback tone is to be played.
      */
     public final void setRequestingRingback(boolean ringback) {
-        if (mRequestingRingback != ringback) {
-            mRequestingRingback = ringback;
-            for (Listener l : mListeners) {
-                l.onRequestingRingback(this, ringback);
-            }
-        }
+        mHandler.obtainMessage(MSG_SET_REQUESTING_RINGBACK, Boolean.valueOf(ringback))
+                .sendToTarget();
     }
 
     /**
@@ -476,26 +691,15 @@ public abstract class Connection {
      * @param callCapabilities The new call capabilities.
      */
     public final void setCallCapabilities(int callCapabilities) {
-        if (mCallCapabilities != callCapabilities) {
-            mCallCapabilities = callCapabilities;
-            for (Listener l : mListeners) {
-                l.onCallCapabilitiesChanged(this, mCallCapabilities);
-            }
-        }
+        mHandler.obtainMessage(MSG_SET_CALL_CAPABILITIES, Integer.valueOf(callCapabilities))
+                .sendToTarget();
     }
 
     /**
      * TODO(santoscordon): Needs documentation.
      */
     public final void destroy() {
-        // It is possible that onDestroy() will trigger the listener to remove itself which will
-        // result in a concurrent modification exception. To counteract this we make a copy of the
-        // listeners and iterate on that.
-        for (Listener l : new ArrayList<>(mListeners)) {
-            if (mListeners.contains(l)) {
-                l.onDestroyed(this);
-            }
-        }
+        mHandler.obtainMessage(MSG_DESTROY).sendToTarget();
     }
 
     /**
@@ -504,9 +708,7 @@ public abstract class Connection {
      * @param details A {@link android.os.Bundle} containing details of the current level.
      */
     public final void setSignal(Bundle details) {
-        for (Listener l : mListeners) {
-            l.onSignalChanged(this, details);
-        }
+        mHandler.obtainMessage(MSG_SET_SIGNAL, details).sendToTarget();
     }
 
     /**
@@ -515,10 +717,7 @@ public abstract class Connection {
      * @param isVoip True if the audio mode is VOIP.
      */
     public final void setAudioModeIsVoip(boolean isVoip) {
-        mAudioModeIsVoip = isVoip;
-        for (Listener l : mListeners) {
-            l.onAudioModeIsVoipChanged(this, isVoip);
-        }
+        mHandler.obtainMessage(MSG_SET_AUDIO_MODE_IS_VOIP, Boolean.valueOf(isVoip)).sendToTarget();
     }
 
     /**
@@ -527,10 +726,7 @@ public abstract class Connection {
      * @param statusHints The status label and icon to set.
      */
     public final void setStatusHints(StatusHints statusHints) {
-        mStatusHints = statusHints;
-        for (Listener l : mListeners) {
-            l.onStatusHintsChanged(this, statusHints);
-        }
+        mHandler.obtainMessage(MSG_SET_STATUS_HINTS, statusHints).sendToTarget();
     }
 
     /**
@@ -542,13 +738,13 @@ public abstract class Connection {
         if (!intent.isActivity()) {
             throw new IllegalArgumentException("Activity intent required.");
         }
-        for (Listener l : mListeners) {
-            l.onStartActivityFromInCall(this, intent);
-        }
+        mHandler.obtainMessage(MSG_START_ACTIVITY_FROM_IN_CALL, intent).sendToTarget();
     }
 
     /**
      * Notifies this Connection that the {@link #getCallAudioState()} property has a new value.
+     * <p>
+     * This callback will happen on the main thread.
      *
      * @param state The new call audio state.
      */
@@ -557,6 +753,8 @@ public abstract class Connection {
     /**
      * Notifies this Connection of an internal state change. This method is called after the
      * state is changed.
+     * <p>
+     * This callback will happen on the main thread.
      *
      * @param state The new state, a {@link Connection.State} member.
      */
@@ -564,6 +762,8 @@ public abstract class Connection {
 
     /**
      * Notifies this Connection of a request to play a DTMF tone.
+     * <p>
+     * This callback will happen on the main thread.
      *
      * @param c A DTMF character.
      */
@@ -571,61 +771,81 @@ public abstract class Connection {
 
     /**
      * Notifies this Connection of a request to stop any currently playing DTMF tones.
+     * <p>
+     * This callback will happen on the main thread.
      */
     public void onStopDtmfTone() {}
 
     /**
      * Notifies this Connection of a request to disconnect.
+     * <p>
+     * This callback will happen on the main thread.
      */
     public void onDisconnect() {}
 
     /**
      * Notifies this Connection of a request to disconnect.
+     * <p>
+     * This callback will happen on the main thread.
      */
     public void onSeparate() {}
 
     /**
      * Notifies this Connection of a request to abort.
+     * <p>
+     * This callback will happen on the main thread.
      */
     public void onAbort() {}
 
     /**
      * Notifies this Connection of a request to hold.
+     * <p>
+     * This callback will happen on the main thread.
      */
     public void onHold() {}
 
     /**
      * Notifies this Connection of a request to exit a hold state.
+     * <p>
+     * This callback will happen on the main thread.
      */
     public void onUnhold() {}
 
     /**
-     * Notifies this Connection, which is in {@link State#RINGING}, of
-     * a request to accept.
+     * Notifies this Connection, which is in {@link State#RINGING}, of a request to accept.
+     * <p>
+     * This callback will happen on the main thread.
      *
      * @param videoState The video state in which to answer the call.
      */
     public void onAnswer(int videoState) {}
 
     /**
-     * Notifies this Connection, which is in {@link State#RINGING}, of
-     * a request to reject.
+     * Notifies this Connection, which is in {@link State#RINGING}, of a request to reject.
+     * <p>
+     * This callback will happen on the main thread.
      */
     public void onReject() {}
 
     /**
      * Notifies this Connection whether the user wishes to proceed with the post-dial DTMF codes.
+     * <p>
+     * This callback will happen on the main thread.
      */
     public void onPostDialContinue(boolean proceed) {}
 
     /**
      * Swap this call with a background call. This is used for calls that don't support hold,
      * e.g. CDMA.
+     * <p>
+     * This callback will happen on the main thread.
      */
     public void onSwapWithBackgroundCall() {}
 
     /**
      * TODO(santoscordon): Needs documentation.
+     * <p>
+     * This callback will happen on the main thread.
      */
     public void onChildrenChanged(List<Connection> children) {}
 
@@ -634,12 +854,14 @@ public abstract class Connection {
      */
     public void onPhoneAccountClicked() {}
 
+    /** This must be called from the main thread. */
     private void addChild(Connection connection) {
         Log.d(this, "adding child %s", connection);
         mChildConnections.add(connection);
         onChildrenChanged(mChildConnections);
     }
 
+    /** This must be called from the main thread. */
     private void removeChild(Connection connection) {
         Log.d(this, "removing child %s", connection);
         mChildConnections.remove(connection);
