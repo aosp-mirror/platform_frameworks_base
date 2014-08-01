@@ -209,13 +209,13 @@ public final class BluetoothLeAdvertiser {
                         num128BitUuids * BluetoothUuid.UUID_BYTES_128_BIT;
             }
         }
-        for (ParcelUuid uuid : data.getServiceData().keySet()) {
+        if (data.getServiceDataUuid() != null) {
             size += OVERHEAD_BYTES_PER_FIELD + SERVICE_DATA_UUID_LENGTH
-                    + byteLength(data.getServiceData().get(uuid));
+                    + byteLength(data.getServiceData());
         }
-        for (int i = 0; i < data.getManufacturerSpecificData().size(); ++i) {
+        if (data.getManufacturerId() > 0) {
             size += OVERHEAD_BYTES_PER_FIELD + MANUFACTURER_SPECIFIC_DATA_LENGTH +
-                    byteLength(data.getManufacturerSpecificData().valueAt(i));
+                    byteLength(data.getManufacturerSpecificData());
         }
         if (data.getIncludeTxPowerLevel()) {
             size += OVERHEAD_BYTES_PER_FIELD + 1; // tx power level value is one byte.

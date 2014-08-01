@@ -53,13 +53,13 @@ public class ScanRecordTest extends TestCase {
         assertEquals("Ped", data.getDeviceName());
         assertEquals(-20, data.getTxPowerLevel());
 
-        assertTrue(data.getManufacturerSpecificData().get(0x00E0) != null);
+        assertEquals(0x00e0, data.getManufacturerId());
         assertArrayEquals(new byte[] {
-                0x02, 0x15 }, data.getManufacturerSpecificData().get(0x00E0));
+                0x02, 0x15 }, data.getManufacturerSpecificData());
 
-        assertTrue(data.getServiceData().containsKey(uuid2));
+        assertEquals(uuid2, data.getServiceDataUuid());
         assertArrayEquals(new byte[] {
-                0x50, 0x64 }, data.getServiceData().get(uuid2));
+                0x50, 0x64 }, data.getServiceData());
     }
 
     // Assert two byte arrays are equal.
