@@ -337,7 +337,7 @@ public class TaskStack {
             String prevPackage = "";
             int prevAffiliation = -1;
             Random r = new Random();
-            int groupCountDown = 5;
+            int groupCountDown = Constants.DebugFlags.App.TaskAffiliationsGroupCount;
             for (int i = 0; i < taskCount; i++) {
                 Task t = tasks.get(i);
                 String packageName = t.key.baseIntent.getComponent().getPackageName();
@@ -352,7 +352,7 @@ public class TaskStack {
                     addGroup(group);
                     prevAffiliation = affiliation;
                     prevPackage = packageName;
-                    groupCountDown = 5;
+                    groupCountDown = Constants.DebugFlags.App.TaskAffiliationsGroupCount;
                 }
                 group.addTask(t);
                 taskMap.put(t.key, t);

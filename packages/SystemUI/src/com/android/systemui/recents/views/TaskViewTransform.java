@@ -28,13 +28,12 @@ import com.android.systemui.recents.Constants;
 public class TaskViewTransform {
     public int startDelay = 0;
     public int translationY = 0;
-    public int translationZ = 0;
+    public float translationZ = 0;
     public float scale = 1f;
     public float alpha = 1f;
-    public float dismissAlpha = 1f;
     public boolean visible = false;
     public Rect rect = new Rect();
-    float t = 0f;
+    float p = 0f;
 
     public TaskViewTransform() {
         // Do nothing
@@ -46,10 +45,9 @@ public class TaskViewTransform {
         translationZ = o.translationZ;
         scale = o.scale;
         alpha = o.alpha;
-        dismissAlpha = o.dismissAlpha;
         visible = o.visible;
         rect.set(o.rect);
-        t = o.t;
+        p = o.p;
     }
 
     /** Resets the current transform */
@@ -59,18 +57,14 @@ public class TaskViewTransform {
         translationZ = 0;
         scale = 1f;
         alpha = 1f;
-        dismissAlpha = 1f;
         visible = false;
         rect.setEmpty();
-        t = 0f;
+        p = 0f;
     }
 
     /** Convenience functions to compare against current property values */
     public boolean hasAlphaChangedFrom(float v) {
         return (Float.compare(alpha, v) != 0);
-    }
-    public boolean hasDismissAlphaChangedFrom(float v) {
-        return (Float.compare(dismissAlpha, v) != 0);
     }
     public boolean hasScaleChangedFrom(float v) {
         return (Float.compare(scale, v) != 0);
@@ -83,8 +77,7 @@ public class TaskViewTransform {
     }
 
     /** Applies this transform to a view. */
-    public void applyToTaskView(View v, int duration, Interpolator interp, boolean allowLayers,
-                                ValueAnimator.AnimatorUpdateListener scaleUpdateListener) {
+    public void applyToTaskView(View v, int duration, Interpolator interp, boolean allowLayers) {
         // Check to see if any properties have changed, and update the task view
         if (duration > 0) {
             ViewPropertyAnimator anim = v.animate();
@@ -100,8 +93,7 @@ public class TaskViewTransform {
             }
             if (hasScaleChangedFrom(v.getScaleX())) {
                 anim.scaleX(scale)
-                    .scaleY(scale)
-                    .setUpdateListener(scaleUpdateListener);
+                    .scaleY(scale);
                 requiresLayers = true;
             }
             if (hasAlphaChangedFrom(v.getAlpha())) {
@@ -128,7 +120,6 @@ public class TaskViewTransform {
             if (hasScaleChangedFrom(v.getScaleX())) {
                 v.setScaleX(scale);
                 v.setScaleY(scale);
-                scaleUpdateListener.onAnimationUpdate(null);
             }
             if (hasAlphaChangedFrom(v.getAlpha())) {
                 v.setAlpha(alpha);
@@ -152,6 +143,6 @@ public class TaskViewTransform {
     public String toString() {
         return "TaskViewTransform delay: " + startDelay + " y: " + translationY + " z: " + translationZ +
                 " scale: " + scale + " alpha: " + alpha + " visible: " + visible + " rect: " + rect +
-                " dismissAlpha: " + dismissAlpha;
+                " p: " + p;
     }
 }

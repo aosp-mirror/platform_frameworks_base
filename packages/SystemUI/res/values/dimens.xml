@@ -201,8 +201,8 @@
     <!-- The min translation in the Z index for the last task. -->
     <dimen name="recents_task_view_z_min">5dp</dimen>
 
-    <!-- The translation in the Z index for each task above the last task. -->
-    <dimen name="recents_task_view_z_increment">10dp</dimen>
+    <!-- The max translation in the Z index for the last task. -->
+    <dimen name="recents_task_view_z_max">65dp</dimen>
 
     <!-- The amount to translate when animating the removal of a task. -->
     <dimen name="recents_task_view_remove_anim_translation_x">100dp</dimen>
