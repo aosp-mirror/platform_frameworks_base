@@ -54,6 +54,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.server.SystemService;
 import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
 import com.android.server.hdmi.HdmiCecController.AllocateAddressCallback;
+import com.android.server.hdmi.HdmiCecLocalDevice.ActiveSource;
 import com.android.server.hdmi.HdmiCecLocalDevice.PendingActionClearedCallback;
 
 import libcore.util.EmptyArray;
@@ -717,6 +718,26 @@ public final class HdmiControlService extends SystemService {
                 localDevices[i] = mLocalDevices.get(i);
             }
             return localDevices;
+        }
+
+        @Override
+        public HdmiCecDeviceInfo getActiveSource() {
+            HdmiCecLocalDeviceTv tv = tv();
+            if (tv == null) {
+                Slog.w(TAG, "Local tv device not available");
+                return null;
+            }
+            ActiveSource activeSource = tv.getActiveSource();
+            if (activeSource.isValid()) {
+                return new HdmiCecDeviceInfo(activeSource.logicalAddress,
+                        activeSource.physicalAddress, HdmiCecDeviceInfo.PORT_INVALID,
+                        HdmiCecDeviceInfo.DEVICE_INACTIVE, 0, "");
+            }
+            int activePath = tv.getActivePath();
+            if (activePath != HdmiCecDeviceInfo.PATH_INVALID) {
+                return new HdmiCecDeviceInfo(activePath, tv.getActivePortId());
+            }
+            return null;
         }
 
         @Override

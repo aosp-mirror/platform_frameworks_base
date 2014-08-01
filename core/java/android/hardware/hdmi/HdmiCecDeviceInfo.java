@@ -65,6 +65,18 @@ public final class HdmiCecDeviceInfo implements Parcelable {
      */
     public static final int ADDR_INTERNAL = 0;
 
+    /**
+     * Physical address used to indicate the source comes from internal device.
+     * The physical address of TV(0) is used.
+     */
+    public static final int PATH_INTERNAL = 0x0000;
+
+    /** Invalid physical address (routing path) */
+    public static final int PATH_INVALID = 0xFFFF;
+
+    /** Invalid port ID */
+    public static final int PORT_INVALID = -1;
+
     // Logical address, physical address, device type, vendor id and display name
     // are immutable value.
     private final int mLogicalAddress;
