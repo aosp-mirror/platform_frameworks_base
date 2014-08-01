@@ -364,13 +364,19 @@ public class VectorDrawable extends Drawable {
     /** @hide */
     public static VectorDrawable create(Resources resources, int rid) {
         try {
-            final XmlPullParser xpp = resources.getXml(rid);
-            final AttributeSet attrs = Xml.asAttributeSet(xpp);
-            final XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
-            factory.setNamespaceAware(true);
+            final XmlPullParser parser = resources.getXml(rid);
+            final AttributeSet attrs = Xml.asAttributeSet(parser);
+            int type;
+            while ((type=parser.next()) != XmlPullParser.START_TAG &&
+                    type != XmlPullParser.END_DOCUMENT) {
+                // Empty loop
+            }
+            if (type != XmlPullParser.START_TAG) {
+                throw new XmlPullParserException("No start tag found");
+            }
 
             final VectorDrawable drawable = new VectorDrawable();
-            drawable.inflate(resources, xpp, attrs);
+            drawable.inflate(resources, parser, attrs);
 
             return drawable;
         } catch (XmlPullParserException e) {
