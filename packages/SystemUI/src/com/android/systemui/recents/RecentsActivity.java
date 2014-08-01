@@ -383,9 +383,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         filter.addAction(SearchManager.INTENT_GLOBAL_SEARCH_ACTIVITY_CHANGED);
         registerReceiver(mSystemBroadcastReceiver, filter);
 
-        // Register any broadcast receivers for the task loader
-        RecentsTaskLoader.getInstance().registerReceivers(this, mRecentsView);
-
         // Private API calls to make the shadows look better
         try {
             Utilities.setShadowProperty("ambientShadowStrength", String.valueOf(35f));
@@ -451,6 +448,9 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         filter.addAction(ACTION_TOGGLE_RECENTS_ACTIVITY);
         filter.addAction(ACTION_START_ENTER_ANIMATION);
         registerReceiver(mServiceBroadcastReceiver, filter);
+
+        // Register any broadcast receivers for the task loader
+        RecentsTaskLoader.getInstance().registerReceivers(this, mRecentsView);
     }
 
     @Override
@@ -481,8 +481,14 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     protected void onStop() {
         super.onStop();
 
+        // Remove all the views
+        mRecentsView.removeAllTaskStacks();
+
         // Unregister the RecentsService receiver
         unregisterReceiver(mServiceBroadcastReceiver);
+
+        // Unregister any broadcast receivers for the task loader
+        RecentsTaskLoader.getInstance().unregisterReceivers();
 
         // Stop listening for widget package changes if there was one bound
         if (mAppWidgetHost.isListening()) {
@@ -496,7 +502,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
         // Unregister the system broadcast receivers
         unregisterReceiver(mSystemBroadcastReceiver);
-        RecentsTaskLoader.getInstance().unregisterReceivers();
     }
 
     @Override
