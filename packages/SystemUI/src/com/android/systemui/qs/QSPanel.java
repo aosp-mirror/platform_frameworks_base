@@ -95,7 +95,7 @@ public class QSPanel extends ViewGroup {
         mDetailDoneButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                showDetail(false, mDetailRecord);
+                closeDetail();
             }
         });
     }
@@ -134,7 +134,7 @@ public class QSPanel extends ViewGroup {
         if (mExpanded == expanded) return;
         mExpanded = expanded;
         if (!mExpanded) {
-            showDetail(false /*show*/, mDetailRecord);
+            closeDetail();
         }
     }
 
@@ -224,6 +224,14 @@ public class QSPanel extends ViewGroup {
         mRecords.add(r);
 
         addView(r.tileView);
+    }
+
+    public boolean isShowingDetail() {
+        return mDetailRecord != null;
+    }
+
+    public void closeDetail() {
+        showDetail(false, mDetailRecord);
     }
 
     private void handleShowDetail(Record r, boolean show) {

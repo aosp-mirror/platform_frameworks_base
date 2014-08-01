@@ -3458,7 +3458,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             return true;
         }
         if (mNotificationPanel.isQsExpanded()) {
-            mNotificationPanel.animateCloseQs();
+            if (mNotificationPanel.isQsDetailShowing()) {
+                mNotificationPanel.closeQsDetail();
+            } else {
+                mNotificationPanel.animateCloseQs();
+            }
             return true;
         }
         if (mState != StatusBarState.KEYGUARD && mState != StatusBarState.SHADE_LOCKED) {
