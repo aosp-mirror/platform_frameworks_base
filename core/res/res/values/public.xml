@@ -2560,4 +2560,6 @@
   <public type="raw" name="loaderror" id="0x01100000"/>
   <!-- WebView error page for when domain lookup fails. @hide @SystemApi -->
   <public type="raw" name="nodomain"/>
+
+  <public type="attr" name="contentRatingSystemXml"/>
 </resources>
