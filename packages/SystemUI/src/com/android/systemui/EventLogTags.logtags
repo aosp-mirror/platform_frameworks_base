@@ -6,6 +6,7 @@ option java_package com.android.systemui;
 # PhoneStatusBar.java
 # ---------------------------
 36000 sysui_statusbar_touch (type|1),(x|1),(y|1),(enabled|1)
+36001 sysui_heads_up_status (key|3),(visible|1)
 
 # ---------------------------
 # PhoneStatusBarView.java
