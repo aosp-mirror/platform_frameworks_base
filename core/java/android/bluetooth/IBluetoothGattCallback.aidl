@@ -16,6 +16,7 @@
 package android.bluetooth;
 
 import android.os.ParcelUuid;
+import android.bluetooth.le.AdvertiseSettings;
 import android.bluetooth.le.ScanResult;
 
 /**
@@ -26,7 +27,7 @@ oneway interface IBluetoothGattCallback {
     void onClientRegistered(in int status, in int clientIf);
     void onClientConnectionState(in int status, in int clientIf,
                                  in boolean connected, in String address);
-    void onScanResult(in String address, in int rssi, in byte[] advData);
+    void onScanResult(in ScanResult scanResult);
     void onBatchScanResults(in List<ScanResult> batchResults);
     void onGetService(in String address, in int srvcType, in int srvcInstId,
                       in ParcelUuid srvcUuid);
@@ -64,7 +65,8 @@ oneway interface IBluetoothGattCallback {
                              in int charInstId, in ParcelUuid charUuid,
                              in byte[] value);
     void onReadRemoteRssi(in String address, in int rssi, in int status);
-    void onMultiAdvertiseCallback(in int status);
+    void onMultiAdvertiseCallback(in int status, boolean isStart,
+                                  in AdvertiseSettings advertiseSettings);
     void onConfigureMTU(in String address, in int mtu, in int status);
     void onConnectionCongested(in String address, in boolean congested);
     void onFoundOrLost(in boolean onFound, in String address, in int rssi,
