@@ -81,11 +81,6 @@ public class MainInteractionService extends VoiceInteractionService {
     private void hotwordAvailabilityChangeHelper(int availability) {
         Log.i(TAG, "Hotword availability = " + availability);
         switch (availability) {
-            case AlwaysOnHotwordDetector.STATE_INVALID:
-                Log.i(TAG, "STATE_INVALID");
-                mHotwordDetector =
-                        createAlwaysOnHotwordDetector("Hello There", "en-US", mHotwordCallback);
-                break;
             case AlwaysOnHotwordDetector.STATE_HARDWARE_UNAVAILABLE:
                 Log.i(TAG, "STATE_HARDWARE_UNAVAILABLE");
                 break;
