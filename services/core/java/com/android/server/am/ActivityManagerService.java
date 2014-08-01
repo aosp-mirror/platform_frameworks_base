@@ -1206,9 +1206,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                         }
                         return;
                     }
-                    if (!showBackground && UserHandle.getAppId(proc.uid)
-                            >= Process.FIRST_APPLICATION_UID && proc.userId != mCurrentUserId
-                            && proc.pid != MY_PID) {
+                    boolean isBackground = (UserHandle.getAppId(proc.uid)
+                            >= Process.FIRST_APPLICATION_UID
+                            && proc.pid != MY_PID);
+                    for (int userId : mCurrentProfileIds) {
+                        isBackground &= (proc.userId != userId);
+                    }
+                    if (isBackground && !showBackground) {
                         Slog.w(TAG, "Skipping crash dialog of " + proc + ": background");
                         if (res != null) {
                             res.set(0);
