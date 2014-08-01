@@ -57,8 +57,7 @@ public class StatusBarIconView extends AnimatedImageView {
         mNumberPain.setTextAlign(Paint.Align.CENTER);
         mNumberPain.setColor(res.getColor(R.drawable.notification_number_text_color));
         mNumberPain.setAntiAlias(true);
-        mNotification = notification;
-        setContentDescription(notification);
+        setNotification(notification);
 
         // We do not resize and scale system icons (on the right), only notification icons (on the
         // left).
@@ -71,6 +70,11 @@ public class StatusBarIconView extends AnimatedImageView {
         }
 
         setScaleType(ImageView.ScaleType.CENTER);
+    }
+
+    public void setNotification(Notification notification) {
+        mNotification = notification;
+        setContentDescription(notification);
     }
 
     public StatusBarIconView(Context context, AttributeSet attrs) {
