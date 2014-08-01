@@ -263,18 +263,39 @@ public class AudioFormat {
     private int mChannelMask;
     private int mPropertySetMask;
 
-    /** @hide */
+    /**
+     * Return the encoding.
+     * @return one of the values that can be set in {@link Builder#setEncoding(int)} or
+     * {@link AudioFormat#ENCODING_INVALID} if not set.
+     */
     public int getEncoding() {
+        if ((mPropertySetMask & AUDIO_FORMAT_HAS_PROPERTY_ENCODING) == 0) {
+            return ENCODING_INVALID;
+        }
         return mEncoding;
     }
 
-    /** @hide */
+    /**
+     * Return the sample rate.
+     * @return one of the values that can be set in {@link Builder#setSampleRate(int)} or
+     * 0 if not set.
+     */
     public int getSampleRate() {
+        if ((mPropertySetMask & AUDIO_FORMAT_HAS_PROPERTY_SAMPLE_RATE) == 0) {
+            return 0;
+        }
         return mSampleRate;
     }
 
-    /** @hide */
+    /**
+     * Return the channel mask.
+     * @return one of the values that can be set in {@link Builder#setChannelMask(int)} or
+     * {@link AudioFormat#CHANNEL_INVALID} if not set.
+     */
     public int getChannelMask() {
+        if ((mPropertySetMask & AUDIO_FORMAT_HAS_PROPERTY_CHANNEL_MASK) == 0) {
+            return CHANNEL_INVALID;
+        }
         return mChannelMask;
     }
 
