@@ -225,6 +225,8 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     public void setSearchBarVisibility(int visibility) {
         if (mSearchBar != null) {
             mSearchBar.setVisibility(visibility);
+            // Always bring the search bar to the top
+            mSearchBar.bringToFront();
         }
     }
 
@@ -364,17 +366,17 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         View sourceView = tv;
         int offsetX = 0;
         int offsetY = 0;
-        int stackScroll = stackView.getStackScroll();
+        float stackScroll = stackView.getScroller().getStackScroll();
         if (tv == null) {
             // If there is no actual task view, then use the stack view as the source view
             // and then offset to the expected transform rect, but bound this to just
             // outside the display rect (to ensure we don't animate from too far away)
             sourceView = stackView;
-            transform = stackView.getStackAlgorithm().getStackTransform(task, stackScroll, transform);
+            transform = stackView.getStackAlgorithm().getStackTransform(task, stackScroll, transform, null);
             offsetX = transform.rect.left;
             offsetY = Math.min(transform.rect.top, mConfig.displayRect.height());
         } else {
-            transform = stackView.getStackAlgorithm().getStackTransform(task, stackScroll, transform);
+            transform = stackView.getStackAlgorithm().getStackTransform(task, stackScroll, transform, null);
         }
 
         // Compute the thumbnail to scale up from

@@ -26,6 +26,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.SeekBar;
 import com.android.systemui.R;
+import com.android.systemui.recents.RecentsConfiguration;
 
 import java.util.ArrayList;
 
@@ -42,11 +43,14 @@ public class DebugOverlayView extends FrameLayout implements SeekBar.OnSeekBarCh
 
     final static int sCornerRectSize = 50;
 
+    RecentsConfiguration mConfig;
     DebugOverlayViewCallbacks mCb;
 
     ArrayList<Pair<Rect, Integer>> mRects = new ArrayList<Pair<Rect, Integer>>();
+    String mText;
     Paint mDebugOutline = new Paint();
     Paint mTmpPaint = new Paint();
+    Rect mTmpRect = new Rect();
     boolean mEnabled = true;
 
     SeekBar mPrimarySeekBar;
@@ -66,6 +70,7 @@ public class DebugOverlayView extends FrameLayout implements SeekBar.OnSeekBarCh
 
     public DebugOverlayView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+        mConfig = RecentsConfiguration.getInstance();
         mDebugOutline.setColor(0xFFff0000);
         mDebugOutline.setStyle(Paint.Style.STROKE);
         mDebugOutline.setStrokeWidth(8f);
@@ -124,6 +129,12 @@ public class DebugOverlayView extends FrameLayout implements SeekBar.OnSeekBarCh
         invalidate();
     }
 
+    /** Sets the debug text at the bottom of the screen. */
+    void setText(String message) {
+        mText = message;
+        invalidate();
+    }
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
@@ -144,6 +155,14 @@ public class DebugOverlayView extends FrameLayout implements SeekBar.OnSeekBarCh
                 Pair<Rect, Integer> r = mRects.get(i);
                 mTmpPaint.setColor(r.second);
                 canvas.drawRect(r.first, mTmpPaint);
+            }
+
+            // Draw the text
+            if (mText != null && mText.length() > 0) {
+                mTmpPaint.setColor(0xFFff0000);
+                mTmpPaint.setTextSize(60);
+                mTmpPaint.getTextBounds(mText, 0, 1, mTmpRect);
+                canvas.drawText(mText, 10f, getMeasuredHeight() - mTmpRect.height() - mConfig.systemInsets.bottom, mTmpPaint);
             }
         }
     }

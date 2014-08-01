@@ -126,28 +126,6 @@ class TaskBarView extends FrameLayout {
         mIsFullscreen = isFullscreen;
     }
 
-    /** Synchronizes this bar view's properties with the task's transform */
-    void updateViewPropertiesToTaskTransform(TaskViewTransform toTransform, int duration) {
-        if (duration > 0 && (mDismissButton.getVisibility() == View.VISIBLE)) {
-            ViewPropertyAnimator anim = mDismissButton.animate();
-
-            // Animate to the final state
-            if (toTransform.hasDismissAlphaChangedFrom(mDismissButton.getAlpha())) {
-                anim.alpha(toTransform.dismissAlpha)
-                    .setStartDelay(0)
-                    .setDuration(duration)
-                    .setInterpolator(mConfig.fastOutSlowInInterpolator)
-                    .withLayer()
-                    .start();
-            }
-        } else {
-            // Set the changed properties
-            if (toTransform.hasDismissAlphaChangedFrom(mDismissButton.getAlpha())) {
-                mDismissButton.setAlpha(toTransform.dismissAlpha);
-            }
-        }
-    }
-
     @Override
     public boolean hasOverlappingRendering() {
         return false;

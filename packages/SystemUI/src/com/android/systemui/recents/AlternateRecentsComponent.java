@@ -105,7 +105,8 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
     }
 
     public void onStart() {
-        // Do nothing
+        // Initialize some static datastructures
+        TaskStackViewLayoutAlgorithm.initializeCurve();
     }
 
     public void onBootCompleted() {
@@ -322,7 +323,7 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
         Rect taskStackBounds = new Rect(mTaskStackBounds);
         taskStackBounds.bottom -= mSystemInsets.bottom;
         tsv.computeRects(mWindowRect.width(), mWindowRect.height(), taskStackBounds);
-        tsv.setStackScrollToInitialState();
+        tsv.getScroller().setStackScrollToInitialState();
 
         // Find the running task in the TaskStack
         Task task = null;
@@ -344,7 +345,7 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
         }
 
         // Get the transform for the running task
-        mTmpTransform = algo.getStackTransform(task, tsv.getStackScroll(), mTmpTransform);
+        mTmpTransform = algo.getStackTransform(task, tsv.getScroller().getStackScroll(), mTmpTransform, null);
         return new Rect(mTmpTransform.rect);
     }
 

@@ -18,184 +18,276 @@ package com.android.systemui.recents.views;
 
 import android.graphics.Rect;
 import com.android.systemui.recents.RecentsConfiguration;
+import com.android.systemui.recents.misc.Console;
 import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.Task;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
-/* The layout logic for a TaskStackView */
+/* The layout logic for a TaskStackView.
+ *
+ * We are using a curve that defines the curve of the tasks as that go back in the recents list.
+ * The curve is defined such that at curve progress p = 0 is the end of the curve (the top of the
+ * stack rect), and p = 1 at the start of the curve and the bottom of the stack rect.
+ */
 public class TaskStackViewLayoutAlgorithm {
 
     // These are all going to change
-    static final float StackOverlapPct = 0.65f; // The overlap height relative to the task height
-    static final float StackPeekHeightPct = 0.075f; // The height of the peek space relative to the stack height
-    static final float StackPeekMinScale = 0.8f; // The min scale of the last card in the peek area
-    static final int StackPeekNumCards = 3; // The number of cards we see in the peek space
+    static final float StackPeekMinScale = 0.825f; // The min scale of the last card in the peek area
 
     RecentsConfiguration mConfig;
 
     // The various rects that define the stack view
     Rect mViewRect = new Rect();
+    Rect mStackVisibleRect = new Rect();
     Rect mStackRect = new Rect();
-    Rect mStackRectSansPeek = new Rect();
     Rect mTaskRect = new Rect();
 
-    // The min/max scroll
-    int mMinScroll;
-    int mMaxScroll;
+    // The min/max scroll progress
+    float mMinScrollP;
+    float mMaxScrollP;
+    float mInitialScrollP;
+    int mWithinAffiliationOffset;
+    int mBetweenAffiliationOffset;
+    HashMap<Task.TaskKey, Float> mTaskProgressMap = new HashMap<Task.TaskKey, Float>();
 
-    HashMap<Task.TaskKey, Integer> mTaskOffsetMap = new HashMap<Task.TaskKey, Integer>();
+    // Log function
+    static final float XScale = 1.75f;  // The large the XScale, the longer the flat area of the curve
+    static final float LogBase = 300;
+    static final int PrecisionSteps = 250;
+    static float[] xp;
+    static float[] px;
 
     public TaskStackViewLayoutAlgorithm(RecentsConfiguration config) {
         mConfig = config;
+        mWithinAffiliationOffset = mConfig.taskBarHeight;
+        mBetweenAffiliationOffset = 4 * mConfig.taskBarHeight;
+
+        // Precompute the path
+        initializeCurve();
     }
 
     /** Computes the stack and task rects */
-    public void computeRects(ArrayList<Task> tasks, int windowWidth, int windowHeight,
-                             Rect taskStackBounds) {
-        // Note: We let the stack view be the full height because we want the cards to go under the
-        //       navigation bar if possible.  However, the stack rects which we use to calculate
-        //       max scroll, etc. need to take the nav bar into account
-
+    public void computeRects(int windowWidth, int windowHeight, Rect taskStackBounds) {
         // Compute the stack rects
         mViewRect.set(0, 0, windowWidth, windowHeight);
         mStackRect.set(taskStackBounds);
+        mStackVisibleRect.set(taskStackBounds);
+        mStackVisibleRect.bottom = mViewRect.bottom;
 
         int widthPadding = (int) (mConfig.taskStackWidthPaddingPct * mStackRect.width());
         int heightPadding = mConfig.taskStackTopPaddingPx;
         mStackRect.inset(widthPadding, heightPadding);
-        mStackRectSansPeek.set(mStackRect);
-        mStackRectSansPeek.top += StackPeekHeightPct * windowHeight;
 
         // Compute the task rect
         int size = mStackRect.width();
         int left = mStackRect.left + (mStackRect.width() - size) / 2;
-        mTaskRect.set(left, mStackRectSansPeek.top,
-                left + size, mStackRectSansPeek.top + size);
-
-        // Update the task offsets once the size changes
-        updateTaskOffsets(tasks);
+        mTaskRect.set(left, mStackRect.top,
+                left + size, mStackRect.top + size);
     }
 
+    /** Computes the minimum and maximum scroll progress values */
     void computeMinMaxScroll(ArrayList<Task> tasks) {
-        // Compute the min and max scroll values
-        int numTasks = Math.max(1, tasks.size());
-        int taskHeight = mTaskRect.height();
-        int stackHeight = mStackRectSansPeek.height();
+        // Clear the progress map
+        mTaskProgressMap.clear();
 
-        if (numTasks <= 1) {
-            // If there is only one task, then center the task in the stack rect (sans peek)
-            mMinScroll = mMaxScroll = -(stackHeight -
-                    (taskHeight + mConfig.taskViewLockToAppButtonHeight)) / 2;
-        } else {
-            int maxScrollHeight = getStackScrollForTaskIndex(tasks.get(tasks.size() - 1))
-                    + taskHeight + mConfig.taskViewLockToAppButtonHeight;
-            mMinScroll = Math.min(stackHeight, maxScrollHeight) - stackHeight;
-            mMaxScroll = maxScrollHeight - stackHeight;
+        // Return early if we have no tasks
+        if (tasks.isEmpty()) {
+            mMinScrollP = mMaxScrollP = 0;
+            return;
         }
+
+        int taskHeight = mTaskRect.height();
+        float pAtBottomOfStackRect = screenYToCurveProgress(mStackVisibleRect.bottom);
+        float pWithinAffiliateOffset = pAtBottomOfStackRect -
+                screenYToCurveProgress(mStackVisibleRect.bottom - mWithinAffiliationOffset);
+        float pBetweenAffiliateOffset = pAtBottomOfStackRect -
+                screenYToCurveProgress(mStackVisibleRect.bottom - mBetweenAffiliationOffset);
+        float pTaskHeightOffset = pAtBottomOfStackRect -
+                screenYToCurveProgress(mStackVisibleRect.bottom - taskHeight);
+        float pNavBarOffset = pAtBottomOfStackRect -
+                screenYToCurveProgress(mStackVisibleRect.bottom - (mStackVisibleRect.bottom - mStackRect.bottom));
+
+        // Update the task offsets
+        float pAtBackMostCardTop = screenYToCurveProgress(mStackVisibleRect.top +
+                (mStackVisibleRect.height() - taskHeight) / 2);
+        float pAtFrontMostCardTop = pAtBackMostCardTop;
+        float pAtSecondFrontMostCardTop = pAtBackMostCardTop;
+        int taskCount = tasks.size();
+        for (int i = 0; i < taskCount; i++) {
+            Task task = tasks.get(i);
+            mTaskProgressMap.put(task.key, pAtFrontMostCardTop);
+
+            if (i < (taskCount - 1)) {
+                // Increment the peek height
+                float pPeek = task.group.isFrontMostTask(task) ? pBetweenAffiliateOffset :
+                    pWithinAffiliateOffset;
+                pAtSecondFrontMostCardTop = pAtFrontMostCardTop;
+                pAtFrontMostCardTop += pPeek;
+            }
+        }
+
+        mMinScrollP = 0f;
+        mMaxScrollP = pAtFrontMostCardTop - ((1f - pTaskHeightOffset - pNavBarOffset));
+        mInitialScrollP = pAtSecondFrontMostCardTop - ((1f - pTaskHeightOffset - pNavBarOffset));
     }
 
     /** Update/get the transform */
-    public TaskViewTransform getStackTransform(Task task, int stackScroll, TaskViewTransform transformOut) {
+    public TaskViewTransform getStackTransform(Task task, float stackScroll, TaskViewTransform transformOut,
+            TaskViewTransform prevTransform) {
         // Return early if we have an invalid index
         if (task == null) {
             transformOut.reset();
             return transformOut;
         }
-        return getStackTransform(getStackScrollForTaskIndex(task), stackScroll, transformOut);
+        return getStackTransform(mTaskProgressMap.get(task.key), stackScroll, transformOut, prevTransform);
     }
 
     /** Update/get the transform */
-    public TaskViewTransform getStackTransform(int taskStackScroll, int stackScroll, TaskViewTransform transformOut) {
-        // Map the items to an continuous position relative to the specified scroll
-        int numPeekCards = StackPeekNumCards;
-        float overlapHeight = StackOverlapPct * mTaskRect.height();
-        float peekHeight = StackPeekHeightPct * mStackRect.height();
-        float t = (taskStackScroll - stackScroll) / overlapHeight;
-        float boundedT = Math.max(t, -(numPeekCards + 1));
-
-        // Set the scale relative to its position
-        int numFrontScaledCards = 3;
-        float minScale = StackPeekMinScale;
-        float scaleRange = 1f - minScale;
-        float scaleInc = scaleRange / (numPeekCards + numFrontScaledCards);
-        float scale = Math.max(minScale, Math.min(1f, minScale +
-                ((boundedT + (numPeekCards + 1)) * scaleInc)));
-        float scaleYOffset = ((1f - scale) * mTaskRect.height()) / 2;
-        // Account for the bar offsets being scaled?
-        float scaleBarYOffset = (1f - scale) * mConfig.taskBarHeight;
-        transformOut.scale = scale;
-
-        // Set the y translation
-        if (boundedT < 0f) {
-            transformOut.translationY = (int) ((Math.max(-numPeekCards, boundedT) /
-                    numPeekCards) * peekHeight - scaleYOffset);
-        } else {
-            transformOut.translationY = (int) (boundedT * overlapHeight - scaleYOffset);
+    public TaskViewTransform getStackTransform(float taskProgress, float stackScroll, TaskViewTransform transformOut, TaskViewTransform prevTransform) {
+        float pTaskRelative = taskProgress - stackScroll;
+        float pBounded = Math.max(0, Math.min(pTaskRelative, 1f));
+        // If the task top is outside of the bounds below the screen, then immediately reset it
+        if (pTaskRelative > 1f) {
+            transformOut.reset();
+            return transformOut;
         }
-
-        // Set the z translation
+        // The check for the top is trickier, since we want to show the next task if it is at all
+        // visible, even if p < 0.
+        if (pTaskRelative < 0f) {
+            if (prevTransform != null && Float.compare(prevTransform.p, 0f) <= 0) {
+                transformOut.reset();
+                return transformOut;
+            }
+        }
+        float scale = curveProgressToScale(pBounded);
+        int scaleYOffset = (int) (((1f - scale) * mTaskRect.height()) / 2);
         int minZ = mConfig.taskViewTranslationZMinPx;
-        int incZ = mConfig.taskViewTranslationZIncrementPx;
-        transformOut.translationZ = (int) Math.max(minZ, minZ + ((boundedT + numPeekCards) * incZ));
-
-        // Set the alphas
-        // transformOut.dismissAlpha = Math.max(-1f, Math.min(0f, t + 1)) + 1f;
-        transformOut.dismissAlpha = 1f;
-
-        // Update the rect and visibility
+        int maxZ = mConfig.taskViewTranslationZMaxPx;
+        transformOut.scale = scale;
+        transformOut.translationY = curveProgressToScreenY(pBounded) - mStackVisibleRect.top -
+                scaleYOffset;
+        transformOut.translationZ = Math.max(minZ, minZ + (pBounded * (maxZ - minZ)));
         transformOut.rect.set(mTaskRect);
-        if (t < -(numPeekCards + 1)) {
-            transformOut.visible = false;
-        } else {
-            transformOut.rect.offset(0, transformOut.translationY);
-            Utilities.scaleRectAboutCenter(transformOut.rect, transformOut.scale);
-            transformOut.visible = Rect.intersects(mViewRect, transformOut.rect);
-        }
-        transformOut.t = t;
+        transformOut.rect.offset(0, transformOut.translationY);
+        Utilities.scaleRectAboutCenter(transformOut.rect, transformOut.scale);
+        transformOut.visible = true;
+        transformOut.p = pTaskRelative;
         return transformOut;
     }
 
     /**
-     * Returns the overlap between one task and the next.
+     * Returns the scroll to such task top = 1f;
      */
-    float getTaskOverlapHeight() {
-        return StackOverlapPct * mTaskRect.height();
+    float getStackScrollForTaskIndex(Task t) {
+        return mTaskProgressMap.get(t.key);
     }
 
-    /**
-     * Returns the scroll to such that the task transform at that index will have t=0. (If the scroll
-     * is not bounded)
-     */
-    int getStackScrollForTaskIndex(Task t) {
-        return mTaskOffsetMap.get(t.key);
-    }
+    /** Initializes the curve. */
+    public static void initializeCurve() {
+        if (xp != null && px != null) return;
+        xp = new float[PrecisionSteps + 1];
+        px = new float[PrecisionSteps + 1];
 
-    /**
-     * Returns the scroll to such that the task transform at that task + index will have t=0.
-     * (If the scroll is not bounded)
-     */
-    int getStackScrollForTaskIndex(Task t, int relativeIndexOffset) {
-        return mTaskOffsetMap.get(t.key) + (int) (relativeIndexOffset * getTaskOverlapHeight());
-    }
-
-    /**
-     * Updates the cache of tasks to offsets.
-     */
-    void updateTaskOffsets(ArrayList<Task> tasks) {
-        mTaskOffsetMap.clear();
-        int offset = 0;
-        int taskCount = tasks.size();
-        for (int i = 0; i < taskCount; i++) {
-            Task t = tasks.get(i);
-            mTaskOffsetMap.put(t.key, offset);
-            if (t.group.isFrontMostTask(t)) {
-                offset += getTaskOverlapHeight();
-            } else {
-                offset += mConfig.taskBarHeight;
+        // Approximate f(x)
+        float[] fx = new float[PrecisionSteps + 1];
+        float step = 1f / PrecisionSteps;
+        float x = 0;
+        for (int xStep = 0; xStep <= PrecisionSteps; xStep++) {
+            fx[xStep] = logFunc(x);
+            x += step;
+        }
+        // Calculate the arc length for x:1->0
+        float pLength = 0;
+        float[] dx = new float[PrecisionSteps + 1];
+        dx[0] = 0;
+        for (int xStep = 1; xStep < PrecisionSteps; xStep++) {
+            dx[xStep] = (float) Math.sqrt(Math.pow(fx[xStep] - fx[xStep - 1], 2) + Math.pow(step, 2));
+            pLength += dx[xStep];
+        }
+        // Approximate p(x), a function of cumulative progress with x, normalized to 0..1
+        float p = 0;
+        px[0] = 0f;
+        px[PrecisionSteps] = 1f;
+        for (int xStep = 1; xStep <= PrecisionSteps; xStep++) {
+            p += Math.abs(dx[xStep] / pLength);
+            px[xStep] = p;
+        }
+        // Given p(x), calculate the inverse function x(p). This assumes that x(p) is also a valid
+        // function.
+        int xStep = 0;
+        p = 0;
+        xp[0] = 0f;
+        xp[PrecisionSteps] = 1f;
+        for (int pStep = 0; pStep < PrecisionSteps; pStep++) {
+            // Walk forward in px and find the x where px <= p && p < px+1
+            while (xStep < PrecisionSteps) {
+                if (px[xStep] > p) break;
+                xStep++;
             }
+            // Now, px[xStep-1] <= p < px[xStep]
+            if (xStep == 0) {
+                xp[pStep] = 0;
+            } else {
+                // Find x such that proportionally, x is correct
+                float fraction = (p - px[xStep - 1]) / (px[xStep] - px[xStep - 1]);
+                x = (xStep - 1 + fraction) * step;
+                xp[pStep] = x;
+            }
+            p += step;
         }
     }
 
+    /** Reverses and scales out x. */
+    static float reverse(float x) {
+        return (-x * XScale) + 1;
+    }
+    /** The log function describing the curve. */
+    static float logFunc(float x) {
+        return 1f - (float) (Math.pow(LogBase, reverse(x))) / (LogBase);
+    }
+    /** The inverse of the log function describing the curve. */
+    float invLogFunc(float y) {
+        return (float) (Math.log((1f - reverse(y)) * (LogBase - 1) + 1) / Math.log(LogBase));
+    }
+
+    /** Converts from the progress along the curve to a screen coordinate. */
+    int curveProgressToScreenY(float p) {
+        if (p < 0 || p > 1) return mStackVisibleRect.top + (int) (p * mStackVisibleRect.height());
+        float pIndex = p * PrecisionSteps;
+        int pFloorIndex = (int) Math.floor(pIndex);
+        int pCeilIndex = (int) Math.ceil(pIndex);
+        float xFraction = 0;
+        if (pFloorIndex < PrecisionSteps && (pCeilIndex != pFloorIndex)) {
+            float pFraction = (pIndex - pFloorIndex) / (pCeilIndex - pFloorIndex);
+            xFraction = (xp[pCeilIndex] - xp[pFloorIndex]) * pFraction;
+        }
+        float x = xp[pFloorIndex] + xFraction;
+        return mStackVisibleRect.top + (int) (x * mStackVisibleRect.height());
+    }
+
+    /** Converts from the progress along the curve to a scale. */
+    float curveProgressToScale(float p) {
+        if (p < 0) return StackPeekMinScale;
+        if (p > 1) return 1f;
+        float scaleRange = (1f - StackPeekMinScale);
+        float scale = StackPeekMinScale + (p * scaleRange);
+        return scale;
+    }
+
+    /** Converts from a screen coordinate to the progress along the curve. */
+    float screenYToCurveProgress(int screenY) {
+        float x = (float) (screenY - mStackVisibleRect.top) / mStackVisibleRect.height();
+        if (x < 0 || x > 1) return x;
+        float xIndex = x * PrecisionSteps;
+        int xFloorIndex = (int) Math.floor(xIndex);
+        int xCeilIndex = (int) Math.ceil(xIndex);
+        float pFraction = 0;
+        if (xFloorIndex < PrecisionSteps && (xCeilIndex != xFloorIndex)) {
+            float xFraction = (xIndex - xFloorIndex) / (xCeilIndex - xFloorIndex);
+            pFraction = (px[xCeilIndex] - px[xFloorIndex]) * xFraction;
+        }
+        return px[xFloorIndex] + pFraction;
+    }
 }
