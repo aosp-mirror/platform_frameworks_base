@@ -76,23 +76,25 @@ public class SpeedBumpView extends ExpandableView {
         return true;
     }
 
-    public void performVisibilityAnimation(boolean nowVisible) {
-        animateDivider(nowVisible, null /* onFinishedRunnable */);
+    public void performVisibilityAnimation(boolean nowVisible, long delay) {
+        animateDivider(nowVisible, delay, null /* onFinishedRunnable */);
     }
 
     /**
      * Animate the divider to a new visibility.
      *
      * @param nowVisible should it now be visible
+     * @param delay the delay after the animation should start
      * @param onFinishedRunnable A runnable which should be run when the animation is
      *        finished.
      */
-    public void animateDivider(boolean nowVisible, Runnable onFinishedRunnable) {
+    public void animateDivider(boolean nowVisible, long delay, Runnable onFinishedRunnable) {
         if (nowVisible != mIsVisible) {
             // Animate dividers
             float endValue = nowVisible ? 1.0f : 0.0f;
             mLine.animate()
                     .alpha(endValue)
+                    .setStartDelay(delay)
                     .scaleX(endValue)
                     .scaleY(endValue)
                     .setInterpolator(mFastOutSlowInInterpolator)
@@ -116,13 +118,13 @@ public class SpeedBumpView extends ExpandableView {
     public void performRemoveAnimation(long duration, float translationDirection,
             Runnable onFinishedRunnable) {
         // TODO: Use duration
-        performVisibilityAnimation(false);
+        performVisibilityAnimation(false, 0 /* delay */);
     }
 
     @Override
     public void performAddAnimation(long delay, long duration) {
-        // TODO: Use delay and duration
-        performVisibilityAnimation(true);
+        // TODO: Use duration
+        performVisibilityAnimation(true, delay);
     }
 
     @Override

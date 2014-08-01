@@ -1932,10 +1932,8 @@ public class NotificationStackScrollLayout extends ViewGroup
             if (visible) {
                 // Make invisible to ensure that the appear animation is played.
                 mSpeedBumpView.setInvisible();
-                if (!mIsExpansionChanging) {
-                    generateAddAnimation(mSpeedBumpView);
-                }
             } else {
+                // TODO: This doesn't really work, because the view is already set to GONE above.
                 generateRemoveAnimation(mSpeedBumpView);
             }
         }

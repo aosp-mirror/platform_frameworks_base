@@ -27,6 +27,7 @@ import android.view.animation.Interpolator;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.ExpandableView;
+import com.android.systemui.statusbar.SpeedBumpView;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -115,7 +116,7 @@ public class StackStateAnimator {
             }
 
             child.setClipBounds(null);
-            startAnimations(child, viewState, finalState);
+            startAnimations(child, viewState, finalState, i);
         }
         if (!isRunning()) {
             // no child has preformed any animation, lets finish
@@ -145,7 +146,7 @@ public class StackStateAnimator {
      * Start an animation to the given viewState
      */
     private void startAnimations(final ExpandableView child, StackScrollState.ViewState viewState,
-            StackScrollState finalState) {
+            StackScrollState finalState, int i) {
         int childVisibility = child.getVisibility();
         boolean wasVisible = childVisibility == View.VISIBLE;
         final float alpha = viewState.alpha;
@@ -222,6 +223,10 @@ public class StackStateAnimator {
 
         if (wasAdded) {
             child.performAddAnimation(delay, mCurrentLength);
+        }
+        if (child instanceof SpeedBumpView) {
+            finalState.performSpeedBumpAnimation(i, (SpeedBumpView) child, viewState,
+                    delay + duration);
         }
     }
 
