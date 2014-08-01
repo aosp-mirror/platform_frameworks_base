@@ -1,5 +1,6 @@
 package android.hardware.hdmi;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.hardware.hdmi.HdmiControlManager.VendorCommandListener;
 import android.hardware.hdmi.IHdmiVendorCommandListener;
@@ -22,6 +23,21 @@ public abstract class HdmiClient {
 
     public HdmiClient(IHdmiControlService service) {
         mService = service;
+    }
+
+    /**
+     * Returns the active source information.
+     *
+     * @return {@link HdmiCecDeviceInfo} object that describes the active source
+     *         or active routing path
+     */
+    public HdmiCecDeviceInfo getActiveSource() {
+        try {
+            return mService.getActiveSource();
+        } catch (RemoteException e) {
+            Log.e(TAG, "getActiveSource threw exception ", e);
+        }
+        return null;
     }
 
     /**
@@ -60,7 +76,10 @@ public abstract class HdmiClient {
      *
      * @param listener listener object
      */
-    public void addVendorCommandListener(VendorCommandListener listener) {
+    public void addVendorCommandListener(@NonNull VendorCommandListener listener) {
+        if (listener == null) {
+            throw new IllegalArgumentException("listener cannot be null");
+        }
         try {
             mService.addVendorCommandListener(getListenerWrapper(listener), getDeviceType());
         } catch (RemoteException e) {
