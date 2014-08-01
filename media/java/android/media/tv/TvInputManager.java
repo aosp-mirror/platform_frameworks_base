@@ -800,6 +800,19 @@ public final class TvInputManager {
     }
 
     /**
+     * Returns the list of xml resource uris for TV content rating systems.
+     * @hide
+     */
+    @SystemApi
+    public List<Uri> getTvContentRatingSystemXmls() {
+        try {
+            return mService.getTvContentRatingSystemXmls(mUserId);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
      * Creates a {@link Session} for a given TV input.
      * <p>
      * The number of sessions that can be created at the same time is limited by the capability of
