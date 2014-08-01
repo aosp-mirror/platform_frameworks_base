@@ -487,5 +487,10 @@ public class AudioSystem
     public static native int releaseAudioPatch(AudioPatch patch);
     public static native int listAudioPatches(ArrayList<AudioPatch> patches, int[] generation);
     public static native int setAudioPortConfig(AudioPortConfig config);
+
+    // must be kept in sync with value in include/system/audio.h
+    public static final int AUDIO_HW_SYNC_INVALID = 0;
+
+    public static native int getAudioHwSyncForSession(int sessionId);
 }
 
