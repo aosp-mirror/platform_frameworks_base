@@ -465,6 +465,7 @@ package android {
     field public static final int contentInsetLeft = 16843863; // 0x1010457
     field public static final int contentInsetRight = 16843864; // 0x1010458
     field public static final int contentInsetStart = 16843861; // 0x1010455
+    field public static final int contentRatingSystemXml = 16843957; // 0x10104b5
     field public static final int controlX1 = 16843798; // 0x1010416
     field public static final int controlX2 = 16843800; // 0x1010418
     field public static final int controlY1 = 16843799; // 0x1010417
@@ -16847,28 +16848,14 @@ package android.media.session {
 package android.media.tv {
 
   public final class TvContentRating {
-    ctor public TvContentRating(java.lang.String);
-    ctor public TvContentRating(java.lang.String, java.lang.String[]);
+    method public static android.media.tv.TvContentRating createRating(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String...);
     method public java.lang.String flattenToString();
+    method public java.lang.String getCountry();
+    method public java.lang.String getDomain();
     method public java.lang.String getMainRating();
+    method public java.lang.String getRatingSystem();
     method public java.util.List<java.lang.String> getSubRatings();
     method public static android.media.tv.TvContentRating unflattenFromString(java.lang.String);
-    field public static final java.lang.String RATING_KR_12 = "RATING_KR_12";
-    field public static final java.lang.String RATING_KR_15 = "RATING_KR_15";
-    field public static final java.lang.String RATING_KR_19 = "RATING_KR_19";
-    field public static final java.lang.String RATING_KR_7 = "RATING_KR_7";
-    field public static final java.lang.String RATING_KR_ALL = "RATING_KR_ALL";
-    field public static final java.lang.String RATING_US_TV_14 = "RATING_US_TV_14";
-    field public static final java.lang.String RATING_US_TV_G = "RATING_US_TV_G";
-    field public static final java.lang.String RATING_US_TV_MA = "RATING_US_TV_MA";
-    field public static final java.lang.String RATING_US_TV_PG = "RATING_US_TV_PG";
-    field public static final java.lang.String RATING_US_TV_Y = "RATING_US_TV_Y";
-    field public static final java.lang.String RATING_US_TV_Y7 = "RATING_US_TV_Y7";
-    field public static final java.lang.String SUBRATING_US_D = "SUBRATING_US_D";
-    field public static final java.lang.String SUBRATING_US_FV = "SUBRATING_US_FV";
-    field public static final java.lang.String SUBRATING_US_L = "SUBRATING_US_L";
-    field public static final java.lang.String SUBRATING_US_S = "SUBRATING_US_S";
-    field public static final java.lang.String SUBRATING_US_V = "SUBRATING_US_V";
   }
 
   public final class TvContract {
