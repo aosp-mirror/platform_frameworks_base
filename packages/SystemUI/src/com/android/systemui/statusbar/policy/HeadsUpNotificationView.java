@@ -338,6 +338,10 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
         mBar.scheduleHeadsUpEscalation();
     }
 
+    public String getKey() {
+        return mHeadsUp == null ? null : mHeadsUp.notification.getKey();
+    }
+
     private class EdgeSwipeHelper implements Gefingerpoken {
         private static final boolean DEBUG_EDGE_SWIPE = false;
         private final float mTouchSlop;
