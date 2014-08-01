@@ -1435,8 +1435,12 @@ package android {
     field public static final int windowNoDisplay = 16843294; // 0x101021e
     field public static final int windowNoTitle = 16842838; // 0x1010056
     field public static final int windowOverscan = 16843727; // 0x10103cf
+    field public static final int windowReenterTransition = 16843954; // 0x10104b2
+    field public static final int windowReturnTransition = 16843953; // 0x10104b1
     field public static final int windowSharedElementEnterTransition = 16843835; // 0x101043b
     field public static final int windowSharedElementExitTransition = 16843836; // 0x101043c
+    field public static final int windowSharedElementReenterTransition = 16843956; // 0x10104b4
+    field public static final int windowSharedElementReturnTransition = 16843955; // 0x10104b3
     field public static final int windowShowAnimation = 16842934; // 0x10100b6
     field public static final int windowShowWallpaper = 16843410; // 0x1010292
     field public static final int windowSoftInputMode = 16843307; // 0x101022b
@@ -35324,8 +35328,12 @@ package android.view {
     method protected final int getLocalFeatures();
     method public android.media.session.MediaController getMediaController();
     method public abstract int getNavigationBarColor();
+    method public android.transition.Transition getReenterTransition();
+    method public android.transition.Transition getReturnTransition();
     method public android.transition.Transition getSharedElementEnterTransition();
     method public android.transition.Transition getSharedElementExitTransition();
+    method public android.transition.Transition getSharedElementReenterTransition();
+    method public android.transition.Transition getSharedElementReturnTransition();
     method public abstract int getStatusBarColor();
     method public long getTransitionBackgroundFadeDuration();
     method public android.transition.TransitionManager getTransitionManager();
@@ -35381,8 +35389,12 @@ package android.view {
     method public void setLogo(int);
     method public void setMediaController(android.media.session.MediaController);
     method public abstract void setNavigationBarColor(int);
+    method public void setReenterTransition(android.transition.Transition);
+    method public void setReturnTransition(android.transition.Transition);
     method public void setSharedElementEnterTransition(android.transition.Transition);
     method public void setSharedElementExitTransition(android.transition.Transition);
+    method public void setSharedElementReenterTransition(android.transition.Transition);
+    method public void setSharedElementReturnTransition(android.transition.Transition);
     method public void setSoftInputMode(int);
     method public abstract void setStatusBarColor(int);
     method public abstract void setTitle(java.lang.CharSequence);
