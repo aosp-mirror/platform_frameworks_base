@@ -1012,6 +1012,19 @@ public final class TvInputManager {
          * @throws IllegalArgumentException if the argument is {@code null}.
          */
         public void tune(Uri channelUri) {
+            tune(channelUri, null);
+        }
+
+        /**
+         * Tunes to a given channel.
+         *
+         * @param channelUri The URI of a channel.
+         * @param params A set of extra parameters which might be handled with this tune event.
+         * @throws IllegalArgumentException if {@code channelUri} is {@code null}.
+         * @hide
+         */
+        @SystemApi
+        public void tune(Uri channelUri, Bundle params) {
             if (channelUri == null) {
                 throw new IllegalArgumentException("channelUri cannot be null");
             }
@@ -1021,7 +1034,7 @@ public final class TvInputManager {
             }
             mTracks = null;
             try {
-                mService.tune(mToken, channelUri, mUserId);
+                mService.tune(mToken, channelUri, params, mUserId);
             } catch (RemoteException e) {
                 throw new RuntimeException(e);
             }

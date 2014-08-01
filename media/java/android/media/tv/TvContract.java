@@ -509,7 +509,7 @@ public final class TvContract {
          * The ID of the TV input service that provides this TV channel.
          * <p>
          * Use {@link #buildInputId} to build the ID.
-         * <p>
+         * </p><p>
          * This is a required field.
          * </p><p>
          * Type: TEXT
@@ -662,7 +662,7 @@ public final class TvContract {
          * {@link Programs#COLUMN_VIDEO_HEIGHT} to get more accurate video resolution.
          * </p><p>
          * Type: TEXT
-         * </p><p>
+         * </p>
          * @see #getVideoResolution
          */
         public static final String COLUMN_VIDEO_FORMAT = "video_format";
@@ -688,8 +688,7 @@ public final class TvContract {
          * the channel is searchable and can be included in search results, a value of 0 indicates
          * the channel and its TV programs are hidden from search. If not specified, this value is
          * set to 1 (searchable) by default.
-         * </p>
-         * <p>
+         * </p><p>
          * Type: INTEGER (boolean)
          * </p>
          */
@@ -743,14 +742,12 @@ public final class TvContract {
          * To access this directory, append {@link Channels.Logo#CONTENT_DIRECTORY} to the raw
          * channel URI.  The resulting URI represents an image file, and should be interacted
          * using ContentResolver.openAssetFileDescriptor.
-         * </p>
-         * <p>
+         * </p><p>
          * Note that this sub-directory also supports opening the logo as an asset file in write
          * mode.  Callers can create or replace the primary logo associated with this channel by
          * opening the asset file and writing the full-size photo contents into it.  When the file
          * is closed, the image will be parsed, sized down if necessary, and stored.
-         * </p>
-         * <p>
+         * </p><p>
          * Usage example:
          * <pre>
          * public void writeChannelLogo(long channelId, byte[] logo) {
@@ -1179,6 +1176,19 @@ public final class TvContract {
          * </p>
          */
         public static final String COLUMN_DESCRIPTION = "description";
+
+        /**
+         * Extra parameters of the tune operation.
+         * <p>
+         * This column contains an encoded string which is comma-separated key-value pairs.
+         * (Ex. "[key1]=[value1], [key2]=[value2]"). COLUMN_TUNE_PARAMS will use '%' as an escape
+         * character for the characters of '%', '=', and ','.
+         * </p><p>
+         * Type: TEXT
+         * </p>
+         * @see TvInputManager.Session.tune(Uri, Bundle)
+         */
+        public static final String COLUMN_TUNE_PARAMS = "tune_params";
 
         private WatchedPrograms() {}
     }

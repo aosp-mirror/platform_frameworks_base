@@ -111,7 +111,9 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
                 return;
             }
             case DO_TUNE: {
-                mTvInputSessionImpl.tune((Uri) msg.obj);
+                SomeArgs args = (SomeArgs) msg.obj;
+                mTvInputSessionImpl.tune((Uri) args.arg1, (Bundle) args.arg2);
+                args.recycle();
                 return;
             }
             case DO_SET_CAPTION_ENABLED: {
@@ -184,8 +186,8 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     }
 
     @Override
-    public void tune(Uri channelUri) {
-        mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_TUNE, channelUri));
+    public void tune(Uri channelUri, Bundle params) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageOO(DO_TUNE, channelUri, params));
     }
 
     @Override

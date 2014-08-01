@@ -51,6 +51,7 @@ import android.media.tv.TvContentRating;
 import android.media.tv.TvContract;
 import android.media.tv.TvInputHardwareInfo;
 import android.media.tv.TvInputInfo;
+import android.media.tv.TvInputManager;
 import android.media.tv.TvInputService;
 import android.media.tv.TvStreamConfig;
 import android.media.tv.TvTrackInfo;
@@ -1135,7 +1136,7 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
-        public void tune(IBinder sessionToken, final Uri channelUri, int userId) {
+        public void tune(IBinder sessionToken, final Uri channelUri, Bundle params, int userId) {
             final int callingUid = Binder.getCallingUid();
             final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
                     userId, "tune");
@@ -1143,7 +1144,8 @@ public final class TvInputManagerService extends SystemService {
             try {
                 synchronized (mLock) {
                     try {
-                        getSessionLocked(sessionToken, callingUid, resolvedUserId).tune(channelUri);
+                        getSessionLocked(sessionToken, callingUid, resolvedUserId).tune(
+                                channelUri, params);
                         if (TvContract.isChannelUriForPassthroughTvInput(channelUri)) {
                             // Do not log the watch history for passthrough inputs.
                             return;
@@ -1170,6 +1172,10 @@ public final class TvInputManagerService extends SystemService {
                                 currentTime);
                         values.put(TvContract.WatchedPrograms.COLUMN_WATCH_END_TIME_UTC_MILLIS, 0);
                         values.put(TvContract.WatchedPrograms.COLUMN_CHANNEL_ID, channelId);
+                        if (params != null) {
+                            values.put(TvContract.WatchedPrograms.COLUMN_TUNE_PARAMS,
+                                    encodeTuneParams(params));
+                        }
 
                         sessionState.mLogUri = mContentResolver.insert(
                                 TvContract.WatchedPrograms.CONTENT_URI, values);
@@ -1581,6 +1587,39 @@ public final class TvInputManagerService extends SystemService {
                     pw.decreaseIndent();
                 }
             }
+        }
+
+        private String encodeTuneParams(Bundle tuneParams) {
+            StringBuilder builder = new StringBuilder();
+            Set<String> keySet = tuneParams.keySet();
+            Iterator<String> it = keySet.iterator();
+            while (it.hasNext()) {
+                String key = it.next();
+                Object value = tuneParams.get(key);
+                if (value == null) {
+                    continue;
+                }
+                builder.append(replaceEscapeCharacters(key));
+                builder.append("=");
+                builder.append(replaceEscapeCharacters(value.toString()));
+                if (it.hasNext()) {
+                    builder.append(", ");
+                }
+            }
+            return builder.toString();
+        }
+
+        private String replaceEscapeCharacters(String src) {
+            final char ESCAPE_CHARACTER = '%';
+            final String ENCODING_TARGET_CHARACTERS = "%=,";
+            StringBuilder builder = new StringBuilder();
+            for (char ch : src.toCharArray()) {
+                if (ENCODING_TARGET_CHARACTERS.indexOf(ch) >= 0) {
+                    builder.append(ESCAPE_CHARACTER);
+                }
+                builder.append(ch);
+            }
+            return builder.toString();
         }
     }
 
