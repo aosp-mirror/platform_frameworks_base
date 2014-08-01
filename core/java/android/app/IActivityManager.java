@@ -454,7 +454,7 @@ public interface IActivityManager extends IInterface {
      * Private non-Binder interfaces
      */
     /* package */ boolean testIsSystemReady();
-    
+
     /** Information you can retrieve about a particular application. */
     public static class ContentProviderHolder implements Parcelable {
         public final ProviderInfo info;
