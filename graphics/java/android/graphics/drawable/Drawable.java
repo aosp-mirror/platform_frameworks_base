@@ -861,16 +861,14 @@ public abstract class Drawable {
      * This method is called by the default {@link android.view.ViewOutlineProvider} to define
      * the outline of the View.
      * <p>
-     * The default behavior defines the outline to be the bounding rectangle. Subclasses that wish
-     * to convey a different shape must override this method.
-     *
-     * @return true if this drawable actually has an outline, else false. The outline must be
-     *         populated by the drawable if true is returned.
+     * The default behavior defines the outline to be the bounding rectangle of 0 alpha.
+     * Subclasses that wish to convey a different shape or alpha value must override this method.
      *
      * @see android.view.View#setOutlineProvider(android.view.ViewOutlineProvider)
      */
     public void getOutline(@NonNull Outline outline) {
         outline.setRect(getBounds());
+        outline.setAlpha(getAlpha() / 255.0f);
     }
 
     /**

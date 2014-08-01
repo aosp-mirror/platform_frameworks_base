@@ -585,11 +585,9 @@ public class RippleDrawable extends LayerDrawable {
 
     /**
      * Populates <code>outline</code> with the first available layer outline,
-     * excluding the mask layer. Returns <code>true</code> if an outline is
-     * available, <code>false</code> otherwise.
+     * excluding the mask layer.
      *
      * @param outline Outline in which to place the first available layer outline
-     * @return <code>true</code> if an outline is available
      */
     @Override
     public void getOutline(@NonNull Outline outline) {

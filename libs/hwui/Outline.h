@@ -28,18 +28,20 @@ public:
     Outline()
             : mShouldClip(false)
             , mType(kOutlineType_None)
-            , mRadius(0) {}
+            , mRadius(0)
+            , mAlpha(0.0f) {}
 
-    void setRoundRect(int left, int top, int right, int bottom, float radius) {
+    void setRoundRect(int left, int top, int right, int bottom, float radius, float alpha) {
         mType = kOutlineType_RoundRect;
         mBounds.set(left, top, right, bottom);
         mRadius = radius;
         mPath.reset();
         mPath.addRoundRect(SkRect::MakeLTRB(left, top, right, bottom),
                 radius, radius);
+        mAlpha = alpha;
     }
 
-    void setConvexPath(const SkPath* outline) {
+    void setConvexPath(const SkPath* outline, float alpha) {
         if (!outline) {
             setEmpty();
             return;
@@ -47,20 +49,27 @@ public:
         mType = kOutlineType_ConvexPath;
         mPath = *outline;
         mBounds.set(outline->getBounds());
+        mAlpha = alpha;
     }
 
     void setEmpty() {
         mType = kOutlineType_Empty;
         mPath.reset();
+        mAlpha = 0.0f;
     }
 
     void setNone() {
         mType = kOutlineType_None;
         mPath.reset();
+        mAlpha = 0.0f;
     }
 
     bool isEmpty() const {
         return mType == kOutlineType_Empty;
+    }
+
+    float getAlpha() const {
+        return mAlpha;
     }
 
     void setShouldClip(bool clip) {
@@ -103,6 +112,7 @@ private:
     OutlineType mType;
     Rect mBounds;
     float mRadius;
+    float mAlpha;
     SkPath mPath;
 };
 
