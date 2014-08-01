@@ -171,8 +171,7 @@ public class StackScrollState {
                 updateChildClip(child, newHeight, state.topOverLap);
 
                 if(child instanceof SpeedBumpView) {
-                    float lineEnd = newYTranslation + newHeight / 2;
-                    performSpeedBumpAnimation(i, (SpeedBumpView) child, lineEnd);
+                    performSpeedBumpAnimation(i, (SpeedBumpView) child, state, 0);
                 } else if (child instanceof DismissView) {
                     DismissView dismissView = (DismissView) child;
                     boolean visible = state.topOverLap < mClearAllTopPadding;
@@ -197,12 +196,14 @@ public class StackScrollState {
         child.setClipBounds(mClipRect);
     }
 
-    private void performSpeedBumpAnimation(int i, SpeedBumpView speedBump, float speedBumpEnd) {
+    public void performSpeedBumpAnimation(int i, SpeedBumpView speedBump, ViewState state,
+            long delay) {
         View nextChild = getNextChildNotGone(i);
         if (nextChild != null) {
+            float lineEnd = state.yTranslation + state.height / 2;
             ViewState nextState = getViewStateForView(nextChild);
-            boolean startIsAboveNext = nextState.yTranslation > speedBumpEnd;
-            speedBump.animateDivider(startIsAboveNext, null /* onFinishedRunnable */);
+            boolean startIsAboveNext = nextState.yTranslation > lineEnd;
+            speedBump.animateDivider(startIsAboveNext, delay, null /* onFinishedRunnable */);
         }
     }
 
