@@ -49,6 +49,11 @@ public class MmsServiceBroker extends SystemService {
 
     private static final int MSG_TRY_CONNECTING = 1;
 
+    private static final Uri FAKE_SMS_SENT_URI = Uri.parse("content://sms/sent/0");
+    private static final Uri FAKE_MMS_SENT_URI = Uri.parse("content://mms/sent/0");
+    private static final Uri FAKE_SMS_DRAFT_URI = Uri.parse("content://sms/draft/0");
+    private static final Uri FAKE_MMS_DRAFT_URI = Uri.parse("content://mms/draft/0");
+
     private Context mContext;
     // The actual MMS service instance to invoke
     private volatile IMms mService;
@@ -275,7 +280,9 @@ public class MmsServiceBroker extends SystemService {
             mContext.enforceCallingPermission(Manifest.permission.WRITE_SMS, "Import SMS message");
             if (getAppOpsManager().noteOp(AppOpsManager.OP_WRITE_SMS, Binder.getCallingUid(),
                     callingPkg) != AppOpsManager.MODE_ALLOWED) {
-                return null;
+                // Silently fail AppOps failure due to not being the default SMS app
+                // while writing the TelephonyProvider
+                return FAKE_SMS_SENT_URI;
             }
             return getServiceGuarded().importTextMessage(
                     callingPkg, address, type, text, timestampMillis, seen, read);
@@ -287,7 +294,9 @@ public class MmsServiceBroker extends SystemService {
             mContext.enforceCallingPermission(Manifest.permission.WRITE_SMS, "Import MMS message");
             if (getAppOpsManager().noteOp(AppOpsManager.OP_WRITE_SMS, Binder.getCallingUid(),
                     callingPkg) != AppOpsManager.MODE_ALLOWED) {
-                return null;
+                // Silently fail AppOps failure due to not being the default SMS app
+                // while writing the TelephonyProvider
+                return FAKE_MMS_SENT_URI;
             }
             return getServiceGuarded().importMultimediaMessage(
                     callingPkg, pdu, messageId, timestampSecs, seen, read);
@@ -340,7 +349,9 @@ public class MmsServiceBroker extends SystemService {
             mContext.enforceCallingPermission(Manifest.permission.WRITE_SMS, "Add SMS draft");
             if (getAppOpsManager().noteOp(AppOpsManager.OP_WRITE_SMS, Binder.getCallingUid(),
                     callingPkg) != AppOpsManager.MODE_ALLOWED) {
-                return null;
+                // Silently fail AppOps failure due to not being the default SMS app
+                // while writing the TelephonyProvider
+                return FAKE_SMS_DRAFT_URI;
             }
             return getServiceGuarded().addTextMessageDraft(callingPkg, address, text);
         }
@@ -350,7 +361,9 @@ public class MmsServiceBroker extends SystemService {
             mContext.enforceCallingPermission(Manifest.permission.WRITE_SMS, "Add MMS draft");
             if (getAppOpsManager().noteOp(AppOpsManager.OP_WRITE_SMS, Binder.getCallingUid(),
                     callingPkg) != AppOpsManager.MODE_ALLOWED) {
-                return null;
+                // Silently fail AppOps failure due to not being the default SMS app
+                // while writing the TelephonyProvider
+                return FAKE_MMS_DRAFT_URI;
             }
             return getServiceGuarded().addMultimediaMessageDraft(callingPkg, pdu);
         }
