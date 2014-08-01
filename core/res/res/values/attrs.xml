@@ -464,10 +464,22 @@
         <attr name="windowEnterTransition" format="reference"/>
 
         <!-- Reference to a Transition XML resource defining the desired Transition
+             used to move Views out of the scene when the Window is
+             preparing to close. Corresponds to
+             {@link android.view.Window#setReturnTransition(android.transition.Transition)}. -->
+        <attr name="windowReturnTransition" format="reference"/>
+
+        <!-- Reference to a Transition XML resource defining the desired Transition
              used to move Views out of the Window's content Scene when launching a new Activity.
              Corresponds to
              {@link android.view.Window#setExitTransition(android.transition.Transition)}. -->
         <attr name="windowExitTransition" format="reference"/>
+
+        <!-- Reference to a Transition XML resource defining the desired Transition
+             used to move Views in to the scene when returning from a previously-started Activity.
+             Corresponds to
+             {@link android.view.Window#setReenterTransition(android.transition.Transition)}. -->
+        <attr name="windowReenterTransition" format="reference"/>
 
         <!-- Reference to a Transition XML resource defining the desired Transition
              used to move shared elements transferred into the Window's initial content Scene.
@@ -476,11 +488,23 @@
         <attr name="windowSharedElementEnterTransition" format="reference"/>
 
         <!-- Reference to a Transition XML resource defining the desired Transition
+             used to move shared elements transferred back to a calling Activity.
+             Corresponds to {@link android.view.Window#setSharedElementReturnTransition(
+             android.transition.Transition)}. -->
+        <attr name="windowSharedElementReturnTransition" format="reference"/>
+
+        <!-- Reference to a Transition XML resource defining the desired Transition
              used when starting a new Activity to move shared elements prior to transferring
              to the called Activity.
              Corresponds to {@link android.view.Window#setSharedElementExitTransition(
              android.transition.Transition)}. -->
         <attr name="windowSharedElementExitTransition" format="reference"/>
+
+        <!-- Reference to a Transition XML resource defining the desired Transition
+             used for shared elements transferred back to a calling Activity.
+             Corresponds to {@link android.view.Window#setSharedElementReenterTransition(
+             android.transition.Transition)}. -->
+        <attr name="windowSharedElementReenterTransition" format="reference"/>
 
         <!-- Flag indicating whether this Window's transition should overlap with
              the exiting transition of the calling Activity. Corresponds to
@@ -1751,29 +1775,53 @@
              or a fraction of the screen size in that dimension. -->
         <attr name="windowFixedHeightMajor" format="dimension|fraction" />
         <attr name="windowOutsetBottom" format="dimension" />
-        <!-- Reference to a TransitionManager XML resource defining the desired Transition
+        <!-- Reference to a Transition XML resource defining the desired Transition
              used to move Views into the initial Window's content Scene. Corresponds to
              {@link android.view.Window#setEnterTransition(android.transition.Transition)}. -->
         <attr name="windowEnterTransition"/>
 
-        <!-- Reference to a TransitionManager XML resource defining the desired Transition
+        <!-- Reference to a Transition XML resource defining the desired Transition
+             used to move Views out of the scene when the Window is
+             preparing to close. Corresponds to
+             {@link android.view.Window#setReturnTransition(android.transition.Transition)}. -->
+        <attr name="windowReturnTransition"/>
+
+        <!-- Reference to a Transition XML resource defining the desired Transition
              used to move Views out of the Window's content Scene when launching a new Activity.
              Corresponds to
              {@link android.view.Window#setExitTransition(android.transition.Transition)}. -->
         <attr name="windowExitTransition"/>
 
-        <!-- Reference to a TransitionManager XML resource defining the desired Transition
+        <!-- Reference to a Transition XML resource defining the desired Transition
+             used to move Views in to the scene when returning from a previously-started Activity.
+             Corresponds to
+             {@link android.view.Window#setReenterTransition(android.transition.Transition)}. -->
+        <attr name="windowReenterTransition"/>
+
+        <!-- Reference to a Transition XML resource defining the desired Transition
              used to move shared elements transferred into the Window's initial content Scene.
              Corresponds to {@link android.view.Window#setSharedElementEnterTransition(
              android.transition.Transition)}. -->
         <attr name="windowSharedElementEnterTransition"/>
 
-        <!-- Reference to a TransitionManager XML resource defining the desired Transition
+        <!-- Reference to a Transition XML resource defining the desired Transition
+             used to move shared elements transferred back to a calling Activity.
+             Corresponds to {@link android.view.Window#setSharedElementReturnTransition(
+             android.transition.Transition)}. -->
+        <attr name="windowSharedElementReturnTransition"/>
+
+        <!-- Reference to a Transition XML resource defining the desired Transition
              used when starting a new Activity to move shared elements prior to transferring
              to the called Activity.
              Corresponds to {@link android.view.Window#setSharedElementExitTransition(
              android.transition.Transition)}. -->
         <attr name="windowSharedElementExitTransition"/>
+
+        <!-- Reference to a Transition XML resource defining the desired Transition
+             used for shared elements transferred back to a calling Activity.
+             Corresponds to {@link android.view.Window#setSharedElementReenterTransition(
+             android.transition.Transition)}. -->
+        <attr name="windowSharedElementReenterTransition"/>
 
 
         <!-- Flag indicating whether this Window's transition should overlap with
