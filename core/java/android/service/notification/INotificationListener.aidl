@@ -28,5 +28,5 @@ oneway interface INotificationListener
     void onNotificationRemoved(in StatusBarNotification notification,
             in NotificationRankingUpdate update);
     void onNotificationRankingUpdate(in NotificationRankingUpdate update);
-    void onListenerFlagsChanged(int flags);
+    void onListenerHintsChanged(int hints);
 }

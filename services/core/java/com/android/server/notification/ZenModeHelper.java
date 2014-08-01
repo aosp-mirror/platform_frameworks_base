@@ -41,6 +41,7 @@ import android.os.IBinder;
 import android.os.UserHandle;
 import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
+import android.service.notification.NotificationListenerService;
 import android.service.notification.ZenModeConfig;
 import android.telecomm.TelecommManager;
 import android.util.Slog;
@@ -123,6 +124,40 @@ public class ZenModeHelper {
 
     public void setAudioManager(AudioManager audioManager) {
         mAudioManager = audioManager;
+    }
+
+    public int getZenModeListenerHint() {
+        switch(mZenMode) {
+            case Global.ZEN_MODE_OFF:
+                return NotificationListenerService.HINT_HOST_INTERRUPTION_LEVEL_ALL;
+            case Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS:
+                return NotificationListenerService.HINT_HOST_INTERRUPTION_LEVEL_PRIORITY;
+            case Global.ZEN_MODE_NO_INTERRUPTIONS:
+                return NotificationListenerService.HINT_HOST_INTERRUPTION_LEVEL_NONE;
+            default:
+                return 0;
+        }
+    }
+
+    private static int zenFromListenerHint(int hints, int defValue) {
+        final int level = hints & NotificationListenerService.HOST_INTERRUPTION_LEVEL_MASK;
+        switch(level) {
+            case NotificationListenerService.HINT_HOST_INTERRUPTION_LEVEL_ALL:
+                return Global.ZEN_MODE_OFF;
+            case NotificationListenerService.HINT_HOST_INTERRUPTION_LEVEL_PRIORITY:
+                return Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+            case NotificationListenerService.HINT_HOST_INTERRUPTION_LEVEL_NONE:
+                return Global.ZEN_MODE_NO_INTERRUPTIONS;
+            default:
+                return defValue;
+        }
+    }
+
+    public void requestFromListener(int hints) {
+        final int newZen = zenFromListenerHint(hints, -1);
+        if (newZen != -1) {
+            setZenMode(newZen);
+        }
     }
 
     public boolean shouldIntercept(NotificationRecord record) {
