@@ -18,6 +18,7 @@ package android.bluetooth.le;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothGatt;
+import android.bluetooth.BluetoothGattCallbackWrapper;
 import android.bluetooth.BluetoothUuid;
 import android.bluetooth.IBluetoothGatt;
 import android.bluetooth.IBluetoothGattCallback;
@@ -233,7 +234,7 @@ public final class BluetoothLeAdvertiser {
     /**
      * Bluetooth GATT interface callbacks for advertising.
      */
-    private static class AdvertiseCallbackWrapper extends IBluetoothGattCallback.Stub {
+    private static class AdvertiseCallbackWrapper extends BluetoothGattCallbackWrapper {
         private static final int LE_CALLBACK_TIMEOUT_MILLIS = 2000;
         private final AdvertiseCallback mAdvertiseCallback;
         private final AdvertiseData mAdvertisement;
@@ -245,7 +246,7 @@ public final class BluetoothLeAdvertiser {
         // -1: scan stopped
         // >0: registered and scan started
         private int mClientIf;
-        private boolean isAdvertising = false;
+        private boolean mIsAdvertising = false;
 
         public AdvertiseCallbackWrapper(AdvertiseCallback advertiseCallback,
                 AdvertiseData advertiseData, AdvertiseData scanResponse,
@@ -270,7 +271,7 @@ public final class BluetoothLeAdvertiser {
                 } catch (InterruptedException e) {
                     Log.e(TAG, "Callback reg wait interrupted: ", e);
                 }
-                started = (mClientIf > 0 && isAdvertising);
+                started = (mClientIf > 0 && mIsAdvertising);
             }
             return started;
         }
@@ -282,7 +283,7 @@ public final class BluetoothLeAdvertiser {
                 } catch (InterruptedException e) {
                     Log.e(TAG, "Callback reg wait interrupted: " + e);
                 }
-                return !isAdvertising;
+                return !mIsAdvertising;
             }
         }
 
@@ -312,155 +313,35 @@ public final class BluetoothLeAdvertiser {
         }
 
         @Override
-        public void onClientConnectionState(int status, int clientIf,
-                boolean connected, String address) {
-            // no op
-        }
-
-        @Override
-        public void onScanResult(String address, int rssi, byte[] advData) {
-            // no op
-        }
-
-        @Override
-        public void onGetService(String address, int srvcType,
-                int srvcInstId, ParcelUuid srvcUuid) {
-            // no op
-        }
-
-        @Override
-        public void onGetIncludedService(String address, int srvcType,
-                int srvcInstId, ParcelUuid srvcUuid,
-                int inclSrvcType, int inclSrvcInstId,
-                ParcelUuid inclSrvcUuid) {
-            // no op
-        }
-
-        @Override
-        public void onGetCharacteristic(String address, int srvcType,
-                int srvcInstId, ParcelUuid srvcUuid,
-                int charInstId, ParcelUuid charUuid,
-                int charProps) {
-            // no op
-        }
-
-        @Override
-        public void onGetDescriptor(String address, int srvcType,
-                int srvcInstId, ParcelUuid srvcUuid,
-                int charInstId, ParcelUuid charUuid,
-                int descInstId, ParcelUuid descUuid) {
-            // no op
-        }
-
-        @Override
-        public void onSearchComplete(String address, int status) {
-            // no op
-        }
-
-        @Override
-        public void onCharacteristicRead(String address, int status, int srvcType,
-                int srvcInstId, ParcelUuid srvcUuid,
-                int charInstId, ParcelUuid charUuid, byte[] value) {
-            // no op
-        }
-
-        @Override
-        public void onCharacteristicWrite(String address, int status, int srvcType,
-                int srvcInstId, ParcelUuid srvcUuid,
-                int charInstId, ParcelUuid charUuid) {
-            // no op
-        }
-
-        @Override
-        public void onNotify(String address, int srvcType,
-                int srvcInstId, ParcelUuid srvcUuid,
-                int charInstId, ParcelUuid charUuid,
-                byte[] value) {
-            // no op
-        }
-
-        @Override
-        public void onDescriptorRead(String address, int status, int srvcType,
-                int srvcInstId, ParcelUuid srvcUuid,
-                int charInstId, ParcelUuid charUuid,
-                int descInstId, ParcelUuid descrUuid, byte[] value) {
-            // no op
-        }
-
-        @Override
-        public void onDescriptorWrite(String address, int status, int srvcType,
-                int srvcInstId, ParcelUuid srvcUuid,
-                int charInstId, ParcelUuid charUuid,
-                int descInstId, ParcelUuid descrUuid) {
-            // no op
-        }
-
-        @Override
-        public void onExecuteWrite(String address, int status) {
-            // no op
-        }
-
-        @Override
-        public void onReadRemoteRssi(String address, int rssi, int status) {
-            // no op
-        }
-
-        @Override
-        public void onMultiAdvertiseCallback(int status) {
-            // TODO: This logic needs to be re-visited to account
-            // for whether the scan has actually been started
-            // or not. Toggling the isAdvertising does not seem
-            // correct.
+        public void onMultiAdvertiseCallback(int status, boolean isStart,
+                AdvertiseSettings settings) {
             synchronized (this) {
-                if (status == AdvertiseCallback.ADVERTISE_SUCCESS) {
-                    isAdvertising = !isAdvertising;
-                    if (!isAdvertising) {
-                        try {
-                            mBluetoothGatt.unregisterClient(mClientIf);
-                            mClientIf = -1;
-                        } catch (RemoteException e) {
-                            Log.e(TAG, "remote exception when unregistering", e);
-                        }
+                if (isStart) {
+                    if (status == AdvertiseCallback.ADVERTISE_SUCCESS) {
+                        // Start success
+                        mAdvertiseCallback.onStartSuccess(settings);
+                        mIsAdvertising = true;
                     } else {
-                        mAdvertiseCallback.onStartSuccess(null);
+                        // Start failure.
+                        mAdvertiseCallback.onStartFailure(status);
                     }
                 } else {
-                    if (!isAdvertising)
-                        mAdvertiseCallback.onStartFailure(status);
+                    // unregister client for stop.
+                    try {
+                        mBluetoothGatt.unregisterClient(mClientIf);
+                        mClientIf = -1;
+                        mIsAdvertising = false;
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "remote exception when unregistering", e);
+                    }
                 }
                 notifyAll();
             }
 
         }
-
-        /**
-         * Callback reporting LE ATT MTU.
-         *
-         * @hide
-         */
-        @Override
-        public void onConfigureMTU(String address, int mtu, int status) {
-            // no op
-        }
-
-        @Override
-        public void onConnectionCongested(String address, boolean congested) {
-            // no op
-        }
-
-        @Override
-        public void onBatchScanResults(List<ScanResult> results) {
-            // no op
-        }
-
-        @Override
-        public void onFoundOrLost(boolean onFound, String address, int rssi,
-                byte[] advData) {
-            // no op
-        }
     }
 
-    //TODO: move this api to a common util class.
+    // TODO: move this api to a common util class.
     private void checkAdapterState() {
         if (mBluetoothAdapter.getState() != mBluetoothAdapter.STATE_ON) {
             throw new IllegalStateException("BT Adapter is not turned ON");
