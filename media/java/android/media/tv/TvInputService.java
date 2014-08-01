@@ -558,6 +558,19 @@ public abstract class TvInputService extends Service {
         public abstract boolean onTune(Uri channelUri);
 
         /**
+         * Calls {@link #onTune(Uri)}. Override this method in order to handle {@code params}.
+         *
+         * @param channelUri The URI of the channel.
+         * @param params The extra parameters from other applications.
+         * @return {@code true} the tuning was successful, {@code false} otherwise.
+         * @hide
+         */
+        @SystemApi
+        public boolean onTune(Uri channelUri, Bundle params) {
+            return onTune(channelUri);
+        }
+
+        /**
          * Enables or disables the caption.
          * <p>
          * The locale for the user's preferred captioning language can be obtained by calling
@@ -809,8 +822,8 @@ public abstract class TvInputService extends Service {
         /**
          * Calls {@link #onTune}.
          */
-        void tune(Uri channelUri) {
-            onTune(channelUri);
+        void tune(Uri channelUri, Bundle params) {
+            onTune(channelUri, params);
             // TODO: Handle failure.
         }
 
