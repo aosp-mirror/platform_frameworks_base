@@ -203,10 +203,23 @@ public class TvView extends ViewGroup {
     /**
      * Tunes to a given channel.
      *
-     * @param inputId the id of TV input which will play the given channel.
+     * @param inputId The id of TV input which will play the given channel.
      * @param channelUri The URI of a channel.
      */
     public void tune(String inputId, Uri channelUri) {
+        tune(inputId, channelUri, null);
+    }
+
+    /**
+     * Tunes to a given channel.
+     *
+     * @param inputId The id of TV input which will play the given channel.
+     * @param channelUri The URI of a channel.
+     * @param params Extra parameters which might be handled with the tune event.
+     * @hide
+     */
+    @SystemApi
+    public void tune(String inputId, Uri channelUri, Bundle params) {
         if (DEBUG) Log.d(TAG, "tune(" + channelUri + ")");
         if (TextUtils.isEmpty(inputId)) {
             throw new IllegalArgumentException("inputId cannot be null or an empty string");
@@ -218,11 +231,12 @@ public class TvView extends ViewGroup {
         }
         if (mSessionCallback != null && mSessionCallback.mInputId.equals(inputId)) {
             if (mSession != null) {
-                mSession.tune(channelUri);
+                mSession.tune(channelUri, params);
             } else {
                 // Session is not created yet. Replace the channel which will be set once the
                 // session is made.
                 mSessionCallback.mChannelUri = channelUri;
+                mSessionCallback.mTuneParams = params;
             }
         } else {
             reset();
@@ -231,7 +245,7 @@ public class TvView extends ViewGroup {
             // The previous callbacks will be ignored. For the logic, mSessionCallback
             // is newly assigned for every createSession request and compared with
             // MySessionCreateCallback.this.
-            mSessionCallback = new MySessionCallback(inputId, channelUri);
+            mSessionCallback = new MySessionCallback(inputId, channelUri, params);
             mTvInputManager.createSession(inputId, mSessionCallback, mHandler);
         }
     }
@@ -722,10 +736,12 @@ public class TvView extends ViewGroup {
     private class MySessionCallback extends SessionCallback {
         final String mInputId;
         Uri mChannelUri;
+        Bundle mTuneParams;
 
-        MySessionCallback(String inputId, Uri channelUri) {
+        MySessionCallback(String inputId, Uri channelUri, Bundle tuneParams) {
             mInputId = inputId;
             mChannelUri = channelUri;
+            mTuneParams = tuneParams;
         }
 
         @Override
@@ -754,7 +770,7 @@ public class TvView extends ViewGroup {
                     }
                 }
                 createSessionOverlayView();
-                mSession.tune(mChannelUri);
+                mSession.tune(mChannelUri, mTuneParams);
                 if (mHasStreamVolume) {
                     mSession.setStreamVolume(mStreamVolume);
                 }
