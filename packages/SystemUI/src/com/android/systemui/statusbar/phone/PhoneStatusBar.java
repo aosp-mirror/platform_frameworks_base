@@ -2969,6 +2969,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private void setHeadsUpVisibility(boolean vis) {
         if (!ENABLE_HEADS_UP) return;
         if (DEBUG) Log.v(TAG, (vis ? "showing" : "hiding") + " heads up window");
+        EventLog.writeEvent(EventLogTags.SYSUI_HEADS_UP_STATUS,
+                vis ? mHeadsUpNotificationView.getKey() : "",
+                vis ? 1 : 0);
         mHeadsUpNotificationView.setVisibility(vis ? View.VISIBLE : View.GONE);
     }
 
