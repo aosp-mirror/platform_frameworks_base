@@ -595,12 +595,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
 
     private final void updateTelephonySignalStrength() {
         Rlog.d(TAG, "updateTelephonySignalStrength: hasService=" + hasService() + " ss=" + mSignalStrength);
-        if (mDemoMode) {
-            mQSPhoneSignalIconId = mDemoMobileLevel < 0 ? R.drawable.ic_qs_signal_no_signal :
-                    TelephonyIcons.QS_TELEPHONY_SIGNAL_STRENGTH[mDemoInetCondition][mDemoMobileLevel];
-            mQSDataTypeIconId = mDemoQSDataTypeIconId;
-            return;
-        }
         if (!hasService()) {
             if (true/*CHATTY*/) Log.d(TAG, "updateTelephonySignalStrength: !hasService()");
             mPhoneSignalIconId = R.drawable.stat_sys_signal_null;
@@ -950,11 +944,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
     }
 
     private void updateWifiIcons() {
-        if (mDemoMode) {
-            mQSWifiIconId = mDemoWifiLevel < 0 ? R.drawable.ic_qs_wifi_no_network
-                    : WifiIcons.QS_WIFI_SIGNAL_STRENGTH[mDemoInetCondition][mDemoWifiLevel];
-            return;
-        }
         if (mWifiConnected) {
             mWifiIconId = WifiIcons.WIFI_SIGNAL_STRENGTH[mInetCondition][mWifiLevel];
             mQSWifiIconId = WifiIcons.QS_WIFI_SIGNAL_STRENGTH[mInetCondition][mWifiLevel];
@@ -1207,6 +1196,14 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 mDataTypeIconId = R.drawable.stat_sys_data_fully_connected_roam;
                 mQSDataTypeIconId = TelephonyIcons.QS_DATA_R[mInetCondition];
             }
+        }
+
+        if (mDemoMode) {
+            mQSWifiIconId = mDemoWifiLevel < 0 ? R.drawable.ic_qs_wifi_no_network
+                    : WifiIcons.QS_WIFI_SIGNAL_STRENGTH[mDemoInetCondition][mDemoWifiLevel];
+            mQSPhoneSignalIconId = mDemoMobileLevel < 0 ? R.drawable.ic_qs_signal_no_signal :
+                    TelephonyIcons.QS_TELEPHONY_SIGNAL_STRENGTH[mDemoInetCondition][mDemoMobileLevel];
+            mQSDataTypeIconId = mDemoQSDataTypeIconId;
         }
 
         if (DEBUG) {
@@ -1497,8 +1494,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
             for (SignalCluster cluster : mSignalClusters) {
                 refreshSignalCluster(cluster);
             }
-            updateWifiIcons();
-            updateTelephonySignalStrength();
             refreshViews();
         } else if (mDemoMode && command.equals(COMMAND_NETWORK)) {
             String airplane = args.getString("airplane");
@@ -1528,7 +1523,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
                             iconId,
                             "Demo");
                 }
-                updateWifiIcons();
                 refreshViews();
             }
             String mobile = args.getString("mobile");
@@ -1574,7 +1568,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
                             "Demo",
                             "Demo");
                 }
-                updateTelephonySignalStrength();
                 refreshViews();
             }
         }
