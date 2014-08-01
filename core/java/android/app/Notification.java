@@ -247,7 +247,6 @@ public class Notification implements Parcelable
 
 
     /**
-     * @hide
      * A medium-format version of {@link #contentView}, providing the Notification an
      * opportunity to add action buttons to contentView. At its discretion, the system UI may
      * choose to show this as a heads-up notification, which will pop up so the user can see
