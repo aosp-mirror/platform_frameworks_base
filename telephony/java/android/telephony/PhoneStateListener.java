@@ -50,7 +50,8 @@ import java.util.List;
  * appropriate LISTEN_ flags.
  */
 public class PhoneStateListener {
-    private static final String TAG = "PhoneStateListener";
+    private static final String LOG_TAG = "PhoneStateListener";
+    private static final boolean DBG = false; // STOPSHIP if true
 
     /**
      * Stop listening for updates.
@@ -233,12 +234,14 @@ public class PhoneStateListener {
 
     /** @hide */
     public PhoneStateListener(long subId, Looper looper) {
-        Rlog.d(TAG, "ctor: subId=" + subId + " looper=" + looper);
+        if (DBG) log("ctor: subId=" + subId + " looper=" + looper);
         mSubId = subId;
         mHandler = new Handler(looper) {
             public void handleMessage(Message msg) {
-                Rlog.d(TAG, "mSubId=" + mSubId + " what=0x" + Integer.toHexString(msg.what)
-                 + " msg=" + msg);
+                if (DBG) {
+                    if (DBG) log("mSubId=" + mSubId + " what=0x" + Integer.toHexString(msg.what)
+                            + " msg=" + msg);
+                }
                 switch (msg.what) {
                     case LISTEN_SERVICE_STATE:
                         PhoneStateListener.this.onServiceStateChanged((ServiceState)msg.obj);
@@ -528,4 +531,8 @@ public class PhoneStateListener {
             Message.obtain(mHandler, LISTEN_VOLTE_STATE, 0, 0, lteState).sendToTarget();
         }
     };
+
+    private void log(String s) {
+        Rlog.d(LOG_TAG, s);
+    }
 }
