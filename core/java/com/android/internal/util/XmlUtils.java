@@ -16,12 +16,18 @@
 
 package com.android.internal.util;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Bitmap.CompressFormat;
+import android.net.Uri;
+import android.util.Base64;
 import android.util.Xml;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -1415,6 +1421,20 @@ public class XmlUtils {
         out.attribute(null, name, Long.toString(value));
     }
 
+    public static float readFloatAttribute(XmlPullParser in, String name) throws IOException {
+        final String value = in.getAttributeValue(null, name);
+        try {
+            return Float.parseFloat(value);
+        } catch (NumberFormatException e) {
+            throw new ProtocolException("problem parsing " + name + "=" + value + " as long");
+        }
+    }
+
+    public static void writeFloatAttribute(XmlSerializer out, String name, float value)
+            throws IOException {
+        out.attribute(null, name, Float.toString(value));
+    }
+
     public static boolean readBooleanAttribute(XmlPullParser in, String name) {
         final String value = in.getAttributeValue(null, name);
         return Boolean.parseBoolean(value);
@@ -1423,6 +1443,63 @@ public class XmlUtils {
     public static void writeBooleanAttribute(XmlSerializer out, String name, boolean value)
             throws IOException {
         out.attribute(null, name, Boolean.toString(value));
+    }
+
+    public static Uri readUriAttribute(XmlPullParser in, String name) {
+        final String value = in.getAttributeValue(null, name);
+        return (value != null) ? Uri.parse(value) : null;
+    }
+
+    public static void writeUriAttribute(XmlSerializer out, String name, Uri value)
+            throws IOException {
+        if (value != null) {
+            out.attribute(null, name, value.toString());
+        }
+    }
+
+    public static String readStringAttribute(XmlPullParser in, String name) {
+        return in.getAttributeValue(null, name);
+    }
+
+    public static void writeStringAttribute(XmlSerializer out, String name, String value)
+            throws IOException {
+        if (value != null) {
+            out.attribute(null, name, value);
+        }
+    }
+
+    public static byte[] readByteArrayAttribute(XmlPullParser in, String name) {
+        final String value = in.getAttributeValue(null, name);
+        if (value != null) {
+            return Base64.decode(value, Base64.DEFAULT);
+        } else {
+            return null;
+        }
+    }
+
+    public static void writeByteArrayAttribute(XmlSerializer out, String name, byte[] value)
+            throws IOException {
+        if (value != null) {
+            out.attribute(null, name, Base64.encodeToString(value, Base64.DEFAULT));
+        }
+    }
+
+    public static Bitmap readBitmapAttribute(XmlPullParser in, String name) {
+        final byte[] value = readByteArrayAttribute(in, name);
+        if (value != null) {
+            return BitmapFactory.decodeByteArray(value, 0, value.length);
+        } else {
+            return null;
+        }
+    }
+
+    public static void writeBitmapAttribute(XmlSerializer out, String name, Bitmap value)
+            throws IOException {
+        if (value != null) {
+            final ByteArrayOutputStream os = new ByteArrayOutputStream();
+            value.compress(CompressFormat.PNG, 90, os);
+            writeByteArrayAttribute(out, name, os.toByteArray());
+        }
     }
 
     /** @hide */

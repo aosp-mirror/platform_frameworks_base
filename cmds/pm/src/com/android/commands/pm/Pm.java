@@ -59,7 +59,6 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.SizedInputStream;
 
 import libcore.io.IoUtils;
-import libcore.io.Streams;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -1068,6 +1067,8 @@ public final class Pm {
             }
         }
 
+        final InstallSessionInfo info = mInstaller.getSessionInfo(sessionId);
+
         PackageInstaller.Session session = null;
         InputStream in = null;
         OutputStream out = null;
@@ -1081,16 +1082,21 @@ public final class Pm {
             }
             out = session.openWrite(splitName, 0, sizeBytes);
 
-            final int n = Streams.copy(in, out);
+            int total = 0;
+            byte[] buffer = new byte[65536];
+            int c;
+            while ((c = in.read(buffer)) != -1) {
+                total += c;
+                out.write(buffer, 0, c);
+
+                if (info.sizeBytes > 0) {
+                    final float fraction = ((float) c / (float) info.sizeBytes);
+                    session.addProgress(fraction);
+                }
+            }
             session.fsync(out);
 
-            final InstallSessionInfo info = mInstaller.getSessionInfo(sessionId);
-            if (info.sizeBytes > 0) {
-                final float fraction = ((float) n / (float) info.sizeBytes);
-                session.addProgress(fraction);
-            }
-
-            System.out.println("Success: streamed " + n + " bytes");
+            System.out.println("Success: streamed " + total + " bytes");
         } finally {
             IoUtils.closeQuietly(out);
             IoUtils.closeQuietly(in);

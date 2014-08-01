@@ -17,6 +17,7 @@
 package android.content.pm;
 
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -29,6 +30,9 @@ import com.android.internal.util.IndentingPrintWriter;
  * Parameters for creating a new {@link PackageInstaller.Session}.
  */
 public class InstallSessionParams implements Parcelable {
+
+    /** {@hide} */
+    public static final int MODE_INVALID = -1;
 
     /**
      * Mode for an install session whose staged APKs should fully replace any
@@ -48,13 +52,11 @@ public class InstallSessionParams implements Parcelable {
     public static final int MODE_INHERIT_EXISTING = 2;
 
     /** {@hide} */
-    public int mode;
+    public int mode = MODE_INVALID;
     /** {@hide} */
     public int installFlags;
     /** {@hide} */
     public int installLocation = PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY;
-    /** {@hide} */
-    public Signature[] signatures;
     /** {@hide} */
     public long sizeBytes = -1;
     /** {@hide} */
@@ -62,7 +64,7 @@ public class InstallSessionParams implements Parcelable {
     /** {@hide} */
     public Bitmap appIcon;
     /** {@hide} */
-    public CharSequence appLabel;
+    public String appLabel;
     /** {@hide} */
     public Uri originatingUri;
     /** {@hide} */
@@ -86,7 +88,6 @@ public class InstallSessionParams implements Parcelable {
         mode = source.readInt();
         installFlags = source.readInt();
         installLocation = source.readInt();
-        signatures = (Signature[]) source.readParcelableArray(null);
         sizeBytes = source.readLong();
         appPackageName = source.readString();
         appIcon = source.readParcelable(null);
@@ -106,16 +107,13 @@ public class InstallSessionParams implements Parcelable {
     }
 
     /**
-     * Optionally provide a set of certificates for the app being installed.
-     * <p>
-     * If the APKs staged in the session aren't consistent with these
-     * signatures, the install will fail. Regardless of this value, all APKs in
-     * the app must have the same signing certificates.
-     *
-     * @see PackageInfo#signatures
+     * @deprecated use {@link PackageInstaller.Session#openRead(String)} to
+     *             calculate message digest instead.
+     * @hide
      */
+    @Deprecated
     public void setSignatures(@Nullable Signature[] signatures) {
-        this.signatures = signatures;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -146,7 +144,8 @@ public class InstallSessionParams implements Parcelable {
 
     /**
      * Optionally set an icon representing the app being installed. This should
-     * be at least {@link android.R.dimen#app_icon_size} in both dimensions.
+     * be roughly {@link ActivityManager#getLauncherLargeIconSize()} in both
+     * dimensions.
      */
     public void setAppIcon(@Nullable Bitmap appIcon) {
         this.appIcon = appIcon;
@@ -156,7 +155,7 @@ public class InstallSessionParams implements Parcelable {
      * Optionally set a label representing the app being installed.
      */
     public void setAppLabel(@Nullable CharSequence appLabel) {
-        this.appLabel = appLabel;
+        this.appLabel = (appLabel != null) ? appLabel.toString() : null;
     }
 
     /**
@@ -184,7 +183,6 @@ public class InstallSessionParams implements Parcelable {
         pw.printPair("mode", mode);
         pw.printHexPair("installFlags", installFlags);
         pw.printPair("installLocation", installLocation);
-        pw.printPair("signatures", (signatures != null));
         pw.printPair("sizeBytes", sizeBytes);
         pw.printPair("appPackageName", appPackageName);
         pw.printPair("appIcon", (appIcon != null));
@@ -205,11 +203,10 @@ public class InstallSessionParams implements Parcelable {
         dest.writeInt(mode);
         dest.writeInt(installFlags);
         dest.writeInt(installLocation);
-        dest.writeParcelableArray(signatures, flags);
         dest.writeLong(sizeBytes);
         dest.writeString(appPackageName);
         dest.writeParcelable(appIcon, flags);
-        dest.writeString(appLabel != null ? appLabel.toString() : null);
+        dest.writeString(appLabel);
         dest.writeParcelable(originatingUri, flags);
         dest.writeParcelable(referrerUri, flags);
         dest.writeString(abiOverride);

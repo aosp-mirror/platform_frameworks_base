@@ -61,6 +61,12 @@ public class Process {
     public static final String SECONDARY_ZYGOTE_SOCKET = "zygote_secondary";
 
     /**
+     * Defines the root UID.
+     * @hide
+     */
+    public static final int ROOT_UID = 0;
+
+    /**
      * Defines the UID/GID under which system code runs.
      */
     public static final int SYSTEM_UID = 1000;

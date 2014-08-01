@@ -8519,9 +8519,11 @@ package android.content.pm {
     method public android.graphics.Bitmap getAppIcon();
     method public java.lang.CharSequence getAppLabel();
     method public java.lang.String getAppPackageName();
+    method public android.content.Intent getDetailsIntent();
     method public java.lang.String getInstallerPackageName();
     method public float getProgress();
     method public int getSessionId();
+    method public boolean isOpen();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
   }
@@ -8535,7 +8537,6 @@ package android.content.pm {
     method public void setInstallLocation(int);
     method public void setOriginatingUri(android.net.Uri);
     method public void setReferrerUri(android.net.Uri);
-    method public void setSignatures(android.content.pm.Signature[]);
     method public void setSize(long);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
@@ -8651,6 +8652,8 @@ package android.content.pm {
     method public android.content.pm.PackageInstaller.Session openSession(int);
     method public void removeSessionCallback(android.content.pm.PackageInstaller.SessionCallback);
     method public void uninstall(java.lang.String, android.content.pm.PackageInstaller.UninstallCallback);
+    field public static final java.lang.String ACTION_SESSION_DETAILS = "android.content.pm.action.SESSION_DETAILS";
+    field public static final java.lang.String EXTRA_SESSION_ID = "android.content.pm.extra.SESSION_ID";
   }
 
   public static abstract class PackageInstaller.CommitCallback {
@@ -8670,14 +8673,18 @@ package android.content.pm {
     method public void close();
     method public void commit(android.content.pm.PackageInstaller.CommitCallback);
     method public void fsync(java.io.OutputStream) throws java.io.IOException;
+    method public java.lang.String[] list();
+    method public java.io.InputStream openRead(java.lang.String) throws java.io.IOException;
     method public java.io.OutputStream openWrite(java.lang.String, long, long) throws java.io.IOException;
     method public void setProgress(float);
   }
 
   public static abstract class PackageInstaller.SessionCallback {
     ctor public PackageInstaller.SessionCallback();
+    method public abstract void onClosed(int);
     method public abstract void onCreated(int);
     method public abstract void onFinished(int, boolean);
+    method public abstract void onOpened(int);
     method public abstract void onProgressChanged(int, float);
   }
 
