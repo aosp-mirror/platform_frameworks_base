@@ -78,6 +78,12 @@ public class NotificationPanelView extends PanelView implements
     private boolean mQsTracking;
 
     /**
+     * Handles launching the secure camera properly even when other applications may be using the
+     * camera hardware.
+     */
+    private SecureCameraLaunchManager mSecureCameraLaunchManager;
+
+    /**
      * If set, the ongoing touch gesture might both trigger the expansion in {@link PanelView} and
      * the expansion for quick settings.
      */
@@ -174,6 +180,8 @@ public class NotificationPanelView extends PanelView implements
                 android.R.interpolator.fast_out_linear_in);
         mKeyguardBottomArea = (KeyguardBottomAreaView) findViewById(R.id.keyguard_bottom_area);
         mAfforanceHelper = new KeyguardAffordanceHelper(this, getContext());
+        mSecureCameraLaunchManager =
+                new SecureCameraLaunchManager(getContext(), mKeyguardBottomArea);
     }
 
     @Override
@@ -216,6 +224,16 @@ public class NotificationPanelView extends PanelView implements
             positionClockAndNotifications();
             mNotificationStackScroller.setStackHeight(getExpandedHeight());
         }
+    }
+
+    @Override
+    public void onAttachedToWindow() {
+        mSecureCameraLaunchManager.create();
+    }
+
+    @Override
+    public void onDetachedFromWindow() {
+        mSecureCameraLaunchManager.destroy();
     }
 
     /**
@@ -1271,7 +1289,7 @@ public class NotificationPanelView extends PanelView implements
         if (start) {
             mKeyguardBottomArea.launchPhone();
         } else {
-            mKeyguardBottomArea.launchCamera();
+            mSecureCameraLaunchManager.startSecureCameraLaunch();
         }
         mBlockTouches = true;
     }
@@ -1336,6 +1354,7 @@ public class NotificationPanelView extends PanelView implements
 
     @Override
     public void onSwipingStarted() {
+        mSecureCameraLaunchManager.onSwipingStarted();
         requestDisallowInterceptTouchEvent(true);
         mOnlyAffordanceInThisMotion = true;
     }
