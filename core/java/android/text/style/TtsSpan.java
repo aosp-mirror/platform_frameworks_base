@@ -518,7 +518,7 @@ public class TtsSpan implements ParcelableSpan {
      * This class uses generics so methods from this class can return instances
      * of its child classes, resulting in a fluent API (CRTP pattern).
      */
-    public static abstract class Builder<C extends Builder<C>> {
+    public static class Builder<C extends Builder<?>> {
         // Holds the type of this class.
         private final String mType;
 
@@ -580,7 +580,7 @@ public class TtsSpan implements ParcelableSpan {
      * this builder like {@link TtsSpan.TextBuilder} and
      * {@link TtsSpan.CardinalBuilder} are likely more useful.
      */
-    public static class SemioticClassBuilder<C extends SemioticClassBuilder<C>>
+    public static class SemioticClassBuilder<C extends SemioticClassBuilder<?>>
             extends Builder<C> {
 
         public SemioticClassBuilder(String type) {
