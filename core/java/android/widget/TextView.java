@@ -658,6 +658,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         float dx = 0, dy = 0, r = 0;
         boolean elegant = false;
         float letterSpacing = 0;
+        String fontFeatureSettings = null;
 
         final Resources.Theme theme = context.getTheme();
 
@@ -741,6 +742,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                 case com.android.internal.R.styleable.TextAppearance_letterSpacing:
                     letterSpacing = appearance.getFloat(attr, 0);
+                    break;
+
+                case com.android.internal.R.styleable.TextAppearance_fontFeatureSettings:
+                    fontFeatureSettings = appearance.getString(attr);
                     break;
                 }
             }
@@ -1087,6 +1092,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             case com.android.internal.R.styleable.TextView_letterSpacing:
                 letterSpacing = a.getFloat(attr, 0);
                 break;
+
+            case com.android.internal.R.styleable.TextView_fontFeatureSettings:
+                fontFeatureSettings = a.getString(attr);
+                break;
             }
         }
         a.recycle();
@@ -1269,6 +1278,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         setRawTextSize(textSize);
         setElegantTextHeight(elegant);
         setLetterSpacing(letterSpacing);
+        setFontFeatureSettings(fontFeatureSettings);
 
         if (allCaps) {
             setTransformationMethod(new AllCapsTransformationMethod(getContext()));
@@ -2502,6 +2512,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 com.android.internal.R.styleable.TextAppearance_letterSpacing, 0));
         }
 
+        if (appearance.hasValue(com.android.internal.R.styleable.TextAppearance_fontFeatureSettings)) {
+            setFontFeatureSettings(appearance.getString(
+                com.android.internal.R.styleable.TextAppearance_fontFeatureSettings));
+        }
+
         appearance.recycle();
     }
 
@@ -2686,6 +2701,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * This will normally be 0.
      *
      * @see #setLetterSpacing(float)
+     * @see Paint#setLetterSpacing
      * @hide
      */
     public float getLetterSpacing() {
@@ -2697,7 +2713,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * for slight expansion will be around 0.05.  Negative values tighten text.
      *
      * @see #getLetterSpacing()
-     * @see Paint#setFlags
+     * @see Paint#getLetterSpacing
      *
      * @attr ref android.R.styleable#TextView_letterSpacing
      * @hide
@@ -2706,6 +2722,41 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public void setLetterSpacing(float letterSpacing) {
         if (letterSpacing != mTextPaint.getLetterSpacing()) {
             mTextPaint.setLetterSpacing(letterSpacing);
+
+            if (mLayout != null) {
+                nullLayouts();
+                requestLayout();
+                invalidate();
+            }
+        }
+    }
+
+    /**
+     * @return the currently set font feature settings.  Default is null.
+     *
+     * @see #setFontFeatureSettings(String)
+     * @see Paint#setFontFeatureSettings
+     * @hide
+     */
+    public String getFontFeatureSettings() {
+        return mTextPaint.getFontFeatureSettings();
+    }
+
+    /**
+     * Sets font feature settings.  The format is the same as the CSS
+     * font-feature-settings attribute:
+     * http://dev.w3.org/csswg/css-fonts/#propdef-font-feature-settings
+     *
+     * @see #getFontFeatureSettings()
+     * @see Paint#getFontFeatureSettings
+     *
+     * @attr ref android.R.styleable#TextView_fontFeatureSettings
+     * @hide
+     */
+    @android.view.RemotableViewMethod
+    public void setFontFeatureSettings(String fontFeatureSettings) {
+        if (fontFeatureSettings != mTextPaint.getFontFeatureSettings()) {
+            mTextPaint.setFontFeatureSettings(fontFeatureSettings);
 
             if (mLayout != null) {
                 nullLayouts();

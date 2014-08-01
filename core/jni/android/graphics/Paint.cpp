@@ -430,9 +430,9 @@ public:
 
     static void setFontFeatureSettings(JNIEnv* env, jobject clazz, jlong paintHandle, jstring settings) {
         Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-        if (!settings)
+        if (!settings) {
             paint->setFontFeatureSettings(std::string());
-        else {
+        } else {
             ScopedUtfChars settingsChars(env, settings);
             paint->setFontFeatureSettings(std::string(settingsChars.c_str(), settingsChars.size()));
         }

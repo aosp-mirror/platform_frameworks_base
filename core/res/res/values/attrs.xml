@@ -3784,6 +3784,8 @@
         <attr name="elegantTextHeight" format="boolean" />
         <!-- Text letter-spacing. -->
         <attr name="letterSpacing" format="float" />
+        <!-- Font feature settings. -->
+        <attr name="fontFeatureSettings" format="string" />
     </declare-styleable>
     <declare-styleable name="TextClock">
         <!-- Specifies the formatting pattern used to show the time and/or date
@@ -4079,6 +4081,8 @@
         <attr name="elegantTextHeight" />
         <!-- Text letter-spacing. -->
         <attr name="letterSpacing" />
+        <!-- Font feature settings. -->
+        <attr name="fontFeatureSettings" />
     </declare-styleable>
     <declare-styleable name="TextViewAppearance">
         <!-- Base text color, typeface, size, and style. -->
