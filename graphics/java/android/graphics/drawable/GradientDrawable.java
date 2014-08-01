@@ -1413,6 +1413,7 @@ public class GradientDrawable extends Drawable {
     public void getOutline(Outline outline) {
         final GradientState st = mGradientState;
         final Rect bounds = getBounds();
+        outline.setAlpha(mAlpha / 255.0f);
 
         switch (st.mShape) {
             case RECTANGLE:

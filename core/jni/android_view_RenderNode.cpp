@@ -140,18 +140,19 @@ static jboolean android_view_RenderNode_setProjectionReceiver(JNIEnv* env,
 
 static jboolean android_view_RenderNode_setOutlineRoundRect(JNIEnv* env,
         jobject clazz, jlong renderNodePtr, jint left, jint top,
-        jint right, jint bottom, jfloat radius) {
+        jint right, jint bottom, jfloat radius, jfloat alpha) {
     RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
-    renderNode->mutateStagingProperties().mutableOutline().setRoundRect(left, top, right, bottom, radius);
+    renderNode->mutateStagingProperties().mutableOutline().setRoundRect(left, top, right, bottom,
+            radius, alpha);
     renderNode->setPropertyFieldsDirty(RenderNode::GENERIC);
     return true;
 }
 
 static jboolean android_view_RenderNode_setOutlineConvexPath(JNIEnv* env,
-        jobject clazz, jlong renderNodePtr, jlong outlinePathPtr) {
+        jobject clazz, jlong renderNodePtr, jlong outlinePathPtr, jfloat alpha) {
     RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
     SkPath* outlinePath = reinterpret_cast<SkPath*>(outlinePathPtr);
-    renderNode->mutateStagingProperties().mutableOutline().setConvexPath(outlinePath);
+    renderNode->mutateStagingProperties().mutableOutline().setConvexPath(outlinePath, alpha);
     renderNode->setPropertyFieldsDirty(RenderNode::GENERIC);
     return true;
 }
@@ -480,8 +481,8 @@ static JNINativeMethod gMethods[] = {
     { "nSetProjectBackwards",  "(JZ)Z",  (void*) android_view_RenderNode_setProjectBackwards },
     { "nSetProjectionReceiver","(JZ)Z",  (void*) android_view_RenderNode_setProjectionReceiver },
 
-    { "nSetOutlineRoundRect",  "(JIIIIF)Z", (void*) android_view_RenderNode_setOutlineRoundRect },
-    { "nSetOutlineConvexPath", "(JJ)Z",  (void*) android_view_RenderNode_setOutlineConvexPath },
+    { "nSetOutlineRoundRect",  "(JIIIIFF)Z", (void*) android_view_RenderNode_setOutlineRoundRect },
+    { "nSetOutlineConvexPath", "(JJF)Z", (void*) android_view_RenderNode_setOutlineConvexPath },
     { "nSetOutlineEmpty",      "(J)Z",   (void*) android_view_RenderNode_setOutlineEmpty },
     { "nSetOutlineNone",       "(J)Z",   (void*) android_view_RenderNode_setOutlineNone },
     { "nSetClipToOutline",     "(JZ)Z",  (void*) android_view_RenderNode_setClipToOutline },

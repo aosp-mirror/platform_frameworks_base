@@ -25,7 +25,8 @@ import android.graphics.drawable.Drawable;
 public abstract class ViewOutlineProvider {
     /**
      * Default outline provider for Views, which queries the Outline from the View's background,
-     * or returns <code>false</code> if the View does not have a background.
+     * or generates a 0 alpha, rectangular Outline the size of the View if a background
+     * isn't present.
      *
      * @see Drawable#getOutline(Outline)
      */
@@ -35,6 +36,10 @@ public abstract class ViewOutlineProvider {
             Drawable background = view.getBackground();
             if (background != null) {
                 background.getOutline(outline);
+            } else {
+
+                outline.setRect(0, 0, view.getWidth(), view.getHeight());
+                outline.setAlpha(0.0f);
             }
         }
     };

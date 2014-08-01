@@ -33,7 +33,7 @@ public:
             , mPatchSize(0)
             , mHasInsets(false)
             , mOutlineRadius(0)
-            , mOutlineFilled(false) {
+            , mOutlineAlpha(0) {
         memset(mOpticalInsets, 0, 4 * sizeof(int32_t));
         memset(mOutlineInsets, 0, 4 * sizeof(int32_t));
     }
@@ -50,7 +50,7 @@ public:
     int32_t mOpticalInsets[4];
     int32_t mOutlineInsets[4];
     float mOutlineRadius;
-    bool mOutlineFilled;
+    uint8_t mOutlineAlpha;
 };
 
 #endif // NinePatchPeeker_h
