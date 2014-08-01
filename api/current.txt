@@ -27513,7 +27513,6 @@ package android.service.voice {
     field public static final int RECOGNITION_MODE_USER_IDENTIFICATION = 2; // 0x2
     field public static final int RECOGNITION_MODE_VOICE_TRIGGER = 1; // 0x1
     field public static final int STATE_HARDWARE_UNAVAILABLE = -2; // 0xfffffffe
-    field public static final int STATE_INVALID = -3; // 0xfffffffd
     field public static final int STATE_KEYPHRASE_ENROLLED = 2; // 0x2
     field public static final int STATE_KEYPHRASE_UNENROLLED = 1; // 0x1
     field public static final int STATE_KEYPHRASE_UNSUPPORTED = -1; // 0xffffffff
