@@ -32,11 +32,14 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.UserInfo;
+import android.database.ContentObserver;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.Settings;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
@@ -57,12 +60,15 @@ public class UserSwitcherController {
 
     private static final String TAG = "UserSwitcherController";
     private static final boolean DEBUG = false;
+    private static final String SIMPLE_USER_SWITCHER_GLOBAL_SETTING =
+            "lockscreenSimpleUserSwitcher";
 
     private final Context mContext;
     private final UserManager mUserManager;
     private final ArrayList<WeakReference<BaseUserAdapter>> mAdapters = new ArrayList<>();
     private final GuestResumeSessionReceiver mGuestResumeSessionReceiver
             = new GuestResumeSessionReceiver();
+    private boolean mSimpleUserSwitcher;
 
     private ArrayList<UserRecord> mUsers = new ArrayList<>();
     private Dialog mExitGuestDialog;
@@ -80,6 +86,13 @@ public class UserSwitcherController {
         filter.addAction(Intent.ACTION_USER_STOPPING);
         mContext.registerReceiverAsUser(mReceiver, UserHandle.OWNER, filter,
                 null /* permission */, null /* scheduler */);
+
+        mSimpleUserSwitcher = Settings.Global.getInt(context.getContentResolver(),
+                SIMPLE_USER_SWITCHER_GLOBAL_SETTING, 0) != 0;
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Global.getUriFor(SIMPLE_USER_SWITCHER_GLOBAL_SETTING), true,
+                mSimpleUserSwitcherObserver);
+
         refreshUsers(UserHandle.USER_NULL);
     }
 
@@ -136,11 +149,13 @@ public class UserSwitcherController {
                     }
                 }
 
-                if (guestRecord == null) {
-                    records.add(new UserRecord(null /* info */, null /* picture */,
-                            true /* isGuest */, false /* isCurrent */));
-                } else {
-                    records.add(guestRecord);
+                if (!mSimpleUserSwitcher) {
+                    if (guestRecord == null) {
+                        records.add(new UserRecord(null /* info */, null /* picture */,
+                                true /* isGuest */, false /* isCurrent */));
+                    } else {
+                        records.add(guestRecord);
+                    }
                 }
 
                 return records;
@@ -165,6 +180,10 @@ public class UserSwitcherController {
                 mAdapters.remove(i);
             }
         }
+    }
+
+    public boolean isSimpleUserSwitcher() {
+        return mSimpleUserSwitcher;
     }
 
     public void switchTo(UserRecord record) {
@@ -251,6 +270,14 @@ public class UserSwitcherController {
             }
             refreshUsers(forcePictureLoadForId);
         }
+    };
+
+    private final ContentObserver mSimpleUserSwitcherObserver = new ContentObserver(new Handler()) {
+        public void onChange(boolean selfChange) {
+            mSimpleUserSwitcher = Settings.Global.getInt(mContext.getContentResolver(),
+                    SIMPLE_USER_SWITCHER_GLOBAL_SETTING, 0) != 0;
+            refreshUsers(UserHandle.USER_NULL);
+        };
     };
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
