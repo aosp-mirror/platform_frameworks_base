@@ -101,12 +101,12 @@ final class RoutingControlAction extends FeatureAction {
             // If the routing path doesn't belong to the currently active one, we should
             // ignore it since it might have come from other routing change sequence.
             int routingPath = HdmiUtils.twoBytesToInt(params);
-            if (HdmiUtils.isInActiveRoutingPath(mCurrentRoutingPath, routingPath)) {
+            if (!HdmiUtils.isInActiveRoutingPath(mCurrentRoutingPath, routingPath)) {
                 return true;
             }
             mCurrentRoutingPath = routingPath;
             // Stop possible previous routing change sequence if in progress.
-            removeAction(RoutingControlAction.class);
+            removeActionExcept(RoutingControlAction.class, this);
             addTimer(mState, TIMEOUT_ROUTING_INFORMATION_MS);
             return true;
         } else if (mState == STATE_WAIT_FOR_REPORT_POWER_STATUS

@@ -71,18 +71,16 @@ final class ActiveSourceHandler {
             tv.startNewDeviceAction(newActive);
         }
 
-        ActiveSource current = tv.getActiveSource();
         if (!tv.isProhibitMode()) {
             tv.updateActiveSource(newActive);
-            if (!current.equals(newActive)) {
-                boolean notifyInputChange = (mCallback == null);
-                tv.updateActiveInput(newActive.physicalAddress, notifyInputChange);
-            }
+            boolean notifyInputChange = (mCallback == null);
+            tv.updateActiveInput(newActive.physicalAddress, notifyInputChange);
             invokeCallback(HdmiControlManager.RESULT_SUCCESS);
         } else {
             // TV is in a mode that should keep its current source/input from
             // being changed for its operation. Reclaim the active source
             // or switch the port back to the one used for the current mode.
+            ActiveSource current = tv.getActiveSource();
             if (current.logicalAddress == getSourceAddress()) {
                 HdmiCecMessage activeSourceCommand = HdmiCecMessageBuilder.buildActiveSource(
                         current.logicalAddress, current.physicalAddress);

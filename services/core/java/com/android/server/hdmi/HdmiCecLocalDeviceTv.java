@@ -238,9 +238,9 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         if (path == getActivePath()) {
             return;
         }
+        setPrevPortId(getActivePortId());
         int portId = mService.pathToPortId(path);
         setActivePath(path);
-        setPrevPortId(portId);
         // TODO: Handle PAP/PIP case.
         // Show OSD port change banner
         if (notifyInputChange) {
@@ -440,9 +440,10 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         if (isTailOfActivePath(path, getActivePath())) {
             removeAction(RoutingControlAction.class);
             int newPath = mService.portIdToPath(getActivePortId());
+            setActivePath(newPath);
             mService.sendCecCommand(HdmiCecMessageBuilder.buildRoutingChange(
                     mAddress, getActivePath(), newPath));
-            addAndStartAction(new RoutingControlAction(this, getActivePortId(), false, null));
+            addAndStartAction(new RoutingControlAction(this, newPath, false, null));
         }
     }
 
