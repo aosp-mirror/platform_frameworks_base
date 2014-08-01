@@ -93,7 +93,7 @@ public class IccOpenLogicalChannelResponse implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(mChannel);
         out.writeInt(mStatus);
-        if (mSelectResponse != null & mSelectResponse.length > 0) {
+        if (mSelectResponse != null && mSelectResponse.length > 0) {
             out.writeInt(mSelectResponse.length);
             out.writeByteArray(mSelectResponse);
         } else {
