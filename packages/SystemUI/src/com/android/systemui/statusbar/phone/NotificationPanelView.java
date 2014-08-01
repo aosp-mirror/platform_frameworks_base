@@ -1424,6 +1424,14 @@ public class NotificationPanelView extends PanelView implements
         return mQsExpanded;
     }
 
+    public boolean isQsDetailShowing() {
+        return mQsPanel.isShowingDetail();
+    }
+
+    public void closeQsDetail() {
+        mQsPanel.closeDetail();
+    }
+
     @Override
     public boolean shouldDelayChildPressedState() {
         return true;
