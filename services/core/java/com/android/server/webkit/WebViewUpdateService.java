@@ -117,7 +117,7 @@ public class WebViewUpdateService extends SystemService {
 
             final long NS_PER_MS = 1000000;
             final long timeoutTimeMs = System.nanoTime() / NS_PER_MS + WAIT_TIMEOUT_MS;
-            boolean relroReady = false;
+            boolean relroReady = (is64Bit ? mRelroReady64Bit : mRelroReady32Bit);
             synchronized (WebViewUpdateService.this) {
                 while (!relroReady) {
                     final long timeNowMs = System.nanoTime() / NS_PER_MS;
