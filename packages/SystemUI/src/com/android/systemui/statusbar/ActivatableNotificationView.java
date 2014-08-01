@@ -43,7 +43,6 @@ import android.view.animation.LinearInterpolator;
 import android.view.animation.PathInterpolator;
 
 import com.android.systemui.R;
-import com.android.systemui.statusbar.stack.StackStateAnimator;
 
 /**
  * Base class for both {@link ExpandableNotificationRow} and {@link NotificationOverflowContainer}
@@ -449,19 +448,20 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     }
 
     @Override
-    public void performRemoveAnimation(float translationDirection, Runnable onFinishedRunnable) {
+    public void performRemoveAnimation(long duration, float translationDirection,
+            Runnable onFinishedRunnable) {
         enableAppearDrawing(true);
         if (mDrawingAppearAnimation) {
             startAppearAnimation(false /* isAppearing */, translationDirection,
-                    0, onFinishedRunnable);
+                    0, duration, onFinishedRunnable);
         }
     }
 
     @Override
-    public void performAddAnimation(long delay) {
+    public void performAddAnimation(long delay, long duration) {
         enableAppearDrawing(true);
         if (mDrawingAppearAnimation) {
-            startAppearAnimation(true /* isAppearing */, -1.0f, delay, null);
+            startAppearAnimation(true /* isAppearing */, -1.0f, delay, duration, null);
         }
     }
 
@@ -470,8 +470,8 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         mScrimView.setAlpha(scrimAmount);
     }
 
-    private void startAppearAnimation(boolean isAppearing,
-            float translationDirection, long delay, final Runnable onFinishedRunnable) {
+    private void startAppearAnimation(boolean isAppearing, float translationDirection, long delay,
+            long duration, final Runnable onFinishedRunnable) {
         if (mAppearAnimator != null) {
             mAppearAnimator.cancel();
         }
@@ -501,8 +501,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
                 targetValue);
         mAppearAnimator.setInterpolator(mLinearInterpolator);
         mAppearAnimator.setDuration(
-                (long) (StackStateAnimator.ANIMATION_DURATION_APPEAR_DISAPPEAR
-                        * Math.abs(mAppearAnimationFraction - targetValue)));
+                (long) (duration * Math.abs(mAppearAnimationFraction - targetValue)));
         mAppearAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {

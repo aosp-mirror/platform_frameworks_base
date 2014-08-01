@@ -133,6 +133,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private boolean mDimmedNeedsAnimation;
     private boolean mDarkNeedsAnimation;
     private boolean mActivateNeedsAnimation;
+    private boolean mGoToFullShadeNeedsAnimation;
     private boolean mIsExpanded = true;
     private boolean mChildrenUpdateRequested;
     private SpeedBumpView mSpeedBumpView;
@@ -1214,6 +1215,9 @@ public class NotificationStackScrollLayout extends ViewGroup
                 count++;
             }
         }
+        if (mDismissView.willBeGone()) {
+            count--;
+        }
         return count;
     }
 
@@ -1573,6 +1577,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         generateActivateEvent();
         generateDimmedEvent();
         generateDarkEvent();
+        generateGoToFullShadeEvent();
         mNeedsAnimation = false;
     }
 
@@ -1654,6 +1659,14 @@ public class NotificationStackScrollLayout extends ViewGroup
                     new AnimationEvent(null, AnimationEvent.ANIMATION_TYPE_DARK));
         }
         mDarkNeedsAnimation = false;
+    }
+
+    private void generateGoToFullShadeEvent() {
+        if (mGoToFullShadeNeedsAnimation) {
+            mAnimationEvents.add(
+                    new AnimationEvent(null, AnimationEvent.ANIMATION_TYPE_GO_TO_FULL_SHADE));
+        }
+        mGoToFullShadeNeedsAnimation = false;
     }
 
     private boolean onInterceptTouchEventScroll(MotionEvent ev) {
@@ -1923,7 +1936,6 @@ public class NotificationStackScrollLayout extends ViewGroup
                     generateAddAnimation(mSpeedBumpView);
                 }
             } else {
-                mSpeedBumpView.performVisibilityAnimation(false);
                 generateRemoveAnimation(mSpeedBumpView);
             }
         }
@@ -1932,6 +1944,9 @@ public class NotificationStackScrollLayout extends ViewGroup
     public void goToFullShade() {
         updateSpeedBump(true /* visibility */);
         mDismissView.setInvisible();
+        mGoToFullShadeNeedsAnimation = true;
+        mNeedsAnimation =  true;
+        requestChildrenUpdate();
     }
 
     public void cancelExpandHelper() {
@@ -2128,6 +2143,16 @@ public class NotificationStackScrollLayout extends ViewGroup
                 // ANIMATION_TYPE_DARK
                 new AnimationFilter()
                         .animateDark(),
+
+                // ANIMATION_TYPE_GO_TO_FULL_SHADE
+                new AnimationFilter()
+                        .animateAlpha()
+                        .animateHeight()
+                        .animateTopInset()
+                        .animateY()
+                        .animateDimmed()
+                        .animateScale()
+                        .animateZ(),
         };
 
         static int[] LENGTHS = new int[] {
@@ -2161,6 +2186,9 @@ public class NotificationStackScrollLayout extends ViewGroup
 
                 // ANIMATION_TYPE_DARK
                 StackStateAnimator.ANIMATION_DURATION_STANDARD,
+
+                // ANIMATION_TYPE_GO_TO_FULL_SHADE
+                StackStateAnimator.ANIMATION_DURATION_GO_TO_FULL_SHADE,
         };
 
         static final int ANIMATION_TYPE_ADD = 0;
@@ -2173,6 +2201,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         static final int ANIMATION_TYPE_DIMMED = 7;
         static final int ANIMATION_TYPE_CHANGE_POSITION = 8;
         static final int ANIMATION_TYPE_DARK = 9;
+        static final int ANIMATION_TYPE_GO_TO_FULL_SHADE = 10;
 
         final long eventStartTime;
         final View changingView;
@@ -2193,13 +2222,18 @@ public class NotificationStackScrollLayout extends ViewGroup
          * Combines the length of several animation events into a single value.
          *
          * @param events The events of the lengths to combine.
-         * @return The combined length. This is just the maximum of all length.
+         * @return The combined length. Depending on the event types, this might be the maximum of
+         *         all events or the length of a specific event.
          */
         static long combineLength(ArrayList<AnimationEvent> events) {
             long length = 0;
             int size = events.size();
             for (int i = 0; i < size; i++) {
-                length = Math.max(length, events.get(i).length);
+                AnimationEvent event = events.get(i);
+                length = Math.max(length, event.length);
+                if (event.animationType == ANIMATION_TYPE_GO_TO_FULL_SHADE) {
+                    return event.length;
+                }
             }
             return length;
         }

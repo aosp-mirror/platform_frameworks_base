@@ -113,12 +113,15 @@ public class SpeedBumpView extends ExpandableView {
     }
 
     @Override
-    public void performRemoveAnimation(float translationDirection, Runnable onFinishedRunnable) {
+    public void performRemoveAnimation(long duration, float translationDirection,
+            Runnable onFinishedRunnable) {
+        // TODO: Use duration
         performVisibilityAnimation(false);
     }
 
     @Override
-    public void performAddAnimation(long delay) {
+    public void performAddAnimation(long delay, long duration) {
+        // TODO: Use delay and duration
         performVisibilityAnimation(true);
     }
 
