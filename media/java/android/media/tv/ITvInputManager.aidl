@@ -56,7 +56,7 @@ interface ITvInputManager {
     void dispatchSurfaceChanged(in IBinder sessionToken, int format, int width, int height,
             int userId);
     void setVolume(in IBinder sessionToken, float volume, int userId);
-    void tune(in IBinder sessionToken, in Uri channelUri, int userId);
+    void tune(in IBinder sessionToken, in Uri channelUri, in Bundle params, int userId);
     void setCaptionEnabled(in IBinder sessionToken, boolean enabled, int userId);
     void selectTrack(in IBinder sessionToken, in TvTrackInfo track, int userId);
     void unselectTrack(in IBinder sessionToken, in TvTrackInfo track, int userId);
