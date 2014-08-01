@@ -57,7 +57,7 @@ public final class SignalTileView extends QSTileView {
         mSignal = new ImageView(mContext);
         mIconFrame.addView(mSignal);
         mOverlay = new ImageView(mContext);
-        mIconFrame.addView(mOverlay);
+        mIconFrame.addView(mOverlay, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
         return mIconFrame;
     }
 
