@@ -429,6 +429,11 @@ public class AudioRecord
         // To update when supporting compressed formats
         int frameSizeInBytes = mChannelCount
             * (AudioFormat.getBytesPerSample(mAudioFormat));
+        //overwrite frameSizeInBytes for compress voip
+        if ((mRecordSource == MediaRecorder.AudioSource.VOICE_COMMUNICATION) &&
+            (mAudioFormat != AudioFormat.ENCODING_PCM_16BIT)) {
+            frameSizeInBytes = mChannelCount * 1;
+        }
         if ((audioBufferSize % frameSizeInBytes != 0) || (audioBufferSize < 1)) {
             throw new IllegalArgumentException("Invalid audio buffer size.");
         }

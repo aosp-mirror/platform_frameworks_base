@@ -183,8 +183,6 @@ android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
          ALOGE("Error creating AudioRecord: frameCount is 0.");
         return (jint) AUDIORECORD_ERROR_SETUP_ZEROFRAMECOUNT;
     }
-    size_t frameSize = channelCount * bytesPerSample;
-    size_t frameCount = buffSizeInBytes / frameSize;
 
     jclass clazz = env->GetObjectClass(thiz);
     if (clazz == NULL) {
@@ -220,12 +218,23 @@ android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
     env->ReleaseStringUTFChars(jtags, tags);
     paa->source = (audio_source_t) env->GetIntField(jaa, javaAudioAttrFields.fieldRecSource);
     paa->flags = (audio_flags_mask_t)env->GetIntField(jaa, javaAudioAttrFields.fieldFlags);
+
+    //overwrite bytesPerSample for compress VOIP use cases
+    if ((paa->source == AUDIO_SOURCE_VOICE_COMMUNICATION) &&
+        (format != AUDIO_FORMAT_PCM_16_BIT)) {
+        bytesPerSample = sizeof(uint8_t);
+    }
+
+    size_t frameSize = channelCount * bytesPerSample;
+    size_t frameCount = buffSizeInBytes / frameSize;
+
     ALOGV("AudioRecord_setup for source=%d tags=%s flags=%08x", paa->source, paa->tags, paa->flags);
 
     audio_input_flags_t flags = AUDIO_INPUT_FLAG_NONE;
     if (paa->flags & AUDIO_FLAG_HW_HOTWORD) {
         flags = AUDIO_INPUT_FLAG_HW_HOTWORD;
     }
+
     // create the callback information:
     // this data will be passed with every AudioRecord callback
     audiorecord_callback_cookie *lpCallbackData = new audiorecord_callback_cookie;
