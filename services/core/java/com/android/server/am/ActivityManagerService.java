@@ -3639,7 +3639,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     //explicitly remove thd old information in mRecentTasks when removing existing user.
-    private void removeRecentTaskLocked(int userId) {
+    private void removeRecentTasksForUser(int userId) {
         if(userId <= 0) {
             Slog.i(TAG, "Can't remove recent task on user " + userId);
             return;
@@ -3649,11 +3649,14 @@ public final class ActivityManagerService extends ActivityManagerNative
             TaskRecord tr = mRecentTasks.get(i);
             if (tr.userId == userId) {
                 if(DEBUG_TASKS) Slog.i(TAG, "remove RecentTask " + tr
-                                          + " when finishing user" + userId);
+                        + " when finishing user" + userId);
                 tr.disposeThumbnail();
                 mRecentTasks.remove(i);
             }
         }
+
+        // Remove tasks from persistent storage.
+        mTaskPersister.wakeup(null, true);
     }
 
     final void addRecentTaskLocked(TaskRecord task) {
@@ -17658,9 +17661,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // Kill all the processes for the user.
                 forceStopUserLocked(userId, "finish user");
             }
-            //explicitly remove the old information in mRecentTasks when removing existing user.
-            removeRecentTaskLocked(userId);
         }
+
+        // Explicitly remove the old information in mRecentTasks.
+        removeRecentTasksForUser(userId);
 
         for (int i=0; i<callbacks.size(); i++) {
             try {
