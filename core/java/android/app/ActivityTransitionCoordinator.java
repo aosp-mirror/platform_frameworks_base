@@ -196,7 +196,7 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
     final protected ArrayList<View> mSharedElements = new ArrayList<View>();
     final protected ArrayList<String> mSharedElementNames = new ArrayList<String>();
     final protected ArrayList<View> mTransitioningViews = new ArrayList<View>();
-    final protected SharedElementListener mListener;
+    protected SharedElementListener mListener;
     protected ResultReceiver mResultReceiver;
     final private FixedEpicenterCallback mEpicenterCallback = new FixedEpicenterCallback();
     final protected boolean mIsReturning;
@@ -564,6 +564,7 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         mTransitioningViews.clear();
         mResultReceiver = null;
         mPendingTransition = null;
+        mListener = null;
     }
 
     protected long getFadeDuration() {
