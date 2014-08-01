@@ -25,8 +25,6 @@ public class Constants {
         public static final boolean Verbose = false;
 
         public static class App {
-            // Enables the simulated task affiliations
-            public static final boolean EnableSimulatedTaskGroups = false;
             // Enables the screenshot app->Recents transition
             public static final boolean EnableScreenshotAppTransition = false;
             // Enables the filtering of tasks according to their grouping
@@ -43,11 +41,15 @@ public class Constants {
             public static final boolean EnableShadows = true;
             // This disables the bitmap and icon caches
             public static final boolean DisableBackgroundCache = false;
-            // For debugging, this enables us to create mock recents tasks
+            // Enables the simulated task affiliations
+            public static final boolean EnableSimulatedTaskGroups = false;
+            // Defines the number of mock task affiliations per group
+            public static final int TaskAffiliationsGroupCount = 12;
+            // Enables us to create mock recents tasks
             public static final boolean EnableSystemServicesProxy = false;
-            // For debugging, this defines the number of mock recents packages to create
+            // Defines the number of mock recents packages to create
             public static final int SystemServicesProxyMockPackageCount = 3;
-            // For debugging, this defines the number of mock recents tasks to create
+            // Defines the number of mock recents tasks to create
             public static final int SystemServicesProxyMockTaskCount = 100;
         }
     }

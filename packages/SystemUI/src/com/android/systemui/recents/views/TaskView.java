@@ -52,9 +52,11 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
 
     RecentsConfiguration mConfig;
 
+    float mTaskProgress;
+    ObjectAnimator mTaskProgressAnimator;
+    float mMaxDimScale;
     int mDim;
-    int mMaxDim;
-    AccelerateInterpolator mDimInterpolator = new AccelerateInterpolator();
+    AccelerateInterpolator mDimInterpolator = new AccelerateInterpolator(1.25f);
     PorterDuffColorFilter mDimColorFilter = new PorterDuffColorFilter(0, PorterDuff.Mode.MULTIPLY);
 
     Task mTask;
@@ -76,7 +78,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
             new ValueAnimator.AnimatorUpdateListener() {
                 @Override
                 public void onAnimationUpdate(ValueAnimator animation) {
-                    updateDimOverlayFromScale();
+                    setTaskProgress((Float) animation.getAnimatedValue());
                 }
             };
 
@@ -96,10 +98,11 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     public TaskView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         mConfig = RecentsConfiguration.getInstance();
-        mMaxDim = mConfig.taskStackMaxDim;
+        mMaxDimScale = mConfig.taskStackMaxDim / 255f;
         mClipViewInStack = true;
         mViewBounds = new AnimateableViewBounds(this, mConfig.taskViewRoundedCornerRadiusPx);
         setOutlineProvider(mViewBounds);
+        setTaskProgress(getTaskProgress());
         setDim(getDim());
     }
 
@@ -159,9 +162,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
 
     /** Synchronizes this view's properties with the task's transform */
     void updateViewPropertiesToTaskTransform(TaskViewTransform toTransform, int duration) {
-        // Update the bar view
-        mBarView.updateViewPropertiesToTaskTransform(toTransform, duration);
-
         // If we are a full screen view, then only update the Z to keep it in order
         // XXX: Also update/animate the dim as well
         if (mIsFullScreenView) {
@@ -173,8 +173,21 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         }
 
         // Apply the transform
-        toTransform.applyToTaskView(this, duration, mConfig.fastOutSlowInInterpolator, false,
-                mUpdateDimListener);
+        toTransform.applyToTaskView(this, duration, mConfig.fastOutSlowInInterpolator, false);
+
+        // Update the task progress
+        if (mTaskProgressAnimator != null) {
+            mTaskProgressAnimator.removeAllListeners();
+            mTaskProgressAnimator.cancel();
+        }
+        if (duration <= 0) {
+            setTaskProgress(toTransform.p);
+        } else {
+            mTaskProgressAnimator = ObjectAnimator.ofFloat(this, "taskProgress", toTransform.p);
+            mTaskProgressAnimator.setDuration(duration);
+            mTaskProgressAnimator.addUpdateListener(mUpdateDimListener);
+            mTaskProgressAnimator.start();
+        }
     }
 
     /** Resets this view's properties */
@@ -325,7 +338,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                         mThumbnailView.enableTaskBarClipAsRunnable(mBarView));
 
                 // Animate the dim into view as well
-                ObjectAnimator anim = ObjectAnimator.ofInt(this, "dim", getDimOverlayFromScale());
+                ObjectAnimator anim = ObjectAnimator.ofInt(this, "dim", getDimFromTaskProgress());
                 anim.setStartDelay(mConfig.taskBarEnterAnimDelay);
                 anim.setDuration(mConfig.taskBarEnterAnimDuration);
                 anim.setInterpolator(mConfig.fastOutLinearInInterpolator);
@@ -556,6 +569,17 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         }
     }
 
+    /** Sets the current task progress. */
+    public void setTaskProgress(float p) {
+        mTaskProgress = p;
+        updateDimFromTaskProgress();
+    }
+
+    /** Returns the current task progress. */
+    public float getTaskProgress() {
+        return mTaskProgress;
+    }
+
     /** Returns the current dim. */
     public void setDim(int dim) {
         mDim = dim;
@@ -571,17 +595,14 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     }
 
     /** Compute the dim as a function of the scale of this view. */
-    int getDimOverlayFromScale() {
-        float minScale = TaskStackViewLayoutAlgorithm.StackPeekMinScale;
-        float scaleRange = 1f - minScale;
-        float dim = (1f - getScaleX()) / scaleRange;
-        dim = mDimInterpolator.getInterpolation(Math.min(dim, 1f));
-        return Math.max(0, Math.min(mMaxDim, (int) (dim * 255)));
+    int getDimFromTaskProgress() {
+        float dim = mMaxDimScale * mDimInterpolator.getInterpolation(1f - mTaskProgress);
+        return (int) (dim * 255);
     }
 
     /** Update the dim as a function of the scale of this view. */
-    void updateDimOverlayFromScale() {
-        setDim(getDimOverlayFromScale());
+    void updateDimFromTaskProgress() {
+        setDim(getDimFromTaskProgress());
     }
 
     /**** View focus state ****/
@@ -650,9 +671,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
             }
             mBarView.rebindToTask(mTask);
             // Rebind any listeners
-            if (Constants.DebugFlags.App.EnableTaskFiltering) {
-                mBarView.mApplicationIcon.setOnClickListener(this);
-            }
+            mBarView.mApplicationIcon.setOnClickListener(this);
             mBarView.mDismissButton.setOnClickListener(this);
             if (mFooterView != null) {
                 mFooterView.setOnClickListener(this);
@@ -675,9 +694,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
             mThumbnailView.unbindFromTask();
             mBarView.unbindFromTask();
             // Unbind any listeners
-            if (Constants.DebugFlags.App.EnableTaskFiltering) {
-                mBarView.mApplicationIcon.setOnClickListener(null);
-            }
+            mBarView.mApplicationIcon.setOnClickListener(null);
             mBarView.mDismissButton.setOnClickListener(null);
             if (mFooterView != null) {
                 mFooterView.setOnClickListener(null);
@@ -717,7 +734,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         postDelayed(new Runnable() {
             @Override
             public void run() {
-                if (v == mBarView.mApplicationIcon) {
+                if (Constants.DebugFlags.App.EnableTaskFiltering && v == mBarView.mApplicationIcon) {
                     mCb.onTaskViewAppIconClicked(tv);
                 } else if (v == mBarView.mDismissButton) {
                     // Animate out the view and call the callback
@@ -729,7 +746,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                     });
                     // Hide the footer
                     tv.animateFooterVisibility(false, mConfig.taskViewRemoveAnimDuration);
-                } else if (v == tv || (v == mFooterView || v == mActionButtonView)) {
+                } else {
                     mCb.onTaskViewClicked(tv, tv.getTask(),
                             (v == mFooterView || v == mActionButtonView));
                 }

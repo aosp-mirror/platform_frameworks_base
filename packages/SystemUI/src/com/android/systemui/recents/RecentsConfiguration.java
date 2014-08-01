@@ -76,7 +76,7 @@ public class RecentsConfiguration {
     public int taskViewRemoveAnimDuration;
     public int taskViewRemoveAnimTranslationXPx;
     public int taskViewTranslationZMinPx;
-    public int taskViewTranslationZIncrementPx;
+    public int taskViewTranslationZMaxPx;
     public int taskViewRoundedCornerRadiusPx;
     public int taskViewHighlightPx;
     public int taskViewAffiliateGroupEnterOffsetPx;
@@ -208,8 +208,7 @@ public class RecentsConfiguration {
                 res.getDimensionPixelSize(R.dimen.recents_task_view_rounded_corners_radius);
         taskViewHighlightPx = res.getDimensionPixelSize(R.dimen.recents_task_view_highlight);
         taskViewTranslationZMinPx = res.getDimensionPixelSize(R.dimen.recents_task_view_z_min);
-        taskViewTranslationZIncrementPx =
-                res.getDimensionPixelSize(R.dimen.recents_task_view_z_increment);
+        taskViewTranslationZMaxPx = res.getDimensionPixelSize(R.dimen.recents_task_view_z_max);
         taskViewAffiliateGroupEnterOffsetPx =
                 res.getDimensionPixelSize(R.dimen.recents_task_view_affiliate_group_enter_offset);
 
