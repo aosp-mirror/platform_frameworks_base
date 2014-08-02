@@ -182,6 +182,7 @@ public class VoiceInteractionService extends Service {
     /**
      * Called during service de-initialization to tell you when the system is shutting the
      * service down.
+     * At this point this service may no longer be the active {@link VoiceInteractionService}.
      */
     public void onShutdown() {
     }

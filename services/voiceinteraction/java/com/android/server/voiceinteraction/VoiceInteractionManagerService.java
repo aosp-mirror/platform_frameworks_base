@@ -49,9 +49,6 @@ import com.android.server.UiThread;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.List;
-import java.util.UUID;
-
 
 /**
  * SystemService that publishes an IVoiceInteractionManagerService.
@@ -151,6 +148,7 @@ public class VoiceInteractionManagerService extends SystemService {
                 }
                 if (force || mImpl == null || mImpl.mUser != mCurUser
                         || !mImpl.mComponent.equals(serviceComponent)) {
+                    mSoundTriggerHelper.stopAllRecognitions();
                     if (mImpl != null) {
                         mImpl.shutdownLocked();
                     }
