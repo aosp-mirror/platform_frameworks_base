@@ -17,7 +17,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/system_primary_color"
+    android:background="@drawable/qs_detail_background"
     android:padding="16dp" >
 
     <TextView
