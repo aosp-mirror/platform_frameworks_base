@@ -19,37 +19,40 @@ package com.android.systemui.qs;
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorListenerAdapter;
+import android.graphics.drawable.TransitionDrawable;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 
-/** Helper for view-level circular clip animations. **/
-public class CircularClipper {
+/** Helper for quick settings detail panel clip animations. **/
+public class QSDetailClipper {
 
-    private final View mTarget;
+    private final View mDetail;
+    private final TransitionDrawable mBackground;
 
     private Animator mAnimator;
 
-    public CircularClipper(View target) {
-        mTarget = target;
+    public QSDetailClipper(View detail) {
+        mDetail = detail;
+        mBackground = (TransitionDrawable) detail.getBackground();
     }
 
     public void animateCircularClip(int x, int y, boolean in, AnimatorListener listener) {
         if (mAnimator != null) {
             mAnimator.cancel();
         }
-        final int w = mTarget.getWidth() - x;
-        final int h = mTarget.getHeight() - y;
+        final int w = mDetail.getWidth() - x;
+        final int h = mDetail.getHeight() - y;
         int r = (int) Math.ceil(Math.sqrt(x * x + y * y));
         r = (int) Math.max(r, Math.ceil(Math.sqrt(w * w + y * y)));
         r = (int) Math.max(r, Math.ceil(Math.sqrt(w * w + h * h)));
         r = (int) Math.max(r, Math.ceil(Math.sqrt(x * x + h * h)));
-
-        mAnimator = ViewAnimationUtils.createCircularReveal(mTarget, x, y, 0, r);
-        mAnimator.removeAllListeners();
+        mAnimator = ViewAnimationUtils.createCircularReveal(mDetail, x, y, 0, r);
+        mAnimator.setDuration((long)(mAnimator.getDuration() * 1.5));
         if (listener != null) {
             mAnimator.addListener(listener);
         }
         if (in) {
+            mBackground.startTransition((int)(mAnimator.getDuration() * 0.6));
             mAnimator.addListener(mVisibleOnStart);
             mAnimator.start();
         } else {
@@ -61,14 +64,20 @@ public class CircularClipper {
     private final AnimatorListenerAdapter mVisibleOnStart = new AnimatorListenerAdapter() {
         @Override
         public void onAnimationStart(Animator animation) {
-            mTarget.setVisibility(View.VISIBLE);
+            mDetail.setVisibility(View.VISIBLE);
+        }
+
+        public void onAnimationEnd(Animator animation) {
+            mAnimator = null;
         }
     };
 
     private final AnimatorListenerAdapter mGoneOnEnd = new AnimatorListenerAdapter() {
         @Override
         public void onAnimationEnd(Animator animation) {
-            mTarget.setVisibility(View.GONE);
+            mDetail.setVisibility(View.GONE);
+            mBackground.resetTransition();
+            mAnimator = null;
         };
     };
 }
