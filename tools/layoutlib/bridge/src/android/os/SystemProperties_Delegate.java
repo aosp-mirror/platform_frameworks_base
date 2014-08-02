@@ -48,4 +48,58 @@ public class SystemProperties_Delegate {
 
         return def;
     }
+    @LayoutlibDelegate
+    /*package*/ static int native_get_int(String key, int def) {
+        Map<String, String> properties = Bridge.getPlatformProperties();
+        String value = properties.get(key);
+        if (value != null) {
+            return Integer.decode(value);
+        }
+
+        return def;
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static long native_get_long(String key, long def) {
+        Map<String, String> properties = Bridge.getPlatformProperties();
+        String value = properties.get(key);
+        if (value != null) {
+            return Long.decode(value);
+        }
+
+        return def;
+    }
+
+    /**
+     * Values 'n', 'no', '0', 'false' or 'off' are considered false.
+     * Values 'y', 'yes', '1', 'true' or 'on' are considered true.
+     */
+    @LayoutlibDelegate
+    /*package*/ static boolean native_get_boolean(String key, boolean def) {
+        Map<String, String> properties = Bridge.getPlatformProperties();
+        String value = properties.get(key);
+
+        if ("n".equals(value) || "no".equals(value) || "0".equals(value) || "false".equals(value)
+                || "off".equals(value)) {
+            return false;
+        }
+        //noinspection SimplifiableIfStatement
+        if ("y".equals(value) || "yes".equals(value) || "1".equals(value) || "true".equals(value)
+                || "on".equals(value)) {
+            return true;
+        }
+
+        return def;
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static void native_set(String key, String def) {
+        Map<String, String> properties = Bridge.getPlatformProperties();
+        properties.put(key, def);
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static void native_add_change_callback() {
+        // pass.
+    }
 }
