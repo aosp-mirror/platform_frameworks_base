@@ -240,6 +240,30 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         }
     }
 
+    synchronized void stopAllRecognitions() {
+        if (moduleProperties == null || mModule == null) {
+            return;
+        }
+
+        if (mCurrentSoundModelHandle == INVALID_SOUND_MODEL_HANDLE) {
+            return;
+        }
+
+        int status = mModule.stopRecognition(mCurrentSoundModelHandle);
+        if (status != SoundTrigger.STATUS_OK) {
+            Slog.w(TAG, "stopRecognition call failed with " + status);
+        }
+        status = mModule.unloadSoundModel(mCurrentSoundModelHandle);
+        if (status != SoundTrigger.STATUS_OK) {
+            Slog.w(TAG, "unloadSoundModel call failed with " + status);
+        }
+
+        mCurrentSoundModelHandle = INVALID_SOUND_MODEL_HANDLE;
+        mCurrentSoundModelUuid = null;
+
+        mActiveListeners.clear();
+    }
+
     //---- SoundTrigger.StatusListener methods
     @Override
     public void onRecognition(RecognitionEvent event) {
