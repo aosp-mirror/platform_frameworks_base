@@ -20,6 +20,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.service.voice.AlwaysOnHotwordDetector;
 import android.service.voice.AlwaysOnHotwordDetector.Callback;
+import android.service.voice.AlwaysOnHotwordDetector.TriggerAudio;
 import android.service.voice.VoiceInteractionService;
 import android.util.Log;
 
@@ -36,18 +37,8 @@ public class MainInteractionService extends VoiceInteractionService {
         }
 
         @Override
-        public void onDetected(byte[] data) {
+        public void onDetected(TriggerAudio triggerAudio) {
             Log.i(TAG, "onDetected");
-        }
-
-        @Override
-        public void onDetectionStarted() {
-            Log.i(TAG, "onDetectionStarted");
-        }
-
-        @Override
-        public void onDetectionStopped() {
-            Log.i(TAG, "onDetectionStopped");
         }
 
         @Override
@@ -95,8 +86,12 @@ public class MainInteractionService extends VoiceInteractionService {
                 break;
             case AlwaysOnHotwordDetector.STATE_KEYPHRASE_ENROLLED:
                 Log.i(TAG, "STATE_KEYPHRASE_ENROLLED - starting recognition");
-                mHotwordDetector.startRecognition(
-                        AlwaysOnHotwordDetector.RECOGNITION_FLAG_NONE);
+                if (mHotwordDetector.startRecognition(
+                        AlwaysOnHotwordDetector.RECOGNITION_FLAG_NONE)) {
+                    Log.i(TAG, "startRecognition succeeded");
+                } else {
+                    Log.i(TAG, "startRecognition failed");
+                }
                 break;
         }
     }
