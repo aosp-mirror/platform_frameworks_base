@@ -49,7 +49,7 @@ public class QSPanel extends ViewGroup {
     private final View mDetailSettingsButton;
     private final View mDetailDoneButton;
     private final View mBrightnessView;
-    private final CircularClipper mClipper;
+    private final QSDetailClipper mClipper;
     private final H mHandler = new H();
 
     private int mColumns;
@@ -85,7 +85,7 @@ public class QSPanel extends ViewGroup {
                 R.layout.quick_settings_brightness_dialog, this, false);
         addView(mDetail);
         addView(mBrightnessView);
-        mClipper = new CircularClipper(mDetail);
+        mClipper = new QSDetailClipper(mDetail);
         updateResources();
 
         mBrightnessController = new BrightnessController(getContext(),
