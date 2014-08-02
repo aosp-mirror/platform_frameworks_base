@@ -838,9 +838,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             // network is blocked; clone and override state
             info = new NetworkInfo(info);
             info.setDetailedState(DetailedState.BLOCKED, null, null);
+            if (VDBG) log("returning Blocked NetworkInfo");
         }
         if (mLockdownTracker != null) {
             info = mLockdownTracker.augmentNetworkInfo(info);
+            if (VDBG) log("returning Locked NetworkInfo");
         }
         return info;
     }
