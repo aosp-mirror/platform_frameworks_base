@@ -65,6 +65,8 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
 
     private int mCurrentSoundModelHandle = INVALID_SOUND_MODEL_HANDLE;
     private UUID mCurrentSoundModelUuid = null;
+    // FIXME: Ideally this should not be stored if allowMultipleTriggers happens at a lower layer.
+    private RecognitionConfig mRecognitionConfig = null;
 
     SoundTriggerHelper() {
         ArrayList <ModuleProperties> modules = new ArrayList<>();
@@ -174,6 +176,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         // Everything went well!
         mCurrentSoundModelHandle = soundModelHandle;
         mCurrentSoundModelUuid = soundModel.uuid;
+        mRecognitionConfig = recognitionConfig;
         // Register the new listener. This replaces the old one.
         // There can only be a maximum of one active listener for a keyphrase
         // at any given time.
@@ -221,12 +224,12 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             int status = mModule.stopRecognition(mCurrentSoundModelHandle);
             if (status != SoundTrigger.STATUS_OK) {
                 Slog.w(TAG, "stopRecognition call failed with " + status);
-                return STATUS_ERROR;
+                return status;
             }
             status = mModule.unloadSoundModel(mCurrentSoundModelHandle);
             if (status != SoundTrigger.STATUS_OK) {
                 Slog.w(TAG, "unloadSoundModel call failed with " + status);
-                return STATUS_ERROR;
+                return status;
             }
 
             mCurrentSoundModelHandle = INVALID_SOUND_MODEL_HANDLE;
@@ -283,6 +286,17 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
                         } else {
                             Slog.w(TAG, "received onRecognition event without any listener for it");
                             return;
+                        }
+
+                        // FIXME: Remove this block if the lower layer supports multiple triggers.
+                        if (mRecognitionConfig != null
+                                && mRecognitionConfig.allowMultipleTriggers) {
+                            int status = mModule.startRecognition(
+                                    mCurrentSoundModelHandle, mRecognitionConfig);
+                            if (status != STATUS_OK) {
+                                Slog.w(TAG, "Error in restarting recognition after a trigger");
+                                listener.onError(status);
+                            }
                         }
                     }
                 } catch (RemoteException e) {

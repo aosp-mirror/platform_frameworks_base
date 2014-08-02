@@ -524,6 +524,11 @@ public class SoundTrigger {
         /** True if the DSP should capture the trigger sound and make it available for further
          * capture. */
         public final boolean captureRequested;
+        /**
+         * True if the service should restart listening after the DSP triggers.
+         * Note: This config flag is currently used at the service layer rather than by the DSP.
+         */
+        public final boolean allowMultipleTriggers;
         /** List of all keyphrases in the sound model for which recognition should be performed with
          * options for each keyphrase. */
         public final KeyphraseRecognitionExtra keyphrases[];
@@ -531,9 +536,10 @@ public class SoundTrigger {
          * typically during enrollment. */
         public final byte[] data;
 
-        public RecognitionConfig(boolean captureRequested,
+        public RecognitionConfig(boolean captureRequested, boolean allowMultipleTriggers,
                 KeyphraseRecognitionExtra keyphrases[], byte[] data) {
             this.captureRequested = captureRequested;
+            this.allowMultipleTriggers = allowMultipleTriggers;
             this.keyphrases = keyphrases;
             this.data = data;
         }
@@ -551,15 +557,17 @@ public class SoundTrigger {
 
         private static RecognitionConfig fromParcel(Parcel in) {
             boolean captureRequested = in.readByte() == 1;
+            boolean allowMultipleTriggers = in.readByte() == 1;
             KeyphraseRecognitionExtra[] keyphrases =
                     in.createTypedArray(KeyphraseRecognitionExtra.CREATOR);
             byte[] data = in.readBlob();
-            return new RecognitionConfig(captureRequested, keyphrases, data);
+            return new RecognitionConfig(captureRequested, allowMultipleTriggers, keyphrases, data);
         }
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeByte((byte) (captureRequested ? 1 : 0));
+            dest.writeByte((byte) (allowMultipleTriggers ? 1 : 0));
             dest.writeTypedArray(keyphrases, flags);
             dest.writeBlob(data);
         }
@@ -571,9 +579,9 @@ public class SoundTrigger {
 
         @Override
         public String toString() {
-            return "RecognitionConfig [captureRequested=" + captureRequested + ", keyphrases="
-                    + Arrays.toString(keyphrases)
-                    + ", data=" + (data == null ? 0 : data.length) + "]";
+            return "RecognitionConfig [captureRequested=" + captureRequested
+                    + ", allowMultipleTriggers=" + allowMultipleTriggers + ", keyphrases="
+                    + Arrays.toString(keyphrases) + ", data=" + Arrays.toString(data) + "]";
         }
     }
 
