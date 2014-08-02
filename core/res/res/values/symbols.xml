@@ -1894,6 +1894,7 @@
   <java-symbol type="string" name="timepicker_numbers_radius_multiplier_normal" />
   <java-symbol type="string" name="timepicker_transition_mid_radius_multiplier" />
   <java-symbol type="string" name="timepicker_transition_end_radius_multiplier" />
+  <java-symbol type="string" name="battery_saver_description" />
 
   <java-symbol type="string" name="item_is_selected" />
   <java-symbol type="string" name="day_of_week_label_typeface" />
