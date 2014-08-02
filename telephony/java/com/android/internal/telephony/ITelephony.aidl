@@ -793,5 +793,16 @@ interface ITelephony {
      *         positive value success, data length of response
      */
     int invokeOemRilRequestRaw(in byte[] oemReq, out byte[] oemResp);
-}
 
+    /**
+     * Check if any mobile Radios need to be shutdown.
+     *
+     * @return true is any mobile radio needs to be shutdown
+     */
+    boolean needMobileRadioShutdown();
+
+    /**
+     * Shutdown Mobile Radios
+     */
+    void shutdownMobileRadios();
+}
