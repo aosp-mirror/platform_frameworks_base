@@ -593,6 +593,11 @@ public final class Downloads {
         public static final int STATUS_QUEUED_FOR_WIFI = 196;
 
         /**
+         * This download has been paused by user.
+         */
+        public static final int STATUS_PAUSED_BY_USER = 197;
+
+        /**
          * This download couldn't be completed due to insufficient storage
          * space.  Typically, this is because the SD card is full.
          */
