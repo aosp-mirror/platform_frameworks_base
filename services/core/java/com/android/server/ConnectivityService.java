@@ -465,6 +465,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      *    changes.
      */
     private class LegacyTypeTracker {
+
+        private static final boolean DBG = true;
+        private static final boolean VDBG = false;
+        private static final String TAG = "CSLegacyTypeTracker";
+
         /**
          * Array of lists, one per legacy network type (e.g., TYPE_MOBILE_MMS).
          * Each list holds references to all NetworkAgentInfos that are used to
@@ -508,6 +513,15 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
         }
 
+        private void maybeLogBroadcast(NetworkAgentInfo nai, boolean connected, int type) {
+            if (DBG) {
+                log("Sending " + (connected ? "connected" : "disconnected") +
+                        " broadcast for type " + type + " " + nai.name() +
+                        " isDefaultNetwork=" + isDefaultNetwork(nai));
+            }
+        }
+
+        /** Adds the given network to the specified legacy type list. */
         public void add(int type, NetworkAgentInfo nai) {
             if (!isTypeSupported(type)) {
                 return;  // Invalid network type.
@@ -521,40 +535,52 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
 
             if (list.isEmpty() || isDefaultNetwork(nai)) {
-                if (VDBG) log("Sending connected broadcast for type " + type +
-                              "isDefaultNetwork=" + isDefaultNetwork(nai));
+                maybeLogBroadcast(nai, true, type);
                 sendLegacyNetworkBroadcast(nai, true, type);
             }
             list.add(nai);
         }
 
+        /** Removes the given network from the specified legacy type list. */
+        public void remove(int type, NetworkAgentInfo nai) {
+            ArrayList<NetworkAgentInfo> list = mTypeLists[type];
+            if (list == null || list.isEmpty()) {
+                return;
+            }
+
+            boolean wasFirstNetwork = list.get(0).equals(nai);
+
+            if (!list.remove(nai)) {
+                return;
+            }
+
+            if (wasFirstNetwork || isDefaultNetwork(nai)) {
+                maybeLogBroadcast(nai, false, type);
+                sendLegacyNetworkBroadcast(nai, false, type);
+            }
+
+            if (!list.isEmpty() && wasFirstNetwork) {
+                if (DBG) log("Other network available for type " + type +
+                              ", sending connected broadcast");
+                maybeLogBroadcast(list.get(0), false, type);
+                sendLegacyNetworkBroadcast(list.get(0), false, type);
+            }
+        }
+
+        /** Removes the given network from all legacy type lists. */
         public void remove(NetworkAgentInfo nai) {
             if (VDBG) log("Removing agent " + nai);
             for (int type = 0; type < mTypeLists.length; type++) {
-                ArrayList<NetworkAgentInfo> list = mTypeLists[type];
-                if (list == null || list.isEmpty()) {
-                    continue;
-                }
-
-                boolean wasFirstNetwork = false;
-                if (list.get(0).equals(nai)) {
-                    // This network was the first in the list. Send broadcast.
-                    wasFirstNetwork = true;
-                }
-                list.remove(nai);
-
-                if (wasFirstNetwork || isDefaultNetwork(nai)) {
-                    if (VDBG) log("Sending disconnected broadcast for type " + type +
-                                  "isDefaultNetwork=" + isDefaultNetwork(nai));
-                    sendLegacyNetworkBroadcast(nai, false, type);
-                }
-
-                if (!list.isEmpty() && wasFirstNetwork) {
-                    if (VDBG) log("Other network available for type " + type +
-                                  ", sending connected broadcast");
-                    sendLegacyNetworkBroadcast(list.get(0), false, type);
-                }
+                remove(type, nai);
             }
+        }
+
+        private String naiToString(NetworkAgentInfo nai) {
+            String name = (nai != null) ? nai.name() : "null";
+            String state = (nai.networkInfo != null) ?
+                    nai.networkInfo.getState() + "/" + nai.networkInfo.getDetailedState() :
+                    "???/???";
+            return name + " " + state;
         }
 
         public void dump(IndentingPrintWriter pw) {
@@ -564,11 +590,17 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 pw.increaseIndent();
                 if (mTypeLists[type].size() == 0) pw.println("none");
                 for (NetworkAgentInfo nai : mTypeLists[type]) {
-                    pw.println(nai.name());
+                    pw.println(naiToString(nai));
                 }
                 pw.decreaseIndent();
             }
         }
+
+        // This class needs its own log method because it has a different TAG.
+        private void log(String s) {
+            Slog.d(TAG, s);
+        }
+
     }
     private LegacyTypeTracker mLegacyTypeTracker = new LegacyTypeTracker();
 
@@ -1693,7 +1725,16 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         pw.println();
         pw.decreaseIndent();
 
-        pw.println("mActiveDefaultNetwork:" + mActiveDefaultNetwork);
+        pw.print("mActiveDefaultNetwork: " + mActiveDefaultNetwork);
+        if (mActiveDefaultNetwork != TYPE_NONE) {
+            NetworkInfo activeNetworkInfo = getActiveNetworkInfo();
+            if (activeNetworkInfo != null) {
+                pw.print(" " + activeNetworkInfo.getState() +
+                         "/" + activeNetworkInfo.getDetailedState());
+            }
+        }
+        pw.println();
+
         pw.println("mLegacyTypeTracker:");
         pw.increaseIndent();
         mLegacyTypeTracker.dump(pw);
@@ -1986,6 +2027,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     synchronized (mNetworkForNetId) {
                         mNetworkForNetId.remove(nai.network.netId);
                     }
+                    // Just in case.
                     mLegacyTypeTracker.remove(nai);
                 }
             }
@@ -2087,15 +2129,14 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
             bestNetwork.addRequest(nri.request);
             mNetworkForRequestId.put(nri.request.requestId, bestNetwork);
-            int legacyType = nri.request.legacyType;
-            if (legacyType != TYPE_NONE) {
-                mLegacyTypeTracker.add(legacyType, bestNetwork);
-            }
             notifyNetworkCallback(bestNetwork, nri);
             score = bestNetwork.currentScore;
+            if (nri.isRequest && nri.request.legacyType != TYPE_NONE) {
+                mLegacyTypeTracker.add(nri.request.legacyType, bestNetwork);
+            }
         }
         mNetworkRequests.put(nri.request, nri);
-        if (msg.what == EVENT_REGISTER_NETWORK_REQUEST) {
+        if (nri.isRequest) {
             if (DBG) log("sending new NetworkRequest to factories");
             for (NetworkFactoryInfo nfi : mNetworkFactoryInfos.values()) {
                 nfi.asyncChannel.sendMessage(android.net.NetworkFactory.CMD_REQUEST_NETWORK, score,
@@ -2122,6 +2163,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 if (VDBG) {
                     log(" Removing from current network " + affectedNetwork.name() + ", leaving " +
                             affectedNetwork.networkRequests.size() + " requests.");
+                }
+                if (nri.isRequest && nri.request.legacyType != TYPE_NONE) {
+                    mLegacyTypeTracker.remove(nri.request.legacyType, affectedNetwork);
                 }
             }
 
@@ -4454,9 +4498,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     }
                     mNetworkForRequestId.put(nri.request.requestId, newNetwork);
                     newNetwork.addRequest(nri.request);
-                    int legacyType = nri.request.legacyType;
-                    if (legacyType != TYPE_NONE) {
-                        mLegacyTypeTracker.add(legacyType, newNetwork);
+                    if (nri.isRequest && nri.request.legacyType != TYPE_NONE) {
+                        mLegacyTypeTracker.add(nri.request.legacyType, newNetwork);
                     }
                     keep = true;
                     // TODO - this could get expensive if we have alot of requests for this
@@ -4471,6 +4514,14 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                                     newNetwork.linkProperties.getDnsServers());
                         } else {
                             setDefaultDnsSystemProperties(new ArrayList<InetAddress>());
+                        }
+                        // Maintain the illusion: since the legacy API only
+                        // understands one network at a time, we must pretend
+                        // that the current default network disconnected before
+                        // the new one connected.
+                        if (currentNetwork != null) {
+                            mLegacyTypeTracker.remove(currentNetwork.networkInfo.getType(),
+                                                      currentNetwork);
                         }
                         mLegacyTypeTracker.add(newNetwork.networkInfo.getType(), newNetwork);
                     }
@@ -4665,13 +4716,19 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     private void sendLegacyNetworkBroadcast(NetworkAgentInfo nai, boolean connected, int type) {
+        // The NetworkInfo we actually send out has no bearing on the real
+        // state of affairs. For example, if the default connection is mobile,
+        // and a request for HIPRI has just gone away, we need to pretend that
+        // HIPRI has just disconnected. So we need to set the type to HIPRI and
+        // the state to DISCONNECTED, even though the network is of type MOBILE
+        // and is still connected.
+        NetworkInfo info = new NetworkInfo(nai.networkInfo);
+        info.setType(type);
         if (connected) {
-            NetworkInfo info = new NetworkInfo(nai.networkInfo);
-            info.setType(type);
+            info.setDetailedState(DetailedState.CONNECTED, null, info.getExtraInfo());
             sendConnectedBroadcastDelayed(info, getConnectivityChangeDelay());
         } else {
-            NetworkInfo info = new NetworkInfo(nai.networkInfo);
-            info.setType(type);
+            info.setDetailedState(DetailedState.DISCONNECTED, null, info.getExtraInfo());
             Intent intent = new Intent(ConnectivityManager.CONNECTIVITY_ACTION);
             intent.putExtra(ConnectivityManager.EXTRA_NETWORK_INFO, info);
             intent.putExtra(ConnectivityManager.EXTRA_NETWORK_TYPE, info.getType());
