@@ -151,7 +151,6 @@ public final class CreateInfo implements ICreateInfo {
         "com.android.internal.view.menu.MenuBuilder#createNewMenuItem",
         "com.android.internal.util.XmlUtils#convertValueToInt",
         "com.android.internal.textservice.ITextServicesManager$Stub#asInterface",
-        "android.os.SystemProperties#native_get",
     };
 
     /**
@@ -198,6 +197,7 @@ public final class CreateInfo implements ICreateInfo {
         "android.graphics.Typeface",
         "android.graphics.Xfermode",
         "android.os.SystemClock",
+        "android.os.SystemProperties",
         "android.text.AndroidBidi",
         "android.text.format.Time",
         "android.util.FloatMath",
