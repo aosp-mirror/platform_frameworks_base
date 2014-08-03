@@ -220,6 +220,10 @@ public class StackStateAnimator {
         // apply speed bump state
         child.setBelowSpeedBump(viewState.belowSpeedBump);
 
+        // start hiding sensitive animation
+        child.setHideSensitive(viewState.hideSensitive,
+                mAnimationFilter.animateHideSensitive && !wasAdded, delay, duration);
+
         // apply scrimming
         child.setScrimAmount(viewState.scrimAmount);
 

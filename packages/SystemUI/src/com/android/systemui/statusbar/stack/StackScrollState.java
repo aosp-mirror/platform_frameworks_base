@@ -157,6 +157,10 @@ public class StackScrollState {
                 // apply dark
                 child.setDark(state.dark, false /* animate */);
 
+                // apply hiding sensitive
+                child.setHideSensitive(
+                        state.hideSensitive, false /* animated */, 0 /* delay */, 0 /* duration */);
+
                 // apply speed bump state
                 child.setBelowSpeedBump(state.belowSpeedBump);
 
@@ -238,6 +242,7 @@ public class StackScrollState {
         float scale;
         boolean dimmed;
         boolean dark;
+        boolean hideSensitive;
         boolean belowSpeedBump;
 
         /**
