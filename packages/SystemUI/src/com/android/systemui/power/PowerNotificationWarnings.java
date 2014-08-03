@@ -16,7 +16,6 @@
 
 package com.android.systemui.power;
 
-import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -25,9 +24,10 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
+import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.media.AudioManager;
+import android.media.AudioAttributes;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -35,11 +35,10 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Slog;
-import android.view.ContextThemeWrapper;
 import android.view.View;
-import android.view.WindowManager;
 
 import com.android.systemui.R;
+import com.android.systemui.statusbar.phone.SystemUIDialog;
 
 import java.io.PrintWriter;
 
@@ -66,9 +65,14 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     private static final String ACTION_SHOW_FALLBACK_CHARGER = "PNW.chargerFallback";
     private static final String ACTION_SHOW_BATTERY_SETTINGS = "PNW.batterySettings";
     private static final String ACTION_START_SAVER = "PNW.startSaver";
+    private static final String ACTION_STOP_SAVER = "PNW.stopSaver";
+
+    private static final AudioAttributes AUDIO_ATTRIBUTES = new AudioAttributes.Builder()
+            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+            .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
+            .build();
 
     private final Context mContext;
-    private final Context mLightContext;
     private final NotificationManager mNoMan;
     private final Handler mHandler = new Handler();
     private final PowerDialogWarnings mFallbackDialogs;
@@ -84,15 +88,13 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     private long mBucketDroppedNegativeTimeMs;
 
     private boolean mSaver;
-    private int mSaverTriggerLevel;
     private boolean mWarning;
     private boolean mPlaySound;
     private boolean mInvalidCharger;
+    private SystemUIDialog mSaverConfirmation;
 
     public PowerNotificationWarnings(Context context) {
         mContext = context;
-        mLightContext = new ContextThemeWrapper(mContext,
-                android.R.style.Theme_DeviceDefault_Light);
         mNoMan = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         mFallbackDialogs = new PowerDialogWarnings(context);
         mReceiver.init();
@@ -105,6 +107,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         pw.print("mPlaySound="); pw.println(mPlaySound);
         pw.print("mInvalidCharger="); pw.println(mInvalidCharger);
         pw.print("mShowing="); pw.println(SHOWING_STRINGS[mShowing]);
+        pw.print("mSaverConfirmation="); pw.println(mSaverConfirmation != null ? "not null" : null);
     }
 
     @Override
@@ -123,12 +126,9 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     @Override
     public void showSaverMode(boolean mode) {
         mSaver = mode;
-        updateNotification();
-    }
-
-    @Override
-    public void setSaverTrigger(int level) {
-        mSaverTriggerLevel = level;
+        if (mSaver && mSaverConfirmation != null) {
+            mSaverConfirmation.dismiss();
+        }
         updateNotification();
     }
 
@@ -180,6 +180,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                 .setContentTitle(mContext.getString(R.string.battery_low_title))
                 .setContentText(mContext.getString(textRes, mBatteryLevel))
                 .setOngoing(true)
+                .setOnlyAlertOnce(true)
                 .setPriority(Notification.PRIORITY_MAX)
                 .setCategory(Notification.CATEGORY_SYSTEM)
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
@@ -187,10 +188,12 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         if (hasBatterySettings()) {
             nb.setContentIntent(pendingBroadcast(ACTION_SHOW_BATTERY_SETTINGS));
         }
-        if (!mSaver && mSaverTriggerLevel <= 0) {
+        if (!mSaver) {
             nb.addAction(R.drawable.ic_power_saver,
                     mContext.getString(R.string.battery_saver_start_action),
                     pendingBroadcast(ACTION_START_SAVER));
+        } else {
+            addStopSaverAction(nb);
         }
         if (mPlaySound) {
             attachLowBatterySound(nb);
@@ -208,17 +211,26 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                 .setContentTitle(mContext.getString(R.string.battery_saver_notification_title))
                 .setContentText(mContext.getString(R.string.battery_saver_notification_text))
                 .setOngoing(true)
-                .setWhen(0)
                 .setShowWhen(false)
                 .setCategory(Notification.CATEGORY_SYSTEM)
                 .setVisibility(Notification.VISIBILITY_PUBLIC);
+        addStopSaverAction(nb);
         if (hasSaverSettings()) {
-            nb.addAction(0,
-                    mContext.getString(R.string.battery_saver_notification_action_text),
-                    pendingActivity(mOpenSaverSettings));
             nb.setContentIntent(pendingActivity(mOpenSaverSettings));
         }
         mNoMan.notifyAsUser(TAG_NOTIFICATION, ID_NOTIFICATION, nb.build(), UserHandle.CURRENT);
+    }
+
+    private void addStopSaverAction(Notification.Builder nb) {
+        nb.addAction(R.drawable.ic_power_saver,
+                mContext.getString(R.string.battery_saver_notification_action_text),
+                pendingBroadcast(ACTION_STOP_SAVER));
+    }
+
+    private void dismissSaverNotification() {
+        if (mSaver) Slog.i(TAG, "dismissing saver notification");
+        mSaver = false;
+        updateNotification();
     }
 
     private PendingIntent pendingActivity(Intent intent) {
@@ -307,8 +319,8 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
             if (soundPath != null) {
                 final Uri soundUri = Uri.parse("file://" + soundPath);
                 if (soundUri != null) {
-                    b.setSound(soundUri, AudioManager.STREAM_SYSTEM);
-                    Slog.d(TAG, "playing sound " + soundUri);
+                    b.setSound(soundUri, AUDIO_ATTRIBUTES);
+                    if (DEBUG) Slog.d(TAG, "playing sound " + soundUri);
                 }
             }
         }
@@ -333,17 +345,21 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     }
 
     private void showStartSaverConfirmation() {
-        final AlertDialog d = new AlertDialog.Builder(mLightContext)
-                .setTitle(R.string.battery_saver_confirmation_title)
-                .setMessage(R.string.battery_saver_confirmation_text)
-                .setNegativeButton(android.R.string.cancel, null)
-                .setPositiveButton(R.string.battery_saver_confirmation_ok, mStartSaverMode)
-                .create();
-
-        d.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ERROR);
-        d.getWindow().getAttributes().privateFlags |=
-                WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
+        if (mSaverConfirmation != null) return;
+        final SystemUIDialog d = new SystemUIDialog(mContext);
+        d.setTitle(R.string.battery_saver_confirmation_title);
+        d.setMessage(com.android.internal.R.string.battery_saver_description);
+        d.setNegativeButton(android.R.string.cancel, null);
+        d.setPositiveButton(R.string.battery_saver_confirmation_ok, mStartSaverMode);
+        d.setShowForAllUsers(true);
+        d.setOnDismissListener(new OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialog) {
+                mSaverConfirmation = null;
+            }
+        });
         d.show();
+        mSaverConfirmation = d;
     }
 
     private void setSaverSetting(boolean mode) {
@@ -359,6 +375,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
             filter.addAction(ACTION_SHOW_FALLBACK_CHARGER);
             filter.addAction(ACTION_SHOW_BATTERY_SETTINGS);
             filter.addAction(ACTION_START_SAVER);
+            filter.addAction(ACTION_STOP_SAVER);
             mContext.registerReceiver(this, filter, null, mHandler);
         }
 
@@ -378,6 +395,10 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
             } else if (action.equals(ACTION_START_SAVER)) {
                 dismissLowBatteryNotification();
                 showStartSaverConfirmation();
+            } else if (action.equals(ACTION_STOP_SAVER)) {
+                dismissSaverNotification();
+                dismissLowBatteryNotification();
+                setSaverSetting(false);
             }
         }
     }
