@@ -2436,7 +2436,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         final boolean powerSave = mBatteryController.isPowerSave();
         final boolean anim = (mScreenOn == null || mScreenOn) && windowState != WINDOW_STATE_HIDDEN
                 && !powerSave;
-        if (powerSave && getBarState() != StatusBarState.KEYGUARD) {
+        if (powerSave && getBarState() == StatusBarState.SHADE) {
             mode = MODE_WARNING;
         }
         transitions.transitionTo(mode, anim);

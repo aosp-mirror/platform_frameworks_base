@@ -48,7 +48,6 @@ public class PowerDialogWarnings implements PowerUI.WarningsUI {
     private int mBucket;
     private long mScreenOffTime;
     private boolean mSaver;
-    private int mSaverTriggerLevel;
 
     private AlertDialog mInvalidChargerDialog;
     private AlertDialog mLowBatteryDialog;
@@ -221,10 +220,5 @@ public class PowerDialogWarnings implements PowerUI.WarningsUI {
     @Override
     public void showSaverMode(boolean mode) {
         mSaver = mode;
-    }
-
-    @Override
-    public void setSaverTrigger(int level) {
-        mSaverTriggerLevel = level;
     }
 }

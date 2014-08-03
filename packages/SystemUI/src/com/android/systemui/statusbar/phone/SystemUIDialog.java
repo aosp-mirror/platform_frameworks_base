@@ -27,13 +27,39 @@ import android.view.WindowManager;
  */
 public class SystemUIDialog extends AlertDialog {
 
+    private final Context mContext;
+
     public SystemUIDialog(Context context) {
         super(context, R.style.Theme_SystemUI_Dialog);
+        mContext = context;
+
         getWindow().setType(WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
                 | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
         WindowManager.LayoutParams attrs = getWindow().getAttributes();
         attrs.setTitle(getClass().getSimpleName());
         getWindow().setAttributes(attrs);
+    }
+
+    public void setShowForAllUsers(boolean show) {
+        if (show) {
+            getWindow().getAttributes().privateFlags |=
+                    WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
+        } else {
+            getWindow().getAttributes().privateFlags &=
+                    ~WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
+        }
+    }
+
+    public void setMessage(int resId) {
+        setMessage(mContext.getString(resId));
+    }
+
+    public void setPositiveButton(int resId, OnClickListener onClick) {
+        setButton(BUTTON_POSITIVE, mContext.getString(resId), onClick);
+    }
+
+    public void setNegativeButton(int resId, OnClickListener onClick) {
+        setButton(BUTTON_NEGATIVE, mContext.getString(resId), onClick);
     }
 }
