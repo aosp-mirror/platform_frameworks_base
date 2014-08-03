@@ -22,6 +22,7 @@ import com.android.ims.ImsCallProfile;
 import com.android.ims.internal.IImsRegistrationListener;
 import com.android.ims.internal.IImsCallSession;
 import com.android.ims.internal.IImsCallSessionListener;
+import com.android.ims.internal.IImsEcbm;
 import com.android.ims.internal.IImsUt;
 import com.android.ims.internal.IImsConfig;
 
@@ -62,4 +63,11 @@ interface IImsService {
      * When IMS is OFF, device will behave as CSFB'ed.
      */
     void turnOffIms();
+
+
+    /**
+     * ECBM interface for Emergency Callback mode mechanism.
+     */
+    IImsEcbm getEcbmInterface(int serviceId);
+
 }
