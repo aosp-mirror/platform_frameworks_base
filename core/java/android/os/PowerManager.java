@@ -716,6 +716,19 @@ public final class PowerManager {
             = "android.os.action.POWER_SAVE_MODE_CHANGED";
 
     /**
+     * Intent that is broadcast when the state of {@link #isPowerSaveMode()} is about to change.
+     * This broadcast is only sent to registered receivers.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_POWER_SAVE_MODE_CHANGING
+            = "android.os.action.POWER_SAVE_MODE_CHANGING";
+
+    /** @hide */
+    public static final String EXTRA_POWER_SAVE_MODE = "mode";
+
+    /**
      * A wake lock is a mechanism to indicate that your application needs
      * to have the device stay on.
      * <p>
