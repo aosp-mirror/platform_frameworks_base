@@ -176,6 +176,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private boolean mInterceptDelegateEnabled;
     private boolean mDelegateToScrollView;
     private boolean mDisallowScrollingInThisMotion;
+    private long mGoToFullShadeDelay;
 
     private ViewTreeObserver.OnPreDrawListener mChildrenUpdater
             = new ViewTreeObserver.OnPreDrawListener() {
@@ -1560,11 +1561,13 @@ public class NotificationStackScrollLayout extends ViewGroup
             mNeedsAnimation = false;
         }
         if (!mAnimationEvents.isEmpty() || isCurrentlyAnimating()) {
-            mStateAnimator.startAnimationForEvents(mAnimationEvents, mCurrentStackScrollState);
+            mStateAnimator.startAnimationForEvents(mAnimationEvents, mCurrentStackScrollState,
+                    mGoToFullShadeDelay);
             mAnimationEvents.clear();
         } else {
             applyCurrentState();
         }
+        mGoToFullShadeDelay = 0;
     }
 
     private void generateChildHierarchyEvents() {
@@ -1939,10 +1942,11 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
     }
 
-    public void goToFullShade() {
+    public void goToFullShade(long delay) {
         updateSpeedBump(true /* visibility */);
         mDismissView.setInvisible();
         mGoToFullShadeNeedsAnimation = true;
+        mGoToFullShadeDelay = delay;
         mNeedsAnimation =  true;
         requestChildrenUpdate();
     }
@@ -2117,7 +2121,8 @@ public class NotificationStackScrollLayout extends ViewGroup
 
                 // ANIMATION_TYPE_SNAP_BACK
                 new AnimationFilter()
-                        .animateAlpha(),
+                        .animateAlpha()
+                        .animateHeight(),
 
                 // ANIMATION_TYPE_ACTIVATED_CHILD
                 new AnimationFilter()

@@ -455,6 +455,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private int mDrawCount;
     private Runnable mLaunchTransitionEndRunnable;
     private boolean mLaunchTransitionFadingAway;
+    private ExpandableNotificationRow mDraggedDownRow;
 
     private static final int VISIBLE_LOCATIONS = ViewState.LOCATION_FIRST_CARD
             | ViewState.LOCATION_TOP_STACK_PEEKING
@@ -3290,9 +3291,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     public void showKeyguard() {
         setBarState(StatusBarState.KEYGUARD);
-        updateKeyguardState();
+        updateKeyguardState(false /* goingToFullShade */);
         instantExpandNotificationsPanel();
         mLeaveOpenOnKeyguardHide = false;
+        if (mDraggedDownRow != null) {
+            mDraggedDownRow.setUserLocked(false);
+            mDraggedDownRow.notifyHeightChanged();
+            mDraggedDownRow = null;
+        }
     }
 
     public boolean isInLaunchTransition() {
@@ -3341,15 +3347,28 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
     }
 
-    public void hideKeyguard() {
+    /**
+     * @return true if we would like to stay in the shade, false if it should go away entirely
+     */
+    public boolean hideKeyguard() {
+        boolean staying = mLeaveOpenOnKeyguardHide;
         setBarState(StatusBarState.SHADE);
         if (mLeaveOpenOnKeyguardHide) {
             mLeaveOpenOnKeyguardHide = false;
-            mNotificationPanel.animateToFullShade();
+            mNotificationPanel.animateToFullShade(calculateGoingToFullShadeDelay());
+            if (mDraggedDownRow != null) {
+                mDraggedDownRow.setUserLocked(false);
+                mDraggedDownRow = null;
+            }
         } else {
             instantCollapseNotificationPanel();
         }
-        updateKeyguardState();
+        updateKeyguardState(staying);
+        return staying;
+    }
+
+    public long calculateGoingToFullShadeDelay() {
+        return mKeyguardFadingAwayDelay + mKeyguardFadingAwayDuration;
     }
 
     /**
@@ -3380,7 +3399,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 && mStatusBarKeyguardViewManager.isSecure());
     }
 
-    private void updateKeyguardState() {
+    private void updateKeyguardState(boolean goingToFullShade) {
         if (mState == StatusBarState.KEYGUARD) {
             mKeyguardIndicationController.setVisible(true);
             mNotificationPanel.resetViews();
@@ -3390,13 +3409,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mKeyguardUserSwitcher.setKeyguard(false);
         }
         if (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED) {
-            mKeyguardBottomArea.setVisibility(View.VISIBLE);
             mScrimController.setKeyguardShowing(true);
         } else {
-            mKeyguardBottomArea.setVisibility(View.GONE);
             mScrimController.setKeyguardShowing(false);
         }
-        mNotificationPanel.setBarState(mState, mKeyguardFadingAway);
+        mNotificationPanel.setBarState(mState, mKeyguardFadingAway, goingToFullShade);
         updateDozingState();
         updateStackScrollerState();
         updatePublicMode();
@@ -3609,17 +3626,22 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
      * @param expandView The view to expand after going to the shade.
      */
     public void goToLockedShade(View expandView) {
+        ExpandableNotificationRow row = null;
         if (expandView instanceof ExpandableNotificationRow) {
-            ExpandableNotificationRow row = (ExpandableNotificationRow) expandView;
+            row = (ExpandableNotificationRow) expandView;
             row.setUserExpanded(true);
         }
         if (isLockscreenPublicMode() && !userAllowsPrivateNotificationsInPublic(mCurrentUserId)) {
             mLeaveOpenOnKeyguardHide = true;
             showBouncer();
+            mDraggedDownRow = row;
         } else {
-            mNotificationPanel.animateToFullShade();
+            mNotificationPanel.animateToFullShade(0 /* delay */);
             setBarState(StatusBarState.SHADE_LOCKED);
-            updateKeyguardState();
+            updateKeyguardState(false /* goingToFullShade */);
+            if (row != null) {
+                row.setUserLocked(false);
+            }
         }
     }
 
@@ -3629,7 +3651,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     public void goToKeyguard() {
         if (mState == StatusBarState.SHADE_LOCKED) {
             setBarState(StatusBarState.KEYGUARD);
-            updateKeyguardState();
+            updateKeyguardState(false /* goingToFullShade */);
         }
     }
 
@@ -3638,6 +3660,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
      */
     public ViewGroup getQuickSettingsOverlayParent() {
         return mNotificationPanel;
+    }
+
+    public long getKeyguardFadingAwayDelay() {
+        return mKeyguardFadingAwayDelay;
+    }
+
+    public long getKeyguardFadingAwayDuration() {
+        return mKeyguardFadingAwayDuration;
     }
 
     public LinearLayout getSystemIcons() {

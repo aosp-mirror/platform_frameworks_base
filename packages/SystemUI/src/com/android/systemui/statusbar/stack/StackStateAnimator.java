@@ -77,6 +77,7 @@ public class StackStateAnimator {
     private Stack<AnimatorListenerAdapter> mAnimationListenerPool = new Stack<>();
     private AnimationFilter mAnimationFilter = new AnimationFilter();
     private long mCurrentLength;
+    private long mCurrentAdditionalDelay;
 
     /** The current index for the last child which was not added in this event set. */
     private int mCurrentLastNotAddedIndex;
@@ -99,12 +100,13 @@ public class StackStateAnimator {
 
     public void startAnimationForEvents(
             ArrayList<NotificationStackScrollLayout.AnimationEvent> mAnimationEvents,
-            StackScrollState finalState) {
+            StackScrollState finalState, long additionalDelay) {
 
         processAnimationEvents(mAnimationEvents, finalState);
 
         int childCount = mHostLayout.getChildCount();
         mAnimationFilter.applyCombination(mNewEvents);
+        mCurrentAdditionalDelay = additionalDelay;
         mCurrentLength = NotificationStackScrollLayout.AnimationEvent.combineLength(mNewEvents);
         mCurrentLastNotAddedIndex = findLastNotAddedIndex(finalState);
         for (int i = 0; i < childCount; i++) {
@@ -167,7 +169,7 @@ public class StackStateAnimator {
         long delay = 0;
         long duration = mCurrentLength;
         if (hasDelays && isDelayRelevant || wasAdded) {
-            delay = calculateChildAnimationDelay(viewState, finalState);
+            delay = mCurrentAdditionalDelay + calculateChildAnimationDelay(viewState, finalState);
         }
 
         if (wasAdded && mAnimationFilter.hasGoToFullShadeEvent) {
