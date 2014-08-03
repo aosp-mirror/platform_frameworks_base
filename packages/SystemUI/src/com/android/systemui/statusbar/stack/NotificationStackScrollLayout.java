@@ -131,6 +131,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private boolean mNeedsAnimation;
     private boolean mTopPaddingNeedsAnimation;
     private boolean mDimmedNeedsAnimation;
+    private boolean mHideSensitiveNeedsAnimation;
     private boolean mDarkNeedsAnimation;
     private boolean mActivateNeedsAnimation;
     private boolean mGoToFullShadeNeedsAnimation;
@@ -1579,6 +1580,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         generateTopPaddingEvent();
         generateActivateEvent();
         generateDimmedEvent();
+        generateHideSensitiveEvent();
         generateDarkEvent();
         generateGoToFullShadeEvent();
         mNeedsAnimation = false;
@@ -1654,6 +1656,14 @@ public class NotificationStackScrollLayout extends ViewGroup
                     new AnimationEvent(null, AnimationEvent.ANIMATION_TYPE_DIMMED));
         }
         mDimmedNeedsAnimation = false;
+    }
+
+    private void generateHideSensitiveEvent() {
+        if (mHideSensitiveNeedsAnimation) {
+            mAnimationEvents.add(
+                    new AnimationEvent(null, AnimationEvent.ANIMATION_TYPE_HIDE_SENSITIVE));
+        }
+        mHideSensitiveNeedsAnimation = false;
     }
 
     private void generateDarkEvent() {
@@ -1897,6 +1907,22 @@ public class NotificationStackScrollLayout extends ViewGroup
             mNeedsAnimation =  true;
         }
         requestChildrenUpdate();
+    }
+
+    public void setHideSensitive(boolean hideSensitive, boolean animate) {
+        if (hideSensitive != mAmbientState.isHideSensitive()) {
+            int childCount = getChildCount();
+            for (int i = 0; i < childCount; i++) {
+                ExpandableView v = (ExpandableView) getChildAt(i);
+                v.setHideSensitiveForIntrinsicHeight(hideSensitive);
+            }
+            mAmbientState.setHideSensitive(hideSensitive);
+            if (animate && mAnimationsEnabled) {
+                mHideSensitiveNeedsAnimation = true;
+                mNeedsAnimation =  true;
+            }
+            requestChildrenUpdate();
+        }
     }
 
     /**
@@ -2155,7 +2181,12 @@ public class NotificationStackScrollLayout extends ViewGroup
                         .animateY()
                         .animateDimmed()
                         .animateScale()
-                        .animateZ(),
+                        .animateZ()
+                        .hasDelays(),
+
+                // ANIMATION_TYPE_HIDE_SENSITIVE
+                new AnimationFilter()
+                        .animateHideSensitive(),
         };
 
         static int[] LENGTHS = new int[] {
@@ -2192,6 +2223,9 @@ public class NotificationStackScrollLayout extends ViewGroup
 
                 // ANIMATION_TYPE_GO_TO_FULL_SHADE
                 StackStateAnimator.ANIMATION_DURATION_GO_TO_FULL_SHADE,
+
+                // ANIMATION_TYPE_HIDE_SENSITIVE
+                StackStateAnimator.ANIMATION_DURATION_STANDARD,
         };
 
         static final int ANIMATION_TYPE_ADD = 0;
@@ -2205,6 +2239,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         static final int ANIMATION_TYPE_CHANGE_POSITION = 8;
         static final int ANIMATION_TYPE_DARK = 9;
         static final int ANIMATION_TYPE_GO_TO_FULL_SHADE = 10;
+        static final int ANIMATION_TYPE_HIDE_SENSITIVE = 11;
 
         final long eventStartTime;
         final View changingView;

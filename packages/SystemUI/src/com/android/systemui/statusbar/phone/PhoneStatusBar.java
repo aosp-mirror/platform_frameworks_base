@@ -1362,10 +1362,15 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             int vis = ent.notification.getNotification().visibility;
 
             // Display public version of the notification if we need to redact.
-            final boolean hideSensitive = shouldHideSensitiveContents(ent.notification.getUserId());
-            boolean showingPublic = vis == Notification.VISIBILITY_PRIVATE && hideSensitive;
-            ent.row.setShowingPublic(showingPublic);
+            final boolean hideSensitive =
+                    !userAllowsPrivateNotificationsInPublic(ent.notification.getUserId());
+            boolean sensitive = vis == Notification.VISIBILITY_PRIVATE;
+            boolean showingPublic = sensitive && hideSensitive && isLockscreenPublicMode();
+            ent.row.setSensitive(sensitive && hideSensitive);
             if (ent.autoRedacted && ent.legacy) {
+
+                // TODO: Also fade this? Or, maybe easier (and better), provide a dark redacted form
+                // for legacy auto redacted notifications.
                 if (showingPublic) {
                     ent.row.setShowingLegacyBackground(false);
                 } else {
@@ -3415,8 +3420,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
         mNotificationPanel.setBarState(mState, mKeyguardFadingAway, goingToFullShade);
         updateDozingState();
-        updateStackScrollerState();
         updatePublicMode();
+        updateStackScrollerState(goingToFullShade);
         updateNotifications();
         checkBarModes();
         updateCarrierLabelVisibility(false);
@@ -3443,9 +3448,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mScrimController.setDozing(mDozing);
     }
 
-    public void updateStackScrollerState() {
+    public void updateStackScrollerState(boolean goingToFullShade) {
         if (mStackScroller == null) return;
         boolean onKeyguard = mState == StatusBarState.KEYGUARD;
+        mStackScroller.setHideSensitive(isLockscreenPublicMode(), goingToFullShade);
         mStackScroller.setDimmed(onKeyguard, false /* animate */);
         mStackScroller.setExpandingEnabled(!onKeyguard);
         ActivatableNotificationView activatedChild = mStackScroller.getActivatedChild();

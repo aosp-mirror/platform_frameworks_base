@@ -176,6 +176,23 @@ public abstract class ExpandableView extends FrameLayout {
     }
 
     /**
+     * See {@link #setHideSensitive}. This is a variant which notifies this view in advance about
+     * the upcoming state of hiding sensitive notifications. It gets called at the very beginning
+     * of a stack scroller update such that the updated intrinsic height (which is dependent on
+     * whether private or public layout is showing) gets taken into account into all layout
+     * calculations.
+     */
+    public void setHideSensitiveForIntrinsicHeight(boolean hideSensitive) {
+    }
+
+    /**
+     * Sets whether the notification should hide its private contents if it is sensitive.
+     */
+    public void setHideSensitive(boolean hideSensitive, boolean animated, long delay,
+            long duration) {
+    }
+
+    /**
      * @return The desired notification height.
      */
     public int getIntrinsicHeight() {

@@ -91,7 +91,9 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
 
         if (mHeadsUp != null) {
             mHeadsUp.row.setSystemExpanded(true);
-            mHeadsUp.row.setShowingPublic(false);
+            mHeadsUp.row.setSensitive(false);
+            mHeadsUp.row.setHideSensitive(
+                    false, false /* animated */, 0 /* delay */, 0 /* duration */);
             if (mContentHolder == null) {
                 // too soon!
                 return false;

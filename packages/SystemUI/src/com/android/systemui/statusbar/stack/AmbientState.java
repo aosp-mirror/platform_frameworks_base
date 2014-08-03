@@ -34,6 +34,7 @@ public class AmbientState {
     private int mSpeedBumpIndex = -1;
     private float mScrimAmount;
     private boolean mDark;
+    private boolean mHideSensitive;
 
     public int getScrollY() {
         return mScrollY;
@@ -68,6 +69,10 @@ public class AmbientState {
         mDark = dark;
     }
 
+    public void setHideSensitive(boolean hideSensitive) {
+        mHideSensitive = hideSensitive;
+    }
+
     /**
      * In dimmed mode, a child can be activated, which happens on the first tap of the double-tap
      * interaction. This child is then scaled normally and its background is fully opaque.
@@ -82,6 +87,10 @@ public class AmbientState {
 
     public boolean isDark() {
         return mDark;
+    }
+
+    public boolean isHideSensitive() {
+        return mHideSensitive;
     }
 
     public ActivatableNotificationView getActivatedChild() {

@@ -159,7 +159,7 @@ public class StackScrollAlgorithm {
         updateZValuesForState(resultState, algorithmState);
 
         handleDraggedViews(ambientState, resultState, algorithmState);
-        updateDimmedActivated(ambientState, resultState, algorithmState);
+        updateDimmedActivatedHideSensitive(ambientState, resultState, algorithmState);
         updateClipping(resultState, algorithmState);
         updateScrimAmount(resultState, algorithmState, ambientState.getScrimAmount());
         updateSpeedBumpState(resultState, algorithmState, ambientState.getSpeedBumpIndex());
@@ -251,12 +251,13 @@ public class StackScrollAlgorithm {
     }
 
     /**
-     * Updates the dimmed and activated states of the children.
+     * Updates the dimmed, activated and hiding sensitive states of the children.
      */
-    private void updateDimmedActivated(AmbientState ambientState, StackScrollState resultState,
-            StackScrollAlgorithmState algorithmState) {
+    private void updateDimmedActivatedHideSensitive(AmbientState ambientState,
+            StackScrollState resultState, StackScrollAlgorithmState algorithmState) {
         boolean dimmed = ambientState.isDimmed();
         boolean dark = ambientState.isDark();
+        boolean hideSensitive = ambientState.isHideSensitive();
         View activatedChild = ambientState.getActivatedChild();
         int childCount = algorithmState.visibleChildren.size();
         for (int i = 0; i < childCount; i++) {
@@ -264,6 +265,7 @@ public class StackScrollAlgorithm {
             StackScrollState.ViewState childViewState = resultState.getViewStateForView(child);
             childViewState.dimmed = dimmed;
             childViewState.dark = dark;
+            childViewState.hideSensitive = hideSensitive;
             boolean isActivatedChild = activatedChild == child;
             childViewState.scale = !dimmed || isActivatedChild
                     ? 1.0f
