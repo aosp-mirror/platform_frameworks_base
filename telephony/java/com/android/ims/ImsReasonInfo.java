@@ -218,7 +218,10 @@ public class ImsReasonInfo implements Parcelable {
     public static final int CODE_UT_OPERATION_NOT_ALLOWED = 803;
     public static final int CODE_UT_CB_PASSWORD_MISMATCH = 821;
 
-
+    /**
+     * ECBM
+     */
+    public static final int CODE_ECBM_NOT_SUPPORTED = 901;
 
     // For reason type
     public int mReasonType;
