@@ -115,6 +115,13 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
         scheduleUpdate();
     }
 
+    public void animateGoingToFullShade(long delay, long duration) {
+        mDurationOverride = duration;
+        mAnimationDelay = delay;
+        mAnimateChange = true;
+        scheduleUpdate();
+    }
+
     public void setDozing(boolean dozing) {
         if (mDozing == dozing) return;
         mDozing = dozing;
