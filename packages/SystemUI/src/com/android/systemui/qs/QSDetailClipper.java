@@ -51,15 +51,26 @@ public class QSDetailClipper {
         if (listener != null) {
             mAnimator.addListener(listener);
         }
+        mDetail.setLayerType(View.LAYER_TYPE_HARDWARE, null);
         if (in) {
             mBackground.startTransition((int)(mAnimator.getDuration() * 0.6));
             mAnimator.addListener(mVisibleOnStart);
             mAnimator.start();
         } else {
+            mDetail.postDelayed(mReverseBackground, (long)(mAnimator.getDuration() * 0.65));
             mAnimator.addListener(mGoneOnEnd);
             mAnimator.reverse();
         }
     }
+
+    private final Runnable mReverseBackground = new Runnable() {
+        @Override
+        public void run() {
+            if (mAnimator != null) {
+                mBackground.reverseTransition((int)(mAnimator.getDuration() * 0.35));
+            }
+        }
+    };
 
     private final AnimatorListenerAdapter mVisibleOnStart = new AnimatorListenerAdapter() {
         @Override
@@ -68,6 +79,7 @@ public class QSDetailClipper {
         }
 
         public void onAnimationEnd(Animator animation) {
+            mDetail.setLayerType(View.LAYER_TYPE_NONE, null);
             mAnimator = null;
         }
     };
@@ -75,6 +87,7 @@ public class QSDetailClipper {
     private final AnimatorListenerAdapter mGoneOnEnd = new AnimatorListenerAdapter() {
         @Override
         public void onAnimationEnd(Animator animation) {
+            mDetail.setLayerType(View.LAYER_TYPE_NONE, null);
             mDetail.setVisibility(View.GONE);
             mBackground.resetTransition();
             mAnimator = null;
