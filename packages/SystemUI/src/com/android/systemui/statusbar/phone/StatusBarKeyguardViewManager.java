@@ -230,17 +230,22 @@ public class StatusBarKeyguardViewManager {
             });
         } else {
             mPhoneStatusBar.setKeyguardFadingAway(delay, fadeoutDuration);
-            mPhoneStatusBar.hideKeyguard();
-            mStatusBarWindowManager.setKeyguardFadingAway(true);
+            boolean staying = mPhoneStatusBar.hideKeyguard();
+            if (!staying) {
+                mStatusBarWindowManager.setKeyguardFadingAway(true);
+                mScrimController.animateKeyguardFadingOut(delay, fadeoutDuration, new Runnable() {
+                    @Override
+                    public void run() {
+                        mStatusBarWindowManager.setKeyguardFadingAway(false);
+                        mPhoneStatusBar.finishKeyguardFadingAway();
+                    }
+                });
+            } else {
+                mScrimController.animateGoingToFullShade(delay, fadeoutDuration);
+                mPhoneStatusBar.finishKeyguardFadingAway();
+            }
             mStatusBarWindowManager.setKeyguardShowing(false);
             mBouncer.animateHide(delay, fadeoutDuration);
-            mScrimController.animateKeyguardFadingOut(delay, fadeoutDuration, new Runnable() {
-                @Override
-                public void run() {
-                    mStatusBarWindowManager.setKeyguardFadingAway(false);
-                    mPhoneStatusBar.finishKeyguardFadingAway();
-                }
-            });
             mViewMediatorCallback.keyguardGone();
             updateStates();
         }

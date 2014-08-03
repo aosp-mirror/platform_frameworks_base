@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.phone;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
+import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -115,6 +116,7 @@ public class NotificationPanelView extends PanelView implements
 
     private Interpolator mFastOutSlowInInterpolator;
     private Interpolator mFastOutLinearInterpolator;
+    private Interpolator mLinearOutSlowInInterpolator;
     private ObjectAnimator mClockAnimator;
     private int mClockAnimationTarget = -1;
     private int mTopPaddingAdjustment;
@@ -140,6 +142,8 @@ public class NotificationPanelView extends PanelView implements
     private Runnable mLaunchAnimationEndRunnable;
     private boolean mOnlyAffordanceInThisMotion;
     private boolean mKeyguardStatusViewAnimating;
+    private boolean mHeaderAnimatingIn;
+    private ObjectAnimator mQsContainerAnimator;
 
     public NotificationPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -172,6 +176,8 @@ public class NotificationPanelView extends PanelView implements
                 android.R.interpolator.fast_out_slow_in);
         mFastOutLinearInterpolator = AnimationUtils.loadInterpolator(getContext(),
                 android.R.interpolator.fast_out_linear_in);
+        mLinearOutSlowInInterpolator = AnimationUtils.loadInterpolator(getContext(),
+                android.R.interpolator.linear_out_slow_in);
         mKeyguardBottomArea = (KeyguardBottomAreaView) findViewById(R.id.keyguard_bottom_area);
         mAfforanceHelper = new KeyguardAffordanceHelper(this, getContext());
     }
@@ -292,9 +298,9 @@ public class NotificationPanelView extends PanelView implements
         mKeyguardStatusView.setScaleY(scale);
     }
 
-    public void animateToFullShade() {
+    public void animateToFullShade(long delay) {
         mAnimateNextTopPaddingChange = true;
-        mNotificationStackScroller.goToFullShade();
+        mNotificationStackScroller.goToFullShade(delay);
         requestLayout();
     }
 
@@ -673,19 +679,28 @@ public class NotificationPanelView extends PanelView implements
         }
     }
 
-    public void setBarState(int statusBarState, boolean keyguardFadingAway) {
+    public void setBarState(int statusBarState, boolean keyguardFadingAway,
+            boolean goingToFullShade) {
         boolean keyguardShowing = statusBarState == StatusBarState.KEYGUARD
                 || statusBarState == StatusBarState.SHADE_LOCKED;
-        mKeyguardStatusBar.setAlpha(1f);
-        mKeyguardStatusBar.setVisibility(keyguardShowing ? View.VISIBLE : View.INVISIBLE);
         if (!mKeyguardShowing && keyguardShowing) {
             setQsTranslation(mQsExpansionHeight);
             mHeader.setTranslationY(0f);
         }
-        setKeyguardStatusViewVisibility(statusBarState, keyguardFadingAway);
+        setKeyguardStatusViewVisibility(statusBarState, keyguardFadingAway, goingToFullShade);
+        setKeyguardBottomAreaVisibility(statusBarState, goingToFullShade);
+        if (goingToFullShade) {
+            animateKeyguardStatusBarOut();
+        } else {
+            mKeyguardStatusBar.setAlpha(1f);
+            mKeyguardStatusBar.setVisibility(keyguardShowing ? View.VISIBLE : View.INVISIBLE);
+        }
         mStatusBarState = statusBarState;
         mKeyguardShowing = keyguardShowing;
         updateQsState();
+        if (goingToFullShade) {
+            animateHeaderSlidingIn();
+        }
     }
 
     private final Runnable mAnimateKeyguardStatusViewInvisibleEndRunnable = new Runnable() {
@@ -703,16 +718,131 @@ public class NotificationPanelView extends PanelView implements
         }
     };
 
-    private void setKeyguardStatusViewVisibility(int statusBarState, boolean keyguardFadingAway) {
-        if (!keyguardFadingAway && mStatusBarState == StatusBarState.KEYGUARD
-                && statusBarState != StatusBarState.KEYGUARD) {
+    private final Animator.AnimatorListener mAnimateHeaderSlidingInListener
+            = new AnimatorListenerAdapter() {
+        @Override
+        public void onAnimationEnd(Animator animation) {
+            mHeaderAnimatingIn = false;
+            mQsContainerAnimator = null;
+            mQsContainer.removeOnLayoutChangeListener(mQsContainerAnimatorUpdater);
+        }
+    };
+
+    private final OnLayoutChangeListener mQsContainerAnimatorUpdater
+            = new OnLayoutChangeListener() {
+        @Override
+        public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft,
+                int oldTop, int oldRight, int oldBottom) {
+            int oldHeight = oldBottom - oldTop;
+            int height = bottom - top;
+            if (height != oldHeight && mQsContainerAnimator != null) {
+                PropertyValuesHolder[] values = mQsContainerAnimator.getValues();
+                float newEndValue = mHeader.getCollapsedHeight() + mQsPeekHeight - height - top;
+                float newStartValue = -height - top;
+                values[0].setFloatValues(newStartValue, newEndValue);
+                mQsContainerAnimator.setCurrentPlayTime(mQsContainerAnimator.getCurrentPlayTime());
+            }
+        }
+    };
+
+    private final ViewTreeObserver.OnPreDrawListener mStartHeaderSlidingIn
+            = new ViewTreeObserver.OnPreDrawListener() {
+        @Override
+        public boolean onPreDraw() {
+            getViewTreeObserver().removeOnPreDrawListener(this);
+            mHeader.setTranslationY(-mHeader.getCollapsedHeight() - mQsPeekHeight);
+            mHeader.animate()
+                    .translationY(0f)
+                    .setStartDelay(mStatusBar.calculateGoingToFullShadeDelay())
+                    .setDuration(StackStateAnimator.ANIMATION_DURATION_GO_TO_FULL_SHADE)
+                    .setInterpolator(mFastOutSlowInInterpolator)
+                    .start();
+            mQsContainer.setY(-mQsContainer.getHeight());
+            mQsContainerAnimator = ObjectAnimator.ofFloat(mQsContainer, View.TRANSLATION_Y,
+                    mQsContainer.getTranslationY(),
+                    mHeader.getCollapsedHeight() + mQsPeekHeight - mQsContainer.getHeight()
+                            - mQsContainer.getTop());
+            mQsContainerAnimator.setStartDelay(mStatusBar.calculateGoingToFullShadeDelay());
+            mQsContainerAnimator.setDuration(StackStateAnimator.ANIMATION_DURATION_GO_TO_FULL_SHADE);
+            mQsContainerAnimator.setInterpolator(mFastOutSlowInInterpolator);
+            mQsContainerAnimator.addListener(mAnimateHeaderSlidingInListener);
+            mQsContainerAnimator.start();
+            mQsContainer.addOnLayoutChangeListener(mQsContainerAnimatorUpdater);
+            return true;
+        }
+    };
+    
+    private void animateHeaderSlidingIn() {
+        mHeaderAnimatingIn = true;
+        getViewTreeObserver().addOnPreDrawListener(mStartHeaderSlidingIn);
+
+    }
+
+    private final Runnable mAnimateKeyguardStatusBarInvisibleEndRunnable = new Runnable() {
+        @Override
+        public void run() {
+            mKeyguardStatusBar.setVisibility(View.INVISIBLE);
+        }
+    };
+
+    private void animateKeyguardStatusBarOut() {
+        mKeyguardStatusBar.animate()
+                .alpha(0f)
+                .setStartDelay(mStatusBar.getKeyguardFadingAwayDelay())
+                .setDuration(mStatusBar.getKeyguardFadingAwayDuration()/2)
+                .setInterpolator(PhoneStatusBar.ALPHA_OUT)
+                .withEndAction(mAnimateKeyguardStatusBarInvisibleEndRunnable)
+                .start();
+    }
+
+    private final Runnable mAnimateKeyguardBottomAreaInvisibleEndRunnable = new Runnable() {
+        @Override
+        public void run() {
+            mKeyguardBottomArea.setVisibility(View.GONE);
+        }
+    };
+
+    private void setKeyguardBottomAreaVisibility(int statusBarState,
+            boolean goingToFullShade) {
+        if (goingToFullShade) {
+            mKeyguardBottomArea.animate().cancel();
+            mKeyguardBottomArea.animate()
+                    .alpha(0f)
+                    .setStartDelay(mStatusBar.getKeyguardFadingAwayDelay())
+                    .setDuration(mStatusBar.getKeyguardFadingAwayDuration()/2)
+                    .setInterpolator(PhoneStatusBar.ALPHA_OUT)
+                    .withEndAction(mAnimateKeyguardBottomAreaInvisibleEndRunnable)
+                    .start();
+        } else if (statusBarState == StatusBarState.KEYGUARD
+                || statusBarState == StatusBarState.SHADE_LOCKED) {
+            mKeyguardBottomArea.animate().cancel();
+            mKeyguardBottomArea.setVisibility(View.VISIBLE);
+            mKeyguardBottomArea.setAlpha(1f);
+        } else {
+            mKeyguardBottomArea.animate().cancel();
+            mKeyguardBottomArea.setVisibility(View.GONE);
+            mKeyguardBottomArea.setAlpha(1f);
+        }
+    }
+
+    private void setKeyguardStatusViewVisibility(int statusBarState, boolean keyguardFadingAway,
+            boolean goingToFullShade) {
+        if ((!keyguardFadingAway && mStatusBarState == StatusBarState.KEYGUARD
+                && statusBarState != StatusBarState.KEYGUARD) || goingToFullShade) {
             mKeyguardStatusView.animate().cancel();
             mKeyguardStatusViewAnimating = true;
             mKeyguardStatusView.animate()
                     .alpha(0f)
+                    .setStartDelay(0)
                     .setDuration(160)
                     .setInterpolator(PhoneStatusBar.ALPHA_OUT)
                     .withEndAction(mAnimateKeyguardStatusViewInvisibleEndRunnable);
+            if (keyguardFadingAway) {
+                mKeyguardStatusView.animate()
+                        .setStartDelay(mStatusBar.getKeyguardFadingAwayDelay())
+                        .setDuration(mStatusBar.getKeyguardFadingAwayDuration()/2)
+                        .start();
+            }
         } else if (mStatusBarState == StatusBarState.SHADE_LOCKED
                 && statusBarState == StatusBarState.KEYGUARD) {
             mKeyguardStatusView.animate().cancel();
@@ -721,6 +851,7 @@ public class NotificationPanelView extends PanelView implements
             mKeyguardStatusView.setAlpha(0f);
             mKeyguardStatusView.animate()
                     .alpha(1f)
+                    .setStartDelay(0)
                     .setDuration(320)
                     .setInterpolator(PhoneStatusBar.ALPHA_IN)
                     .withEndAction(mAnimateKeyguardStatusViewVisibleEndRunnable);
@@ -791,7 +922,9 @@ public class NotificationPanelView extends PanelView implements
     }
 
     private void setQsTranslation(float height) {
-        mQsContainer.setY(height - mQsContainer.getHeight() + getHeaderTranslation());
+        if (!mHeaderAnimatingIn) {
+            mQsContainer.setY(height - mQsContainer.getHeight() + getHeaderTranslation());
+        }
         if (mKeyguardShowing) {
             mHeader.setY(interpolate(getQsExpansionFraction(), -mHeader.getHeight(), 0));
         }
@@ -1089,7 +1222,9 @@ public class NotificationPanelView extends PanelView implements
     }
 
     private void updateHeaderShade() {
-        mHeader.setTranslationY(getHeaderTranslation());
+        if (!mHeaderAnimatingIn) {
+            mHeader.setTranslationY(getHeaderTranslation());
+        }
         setQsTranslation(mQsExpansionHeight);
     }
 
