@@ -37,6 +37,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     private boolean mUserLocked;
     /** Are we showing the "public" version */
     private boolean mShowingPublic;
+    private boolean mSensitive;
+    private boolean mShowingPublicInitialized;
+    private boolean mShowingPublicForIntrinsicHeight;
 
     /**
      * Is this notification expanded by the system. The expansion state can be overridden by the
@@ -78,6 +81,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         mHasUserChangedExpansion = false;
         mUserLocked = false;
         mShowingPublic = false;
+        mSensitive = false;
+        mShowingPublicInitialized = false;
         mIsSystemExpanded = false;
         mExpansionDisabled = false;
         mPublicLayout.reset();
@@ -222,7 +227,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
             return mRowMinHeight;
         }
 
-        return mShowingPublic ? mRowMinHeight : getMaxExpandHeight();
+        return mShowingPublicForIntrinsicHeight ? mRowMinHeight : getMaxExpandHeight();
     }
 
     /**
@@ -248,17 +253,64 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         }
     }
 
-    public void setShowingPublic(boolean show) {
-        mShowingPublic = show;
+    public void setSensitive(boolean sensitive) {
+        mSensitive = sensitive;
+    }
+
+    public void setHideSensitiveForIntrinsicHeight(boolean hideSensitive) {
+        mShowingPublicForIntrinsicHeight = mSensitive && hideSensitive;
+    }
+
+    public void setHideSensitive(boolean hideSensitive, boolean animated, long delay,
+            long duration) {
+        boolean oldShowingPublic = mShowingPublic;
+        mShowingPublic = mSensitive && hideSensitive;
+        if (mShowingPublicInitialized && mShowingPublic == oldShowingPublic) {
+            return;
+        }
 
         // bail out if no public version
         if (mPublicLayout.getChildCount() == 0) return;
 
-        // TODO: animation?
-        mPublicLayout.setVisibility(show ? View.VISIBLE : View.GONE);
-        mPrivateLayout.setVisibility(show ? View.GONE : View.VISIBLE);
+        if (!animated) {
+            mPublicLayout.animate().cancel();
+            mPrivateLayout.animate().cancel();
+            mPublicLayout.setAlpha(1f);
+            mPrivateLayout.setAlpha(1f);
+            mPublicLayout.setVisibility(mShowingPublic ? View.VISIBLE : View.INVISIBLE);
+            mPrivateLayout.setVisibility(mShowingPublic ? View.INVISIBLE : View.VISIBLE);
+        } else {
+            animateShowingPublic(delay, duration);
+        }
 
         updateVetoButton();
+        mShowingPublicInitialized = true;
+    }
+
+    private void animateShowingPublic(long delay, long duration) {
+        final View source = mShowingPublic ? mPrivateLayout : mPublicLayout;
+        View target = mShowingPublic ? mPublicLayout : mPrivateLayout;
+        source.setVisibility(View.VISIBLE);
+        target.setVisibility(View.VISIBLE);
+        target.setAlpha(0f);
+        source.animate().cancel();
+        target.animate().cancel();
+        source.animate()
+                .alpha(0f)
+                .withLayer()
+                .setStartDelay(delay)
+                .setDuration(duration)
+                .withEndAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        source.setVisibility(View.INVISIBLE);
+                    }
+                });
+        target.animate()
+                .alpha(1f)
+                .withLayer()
+                .setStartDelay(delay)
+                .setDuration(duration);
     }
 
     private void updateVetoButton() {
@@ -267,7 +319,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     }
 
     public int getMaxExpandHeight() {
-        return mShowingPublic ? mRowMinHeight : mMaxExpandHeight;
+        return mShowingPublicForIntrinsicHeight ? mRowMinHeight : mMaxExpandHeight;
     }
 
     @Override

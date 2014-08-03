@@ -30,6 +30,7 @@ public class AnimationFilter {
     boolean animateTopInset;
     boolean animateDimmed;
     boolean animateDark;
+    boolean animateHideSensitive;
     boolean hasDelays;
     boolean hasGoToFullShadeEvent;
 
@@ -78,6 +79,11 @@ public class AnimationFilter {
         return this;
     }
 
+    public AnimationFilter animateHideSensitive() {
+        animateHideSensitive = true;
+        return this;
+    }
+
     /**
      * Combines multiple filters into {@code this} filter, using or as the operand .
      *
@@ -104,6 +110,7 @@ public class AnimationFilter {
         animateTopInset |= filter.animateTopInset;
         animateDimmed |= filter.animateDimmed;
         animateDark |= filter.animateDark;
+        animateHideSensitive |= filter.animateHideSensitive;
         hasDelays |= filter.hasDelays;
     }
 
@@ -116,6 +123,7 @@ public class AnimationFilter {
         animateTopInset = false;
         animateDimmed = false;
         animateDark = false;
+        animateHideSensitive = false;
         hasDelays = false;
         hasGoToFullShadeEvent = false;
     }
