@@ -4878,4 +4878,7 @@
     <string name="description_krtv_12">12세미만의 청소년이 시청하기에 부적절한 내용이 포함되어 있어 보호자의 시청지도가 필요한 등급을 말한다.</string>
     <string name="description_krtv_15">15세미만의 청소년이 시청하기에 부적절한 내용이 포함되어 있어 보호자의 시청지도가 필요한 등급을 말한다.</string>
     <string name="description_krtv_19">19세미만의 청소년이 시청하기에 부적절한 내용이 포함되어 있어 청소년이 시청할 수 없는 등급을 말한다.</string>
+
+     <!-- [CHAR_LIMIT=NONE] Battery saver: Feature description -->
+    <string name="battery_saver_description">To help improve battery life, battery saver will reduce your device’s performance and restrict background data.  Email, messaging, and other apps that rely on syncing may not update unless you open them.\n\nBattery saver turns off automatically when your device is charging.</string>
 </resources>

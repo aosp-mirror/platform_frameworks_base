@@ -47,6 +47,7 @@ public class BatteryController extends BroadcastReceiver {
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_BATTERY_CHANGED);
         filter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED);
+        filter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGING);
         context.registerReceiver(this, filter);
 
         updatePowerSave();
@@ -86,6 +87,8 @@ public class BatteryController extends BroadcastReceiver {
             fireBatteryLevelChanged();
         } else if (action.equals(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED)) {
             updatePowerSave();
+        } else if (action.equals(PowerManager.ACTION_POWER_SAVE_MODE_CHANGING)) {
+            setPowerSave(intent.getBooleanExtra(PowerManager.EXTRA_POWER_SAVE_MODE, false));
         }
     }
 
@@ -94,7 +97,10 @@ public class BatteryController extends BroadcastReceiver {
     }
 
     private void updatePowerSave() {
-        final boolean powerSave = mPowerManager.isPowerSaveMode();
+        setPowerSave(mPowerManager.isPowerSaveMode());
+    }
+
+    private void setPowerSave(boolean powerSave) {
         if (powerSave == mPowerSave) return;
         mPowerSave = powerSave;
         if (DEBUG) Log.d(TAG, "Power save is " + (mPowerSave ? "on" : "off"));

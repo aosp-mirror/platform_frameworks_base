@@ -422,6 +422,9 @@ public final class PowerManagerService extends com.android.server.SystemService
     // Current state of whether the settings are allowing auto low power mode.
     private boolean mAutoLowPowerModeEnabled;
 
+   // The user turned off low power mode below the trigger level
+    private boolean mAutoLowPowerModeSnoozing;
+
     // True if the battery level is currently considered low.
     private boolean mBatteryLevelLow;
 
@@ -650,9 +653,23 @@ public final class PowerManagerService extends com.android.server.SystemService
         final boolean lowPowerModeEnabled = Settings.Global.getInt(resolver,
                 Settings.Global.LOW_POWER_MODE, 0) != 0;
         final boolean autoLowPowerModeEnabled = Settings.Global.getInt(resolver,
-                Settings.Global.LOW_POWER_MODE_TRIGGER_LEVEL, 15) != 0;
+                Settings.Global.LOW_POWER_MODE_TRIGGER_LEVEL, 0) != 0;
         if (lowPowerModeEnabled != mLowPowerModeSetting
                 || autoLowPowerModeEnabled != mAutoLowPowerModeEnabled) {
+            if (lowPowerModeEnabled != mLowPowerModeSetting) {
+                if (!mAutoLowPowerModeSnoozing && !lowPowerModeEnabled && !mIsPowered
+                        && mAutoLowPowerModeEnabled) {
+                    if (DEBUG_SPEW) {
+                        Slog.d(TAG, "updateSettingsLocked: snoozing low power mode");
+                    }
+                    mAutoLowPowerModeSnoozing = true;
+                } else if (mAutoLowPowerModeSnoozing && lowPowerModeEnabled) {
+                    if (DEBUG_SPEW) {
+                        Slog.d(TAG, "updateSettingsLocked: no longer snoozing low power mode");
+                    }
+                    mAutoLowPowerModeSnoozing = true;
+                }
+            }
             mLowPowerModeSetting = lowPowerModeEnabled;
             mAutoLowPowerModeEnabled = autoLowPowerModeEnabled;
             updateLowPowerModeLocked();
@@ -662,8 +679,25 @@ public final class PowerManagerService extends com.android.server.SystemService
     }
 
     void updateLowPowerModeLocked() {
-        final boolean lowPowerModeEnabled = !mIsPowered
-                && (mLowPowerModeSetting || (mAutoLowPowerModeEnabled && mBatteryLevelLow));
+        if (mIsPowered && mLowPowerModeSetting) {
+            if (DEBUG_SPEW) {
+                Slog.d(TAG, "updateLowPowerModeLocked: powered, turning setting off");
+            }
+            // Turn setting off if powered
+            Settings.Global.putInt(mContext.getContentResolver(),
+                    Settings.Global.LOW_POWER_MODE, 0);
+            mLowPowerModeSetting = false;
+        } else if (!mIsPowered && mAutoLowPowerModeEnabled && !mAutoLowPowerModeSnoozing
+                && mBatteryLevelLow && !mLowPowerModeSetting) {
+            if (DEBUG_SPEW) {
+                Slog.d(TAG, "updateLowPowerModeLocked: trigger level reached, turning setting on");
+            }
+            // Turn setting on if trigger level is enabled, and we're now below it
+            Settings.Global.putInt(mContext.getContentResolver(),
+                    Settings.Global.LOW_POWER_MODE, 1);
+            mLowPowerModeSetting = true;
+        }
+        final boolean lowPowerModeEnabled = mLowPowerModeSetting;
         if (mLowPowerModeEnabled != lowPowerModeEnabled) {
             mLowPowerModeEnabled = lowPowerModeEnabled;
             powerHintInternal(POWER_HINT_LOW_POWER_MODE, lowPowerModeEnabled ? 1 : 0);
@@ -672,6 +706,10 @@ public final class PowerManagerService extends com.android.server.SystemService
             BackgroundThread.getHandler().post(new Runnable() {
                 @Override
                 public void run() {
+                    Intent intent = new Intent(PowerManager.ACTION_POWER_SAVE_MODE_CHANGING)
+                            .putExtra(PowerManager.EXTRA_POWER_SAVE_MODE, mLowPowerModeEnabled)
+                            .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+                    mContext.sendBroadcast(intent);
                     ArrayList<PowerManagerInternal.LowPowerModeListener> listeners;
                     synchronized (mLock) {
                         listeners = new ArrayList<PowerManagerInternal.LowPowerModeListener>(
@@ -680,7 +718,7 @@ public final class PowerManagerService extends com.android.server.SystemService
                     for (int i=0; i<listeners.size(); i++) {
                         listeners.get(i).onLowPowerModeChanged(lowPowerModeEnabled);
                     }
-                    Intent intent = new Intent(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED);
+                    intent = new Intent(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED);
                     intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
                     mContext.sendBroadcast(intent);
                 }
@@ -1218,6 +1256,12 @@ public final class PowerManagerService extends com.android.server.SystemService
             }
 
             if (wasPowered != mIsPowered || oldLevelLow != mBatteryLevelLow) {
+                if (oldLevelLow != mBatteryLevelLow && !mBatteryLevelLow) {
+                    if (DEBUG_SPEW) {
+                        Slog.d(TAG, "updateIsPoweredLocked: resetting low power snooze");
+                    }
+                    mAutoLowPowerModeSnoozing = false;
+                }
                 updateLowPowerModeLocked();
             }
         }
@@ -2265,6 +2309,7 @@ public final class PowerManagerService extends com.android.server.SystemService
             pw.println("  mDreamsActivateOnDockSetting=" + mDreamsActivateOnDockSetting);
             pw.println("  mLowPowerModeSetting=" + mLowPowerModeSetting);
             pw.println("  mAutoLowPowerModeEnabled=" + mAutoLowPowerModeEnabled);
+            pw.println("  mAutoLowPowerModeSnoozing=" + mAutoLowPowerModeSnoozing);
             pw.println("  mMinimumScreenOffTimeoutConfig=" + mMinimumScreenOffTimeoutConfig);
             pw.println("  mMaximumScreenDimDurationConfig=" + mMaximumScreenDimDurationConfig);
             pw.println("  mMaximumScreenDimRatioConfig=" + mMaximumScreenDimRatioConfig);

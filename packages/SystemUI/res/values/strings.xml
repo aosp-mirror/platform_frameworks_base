@@ -86,16 +86,13 @@
     <string name="battery_low_why">Settings</string>
 
     <!-- Battery saver confirmation dialog title [CHAR LIMIT=NONE]-->
-    <string name="battery_saver_confirmation_title">Start battery saver?</string>
+    <string name="battery_saver_confirmation_title">Turn on battery saver?</string>
 
     <!-- Battery saver confirmation dialog ok text [CHAR LIMIT=40]-->
-    <string name="battery_saver_confirmation_ok">Start</string>
+    <string name="battery_saver_confirmation_ok">Turn on</string>
 
     <!-- Battery saver notification action [CHAR LIMIT=NONE]-->
-    <string name="battery_saver_start_action">Start battery saver</string>
-
-    <!-- Battery saver confirmation dialog text [CHAR LIMIT=NONE]-->
-    <string name="battery_saver_confirmation_text">To help improve battery life, Battery saver will reduce your device’s performance.\n\nBattery saver will be disabled when your device is plugged in.</string>
+    <string name="battery_saver_start_action">Turn on battery saver</string>
 
     <!-- Name of the button that links to the Settings app. [CHAR LIMIT=NONE] -->
     <string name="status_bar_settings_settings_button">Settings</string>
@@ -719,10 +716,10 @@
     <string name="battery_saver_notification_title">Battery saver is on</string>
 
     <!-- Battery saver notification text. [CHAR LIMIT=60] -->
-    <string name="battery_saver_notification_text">Device performance is reduced.</string>
+    <string name="battery_saver_notification_text">Reduces performance and background data</string>
 
     <!-- Battery saver notification action text. [CHAR LIMIT=60] -->
-    <string name="battery_saver_notification_action_text">Open battery saver settings</string>
+    <string name="battery_saver_notification_action_text">Turn off battery saver</string>
 
     <!-- Battery level for expanded quick settings [CHAR LIMIT=2] -->
     <string name="battery_level_template"><xliff:g id="level" example="45">%d</xliff:g>%%</string>
