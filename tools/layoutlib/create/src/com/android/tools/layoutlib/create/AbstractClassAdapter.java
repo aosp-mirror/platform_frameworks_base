@@ -97,7 +97,7 @@ public abstract class AbstractClassAdapter extends ClassVisitor {
         if (type.getSort() == Type.OBJECT) {
             String in = type.getInternalName();
             String newIn = renameInternalType(in);
-            if (newIn != in) {
+            if (!newIn.equals(in)) {
                 return Type.getType("L" + newIn + ";");
             }
         } else if (type.getSort() == Type.ARRAY) {
