@@ -709,6 +709,7 @@ public class NotificationManagerService extends SystemService {
             } else if (action.equals(Intent.ACTION_USER_PRESENT)) {
                 // turn off LED when user passes through lock screen
                 mNotificationLight.turnOff();
+                mStatusBar.notificationLightOff();
             } else if (action.equals(Intent.ACTION_USER_SWITCHED)) {
                 // reload per-user settings
                 mSettingsObserver.update(null);
@@ -1442,7 +1443,8 @@ public class NotificationManagerService extends SystemService {
                         }
                         pw.println("  ");
                     }
-
+                    pw.println("  mUseAttentionLight=" + mUseAttentionLight);
+                    pw.println("  mNotificationPulseEnabled=" + mNotificationPulseEnabled);
                     pw.println("  mSoundNotification=" + mSoundNotification);
                     pw.println("  mVibrateNotification=" + mVibrateNotification);
                     pw.println("  mDisableNotificationAlerts=" + mDisableNotificationAlerts);
@@ -2376,6 +2378,7 @@ public class NotificationManagerService extends SystemService {
         // Don't flash while we are in a call or screen is on
         if (mLedNotification == null || mInCall || mScreenOn) {
             mNotificationLight.turnOff();
+            mStatusBar.notificationLightOff();
         } else {
             final Notification ledno = mLedNotification.sbn.getNotification();
             int ledARGB = ledno.ledARGB;
@@ -2390,6 +2393,7 @@ public class NotificationManagerService extends SystemService {
                 // pulse repeatedly
                 mNotificationLight.setFlashing(ledARGB, Light.LIGHT_FLASH_TIMED,
                         ledOnMS, ledOffMS);
+                mStatusBar.notificationLightPulse(ledARGB, ledOnMS, ledOffMS);
             }
         }
     }

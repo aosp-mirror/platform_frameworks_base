@@ -19,6 +19,8 @@ package com.android.systemui.doze;
 import static android.os.PowerManager.BRIGHTNESS_OFF;
 import static android.os.PowerManager.BRIGHTNESS_ON;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -42,12 +44,16 @@ import com.android.systemui.SystemUIApplication;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.Date;
 
 public class DozeService extends DreamService {
     private static final String TAG = "DozeService";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    private static final String TEASE_ACTION = "com.android.systemui.doze.tease";
+    private static final String ACTION_BASE = "com.android.systemui.doze";
+    private static final String PULSE_ACTION = ACTION_BASE + ".pulse";
+    private static final String NOTIFICATION_PULSE_ACTION = ACTION_BASE + ".notification_pulse";
+    private static final String EXTRA_PULSES = "pulses";
 
     private final String mTag = String.format(TAG + ".%08x", hashCode());
     private final Context mContext = this;
@@ -58,13 +64,18 @@ public class DozeService extends DreamService {
     private Sensor mSigMotionSensor;
     private PowerManager mPowerManager;
     private PowerManager.WakeLock mWakeLock;
+    private AlarmManager mAlarmManager;
     private int mMaxBrightness;
     private boolean mDreaming;
-    private boolean mTeaseReceiverRegistered;
+    private boolean mBroadcastReceiverRegistered;
     private boolean mSigMotionConfigured;
     private boolean mSigMotionEnabled;
     private boolean mDisplayStateSupported;
     private int mDisplayStateWhenOn;
+    private boolean mNotificationLightOn;
+    private PendingIntent mNotificationPulseIntent;
+    private int mMultipulseCount;
+    private int mNotificationPulseInterval;
 
     public DozeService() {
         if (DEBUG) Log.d(mTag, "new DozeService()");
@@ -75,12 +86,15 @@ public class DozeService extends DreamService {
     protected void dumpOnHandler(FileDescriptor fd, PrintWriter pw, String[] args) {
         super.dumpOnHandler(fd, pw, args);
         pw.print("  mDreaming: "); pw.println(mDreaming);
-        pw.print("  mTeaseReceiverRegistered: "); pw.println(mTeaseReceiverRegistered);
+        pw.print("  mBroadcastReceiverRegistered: "); pw.println(mBroadcastReceiverRegistered);
         pw.print("  mSigMotionSensor: "); pw.println(mSigMotionSensor);
         pw.print("  mSigMotionConfigured: "); pw.println(mSigMotionConfigured);
         pw.print("  mSigMotionEnabled: "); pw.println(mSigMotionEnabled);
         pw.print("  mMaxBrightness: "); pw.println(mMaxBrightness);
         pw.print("  mDisplayStateSupported: "); pw.println(mDisplayStateSupported);
+        pw.print("  mNotificationLightOn: "); pw.println(mNotificationLightOn);
+        pw.print("  mMultipulseCount: "); pw.println(mMultipulseCount);
+        pw.print("  mNotificationPulseInterval: "); pw.println(mNotificationPulseInterval);
     }
 
     @Override
@@ -99,14 +113,21 @@ public class DozeService extends DreamService {
         mSigMotionSensor = mSensors.getDefaultSensor(Sensor.TYPE_SIGNIFICANT_MOTION);
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, mTag);
+        mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
         final Resources res = mContext.getResources();
-        mSigMotionConfigured = SystemProperties.getBoolean("doze.tease.sigmotion",
-                res.getBoolean(R.bool.doze_tease_on_significant_motion));
+        mSigMotionConfigured = SystemProperties.getBoolean("doze.pulse.sigmotion",
+                res.getBoolean(R.bool.doze_pulse_on_significant_motion));
         mDisplayStateSupported = SystemProperties.getBoolean("doze.display.supported",
                 res.getBoolean(R.bool.doze_display_state_supported));
-        mMaxBrightness = MathUtils.constrain(res.getInteger(R.integer.doze_tease_brightness),
+        mMaxBrightness = MathUtils.constrain(res.getInteger(R.integer.doze_pulse_brightness),
                 BRIGHTNESS_OFF, BRIGHTNESS_ON);
-
+        mNotificationPulseIntent = PendingIntent.getBroadcast(mContext, 0,
+                new Intent(NOTIFICATION_PULSE_ACTION).setPackage(getPackageName()),
+                PendingIntent.FLAG_CANCEL_CURRENT);
+        mMultipulseCount = SystemProperties.getInt("doze.multipulses",
+                res.getInteger(R.integer.doze_multipulse_count));
+        mNotificationPulseInterval = SystemProperties.getInt("doze.notification.pulse",
+                res.getInteger(R.integer.doze_notification_pulse_interval));
         mDisplayStateWhenOn = mDisplayStateSupported ? Display.STATE_DOZE : Display.STATE_ON;
         setDozeScreenState(mDisplayStateWhenOn);
     }
@@ -122,7 +143,7 @@ public class DozeService extends DreamService {
         super.onDreamingStarted();
         if (DEBUG) Log.d(mTag, "onDreamingStarted canDoze=" + canDoze());
         mDreaming = true;
-        listenForTeaseSignals(true);
+        listenForPulseSignals(true);
         requestDoze();
     }
 
@@ -160,7 +181,7 @@ public class DozeService extends DreamService {
         if (mWakeLock.isHeld()) {
             mWakeLock.release();
         }
-        listenForTeaseSignals(false);
+        listenForPulseSignals(false);
         stopDozing();
         dozingStopped();
     }
@@ -187,9 +208,17 @@ public class DozeService extends DreamService {
         }
     }
 
-    private void requestTease() {
+    private void requestMultipulse() {
+        requestPulse(mMultipulseCount);
+    }
+
+    private void requestPulse() {
+        requestPulse(1);
+    }
+
+    private void requestPulse(int pulses) {
         if (mHost != null) {
-            mHost.requestTease(this);
+            mHost.requestPulse(pulses, this);
         }
     }
 
@@ -199,10 +228,10 @@ public class DozeService extends DreamService {
         }
     }
 
-    private void listenForTeaseSignals(boolean listen) {
-        if (DEBUG) Log.d(mTag, "listenForTeaseSignals: " + listen);
+    private void listenForPulseSignals(boolean listen) {
+        if (DEBUG) Log.d(mTag, "listenForPulseSignals: " + listen);
         listenForSignificantMotion(listen);
-        listenForBroadcast(listen);
+        listenForBroadcasts(listen);
         listenForNotifications(listen);
     }
 
@@ -216,15 +245,17 @@ public class DozeService extends DreamService {
         }
     }
 
-    private void listenForBroadcast(boolean listen) {
+    private void listenForBroadcasts(boolean listen) {
         if (listen) {
-            mContext.registerReceiver(mTeaseReceiver, new IntentFilter(TEASE_ACTION));
-            mTeaseReceiverRegistered = true;
+            final IntentFilter filter = new IntentFilter(PULSE_ACTION);
+            filter.addAction(NOTIFICATION_PULSE_ACTION);
+            mContext.registerReceiver(mBroadcastReceiver, filter);
+            mBroadcastReceiverRegistered = true;
         } else {
-            if (mTeaseReceiverRegistered) {
-                mContext.unregisterReceiver(mTeaseReceiver);
+            if (mBroadcastReceiverRegistered) {
+                mContext.unregisterReceiver(mBroadcastReceiver);
             }
-            mTeaseReceiverRegistered = false;
+            mBroadcastReceiverRegistered = false;
         }
     }
 
@@ -234,6 +265,15 @@ public class DozeService extends DreamService {
             mHost.addCallback(mHostCallback);
         } else {
             mHost.removeCallback(mHostCallback);
+        }
+    }
+
+    private void rescheduleNotificationPulse() {
+        mAlarmManager.cancel(mNotificationPulseIntent);
+        if (mNotificationLightOn) {
+            final long time = System.currentTimeMillis() + mNotificationPulseInterval;
+            if (DEBUG) Log.d(TAG, "Scheduling pulse for " + new Date(time));
+            mAlarmManager.setExact(AlarmManager.RTC_WAKEUP, time, mNotificationPulseIntent);
         }
     }
 
@@ -269,16 +309,23 @@ public class DozeService extends DreamService {
                     v.vibrate(1000);
                 }
             }
-            requestTease();
+            requestPulse();
             listenForSignificantMotion(true);  // reregister, this sensor only fires once
         }
     };
 
-    private final BroadcastReceiver mTeaseReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (DEBUG) Log.d(mTag, "Received tease intent");
-            requestTease();
+            if (PULSE_ACTION.equals(intent.getAction())) {
+                if (DEBUG) Log.d(mTag, "Received pulse intent");
+                requestPulse(intent.getIntExtra(EXTRA_PULSES, mMultipulseCount));
+            }
+            if (NOTIFICATION_PULSE_ACTION.equals(intent.getAction())) {
+                if (DEBUG) Log.d(mTag, "Received notification pulse intent");
+                requestPulse();
+                rescheduleNotificationPulse();
+            }
         }
     };
 
@@ -288,10 +335,19 @@ public class DozeService extends DreamService {
             if (DEBUG) Log.d(mTag, "onNewNotifications");
             // noop for now
         }
+
         @Override
         public void onBuzzBeepBlinked() {
             if (DEBUG) Log.d(mTag, "onBuzzBeepBlinked");
-            requestTease();
+            requestMultipulse();
+        }
+
+        @Override
+        public void onNotificationLight(boolean on) {
+            if (DEBUG) Log.d(mTag, "onNotificationLight on=" + on);
+            if (mNotificationLightOn == on) return;
+            mNotificationLightOn = on;
+            rescheduleNotificationPulse();
         }
     };
 
@@ -299,12 +355,13 @@ public class DozeService extends DreamService {
         void addCallback(Callback callback);
         void removeCallback(Callback callback);
         void requestDoze(DozeService dozeService);
-        void requestTease(DozeService dozeService);
+        void requestPulse(int pulses, DozeService dozeService);
         void dozingStopped(DozeService dozeService);
 
         public interface Callback {
             void onNewNotifications();
             void onBuzzBeepBlinked();
+            void onNotificationLight(boolean on);
         }
     }
 }

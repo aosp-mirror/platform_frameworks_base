@@ -21,4 +21,6 @@ import com.android.server.notification.NotificationDelegate;
 public interface StatusBarManagerInternal {
     void setNotificationDelegate(NotificationDelegate delegate);
     void buzzBeepBlinked();
+    void notificationLightPulse(int argb, int onMillis, int offMillis);
+    void notificationLightOff();
 }
