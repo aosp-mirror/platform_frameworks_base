@@ -43,6 +43,7 @@ import com.android.systemui.statusbar.policy.ScrollAdapter;
 import com.android.systemui.statusbar.stack.StackScrollState.ViewState;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 /**
  * A layout which handles a dynamic amount of notifications and presents them in a scrollable stack.
@@ -108,6 +109,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private ArrayList<View> mSnappedBackChildren = new ArrayList<View>();
     private ArrayList<View> mDragAnimPendingChildren = new ArrayList<View>();
     private ArrayList<View> mChildrenChangingPositions = new ArrayList<View>();
+    private HashSet<View> mFromMoreCardAdditions = new HashSet<>();
     private ArrayList<AnimationEvent> mAnimationEvents
             = new ArrayList<AnimationEvent>();
     private ArrayList<View> mSwipedOutViews = new ArrayList<View>();
@@ -1456,6 +1458,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 return true;
             } else {
                 mChildrenToAddAnimated.remove(child);
+                mFromMoreCardAdditions.remove(child);
                 return false;
             }
         }
@@ -1512,7 +1515,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         super.onViewAdded(child);
         mStackScrollAlgorithm.notifyChildrenChanged(this);
         ((ExpandableView) child).setOnHeightChangedListener(this);
-        generateAddAnimation(child);
+        generateAddAnimation(child, false /* fromMoreCard */);
     }
 
     public void setAnimationsEnabled(boolean animationsEnabled) {
@@ -1527,11 +1530,15 @@ public class NotificationStackScrollLayout extends ViewGroup
      * Generate an animation for an added child view.
      *
      * @param child The view to be added.
+     * @param fromMoreCard Whether this add is coming from the "more" card on lockscreen.
      */
-    public void generateAddAnimation(View child) {
+    public void generateAddAnimation(View child, boolean fromMoreCard) {
         if (mIsExpanded && mAnimationsEnabled && !mChangePositionInProgress) {
             // Generate Animations
             mChildrenToAddAnimated.add(child);
+            if (fromMoreCard) {
+                mFromMoreCardAdditions.add(child);
+            }
             mNeedsAnimation = true;
         }
     }
@@ -1628,10 +1635,17 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     private void generateChildAdditionEvents() {
         for (View child : mChildrenToAddAnimated) {
-            mAnimationEvents.add(new AnimationEvent(child,
-                    AnimationEvent.ANIMATION_TYPE_ADD));
+            if (mFromMoreCardAdditions.contains(child)) {
+                mAnimationEvents.add(new AnimationEvent(child,
+                        AnimationEvent.ANIMATION_TYPE_ADD,
+                        StackStateAnimator.ANIMATION_DURATION_STANDARD));
+            } else {
+                mAnimationEvents.add(new AnimationEvent(child,
+                        AnimationEvent.ANIMATION_TYPE_ADD));
+            }
         }
         mChildrenToAddAnimated.clear();
+        mFromMoreCardAdditions.clear();
     }
 
     private void generateTopPaddingEvent() {
@@ -2249,11 +2263,15 @@ public class NotificationStackScrollLayout extends ViewGroup
         View viewAfterChangingView;
 
         AnimationEvent(View view, int type) {
+            this(view, type, LENGTHS[type]);
+        }
+
+        AnimationEvent(View view, int type, long length) {
             eventStartTime = AnimationUtils.currentAnimationTimeMillis();
             changingView = view;
             animationType = type;
             filter = FILTERS[type];
-            length = LENGTHS[type];
+            this.length = length;
         }
 
         /**
