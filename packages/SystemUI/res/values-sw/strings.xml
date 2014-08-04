@@ -37,10 +37,12 @@
     <string name="invalid_charger_title" msgid="3515740382572798460">"Kuchaji kwa kutumia USB hakutumiki."</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"Tumia chaja iliyonunuliwa pamoja na kifaa pekee."</string>
     <string name="battery_low_why" msgid="4553600287639198111">"Mipangilio"</string>
-    <string name="battery_saver_confirmation_title" msgid="5987726159603849352">"Ungependa kuwasha kiokoa betri?"</string>
-    <string name="battery_saver_confirmation_ok" msgid="7283108887345688413">"Anza"</string>
-    <string name="battery_saver_start_action" msgid="7245333922937402896">"Washa kiokoa betri"</string>
-    <string name="battery_saver_confirmation_text" msgid="8417584516834617662">"Ili kusaidia kuboresha muda wa matumizi ya betri, Kiokoa betri kitapunguza utendaji wa kifaa chako.\n\nKiokoa betri kitazimwa kifaa chako kitakapochomekwa kwenye nishati ya umeme."</string>
+    <!-- no translation found for battery_saver_confirmation_title (5299585433050361634) -->
+    <skip />
+    <!-- no translation found for battery_saver_confirmation_ok (7507968430447930257) -->
+    <skip />
+    <!-- no translation found for battery_saver_start_action (5576697451677486320) -->
+    <skip />
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Mipangilio"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Mtandao-Hewa"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"Hali ya Ndege"</string>
@@ -284,8 +286,10 @@
     <item quantity="other" msgid="5408537517529822157">"Kwa saa %d"</item>
   </plurals>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Kiokoa betri kimewashwa"</string>
-    <string name="battery_saver_notification_text" msgid="7796554871101546872">"Utendaji wa kifaa umepunguzwa."</string>
-    <string name="battery_saver_notification_action_text" msgid="7546297220816993504">"Fungua mipangilio ya hali inayookoa betri"</string>
+    <!-- no translation found for battery_saver_notification_text (820318788126672692) -->
+    <skip />
+    <!-- no translation found for battery_saver_notification_action_text (109158658238110382) -->
+    <skip />
     <string name="battery_level_template" msgid="1609636980292580020">"<xliff:g id="LEVEL">%d</xliff:g>%%"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"Maudhui yamefichwa"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> itaanza kupiga picha kila kitu kinachoonyeshwa kwenye skrini yako."</string>

@@ -39,10 +39,12 @@
     <string name="invalid_charger_title" msgid="3515740382572798460">"Ez da USB bidez kargatzea onartzen."</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"Erabili jatorrizko kargagailua soilik."</string>
     <string name="battery_low_why" msgid="4553600287639198111">"Ezarpenak"</string>
-    <string name="battery_saver_confirmation_title" msgid="5987726159603849352">"Bateria aurrezlea aktibatu nahi duzu?"</string>
-    <string name="battery_saver_confirmation_ok" msgid="7283108887345688413">"Hasi"</string>
-    <string name="battery_saver_start_action" msgid="7245333922937402896">"Aktibatu bateria aurrezlea"</string>
-    <string name="battery_saver_confirmation_text" msgid="8417584516834617662">"Bateria aurrezleak gailuaren funtzionamendua erregulatzen du, energiaren kontsumoa murriztuta bateriak gehiago iraun dezan.\n\nGailua kargagailura konektatzen duzunean Bateria aurrezlea desaktibatu egingo da."</string>
+    <!-- no translation found for battery_saver_confirmation_title (5299585433050361634) -->
+    <skip />
+    <!-- no translation found for battery_saver_confirmation_ok (7507968430447930257) -->
+    <skip />
+    <!-- no translation found for battery_saver_start_action (5576697451677486320) -->
+    <skip />
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Ezarpenak"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"Hegaldi modua"</string>
@@ -286,13 +288,15 @@
     <item quantity="other" msgid="5408537517529822157">"%d orduz"</item>
   </plurals>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Bateria aurrezlea aktibatuta dago"</string>
-    <string name="battery_saver_notification_text" msgid="7796554871101546872">"Gailuaren funtzioak murrizten dira, energia gutxiago kontsumi dezan."</string>
-    <string name="battery_saver_notification_action_text" msgid="7546297220816993504">"Ireki bateria aurrezlearen ezarpenak"</string>
+    <!-- no translation found for battery_saver_notification_text (820318788126672692) -->
+    <skip />
+    <!-- no translation found for battery_saver_notification_action_text (109158658238110382) -->
+    <skip />
     <string name="battery_level_template" msgid="1609636980292580020">"%% <xliff:g id="LEVEL">%d</xliff:g>"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"Edukiak ezkutatuta daude"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> aplikazioak pantailan bistaratzen den guztia grabatuko du."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Ez erakutsi berriro"</string>
-    <string name="clear_all_notifications_text" msgid="814192889771462828">"Garbitu guztia"</string>
+    <string name="clear_all_notifications_text" msgid="814192889771462828">"Garbitu guztiak"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Hasi"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Ez dago jakinarazpenik"</string>
 </resources>
