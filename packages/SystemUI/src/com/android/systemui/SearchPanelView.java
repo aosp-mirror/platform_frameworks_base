@@ -16,46 +16,41 @@
 
 package com.android.systemui;
 
-import android.animation.LayoutTransition;
-import android.app.ActivityManagerNative;
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
+import android.animation.PropertyValuesHolder;
 import android.app.ActivityOptions;
 import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.media.AudioAttributes;
-import android.os.RemoteException;
-import android.os.ServiceManager;
+import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.UserHandle;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.util.AttributeSet;
-import android.util.EventLog;
 import android.util.Log;
-import android.view.IWindowManager;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
-import android.view.ViewTreeObserver.OnPreDrawListener;
+import android.view.animation.AnimationUtils;
+import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 
-import com.android.internal.widget.multiwaveview.GlowPadView;
-import com.android.internal.widget.multiwaveview.GlowPadView.OnTriggerListener;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.StatusBarPanel;
-import com.android.systemui.statusbar.phone.KeyguardTouchDelegate;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 
-public class SearchPanelView extends FrameLayout implements
-        StatusBarPanel, ActivityOptions.OnAnimationStartedListener {
-    private static final int SEARCH_PANEL_HOLD_DURATION = 0;
-    static final String TAG = "SearchPanelView";
-    static final boolean DEBUG = PhoneStatusBar.DEBUG || false;
-    public static final boolean DEBUG_GESTURES = true;
+public class SearchPanelView extends FrameLayout implements StatusBarPanel {
+
+    private static final String TAG = "SearchPanelView";
     private static final String ASSIST_ICON_METADATA_NAME =
             "com.android.systemui.action_assist_icon";
 
@@ -67,10 +62,26 @@ public class SearchPanelView extends FrameLayout implements
     private final Context mContext;
     private BaseStatusBar mBar;
 
-    private boolean mShowing;
-    private View mSearchTargetsContainer;
-    private GlowPadView mGlowPadView;
-    private IWindowManager mWm;
+    private View mCard;
+    private ImageView mLogo;
+    private View mScrim;
+
+    private int mPeekHeight;
+    private int mThreshold;
+    private boolean mHorizontal;
+    private final Interpolator mLinearOutSlowInInterpolator;
+    private final Interpolator mFastOutLinearInInterpolator;
+
+    private boolean mAnimatingIn;
+    private boolean mAnimatingOut;
+    private boolean mDragging;
+    private boolean mDraggedFarEnough;
+    private float mStartTouch;
+    private float mStartDrag;
+
+    private ObjectAnimator mEnterAnimator;
+
+    private boolean mStartExitAfterAnimatingIn;
 
     public SearchPanelView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
@@ -79,7 +90,12 @@ public class SearchPanelView extends FrameLayout implements
     public SearchPanelView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         mContext = context;
-        mWm = IWindowManager.Stub.asInterface(ServiceManager.getService("window"));
+        mPeekHeight = context.getResources().getDimensionPixelSize(R.dimen.search_card_peek_height);
+        mThreshold = context.getResources().getDimensionPixelSize(R.dimen.search_panel_threshold);
+        mLinearOutSlowInInterpolator =
+                AnimationUtils.loadInterpolator(context, android.R.interpolator.linear_out_slow_in);
+        mFastOutLinearInInterpolator =
+                AnimationUtils.loadInterpolator(context, android.R.interpolator.fast_out_linear_in);
     }
 
     private void startAssistActivity() {
@@ -87,92 +103,34 @@ public class SearchPanelView extends FrameLayout implements
 
         // Close Recent Apps if needed
         mBar.animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_SEARCH_PANEL);
-        boolean isKeyguardShowing = false;
+
+        final Intent intent = ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
+                .getAssistIntent(mContext, true, UserHandle.USER_CURRENT);
+        if (intent == null) return;
+
         try {
-            isKeyguardShowing = mWm.isKeyguardLocked();
-        } catch (RemoteException e) {
-
+            final ActivityOptions opts = ActivityOptions.makeCustomAnimation(mContext,
+                    R.anim.search_launch_enter, R.anim.search_launch_exit);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            AsyncTask.execute(new Runnable() {
+                @Override
+                public void run() {
+                    mContext.startActivityAsUser(intent, opts.toBundle(),
+                            new UserHandle(UserHandle.USER_CURRENT));
+                }
+            });
+        } catch (ActivityNotFoundException e) {
+            Log.w(TAG, "Activity not found for " + intent.getAction());
         }
-
-        if (isKeyguardShowing) {
-            // Have keyguard show the bouncer and launch the activity if the user succeeds.
-            KeyguardTouchDelegate.getInstance(getContext()).showAssistant();
-            onAnimationStarted();
-        } else {
-            // Otherwise, keyguard isn't showing so launch it from here.
-            Intent intent = ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
-                    .getAssistIntent(mContext, true, UserHandle.USER_CURRENT);
-            if (intent == null) return;
-
-            try {
-                ActivityManagerNative.getDefault().dismissKeyguardOnNextActivity();
-            } catch (RemoteException e) {
-                // too bad, so sad...
-            }
-
-            try {
-                ActivityOptions opts = ActivityOptions.makeCustomAnimation(mContext,
-                        R.anim.search_launch_enter, R.anim.search_launch_exit,
-                        getHandler(), this);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                mContext.startActivityAsUser(intent, opts.toBundle(),
-                        new UserHandle(UserHandle.USER_CURRENT));
-            } catch (ActivityNotFoundException e) {
-                Log.w(TAG, "Activity not found for " + intent.getAction());
-                onAnimationStarted();
-            }
-        }
-    }
-
-    class GlowPadTriggerListener implements GlowPadView.OnTriggerListener {
-        boolean mWaitingForLaunch;
-
-        public void onGrabbed(View v, int handle) {
-        }
-
-        public void onReleased(View v, int handle) {
-        }
-
-        public void onGrabbedStateChange(View v, int handle) {
-            if (!mWaitingForLaunch && OnTriggerListener.NO_HANDLE == handle) {
-                mBar.hideSearchPanel();
-            }
-        }
-
-        public void onTrigger(View v, final int target) {
-            final int resId = mGlowPadView.getResourceIdForTarget(target);
-            switch (resId) {
-                case R.drawable.ic_action_assist_generic:
-                    mWaitingForLaunch = true;
-                    startAssistActivity();
-                    vibrate();
-                    break;
-            }
-        }
-
-        public void onFinishFinalAnimation() {
-        }
-    }
-    final GlowPadTriggerListener mGlowPadViewListener = new GlowPadTriggerListener();
-
-    @Override
-    public void onAnimationStarted() {
-        postDelayed(new Runnable() {
-            public void run() {
-                mGlowPadViewListener.mWaitingForLaunch = false;
-                mBar.hideSearchPanel();
-            }
-        }, SEARCH_PANEL_HOLD_DURATION);
     }
 
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
         mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        mSearchTargetsContainer = findViewById(R.id.search_panel_container);
-        // TODO: fetch views
-        mGlowPadView = (GlowPadView) findViewById(R.id.glow_pad_view);
-        mGlowPadView.setOnTriggerListener(mGlowPadViewListener);
+        mCard = findViewById(R.id.search_panel_card);
+        mLogo = (ImageView) findViewById(R.id.search_logo);
+        mScrim = findViewById(R.id.search_panel_scrim);
     }
 
     private void maybeSwapSearchIcon() {
@@ -180,12 +138,36 @@ public class SearchPanelView extends FrameLayout implements
                 .getAssistIntent(mContext, false, UserHandle.USER_CURRENT);
         if (intent != null) {
             ComponentName component = intent.getComponent();
-            if (component == null || !mGlowPadView.replaceTargetDrawablesIfPresent(component,
-                    ASSIST_ICON_METADATA_NAME,
-                    R.drawable.ic_action_assist_generic)) {
-                if (DEBUG) Log.v(TAG, "Couldn't grab icon for component " + component);
+            replaceDrawable(mLogo, component, ASSIST_ICON_METADATA_NAME);
+        } else {
+            mLogo.setImageDrawable(null);
+        }
+    }
+
+    public void replaceDrawable(ImageView v, ComponentName component, String name) {
+        if (component != null) {
+            try {
+                PackageManager packageManager = mContext.getPackageManager();
+                // Look for the search icon specified in the activity meta-data
+                Bundle metaData = packageManager.getActivityInfo(
+                        component, PackageManager.GET_META_DATA).metaData;
+                if (metaData != null) {
+                    int iconResId = metaData.getInt(name);
+                    if (iconResId != 0) {
+                        Resources res = packageManager.getResourcesForActivity(component);
+                        v.setImageDrawable(res.getDrawable(iconResId));
+                        return;
+                    }
+                }
+            } catch (PackageManager.NameNotFoundException e) {
+                Log.w(TAG, "Failed to swap drawable; "
+                        + component.flattenToShortString() + " not found", e);
+            } catch (Resources.NotFoundException nfe) {
+                Log.w(TAG, "Failed to swap drawable from "
+                        + component.flattenToShortString(), nfe);
             }
         }
+        v.setImageDrawable(null);
     }
 
     private boolean pointInside(int x, int y, View v) {
@@ -197,16 +179,8 @@ public class SearchPanelView extends FrameLayout implements
     }
 
     public boolean isInContentArea(int x, int y) {
-        return pointInside(x, y, mSearchTargetsContainer);
+        return pointInside(x, y, mCard);
     }
-
-    private final OnPreDrawListener mPreDrawListener = new ViewTreeObserver.OnPreDrawListener() {
-        public boolean onPreDraw() {
-            getViewTreeObserver().removeOnPreDrawListener(this);
-            mGlowPadView.resumeAnimations();
-            return false;
-        }
-    };
 
     private void vibrate() {
         Context context = getContext();
@@ -220,28 +194,93 @@ public class SearchPanelView extends FrameLayout implements
     }
 
     public void show(final boolean show, boolean animate) {
-        if (!show) {
-            final LayoutTransition transitioner = animate ? createLayoutTransitioner() : null;
-            ((ViewGroup) mSearchTargetsContainer).setLayoutTransition(transitioner);
-        }
-        mShowing = show;
         if (show) {
             maybeSwapSearchIcon();
             if (getVisibility() != View.VISIBLE) {
                 setVisibility(View.VISIBLE);
-                // Don't start the animation until we've created the layer, which is done
-                // right before we are drawn
-                mGlowPadView.suspendAnimations();
-                mGlowPadView.ping();
-                getViewTreeObserver().addOnPreDrawListener(mPreDrawListener);
                 vibrate();
+                mCard.setAlpha(1f);
+                if (animate) {
+                    startEnterAnimation();
+                } else {
+                    mScrim.setAlpha(1f);
+                    if (mHorizontal) {
+                        mCard.setX(getWidth() - mPeekHeight);
+                    } else {
+                        mCard.setY(getHeight() - mPeekHeight);
+                    }
+                }
             }
             setFocusable(true);
             setFocusableInTouchMode(true);
             requestFocus();
         } else {
-            setVisibility(View.INVISIBLE);
+            if (animate) {
+                startAbortAnimation();
+            } else {
+                setVisibility(View.INVISIBLE);
+            }
         }
+    }
+
+    private void startEnterAnimation() {
+        if (mHorizontal) {
+            mCard.setX(getWidth());
+        } else {
+            mCard.setY(getHeight());
+        }
+        mAnimatingIn = true;
+        mCard.animate().cancel();
+        mEnterAnimator = ObjectAnimator.ofFloat(mCard, mHorizontal ? View.X : View.Y,
+                mHorizontal ? mCard.getX() : mCard.getY(),
+                mHorizontal ? getWidth() - mPeekHeight : getHeight() - mPeekHeight);
+        mEnterAnimator.setDuration(300);
+        mEnterAnimator.setStartDelay(50);
+        mEnterAnimator.setInterpolator(mLinearOutSlowInInterpolator);
+        mEnterAnimator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mEnterAnimator = null;
+                mAnimatingIn = false;
+                if (mStartExitAfterAnimatingIn) {
+                    startExitAnimation();
+                }
+            }
+        });
+        mEnterAnimator.start();
+        mScrim.setAlpha(0f);
+        mScrim.animate()
+                .alpha(1f)
+                .setDuration(300)
+                .setStartDelay(50)
+                .setInterpolator(PhoneStatusBar.ALPHA_IN)
+                .start();
+
+    }
+
+    private void startAbortAnimation() {
+        mCard.animate().cancel();
+        mAnimatingOut = true;
+        if (mHorizontal) {
+            mCard.animate().x(getWidth());
+        } else {
+            mCard.animate().y(getHeight());
+        }
+        mCard.animate()
+                .setDuration(150)
+                .setInterpolator(mFastOutLinearInInterpolator)
+                .withEndAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        mAnimatingOut = false;
+                        setVisibility(View.INVISIBLE);
+                    }
+                });
+        mScrim.animate()
+                .alpha(0f)
+                .setDuration(150)
+                .setStartDelay(0)
+                .setInterpolator(PhoneStatusBar.ALPHA_OUT);
     }
 
     public void hide(boolean animate) {
@@ -249,18 +288,12 @@ public class SearchPanelView extends FrameLayout implements
             // This will indirectly cause show(false, ...) to get called
             mBar.animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE);
         } else {
-            setVisibility(View.INVISIBLE);
+            if (animate) {
+                startAbortAnimation();
+            } else {
+                setVisibility(View.INVISIBLE);
+            }
         }
-    }
-
-    /**
-     * We need to be aligned at the bottom.  LinearLayout can't do this, so instead,
-     * let LinearLayout do all the hard work, and then shift everything down to the bottom.
-     */
-    @Override
-    protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        super.onLayout(changed, l, t, r, b);
-        // setPanelHeight(mSearchTargetsContainer.getHeight());
     }
 
     @Override
@@ -281,34 +314,113 @@ public class SearchPanelView extends FrameLayout implements
      * when the animation is done.
      */
     public boolean isShowing() {
-        return mShowing;
+        return getVisibility() == View.VISIBLE && !mAnimatingOut;
     }
 
     public void setBar(BaseStatusBar bar) {
         mBar = bar;
     }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        if (DEBUG_GESTURES) {
-            if (event.getActionMasked() != MotionEvent.ACTION_MOVE) {
-                EventLog.writeEvent(EventLogTags.SYSUI_SEARCHPANEL_TOUCH,
-                        event.getActionMasked(), (int) event.getX(), (int) event.getY());
-            }
-        }
-        return super.onTouchEvent(event);
-    }
-
-    private LayoutTransition createLayoutTransitioner() {
-        LayoutTransition transitioner = new LayoutTransition();
-        transitioner.setDuration(200);
-        transitioner.setStartDelay(LayoutTransition.CHANGE_DISAPPEARING, 0);
-        transitioner.setAnimator(LayoutTransition.DISAPPEARING, null);
-        return transitioner;
-    }
-
     public boolean isAssistantAvailable() {
         return ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
                 .getAssistIntent(mContext, false, UserHandle.USER_CURRENT) != null;
+    }
+
+    private float rubberband(float diff) {
+        return Math.signum(diff) * (float) Math.pow(Math.abs(diff), 0.8f);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        int action = event.getActionMasked();
+        switch (action) {
+            case MotionEvent.ACTION_DOWN:
+                mStartTouch = mHorizontal ? event.getX() : event.getY();
+                mDragging = false;
+                mDraggedFarEnough = false;
+                mStartExitAfterAnimatingIn = false;
+                break;
+            case MotionEvent.ACTION_MOVE:
+                float currentTouch = mHorizontal ? event.getX() : event.getY();
+                if (getVisibility() == View.VISIBLE && !mDragging &&
+                        (!mAnimatingIn || Math.abs(mStartTouch - currentTouch) > mThreshold)) {
+                    mStartDrag = currentTouch;
+                    mDragging = true;
+                }
+                if (!mDraggedFarEnough && Math.abs(mStartTouch - currentTouch) > mThreshold) {
+                    mDraggedFarEnough = true;
+                }
+                if (mDragging) {
+                    if (!mAnimatingIn && !mAnimatingOut) {
+                        if (Math.abs(currentTouch - mStartDrag) > mThreshold) {
+                            startExitAnimation();
+                        } else {
+                            if (mHorizontal) {
+                                mCard.setX(getWidth() - mPeekHeight + rubberband(
+                                        currentTouch - mStartDrag));
+                            } else {
+                                mCard.setY(getHeight() - mPeekHeight + rubberband(
+                                        currentTouch - mStartDrag));
+                            }
+                        }
+                    } else if (mAnimatingIn ) {
+                        float diff = rubberband(currentTouch - mStartDrag);
+                        PropertyValuesHolder[] values = mEnterAnimator.getValues();
+                        values[0].setFloatValues(
+                                mHorizontal ? getWidth() + diff : getHeight() + diff,
+                                mHorizontal
+                                        ? getWidth() - mPeekHeight + diff
+                                        : getHeight() - mPeekHeight + diff);
+                        mEnterAnimator.setCurrentPlayTime(mEnterAnimator.getCurrentPlayTime());
+                    }
+                }
+                break;
+            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_CANCEL:
+                if (mDraggedFarEnough) {
+                    if (mAnimatingIn) {
+                        mStartExitAfterAnimatingIn = true;
+                    } else {
+                        startExitAnimation();
+                    }
+                } else {
+                    startAbortAnimation();
+                }
+                break;
+        }
+        return true;
+    }
+
+    private void startExitAnimation() {
+        if (mAnimatingOut || getVisibility() != View.VISIBLE) {
+            return;
+        }
+        if (mEnterAnimator != null) {
+            mEnterAnimator.cancel();
+        }
+        mAnimatingOut = true;
+        startAssistActivity();
+        vibrate();
+        mCard.animate()
+                .alpha(0f)
+                .withLayer()
+                .setDuration(250)
+                .setInterpolator(PhoneStatusBar.ALPHA_OUT)
+                .withEndAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        mAnimatingOut = false;
+                        setVisibility(View.INVISIBLE);
+                    }
+                });
+        mScrim.animate()
+                .alpha(0f)
+                .setDuration(250)
+                .setStartDelay(0)
+                .setInterpolator(PhoneStatusBar.ALPHA_OUT);
+    }
+
+    public void setHorizontal(boolean horizontal) {
+        mHorizontal = horizontal;
     }
 }

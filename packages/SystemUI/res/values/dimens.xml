@@ -399,4 +399,17 @@
     <!-- Additional translation (downwards) for appearing notifications when going to the full shade
          from Keyguard. -->
     <dimen name="go_to_full_shade_appearing_translation">200dp</dimen>
+
+    <!-- The height of the search panel card. -->
+    <dimen name="search_panel_card_height">300dp</dimen>
+
+    <!-- The height of the scrim behind the search panel card. -->
+    <dimen name="search_panel_scrim_height">250dp</dimen>
+
+    <!-- How much from the bottom of the screen the card should peek in when activating the search
+         panel -->
+    <dimen name="search_card_peek_height">100dp</dimen>
+
+    <!-- How far the user needs to drag up to invoke search. -->
+    <dimen name="search_panel_threshold">150dp</dimen>
 </resources>

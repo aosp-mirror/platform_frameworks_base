@@ -73,16 +73,22 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
 
     @Override
     public void onResume(int reason) {
-        getSecurityView(mCurrentSecuritySelection).onResume(reason);
+        if (mCurrentSecuritySelection != SecurityMode.None) {
+            getSecurityView(mCurrentSecuritySelection).onResume(reason);
+        }
     }
 
     @Override
     public void onPause() {
-        getSecurityView(mCurrentSecuritySelection).onPause();
+        if (mCurrentSecuritySelection != SecurityMode.None) {
+            getSecurityView(mCurrentSecuritySelection).onPause();
+        }
     }
 
     public void startAppearAnimation() {
-        getSecurityView(mCurrentSecuritySelection).startAppearAnimation();
+        if (mCurrentSecuritySelection != SecurityMode.None) {
+            getSecurityView(mCurrentSecuritySelection).startAppearAnimation();
+        }
     }
 
     void updateSecurityViews(boolean isBouncing) {
@@ -117,12 +123,6 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
             mSecurityViewFlipper.addView(v);
             updateSecurityView(v, mIsBouncing);
             view = (KeyguardSecurityView)v;
-        }
-
-        if (view instanceof KeyguardSelectorView) {
-            KeyguardSelectorView selectorView = (KeyguardSelectorView) view;
-            View carrierText = selectorView.findViewById(R.id.keyguard_selector_fade_container);
-            selectorView.setCarrierArea(carrierText);
         }
 
         return view;
@@ -375,8 +375,10 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
             oldView.onPause();
             oldView.setKeyguardCallback(mNullCallback); // ignore requests from old view
         }
-        newView.onResume(KeyguardSecurityView.VIEW_REVEALED);
-        newView.setKeyguardCallback(mCallback);
+        if (securityMode != SecurityMode.None) {
+            newView.onResume(KeyguardSecurityView.VIEW_REVEALED);
+            newView.setKeyguardCallback(mCallback);
+        }
 
         // Find and show this child.
         final int childCount = mSecurityViewFlipper.getChildCount();
@@ -390,7 +392,8 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         }
 
         mCurrentSecuritySelection = securityMode;
-        mSecurityCallback.onSecurityModeChanged(securityMode, newView.needsInput());
+        mSecurityCallback.onSecurityModeChanged(securityMode,
+                securityMode != SecurityMode.None && newView.needsInput());
     }
 
     private KeyguardSecurityViewFlipper getFlipper() {
@@ -472,7 +475,6 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
 
     private int getSecurityViewIdForMode(SecurityMode securityMode) {
         switch (securityMode) {
-            case None: return R.id.keyguard_selector_view;
             case Pattern: return R.id.keyguard_pattern_view;
             case PIN: return R.id.keyguard_pin_view;
             case Password: return R.id.keyguard_password_view;
@@ -486,7 +488,6 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
 
     private int getLayoutIdFor(SecurityMode securityMode) {
         switch (securityMode) {
-            case None: return R.layout.keyguard_selector_view;
             case Pattern: return R.layout.keyguard_pattern_view;
             case PIN: return R.layout.keyguard_pin_view;
             case Password: return R.layout.keyguard_password_view;

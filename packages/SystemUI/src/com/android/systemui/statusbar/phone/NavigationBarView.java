@@ -88,6 +88,8 @@ public class NavigationBarView extends LinearLayout {
     // performs manual animation in sync with layout transitions
     private final NavTransitionListener mTransitionListener = new NavTransitionListener();
 
+    private OnVerticalChangedListener mOnVerticalChangedListener;
+
     private class NavTransitionListener implements TransitionListener {
         private boolean mBackTransitioning;
         private boolean mHomeAppearing;
@@ -191,6 +193,10 @@ public class NavigationBarView extends LinearLayout {
 
     public void setBar(BaseStatusBar phoneStatusBar) {
         mDelegateHelper.setBar(phoneStatusBar);
+    }
+
+    public void setOnVerticalChangedListener(OnVerticalChangedListener onVerticalChangedListener) {
+        mOnVerticalChangedListener = onVerticalChangedListener;
     }
 
     @Override
@@ -413,7 +419,7 @@ public class NavigationBarView extends LinearLayout {
 
         // swap to x coordinate if orientation is not in vertical
         if (mDelegateHelper != null) {
-            mDelegateHelper.setSwapXY(!mVertical);
+            mDelegateHelper.setSwapXY(mVertical);
         }
 
         setNavigationIconHints(mNavigationIconHints, true);
@@ -435,6 +441,9 @@ public class NavigationBarView extends LinearLayout {
             mVertical = newVertical;
             //Log.v(TAG, String.format("onSizeChanged: h=%d, w=%d, vert=%s", h, w, mVertical?"y":"n"));
             reorient();
+            if (mOnVerticalChangedListener != null) {
+                mOnVerticalChangedListener.onVerticalChanged(newVertical);
+            }
         }
 
         postCheckForInvalidLayout("sizeChanged");
@@ -542,4 +551,7 @@ public class NavigationBarView extends LinearLayout {
         pw.println();
     }
 
+    public interface OnVerticalChangedListener {
+        void onVerticalChanged(boolean isVertical);
+    }
 }
