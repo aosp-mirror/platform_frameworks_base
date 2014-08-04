@@ -813,6 +813,15 @@ public class Notification implements Parcelable
      */
     public static final String EXTRA_COMPACT_ACTIONS = "android.compactActions";
 
+
+    /**
+     * {@link #extras} key: Bitmap representing the profile badge to be shown with the
+     * notification.
+     *
+     * @hide
+     */
+    public static final String EXTRA_PROFILE_BADGE = "android.profileBadge";
+
     /**
      * Value for {@link #EXTRA_AS_HEADS_UP} that indicates this notification should not be
      * displayed in the heads up space.
@@ -1861,7 +1870,7 @@ public class Notification implements Parcelable
         private final NotificationColorUtil mColorUtil;
         private ArrayList<String> mPeople;
         private int mColor = COLOR_DEFAULT;
-
+        private Bitmap mProfileBadge;
 
         /**
          * Contains extras related to rebuilding during the build phase.
@@ -2585,7 +2594,6 @@ public class Notification implements Parcelable
         }
 
         private RemoteViews applyStandardTemplate(int resId, boolean fitIn1U) {
-            Bitmap profileIcon = getProfileBadge();
             RemoteViews contentView = new BuilderRemoteViews(mContext.getPackageName(), resId);
             boolean showLine3 = false;
             boolean showLine2 = false;
@@ -2593,8 +2601,8 @@ public class Notification implements Parcelable
             if (mPriority < PRIORITY_LOW) {
                 // TODO: Low priority presentation
             }
-            if (profileIcon != null) {
-                contentView.setImageViewBitmap(R.id.profile_icon, profileIcon);
+            if (mProfileBadge != null) {
+                contentView.setImageViewBitmap(R.id.profile_icon, mProfileBadge);
                 contentView.setViewVisibility(R.id.profile_icon, View.VISIBLE);
             } else {
                 contentView.setViewVisibility(R.id.profile_icon, View.GONE);
@@ -2936,6 +2944,9 @@ public class Notification implements Parcelable
             if (!mPeople.isEmpty()) {
                 extras.putStringArray(EXTRA_PEOPLE, mPeople.toArray(new String[mPeople.size()]));
             }
+            if (mProfileBadge != null) {
+                extras.putParcelable(EXTRA_PROFILE_BADGE, mProfileBadge);
+            }
             // NOTE: If you're adding new extras also update restoreFromNotification().
         }
 
@@ -3163,6 +3174,9 @@ public class Notification implements Parcelable
                 mPeople.clear();
                 Collections.addAll(mPeople, extras.getStringArray(EXTRA_PEOPLE));
             }
+            if (extras.containsKey(EXTRA_PROFILE_BADGE)) {
+                mProfileBadge = extras.getParcelable(EXTRA_PROFILE_BADGE);
+            }
         }
 
         /**
@@ -3178,6 +3192,8 @@ public class Notification implements Parcelable
          * object.
          */
         public Notification build() {
+            mProfileBadge = getProfileBadge();
+
             Notification n = buildUnstyled();
 
             if (mStyle != null) {
