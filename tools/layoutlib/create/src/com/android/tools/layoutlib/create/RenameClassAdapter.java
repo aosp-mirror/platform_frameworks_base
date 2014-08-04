@@ -73,7 +73,7 @@ public class RenameClassAdapter extends AbstractClassAdapter {
             return mNewName;
         }
 
-        if (mOldBase != mOldName && type.equals(mOldBase)) {
+        if (!mOldBase.equals(mOldName) && type.equals(mOldBase)) {
             return mNewBase;
         }
 
