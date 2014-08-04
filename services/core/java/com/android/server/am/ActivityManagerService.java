@@ -3695,7 +3695,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     //explicitly remove thd old information in mRecentTasks when removing existing user.
-    private void removeRecentTasksForUser(int userId) {
+    private void removeRecentTasksForUserLocked(int userId) {
         if(userId <= 0) {
             Slog.i(TAG, "Can't remove recent task on user " + userId);
             return;
@@ -17724,10 +17724,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // Kill all the processes for the user.
                 forceStopUserLocked(userId, "finish user");
             }
-        }
 
-        // Explicitly remove the old information in mRecentTasks.
-        removeRecentTasksForUser(userId);
+            // Explicitly remove the old information in mRecentTasks.
+            removeRecentTasksForUserLocked(userId);
+        }
 
         for (int i=0; i<callbacks.size(); i++) {
             try {
