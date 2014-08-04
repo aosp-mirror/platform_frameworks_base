@@ -38,14 +38,8 @@ import com.android.internal.util.StateMachine;
 import com.android.server.ConnectivityService;
 import com.android.server.connectivity.NetworkAgentInfo;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.net.URL;
 
 /**
@@ -608,84 +602,41 @@ public class NetworkMonitor extends StateMachine {
     private int isCaptivePortal() {
         if (!mIsCaptivePortalCheckEnabled) return 204;
 
-        String urlString = "http://" + mServer + "/generate_204";
-        if (DBG) {
-            log("Checking " + urlString + " on " + mNetworkAgentInfo.networkInfo.getExtraInfo());
-        }
         HttpURLConnection urlConnection = null;
-        Socket socket = null;
         int httpResponseCode = 599;
         try {
-            URL url = new URL(urlString);
-            // TODO: check that standard HttpURLConnection doesn't choke on
-            // cruel and unusual captive portals, and then replace the
-            // hand-rolled HTTP code in the else branch with this code.
-            if (false) {
-                url = mNetworkAgentInfo.network.getBoundURL(url);
-                urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setInstanceFollowRedirects(false);
-                urlConnection.setConnectTimeout(SOCKET_TIMEOUT_MS);
-                urlConnection.setReadTimeout(SOCKET_TIMEOUT_MS);
-                urlConnection.setUseCaches(false);
-                urlConnection.getInputStream();
-                httpResponseCode = urlConnection.getResponseCode();
-            } else {
-                // Lookup addresses only on this Network.
-                InetAddress[] hostAddresses = mNetworkAgentInfo.network.getAllByName(url.getHost());
-                // Try all addresses.
-                for (int i = 0; i < hostAddresses.length; i++) {
-                    // Create a new socket for every IP address. See http://b/16664129 .
-                    socket = mNetworkAgentInfo.network.getSocketFactory().createSocket();
-                    socket.setSoTimeout(SOCKET_TIMEOUT_MS);
-                    if (DBG) log("Connecting to " + hostAddresses[i]);
-                    try {
-                        socket.connect(new InetSocketAddress(hostAddresses[i],
-                                url.getDefaultPort()), SOCKET_TIMEOUT_MS);
-                        break;
-                    } catch (IOException e) {
-                        // Ignore exceptions on all but the last.
-                        if (i == (hostAddresses.length - 1)) throw e;
-                    }
-                }
-                if (DBG) log("Requesting " + url.getFile());
-                BufferedReader reader = new BufferedReader(
-                        new InputStreamReader(socket.getInputStream()));
-                OutputStreamWriter writer = new OutputStreamWriter(socket.getOutputStream());
-                writer.write("GET " + url.getFile() + " HTTP/1.1\r\nHost: " + url.getHost() +
-                        "\r\nUser-Agent: " + System.getProperty("http.agent") +
-                        "\r\nConnection: close\r\n\r\n");
-                writer.flush();
-                String response = reader.readLine();
-                if (DBG) log("Received \"" + response + "\"");
-                if (response != null && (response.startsWith("HTTP/1.1 ") ||
-                        // NOTE: We may want to consider an "HTTP/1.0 204" response to be a captive
-                        // portal.  The only example of this seen so far was a captive portal.  For
-                        // the time being go with prior behavior of assuming it's not a captive
-                        // portal.  If it is considered a captive portal, a different sign-in URL
-                        // is needed (i.e. can't browse a 204).  This could be the result of an HTTP
-                        // proxy server.
-                        response.startsWith("HTTP/1.0 "))) {
-                    // NOTE: We may want to consider an "200" response with "Content-length=0" to
-                    // not be a captive portal. This could be the result of an HTTP proxy server.
-                    // See b/9972012.
-                    httpResponseCode = Integer.parseInt(response.substring(9, 12));
-                } else {
-                    // A response was received but not understood.  The fact that a
-                    // response was sent indicates there's some kind of responsive network
-                    // out there so put up the notification to the user to log into the network
-                    // so the user can have the final say as to whether the network is useful.
-                    httpResponseCode = 399;
-                    while (DBG && response != null && !response.isEmpty()) {
-                        try {
-                            response = reader.readLine();
-                        } catch (IOException e) {
-                            break;
-                        }
-                        log("Received \"" + response + "\"");
-                    }
-                }
+            URL url = new URL("http", mServer, "/generate_204");
+            if (DBG) {
+                log("Checking " + url.toString() + " on " +
+                        mNetworkAgentInfo.networkInfo.getExtraInfo());
             }
-            if (DBG) log("isCaptivePortal: ret=" + httpResponseCode);
+            url = mNetworkAgentInfo.network.getBoundURL(url);
+            urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.setInstanceFollowRedirects(false);
+            urlConnection.setConnectTimeout(SOCKET_TIMEOUT_MS);
+            urlConnection.setReadTimeout(SOCKET_TIMEOUT_MS);
+            urlConnection.setUseCaches(false);
+            urlConnection.getInputStream();
+            httpResponseCode = urlConnection.getResponseCode();
+            if (DBG) {
+                log("isCaptivePortal: ret=" + httpResponseCode +
+                        " headers=" + urlConnection.getHeaderFields());
+            }
+            // NOTE: We may want to consider an "HTTP/1.0 204" response to be a captive
+            // portal.  The only example of this seen so far was a captive portal.  For
+            // the time being go with prior behavior of assuming it's not a captive
+            // portal.  If it is considered a captive portal, a different sign-in URL
+            // is needed (i.e. can't browse a 204).  This could be the result of an HTTP
+            // proxy server.
+
+            // Consider 200 response with "Content-length=0" to not be a captive portal.
+            // There's no point in considering this a captive portal as the user cannot
+            // sign-in to an empty page.  Probably the result of a broken transparent proxy.
+            // See http://b/9972012.
+            if (httpResponseCode == 200 && urlConnection.getContentLength() == 0) {
+                if (DBG) log("Empty 200 response interpreted as 204 response.");
+                httpResponseCode = 204;
+            }
         } catch (IOException e) {
             if (DBG) log("Probably not a portal: exception " + e);
             if (httpResponseCode == 599) {
@@ -694,13 +645,6 @@ public class NetworkMonitor extends StateMachine {
         } finally {
             if (urlConnection != null) {
                 urlConnection.disconnect();
-            }
-            if (socket != null) {
-                try {
-                    socket.close();
-                } catch (IOException e) {
-                    // Ignore
-                }
             }
         }
         return httpResponseCode;
