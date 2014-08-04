@@ -1790,12 +1790,15 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     if (nai == null) {
                         loge("NetworkAgent not found for EVENT_NETWORK_PROPERTIES_CHANGED");
                     } else {
-                        if (VDBG) log("Update of Linkproperties for " + nai.name());
+                        if (VDBG) {
+                            log("Update of Linkproperties for " + nai.name() +
+                                    "; created=" + nai.created);
+                        }
                         LinkProperties oldLp = nai.linkProperties;
                         synchronized (nai) {
                             nai.linkProperties = (LinkProperties)msg.obj;
                         }
-                        updateLinkProperties(nai, oldLp);
+                        if (nai.created) updateLinkProperties(nai, oldLp);
                     }
                     break;
                 }
@@ -2032,12 +2035,14 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 log(nai.name() + " got DISCONNECTED, was satisfying " + nai.networkRequests.size());
             }
             // A network agent has disconnected.
-            // Tell netd to clean up the configuration for this network
-            // (routing rules, DNS, etc).
-            try {
-                mNetd.removeNetwork(nai.network.netId);
-            } catch (Exception e) {
-                loge("Exception removing network: " + e);
+            if (nai.created) {
+                // Tell netd to clean up the configuration for this network
+                // (routing rules, DNS, etc).
+                try {
+                    mNetd.removeNetwork(nai.network.netId);
+                } catch (Exception e) {
+                    loge("Exception removing network: " + e);
+                }
             }
             // TODO - if we move the logic to the network agent (have them disconnect
             // because they lost all their requests or because their score isn't good)
@@ -4622,13 +4627,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     " to " + state);
         }
 
-        if (state == NetworkInfo.State.CONNECTED) {
+        if (state == NetworkInfo.State.CONNECTED && !networkAgent.created) {
             try {
-                // This is likely caused by the fact that this network already
-                // exists. An example is when a network goes from CONNECTED to
-                // CONNECTING and back (like wifi on DHCP renew).
-                // TODO: keep track of which networks we've created, or ask netd
-                // to tell us whether we've already created this network or not.
+                // This should never fail.  Specifying an already in use NetID will cause failure.
                 if (networkAgent.isVPN()) {
                     mNetd.createVirtualNetwork(networkAgent.network.netId,
                             !networkAgent.linkProperties.getDnsServers().isEmpty(),
@@ -4642,7 +4643,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         + e.getMessage());
                 return;
             }
-
+            networkAgent.created = true;
             updateLinkProperties(networkAgent, null);
             notifyNetworkCallbacks(networkAgent, ConnectivityManager.CALLBACK_PRECHECK);
             networkAgent.networkMonitor.sendMessage(NetworkMonitor.CMD_NETWORK_CONNECTED);
