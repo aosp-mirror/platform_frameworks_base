@@ -1339,8 +1339,10 @@
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Mise en forme"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Débogage USB connecté"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Appuyez pour désactiver le débogage USB."</string>
-    <string name="select_input_method" msgid="4653387336791222978">"Sélectionnez le mode de saisie"</string>
-    <string name="configure_input_methods" msgid="9091652157722495116">"Configurer les modes de saisie"</string>
+    <!-- no translation found for select_input_method (8547250819326693584) -->
+    <skip />
+    <!-- no translation found for configure_input_methods (4769971288371946846) -->
+    <skip />
     <string name="use_physical_keyboard" msgid="6203112478095117625">"Clavier physique"</string>
     <string name="hardware" msgid="7517821086888990278">"Matériel"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Sélectionnez la disposition du clavier"</string>
@@ -1414,8 +1416,8 @@
     <string name="deny" msgid="2081879885755434506">"Refuser"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Autorisation demandée"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Autorisation demandée\npour le compte \"<xliff:g id="ACCOUNT">%s</xliff:g>\""</string>
-    <string name="forward_intent_to_owner" msgid="570916783072215572">"Vous utilisez cette application dans votre espace personnel."</string>
-    <string name="forward_intent_to_work" msgid="8624579696577525279">"Vous utilisez cette application dans votre espace de travail."</string>
+    <string name="forward_intent_to_owner" msgid="570916783072215572">"Vous utilisez cette application dans votre espace personnel"</string>
+    <string name="forward_intent_to_work" msgid="8624579696577525279">"Vous utilisez cette application dans votre espace de travail"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Mode de saisie"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Synchroniser"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Accessibilité"</string>
@@ -1626,15 +1628,14 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Vous avez dessiné un schéma de déverrouillage incorrect à <xliff:g id="NUMBER_0">%d</xliff:g> reprises. Si vous échouez encore <xliff:g id="NUMBER_1">%d</xliff:g> fois, vous devrez déverrouiller votre téléphone à l\'aide d\'un compte de messagerie électronique.\n\n Veuillez réessayer dans <xliff:g id="NUMBER_2">%d</xliff:g> secondes."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Supprimer"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Augmenter le volume au dessus du niveau recommandé ?\n\nL\'écoute prolongée à un volume élevé peut endommager vos facultés auditives."</string>
+    <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Augmenter le volume au-dessus du niveau recommandé?\n\nL\'écoute prolongée à un volume élevé peut endommager vos facultés auditives."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Pour activer l\'accessibilité, appuyez de manière prolongée avec deux doigts."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"L\'accessibilité a bien été activée."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Accessibilité annulée."</string>
     <string name="user_switched" msgid="3768006783166984410">"Utilisateur actuel : <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="owner_name" msgid="2716755460376028154">"Propriétaire"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Erreur"</string>
-    <!-- no translation found for error_message_change_not_allowed (1347282344200417578) -->
-    <skip />
+    <string name="error_message_change_not_allowed" msgid="1347282344200417578">"Cette modification n\'est pas autorisée par votre administrateur"</string>
     <string name="app_not_found" msgid="3429141853498927379">"Aucune application trouvée pour gérer cette action."</string>
     <string name="revoke" msgid="5404479185228271586">"Révoquer"</string>
     <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>
@@ -1765,4 +1766,40 @@
     <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"NIP"</string>
     <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"schéma de déverrouillage"</string>
     <string name="lock_to_app_unlock_password" msgid="795224196583495868">"mot de passe"</string>
+    <!-- no translation found for description_ustvpg (3666171166900312727) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_d (6552868431924879897) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_l (2427588153488291892) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_s (2556047043212535339) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_v (6647466085048806213) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_fv (4015953953338931020) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_y (2271448022073929890) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_y7 (8931861188215869211) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_g (506861774854051282) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_pg (4238749719629801564) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_14 (6305164472373004907) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_ma (5842074394338699982) -->
+    <skip />
+    <!-- no translation found for description_krtv_all (11497981488871053) -->
+    <skip />
+    <!-- no translation found for description_krtv_7 (6204900788594114856) -->
+    <skip />
+    <!-- no translation found for description_krtv_12 (5134514644432355428) -->
+    <skip />
+    <!-- no translation found for description_krtv_15 (1183692678647313272) -->
+    <skip />
+    <!-- no translation found for description_krtv_19 (7021986912313208481) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (724302068634956656) -->
+    <skip />
 </resources>

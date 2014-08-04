@@ -1339,8 +1339,10 @@
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"格式化"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"已连接到USB调试"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"触摸可停用USB调试。"</string>
-    <string name="select_input_method" msgid="4653387336791222978">"选择输入法"</string>
-    <string name="configure_input_methods" msgid="9091652157722495116">"设置输入法"</string>
+    <!-- no translation found for select_input_method (8547250819326693584) -->
+    <skip />
+    <!-- no translation found for configure_input_methods (4769971288371946846) -->
+    <skip />
     <string name="use_physical_keyboard" msgid="6203112478095117625">"物理键盘"</string>
     <string name="hardware" msgid="7517821086888990278">"硬件"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"选择键盘布局"</string>
@@ -1395,7 +1397,7 @@
     <string name="permlab_createMediaProjection" msgid="4941338725487978112">"创建媒体投影会话"</string>
     <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"允许应用创建媒体投影会话。这些会话可让应用截取显示内容和音频内容。普通应用绝不需要此权限。"</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"读取安装会话"</string>
-    <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"允许应用读取安装会话。这样，应用将可以查看有关当前程序包安装的详情。"</string>
+    <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"允许应用读取安装会话。这样，应用将可以查看有关当前软件包安装的详情。"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"触摸两次可进行缩放控制"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"无法添加小部件。"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"开始"</string>
@@ -1414,8 +1416,8 @@
     <string name="deny" msgid="2081879885755434506">"拒绝"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"权限请求"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"应用对帐户 <xliff:g id="ACCOUNT">%s</xliff:g>\n 提出权限请求。"</string>
-    <string name="forward_intent_to_owner" msgid="570916783072215572">"您目前正在个人空间使用此应用"</string>
-    <string name="forward_intent_to_work" msgid="8624579696577525279">"您目前正在工作空间使用此应用"</string>
+    <string name="forward_intent_to_owner" msgid="570916783072215572">"您目前是在个人空间内使用此应用"</string>
+    <string name="forward_intent_to_work" msgid="8624579696577525279">"您目前是在工作空间内使用此应用"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"输入法"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"同步"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"辅助功能"</string>
@@ -1626,15 +1628,14 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"您已经 <xliff:g id="NUMBER_0">%d</xliff:g> 次错误地绘制了解锁图案。如果再尝试 <xliff:g id="NUMBER_1">%d</xliff:g> 次后仍不成功，系统就会要求您使用自己的电子邮件帐户解锁手机。\n\n请在 <xliff:g id="NUMBER_2">%d</xliff:g> 秒后重试。"</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"删除"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"要将音量提高到建议的音量以上吗？\n\n长时间聆听高音量内容可能会损伤您的听力。"</string>
+    <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"要将音量调高到推荐水平以上吗？\n\n长时间保持高音量可能会损伤听力。"</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"持续按住双指即可启用辅助功能。"</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"辅助功能已启用。"</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"已取消辅助功能。"</string>
     <string name="user_switched" msgid="3768006783166984410">"当前用户是<xliff:g id="NAME">%1$s</xliff:g>。"</string>
     <string name="owner_name" msgid="2716755460376028154">"机主"</string>
     <string name="error_message_title" msgid="4510373083082500195">"错误"</string>
-    <!-- no translation found for error_message_change_not_allowed (1347282344200417578) -->
-    <skip />
+    <string name="error_message_change_not_allowed" msgid="1347282344200417578">"您的管理员不允许进行此更改"</string>
     <string name="app_not_found" msgid="3429141853498927379">"找不到可处理此操作的应用"</string>
     <string name="revoke" msgid="5404479185228271586">"撤消"</string>
     <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>
@@ -1765,4 +1766,40 @@
     <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN码"</string>
     <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"解锁图案"</string>
     <string name="lock_to_app_unlock_password" msgid="795224196583495868">"密码"</string>
+    <!-- no translation found for description_ustvpg (3666171166900312727) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_d (6552868431924879897) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_l (2427588153488291892) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_s (2556047043212535339) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_v (6647466085048806213) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_fv (4015953953338931020) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_y (2271448022073929890) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_y7 (8931861188215869211) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_g (506861774854051282) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_pg (4238749719629801564) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_14 (6305164472373004907) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_ma (5842074394338699982) -->
+    <skip />
+    <!-- no translation found for description_krtv_all (11497981488871053) -->
+    <skip />
+    <!-- no translation found for description_krtv_7 (6204900788594114856) -->
+    <skip />
+    <!-- no translation found for description_krtv_12 (5134514644432355428) -->
+    <skip />
+    <!-- no translation found for description_krtv_15 (1183692678647313272) -->
+    <skip />
+    <!-- no translation found for description_krtv_19 (7021986912313208481) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (724302068634956656) -->
+    <skip />
 </resources>

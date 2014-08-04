@@ -1339,8 +1339,10 @@
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formata"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Depuració USB activada"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Toca per desactivar la depuració USB"</string>
-    <string name="select_input_method" msgid="4653387336791222978">"Selecciona un mètode d\'entrada"</string>
-    <string name="configure_input_methods" msgid="9091652157722495116">"Configura els mètodes d\'entrada"</string>
+    <!-- no translation found for select_input_method (8547250819326693584) -->
+    <skip />
+    <!-- no translation found for configure_input_methods (4769971288371946846) -->
+    <skip />
     <string name="use_physical_keyboard" msgid="6203112478095117625">"Teclat físic"</string>
     <string name="hardware" msgid="7517821086888990278">"Maquinari"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Selecciona una disposició de teclat"</string>
@@ -1388,8 +1390,8 @@
     <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Permet que una aplicació proporcioni un agent de confiança."</string>
     <string name="permlab_launch_trust_agent_settings" msgid="5859430082240410200">"Iniciar el menú de configuració de l\'agent de confiança"</string>
     <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"Permet que una aplicació iniciï una activitat que modifiqui el comportament de l\'agent de confiança."</string>
-    <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Enllaçar amb el servei d\'un agent de confiança"</string>
-    <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Permet que una aplicació es vinculi amb el servei d\'un agent de confiança."</string>
+    <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Enllaçar amb un servei d\'agent de confiança"</string>
+    <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Permet que una aplicació es vinculi amb un servei d\'agent de confiança."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Interacciona amb el sistema de recuperació i amb les actualitzacions"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Permet que una aplicació interaccioni amb el sistema de recuperació i amb les actualitzacions del sistema."</string>
     <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Creació de sessions de projecció de fitxers multimèdia"</string>
@@ -1633,8 +1635,7 @@
     <string name="user_switched" msgid="3768006783166984410">"Usuari actual: <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"Propietari"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Error"</string>
-    <!-- no translation found for error_message_change_not_allowed (1347282344200417578) -->
-    <skip />
+    <string name="error_message_change_not_allowed" msgid="1347282344200417578">"L\'administrador no permet aquest canvi."</string>
     <string name="app_not_found" msgid="3429141853498927379">"No s\'ha trobat cap aplicació per processar aquesta acció"</string>
     <string name="revoke" msgid="5404479185228271586">"Revoca"</string>
     <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>
@@ -1765,4 +1766,40 @@
     <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN"</string>
     <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"patró de desbloqueig"</string>
     <string name="lock_to_app_unlock_password" msgid="795224196583495868">"contrasenya"</string>
+    <!-- no translation found for description_ustvpg (3666171166900312727) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_d (6552868431924879897) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_l (2427588153488291892) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_s (2556047043212535339) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_v (6647466085048806213) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_fv (4015953953338931020) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_y (2271448022073929890) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_y7 (8931861188215869211) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_g (506861774854051282) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_pg (4238749719629801564) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_14 (6305164472373004907) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_ma (5842074394338699982) -->
+    <skip />
+    <!-- no translation found for description_krtv_all (11497981488871053) -->
+    <skip />
+    <!-- no translation found for description_krtv_7 (6204900788594114856) -->
+    <skip />
+    <!-- no translation found for description_krtv_12 (5134514644432355428) -->
+    <skip />
+    <!-- no translation found for description_krtv_15 (1183692678647313272) -->
+    <skip />
+    <!-- no translation found for description_krtv_19 (7021986912313208481) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (724302068634956656) -->
+    <skip />
 </resources>

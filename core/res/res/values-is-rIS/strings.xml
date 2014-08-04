@@ -1339,8 +1339,10 @@
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Forsníða"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-villuleit tengd"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Snertu til að slökkva á USB-villuleit."</string>
-    <string name="select_input_method" msgid="4653387336791222978">"Veldu innsláttaraðferð"</string>
-    <string name="configure_input_methods" msgid="9091652157722495116">"Setja upp innsláttaraðferðir"</string>
+    <!-- no translation found for select_input_method (8547250819326693584) -->
+    <skip />
+    <!-- no translation found for configure_input_methods (4769971288371946846) -->
+    <skip />
     <string name="use_physical_keyboard" msgid="6203112478095117625">"Vélbúnaðarlyklaborð"</string>
     <string name="hardware" msgid="7517821086888990278">"Vélbúnaður"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Veldu lyklaskipan"</string>
@@ -1633,8 +1635,7 @@
     <string name="user_switched" msgid="3768006783166984410">"Núverandi notandi <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"Eigandi"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Villa"</string>
-    <!-- no translation found for error_message_change_not_allowed (1347282344200417578) -->
-    <skip />
+    <string name="error_message_change_not_allowed" msgid="1347282344200417578">"Stjórnandinn þinn leyfir ekki þessa breytingu."</string>
     <string name="app_not_found" msgid="3429141853498927379">"Ekkert forrit fannst til að meðhöndla þessa aðgerð"</string>
     <string name="revoke" msgid="5404479185228271586">"Afturkalla"</string>
     <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>
@@ -1765,4 +1766,40 @@
     <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN-númer"</string>
     <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"opnunarmynstur"</string>
     <string name="lock_to_app_unlock_password" msgid="795224196583495868">"aðgangsorð"</string>
+    <!-- no translation found for description_ustvpg (3666171166900312727) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_d (6552868431924879897) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_l (2427588153488291892) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_s (2556047043212535339) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_v (6647466085048806213) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_fv (4015953953338931020) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_y (2271448022073929890) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_y7 (8931861188215869211) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_g (506861774854051282) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_pg (4238749719629801564) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_14 (6305164472373004907) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_ma (5842074394338699982) -->
+    <skip />
+    <!-- no translation found for description_krtv_all (11497981488871053) -->
+    <skip />
+    <!-- no translation found for description_krtv_7 (6204900788594114856) -->
+    <skip />
+    <!-- no translation found for description_krtv_12 (5134514644432355428) -->
+    <skip />
+    <!-- no translation found for description_krtv_15 (1183692678647313272) -->
+    <skip />
+    <!-- no translation found for description_krtv_19 (7021986912313208481) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (724302068634956656) -->
+    <skip />
 </resources>
