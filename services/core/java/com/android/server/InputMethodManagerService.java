@@ -51,6 +51,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
+import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
@@ -91,6 +92,7 @@ import android.util.PrintWriterPrinter;
 import android.util.Printer;
 import android.util.Slog;
 import android.util.Xml;
+import android.view.ContextThemeWrapper;
 import android.view.IWindowManager;
 import android.view.InputChannel;
 import android.view.LayoutInflater;
@@ -2728,6 +2730,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return mKeyguardManager != null
                 && mKeyguardManager.isKeyguardLocked() && mKeyguardManager.isKeyguardSecure();
     }
+
     private void showInputMethodMenuInternal(boolean showSubtypes) {
         if (DEBUG) Slog.v(TAG, "Show switching menu");
 
@@ -2778,84 +2781,81 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     }
                 }
             }
-            final TypedArray a = context.obtainStyledAttributes(null,
+            final Context themedContext = new ContextThemeWrapper(context,
+                    android.R.style.Theme_DeviceDefault_Settings);
+            mDialogBuilder = new AlertDialog.Builder(themedContext);
+            final TypedArray a = themedContext.obtainStyledAttributes(null,
                     com.android.internal.R.styleable.DialogPreference,
                     com.android.internal.R.attr.alertDialogStyle, 0);
-            mDialogBuilder = new AlertDialog.Builder(context)
-                    .setOnCancelListener(new OnCancelListener() {
-                        @Override
-                        public void onCancel(DialogInterface dialog) {
-                            hideInputMethodMenu();
-                        }
-                    })
-                    .setIcon(a.getDrawable(
-                            com.android.internal.R.styleable.DialogPreference_dialogTitle));
+            mDialogBuilder.setIcon(a.getDrawable(
+                    com.android.internal.R.styleable.DialogPreference_dialogIcon));
             a.recycle();
+            mDialogBuilder.setOnCancelListener(new OnCancelListener() {
+                @Override
+                public void onCancel(DialogInterface dialog) {
+                    hideInputMethodMenu();
+                }
+            });
             final LayoutInflater inflater =
-                    (LayoutInflater)mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    (LayoutInflater)themedContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             final View tv = inflater.inflate(
                     com.android.internal.R.layout.input_method_switch_dialog_title, null);
             mDialogBuilder.setCustomTitle(tv);
 
             // Setup layout for a toggle switch of the hardware keyboard
             mSwitchingDialogTitleView = tv;
-            mSwitchingDialogTitleView.findViewById(
-                    com.android.internal.R.id.hard_keyboard_section).setVisibility(
-                            mWindowManagerService.isHardKeyboardAvailable() ?
-                                    View.VISIBLE : View.GONE);
-            final Switch hardKeySwitch =  ((Switch)mSwitchingDialogTitleView.findViewById(
-                    com.android.internal.R.id.hard_keyboard_switch));
+            mSwitchingDialogTitleView
+                    .findViewById(com.android.internal.R.id.hard_keyboard_section)
+                    .setVisibility(mWindowManagerService.isHardKeyboardAvailable()
+                            ? View.VISIBLE : View.GONE);
+            final Switch hardKeySwitch = (Switch)mSwitchingDialogTitleView.findViewById(
+                    com.android.internal.R.id.hard_keyboard_switch);
             hardKeySwitch.setChecked(mWindowManagerService.isHardKeyboardEnabled());
-            hardKeySwitch.setOnCheckedChangeListener(
-                    new OnCheckedChangeListener() {
-                        @Override
-                        public void onCheckedChanged(
-                                CompoundButton buttonView, boolean isChecked) {
-                            mWindowManagerService.setHardKeyboardEnabled(isChecked);
-                            // Ensure that the input method dialog is dismissed when changing
-                            // the hardware keyboard state.
-                            hideInputMethodMenu();
+            hardKeySwitch.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    mWindowManagerService.setHardKeyboardEnabled(isChecked);
+                    // Ensure that the input method dialog is dismissed when changing
+                    // the hardware keyboard state.
+                    hideInputMethodMenu();
+                }
+            });
+
+            final ImeSubtypeListAdapter adapter = new ImeSubtypeListAdapter(themedContext,
+                    com.android.internal.R.layout.input_method_switch_item, imList, checkedItem);
+            final OnClickListener choiceListener = new OnClickListener() {
+                @Override
+                public void onClick(final DialogInterface dialog, final int which) {
+                    synchronized (mMethodMap) {
+                        if (mIms == null || mIms.length <= which || mSubtypeIds == null
+                                || mSubtypeIds.length <= which) {
+                            return;
                         }
-                    });
-
-            final ImeSubtypeListAdapter adapter = new ImeSubtypeListAdapter(context,
-                    com.android.internal.R.layout.simple_list_item_2_single_choice, imList,
-                    checkedItem);
-
-            mDialogBuilder.setSingleChoiceItems(adapter, checkedItem,
-                    new AlertDialog.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            synchronized (mMethodMap) {
-                                if (mIms == null || mIms.length <= which
-                                        || mSubtypeIds == null || mSubtypeIds.length <= which) {
-                                    return;
-                                }
-                                InputMethodInfo im = mIms[which];
-                                int subtypeId = mSubtypeIds[which];
-                                adapter.mCheckedItem = which;
-                                adapter.notifyDataSetChanged();
-                                hideInputMethodMenu();
-                                if (im != null) {
-                                    if ((subtypeId < 0)
-                                            || (subtypeId >= im.getSubtypeCount())) {
-                                        subtypeId = NOT_A_SUBTYPE_ID;
-                                    }
-                                    setInputMethodLocked(im.getId(), subtypeId);
-                                }
+                        final InputMethodInfo im = mIms[which];
+                        int subtypeId = mSubtypeIds[which];
+                        adapter.mCheckedItem = which;
+                        adapter.notifyDataSetChanged();
+                        hideInputMethodMenu();
+                        if (im != null) {
+                            if (subtypeId < 0 || subtypeId >= im.getSubtypeCount()) {
+                                subtypeId = NOT_A_SUBTYPE_ID;
                             }
+                            setInputMethodLocked(im.getId(), subtypeId);
                         }
-                    });
+                    }
+                }
+            };
+            mDialogBuilder.setSingleChoiceItems(adapter, checkedItem, choiceListener);
 
             if (showSubtypes && !isScreenLocked) {
+                final OnClickListener positiveListener = new OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        showConfigureInputMethods();
+                    }
+                };
                 mDialogBuilder.setPositiveButton(
-                        com.android.internal.R.string.configure_input_methods,
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int whichButton) {
-                                showConfigureInputMethods();
-                            }
-                        });
+                        com.android.internal.R.string.configure_input_methods, positiveListener);
             }
             mSwitchingDialog = mDialogBuilder.create();
             mSwitchingDialog.setCanceledOnTouchOutside(true);
