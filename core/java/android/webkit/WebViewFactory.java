@@ -118,8 +118,17 @@ public final class WebViewFactory {
             return (Class<WebViewFactoryProvider>) Class.forName(CHROMIUM_WEBVIEW_FACTORY, true,
                                                                  clazzLoader);
         } catch (PackageManager.NameNotFoundException e) {
-            Log.e(LOGTAG, "Chromium WebView package does not exist");
-            return (Class<WebViewFactoryProvider>) Class.forName(NULL_WEBVIEW_FACTORY);
+            // If the package doesn't exist, then try loading the null WebView instead.
+            // If that succeeds, then this is a device without WebView support; if it fails then
+            // swallow the failure, complain that the real WebView is missing and rethrow the
+            // original exception.
+            try {
+                return (Class<WebViewFactoryProvider>) Class.forName(NULL_WEBVIEW_FACTORY);
+            } catch (ClassNotFoundException e2) {
+                // Ignore.
+            }
+            Log.e(LOGTAG, "Chromium WebView package does not exist", e);
+            throw new AndroidRuntimeException(e);
         }
     }
 
