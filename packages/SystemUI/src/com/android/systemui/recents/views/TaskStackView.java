@@ -428,11 +428,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     @Override
     public void computeScroll() {
+        mStackScroller.computeScroll();
         // Synchronize the views
         if (synchronizeStackViewsWithModel()) {
             clipTaskViews();
         }
-        mStackScroller.computeScroll();
     }
 
     /** Computes the stack and task rects */
@@ -630,12 +630,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 t.startLaunchTaskAnimation(null, false, occludesLaunchTarget);
             }
         }
-    }
-
-    @Override
-    protected void onScrollChanged(int l, int t, int oldl, int oldt) {
-        super.onScrollChanged(l, t, oldl, oldt);
-        requestSynchronizeStackViewsWithModel();
     }
 
     public boolean isTransformedTouchPointInView(float x, float y, View child) {
@@ -889,7 +883,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     public void onScrollChanged(float p) {
         mUIDozeTrigger.poke();
         requestSynchronizeStackViewsWithModel();
-        invalidate();
+        postInvalidateOnAnimation();
     }
 
     /**** RecentsPackageMonitor.PackageCallbacks Implementation ****/
