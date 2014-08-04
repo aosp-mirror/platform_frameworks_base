@@ -813,14 +813,12 @@ public class Notification implements Parcelable
      */
     public static final String EXTRA_COMPACT_ACTIONS = "android.compactActions";
 
-
     /**
-     * {@link #extras} key: Bitmap representing the profile badge to be shown with the
-     * notification.
+     * {@link #extras} key: the user that built the notification.
      *
      * @hide
      */
-    public static final String EXTRA_PROFILE_BADGE = "android.profileBadge";
+    public static final String EXTRA_ORIGINATING_USERID = "android.originatingUserId";
 
     /**
      * Value for {@link #EXTRA_AS_HEADS_UP} that indicates this notification should not be
@@ -1870,7 +1868,11 @@ public class Notification implements Parcelable
         private final NotificationColorUtil mColorUtil;
         private ArrayList<String> mPeople;
         private int mColor = COLOR_DEFAULT;
-        private Bitmap mProfileBadge;
+
+        /**
+         * The user that built the notification originally.
+         */
+        private int mOriginatingUserId;
 
         /**
          * Contains extras related to rebuilding during the build phase.
@@ -2579,8 +2581,10 @@ public class Notification implements Parcelable
         }
 
         private Bitmap getProfileBadge() {
+            // Note: This assumes that the current user can read the profile badge of the
+            // originating user.
             UserManager userManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-            Drawable badge = userManager.getBadgeForUser(android.os.Process.myUserHandle());
+            Drawable badge = userManager.getBadgeForUser(new UserHandle(mOriginatingUserId));
             if (badge == null) {
                 return null;
             }
@@ -2594,6 +2598,7 @@ public class Notification implements Parcelable
         }
 
         private RemoteViews applyStandardTemplate(int resId, boolean fitIn1U) {
+            Bitmap profileIcon = getProfileBadge();
             RemoteViews contentView = new BuilderRemoteViews(mContext.getPackageName(), resId);
             boolean showLine3 = false;
             boolean showLine2 = false;
@@ -2601,8 +2606,8 @@ public class Notification implements Parcelable
             if (mPriority < PRIORITY_LOW) {
                 // TODO: Low priority presentation
             }
-            if (mProfileBadge != null) {
-                contentView.setImageViewBitmap(R.id.profile_icon, mProfileBadge);
+            if (profileIcon != null) {
+                contentView.setImageViewBitmap(R.id.profile_icon, profileIcon);
                 contentView.setViewVisibility(R.id.profile_icon, View.VISIBLE);
             } else {
                 contentView.setViewVisibility(R.id.profile_icon, View.GONE);
@@ -2927,6 +2932,7 @@ public class Notification implements Parcelable
          */
         public void populateExtras(Bundle extras) {
             // Store original information used in the construction of this object
+            extras.putInt(EXTRA_ORIGINATING_USERID, mOriginatingUserId);
             extras.putString(EXTRA_REBUILD_CONTEXT_PACKAGE, mContext.getPackageName());
             extras.putCharSequence(EXTRA_TITLE, mContentTitle);
             extras.putCharSequence(EXTRA_TEXT, mContentText);
@@ -2943,9 +2949,6 @@ public class Notification implements Parcelable
             }
             if (!mPeople.isEmpty()) {
                 extras.putStringArray(EXTRA_PEOPLE, mPeople.toArray(new String[mPeople.size()]));
-            }
-            if (mProfileBadge != null) {
-                extras.putParcelable(EXTRA_PROFILE_BADGE, mProfileBadge);
             }
             // NOTE: If you're adding new extras also update restoreFromNotification().
         }
@@ -3157,6 +3160,7 @@ public class Notification implements Parcelable
 
             // Extras.
             Bundle extras = n.extras;
+            mOriginatingUserId = extras.getInt(EXTRA_ORIGINATING_USERID);
             mContentTitle = extras.getCharSequence(EXTRA_TITLE);
             mContentText = extras.getCharSequence(EXTRA_TEXT);
             mSubText = extras.getCharSequence(EXTRA_SUB_TEXT);
@@ -3174,9 +3178,6 @@ public class Notification implements Parcelable
                 mPeople.clear();
                 Collections.addAll(mPeople, extras.getStringArray(EXTRA_PEOPLE));
             }
-            if (extras.containsKey(EXTRA_PROFILE_BADGE)) {
-                mProfileBadge = extras.getParcelable(EXTRA_PROFILE_BADGE);
-            }
         }
 
         /**
@@ -3192,7 +3193,7 @@ public class Notification implements Parcelable
          * object.
          */
         public Notification build() {
-            mProfileBadge = getProfileBadge();
+            mOriginatingUserId = mContext.getUserId();
 
             Notification n = buildUnstyled();
 
