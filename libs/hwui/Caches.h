@@ -366,9 +366,6 @@ public:
     float propertyLightPosY;
     float propertyLightPosZ;
     float propertyAmbientRatio;
-    int propertyAmbientShadowStrength;
-    int propertySpotShadowStrength;
-    std::vector<float> propertyExtraRasterBuckets;
 private:
     enum OverdrawColorSet {
         kColorSet_Default = 0,

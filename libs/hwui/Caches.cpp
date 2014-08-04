@@ -699,9 +699,6 @@ TextureVertex* Caches::getRegionMesh() {
 ///////////////////////////////////////////////////////////////////////////////
 
 void Caches::initTempProperties() {
-    propertyAmbientShadowStrength = 12;
-    propertySpotShadowStrength = 48;
-
     propertyLightDiameter = -1.0f;
     propertyLightPosY = -1.0f;
     propertyLightPosZ = -1.0f;
@@ -710,15 +707,7 @@ void Caches::initTempProperties() {
 
 void Caches::setTempProperty(const char* name, const char* value) {
     ALOGD("setting property %s to %s", name, value);
-    if (!strcmp(name, "ambientShadowStrength")) {
-        propertyAmbientShadowStrength = atoi(value);
-        ALOGD("ambient shadow strength = 0x%x out of 0xff", propertyAmbientShadowStrength);
-        return;
-    } else if (!strcmp(name, "spotShadowStrength")) {
-        propertySpotShadowStrength = atoi(value);
-        ALOGD("spot shadow strength = 0x%x out of 0xff", propertySpotShadowStrength);
-        return;
-    } else if (!strcmp(name, "ambientRatio")) {
+    if (!strcmp(name, "ambientRatio")) {
         propertyAmbientRatio = fmin(fmax(atof(value), 0.0), 10.0);
         ALOGD("ambientRatio = %.2f", propertyAmbientRatio);
         return;
@@ -733,10 +722,6 @@ void Caches::setTempProperty(const char* name, const char* value) {
     } else if (!strcmp(name, "lightPosZ")) {
         propertyLightPosZ = fmin(fmax(atof(value), 0.0), 3000.0);
         ALOGD("lightPos Z = %.2f", propertyLightPosZ);
-        return;
-    } else if (!strcmp(name, "extraRasterBucket")) {
-        float bucket = atof(value);
-        propertyExtraRasterBuckets.push_back(bucket);
         return;
     }
     ALOGD("    failed");

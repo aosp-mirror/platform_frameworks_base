@@ -2809,31 +2809,15 @@ bool OpenGLRenderer::findBestFontTransform(const mat4& transform, SkMatrix* outM
     }
 
     /**
-     * Input is a non-perspective, scaling transform. Generate a scale-only transform, based upon
-     * bucketed scale values. Special case for 'extra raster buckets' - disable filtration in the
-     * case of an exact match, and isSimple() transform
+     * Input is a non-perspective, scaling transform. Generate a scale-only transform,
+     * with values rounded to the nearest int.
      */
     float sx, sy;
     transform.decomposeScale(sx, sy);
-
-    float bestSx = roundf(fmaxf(1.0f, sx));
-    float bestSy = roundf(fmaxf(1.0f, sy));
-    bool filter = true;
-
-    for (unsigned int i = 0; i < mCaches.propertyExtraRasterBuckets.size(); i++) {
-        float bucket = mCaches.propertyExtraRasterBuckets[i];
-        if (sx == bucket && sy == bucket) {
-            bestSx = bestSy = bucket;
-            filter = !transform.isSimple(); // disable filter, if simple
-            break;
-        }
-
-        if (fabs(bucket - sx) < fabs(bestSx - sx)) bestSx = sx;
-        if (fabs(bucket - sy) < fabs(bestSy - sy)) bestSy = sy;
-    }
-
-    outMatrix->setScale(bestSx, bestSy);
-    return filter;
+    outMatrix->setScale(
+            roundf(fmaxf(1.0f, sx)),
+            roundf(fmaxf(1.0f, sy)));
+    return true;
 }
 
 status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count, float x, float y,
