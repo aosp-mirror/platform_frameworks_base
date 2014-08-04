@@ -3265,21 +3265,29 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             final View child = children[i];
             if (((child.mViewFlags & VISIBILITY_MASK) == VISIBLE || child.getAnimation() != null) &&
                     child.hasStaticLayer()) {
-                child.mRecreateDisplayList = (child.mPrivateFlags & PFLAG_INVALIDATED)
-                        == PFLAG_INVALIDATED;
-                child.mPrivateFlags &= ~PFLAG_INVALIDATED;
-                child.getDisplayList();
-                child.mRecreateDisplayList = false;
+                recreateChildDisplayList(child);
             }
         }
         if (mOverlay != null) {
             View overlayView = mOverlay.getOverlayView();
-            overlayView.mRecreateDisplayList = (overlayView.mPrivateFlags & PFLAG_INVALIDATED)
-                    == PFLAG_INVALIDATED;
-            overlayView.mPrivateFlags &= ~PFLAG_INVALIDATED;
-            overlayView.getDisplayList();
-            overlayView.mRecreateDisplayList = false;
+            recreateChildDisplayList(overlayView);
         }
+        if (mDisappearingChildren != null) {
+            final ArrayList<View> disappearingChildren = mDisappearingChildren;
+            final int disappearingCount = disappearingChildren.size();
+            for (int i = 0; i < disappearingCount; ++i) {
+                final View child = disappearingChildren.get(i);
+                recreateChildDisplayList(child);
+            }
+        }
+    }
+
+    private void recreateChildDisplayList(View child) {
+        child.mRecreateDisplayList = (child.mPrivateFlags & PFLAG_INVALIDATED)
+                == PFLAG_INVALIDATED;
+        child.mPrivateFlags &= ~PFLAG_INVALIDATED;
+        child.getDisplayList();
+        child.mRecreateDisplayList = false;
     }
 
     /**
