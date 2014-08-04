@@ -19,27 +19,23 @@ package com.android.systemui.qs.tiles;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 
 import com.android.systemui.R;
+import com.android.systemui.qs.UsageTracker;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.statusbar.policy.HotspotController;
 
 /** Quick settings tile: Hotspot **/
 public class HotspotTile extends QSTile<QSTile.BooleanState> {
-    private static final String KEY_LAST_USED_DATE = "lastUsedDate";
-    private static final long MILLIS_PER_DAY = 1000 * 60 * 60 * 24;
-
     private final HotspotController mController;
     private final Callback mCallback = new Callback();
-    private final long mTimeToShowTile;
+    private final UsageTracker mUsageTracker;
 
     public HotspotTile(Host host) {
         super(host);
         mController = host.getHotspotController();
-
-        mTimeToShowTile = MILLIS_PER_DAY
-                * mContext.getResources().getInteger(R.integer.days_to_show_hotspot);
+        mUsageTracker = new UsageTracker(host.getContext(), HotspotTile.class);
+        mUsageTracker.listenForReset();
     }
 
     @Override
@@ -64,21 +60,12 @@ public class HotspotTile extends QSTile<QSTile.BooleanState> {
 
     @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
-        state.visible = mController.isHotspotSupported() && isHotspotRecentlyUsed();
+        state.visible = mController.isHotspotSupported() && mUsageTracker.isRecentlyUsed();
         state.label = mContext.getString(R.string.quick_settings_hotspot_label);
 
         state.value = mController.isHotspotEnabled();
         state.iconId = state.visible && state.value ? R.drawable.ic_qs_hotspot_on
                 : R.drawable.ic_qs_hotspot_off;
-    }
-
-    private boolean isHotspotRecentlyUsed() {
-        long lastDay = getSharedPrefs(mContext).getLong(KEY_LAST_USED_DATE, 0);
-        return (System.currentTimeMillis() - lastDay) < mTimeToShowTile;
-    }
-
-    private static SharedPreferences getSharedPrefs(Context context) {
-        return context.getSharedPreferences(context.getPackageName(), 0);
     }
 
     private final class Callback implements HotspotController.Callback {
@@ -93,10 +80,14 @@ public class HotspotTile extends QSTile<QSTile.BooleanState> {
      * the hotspot tile for a number of days after use.
      */
     public static class APChangedReceiver extends BroadcastReceiver {
+        private UsageTracker mUsageTracker;
+
         @Override
         public void onReceive(Context context, Intent intent) {
-            long currentTime = System.currentTimeMillis();
-            getSharedPrefs(context).edit().putLong(KEY_LAST_USED_DATE, currentTime).commit();
+            if (mUsageTracker == null) {
+                mUsageTracker = new UsageTracker(context, HotspotTile.class);
+            }
+            mUsageTracker.trackUsage();
         }
     }
 }
