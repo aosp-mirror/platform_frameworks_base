@@ -3434,15 +3434,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         if (mState != StatusBarState.KEYGUARD) {
             return;
         }
+        mNotificationPanel.setDozing(mDozing);
         if (mDozing) {
-            mNotificationPanel.setBackgroundColor(0xff000000);
-            mKeyguardStatusBar.setVisibility(View.INVISIBLE);
             mKeyguardBottomArea.setVisibility(View.INVISIBLE);
             mStackScroller.setDark(true, false /*animate*/);
         } else {
-            mNotificationPanel.setBackground(null);
-            mKeyguardStatusBar.setVisibility(View.VISIBLE);
-                mKeyguardBottomArea.setVisibility(View.VISIBLE);
+            mKeyguardBottomArea.setVisibility(View.VISIBLE);
             mStackScroller.setDark(false, false /*animate*/);
         }
         mScrimController.setDozing(mDozing);
