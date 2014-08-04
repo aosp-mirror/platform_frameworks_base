@@ -200,10 +200,10 @@ import java.util.List;
  *         <td>MY_TV</td>
  *         <td></td>
  *     </tr-->
- *     <!--tr>
+ *     <tr>
  *         <td>NL_TV</td>
- *         <td></td>
- *     </tr-->
+ *         <td>The television rating system in the Netherlands</td>
+ *     </tr>
  *     <!--tr>
  *         <td>NZ_TV</td>
  *         <td></td>
@@ -416,10 +416,31 @@ import java.util.List;
  *         <td>MY_TV_ALL</td>
  *         <td></td>
  *     </tr-->
- *     <!--tr>
- *         <td>NL_TV_ALL</td>
- *         <td></td>
- *     </tr-->
+ *     <tr>
+ *         <td>NL_TV_AL</td>
+ *         <td>A rating string for {@code NL_TV}. This rating is for programs that are appropriate
+ *         for all ages.</td>
+ *     </tr>
+ *     <tr>
+ *         <td>NL_TV_6</td>
+ *         <td>A rating string for {@code NL_TV}. This rating is for programs that require parental
+ *         advisory for children under 6.</td>
+ *     </tr>
+ *     <tr>
+ *         <td>NL_TV_9</td>
+ *         <td>A rating string for {@code NL_TV}. This rating is for programs that require parental
+ *         advisory for children under 9.</td>
+ *     </tr>
+ *     <tr>
+ *         <td>NL_TV_12</td>
+ *         <td>A rating string for {@code NL_TV}. This rating is for programs that require parental
+ *         advisory for children under 12.</td>
+ *     </tr>
+ *     <tr>
+ *         <td>NL_TV_16</td>
+ *         <td>A rating string for {@code NL_TV}. This rating is for programs that require parental
+ *         advisory for children under 16.</td>
+ *     </tr>
  *     <!--tr>
  *         <td>NZ_TV_ALL</td>
  *         <td></td>
@@ -653,10 +674,30 @@ import java.util.List;
  *         <td>MY_TV_</td>
  *         <td></td>
  *     </tr-->
- *     <!--tr>
- *         <td>NL_TV_</td>
- *         <td></td>
- *     </tr-->
+ *     <tr>
+ *         <td>NL_TV_V</td>
+ *         <td>Violence</td>
+ *     </tr>
+ *     <tr>
+ *         <td>NL_TV_F</td>
+ *         <td>Fear</td>
+ *     </tr>
+ *     <tr>
+ *         <td>NL_TV_S</td>
+ *         <td>Sex</td>
+ *     </tr>
+ *     <tr>
+ *         <td>NL_TV_D</td>
+ *         <td>Discrimination</td>
+ *     </tr>
+ *     <tr>
+ *         <td>NL_TV_DA</td>
+ *         <td>Drugs- and alcoholabuse</td>
+ *     </tr>
+ *     <tr>
+ *         <td>NL_TV_L</td>
+ *         <td>Coarse Language</td>
+ *     </tr>
  *     <!--tr>
  *         <td>NZ_TV_</td>
  *         <td></td>

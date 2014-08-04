@@ -105,6 +105,92 @@
     <!-- TV content rating system for MY TV -->
 
     <!-- TV content rating system for NL TV -->
+    <rating-system-definition id="NL_TV"
+        displayName="@string/display_name_nltv"
+        country="NL">
+        <sub-rating-definition id="NL_TV_V"
+            displayName="@string/display_name_nltv_v"
+            description="@string/description_nltv_v" />
+        <sub-rating-definition id="NL_TV_F"
+            displayName="@string/display_name_nltv_f"
+            description="@string/description_nltv_f" />
+        <sub-rating-definition id="NL_TV_S"
+            displayName="@string/display_name_nltv_s"
+            description="@string/description_nltv_s" />
+        <sub-rating-definition id="NL_TV_D"
+            displayName="@string/display_name_nltv_d"
+            description="@string/description_nltv_d" />
+        <sub-rating-definition id="NL_TV_DA"
+            displayName="@string/display_name_nltv_da"
+            description="@string/description_nltv_da" />
+        <sub-rating-definition id="NL_TV_L"
+            displayName="@string/display_name_nltv_l"
+            description="@string/description_nltv_l" />
+
+        <rating-definition id="NL_TV_AL"
+            displayName="@string/display_name_nltv_al"
+            description="@string/description_nltv_al"
+            ageHint="0">
+            <sub-rating id="NL_TV_V" />
+            <sub-rating id="NL_TV_F" />
+            <sub-rating id="NL_TV_S" />
+            <sub-rating id="NL_TV_D" />
+            <sub-rating id="NL_TV_DA" />
+            <sub-rating id="NL_TV_L" />
+        </rating-definition>
+        <rating-definition id="NL_TV_6"
+            displayName="@string/display_name_nltv_6"
+            description="@string/description_nltv_6"
+            ageHint="6">
+            <sub-rating id="NL_TV_V" />
+            <sub-rating id="NL_TV_F" />
+            <sub-rating id="NL_TV_S" />
+            <sub-rating id="NL_TV_D" />
+            <sub-rating id="NL_TV_DA" />
+            <sub-rating id="NL_TV_L" />
+        </rating-definition>
+        <rating-definition id="NL_TV_9"
+            displayName="@string/display_name_nltv_9"
+            description="@string/description_nltv_9"
+            ageHint="9">
+            <sub-rating id="NL_TV_V" />
+            <sub-rating id="NL_TV_F" />
+            <sub-rating id="NL_TV_S" />
+            <sub-rating id="NL_TV_D" />
+            <sub-rating id="NL_TV_DA" />
+            <sub-rating id="NL_TV_L" />
+        </rating-definition>
+        <rating-definition id="NL_TV_12"
+            displayName="@string/display_name_nltv_12"
+            description="@string/description_nltv_12"
+            ageHint="12">
+            <sub-rating id="NL_TV_V" />
+            <sub-rating id="NL_TV_F" />
+            <sub-rating id="NL_TV_S" />
+            <sub-rating id="NL_TV_D" />
+            <sub-rating id="NL_TV_DA" />
+            <sub-rating id="NL_TV_L" />
+        </rating-definition>
+        <rating-definition id="NL_TV_16"
+            displayName="@string/display_name_nltv_16"
+            description="@string/description_nltv_16"
+            ageHint="16">
+            <sub-rating id="NL_TV_V" />
+            <sub-rating id="NL_TV_F" />
+            <sub-rating id="NL_TV_S" />
+            <sub-rating id="NL_TV_D" />
+            <sub-rating id="NL_TV_DA" />
+            <sub-rating id="NL_TV_L" />
+        </rating-definition>
+
+        <order>
+            <rating id="NL_TV_AL" />
+            <rating id="NL_TV_6" />
+            <rating id="NL_TV_9" />
+            <rating id="NL_TV_12" />
+            <rating id="NL_TV_16" />
+        </order>
+    </rating-system-definition>
 
     <!-- TV content rating system for NZ TV -->
 
