@@ -1126,18 +1126,17 @@ public final class ContactsContract {
          * import android.provider.ContactsContract.Contacts;
          *
          * Uri uri = Contacts.CONTENT_URI.buildUpon()
-         *          .appendQueryParameter(ContactCounts.ADDRESS_BOOK_INDEX_EXTRAS, "true")
+         *          .appendQueryParameter(Contacts.ADDRESS_BOOK_INDEX_EXTRAS, "true")
          *          .build();
          * Cursor cursor = getContentResolver().query(uri,
          *          new String[] {Contacts.DISPLAY_NAME},
          *          null, null, null);
          * Bundle bundle = cursor.getExtras();
-         * if (bundle.containsKey(Contacts.ContactCounts.EXTRA_ADDRESS_BOOK_INDEX_TITLES) &&
-         *         bundle.containsKey(Contacts.ContactCounts.EXTRA_ADDRESS_BOOK_INDEX_COUNTS)) {
+         * if (bundle.containsKey(Contacts.EXTRA_ADDRESS_BOOK_INDEX_TITLES) &&
+         *         bundle.containsKey(Contacts.EXTRA_ADDRESS_BOOK_INDEX_COUNTS)) {
          *     String sections[] =
-         *             bundle.getStringArray(Contacts.ContactCounts.EXTRA_ADDRESS_BOOK_INDEX_TITLES);
-         *     int counts[] = bundle.getIntArray(
-         *             Contacts.ContactCounts.EXTRA_ADDRESS_BOOK_INDEX_COUNTS);
+         *             bundle.getStringArray(Contacts.EXTRA_ADDRESS_BOOK_INDEX_TITLES);
+         *     int counts[] = bundle.getIntArray(Contacts.EXTRA_ADDRESS_BOOK_INDEX_COUNTS);
          * }
          * </pre>
          * </p>
