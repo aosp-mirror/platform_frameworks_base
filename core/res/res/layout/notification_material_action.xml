@@ -21,11 +21,12 @@
     android:layout_width="0dp"
     android:layout_height="48dp"
     android:layout_weight="1"
+    android:layout_margin="0dp"
     android:gravity="start|center_vertical"
     android:drawablePadding="8dp"
     android:paddingStart="8dp"
     android:textColor="#555555"
-    android:textSize="14dp"
+    android:textSize="@dimen/notification_text_size"
     android:singleLine="true"
     android:ellipsize="end"
     />
