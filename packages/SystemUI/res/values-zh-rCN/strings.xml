@@ -39,10 +39,12 @@
     <string name="invalid_charger_title" msgid="3515740382572798460">"不支持USB充电。"</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"仅限使用设备随附的充电器。"</string>
     <string name="battery_low_why" msgid="4553600287639198111">"设置"</string>
-    <string name="battery_saver_confirmation_title" msgid="5987726159603849352">"要开启节电助手吗？"</string>
-    <string name="battery_saver_confirmation_ok" msgid="7283108887345688413">"开启"</string>
-    <string name="battery_saver_start_action" msgid="7245333922937402896">"开启节电助手"</string>
-    <string name="battery_saver_confirmation_text" msgid="8417584516834617662">"为了延长电池的续航时间，节电助手会减降设备的性能。\n\n设备接通电源后，节电助手会自动关闭。"</string>
+    <!-- no translation found for battery_saver_confirmation_title (5299585433050361634) -->
+    <skip />
+    <!-- no translation found for battery_saver_confirmation_ok (7507968430447930257) -->
+    <skip />
+    <!-- no translation found for battery_saver_start_action (5576697451677486320) -->
+    <skip />
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"设置"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"WLAN"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"飞行模式"</string>
@@ -152,7 +154,7 @@
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"电传打字机已启用。"</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"振铃器振动。"</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"振铃器静音。"</string>
-    <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"关闭<xliff:g id="APP">%s</xliff:g>。"</string>
+    <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"移除<xliff:g id="APP">%s</xliff:g>。"</string>
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"已删除<xliff:g id="APP">%s</xliff:g>"</string>
     <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"正在启动<xliff:g id="APP">%s</xliff:g>。"</string>
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"已关闭通知。"</string>
@@ -288,8 +290,10 @@
     <item quantity="other" msgid="5408537517529822157">"%d小时"</item>
   </plurals>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"节电助手已开启"</string>
-    <string name="battery_saver_notification_text" msgid="7796554871101546872">"设备性能已减降。"</string>
-    <string name="battery_saver_notification_action_text" msgid="7546297220816993504">"打开节电助手设置"</string>
+    <!-- no translation found for battery_saver_notification_text (820318788126672692) -->
+    <skip />
+    <!-- no translation found for battery_saver_notification_action_text (109158658238110382) -->
+    <skip />
     <string name="battery_level_template" msgid="1609636980292580020">"<xliff:g id="LEVEL">%d</xliff:g>%%"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"内容已隐藏"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>将开始截取您的屏幕上显示的所有内容。"</string>

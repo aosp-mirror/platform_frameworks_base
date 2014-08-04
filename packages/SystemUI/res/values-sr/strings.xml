@@ -39,10 +39,12 @@
     <string name="invalid_charger_title" msgid="3515740382572798460">"Пуњење преко USB-а није подржано."</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"Користите само пуњач који сте добили."</string>
     <string name="battery_low_why" msgid="4553600287639198111">"Подешавања"</string>
-    <string name="battery_saver_confirmation_title" msgid="5987726159603849352">"Желите ли да покренете Штедњу батерије?"</string>
-    <string name="battery_saver_confirmation_ok" msgid="7283108887345688413">"Покрени"</string>
-    <string name="battery_saver_start_action" msgid="7245333922937402896">"Покрените Штедњу батерије"</string>
-    <string name="battery_saver_confirmation_text" msgid="8417584516834617662">"Да би продужила век трајања батерије, Штедња батерије умањује перформансе уређаја.\n\nШтедња батерије ће се искључити када прикључите уређај на напајање."</string>
+    <!-- no translation found for battery_saver_confirmation_title (5299585433050361634) -->
+    <skip />
+    <!-- no translation found for battery_saver_confirmation_ok (7507968430447930257) -->
+    <skip />
+    <!-- no translation found for battery_saver_start_action (5576697451677486320) -->
+    <skip />
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Подешавања"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"Режим рада у авиону"</string>
@@ -286,8 +288,10 @@
     <item quantity="other" msgid="5408537517529822157">"%d с"</item>
   </plurals>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Штедња батерије је укључена"</string>
-    <string name="battery_saver_notification_text" msgid="7796554871101546872">"Перформансе уређаја су умањене."</string>
-    <string name="battery_saver_notification_action_text" msgid="7546297220816993504">"Отворите подешавања Штедње батерије"</string>
+    <!-- no translation found for battery_saver_notification_text (820318788126672692) -->
+    <skip />
+    <!-- no translation found for battery_saver_notification_action_text (109158658238110382) -->
+    <skip />
     <string name="battery_level_template" msgid="1609636980292580020">"<xliff:g id="LEVEL">%d</xliff:g>%%"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"Садржај је сакривен"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ће почети да снима све што се приказује на екрану."</string>

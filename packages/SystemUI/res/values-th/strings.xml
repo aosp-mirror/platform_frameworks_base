@@ -39,10 +39,12 @@
     <string name="invalid_charger_title" msgid="3515740382572798460">"ไม่รองรับการชาร์จผ่าน USB"</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"ใช้เฉพาะที่ชาร์จที่ให้มา"</string>
     <string name="battery_low_why" msgid="4553600287639198111">"การตั้งค่า"</string>
-    <string name="battery_saver_confirmation_title" msgid="5987726159603849352">"เริ่มใช้โหมดประหยัดแบตเตอรี่ใช่ไหม"</string>
-    <string name="battery_saver_confirmation_ok" msgid="7283108887345688413">"เริ่ม"</string>
-    <string name="battery_saver_start_action" msgid="7245333922937402896">"เริ่มโหมดประหยัดแบตเตอรี่"</string>
-    <string name="battery_saver_confirmation_text" msgid="8417584516834617662">"เพื่อช่วยให้ใช้งานแบตเตอรี่ได้ยาวนานขึ้น โหมดประหยัดแบตเตอรี่จะลดประสิทธิภาพการทำงานของอุปกรณ์ลง\n\nโหมดประหยัดแบตเตอรี่จะปิดเมื่อคุณเสียบปลั๊กไฟกับอุปกรณ์"</string>
+    <!-- no translation found for battery_saver_confirmation_title (5299585433050361634) -->
+    <skip />
+    <!-- no translation found for battery_saver_confirmation_ok (7507968430447930257) -->
+    <skip />
+    <!-- no translation found for battery_saver_start_action (5576697451677486320) -->
+    <skip />
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"การตั้งค่า"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"WiFi"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"โหมดใช้งานบนเครื่องบิน"</string>
@@ -286,8 +288,10 @@
     <item quantity="other" msgid="5408537517529822157">"%d ชั่วโมง"</item>
   </plurals>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"เปิดโหมดประหยัดแบตเตอรี่อยู่"</string>
-    <string name="battery_saver_notification_text" msgid="7796554871101546872">"ประสิทธิภาพการทำงานของอุปกรณ์ลดลง"</string>
-    <string name="battery_saver_notification_action_text" msgid="7546297220816993504">"เปิดการตั้งค่าโหมดประหยัดแบตเตอรี่"</string>
+    <!-- no translation found for battery_saver_notification_text (820318788126672692) -->
+    <skip />
+    <!-- no translation found for battery_saver_notification_action_text (109158658238110382) -->
+    <skip />
     <string name="battery_level_template" msgid="1609636980292580020">"<xliff:g id="LEVEL">%d</xliff:g>%%"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"เนื้อหาที่ซ่อน"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> จะเริ่มจับภาพทุกอย่างที่แสดงบนหน้าจอ"</string>
