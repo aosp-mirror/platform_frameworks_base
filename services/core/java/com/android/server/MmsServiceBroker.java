@@ -191,25 +191,28 @@ public class MmsServiceBroker extends SystemService {
     private final class BinderService extends IMms.Stub {
         @Override
         public void sendMessage(long subId, String callingPkg, byte[] pdu, String locationUrl,
-                PendingIntent sentIntent) throws RemoteException {
+                ContentValues configOverrides, PendingIntent sentIntent) throws RemoteException {
             mContext.enforceCallingPermission(Manifest.permission.SEND_SMS, "Send MMS message");
             if (getAppOpsManager().noteOp(AppOpsManager.OP_SEND_SMS, Binder.getCallingUid(),
                     callingPkg) != AppOpsManager.MODE_ALLOWED) {
                 return;
             }
-            getServiceGuarded().sendMessage(subId, callingPkg, pdu, locationUrl, sentIntent);
+            getServiceGuarded().sendMessage(subId, callingPkg, pdu, locationUrl, configOverrides,
+                    sentIntent);
         }
 
         @Override
         public void downloadMessage(long subId, String callingPkg, String locationUrl,
-                PendingIntent downloadedIntent) throws RemoteException {
+                ContentValues configOverrides, PendingIntent downloadedIntent)
+                throws RemoteException {
             mContext.enforceCallingPermission(Manifest.permission.RECEIVE_MMS,
                     "Download MMS message");
             if (getAppOpsManager().noteOp(AppOpsManager.OP_RECEIVE_MMS, Binder.getCallingUid(),
                     callingPkg) != AppOpsManager.MODE_ALLOWED) {
                 return;
             }
-            getServiceGuarded().downloadMessage(subId, callingPkg, locationUrl, downloadedIntent);
+            getServiceGuarded().downloadMessage(subId, callingPkg, locationUrl, configOverrides,
+                    downloadedIntent);
         }
 
         @Override
@@ -225,53 +228,21 @@ public class MmsServiceBroker extends SystemService {
         }
 
         @Override
-        public boolean getCarrierConfigBoolean(String name, boolean defaultValue)
+        public boolean getCarrierConfigBoolean(long subId, String name, boolean defaultValue)
                 throws RemoteException {
-            return getServiceGuarded().getCarrierConfigBoolean(name, defaultValue);
+            return getServiceGuarded().getCarrierConfigBoolean(subId, name, defaultValue);
         }
 
         @Override
-        public int getCarrierConfigInt(String name, int defaultValue) throws RemoteException {
-            return getServiceGuarded().getCarrierConfigInt(name, defaultValue);
+        public int getCarrierConfigInt(long subId, String name, int defaultValue)
+                throws RemoteException {
+            return getServiceGuarded().getCarrierConfigInt(subId, name, defaultValue);
         }
 
         @Override
-        public String getCarrierConfigString(String name, String defaultValue)
+        public String getCarrierConfigString(long subId, String name, String defaultValue)
                 throws RemoteException {
-            return getServiceGuarded().getCarrierConfigString(name, defaultValue);
-        }
-
-        @Override
-        public void setCarrierConfigBoolean(String callingPkg, String name, boolean value)
-                throws RemoteException {
-            mContext.enforceCallingPermission(Manifest.permission.SEND_SMS, "Set MMS config");
-            if (getAppOpsManager().noteOp(AppOpsManager.OP_SEND_SMS, Binder.getCallingUid(),
-                    callingPkg) != AppOpsManager.MODE_ALLOWED) {
-                return;
-            }
-            getServiceGuarded().setCarrierConfigBoolean(callingPkg, name, value);
-        }
-
-        @Override
-        public void setCarrierConfigInt(String callingPkg, String name, int value)
-                throws RemoteException {
-            mContext.enforceCallingPermission(Manifest.permission.SEND_SMS, "Set MMS config");
-            if (getAppOpsManager().noteOp(AppOpsManager.OP_SEND_SMS, Binder.getCallingUid(),
-                    callingPkg) != AppOpsManager.MODE_ALLOWED) {
-                return;
-            }
-            getServiceGuarded().setCarrierConfigInt(callingPkg, name, value);
-        }
-
-        @Override
-        public void setCarrierConfigString(String callingPkg, String name, String value)
-                throws RemoteException {
-            mContext.enforceCallingPermission(Manifest.permission.SEND_SMS, "Set MMS config");
-            if (getAppOpsManager().noteOp(AppOpsManager.OP_SEND_SMS, Binder.getCallingUid(),
-                    callingPkg) != AppOpsManager.MODE_ALLOWED) {
-                return;
-            }
-            getServiceGuarded().setCarrierConfigString(callingPkg, name, value);
+            return getServiceGuarded().getCarrierConfigString(subId, name, defaultValue);
         }
 
         @Override
@@ -370,14 +341,15 @@ public class MmsServiceBroker extends SystemService {
 
         @Override
         public void sendStoredMessage(long subId, String callingPkg, Uri messageUri,
-                PendingIntent sentIntent) throws RemoteException {
+                ContentValues configOverrides, PendingIntent sentIntent) throws RemoteException {
             mContext.enforceCallingPermission(Manifest.permission.SEND_SMS,
                     "Send stored MMS message");
             if (getAppOpsManager().noteOp(AppOpsManager.OP_SEND_SMS, Binder.getCallingUid(),
                     callingPkg) != AppOpsManager.MODE_ALLOWED) {
                 return;
             }
-            getServiceGuarded().sendStoredMessage(subId, callingPkg, messageUri, sentIntent);
+            getServiceGuarded().sendStoredMessage(subId, callingPkg, messageUri, configOverrides,
+                    sentIntent);
         }
 
         @Override
