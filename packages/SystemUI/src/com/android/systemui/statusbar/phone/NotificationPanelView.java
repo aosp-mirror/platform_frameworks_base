@@ -93,6 +93,8 @@ public class NotificationPanelView extends PanelView implements
     private boolean mQsExpandedWhenExpandingStarted;
     private boolean mQsFullyExpanded;
     private boolean mKeyguardShowing;
+    private boolean mDozing;
+    private boolean mKeyguardStatusBarTransparent;
     private int mStatusBarState;
     private float mInitialHeightOnTouch;
     private float mInitialTouchX;
@@ -897,10 +899,9 @@ public class NotificationPanelView extends PanelView implements
             alpha *= 2;
             alpha = Math.min(1, alpha);
             alpha = 1 - alpha;
-            if (alpha == 0f) {
-                mKeyguardStatusBar.setVisibility(View.INVISIBLE);
-            } else {
-                mKeyguardStatusBar.setVisibility(View.VISIBLE);
+            mKeyguardStatusBarTransparent = alpha == 0f;
+            updateKeyguardStatusBarVisibility();
+            if (!mKeyguardStatusBarTransparent) {
                 mKeyguardStatusBar.setAlpha(alpha);
             }
         }
@@ -1597,5 +1598,21 @@ public class NotificationPanelView extends PanelView implements
 
     private static float interpolate(float t, float start, float end) {
         return (1 - t) * start + t * end;
+    }
+
+    private void updateKeyguardStatusBarVisibility() {
+        mKeyguardStatusBar.setVisibility(mKeyguardShowing && !mKeyguardStatusBarTransparent
+                && !mDozing ? VISIBLE : INVISIBLE);
+    }
+
+    public void setDozing(boolean dozing) {
+        if (dozing == mDozing) return;
+        mDozing = dozing;
+        if (mDozing) {
+            setBackgroundColor(0xff000000);
+        } else {
+            setBackground(null);
+        }
+        updateKeyguardStatusBarVisibility();
     }
 }
