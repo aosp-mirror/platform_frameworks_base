@@ -363,11 +363,7 @@ int AndroidRuntime::addVmArguments(int argc, const char* const argv[])
         if (argv[i][1] == '-' && argv[i][2] == 0) {
             return i+1;
         }
-
-        JavaVMOption opt;
-        memset(&opt, 0, sizeof(opt));
-        opt.optionString = (char*)argv[i];
-        mOptions.add(opt);
+        addOption(argv[i]);
     }
     return i;
 }
@@ -401,6 +397,14 @@ static void readLocale(char* language, char* region)
     //ALOGD("language=%s region=%s\n", language, region);
 }
 
+void AndroidRuntime::addOption(const char* optionString, void* extraInfo)
+{
+    JavaVMOption opt;
+    opt.optionString = optionString;
+    opt.extraInfo = extraInfo;
+    mOptions.add(opt);
+}
+
 /*
  * Parse a property containing space-separated options that should be
  * passed directly to the VM, e.g. "-Xmx32m -verbose:gc -Xregenmap".
@@ -413,8 +417,6 @@ static void readLocale(char* language, char* region)
  */
 void AndroidRuntime::parseExtraOpts(char* extraOptsBuf, const char* quotingArg)
 {
-    JavaVMOption opt;
-    memset(&opt, 0, sizeof(opt));
     char* start = extraOptsBuf;
     char* end = NULL;
     while (*start != '\0') {
@@ -429,13 +431,10 @@ void AndroidRuntime::parseExtraOpts(char* extraOptsBuf, const char* quotingArg)
         if (*end == ' ')
             *end++ = '\0';          /* mark end, advance to indicate more */
 
-        opt.optionString = start;
         if (quotingArg != NULL) {
-            JavaVMOption quotingOpt;
-            quotingOpt.optionString = quotingArg;
-            mOptions.add(quotingOpt);
+            addOption(quotingArg);
         }
-        mOptions.add(opt);
+        addOption(start);
         start = end;
     }
 }
@@ -463,13 +462,7 @@ bool AndroidRuntime::parseRuntimeOption(const char* property,
     if (buffer[runtimeArgLen] == '\0') {
         return false;
     }
-
-    JavaVMOption opt;
-    memset(&opt, 0, sizeof(opt));
-
-    opt.optionString = buffer;
-    mOptions.add(opt);
-
+    addOption(buffer);
     return true;
 }
 
@@ -496,16 +489,8 @@ bool AndroidRuntime::parseCompilerOption(const char* property,
     if (buffer[compilerArgLen] == '\0') {
         return false;
     }
-
-    JavaVMOption opt;
-    memset(&opt, 0, sizeof(opt));
-
-    opt.optionString = quotingArg;
-    mOptions.add(opt);
-
-    opt.optionString = buffer;
-    mOptions.add(opt);
-
+    addOption(quotingArg);
+    addOption(buffer);
     return true;
 }
 
@@ -533,22 +518,10 @@ bool AndroidRuntime::parseCompilerRuntimeOption(const char* property,
     if (buffer[runtimeArgLen] == '\0') {
         return false;
     }
-
-    JavaVMOption opt;
-    memset(&opt, 0, sizeof(opt));
-
-    opt.optionString = quotingArg;
-    mOptions.add(opt);
-
-    opt.optionString = "--runtime-arg";
-    mOptions.add(opt);
-
-    opt.optionString = quotingArg;
-    mOptions.add(opt);
-
-    opt.optionString = buffer;
-    mOptions.add(opt);
-
+    addOption(quotingArg);
+    addOption("--runtime-arg");
+    addOption(quotingArg);
+    addOption(buffer);
     return true;
 }
 
@@ -572,7 +545,6 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
 {
     int result = -1;
     JavaVMInitArgs initArgs;
-    JavaVMOption opt;
     char propBuf[PROPERTY_VALUE_MAX];
     char stackTraceFileBuf[sizeof("-Xstacktracefile:")-1 + PROPERTY_VALUE_MAX];
     char dexoptFlagsBuf[PROPERTY_VALUE_MAX];
@@ -597,6 +569,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     char dex2oatFlagsBuf[PROPERTY_VALUE_MAX];
     char dex2oatImageFlagsBuf[PROPERTY_VALUE_MAX];
     char extraOptsBuf[PROPERTY_VALUE_MAX];
+    char voldDecryptBuf[PROPERTY_VALUE_MAX];
     enum {
       kEMDefault,
       kEMIntPortable,
@@ -632,16 +605,13 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     ALOGD("CheckJNI is %s\n", checkJni ? "ON" : "OFF");
     if (checkJni) {
         /* extended JNI checking */
-        opt.optionString = "-Xcheck:jni";
-        mOptions.add(opt);
+        addOption("-Xcheck:jni");
 
         /* set a cap on JNI global references */
-        opt.optionString = "-Xjnigreflimit:2000";
-        mOptions.add(opt);
+        addOption("-Xjnigreflimit:2000");
 
         /* with -Xcheck:jni, this provides a JNI function call trace */
-        //opt.optionString = "-verbose:jni";
-        //mOptions.add(opt);
+        //addOption("-verbose:jni");
     }
 
     property_get("dalvik.vm.execution-mode", propBuf, "");
@@ -658,15 +628,13 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     property_get("dalvik.vm.check-dex-sum", propBuf, "");
     if (strcmp(propBuf, "true") == 0) {
         /* perform additional DEX checksum tests */
-        opt.optionString = "-Xcheckdexsum";
-        mOptions.add(opt);
+        addOption("-Xcheckdexsum");
     }
 
     property_get("log.redirect-stdio", propBuf, "");
     if (strcmp(propBuf, "true") == 0) {
         /* convert stdout/stderr to log messages */
-        opt.optionString = "-Xlog-stdio";
-        mOptions.add(opt);
+        addOption("-Xlog-stdio");
     }
 
     strcpy(enableAssertBuf, "-ea:");
@@ -676,8 +644,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
         if (strcmp(enableAssertBuf+sizeof("-ea:")-1, "all") == 0)
             enableAssertBuf[3] = '\0'; // truncate to "-ea"
         ALOGI("Assertions enabled: '%s'\n", enableAssertBuf);
-        opt.optionString = enableAssertBuf;
-        mOptions.add(opt);
+        addOption(enableAssertBuf);
     } else {
         ALOGV("Assertions disabled\n");
     }
@@ -688,27 +655,18 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     }
 
     /* route exit() to our handler */
-    opt.extraInfo = (void*) runtime_exit;
-    opt.optionString = "exit";
-    mOptions.add(opt);
+    addOption("exit", (void*) runtime_exit);
 
     /* route fprintf() to our handler */
-    opt.extraInfo = (void*) runtime_vfprintf;
-    opt.optionString = "vfprintf";
-    mOptions.add(opt);
+    addOption("vfprintf", (void*) runtime_vfprintf);
 
     /* register the framework-specific "is sensitive thread" hook */
-    opt.extraInfo = (void*) runtime_isSensitiveThread;
-    opt.optionString = "sensitiveThread";
-    mOptions.add(opt);
-
-    opt.extraInfo = NULL;
+    addOption("sensitiveThread", (void*) runtime_isSensitiveThread);
 
     /* enable verbose; standard options are { jni, gc, class } */
-    //options[curOpt++].optionString = "-verbose:jni";
-    opt.optionString = "-verbose:gc";
-    mOptions.add(opt);
-    //options[curOpt++].optionString = "-verbose:class";
+    //addOption("-verbose:jni");
+    addOption("-verbose:gc");
+    //addOption("-verbose:class");
 
     /*
      * The default starting and maximum size of the heap.  Larger
@@ -718,8 +676,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     parseRuntimeOption("dalvik.vm.heapsize", heapsizeOptsBuf, "-Xmx", "16m");
 
     // Increase the main thread's interpreter stack size for bug 6315322.
-    opt.optionString = "-XX:mainThreadStackSize=24K";
-    mOptions.add(opt);
+    addOption("-XX:mainThreadStackSize=24K");
 
     // Set the max jit code cache size.  Note: size of 0 will disable the JIT.
     parseRuntimeOption("dalvik.vm.jit.codecachesize",
@@ -735,8 +692,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
 
     property_get("ro.config.low_ram", propBuf, "");
     if (strcmp(propBuf, "true") == 0) {
-      opt.optionString = "-XX:LowMemoryMode";
-      mOptions.add(opt);
+      addOption("-XX:LowMemoryMode");
     }
 
     parseRuntimeOption("dalvik.vm.gctype", gctypeOptsBuf, "-Xgc:");
@@ -761,8 +717,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
             }
 
             if (val != NULL) {
-                opt.optionString = val;
-                mOptions.add(opt);
+                addOption(val);
             }
         }
 
@@ -777,27 +732,22 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
             }
 
             if (val != NULL) {
-                opt.optionString = val;
-                mOptions.add(opt);
+                addOption(val);
             }
         }
 
         opc = strstr(dexoptFlagsBuf, "m=y");    /* register map */
         if (opc != NULL) {
-            opt.optionString = "-Xgenregmap";
-            mOptions.add(opt);
+            addOption("-Xgenregmap");
 
             /* turn on precise GC while we're at it */
-            opt.optionString = "-Xgc:precise";
-            mOptions.add(opt);
+            addOption("-Xgc:precise");
         }
     }
 
     /* enable debugging; set suspend=y to pause during VM init */
     /* use android ADB transport */
-    opt.optionString =
-        "-agentlib:jdwp=transport=dt_android_adb,suspend=n,server=y";
-    mOptions.add(opt);
+    addOption("-agentlib:jdwp=transport=dt_android_adb,suspend=n,server=y");
 
     parseRuntimeOption("dalvik.vm.lockprof.threshold",
                        lockProfThresholdBuf,
@@ -810,14 +760,11 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     parseRuntimeOption("dalvik.vm.jit.method", jitMethodBuf, "-Xjitmethod:");
 
     if (executionMode == kEMIntPortable) {
-        opt.optionString = "-Xint:portable";
-        mOptions.add(opt);
+        addOption("-Xint:portable");
     } else if (executionMode == kEMIntFast) {
-        opt.optionString = "-Xint:fast";
-        mOptions.add(opt);
+        addOption("-Xint:fast");
     } else if (executionMode == kEMJitCompiler) {
-        opt.optionString = "-Xint:jit";
-        mOptions.add(opt);
+        addOption("-Xint:jit");
     }
 
     // libart tolerates libdvm flags, but not vice versa, so only pass some options if libart.
@@ -825,13 +772,27 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     bool libart = (strncmp(dalvikVmLibBuf, "libart", 6) == 0);
 
     if (libart) {
+        // If we booting without the real /data, don't spend time compiling.
+        property_get("vold.decrypt", voldDecryptBuf, "");
+        bool skip_compilation = ((strcmp(voldDecryptBuf, "trigger_restart_min_framework") == 0) ||
+                                 (strcmp(voldDecryptBuf, "1") == 0));
+
         // Extra options for boot.art/boot.oat image generation.
         parseCompilerRuntimeOption("dalvik.vm.image-dex2oat-Xms", dex2oatXmsImageFlagsBuf,
                                    "-Xms", "-Ximage-compiler-option");
         parseCompilerRuntimeOption("dalvik.vm.image-dex2oat-Xmx", dex2oatXmxImageFlagsBuf,
                                    "-Xmx", "-Ximage-compiler-option");
-        parseCompilerOption("dalvik.vm.image-dex2oat-filter", dex2oatImageCompilerFilterBuf,
-                            "--compiler-filter=", "-Ximage-compiler-option");
+        if (skip_compilation) {
+            addOption("-Ximage-compiler-option");
+            addOption("--compiler-filter=verify-none");
+        } else {
+            parseCompilerOption("dalvik.vm.image-dex2oat-filter", dex2oatImageCompilerFilterBuf,
+                                "--compiler-filter=", "-Ximage-compiler-option");
+        }
+        addOption("-Ximage-compiler-option");
+        addOption("--image-classes-zip=/system/framework/framework.jar");
+        addOption("-Ximage-compiler-option");
+        addOption("--image-classes=preloaded-classes");
         property_get("dalvik.vm.image-dex2oat-flags", dex2oatImageFlagsBuf, "");
         parseExtraOpts(dex2oatImageFlagsBuf, "-Ximage-compiler-option");
 
@@ -840,10 +801,16 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
                                    "-Xms", "-Xcompiler-option");
         parseCompilerRuntimeOption("dalvik.vm.dex2oat-Xmx", dex2oatXmxFlagsBuf,
                                    "-Xmx", "-Xcompiler-option");
-        parseCompilerOption("dalvik.vm.dex2oat-filter", dex2oatCompilerFilterBuf,
-                            "--compiler-filter=", "-Xcompiler-option");
+        if (skip_compilation) {
+            addOption("-Xcompiler-option");
+            addOption("--compiler-filter=interpret-only");
+        } else {
+            parseCompilerOption("dalvik.vm.dex2oat-filter", dex2oatCompilerFilterBuf,
+                                "--compiler-filter=", "-Xcompiler-option");
+        }
         property_get("dalvik.vm.dex2oat-flags", dex2oatFlagsBuf, "");
         parseExtraOpts(dex2oatFlagsBuf, "-Xcompiler-option");
+
     }
 
     /* extra options; parse this late so it overrides others */
@@ -855,11 +822,8 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
         strcpy(langOption, "-Duser.language=");
         strcpy(regionOption, "-Duser.region=");
         readLocale(langOption, regionOption);
-        opt.extraInfo = NULL;
-        opt.optionString = langOption;
-        mOptions.add(opt);
-        opt.optionString = regionOption;
-        mOptions.add(opt);
+        addOption(langOption);
+        addOption(regionOption);
     }
 
     /*
@@ -869,16 +833,14 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
         // Whether or not the profiler should be enabled.
         property_get("dalvik.vm.profiler", propBuf, "0");
         if (propBuf[0] == '1') {
-            opt.optionString = "-Xenable-profiler";
-            mOptions.add(opt);
+            addOption("-Xenable-profiler");
         }
 
         // Whether the profile should start upon app startup or be delayed by some random offset
         // (in seconds) that is bound between 0 and a fixed value.
         property_get("dalvik.vm.profile.start-immed", propBuf, "0");
         if (propBuf[0] == '1') {
-            opt.optionString = "-Xprofile-start-immediately";
-            mOptions.add(opt);
+            addOption("-Xprofile-start-immediately");
         }
 
         // Number of seconds during profile runs.
