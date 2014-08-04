@@ -67,6 +67,8 @@ public class QSPanel extends ViewGroup {
     private BrightnessController mBrightnessController;
     private QSTileHost mHost;
 
+    private QSFooter mFooter;
+
     public QSPanel(Context context) {
         this(context, null);
     }
@@ -83,8 +85,10 @@ public class QSPanel extends ViewGroup {
         mDetail.setClickable(true);
         mBrightnessView = LayoutInflater.from(context).inflate(
                 R.layout.quick_settings_brightness_dialog, this, false);
+        mFooter = new QSFooter(this, context);
         addView(mDetail);
         addView(mBrightnessView);
+        addView(mFooter.getView());
         mClipper = new QSDetailClipper(mDetail);
         updateResources();
 
@@ -106,6 +110,7 @@ public class QSPanel extends ViewGroup {
 
     public void setHost(QSTileHost host) {
         mHost = host;
+        mFooter.setHost(host);
     }
 
     public QSTileHost getHost() {
@@ -144,6 +149,7 @@ public class QSPanel extends ViewGroup {
         for (TileRecord r : mRecords) {
             r.tile.setListening(mListening);
         }
+        mFooter.setListening(mListening);
         if (mListening) {
             refreshAllTiles();
         }
@@ -158,6 +164,7 @@ public class QSPanel extends ViewGroup {
         for (TileRecord r : mRecords) {
             r.tile.refreshState();
         }
+        mFooter.refreshState();
     }
 
     public void showDetailAdapter(boolean show, DetailAdapter adapter) {
@@ -287,6 +294,7 @@ public class QSPanel extends ViewGroup {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         final int width = MeasureSpec.getSize(widthMeasureSpec);
         mBrightnessView.measure(exactly(width), MeasureSpec.UNSPECIFIED);
+        mFooter.getView().measure(exactly(width), MeasureSpec.UNSPECIFIED);
         int r = -1;
         int c = -1;
         int rows = 0;
@@ -315,6 +323,9 @@ public class QSPanel extends ViewGroup {
             record.tileView.measure(exactly(cw), exactly(ch));
         }
         int h = rows == 0 ? mBrightnessView.getHeight() : (getRowTop(rows) + mPanelPaddingBottom);
+        if (mFooter.hasFooter()) {
+            h += mFooter.getView().getHeight();
+        }
         mDetail.measure(exactly(width), exactly(h));
         setMeasuredDimension(width, h);
     }
@@ -341,6 +352,11 @@ public class QSPanel extends ViewGroup {
         }
         final int dh = Math.max(mDetail.getMeasuredHeight(), getMeasuredHeight());
         mDetail.layout(0, 0, mDetail.getMeasuredWidth(), dh);
+        if (mFooter.hasFooter()) {
+            View footer = mFooter.getView();
+            footer.layout(0, getMeasuredHeight() - footer.getMeasuredHeight(),
+                    footer.getMeasuredWidth(), getMeasuredHeight());
+        }
     }
 
     private int getRowTop(int row) {
