@@ -185,6 +185,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
 
     /** Handles touch events once we have intercepted them */
     public boolean onTouchEvent(MotionEvent ev) {
+
         // Short circuit if we have no children
         boolean hasChildren = (mSv.getChildCount() > 0);
         if (!hasChildren) {
@@ -278,7 +279,6 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                 final VelocityTracker velocityTracker = mVelocityTracker;
                 velocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
                 int velocity = (int) velocityTracker.getYVelocity(mActivePointerId);
-
                 if (mIsScrolling && (Math.abs(velocity) > mMinimumVelocity)) {
                     // XXX: Should this be calculated as a percentage of a curve?
                     int overscrollRange = (int) (Math.min(1f,
