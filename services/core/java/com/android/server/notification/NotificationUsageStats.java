@@ -468,7 +468,7 @@ public class NotificationUsageStats {
         private static final int MSG_DISMISS = 4;
 
         private static final String DB_NAME = "notification_log.db";
-        private static final int DB_VERSION = 3;
+        private static final int DB_VERSION = 4;
 
         /** Age in ms after which events are pruned from the DB. */
         private static final long HORIZON_MS = 7 * 24 * 60 * 60 * 1000L;  // 1 week
@@ -559,32 +559,19 @@ public class NotificationUsageStats {
                             COL_CATEGORY + " TEXT," +
                             COL_ACTION_COUNT + " INT," +
                             COL_POSTTIME_MS + " INT," +
-                            COL_AIRTIME_MS + " INT" +
-                            COL_FIRST_EXPANSIONTIME_MS + " INT" +
-                            COL_AIRTIME_EXPANDED_MS + " INT" +
+                            COL_AIRTIME_MS + " INT," +
+                            COL_FIRST_EXPANSIONTIME_MS + " INT," +
+                            COL_AIRTIME_EXPANDED_MS + " INT," +
                             COL_EXPAND_COUNT + " INT" +
                             ")");
                 }
 
                 @Override
                 public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-                    switch (oldVersion) {
-                        case 1:
-                            // Add COL_POSTTIME_MS, COL_AIRTIME_MS columns,
-                            db.execSQL("ALTER TABLE " + TAB_LOG + " ADD COLUMN " +
-                                    COL_POSTTIME_MS + " INT");
-                            db.execSQL("ALTER TABLE " + TAB_LOG + " ADD COLUMN " +
-                                    COL_AIRTIME_MS + " INT");
-                        case 2:
-                            // Add COL_EXPANSIONTIME_MS column
-                            db.execSQL("ALTER TABLE " + TAB_LOG + " ADD COLUMN " +
-                                    COL_FIRST_EXPANSIONTIME_MS + " INT");
-                            // Add COL_AIRTIME_EXPANDED_MS column
-                            db.execSQL("ALTER TABLE " + TAB_LOG + " ADD COLUMN " +
-                                    COL_AIRTIME_EXPANDED_MS + " INT");
-                            // Add COL_EXPAND_COUNT column
-                            db.execSQL("ALTER TABLE " + TAB_LOG + " ADD COLUMN " +
-                                    COL_EXPAND_COUNT + " INT");
+                    if (oldVersion <= 3) {
+                        // Version 3 creation left 'log' in a weird state. Just reset for now.
+                        db.execSQL("DROP TABLE IF EXISTS " + TAB_LOG);
+                        onCreate(db);
                     }
                 }
             };
