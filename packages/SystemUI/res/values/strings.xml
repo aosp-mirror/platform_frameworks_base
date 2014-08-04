@@ -741,4 +741,38 @@
 
     <!-- Text which is shown in the notification shade when there are no notifications. [CHAR LIMIT=30] -->
     <string name="empty_shade_text">No notifications</string>
+
+    <!-- Footer device owned text [CHAR LIMIT=50] -->
+    <string name="device_owned_footer">Device may be monitored</string>
+
+    <!-- Footer vpn present text [CHAR LIMIT=50] -->
+    <string name="vpn_footer">Network may be monitored</string>
+
+    <!-- Monitoring dialog title for device owned devices [CHAR LIMIT=35] -->
+    <string name="monitoring_title_device_owned">Device monitoring</string>
+
+    <!-- Monitoring dialog title for normal devices  [CHAR LIMIT=35]-->
+    <string name="monitoring_title">Network monitoring</string>
+
+    <!-- Monitoring dialog open app button [CHAR LIMIT=30] -->
+    <string name="open_app">Open app</string>
+
+    <!-- Monitoring dialog disconnect vpn button [CHAR LIMIT=30] -->
+    <string name="disconnect_vpn">Disconnect VPN</string>
+
+    <!-- Monitoring dialog device owner body text [CHAR LIMIT=300] -->
+    <string name="monitoring_description_device_owned">This device is managed by:\n<xliff:g id="organization">%1$s</xliff:g>\n\nYour administrator can monitor your network activity, including emails, apps and secure websites.\n\nFor more information, contact your administrator.</string>
+
+    <!-- Monitoring dialog non-legacy VPN text [CHAR LIMIT=300] -->
+    <string name="monitoring_description_vpn">You gave \"<xliff:g id="application">%1$s</xliff:g>\" permission to set up a VPN connection.\n\nThis app can monitor your network activity, including emails, apps and secure websites.</string>
+
+    <!-- Monitoring dialog legacy VPN text [CHAR LIMIT=300] -->
+    <string name="monitoring_description_legacy_vpn">You\'re connected to a VPN (\"<xliff:g id="application">%1$s</xliff:g>\").\n\nYour VPN service provider can monitor your network activity including emails, apps, and secure websites.</string>
+
+    <!-- Monitoring dialog non-legacy VPN with device owner text [CHAR LIMIT=300] -->
+    <string name="monitoring_description_vpn_device_owned">This device is managed by:\n<xliff:g id="organization">%1$s</xliff:g>\n\nYour administrator is capable of monitoring your network activity including emails, apps, and secure websites. For more information, contact your administrator.\n\nAlso, you gave \"<xliff:g id="application">%2$s</xliff:g>\" permission to set up a VPN connection. This app can monitor network activity too.</string>
+
+    <!-- Monitoring dialog legacy VPN with device owner text [CHAR LIMIT=300] -->
+    <string name="monitoring_description_legacy_vpn_device_owned">This device is managed by:\n<xliff:g id="organization">%1$s</xliff:g>\n\nYour administrator is capable of monitoring your network activity including emails, apps, and secure websites. For more information, contact your administrator.\n\nAlso, you\'re connected to a VPN (\"<xliff:g id="application">%2$s</xliff:g>\"). Your VPN service provider can monitor network activity too.</string>
+
 </resources>
