@@ -153,7 +153,7 @@ abstract class HdmiCecLocalDevice {
     /**
      * Called once a logical address of the local device is allocated.
      */
-    protected abstract void onAddressAllocated(int logicalAddress, boolean fromBootup);
+    protected abstract void onAddressAllocated(int logicalAddress, int reason);
 
     /**
      * Get the preferred logical address from system properties.
@@ -458,10 +458,10 @@ abstract class HdmiCecLocalDevice {
     }
 
     @ServiceThreadOnly
-    final void handleAddressAllocated(int logicalAddress, boolean fromBootup) {
+    final void handleAddressAllocated(int logicalAddress, int reason) {
         assertRunOnServiceThread();
         mAddress = mPreferredAddress = logicalAddress;
-        onAddressAllocated(logicalAddress, fromBootup);
+        onAddressAllocated(logicalAddress, reason);
         setPreferredAddress(logicalAddress);
     }
 
