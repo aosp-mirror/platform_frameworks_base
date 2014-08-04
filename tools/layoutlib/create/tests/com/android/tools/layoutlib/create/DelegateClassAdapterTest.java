@@ -116,9 +116,16 @@ public class DelegateClassAdapterTest {
 
                     // Check that the native method does NOT have the new annotation
                     Method[] m = clazz2.getDeclaredMethods();
-                    assertEquals("native_instance", m[2].getName());
-                    assertTrue(Modifier.isNative(m[2].getModifiers()));
-                    Annotation[] a = m[2].getAnnotations();
+                    Method nativeInstanceMethod = null;
+                    for (Method method : m) {
+                        if ("native_instance".equals(method.getName())) {
+                            nativeInstanceMethod = method;
+                            break;
+                        }
+                    }
+                    assertNotNull(nativeInstanceMethod);
+                    assertTrue(Modifier.isNative(nativeInstanceMethod.getModifiers()));
+                    Annotation[] a = nativeInstanceMethod.getAnnotations();
                     assertEquals(0, a.length);
                 }
             };
@@ -184,9 +191,16 @@ public class DelegateClassAdapterTest {
 
                      // Check that the native method now has the new annotation and is not native
                      Method[] m = clazz2.getDeclaredMethods();
-                     assertEquals("native_instance", m[2].getName());
-                     assertFalse(Modifier.isNative(m[2].getModifiers()));
-                     Annotation[] a = m[2].getAnnotations();
+                     Method nativeInstanceMethod = null;
+                     for (Method method : m) {
+                         if ("native_instance".equals(method.getName())) {
+                             nativeInstanceMethod = method;
+                             break;
+                         }
+                     }
+                     assertNotNull(nativeInstanceMethod);
+                     assertFalse(Modifier.isNative(nativeInstanceMethod.getModifiers()));
+                     Annotation[] a = nativeInstanceMethod.getAnnotations();
                      assertEquals("LayoutlibDelegate", a[0].annotationType().getSimpleName());
                 }
             };
@@ -237,13 +251,8 @@ public class DelegateClassAdapterTest {
                     assertEquals(4+10+20, callGet(o2, 10, 20));
                     assertEquals(1+10+20, callGet_Original(o2, 10, 20));
 
-                    // The original Outer has a private method that is
-                    // delegated. We should be able to call both the delegate
-                    // and the original (which is now public).
-                    assertEquals("outerPrivateMethod",
-                                 callMethod(o2, "privateMethod_Original", false /*makePublic*/));
-
-                    // The original method is private, so by default we can't access it
+                    // The original Outer has a private method,
+                    // so by default we can't access it.
                     boolean gotIllegalAccessException = false;
                     try {
                          callMethod(o2, "privateMethod", false /*makePublic*/);
@@ -251,9 +260,18 @@ public class DelegateClassAdapterTest {
                         gotIllegalAccessException = true;
                     }
                     assertTrue(gotIllegalAccessException);
-                    // Try again, but now making it accessible
-                    assertEquals("outerPrivate_Delegate",
-                            callMethod(o2, "privateMethod", true /*makePublic*/));
+
+                    // The private method from original Outer has been
+                    // delegated. The delegate generated should have the
+                    // same access.
+                    gotIllegalAccessException = false;
+                    try {
+                        assertEquals("outerPrivateMethod",
+                                callMethod(o2, "privateMethod_Original", false /*makePublic*/));
+                    } catch (IllegalAccessException e) {
+                        gotIllegalAccessException = true;
+                    }
+                    assertTrue(gotIllegalAccessException);
 
                     // Check the inner class. Since it's not a static inner class, we need
                     // to use the hidden constructor that takes the outer class as first parameter.

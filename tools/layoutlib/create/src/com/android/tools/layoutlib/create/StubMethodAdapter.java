@@ -29,8 +29,8 @@ import org.objectweb.asm.Type;
  */
 class StubMethodAdapter extends MethodVisitor {
 
-    private static String CONSTRUCTOR = "<init>";
-    private static String CLASS_INIT = "<clinit>";
+    private static final String CONSTRUCTOR = "<init>";
+    private static final String CLASS_INIT = "<clinit>";
 
     /** The parent method writer */
     private MethodVisitor mParentVisitor;
