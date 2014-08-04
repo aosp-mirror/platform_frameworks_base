@@ -92,19 +92,15 @@ public final class Outline {
     /**
      * Sets the alpha represented by the Outline.
      *
-     * Content producing a fully opaque (alpha = 1.0f) outline is assumed, by the drawing system,
+     * Content producing a fully opaque (alpha = 1.0f) outline is assumed by the drawing system
      * to fully cover content beneath it, meaning content beneath may be optimized away.
-     *
-     * @hide
      */
     public void setAlpha(float alpha) {
         mAlpha = alpha;
     }
 
     /**
-     * Sets the alpha represented by the Outline.
-     *
-     * @hide
+     * Returns the alpha represented by the Outline.
      */
     public float getAlpha() {
         return mAlpha;
