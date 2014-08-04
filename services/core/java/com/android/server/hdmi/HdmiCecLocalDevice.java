@@ -172,7 +172,7 @@ abstract class HdmiCecLocalDevice {
      * @return true if consumed a message; otherwise, return false.
      */
     @ServiceThreadOnly
-    final boolean dispatchMessage(HdmiCecMessage message) {
+    boolean dispatchMessage(HdmiCecMessage message) {
         assertRunOnServiceThread();
         int dest = message.getDestination();
         if (dest != mAddress && dest != Constants.ADDR_BROADCAST) {
@@ -309,7 +309,7 @@ abstract class HdmiCecLocalDevice {
         mService.sendCecCommand(
                 HdmiCecMessageBuilder.buildFeatureAbortCommand(mAddress,
                         message.getSource(), Constants.MESSAGE_GET_MENU_LANGUAGE,
-                        Constants.ABORT_UNRECOGNIZED_MODE));
+                        Constants.ABORT_UNRECOGNIZED_OPCODE));
         return true;
     }
 
@@ -381,7 +381,7 @@ abstract class HdmiCecLocalDevice {
         return false;
     }
 
-    private static boolean isPowerOnOrToggleCommand(HdmiCecMessage message) {
+    static boolean isPowerOnOrToggleCommand(HdmiCecMessage message) {
         byte[] params = message.getParams();
         return message.getOpcode() == Constants.MESSAGE_USER_CONTROL_PRESSED
                 && (params[0] == HdmiCecKeycode.CEC_KEYCODE_POWER
@@ -389,7 +389,7 @@ abstract class HdmiCecLocalDevice {
                         || params[0] == HdmiCecKeycode.CEC_KEYCODE_POWER_TOGGLE_FUNCTION);
     }
 
-    private static boolean isPowerOffOrToggleCommand(HdmiCecMessage message) {
+    static boolean isPowerOffOrToggleCommand(HdmiCecMessage message) {
         byte[] params = message.getParams();
         return message.getOpcode() == Constants.MESSAGE_USER_CONTROL_PRESSED
                 && (params[0] == HdmiCecKeycode.CEC_KEYCODE_POWER
@@ -431,7 +431,7 @@ abstract class HdmiCecLocalDevice {
             Slog.v(TAG, "Wrong direct vendor command. Replying with <Feature Abort>");
             mService.sendCecCommand(HdmiCecMessageBuilder.buildFeatureAbortCommand(mAddress,
                     message.getSource(), Constants.MESSAGE_VENDOR_COMMAND_WITH_ID,
-                    Constants.ABORT_UNRECOGNIZED_MODE));
+                    Constants.ABORT_UNRECOGNIZED_OPCODE));
         } else {
             Slog.v(TAG, "Wrong broadcast vendor command. Ignoring");
         }
@@ -444,9 +444,10 @@ abstract class HdmiCecLocalDevice {
     }
 
     protected boolean handleRecordTvScreen(HdmiCecMessage message) {
-        // The default behavior of <Record TV Screen> is replying <Feature Abort> with "Refused".
+        // The default behavior of <Record TV Screen> is replying <Feature Abort> with
+        // "Cannot provide source".
         mService.sendCecCommand(HdmiCecMessageBuilder.buildFeatureAbortCommand(mAddress,
-                message.getSource(), message.getOpcode(), Constants.ABORT_REFUSED));
+                message.getSource(), message.getOpcode(), Constants.ABORT_CANNOT_PROVIDE_SOURCE));
         return true;
     }
 
