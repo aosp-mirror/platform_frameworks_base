@@ -30,6 +30,8 @@ import android.widget.TextView;
 
 import com.android.internal.widget.LockPatternUtils;
 
+import lineageos.providers.LineageSettings;
+
 public class NumPadKey extends ViewGroup {
     // list of "ABC", etc per digit, starting with '0'
     static String sKlondike[];
@@ -101,27 +103,34 @@ public class NumPadKey extends ViewGroup {
         mDigitText.setText(Integer.toString(mDigit));
         mKlondikeText = (TextView) findViewById(R.id.klondike_text);
 
+        updateText();
+        setBackground(mContext.getDrawable(R.drawable.ripple_drawable));
+        setContentDescription(mDigitText.getText().toString());
+    }
+
+    public void setDigit(int digit) {
+        mDigit = digit;
+        updateText();
+    }
+
+    private void updateText() {
+        boolean scramblePin = (LineageSettings.System.getInt(getContext().getContentResolver(),
+                LineageSettings.System.LOCKSCREEN_PIN_SCRAMBLE_LAYOUT, 0) == 1);
         if (mDigit >= 0) {
+            mDigitText.setText(Integer.toString(mDigit));
             if (sKlondike == null) {
                 sKlondike = getResources().getStringArray(R.array.lockscreen_num_pad_klondike);
             }
             if (sKlondike != null && sKlondike.length > mDigit) {
                 String klondike = sKlondike[mDigit];
                 final int len = klondike.length();
-                if (len > 0) {
+                if (len > 0 || scramblePin) {
                     mKlondikeText.setText(klondike);
                 } else {
                     mKlondikeText.setVisibility(View.INVISIBLE);
                 }
             }
         }
-
-        a = context.obtainStyledAttributes(attrs, android.R.styleable.View);
-        if (!a.hasValueOrEmpty(android.R.styleable.View_background)) {
-            setBackground(mContext.getDrawable(R.drawable.ripple_drawable_pin));
-        }
-        a.recycle();
-        setContentDescription(mDigitText.getText().toString());
     }
 
     @Override
