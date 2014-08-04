@@ -190,7 +190,7 @@ public class StubProvider extends ContentProvider {
     &lt;provider
         android:name="com.example.android.datasync.provider.StubProvider"
         android:authorities="com.example.android.datasync.provider"
-        android:export="false"
+        android:exported="false"
         android:syncable="true"/&gt;
     ...
     &lt;/application&gt;
