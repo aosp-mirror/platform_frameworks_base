@@ -23,6 +23,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.service.persistentdata.IPersistentDataBlockService;
 import android.util.Slog;
 import com.android.internal.R;
@@ -66,8 +67,9 @@ public class PersistentDataBlockService extends SystemService {
 
     private final Context mContext;
     private final String mDataBlockFile;
-    private final int mAllowedUid;
     private final Object mLock = new Object();
+
+    private int mAllowedAppId = -1;
     /*
      * Separate lock for OEM unlock related operations as they can happen in parallel with regular
      * block operations.
@@ -81,19 +83,22 @@ public class PersistentDataBlockService extends SystemService {
         mContext = context;
         mDataBlockFile = SystemProperties.get(PERSISTENT_DATA_BLOCK_PROP);
         mBlockDeviceSize = -1; // Load lazily
-        String allowedPackage = context.getResources()
+        mAllowedAppId = getAllowedAppId(UserHandle.USER_OWNER);
+    }
+
+
+    private int getAllowedAppId(int userHandle) {
+        String allowedPackage = mContext.getResources()
                 .getString(R.string.config_persistentDataPackageName);
         PackageManager pm = mContext.getPackageManager();
         int allowedUid = -1;
         try {
-            allowedUid = pm.getPackageUid(allowedPackage,
-                    Binder.getCallingUserHandle().getIdentifier());
+            allowedUid = pm.getPackageUid(allowedPackage, userHandle);
         } catch (PackageManager.NameNotFoundException e) {
             // not expected
             Slog.e(TAG, "not able to find package " + allowedPackage, e);
         }
-
-        mAllowedUid = allowedUid;
+        return UserHandle.getAppId(allowedUid);
     }
 
     @Override
@@ -108,7 +113,7 @@ public class PersistentDataBlockService extends SystemService {
     }
 
     private void enforceUid(int callingUid) {
-        if (callingUid != mAllowedUid) {
+        if (UserHandle.getAppId(callingUid) != mAllowedAppId) {
             throw new SecurityException("uid " + callingUid + " not allowed to access PST");
         }
     }
