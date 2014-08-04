@@ -107,16 +107,43 @@ public class StatusBarManagerService extends IStatusBarService.Stub
      * Private API used by NotificationManagerService.
      */
     private final StatusBarManagerInternal mInternalService = new StatusBarManagerInternal() {
+        private boolean mNotificationLightOn;
+
         @Override
         public void setNotificationDelegate(NotificationDelegate delegate) {
             mNotificationDelegate = delegate;
         }
+
         @Override
         public void buzzBeepBlinked() {
             if (mBar != null) {
                 try {
                     mBar.buzzBeepBlinked();
                 } catch (RemoteException ex) {
+                }
+            }
+        }
+
+        @Override
+        public void notificationLightPulse(int argb, int onMillis, int offMillis) {
+            mNotificationLightOn = true;
+            if (mBar != null) {
+                try {
+                    mBar.notificationLightPulse(argb, onMillis, offMillis);
+                } catch (RemoteException ex) {
+                }
+            }
+        }
+
+        @Override
+        public void notificationLightOff() {
+            if (mNotificationLightOn) {
+                mNotificationLightOn = false;
+                if (mBar != null) {
+                    try {
+                        mBar.notificationLightOff();
+                    } catch (RemoteException ex) {
+                    }
                 }
             }
         }
