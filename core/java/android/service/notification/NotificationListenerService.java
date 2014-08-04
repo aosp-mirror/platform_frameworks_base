@@ -609,8 +609,12 @@ public abstract class NotificationListenerService extends Service {
         }
 
         private boolean isAmbient(String key) {
+            int firstAmbientIndex = mRankingUpdate.getFirstAmbientIndex();
+            if (firstAmbientIndex < 0) {
+                return false;
+            }
             int rank = getRank(key);
-            return rank >= 0 && rank >= mRankingUpdate.getFirstAmbientIndex();
+            return rank >= 0 && rank >= firstAmbientIndex;
         }
 
         private boolean isIntercepted(String key) {
