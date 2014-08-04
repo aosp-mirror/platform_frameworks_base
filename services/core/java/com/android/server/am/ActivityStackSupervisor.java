@@ -97,6 +97,7 @@ import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.internal.widget.LockPatternUtils;
 import com.android.server.LocalServices;
 import com.android.server.am.ActivityStack.ActivityState;
 import com.android.server.wm.WindowManagerService;
@@ -3327,6 +3328,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
                             if (!mLockTaskIsLocked && shouldLockKeyguard) {
                                 mWindowManager.lockNow(null);
                                 mWindowManager.dismissKeyguard();
+                                new LockPatternUtils(mService.mContext)
+                                        .requireCredentialEntry(UserHandle.USER_ALL);
                             }
                         } catch (SettingNotFoundException e) {
                             // No setting, don't lock.
