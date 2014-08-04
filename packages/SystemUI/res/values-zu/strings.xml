@@ -39,10 +39,12 @@
     <string name="invalid_charger_title" msgid="3515740382572798460">"Ukushaja kwe-USB akusekelwe."</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"Sebenzisa kuphela ishaja enikeziwe."</string>
     <string name="battery_low_why" msgid="4553600287639198111">"Izilungiselelo"</string>
-    <string name="battery_saver_confirmation_title" msgid="5987726159603849352">"Qala isilondolozi sebhethri?"</string>
-    <string name="battery_saver_confirmation_ok" msgid="7283108887345688413">"Qala"</string>
-    <string name="battery_saver_start_action" msgid="7245333922937402896">"Qala isilondolozi sebhethri"</string>
-    <string name="battery_saver_confirmation_text" msgid="8417584516834617662">"Ukusiza ukuthuthukisa impilo yebhethri, Isilondolozi Sebhethri sizonciphisa ukusebenza kwedivayisi yakho.\n\nIsilondolozi Sebhethri sizokhutshazwa uma idivayisi yakho ixhunywa."</string>
+    <!-- no translation found for battery_saver_confirmation_title (5299585433050361634) -->
+    <skip />
+    <!-- no translation found for battery_saver_confirmation_ok (7507968430447930257) -->
+    <skip />
+    <!-- no translation found for battery_saver_start_action (5576697451677486320) -->
+    <skip />
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Izilungiselelo"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"I-Wi-Fi"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"Imodi yendiza"</string>
@@ -286,8 +288,10 @@
     <item quantity="other" msgid="5408537517529822157">"Amahora angu-%d"</item>
   </plurals>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Isilondolozi sebhethri sivuliwe"</string>
-    <string name="battery_saver_notification_text" msgid="7796554871101546872">"Ukusebenza kwedivayisi kwehlisiwe."</string>
-    <string name="battery_saver_notification_action_text" msgid="7546297220816993504">"Vula izilungiselelo zesilondolozi sebhethri"</string>
+    <!-- no translation found for battery_saver_notification_text (820318788126672692) -->
+    <skip />
+    <!-- no translation found for battery_saver_notification_action_text (109158658238110382) -->
+    <skip />
     <string name="battery_level_template" msgid="1609636980292580020">"<xliff:g id="LEVEL">%d</xliff:g>%%"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"Okuqukethwe kufihliwe"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> izoqala ukuthwebula yonke into eboniswa kusikrini sakho."</string>

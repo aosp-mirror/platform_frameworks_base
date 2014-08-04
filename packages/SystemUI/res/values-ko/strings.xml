@@ -41,10 +41,12 @@
     <string name="invalid_charger_title" msgid="3515740382572798460">"USB 충전은 지원되지 않습니다."</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"제공된 충전기만 사용하세요."</string>
     <string name="battery_low_why" msgid="4553600287639198111">"설정"</string>
-    <string name="battery_saver_confirmation_title" msgid="5987726159603849352">"배터리 세이버를 시작할까요?"</string>
-    <string name="battery_saver_confirmation_ok" msgid="7283108887345688413">"시작"</string>
-    <string name="battery_saver_start_action" msgid="7245333922937402896">"배터리 세이버 시작"</string>
-    <string name="battery_saver_confirmation_text" msgid="8417584516834617662">"배터리 세이버는 기기의 성능을 저하시켜 배터리 수명을 늘립니다.\n\n기기에 전원이 연결되면 배터리 세이버는 사용 중지됩니다."</string>
+    <!-- no translation found for battery_saver_confirmation_title (5299585433050361634) -->
+    <skip />
+    <!-- no translation found for battery_saver_confirmation_ok (7507968430447930257) -->
+    <skip />
+    <!-- no translation found for battery_saver_start_action (5576697451677486320) -->
+    <skip />
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"설정"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"비행기 모드"</string>
@@ -75,7 +77,7 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"캡쳐화면 저장됨"</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"캡쳐화면을 보려면 터치하세요."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"캡쳐화면을 캡쳐하지 못했습니다."</string>
-    <string name="screenshot_failed_text" msgid="1260203058661337274">"저장 공간이 부족하거나 앱 또는 소속 조직에서 허용하지 않기 때문에 스크린샷을 찍을 수 없습니다."</string>
+    <string name="screenshot_failed_text" msgid="1260203058661337274">"저장 공간이 부족하거나 앱 또는 소속 조직에서 허용하지 않아 스크린샷을 찍을 수 없습니다."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB 파일 전송 옵션"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"미디어 플레이어로 마운트(MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"카메라로 마운트(PTP)"</string>
@@ -288,8 +290,10 @@
     <item quantity="other" msgid="5408537517529822157">"%d시간 동안"</item>
   </plurals>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"배터리 세이버 사용 중"</string>
-    <string name="battery_saver_notification_text" msgid="7796554871101546872">"기기의 성능이 저하됩니다."</string>
-    <string name="battery_saver_notification_action_text" msgid="7546297220816993504">"배터리 세이버 설정 열기"</string>
+    <!-- no translation found for battery_saver_notification_text (820318788126672692) -->
+    <skip />
+    <!-- no translation found for battery_saver_notification_action_text (109158658238110382) -->
+    <skip />
     <string name="battery_level_template" msgid="1609636980292580020">"<xliff:g id="LEVEL">%d</xliff:g>%%"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"숨겨진 콘텐츠"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>에서 화면에 표시된 모든 것을 캡처하기 시작합니다."</string>
