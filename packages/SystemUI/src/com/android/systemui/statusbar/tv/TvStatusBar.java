@@ -99,6 +99,14 @@ public class TvStatusBar extends BaseStatusBar {
     public void buzzBeepBlinked() {
     }
 
+    @Override // CommandQueue
+    public void notificationLightOff() {
+    }
+
+    @Override // CommandQueue
+    public void notificationLightPulse(int argb, int onMillis, int offMillis) {
+    }
+
     @Override
     protected WindowManager.LayoutParams getSearchLayoutParams(
             LayoutParams layoutParams) {
