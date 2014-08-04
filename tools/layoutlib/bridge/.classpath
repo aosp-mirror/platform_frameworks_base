@@ -10,5 +10,7 @@
 	<classpathentry kind="var" path="ANDROID_PLAT_SRC/prebuilts/misc/common/tools-common/tools-common-prebuilt.jar"/>
 	<classpathentry kind="var" path="ANDROID_PLAT_SRC/prebuilts/misc/common/icu4j/icu4j.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry kind="var" path="ANDROID_PLAT_SRC/prebuilts/misc/common/sdk-common/sdk-common.jar"/>
+	<classpathentry kind="var" path="ANDROID_PLAT_SRC/out/host/common/obj/JAVA_LIBRARIES/guavalib_intermediates/javalib.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
