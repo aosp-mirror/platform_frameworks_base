@@ -43,14 +43,13 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
     private static final long ANIMATION_DURATION = 220;
     private static final int TAG_KEY_ANIM = R.id.scrim;
 
-    private static final int NUM_TEASES = 3;
-    private static final long TEASE_IN_ANIMATION_DURATION = 1000;
-    private static final long TEASE_VISIBLE_DURATION = 2000;
-    private static final long TEASE_OUT_ANIMATION_DURATION = 1000;
-    private static final long TEASE_INVISIBLE_DURATION = 1000;
-    private static final long TEASE_DURATION = TEASE_IN_ANIMATION_DURATION
-            + TEASE_VISIBLE_DURATION + TEASE_OUT_ANIMATION_DURATION + TEASE_INVISIBLE_DURATION;
-    private static final long PRE_TEASE_DELAY = 1000;
+    private static final long PULSE_IN_ANIMATION_DURATION = 1000;
+    private static final long PULSE_VISIBLE_DURATION = 2000;
+    private static final long PULSE_OUT_ANIMATION_DURATION = 1000;
+    private static final long PULSE_INVISIBLE_DURATION = 1000;
+    private static final long PULSE_DURATION = PULSE_IN_ANIMATION_DURATION
+            + PULSE_VISIBLE_DURATION + PULSE_OUT_ANIMATION_DURATION + PULSE_INVISIBLE_DURATION;
+    private static final long PRE_PULSE_DELAY = 1000;
 
     private final View mScrimBehind;
     private final View mScrimInFront;
@@ -70,7 +69,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
     private Runnable mOnAnimationFinished;
     private boolean mAnimationStarted;
     private boolean mDozing;
-    private int mTeasesRemaining;
+    private int mPulsesRemaining;
     private final Interpolator mInterpolator = new DecelerateInterpolator();
 
     public ScrimController(View scrimBehind, View scrimInFront) {
@@ -126,23 +125,23 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
         if (mDozing == dozing) return;
         mDozing = dozing;
         if (!mDozing) {
-            cancelTeasing();
+            cancelPulsing();
         }
         scheduleUpdate();
     }
 
     /** When dozing, fade screen contents in and out a few times using the front scrim. */
-    public long tease() {
+    public long pulse(int pulses) {
         if (!mDozing) return 0;
-        mTeasesRemaining = NUM_TEASES;
-        mScrimInFront.postDelayed(mTeaseIn, PRE_TEASE_DELAY);
-        return PRE_TEASE_DELAY + NUM_TEASES * TEASE_DURATION;
+        mPulsesRemaining = Math.max(pulses, mPulsesRemaining);
+        mScrimInFront.postDelayed(mPulseIn, PRE_PULSE_DELAY);
+        return PRE_PULSE_DELAY + mPulsesRemaining * PULSE_DURATION;
     }
 
-    private void cancelTeasing() {
-        mTeasesRemaining = 0;
-        mScrimInFront.removeCallbacks(mTeaseIn);
-        mScrimInFront.removeCallbacks(mTeaseOut);
+    private void cancelPulsing() {
+        mPulsesRemaining = 0;
+        mScrimInFront.removeCallbacks(mPulseIn);
+        mScrimInFront.removeCallbacks(mPulseOut);
     }
 
     private void scheduleUpdate() {
@@ -285,49 +284,49 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
         return true;
     }
 
-    private final Runnable mTeaseIn = new Runnable() {
+    private final Runnable mPulseIn = new Runnable() {
         @Override
         public void run() {
-            if (DEBUG) Log.d(TAG, "Tease in, mDozing=" + mDozing
-                    + " mTeasesRemaining=" + mTeasesRemaining);
-            if (!mDozing || mTeasesRemaining == 0) return;
-            mTeasesRemaining--;
-            mDurationOverride = TEASE_IN_ANIMATION_DURATION;
+            if (DEBUG) Log.d(TAG, "Pulse in, mDozing=" + mDozing
+                    + " mPulsesRemaining=" + mPulsesRemaining);
+            if (!mDozing || mPulsesRemaining == 0) return;
+            mPulsesRemaining--;
+            mDurationOverride = PULSE_IN_ANIMATION_DURATION;
             mAnimationDelay = 0;
             mAnimateChange = true;
-            mOnAnimationFinished = mTeaseInFinished;
+            mOnAnimationFinished = mPulseInFinished;
             setScrimColor(mScrimInFront, 0);
         }
     };
 
-    private final Runnable mTeaseInFinished = new Runnable() {
+    private final Runnable mPulseInFinished = new Runnable() {
         @Override
         public void run() {
-            if (DEBUG) Log.d(TAG, "Tease in finished, mDozing=" + mDozing);
+            if (DEBUG) Log.d(TAG, "Pulse in finished, mDozing=" + mDozing);
             if (!mDozing) return;
-            mScrimInFront.postDelayed(mTeaseOut, TEASE_VISIBLE_DURATION);
+            mScrimInFront.postDelayed(mPulseOut, PULSE_VISIBLE_DURATION);
         }
     };
 
-    private final Runnable mTeaseOut = new Runnable() {
+    private final Runnable mPulseOut = new Runnable() {
         @Override
         public void run() {
-            if (DEBUG) Log.d(TAG, "Tease in finished, mDozing=" + mDozing);
+            if (DEBUG) Log.d(TAG, "Pulse out, mDozing=" + mDozing);
             if (!mDozing) return;
-            mDurationOverride = TEASE_OUT_ANIMATION_DURATION;
+            mDurationOverride = PULSE_OUT_ANIMATION_DURATION;
             mAnimationDelay = 0;
             mAnimateChange = true;
-            mOnAnimationFinished = mTeaseOutFinished;
+            mOnAnimationFinished = mPulseOutFinished;
             setScrimColor(mScrimInFront, 1);
         }
     };
 
-    private final Runnable mTeaseOutFinished = new Runnable() {
+    private final Runnable mPulseOutFinished = new Runnable() {
         @Override
         public void run() {
-            if (DEBUG) Log.d(TAG, "Tease out finished, mTeasesRemaining=" + mTeasesRemaining);
-            if (mTeasesRemaining > 0) {
-                mScrimInFront.postDelayed(mTeaseIn, TEASE_INVISIBLE_DURATION);
+            if (DEBUG) Log.d(TAG, "Pulse out finished, mPulsesRemaining=" + mPulsesRemaining);
+            if (mPulsesRemaining > 0) {
+                mScrimInFront.postDelayed(mPulseIn, PULSE_INVISIBLE_DURATION);
             }
         }
     };

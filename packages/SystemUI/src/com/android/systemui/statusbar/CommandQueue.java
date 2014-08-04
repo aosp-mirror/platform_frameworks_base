@@ -55,6 +55,8 @@ public class CommandQueue extends IStatusBar.Stub {
     private static final int MSG_SHOW_RECENT_APPS           = 14 << MSG_SHIFT;
     private static final int MSG_HIDE_RECENT_APPS           = 15 << MSG_SHIFT;
     private static final int MSG_BUZZ_BEEP_BLINKED          = 16 << MSG_SHIFT;
+    private static final int MSG_NOTIFICATION_LIGHT_OFF     = 17 << MSG_SHIFT;
+    private static final int MSG_NOTIFICATION_LIGHT_PULSE   = 18 << MSG_SHIFT;
 
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
@@ -95,6 +97,8 @@ public class CommandQueue extends IStatusBar.Stub {
         public void hideSearchPanel();
         public void setWindowState(int window, int state);
         public void buzzBeepBlinked();
+        public void notificationLightOff();
+        public void notificationLightPulse(int argb, int onMillis, int offMillis);
     }
 
     public CommandQueue(Callbacks callbacks, StatusBarIconList list) {
@@ -230,6 +234,19 @@ public class CommandQueue extends IStatusBar.Stub {
         }
     }
 
+    public void notificationLightOff() {
+        synchronized (mList) {
+            mHandler.sendEmptyMessage(MSG_NOTIFICATION_LIGHT_OFF);
+        }
+    }
+
+    public void notificationLightPulse(int argb, int onMillis, int offMillis) {
+        synchronized (mList) {
+            mHandler.obtainMessage(MSG_NOTIFICATION_LIGHT_PULSE, onMillis, offMillis, argb)
+                    .sendToTarget();
+        }
+    }
+
     private final class H extends Handler {
         public void handleMessage(Message msg) {
             final int what = msg.what & MSG_MASK;
@@ -306,7 +323,12 @@ public class CommandQueue extends IStatusBar.Stub {
                 case MSG_BUZZ_BEEP_BLINKED:
                     mCallbacks.buzzBeepBlinked();
                     break;
-
+                case MSG_NOTIFICATION_LIGHT_OFF:
+                    mCallbacks.notificationLightOff();
+                    break;
+                case MSG_NOTIFICATION_LIGHT_PULSE:
+                    mCallbacks.notificationLightPulse((Integer) msg.obj, msg.arg1, msg.arg2);
+                    break;
             }
         }
     }

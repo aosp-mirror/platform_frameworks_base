@@ -35,6 +35,8 @@ oneway interface IStatusBar
     void setHardKeyboardStatus(boolean available, boolean enabled);
     void setWindowState(int window, int state);
     void buzzBeepBlinked();
+    void notificationLightOff();
+    void notificationLightPulse(int argb, int millisOn, int millisOff);
 
     void showRecentApps(boolean triggeredFromAltTab);
     void hideRecentApps(boolean triggeredFromAltTab);
