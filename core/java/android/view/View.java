@@ -10830,13 +10830,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         // Unattached views ignore this signal, and outline is recomputed in onAttachedToWindow()
         if (mAttachInfo == null) return;
 
-        final Outline outline = mAttachInfo.mTmpOutline;
-        outline.setEmpty();
-
         if (mOutlineProvider == null) {
             // no provider, remove outline
             mRenderNode.setOutline(null);
         } else {
+            final Outline outline = mAttachInfo.mTmpOutline;
+            outline.setEmpty();
+            outline.setAlpha(1.0f);
+
             mOutlineProvider.getOutline(this, outline);
             mRenderNode.setOutline(outline);
         }
