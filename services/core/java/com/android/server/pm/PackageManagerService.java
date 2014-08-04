@@ -1402,7 +1402,9 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             boolean didDexOptLibraryOrTool = false;
 
-            final List<String> instructionSets = getAllInstructionSets();
+            final List<String> allInstructionSets = getAllInstructionSets();
+            final String[] dexCodeInstructionSets =
+                getDexCodeInstructionSets(allInstructionSets.toArray(new String[allInstructionSets.size()]));
 
             /**
              * Ensure all external libraries have had dexopt run on them.
@@ -1412,7 +1414,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // (and framework jars) into all available architectures. It's possible
                 // to compile them only when we come across an app that uses them (there's
                 // already logic for that in scanPackageLI) but that adds some complexity.
-                for (String instructionSet : instructionSets) {
+                for (String dexCodeInstructionSet : dexCodeInstructionSets) {
                     for (SharedLibraryEntry libEntry : mSharedLibraries.values()) {
                         final String lib = libEntry.path;
                         if (lib == null) {
@@ -1421,16 +1423,16 @@ public class PackageManagerService extends IPackageManager.Stub {
 
                         try {
                             byte dexoptRequired = DexFile.isDexOptNeededInternal(lib, null,
-                                                                                 instructionSet,
+                                                                                 dexCodeInstructionSet,
                                                                                  false);
                             if (dexoptRequired != DexFile.UP_TO_DATE) {
                                 alreadyDexOpted.add(lib);
 
                                 // The list of "shared libraries" we have at this point is
                                 if (dexoptRequired == DexFile.DEXOPT_NEEDED) {
-                                    mInstaller.dexopt(lib, Process.SYSTEM_UID, true, instructionSet);
+                                    mInstaller.dexopt(lib, Process.SYSTEM_UID, true, dexCodeInstructionSet);
                                 } else {
-                                    mInstaller.patchoat(lib, Process.SYSTEM_UID, true, instructionSet);
+                                    mInstaller.patchoat(lib, Process.SYSTEM_UID, true, dexCodeInstructionSet);
                                 }
                                 didDexOptLibraryOrTool = true;
                             }
@@ -1465,7 +1467,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // TODO: We could compile these only for the most preferred ABI. We should
                 // first double check that the dex files for these commands are not referenced
                 // by other system apps.
-                for (String instructionSet : instructionSets) {
+                for (String dexCodeInstructionSet : dexCodeInstructionSets) {
                     for (int i=0; i<frameworkFiles.length; i++) {
                         File libPath = new File(frameworkDir, frameworkFiles[i]);
                         String path = libPath.getPath();
@@ -1479,13 +1481,13 @@ public class PackageManagerService extends IPackageManager.Stub {
                         }
                         try {
                             byte dexoptRequired = DexFile.isDexOptNeededInternal(path, null,
-                                                                                 instructionSet,
+                                                                                 dexCodeInstructionSet,
                                                                                  false);
                             if (dexoptRequired == DexFile.DEXOPT_NEEDED) {
-                                mInstaller.dexopt(path, Process.SYSTEM_UID, true, instructionSet);
+                                mInstaller.dexopt(path, Process.SYSTEM_UID, true, dexCodeInstructionSet);
                                 didDexOptLibraryOrTool = true;
                             } else if (dexoptRequired == DexFile.PATCHOAT_NEEDED) {
-                                mInstaller.patchoat(path, Process.SYSTEM_UID, true, instructionSet);
+                                mInstaller.patchoat(path, Process.SYSTEM_UID, true, dexCodeInstructionSet);
                                 didDexOptLibraryOrTool = true;
                             }
                         } catch (FileNotFoundException e) {
@@ -1509,8 +1511,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // small maintenance release update that the library and tool
                 // jars may be unchanged but APK could be removed resulting in
                 // unused dalvik-cache files.
-                for (String instructionSet : instructionSets) {
-                    mInstaller.pruneDexCache(instructionSet);
+                for (String dexCodeInstructionSet : dexCodeInstructionSets) {
+                    mInstaller.pruneDexCache(dexCodeInstructionSet);
                 }
 
                 // Additionally, delete all dex files from the root directory
@@ -4632,9 +4634,10 @@ public class PackageManagerService extends IPackageManager.Stub {
         // 1.) we need to dexopt, either because we are forced or it is needed
         // 2.) we are defering a needed dexopt
         // 3.) we are skipping an unneeded dexopt
+        final String[] dexCodeInstructionSets = getDexCodeInstructionSets(instructionSets);
         for (String path : paths) {
-            for (String instructionSet : instructionSets) {
-                if (!forceDex && pkg.mDexOptPerformed.contains(instructionSet)) {
+            for (String dexCodeInstructionSet : dexCodeInstructionSets) {
+                if (!forceDex && pkg.mDexOptPerformed.contains(dexCodeInstructionSet)) {
                     continue;
                 }
 
@@ -4645,13 +4648,13 @@ public class PackageManagerService extends IPackageManager.Stub {
                     // odex file and it matches the checksum of the image but not its base address,
                     // meaning we need to move it.
                     final byte isDexOptNeeded = DexFile.isDexOptNeededInternal(path,
-                            pkg.packageName, instructionSet, defer);
+                            pkg.packageName, dexCodeInstructionSet, defer);
                     if (forceDex || (!defer && isDexOptNeeded == DexFile.DEXOPT_NEEDED)) {
                         Log.i(TAG, "Running dexopt on: " + path + " pkg="
-                                + pkg.applicationInfo.packageName + " isa=" + instructionSet);
+                                + pkg.applicationInfo.packageName + " isa=" + dexCodeInstructionSet);
                         final int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
                         final int ret = mInstaller.dexopt(path, sharedGid, !isForwardLocked(pkg),
-                                pkg.packageName, instructionSet);
+                                pkg.packageName, dexCodeInstructionSet);
 
                         if (ret < 0) {
                             // Don't bother running dexopt again if we failed, it will probably
@@ -4660,13 +4663,13 @@ public class PackageManagerService extends IPackageManager.Stub {
                             return DEX_OPT_FAILED;
                         } else {
                             performedDexOpt = true;
-                            pkg.mDexOptPerformed.add(instructionSet);
+                            pkg.mDexOptPerformed.add(dexCodeInstructionSet);
                         }
                     } else if (!defer && isDexOptNeeded == DexFile.PATCHOAT_NEEDED) {
                         Log.i(TAG, "Running patchoat on: " + pkg.applicationInfo.packageName);
                         final int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
                         final int ret = mInstaller.patchoat(path, sharedGid, !isForwardLocked(pkg),
-                                pkg.packageName, instructionSet);
+                                pkg.packageName, dexCodeInstructionSet);
 
                         if (ret < 0) {
                             // Don't bother running patchoat again if we failed, it will probably
@@ -4675,7 +4678,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                             return DEX_OPT_FAILED;
                         } else {
                             performedDexOpt = true;
-                            pkg.mDexOptPerformed.add(instructionSet);
+                            pkg.mDexOptPerformed.add(dexCodeInstructionSet);
                         }
                     }
 
@@ -4762,6 +4765,23 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         return allInstructionSets;
+    }
+
+    /**
+     * Returns the instruction set that should be used to compile dex code. In the presence of
+     * a native bridge this might be different than the one shared libraries use.
+     */
+    private static String getDexCodeInstructionSet(String sharedLibraryIsa) {
+        String dexCodeIsa = SystemProperties.get("ro.dalvik.vm.isa." + sharedLibraryIsa);
+        return (dexCodeIsa.isEmpty() ? sharedLibraryIsa : dexCodeIsa);
+    }
+
+    private static String[] getDexCodeInstructionSets(String[] instructionSets) {
+        HashSet<String> dexCodeInstructionSets = new HashSet<String>(instructionSets.length);
+        for (String instructionSet : instructionSets) {
+            dexCodeInstructionSets.add(getDexCodeInstructionSet(instructionSet));
+        }
+        return dexCodeInstructionSets.toArray(new String[dexCodeInstructionSets.size()]);
     }
 
     @Override
@@ -6183,7 +6203,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                             ps.pkg.applicationInfo.primaryCpuAbi = null;
                             return;
                         } else {
-                            mInstaller.rmdex(ps.codePathString, getPreferredInstructionSet());
+                            mInstaller.rmdex(ps.codePathString,
+                                             getDexCodeInstructionSet(getPreferredInstructionSet()));
                         }
                     }
                 }
@@ -9412,10 +9433,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                 if (instructionSets == null) {
                     throw new IllegalStateException("instructionSet == null");
                 }
-
+                String[] dexCodeInstructionSets = getDexCodeInstructionSets(instructionSets);
                 for (String codePath : allCodePaths) {
-                    for (String instructionSet : instructionSets) {
-                        int retCode = mInstaller.rmdex(codePath, instructionSet);
+                    for (String dexCodeInstructionSet : dexCodeInstructionSets) {
+                        int retCode = mInstaller.rmdex(codePath, dexCodeInstructionSet);
                         if (retCode < 0) {
                             Slog.w(TAG, "Couldn't remove dex file for package: "
                                     + " at location " + codePath + ", retcode=" + retCode);
@@ -9695,8 +9716,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (instructionSets == null) {
                 throw new IllegalStateException("instructionSet == null");
             }
-            for (String instructionSet : instructionSets) {
-                int retCode = mInstaller.rmdex(sourceFile, instructionSet);
+            String[] dexCodeInstructionSets = getDexCodeInstructionSets(instructionSets);
+            for (String dexCodeInstructionSet : dexCodeInstructionSets) {
+                int retCode = mInstaller.rmdex(sourceFile, dexCodeInstructionSet);
                 if (retCode < 0) {
                     Slog.w(TAG, "Couldn't remove dex file for package: "
                             + " at location "
@@ -10199,9 +10221,10 @@ public class PackageManagerService extends IPackageManager.Stub {
         // TODO: extend to move split APK dex files
         if ((newPackage.applicationInfo.flags&ApplicationInfo.FLAG_HAS_CODE) != 0) {
             final String[] instructionSets = getAppDexInstructionSets(newPackage.applicationInfo);
-            for (String instructionSet : instructionSets) {
+            String[] dexCodeInstructionSets = getDexCodeInstructionSets(instructionSets);
+            for (String dexCodeInstructionSet : dexCodeInstructionSets) {
                 int retCode = mInstaller.movedex(oldCodePath, newPackage.baseCodePath,
-                        instructionSet);
+                        dexCodeInstructionSet);
                 if (retCode != 0) {
                 /*
                  * Programs may be lazily run through dexopt, so the
@@ -10212,8 +10235,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                  * file from a previous version of the package.
                  */
                     newPackage.mDexOptPerformed.clear();
-                    mInstaller.rmdex(oldCodePath, instructionSet);
-                    mInstaller.rmdex(newPackage.baseCodePath, instructionSet);
+                    mInstaller.rmdex(oldCodePath, dexCodeInstructionSet);
+                    mInstaller.rmdex(newPackage.baseCodePath, dexCodeInstructionSet);
                 }
             }
         }
@@ -11360,9 +11383,9 @@ public class PackageManagerService extends IPackageManager.Stub {
         // not just the first level.
         // TODO(multiArch): Extend getSizeInfo to look at *all* instruction sets, not
         // just the primary.
+        String[] dexCodeInstructionSets = getDexCodeInstructionSets(getAppDexInstructionSets(ps));
         int res = mInstaller.getSizeInfo(packageName, userHandle, p.baseCodePath, libDirRoot,
-                publicSrcDir, asecPath, getAppDexInstructionSets(ps),
-                pStats);
+                publicSrcDir, asecPath, dexCodeInstructionSets, pStats);
         if (res < 0) {
             return false;
         }
