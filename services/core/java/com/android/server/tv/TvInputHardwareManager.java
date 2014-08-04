@@ -559,7 +559,39 @@ class TvInputHardwareManager implements TvInputHal.Callback {
         private boolean mReleased = false;
         private final Object mImplLock = new Object();
 
-        private final AudioDevicePort mAudioSource;
+        private final AudioManager.OnAudioPortUpdateListener mAudioListener =
+                new AudioManager.OnAudioPortUpdateListener() {
+            @Override
+            public void onAudioPortListUpdate(AudioPort[] portList) {
+                synchronized (mImplLock) {
+                    updateAudioSinkLocked();
+                    if (mInfo.getAudioType() != AudioManager.DEVICE_NONE && mAudioSource == null) {
+                        mAudioSource = findAudioDevicePort(mInfo.getAudioType(),
+                                mInfo.getAudioAddress());
+                        if (mActiveConfig != null) {
+                            updateAudioPatchLocked();
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onAudioPatchListUpdate(AudioPatch[] patchList) {
+                // No-op
+            }
+
+            @Override
+            public void onServiceDied() {
+                synchronized (mImplLock) {
+                    mAudioSource = null;
+                    mAudioSink = null;
+                    mAudioPatch = null;
+                }
+            }
+        };
+        private int mOverrideAudioType = AudioManager.DEVICE_NONE;
+        private String mOverrideAudioAddress = "";
+        private AudioDevicePort mAudioSource;
         private AudioDevicePort mAudioSink;
         private AudioPatch mAudioPatch = null;
         private float mCommittedVolume = 0.0f;
@@ -573,12 +605,11 @@ class TvInputHardwareManager implements TvInputHal.Callback {
 
         public TvInputHardwareImpl(TvInputHardwareInfo info) {
             mInfo = info;
-            AudioDevicePort audioSource = null;
+            mAudioManager.registerAudioPortUpdateListener(mAudioListener);
             if (mInfo.getAudioType() != AudioManager.DEVICE_NONE) {
-                audioSource = findAudioDevicePort(mInfo.getAudioType(), mInfo.getAudioAddress());
+                mAudioSource = findAudioDevicePort(mInfo.getAudioType(), mInfo.getAudioAddress());
                 mAudioSink = findAudioSinkFromAudioPolicy();
             }
-            mAudioSource = audioSource;
         }
 
         private AudioDevicePort findAudioSinkFromAudioPolicy() {
@@ -614,6 +645,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
 
         public void release() {
             synchronized (mImplLock) {
+                mAudioManager.unregisterAudioPortUpdateListener(mAudioListener);
                 if (mAudioPatch != null) {
                     mAudioManager.releaseAudioPatch(mAudioPatch);
                     mAudioPatch = null;
@@ -668,6 +700,14 @@ class TvInputHardwareManager implements TvInputHal.Callback {
         }
 
         private void updateAudioPatchLocked() {
+            if (mAudioSource == null || mAudioSink == null) {
+                if (mAudioPatch != null) {
+                    throw new IllegalStateException("Audio patch should be null if audio source "
+                            + "or sink is null.");
+                }
+                return;
+            }
+
             AudioGainConfig sourceGainConfig = null;
             if (mAudioSource.gains().length > 0 && mVolume != mCommittedVolume) {
                 AudioGain sourceGain = null;
@@ -786,18 +826,29 @@ class TvInputHardwareManager implements TvInputHal.Callback {
             }
         }
 
+        private void updateAudioSinkLocked() {
+            if (mInfo.getAudioType() == AudioManager.DEVICE_NONE) {
+                return;
+            }
+            if (mOverrideAudioType == AudioManager.DEVICE_NONE) {
+                mAudioSink = findAudioSinkFromAudioPolicy();
+            } else {
+                AudioDevicePort audioSink =
+                        findAudioDevicePort(mOverrideAudioType, mOverrideAudioAddress);
+                if (audioSink != null) {
+                    mAudioSink = audioSink;
+                }
+            }
+        }
+
         @Override
         public void overrideAudioSink(int audioType, String audioAddress, int samplingRate,
                 int channelMask, int format) {
             synchronized (mImplLock) {
-                if (audioType == AudioManager.DEVICE_NONE) {
-                    mAudioSink = findAudioSinkFromAudioPolicy();
-                } else {
-                    AudioDevicePort audioSink = findAudioDevicePort(audioType, audioAddress);
-                    if (audioSink != null) {
-                        mAudioSink = audioSink;
-                    }
-                }
+                mOverrideAudioType = audioType;
+                mOverrideAudioAddress = audioAddress;
+                updateAudioSinkLocked();
+
                 mDesiredSamplingRate = samplingRate;
                 mDesiredChannelMask = channelMask;
                 mDesiredFormat = format;
