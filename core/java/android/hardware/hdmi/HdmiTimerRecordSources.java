@@ -142,34 +142,34 @@ public class HdmiTimerRecordSources {
     /**
      * Create {@link Duration} for time value.
      *
-     * @param hour hour in range of [0, 24]
+     * @param hour hour in range of [0, 23]
      * @param minute minute in range of [0, 60]
      * @return {@link Duration}
      * @throws IllegalArgumentException if hour or minute is out of range
      */
-    public static Time ofTime(int hour, int minute) {
+    public static Time timeOf(int hour, int minute) {
         checkTimeValue(hour, minute);
         return new Time(hour, minute);
     }
 
     private static void checkTimeValue(int hour, int minute) {
-        if (hour < 0 || hour > 24) {
-            throw new IllegalArgumentException("Hour should be in rage of [0, 24]:" + hour);
+        if (hour < 0 || hour > 23) {
+            throw new IllegalArgumentException("Hour should be in rage of [0, 23]:" + hour);
         }
-        if (minute < 0 || minute > 60) {
-            throw new IllegalArgumentException("Minute should be in rage of [0, 60]:" + minute);
+        if (minute < 0 || minute > 59) {
+            throw new IllegalArgumentException("Minute should be in rage of [0, 59]:" + minute);
         }
     }
 
     /**
      * Create {@link Duration} for duration value.
      *
-     * @param hour hour in range of [0, 90]
-     * @param minute minute in range of [0, 60]
+     * @param hour hour in range of [0, 99]
+     * @param minute minute in range of [0, 59]
      * @return {@link Duration}
      * @throws IllegalArgumentException if hour or minute is out of range
      */
-    public static Duration ofDuration(int hour, int minute) {
+    public static Duration durationOf(int hour, int minute) {
         checkDurationValue(hour, minute);
         return new Duration(hour, minute);
     }
@@ -178,8 +178,8 @@ public class HdmiTimerRecordSources {
         if (hour < 0 || hour > 99) {
             throw new IllegalArgumentException("Hour should be in rage of [0, 99]:" + hour);
         }
-        if (minute < 0 || minute > 60) {
-            throw new IllegalArgumentException("minute should be in rage of [0, 60]:" + minute);
+        if (minute < 0 || minute > 59) {
+            throw new IllegalArgumentException("minute should be in rage of [0, 59]:" + minute);
         }
     }
 
