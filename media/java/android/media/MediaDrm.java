@@ -20,6 +20,7 @@ import java.lang.ref.WeakReference;
 import java.util.UUID;
 import java.util.HashMap;
 import java.util.List;
+import android.annotation.SystemApi;
 import android.os.Binder;
 import android.os.Debug;
 import android.os.Handler;
@@ -519,6 +520,18 @@ public final class MediaDrm {
 
     private native Certificate provideProvisionResponseNative(byte[] response)
             throws DeniedByServerException;
+
+    /**
+     * Remove provisioning from a device.  Only system apps may unprovision a
+     * device.  Note that removing provisioning will invalidate any keys saved
+     * for offline use (KEY_TYPE_OFFLINE), which may render downloaded content
+     * unplayable until new licenses are acquired.  Since provisioning is global
+     * to the device, license invalidation will apply to all content downloaded
+     * by any app, so appropriate warnings should be given to the user.
+     * @hide
+     */
+    @SystemApi
+    public native void unprovisionDevice();
 
     /**
      * A means of enforcing limits on the number of concurrent streams per subscriber
