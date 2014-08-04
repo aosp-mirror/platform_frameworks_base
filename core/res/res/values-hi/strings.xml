@@ -417,6 +417,10 @@
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"धारक को किसी उपकरण व्‍यवस्‍थापक को उद्देश्य भेजने देता है. सामान्‍य ऐप्स के लिए कभी भी आवश्‍यक नहीं होना चाहिए."</string>
     <string name="permlab_bindTvInput" msgid="5601264742478168987">"टीवी इनपुट से आबद्ध करें"</string>
     <string name="permdesc_bindTvInput" msgid="2371008331852001924">"धारक को किसी टीवी इनपुट के शीर्ष-स्‍तर इंटरफ़ेस से आबद्ध होने देती है. सामान्‍य ऐप्स के लिए कभी भी आवश्‍यक नहीं होना चाहिए."</string>
+    <!-- no translation found for permlab_modifyParentalControls (4611318225997592242) -->
+    <skip />
+    <!-- no translation found for permdesc_modifyParentalControls (7438482894162282039) -->
+    <skip />
     <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"उपकरण उपकरण सुचारू ढ़ंग से चलाने वाले को जोड़ें या निकालें"</string>
     <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"धारक को सक्रिय डिवाइस व्यवस्थापकों को जोड़ने या निकालने देता है. सामान्य ऐप्स  के लिए कभी भी आवश्यक नहीं होना चाहिए."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"स्‍क्रीन अभिविन्‍यास बदलें"</string>
@@ -476,11 +480,11 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"ऐप्स को स्‍टिकी प्रसारण भेजने देता है, जो प्रसारण समाप्त होने के बाद भी बने रहते हैं. अत्यधिक उपयोग, टेबलेट की बहुत अधिक स्मृति का उपयोग करके उसे धीमा या अस्‍थिर कर सकता है."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"ऐप्स को स्‍टिकी प्रसारण भेजने देता है, जो प्रसारण समाप्त होने के बाद भी बने रहते हैं. अत्यधिक उपयोग, फ़ोन की बहुत अधिक स्मृति का उपयोग करके उसे धीमा या अस्‍थिर कर सकता है."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"अपने संपर्क पढ़ें"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"ऐप्स  को आपके टेबलेट में संग्रहीत संपर्कों के डेटा को, साथ ही आपके द्वारा विशिष्ट व्यक्तियों को कॉल करने, ईमेल करने, या अन्‍य तरीके से संवाद करने की आवृत्ति को पढ़ने देता है. यह अनुमति ऐप्स  को आपके संपर्क डेटा को सहेजने देती है, और दुर्भावनापूर्ण ऐप्स  आपकी जानकारी के बिना संपर्क डेटा को साझा कर सकते हैं."</string>
-    <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"ऐप्स  को आपके फ़ोन में संग्रहीत संपर्कों के डेटा को, साथ ही आपके द्वारा विशिष्ट व्यक्तियों को कॉल करने, ईमेल करने, या अन्‍य तरीके से संवाद करने की आवृत्ति को पढ़ने देता है. यह अनुमति ऐप्स  को आपके संपर्क डेटा को सहेजने देती है, और दुर्भावनापूर्ण ऐप्स  आपकी जानकारी के बिना संपर्क डेटा को साझा कर सकते हैं."</string>
+    <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"ऐप्स  को आपके टेबलेट में संग्रहीत संपर्कों के डेटा को, साथ ही आपके द्वारा विशिष्ट व्यक्तियों को कॉल करने, ईमेल करने, या अन्‍य तरीके से डॉयलॉग करने की आवृत्ति को पढ़ने देता है. यह अनुमति ऐप्स  को आपके संपर्क डेटा को सहेजने देती है, और दुर्भावनापूर्ण ऐप्स  आपकी जानकारी के बिना संपर्क डेटा को साझा कर सकते हैं."</string>
+    <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"ऐप्स  को आपके फ़ोन में संग्रहीत संपर्कों के डेटा को, साथ ही आपके द्वारा विशिष्ट व्यक्तियों को कॉल करने, ईमेल करने, या अन्‍य तरीके से डॉयलॉग करने की आवृत्ति को पढ़ने देता है. यह अनुमति ऐप्स  को आपके संपर्क डेटा को सहेजने देती है, और दुर्भावनापूर्ण ऐप्स  आपकी जानकारी के बिना संपर्क डेटा को साझा कर सकते हैं."</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"अपने संपर्क बदलें"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"ऐप्स  को आपके टेबलेट में संग्रहीत संपर्कों के डेटा को, साथ ही आपके द्वारा विशिष्ट व्यक्तियों को कॉल करने, ईमेल करने, या अन्‍य तरीके से संवाद करने की आवृत्ति को संशोधित करने देता है. यह अनुमति ऐप्स  को आपके संपर्क डेटा को हटाने देती है."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"ऐप्स  को आपके फ़ोन में संग्रहीत संपर्कों के डेटा को, साथ ही आपके द्वारा विशिष्ट व्यक्तियों को कॉल करने, ईमेल करने, या अन्‍य तरीके से संवाद करने की आवृत्ति को संशोधित करने देता है. यह अनुमति ऐप्स  को आपके संपर्क डेटा को हटाने देती है."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"ऐप्स  को आपके टेबलेट में संग्रहीत संपर्कों के डेटा को, साथ ही आपके द्वारा विशिष्ट व्यक्तियों को कॉल करने, ईमेल करने, या अन्‍य तरीके से डॉयलॉग करने की आवृत्ति को संशोधित करने देता है. यह अनुमति ऐप्स  को आपके संपर्क डेटा को हटाने देती है."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"ऐप्स  को आपके फ़ोन में संग्रहीत संपर्कों के डेटा को, साथ ही आपके द्वारा विशिष्ट व्यक्तियों को कॉल करने, ईमेल करने, या अन्‍य तरीके से डॉयलॉग करने की आवृत्ति को संशोधित करने देता है. यह अनुमति ऐप्स  को आपके संपर्क डेटा को हटाने देती है."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"कॉल लॉग पढ़ें"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3700645184870760285">"ऐप्स  को आपके फ़ोन का कॉल लॉग पढ़ने देता है, जिसमें इनकमिंग और आउटगोइंग कॉल का डेटा शामिल है. यह अनुमति ऐप्स  को आपके कॉल लॉग डेटा को सहेजने देती है, और दुर्भावनापूर्ण ऐप्स  आपकी जानकारी के बिना कॉल लॉग डेटा को साझा कर सकते हैं."</string>
     <string name="permdesc_readCallLog" product="default" msgid="5777725796813217244">"ऐप्स  को आपके फ़ोन का कॉल लॉग पढ़ने देता है, जिसमें इनकमिंग और आउटगोइंग कॉल का डेटा शामिल है. यह अनुमति ऐप्स  को आपके कॉल लॉग डेटा को सहेजने देती है, और दुर्भावनापूर्ण ऐप्स  आपकी जानकारी के बिना कॉल लॉग डेटा को साझा कर सकते हैं."</string>
@@ -1044,8 +1048,8 @@
     <string name="searchview_description_submit" msgid="2688450133297983542">"क्वेरी सबमिट करें"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"बोलकर खोजें"</string>
     <string name="enable_explore_by_touch_warning_title" msgid="7460694070309730149">"स्‍पर्श के द्वारा अन्‍वेषण करें सक्षम करें?"</string>
-    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> स्‍पर्श के द्वारा अन्‍वेषण करें सक्षम करना चाहती है. स्‍पर्श के द्वारा अन्‍वेष करें चालू होने पर, आप अपनी अंगुली के नीचे क्या है उसका विवरण सुन सकते हैं या देख सकते हैं या टेबलेट से संवाद करने के लिए जेस्‍चर निष्‍पादित कर सकते हैं."</string>
-    <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> स्‍पर्श के द्वारा अन्‍वेषण करें सक्षम करना चाहती है. स्‍पर्श के द्वारा अन्‍वेष करें चालू होने पर, आप अपनी अंगुली के नीचे क्या है उसका विवरण सुन सकते हैं या देख सकते हैं या फ़ोन से संवाद करने के लिए जेस्‍चर निष्‍पादित कर सकते हैं."</string>
+    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> स्‍पर्श के द्वारा अन्‍वेषण करें सक्षम करना चाहती है. स्‍पर्श के द्वारा अन्‍वेष करें चालू होने पर, आप अपनी अंगुली के नीचे क्या है उसका विवरण सुन सकते हैं या देख सकते हैं या टेबलेट से डॉयलॉग करने के लिए जेस्‍चर निष्‍पादित कर सकते हैं."</string>
+    <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> स्‍पर्श के द्वारा अन्‍वेषण करें सक्षम करना चाहती है. स्‍पर्श के द्वारा अन्‍वेष करें चालू होने पर, आप अपनी अंगुली के नीचे क्या है उसका विवरण सुन सकते हैं या देख सकते हैं या फ़ोन से डॉयलॉग करने के लिए जेस्‍चर निष्‍पादित कर सकते हैं."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1 माह पहले"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"1 माह से पहले"</string>
   <plurals name="num_seconds_ago">
@@ -1335,8 +1339,10 @@
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"प्रारूपित करें"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB डीबग करना कनेक्ट किया गया"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB डीबग करना अक्षम करने के लिए स्‍पर्श करें."</string>
-    <string name="select_input_method" msgid="4653387336791222978">"इनपुट पद्धति चुनें"</string>
-    <string name="configure_input_methods" msgid="9091652157722495116">"इनपुट पद्धतियां सेट करें"</string>
+    <!-- no translation found for select_input_method (8547250819326693584) -->
+    <skip />
+    <!-- no translation found for configure_input_methods (4769971288371946846) -->
+    <skip />
     <string name="use_physical_keyboard" msgid="6203112478095117625">"भौतिक कीबोर्ड"</string>
     <string name="hardware" msgid="7517821086888990278">"हार्डवेयर"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"कीबोर्ड लेआउट को चुनें"</string>
@@ -1382,10 +1388,10 @@
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"किसी ऐप्लिकेशन को ट्रस्ट स्थिति के बदलावों को सुनने की अनुमति देती है."</string>
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"विश्वसनीय एजेंट प्रदान करें."</string>
     <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"ऐप्लिकेशन को विश्वसनीय एजेंट प्रदान करने देती है."</string>
-    <string name="permlab_launch_trust_agent_settings" msgid="5859430082240410200">"विश्वस्त एजेंट सेटिंग मेनू लॉन्च करें."</string>
-    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"ऐप्लिकेशन को ऐसी गतिविधि लॉन्च करने देती है जो विश्वस्त एजेंट के व्यवहार में बदलाव लाती है."</string>
-    <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"ट्रस्ट एजेंट सेवा से आबद्ध करना"</string>
-    <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"किसी ऐप्लिकेशन को ट्रस्ट एजेंट सेवा से आबद्ध करने की अनुमति देती है."</string>
+    <string name="permlab_launch_trust_agent_settings" msgid="5859430082240410200">"विश्वसनीय एजेंट सेटिंग मेनू लॉन्च करें."</string>
+    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"ऐप्लिकेशन को ऐसी गतिविधि लॉन्च करने देती है जो विश्वसनीय एजेंट के व्यवहार में बदलाव लाती है."</string>
+    <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"विश्वसनीय एजेंट सेवा से जुड़ें"</string>
+    <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"किसी ऐप्लिकेशन को विश्वसनीय एजेंट सेवा से जुडॉव की अनुमति देती है."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"अपडेट और पुनर्प्राप्ति सिस्टम के साथ सहभागिता करें"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"ऐप्लिकेशन को पुनर्प्राप्ति सिस्टम और सिस्टम अपडेट के साथ सहभागिता करने देती है."</string>
     <string name="permlab_createMediaProjection" msgid="4941338725487978112">"मीडिया प्रोजेक्शन सत्र बनाएं"</string>
@@ -1553,6 +1559,8 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"कॉल स्वीकार करें?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"हमेशा"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"केवल एक बार"</string>
+    <!-- no translation found for activity_resolver_work_profiles_support (5462991471861024343) -->
+    <skip />
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"टेबलेट"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"फ़ोन"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"हेडफ़ोन"</string>
@@ -1627,8 +1635,7 @@
     <string name="user_switched" msgid="3768006783166984410">"वर्तमान उपयोगकर्ता <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"स्वामी"</string>
     <string name="error_message_title" msgid="4510373083082500195">"त्रुटि"</string>
-    <!-- no translation found for error_message_change_not_allowed (1347282344200417578) -->
-    <skip />
+    <string name="error_message_change_not_allowed" msgid="1347282344200417578">"यह बदलाव आपके व्यवस्थापक द्वारा अनुमत नहीं है"</string>
     <string name="app_not_found" msgid="3429141853498927379">"इस कार्यवाही को प्रबंधित करने के लिए कोई ऐप्स  नहीं मिला"</string>
     <string name="revoke" msgid="5404479185228271586">"निरस्‍त करें"</string>
     <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>
@@ -1759,4 +1766,40 @@
     <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"पिन"</string>
     <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"पैटर्न अनलॉक करें"</string>
     <string name="lock_to_app_unlock_password" msgid="795224196583495868">"पासवर्ड"</string>
+    <!-- no translation found for description_ustvpg (3666171166900312727) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_d (6552868431924879897) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_l (2427588153488291892) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_s (2556047043212535339) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_v (6647466085048806213) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_fv (4015953953338931020) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_y (2271448022073929890) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_y7 (8931861188215869211) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_g (506861774854051282) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_pg (4238749719629801564) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_14 (6305164472373004907) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_ma (5842074394338699982) -->
+    <skip />
+    <!-- no translation found for description_krtv_all (11497981488871053) -->
+    <skip />
+    <!-- no translation found for description_krtv_7 (6204900788594114856) -->
+    <skip />
+    <!-- no translation found for description_krtv_12 (5134514644432355428) -->
+    <skip />
+    <!-- no translation found for description_krtv_15 (1183692678647313272) -->
+    <skip />
+    <!-- no translation found for description_krtv_19 (7021986912313208481) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (724302068634956656) -->
+    <skip />
 </resources>

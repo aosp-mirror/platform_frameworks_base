@@ -417,6 +417,10 @@
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Ermöglicht dem Halter, Intents an einen Geräteadministrator zu senden. Sollte nie für normale Apps benötigt werden."</string>
     <string name="permlab_bindTvInput" msgid="5601264742478168987">"An eine TV-Eingabe binden"</string>
     <string name="permdesc_bindTvInput" msgid="2371008331852001924">"Ermöglicht dem Inhaber, sich an die Oberfläche einer TV-Eingabe auf oberster Ebene zu binden. Sollte nie für normale Apps benötigt werden."</string>
+    <!-- no translation found for permlab_modifyParentalControls (4611318225997592242) -->
+    <skip />
+    <!-- no translation found for permdesc_modifyParentalControls (7438482894162282039) -->
+    <skip />
     <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"Geräteadministrator hinzufügen oder entfernen"</string>
     <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Ermöglicht dem Inhaber, aktive Geräteadministratoren hinzuzufügen oder zu entfernen. Sollte für normale Apps nie benötigt werden."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"Bildschirmausrichtung ändern"</string>
@@ -1335,8 +1339,10 @@
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Format"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-Debugging"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Zum Deaktivieren von USB-Debugging berühren"</string>
-    <string name="select_input_method" msgid="4653387336791222978">"Eingabemethode wählen"</string>
-    <string name="configure_input_methods" msgid="9091652157722495116">"Eingabemethoden einrichten"</string>
+    <!-- no translation found for select_input_method (8547250819326693584) -->
+    <skip />
+    <!-- no translation found for configure_input_methods (4769971288371946846) -->
+    <skip />
     <string name="use_physical_keyboard" msgid="6203112478095117625">"Physische Tastatur"</string>
     <string name="hardware" msgid="7517821086888990278">"Hardware"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Tastaturlayout auswählen"</string>
@@ -1553,6 +1559,8 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"Anruf annehmen?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Immer"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Nur diesmal"</string>
+    <!-- no translation found for activity_resolver_work_profiles_support (5462991471861024343) -->
+    <skip />
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Tablet"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Telefon"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Kopfhörer"</string>
@@ -1627,8 +1635,7 @@
     <string name="user_switched" msgid="3768006783166984410">"Aktueller Nutzer <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="owner_name" msgid="2716755460376028154">"Eigentümer"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Fehler"</string>
-    <!-- no translation found for error_message_change_not_allowed (1347282344200417578) -->
-    <skip />
+    <string name="error_message_change_not_allowed" msgid="1347282344200417578">"Ihr Administrator lässt diese Änderung nicht zu."</string>
     <string name="app_not_found" msgid="3429141853498927379">"Für diese Aktion wurde keine App gefunden."</string>
     <string name="revoke" msgid="5404479185228271586">"Aufheben"</string>
     <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>
@@ -1759,4 +1766,40 @@
     <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN"</string>
     <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"Entsperrungsmuster"</string>
     <string name="lock_to_app_unlock_password" msgid="795224196583495868">"Passwort"</string>
+    <!-- no translation found for description_ustvpg (3666171166900312727) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_d (6552868431924879897) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_l (2427588153488291892) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_s (2556047043212535339) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_v (6647466085048806213) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_fv (4015953953338931020) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_y (2271448022073929890) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_y7 (8931861188215869211) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_g (506861774854051282) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_pg (4238749719629801564) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_14 (6305164472373004907) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_ma (5842074394338699982) -->
+    <skip />
+    <!-- no translation found for description_krtv_all (11497981488871053) -->
+    <skip />
+    <!-- no translation found for description_krtv_7 (6204900788594114856) -->
+    <skip />
+    <!-- no translation found for description_krtv_12 (5134514644432355428) -->
+    <skip />
+    <!-- no translation found for description_krtv_15 (1183692678647313272) -->
+    <skip />
+    <!-- no translation found for description_krtv_19 (7021986912313208481) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (724302068634956656) -->
+    <skip />
 </resources>

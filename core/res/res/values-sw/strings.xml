@@ -417,6 +417,10 @@
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Humruhusu mmiliki kutuma kidhibiti cha kifaa malengo. Programu za kawaida hazikihitaji."</string>
     <string name="permlab_bindTvInput" msgid="5601264742478168987">"bandika kwenye zana za data ya runinga"</string>
     <string name="permdesc_bindTvInput" msgid="2371008331852001924">"Inaruhusu kishikiliaji kubandika kwenye kusano la kiwango cha juu cha zana za data kwenye runinga. Haipaswi kuhitajika kwa programu za kawaida."</string>
+    <!-- no translation found for permlab_modifyParentalControls (4611318225997592242) -->
+    <skip />
+    <!-- no translation found for permdesc_modifyParentalControls (7438482894162282039) -->
+    <skip />
     <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"ongeza au ondoa msimamizi wa kifaa"</string>
     <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Huruhusu mmiliki kuongeza au kuondoa vidhibiti vya kifaa vinavyotumika. Programu za kawaida hazivihitaji."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"badilisha uelekezo wa skrini"</string>
@@ -1195,8 +1199,8 @@
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Chagua programu ya kifaa cha USB"</string>
     <string name="noApplications" msgid="2991814273936504689">"Hakuna programu zinazoweza kufanya tendo hili."</string>
     <string name="aerr_title" msgid="1905800560317137752"></string>
-    <string name="aerr_application" msgid="932628488013092776">"Kwa bahati mbaya, <xliff:g id="APPLICATION">%1$s</xliff:g> imekoma."</string>
-    <string name="aerr_process" msgid="4507058997035697579">"Kwa bahati mbaya, mchakato <xliff:g id="PROCESS">%1$s</xliff:g> umekoma."</string>
+    <string name="aerr_application" msgid="932628488013092776">"Kwa bahati mbaya, <xliff:g id="APPLICATION">%1$s</xliff:g> imeacha kufanya kazi."</string>
+    <string name="aerr_process" msgid="4507058997035697579">"Kwa bahati mbaya, mchakato wa <xliff:g id="PROCESS">%1$s</xliff:g> umekoma."</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
     <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> haifanyi kazi.\n\nUnataka kuifunga?"</string>
     <string name="anr_activity_process" msgid="5776209883299089767">"Shughuli <xliff:g id="ACTIVITY">%1$s</xliff:g> haijibu. \n\n Unataka kuifunga?"</string>
@@ -1335,8 +1339,10 @@
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Fomati"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Utatuaji wa USB umeunganishwa"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Gusa ili uzime utatuaji wa USB."</string>
-    <string name="select_input_method" msgid="4653387336791222978">"Chagua njia ya ingizo"</string>
-    <string name="configure_input_methods" msgid="9091652157722495116">"Weka mbinu za ingizo"</string>
+    <!-- no translation found for select_input_method (8547250819326693584) -->
+    <skip />
+    <!-- no translation found for configure_input_methods (4769971288371946846) -->
+    <skip />
     <string name="use_physical_keyboard" msgid="6203112478095117625">"Kibodi halisi"</string>
     <string name="hardware" msgid="7517821086888990278">"Maunzi"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Teua mpangilio wa kibodi"</string>
@@ -1380,12 +1386,12 @@
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Huruhusu programu kudhibiti kilinda-funguo."</string>
     <string name="permlab_trust_listener" msgid="1765718054003704476">"Sikiliza mabadiliko ya hali ya kuaminiwa."</string>
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Huruhusu programu kusikiliza mabadiliko katika hali ya kuaminiwa."</string>
-    <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Toa wakala wa uaminifu."</string>
-    <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Huruhusu programu kutoa wakala wa uaminifu."</string>
-    <string name="permlab_launch_trust_agent_settings" msgid="5859430082240410200">"Fungua menyu ya mipangilio ya madalali wa kuaminiwa."</string>
-    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"Huruhusu programu kufungua kitendo ambacho hubadilisha tabia ya madalali wa kuaminiwa."</string>
-    <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Funga kwenye huduma ya dalali wa kuaminiwa"</string>
-    <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Huruhusu programu kufungamanisha kwenye huduma ya dalali wa kuaminiwa."</string>
+    <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Kutoa kipengele cha kutathmini hali ya kuaminika."</string>
+    <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Huruhusu programu kutoa kipengele cha kutathmini hali ya kuaminika."</string>
+    <string name="permlab_launch_trust_agent_settings" msgid="5859430082240410200">"Fungua menyu ya mipangilio ya kipengele cha kutathmini hali ya kuaminika."</string>
+    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"Huruhusu programu kuanzisha shughuli ambayo hubadilisha tabia ya kipengele cha kutathmini hali ya kuaminika."</string>
+    <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Kujiambatisha kwenye huduma ya kutathmini hali ya kuaminika"</string>
+    <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Huruhusu programu kujiambatisha kwenye huduma ya kutathmini hali ya kuaminika."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Ingiliana na sasisho na mfumo wa kurejesha"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Huruhusu programu kuingiliana na mfumo wa kurejesha na sasisho la mfumo."</string>
     <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Unda vipindi vya kuonyesha maudhui"</string>
@@ -1553,6 +1559,8 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"Kubali simu?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Kila mara"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Mara moja tu"</string>
+    <!-- no translation found for activity_resolver_work_profiles_support (5462991471861024343) -->
+    <skip />
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Kompyuta kibao"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Simu"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Vipokeasauti"</string>
@@ -1627,8 +1635,7 @@
     <string name="user_switched" msgid="3768006783166984410">"Mtumiaji wa sasa <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"Mmiliki"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Hitilafu"</string>
-    <!-- no translation found for error_message_change_not_allowed (1347282344200417578) -->
-    <skip />
+    <string name="error_message_change_not_allowed" msgid="1347282344200417578">"Mabadiliko haya hayaruhusiwi na msimamizi wako"</string>
     <string name="app_not_found" msgid="3429141853498927379">"Hakuna programu iliyopatikana ili kushughulikia kitendo hiki"</string>
     <string name="revoke" msgid="5404479185228271586">"Batilisha"</string>
     <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>
@@ -1759,4 +1766,40 @@
     <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN"</string>
     <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"mchoro wa kufungua"</string>
     <string name="lock_to_app_unlock_password" msgid="795224196583495868">"nenosiri"</string>
+    <!-- no translation found for description_ustvpg (3666171166900312727) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_d (6552868431924879897) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_l (2427588153488291892) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_s (2556047043212535339) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_v (6647466085048806213) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_fv (4015953953338931020) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_y (2271448022073929890) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_y7 (8931861188215869211) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_g (506861774854051282) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_pg (4238749719629801564) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_14 (6305164472373004907) -->
+    <skip />
+    <!-- no translation found for description_ustvpg_ma (5842074394338699982) -->
+    <skip />
+    <!-- no translation found for description_krtv_all (11497981488871053) -->
+    <skip />
+    <!-- no translation found for description_krtv_7 (6204900788594114856) -->
+    <skip />
+    <!-- no translation found for description_krtv_12 (5134514644432355428) -->
+    <skip />
+    <!-- no translation found for description_krtv_15 (1183692678647313272) -->
+    <skip />
+    <!-- no translation found for description_krtv_19 (7021986912313208481) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (724302068634956656) -->
+    <skip />
 </resources>
