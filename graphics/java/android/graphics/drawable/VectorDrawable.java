@@ -708,7 +708,7 @@ public class VectorDrawable extends Drawable {
             mRootGroup = new VGroup(copy.mRootGroup, mVGTargetsMap);
             mBaseWidth = copy.mBaseWidth;
             mBaseHeight = copy.mBaseHeight;
-            mViewportWidth = copy.mViewportHeight;
+            mViewportWidth = copy.mViewportWidth;
             mViewportHeight = copy.mViewportHeight;
             mChangingConfigurations = copy.mChangingConfigurations;
             mRootAlpha = copy.mRootAlpha;

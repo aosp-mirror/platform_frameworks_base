@@ -22,10 +22,11 @@ import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.ScrollView;
 
-public class AnimatedVectorDrawableTest extends Activity implements View.OnClickListener{
+public class AnimatedVectorDrawableTest extends Activity implements View.OnClickListener {
     private static final String LOGCAT = "AnimatedVectorDrawableTest";
 
     protected int[] icon = {
+            R.drawable.animation_vector_linear_progress_bar,
             R.drawable.animation_vector_drawable_grouping_1,
             R.drawable.animation_vector_progress_bar,
             R.drawable.animation_vector_drawable_favorite,
