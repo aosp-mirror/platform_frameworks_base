@@ -215,9 +215,9 @@ public final class NinePatch_Delegate {
         if (c == null) {
             // not a 9-patch?
             BufferedImage image = bitmap_delegate.getImage();
-            Canvas_Delegate.native_drawBitmap(canvas_instance, bitmap_instance,
-                    new Rect(0, 0, image.getWidth(), image.getHeight()),
-                    new Rect(left, top, right, bottom),
+            Canvas_Delegate.native_drawBitmap(null, canvas_instance, bitmap_instance,
+                    0f, 0f, (float)image.getWidth(), (float)image.getHeight(),
+                    (float)left, (float)top, (float)right, (float)bottom,
                     paint_instance_or_null, destDensity, srcDensity);
             return;
         }

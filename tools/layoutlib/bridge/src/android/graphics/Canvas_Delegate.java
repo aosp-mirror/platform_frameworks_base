@@ -132,20 +132,6 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static long initCanvas(long nativeCanvas) {
-        // get the delegate from the native int.
-        Canvas_Delegate nativeCanvasDelegate = sManager.getDelegate(nativeCanvas);
-        if (nativeCanvasDelegate == null) {
-            return 0;
-        }
-
-        Canvas_Delegate newDelegate = new Canvas_Delegate();
-
-        // TODO: actually copy the canvas state.
-        return sManager.addNewDelegate(newDelegate);
-    }
-
-    @LayoutlibDelegate
     /*package*/
     static void native_setBitmap(long canvas, long bitmap, boolean copyState) {
         Canvas_Delegate canvasDelegate = sManager.getDelegate(canvas);
@@ -498,24 +484,6 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_drawRGB(long nativeCanvas, int r, int g, int b) {
-        native_drawColor(nativeCanvas, 0xFF000000 | r << 16 | (g&0xFF) << 8 | (b&0xFF),
-                PorterDuff.Mode.SRC_OVER.nativeInt);
-
-    }
-
-    @LayoutlibDelegate
-    /*package*/ static void native_drawARGB(long nativeCanvas, int a, int r, int g, int b) {
-        native_drawColor(nativeCanvas, a << 24 | (r&0xFF) << 16 | (g&0xFF) << 8 | (b&0xFF),
-                PorterDuff.Mode.SRC_OVER.nativeInt);
-    }
-
-    @LayoutlibDelegate
-    /*package*/ static void native_drawColor(long nativeCanvas, int color) {
-        native_drawColor(nativeCanvas, color, PorterDuff.Mode.SRC_OVER.nativeInt);
-    }
-
-    @LayoutlibDelegate
     /*package*/ static void native_drawColor(long nativeCanvas, final int color, final int mode) {
         // get the delegate from the native int.
         Canvas_Delegate canvasDelegate = sManager.getDelegate(nativeCanvas);
@@ -772,52 +740,18 @@ public final class Canvas_Delegate {
 
     @LayoutlibDelegate
     /*package*/ static void native_drawBitmap(Canvas thisCanvas, long nativeCanvas, long bitmap,
-                                                 Rect src, RectF dst,
-                                                 long nativePaintOrZero,
-                                                 int screenDensity,
-                                                 int bitmapDensity) {
+                                 float srcLeft, float srcTop, float srcRight, float srcBottom,
+                                 float dstLeft, float dstTop, float dstRight, float dstBottom,
+                                 long nativePaintOrZero, int screenDensity, int bitmapDensity) {
         // get the delegate from the native int.
         Bitmap_Delegate bitmapDelegate = Bitmap_Delegate.getDelegate(bitmap);
         if (bitmapDelegate == null) {
             return;
         }
 
-        BufferedImage image = bitmapDelegate.getImage();
-
-        if (src == null) {
-            drawBitmap(nativeCanvas, bitmapDelegate, nativePaintOrZero,
-                    0, 0, image.getWidth(), image.getHeight(),
-                    (int)dst.left, (int)dst.top, (int)dst.right, (int)dst.bottom);
-        } else {
-            drawBitmap(nativeCanvas, bitmapDelegate, nativePaintOrZero,
-                    src.left, src.top, src.width(), src.height(),
-                    (int)dst.left, (int)dst.top, (int)dst.right, (int)dst.bottom);
-        }
-    }
-
-    @LayoutlibDelegate
-    /*package*/ static void native_drawBitmap(long nativeCanvas, long bitmap,
-                                                 Rect src, Rect dst,
-                                                 long nativePaintOrZero,
-                                                 int screenDensity,
-                                                 int bitmapDensity) {
-        // get the delegate from the native int.
-        Bitmap_Delegate bitmapDelegate = Bitmap_Delegate.getDelegate(bitmap);
-        if (bitmapDelegate == null) {
-            return;
-        }
-
-        BufferedImage image = bitmapDelegate.getImage();
-
-        if (src == null) {
-            drawBitmap(nativeCanvas, bitmapDelegate, nativePaintOrZero,
-                    0, 0, image.getWidth(), image.getHeight(),
-                    dst.left, dst.top, dst.right, dst.bottom);
-        } else {
-            drawBitmap(nativeCanvas, bitmapDelegate, nativePaintOrZero,
-                    src.left, src.top, src.width(), src.height(),
-                    dst.left, dst.top, dst.right, dst.bottom);
-        }
+        drawBitmap(nativeCanvas, bitmapDelegate, nativePaintOrZero,
+                (int)srcLeft, (int)srcTop, (int)srcRight, (int)srcBottom,
+                (int)dstLeft, (int)dstTop, (int)dstRight, (int)dstBottom);
     }
 
     @LayoutlibDelegate
