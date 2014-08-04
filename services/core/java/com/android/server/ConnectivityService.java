@@ -55,7 +55,6 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
-import android.net.CaptivePortalTracker;
 import android.net.ConnectivityManager;
 import android.net.IConnectivityManager;
 import android.net.INetworkManagementEventObserver;
@@ -247,12 +246,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      * abstractly.
      */
     private NetworkStateTracker mNetTrackers[];
-
-    /*
-     * Handles captive portal check on a network.
-     * Only set if device has {@link PackageManager#FEATURE_WIFI}.
-     */
-    private CaptivePortalTracker mCaptivePortalTracker;
 
     private Context mContext;
     private int mNetworkPreference;
@@ -1444,9 +1437,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 SAMPLE_INTERVAL_ELAPSED_REQUEST_CODE, intent, 0);
         setAlarm(DEFAULT_START_SAMPLING_INTERVAL_IN_SECONDS * 1000, mSampleIntervalElapsedIntent);
 
-        if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WIFI)) {
-            mCaptivePortalTracker = CaptivePortalTracker.makeCaptivePortalTracker(mContext, this);
-        }
         loadGlobalProxy();
 
         synchronized(this) {
