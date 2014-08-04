@@ -260,6 +260,16 @@ public final class HdmiControlService extends SystemService {
         }
     }
 
+    /**
+     * Called when the initialization of local devices is complete.
+     */
+    private void onInitializeCecComplete() {
+        if (isTvDevice()) {
+            mCecController.setOption(HdmiTvClient.OPTION_CEC_AUTO_WAKEUP,
+                    tv().getAutoWakeup() ? HdmiTvClient.ENABLED : HdmiTvClient.DISABLED);
+        }
+    }
+
     boolean readBooleanSetting(String key, boolean defVal) {
         ContentResolver cr = getContext().getContentResolver();
         return Global.getInt(cr, key, defVal ? Constants.TRUE : Constants.FALSE) == Constants.TRUE;
@@ -322,6 +332,7 @@ public final class HdmiControlService extends SystemService {
             HdmiCecLocalDevice device = devices.valueAt(i);
             device.handleAddressAllocated(address, fromBootup);
         }
+        onInitializeCecComplete();
     }
 
     // Initialize HDMI port information. Combine the information from CEC and MHL HAL and
@@ -996,6 +1007,7 @@ public final class HdmiControlService extends SystemService {
             }
             switch (key) {
                 case HdmiTvClient.OPTION_CEC_AUTO_WAKEUP:
+                    tv().setAutoWakeup(value == HdmiTvClient.ENABLED);
                     mCecController.setOption(key, value);
                     break;
                 case HdmiTvClient.OPTION_CEC_AUTO_DEVICE_OFF:
