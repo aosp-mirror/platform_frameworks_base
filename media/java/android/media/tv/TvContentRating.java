@@ -237,7 +237,6 @@ public final class TvContentRating {
     private static final String DELIMITER = "/";
 
     private final String mDomain;
-    private final String mCountryCode;
     private final String mRatingSystem;
     private final String mRating;
     private final String[] mSubRatings;
@@ -246,21 +245,20 @@ public final class TvContentRating {
      * Creates a TvContentRating object.
      *
      * @param domain The domain name.
-     * @param countryCode The country code in ISO 3166-2 format or {@code null}.
      * @param ratingSystem The rating system id.
      * @param rating The content rating string.
      * @param subRatings The string array of sub-ratings.
      * @return A TvContentRating object, or null if creation failed.
      */
-    public static TvContentRating createRating(String domain, String countryCode,
-            String ratingSystem, String rating, String... subRatings) {
+    public static TvContentRating createRating(String domain, String ratingSystem,
+            String rating, String... subRatings) {
         if (TextUtils.isEmpty(domain)) {
             throw new IllegalArgumentException("domain cannot be empty");
         }
         if (TextUtils.isEmpty(rating)) {
             throw new IllegalArgumentException("rating cannot be empty");
         }
-        return new TvContentRating(domain, countryCode, ratingSystem, rating, subRatings);
+        return new TvContentRating(domain, ratingSystem, rating, subRatings);
     }
 
     /**
@@ -268,7 +266,7 @@ public final class TvContentRating {
      * {@link #flattenToString}.
      *
      * @param ratingString The String that was returned by flattenToString().
-     * @return a new TvContentRating containing the domain, countryCode, rating system, rating and
+     * @return a new TvContentRating containing the domain, rating system, rating and
      *         sub-ratings information was encoded in {@code ratingString}.
      * @see #flattenToString
      */
@@ -277,27 +275,28 @@ public final class TvContentRating {
             throw new IllegalArgumentException("ratingString cannot be empty");
         }
         String[] strs = ratingString.split(DELIMITER);
-        if (strs.length < 4) {
+        if (strs.length < 3) {
             throw new IllegalArgumentException("Invalid rating string: " + ratingString);
         }
-        if (strs.length > 4) {
-            String[] subRatings = new String[strs.length - 4];
-            System.arraycopy(strs, 4, subRatings, 0, subRatings.length);
-            return new TvContentRating(strs[0], strs[1], strs[2], strs[3], subRatings);
+        if (strs.length > 3) {
+            String[] subRatings = new String[strs.length - 3];
+            System.arraycopy(strs, 3, subRatings, 0, subRatings.length);
+            return new TvContentRating(strs[0], strs[1], strs[2], subRatings);
         }
-        return new TvContentRating(strs[0], strs[1], strs[2], strs[3], null);
+        return new TvContentRating(strs[0], strs[1], strs[2], null);
     }
 
     /**
      * Constructs a TvContentRating object from a given rating and sub-rating constants.
      *
-     * @param rating The rating constant defined in this class.
+     * @param domain The domain name.
+     * @param ratingSystem The rating system id.
+     * @param rating The content rating string.
      * @param subRatings The String array of sub-rating constants defined in this class.
      */
-    private TvContentRating(String domain, String countryCode,
-            String ratingSystem, String rating, String[] subRatings) {
+    private TvContentRating(
+            String domain, String ratingSystem, String rating, String[] subRatings) {
         mDomain = domain;
-        mCountryCode = countryCode;
         mRatingSystem = ratingSystem;
         mRating = rating;
         mSubRatings = subRatings;
@@ -308,13 +307,6 @@ public final class TvContentRating {
      */
     public String getDomain() {
         return mDomain;
-    }
-
-    /**
-     * Returns the country code in ISO 3166-2 format or {@code null}.
-     */
-    public String getCountry() {
-        return mCountryCode;
     }
 
     /**
@@ -341,7 +333,6 @@ public final class TvContentRating {
         return Collections.unmodifiableList(Arrays.asList(mSubRatings));
     }
 
-
     /**
      * Returns a String that unambiguously describes both the rating and sub-rating information
      * contained in the TvContentRating. You can later recover the TvContentRating from this string
@@ -354,8 +345,6 @@ public final class TvContentRating {
     public String flattenToString() {
         StringBuilder builder = new StringBuilder();
         builder.append(mDomain);
-        builder.append(DELIMITER);
-        builder.append(mCountryCode);
         builder.append(DELIMITER);
         builder.append(mRatingSystem);
         builder.append(DELIMITER);
