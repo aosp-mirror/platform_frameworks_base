@@ -33,4 +33,27 @@ public class AndroidLocale {
     public static String toLanguageTag(Locale locale)  {
         return ULocale.forLocale(locale).toLanguageTag();
     }
+
+    public static String adjustLanguageCode(String languageCode) {
+        String adjusted = languageCode.toLowerCase(Locale.US);
+        // Map new language codes to the obsolete language
+        // codes so the correct resource bundles will be used.
+        if (languageCode.equals("he")) {
+            adjusted = "iw";
+        } else if (languageCode.equals("id")) {
+            adjusted = "in";
+        } else if (languageCode.equals("yi")) {
+            adjusted = "ji";
+        }
+
+        return adjusted;
+    }
+
+    public static Locale forLanguageTag(String tag) {
+        return ULocale.forLanguageTag(tag).toLocale();
+    }
+
+    public static String getScript(Locale locale) {
+        return ULocale.forLocale(locale).getScript();
+    }
 }

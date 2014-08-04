@@ -19,11 +19,13 @@ package com.android.tools.layoutlib.create;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 /**
@@ -42,45 +44,70 @@ public class ReplaceMethodCallsAdapter extends ClassVisitor {
 
     private static final List<MethodReplacer> METHOD_REPLACERS = new ArrayList<MethodReplacer>(2);
 
+    private static final String ANDROID_LOCALE_CLASS =
+            "com/android/layoutlib/bridge/android/AndroidLocale";
+
+    private static final String JAVA_LOCALE_CLASS = "java/util/Locale";
+    private static final Type STRING = Type.getType(String.class);
+
     // Static initialization block to initialize METHOD_REPLACERS.
     static {
         // Case 1: java.lang.System.arraycopy()
         METHOD_REPLACERS.add(new MethodReplacer() {
             @Override
             public boolean isNeeded(String owner, String name, String desc) {
-                return owner.equals("java/lang/System") && name.equals("arraycopy") &&
+                return "java/lang/System".equals(owner) && "arraycopy".equals(name) &&
                         ARRAYCOPY_DESCRIPTORS.contains(desc);
             }
 
             @Override
-            public void replace(int opcode, String owner, String name, String desc,
-                    int[] opcodeOut, String[] output) {
-                assert isNeeded(owner, name, desc) && output.length == 3
-                        && opcodeOut.length == 1;
-                opcodeOut[0] = opcode;
-                output[0] = owner;
-                output[1] = name;
-                output[2] = "(Ljava/lang/Object;ILjava/lang/Object;II)V";
+            public void replace(int[] opcode, String[] methodInformation) {
+                assert methodInformation.length == 3 && isNeeded(methodInformation[0], methodInformation[1], methodInformation[2])
+                        && opcode.length == 1;
+                methodInformation[2] = "(Ljava/lang/Object;ILjava/lang/Object;II)V";
             }
         });
 
-        // Case 2: java.util.Locale.toLanguageTag()
+        // Case 2: java.util.Locale.toLanguageTag() and java.util.Locale.getScript()
         METHOD_REPLACERS.add(new MethodReplacer() {
+
+            String LOCALE_TO_STRING = Type.getMethodDescriptor(STRING, Type.getType(Locale.class));
+
             @Override
             public boolean isNeeded(String owner, String name, String desc) {
-                return owner.equals("java/util/Locale") && name.equals("toLanguageTag") &&
-                        "()Ljava/lang/String;".equals(desc);
+                return JAVA_LOCALE_CLASS.equals(owner) && "()Ljava/lang/String;".equals(desc) &&
+                        ("toLanguageTag".equals(name) || "getScript".equals(name));
             }
 
             @Override
-            public void replace(int opcode, String owner, String name, String desc,
-                    int[] opcodeOut, String[] output) {
-                assert isNeeded(owner, name, desc) && output.length == 3
-                        && opcodeOut.length == 1;
-                opcodeOut[0] = Opcodes.INVOKESTATIC;
-                output[0] = "com/android/layoutlib/bridge/android/AndroidLocale";
-                output[1] = name;
-                output[2] = "(Ljava/util/Locale;)Ljava/lang/String;";
+            public void replace(int[] opcode, String[] methodInformation) {
+                assert methodInformation.length == 3 && isNeeded(methodInformation[0], methodInformation[1], methodInformation[2])
+                        && opcode.length == 1;
+                opcode[0] = Opcodes.INVOKESTATIC;
+                methodInformation[0] = ANDROID_LOCALE_CLASS;
+                methodInformation[2] = LOCALE_TO_STRING;
+            }
+        });
+
+        // Case 3: java.util.Locale.adjustLanguageCode() or java.util.Locale.forLanguageTag()
+        METHOD_REPLACERS.add(new MethodReplacer() {
+
+            private final String STRING_TO_STRING = Type.getMethodDescriptor(STRING, STRING);
+            private final String STRING_TO_LOCALE = Type.getMethodDescriptor(
+                    Type.getType(Locale.class), STRING);
+
+            @Override
+            public boolean isNeeded(String owner, String name, String desc) {
+                return JAVA_LOCALE_CLASS.equals(owner) &&
+                        ("adjustLanguageCode".equals(name) && desc.equals(STRING_TO_STRING) ||
+                        "forLanguageTag".equals(name) && desc.equals(STRING_TO_LOCALE));
+            }
+
+            @Override
+            public void replace(int[] opcode, String[] methodInformation) {
+                assert methodInformation.length == 3 && isNeeded(methodInformation[0], methodInformation[1], methodInformation[2])
+                        && opcode.length == 1;
+                methodInformation[0] = ANDROID_LOCALE_CLASS;
             }
         });
     }
@@ -112,16 +139,15 @@ public class ReplaceMethodCallsAdapter extends ClassVisitor {
 
         @Override
         public void visitMethodInsn(int opcode, String owner, String name, String desc) {
-            // Check if method is a specialized version of java.lang.System.arrayCopy
             for (MethodReplacer replacer : METHOD_REPLACERS) {
                 if (replacer.isNeeded(owner, name, desc)) {
-                    String[] output = new String[3];
-                    int[] opcodeOut = new int[1];
-                    replacer.replace(opcode, owner, name, desc, opcodeOut, output);
+                    String[] methodInformation = {owner, name, desc};
+                    int[] opcodeOut = {opcode};
+                    replacer.replace(opcodeOut, methodInformation);
                     opcode = opcodeOut[0];
-                    owner = output[0];
-                    name = output[1];
-                    desc = output[2];
+                    owner = methodInformation[0];
+                    name = methodInformation[1];
+                    desc = methodInformation[2];
                     break;
                 }
             }
@@ -133,14 +159,15 @@ public class ReplaceMethodCallsAdapter extends ClassVisitor {
         public boolean isNeeded(String owner, String name, String desc);
 
         /**
-         * This method must update the values of the output arrays with the new values of method
-         * attributes - opcode, owner, name and desc.
-         * @param opcodeOut An array that will contain the new value of the opcode. The size of
-         *                  the array must be 1.
-         * @param output An array that will contain the new values of the owner, name and desc in
-         *               that order. The size of the array must be 3.
+         * This method must update the arrays with the new values of the method attributes -
+         * opcode, owner, name and desc.
+         * @param opcode This array should contain the original value of the opcode. The value is
+         *               modified by the method if needed. The size of the array must be 1.
+         *
+         * @param methodInformation This array should contain the original values of the method
+         *                          attributes - owner, name and desc in that order. The values
+         *                          may be modified as needed. The size of the array must be 3.
          */
-        public void replace(int opcode, String owner, String name, String desc, int[] opcodeOut,
-                String[] output);
+        public void replace(int[] opcode, String[] methodInformation);
     }
 }
