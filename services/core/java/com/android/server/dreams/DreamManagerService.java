@@ -249,7 +249,7 @@ public final class DreamManagerService extends SystemService {
 
     private ComponentName chooseDreamForUser(boolean doze, int userId) {
         if (doze) {
-            ComponentName dozeComponent = getDozeComponent();
+            ComponentName dozeComponent = getDozeComponent(userId);
             return validateDream(dozeComponent) ? dozeComponent : null;
         }
         ComponentName[] dreams = getDreamComponentsForUser(userId);
@@ -314,6 +314,10 @@ public final class DreamManagerService extends SystemService {
     }
 
     private ComponentName getDozeComponent() {
+        return getDozeComponent(ActivityManager.getCurrentUser());
+    }
+
+    private ComponentName getDozeComponent(int userId) {
         // Read the component from a system property to facilitate debugging.
         // Note that for production devices, the dream should actually be declared in
         // a config.xml resource.
@@ -324,7 +328,9 @@ public final class DreamManagerService extends SystemService {
             name = mContext.getResources().getString(
                     com.android.internal.R.string.config_dozeComponent);
         }
-        return TextUtils.isEmpty(name) ? null : ComponentName.unflattenFromString(name);
+        boolean enabled = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.DOZE_ENABLED, 1, userId) != 0;
+        return TextUtils.isEmpty(name) || !enabled ? null : ComponentName.unflattenFromString(name);
     }
 
     private ServiceInfo getServiceInfo(ComponentName name) {
