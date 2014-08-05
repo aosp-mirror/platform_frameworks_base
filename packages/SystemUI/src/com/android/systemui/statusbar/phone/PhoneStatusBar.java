@@ -158,7 +158,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 
 public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
@@ -338,8 +337,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         : null;
 
     private int mNavigationIconHints = 0;
-    private final HashSet<View> mOverflowNotifications = new HashSet<>();
-    private final HashSet<View> mOldOverflowNotifications = new HashSet<>();
 
     // ensure quick settings is disabled until the current user makes it through the setup wizard
     private boolean mUserSetup = false;
@@ -1358,32 +1355,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private void updateNotificationShade() {
         if (mStackScroller == null) return;
 
-        int speedbumpIndex = -1;
-        int maxKeyguardNotifications = getMaxKeyguardNotifications();
-        mKeyguardIconOverflowContainer.getIconsView().removeAllViews();
-        int visibleNotifications = 0;
-        boolean onKeyguard = mState == StatusBarState.KEYGUARD;
-        mOldOverflowNotifications.clear();
-        mOldOverflowNotifications.addAll(mOverflowNotifications);
-
         ArrayList<Entry> activeNotifications = mNotificationData.getActiveNotifications();
-        ArrayList<View> toShow = new ArrayList<>(activeNotifications.size());
+        ArrayList<ExpandableNotificationRow> toShow = new ArrayList<>(activeNotifications.size());
         final int N = activeNotifications.size();
         for (int i=0; i<N; i++) {
             Entry ent = activeNotifications.get(i);
             int vis = ent.notification.getNotification().visibility;
-
-            // Decide whether to hide to notification because of Keyguard showing.
-            boolean showOnKeyguard = mShowLockscreenNotifications
-                    && !mNotificationData.isAmbient(ent.key);
-            if (onKeyguard && (visibleNotifications >= maxKeyguardNotifications
-                    || !showOnKeyguard)) {
-                if (showOnKeyguard) {
-                    mKeyguardIconOverflowContainer.getIconsView().addNotification(ent);
-                    mOverflowNotifications.add(ent.row);
-                }
-                continue;
-            }
 
             // Display public version of the notification if we need to redact.
             final boolean hideSensitive =
@@ -1402,23 +1379,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 }
             }
             toShow.add(ent.row);
-            visibleNotifications++;
-
-            // Handle speed bump.
-            if (speedbumpIndex == -1 && mNotificationData.isAmbient(ent.key)) {
-                speedbumpIndex = visibleNotifications-1;
-            }
-        }
-
-        if (onKeyguard && mKeyguardIconOverflowContainer.getIconsView().getChildCount() > 0) {
-            toShow.add(mKeyguardIconOverflowContainer);
         }
 
         ArrayList<View> toRemove = new ArrayList<View>();
         for (int i=0; i< mStackScroller.getChildCount(); i++) {
             View child = mStackScroller.getChildAt(i);
-            if ((child instanceof ExpandableNotificationRow
-                    || child == mKeyguardIconOverflowContainer) && !toShow.contains(child)) {
+            if (!toShow.contains(child) && child instanceof ExpandableNotificationRow) {
                 toRemove.add(child);
             }
         }
@@ -1430,9 +1396,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             View v = toShow.get(i);
             if (v.getParent() == null) {
                 mStackScroller.addView(v);
-                if (mOldOverflowNotifications.contains(v)) {
-                    mStackScroller.notifyAddFromMoreCard(v);
-                }
             }
         }
 
@@ -1459,15 +1422,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             j++;
         }
         updateRowStates();
-
-        mStackScroller.changeViewPosition(mEmptyShadeView,
-                mStackScroller.getChildCount() - 1);
-        mStackScroller.changeViewPosition(mDismissView,
-                mStackScroller.getChildCount() - 2);
-        mStackScroller.changeViewPosition(mKeyguardIconOverflowContainer,
-                mStackScroller.getChildCount() - 3);
-        mStackScroller.updateSpeedBumpIndex(speedbumpIndex);
-
+        updateSpeedbump();
         updateClearAll();
         updateEmptyShadeView();
 
@@ -1487,6 +1442,23 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 mState != StatusBarState.KEYGUARD &&
                         mNotificationData.getActiveNotifications().size() == 0;
         mNotificationPanel.setShadeEmpty(showEmptyShade);
+    }
+
+    private void updateSpeedbump() {
+        int speedbumpIndex = -1;
+        int currentIndex = 0;
+        ArrayList<Entry> activeNotifications = mNotificationData.getActiveNotifications();
+        final int N = activeNotifications.size();
+        for (int i = 0; i < N; i++) {
+            Entry entry = activeNotifications.get(i);
+            if (entry.row.getVisibility() != View.GONE &&
+                    mNotificationData.isAmbient(entry.key)) {
+                speedbumpIndex = currentIndex;
+                break;
+            }
+            currentIndex++;
+        }
+        mStackScroller.updateSpeedBumpIndex(speedbumpIndex);
     }
 
     @Override
@@ -2999,7 +2971,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         repositionNavigationBar();
         updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
         updateShowSearchHoldoff();
-        updateNotificationShade();
+        updateRowStates();
     }
 
     @Override
