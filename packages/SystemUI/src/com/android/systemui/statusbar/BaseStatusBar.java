@@ -1364,9 +1364,13 @@ public abstract class BaseStatusBar extends SystemUI implements
      * Updates expanded, dimmed and locked states of notification rows.
      */
     protected void updateRowStates() {
+        int maxKeyguardNotifications = getMaxKeyguardNotifications();
+        mKeyguardIconOverflowContainer.getIconsView().removeAllViews();
+
         ArrayList<Entry> activeNotifications = mNotificationData.getActiveNotifications();
         final int N = activeNotifications.size();
 
+        int visibleNotifications = 0;
         boolean onKeyguard = mState == StatusBarState.KEYGUARD;
         for (int i = 0; i < N; i++) {
             NotificationData.Entry entry = activeNotifications.get(i);
@@ -1379,7 +1383,38 @@ public abstract class BaseStatusBar extends SystemUI implements
                     entry.row.setSystemExpanded(top);
                 }
             }
+            boolean showOnKeyguard = shouldShowOnKeyguard(entry.notification);
+            if (onKeyguard && (visibleNotifications >= maxKeyguardNotifications
+                    || !showOnKeyguard)) {
+                entry.row.setVisibility(View.GONE);
+                if (showOnKeyguard) {
+                    mKeyguardIconOverflowContainer.getIconsView().addNotification(entry);
+                }
+            } else {
+                boolean wasGone = entry.row.getVisibility() == View.GONE;
+                entry.row.setVisibility(View.VISIBLE);
+                if (wasGone) {
+                    // notify the scroller of a child addition
+                    mStackScroller.generateAddAnimation(entry.row, true /* fromMoreCard */);
+                }
+                visibleNotifications++;
+            }
         }
+
+        if (onKeyguard && mKeyguardIconOverflowContainer.getIconsView().getChildCount() > 0) {
+            mKeyguardIconOverflowContainer.setVisibility(View.VISIBLE);
+        } else {
+            mKeyguardIconOverflowContainer.setVisibility(View.GONE);
+        }
+
+        mStackScroller.changeViewPosition(mKeyguardIconOverflowContainer,
+                mStackScroller.getChildCount() - 3);
+        mStackScroller.changeViewPosition(mDismissView, mStackScroller.getChildCount() - 2);
+        mStackScroller.changeViewPosition(mEmptyShadeView, mStackScroller.getChildCount() - 1);
+    }
+
+    private boolean shouldShowOnKeyguard(StatusBarNotification sbn) {
+        return mShowLockscreenNotifications && !mNotificationData.isAmbient(sbn.getKey());
     }
 
     protected void setZenMode(int mode) {
