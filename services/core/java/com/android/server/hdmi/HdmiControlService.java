@@ -1315,7 +1315,19 @@ public final class HdmiControlService extends SystemService {
                 try {
                     mRecordListener.onTimerRecordingResult(result);
                 } catch (RemoteException e) {
-                    Slog.w(TAG, "Failed to call onOneTouchRecordResult.", e);
+                    Slog.w(TAG, "Failed to call onTimerRecordingResult.", e);
+                }
+            }
+        }
+    }
+
+    void invokeClearTimerRecordingResult(int result) {
+        synchronized (mLock) {
+            if (mRecordListener != null) {
+                try {
+                    mRecordListener.onClearTimerRecordingResult(result);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Failed to call onClearTimerRecordingResult.", e);
                 }
             }
         }
@@ -1354,11 +1366,6 @@ public final class HdmiControlService extends SystemService {
         } catch (RemoteException e) {
             Slog.e(TAG, "Failed to report hotplug event:" + event.toString(), e);
         }
-    }
-
-    private static boolean hasSameTopPort(int path1, int path2) {
-        return (path1 & Constants.ROUTING_PATH_TOP_MASK)
-                == (path2 & Constants.ROUTING_PATH_TOP_MASK);
     }
 
     private HdmiCecLocalDeviceTv tv() {

@@ -36,7 +36,14 @@ package android.hardware.hdmi;
      void onOneTouchRecordResult(int result);
      /**
       * Called when timer recording is started or failed during initialization.
+
       * @param result result code for timer recording
       */
      void onTimerRecordingResult(int result);
+     /**
+      * Called when receiving result for clear timer recording request.
+      *
+      * @param result result of clear timer.
+      */
+     void onClearTimerRecordingResult(int result);
  }
