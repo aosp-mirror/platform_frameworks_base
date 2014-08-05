@@ -38,6 +38,7 @@ public class UserAvatarView extends View {
     private int mActiveFrameColor;
     private int mFrameColor;
     private float mFrameWidth;
+    private float mFramePadding;
     private Bitmap mBitmap;
     private Drawable mDrawable;
 
@@ -59,6 +60,9 @@ public class UserAvatarView extends View {
             switch (attr) {
                 case R.styleable.UserAvatarView_frameWidth:
                     setFrameWidth(a.getDimension(attr, 0));
+                    break;
+                case R.styleable.UserAvatarView_framePadding:
+                    setFramePadding(a.getDimension(attr, 0));
                     break;
                 case R.styleable.UserAvatarView_activeFrameColor:
                     setActiveFrameColor(a.getColor(attr, 0));
@@ -115,6 +119,11 @@ public class UserAvatarView extends View {
         invalidate();
     }
 
+    public void setFramePadding(float framePadding) {
+        mFramePadding = framePadding;
+        invalidate();
+    }
+
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
@@ -131,11 +140,11 @@ public class UserAvatarView extends View {
             dwidth = mBitmap.getWidth();
             dheight = mBitmap.getHeight();
         } else if (mDrawable != null) {
-            dwidth = mDrawable.getIntrinsicWidth();
-            dheight = mDrawable.getIntrinsicHeight();
-            mDrawable.setBounds(0, 0, dwidth, dheight);
             vwidth -= 2 * (mFrameWidth - 1);
             vheight -= 2 * (mFrameWidth - 1);
+            dwidth = vwidth;
+            dheight = vheight;
+            mDrawable.setBounds(0, 0, dwidth, dheight);
         } else {
             return;
         }
@@ -183,7 +192,8 @@ public class UserAvatarView extends View {
         if (frameColor != 0) {
             mFramePaint.setColor(frameColor);
             mFramePaint.setStrokeWidth(mFrameWidth);
-            canvas.drawCircle(halfW, halfH, halfSW - mFrameWidth / 2f, mFramePaint);
+            canvas.drawCircle(halfW, halfH, halfSW + (mFramePadding - mFrameWidth) / 2f,
+                    mFramePaint);
         }
     }
 
