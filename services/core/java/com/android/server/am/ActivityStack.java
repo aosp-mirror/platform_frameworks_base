@@ -1099,6 +1099,51 @@ final class ActivityStack {
         }
     }
 
+    // Find the first visible activity above the passed activity and if it is translucent return it
+    // otherwise return null;
+    ActivityRecord findNextTranslucentActivity(ActivityRecord r) {
+        TaskRecord task = r.task;
+        if (task == null) {
+            return null;
+        }
+
+        ActivityStack stack = task.stack;
+        if (stack == null) {
+            return null;
+        }
+
+        int stackNdx = mStacks.indexOf(stack);
+
+        ArrayList<TaskRecord> tasks = stack.mTaskHistory;
+        int taskNdx = tasks.indexOf(task);
+
+        ArrayList<ActivityRecord> activities = task.mActivities;
+        int activityNdx = activities.indexOf(r) + 1;
+
+        final int numStacks = mStacks.size();
+        while (stackNdx < numStacks) {
+            tasks = mStacks.get(stackNdx).mTaskHistory;
+            final int numTasks = tasks.size();
+            while (taskNdx < numTasks) {
+                activities = tasks.get(taskNdx).mActivities;
+                final int numActivities = activities.size();
+                while (activityNdx < numActivities) {
+                    final ActivityRecord activity = activities.get(activityNdx);
+                    if (!activity.finishing) {
+                        return activity.fullscreen ? null : activity;
+                    }
+                    ++activityNdx;
+                }
+                activityNdx = 0;
+                ++taskNdx;
+            }
+            taskNdx = 0;
+            ++stackNdx;
+        }
+
+        return null;
+    }
+
     // Checks if any of the stacks above this one has a fullscreen activity behind it.
     // If so, this stack is hidden, otherwise it is visible.
     private boolean isStackVisible() {
