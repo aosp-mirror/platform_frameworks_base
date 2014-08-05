@@ -114,6 +114,9 @@ public class PackageInstaller {
      *
      * @throws IOException if parameters were unsatisfiable, such as lack of
      *             disk space or unavailable media.
+     * @return positive, non-zero unique ID that represents the created session.
+     *         This ID remains consistent across device reboots until the
+     *         session is finalized. IDs are not reused during a given boot.
      */
     public int createSession(@NonNull InstallSessionParams params) throws IOException {
         try {
