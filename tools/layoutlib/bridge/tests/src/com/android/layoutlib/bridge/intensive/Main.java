@@ -116,17 +116,16 @@ public class Main {
         }
         File[] possibleSdks = sdkDir.listFiles(new FileFilter() {
             @Override
-            public boolean accept(File pathname) {
-                return pathname.isDirectory() && pathname.getAbsolutePath().contains("android-sdk");
+            public boolean accept(File path) {
+                return path.isDirectory() && path.getAbsolutePath().contains("android-sdk");
             }
         });
         for (File possibleSdk : possibleSdks) {
             File platformsDir = new File(possibleSdk, "platforms");
             File[] platforms = platformsDir.listFiles(new FileFilter() {
                 @Override
-                public boolean accept(File pathname) {
-                    return pathname.isDirectory()
-                            && pathname.toPath().getFileName().toString().startsWith("android-");
+                public boolean accept(File path) {
+                    return path.isDirectory() && path.getName().startsWith("android-");
                 }
             });
             if (platforms == null || platforms.length == 0) {
@@ -137,10 +136,8 @@ public class Main {
                 @Override
                 public int compare(File o1, File o2) {
                     final int MAX_VALUE = 1000;
-                    String suffix1 = o1.toPath().getFileName().toString()
-                            .substring("android-".length());
-                    String suffix2 = o2.toPath().getFileName().toString()
-                            .substring("android-".length());
+                    String suffix1 = o1.getName().substring("android-".length());
+                    String suffix2 = o2.getName().substring("android-".length());
                     int suff1, suff2;
                     try {
                         suff1 = Integer.parseInt(suffix1);
