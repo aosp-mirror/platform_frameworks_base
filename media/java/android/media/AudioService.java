@@ -4340,7 +4340,7 @@ public class AudioService extends IAudioService.Stub {
             AudioSystem.DEVICE_OUT_WIRED_HEADSET | AudioSystem.DEVICE_OUT_WIRED_HEADPHONE |
             AudioSystem.DEVICE_OUT_ALL_A2DP | AudioSystem.DEVICE_OUT_HDMI |
             AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET | AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET |
-            AudioSystem.DEVICE_OUT_ALL_USB;
+            AudioSystem.DEVICE_OUT_ALL_USB | AudioSystem.DEVICE_OUT_LINE;
 
     // must be called before removing the device from mConnectedDevices
     private int checkSendBecomingNoisyIntent(int device, int state) {
@@ -4386,7 +4386,9 @@ public class AudioService extends IAudioService.Stub {
             connType = AudioRoutesInfo.MAIN_HEADSET;
             intent.setAction(Intent.ACTION_HEADSET_PLUG);
             intent.putExtra("microphone", 1);
-        } else if (device == AudioSystem.DEVICE_OUT_WIRED_HEADPHONE) {
+        } else if (device == AudioSystem.DEVICE_OUT_WIRED_HEADPHONE ||
+                   device == AudioSystem.DEVICE_OUT_LINE) {
+            /*do apps care about line-out vs headphones?*/
             connType = AudioRoutesInfo.MAIN_HEADPHONES;
             intent.setAction(Intent.ACTION_HEADSET_PLUG);
             intent.putExtra("microphone", 0);
@@ -4429,7 +4431,8 @@ public class AudioService extends IAudioService.Stub {
     {
         synchronized (mConnectedDevices) {
             if ((state == 0) && ((device == AudioSystem.DEVICE_OUT_WIRED_HEADSET) ||
-                    (device == AudioSystem.DEVICE_OUT_WIRED_HEADPHONE))) {
+                    (device == AudioSystem.DEVICE_OUT_WIRED_HEADPHONE) ||
+                    (device == AudioSystem.DEVICE_OUT_LINE))) {
                 setBluetoothA2dpOnInt(true);
             }
             boolean isUsb = ((device & ~AudioSystem.DEVICE_OUT_ALL_USB) == 0) ||
@@ -4438,7 +4441,8 @@ public class AudioService extends IAudioService.Stub {
             handleDeviceConnection((state == 1), device, (isUsb ? name : ""));
             if (state != 0) {
                 if ((device == AudioSystem.DEVICE_OUT_WIRED_HEADSET) ||
-                    (device == AudioSystem.DEVICE_OUT_WIRED_HEADPHONE)) {
+                    (device == AudioSystem.DEVICE_OUT_WIRED_HEADPHONE) ||
+                    (device == AudioSystem.DEVICE_OUT_LINE)) {
                     setBluetoothA2dpOnInt(false);
                 }
                 if ((device & mSafeMediaVolumeDevices) != 0) {
