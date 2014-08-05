@@ -2123,6 +2123,22 @@ public class NotificationStackScrollLayout extends ViewGroup
         return mDismissView.getHeight() + mPaddingBetweenElementsNormal;
     }
 
+    public float getBottomMostNotificationBottom() {
+        final int count = getChildCount();
+        float max = 0;
+        for (int childIdx = 0; childIdx < count; childIdx++) {
+            ExpandableView child = (ExpandableView) getChildAt(childIdx);
+            if (child.getVisibility() == GONE) {
+                continue;
+            }
+            float bottom = child.getTranslationY() + child.getActualHeight();
+            if (bottom > max) {
+                max = bottom;
+            }
+        }
+        return max + getTranslationY();
+    }
+
     /**
      * A listener that is notified when some child locations might have changed.
      */
