@@ -1819,18 +1819,23 @@ public class BackupManagerService extends IBackupManager.Stub {
         @Override
         public void onServiceConnected(ComponentName component, IBinder service) {
             if (DEBUG) Slog.v(TAG, "Connected to transport " + component);
+            final String name = component.flattenToShortString();
             try {
                 IBackupTransport transport = IBackupTransport.Stub.asInterface(service);
-                registerTransport(transport.name(), component.flattenToShortString(), transport);
+                registerTransport(transport.name(), name, transport);
+                EventLog.writeEvent(EventLogTags.BACKUP_TRANSPORT_LIFECYCLE, name, 1);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Unable to register transport " + component);
+                EventLog.writeEvent(EventLogTags.BACKUP_TRANSPORT_LIFECYCLE, name, 0);
             }
         }
 
         @Override
         public void onServiceDisconnected(ComponentName component) {
             if (DEBUG) Slog.v(TAG, "Disconnected from transport " + component);
-            registerTransport(null, component.flattenToShortString(), null);
+            final String name = component.flattenToShortString();
+            EventLog.writeEvent(EventLogTags.BACKUP_TRANSPORT_LIFECYCLE, name, 0);
+            registerTransport(null, name, null);
         }
     };
 
@@ -3690,6 +3695,9 @@ public class BackupManagerService extends IBackupManager.Stub {
                         Slog.i(TAG, "Initiating full-data transport backup of "
                                 + currentPackage.packageName);
                     }
+                    EventLog.writeEvent(EventLogTags.FULL_BACKUP_PACKAGE,
+                            currentPackage.packageName);
+
                     transportPipes = ParcelFileDescriptor.createPipe();
 
                     // Tell the transport the data's coming
@@ -3780,12 +3788,19 @@ public class BackupManagerService extends IBackupManager.Stub {
                                     + currentPackage.packageName
                                     + ", skipping");
                         }
+                        EventLog.writeEvent(EventLogTags.FULL_BACKUP_AGENT_FAILURE,
+                                currentPackage.packageName, "transport rejected");
                         // do nothing, clean up, and continue looping
                     } else if (result != BackupTransport.TRANSPORT_OK) {
                         if (DEBUG) {
                             Slog.i(TAG, "Transport failed; aborting backup: " + result);
+                            EventLog.writeEvent(EventLogTags.FULL_BACKUP_TRANSPORT_FAILURE);
                             return;
                         }
+                    } else {
+                        // Success!
+                        EventLog.writeEvent(EventLogTags.FULL_BACKUP_SUCCESS,
+                                currentPackage.packageName);
                     }
                     cleanUpPipes(transportPipes);
                     cleanUpPipes(enginePipes);
@@ -7339,6 +7354,9 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                 UnifiedRestoreState nextState = UnifiedRestoreState.RUNNING_QUEUE;
                 int status = BackupTransport.TRANSPORT_OK;
 
+                EventLog.writeEvent(EventLogTags.FULL_RESTORE_PACKAGE,
+                        mCurrentPackage.packageName);
+
                 mEngine = new FullRestoreEngine(null, mCurrentPackage, false, false);
                 EngineThread eThread = new EngineThread(mEngine, mEnginePipes[0]);
 
@@ -7390,6 +7408,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                             // handling will deal properly with that.
                             Slog.e(TAG, "Error " + result + " streaming restore for "
                                     + mCurrentPackage.packageName);
+                            EventLog.writeEvent(EventLogTags.RESTORE_TRANSPORT_FAILURE);
                             status = result;
                         }
                     }
@@ -7399,12 +7418,15 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                     // but potentially recoverable; abandon this package's restore but
                     // carry on with the next restore target.
                     Slog.e(TAG, "Unable to route data for restore");
+                    EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE,
+                            mCurrentPackage.packageName, "I/O error on pipes");
                     status = BackupTransport.AGENT_ERROR;
                 } catch (RemoteException e) {
                     // The transport went away; terminate the whole operation.  Closing
                     // the sockets will wake up the engine and it will then tidy up the
                     // remote end.
                     Slog.e(TAG, "Transport failed during restore");
+                    EventLog.writeEvent(EventLogTags.RESTORE_TRANSPORT_FAILURE);
                     status = BackupTransport.TRANSPORT_ERROR;
                 } finally {
                     // Close the transport pipes and *our* end of the engine pipe,
