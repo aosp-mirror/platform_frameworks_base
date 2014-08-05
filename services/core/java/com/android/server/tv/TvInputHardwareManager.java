@@ -930,6 +930,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
             if (inputId != null) {
                 Intent intent = new Intent(Intent.ACTION_VIEW);
                 intent.setData(TvContract.buildChannelUriForPassthroughTvInput(inputId));
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 mContext.startActivity(intent);
             } else {
                 Slog.w(TAG, "onChanged: InputId cannot be found for :" + device);
