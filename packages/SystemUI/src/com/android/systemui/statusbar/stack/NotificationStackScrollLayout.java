@@ -36,6 +36,7 @@ import com.android.systemui.R;
 import com.android.systemui.SwipeHelper;
 import com.android.systemui.statusbar.ActivatableNotificationView;
 import com.android.systemui.statusbar.DismissView;
+import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.ExpandableView;
 import com.android.systemui.statusbar.SpeedBumpView;
@@ -145,6 +146,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private boolean mExpandedInThisMotion;
     private boolean mScrollingEnabled;
     private DismissView mDismissView;
+    private EmptyShadeView mEmptyShadeView;
     private boolean mDismissAllInProgress;
 
     /**
@@ -1222,6 +1224,9 @@ public class NotificationStackScrollLayout extends ViewGroup
         if (mDismissView.willBeGone()) {
             count--;
         }
+        if (mEmptyShadeView.willBeGone()) {
+            count--;
+        }
         return count;
     }
 
@@ -1985,6 +1990,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     public void goToFullShade(long delay) {
         updateSpeedBump(true /* visibility */);
         mDismissView.setInvisible();
+        mEmptyShadeView.setInvisible();
         mGoToFullShadeNeedsAnimation = true;
         mGoToFullShadeDelay = delay;
         mNeedsAnimation =  true;
@@ -2037,6 +2043,38 @@ public class NotificationStackScrollLayout extends ViewGroup
     public void setDismissView(DismissView dismissView) {
         mDismissView = dismissView;
         addView(mDismissView);
+    }
+
+    public void setEmptyShadeView(EmptyShadeView emptyShadeView) {
+        mEmptyShadeView = emptyShadeView;
+        addView(mEmptyShadeView);
+    }
+
+    public void updateEmptyShadeView(boolean visible) {
+        int oldVisibility = mEmptyShadeView.willBeGone() ? GONE : mEmptyShadeView.getVisibility();
+        int newVisibility = visible ? VISIBLE : GONE;
+        if (oldVisibility != newVisibility) {
+            if (oldVisibility == GONE) {
+                if (mEmptyShadeView.willBeGone()) {
+                    mEmptyShadeView.cancelAnimation();
+                } else {
+                    mEmptyShadeView.setInvisible();
+                    mEmptyShadeView.setVisibility(newVisibility);
+                }
+                mEmptyShadeView.setWillBeGone(false);
+                updateContentHeight();
+            } else {
+                mEmptyShadeView.setWillBeGone(true);
+                mEmptyShadeView.performVisibilityAnimation(false, new Runnable() {
+                    @Override
+                    public void run() {
+                        mEmptyShadeView.setVisibility(GONE);
+                        mEmptyShadeView.setWillBeGone(false);
+                        updateContentHeight();
+                    }
+                });
+            }
+        }
     }
 
     public void updateDismissView(boolean visible) {

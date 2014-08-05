@@ -19,21 +19,19 @@ package com.android.systemui.statusbar;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.animation.Interpolator;
 
 import com.android.systemui.R;
+import com.android.systemui.statusbar.phone.PhoneStatusBar;
 
-public class DismissView extends StackScrollerDecorView {
+public class EmptyShadeView extends StackScrollerDecorView {
 
-    public DismissView(Context context, AttributeSet attrs) {
+    public EmptyShadeView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
     @Override
     protected View findContentView() {
-        return findViewById(R.id.dismiss_text);
-    }
-
-    public void setOnButtonClickListener(OnClickListener listener) {
-        mContent.setOnClickListener(listener);
+        return findViewById(R.id.no_notifications);
     }
 }
