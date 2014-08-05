@@ -29,6 +29,8 @@ import android.hardware.hdmi.IHdmiHotplugEventListener;
 import android.hardware.hdmi.IHdmiInputChangeListener;
 import android.media.AudioDevicePort;
 import android.media.AudioFormat;
+import android.media.AudioGain;
+import android.media.AudioGainConfig;
 import android.media.AudioManager;
 import android.media.AudioPatch;
 import android.media.AudioPort;
@@ -55,6 +57,7 @@ import android.view.Surface;
 import com.android.server.SystemService;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -559,6 +562,8 @@ class TvInputHardwareManager implements TvInputHal.Callback {
         private final AudioDevicePort mAudioSource;
         private AudioDevicePort mAudioSink;
         private AudioPatch mAudioPatch = null;
+        private float mCommittedVolume = 0.0f;
+        private float mVolume = 0.0f;
 
         private TvStreamConfig mActiveConfig = null;
 
@@ -663,9 +668,42 @@ class TvInputHardwareManager implements TvInputHal.Callback {
         }
 
         private void updateAudioPatchLocked() {
+            AudioGainConfig sourceGainConfig = null;
+            if (mAudioSource.gains().length > 0 && mVolume != mCommittedVolume) {
+                AudioGain sourceGain = null;
+                for (AudioGain gain : mAudioSource.gains()) {
+                    if ((gain.mode() & AudioGain.MODE_JOINT) != 0) {
+                        sourceGain = gain;
+                        break;
+                    }
+                }
+                // NOTE: we only change the source gain in MODE_JOINT here.
+                if (sourceGain != null) {
+                    int steps = (sourceGain.maxValue() - sourceGain.minValue())
+                            / sourceGain.stepValue();
+                    int gainValue = sourceGain.minValue();
+                    if (mVolume < 1.0f) {
+                        gainValue += sourceGain.stepValue() * (int) (mVolume * steps + 0.5);
+                    } else {
+                        gainValue = sourceGain.maxValue();
+                    }
+                    int numChannels = 0;
+                    for (int mask = sourceGain.channelMask(); mask > 0; mask >>= 1) {
+                        numChannels += (mask & 1);
+                    }
+                    int[] gainValues = new int[numChannels];
+                    Arrays.fill(gainValues, gainValue);
+                    sourceGainConfig = sourceGain.buildConfig(AudioGain.MODE_JOINT,
+                            sourceGain.channelMask(), gainValues, 0);
+                } else {
+                    Slog.w(TAG, "No audio source gain with MODE_JOINT support exists.");
+                }
+            }
+
             AudioPortConfig sourceConfig = mAudioSource.activeConfig();
             AudioPortConfig sinkConfig = mAudioSink.activeConfig();
             AudioPatch[] audioPatchArray = new AudioPatch[] { mAudioPatch };
+            boolean shouldRecreateAudioPatch = false;
             if (sinkConfig == null
                     || (mDesiredSamplingRate != 0
                             && sinkConfig.samplingRate() != mDesiredSamplingRate)
@@ -675,26 +713,32 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                             && sinkConfig.format() != mDesiredFormat)) {
                 sinkConfig = mAudioSource.buildConfig(mDesiredSamplingRate, mDesiredChannelMask,
                         mDesiredFormat, null);
+                shouldRecreateAudioPatch = true;
             }
-            if (sourceConfig == null) {
+            if (sourceConfig == null || sourceGainConfig != null) {
                 sourceConfig = mAudioSource.buildConfig(sinkConfig.samplingRate(),
-                        sinkConfig.channelMask(), sinkConfig.format(), null);
+                        sinkConfig.channelMask(), sinkConfig.format(), sourceGainConfig);
+                shouldRecreateAudioPatch = true;
             }
-            mAudioManager.createAudioPatch(
-                    audioPatchArray,
-                    new AudioPortConfig[] { sourceConfig },
-                    new AudioPortConfig[] { sinkConfig });
-            mAudioPatch = audioPatchArray[0];
+            if (shouldRecreateAudioPatch) {
+                mCommittedVolume = mVolume;
+                mAudioManager.createAudioPatch(
+                        audioPatchArray,
+                        new AudioPortConfig[] { sourceConfig },
+                        new AudioPortConfig[] { sinkConfig });
+                mAudioPatch = audioPatchArray[0];
+            }
         }
 
         @Override
-        public void setVolume(float volume) throws RemoteException {
+        public void setStreamVolume(float volume) throws RemoteException {
             synchronized (mImplLock) {
                 if (mReleased) {
                     throw new IllegalStateException("Device already released.");
                 }
+                mVolume = volume;
+                updateAudioPatchLocked();
             }
-            // TODO: Use AudioGain?
         }
 
         @Override
