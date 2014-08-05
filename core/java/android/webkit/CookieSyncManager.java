@@ -21,13 +21,6 @@ import android.util.Log;
 
 
 /**
- * @deprecated The WebView now automatically syncs cookies as necessary.
- *             You no longer need to create or use the CookieSyncManager.
- *             To manually force a sync you can use the CookieManager
- *             method {@link CookieManager#flush} which is a synchronous
- *             replacement for {@link #sync}.
- *             <p>
- *
  * The CookieSyncManager is used to synchronize the browser cookie store
  * between RAM and permanent storage. To get the best performance, browser cookies are
  * saved in RAM. A separate thread saves the cookies between, driven by a timer.
@@ -61,6 +54,12 @@ import android.util.Log;
  * WebViewClient#onPageFinished}. Note that even sync() happens
  * asynchronously, so don't do it just as your activity is shutting
  * down.
+ *
+ * @deprecated The WebView now automatically syncs cookies as necessary.
+ *             You no longer need to create or use the CookieSyncManager.
+ *             To manually force a sync you can use the CookieManager
+ *             method {@link CookieManager#flush} which is a synchronous
+ *             replacement for {@link #sync}.
  */
 @Deprecated
 public final class CookieSyncManager extends WebSyncManager {
