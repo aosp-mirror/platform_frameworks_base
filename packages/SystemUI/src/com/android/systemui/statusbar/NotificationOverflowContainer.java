@@ -38,6 +38,7 @@ public class NotificationOverflowContainer extends ActivatableNotificationView {
         super.onFinishInflate();
         mIconsView = (NotificationOverflowIconsView) findViewById(R.id.overflow_icons_view);
         mIconsView.setMoreText((TextView) findViewById(R.id.more_text));
+        mIconsView.setOverflowIndicator(findViewById(R.id.more_icon_overflow));
     }
 
     public NotificationOverflowIconsView getIconsView() {
