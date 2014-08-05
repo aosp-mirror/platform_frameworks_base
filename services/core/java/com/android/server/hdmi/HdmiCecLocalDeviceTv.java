@@ -120,13 +120,14 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
 
     @Override
     @ServiceThreadOnly
-    protected void onAddressAllocated(int logicalAddress, boolean fromBootup) {
+    protected void onAddressAllocated(int logicalAddress, int reason) {
         assertRunOnServiceThread();
         mService.sendCecCommand(HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
                 mAddress, mService.getPhysicalAddress(), mDeviceType));
         mService.sendCecCommand(HdmiCecMessageBuilder.buildDeviceVendorIdCommand(
                 mAddress, mService.getVendorId()));
-        launchRoutingControl(fromBootup);
+        launchRoutingControl(reason != HdmiControlService.INITIATED_BY_ENABLE_CEC &&
+                reason != HdmiControlService.INITIATED_BY_BOOT_UP);
         launchDeviceDiscovery();
     }
 
