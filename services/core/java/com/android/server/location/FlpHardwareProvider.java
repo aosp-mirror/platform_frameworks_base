@@ -272,8 +272,7 @@ public class FlpHardwareProvider {
             synchronized (mLocationSinkLock) {
                 // only one sink is allowed at the moment
                 if (mLocationSink != null) {
-                    throw new RuntimeException(
-                            "IFusedLocationHardware does not support multiple sinks");
+                    Log.e(TAG, "Replacing an existing IFusedLocationHardware sink");
                 }
 
                 mLocationSink = eventSink;
