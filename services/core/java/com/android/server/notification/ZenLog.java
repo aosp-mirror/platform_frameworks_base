@@ -58,6 +58,7 @@ public class ZenLog {
     private static final int TYPE_UNSUBSCRIBE = 8;
     private static final int TYPE_CONFIG = 9;
     private static final int TYPE_FOLLOW_RINGER_MODE = 10;
+    private static final int TYPE_NOT_INTERCEPTED = 11;
 
     private static int sNext;
     private static int sSize;
@@ -65,6 +66,11 @@ public class ZenLog {
     public static void traceIntercepted(NotificationRecord record, String reason) {
         if (record != null && record.isIntercepted()) return;  // already logged
         append(TYPE_INTERCEPTED, record.getKey() + "," + reason);
+    }
+
+    public static void traceNotIntercepted(NotificationRecord record, String reason) {
+        if (record != null && record.isUpdate) return;  // already logged
+        append(TYPE_NOT_INTERCEPTED, record.getKey() + "," + reason);
     }
 
     public static void traceAllowDisable(String pkg, boolean allowDisable, String reason) {
@@ -122,6 +128,7 @@ public class ZenLog {
             case TYPE_UNSUBSCRIBE: return "unsubscribe";
             case TYPE_CONFIG: return "config";
             case TYPE_FOLLOW_RINGER_MODE: return "follow_ringer_mode";
+            case TYPE_NOT_INTERCEPTED: return "not_intercepted";
             default: return "unknown";
         }
     }
