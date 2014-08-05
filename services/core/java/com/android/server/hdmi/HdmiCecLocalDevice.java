@@ -240,6 +240,8 @@ abstract class HdmiCecLocalDevice {
                 return handleSetOsdName(message);
             case Constants.MESSAGE_RECORD_TV_SCREEN:
                 return handleRecordTvScreen(message);
+            case Constants.MESSAGE_TIMER_CLEARED_STATUS:
+                return handleTimerClearedStatus(message);
             default:
                 return false;
         }
@@ -449,6 +451,10 @@ abstract class HdmiCecLocalDevice {
         mService.sendCecCommand(HdmiCecMessageBuilder.buildFeatureAbortCommand(mAddress,
                 message.getSource(), message.getOpcode(), Constants.ABORT_CANNOT_PROVIDE_SOURCE));
         return true;
+    }
+
+    protected boolean handleTimerClearedStatus(HdmiCecMessage message) {
+        return false;
     }
 
     @ServiceThreadOnly

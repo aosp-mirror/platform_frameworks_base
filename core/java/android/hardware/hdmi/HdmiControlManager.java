@@ -42,7 +42,7 @@ public final class HdmiControlManager {
      * Broadcast Action: Display OSD message.
      * <p>Send when the service has a message to display on screen for events
      * that need user's attention such as ARC status change.
-     * <p>Always contains the extra fields {@link #EXTRA_MESSAGE}.
+     * <p>Always contains the extra fields {@link #EXTRA_MESSAGE_ID}.
      * <p>Requires {@link android.Manifest.permission#HDMI_CEC} to receive.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
@@ -141,13 +141,71 @@ public final class HdmiControlManager {
     /** Timer recording type for external source. */
     public static final int TIMER_RECORDING_TYPE_EXTERNAL = 3;
 
+    // --- Timer Status Data
+    /** [Timer Status Data/Media Info] - Media present and not protected. */
+    public static final int TIMER_STATUS_MEDIA_INFO_PRESENT_NOT_PROTECTED = 0x0;
+    /** [Timer Status Data/Media Info] - Media present, but protected. */
+    public static final int TIMER_STATUS_MEDIA_INFO_PRESENT_PROTECTED = 0x1;
+    /** [Timer Status Data/Media Info] - Media not present. */
+    public static final int TIMER_STATUS_MEDIA_INFO_NOT_PRESENT = 0x2;
+
+    /** [Timer Status Data/Programmed Info] - Enough space available for recording. */
+    public static final int TIMER_STATUS_PROGRAMMED_INFO_ENOUGH_SPACE = 0x8;
+    /** [Timer Status Data/Programmed Info] - Not enough space available for recording. */
+    public static final int TIMER_STATUS_PROGRAMMED_INFO_NOT_ENOUGH_SPACE = 0x9;
+    /** [Timer Status Data/Programmed Info] - Might not enough space available for recording. */
+    public static final int TIMER_STATUS_PROGRAMMED_INFO_MIGHT_NOT_ENOUGH_SPACE = 0xB;
+    /** [Timer Status Data/Programmed Info] - No media info available. */
+    public static final int TIMER_STATUS_PROGRAMMED_INFO_NO_MEDIA_INFO = 0xA;
+
+    /** [Timer Status Data/Not Programmed Error Info] - No free timer available. */
+    public static final int TIMER_STATUS_NOT_PROGRAMMED_NO_FREE_TIME = 0x1;
+    /** [Timer Status Data/Not Programmed Error Info] - Date out of range. */
+    public static final int TIMER_STATUS_NOT_PROGRAMMED_DATE_OUT_OF_RANGE = 0x2;
+    /** [Timer Status Data/Not Programmed Error Info] - Recording Sequence error. */
+    public static final int TIMER_STATUS_NOT_PROGRAMMED_INVALID_SEQUENCE = 0x3;
+    /** [Timer Status Data/Not Programmed Error Info] - Invalid External Plug Number. */
+    public static final int TIMER_STATUS_NOT_PROGRAMMED_INVALID_EXTERNAL_PLUG_NUMBER = 0x4;
+    /** [Timer Status Data/Not Programmed Error Info] - Invalid External Physical Address. */
+    public static final int TIMER_STATUS_NOT_PROGRAMMED_INVALID_EXTERNAL_PHYSICAL_NUMBER = 0x5;
+    /** [Timer Status Data/Not Programmed Error Info] - CA system not supported. */
+    public static final int TIMER_STATUS_NOT_PROGRAMMED_CA_NOT_SUPPORTED = 0x6;
+    /** [Timer Status Data/Not Programmed Error Info] - No or insufficient CA Entitlements. */
+    public static final int TIMER_STATUS_NOT_PROGRAMMED_NO_CA_ENTITLEMENTS = 0x7;
+    /** [Timer Status Data/Not Programmed Error Info] - Does not support resolution. */
+    public static final int TIMER_STATUS_NOT_PROGRAMMED_UNSUPPORTED_RESOLUTION = 0x8;
+    /** [Timer Status Data/Not Programmed Error Info] - Parental Lock On. */
+    public static final int TIMER_STATUS_NOT_PROGRAMMED_PARENTAL_LOCK_ON= 0x9;
+    /** [Timer Status Data/Not Programmed Error Info] - Clock Failure. */
+    public static final int TIMER_STATUS_NOT_PROGRAMMED_CLOCK_FAILURE = 0xA;
+    /** [Timer Status Data/Not Programmed Error Info] - Duplicate: already programmed. */
+    public static final int TIMER_STATUS_NOT_PROGRAMMED_DUPLICATED = 0xE;
+
     // --- Extra result value for timer recording.
+    /** No extra error. */
+    public static final int TIMER_RECORDING_RESULT_EXTRA_NO_ERROR = 0x00;
     /** No timer recording - check recorder and connection. */
-    public static final int TIME_RECORDING_RESULT_EXTRA_CHECK_RECORDER_CONNECTION = 0x01;
+    public static final int TIMER_RECORDING_RESULT_EXTRA_CHECK_RECORDER_CONNECTION = 0x01;
     /** No timer recording - cannot record selected source. */
-    public static final int TIME_RECORDING_RESULT_EXTRA_FAIL_TO_RECORD_SELECTED_SOURCE = 0x02;
+    public static final int TIMER_RECORDING_RESULT_EXTRA_FAIL_TO_RECORD_SELECTED_SOURCE = 0x02;
     /** CEC is disabled. */
-    public static final int TIME_RECORDING_RESULT_EXTRA_CEC_DISABLED = 0x33;
+    public static final int TIMER_RECORDING_RESULT_EXTRA_CEC_DISABLED = 0x03;
+
+    // -- Timer cleared status data code used for result of onClearTimerRecordingResult.
+    /** Timer not cleared – recording. */
+    public static final int CLEAR_TIMER_STATUS_TIMER_NOT_CLEARED_RECORDING = 0x00;
+    /** Timer not cleared – no matching. */
+    public static final int CLEAR_TIMER_STATUS_TIMER_NOT_CLEARED_NO_MATCHING = 0x01;
+    /** Timer not cleared – no info available. */
+    public static final int CLEAR_TIMER_STATUS_TIMER_NOT_CLEARED_NO_INFO_AVAILABLE = 0x02;
+    /** Timer cleared. */
+    public static final int CLEAR_TIMER_STATUS_TIMER_CLEARED = 0x80;
+    /** Clear timer error - check recorder and connection. */
+    public static final int CLEAR_TIMER_STATUS_CHECK_RECORDER_CONNECTION = 0xA0;
+    /** Clear timer error - cannot clear timer for selected source. */
+    public static final int CLEAR_TIMER_STATUS_FAIL_TO_CLEAR_SELECTED_SOURCE = 0xA1;
+    /** Clear timer error - CEC is disabled. */
+    public static final int CLEAR_TIMER_STATUS_CEC_DISABLE = 0xA2;
 
     // True if we have a logical device of type playback hosted in the system.
     private final boolean mHasPlaybackDevice;
@@ -281,6 +339,7 @@ public final class HdmiControlManager {
     private IHdmiHotplugEventListener getHotplugEventListenerWrapper(
             final HotplugEventListener listener) {
         return new IHdmiHotplugEventListener.Stub() {
+            @Override
             public void onReceived(HdmiHotplugEvent event) {
                 listener.onReceived(event);;
             }
