@@ -279,6 +279,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int[] mNavigationBarHeightForRotation = new int[4];
     int[] mNavigationBarWidthForRotation = new int[4];
 
+    boolean mBootMessageNeedsHiding;
     KeyguardServiceDelegate mKeyguardDelegate;
     // The following are only accessed on the mHandler thread.
     boolean mKeyguardDrawComplete;
@@ -537,6 +538,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int MSG_WAKING_UP = 8;
     private static final int MSG_DISPATCH_SHOW_RECENTS = 9;
     private static final int MSG_DISPATCH_SHOW_GLOBAL_ACTIONS = 10;
+    private static final int MSG_HIDE_BOOT_MESSAGE = 11;
 
     private class PolicyHandler extends Handler {
         @Override
@@ -578,6 +580,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     break;
                 case MSG_WAKING_UP:
                     handleWakingUp((ScreenOnListener) msg.obj);
+                    break;
+                case MSG_HIDE_BOOT_MESSAGE:
+                    handleHideBootMessage();
                     break;
             }
         }
@@ -1096,9 +1101,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         initializeHdmiState();
 
         // Match current screen state.
-        if (mPowerManager.isInteractive()) {
-            wakingUp(null);
-        } else {
+        if (!mPowerManager.isInteractive()) {
             goingToSleep(WindowManagerPolicy.OFF_BECAUSE_OF_USER);
         }
     }
@@ -4650,6 +4653,26 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         setKeyguardDrawn();
+
+        if (mBootMessageNeedsHiding) {
+            handleHideBootMessage();
+            mBootMessageNeedsHiding = false;
+        }
+    }
+
+    private void handleHideBootMessage() {
+        if (mBootMsgDialog == null) {
+            if (DEBUG_WAKEUP) Slog.d(TAG, "handleHideBootMessage: boot message not up");
+            return;
+        }
+        if (!mKeyguardDrawComplete || !mWindowManagerDrawComplete) {
+            if (DEBUG_WAKEUP) Slog.d(TAG, "handleHideBootMessage: deferring until keyguard ready");
+            mBootMessageNeedsHiding = true;
+            return;
+        }
+        if (DEBUG_WAKEUP) Slog.d(TAG, "handleHideBootMessage: dismissing");
+        mBootMsgDialog.dismiss();
+        mBootMsgDialog = null;
     }
 
     @Override
@@ -5107,14 +5130,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     /** {@inheritDoc} */
     @Override
     public void hideBootMessages() {
-        mHandler.post(new Runnable() {
-            @Override public void run() {
-                if (mBootMsgDialog != null) {
-                    mBootMsgDialog.dismiss();
-                    mBootMsgDialog = null;
-                }
-            }
-        });
+        mHandler.sendEmptyMessage(MSG_HIDE_BOOT_MESSAGE);
     }
 
     /** {@inheritDoc} */
