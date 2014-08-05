@@ -4841,10 +4841,106 @@
     <!-- Lock-to-app unlock password string -->
     <string name="lock_to_app_unlock_password">password</string>
 
+    <!-- TV content rating system strings for AM TV -->
+
+    <!-- TV content rating system strings for AR TV -->
+
+    <!-- TV content rating system strings for AU TV -->
+
+    <!-- TV content rating system strings for BG TV -->
+
+    <!-- TV content rating system strings for BR TV -->
+
+    <!-- TV content rating system strings for CA TV -->
+
+    <!-- TV content rating system strings for CH TV -->
+
+    <!-- TV content rating system strings for CL TV -->
+
+    <!-- TV content rating system strings for CO TV -->
+
+    <!-- TV content rating system strings for DE TV -->
+
+    <!-- TV content rating system strings for DK TV -->
+
+    <!-- TV content rating system strings for ES TV -->
+
+    <!-- TV content rating system strings for FI TV -->
+
+    <!-- TV content rating system strings for FR TV -->
+
+    <!-- TV content rating system strings for GR TV -->
+
+    <!-- TV content rating system strings for HK TV -->
+
+    <!-- TV content rating system strings for HU TV -->
+
+    <!-- TV content rating system strings for ID TV -->
+
+    <!-- TV content rating system strings for IE TV -->
+
+    <!-- TV content rating system strings for IL TV -->
+
+    <!-- TV content rating system strings for IN TV -->
+
+    <!-- TV content rating system strings for IS TV -->
+
+    <!-- TV content rating system strings for IT TV -->
+
+    <!-- TV content rating system strings for KH TV -->
+
+    <!-- TV content rating system strings for KR TV -->
+    <string name="display_name_krtv" translatable="false">KR-TV</string>
+    <string name="display_name_krtv_all" translatable="false">모든연령시청가</string>
+    <string name="display_name_krtv_7" translatable="false">7세이상시청가</string>
+    <string name="display_name_krtv_12" translatable="false">12세이상시청가</string>
+    <string name="display_name_krtv_15" translatable="false">15세이상시청가</string>
+    <string name="display_name_krtv_19" translatable="false">19세이상시청가</string>
+    <string name="description_krtv_all">모든 연령의 시청자가 시청하기에 부적절한 내용이 없는 등급을 말한다.</string>
+    <string name="description_krtv_7">7세미만의 어린이가 시청하기에 부적절한 내용이 포함되어 있어 보호자의 시청지도가 필요한 등급을 말한다.</string>
+    <string name="description_krtv_12">12세미만의 청소년이 시청하기에 부적절한 내용이 포함되어 있어 보호자의 시청지도가 필요한 등급을 말한다.</string>
+    <string name="description_krtv_15">15세미만의 청소년이 시청하기에 부적절한 내용이 포함되어 있어 보호자의 시청지도가 필요한 등급을 말한다.</string>
+    <string name="description_krtv_19">19세미만의 청소년이 시청하기에 부적절한 내용이 포함되어 있어 청소년이 시청할 수 없는 등급을 말한다.</string>
+
+    <!-- TV content rating system strings for MV TV -->
+
+    <!-- TV content rating system strings for MX TV -->
+
+    <!-- TV content rating system strings for MY TV -->
+
+    <!-- TV content rating system strings for NL TV -->
+
+    <!-- TV content rating system strings for NZ TV -->
+
+    <!-- TV content rating system strings for PE TV -->
+
+    <!-- TV content rating system strings for PH TV -->
+
+    <!-- TV content rating system strings for PL TV -->
+
+    <!-- TV content rating system strings for PT TV -->
+
+    <!-- TV content rating system strings for RO TV -->
+
+    <!-- TV content rating system strings for RU TV -->
+
+    <!-- TV content rating system strings for RS TV -->
+
+    <!-- TV content rating system strings for SG TV -->
+
+    <!-- TV content rating system strings for SI TV -->
+
+    <!-- TV content rating system strings for TH TV -->
+
+    <!-- TV content rating system strings for TR TV -->
+
+    <!-- TV content rating system strings for TW TV -->
+
+    <!-- TV content rating system strings for UA TV -->
+
+    <!-- TV content rating system strings for US TV -->
     <string name="display_name_ustvpg" translatable="false">US-TV</string>
     <string name="description_ustvpg">The TV Parental Guidelines</string>
-    <string name="display_name_krtv" translatable="false">KR-TV</string>
-
     <string name="display_name_ustvpg_d" translatable="false">D</string>
     <string name="display_name_ustvpg_l" translatable="false">L</string>
     <string name="display_name_ustvpg_s" translatable="false">S</string>
@@ -4856,12 +4952,6 @@
     <string name="display_name_ustvpg_pg" translatable="false">TV-PG</string>
     <string name="display_name_ustvpg_14" translatable="false">TV-14</string>
     <string name="display_name_ustvpg_ma" translatable="false">TV-MA</string>
-    <string name="display_name_krtv_all" translatable="false">모든연령시청가</string>
-    <string name="display_name_krtv_7" translatable="false">7세이상시청가</string>
-    <string name="display_name_krtv_12" translatable="false">12세이상시청가</string>
-    <string name="display_name_krtv_15" translatable="false">15세이상시청가</string>
-    <string name="display_name_krtv_19" translatable="false">19세이상시청가</string>
-
     <string name="description_ustvpg_d">Suggestive dialogue (Usually means talks about sex)</string>
     <string name="description_ustvpg_l">Coarse language</string>
     <string name="description_ustvpg_s">Sexual content</string>
@@ -4873,12 +4963,11 @@
     <string name="description_ustvpg_pg">This program contains material that parents may find unsuitable for younger children.</string>
     <string name="description_ustvpg_14">This program contains some material that many parents would find unsuitable for children under 14 years of age.</string>
     <string name="description_ustvpg_ma">This program is specifically designed to be viewed by adults and therefore may be unsuitable for children under 17.</string>
-    <string name="description_krtv_all">모든 연령의 시청자가 시청하기에 부적절한 내용이 없는 등급을 말한다.</string>
-    <string name="description_krtv_7">7세미만의 어린이가 시청하기에 부적절한 내용이 포함되어 있어 보호자의 시청지도가 필요한 등급을 말한다.</string>
-    <string name="description_krtv_12">12세미만의 청소년이 시청하기에 부적절한 내용이 포함되어 있어 보호자의 시청지도가 필요한 등급을 말한다.</string>
-    <string name="description_krtv_15">15세미만의 청소년이 시청하기에 부적절한 내용이 포함되어 있어 보호자의 시청지도가 필요한 등급을 말한다.</string>
-    <string name="description_krtv_19">19세미만의 청소년이 시청하기에 부적절한 내용이 포함되어 있어 청소년이 시청할 수 없는 등급을 말한다.</string>
 
-     <!-- [CHAR_LIMIT=NONE] Battery saver: Feature description -->
+    <!-- TV content rating system strings for VE TV -->
+
+    <!-- TV content rating system strings for ZA TV -->
+
+    <!-- [CHAR_LIMIT=NONE] Battery saver: Feature description -->
     <string name="battery_saver_description">To help improve battery life, battery saver will reduce your device’s performance and restrict background data.  Email, messaging, and other apps that rely on syncing may not update unless you open them.\n\nBattery saver turns off automatically when your device is charging.</string>
 </resources>

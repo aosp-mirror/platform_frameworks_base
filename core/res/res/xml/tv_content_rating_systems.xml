@@ -17,6 +17,124 @@
 */
 -->
 <rating-system-definitions>
+    <!-- TV content rating system for AM TV -->
+
+    <!-- TV content rating system for AR TV -->
+
+    <!-- TV content rating system for AU TV -->
+
+    <!-- TV content rating system for BG TV -->
+
+    <!-- TV content rating system for BR TV -->
+
+    <!-- TV content rating system for CA TV -->
+
+    <!-- TV content rating system for CH TV -->
+
+    <!-- TV content rating system for CL TV -->
+
+    <!-- TV content rating system for CO TV -->
+
+    <!-- TV content rating system for DE TV -->
+
+    <!-- TV content rating system for DK TV -->
+
+    <!-- TV content rating system for ES TV -->
+
+    <!-- TV content rating system for FI TV -->
+
+    <!-- TV content rating system for FR TV -->
+
+    <!-- TV content rating system for GR TV -->
+
+    <!-- TV content rating system for HK TV -->
+
+    <!-- TV content rating system for HU TV -->
+
+    <!-- TV content rating system for ID TV -->
+
+    <!-- TV content rating system for IE TV -->
+
+    <!-- TV content rating system for IL TV -->
+
+    <!-- TV content rating system for IN TV -->
+
+    <!-- TV content rating system for IS TV -->
+
+    <!-- TV content rating system for IT TV -->
+
+    <!-- TV content rating system for KH TV -->
+
+    <!-- TV content rating system for KR TV -->
+    <rating-system-definition id="KR_TV"
+        displayName="@string/display_name_krtv"
+        country="KR">
+        <rating-definition id="KR_TV_ALL"
+            displayName="@string/display_name_krtv_all"
+            description="@string/description_krtv_all"
+            ageHint="0" />
+        <rating-definition id="KR_TV_7"
+            displayName="@string/display_name_krtv_7"
+            description="@string/description_krtv_7"
+            ageHint="7" />
+        <rating-definition id="KR_TV_12"
+            displayName="@string/display_name_krtv_12"
+            description="@string/description_krtv_12"
+            ageHint="12" />
+        <rating-definition id="KR_TV_15"
+            displayName="@string/display_name_krtv_15"
+            description="@string/description_krtv_15"
+            ageHint="15" />
+        <rating-definition id="KR_TV_19"
+            displayName="@string/display_name_krtv_19"
+            description="@string/description_krtv_19"
+            ageHint="19" />
+        <order>
+            <rating id="KR_TV_ALL" />
+            <rating id="KR_TV_7" />
+            <rating id="KR_TV_12" />
+            <rating id="KR_TV_15" />
+            <rating id="KR_TV_19" />
+        </order>
+    </rating-system-definition>
+
+    <!-- TV content rating system for MV TV -->
+
+    <!-- TV content rating system for MX TV -->
+
+    <!-- TV content rating system for MY TV -->
+
+    <!-- TV content rating system for NL TV -->
+
+    <!-- TV content rating system for NZ TV -->
+
+    <!-- TV content rating system for PE TV -->
+
+    <!-- TV content rating system for PH TV -->
+
+    <!-- TV content rating system for PL TV -->
+
+    <!-- TV content rating system for PT TV -->
+
+    <!-- TV content rating system for RO TV -->
+
+    <!-- TV content rating system for RU TV -->
+
+    <!-- TV content rating system for RS TV -->
+
+    <!-- TV content rating system for SG TV -->
+
+    <!-- TV content rating system for SI TV -->
+
+    <!-- TV content rating system for TH TV -->
+
+    <!-- TV content rating system for TR TV -->
+
+    <!-- TV content rating system for TW TV -->
+
+    <!-- TV content rating system for UA TV -->
+
+    <!-- TV content rating system for US TV -->
     <rating-system-definition id="US_TVPG"
         displayName="@string/display_name_ustvpg"
         description="@string/description_ustvpg"
@@ -89,39 +207,7 @@
         </order>
     </rating-system-definition>
 
-    <rating-system-definition id="KR_TV"
-        displayName="@string/display_name_krtv"
-        country="KR">
-        <rating-definition id="KR_TV_ALL"
-            displayName="@string/display_name_krtv_all"
-            description="@string/description_krtv_all"
-            ageHint="0" />
-        <rating-definition id="KR_TV_7"
-            displayName="@string/display_name_krtv_7"
-            description="@string/description_krtv_7"
-            ageHint="7">
-        </rating-definition>
-        <rating-definition id="KR_TV_12"
-            displayName="@string/display_name_krtv_12"
-            description="@string/description_krtv_12"
-            ageHint="12">
-        </rating-definition>
-        <rating-definition id="KR_TV_15"
-            displayName="@string/display_name_krtv_15"
-            description="@string/description_krtv_15"
-            ageHint="15">
-        </rating-definition>
-        <rating-definition id="KR_TV_19"
-            displayName="@string/display_name_krtv_19"
-            description="@string/description_krtv_19"
-            ageHint="19">
-        </rating-definition>
-        <order>
-            <rating id="KR_TV_ALL" />
-            <rating id="KR_TV_7" />
-            <rating id="KR_TV_12" />
-            <rating id="KR_TV_15" />
-            <rating id="KR_TV_19" />
-        </order>
-    </rating-system-definition>
+    <!-- TV content rating system for VE TV -->
+
+    <!-- TV content rating system for ZA TV -->
 </rating-system-definitions>
