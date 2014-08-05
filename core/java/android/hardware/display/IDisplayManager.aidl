@@ -65,6 +65,10 @@ interface IDisplayManager {
             in IMediaProjection projectionToken, String packageName, String name,
             int width, int height, int densityDpi, in Surface surface, int flags);
 
+    // No permissions required, but must be same Uid as the creator.
+    void resizeVirtualDisplay(in IVirtualDisplayCallbacks token,
+            int width, int height, int densityDpi);
+
     // No permissions required but must be same Uid as the creator.
     void setVirtualDisplaySurface(in IVirtualDisplayCallbacks token, in Surface surface);
 

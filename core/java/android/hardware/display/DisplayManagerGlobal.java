@@ -416,6 +416,15 @@ public final class DisplayManagerGlobal {
         }
     }
 
+    public void resizeVirtualDisplay(IVirtualDisplayCallbacks token,
+            int width, int height, int densityDpi) {
+        try {
+            mDm.resizeVirtualDisplay(token, width, height, densityDpi);
+        } catch (RemoteException ex) {
+            Log.w(TAG, "Failed to resize virtual display.", ex);
+        }
+    }
+
     public void releaseVirtualDisplay(IVirtualDisplayCallbacks token) {
         try {
             mDm.releaseVirtualDisplay(token);
