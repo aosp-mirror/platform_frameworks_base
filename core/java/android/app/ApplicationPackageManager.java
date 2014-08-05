@@ -1384,7 +1384,18 @@ final class ApplicationPackageManager extends PackageManager {
     public void replacePreferredActivity(IntentFilter filter,
                                          int match, ComponentName[] set, ComponentName activity) {
         try {
-            mPM.replacePreferredActivity(filter, match, set, activity);
+            mPM.replacePreferredActivity(filter, match, set, activity, UserHandle.myUserId());
+        } catch (RemoteException e) {
+            // Should never happen!
+        }
+    }
+
+    @Override
+    public void replacePreferredActivityAsUser(IntentFilter filter,
+                                         int match, ComponentName[] set, ComponentName activity,
+                                         int userId) {
+        try {
+            mPM.replacePreferredActivity(filter, match, set, activity, userId);
         } catch (RemoteException e) {
             // Should never happen!
         }

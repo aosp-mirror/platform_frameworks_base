@@ -3523,6 +3523,15 @@ public abstract class PackageManager {
             ComponentName[] set, ComponentName activity);
 
     /**
+     * @hide
+     */
+    @Deprecated
+    public void replacePreferredActivityAsUser(IntentFilter filter, int match,
+           ComponentName[] set, ComponentName activity, int userId) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
      * Remove all preferred activity mappings, previously added with
      * {@link #addPreferredActivity}, from the
      * system whose activities are implemented in the given package name.
