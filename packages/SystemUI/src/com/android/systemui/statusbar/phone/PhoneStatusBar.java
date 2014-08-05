@@ -650,6 +650,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                         if (mSearchPanelView != null) {
                             mSearchPanelView.setHorizontal(isVertical);
                         }
+                        mNotificationPanel.setQsScrimEnabled(!isVertical);
                     }
                 });
                 mNavigationBarView.setOnTouchListener(new View.OnTouchListener() {
