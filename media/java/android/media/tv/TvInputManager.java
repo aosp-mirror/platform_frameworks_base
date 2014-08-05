@@ -176,16 +176,20 @@ public final class TvInputManager {
          * @param session A {@link TvInputManager.Session} associated with this callback.
          * @param tracks A list which includes track information.
          */
-        public void onTrackInfoChanged(Session session, List<TvTrackInfo> tracks) {
+        public void onTracksChanged(Session session, List<TvTrackInfo> tracks) {
         }
 
         /**
-         * This is called when there is a change on the selected tracks in this session.
+         * This is called when a track for a given type is selected.
          *
          * @param session A {@link TvInputManager.Session} associated with this callback
-         * @param selectedTracks A list of selected tracks.
+         * @param type The type of the selected track. The type can be
+         *            {@link TvTrackInfo#TYPE_AUDIO}, {@link TvTrackInfo#TYPE_VIDEO} or
+         *            {@link TvTrackInfo#TYPE_SUBTITLE}.
+         * @param trackId The ID of the selected track. When {@code null} the currently selected
+         *            track for a given type should be unselected.
          */
-        public void onTrackSelectionChanged(Session session, List<TvTrackInfo> selectedTracks) {
+        public void onTrackSelected(Session session, int type, String trackId) {
         }
 
         /**
@@ -282,22 +286,44 @@ public final class TvInputManager {
             });
         }
 
-        public void postTrackInfoChanged(final List<TvTrackInfo> tracks) {
+        public void postTracksChanged(final List<TvTrackInfo> tracks) {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    mSession.mTracks = tracks;
-                    mSessionCallback.onTrackInfoChanged(mSession, tracks);
+                    mSession.mAudioTracks.clear();
+                    mSession.mVideoTracks.clear();
+                    mSession.mSubtitleTracks.clear();
+                    for (TvTrackInfo track : tracks) {
+                        if (track.getType() == TvTrackInfo.TYPE_AUDIO) {
+                            mSession.mAudioTracks.add(track);
+                        } else if (track.getType() == TvTrackInfo.TYPE_VIDEO) {
+                            mSession.mVideoTracks.add(track);
+                        } else if (track.getType() == TvTrackInfo.TYPE_SUBTITLE) {
+                            mSession.mSubtitleTracks.add(track);
+                        } else {
+                            // Silently ignore.
+                        }
+                    }
+                    mSessionCallback.onTracksChanged(mSession, tracks);
                 }
             });
         }
 
-        public void postTrackSelectionChanged(final List<TvTrackInfo> selectedTracks) {
+        public void postTrackSelected(final int type, final String trackId) {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    mSession.mSelectedTracks = selectedTracks;
-                    mSessionCallback.onTrackSelectionChanged(mSession, selectedTracks);
+                    if (type == TvTrackInfo.TYPE_AUDIO) {
+                        mSession.mSelectedAudioTrackId = trackId;
+                    } else if (type == TvTrackInfo.TYPE_VIDEO) {
+                        mSession.mSelectedVideoTrackId = trackId;
+                    } else if (type == TvTrackInfo.TYPE_SUBTITLE) {
+                        mSession.mSelectedSubtitleTrackId = trackId;
+                    } else {
+                        // Silently ignore.
+                        return;
+                    }
+                    mSessionCallback.onTrackSelected(mSession, type, trackId);
                 }
             });
         }
@@ -476,26 +502,26 @@ public final class TvInputManager {
             }
 
             @Override
-            public void onTrackInfoChanged(List<TvTrackInfo> tracks, int seq) {
+            public void onTracksChanged(List<TvTrackInfo> tracks, int seq) {
                 synchronized (mSessionCallbackRecordMap) {
                     SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
                     if (record == null) {
                         Log.e(TAG, "Callback not found for seq " + seq);
                         return;
                     }
-                    record.postTrackInfoChanged(tracks);
+                    record.postTracksChanged(tracks);
                 }
             }
 
             @Override
-            public void onTrackSelectionChanged(List<TvTrackInfo> selectedTracks, int seq) {
+            public void onTrackSelected(int type, String trackId, int seq) {
                 synchronized (mSessionCallbackRecordMap) {
                     SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
                     if (record == null) {
                         Log.e(TAG, "Callback not found for seq " + seq);
                         return;
                     }
-                    record.postTrackSelectionChanged(selectedTracks);
+                    record.postTrackSelected(type, trackId);
                 }
             }
 
@@ -911,8 +937,12 @@ public final class TvInputManager {
         private IBinder mToken;
         private TvInputEventSender mSender;
         private InputChannel mChannel;
-        private List<TvTrackInfo> mTracks;
-        private List<TvTrackInfo> mSelectedTracks;
+        private final List<TvTrackInfo> mAudioTracks = new ArrayList<TvTrackInfo>();
+        private final List<TvTrackInfo> mVideoTracks = new ArrayList<TvTrackInfo>();
+        private final List<TvTrackInfo> mSubtitleTracks = new ArrayList<TvTrackInfo>();
+        private String mSelectedAudioTrackId;
+        private String mSelectedVideoTrackId;
+        private String mSelectedSubtitleTrackId;
 
         private Session(IBinder token, InputChannel channel, ITvInputManager service, int userId,
                 int seq, SparseArray<SessionCallbackRecord> sessionCallbackRecordMap) {
@@ -1045,7 +1075,12 @@ public final class TvInputManager {
                 Log.w(TAG, "The session has been already released");
                 return;
             }
-            mTracks = null;
+            mAudioTracks.clear();
+            mVideoTracks.clear();
+            mSubtitleTracks.clear();
+            mSelectedAudioTrackId = null;
+            mSelectedVideoTrackId = null;
+            mSelectedSubtitleTrackId = null;
             try {
                 mService.tune(mToken, channelUri, params, mUserId);
             } catch (RemoteException e) {
@@ -1073,69 +1108,84 @@ public final class TvInputManager {
         /**
          * Selects a track.
          *
-         * @param track The track to be selected.
+         * @param type The type of the track to select. The type can be
+         *            {@link TvTrackInfo#TYPE_AUDIO}, {@link TvTrackInfo#TYPE_VIDEO} or
+         *            {@link TvTrackInfo#TYPE_SUBTITLE}.
+         * @param trackId The ID of the track to select. When {@code null}, the currently selected
+         *            track of the given type will be unselected.
          * @see #getTracks()
          */
-        public void selectTrack(TvTrackInfo track) {
-            if (track == null) {
-                throw new IllegalArgumentException("track cannot be null");
+        public void selectTrack(int type, String trackId) {
+            if (type == TvTrackInfo.TYPE_AUDIO) {
+                if (trackId != null && !mAudioTracks.contains(trackId)) {
+                    Log.w(TAG, "Invalid audio trackId: " + trackId);
+                }
+            } else if (type == TvTrackInfo.TYPE_VIDEO) {
+                if (trackId != null && !mVideoTracks.contains(trackId)) {
+                    Log.w(TAG, "Invalid video trackId: " + trackId);
+                }
+            } else if (type == TvTrackInfo.TYPE_SUBTITLE) {
+                if (trackId != null && !mSubtitleTracks.contains(trackId)) {
+                    Log.w(TAG, "Invalid subtitle trackId: " + trackId);
+                }
+            } else {
+                throw new IllegalArgumentException("invalid type: " + type);
             }
             if (mToken == null) {
                 Log.w(TAG, "The session has been already released");
                 return;
             }
             try {
-                mService.selectTrack(mToken, track, mUserId);
+                mService.selectTrack(mToken, type, trackId, mUserId);
             } catch (RemoteException e) {
                 throw new RuntimeException(e);
             }
         }
 
         /**
-         * Unselects a track.
+         * Returns the list of tracks for a given type. Returns {@code null} if the information is
+         * not available.
          *
-         * @param track The track to be selected.
-         * @see #getTracks()
+         * @param type The type of the tracks. The type can be {@link TvTrackInfo#TYPE_AUDIO},
+         *            {@link TvTrackInfo#TYPE_VIDEO} or {@link TvTrackInfo#TYPE_SUBTITLE}.
+         * @return the list of tracks for the given type.
          */
-        public void unselectTrack(TvTrackInfo track) {
-            if (track == null) {
-                throw new IllegalArgumentException("track cannot be null");
+        public List<TvTrackInfo> getTracks(int type) {
+            if (type == TvTrackInfo.TYPE_AUDIO) {
+                if (mAudioTracks == null) {
+                    return null;
+                }
+                return mAudioTracks;
+            } else if (type == TvTrackInfo.TYPE_VIDEO) {
+                if (mVideoTracks == null) {
+                    return null;
+                }
+                return mVideoTracks;
+            } else if (type == TvTrackInfo.TYPE_SUBTITLE) {
+                if (mSubtitleTracks == null) {
+                    return null;
+                }
+                return mSubtitleTracks;
             }
-            if (mToken == null) {
-                Log.w(TAG, "The session has been already released");
-                return;
-            }
-            try {
-                mService.unselectTrack(mToken, track, mUserId);
-            } catch (RemoteException e) {
-                throw new RuntimeException(e);
-            }
+            throw new IllegalArgumentException("invalid type: " + type);
         }
 
         /**
-         * Returns a list which includes track information. May return {@code null} if the
-         * information is not available.
-         * @see #selectTrack(TvTrackInfo)
-         * @see #unselectTrack(TvTrackInfo)
+         * Returns the selected track for a given type. Returns {@code null} if the information is
+         * not available or any of the tracks for the given type is not selected.
+         *
+         * @return the ID of the selected track.
+         * @see #selectTrack
          */
-        public List<TvTrackInfo> getTracks() {
-            if (mTracks == null) {
-                return null;
+        public String getSelectedTrack(int type) {
+            if (type == TvTrackInfo.TYPE_AUDIO) {
+                return mSelectedAudioTrackId;
+            } else if (type == TvTrackInfo.TYPE_VIDEO) {
+                return mSelectedVideoTrackId;
+            } else if (type == TvTrackInfo.TYPE_SUBTITLE) {
+                return mSelectedSubtitleTrackId;
             }
-            return new ArrayList<TvTrackInfo>(mTracks);
-        }
-
-        /**
-         * Returns a list of selected tracks May return {@code null} if the information is not
-         * available.
-         * @see #selectTrack(TvTrackInfo)
-         * @see #unselectTrack(TvTrackInfo)
-         */
-        public List<TvTrackInfo> getSelectedTracks() {
-            if (mSelectedTracks == null) {
-                return null;
-            }
-            return new ArrayList<TvTrackInfo>(mSelectedTracks);
+            throw new IllegalArgumentException("invalid type: " + type);
         }
 
         /**

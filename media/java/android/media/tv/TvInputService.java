@@ -47,7 +47,9 @@ import android.view.accessibility.CaptioningManager;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * The TvInputService class represents a TV input or source such as HDMI or built-in tuner which
@@ -319,42 +321,56 @@ public abstract class TvInputService extends Service {
         }
 
         /**
-         * Sends the change on the track information. This is expected to be called whenever a
-         * track is added/removed and the metadata of a track is modified.
+         * Sends the change on the track information. This is expected to be called whenever a track
+         * is added/removed and the metadata of a track is modified.
          *
          * @param tracks A list which includes track information.
+         * @throws IllegalArgumentException if {@code tracks} contains redundant tracks.
          */
-        public void notifyTrackInfoChanged(final List<TvTrackInfo> tracks) {
+        public void notifyTracksChanged(final List<TvTrackInfo> tracks) {
+            Set<String> trackIdSet = new HashSet<String>();
+            for (TvTrackInfo track : tracks) {
+                String trackId = track.getId();
+                if (trackIdSet.contains(trackId)) {
+                    throw new IllegalArgumentException("redundant track ID: " + trackId);
+                }
+                trackIdSet.add(trackId);
+            }
+            trackIdSet.clear();
+
+            // TODO: Validate the track list.
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        if (DEBUG) Log.d(TAG, "notifyTrackInfoChanged");
-                        mSessionCallback.onTrackInfoChanged(tracks);
+                        if (DEBUG) Log.d(TAG, "notifyTracksChanged");
+                        mSessionCallback.onTracksChanged(tracks);
                     } catch (RemoteException e) {
-                        Log.w(TAG, "error in notifyTrackInfoChanged");
+                        Log.w(TAG, "error in notifyTracksChanged");
                     }
                 }
             });
         }
 
         /**
-         * Sends the list of selected tracks. This is expected to be called whenever there is a
-         * change on track selection.
+         * Sends the ID of the selected track for a given track type. This is expected to be called
+         * whenever there is a change on track selection.
          *
-         * @param selectedTracks A list of selected tracks.
-         * @see #onSelectTrack(TvTrackInfo)
-         * @see #onUnselectTrack(TvTrackInfo)
+         * @param type The type of the selected track. The type can be
+         *            {@link TvTrackInfo#TYPE_AUDIO}, {@link TvTrackInfo#TYPE_VIDEO} or
+         *            {@link TvTrackInfo#TYPE_SUBTITLE}.
+         * @param trackId The ID of the selected track.
+         * @see #onSelectTrack
          */
-        public void notifyTrackSelectionChanged(final List<TvTrackInfo> selectedTracks) {
+        public void notifyTrackSelected(final int type, final String trackId) {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        if (DEBUG) Log.d(TAG, "notifyTrackSelectionChanged");
-                        mSessionCallback.onTrackSelectionChanged(selectedTracks);
+                        if (DEBUG) Log.d(TAG, "notifyTrackSelected");
+                        mSessionCallback.onTrackSelected(type, trackId);
                     } catch (RemoteException e) {
-                        Log.w(TAG, "error in notifyTrackSelectionChanged");
+                        Log.w(TAG, "error in notifyTrackSelected");
                     }
                 }
             });
@@ -598,34 +614,20 @@ public abstract class TvInputService extends Service {
         }
 
         /**
-         * Selects a given track.
+         * Select a given track.
          * <p>
-         * If it is called multiple times on the same type of track (ie. Video, Audio, Text), the
-         * track selected previously should be unselected in the implementation of this method.
-         * Also, if the select operation was successful, the implementation should call
-         * {@link #notifyTrackSelectionChanged(List)} to report the selected track list.
+         * If this is done successfully, the implementation should call {@link #notifyTrackSelected}
+         * to help applications maintain the selcted track lists.
          * </p>
          *
-         * @param track The track to be selected.
-         * @return {@code true} if the select operation was successful, {@code false} otherwise.
-         * @see #notifyTrackSelectionChanged(List)
+         * @param trackId The ID of the track to select. {@code null} means to unselect the current
+         *            track for a given type.
+         * @param type The type of the track to select. The type can be
+         *            {@link TvTrackInfo#TYPE_AUDIO}, {@link TvTrackInfo#TYPE_VIDEO} or
+         *            {@link TvTrackInfo#TYPE_SUBTITLE}.
+         * @see #notifyTrackSelected
          */
-        public boolean onSelectTrack(TvTrackInfo track) {
-            return false;
-        }
-
-        /**
-         * Unselects a given track.
-         * <p>
-         * If the unselect operation was successful, the implementation should call
-         * {@link #notifyTrackSelectionChanged(List)} to report the selected track list.
-         * </p>
-         *
-         * @param track The track to be unselected.
-         * @return {@code true} if the unselect operation was successful, {@code false} otherwise.
-         * @see #notifyTrackSelectionChanged(List)
-         */
-        public boolean onUnselectTrack(TvTrackInfo track) {
+        public boolean onSelectTrack(int type, String trackId) {
             return false;
         }
 
@@ -837,17 +839,8 @@ public abstract class TvInputService extends Service {
         /**
          * Calls {@link #onSelectTrack}.
          */
-        void selectTrack(TvTrackInfo track) {
-            onSelectTrack(track);
-            // TODO: Handle failure.
-        }
-
-        /**
-         * Calls {@link #onUnselectTrack}.
-         */
-        void unselectTrack(TvTrackInfo track) {
-            onUnselectTrack(track);
-            // TODO: Handle failure.
+        void selectTrack(int type, String trackId) {
+            onSelectTrack(type, trackId);
         }
 
         /**

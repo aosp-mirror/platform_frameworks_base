@@ -294,55 +294,49 @@ public class TvView extends ViewGroup {
 
     /**
      * Selects a track.
-     * <p>
-     * If it is called multiple times on the same type of track (ie. Video, Audio, Text), the track
-     * selected in previous will be unselected. Note that this method does not take any effect
-     * unless the current TvView is tuned.
-     * </p>
      *
-     * @param track the track to be selected.
-     * @see #getTracks()
+     * @param type The type of the track to select. The type can be {@link TvTrackInfo#TYPE_AUDIO},
+     *            {@link TvTrackInfo#TYPE_VIDEO} or {@link TvTrackInfo#TYPE_SUBTITLE}.
+     * @param trackId The ID of the track to select. {@code null} means to unselect the current
+     *            track for a given type.
+     * @see #getTracks
+     * @see #getSelectedTrack
      */
-    public void selectTrack(TvTrackInfo track) {
+    public void selectTrack(int type, String trackId) {
         if (mSession != null) {
-            mSession.selectTrack(track);
+            mSession.selectTrack(type, trackId);
         }
     }
 
     /**
-     * Unselects a track.
-     * <p>
-     * Note that this method does not take any effect unless the current TvView is tuned.
+     * Returns the list of tracks. Returns {@code null} if the information is not available.
      *
-     * @param track the track to be unselected.
-     * @see #getTracks()
+     * @param type The type of the tracks. The type can be {@link TvTrackInfo#TYPE_AUDIO},
+     *            {@link TvTrackInfo#TYPE_VIDEO} or {@link TvTrackInfo#TYPE_SUBTITLE}.
+     * @see #selectTrack
+     * @see #getSelectedTrack
      */
-    public void unselectTrack(TvTrackInfo track) {
-        if (mSession != null) {
-            mSession.unselectTrack(track);
-        }
-    }
-
-    /**
-     * Returns a list which includes of track information. May return {@code null} if the
-     * information is not available.
-     */
-    public List<TvTrackInfo> getTracks() {
+    public List<TvTrackInfo> getTracks(int type) {
         if (mSession == null) {
             return null;
         }
-        return mSession.getTracks();
+        return mSession.getTracks(type);
     }
 
     /**
-     * Returns a list of selected tracks. May return {@code null} if the information is not
-     * available.
+     * Returns the ID of the selected track for a given type. Returns {@code null} if the
+     * information is not available or the track is not selected.
+     *
+     * @param type The type of the selected tracks. The type can be {@link TvTrackInfo#TYPE_AUDIO},
+     *            {@link TvTrackInfo#TYPE_VIDEO} or {@link TvTrackInfo#TYPE_SUBTITLE}.
+     * @see #selectTrack
+     * @see #getTracks
      */
-    public List<TvTrackInfo> getSelectedTracks() {
+    public String getSelectedTrack(int type) {
         if (mSession == null) {
             return null;
         }
-        return mSession.getSelectedTracks();
+        return mSession.getSelectedTrack(type);
     }
 
     /**
@@ -592,22 +586,6 @@ public class TvView extends ViewGroup {
                 location[0] + getWidth(), location[1] + getHeight());
     }
 
-    private void updateVideoSize(List<TvTrackInfo> tracks) {
-        for (TvTrackInfo track : tracks) {
-            if (track.getType() == TvTrackInfo.TYPE_VIDEO) {
-                int width = track.getVideoWidth();
-                int height = track.getVideoHeight();
-                if (width != mVideoWidth || height != mVideoHeight) {
-                    mVideoWidth = width;
-                    mVideoHeight = height;
-                    if (mListener != null) {
-                        mListener.onVideoSizeChanged(mSessionCallback.mInputId, width, height);
-                    }
-                }
-            }
-        }
-    }
-
     /**
      * Interface used to receive various status updates on the {@link TvView}.
      */
@@ -650,16 +628,19 @@ public class TvView extends ViewGroup {
          * @param inputId The ID of the TV input bound to this view.
          * @param tracks A list which includes track information.
          */
-        public void onTrackInfoChanged(String inputId, List<TvTrackInfo> tracks) {
+        public void onTracksChanged(String inputId, List<TvTrackInfo> tracks) {
         }
 
         /**
          * This is called when there is a change on the selected tracks.
          *
          * @param inputId The ID of the TV input bound to this view.
-         * @param selectedTracks A list which includes track information.
+         * @param type The type of the track selected. The type can be
+         *            {@link TvTrackInfo#TYPE_AUDIO}, {@link TvTrackInfo#TYPE_VIDEO} or
+         *            {@link TvTrackInfo#TYPE_SUBTITLE}.
+         * @param trackId The ID of the track selected.
          */
-        public void onTrackSelectionChanged(String inputId, List<TvTrackInfo> selectedTracks) {
+        public void onTrackSelected(String inputId, int type, String trackId) {
         }
 
         /**
@@ -807,29 +788,29 @@ public class TvView extends ViewGroup {
         }
 
         @Override
-        public void onTrackInfoChanged(Session session, List<TvTrackInfo> tracks) {
+        public void onTracksChanged(Session session, List<TvTrackInfo> tracks) {
             if (this != mSessionCallback) {
                 return;
             }
             if (DEBUG) {
-                Log.d(TAG, "onTrackInfoChanged()");
+                Log.d(TAG, "onTracksChanged()");
             }
             if (mListener != null) {
-                mListener.onTrackInfoChanged(mInputId, tracks);
+                mListener.onTracksChanged(mInputId, tracks);
             }
         }
 
         @Override
-        public void onTrackSelectionChanged(Session session, List<TvTrackInfo> selectedTracks) {
+        public void onTrackSelected(Session session, int type, String trackId) {
             if (this != mSessionCallback) {
                 return;
             }
             if (DEBUG) {
-                Log.d(TAG, "onTrackInfoChanged()");
+                Log.d(TAG, "onTrackSelected()");
             }
-            updateVideoSize(selectedTracks);
+            // TODO: Update the video size when the type is TYPE_VIDEO.
             if (mListener != null) {
-                mListener.onTrackSelectionChanged(mInputId, selectedTracks);
+                mListener.onTrackSelected(mInputId, type, trackId);
             }
         }
 

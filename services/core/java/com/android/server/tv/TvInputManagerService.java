@@ -533,37 +533,35 @@ public final class TvInputManagerService extends SystemService {
             }
 
             @Override
-            public void onTrackInfoChanged(List<TvTrackInfo> tracks) {
+            public void onTracksChanged(List<TvTrackInfo> tracks) {
                 synchronized (mLock) {
                     if (DEBUG) {
-                        Slog.d(TAG, "onTrackInfoChanged(" + tracks + ")");
+                        Slog.d(TAG, "onTracksChanged(" + tracks + ")");
                     }
                     if (sessionState.mSession == null || sessionState.mClient == null) {
                         return;
                     }
                     try {
-                        sessionState.mClient.onTrackInfoChanged(tracks,
-                                sessionState.mSeq);
+                        sessionState.mClient.onTracksChanged(tracks, sessionState.mSeq);
                     } catch (RemoteException e) {
-                        Slog.e(TAG, "error in onTrackInfoChanged");
+                        Slog.e(TAG, "error in onTracksChanged");
                     }
                 }
             }
 
             @Override
-            public void onTrackSelectionChanged(List<TvTrackInfo> selectedTracks) {
+            public void onTrackSelected(int type, String trackId) {
                 synchronized (mLock) {
                     if (DEBUG) {
-                        Slog.d(TAG, "onTrackSelectionChanged(" + selectedTracks + ")");
+                        Slog.d(TAG, "onTrackSelected(type=" + type + ", trackId=" + trackId + ")");
                     }
                     if (sessionState.mSession == null || sessionState.mClient == null) {
                         return;
                     }
                     try {
-                        sessionState.mClient.onTrackSelectionChanged(selectedTracks,
-                                sessionState.mSeq);
+                        sessionState.mClient.onTrackSelected(type, trackId, sessionState.mSeq);
                     } catch (RemoteException e) {
-                        Slog.e(TAG, "error in onTrackSelectionChanged");
+                        Slog.e(TAG, "error in onTrackSelected");
                     }
                 }
             }
@@ -1266,7 +1264,7 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
-        public void selectTrack(IBinder sessionToken, TvTrackInfo track, int userId) {
+        public void selectTrack(IBinder sessionToken, int type, String trackId, int userId) {
             final int callingUid = Binder.getCallingUid();
             final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
                     userId, "selectTrack");
@@ -1275,29 +1273,9 @@ public final class TvInputManagerService extends SystemService {
                 synchronized (mLock) {
                     try {
                         getSessionLocked(sessionToken, callingUid, resolvedUserId).selectTrack(
-                                track);
+                                type, trackId);
                     } catch (RemoteException e) {
                         Slog.e(TAG, "error in selectTrack", e);
-                    }
-                }
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
-        }
-
-        @Override
-        public void unselectTrack(IBinder sessionToken, TvTrackInfo track, int userId) {
-            final int callingUid = Binder.getCallingUid();
-            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
-                    userId, "unselectTrack");
-            final long identity = Binder.clearCallingIdentity();
-            try {
-                synchronized (mLock) {
-                    try {
-                        getSessionLocked(sessionToken, callingUid, resolvedUserId).unselectTrack(
-                                track);
-                    } catch (RemoteException e) {
-                        Slog.e(TAG, "error in unselectTrack", e);
                     }
                 }
             } finally {

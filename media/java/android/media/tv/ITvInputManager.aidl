@@ -60,8 +60,7 @@ interface ITvInputManager {
     void setVolume(in IBinder sessionToken, float volume, int userId);
     void tune(in IBinder sessionToken, in Uri channelUri, in Bundle params, int userId);
     void setCaptionEnabled(in IBinder sessionToken, boolean enabled, int userId);
-    void selectTrack(in IBinder sessionToken, in TvTrackInfo track, int userId);
-    void unselectTrack(in IBinder sessionToken, in TvTrackInfo track, int userId);
+    void selectTrack(in IBinder sessionToken, int type, in String trackId, int userId);
 
     void sendAppPrivateCommand(in IBinder sessionToken, in String action, in Bundle data,
             int userId);

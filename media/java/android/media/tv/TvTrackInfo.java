@@ -40,6 +40,7 @@ public final class TvTrackInfo implements Parcelable {
     public static final int TYPE_SUBTITLE = 2;
 
     private final int mType;
+    private final String mId;
     private final String mLanguage;
     private final int mAudioChannelCount;
     private final int mAudioSampleRate;
@@ -47,9 +48,10 @@ public final class TvTrackInfo implements Parcelable {
     private final int mVideoHeight;
     private final Bundle mExtra;
 
-    private TvTrackInfo(int type, String language, int audioChannelCount,
+    private TvTrackInfo(int type, String id, String language, int audioChannelCount,
             int audioSampleRate, int videoWidth, int videoHeight, Bundle extra) {
         mType = type;
+        mId = id;
         mLanguage = language;
         mAudioChannelCount = audioChannelCount;
         mAudioSampleRate = audioSampleRate;
@@ -60,6 +62,7 @@ public final class TvTrackInfo implements Parcelable {
 
     private TvTrackInfo(Parcel in) {
         mType = in.readInt();
+        mId = in.readString();
         mLanguage = in.readString();
         mAudioChannelCount = in.readInt();
         mAudioSampleRate = in.readInt();
@@ -74,6 +77,13 @@ public final class TvTrackInfo implements Parcelable {
      */
     public final int getType() {
         return mType;
+    }
+
+    /**
+     * Returns the ID of the track.
+     */
+    public final String getId() {
+        return mId;
     }
 
     /**
@@ -147,6 +157,7 @@ public final class TvTrackInfo implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mType);
+        dest.writeString(mId);
         dest.writeString(mLanguage);
         dest.writeInt(mAudioChannelCount);
         dest.writeInt(mAudioSampleRate);
@@ -172,7 +183,8 @@ public final class TvTrackInfo implements Parcelable {
      * A builder class for creating {@link TvTrackInfo} objects.
      */
     public static final class Builder {
-        private int mType;
+        private final String mId;
+        private final int mType;
         private String mLanguage;
         private int mAudioChannelCount;
         private int mAudioSampleRate;
@@ -185,14 +197,20 @@ public final class TvTrackInfo implements Parcelable {
          * must be added.
          *
          * @param type The type of the track.
+         * @param id The ID of the track that uniquely identifies the current track among all the
+         *            other tracks in the same TV program.
          */
-        public Builder(int type) {
+        public Builder(int type, String id) {
             if (type != TYPE_AUDIO
                     && type != TYPE_VIDEO
                     && type != TYPE_SUBTITLE) {
                 throw new IllegalArgumentException("Unknown type: " + type);
             }
+            if (id == null) {
+                throw new IllegalArgumentException("id cannot be null");
+            }
             mType = type;
+            mId = id;
         }
 
         /**
@@ -276,8 +294,8 @@ public final class TvTrackInfo implements Parcelable {
          * @return The new {@link TvTrackInfo} instance
          */
         public TvTrackInfo build() {
-            return new TvTrackInfo(mType, mLanguage, mAudioChannelCount,
-                    mAudioSampleRate, mVideoWidth, mVideoHeight, mExtra);
+            return new TvTrackInfo(mType, mId, mLanguage, mAudioChannelCount, mAudioSampleRate,
+                    mVideoWidth, mVideoHeight, mExtra);
         }
     }
 }
