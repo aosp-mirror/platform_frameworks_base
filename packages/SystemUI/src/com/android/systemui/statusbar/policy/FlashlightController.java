@@ -44,9 +44,6 @@ public class FlashlightController {
     private static final String TAG = "FlashlightController";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    private static final boolean ENFORCE_AVAILABILITY_LISTENER =
-            SystemProperties.getBoolean("persist.sysui.flash.listener", false);
-
     private static final int DISPATCH_ERROR = 0;
     private static final int DISPATCH_OFF = 1;
     private static final int DISPATCH_AVAILABILITY_CHANGED = 2;
@@ -82,9 +79,10 @@ public class FlashlightController {
             return;
         }
 
-        ensureHandler();
-        mCameraAvailable = true;
-        mCameraManager.addAvailabilityListener(mAvailabilityListener, mHandler);
+        if (mCameraId != null) {
+            ensureHandler();
+            mCameraManager.addAvailabilityListener(mAvailabilityListener, mHandler);
+        }
     }
 
     public synchronized void setFlashlight(boolean enabled) {
@@ -105,7 +103,7 @@ public class FlashlightController {
     }
 
     public synchronized boolean isAvailable() {
-        return ENFORCE_AVAILABILITY_LISTENER ? mCameraAvailable : (mCameraId != null);
+        return mCameraAvailable;
     }
 
     public void addListener(FlashlightListener l) {
