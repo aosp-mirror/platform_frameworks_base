@@ -150,7 +150,7 @@ public class AppWidget {
             IBinder binder = ServiceManager.getService(Context.APPWIDGET_SERVICE);
             IAppWidgetService appWidgetService = IAppWidgetService.Stub.asInterface(binder);
             try {
-                appWidgetService.setBindAppWidgetPermission(mPackageName, mGranted, mUserId);
+                appWidgetService.setBindAppWidgetPermission(mPackageName, mUserId, mGranted);
             } catch (RemoteException re) {
                 re.printStackTrace();
             }

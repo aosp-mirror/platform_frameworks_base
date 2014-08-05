@@ -21,8 +21,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.TypedArray;
-import android.os.Handler;
-import android.os.Message;
+import android.os.*;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
@@ -90,7 +89,16 @@ public class ViewFlipper extends ViewAnimator {
         final IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction(Intent.ACTION_USER_PRESENT);
-        getContext().registerReceiver(mReceiver, filter, null, mHandler);
+
+        // OK, this is gross but needed. This class is supported by the
+        // remote views machanism and as a part of that the remote views
+        // can be inflated by a context for another user without the app
+        // having interact users permission - just for loading resources.
+        // For exmaple, when adding widgets from a user profile to the
+        // home screen. Therefore, we register the receiver as the current
+        // user not the one the context is for.
+        getContext().registerReceiverAsUser(mReceiver, android.os.Process.myUserHandle(),
+                filter, null, mHandler);
 
         if (mAutoStart) {
             // Automatically start when requested

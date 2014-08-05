@@ -175,4 +175,7 @@ interface IDevicePolicyManager {
     void setTrustAgentFeaturesEnabled(in ComponentName admin, in ComponentName agent, in List<String> features, int userId);
     List<String> getTrustAgentFeaturesEnabled(in ComponentName admin, in ComponentName agent, int userId);
 
+    boolean addCrossProfileWidgetProvider(in ComponentName admin, String packageName);
+    boolean removeCrossProfileWidgetProvider(in ComponentName admin, String packageName);
+    List<String> getCrossProfileWidgetProviders(in ComponentName admin);
 }

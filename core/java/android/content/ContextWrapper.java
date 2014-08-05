@@ -666,6 +666,12 @@ public class ContextWrapper extends Context {
     }
 
     /** @hide */
+    public Context createApplicationContext(ApplicationInfo application,
+            int flags) throws PackageManager.NameNotFoundException {
+        return mBase.createApplicationContext(application, flags);
+    }
+
+    /** @hide */
     @Override
     public int getUserId() {
         return mBase.getUserId();

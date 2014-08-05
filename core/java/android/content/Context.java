@@ -2076,7 +2076,7 @@ public abstract class Context {
             CLIPBOARD_SERVICE,
             INPUT_METHOD_SERVICE,
             TEXT_SERVICES_MANAGER_SERVICE,
-            //@hide: APPWIDGET_SERVICE,
+            APPWIDGET_SERVICE,
             //@hide: BACKUP_SERVICE,
             DROPBOX_SERVICE,
             DEVICE_POLICY_SERVICE,
@@ -2596,7 +2596,6 @@ public abstract class Context {
      * Use with {@link #getSystemService} to retrieve a
      * {@link android.appwidget.AppWidgetManager} for accessing AppWidgets.
      *
-     * @hide
      * @see #getSystemService
      */
     public static final String APPWIDGET_SERVICE = "appwidget";
@@ -3304,6 +3303,14 @@ public abstract class Context {
     public abstract Context createPackageContextAsUser(
             String packageName, int flags, UserHandle user)
             throws PackageManager.NameNotFoundException;
+
+    /**
+     * Creates a context given an {@link android.content.pm.ApplicationInfo}.
+     *
+     * @hide
+     */
+    public abstract Context createApplicationContext(ApplicationInfo application,
+            int flags) throws PackageManager.NameNotFoundException;
 
     /**
      * Get the userId associated with this context
