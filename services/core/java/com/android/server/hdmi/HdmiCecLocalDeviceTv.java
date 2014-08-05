@@ -41,6 +41,7 @@ import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings.Global;
+import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -52,7 +53,9 @@ import com.android.server.hdmi.HdmiControlService.SendMessageCallback;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
@@ -109,6 +112,10 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
 
     private final HdmiCecStandbyModeHandler mStandbyHandler;
 
+    // Set of physical addresses of CEC switches on the CEC bus. Managed independently from
+    // other CEC devices since they might not have logical address.
+    private final ArraySet<Integer> mCecSwitches = new ArraySet<Integer>();
+
     HdmiCecLocalDeviceTv(HdmiControlService service) {
         super(service, HdmiCecDeviceInfo.DEVICE_TV);
         mPrevPortId = Constants.INVALID_PORT_ID;
@@ -126,6 +133,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                 mAddress, mService.getPhysicalAddress(), mDeviceType));
         mService.sendCecCommand(HdmiCecMessageBuilder.buildDeviceVendorIdCommand(
                 mAddress, mService.getVendorId()));
+        mCecSwitches.add(mService.getPhysicalAddress());  // TV is a CEC switch too.
         launchRoutingControl(reason != HdmiControlService.INITIATED_BY_ENABLE_CEC &&
                 reason != HdmiControlService.INITIATED_BY_BOOT_UP);
         launchDeviceDiscovery();
@@ -426,15 +434,27 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     protected boolean handleReportPhysicalAddress(HdmiCecMessage message) {
         assertRunOnServiceThread();
+        int path = HdmiUtils.twoBytesToInt(message.getParams());
+        int address = message.getSource();
+
+        // Build cec switch list with pure CEC switch, AVR.
+        if (address == Constants.ADDR_UNREGISTERED) {
+            int type = message.getParams()[2];
+            if (type == HdmiCecDeviceInfo.DEVICE_PURE_CEC_SWITCH) {
+                mCecSwitches.add(path);
+                updateSafeDeviceInfoList();
+                return true;  // Pure switch does not need further processing. Return here.
+            } else if (type == HdmiCecDeviceInfo.DEVICE_AUDIO_SYSTEM) {
+                mCecSwitches.add(path);
+            }
+        }
+
         // Ignore if [Device Discovery Action] is going on.
         if (hasAction(DeviceDiscoveryAction.class)) {
-            Slog.i(TAG, "Ignore unrecognizable <Report Physical Address> "
-                    + "because Device Discovery Action is on-going:" + message);
+            Slog.i(TAG, "Ignored while Device Discovery Action is in progress: " + message);
             return true;
         }
 
-        int path = HdmiUtils.twoBytesToInt(message.getParams());
-        int address = message.getSource();
         if (!isInDeviceList(path, address)) {
             handleNewDeviceAtTheTailOfActivePath(path);
         }
@@ -619,7 +639,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     private void clearDeviceInfoList() {
         assertRunOnServiceThread();
         for (HdmiCecDeviceInfo info : mSafeExternalInputs) {
-            mService.invokeDeviceEventListeners(info, false);
+            invokeDeviceEventListener(info, false);
         }
         mDeviceInfos.clear();
         updateSafeDeviceInfoList();
@@ -1012,11 +1032,47 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             if (isLocalDeviceAddress(i)) {
                 continue;
             }
-            if (info.isSourceType()) {
+            if (info.isSourceType() && !hideDevicesBehindLegacySwitch(info)) {
                 infoList.add(info);
             }
         }
         return infoList;
+    }
+
+    // Check if we are hiding CEC devices connected to a legacy (non-CEC) switch.
+    // Returns true if the policy is set to true, and the device to check does not have
+    // a parent CEC device (which should be the CEC-enabled switch) in the list.
+    private boolean hideDevicesBehindLegacySwitch(HdmiCecDeviceInfo info) {
+        return HdmiConfig.HIDE_DEVICES_BEHIND_LEGACY_SWITCH
+                && !isConnectedToCecSwitch(info.getPhysicalAddress(), mCecSwitches);
+    }
+
+    private static boolean isConnectedToCecSwitch(int path, Collection<Integer> switches) {
+        for (int switchPath : switches) {
+            if (isParentPath(switchPath, path)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean isParentPath(int parentPath, int childPath) {
+        // (A000, AB00) (AB00, ABC0), (ABC0, ABCD)
+        // If child's last non-zero nibble is removed, the result equals to the parent.
+        for (int i = 0; i <= 12; i += 4) {
+            int nibble = (childPath >> i) & 0xF;
+            if (nibble != 0) {
+                int parentNibble = (parentPath >> i) & 0xF;
+                return parentNibble == 0 && (childPath >> i+4) == (parentPath >> i+4);
+            }
+        }
+        return false;
+    }
+
+    private void invokeDeviceEventListener(HdmiCecDeviceInfo info, boolean activated) {
+        if (!hideDevicesBehindLegacySwitch(info)) {
+            mService.invokeDeviceEventListeners(info, activated);
+        }
     }
 
     @ServiceThreadOnly
@@ -1087,7 +1143,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             // The addition of TV device itself should not be notified.
             return;
         }
-        mService.invokeDeviceEventListeners(info, true);
+        invokeDeviceEventListener(info, true);
     }
 
     /**
@@ -1101,7 +1157,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         HdmiCecDeviceInfo info = removeDeviceInfo(address);
 
         mCecMessageCache.flushMessagesFrom(address);
-        mService.invokeDeviceEventListeners(info, false);
+        invokeDeviceEventListener(info, false);
     }
 
     @ServiceThreadOnly
@@ -1190,6 +1246,9 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     void onHotplug(int portId, boolean connected) {
         assertRunOnServiceThread();
 
+        if (!connected) {
+            removeCecSwitches(portId);
+        }
         // Tv device will have permanent HotplugDetectionAction.
         List<HotplugDetectionAction> hotplugActions = getActions(HotplugDetectionAction.class);
         if (!hotplugActions.isEmpty()) {
@@ -1197,6 +1256,16 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             // "pollAllDevicesNow" cleans up timer and start poll action immediately.
             // It covers seq #40, #43.
             hotplugActions.get(0).pollAllDevicesNow();
+        }
+    }
+
+    private void removeCecSwitches(int portId) {
+        Iterator<Integer> it = mCecSwitches.iterator();
+        while (!it.hasNext()) {
+            int path = it.next();
+            if (pathToPortId(path) == portId) {
+                it.remove();
+            }
         }
     }
 
