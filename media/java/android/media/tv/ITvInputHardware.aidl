@@ -35,9 +35,9 @@ interface ITvInputHardware {
     boolean setSurface(in Surface surface, in TvStreamConfig config);
 
     /**
-     * Set volume for this stream via AudioGain. (TBD)
+     * Set volume for this stream via AudioGain.
      */
-    void setVolume(float volume);
+    void setStreamVolume(float volume);
 
     /**
      * Dispatch key event to HDMI service. The events would be automatically converted to
