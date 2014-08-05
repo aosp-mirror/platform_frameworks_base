@@ -21,13 +21,13 @@ import android.provider.Settings.Secure;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.qs.SecureSetting;
+import com.android.systemui.qs.UsageTracker;
 
 /** Quick settings tile: Invert colors **/
 public class ColorInversionTile extends QSTile<QSTile.BooleanState> {
 
     private final SecureSetting mSetting;
-
-    private boolean mVisible;
+    private final UsageTracker mUsageTracker;
 
     public ColorInversionTile(Host host) {
         super(host);
@@ -37,8 +37,11 @@ public class ColorInversionTile extends QSTile<QSTile.BooleanState> {
             @Override
             protected void handleValueChanged(int value) {
                 handleRefreshState(value);
+                mUsageTracker.trackUsage();
             }
         };
+        mUsageTracker = new UsageTracker(host.getContext(), ColorInversionTile.class);
+        mUsageTracker.listenForReset();
     }
 
     @Override
@@ -65,10 +68,7 @@ public class ColorInversionTile extends QSTile<QSTile.BooleanState> {
     protected void handleUpdateState(BooleanState state, Object arg) {
         final int value = arg instanceof Integer ? (Integer) arg : mSetting.getValue();
         final boolean enabled = value != 0;
-        if (enabled) {
-            mVisible = true;
-        }
-        state.visible = mVisible;
+        state.visible = enabled || mUsageTracker.isRecentlyUsed();
         state.value = enabled;
         state.label = mContext.getString(R.string.quick_settings_inversion_label);
         state.iconId = enabled ? R.drawable.ic_qs_inversion_on : R.drawable.ic_qs_inversion_off;
