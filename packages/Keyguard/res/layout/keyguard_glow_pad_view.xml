@@ -28,10 +28,6 @@
     android:orientation="horizontal"
     android:gravity="@integer/kg_selector_gravity"
     android:contentDescription="@string/keyguard_accessibility_slide_area"
-
-    prvandroid:targetDrawables="@array/lockscreen_targets_unlock_only"
-    prvandroid:targetDescriptions="@array/lockscreen_target_descriptions_unlock_only"
-    prvandroid:directionDescriptions="@array/lockscreen_direction_descriptions"
     prvandroid:handleDrawable="@drawable/ic_lockscreen_handle"
     prvandroid:outerRingDrawable="@drawable/ic_lockscreen_outerring"
     prvandroid:outerRadius="@dimen/glowpadview_target_placement_radius"

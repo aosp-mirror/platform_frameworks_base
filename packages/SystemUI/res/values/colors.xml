@@ -101,4 +101,6 @@
     <color name="notification_guts_title_color">#FFFFFFFF</color>
     <color name="notification_guts_text_color">#99FFFFFF</color>
     <color name="notification_guts_btn_color">#FFFFFFFF</color>
+
+    <color name="search_panel_card_color">#ffffff</color>
 </resources>

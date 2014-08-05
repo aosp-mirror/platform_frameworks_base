@@ -641,6 +641,15 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
                 mNavigationBarView.setDisabledFlags(mDisabled);
                 mNavigationBarView.setBar(this);
+                mNavigationBarView.setOnVerticalChangedListener(
+                        new NavigationBarView.OnVerticalChangedListener() {
+                    @Override
+                    public void onVerticalChanged(boolean isVertical) {
+                        if (mSearchPanelView != null) {
+                            mSearchPanelView.setHorizontal(isVertical);
+                        }
+                    }
+                });
                 mNavigationBarView.setOnTouchListener(new View.OnTouchListener() {
                     @Override
                     public boolean onTouch(View v, MotionEvent event) {
@@ -951,20 +960,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     @Override
-    protected void onShowSearchPanel() {
-        if (mNavigationBarView != null) {
-            mNavigationBarView.getBarTransitions().setContentVisible(false);
-        }
-    }
-
-    @Override
-    protected void onHideSearchPanel() {
-        if (mNavigationBarView != null) {
-            mNavigationBarView.getBarTransitions().setContentVisible(true);
-        }
-    }
-
-    @Override
     protected View getStatusBarView() {
         return mStatusBarView;
     }
@@ -989,8 +984,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
         lp.gravity = Gravity.BOTTOM | Gravity.START;
         lp.setTitle("SearchPanel");
-        // TODO: Define custom animation for Search panel
-        lp.windowAnimations = com.android.internal.R.style.Animation_RecentApplications;
         lp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_STATE_UNCHANGED
         | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
         return lp;
@@ -1066,7 +1059,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     View.OnTouchListener mHomeActionListener = new View.OnTouchListener() {
         public boolean onTouch(View v, MotionEvent event) {
             switch(event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
+                case MotionEvent.ACTION_DOWN:
                 if (!shouldDisableNavbarGestures()) {
                     mHandler.removeCallbacks(mShowSearchPanel);
                     mHandler.postDelayed(mShowSearchPanel, mShowSearchHoldoff);
