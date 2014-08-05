@@ -15,7 +15,6 @@
 */
 package com.android.server.notification;
 
-import android.app.Notification;
 import android.content.Context;
 import android.util.Slog;
 
