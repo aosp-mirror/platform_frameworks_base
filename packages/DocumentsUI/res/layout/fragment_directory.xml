@@ -26,7 +26,7 @@
         android:gravity="center"
         android:text="@string/empty"
         android:visibility="gone"
-        style="@style/TextAppearance.Medium" />
+        style="@android:style/TextAppearance.Material.Subhead" />
 
     <ListView
         android:id="@+id/list"

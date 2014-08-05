@@ -16,7 +16,9 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <style name="DocumentsTheme" parent="@android:style/Theme.DeviceDefault.Light.DialogWhenLarge">
+    <style name="DialogWhenReallyLarge" parent="@android:style/Theme.DeviceDefault.Light" />
+
+    <style name="DocumentsTheme" parent="@style/DialogWhenReallyLarge">
         <item name="android:actionBarWidgetTheme">@null</item>
         <item name="android:actionBarTheme">@*android:style/ThemeOverlay.Material.Dark.ActionBar</item>
         <item name="android:actionBarPopupTheme">@*android:style/ThemeOverlay.Material.Light</item>
@@ -36,18 +38,6 @@
         <item name="*android:windowFixedHeightMinor">90%</item>
 
         <item name="android:windowSoftInputMode">stateUnspecified|adjustUnspecified</item>
-    </style>
-
-    <style name="TextAppearance" />
-
-    <style name="TextAppearance.Medium">
-        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
-        <item name="android:textColor">?android:attr/textColorSecondary</item>
-    </style>
-
-    <style name="TextAppearance.Small">
-        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
-        <item name="android:textColor">?android:attr/textColorTertiary</item>
     </style>
 
 </resources>
