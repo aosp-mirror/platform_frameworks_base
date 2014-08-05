@@ -249,6 +249,20 @@ public class AudioFormat {
     private AudioFormat(int ignoredArgument) {
     }
 
+    /**
+     * Constructor used by the JNI
+     */
+    // Update sound trigger JNI in core/jni/android_hardware_SoundTrigger.cpp when modifying this
+    // constructor
+    private AudioFormat(int encoding, int sampleRate, int channelMask) {
+        mEncoding = encoding;
+        mSampleRate = sampleRate;
+        mChannelMask = channelMask;
+        mPropertySetMask = AUDIO_FORMAT_HAS_PROPERTY_ENCODING |
+                AUDIO_FORMAT_HAS_PROPERTY_SAMPLE_RATE |
+                AUDIO_FORMAT_HAS_PROPERTY_CHANNEL_MASK;
+    }
+
     /** @hide */
     public final static int AUDIO_FORMAT_HAS_PROPERTY_NONE = 0x0;
     /** @hide */
