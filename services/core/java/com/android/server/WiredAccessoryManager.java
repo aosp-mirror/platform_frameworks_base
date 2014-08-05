@@ -36,8 +36,10 @@ import com.android.server.input.InputManagerService;
 import com.android.server.input.InputManagerService.WiredAccessoryCallbacks;
 import static com.android.server.input.InputManagerService.SW_HEADPHONE_INSERT;
 import static com.android.server.input.InputManagerService.SW_MICROPHONE_INSERT;
+import static com.android.server.input.InputManagerService.SW_LINEOUT_INSERT;
 import static com.android.server.input.InputManagerService.SW_HEADPHONE_INSERT_BIT;
 import static com.android.server.input.InputManagerService.SW_MICROPHONE_INSERT_BIT;
+import static com.android.server.input.InputManagerService.SW_LINEOUT_INSERT_BIT;
 
 import java.io.File;
 import java.io.FileReader;
@@ -60,9 +62,10 @@ final class WiredAccessoryManager implements WiredAccessoryCallbacks {
     private static final int BIT_USB_HEADSET_ANLG = (1 << 2);
     private static final int BIT_USB_HEADSET_DGTL = (1 << 3);
     private static final int BIT_HDMI_AUDIO = (1 << 4);
+    private static final int BIT_LINEOUT = (1 << 5);
     private static final int SUPPORTED_HEADSETS = (BIT_HEADSET|BIT_HEADSET_NO_MIC|
                                                    BIT_USB_HEADSET_ANLG|BIT_USB_HEADSET_DGTL|
-                                                   BIT_HDMI_AUDIO);
+                                                   BIT_HDMI_AUDIO|BIT_LINEOUT);
 
     private static final String NAME_H2W = "h2w";
     private static final String NAME_USB_AUDIO = "usb_audio";
@@ -108,8 +111,11 @@ final class WiredAccessoryManager implements WiredAccessoryCallbacks {
             if (mInputManager.getSwitchState(-1, InputDevice.SOURCE_ANY, SW_MICROPHONE_INSERT) == 1) {
                 switchValues |= SW_MICROPHONE_INSERT_BIT;
             }
+            if (mInputManager.getSwitchState(-1, InputDevice.SOURCE_ANY, SW_LINEOUT_INSERT) == 1) {
+                switchValues |= SW_LINEOUT_INSERT_BIT;
+            }
             notifyWiredAccessoryChanged(0, switchValues,
-                    SW_HEADPHONE_INSERT_BIT | SW_MICROPHONE_INSERT_BIT);
+                    SW_HEADPHONE_INSERT_BIT | SW_MICROPHONE_INSERT_BIT | SW_LINEOUT_INSERT_BIT);
         }
 
         mObserver.init();
@@ -124,13 +130,18 @@ final class WiredAccessoryManager implements WiredAccessoryCallbacks {
         synchronized (mLock) {
             int headset;
             mSwitchValues = (mSwitchValues & ~switchMask) | switchValues;
-            switch (mSwitchValues & (SW_HEADPHONE_INSERT_BIT | SW_MICROPHONE_INSERT_BIT)) {
+            switch (mSwitchValues &
+                (SW_HEADPHONE_INSERT_BIT | SW_MICROPHONE_INSERT_BIT | SW_LINEOUT_INSERT_BIT)) {
                 case 0:
                     headset = 0;
                     break;
 
                 case SW_HEADPHONE_INSERT_BIT:
                     headset = BIT_HEADSET_NO_MIC;
+                    break;
+
+                case SW_LINEOUT_INSERT_BIT:
+                    headset = BIT_LINEOUT;
                     break;
 
                 case SW_HEADPHONE_INSERT_BIT | SW_MICROPHONE_INSERT_BIT:
@@ -146,7 +157,8 @@ final class WiredAccessoryManager implements WiredAccessoryCallbacks {
                     break;
             }
 
-            updateLocked(NAME_H2W, (mHeadsetState & ~(BIT_HEADSET | BIT_HEADSET_NO_MIC)) | headset);
+            updateLocked(NAME_H2W,
+                (mHeadsetState & ~(BIT_HEADSET | BIT_HEADSET_NO_MIC | BIT_LINEOUT)) | headset);
         }
     }
 
@@ -174,7 +186,7 @@ final class WiredAccessoryManager implements WiredAccessoryCallbacks {
         int headsetState = newState & SUPPORTED_HEADSETS;
         int usb_headset_anlg = headsetState & BIT_USB_HEADSET_ANLG;
         int usb_headset_dgtl = headsetState & BIT_USB_HEADSET_DGTL;
-        int h2w_headset = headsetState & (BIT_HEADSET | BIT_HEADSET_NO_MIC);
+        int h2w_headset = headsetState & (BIT_HEADSET | BIT_HEADSET_NO_MIC | BIT_LINEOUT);
         boolean h2wStateChange = true;
         boolean usbStateChange = true;
         if (LOG) Slog.v(TAG, "newName=" + newName
@@ -190,7 +202,7 @@ final class WiredAccessoryManager implements WiredAccessoryCallbacks {
         // reject all suspect transitions: only accept state changes from:
         // - a: 0 headset to 1 headset
         // - b: 1 headset to 0 headset
-        if (h2w_headset == (BIT_HEADSET | BIT_HEADSET_NO_MIC)) {
+        if (h2w_headset == (BIT_HEADSET | BIT_HEADSET_NO_MIC | BIT_LINEOUT)) {
             Log.e(TAG, "Invalid combination, unsetting h2w flag");
             h2wStateChange = false;
         }
@@ -261,6 +273,8 @@ final class WiredAccessoryManager implements WiredAccessoryCallbacks {
                 inDevice = AudioManager.DEVICE_IN_WIRED_HEADSET;
             } else if (headset == BIT_HEADSET_NO_MIC){
                 outDevice = AudioManager.DEVICE_OUT_WIRED_HEADPHONE;
+            } else if (headset == BIT_LINEOUT){
+                outDevice = AudioManager.DEVICE_OUT_LINE;
             } else if (headset == BIT_USB_HEADSET_ANLG) {
                 outDevice = AudioManager.DEVICE_OUT_ANLG_DOCK_HEADSET;
             } else if (headset == BIT_USB_HEADSET_DGTL) {
@@ -345,7 +359,7 @@ final class WiredAccessoryManager implements WiredAccessoryCallbacks {
 
             // Monitor h2w
             if (!mUseDevInputEventForAudioJack) {
-                uei = new UEventInfo(NAME_H2W, BIT_HEADSET, BIT_HEADSET_NO_MIC);
+                uei = new UEventInfo(NAME_H2W, BIT_HEADSET, BIT_HEADSET_NO_MIC, BIT_LINEOUT);
                 if (uei.checkSwitchExists()) {
                     retVal.add(uei);
                 } else {
@@ -354,7 +368,7 @@ final class WiredAccessoryManager implements WiredAccessoryCallbacks {
             }
 
             // Monitor USB
-            uei = new UEventInfo(NAME_USB_AUDIO, BIT_USB_HEADSET_ANLG, BIT_USB_HEADSET_DGTL);
+            uei = new UEventInfo(NAME_USB_AUDIO, BIT_USB_HEADSET_ANLG, BIT_USB_HEADSET_DGTL, 0);
             if (uei.checkSwitchExists()) {
                 retVal.add(uei);
             } else {
@@ -369,11 +383,11 @@ final class WiredAccessoryManager implements WiredAccessoryCallbacks {
             //
             // If the kernel does not have an "hdmi_audio" switch, just fall back on the older
             // "hdmi" switch instead.
-            uei = new UEventInfo(NAME_HDMI_AUDIO, BIT_HDMI_AUDIO, 0);
+            uei = new UEventInfo(NAME_HDMI_AUDIO, BIT_HDMI_AUDIO, 0, 0);
             if (uei.checkSwitchExists()) {
                 retVal.add(uei);
             } else {
-                uei = new UEventInfo(NAME_HDMI, BIT_HDMI_AUDIO, 0);
+                uei = new UEventInfo(NAME_HDMI, BIT_HDMI_AUDIO, 0, 0);
                 if (uei.checkSwitchExists()) {
                     retVal.add(uei);
                 } else {
@@ -414,11 +428,13 @@ final class WiredAccessoryManager implements WiredAccessoryCallbacks {
             private final String mDevName;
             private final int mState1Bits;
             private final int mState2Bits;
+            private final int mStateNbits;
 
-            public UEventInfo(String devName, int state1Bits, int state2Bits) {
+            public UEventInfo(String devName, int state1Bits, int state2Bits, int stateNbits) {
                 mDevName = devName;
                 mState1Bits = state1Bits;
                 mState2Bits = state2Bits;
+                mStateNbits = stateNbits;
             }
 
             public String getDevName() { return mDevName; }
@@ -437,9 +453,10 @@ final class WiredAccessoryManager implements WiredAccessoryCallbacks {
             }
 
             public int computeNewHeadsetState(int headsetState, int switchState) {
-                int preserveMask = ~(mState1Bits | mState2Bits);
+                int preserveMask = ~(mState1Bits | mState2Bits | mStateNbits);
                 int setBits = ((switchState == 1) ? mState1Bits :
-                              ((switchState == 2) ? mState2Bits : 0));
+                              ((switchState == 2) ? mState2Bits :
+                              ((switchState == mStateNbits) ? mStateNbits : 0)));
 
                 return ((headsetState & preserveMask) | setBits);
             }
