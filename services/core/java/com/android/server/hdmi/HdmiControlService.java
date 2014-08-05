@@ -207,10 +207,10 @@ public final class HdmiControlService extends SystemService {
     private List<HdmiPortInfo> mPortInfo;
 
     // Map from path(physical address) to port ID.
-    private final SparseIntArray mPortIdMap = new SparseIntArray();
+    private UnmodifiableSparseIntArray mPortIdMap;
 
     // Map from port ID to HdmiPortInfo.
-    private final SparseArray<HdmiPortInfo> mPortInfoMap = new SparseArray<>();
+    private UnmodifiableSparseArray<HdmiPortInfo> mPortInfoMap;
 
     private HdmiCecMessageValidator mMessageValidator;
 
@@ -360,10 +360,14 @@ public final class HdmiControlService extends SystemService {
             return;
         }
 
+        SparseArray<HdmiPortInfo> portInfoMap = new SparseArray<>();
+        SparseIntArray portIdMap = new SparseIntArray();
         for (HdmiPortInfo info : cecPortInfo) {
-            mPortIdMap.put(info.getAddress(), info.getId());
-            mPortInfoMap.put(info.getId(), info);
+            portIdMap.put(info.getAddress(), info.getId());
+            portInfoMap.put(info.getId(), info);
         }
+        mPortIdMap = new UnmodifiableSparseIntArray(portIdMap);
+        mPortInfoMap = new UnmodifiableSparseArray<>(portInfoMap);
 
         if (mMhlController == null) {
             mPortInfo = Collections.unmodifiableList(Arrays.asList(cecPortInfo));
@@ -397,9 +401,7 @@ public final class HdmiControlService extends SystemService {
      * @param portId HDMI port id
      * @return {@link HdmiPortInfo} for the given port
      */
-    @ServiceThreadOnly
     HdmiPortInfo getPortInfo(int portId) {
-        assertRunOnServiceThread();
         return mPortInfoMap.get(portId, null);
     }
 
@@ -407,9 +409,7 @@ public final class HdmiControlService extends SystemService {
      * Returns the routing path (physical address) of the HDMI port for the given
      * port id.
      */
-    @ServiceThreadOnly
     int portIdToPath(int portId) {
-        assertRunOnServiceThread();
         HdmiPortInfo portInfo = getPortInfo(portId);
         if (portInfo == null) {
             Slog.e(TAG, "Cannot find the port info: " + portId);
@@ -424,16 +424,12 @@ public final class HdmiControlService extends SystemService {
      * the port id to be returned is the ID associated with the port address
      * 0x1000 (1.0.0.0) which is the topmost path of the given routing path.
      */
-    @ServiceThreadOnly
     int pathToPortId(int path) {
-        assertRunOnServiceThread();
         int portAddress = path & Constants.ROUTING_PATH_TOP_MASK;
         return mPortIdMap.get(portAddress, Constants.INVALID_PORT_ID);
     }
 
-    @ServiceThreadOnly
     boolean isValidPortId(int portId) {
-        assertRunOnServiceThread();
         return getPortInfo(portId) != null;
     }
 
@@ -490,9 +486,7 @@ public final class HdmiControlService extends SystemService {
     /**
      * Whether a device of the specified physical address is connected to ARC enabled port.
      */
-    @ServiceThreadOnly
     boolean isConnectedToArcPort(int physicalAddress) {
-        assertRunOnServiceThread();
         int portId = mPortIdMap.get(physicalAddress);
         if (portId != Constants.INVALID_PORT_ID) {
             return mPortInfoMap.get(portId).isArcSupported();
