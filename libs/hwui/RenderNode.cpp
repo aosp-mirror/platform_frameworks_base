@@ -184,7 +184,9 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
         return;
     }
 
-    if (!dirty.isEmpty()) {
+
+    if (dirty.intersect(0, 0, getWidth(), getHeight())) {
+        dirty.roundOut();
         mLayer->updateDeferred(this, dirty.fLeft, dirty.fTop, dirty.fRight, dirty.fBottom);
     }
     // This is not inside the above if because we may have called
