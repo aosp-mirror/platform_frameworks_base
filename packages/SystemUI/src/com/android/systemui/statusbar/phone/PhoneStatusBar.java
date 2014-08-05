@@ -2745,7 +2745,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         pw.print("  mMediaMetadata=");
         pw.print(mMediaMetadata);
         if (mMediaMetadata != null) {
-            pw.print(" title=" + mMediaMetadata.getString(MediaMetadata.METADATA_KEY_TITLE));
+            pw.print(" title=" + mMediaMetadata.getText(MediaMetadata.METADATA_KEY_TITLE));
         }
         pw.println();
 
