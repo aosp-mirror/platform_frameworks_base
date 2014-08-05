@@ -119,6 +119,7 @@ import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.DismissView;
 import com.android.systemui.statusbar.DragDownHelper;
+import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.GestureRecorder;
 import com.android.systemui.statusbar.KeyguardIndicationController;
@@ -696,6 +697,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             }
         });
         mStackScroller.setDismissView(mDismissView);
+        mEmptyShadeView = (EmptyShadeView) LayoutInflater.from(mContext).inflate(
+                R.layout.status_bar_no_notifications, mStackScroller, false);
+        mStackScroller.setEmptyShadeView(mEmptyShadeView);
         mExpandedContents = mStackScroller;
 
         mScrimController = new ScrimController(mStatusBarWindow.findViewById(R.id.scrim_behind),
@@ -1420,6 +1424,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         updateRowStates();
         updateSpeedbump();
         updateClearAll();
+        updateEmptyShadeView();
 
         mNotificationPanel.setQsExpansionEnabled(isDeviceProvisioned() && mUserSetup);
         mShadeUpdates.check();
@@ -1430,6 +1435,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 mState != StatusBarState.KEYGUARD &&
                 mNotificationData.hasActiveClearableNotifications();
         mStackScroller.updateDismissView(showDismissView);
+    }
+
+    private void updateEmptyShadeView() {
+        boolean showEmptyShade =
+                mState != StatusBarState.KEYGUARD &&
+                        mNotificationData.getActiveNotifications().size() == 0;
+        mNotificationPanel.setShadeEmpty(showEmptyShade);
     }
 
     private void updateSpeedbump() {

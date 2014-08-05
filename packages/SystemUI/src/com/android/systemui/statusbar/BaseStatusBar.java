@@ -200,6 +200,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected NotificationOverflowContainer mKeyguardIconOverflowContainer;
     protected DismissView mDismissView;
+    protected EmptyShadeView mEmptyShadeView;
 
     @Override  // NotificationData.Environment
     public boolean isDeviceProvisioned() {
@@ -1405,12 +1406,11 @@ public abstract class BaseStatusBar extends SystemUI implements
         } else {
             mKeyguardIconOverflowContainer.setVisibility(View.GONE);
         }
-        // Move overflow container to second last position.
-        mStackScroller.changeViewPosition(mKeyguardIconOverflowContainer,
-                mStackScroller.getChildCount() - 2);
 
-        // Now move dismissView to the last position.
-        mStackScroller.changeViewPosition(mDismissView, mStackScroller.getChildCount() - 1);
+        mStackScroller.changeViewPosition(mKeyguardIconOverflowContainer,
+                mStackScroller.getChildCount() - 3);
+        mStackScroller.changeViewPosition(mDismissView, mStackScroller.getChildCount() - 2);
+        mStackScroller.changeViewPosition(mEmptyShadeView, mStackScroller.getChildCount() - 1);
     }
 
     private boolean shouldShowOnKeyguard(StatusBarNotification sbn) {
