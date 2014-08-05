@@ -900,6 +900,10 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         mService.invokeTimerRecordingResult(result);
     }
 
+    void announceClearTimerRecordingResult(int result) {
+        mService.invokeClearTimerRecordingResult(result);
+    }
+
     private boolean isMessageForSystemAudio(HdmiCecMessage message) {
         if (message.getSource() != Constants.ADDR_AUDIO_SYSTEM
                 || message.getDestination() != Constants.ADDR_TV
@@ -1227,8 +1231,9 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         //     LocalDeviceTv.onAddressAllocated() -> launchDeviceDiscovery().
         removeAction(DeviceDiscoveryAction.class);
         removeAction(HotplugDetectionAction.class);
-        // Remove one touch record action.
+        // Remove recording actions.
         removeAction(OneTouchRecordAction.class);
+        removeAction(TimerRecordingAction.class);
 
         disableSystemAudioIfExist();
         disableArcIfExist();
@@ -1397,19 +1402,19 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         assertRunOnServiceThread();
         if (!mService.isControlEnabled()) {
             Slog.w(TAG, "Can not start one touch record. CEC control is disabled.");
-            announceTimerRecordingResult(CLEAR_TIMER_STATUS_CEC_DISABLE);
+            announceClearTimerRecordingResult(CLEAR_TIMER_STATUS_CEC_DISABLE);
             return;
         }
 
         if (!checkRecorder(recorderAddress)) {
             Slog.w(TAG, "Invalid recorder address:" + recorderAddress);
-            announceTimerRecordingResult(CLEAR_TIMER_STATUS_CHECK_RECORDER_CONNECTION);
+            announceClearTimerRecordingResult(CLEAR_TIMER_STATUS_CHECK_RECORDER_CONNECTION);
             return;
         }
 
         if (!checkTimerRecordingSource(sourceType, recordSource)) {
             Slog.w(TAG, "Invalid record source." + Arrays.toString(recordSource));
-            announceTimerRecordingResult(CLEAR_TIMER_STATUS_FAIL_TO_CLEAR_SELECTED_SOURCE);
+            announceClearTimerRecordingResult(CLEAR_TIMER_STATUS_FAIL_TO_CLEAR_SELECTED_SOURCE);
             return;
         }
 
@@ -1433,7 +1438,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                 break;
             default:
                 Slog.w(TAG, "Invalid source type:" + recorderAddress);
-                announceTimerRecordingResult(CLEAR_TIMER_STATUS_FAIL_TO_CLEAR_SELECTED_SOURCE);
+                announceClearTimerRecordingResult(CLEAR_TIMER_STATUS_FAIL_TO_CLEAR_SELECTED_SOURCE);
                 return;
 
         }
@@ -1441,7 +1446,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             @Override
             public void onSendCompleted(int error) {
                 if (error != Constants.SEND_RESULT_SUCCESS) {
-                    announceTimerRecordingResult(CLEAR_TIMER_STATUS_FAIL_TO_CLEAR_SELECTED_SOURCE);
+                    announceClearTimerRecordingResult(
+                            CLEAR_TIMER_STATUS_FAIL_TO_CLEAR_SELECTED_SOURCE);
                 }
             }
         });
