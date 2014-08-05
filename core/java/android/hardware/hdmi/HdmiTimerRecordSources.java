@@ -210,7 +210,7 @@ public class HdmiTimerRecordSources {
      * @hide
      */
     @SystemApi
-    public static class Time extends TimeUnit {
+    public static final class Time extends TimeUnit {
         private Time(int hour, int minute) {
             super(hour, minute);
         }
@@ -221,7 +221,7 @@ public class HdmiTimerRecordSources {
      * @hide
      */
     @SystemApi
-    public static class Duration extends TimeUnit {
+    public static final class Duration extends TimeUnit {
         private Duration(int hour, int minute) {
             super(hour, minute);
         }
@@ -298,7 +298,7 @@ public class HdmiTimerRecordSources {
      * @hide
      */
     @SystemApi
-    public static class TimerInfo {
+    public static final class TimerInfo {
         private static final int DAY_OF_MONTH_SIZE = 1;
         private static final int MONTH_OF_YEAR_SIZE = 1;
         private static final int START_TIME_SIZE = 2; // 1byte for hour and 1byte for minute.
@@ -373,7 +373,7 @@ public class HdmiTimerRecordSources {
      * @hide
      */
     @SystemApi
-    public static class TimerRecordSource {
+    public static final class TimerRecordSource {
         private final RecordSource mRecordSource;
         private final TimerInfo mTimerInfo;
 
