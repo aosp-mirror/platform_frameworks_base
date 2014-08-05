@@ -760,7 +760,38 @@ public final class BluetoothDevice implements Parcelable {
             return false;
         }
         try {
-            return sService.createBond(this);
+            return sService.createBond(this, TRANSPORT_AUTO);
+        } catch (RemoteException e) {Log.e(TAG, "", e);}
+        return false;
+    }
+
+    /**
+     * Start the bonding (pairing) process with the remote device using the
+     * specified transport.
+     *
+     * <p>This is an asynchronous call, it will return immediately. Register
+     * for {@link #ACTION_BOND_STATE_CHANGED} intents to be notified when
+     * the bonding process completes, and its result.
+     * <p>Android system services will handle the necessary user interactions
+     * to confirm and complete the bonding process.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}.
+     *
+     * @param transport The transport to use for the pairing procedure.
+     * @return false on immediate error, true if bonding will begin
+     * @throws IllegalArgumentException if an invalid transport was specified
+     * @hide
+     */
+    public boolean createBond(int transport) {
+        if (sService == null) {
+            Log.e(TAG, "BT not enabled. Cannot create bond to Remote Device");
+            return false;
+        }
+        if (TRANSPORT_AUTO > transport || transport > TRANSPORT_LE)
+        {
+            throw new IllegalArgumentException(transport + " is not a valid Bluetooth transport");
+        }
+        try {
+            return sService.createBond(this, transport);
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return false;
     }
