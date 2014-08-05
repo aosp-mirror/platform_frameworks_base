@@ -334,8 +334,10 @@ const char* gFS_Main_ApplyColorOp[3] = {
 const char* gFS_Main_FragColor_HasRoundRectClip =
         "    mediump vec2 fragToLT = roundRectInnerRectLTRB.xy - roundRectPos;\n"
         "    mediump vec2 fragFromRB = roundRectPos - roundRectInnerRectLTRB.zw;\n"
-        "    mediump vec2 dist = max(max(fragToLT, fragFromRB), vec2(0.0, 0.0));\n"
-        "    mediump float linearDist = roundRectRadius - length(dist);\n"
+
+        // divide + multiply by 128 to avoid falling out of range in length() function
+        "    mediump vec2 dist = max(max(fragToLT, fragFromRB), vec2(0.0, 0.0)) / 128.0;\n"
+        "    mediump float linearDist = roundRectRadius - (length(dist) * 128.0);\n"
         "    gl_FragColor *= clamp(linearDist, 0.0, 1.0);\n";
 
 const char* gFS_Main_DebugHighlight =
