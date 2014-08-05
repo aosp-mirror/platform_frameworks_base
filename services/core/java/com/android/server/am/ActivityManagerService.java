@@ -6325,7 +6325,10 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (DEBUG_URI_PERMISSION) Slog.v(TAG,
                 "checkHoldingPermissionsLocked: uri=" + grantUri + " uid=" + uid);
         if (UserHandle.getUserId(uid) != grantUri.sourceUserId) {
-            return false;
+            if (ActivityManager.checkComponentPermission(INTERACT_ACROSS_USERS, uid, -1, true)
+                    != PERMISSION_GRANTED) {
+                return false;
+            }
         }
         return checkHoldingPermissionsInternalLocked(pm, pi, grantUri, uid, modeFlags, true);
     }
