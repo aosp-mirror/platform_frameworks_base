@@ -967,6 +967,12 @@ public final class BridgeContext extends Context {
     }
 
     @Override
+    public Context createApplicationContext(ApplicationInfo application, int flags)
+            throws PackageManager.NameNotFoundException {
+        return null;
+    }
+
+    @Override
     public boolean deleteDatabase(String arg0) {
         // pass
         return false;
