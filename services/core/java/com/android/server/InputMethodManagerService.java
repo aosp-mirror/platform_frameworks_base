@@ -204,7 +204,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private boolean mNotificationShown;
     private final boolean mImeSelectedOnBoot;
 
-    class SessionState {
+    static class SessionState {
         final ClientState client;
         final IInputMethod method;
 
