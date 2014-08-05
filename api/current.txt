@@ -15131,6 +15131,7 @@ package android.media {
     method public long getLong(java.lang.String);
     method public android.media.Rating getRating(java.lang.String);
     method public java.lang.String getString(java.lang.String);
+    method public java.lang.CharSequence getText(java.lang.String);
     method public java.util.Set<java.lang.String> keySet();
     method public int size();
     method public void writeToParcel(android.os.Parcel, int);
@@ -15147,6 +15148,11 @@ package android.media {
     field public static final java.lang.String METADATA_KEY_COMPOSER = "android.media.metadata.COMPOSER";
     field public static final java.lang.String METADATA_KEY_DATE = "android.media.metadata.DATE";
     field public static final java.lang.String METADATA_KEY_DISC_NUMBER = "android.media.metadata.DISC_NUMBER";
+    field public static final java.lang.String METADATA_KEY_DISPLAY_DESCRIPTION = "android.media.metadata.DISPLAY_DESCRIPTION";
+    field public static final java.lang.String METADATA_KEY_DISPLAY_ICON = "android.media.metadata.DISPLAY_ICON";
+    field public static final java.lang.String METADATA_KEY_DISPLAY_ICON_URI = "android.media.metadata.DISPLAY_ICON_URI";
+    field public static final java.lang.String METADATA_KEY_DISPLAY_SUBTITLE = "android.media.metadata.DISPLAY_SUBTITLE";
+    field public static final java.lang.String METADATA_KEY_DISPLAY_TITLE = "android.media.metadata.DISPLAY_TITLE";
     field public static final java.lang.String METADATA_KEY_DURATION = "android.media.metadata.DURATION";
     field public static final java.lang.String METADATA_KEY_GENRE = "android.media.metadata.GENRE";
     field public static final java.lang.String METADATA_KEY_NUM_TRACKS = "android.media.metadata.NUM_TRACKS";
@@ -15166,6 +15172,7 @@ package android.media {
     method public android.media.MediaMetadata.Builder putLong(java.lang.String, long);
     method public android.media.MediaMetadata.Builder putRating(java.lang.String, android.media.Rating);
     method public android.media.MediaMetadata.Builder putString(java.lang.String, java.lang.String);
+    method public android.media.MediaMetadata.Builder putText(java.lang.String, java.lang.CharSequence);
   }
 
   public abstract deprecated class MediaMetadataEditor {

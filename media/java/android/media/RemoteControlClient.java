@@ -473,7 +473,7 @@ import java.lang.IllegalArgumentException;
                 String metadataKey = MediaMetadata.getKeyFromMetadataEditorKey(key);
                 // But just in case, don't add things we don't understand
                 if (metadataKey != null) {
-                    mMetadataBuilder.putString(metadataKey, value);
+                    mMetadataBuilder.putText(metadataKey, value);
                 }
             }
 
