@@ -83,11 +83,13 @@ public class TimerRecordingAction extends FeatureAction {
             @Override
             public void onSendCompleted(int error) {
                 if (error != Constants.SEND_RESULT_SUCCESS) {
-                    mState = STATE_WAITING_FOR_TIMER_STATUS;
-                    addTimer(mState, TIMER_STATUS_TIMEOUT_MS);
+                    tv().announceTimerRecordingResult(
+                            TIMER_RECORDING_RESULT_EXTRA_CHECK_RECORDER_CONNECTION);
                     finish();
                     return;
                 }
+                mState = STATE_WAITING_FOR_TIMER_STATUS;
+                addTimer(mState, TIMER_STATUS_TIMEOUT_MS);
             }
         });
     }
@@ -128,7 +130,7 @@ public class TimerRecordingAction extends FeatureAction {
 
     private boolean handleFeatureAbort(HdmiCecMessage cmd) {
         byte[] params = cmd.getParams();
-        int messageType = params[0];
+        int messageType = params[0] & 0xFF;
         switch (messageType) {
             case Constants.MESSAGE_SET_DIGITAL_TIMER: // fall through
             case Constants.MESSAGE_SET_ANALOG_TIMER: // fall through
@@ -137,7 +139,7 @@ public class TimerRecordingAction extends FeatureAction {
             default:
                 return false;
         }
-        int reason = params[1];
+        int reason = params[1] & 0xFF;
         Slog.i(TAG, "[Feature Abort] for " + messageType + " reason:" + reason);
         tv().announceTimerRecordingResult(TIMER_RECORDING_RESULT_EXTRA_CHECK_RECORDER_CONNECTION);
         finish();
