@@ -2029,6 +2029,11 @@ public class TextToSpeech {
                             mParams.putString(Engine.KEY_PARAM_LANGUAGE, defaultLanguage[0]);
                             mParams.putString(Engine.KEY_PARAM_COUNTRY, defaultLanguage[1]);
                             mParams.putString(Engine.KEY_PARAM_VARIANT, defaultLanguage[2]);
+
+                            // Get the default voice for the locale.
+                            String defaultVoiceName = mService.getDefaultVoiceNameFor(
+                                defaultLanguage[0], defaultLanguage[1], defaultLanguage[2]);
+                            mParams.putString(Engine.KEY_PARAM_VOICE_NAME, defaultVoiceName);
                         }
 
                         Log.i(TAG, "Set up connection to " + mName);
