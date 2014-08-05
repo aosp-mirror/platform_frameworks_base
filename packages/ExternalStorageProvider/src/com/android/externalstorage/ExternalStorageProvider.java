@@ -18,6 +18,7 @@ package com.android.externalstorage;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.database.MatrixCursor;
@@ -28,7 +29,9 @@ import android.os.CancellationSignal;
 import android.os.Environment;
 import android.os.FileObserver;
 import android.os.FileUtils;
+import android.os.Handler;
 import android.os.ParcelFileDescriptor;
+import android.os.ParcelFileDescriptor.OnCloseListener;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageVolume;
 import android.provider.DocumentsContract;
@@ -80,6 +83,7 @@ public class ExternalStorageProvider extends DocumentsProvider {
     private static final String ROOT_ID_PRIMARY_EMULATED = "primary";
 
     private StorageManager mStorageManager;
+    private Handler mHandler;
 
     private final Object mRootsLock = new Object();
 
@@ -96,6 +100,7 @@ public class ExternalStorageProvider extends DocumentsProvider {
     @Override
     public boolean onCreate() {
         mStorageManager = (StorageManager) getContext().getSystemService(Context.STORAGE_SERVICE);
+        mHandler = new Handler();
 
         mRoots = Lists.newArrayList();
         mIdToRoot = Maps.newHashMap();
@@ -422,7 +427,25 @@ public class ExternalStorageProvider extends DocumentsProvider {
             String documentId, String mode, CancellationSignal signal)
             throws FileNotFoundException {
         final File file = getFileForDocId(documentId);
-        return ParcelFileDescriptor.open(file, ParcelFileDescriptor.parseMode(mode));
+        final int pfdMode = ParcelFileDescriptor.parseMode(mode);
+        if (pfdMode == ParcelFileDescriptor.MODE_READ_ONLY) {
+            return ParcelFileDescriptor.open(file, pfdMode);
+        } else {
+            try {
+                // When finished writing, kick off media scanner
+                return ParcelFileDescriptor.open(file, pfdMode, mHandler, new OnCloseListener() {
+                    @Override
+                    public void onClose(IOException e) {
+                        final Intent intent = new Intent(
+                                Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+                        intent.setData(Uri.fromFile(file));
+                        getContext().sendBroadcast(intent);
+                    }
+                });
+            } catch (IOException e) {
+                throw new FileNotFoundException("Failed to open for writing: " + e);
+            }
+        }
     }
 
     @Override
