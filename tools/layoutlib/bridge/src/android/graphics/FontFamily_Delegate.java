@@ -24,6 +24,7 @@ import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 import android.content.res.AssetManager;
 
 import java.awt.Font;
+import java.awt.FontFormatException;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -152,14 +153,20 @@ public class FontFamily_Delegate {
             try {
                 return Font.createFont(Font.TRUETYPE_FONT, f);
             } catch (Exception e) {
+                if (path.endsWith(".otf") && e instanceof FontFormatException) {
+                    // If we aren't able to load an Open Type font, don't log a warning just yet.
+                    // We wait for a case where font is being used. Only then we try to log the
+                    // warning.
+                    return null;
+                }
                 Bridge.getLog().fidelityWarning(LayoutLog.TAG_BROKEN,
                         String.format("Unable to load font %1$s", relativePath),
-                        e /*throwable*/, null /*data*/);
+                        e, null);
             }
         } else {
             Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
                     "Only platform fonts located in " + SYSTEM_FONTS + "can be loaded.",
-                    null /*throwable*/, null /*data*/);
+                    null, null);
         }
 
         return null;
@@ -206,7 +213,7 @@ public class FontFamily_Delegate {
     @LayoutlibDelegate
     /*package*/ static boolean nAddFontFromAsset(long nativeFamily, AssetManager mgr, String path) {
         Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
-                "FontFamily.addFontFromAsset is not supported.", null /*throwable*/, null /*data*/);
+                "FontFamily.addFontFromAsset is not supported.", null, null);
         return false;
     }
 

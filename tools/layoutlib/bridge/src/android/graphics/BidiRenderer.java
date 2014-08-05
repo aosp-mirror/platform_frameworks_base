@@ -16,6 +16,9 @@
 
 package android.graphics;
 
+import com.android.ide.common.rendering.api.LayoutLog;
+import com.android.layoutlib.bridge.Bridge;
+
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Toolkit;
@@ -58,6 +61,8 @@ public class BidiRenderer {
     private final Graphics2D mGraphics;
     private final Paint_Delegate mPaint;
     private char[] mText;
+    // This List can contain nulls. A null font implies that the we weren't able to load the font
+    // properly. So, if we encounter a situation where we try to use that font, log a warning.
     private List<Font> mFonts;
     // Bounds of the text drawn so far.
     private RectF mBounds;
@@ -169,6 +174,10 @@ public class BidiRenderer {
             // fonts to check which one can draw it.
             int charCount = Character.isHighSurrogate(mText[start]) ? 2 : 1;
             for (Font font : mFonts) {
+                if (font == null) {
+                    logFontWarning();
+                    continue;
+                }
                 canDisplayUpTo = font.canDisplayUpTo(mText, start, start + charCount);
                 if (canDisplayUpTo == -1) {
                     render(start, start+charCount, font, flag, advances, advancesIndex, draw);
@@ -189,6 +198,12 @@ public class BidiRenderer {
                 advancesIndex += charCount;
             }
         }
+    }
+
+    private static void logFontWarning() {
+        Bridge.getLog().fidelityWarning(LayoutLog.TAG_BROKEN,
+                "Some fonts could not be loaded. The rendering may not be perfect. " +
+                        "Try running the IDE with JRE 7.", null, null);
     }
 
     /**
@@ -266,6 +281,10 @@ public class BidiRenderer {
     private static void setScriptFont(char[] text, ScriptRun run,
             List<Font> fonts) {
         for (Font font : fonts) {
+            if (font == null) {
+                logFontWarning();
+                continue;
+            }
             if (font.canDisplayUpTo(text, run.start, run.limit) == -1) {
                 run.font = font;
                 return;
