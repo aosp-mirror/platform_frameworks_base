@@ -450,7 +450,13 @@ public class NotificationPanelView extends PanelView implements
                 mIntercepting = false;
                 break;
         }
-        return !mQsExpanded && super.onInterceptTouchEvent(event);
+
+        // Allow closing the whole panel when in SHADE state.
+        if (mStatusBarState == StatusBarState.SHADE) {
+            return super.onInterceptTouchEvent(event);
+        } else {
+            return !mQsExpanded && super.onInterceptTouchEvent(event);
+        }
     }
 
     private void resetDownStates(MotionEvent event) {
@@ -503,7 +509,7 @@ public class NotificationPanelView extends PanelView implements
             return true;
         }
         if (event.getActionMasked() == MotionEvent.ACTION_DOWN && getExpandedFraction() == 1f
-                && mStatusBar.getBarState() != StatusBarState.KEYGUARD) {
+                && mStatusBar.getBarState() != StatusBarState.KEYGUARD && !mQsExpanded) {
 
             // Down in the empty area while fully expanded - go to QS.
             mQsTracking = true;
@@ -516,7 +522,7 @@ public class NotificationPanelView extends PanelView implements
         if (mExpandedHeight != 0) {
             handleQsDown(event);
         }
-        if (!mTwoFingerQsExpand && (mQsTracking || mQsExpanded)) {
+        if (!mTwoFingerQsExpand && mQsTracking) {
             onQsTouch(event);
             if (!mConflictingQsExpansionGesture) {
                 return true;
@@ -539,9 +545,15 @@ public class NotificationPanelView extends PanelView implements
         return true;
     }
 
+    private boolean isInQsArea(float x, float y) {
+        return mStatusBarState != StatusBarState.SHADE
+                || y <= mNotificationStackScroller.getBottomMostNotificationBottom()
+                || y <= mQsContainer.getY() + mQsContainer.getHeight();
+    }
+
     private void handleQsDown(MotionEvent event) {
         if (event.getActionMasked() == MotionEvent.ACTION_DOWN
-                && shouldQuickSettingsIntercept(event.getX(), event.getY(), 0)) {
+                && shouldQuickSettingsIntercept(event.getX(), event.getY(), -1)) {
             mQsTracking = true;
             onQsExpansionStarted();
             mInitialHeightOnTouch = mQsExpansionHeight;
@@ -627,8 +639,9 @@ public class NotificationPanelView extends PanelView implements
     }
 
     @Override
-    public void onOverscrolled(int amount) {
-        if (mIntercepting) {
+    public void onOverscrolled(float lastTouchX, float lastTouchY, int amount) {
+        if (mIntercepting && shouldQuickSettingsIntercept(lastTouchX, lastTouchY,
+                -1 /* yDiff: Not relevant here */)) {
             onQsExpansionStarted(amount);
             mInitialHeightOnTouch = mQsExpansionHeight;
             mInitialTouchY = mLastTouchY;
@@ -1037,7 +1050,7 @@ public class NotificationPanelView extends PanelView implements
         boolean onHeader = x >= header.getLeft() && x <= header.getRight()
                 && y >= header.getTop() && y <= header.getBottom();
         if (mQsExpanded) {
-            return onHeader || (mScrollView.isScrolledToBottom() && yDiff < 0);
+            return onHeader || (mScrollView.isScrolledToBottom() && yDiff < 0) && isInQsArea(x, y);
         } else {
             return onHeader;
         }
@@ -1087,8 +1100,9 @@ public class NotificationPanelView extends PanelView implements
         }
         if (!isInSettings()) {
             return mNotificationStackScroller.isScrolledToBottom();
+        } else {
+            return mScrollView.isScrolledToBottom();
         }
-        return super.isScrolledToBottom();
     }
 
     @Override
@@ -1353,6 +1367,9 @@ public class NotificationPanelView extends PanelView implements
         if (mStatusBar.getBarState() == StatusBarState.KEYGUARD
                 || mStatusBar.getBarState() == StatusBarState.SHADE_LOCKED) {
             mAfforanceHelper.animateHideLeftRightIcon();
+        }
+        if (mQsExpanded) {
+            mTwoFingerQsExpand = true;
         }
     }
 
