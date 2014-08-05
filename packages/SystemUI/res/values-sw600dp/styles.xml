@@ -29,4 +29,20 @@
         <item name="android:layout_width">@dimen/notification_panel_width</item>
         <item name="android:layout_gravity">center_horizontal</item>
     </style>
+
+    <style name="SearchPanelCard">
+        <item name="android:layout_width">550dp</item>
+        <item name="android:layout_height">@dimen/search_panel_card_height</item>
+        <item name="android:layout_gravity">center_horizontal|bottom</item>
+    </style>
+
+    <style name="SearchPanelLogo">
+        <item name="android:layout_gravity">top|center_horizontal</item>
+    </style>
+
+    <style name="SearchPanelScrim">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/search_panel_scrim_height</item>
+        <item name="android:layout_gravity">bottom</item>
+    </style>
 </resources>
