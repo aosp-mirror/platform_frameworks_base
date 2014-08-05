@@ -114,19 +114,36 @@ public final class HdmiTvClient extends HdmiClient {
     /**
      * Select a CEC logical device to be a new active source.
      *
-     * @param logicalAddress
-     * @param callback
+     * @param logicalAddress logical address of the device to select
+     * @param callback callback to get the result with
+     * @throws {@link IllegalArgumentException} if the {@code callback} is null
      */
     public void deviceSelect(int logicalAddress, @NonNull SelectCallback callback) {
         if (callback == null) {
             throw new IllegalArgumentException("callback must not be null.");
         }
-
-        // TODO: Replace SelectCallback with PartialResult.
         try {
             mService.deviceSelect(logicalAddress, getCallbackWrapper(callback));
         } catch (RemoteException e) {
             Log.e(TAG, "failed to select device: ", e);
+        }
+    }
+
+    /**
+     * Select a HDMI port to be a new route path.
+     *
+     * @param portId HDMI port to select
+     * @param callback callback to get the result with
+     * @throws {@link IllegalArgumentException} if the {@code callback} is null
+     */
+    public void portSelect(int portId, @NonNull SelectCallback callback) {
+        if (callback == null) {
+            throw new IllegalArgumentException("Callback must not be null");
+        }
+        try {
+            mService.portSelect(portId, getCallbackWrapper(callback));
+        } catch (RemoteException e) {
+            Log.e(TAG, "failed to select port: ", e);
         }
     }
 

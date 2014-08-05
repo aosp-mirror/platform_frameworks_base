@@ -245,7 +245,30 @@ public final class HdmiControlManager {
     }
 
     /**
-     * Gets an object that represents a HDMI-CEC logical device of type playback on the system.
+     * Gets an object that represents an HDMI-CEC logical device of a specified type.
+     *
+     * @param type CEC device type
+     * @return {@link HdmiClient} instance. {@code null} on failure.
+     * @see {@link HdmiCecDeviceInfo#DEVICE_PLAYBACK}
+     * @see {@link HdmiCecDeviceInfo#DEVICE_TV}
+     */
+    @Nullable
+    public HdmiClient getClient(int type) {
+        if (mService == null) {
+            return null;
+        }
+        switch (type) {
+            case HdmiCecDeviceInfo.DEVICE_TV:
+                return mHasTvDevice ? new HdmiTvClient(mService) : null;
+            case HdmiCecDeviceInfo.DEVICE_PLAYBACK:
+                return mHasPlaybackDevice ? new HdmiPlaybackClient(mService) : null;
+            default:
+                return null;
+        }
+    }
+
+    /**
+     * Gets an object that represents an HDMI-CEC logical device of type playback on the system.
      *
      * <p>Used to send HDMI control messages to other devices like TV or audio amplifier through
      * HDMI bus. It is also possible to communicate with other logical devices hosted in the same
@@ -255,14 +278,11 @@ public final class HdmiControlManager {
      */
     @Nullable
     public HdmiPlaybackClient getPlaybackClient() {
-        if (mService == null || !mHasPlaybackDevice) {
-            return null;
-        }
-        return new HdmiPlaybackClient(mService);
+        return (HdmiPlaybackClient) getClient(HdmiCecDeviceInfo.DEVICE_PLAYBACK);
     }
 
     /**
-     * Gets an object that represents a HDMI-CEC logical device of type TV on the system.
+     * Gets an object that represents an HDMI-CEC logical device of type TV on the system.
      *
      * <p>Used to send HDMI control messages to other devices and manage them through
      * HDMI bus. It is also possible to communicate with other logical devices hosted in the same
@@ -272,10 +292,7 @@ public final class HdmiControlManager {
      */
     @Nullable
     public HdmiTvClient getTvClient() {
-        if (mService == null || !mHasTvDevice) {
-                return null;
-        }
-        return new HdmiTvClient(mService);
+        return (HdmiTvClient) getClient(HdmiCecDeviceInfo.DEVICE_TV);
     }
 
     /**
