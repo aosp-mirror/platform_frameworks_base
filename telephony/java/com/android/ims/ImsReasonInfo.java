@@ -216,6 +216,7 @@ public class ImsReasonInfo implements Parcelable {
     public static final int CODE_UT_NOT_SUPPORTED = 801;
     public static final int CODE_UT_SERVICE_UNAVAILABLE = 802;
     public static final int CODE_UT_OPERATION_NOT_ALLOWED = 803;
+    public static final int CODE_UT_NETWORK_ERROR = 804;
     public static final int CODE_UT_CB_PASSWORD_MISMATCH = 821;
 
     /**
