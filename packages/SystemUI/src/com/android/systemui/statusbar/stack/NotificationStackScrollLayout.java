@@ -1520,7 +1520,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         super.onViewAdded(child);
         mStackScrollAlgorithm.notifyChildrenChanged(this);
         ((ExpandableView) child).setOnHeightChangedListener(this);
-        generateAddAnimation(child, false /* fromMoreCard */);
+        generateAddAnimation(child);
     }
 
     public void setAnimationsEnabled(boolean animationsEnabled) {
@@ -1535,16 +1535,18 @@ public class NotificationStackScrollLayout extends ViewGroup
      * Generate an animation for an added child view.
      *
      * @param child The view to be added.
-     * @param fromMoreCard Whether this add is coming from the "more" card on lockscreen.
      */
-    public void generateAddAnimation(View child, boolean fromMoreCard) {
+    private void generateAddAnimation(View child) {
         if (mIsExpanded && mAnimationsEnabled && !mChangePositionInProgress) {
             // Generate Animations
             mChildrenToAddAnimated.add(child);
-            if (fromMoreCard) {
-                mFromMoreCardAdditions.add(child);
-            }
             mNeedsAnimation = true;
+        }
+    }
+
+    public void notifyAddFromMoreCard(View v) {
+        if (mChildrenToAddAnimated.contains(v)) {
+            mFromMoreCardAdditions.add(v);
         }
     }
 
