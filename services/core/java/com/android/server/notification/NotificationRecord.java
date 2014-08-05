@@ -211,7 +211,7 @@ public final class NotificationRecord {
     }
 
     public void setPackagePriority(int packagePriority) {
-      mPackagePriority = packagePriority;
+        mPackagePriority = packagePriority;
     }
 
     public int getPackagePriority() {
