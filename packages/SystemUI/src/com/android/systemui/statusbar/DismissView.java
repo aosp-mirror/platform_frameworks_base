@@ -19,22 +19,17 @@ package com.android.systemui.statusbar;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
-import android.view.animation.PathInterpolator;
-import android.widget.Button;
-import android.widget.TextView;
+
 import com.android.systemui.R;
+import com.android.systemui.statusbar.phone.PhoneStatusBar;
 
 public class DismissView extends ExpandableView {
 
-    private Button mClearAllText;
+    private View mClearAllIcon;
     private boolean mIsVisible;
     private boolean mAnimating;
     private boolean mWillBeGone;
-
-    private final Interpolator mAppearInterpolator = new PathInterpolator(0f, 0.2f, 1f, 1f);
-    private final Interpolator mDisappearInterpolator = new PathInterpolator(0f, 0f, 0.8f, 1f);
 
     public DismissView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -43,7 +38,7 @@ public class DismissView extends ExpandableView {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mClearAllText = (Button) findViewById(R.id.dismiss_text);
+        mClearAllIcon = findViewById(R.id.dismiss_text);
         setInvisible();
     }
 
@@ -83,12 +78,12 @@ public class DismissView extends ExpandableView {
             float endValue = nowVisible ? 1.0f : 0.0f;
             Interpolator interpolator;
             if (nowVisible) {
-                interpolator = mAppearInterpolator;
+                interpolator = PhoneStatusBar.ALPHA_IN;
             } else {
-                interpolator = mDisappearInterpolator;
+                interpolator = PhoneStatusBar.ALPHA_OUT;
             }
             mAnimating = true;
-            mClearAllText.animate()
+            mClearAllIcon.animate()
                     .alpha(endValue)
                     .setInterpolator(interpolator)
                     .setDuration(260)
@@ -111,7 +106,7 @@ public class DismissView extends ExpandableView {
     }
 
     public void setInvisible() {
-        mClearAllText.setAlpha(0.0f);
+        mClearAllIcon.setAlpha(0.0f);
         mIsVisible = false;
     }
 
@@ -134,7 +129,7 @@ public class DismissView extends ExpandableView {
     }
 
     public void setOnButtonClickListener(OnClickListener onClickListener) {
-        mClearAllText.setOnClickListener(onClickListener);
+        mClearAllIcon.setOnClickListener(onClickListener);
     }
 
     @Override
@@ -143,7 +138,7 @@ public class DismissView extends ExpandableView {
     }
 
     public void cancelAnimation() {
-        mClearAllText.animate().cancel();
+        mClearAllIcon.animate().cancel();
     }
 
     public boolean willBeGone() {
