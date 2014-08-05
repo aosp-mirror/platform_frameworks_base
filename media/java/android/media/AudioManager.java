@@ -834,6 +834,7 @@ public class AudioManager {
     /**
      * Get the stream type whose volume is driving the UI sounds volume.
      * UI sounds are screen lock/unlock, camera shutter, key clicks...
+     * It is assumed that this stream type is also tied to ringer mode changes.
      * @hide
      */
     public int getMasterStreamType() {
