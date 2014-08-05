@@ -73,6 +73,12 @@ public final class HdmiControlService extends SystemService {
 
     static final String PERMISSION = "android.permission.HDMI_CEC";
 
+    // The reason code to initiate intializeCec().
+    static final int INITIATED_BY_ENABLE_CEC = 0;
+    static final int INITIATED_BY_BOOT_UP = 1;
+    static final int INITIATED_BY_SCREEN_ON = 2;
+    static final int INITIATED_BY_WAKE_UP_MESSAGE = 3;
+
     /**
      * Interface to report send result.
      */
@@ -216,6 +222,9 @@ public final class HdmiControlService extends SystemService {
     @ServiceThreadOnly
     private boolean mStandbyMessageReceived = false;
 
+    @ServiceThreadOnly
+    private boolean mWakeUpMessageReceived = false;
+
     public HdmiControlService(Context context) {
         super(context);
         mLocalDevices = HdmiUtils.asImmutableList(getContext().getResources().getIntArray(
@@ -237,7 +246,7 @@ public final class HdmiControlService extends SystemService {
 
             // TODO: load value for mHdmiControlEnabled from preference.
             if (mHdmiControlEnabled) {
-                initializeCec(true);
+                initializeCec(INITIATED_BY_BOOT_UP);
             }
         } else {
             Slog.i(TAG, "Device does not support HDMI-CEC.");
@@ -264,6 +273,11 @@ public final class HdmiControlService extends SystemService {
      * Called when the initialization of local devices is complete.
      */
     private void onInitializeCecComplete() {
+        if (mPowerStatus == HdmiControlManager.POWER_STATUS_TRANSIENT_TO_ON) {
+            mPowerStatus = HdmiControlManager.POWER_STATUS_ON;
+        }
+        mWakeUpMessageReceived = false;
+
         if (isTvDevice()) {
             mCecController.setOption(HdmiTvClient.OPTION_CEC_AUTO_WAKEUP,
                     tv().getAutoWakeup() ? HdmiTvClient.ENABLED : HdmiTvClient.DISABLED);
@@ -280,18 +294,18 @@ public final class HdmiControlService extends SystemService {
         Global.putInt(cr, key, value ? Constants.TRUE : Constants.FALSE);
     }
 
-    private void initializeCec(boolean fromBootup) {
+    private void initializeCec(int initiatedBy) {
         mCecController.setOption(HdmiTvClient.OPTION_CEC_SERVICE_CONTROL,
                 HdmiTvClient.ENABLED);
-        initializeLocalDevices(mLocalDevices, fromBootup);
+        initializeLocalDevices(mLocalDevices, initiatedBy);
     }
 
     @ServiceThreadOnly
-    private void initializeLocalDevices(final List<Integer> deviceTypes, final boolean fromBootup) {
+    private void initializeLocalDevices(final List<Integer> deviceTypes, final int initiatedBy) {
         assertRunOnServiceThread();
         // A container for [Logical Address, Local device info].
         final SparseArray<HdmiCecLocalDevice> devices = new SparseArray<>();
-        final SparseIntArray finished = new SparseIntArray();
+        final int[] finished = new int[1];
         clearLocalDevices();
         for (int type : deviceTypes) {
             final HdmiCecLocalDevice localDevice = HdmiCecLocalDevice.create(this, type);
@@ -309,14 +323,11 @@ public final class HdmiControlService extends SystemService {
                         mCecController.addLogicalAddress(logicalAddress);
                         devices.append(logicalAddress, localDevice);
                     }
-                    finished.append(deviceType, logicalAddress);
 
                     // Address allocation completed for all devices. Notify each device.
-                    if (deviceTypes.size() == finished.size()) {
-                        if (mPowerStatus == HdmiControlManager.POWER_STATUS_TRANSIENT_TO_ON) {
-                            mPowerStatus = HdmiControlManager.POWER_STATUS_ON;
-                        }
-                        notifyAddressAllocated(devices, fromBootup);
+                    if (deviceTypes.size() == ++finished[0]) {
+                        onInitializeCecComplete();
+                        notifyAddressAllocated(devices, initiatedBy);
                     }
                 }
             });
@@ -324,15 +335,13 @@ public final class HdmiControlService extends SystemService {
     }
 
     @ServiceThreadOnly
-    private void notifyAddressAllocated(SparseArray<HdmiCecLocalDevice> devices,
-            boolean fromBootup) {
+    private void notifyAddressAllocated(SparseArray<HdmiCecLocalDevice> devices, int initiatedBy) {
         assertRunOnServiceThread();
         for (int i = 0; i < devices.size(); ++i) {
             int address = devices.keyAt(i);
             HdmiCecLocalDevice device = devices.valueAt(i);
-            device.handleAddressAllocated(address, fromBootup);
+            device.handleAddressAllocated(address, initiatedBy);
         }
-        onInitializeCecComplete();
     }
 
     // Initialize HDMI port information. Combine the information from CEC and MHL HAL and
@@ -1412,6 +1421,7 @@ public final class HdmiControlService extends SystemService {
     @ServiceThreadOnly
     void wakeUp() {
         assertRunOnServiceThread();
+        mWakeUpMessageReceived = true;
         PowerManager pm = (PowerManager) getContext().getSystemService(Context.POWER_SERVICE);
         pm.wakeUp(SystemClock.uptimeMillis());
         // PowerManger will send the broadcast Intent.ACTION_SCREEN_ON and after this gets
@@ -1434,7 +1444,11 @@ public final class HdmiControlService extends SystemService {
         mPowerStatus = HdmiControlManager.POWER_STATUS_TRANSIENT_TO_ON;
         if (mCecController != null) {
             if (mHdmiControlEnabled) {
-                initializeCec(true);
+                int startReason = INITIATED_BY_SCREEN_ON;
+                if (mWakeUpMessageReceived) {
+                    startReason = INITIATED_BY_WAKE_UP_MESSAGE;
+                }
+                initializeCec(startReason);
             }
         } else {
             Slog.i(TAG, "Device does not support HDMI-CEC.");
@@ -1551,7 +1565,7 @@ public final class HdmiControlService extends SystemService {
         }
 
         if (enabled) {
-            initializeCec(false);
+            initializeCec(INITIATED_BY_ENABLE_CEC);
         } else {
             disableDevices(new PendingActionClearedCallback() {
                 @Override
