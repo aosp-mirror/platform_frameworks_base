@@ -42,6 +42,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
+import java.text.SimpleDateFormat;
 
 /** This class calls its monitor every minute. Killing this process if they don't return **/
 public class Watchdog extends Thread {
@@ -81,6 +83,7 @@ public class Watchdog extends Thread {
     int mPhonePid;
     IActivityController mController;
     boolean mAllowRestart = true;
+    SimpleDateFormat mTraceDateFormat = new SimpleDateFormat("dd_MMM_HH_mm_ss.SSS");
 
     /**
      * Used for checking status of handle threads and scheduling monitor callbacks.
@@ -419,6 +422,23 @@ public class Watchdog extends Thread {
             doSysRq('w');
             doSysRq('l');
 
+            String tracesPath = SystemProperties.get("dalvik.vm.stack-trace-file", null);
+            String traceFileNameAmendment = "_SystemServer_WDT" + mTraceDateFormat.format(new Date());
+
+            if (tracesPath != null && tracesPath.length() != 0) {
+                File traceRenameFile = new File(tracesPath);
+                String newTracesPath;
+                int lpos = tracesPath.lastIndexOf (".");
+                if (-1 != lpos)
+                    newTracesPath = tracesPath.substring (0, lpos) + traceFileNameAmendment + tracesPath.substring (lpos);
+                else
+                    newTracesPath = tracesPath + traceFileNameAmendment;
+                traceRenameFile.renameTo(new File(newTracesPath));
+                tracesPath = newTracesPath;
+            }
+
+            final File newFd = new File(tracesPath);
+
             // Try to add the error to the dropbox, but assuming that the ActivityManager
             // itself may be deadlocked.  (which has happened, causing this statement to
             // deadlock and the watchdog as a whole to be ineffective)
@@ -426,7 +446,7 @@ public class Watchdog extends Thread {
                     public void run() {
                         mActivity.addErrorToDropBox(
                                 "watchdog", null, "system_server", null, null,
-                                subject, null, stack, null);
+                                subject, null, newFd, null);
                     }
                 };
             dropboxThread.start();
