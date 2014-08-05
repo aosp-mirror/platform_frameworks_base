@@ -2138,7 +2138,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // Cancel any pending meta actions if we see any other keys being pressed between the down
         // of the meta key and its corresponding up.
-        if (mPendingMetaAction && keyCode != KeyEvent.KEYCODE_META_LEFT) {
+        if (mPendingMetaAction && KeyEvent.isMetaKey(keyCode)) {
             mPendingMetaAction = false;
         }
 
@@ -2343,11 +2343,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         UserHandle.CURRENT_OR_SELF);
             }
             return -1;
-        } else if (keyCode == KeyEvent.KEYCODE_META_LEFT) {
+        } else if (KeyEvent.isMetaKey(keyCode)) {
             if (down) {
                 mPendingMetaAction = true;
             } else if (mPendingMetaAction) {
-                mPendingMetaAction = false;
                 launchAssistAction();
             }
             return -1;
@@ -2426,7 +2425,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (down && repeatCount == 0 && keyCode == KeyEvent.KEYCODE_TAB) {
             if (mRecentAppsHeldModifiers == 0 && !keyguardOn) {
                 final int shiftlessModifiers = event.getModifiers() & ~KeyEvent.META_SHIFT_MASK;
-                if (KeyEvent.metaStateHasModifiers(shiftlessModifiers, KeyEvent.META_ALT_ON)) {
+                if (KeyEvent.metaStateHasModifiers(shiftlessModifiers, KeyEvent.META_ALT_ON)
+                        || KeyEvent.metaStateHasModifiers(
+                        shiftlessModifiers, KeyEvent.META_META_ON)) {
                     mRecentAppsHeldModifiers = shiftlessModifiers;
                     showRecentApps(true);
                     return -1;
@@ -2459,7 +2460,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         // Reserve all the META modifier combos for system behavior
-        if ((metaState & KeyEvent.META_META_LEFT_ON) != 0) {
+        if ((metaState & KeyEvent.META_META_ON) != 0) {
             return -1;
         }
 
