@@ -96,4 +96,12 @@ interface IImsCallSessionListener {
      */
     void callSessionUssdMessageReceived(in IImsCallSession session,
             int mode, String ussdMessage);
+
+    /**
+     * Notifies of handover information for this call
+     */
+    void callSessionHandover(in IImsCallSession session,
+            in int srcAccessTech, in int targetAccessTech, in ImsReasonInfo reasonInfo);
+    void callSessionHandoverFailed(in IImsCallSession session,
+            in int srcAccessTech, in int targetAccessTech, in ImsReasonInfo reasonInfo);
 }
