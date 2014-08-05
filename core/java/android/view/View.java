@@ -14647,8 +14647,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         } else  if (layerType == LAYER_TYPE_NONE) {
                             final int scrollX = hasDisplayList ? 0 : sx;
                             final int scrollY = hasDisplayList ? 0 : sy;
-                            canvas.saveLayerAlpha(scrollX, scrollY, scrollX + mRight - mLeft,
-                                    scrollY + mBottom - mTop, multipliedAlpha, layerFlags);
+                            canvas.saveLayerAlpha(scrollX, scrollY,
+                                    scrollX + (mRight - mLeft), scrollY + (mBottom - mTop),
+                                    multipliedAlpha, layerFlags);
                         }
                     } else {
                         // Alpha is handled by the child directly, clobber the layer's alpha
@@ -14661,18 +14662,28 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mPrivateFlags &= ~PFLAG_ALPHA_SET;
         }
 
-        if ((flags & ViewGroup.FLAG_CLIP_CHILDREN) == ViewGroup.FLAG_CLIP_CHILDREN &&
-                !usingRenderNodeProperties && cache == null) {
-            if (offsetForScroll) {
-                canvas.clipRect(sx, sy, sx + (mRight - mLeft), sy + (mBottom - mTop));
-            } else {
-                if (!scalingRequired || cache == null) {
-                    canvas.clipRect(0, 0, mRight - mLeft, mBottom - mTop);
+        if (!usingRenderNodeProperties) {
+            // apply clips directly, since RenderNode won't do it for this draw
+            if ((flags & ViewGroup.FLAG_CLIP_CHILDREN) == ViewGroup.FLAG_CLIP_CHILDREN
+                    && cache == null) {
+                if (offsetForScroll) {
+                    canvas.clipRect(sx, sy, sx + (mRight - mLeft), sy + (mBottom - mTop));
                 } else {
-                    canvas.clipRect(0, 0, cache.getWidth(), cache.getHeight());
+                    if (!scalingRequired || cache == null) {
+                        canvas.clipRect(0, 0, mRight - mLeft, mBottom - mTop);
+                    } else {
+                        canvas.clipRect(0, 0, cache.getWidth(), cache.getHeight());
+                    }
                 }
             }
+
+            if (mClipBounds != null) {
+                // clip bounds ignore scroll
+                canvas.clipRect(mClipBounds);
+            }
         }
+
+
 
         if (!usingRenderNodeProperties && hasDisplayList) {
             renderNode = getDisplayList();
@@ -14774,10 +14785,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param canvas The Canvas to which the View is rendered.
      */
     public void draw(Canvas canvas) {
-        boolean usingRenderNodeProperties = canvas.isRecordingFor(mRenderNode);
-        if (mClipBounds != null && !usingRenderNodeProperties) {
-            canvas.clipRect(mClipBounds);
-        }
         final int privateFlags = mPrivateFlags;
         final boolean dirtyOpaque = (privateFlags & PFLAG_DIRTY_MASK) == PFLAG_DIRTY_OPAQUE &&
                 (mAttachInfo == null || !mAttachInfo.mIgnoreDirtyState);
