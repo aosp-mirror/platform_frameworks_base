@@ -108,18 +108,6 @@ public final class NavigationBarTransitions extends BarTransitions {
         return max;
     }
 
-    @Override
-    public void setContentVisible(boolean visible) {
-        final float alpha = visible ? 1 : 0;
-        fadeContent(mView.getBackButton(), alpha);
-    }
-
-    private void fadeContent(View v, float alpha) {
-        if (v != null) {
-            v.animate().alpha(alpha).setDuration(CONTENT_FADE_DURATION);
-        }
-    }
-
     private void setKeyButtonViewQuiescentAlpha(View button, float alpha, boolean animate) {
         if (button instanceof KeyButtonView) {
             ((KeyButtonView) button).setQuiescentAlpha(alpha, animate);
