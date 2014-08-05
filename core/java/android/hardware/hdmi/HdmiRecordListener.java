@@ -80,7 +80,7 @@ public abstract class HdmiRecordListener {
             // Timer Overlap Warning - 1 bit
             data.mOverlapped = ((result >> 31) & 0x1) != 0;
             // Media Info - 2 bits;
-            data.mMediaInfo = (result >> 29) & 0x7;
+            data.mMediaInfo = (result >> 29) & 0x3;
             // Programmed Indicator - 1 bit;
             data.mProgrammed = ((result >> 28) & 0x1) != 0;
             if (data.mProgrammed) {
@@ -88,12 +88,13 @@ public abstract class HdmiRecordListener {
                 data.mDurationHour = bcdByteToInt((byte) ((result >> 16) & 0xFF));
                 data.mDurationMinute = bcdByteToInt((byte) ((result >> 8) & 0xFF));
             } else {
+                // Programmed Info - 4 bits
                 data.mNotProgrammedError = (result >> 24) & 0xF;
                 data.mDurationHour = bcdByteToInt((byte) ((result >> 16) & 0xFF));
                 data.mDurationMinute = bcdByteToInt((byte) ((result >> 8) & 0xFF));
             }
 
-            // Programmed Info - 4 bits
+            // The last byte is used for extra error.
             data.mExtraError = result & 0xFF;
             return data;
         }
