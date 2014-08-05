@@ -532,6 +532,18 @@ public final class HdmiControlService extends SystemService {
         mCecController.sendCommand(command, null);
     }
 
+    /**
+     * Send <Feature Abort> command on the given CEC message if possible.
+     * If the aborted message is invalid, then it wont send the message.
+     * @param command original command to be aborted
+     * @param reason reason of feature abort
+     */
+    @ServiceThreadOnly
+    void maySendFeatureAbortCommand(HdmiCecMessage command, int reason) {
+        assertRunOnServiceThread();
+        mCecController.maySendFeatureAbortCommand(command, reason);
+    }
+
     @ServiceThreadOnly
     boolean handleCecCommand(HdmiCecMessage message) {
         assertRunOnServiceThread();

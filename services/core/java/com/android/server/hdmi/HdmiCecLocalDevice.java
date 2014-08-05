@@ -308,11 +308,8 @@ abstract class HdmiCecLocalDevice {
     protected boolean handleGetMenuLanguage(HdmiCecMessage message) {
         assertRunOnServiceThread();
         Slog.w(TAG, "Only TV can handle <Get Menu Language>:" + message.toString());
-        mService.sendCecCommand(
-                HdmiCecMessageBuilder.buildFeatureAbortCommand(mAddress,
-                        message.getSource(), Constants.MESSAGE_GET_MENU_LANGUAGE,
-                        Constants.ABORT_UNRECOGNIZED_OPCODE));
-        return true;
+        // 'return false' will cause to reply with <Feature Abort>.
+        return false;
     }
 
     @ServiceThreadOnly
@@ -431,9 +428,7 @@ abstract class HdmiCecLocalDevice {
         } else if (message.getDestination() != Constants.ADDR_BROADCAST &&
                 message.getSource() != Constants.ADDR_UNREGISTERED) {
             Slog.v(TAG, "Wrong direct vendor command. Replying with <Feature Abort>");
-            mService.sendCecCommand(HdmiCecMessageBuilder.buildFeatureAbortCommand(mAddress,
-                    message.getSource(), Constants.MESSAGE_VENDOR_COMMAND_WITH_ID,
-                    Constants.ABORT_UNRECOGNIZED_OPCODE));
+            mService.maySendFeatureAbortCommand(message, Constants.ABORT_UNRECOGNIZED_OPCODE);
         } else {
             Slog.v(TAG, "Wrong broadcast vendor command. Ignoring");
         }
@@ -448,8 +443,7 @@ abstract class HdmiCecLocalDevice {
     protected boolean handleRecordTvScreen(HdmiCecMessage message) {
         // The default behavior of <Record TV Screen> is replying <Feature Abort> with
         // "Cannot provide source".
-        mService.sendCecCommand(HdmiCecMessageBuilder.buildFeatureAbortCommand(mAddress,
-                message.getSource(), message.getOpcode(), Constants.ABORT_CANNOT_PROVIDE_SOURCE));
+        mService.maySendFeatureAbortCommand(message, Constants.ABORT_CANNOT_PROVIDE_SOURCE);
         return true;
     }
 

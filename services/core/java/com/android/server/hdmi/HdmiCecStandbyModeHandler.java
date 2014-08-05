@@ -48,16 +48,7 @@ public final class HdmiCecStandbyModeHandler {
         }
         @Override
         public boolean handle(HdmiCecMessage message) {
-            int src = message.getSource();
-            int dest = message.getDestination();
-            if (src == Constants.ADDR_BROADCAST || dest == Constants.ADDR_BROADCAST) {
-                // Do not send <Feature Abort> on the message from the unassigned device
-                // or the broadcasted message.
-                return true;
-            }
-            HdmiCecMessage cecMessage = HdmiCecMessageBuilder.buildFeatureAbortCommand(
-                    dest, src, message.getOpcode(), mReason);
-            mService.sendCecCommand(cecMessage);
+            mService.maySendFeatureAbortCommand(message, mReason);
             return true;
         }
     }
