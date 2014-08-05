@@ -27,6 +27,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -526,7 +527,26 @@ public final class AudioAttributes implements Parcelable {
         }
     };
 
-    /** @hide */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        AudioAttributes that = (AudioAttributes) o;
+
+        return ((mContentType == that.mContentType)
+                && (mFlags == that.mFlags)
+                && (mSource == that.mSource)
+                && (mUsage == that.mUsage)
+                //mFormattedTags is never null due to assignment in Builder or unmarshalling
+                && (mFormattedTags.equals(that.mFormattedTags)));
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mContentType, mFlags, mSource, mUsage, mFormattedTags);
+    }
+
     @Override
     public String toString () {
         return new String("AudioAttributes:"
