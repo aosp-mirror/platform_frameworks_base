@@ -88,14 +88,190 @@ import java.util.List;
  *         <td>String value</td>
  *         <td>Comments</td>
  *     </tr>
- *     <tr>
- *         <td>US_TVPG</td>
- *         <td>The TV Parental Guidelines for US TV content ratings</td>
- *     </tr>
+ *     <!--tr>
+ *         <td>AM_TV</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>AR_TV</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>AU_TV</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>BG_TV</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>BR_TV</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>CA_TV</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>CH_TV</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>CL_TV</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>CO_TV</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>DE_TV</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>DK_TV</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>ES_TV</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>FI_TV</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>FR_TV</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>GR_TV</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>HK_TV</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>HU_TV</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>ID_TV</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>IE_TV</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>IL_TV</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>IN_TV</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>IS_TV</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>IT_TV</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>KH_TV</td>
+ *         <td></td>
+ *     </tr-->
  *     <tr>
  *         <td>KR_TV</td>
  *         <td>The South Korean television rating system</td>
  *     </tr>
+ *     <!--tr>
+ *         <td>MV_TV</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>MX_TV</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>MY_TV</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>NL_TV</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>NZ_TV</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>PE_TV</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>PH_TV</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>PL_TV</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>PT_TV</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>RO_TV</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>RU_TV</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>RS_TV</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>SG_TV</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>SI_TV</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>TH_TV</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>TR_TV</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>TW_TV</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>UA_TV</td>
+ *         <td></td>
+ *     </tr-->
+ *     <tr>
+ *         <td>US_TVPG</td>
+ *         <td>The TV Parental Guidelines for US TV content ratings</td>
+ *     </tr>
+ *     <!--tr>
+ *         <td>VE_TV</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>ZA_TV</td>
+ *         <td></td>
+ *     </tr-->
  * </table>
  *
  * <u>System defined string for {@code rating}</u>
@@ -104,16 +280,212 @@ import java.util.List;
  *         <td>String value</td>
  *         <td>Comments</td>
  *     </tr>
+ *     <!--tr>
+ *         <td>AM_TV_ALL</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>AR_TV_ALL</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>AU_TV_ALL</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>BG_TV_ALL</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>BR_TV_ALL</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>CA_TV_ALL</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>CH_TV_ALL</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>CL_TV_ALL</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>CO_TV_ALL</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>DE_TV_ALL</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>DK_TV_ALL</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>ES_TV_ALL</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>FI_TV_ALL</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>FR_TV_ALL</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>GR_TV_ALL</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>HK_TV_ALL</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>HU_TV_ALL</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>ID_TV_ALL</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>IE_TV_ALL</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>IL_TV_ALL</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>IN_TV_ALL</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>IS_TV_ALL</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>IT_TV_ALL</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>KH_TV_ALL</td>
+ *         <td></td>
+ *     </tr-->
+ *     <tr>
+ *         <td>KR_TV_ALL</td>
+ *         <td>A rating string for {@code KR_TV}. This rating is for programs that are appropriate
+ *         for all ages. This program usually involves programs designed for children or families.
+ *         </td>
+ *     </tr>
+ *     <tr>
+ *         <td>KR_TV_7</td>
+ *         <td>A rating string for {@code KR_TV}. This rating is for programs that may contain
+ *         material inappropriate for children younger than 7, and parental guidance is required.
+ *         </td>
+ *     </tr>
+ *     <tr>
+ *         <td>KR_TV_12</td>
+ *         <td>A rating string for {@code KR_TV}. This rating is for programs that may contain
+ *         material inappropriate for children younger than 12, and parental guidance is required.
+ *         </td>
+ *     </tr>
+ *     <tr>
+ *         <td>KR_TV_15</td>
+ *         <td>A rating string for {@code KR_TV}. This rating is for programs that may contain
+ *         material inappropriate for children younger than 15, and parental guidance is required.
+ *     </tr>
+ *     <tr>
+ *         <td>KR_TV_19</td>
+ *         <td>A rating string for {@code KR_TV}. This rating is for programs designed for adults
+ *         only.</td>
+ *     </tr>
+ *     <!--tr>
+ *         <td>MV_TV_ALL</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>MX_TV_ALL</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>MY_TV_ALL</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>NL_TV_ALL</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>NZ_TV_ALL</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>PE_TV_ALL</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>PH_TV_ALL</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>PL_TV_ALL</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>PT_TV_ALL</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>RO_TV_ALL</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>RU_TV_ALL</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>RS_TV_ALL</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>SG_TV_ALL</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>SI_TV_ALL</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>TH_TV_ALL</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>TR_TV_ALL</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>TW_TV_ALL</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>UA_TV_ALL</td>
+ *         <td></td>
+ *     </tr-->
  *     <tr>
  *         <td>US_TVPG_TV_Y</td>
- *         <td>A rating string for the US_TVPG domain. Programs rated this are designed to be
+ *         <td>A rating string for {@code US_TVPG}. Programs rated this are designed to be
  *         appropriate for all children. Whether animated or live-action, the themes and elements
  *         in this program are specifically designed for a very young audience, including children
  *         from ages 2-6. This program is not expected to frighten younger children.</td>
  *     </tr>
  *     <tr>
  *         <td>US_TVPG_TV_Y7</td>
- *         <td>A rating string for the US_TVPG domain. Programs rated this are designed for children
+ *         <td>A rating string for {@code US_TVPG}. Programs rated this are designed for children
  *         age 7 and above. It may be more appropriate for children who have acquired the
  *         developmental skills needed to distinguish between make-believe and reality. Themes and
  *         elements in this program may include mild fantasy violence or comedic violence, or may
@@ -124,7 +496,7 @@ import java.util.List;
  *     </tr>
  *     <tr>
  *         <td>US_TVPG_TV_G</td>
- *         <td>A rating string for the US_TVPG domain. Most parents would find this program suitable
+ *         <td>A rating string for {@code US_TVPG}. Most parents would find this program suitable
  *         for all ages. Although this rating does not signify a program designed specifically for
  *         children, most parents may let younger children watch this program unattended. It
  *         contains little or no violence, no strong language and little or no sexual dialogue or
@@ -132,69 +504,39 @@ import java.util.List;
  *     </tr>
  *     <tr>
  *         <td>US_TVPG_TV_PG</td>
- *         <td>A rating string for the US_TVPG domain. Programs rated this contain material that
+ *         <td>A rating string for {@code US_TVPG}. Programs rated this contain material that
  *         parents may find unsuitable for younger children. Many parents may want to watch it with
  *         their younger children. The theme itself may call for parental guidance and/or the
- *         program may contain one or more of the following: some suggestive dialogue (US_TVPG_D),
- *         infrequent coarse language (US_TVPG_L), some sexual situations (US_TVPG_S), or moderate
- *         violence (US_TVPG_V).</td>
+ *         program may contain one or more of the following: some suggestive dialogue (
+ *         {@code US_TVPG_D}), infrequent coarse language ({@code US_TVPG_L}), some sexual
+ *         situations ({@code US_TVPG_S}), or moderate violence ({@code US_TVPG_V}).</td>
  *     </tr>
  *     <tr>
  *         <td>US_TVPG_TV_14</td>
- *         <td>A rating string for the US_TVPG domain. Programs rated this contains some material
+ *         <td>A rating string for {@code US_TVPG}. Programs rated this contains some material
  *         that many parents would find unsuitable for children under 14 years of age. Parents are
  *         strongly urged to exercise greater care in monitoring this program and are cautioned
  *         against letting children under the age of 14 watch unattended. This program may contain
- *         one or more of the following: intensely suggestive dialogue (US_TVPG_D), strong coarse
- *         language (US_TVPG_L), intense sexual situations (US_TVPG_S), or intense violence
- *         (US_TVPG_V).</td>
+ *         one or more of the following: intensely suggestive dialogue ({@code US_TVPG_D}), strong
+ *         coarse language ({@code US_TVPG_L}), intense sexual situations ({@code US_TVPG_S}), or
+ *         intense violence ({@code US_TVPG_V}).</td>
  *     </tr>
  *     <tr>
  *         <td>US_TVPG_TV_MA</td>
- *         <td>A rating string for the US_TVPG domain. Programs rated TV-MA are specifically
+ *         <td>A rating string for {@code US_TVPG}. Programs rated TV-MA are specifically
  *         designed to be viewed by adults and therefore may be unsuitable for children under 17.
  *         This program may contain one or more of the following: crude indecent language
- *         (US_TVPG_L), explicit sexual activity (US_TVPG_S), or graphic violence (US_TVPG_V).</td>
+ *         ({@code US_TVPG_L}), explicit sexual activity ({@code US_TVPG_S}), or graphic violence
+ *         ({@code US_TVPG_V}).</td>
  *     </tr>
- *     <tr>
- *         <td>KR_TV_ALL</td>
- *         <td>A rating string for the KR_TV domain. This rating is for programs that are
- *         appropriate for all ages. This program usually involves programs designed for children or
- *         families. This rating does not have an icon.</td>
- *     </tr>
- *     <tr>
- *         <td>KR_TV_7</td>
- *         <td>A rating string for the KR_TV domain. This rating is for programs that may contain
- *         material inappropriate for children younger than 7, and parental discretion should be
- *         used. Some cartoon programs not deemed strictly as "educational", and films rated "G" or
- *         "PG" in North America may fall into the 7 category.</td>
- *     </tr>
- *     <tr>
- *         <td>KR_TV_12</td>
- *         <td>A rating string for the KR_TV domain. This rating is for programs that may deemed
- *         inappropriate for those younger than 12, and parental discretion should be used. Usually
- *         used for animations that have stronger themes or violence then those designed for
- *         children, or for reality shows that have mild violence, themes, or language.</td>
- *     </tr>
- *     <tr>
- *         <td>KR_TV_15</td>
- *         <td>A rating string for the KR_TV domain. This rating is for programs that contain
- *         material that may be inappropriate for children under 15, and that parental discretion
- *         should be used. Examples include most dramas, and talk shows on OTA (over-the-air) TV
- *         (KBS, MBC, SBS), and many American TV shows/dramas on Cable TV channels like OCN and
- *         OnStyle. The programs that have this rating may include moderate or strong adult themes,
- *         language, sexual inference, and violence. As with the TV-14 rating in North America, this
- *         rating is commonly applied to live events where the occurrence of inappropriate dialogue
- *         is unpredictable. Since 2007, this rating is the most used rating for TV.</td>
- *     </tr>
- *     <tr>
- *         <td>KR_TV_19</td>
- *         <td>A rating string for the KR_TV domain. This rating is for programs that are intended
- *         for adults only. 19-rated programs cannot air during the hours of 7:00AM to 9:00AM, and
- *         1:00PM to 10:00PM. Programs that receive this rating will almost certainly have adult
- *         themes, sexual situations, frequent use of strong language and disturbing scenes of
- *         violence.</td>
- *     </tr>
+ *     <!--tr>
+ *         <td>VE_TV_ALL</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>ZA_TV_ALL</td>
+ *         <td></td>
+ *     </tr-->
  * </table>
  *
  * <u>System defined string for {@code subRating}</u>
@@ -203,6 +545,174 @@ import java.util.List;
  *         <td>String value</td>
  *         <td>Comments</td>
  *     </tr>
+ *     <!--tr>
+ *         <td>AM_TV_</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>AR_TV_</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>AU_TV_</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>BG_TV_</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>BR_TV_</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>CA_TV_</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>CH_TV_</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>CL_TV_</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>CO_TV_</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>DE_TV_</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>DK_TV_</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>ES_TV_</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>FI_TV_</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>FR_TV_</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>GR_TV_</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>HK_TV_</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>HU_TV_</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>ID_TV_</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>IE_TV_</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>IL_TV_</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>IN_TV_</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>IS_TV_</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>IT_TV_</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>KH_TV_</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>MV_TV_</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>MX_TV_</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>MY_TV_</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>NL_TV_</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>NZ_TV_</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>PE_TV_</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>PH_TV_</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>PL_TV_</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>PT_TV_</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>RO_TV_</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>RU_TV_</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>RS_TV_</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>SG_TV_</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>SI_TV_</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>TH_TV_</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>TR_TV_</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>TW_TV_</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>UA_TV_</td>
+ *         <td></td>
+ *     </tr-->
  *     <tr>
  *         <td>US_TVPG_D</td>
  *         <td>Suggestive dialogue (Not used with US_TVPG_TV_MA)</td>
@@ -223,6 +733,14 @@ import java.util.List;
  *         <td>US_TVPG_FV</td>
  *         <td>Fantasy violence (exclusive to US_TVPG_TV_Y7)</td>
  *     </tr>
+ *     <!--tr>
+ *         <td>VE_TV_</td>
+ *         <td></td>
+ *     </tr-->
+ *     <!--tr>
+ *         <td>ZA_TV_</td>
+ *         <td></td>
+ *     </tr-->
  * </table>
  */
 public final class TvContentRating {
@@ -340,7 +858,6 @@ public final class TvContentRating {
         }
         return Collections.unmodifiableList(Arrays.asList(mSubRatings));
     }
-
 
     /**
      * Returns a String that unambiguously describes both the rating and sub-rating information
