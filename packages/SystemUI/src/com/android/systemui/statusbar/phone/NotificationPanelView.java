@@ -147,6 +147,8 @@ public class NotificationPanelView extends PanelView implements
     private boolean mHeaderAnimatingIn;
     private ObjectAnimator mQsContainerAnimator;
 
+    private boolean mShadeEmpty;
+
     public NotificationPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mSystemIconsCopy = new MirrorView(context);
@@ -879,6 +881,7 @@ public class NotificationPanelView extends PanelView implements
         mQsContainer.setVisibility(
                 mKeyguardShowing && !expandVisually ? View.INVISIBLE : View.VISIBLE);
         mScrollView.setTouchEnabled(mQsExpanded);
+        updateEmptyShadeView();
     }
 
     private void setQsExpansion(float height) {
@@ -1614,5 +1617,16 @@ public class NotificationPanelView extends PanelView implements
             setBackground(null);
         }
         updateKeyguardStatusBarVisibility();
+    }
+
+    public void setShadeEmpty(boolean shadeEmpty) {
+        mShadeEmpty = shadeEmpty;
+        updateEmptyShadeView();
+    }
+
+    private void updateEmptyShadeView() {
+
+        // Hide "No notifications" in QS.
+        mNotificationStackScroller.updateEmptyShadeView(mShadeEmpty && !mQsExpanded);
     }
 }
