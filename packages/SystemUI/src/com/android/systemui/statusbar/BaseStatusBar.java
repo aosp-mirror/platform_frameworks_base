@@ -152,6 +152,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     private Locale mLocale;
     protected boolean mUseHeadsUp = false;
     protected boolean mHeadsUpTicker = false;
+    protected boolean mDisableNotificationAlerts = false;
 
     protected IDreamManager mDreamManager;
     PowerManager mPowerManager;

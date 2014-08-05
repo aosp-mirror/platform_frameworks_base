@@ -367,7 +367,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         @Override
         public void onChange(boolean selfChange) {
             boolean wasUsing = mUseHeadsUp;
-            mUseHeadsUp = ENABLE_HEADS_UP && Settings.Global.HEADS_UP_OFF != Settings.Global.getInt(
+            mUseHeadsUp = ENABLE_HEADS_UP && !mDisableNotificationAlerts
+                    && Settings.Global.HEADS_UP_OFF != Settings.Global.getInt(
                     mContext.getContentResolver(), Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED,
                     Settings.Global.HEADS_UP_OFF);
             mHeadsUpTicker = mUseHeadsUp && 0 != Settings.Global.getInt(
@@ -1929,6 +1930,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             } else {
                 animateStatusBarShow(mNotificationIconArea, animate);
             }
+        }
+
+        if ((diff & StatusBarManager.DISABLE_NOTIFICATION_ALERTS) != 0) {
+            mDisableNotificationAlerts =
+                    (state & StatusBarManager.DISABLE_NOTIFICATION_ALERTS) != 0;
+            mHeadsUpObserver.onChange(true);
         }
     }
 
