@@ -41,8 +41,8 @@
 
     <com.android.systemui.statusbar.KeyguardAffordanceView
         android:id="@+id/camera_button"
-        android:layout_height="64dp"
-        android:layout_width="64dp"
+        android:layout_height="@dimen/keyguard_affordance_height"
+        android:layout_width="@dimen/keyguard_affordance_width"
         android:layout_gravity="bottom|end"
         android:tint="#ffffffff"
         android:src="@drawable/ic_camera_alt_24dp"
@@ -51,8 +51,8 @@
 
     <com.android.systemui.statusbar.KeyguardAffordanceView
         android:id="@+id/phone_button"
-        android:layout_height="64dp"
-        android:layout_width="64dp"
+        android:layout_height="@dimen/keyguard_affordance_height"
+        android:layout_width="@dimen/keyguard_affordance_width"
         android:layout_gravity="bottom|start"
         android:tint="#ffffffff"
         android:src="@drawable/ic_phone_24dp"
@@ -61,8 +61,8 @@
 
     <com.android.systemui.statusbar.KeyguardAffordanceView
         android:id="@+id/lock_icon"
-        android:layout_width="64dp"
-        android:layout_height="64dp"
+        android:layout_width="@dimen/keyguard_affordance_width"
+        android:layout_height="@dimen/keyguard_affordance_height"
         android:layout_gravity="bottom|center_horizontal"
         android:src="@drawable/ic_lock_24dp"
         android:scaleType="center"
