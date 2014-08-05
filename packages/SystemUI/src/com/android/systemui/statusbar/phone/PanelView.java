@@ -853,6 +853,12 @@ public abstract class PanelView extends FrameLayout {
         }
     }
 
+    private final Runnable mPostCollapseRunnable = new Runnable() {
+        @Override
+        public void run() {
+            collapse();
+        }
+    };
     private boolean onMiddleClicked() {
         switch (mStatusBar.getBarState()) {
             case StatusBarState.KEYGUARD:
@@ -862,7 +868,10 @@ public abstract class PanelView extends FrameLayout {
                 mStatusBar.goToKeyguard();
                 return true;
             case StatusBarState.SHADE:
-                collapse();
+
+                // This gets called in the middle of the touch handling, where the state is still
+                // that we are tracking the panel. Collapse the panel after this is done.
+                post(mPostCollapseRunnable);
                 return false;
             default:
                 return true;
