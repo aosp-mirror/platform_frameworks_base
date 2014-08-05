@@ -85,7 +85,7 @@ public final class TvTrackInfo implements Parcelable {
     }
 
     /**
-     * Returns the audio channel count. Valid for {@link #TYPE_AUDIO} tracks only.
+     * Returns the audio channel count. Valid only for {@link #TYPE_AUDIO} tracks.
      */
     public final int getAudioChannelCount() {
         if (mType != TYPE_AUDIO) {
@@ -95,7 +95,7 @@ public final class TvTrackInfo implements Parcelable {
     }
 
     /**
-     * Returns the audio sample rate, in the unit of Hz. Valid for {@link #TYPE_AUDIO} tracks only.
+     * Returns the audio sample rate, in the unit of Hz. Valid only for {@link #TYPE_AUDIO} tracks.
      */
     public final int getAudioSampleRate() {
         if (mType != TYPE_AUDIO) {
@@ -105,8 +105,8 @@ public final class TvTrackInfo implements Parcelable {
     }
 
     /**
-     * Returns the width of the video, in the unit of pixels. Valid for {@link #TYPE_VIDEO} tracks
-     * only.
+     * Returns the width of the video, in the unit of pixels. Valid only for {@link #TYPE_VIDEO}
+     * tracks.
      */
     public final int getVideoWidth() {
         if (mType != TYPE_VIDEO) {
@@ -116,8 +116,8 @@ public final class TvTrackInfo implements Parcelable {
     }
 
     /**
-     * Returns the height of the video, in the unit of pixels. Valid for {@link #TYPE_VIDEO} tracks
-     * only.
+     * Returns the height of the video, in the unit of pixels. Valid only for {@link #TYPE_VIDEO}
+     * tracks.
      */
     public final int getVideoHeight() {
         if (mType != TYPE_VIDEO) {
@@ -206,7 +206,7 @@ public final class TvTrackInfo implements Parcelable {
         }
 
         /**
-         * Sets the audio channel count. Valid for {@link #TYPE_AUDIO} tracks only.
+         * Sets the audio channel count. Valid only for {@link #TYPE_AUDIO} tracks.
          *
          * @param audioChannelCount The audio channel count.
          */
@@ -219,7 +219,8 @@ public final class TvTrackInfo implements Parcelable {
         }
 
         /**
-         * Sets the audio sample rate, in the unit of Hz. Valid for {@link #TYPE_AUDIO} tracks only.
+         * Sets the audio sample rate, in the unit of Hz. Valid only for {@link #TYPE_AUDIO}
+         * tracks.
          *
          * @param audioSampleRate The audio sample rate.
          */
@@ -232,8 +233,8 @@ public final class TvTrackInfo implements Parcelable {
         }
 
         /**
-         * Sets the width of the video, in the unit of pixels. Valid for {@link #TYPE_VIDEO} tracks
-         * only.
+         * Sets the width of the video, in the unit of pixels. Valid only for {@link #TYPE_VIDEO}
+         * tracks.
          *
          * @param videoWidth The width of the video.
          */
@@ -246,8 +247,8 @@ public final class TvTrackInfo implements Parcelable {
         }
 
         /**
-         * Sets the height of the video, in the unit of pixels. Valid for {@link #TYPE_VIDEO} tracks
-         * only.
+         * Sets the height of the video, in the unit of pixels. Valid only for {@link #TYPE_VIDEO}
+         * tracks.
          *
          * @param videoHeight The height of the video.
          */

@@ -162,7 +162,7 @@ public class TvView extends ViewGroup {
     }
 
     /**
-     * Set this as main TvView.
+     * Sets this as main TvView.
      * <p>
      * Main TvView is the TvView which user is watching and interacting mainly.  It is used for
      * determining internal behavior of hardware TV input devices. For example, this influences
@@ -203,7 +203,7 @@ public class TvView extends ViewGroup {
     /**
      * Tunes to a given channel.
      *
-     * @param inputId The id of TV input which will play the given channel.
+     * @param inputId The ID of TV input which will play the given channel.
      * @param channelUri The URI of a channel.
      */
     public void tune(String inputId, Uri channelUri) {
@@ -213,7 +213,7 @@ public class TvView extends ViewGroup {
     /**
      * Tunes to a given channel.
      *
-     * @param inputId The id of TV input which will play the given channel.
+     * @param inputId The ID of TV input which will play the given channel.
      * @param channelUri The URI of a channel.
      * @param params Extra parameters which might be handled with the tune event.
      * @hide
@@ -293,7 +293,7 @@ public class TvView extends ViewGroup {
     }
 
     /**
-     * Select a track.
+     * Selects a track.
      * <p>
      * If it is called multiple times on the same type of track (ie. Video, Audio, Text), the track
      * selected in previous will be unselected. Note that this method does not take any effect
@@ -310,7 +310,7 @@ public class TvView extends ViewGroup {
     }
 
     /**
-     * Unselect a track.
+     * Unselects a track.
      * <p>
      * Note that this method does not take any effect unless the current TvView is tuned.
      *
@@ -346,7 +346,7 @@ public class TvView extends ViewGroup {
     }
 
     /**
-     * Call {@link TvInputService.Session#appPrivateCommand(String, Bundle)
+     * Calls {@link TvInputService.Session#appPrivateCommand(String, Bundle)
      * TvInputService.Session.appPrivateCommand()} on the current TvView.
      *
      * @param action Name of the command to be performed. This <em>must</em> be a scoped name, i.e.
@@ -385,8 +385,8 @@ public class TvView extends ViewGroup {
     }
 
     /**
-     * Called when an unhandled input event was also not handled by the user provided callback. This
-     * is the last chance to handle the unhandled input event in the TvView.
+     * Called when an unhandled input event also has not been handled by the user provided
+     * callback. This is the last chance to handle the unhandled input event in the TvView.
      *
      * @param event The input event.
      * @return If you handled the event, return {@code true}. If you want to allow the event to be
@@ -397,9 +397,9 @@ public class TvView extends ViewGroup {
     }
 
     /**
-     * Registers a callback to be invoked when an input event was not handled by the bound TV input.
+     * Registers a callback to be invoked when an input event is not handled by the bound TV input.
      *
-     * @param listener The callback to invoke when the unhandled input event was received.
+     * @param listener The callback to be invoked when the unhandled input event is received.
      */
     public void setOnUnhandledInputEventListener(OnUnhandledInputEventListener listener) {
         mOnUnhandledInputEventListener = listener;
