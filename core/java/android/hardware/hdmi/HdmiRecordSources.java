@@ -71,7 +71,7 @@ public final class HdmiRecordSources {
             return includeType ? mExtraDataSize + 1 : mExtraDataSize;
         }
 
-        public final int toByteArray(boolean includeType, byte[] data, int index) {
+        final int toByteArray(boolean includeType, byte[] data, int index) {
             if (includeType) {
                 // 1 to 8 bytes (depends on source).
                 // {[Record Source Type]} |
@@ -161,7 +161,7 @@ public final class HdmiRecordSources {
      * Interface for digital source identification.
      */
     private interface DigitalServiceIdentification {
-        void toByteArray(byte[] data, int index);
+        int toByteArray(byte[] data, int index);
     }
 
     /**
@@ -193,8 +193,9 @@ public final class HdmiRecordSources {
         }
 
         @Override
-        public void toByteArray(byte[] data, int index) {
-            threeFieldsToSixBytes(mTransportStreamId, mServiceId, mOriginalNetworkId, data, index);
+        public int toByteArray(byte[] data, int index) {
+            return threeFieldsToSixBytes(mTransportStreamId, mServiceId, mOriginalNetworkId, data,
+                    index);
         }
     }
 
@@ -221,8 +222,8 @@ public final class HdmiRecordSources {
         }
 
         @Override
-        public void toByteArray(byte[] data, int index) {
-            threeFieldsToSixBytes(mTransportStreamId, mProgramNumber, 0, data, index);
+        public int toByteArray(byte[] data, int index) {
+            return threeFieldsToSixBytes(mTransportStreamId, mProgramNumber, 0, data, index);
         }
     }
 
@@ -255,8 +256,9 @@ public final class HdmiRecordSources {
         }
 
         @Override
-        public void toByteArray(byte[] data, int index) {
-            threeFieldsToSixBytes(mTransportStreamId, mServiceId, mOriginalNetworkId, data, index);
+        public int toByteArray(byte[] data, int index) {
+            return threeFieldsToSixBytes(mTransportStreamId, mServiceId, mOriginalNetworkId, data,
+                    index);
         }
     }
 
@@ -283,12 +285,13 @@ public final class HdmiRecordSources {
             mMinorChannelNumber = minorNumer;
         }
 
-        private void toByteArray(byte[] data, int index) {
+        private int toByteArray(byte[] data, int index) {
             // The first 6 bits for format, the 10 bits for major number.
             data[index] = (byte) (((mChannelNumberFormat << 2) | (mMajorChannelNumber >>> 8) & 0x3));
             data[index + 1] = (byte) (mMajorChannelNumber & 0xFF);
             // Minor number uses the next 16 bits.
             shortToByteArray((short) mMinorChannelNumber, data, index + 2);
+            return 4;
         }
     }
 
@@ -323,11 +326,12 @@ public final class HdmiRecordSources {
         }
 
         @Override
-        public void toByteArray(byte[] data, int index) {
+        public int toByteArray(byte[] data, int index) {
             mChannelIdentifier.toByteArray(data, index);
             // The last 2 bytes is reserved for future use.
             data[index + 4] = 0;
             data[index + 5] = 0;
+            return 6;
         }
     }
 
