@@ -121,8 +121,12 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     private static final String ATTR_REFERRER_URI = "referrerUri";
     private static final String ATTR_ABI_OVERRIDE = "abiOverride";
 
+    /** Automatically destroy sessions older than this */
     private static final long MAX_AGE_MILLIS = 3 * DateUtils.DAY_IN_MILLIS;
+    /** Upper bound on number of active sessions for a UID */
     private static final long MAX_ACTIVE_SESSIONS = 1024;
+    /** Upper bound on number of historical sessions for a UID */
+    private static final long MAX_HISTORICAL_SESSIONS = 1048576;
 
     private final Context mContext;
     private final PackageManagerService mPm;
@@ -410,9 +414,15 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         final PackageInstallerSession session;
         synchronized (mSessions) {
             // Sanity check that installer isn't going crazy
-            final int activeCount = getSessionCountLocked(callingUid);
+            final int activeCount = getSessionCount(mSessions, callingUid);
             if (activeCount >= MAX_ACTIVE_SESSIONS) {
-                throw new IllegalStateException("Too many active sessions for UID " + callingUid);
+                throw new IllegalStateException(
+                        "Too many active sessions for UID " + callingUid);
+            }
+            final int historicalCount = getSessionCount(mHistoricalSessions, callingUid);
+            if (historicalCount >= MAX_HISTORICAL_SESSIONS) {
+                throw new IllegalStateException(
+                        "Too many historical sessions for UID " + callingUid);
             }
 
             sessionId = allocateSessionIdLocked();
@@ -452,8 +462,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         int n = 0;
         int sessionId;
         do {
-            sessionId = mRandom.nextInt(Integer.MAX_VALUE);
-            if (mSessions.get(sessionId) == null) {
+            sessionId = mRandom.nextInt(Integer.MAX_VALUE - 1) + 1;
+            if (mSessions.get(sessionId) == null && mHistoricalSessions.get(sessionId) == null) {
                 return sessionId;
             }
         } while (n++ < 32);
@@ -560,11 +570,12 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         mCallbacks.unregister(callback);
     }
 
-    private int getSessionCountLocked(int installerUid) {
+    private static int getSessionCount(SparseArray<PackageInstallerSession> sessions,
+            int installerUid) {
         int count = 0;
-        final int size = mSessions.size();
+        final int size = sessions.size();
         for (int i = 0; i < size; i++) {
-            final PackageInstallerSession session = mSessions.valueAt(i);
+            final PackageInstallerSession session = sessions.valueAt(i);
             if (session.installerUid == installerUid) {
                 count++;
             }
