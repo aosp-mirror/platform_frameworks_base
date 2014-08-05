@@ -502,24 +502,30 @@ final class HdmiCecController {
     @ServiceThreadOnly
     private void onReceiveCommand(HdmiCecMessage message) {
         assertRunOnServiceThread();
-        if (isAcceptableAddress(message.getDestination())
-                && mService.handleCecCommand(message)) {
+        if (isAcceptableAddress(message.getDestination()) && mService.handleCecCommand(message)) {
             return;
         }
-        if (message.getDestination() == Constants.ADDR_BROADCAST) {
-            return;
-        }
-        if (message.getOpcode() == Constants.MESSAGE_FEATURE_ABORT) {
-            Slog.v(TAG, "Unhandled <Feature Abort> message:" + message);
-            return;
-        }
+        // Not handled message, so we will reply it with <Feature Abort>.
+        maySendFeatureAbortCommand(message, Constants.ABORT_UNRECOGNIZED_OPCODE);
+    }
 
-        int sourceAddress = message.getDestination();
-        // Reply <Feature Abort> to initiator (source) for all requests.
-        HdmiCecMessage cecMessage = HdmiCecMessageBuilder.buildFeatureAbortCommand(
-                sourceAddress, message.getSource(), message.getOpcode(),
-                Constants.ABORT_REFUSED);
-        sendCommand(cecMessage);
+    @ServiceThreadOnly
+    void maySendFeatureAbortCommand(HdmiCecMessage message, int reason) {
+        assertRunOnServiceThread();
+        // Swap the source and the destination.
+        int src = message.getDestination();
+        int dest = message.getSource();
+        if (src == Constants.ADDR_BROADCAST || dest == Constants.ADDR_UNREGISTERED) {
+            // Don't reply <Feature Abort> from the unregistered devices or for the broadcasted
+            // messages. See CEC 12.2 Protocol General Rules for detail.
+            return;
+        }
+        int originalOpcode = message.getOpcode();
+        if (originalOpcode == Constants.MESSAGE_FEATURE_ABORT) {
+            return;
+        }
+        sendCommand(
+                HdmiCecMessageBuilder.buildFeatureAbortCommand(src, dest, originalOpcode, reason));
     }
 
     @ServiceThreadOnly
