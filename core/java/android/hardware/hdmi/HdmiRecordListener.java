@@ -147,8 +147,8 @@ public abstract class HdmiRecordListener {
          *   <li>{@link HdmiControlManager#TIMER_STATUS_PROGRAMMED_INFO_NO_MEDIA_INFO}
          * </ul>
          *
-         * @throw {@link IllegalStateException} if it's called when {@link #isProgrammed()}
-         *                                      returns false
+         * @throws IllegalStateException if it's called when {@link #isProgrammed()}
+         *                               returns false
          */
         public int getProgrammedInfo() {
             if (!isProgrammed()) {
@@ -175,8 +175,8 @@ public abstract class HdmiRecordListener {
          *   <li>{@link HdmiControlManager#TIMER_STATUS_NOT_PROGRAMMED_DUPLICATED}
          * </ul>
          *
-         * @throw {@link IllegalStateException} if it's called when {@link #isProgrammed()}
-         *                                      returns true
+         * @throws IllegalStateException if it's called when {@link #isProgrammed()}
+         *                               returns true
          */
         public int getNotProgammedError() {
             if (isProgrammed()) {
