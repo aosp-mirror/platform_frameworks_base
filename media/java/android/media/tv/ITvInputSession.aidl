@@ -37,8 +37,7 @@ oneway interface ITvInputSession {
     void setVolume(float volume);
     void tune(in Uri channelUri, in Bundle params);
     void setCaptionEnabled(boolean enabled);
-    void selectTrack(in TvTrackInfo track);
-    void unselectTrack(in TvTrackInfo track);
+    void selectTrack(int type, in String trackId);
 
     void appPrivateCommand(in String action, in Bundle data);
 
