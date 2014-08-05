@@ -21,20 +21,11 @@
         android:layout_height="wrap_content"
         android:visibility="gone"
         >
-    <Button
+    <ImageButton
             android:id="@+id/dismiss_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minHeight="0dp"
-            android:textColor="#ffffffff"
-            android:text="@string/clear_all_notifications_text"
-            android:textSize="18sp"
-            android:textAllCaps="true"
-            android:paddingTop="@dimen/clear_all_padding_top"
-            android:paddingEnd="8dp"
-            android:layout_gravity="end|center_vertical"
-            android:drawableEnd="@drawable/ic_clear_all"
-            android:drawablePadding="4dp"
-            android:fontFamily="sans-serif-light"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="end"
+            android:src="@drawable/ic_dismiss_all"
             android:background="@drawable/ripple_drawable" />
 </com.android.systemui.statusbar.DismissView>
