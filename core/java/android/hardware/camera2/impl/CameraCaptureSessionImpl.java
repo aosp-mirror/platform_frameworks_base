@@ -261,9 +261,12 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
      * <p>The semantics are identical to {@link #close}, except that unconfiguring will be skipped.
      * <p>
      *
+     * <p>After this call completes, the session will not call any further methods on the camera
+     * device.</p>
+     *
      * @see CameraCaptureSession#close
      */
-    synchronized void replaceSessionClose(CameraCaptureSession other) {
+    synchronized void replaceSessionClose() {
         /*
          * In order for creating new sessions to be fast, the new session should be created
          * before the old session is closed.
@@ -278,13 +281,17 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
 
         if (VERBOSE) Log.v(TAG, "replaceSessionClose");
 
-        // #close was already called explicitly, keep going the slow route
-        if (mClosed) {
-            if (VERBOSE) Log.v(TAG, "replaceSessionClose - close was already called");
-            return;
-        }
-
+        // Set up fast shutdown. Possible alternative paths:
+        // - This session is active, so close() below starts the shutdown drain
+        // - This session is mid-shutdown drain, and hasn't yet reached the idle drain listener.
+        // - This session is already closed and has executed the idle drain listener, and
+        //   configureOutputs(null) has already been called.
+        //
+        // Do not call configureOutputs(null) going forward, since it would race with the
+        // configuration for the new session. If it was already called, then we don't care, since it
+        // won't get called again.
         mSkipUnconfigure = true;
+
         close();
     }
 
@@ -599,6 +606,8 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
                  *
                  * This operation is idempotent; a session will not be closed twice.
                  */
+                if (VERBOSE) Log.v(TAG, "Session drain complete, skip unconfigure: " +
+                        mSkipUnconfigure);
 
                 // Fast path: A new capture session has replaced this one; don't unconfigure.
                 if (mSkipUnconfigure) {

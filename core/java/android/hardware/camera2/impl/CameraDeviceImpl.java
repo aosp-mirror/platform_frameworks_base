@@ -387,7 +387,11 @@ public class CameraDeviceImpl extends CameraDevice {
 
             checkIfCameraClosedOrInError();
 
-            // TODO: we must be in UNCONFIGURED mode to begin with, or using another session
+            // Notify current session that it's going away, before starting camera operations
+            // After this call completes, the session is not allowed to call into CameraDeviceImpl
+            if (mCurrentSession != null) {
+                mCurrentSession.replaceSessionClose();
+            }
 
             // TODO: dont block for this
             boolean configureSuccess = true;
@@ -406,10 +410,6 @@ public class CameraDeviceImpl extends CameraDevice {
             CameraCaptureSessionImpl newSession =
                     new CameraCaptureSessionImpl(outputs, listener, handler, this, mDeviceHandler,
                             configureSuccess);
-
-            if (mCurrentSession != null) {
-                mCurrentSession.replaceSessionClose(newSession);
-            }
 
             // TODO: wait until current session closes, then create the new session
             mCurrentSession = newSession;
