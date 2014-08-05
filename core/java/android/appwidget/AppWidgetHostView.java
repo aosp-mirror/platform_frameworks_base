@@ -87,7 +87,6 @@ public class AppWidgetHostView extends FrameLayout {
     Bitmap mOld;
     Paint mOldPaint = new Paint();
     private OnClickHandler mOnClickHandler;
-    private UserHandle mUser;
 
     /**
      * Create a host view.  Uses default fade animations.
@@ -115,15 +114,9 @@ public class AppWidgetHostView extends FrameLayout {
     public AppWidgetHostView(Context context, int animationIn, int animationOut) {
         super(context);
         mContext = context;
-        mUser = Process.myUserHandle();
         // We want to segregate the view ids within AppWidgets to prevent
         // problems when those ids collide with view ids in the AppWidgetHost.
         setIsRootNamespace(true);
-    }
-
-    /** @hide */
-    public void setUserId(int userId) {
-        mUser = new UserHandle(userId);
     }
 
     /**
@@ -380,7 +373,7 @@ public class AppWidgetHostView extends FrameLayout {
         } else {
             // Prepare a local reference to the remote Context so we're ready to
             // inflate any requested LayoutParams.
-            mRemoteContext = getRemoteContext(remoteViews);
+            mRemoteContext = getRemoteContext();
             int layoutId = remoteViews.getLayoutId();
 
             // If our stale view has been prepared to match active, and the new
@@ -466,17 +459,14 @@ public class AppWidgetHostView extends FrameLayout {
      * Build a {@link Context} cloned into another package name, usually for the
      * purposes of reading remote resources.
      */
-    private Context getRemoteContext(RemoteViews views) {
-        // Bail if missing package name
-        final String packageName = views.getPackage();
-        if (packageName == null) return mContext;
-
+    private Context getRemoteContext() {
         try {
             // Return if cloned successfully, otherwise default
-            return mContext.createPackageContextAsUser(packageName, Context.CONTEXT_RESTRICTED,
-                    mUser);
+            return mContext.createApplicationContext(
+                    mInfo.providerInfo.applicationInfo,
+                    Context.CONTEXT_RESTRICTED);
         } catch (NameNotFoundException e) {
-            Log.e(TAG, "Package name " + packageName + " not found");
+            Log.e(TAG, "Package name " +  mInfo.providerInfo.packageName + " not found");
             return mContext;
         }
     }
@@ -548,8 +538,7 @@ public class AppWidgetHostView extends FrameLayout {
 
         try {
             if (mInfo != null) {
-                Context theirContext = mContext.createPackageContextAsUser(
-                        mInfo.provider.getPackageName(), Context.CONTEXT_RESTRICTED, mUser);
+                Context theirContext = getRemoteContext();
                 mRemoteContext = theirContext;
                 LayoutInflater inflater = (LayoutInflater)
                         theirContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -572,8 +561,6 @@ public class AppWidgetHostView extends FrameLayout {
             } else {
                 Log.w(TAG, "can't inflate defaultView because mInfo is missing");
             }
-        } catch (PackageManager.NameNotFoundException e) {
-            exception = e;
         } catch (RuntimeException e) {
             exception = e;
         }
