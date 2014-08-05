@@ -220,7 +220,15 @@ final class TaskRecord {
         return System.currentTimeMillis() - lastActiveTime;
     }
 
-    void setIntent(Intent _intent, ActivityInfo info) {
+    /** Sets the original intent, and the calling uid and package. */
+    void setIntent(ActivityRecord r) {
+        setIntent(r.intent, r.info);
+        mCallingUid = r.launchedFromUid;
+        mCallingPackage = r.launchedFromPackage;
+    }
+
+    /** Sets the original intent, _without_ updating the calling uid or package. */
+    private void setIntent(Intent _intent, ActivityInfo info) {
         if (intent == null) {
             mNeverRelinquishIdentity =
                     (info.flags & ActivityInfo.FLAG_RELINQUISH_TASK_IDENTITY) == 0;
@@ -723,7 +731,7 @@ final class TaskRecord {
     void updateEffectiveIntent() {
         final int effectiveRootIndex = findEffectiveRootIndex();
         final ActivityRecord r = mActivities.get(effectiveRootIndex);
-        setIntent(r.intent, r.info);
+        setIntent(r);
     }
 
     void saveTaskDescription(ActivityManager.TaskDescription taskDescription,

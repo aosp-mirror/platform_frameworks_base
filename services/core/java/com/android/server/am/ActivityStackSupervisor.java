@@ -1714,7 +1714,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                         // the activity based on affinity...  now that we
                         // are actually launching it, we can assign the
                         // base intent.
-                        intentActivity.task.setIntent(intent, r.info);
+                        intentActivity.task.setIntent(r);
                     }
                     // If the target task is not in the front, then we need
                     // to bring it to the front...  except...  well, with
@@ -1771,7 +1771,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                         // not be too hard...
                         reuseTask = intentActivity.task;
                         reuseTask.performClearTaskLocked();
-                        reuseTask.setIntent(r.intent, r.info);
+                        reuseTask.setIntent(r);
                     } else if ((launchFlags&Intent.FLAG_ACTIVITY_CLEAR_TOP) != 0
                             || launchSingleInstance || launchSingleTask) {
                         // In this situation we want to remove all activities
@@ -1786,7 +1786,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                                 // intents for the top activity, so make sure
                                 // the task now has the identity of the new
                                 // intent.
-                                top.task.setIntent(r.intent, r.info);
+                                top.task.setIntent(r);
                             }
                             ActivityStack.logStartActivity(EventLogTags.AM_NEW_INTENT,
                                     r, top.task);
@@ -1815,7 +1815,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                             ActivityStack.logStartActivity(EventLogTags.AM_NEW_INTENT, r,
                                     intentActivity.task);
                             if (intentActivity.frontOfTask) {
-                                intentActivity.task.setIntent(r.intent, r.info);
+                                intentActivity.task.setIntent(r);
                             }
                             intentActivity.deliverNewIntentLocked(callingUid, r.intent);
                         } else if (!r.intent.filterEquals(intentActivity.task.intent)) {
@@ -1841,7 +1841,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                         // at the bottom of its stack, but that's a little hard
                         // to do with the current organization of the code so
                         // for now we'll just drop it.
-                        intentActivity.task.setIntent(r.intent, r.info);
+                        intentActivity.task.setIntent(r);
                     }
                     if (!addingToTask && reuseTask == null) {
                         // We didn't do anything...  but it was needed (a.k.a., client
