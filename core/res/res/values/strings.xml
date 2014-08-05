@@ -4878,6 +4878,17 @@
     <!-- TV content rating system strings for DK TV -->
 
     <!-- TV content rating system strings for ES TV -->
+    <string name="display_name_estv" translatable="false">ES-TV</string>
+    <string name="display_name_estv_all" translatable="false">TP</string>
+    <string name="display_name_estv_i" translatable="false">i</string>
+    <string name="display_name_estv_7" translatable="false">+7</string>
+    <string name="display_name_estv_13" translatable="false">+13</string>
+    <string name="display_name_estv_18" translatable="false">+18</string>
+    <string name="description_estv_all">Programas para todos los públicos</string>
+    <string name="description_estv_i">Programas especialmente recomendados para la infancia</string>
+    <string name="description_estv_7">Programas no recomendados para menores de 7 años (NR7)</string>
+    <string name="description_estv_13">Programas no recomendados para menores de 13 años (NR13)</string>
+    <string name="description_estv_18">Programas no recomendados para menores de 18 años (NR18)</string>
 
     <!-- TV content rating system strings for FI TV -->
 
