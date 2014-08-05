@@ -25,6 +25,7 @@ import android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel;
 import android.hardware.soundtrigger.SoundTrigger.ModuleProperties;
 import android.hardware.soundtrigger.SoundTrigger.RecognitionConfig;
 import android.hardware.soundtrigger.SoundTrigger.RecognitionEvent;
+import android.hardware.soundtrigger.SoundTrigger.SoundModelEvent;
 import android.hardware.soundtrigger.SoundTriggerModule;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -328,6 +329,23 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
                 }
                 break;
         }
+    }
+
+    public void onSoundModelUpdate(SoundModelEvent event) {
+        if (event == null) {
+            Slog.w(TAG, "Invalid sound model event!");
+            return;
+        }
+
+        if (DBG) Slog.d(TAG, "onSoundModelUpdate: " + event);
+
+        //TODO: implement sound model update
+    }
+
+    public void onServiceStateChange(int state) {
+        if (DBG) Slog.d(TAG, "onServiceStateChange, state: " + state);
+
+        //TODO: implement service state update
     }
 
     @Override
