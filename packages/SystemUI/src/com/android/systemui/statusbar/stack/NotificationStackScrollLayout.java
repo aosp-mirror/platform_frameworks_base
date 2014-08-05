@@ -568,8 +568,11 @@ public class NotificationStackScrollLayout extends ViewGroup
             float childTop = slidingChild.getTranslationY();
             float top = childTop + slidingChild.getClipTopAmount();
             float bottom = top + slidingChild.getActualHeight();
-            int left = slidingChild.getLeft();
-            int right = slidingChild.getRight();
+
+            // Allow the full width of this view to prevent gesture conflict on Keyguard (phone and
+            // camera affordance).
+            int left = 0;
+            int right = getWidth();
 
             if (touchY >= top && touchY <= bottom && touchX >= left && touchX <= right) {
                 return slidingChild;
