@@ -1854,4 +1854,6 @@
          state changes. Voice radio tech change will always trigger an update of
          phone object irrespective of this config -->
     <bool name="config_switch_phone_on_voice_reg_state_change">true</bool>
+
+    <bool name="config_sms_force_7bit_encoding">false</bool>
 </resources>
