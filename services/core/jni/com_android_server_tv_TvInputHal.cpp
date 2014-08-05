@@ -400,18 +400,15 @@ int JTvInputHal::removeStream(int deviceId, int streamId) {
         connection.mSurface->setSidebandStream(NULL);
         connection.mSurface.clear();
     }
+    if (connection.mThread != NULL) {
+        connection.mThread->shutdown();
+        connection.mThread.clear();
+    }
+    if (mDevice->close_stream(mDevice, deviceId, streamId) != 0) {
+        ALOGE("Couldn't remove stream");
+        return BAD_VALUE;
+    }
     if (connection.mSourceHandle != NULL) {
-        // Need to reset streams
-        if (mDevice->close_stream(mDevice, deviceId, streamId) != 0) {
-            ALOGE("Couldn't remove stream");
-            return BAD_VALUE;
-        }
-
-        // Clear everything
-        if (connection.mThread != NULL) {
-            connection.mThread->shutdown();
-            connection.mThread.clear();
-        }
         connection.mSourceHandle.clear();
     }
     return NO_ERROR;
