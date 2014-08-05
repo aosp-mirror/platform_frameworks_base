@@ -74,7 +74,7 @@ interface IImsUt {
     /**
      * Updates the configuration of the call barring.
      */
-    int updateCallBarring(int cbType, boolean enable);
+    int updateCallBarring(int cbType, boolean enable, in String[] barrList);
 
     /**
      * Updates the configuration of the call forward.
