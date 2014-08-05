@@ -82,6 +82,15 @@ public class AlwaysOnHotwordDetector {
     private static final int STATE_NOT_READY = 0;
 
     // Keyphrase management actions. Used in getManageIntent() ----//
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(value = {
+                MANAGE_ACTION_ENROLL,
+                MANAGE_ACTION_RE_ENROLL,
+                MANAGE_ACTION_UN_ENROLL
+            })
+    public @interface ManageActions {}
+
     /** Indicates that we need to enroll. */
     public static final int MANAGE_ACTION_ENROLL = 0;
     /** Indicates that we need to re-enroll. */
@@ -360,7 +369,7 @@ public class AlwaysOnHotwordDetector {
      *         This may happen if another detector has been instantiated or the
      *         {@link VoiceInteractionService} hosting this detector has been shut down.
      */
-    public Intent getManageIntent(int action) {
+    public Intent getManageIntent(@ManageActions int action) {
         if (DBG) Slog.d(TAG, "getManageIntent(" + action + ")");
         synchronized (mLock) {
             return getManageIntentLocked(action);
