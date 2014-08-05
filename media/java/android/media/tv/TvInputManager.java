@@ -942,7 +942,7 @@ public final class TvInputManager {
         }
 
         /**
-         * Set this as main session. See {@link TvView#setMainTvView} for about meaning of "main".
+         * Sets this as main session. See {@link TvView#setMainTvView} for about meaning of "main".
          * @hide
          */
         public void setMainSession() {
@@ -1071,7 +1071,7 @@ public final class TvInputManager {
         }
 
         /**
-         * Select a track.
+         * Selects a track.
          *
          * @param track The track to be selected.
          * @see #getTracks()
@@ -1092,7 +1092,7 @@ public final class TvInputManager {
         }
 
         /**
-         * Unselect a track.
+         * Unselects a track.
          *
          * @param track The track to be selected.
          * @see #getTracks()
@@ -1139,7 +1139,7 @@ public final class TvInputManager {
         }
 
         /**
-         * Call {@link TvInputService.Session#appPrivateCommand(String, Bundle)
+         * Calls {@link TvInputService.Session#appPrivateCommand(String, Bundle)
          * TvInputService.Session.appPrivateCommand()} on the current TvView.
          *
          * @param action Name of the command to be performed. This <em>must</em> be a scoped name,
