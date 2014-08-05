@@ -33,7 +33,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
@@ -72,6 +71,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private UnlockMethodCache mUnlockMethodCache;
     private LockPatternUtils mLockPatternUtils;
     private FlashlightController mFlashlightController;
+    private PreviewInflater mPreviewInflater;
 
     public KeyguardBottomAreaView(Context context) {
         super(context);
@@ -108,6 +108,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         updateTrust();
         setClipChildren(false);
         setClipToPadding(false);
+        mPreviewInflater = new PreviewInflater(mContext, new LockPatternUtils(mContext));
         inflatePreviews();
     }
 
@@ -208,7 +209,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     public void launchCamera() {
         mFlashlightController.killFlashlight();
         Intent intent = getCameraIntent();
-        if (intent == SECURE_CAMERA_INTENT) {
+        if (intent == SECURE_CAMERA_INTENT &&
+                !mPreviewInflater.wouldLaunchResolverActivity(intent)) {
             mContext.startActivityAsUser(intent, UserHandle.CURRENT);
         } else {
             mActivityStarter.startActivity(intent);
@@ -277,9 +279,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     }
 
     private void inflatePreviews() {
-        PreviewInflater inflater = new PreviewInflater(mContext, new LockPatternUtils(mContext));
-        mPhonePreview = inflater.inflatePreview(PHONE_INTENT);
-        mCameraPreview = inflater.inflatePreview(getCameraIntent());
+        mPhonePreview = mPreviewInflater.inflatePreview(PHONE_INTENT);
+        mCameraPreview = mPreviewInflater.inflatePreview(getCameraIntent());
         if (mPhonePreview != null) {
             mPreviewContainer.addView(mPhonePreview);
             mPhonePreview.setVisibility(View.INVISIBLE);
