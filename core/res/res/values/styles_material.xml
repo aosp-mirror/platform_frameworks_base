@@ -652,7 +652,7 @@ please see styles_device_defaults.xml.
 
     <style name="Widget.Material.ProgressBar.Horizontal" parent="Widget.ProgressBar.Horizontal">
         <item name="progressDrawable">@drawable/progress_horizontal_material</item>
-        <item name="indeterminateDrawable">@drawable/progress_indeterminate_horizontal_holo</item>
+        <item name="indeterminateDrawable">@drawable/progress_indeterminate_horizontal_material</item>
         <item name="minHeight">16dip</item>
         <item name="maxHeight">16dip</item>
     </style>
