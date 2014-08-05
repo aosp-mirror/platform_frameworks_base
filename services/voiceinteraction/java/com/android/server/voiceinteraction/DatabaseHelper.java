@@ -195,7 +195,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     Keyphrase[] keyphrases = new Keyphrase[1];
                     keyphrases[0] = new Keyphrase(
                             keyphraseId, recognitionModes, locale, text, users);
-                    return new KeyphraseSoundModel(UUID.fromString(modelUuid), data, keyphrases);
+                    return new KeyphraseSoundModel(UUID.fromString(modelUuid),
+                            null /* FIXME use vendor UUID */, data, keyphrases);
                 }
                 Slog.w(TAG, "No SoundModel available for the given keyphrase");
             } finally {

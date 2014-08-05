@@ -426,7 +426,7 @@ public class AlwaysOnHotwordDetector {
         KeyphraseRecognitionExtra[] recognitionExtra = new KeyphraseRecognitionExtra[1];
         // TODO: Do we need to do something about the confidence level here?
         recognitionExtra[0] = new KeyphraseRecognitionExtra(mKeyphraseMetadata.id,
-                mKeyphraseMetadata.recognitionModeFlags, new ConfidenceLevel[0]);
+                mKeyphraseMetadata.recognitionModeFlags, 0, new ConfidenceLevel[0]);
         boolean captureTriggerAudio =
                 (recognitionFlags&RECOGNITION_FLAG_CAPTURE_TRIGGER_AUDIO) != 0;
         boolean allowMultipleTriggers =
