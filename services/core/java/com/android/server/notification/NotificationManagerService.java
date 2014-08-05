@@ -2511,10 +2511,7 @@ public class NotificationManagerService extends SystemService {
         if (!listener.enabledAndUserMatches(sbn.getUserId())) {
             return false;
         }
-        Notification n = sbn.getNotification();
-        if (listener.targetSdkVersion < Build.VERSION_CODES.L && n.isGroupChild())  {
-            return false;
-        }
+        // TODO: remove this for older listeners.
         return true;
     }
 
