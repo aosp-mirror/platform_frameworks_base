@@ -4865,6 +4865,15 @@
     <!-- TV content rating system strings for CO TV -->
 
     <!-- TV content rating system strings for DE TV -->
+    <string name="display_name_detv" translatable="false">DE-TV</string>
+    <string name="display_name_detv_all" translatable="false">ab 0 Jahren</string>
+    <string name="display_name_detv_12" translatable="false">ab 12 Jahren</string>
+    <string name="display_name_detv_16" translatable="false">ab 16 Jahren</string>
+    <string name="display_name_detv_18" translatable="false">ab 18 Jahren</string>
+    <string name="description_detv_all">Die nachfolgende Sendung ist für alle alters geeignet.</string>
+    <string name="description_detv_12">Die nachfolgende Sendung ist für Zuschauer unter 12 Jahren nicht geeignet.</string>
+    <string name="description_detv_16">Die nachfolgende Sendung ist für Zuschauer unter 16 Jahren nicht geeignet.</string>
+    <string name="description_detv_18">Die nachfolgende Sendung ist für Zuschauer unter 18 Jahren nicht geeignet.</string>
 
     <!-- TV content rating system strings for DK TV -->
 
