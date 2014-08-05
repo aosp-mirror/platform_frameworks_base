@@ -21,6 +21,7 @@ import android.app.Application;
 import android.app.AppGlobals;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Process;
@@ -109,8 +110,14 @@ public final class WebViewFactory {
     private static Class<WebViewFactoryProvider> getFactoryClass() throws ClassNotFoundException {
         Application initialApplication = AppGlobals.getInitialApplication();
         try {
-            Context webViewContext = initialApplication.createPackageContext(
-                    getWebViewPackageName(),
+            // First fetch the package info so we can log the webview package version.
+            String packageName = getWebViewPackageName();
+            PackageInfo pi = initialApplication.getPackageManager().getPackageInfo(packageName, 0);
+            Log.i(LOGTAG, "Loading " + packageName + " version " + pi.versionName +
+                          " (code " + pi.versionCode + ")");
+
+            // Construct a package context to load the Java code into the current app.
+            Context webViewContext = initialApplication.createPackageContext(packageName,
                     Context.CONTEXT_INCLUDE_CODE | Context.CONTEXT_IGNORE_SECURITY);
             initialApplication.getAssets().addAssetPath(
                     webViewContext.getApplicationInfo().sourceDir);
