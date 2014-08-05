@@ -107,6 +107,19 @@ public class PreviewInflater {
         return info;
     }
 
+    public boolean wouldLaunchResolverActivity(Intent intent) {
+        PackageManager packageManager = mContext.getPackageManager();
+        final List<ResolveInfo> appList = packageManager.queryIntentActivitiesAsUser(
+                intent, PackageManager.MATCH_DEFAULT_ONLY, mLockPatternUtils.getCurrentUser());
+        if (appList.size() == 0) {
+            return false;
+        }
+        ResolveInfo resolved = packageManager.resolveActivityAsUser(intent,
+                PackageManager.MATCH_DEFAULT_ONLY | PackageManager.GET_META_DATA,
+                mLockPatternUtils.getCurrentUser());
+        return wouldLaunchResolverActivity(resolved, appList);
+    }
+
     private boolean wouldLaunchResolverActivity(ResolveInfo resolved, List<ResolveInfo> appList) {
         // If the list contains the above resolved activity, then it can't be
         // ResolverActivity itself.
