@@ -39,4 +39,5 @@ oneway interface ITvInputClient {
     void onVideoUnavailable(int reason, int seq);
     void onContentAllowed(int seq);
     void onContentBlocked(in String rating, int seq);
+    void onLayoutSurface(int left, int top, int right, int bottom, int seq);
 }

@@ -42,6 +42,7 @@ import android.view.InputEventReceiver;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.Surface;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.accessibility.CaptioningManager;
@@ -504,6 +505,35 @@ public abstract class TvInputService extends Service {
         }
 
         /**
+         * Assigns a position of the {@link Surface} passed by {@link #onSetSurface}. The position
+         * is relative to an overlay view. {@see #onOverlayViewSizeChanged}.
+         *
+         * @param left Left position in pixels, relative to the overlay view.
+         * @param top Top position in pixels, relative to the overlay view.
+         * @param right Right position in pixels, relative to the overlay view.
+         * @param bottm Bottom position in pixels, relative to the overlay view.
+         * @hide
+         */
+        @SystemApi
+        public void layoutSurface(final int left, final int top, final int right, final int bottm) {
+            if (left > right || top > bottm) {
+                throw new IllegalArgumentException("Invalid parameter");
+            }
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) Log.d(TAG, "layoutSurface (l=" + left + ", t=" + top + ", r="
+                                + right + ", b=" + bottm + ",)");
+                        mSessionCallback.onLayoutSurface(left, top, right, bottm);
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in layoutSurface");
+                    }
+                }
+            });
+        }
+
+        /**
          * Called when the session is released.
          */
         public abstract void onRelease();
@@ -553,6 +583,20 @@ public abstract class TvInputService extends Service {
          * @param height The new height of the {@link Surface}.
          */
         public void onSurfaceChanged(int format, int width, int height) {
+        }
+
+        /**
+         * Called when a size of an overlay view is changed by an application. Even when the overlay
+         * view is disabled by {@link #setOverlayViewEnabled}, this is called. The size is same as
+         * the size of {@link Surface} in general. Once {@link #layoutSurface} is called, the sizes
+         * of {@link Surface} and the overlay view can be different.
+         *
+         * @param width The width of the overlay view.
+         * @param height The height of the overlay view.
+         * @hide
+         */
+        @SystemApi
+        public void onOverlayViewSizeChanged(int width, int height) {
         }
 
         /**
@@ -873,6 +917,7 @@ public abstract class TvInputService extends Service {
             if (DEBUG) Log.d(TAG, "create overlay view(" + frame + ")");
             mWindowToken = windowToken;
             mOverlayFrame = frame;
+            onOverlayViewSizeChanged(frame.right - frame.left, frame.bottom - frame.top);
             if (!mOverlayViewEnabled) {
                 return;
             }
@@ -887,7 +932,7 @@ public abstract class TvInputService extends Service {
             // the application that owns the window token can decide whether to consume or
             // dispatch the input events.
             int flag = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                    | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                    | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
                     | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
             mWindowParams = new WindowManager.LayoutParams(
                     frame.right - frame.left, frame.bottom - frame.top,
@@ -906,6 +951,12 @@ public abstract class TvInputService extends Service {
          */
         void relayoutOverlayView(Rect frame) {
             if (DEBUG) Log.d(TAG, "relayoutOverlayView(" + frame + ")");
+            if (mOverlayFrame == null || mOverlayFrame.width() != frame.width()
+                    || mOverlayFrame.height() != frame.height()) {
+                // Note: relayoutOverlayView is called whenever TvView's layout is changed
+                // regardless of setOverlayViewEnabled.
+                onOverlayViewSizeChanged(frame.right - frame.left, frame.bottom - frame.top);
+            }
             mOverlayFrame = frame;
             if (!mOverlayViewEnabled || mOverlayView == null) {
                 return;
