@@ -4870,6 +4870,19 @@
     <!-- TV content rating system strings for BG TV -->
 
     <!-- TV content rating system strings for BR TV -->
+    <string name="display_name_brtv" translatable="false">Brazil Content Rating</string>
+    <string name="display_name_brtv_l" translatable="false">Livre</string>
+    <string name="display_name_brtv_10" translatable="false">10 anos</string>
+    <string name="display_name_brtv_12" translatable="false">12 anos</string>
+    <string name="display_name_brtv_14" translatable="false">14 anos</string>
+    <string name="display_name_brtv_16" translatable="false">16 anos</string>
+    <string name="display_name_brtv_18" translatable="false">18 anos</string>
+    <string name="description_brtv_l" translatable="false">Livre para todos os públicos</string>
+    <string name="description_brtv_10" translatable="false">Não recomendado para menores de 10 anos</string>
+    <string name="description_brtv_12" translatable="false">Não recomendado para menores de 10 anos</string>
+    <string name="description_brtv_14" translatable="false">Não recomendado para menores de 14 anos</string>
+    <string name="description_brtv_16" translatable="false">Não recomendado para menores de 16 anos</string>
+    <string name="description_brtv_18" translatable="false">Não recomendado para menores de 18 anos</string>
 
     <!-- TV content rating system strings for CA TV -->
 
@@ -4935,8 +4948,6 @@
     <!-- TV content rating system strings for IN TV -->
 
     <!-- TV content rating system strings for IS TV -->
-
-    <!-- TV content rating system strings for IT TV -->
 
     <!-- TV content rating system strings for KH TV -->
 
