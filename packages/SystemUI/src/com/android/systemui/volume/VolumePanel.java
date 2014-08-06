@@ -680,15 +680,15 @@ public class VolumePanel extends Handler {
             // never disable touch interactions for remote playback, the muting is not tied to
             // the state of the phone.
             sc.seekbarView.setEnabled(!fixedVolume);
-        } else if (fixedVolume ||
-                        (sc.streamType != mAudioManager.getMasterStreamType() && muted) ||
-                        (sSafetyWarning != null)) {
-            sc.seekbarView.setEnabled(false);
         } else if (isRinger && mAudioManager.getRingerMode() == AudioManager.RINGER_MODE_SILENT) {
             sc.seekbarView.setEnabled(false);
             sc.icon.setEnabled(false);
             sc.icon.setAlpha(mDisabledAlpha);
             sc.icon.setClickable(false);
+        } else if (fixedVolume ||
+                (sc.streamType != mAudioManager.getMasterStreamType() && muted) ||
+                (sSafetyWarning != null)) {
+            sc.seekbarView.setEnabled(false);
         } else {
             sc.seekbarView.setEnabled(true);
             sc.icon.setEnabled(true);

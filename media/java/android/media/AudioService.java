@@ -291,14 +291,14 @@ public class AudioService extends IAudioService.Stub {
     };
     private final int[] STREAM_VOLUME_ALIAS_DEFAULT = new int[] {
         AudioSystem.STREAM_VOICE_CALL,      // STREAM_VOICE_CALL
-        AudioSystem.STREAM_MUSIC,           // STREAM_SYSTEM
+        AudioSystem.STREAM_RING,            // STREAM_SYSTEM
         AudioSystem.STREAM_RING,            // STREAM_RING
         AudioSystem.STREAM_MUSIC,           // STREAM_MUSIC
         AudioSystem.STREAM_ALARM,           // STREAM_ALARM
         AudioSystem.STREAM_RING,            // STREAM_NOTIFICATION
         AudioSystem.STREAM_BLUETOOTH_SCO,   // STREAM_BLUETOOTH_SCO
-        AudioSystem.STREAM_MUSIC,           // STREAM_SYSTEM_ENFORCED
-        AudioSystem.STREAM_MUSIC,           // STREAM_DTMF
+        AudioSystem.STREAM_RING,            // STREAM_SYSTEM_ENFORCED
+        AudioSystem.STREAM_RING,            // STREAM_DTMF
         AudioSystem.STREAM_MUSIC            // STREAM_TTS
     };
     private int[] mStreamVolumeAlias;
@@ -1572,15 +1572,7 @@ public class AudioService extends IAudioService.Stub {
 
     /** @see AudioManager#getMasterStreamType()  */
     public int getMasterStreamType() {
-        switch (mPlatformType) {
-            case PLATFORM_VOICE:
-                return AudioSystem.STREAM_RING;
-            case PLATFORM_TELEVISION:
-                return AudioSystem.STREAM_MUSIC;
-            default:
-                break;
-        }
-        return AudioSystem.STREAM_NOTIFICATION;
+        return mStreamVolumeAlias[AudioSystem.STREAM_SYSTEM];
     }
 
     /** @see AudioManager#setMicrophoneMute(boolean) */
