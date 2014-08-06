@@ -53,6 +53,9 @@ public class VectorDrawablePerformance extends Activity {
             R.drawable.vector_drawable23,
             R.drawable.vector_drawable24,
             R.drawable.vector_drawable25,
+            R.drawable.vector_drawable26,
+            R.drawable.vector_drawable27,
+            R.drawable.vector_drawable28,
     };
 
     @Override
