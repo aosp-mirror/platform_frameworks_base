@@ -16869,9 +16869,8 @@ package android.media.session {
 package android.media.tv {
 
   public final class TvContentRating {
-    method public static android.media.tv.TvContentRating createRating(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String...);
+    method public static android.media.tv.TvContentRating createRating(java.lang.String, java.lang.String, java.lang.String, java.lang.String...);
     method public java.lang.String flattenToString();
-    method public java.lang.String getCountry();
     method public java.lang.String getDomain();
     method public java.lang.String getMainRating();
     method public java.lang.String getRatingSystem();
