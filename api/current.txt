@@ -28806,16 +28806,16 @@ package android.telecomm {
     method public void changeCameraCapabilities(android.telecomm.CallCameraCapabilities);
     method public void changePeerDimensions(int, int);
     method public void handleCallSessionEvent(int);
-    method public abstract void onRequestCallDataUsage();
-    method public abstract void onRequestCameraCapabilities();
-    method public abstract void onSendSessionModifyRequest(android.telecomm.VideoCallProfile);
-    method public abstract void onSendSessionModifyResponse(android.telecomm.VideoCallProfile);
-    method public abstract void onSetCamera(java.lang.String);
-    method public abstract void onSetDeviceOrientation(int);
-    method public abstract void onSetDisplaySurface(android.view.Surface);
-    method public abstract void onSetPauseImage(java.lang.String);
-    method public abstract void onSetPreviewSurface(android.view.Surface);
-    method public abstract void onSetZoom(float);
+    method public void onRequestCallDataUsage();
+    method public void onRequestCameraCapabilities();
+    method public void onSendSessionModifyRequest(android.telecomm.VideoCallProfile);
+    method public void onSendSessionModifyResponse(android.telecomm.VideoCallProfile);
+    method public void onSetCamera(java.lang.String);
+    method public void onSetDeviceOrientation(int);
+    method public void onSetDisplaySurface(android.view.Surface);
+    method public void onSetPauseImage(java.lang.String);
+    method public void onSetPreviewSurface(android.view.Surface);
+    method public void onSetZoom(float);
     method public void receiveSessionModifyRequest(android.telecomm.VideoCallProfile);
     method public void receiveSessionModifyResponse(int, android.telecomm.VideoCallProfile, android.telecomm.VideoCallProfile);
   }
