@@ -105,15 +105,11 @@ public:
     virtual status_t drawColor(int color, SkXfermode::Mode mode);
 
     // Bitmap-based
-    virtual status_t drawBitmap(const SkBitmap* bitmap, float left, float top,
-            const SkPaint* paint);
-    virtual status_t drawBitmap(const SkBitmap* bitmap, const SkMatrix& matrix,
-            const SkPaint* paint);
+    virtual status_t drawBitmap(const SkBitmap* bitmap, const SkPaint* paint);
     virtual status_t drawBitmap(const SkBitmap* bitmap, float srcLeft, float srcTop,
             float srcRight, float srcBottom, float dstLeft, float dstTop,
             float dstRight, float dstBottom, const SkPaint* paint);
-    virtual status_t drawBitmapData(const SkBitmap* bitmap, float left, float top,
-            const SkPaint* paint);
+    virtual status_t drawBitmapData(const SkBitmap* bitmap, const SkPaint* paint);
     virtual status_t drawBitmapMesh(const SkBitmap* bitmap, int meshWidth, int meshHeight,
             const float* vertices, const int* colors, const SkPaint* paint);
     virtual status_t drawPatch(const SkBitmap* bitmap, const Res_png_9patch* patch,

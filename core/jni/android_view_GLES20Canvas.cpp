@@ -348,7 +348,12 @@ static void android_view_GLES20Canvas_drawBitmap(JNIEnv* env, jobject clazz,
 
     DisplayListRenderer* renderer = reinterpret_cast<DisplayListRenderer*>(rendererPtr);
     Paint* paint = reinterpret_cast<Paint*>(paintPtr);
-    renderer->drawBitmap(bitmap, left, top, paint);
+
+    // apply transform directly to canvas, so it affects shaders correctly
+    renderer->save(SkCanvas::kMatrix_SaveFlag);
+    renderer->translate(left, top);
+    renderer->drawBitmap(bitmap, paint);
+    renderer->restore();
 }
 
 static void android_view_GLES20Canvas_drawBitmapRect(JNIEnv* env, jobject clazz,
@@ -375,7 +380,12 @@ static void android_view_GLES20Canvas_drawBitmapMatrix(JNIEnv* env, jobject claz
     DisplayListRenderer* renderer = reinterpret_cast<DisplayListRenderer*>(rendererPtr);
     SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixPtr);
     Paint* paint = reinterpret_cast<Paint*>(paintPtr);
-    renderer->drawBitmap(bitmap, *matrix, paint);
+
+    // apply transform directly to canvas, so it affects shaders correctly
+    renderer->save(SkCanvas::kMatrix_SaveFlag);
+    renderer->concatMatrix(*matrix);
+    renderer->drawBitmap(bitmap, paint);
+    renderer->restore();
 }
 
 static void android_view_GLES20Canvas_drawBitmapData(JNIEnv* env, jobject clazz,
@@ -399,7 +409,12 @@ static void android_view_GLES20Canvas_drawBitmapData(JNIEnv* env, jobject clazz,
 
     DisplayListRenderer* renderer = reinterpret_cast<DisplayListRenderer*>(rendererPtr);
     Paint* paint = reinterpret_cast<Paint*>(paintPtr);
-    renderer->drawBitmapData(bitmap, left, top, paint);
+
+    // apply transform directly to canvas, so it affects shaders correctly
+    renderer->save(SkCanvas::kMatrix_SaveFlag);
+    renderer->translate(left, top);
+    renderer->drawBitmapData(bitmap, paint);
+    renderer->restore();
 
     // Note - bitmap isn't deleted as DisplayListRenderer owns it now
 }

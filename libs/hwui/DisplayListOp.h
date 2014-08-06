@@ -639,9 +639,10 @@ private:
 
 class DrawBitmapOp : public DrawBoundedOp {
 public:
-    DrawBitmapOp(const SkBitmap* bitmap, float left, float top, const SkPaint* paint)
-            : DrawBoundedOp(left, top, left + bitmap->width(), top + bitmap->height(), paint),
-            mBitmap(bitmap), mAtlas(Caches::getInstance().assetAtlas) {
+    DrawBitmapOp(const SkBitmap* bitmap, const SkPaint* paint)
+            : DrawBoundedOp(0, 0, bitmap->width(), bitmap->height(), paint)
+            , mBitmap(bitmap)
+            , mAtlas(Caches::getInstance().assetAtlas) {
         mEntry = mAtlas.getEntry(bitmap);
         if (mEntry) {
             mEntryGenerationId = mAtlas.getGenerationId();
@@ -650,8 +651,7 @@ public:
     }
 
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
-        return renderer.drawBitmap(mBitmap, mLocalBounds.left, mLocalBounds.top,
-                getPaint(renderer));
+        return renderer.drawBitmap(mBitmap, getPaint(renderer));
     }
 
     AssetAtlas::Entry* getAtlasEntry() {
@@ -745,35 +745,6 @@ protected:
     UvMapper mUvMapper;
 };
 
-class DrawBitmapMatrixOp : public DrawBoundedOp {
-public:
-    DrawBitmapMatrixOp(const SkBitmap* bitmap, const SkMatrix& matrix, const SkPaint* paint)
-            : DrawBoundedOp(paint), mBitmap(bitmap), mMatrix(matrix) {
-        mLocalBounds.set(0, 0, bitmap->width(), bitmap->height());
-        const mat4 transform(matrix);
-        transform.mapRect(mLocalBounds);
-    }
-
-    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
-        return renderer.drawBitmap(mBitmap, mMatrix, getPaint(renderer));
-    }
-
-    virtual void output(int level, uint32_t logFlags) const {
-        OP_LOG("Draw bitmap %p matrix " SK_MATRIX_STRING, mBitmap, SK_MATRIX_ARGS(&mMatrix));
-    }
-
-    virtual const char* name() { return "DrawBitmapMatrix"; }
-
-    virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo,
-            const DeferredDisplayState& state) {
-        deferInfo.batchId = DeferredDisplayList::kOpBatch_Bitmap;
-    }
-
-private:
-    const SkBitmap* mBitmap;
-    const SkMatrix mMatrix;
-};
-
 class DrawBitmapRectOp : public DrawBoundedOp {
 public:
     DrawBitmapRectOp(const SkBitmap* bitmap,
@@ -807,12 +778,11 @@ private:
 
 class DrawBitmapDataOp : public DrawBitmapOp {
 public:
-    DrawBitmapDataOp(const SkBitmap* bitmap, float left, float top, const SkPaint* paint)
-            : DrawBitmapOp(bitmap, left, top, paint) {}
+    DrawBitmapDataOp(const SkBitmap* bitmap, const SkPaint* paint)
+            : DrawBitmapOp(bitmap, paint) {}
 
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
-        return renderer.drawBitmapData(mBitmap, mLocalBounds.left,
-                mLocalBounds.top, getPaint(renderer));
+        return renderer.drawBitmapData(mBitmap, getPaint(renderer));
     }
 
     virtual void output(int level, uint32_t logFlags) const {
