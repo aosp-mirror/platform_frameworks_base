@@ -25,7 +25,7 @@ public interface RecentsComponent {
     }
 
     void showRecents(boolean triggeredFromAltTab, View statusBarView);
-    void hideRecents(boolean triggeredFromAltTab);
+    void hideRecents(boolean triggeredFromAltTab, boolean triggeredFromHomeKey);
     void toggleRecents(Display display, int layoutDirection, View statusBarView);
     void preloadRecents();
     void cancelPreloadingRecents();
