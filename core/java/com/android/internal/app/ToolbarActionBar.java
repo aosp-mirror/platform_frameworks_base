@@ -179,7 +179,7 @@ public class ToolbarActionBar extends ActionBar {
 
     @Override
     public ActionMode startActionMode(ActionMode.Callback callback) {
-        return mToolbar.startActionMode(callback);
+        return null;
     }
 
     @Override
