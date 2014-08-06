@@ -384,10 +384,19 @@ public class SwipeHelper implements Gefingerpoken {
         }
 
         if (!mDragging) {
-            // We are not doing anything, make sure the long press callback
-            // is not still ticking like a bomb waiting to go off.
-            removeLongPressCallback();
-            return false;
+            if (mCallback.getChildAtPosition(ev) != null) {
+
+                // We are dragging directly over a card, make sure that we also catch the gesture
+                // even if nobody else wants the touch event.
+                onInterceptTouchEvent(ev);
+                return true;
+            } else {
+
+                // We are not doing anything, make sure the long press callback
+                // is not still ticking like a bomb waiting to go off.
+                removeLongPressCallback();
+                return false;
+            }
         }
 
         mVelocityTracker.addMovement(ev);

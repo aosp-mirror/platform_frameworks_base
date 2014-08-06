@@ -98,7 +98,7 @@ public class KeyguardAffordanceHelper {
 
     private void initDimens() {
         final ViewConfiguration configuration = ViewConfiguration.get(mContext);
-        mTouchSlop = configuration.getScaledTouchSlop();
+        mTouchSlop = configuration.getScaledPagingTouchSlop();
         mMinFlingVelocity = configuration.getScaledMinimumFlingVelocity();
         mMinTranslationAmount = mContext.getResources().getDimensionPixelSize(
                 R.dimen.keyguard_min_swipe_amount);
