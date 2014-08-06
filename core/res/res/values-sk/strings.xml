@@ -417,10 +417,8 @@
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Umožňuje držiteľovi odosielať informácie správcovi zariadenia. Bežné aplikácie by toto nastavenie nemali nikdy potrebovať."</string>
     <string name="permlab_bindTvInput" msgid="5601264742478168987">"viazanie na televízny vstup"</string>
     <string name="permdesc_bindTvInput" msgid="2371008331852001924">"Umožňuje držiteľovi viazať sa na najvyššiu úroveň rozhrania televízneho vstupu. Bežné aplikácie by toto nastavenie nemali nikdy potrebovať."</string>
-    <!-- no translation found for permlab_modifyParentalControls (4611318225997592242) -->
-    <skip />
-    <!-- no translation found for permdesc_modifyParentalControls (7438482894162282039) -->
-    <skip />
+    <string name="permlab_modifyParentalControls" msgid="4611318225997592242">"úprava nadradených ovládacích prvkov"</string>
+    <string name="permdesc_modifyParentalControls" msgid="7438482894162282039">"Umožňuje držiteľovi upravovať údaje nadradených ovládacích prvkov systému. Bežné aplikácie by toto povolenie nemali nikdy potrebovať."</string>
     <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"pridanie alebo odstránenie správcu zariadenia"</string>
     <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Umožňuje držiteľovi pridať alebo odstrániť správcov aktívnych zariadení. Bežné aplikácie by toto povolenie nemali nikdy potrebovať."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"zmena orientácie obrazovky"</string>
@@ -739,6 +737,8 @@
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Umožňuje aplikácii vydávať a používať certifikáty DRM. Bežné aplikácie by toto povolenie nemali nikdy potrebovať."</string>
     <string name="permlab_handoverStatus" msgid="1159132046126626731">"Prijímať stav prenosu funkcie Android Beam"</string>
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Povoľuje tejto aplikácii prijímať informácie o aktuálnych prenosoch funkcie Android Beam"</string>
+    <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"odstránenie certifikátov DRM"</string>
+    <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Umožňuje aplikácii odstraňovať certifikáty DRM. Bežné aplikácie by toto povolenie nemali nikdy potrebovať."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Nastaviť pravidlá pre heslo"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Ovládanie dĺžky hesiel na odomknutie obrazovky a v nich používané znaky."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Sledovať pokusy o odomknutie obrazovky"</string>
@@ -1339,10 +1339,8 @@
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formát"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Ladenie cez USB pripojené"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Dotknutím zakážete ladenie USB."</string>
-    <!-- no translation found for select_input_method (8547250819326693584) -->
-    <skip />
-    <!-- no translation found for configure_input_methods (4769971288371946846) -->
-    <skip />
+    <string name="select_input_method" msgid="8547250819326693584">"Zmeniť klávesnicu"</string>
+    <string name="configure_input_methods" msgid="4769971288371946846">"Vybrať klávesnice"</string>
     <string name="use_physical_keyboard" msgid="6203112478095117625">"Fyzická klávesnica"</string>
     <string name="hardware" msgid="7517821086888990278">"Hardvér"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Zvoľte rozloženie klávesnice"</string>
@@ -1559,8 +1557,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"Prijať hovor?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Vždy"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Len raz"</string>
-    <!-- no translation found for activity_resolver_work_profiles_support (5462991471861024343) -->
-    <skip />
+    <string name="activity_resolver_work_profiles_support" msgid="5462991471861024343">"%1$s nepodporuje pracovný profil."</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Tablet"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Telefón"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Slúchadlá"</string>
@@ -1766,40 +1763,22 @@
     <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"Číslo PIN"</string>
     <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"bezpečnostný vzor"</string>
     <string name="lock_to_app_unlock_password" msgid="795224196583495868">"heslo"</string>
-    <!-- no translation found for description_ustvpg (3666171166900312727) -->
-    <skip />
-    <!-- no translation found for description_ustvpg_d (6552868431924879897) -->
-    <skip />
-    <!-- no translation found for description_ustvpg_l (2427588153488291892) -->
-    <skip />
-    <!-- no translation found for description_ustvpg_s (2556047043212535339) -->
-    <skip />
-    <!-- no translation found for description_ustvpg_v (6647466085048806213) -->
-    <skip />
-    <!-- no translation found for description_ustvpg_fv (4015953953338931020) -->
-    <skip />
-    <!-- no translation found for description_ustvpg_y (2271448022073929890) -->
-    <skip />
-    <!-- no translation found for description_ustvpg_y7 (8931861188215869211) -->
-    <skip />
-    <!-- no translation found for description_ustvpg_g (506861774854051282) -->
-    <skip />
-    <!-- no translation found for description_ustvpg_pg (4238749719629801564) -->
-    <skip />
-    <!-- no translation found for description_ustvpg_14 (6305164472373004907) -->
-    <skip />
-    <!-- no translation found for description_ustvpg_ma (5842074394338699982) -->
-    <skip />
-    <!-- no translation found for description_krtv_all (11497981488871053) -->
-    <skip />
-    <!-- no translation found for description_krtv_7 (6204900788594114856) -->
-    <skip />
-    <!-- no translation found for description_krtv_12 (5134514644432355428) -->
-    <skip />
-    <!-- no translation found for description_krtv_15 (1183692678647313272) -->
-    <skip />
-    <!-- no translation found for description_krtv_19 (7021986912313208481) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (724302068634956656) -->
-    <skip />
+    <string name="description_krtv_all" msgid="11497981488871053">"모든 연령의 시청자가 시청하기에 부적절한 내용이 없는 등급을 말한다."</string>
+    <string name="description_krtv_7" msgid="6204900788594114856">"7세미만의 어린이가 시청하기에 부적절한 내용이 포함되어 있어 보호자의 시청지도가 필요한 등급을 말한다."</string>
+    <string name="description_krtv_12" msgid="5134514644432355428">"12세미만의 청소년이 시청하기에 부적절한 내용이 포함되어 있어 보호자의 시청지도가 필요한 등급을 말한다."</string>
+    <string name="description_krtv_15" msgid="1183692678647313272">"15세미만의 청소년이 시청하기에 부적절한 내용이 포함되어 있어 보호자의 시청지도가 필요한 등급을 말한다."</string>
+    <string name="description_krtv_19" msgid="7021986912313208481">"19세미만의 청소년이 시청하기에 부적절한 내용이 포함되어 있어 청소년이 시청할 수 없는 등급을 말한다."</string>
+    <string name="description_ustvpg" msgid="3666171166900312727">"Pokyny pre rodičovský dohľad pre TV"</string>
+    <string name="description_ustvpg_d" msgid="6552868431924879897">"Naznačujúci dialóg (zvyčajne ide o konverzácie o sexe)"</string>
+    <string name="description_ustvpg_l" msgid="2427588153488291892">"Hrubý jazyk"</string>
+    <string name="description_ustvpg_s" msgid="2556047043212535339">"Sexuálny obsah"</string>
+    <string name="description_ustvpg_v" msgid="6647466085048806213">"Násilie"</string>
+    <string name="description_ustvpg_fv" msgid="4015953953338931020">"Fantazijné násilie (iba detské programy)"</string>
+    <string name="description_ustvpg_y" msgid="2271448022073929890">"Tento program je vhodný pre všetky deti."</string>
+    <string name="description_ustvpg_y7" msgid="8931861188215869211">"Tento program je vhodný pre deti od sedem rokov."</string>
+    <string name="description_ustvpg_g" msgid="506861774854051282">"Väčšina rodičov by tento program považovala za vhodný pre deti všetkých vekových skupín."</string>
+    <string name="description_ustvpg_pg" msgid="4238749719629801564">"V tomto programe sa nachádza obsah, ktorý môžu rodičia považovať za nevhodný pre mladšie deti."</string>
+    <string name="description_ustvpg_14" msgid="6305164472373004907">"Tento program zahrnuje obsah, ktorý by mnohí rodičia mohli považovať za nevhodný pre deti mladšie ako 14 rokov."</string>
+    <string name="description_ustvpg_ma" msgid="5842074394338699982">"Tento program je konkrétne určený pre dospelých, a preto môže byť nevhodný pre deti mladšie ako 17 rokov."</string>
+    <string name="battery_saver_description" msgid="724302068634956656">"Šetrič batérie zníži výkonnosť vášho zariadenia a obmedzí prenos údajov na pozadí, aby tak predĺžil výdrž batérie. E-maily, správy a ďalšie aplikácie, ktorú sú závislé od synchronizácie, sa nemusia aktualizovať, dokým ich neotvoríte.\n\nPri nabíjaní zariadenia sa šetrič batérie automaticky vypne."</string>
 </resources>

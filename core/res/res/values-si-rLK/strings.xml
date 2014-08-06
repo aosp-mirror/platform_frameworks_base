@@ -739,6 +739,10 @@
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"යෙදුමකට DRM  සහතික වෙන් කර භාවිතා කිරීමට ඉඩ දේ. සාමාන්‍ය යෙදුම් වලට කිසිදා අවශ්‍ය නොවේ."</string>
     <string name="permlab_handoverStatus" msgid="1159132046126626731">"Android බීම් හුවමාරු තත්ත්වය ලබාගන්න"</string>
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"දැනට තිබෙන Android බීම් හුවමාරු පිළිබඳ තොරතුරු ලබාගැනීමට මෙම යෙදුමට ඉඩ දෙන්න"</string>
+    <!-- no translation found for permlab_removeDrmCertificates (7044888287209892751) -->
+    <skip />
+    <!-- no translation found for permdesc_removeDrmCertificates (7272999075113400993) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"මුරපද නීති සකස් කිරීම"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"තිරය අගුළු ඇරීමේ මුරපදයට අනුමත අකුරු සහ දිග පාලනය කරන්න."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"තිරය අගුළු ඇරීමේ උත්සාහයන් නිරීක්ෂණය කරන්න"</string>
@@ -1769,6 +1773,16 @@
     <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN"</string>
     <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"අඟුළු ඇරීමේ රටාව"</string>
     <string name="lock_to_app_unlock_password" msgid="795224196583495868">"මුරපදය"</string>
+    <!-- no translation found for description_krtv_all (11497981488871053) -->
+    <skip />
+    <!-- no translation found for description_krtv_7 (6204900788594114856) -->
+    <skip />
+    <!-- no translation found for description_krtv_12 (5134514644432355428) -->
+    <skip />
+    <!-- no translation found for description_krtv_15 (1183692678647313272) -->
+    <skip />
+    <!-- no translation found for description_krtv_19 (7021986912313208481) -->
+    <skip />
     <!-- no translation found for description_ustvpg (3666171166900312727) -->
     <skip />
     <!-- no translation found for description_ustvpg_d (6552868431924879897) -->
@@ -1792,16 +1806,6 @@
     <!-- no translation found for description_ustvpg_14 (6305164472373004907) -->
     <skip />
     <!-- no translation found for description_ustvpg_ma (5842074394338699982) -->
-    <skip />
-    <!-- no translation found for description_krtv_all (11497981488871053) -->
-    <skip />
-    <!-- no translation found for description_krtv_7 (6204900788594114856) -->
-    <skip />
-    <!-- no translation found for description_krtv_12 (5134514644432355428) -->
-    <skip />
-    <!-- no translation found for description_krtv_15 (1183692678647313272) -->
-    <skip />
-    <!-- no translation found for description_krtv_19 (7021986912313208481) -->
     <skip />
     <!-- no translation found for battery_saver_description (724302068634956656) -->
     <skip />

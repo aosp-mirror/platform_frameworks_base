@@ -739,6 +739,10 @@
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Приложение сможет синхронизировать и использовать сертификаты DRM (разрешение актуально только для специальных приложений)."</string>
     <string name="permlab_handoverStatus" msgid="1159132046126626731">"Получение статуса передачи Android Beam"</string>
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Получение информации о текущих передачах Android Beam."</string>
+    <!-- no translation found for permlab_removeDrmCertificates (7044888287209892751) -->
+    <skip />
+    <!-- no translation found for permdesc_removeDrmCertificates (7272999075113400993) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Правила выбора паролей"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Контролировать длину и символы при вводе паролей для снятия блокировки экрана."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Отслеживать попытки снятия блокировки экрана"</string>
@@ -1386,12 +1390,12 @@
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Приложение сможет управлять хранилищем ключей."</string>
     <string name="permlab_trust_listener" msgid="1765718054003704476">"Отслеживание изменений статуса доверия"</string>
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Приложение сможет отслеживать изменения в статусе доверия."</string>
-    <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Доверенный агент"</string>
-    <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Предоставление доверенных агентов."</string>
-    <string name="permlab_launch_trust_agent_settings" msgid="5859430082240410200">"Запуск настроек Trust Agent"</string>
-    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"Запуск меню, позволяющего управлять настройками Trust Agent."</string>
-    <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Подключение к службе Trust Agents"</string>
-    <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Приложение сможет подключаться к службе Trust Agents."</string>
+    <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Предоставление промежуточного агента"</string>
+    <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Приложение может предоставлять промежуточный агент."</string>
+    <string name="permlab_launch_trust_agent_settings" msgid="5859430082240410200">"Запуск меню настроек промежуточного агента"</string>
+    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"Приложение может запускать активность, изменяющую поведение промежуточного агента."</string>
+    <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Подключение к службе промежуточного агента"</string>
+    <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Приложение может подключаться к службе промежуточного агента."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Взаимодействовать с системой восстановления и обновлениями"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Приложение сможет взаимодействовать с системой восстановления и обновлениями системы."</string>
     <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Создание сеансов трансляции контента"</string>
@@ -1766,6 +1770,16 @@
     <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN-код"</string>
     <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"графический ключ"</string>
     <string name="lock_to_app_unlock_password" msgid="795224196583495868">"пароль"</string>
+    <!-- no translation found for description_krtv_all (11497981488871053) -->
+    <skip />
+    <!-- no translation found for description_krtv_7 (6204900788594114856) -->
+    <skip />
+    <!-- no translation found for description_krtv_12 (5134514644432355428) -->
+    <skip />
+    <!-- no translation found for description_krtv_15 (1183692678647313272) -->
+    <skip />
+    <!-- no translation found for description_krtv_19 (7021986912313208481) -->
+    <skip />
     <!-- no translation found for description_ustvpg (3666171166900312727) -->
     <skip />
     <!-- no translation found for description_ustvpg_d (6552868431924879897) -->
@@ -1789,16 +1803,6 @@
     <!-- no translation found for description_ustvpg_14 (6305164472373004907) -->
     <skip />
     <!-- no translation found for description_ustvpg_ma (5842074394338699982) -->
-    <skip />
-    <!-- no translation found for description_krtv_all (11497981488871053) -->
-    <skip />
-    <!-- no translation found for description_krtv_7 (6204900788594114856) -->
-    <skip />
-    <!-- no translation found for description_krtv_12 (5134514644432355428) -->
-    <skip />
-    <!-- no translation found for description_krtv_15 (1183692678647313272) -->
-    <skip />
-    <!-- no translation found for description_krtv_19 (7021986912313208481) -->
     <skip />
     <!-- no translation found for battery_saver_description (724302068634956656) -->
     <skip />
