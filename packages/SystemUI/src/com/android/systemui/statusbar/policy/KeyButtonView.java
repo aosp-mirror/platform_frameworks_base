@@ -63,7 +63,6 @@ public class KeyButtonView extends ImageView {
                     // Just an old-fashioned ImageView
                     performLongClick();
                 }
-                setPressed(false);
             }
         }
     };
