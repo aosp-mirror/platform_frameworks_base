@@ -312,9 +312,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable {
         final int size = animators.size();
         for (int i = 0; i < size; i++) {
             final Animator animator = animators.get(i);
-            if (animator.isPaused()) {
-                animator.resume();
-            } else if (!animator.isRunning()) {
+            if (!animator.isRunning()) {
                 animator.start();
             }
         }
@@ -327,7 +325,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable {
         final int size = animators.size();
         for (int i = 0; i < size; i++) {
             final Animator animator = animators.get(i);
-            animator.pause();
+            animator.end();
         }
     }
 
