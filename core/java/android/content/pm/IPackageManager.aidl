@@ -233,7 +233,7 @@ interface IPackageManager {
             in ComponentName[] set, in ComponentName activity, int userId);
 
     void replacePreferredActivity(in IntentFilter filter, int match,
-            in ComponentName[] set, in ComponentName activity);
+            in ComponentName[] set, in ComponentName activity, int userId);
 
     void clearPackagePreferredActivities(String packageName);
 

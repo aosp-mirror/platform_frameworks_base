@@ -13831,6 +13831,10 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         } else if ("system".equals(componentProcessName)) {
             result = true;
+        } else if (UserHandle.isSameApp(aInfo.uid, Process.PHONE_UID)
+                && (flags & ServiceInfo.FLAG_SINGLE_USER) != 0) {
+            // Phone app is allowed to export singleuser providers.
+            result = true;
         } else {
             // App with pre-defined UID, check if it's a persistent app
             result = (aInfo.flags & ApplicationInfo.FLAG_PERSISTENT) != 0;
