@@ -459,15 +459,15 @@ public class AppOpsManager {
             null, //POST_NOTIFICATION
             null, //NEIGHBORING_CELLS
             null, //CALL_PHONE
-            null, //READ_SMS
-            null, //WRITE_SMS
-            null, //RECEIVE_SMS
-            null, //RECEIVE_EMERGECY_SMS
-            null, //RECEIVE_MMS
+            UserManager.DISALLOW_SMS, //READ_SMS
+            UserManager.DISALLOW_SMS, //WRITE_SMS
+            UserManager.DISALLOW_SMS, //RECEIVE_SMS
+            null, //RECEIVE_EMERGENCY_SMS
+            UserManager.DISALLOW_SMS, //RECEIVE_MMS
             null, //RECEIVE_WAP_PUSH
-            null, //SEND_SMS
-            null, //READ_ICC_SMS
-            null, //WRITE_ICC_SMS
+            UserManager.DISALLOW_SMS, //SEND_SMS
+            UserManager.DISALLOW_SMS, //READ_ICC_SMS
+            UserManager.DISALLOW_SMS, //WRITE_ICC_SMS
             null, //WRITE_SETTINGS
             UserManager.DISALLOW_CREATE_WINDOWS, //SYSTEM_ALERT_WINDOW
             null, //ACCESS_NOTIFICATIONS

@@ -11443,7 +11443,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     @Override
     public void replacePreferredActivity(IntentFilter filter, int match,
-            ComponentName[] set, ComponentName activity) {
+            ComponentName[] set, ComponentName activity, int userId) {
         if (filter.countActions() != 1) {
             throw new IllegalArgumentException(
                     "replacePreferredActivity expects filter to have only 1 action.");
@@ -11456,11 +11456,15 @@ public class PackageManagerService extends IPackageManager.Stub {
                     "replacePreferredActivity expects filter to have no data authorities, " +
                     "paths, or types; and at most one scheme.");
         }
+
+        final int callingUid = Binder.getCallingUid();
+        enforceCrossUserPermission(callingUid, userId, true, "replace preferred activity");
+        final int callingUserId = UserHandle.getUserId(callingUid);
         synchronized (mPackages) {
             if (mContext.checkCallingOrSelfPermission(
                     android.Manifest.permission.SET_PREFERRED_APPLICATIONS)
                     != PackageManager.PERMISSION_GRANTED) {
-                if (getUidTargetSdkVersionLockedLPr(Binder.getCallingUid())
+                if (getUidTargetSdkVersionLockedLPr(callingUid)
                         < Build.VERSION_CODES.FROYO) {
                     Slog.w(TAG, "Ignoring replacePreferredActivity() from uid "
                             + Binder.getCallingUid());
@@ -11470,7 +11474,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                         android.Manifest.permission.SET_PREFERRED_APPLICATIONS, null);
             }
 
-            final int callingUserId = UserHandle.getCallingUserId();
             PreferredIntentResolver pir = mSettings.mPreferredActivities.get(callingUserId);
             if (pir != null) {
                 Intent intent = new Intent(filter.getAction(0)).addCategory(filter.getCategory(0));
