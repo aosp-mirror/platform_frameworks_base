@@ -74,7 +74,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
     private boolean mSkipUnconfigure = false;
 
     /** Is the session in the process of aborting? Pay attention to BUSY->IDLE transitions. */
-    private boolean mAborting;
+    private volatile boolean mAborting;
 
     /**
      * Create a new CameraCaptureSession.
@@ -346,6 +346,20 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
     }
 
     /**
+     * Whether currently in mid-abort.
+     *
+     * <p>This is used by the implementation to set the capture failure
+     * reason, in lieu of more accurate error codes from the camera service.
+     * Unsynchronized to avoid deadlocks between simultaneous session->device,
+     * device->session calls.</p>
+     *
+     * <p>Package-private.</p>
+     */
+    boolean isAborting() {
+        return mAborting;
+    }
+
+    /**
      * Post calls into a CameraCaptureSession.StateListener to the user-specified {@code handler}.
      */
     private StateListener createUserStateListenerProxy(Handler handler, StateListener listener) {
@@ -502,8 +516,8 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
 
                 // TODO: Queue captures during abort instead of failing them
                 // since the app won't be able to distinguish the two actives
+                // Don't signal the application since there's no clean mapping here
                 Log.w(TAG, "Device is now busy; do not submit new captures (TODO: allow this)");
-                mStateListener.onActive(session);
             }
 
             @Override

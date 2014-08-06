@@ -384,7 +384,7 @@ public class CameraDeviceImpl extends CameraDevice {
                 catch (IllegalArgumentException e) {
                     // OK. camera service can reject stream config if it's not supported by HAL
                     // This is only the result of a programmer misusing the camera2 api.
-                    Log.e(TAG, "Stream configuration failed", e);
+                    Log.w(TAG, "Stream configuration failed");
                     return false;
                 }
 
@@ -1097,31 +1097,51 @@ public class CameraDeviceImpl extends CameraDevice {
          */
         static final int ERROR_CAMERA_SERVICE = 2;
 
+        /**
+         * Camera has encountered an error processing a single request.
+         */
+        static final int ERROR_CAMERA_REQUEST = 3;
+
+        /**
+         * Camera has encountered an error producing metadata for a single capture
+         */
+        static final int ERROR_CAMERA_RESULT = 4;
+
+        /**
+         * Camera has encountered an error producing an image buffer for a single capture
+         */
+        static final int ERROR_CAMERA_BUFFER = 5;
+
         @Override
         public IBinder asBinder() {
             return this;
         }
 
         @Override
-        public void onCameraError(final int errorCode, CaptureResultExtras resultExtras) {
-            Runnable r = null;
+        public void onDeviceError(final int errorCode, CaptureResultExtras resultExtras) {
+            if (DEBUG) {
+                Log.d(TAG, String.format(
+                    "Device error received, code %d, frame number %d, request ID %d, subseq ID %d",
+                    errorCode, resultExtras.getFrameNumber(), resultExtras.getRequestId(),
+                    resultExtras.getSubsequenceId()));
+            }
 
             synchronized(mInterfaceLock) {
                 if (mRemoteDevice == null) {
                     return; // Camera already closed
                 }
 
-                mInError = true;
                 switch (errorCode) {
                     case ERROR_CAMERA_DISCONNECTED:
-                        r = mCallOnDisconnected;
+                        CameraDeviceImpl.this.mDeviceHandler.post(mCallOnDisconnected);
                         break;
                     default:
                         Log.e(TAG, "Unknown error from camera device: " + errorCode);
                         // no break
                     case ERROR_CAMERA_DEVICE:
                     case ERROR_CAMERA_SERVICE:
-                        r = new Runnable() {
+                        mInError = true;
+                        Runnable r = new Runnable() {
                             @Override
                             public void run() {
                                 if (!CameraDeviceImpl.this.isClosed()) {
@@ -1129,21 +1149,19 @@ public class CameraDeviceImpl extends CameraDevice {
                                 }
                             }
                         };
+                        CameraDeviceImpl.this.mDeviceHandler.post(r);
+                        break;
+                    case ERROR_CAMERA_REQUEST:
+                    case ERROR_CAMERA_RESULT:
+                    case ERROR_CAMERA_BUFFER:
+                        onCaptureErrorLocked(errorCode, resultExtras);
                         break;
                 }
-                CameraDeviceImpl.this.mDeviceHandler.post(r);
-
-                // Fire onCaptureSequenceCompleted
-                if (DEBUG) {
-                    Log.v(TAG, String.format("got error frame %d", resultExtras.getFrameNumber()));
-                }
-                mFrameNumberTracker.updateTracker(resultExtras.getFrameNumber(), /*error*/true);
-                checkAndFireSequenceComplete();
             }
         }
 
         @Override
-        public void onCameraIdle() {
+        public void onDeviceIdle() {
             if (DEBUG) {
                 Log.d(TAG, "Camera now idle");
             }
@@ -1246,7 +1264,6 @@ public class CameraDeviceImpl extends CameraDevice {
 
                 final CaptureRequest request = holder.getRequest(resultExtras.getSubsequenceId());
 
-
                 Runnable resultDispatch = null;
 
                 // Either send a partial result or the final capture completed result
@@ -1290,11 +1307,67 @@ public class CameraDeviceImpl extends CameraDevice {
                 if (!isPartialResult) {
                     checkAndFireSequenceComplete();
                 }
-
             }
         }
 
-    }
+        /**
+         * Called by onDeviceError for handling single-capture failures.
+         */
+        private void onCaptureErrorLocked(int errorCode, CaptureResultExtras resultExtras) {
+
+            final int requestId = resultExtras.getRequestId();
+            final int subsequenceId = resultExtras.getSubsequenceId();
+            final long frameNumber = resultExtras.getFrameNumber();
+            final CaptureListenerHolder holder =
+                    CameraDeviceImpl.this.mCaptureListenerMap.get(requestId);
+
+            final CaptureRequest request = holder.getRequest(subsequenceId);
+
+            // No way to report buffer errors right now
+            if (errorCode == ERROR_CAMERA_BUFFER) {
+                Log.e(TAG, String.format("Lost output buffer reported for frame %d", frameNumber));
+                return;
+            }
+
+            boolean mayHaveBuffers = (errorCode == ERROR_CAMERA_RESULT);
+
+            // This is only approximate - exact handling needs the camera service and HAL to
+            // disambiguate between request failures to due abort and due to real errors.
+            // For now, assume that if the session believes we're mid-abort, then the error
+            // is due to abort.
+            int reason = (mCurrentSession != null && mCurrentSession.isAborting()) ?
+                    CaptureFailure.REASON_FLUSHED :
+                    CaptureFailure.REASON_ERROR;
+
+            final CaptureFailure failure = new CaptureFailure(
+                request,
+                reason,
+                /*dropped*/ mayHaveBuffers,
+                requestId,
+                frameNumber);
+
+            Runnable failureDispatch = new Runnable() {
+                @Override
+                public void run() {
+                    if (!CameraDeviceImpl.this.isClosed()){
+                        holder.getListener().onCaptureFailed(
+                            CameraDeviceImpl.this,
+                            request,
+                            failure);
+                    }
+                }
+            };
+            holder.getHandler().post(failureDispatch);
+
+            // Fire onCaptureSequenceCompleted if appropriate
+            if (DEBUG) {
+                Log.v(TAG, String.format("got error frame %d", frameNumber));
+            }
+            mFrameNumberTracker.updateTracker(frameNumber, /*error*/true);
+            checkAndFireSequenceComplete();
+        }
+
+    } // public class CameraDeviceCallbacks
 
     /**
      * Default handler management.

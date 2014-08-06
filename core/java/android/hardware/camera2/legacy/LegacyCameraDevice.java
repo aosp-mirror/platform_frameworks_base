@@ -97,7 +97,7 @@ public class LegacyCameraDevice implements AutoCloseable {
                         Log.d(TAG, "doing onError callback.");
                     }
                     try {
-                        mDeviceCallbacks.onCameraError(errorCode, extras);
+                        mDeviceCallbacks.onDeviceError(errorCode, extras);
                     } catch (RemoteException e) {
                         throw new IllegalStateException(
                                 "Received remote exception during onCameraError callback: ", e);
@@ -125,7 +125,7 @@ public class LegacyCameraDevice implements AutoCloseable {
                         Log.d(TAG, "doing onIdle callback.");
                     }
                     try {
-                        mDeviceCallbacks.onCameraIdle();
+                        mDeviceCallbacks.onDeviceIdle();
                     } catch (RemoteException e) {
                         throw new IllegalStateException(
                                 "Received remote exception during onCameraIdle callback: ", e);
