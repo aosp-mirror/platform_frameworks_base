@@ -739,6 +739,10 @@
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Ծրագրին թույլ է տալիս տրամադրել և օգտագործել DRM վկայագրեր: Սովորական ծրագրերի համար երբեք պետք չի գալիս:"</string>
     <string name="permlab_handoverStatus" msgid="1159132046126626731">"Ստանալ Android Beam-ով փոխանցման կարգավիճակը"</string>
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Ծրագրին թույլ է տալիս ստանալ Android Beam-ով ընթացիկ փոխանցումների մասին տեղեկատվություն:"</string>
+    <!-- no translation found for permlab_removeDrmCertificates (7044888287209892751) -->
+    <skip />
+    <!-- no translation found for permdesc_removeDrmCertificates (7272999075113400993) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Սահմանել գաղտնաբառի կանոնները"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Վերահսկել էկրանի ապակողպման գաղտնաբառերի թույլատրելի երկարությունն ու գրանշանները:"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Վերահսկել էկրանի ապակողպման փորձերը"</string>
@@ -1386,12 +1390,12 @@
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Թույլ է տալիս հավելվածին կառավարել ստեղնաշարի պաշտպանիչը:"</string>
     <string name="permlab_trust_listener" msgid="1765718054003704476">"Լսել վստահության կարգավիճակի ​փոփոխությունները:"</string>
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Ծրագրին թույլ է տալիս լսել վստահության կարգավիճակի փոփոխությունները:"</string>
-    <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Տրամադրել վստահելի գործակալ:"</string>
-    <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Ծրագրին թույլ է տալիս տրամադրել վստահելի գործակալ:"</string>
-    <string name="permlab_launch_trust_agent_settings" msgid="5859430082240410200">"Գործարկել վստահելի գործակալի կարգավորումների ընտրացանկը:"</string>
-    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"Թույլ է տալիս ծրագրին գործարկել մի գործողություն, որը փոխում է վստահելի գործակալի վարքագիծը:"</string>
-    <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Կապվել վստահելի գործակալի ծառայությանը"</string>
-    <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Ծրագրին թույլ է տալիս կապվել վստահելի գործակալի ծառայությանը:"</string>
+    <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Միջանկյալ գործակալի տրամադրում:"</string>
+    <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Հավելվածը կարող է միջանկյալ գործակալ տրամադրել:"</string>
+    <string name="permlab_launch_trust_agent_settings" msgid="5859430082240410200">"Միջանկյալ գործակալի կարգավորումների ընտրացանկի գործարկում"</string>
+    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"Հավելվածը կարող է գործարկել գործողություն, որը փոխում է միջանկյալ գործակալի վարքագիծը:"</string>
+    <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Կապակցում միջանկյալ գործակալի ծառայությանը"</string>
+    <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Հավելվածը կարող է կապակցվել միջանկյալ գործակալի ծառայությանը:"</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Փոխազդել թարմացման և վերականգնման համակարգի հետ"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Թույլ է տալիս ծրագրին փոխազդել վերականգնման համակարգի և համակարգի թարմացումների հետ:"</string>
     <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Ստեղծել մեդիայի տեսարձակման աշխատաշրջաններ"</string>
@@ -1766,6 +1770,80 @@
     <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN"</string>
     <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"ապակողպող նախշ"</string>
     <string name="lock_to_app_unlock_password" msgid="795224196583495868">"գաղտնաբառ"</string>
+    <!-- no translation found for description_autv_ctc (1340773034128413833) -->
+    <skip />
+    <!-- no translation found for description_autv_g (8825932008126488114) -->
+    <skip />
+    <!-- no translation found for description_autv_pg (3102051294835672333) -->
+    <skip />
+    <!-- no translation found for description_autv_m (1090796276190749241) -->
+    <skip />
+    <!-- no translation found for description_autv_ma15 (970119104753434051) -->
+    <skip />
+    <!-- no translation found for description_autv_r18 (3826039266665650748) -->
+    <skip />
+    <!-- no translation found for description_autv_x18 (2076614946730171971) -->
+    <skip />
+    <!-- no translation found for description_detv_all (4290816084213277907) -->
+    <skip />
+    <!-- no translation found for description_detv_12 (1483291295919180849) -->
+    <skip />
+    <!-- no translation found for description_detv_16 (1530748520169877780) -->
+    <skip />
+    <!-- no translation found for description_detv_18 (6932133267820316706) -->
+    <skip />
+    <!-- no translation found for description_estv_all (4617683093722624240) -->
+    <skip />
+    <!-- no translation found for description_estv_i (1141171160833794692) -->
+    <skip />
+    <!-- no translation found for description_estv_7 (4917355218226086349) -->
+    <skip />
+    <!-- no translation found for description_estv_13 (1591456940863913304) -->
+    <skip />
+    <!-- no translation found for description_estv_18 (1220200554553594583) -->
+    <skip />
+    <!-- no translation found for description_frtv_all (5277155895495938542) -->
+    <skip />
+    <!-- no translation found for description_frtv_10 (4751687393402667290) -->
+    <skip />
+    <!-- no translation found for description_frtv_12 (6813646899508030376) -->
+    <skip />
+    <!-- no translation found for description_frtv_16 (4466993068286008261) -->
+    <skip />
+    <!-- no translation found for description_frtv_18 (6486375640186293566) -->
+    <skip />
+    <!-- no translation found for description_krtv_all (11497981488871053) -->
+    <skip />
+    <!-- no translation found for description_krtv_7 (6204900788594114856) -->
+    <skip />
+    <!-- no translation found for description_krtv_12 (5134514644432355428) -->
+    <skip />
+    <!-- no translation found for description_krtv_15 (1183692678647313272) -->
+    <skip />
+    <!-- no translation found for description_krtv_19 (7021986912313208481) -->
+    <skip />
+    <!-- no translation found for description_nltv_v (3847993626347313388) -->
+    <skip />
+    <!-- no translation found for description_nltv_f (6053045297000290324) -->
+    <skip />
+    <!-- no translation found for description_nltv_s (5727758317180609838) -->
+    <skip />
+    <!-- no translation found for description_nltv_d (8647908408678974106) -->
+    <skip />
+    <!-- no translation found for description_nltv_da (6201574796131887422) -->
+    <skip />
+    <!-- no translation found for description_nltv_l (4895256473269741839) -->
+    <skip />
+    <!-- no translation found for description_nltv_al (438113237508206711) -->
+    <skip />
+    <!-- no translation found for description_nltv_6 (4940119514342845737) -->
+    <skip />
+    <!-- no translation found for description_nltv_9 (7229781600578274275) -->
+    <skip />
+    <!-- no translation found for description_nltv_12 (4096709091642456107) -->
+    <skip />
+    <!-- no translation found for description_nltv_16 (5921176624389788946) -->
+    <skip />
     <!-- no translation found for description_ustvpg (3666171166900312727) -->
     <skip />
     <!-- no translation found for description_ustvpg_d (6552868431924879897) -->
@@ -1789,16 +1867,6 @@
     <!-- no translation found for description_ustvpg_14 (6305164472373004907) -->
     <skip />
     <!-- no translation found for description_ustvpg_ma (5842074394338699982) -->
-    <skip />
-    <!-- no translation found for description_krtv_all (11497981488871053) -->
-    <skip />
-    <!-- no translation found for description_krtv_7 (6204900788594114856) -->
-    <skip />
-    <!-- no translation found for description_krtv_12 (5134514644432355428) -->
-    <skip />
-    <!-- no translation found for description_krtv_15 (1183692678647313272) -->
-    <skip />
-    <!-- no translation found for description_krtv_19 (7021986912313208481) -->
     <skip />
     <!-- no translation found for battery_saver_description (724302068634956656) -->
     <skip />
