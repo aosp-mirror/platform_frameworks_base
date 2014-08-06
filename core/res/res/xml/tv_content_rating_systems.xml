@@ -44,6 +44,41 @@
     <!-- TV content rating system for FI TV -->
 
     <!-- TV content rating system for FR TV -->
+    <rating-system-definition id="FR_TV"
+        displayName="@string/display_name_frtv"
+        country="FR">
+        <rating-definition id="FR_TV_ALL"
+            displayName="@string/display_name_frtv_all"
+            description="@string/description_frtv_all"
+            ageHint="0" />
+        <rating-definition id="FR_TV_10"
+            displayName="@string/display_name_frtv_10"
+            description="@string/description_frtv_10"
+            ageHint="10">
+        </rating-definition>
+        <rating-definition id="FR_TV_12"
+            displayName="@string/display_name_frtv_12"
+            description="@string/description_frtv_12"
+            ageHint="12">
+        </rating-definition>
+        <rating-definition id="FR_TV_16"
+            displayName="@string/display_name_frtv_16"
+            description="@string/description_frtv_16"
+            ageHint="16">
+        </rating-definition>
+        <rating-definition id="FR_TV_18"
+            displayName="@string/display_name_frtv_18"
+            description="@string/description_frtv_18"
+            ageHint="18">
+        </rating-definition>
+        <order>
+            <rating id="FR_TV_ALL" />
+            <rating id="FR_TV_10" />
+            <rating id="FR_TV_12" />
+            <rating id="FR_TV_16" />
+            <rating id="FR_TV_18" />
+        </order>
+    </rating-system-definition>
 
     <!-- TV content rating system for GR TV -->
 
