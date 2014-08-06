@@ -530,7 +530,7 @@ interface ITelephony {
      *            is sent to the SIM.
      * @param data Data to be sent with the APDU.
      * @return The APDU response from the ICC card with the status appended at
-     *            the end. If an error occurs, an empty string is returned.
+     *            the end.
      */
     String iccTransmitApduLogicalChannel(int channel, int cla, int instruction,
             int p1, int p2, int p3, String data);
@@ -548,7 +548,7 @@ interface ITelephony {
      *            is sent to the SIM.
      * @param data Data to be sent with the APDU.
      * @return The APDU response from the ICC card with the status appended at
-     *            the end. If an error occurs, an empty string is returned.
+     *            the end.
      */
     String iccTransmitApduBasicChannel(int cla, int instruction,
             int p1, int p2, int p3, String data);
