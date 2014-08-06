@@ -250,6 +250,9 @@ interface IPackageManager {
     void addCrossProfileIntentsForPackage(in String packageName, int sourceUserId,
             int targetUserId);
 
+    void removeCrossProfileIntentsForPackage(String packageName, int sourceUserId,
+            int targetUserId);
+
     void clearCrossProfileIntentFilters(int sourceUserId, String ownerPackage, int ownerUserId);
 
     /**
