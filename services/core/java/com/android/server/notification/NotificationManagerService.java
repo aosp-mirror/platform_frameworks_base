@@ -1642,7 +1642,23 @@ public class NotificationManagerService extends SystemService {
 
                     applyZenModeLocked(r);
 
-                    mRankingHelper.sort(mNotificationList);
+                    try {
+                        mRankingHelper.sort(mNotificationList);
+                    } catch (RuntimeException ex) {
+                        // Don't crash the system server if something bad happened.
+                        Log.e(TAG, "Extreme badness during notification sort", ex);
+                        Log.e(TAG, "Current notification list: ");
+                        for (int ii=0; ii < mNotificationList.size(); ii++) {
+                            NotificationRecord nr = mNotificationList.get(ii);
+                            Log.e(TAG, String.format(
+                                    "  [%d] %s (group %s, rank %d, sortkey %s, proxy %s)",
+                                    ii, nr, nr.getGroupKey(), nr.getAuthoritativeRank(),
+                                    nr.getNotification().getSortKey(),
+                                    nr.getRankingProxy()));
+                        }
+                        // STOPSHIP: remove once b/16626175 is found
+                        throw ex;
+                    }
 
                     if (notification.icon != 0) {
                         StatusBarNotification oldSbn = (old != null) ? old.sbn : null;
