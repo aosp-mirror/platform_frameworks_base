@@ -179,8 +179,7 @@ public class LauncherActivityInfo {
         }
 
         if (originalIcon instanceof BitmapDrawable) {
-            return mUm.getBadgedDrawableForUser(
-                    originalIcon, mUser);
+            return mUm.getBadgedIconForUser(originalIcon, mUser);
         } else {
             Log.e(TAG, "Unable to create badged icon for " + mActivityInfo);
         }
