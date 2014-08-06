@@ -36,6 +36,32 @@
     <!-- TV content rating system for CO TV -->
 
     <!-- TV content rating system for DE TV -->
+    <rating-system-definition id="DE_TV"
+        displayName="@string/display_name_detv"
+        country="DE">
+        <rating-definition id="DE_TV_ALL"
+            displayName="@string/display_name_detv_all"
+            description="@string/description_detv_all"
+            ageHint="0" />
+        <rating-definition id="DE_TV_12"
+            displayName="@string/display_name_detv_12"
+            description="@string/description_detv_12"
+            ageHint="12" />
+        <rating-definition id="DE_TV_16"
+            displayName="@string/display_name_detv_16"
+            description="@string/description_detv_16"
+            ageHint="16" />
+        <rating-definition id="DE_TV_18"
+            displayName="@string/display_name_detv_18"
+            description="@string/description_detv_18"
+            ageHint="18" />
+        <order>
+            <rating id="DE_TV_ALL" />
+            <rating id="DE_TV_12" />
+            <rating id="DE_TV_16" />
+            <rating id="DE_TV_18" />
+        </order>
+    </rating-system-definition>
 
     <!-- TV content rating system for DK TV -->
 
