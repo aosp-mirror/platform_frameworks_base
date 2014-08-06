@@ -284,14 +284,12 @@ public class ZenModePanel extends LinearLayout {
         final boolean zenOff = zen == Global.ZEN_MODE_OFF;
         final boolean zenImportant = zen == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
         final boolean zenNone = zen == Global.ZEN_MODE_NO_INTERRUPTIONS;
-        final boolean foreverSelected = mExitConditionId == null;
         final boolean hasNextAlarm = mNextAlarm != 0;
         final boolean expanded = !mHidden && mExpanded;
         final boolean showAlarmWarning = zenNone && expanded && hasNextAlarm;
 
         mZenButtons.setVisibility(mHidden ? GONE : VISIBLE);
-        mZenSubhead.setVisibility(!mHidden && !zenOff && (expanded || !foreverSelected) ? VISIBLE
-                : GONE);
+        mZenSubhead.setVisibility(!mHidden && !zenOff ? VISIBLE : GONE);
         mZenSubheadExpanded.setVisibility(expanded ? VISIBLE : GONE);
         mZenSubheadCollapsed.setVisibility(!expanded ? VISIBLE : GONE);
         mMoreSettings.setVisibility(zenImportant && expanded ? VISIBLE : GONE);
