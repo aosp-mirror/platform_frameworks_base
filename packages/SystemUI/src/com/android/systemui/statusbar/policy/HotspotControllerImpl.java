@@ -16,17 +16,19 @@
 
 package com.android.systemui.statusbar.policy;
 
-import java.util.ArrayList;
-
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.Log;
+
+import java.util.ArrayList;
 
 public class HotspotControllerImpl implements HotspotController {
 
@@ -73,7 +75,26 @@ public class HotspotControllerImpl implements HotspotController {
 
     @Override
     public void setHotspotEnabled(boolean enabled) {
+        final ContentResolver cr = mContext.getContentResolver();
+        // This needs to be kept up to date with Settings (WifiApEnabler.setSoftapEnabled)
+        // in case it is turned on in settings and off in qs (or vice versa).
+        // Disable Wifi if enabling tethering.
+        int wifiState = mWifiManager.getWifiState();
+        if (enabled && ((wifiState == WifiManager.WIFI_STATE_ENABLING) ||
+                    (wifiState == WifiManager.WIFI_STATE_ENABLED))) {
+            mWifiManager.setWifiEnabled(false);
+            Settings.Global.putInt(cr, Settings.Global.WIFI_SAVED_STATE, 1);
+        }
+
         mWifiManager.setWifiApEnabled(null, enabled);
+
+        // If needed, restore Wifi on tether disable.
+        if (!enabled) {
+            if (Settings.Global.getInt(cr, Settings.Global.WIFI_SAVED_STATE, 0) == 1) {
+                mWifiManager.setWifiEnabled(true);
+                Settings.Global.putInt(cr, Settings.Global.WIFI_SAVED_STATE, 0);
+            }
+        }
     }
 
     private void fireCallback(boolean isEnabled) {
