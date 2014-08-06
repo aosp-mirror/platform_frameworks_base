@@ -179,7 +179,8 @@ public final class MediaController {
     }
 
     /**
-     * Get the current play queue for this session.
+     * Get the current play queue for this session if one is set. If you only
+     * care about the current item {@link #getMetadata()} should be used.
      *
      * @return The current play queue or null.
      */

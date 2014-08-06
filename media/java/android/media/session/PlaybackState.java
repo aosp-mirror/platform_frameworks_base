@@ -845,20 +845,23 @@ public final class PlaybackState implements Parcelable {
         }
 
         /**
-         * Add a custom action to the playback state. Actions can be used to expose additional
-         * functionality to {@link MediaController MediaControllers} beyond what is offered by the
-         * standard transport controls.
+         * Add a custom action to the playback state. Actions can be used to
+         * expose additional functionality to {@link MediaController
+         * MediaControllers} beyond what is offered by the standard transport
+         * controls.
          * <p>
-         * e.g. start a radio station based on the current item or skip ahead by 30 seconds.
+         * e.g. start a radio station based on the current item or skip ahead by
+         * 30 seconds.
          *
-         * @param action An identifier for this action. It will be sent back to the
-         *               {@link MediaSession} through
-         *               {@link
-         *               MediaSession.TransportControlsCallback#onCustomAction(String, Bundle)}.
-         * @param name The display name for the action. If text is shown with the action or used
-         *             for accessibility, this is what should be used.
-         * @param icon The resource action of the icon that should be displayed for the action. The
-         *             resource should be in the package of the {@link MediaSession}.
+         * @param action An identifier for this action. It can be sent back to
+         *            the {@link MediaSession} through
+         *            {@link MediaController.TransportControls#sendCustomAction(String, Bundle)}.
+         * @param name The display name for the action. If text is shown with
+         *            the action or used for accessibility, this is what should
+         *            be used.
+         * @param icon The resource action of the icon that should be displayed
+         *            for the action. The resource should be in the package of
+         *            the {@link MediaSession}.
          * @return this
          */
         public Builder addCustomAction(String action, String name, int icon) {

@@ -21,12 +21,10 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.PendingIntent;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ParceledListSlice;
 import android.media.AudioAttributes;
-import android.media.AudioManager;
 import android.media.MediaMetadata;
 import android.media.Rating;
 import android.media.VolumeProvider;
@@ -43,11 +41,11 @@ import android.os.ResultReceiver;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.KeyEvent;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -64,10 +62,8 @@ import java.util.List;
  * create a {@link MediaController} to interact with the session.
  * <p>
  * To receive commands, media keys, and other events a {@link Callback} must be
- * set with {@link #addCallback(Callback)} and {@link #setActive(boolean)
- * setActive(true)} must be called. To receive transport control commands a
- * {@link TransportControlsCallback} must be set with
- * {@link #addTransportControlsCallback}.
+ * set with {@link #setCallback(Callback)} and {@link #setActive(boolean)
+ * setActive(true)} must be called.
  * <p>
  * When an app is finished performing playback it must call {@link #release()}
  * to clean up the session and notify any controllers.
@@ -85,8 +81,7 @@ public final class MediaSession {
 
     /**
      * Set this flag on the session to indicate that it handles transport
-     * control commands through a {@link TransportControlsCallback}.
-     * The callback can be retrieved by calling {@link #addTransportControlsCallback}.
+     * control commands through its {@link Callback}.
      */
     public static final int FLAG_HANDLES_TRANSPORT_CONTROLS = 1 << 1;
 
@@ -124,12 +119,9 @@ public final class MediaSession {
     private final ISession mBinder;
     private final CallbackStub mCbStub;
 
-    private final ArrayList<CallbackMessageHandler> mCallbacks
-            = new ArrayList<CallbackMessageHandler>();
-    private final ArrayList<TransportMessageHandler> mTransportCallbacks
-            = new ArrayList<TransportMessageHandler>();
-
+    private CallbackMessageHandler mCallback;
     private VolumeProvider mVolumeProvider;
+    private PlaybackState mPlaybackState;
 
     private boolean mActive = false;
 
@@ -177,30 +169,35 @@ public final class MediaSession {
     }
 
     /**
-     * Add a callback to receive updates on for the MediaSession. This includes
-     * media button and volume events. The caller's thread will be used to post
-     * events.
+     * Set the callback to receive updates for the MediaSession. This includes
+     * media button events and transport controls. The caller's thread will be
+     * used to post updates.
+     * <p>
+     * Set the callback to null to stop receiving updates.
      *
      * @param callback The callback object
      */
-    public void addCallback(@NonNull Callback callback) {
-        addCallback(callback, null);
+    public void setCallback(@Nullable Callback callback) {
+        setCallback(callback, null);
     }
 
     /**
-     * Add a callback to receive updates for the MediaSession. This includes
-     * media button and volume events.
+     * Set the callback to receive updates for the MediaSession. This includes
+     * media button events and transport controls.
+     * <p>
+     * Set the callback to null to stop receiving updates.
      *
      * @param callback The callback to receive updates on.
      * @param handler The handler that events should be posted on.
      */
-    public void addCallback(@NonNull Callback callback, @Nullable Handler handler) {
+    public void setCallback(@Nullable Callback callback, @Nullable Handler handler) {
         if (callback == null) {
-            throw new IllegalArgumentException("Callback cannot be null");
+            mCallback = null;
+            return;
         }
         synchronized (mLock) {
-            if (getHandlerForCallbackLocked(callback) != null) {
-                Log.w(TAG, "Callback is already added, ignoring");
+            if (mCallback != null && mCallback.mCallback == callback) {
+                Log.w(TAG, "Tried to set same callback, ignoring");
                 return;
             }
             if (handler == null) {
@@ -208,18 +205,7 @@ public final class MediaSession {
             }
             CallbackMessageHandler msgHandler = new CallbackMessageHandler(handler.getLooper(),
                     callback);
-            mCallbacks.add(msgHandler);
-        }
-    }
-
-    /**
-     * Remove a callback. It will no longer receive updates.
-     *
-     * @param callback The callback to remove.
-     */
-    public void removeCallback(@NonNull Callback callback) {
-        synchronized (mLock) {
-            removeCallbackLocked(callback);
+            mCallback = msgHandler;
         }
     }
 
@@ -421,63 +407,12 @@ public final class MediaSession {
     }
 
     /**
-     * Add a callback to receive transport controls on, such as play, rewind, or
-     * fast forward.
-     *
-     * @param callback The callback object
-     */
-    public void addTransportControlsCallback(@NonNull TransportControlsCallback callback) {
-        addTransportControlsCallback(callback, null);
-    }
-
-    /**
-     * Add a callback to receive transport controls on, such as play, rewind, or
-     * fast forward. The updates will be posted to the specified handler. If no
-     * handler is provided they will be posted to the caller's thread.
-     *
-     * @param callback The callback to receive updates on
-     * @param handler The handler to post the updates on
-     */
-    public void addTransportControlsCallback(@NonNull TransportControlsCallback callback,
-            @Nullable Handler handler) {
-        if (callback == null) {
-            throw new IllegalArgumentException("Callback cannot be null");
-        }
-        synchronized (mLock) {
-            if (getTransportControlsHandlerForCallbackLocked(callback) != null) {
-                Log.w(TAG, "Callback is already added, ignoring");
-                return;
-            }
-            if (handler == null) {
-                handler = new Handler();
-            }
-            TransportMessageHandler msgHandler = new TransportMessageHandler(handler.getLooper(),
-                    callback);
-            mTransportCallbacks.add(msgHandler);
-        }
-    }
-
-    /**
-     * Stop receiving transport controls on the specified callback. If an update
-     * has already been posted you may still receive it after this call returns.
-     *
-     * @param callback The callback to stop receiving updates on
-     */
-    public void removeTransportControlsCallback(@NonNull TransportControlsCallback callback) {
-        if (callback == null) {
-            throw new IllegalArgumentException("Callback cannot be null");
-        }
-        synchronized (mLock) {
-            removeTransportControlsCallbackLocked(callback);
-        }
-    }
-
-    /**
      * Update the current playback state.
      *
      * @param state The current state of playback
      */
     public void setPlaybackState(@Nullable PlaybackState state) {
+        mPlaybackState = state;
         try {
             mBinder.setPlaybackState(state);
         } catch (RemoteException e) {
@@ -566,138 +501,78 @@ public final class MediaSession {
     }
 
     private void dispatchPlay() {
-        postToTransportCallbacks(TransportMessageHandler.MSG_PLAY);
+        postToCallback(CallbackMessageHandler.MSG_PLAY);
     }
 
     private void dispatchPlayUri(Uri uri, Bundle extras) {
-        postToTransportCallbacks(TransportMessageHandler.MSG_PLAY_URI, uri, extras);
+        postToCallback(CallbackMessageHandler.MSG_PLAY_URI, uri, extras);
     }
 
     private void dispatchPlayFromSearch(String query, Bundle extras) {
-        postToTransportCallbacks(TransportMessageHandler.MSG_PLAY_SEARCH, query, extras);
+        postToCallback(CallbackMessageHandler.MSG_PLAY_SEARCH, query, extras);
     }
 
     private void dispatchSkipToTrack(long id) {
-        postToTransportCallbacks(TransportMessageHandler.MSG_SKIP_TO_TRACK, id);
+        postToCallback(CallbackMessageHandler.MSG_SKIP_TO_TRACK, id);
     }
 
     private void dispatchPause() {
-        postToTransportCallbacks(TransportMessageHandler.MSG_PAUSE);
+        postToCallback(CallbackMessageHandler.MSG_PAUSE);
     }
 
     private void dispatchStop() {
-        postToTransportCallbacks(TransportMessageHandler.MSG_STOP);
+        postToCallback(CallbackMessageHandler.MSG_STOP);
     }
 
     private void dispatchNext() {
-        postToTransportCallbacks(TransportMessageHandler.MSG_NEXT);
+        postToCallback(CallbackMessageHandler.MSG_NEXT);
     }
 
     private void dispatchPrevious() {
-        postToTransportCallbacks(TransportMessageHandler.MSG_PREVIOUS);
+        postToCallback(CallbackMessageHandler.MSG_PREVIOUS);
     }
 
     private void dispatchFastForward() {
-        postToTransportCallbacks(TransportMessageHandler.MSG_FAST_FORWARD);
+        postToCallback(CallbackMessageHandler.MSG_FAST_FORWARD);
     }
 
     private void dispatchRewind() {
-        postToTransportCallbacks(TransportMessageHandler.MSG_REWIND);
+        postToCallback(CallbackMessageHandler.MSG_REWIND);
     }
 
     private void dispatchSeekTo(long pos) {
-        postToTransportCallbacks(TransportMessageHandler.MSG_SEEK_TO, pos);
+        postToCallback(CallbackMessageHandler.MSG_SEEK_TO, pos);
     }
 
     private void dispatchRate(Rating rating) {
-        postToTransportCallbacks(TransportMessageHandler.MSG_RATE, rating);
+        postToCallback(CallbackMessageHandler.MSG_RATE, rating);
     }
 
     private void dispatchCustomAction(String action, Bundle args) {
-        postToTransportCallbacks(TransportMessageHandler.MSG_CUSTOM_ACTION, action, args);
+        postToCallback(CallbackMessageHandler.MSG_CUSTOM_ACTION, action, args);
     }
 
-    private TransportMessageHandler getTransportControlsHandlerForCallbackLocked(
-            TransportControlsCallback callback) {
-        for (int i = mTransportCallbacks.size() - 1; i >= 0; i--) {
-            TransportMessageHandler handler = mTransportCallbacks.get(i);
-            if (callback == handler.mCallback) {
-                return handler;
-            }
-        }
-        return null;
+    private void dispatchMediaButton(Intent mediaButtonIntent) {
+        postToCallback(CallbackMessageHandler.MSG_MEDIA_BUTTON, mediaButtonIntent);
     }
 
-    private boolean removeTransportControlsCallbackLocked(TransportControlsCallback callback) {
-        for (int i = mTransportCallbacks.size() - 1; i >= 0; i--) {
-            if (callback == mTransportCallbacks.get(i).mCallback) {
-                mTransportCallbacks.remove(i);
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private void postToTransportCallbacks(int what, Object obj) {
-        synchronized (mLock) {
-            for (int i = mTransportCallbacks.size() - 1; i >= 0; i--) {
-                mTransportCallbacks.get(i).post(what, obj);
-            }
-        }
-    }
-
-    private void postToTransportCallbacks(int what, Object obj, Bundle args) {
-        synchronized (mLock) {
-            for (int i = mTransportCallbacks.size() - 1; i >= 0; i--) {
-                mTransportCallbacks.get(i).post(what, obj, args);
-            }
-        }
-    }
-
-    private void postToTransportCallbacks(int what) {
-        postToTransportCallbacks(what, null);
-    }
-
-    private CallbackMessageHandler getHandlerForCallbackLocked(Callback cb) {
-        if (cb == null) {
-            throw new IllegalArgumentException("Callback cannot be null");
-        }
-        for (int i = mCallbacks.size() - 1; i >= 0; i--) {
-            CallbackMessageHandler handler = mCallbacks.get(i);
-            if (cb == handler.mCallback) {
-                return handler;
-            }
-        }
-        return null;
-    }
-
-    private boolean removeCallbackLocked(Callback cb) {
-        if (cb == null) {
-            throw new IllegalArgumentException("Callback cannot be null");
-        }
-        for (int i = mCallbacks.size() - 1; i >= 0; i--) {
-            CallbackMessageHandler handler = mCallbacks.get(i);
-            if (cb == handler.mCallback) {
-                mCallbacks.remove(i);
-                return true;
-            }
-        }
-        return false;
+    private void postToCallback(int what) {
+        postToCallback(what, null);
     }
 
     private void postCommand(String command, Bundle args, ResultReceiver resultCb) {
         Command cmd = new Command(command, args, resultCb);
-        synchronized (mLock) {
-            for (int i = mCallbacks.size() - 1; i >= 0; i--) {
-                mCallbacks.get(i).post(CallbackMessageHandler.MSG_COMMAND, cmd);
-            }
-        }
+        postToCallback(CallbackMessageHandler.MSG_COMMAND, cmd);
     }
 
-    private void postMediaButton(Intent mediaButtonIntent) {
+    private void postToCallback(int what, Object obj) {
+        postToCallback(what, obj, null);
+    }
+
+    private void postToCallback(int what, Object obj, Bundle extras) {
         synchronized (mLock) {
-            for (int i = mCallbacks.size() - 1; i >= 0; i--) {
-                mCallbacks.get(i).post(CallbackMessageHandler.MSG_MEDIA_BUTTON, mediaButtonIntent);
+            if (mCallback != null) {
+                mCallback.post(what, obj, extras);
             }
         }
     }
@@ -791,27 +666,13 @@ public final class MediaSession {
     }
 
     /**
-     * Receives generic commands or updates from controllers and the system.
-     * Callbacks may be registered using {@link #addCallback}.
+     * Receives media buttons, transport controls, and commands from controllers
+     * and the system. A callback may be set using {@link #setCallback}.
      */
     public abstract static class Callback {
+        private MediaSession mSession;
 
         public Callback() {
-        }
-
-        /**
-         * Called when a media button is pressed and this session has the
-         * highest priority or a controller sends a media button event to the
-         * session. TODO determine if using Intents identical to the ones
-         * RemoteControlClient receives is useful
-         * <p>
-         * The intent will be of type {@link Intent#ACTION_MEDIA_BUTTON} with a
-         * KeyEvent in {@link Intent#EXTRA_KEY_EVENT}
-         *
-         * @param mediaButtonIntent an intent containing the KeyEvent as an
-         *            extra
-         */
-        public void onMediaButtonEvent(@NonNull Intent mediaButtonIntent) {
         }
 
         /**
@@ -826,13 +687,81 @@ public final class MediaSession {
         public void onCommand(@NonNull String command, @Nullable Bundle args,
                 @Nullable ResultReceiver cb) {
         }
-    }
 
-    /**
-     * Receives transport control commands. Callbacks may be registered using
-     * {@link #addTransportControlsCallback}.
-     */
-    public static abstract class TransportControlsCallback {
+        /**
+         * Called when a media button is pressed and this session has the
+         * highest priority or a controller sends a media button event to the
+         * session. The default behavior will call the relevant method if the
+         * action for it was set.
+         * <p>
+         * The intent will be of type {@link Intent#ACTION_MEDIA_BUTTON} with a
+         * KeyEvent in {@link Intent#EXTRA_KEY_EVENT}
+         *
+         * @param mediaButtonIntent an intent containing the KeyEvent as an
+         *            extra
+         */
+        public boolean onMediaButtonEvent(@NonNull Intent mediaButtonIntent) {
+            if (mSession != null
+                    && Intent.ACTION_MEDIA_BUTTON.equals(mediaButtonIntent.getAction())) {
+                KeyEvent ke = mediaButtonIntent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
+                if (ke != null && ke.getAction() == KeyEvent.ACTION_DOWN) {
+                    PlaybackState state = mSession.mPlaybackState;
+                    long validActions = state == null ? 0 : state.getActions();
+                    switch (ke.getKeyCode()) {
+                        case KeyEvent.KEYCODE_MEDIA_PLAY:
+                            if ((validActions & PlaybackState.ACTION_PLAY) != 0) {
+                                onPlay();
+                            }
+                            break;
+                        case KeyEvent.KEYCODE_MEDIA_PAUSE:
+                            if ((validActions & PlaybackState.ACTION_PAUSE) != 0) {
+                                onPause();
+                            }
+                            break;
+                        case KeyEvent.KEYCODE_MEDIA_NEXT:
+                            if ((validActions & PlaybackState.ACTION_SKIP_TO_NEXT) != 0) {
+                                onSkipToNext();
+                            }
+                            break;
+                        case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
+                            if ((validActions & PlaybackState.ACTION_SKIP_TO_PREVIOUS) != 0) {
+                                onSkipToPrevious();
+                            }
+                            break;
+                        case KeyEvent.KEYCODE_MEDIA_STOP:
+                            if ((validActions & PlaybackState.ACTION_STOP) != 0) {
+                                onStop();
+                            }
+                            break;
+                        case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
+                            if ((validActions & PlaybackState.ACTION_FAST_FORWARD) != 0) {
+                                onFastForward();
+                            }
+                            break;
+                        case KeyEvent.KEYCODE_MEDIA_REWIND:
+                            if ((validActions & PlaybackState.ACTION_REWIND) != 0) {
+                                onRewind();
+                            }
+                            break;
+                        case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
+                        case KeyEvent.KEYCODE_HEADSETHOOK:
+                            boolean isPlaying = state == null ? false
+                                    : state.getState() == PlaybackState.STATE_PLAYING;
+                            boolean canPlay = (validActions & (PlaybackState.ACTION_PLAY_PAUSE
+                                    | PlaybackState.ACTION_PLAY)) != 0;
+                            boolean canPause = (validActions & (PlaybackState.ACTION_PLAY_PAUSE
+                                    | PlaybackState.ACTION_PAUSE)) != 0;
+                            if (isPlaying && canPause) {
+                                onPause();
+                            } else if (!isPlaying && canPlay) {
+                                onPlay();
+                            }
+                            break;
+                    }
+                }
+            }
+            return false;
+        }
 
         /**
          * Override to handle requests to begin playback.
@@ -920,6 +849,10 @@ public final class MediaSession {
          */
         public void onCustomAction(@NonNull String action, @Nullable Bundle extras) {
         }
+
+        private void setSession(MediaSession session) {
+            mSession = session;
+        }
     }
 
     /**
@@ -946,7 +879,7 @@ public final class MediaSession {
             MediaSession session = mMediaSession.get();
             try {
                 if (session != null) {
-                    session.postMediaButton(mediaButtonIntent);
+                    session.dispatchMediaButton(mediaButtonIntent);
                 }
             } finally {
                 if (cb != null) {
@@ -1232,44 +1165,6 @@ public final class MediaSession {
         }
     }
 
-    private class CallbackMessageHandler extends Handler {
-        private static final int MSG_MEDIA_BUTTON = 1;
-        private static final int MSG_COMMAND = 2;
-
-        private MediaSession.Callback mCallback;
-
-        public CallbackMessageHandler(Looper looper, MediaSession.Callback callback) {
-            super(looper, null, true);
-            mCallback = callback;
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            synchronized (mLock) {
-                if (mCallback == null) {
-                    return;
-                }
-                switch (msg.what) {
-                    case MSG_MEDIA_BUTTON:
-                        mCallback.onMediaButtonEvent((Intent) msg.obj);
-                        break;
-                    case MSG_COMMAND:
-                        Command cmd = (Command) msg.obj;
-                        mCallback.onCommand(cmd.command, cmd.extras, cmd.stub);
-                        break;
-                }
-            }
-        }
-
-        public void post(int what, Object obj) {
-            obtainMessage(what, obj).sendToTarget();
-        }
-
-        public void post(int what, Object obj, int arg1) {
-            obtainMessage(what, arg1, 0, obj).sendToTarget();
-        }
-    }
-
     private static final class Command {
         public final String command;
         public final Bundle extras;
@@ -1282,7 +1177,8 @@ public final class MediaSession {
         }
     }
 
-    private class TransportMessageHandler extends Handler {
+    private class CallbackMessageHandler extends Handler {
+
         private static final int MSG_PLAY = 1;
         private static final int MSG_PLAY_URI = 2;
         private static final int MSG_PLAY_SEARCH = 3;
@@ -1296,12 +1192,14 @@ public final class MediaSession {
         private static final int MSG_SEEK_TO = 11;
         private static final int MSG_RATE = 12;
         private static final int MSG_CUSTOM_ACTION = 13;
+        private static final int MSG_MEDIA_BUTTON = 14;
+        private static final int MSG_COMMAND = 15;
 
-        private TransportControlsCallback mCallback;
+        private MediaSession.Callback mCallback;
 
-        public TransportMessageHandler(Looper looper, TransportControlsCallback cb) {
-            super(looper);
-            mCallback = cb;
+        public CallbackMessageHandler(Looper looper, MediaSession.Callback callback) {
+            super(looper, null, true);
+            mCallback = callback;
         }
 
         public void post(int what, Object obj, Bundle bundle) {
@@ -1316,6 +1214,10 @@ public final class MediaSession {
 
         public void post(int what) {
             post(what, null);
+        }
+
+        public void post(int what, Object obj, int arg1) {
+            obtainMessage(what, arg1, 0, obj).sendToTarget();
         }
 
         @Override
@@ -1358,6 +1260,13 @@ public final class MediaSession {
                     break;
                 case MSG_CUSTOM_ACTION:
                     mCallback.onCustomAction((String) msg.obj, msg.getData());
+                    break;
+                case MSG_MEDIA_BUTTON:
+                    mCallback.onMediaButtonEvent((Intent) msg.obj);
+                    break;
+                case MSG_COMMAND:
+                    Command cmd = (Command) msg.obj;
+                    mCallback.onCommand(cmd.command, cmd.extras, cmd.stub);
                     break;
             }
         }

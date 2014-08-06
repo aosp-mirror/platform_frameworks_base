@@ -970,8 +970,7 @@ import java.lang.IllegalArgumentException;
     public final static int RCSE_ID_UNREGISTERED = -1;
 
     // USE_SESSIONS
-    private MediaSession.TransportControlsCallback mTransportListener
-            = new MediaSession.TransportControlsCallback() {
+    private MediaSession.Callback mTransportListener = new MediaSession.Callback() {
 
         @Override
         public void onSeekTo(long pos) {
