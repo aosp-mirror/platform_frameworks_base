@@ -32,6 +32,7 @@ import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -70,7 +71,7 @@ public class NotificationPanelView extends PanelView implements
     private View mReserveNotificationSpace;
     private MirrorView mSystemIconsCopy;
     private View mQsNavbarScrim;
-
+    private View mNotificationContainerParent;
     private NotificationStackScrollLayout mNotificationStackScroller;
     private int mNotificationTopPadding;
     private boolean mAnimateNextTopPaddingChange;
@@ -119,7 +120,6 @@ public class NotificationPanelView extends PanelView implements
 
     private Interpolator mFastOutSlowInInterpolator;
     private Interpolator mFastOutLinearInterpolator;
-    private Interpolator mLinearOutSlowInInterpolator;
     private ObjectAnimator mClockAnimator;
     private int mClockAnimationTarget = -1;
     private int mTopPaddingAdjustment;
@@ -174,6 +174,7 @@ public class NotificationPanelView extends PanelView implements
         mScrollView = (ObservableScrollView) findViewById(R.id.scroll_view);
         mScrollView.setListener(this);
         mReserveNotificationSpace = findViewById(R.id.reserve_notification_space);
+        mNotificationContainerParent = findViewById(R.id.notification_container_parent);
         mNotificationStackScroller = (NotificationStackScrollLayout)
                 findViewById(R.id.notification_stack_scroller);
         mNotificationStackScroller.setOnHeightChangedListener(this);
@@ -183,8 +184,6 @@ public class NotificationPanelView extends PanelView implements
                 android.R.interpolator.fast_out_slow_in);
         mFastOutLinearInterpolator = AnimationUtils.loadInterpolator(getContext(),
                 android.R.interpolator.fast_out_linear_in);
-        mLinearOutSlowInInterpolator = AnimationUtils.loadInterpolator(getContext(),
-                android.R.interpolator.linear_out_slow_in);
         mKeyguardBottomArea = (KeyguardBottomAreaView) findViewById(R.id.keyguard_bottom_area);
         mQsNavbarScrim = findViewById(R.id.qs_navbar_scrim);
         mAfforanceHelper = new KeyguardAffordanceHelper(this, getContext());
@@ -205,6 +204,25 @@ public class NotificationPanelView extends PanelView implements
         mClockPositionAlgorithm.loadDimens(getResources());
         mNotificationScrimWaitDistance =
                 getResources().getDimensionPixelSize(R.dimen.notification_scrim_wait_distance);
+    }
+
+    public void updateResources() {
+        int panelWidth = getResources().getDimensionPixelSize(R.dimen.notification_panel_width);
+        int panelGravity = getResources().getInteger(R.integer.notification_panel_layout_gravity);
+        FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) mHeader.getLayoutParams();
+        if (lp.width != panelWidth) {
+            lp.width = panelWidth;
+            lp.gravity = panelGravity;
+            mHeader.setLayoutParams(lp);
+            mHeader.post(mUpdateHeader);
+        }
+
+        lp = (FrameLayout.LayoutParams) mNotificationContainerParent.getLayoutParams();
+        if (lp.width != panelWidth) {
+            lp.width = panelWidth;
+            lp.gravity = panelGravity;
+            mNotificationContainerParent.setLayoutParams(lp);
+        }
     }
 
     @Override
@@ -1666,4 +1684,11 @@ public class NotificationPanelView extends PanelView implements
             updateQsState();
         }
     }
+
+    private final Runnable mUpdateHeader = new Runnable() {
+        @Override
+        public void run() {
+            mHeader.updateEverything();
+        }
+    };
 }

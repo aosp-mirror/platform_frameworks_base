@@ -16,12 +16,9 @@
 */
 -->
 <resources>
-    <!-- The width of the notification panel window: 400 + 16 + 16 (padding in the bg drawable) -->
-    <dimen name="notification_panel_width">432dp</dimen>
-
-    <!-- Gravity for the notification panel -->
-    <!-- 0x31 = top|center_horizontal -->
-    <integer name="notification_panel_layout_gravity">0x31</integer>
+    <!-- Standard notification width + gravity -->
+    <dimen name="notification_panel_width">@dimen/standard_notification_panel_width</dimen>
+    <integer name="notification_panel_layout_gravity">@integer/standard_notification_panel_layout_gravity</integer>
 
     <!-- Diameter of outer shape drawable shown in navbar search-->
     <dimen name="navbar_search_outerring_diameter">430dip</dimen>
@@ -48,9 +45,6 @@
 
     <!-- The side padding for the task stack as a percentage of the width. -->
     <item name="recents_stack_width_padding_percentage" format="float" type="dimen">0.075</item>
-
-    <!-- Width of the zen mode interstitial dialog. -->
-    <dimen name="zen_mode_dialog_width">384dp</dimen>
 
     <!-- The fraction of the screen height where the clock on the Keyguard has its center. The
          max value is used when no notifications are displaying, and the min value is when the

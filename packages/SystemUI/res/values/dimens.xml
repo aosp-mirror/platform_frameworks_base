@@ -136,9 +136,14 @@
     <!-- Height of the status bar header bar when on Keyguard -->
     <dimen name="status_bar_header_height_keyguard">40dp</dimen>
 
+    <!-- Width for the notification panel and related windows -->
+    <dimen name="match_parent">-1px</dimen>
+    <dimen name="standard_notification_panel_width">416dp</dimen><!-- includes notification_side_padding on each side -->
+    <dimen name="notification_panel_width">@dimen/match_parent</dimen>
+
     <!-- Gravity for the notification panel -->
-    <!-- 0x37 = fill_horizontal|top -->
-    <integer name="notification_panel_layout_gravity">0x37</integer>
+    <integer name="standard_notification_panel_layout_gravity">0x31</integer><!-- top|center_horizontal -->
+    <integer name="notification_panel_layout_gravity">0x37</integer><!-- fill_horizontal|top -->
 
     <!-- Height of the carrier/wifi name label -->
     <dimen name="carrier_label_height">24dp</dimen>
@@ -268,9 +273,6 @@
 
     <!-- The height of the speed bump view. -->
     <dimen name="speed_bump_height">16dp</dimen>
-
-    <!-- Width of the zen mode interstitial dialog. -->
-    <dimen name="zen_mode_dialog_width">320dp</dimen>
 
     <!-- Lockscreen affordance drag distance for camera and phone. -->
     <dimen name="affordance_drag_distance">100dp</dimen>
