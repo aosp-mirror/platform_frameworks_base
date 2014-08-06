@@ -69,6 +69,7 @@ public class NotificationPanelView extends PanelView implements
     private TextView mClockView;
     private View mReserveNotificationSpace;
     private MirrorView mSystemIconsCopy;
+    private View mQsNavbarScrim;
 
     private NotificationStackScrollLayout mNotificationStackScroller;
     private int mNotificationTopPadding;
@@ -149,6 +150,8 @@ public class NotificationPanelView extends PanelView implements
 
     private boolean mShadeEmpty;
 
+    private boolean mQsScrimEnabled = true;
+
     public NotificationPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mSystemIconsCopy = new MirrorView(context);
@@ -183,6 +186,7 @@ public class NotificationPanelView extends PanelView implements
         mLinearOutSlowInInterpolator = AnimationUtils.loadInterpolator(getContext(),
                 android.R.interpolator.linear_out_slow_in);
         mKeyguardBottomArea = (KeyguardBottomAreaView) findViewById(R.id.keyguard_bottom_area);
+        mQsNavbarScrim = findViewById(R.id.qs_navbar_scrim);
         mAfforanceHelper = new KeyguardAffordanceHelper(this, getContext());
     }
 
@@ -882,6 +886,10 @@ public class NotificationPanelView extends PanelView implements
                 mKeyguardShowing && !expandVisually ? View.INVISIBLE : View.VISIBLE);
         mScrollView.setTouchEnabled(mQsExpanded);
         updateEmptyShadeView();
+        mQsNavbarScrim.setVisibility(mStatusBarState == StatusBarState.SHADE && mQsExpanded
+                && !mStackScrollerOverscrolling && mQsScrimEnabled
+                        ? View.VISIBLE
+                        : View.INVISIBLE);
     }
 
     private void setQsExpansion(float height) {
@@ -907,6 +915,10 @@ public class NotificationPanelView extends PanelView implements
             if (!mKeyguardStatusBarTransparent) {
                 mKeyguardStatusBar.setAlpha(alpha);
             }
+        }
+        if (mStatusBarState == StatusBarState.SHADE && mQsExpanded
+                && !mStackScrollerOverscrolling && mQsScrimEnabled) {
+            mQsNavbarScrim.setAlpha(getQsExpansionFraction());
         }
     }
 
@@ -1628,5 +1640,13 @@ public class NotificationPanelView extends PanelView implements
 
         // Hide "No notifications" in QS.
         mNotificationStackScroller.updateEmptyShadeView(mShadeEmpty && !mQsExpanded);
+    }
+
+    public void setQsScrimEnabled(boolean qsScrimEnabled) {
+        boolean changed = mQsScrimEnabled != qsScrimEnabled;
+        mQsScrimEnabled = qsScrimEnabled;
+        if (changed) {
+            updateQsState();
+        }
     }
 }
