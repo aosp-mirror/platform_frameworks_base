@@ -28570,10 +28570,11 @@ package android.telecomm {
   public final class Call {
     method public void addListener(android.telecomm.Call.Listener);
     method public void answer(int);
-    method public void conference();
+    method public void conference(android.telecomm.Call);
     method public void disconnect();
     method public java.util.List<java.lang.String> getCannedTextResponses();
     method public java.util.List<android.telecomm.Call> getChildren();
+    method public java.util.List<android.telecomm.Call> getConferenceableCalls();
     method public android.telecomm.Call.Details getDetails();
     method public android.telecomm.Call getParent();
     method public java.lang.String getRemainingPostDialSequence();
@@ -28619,6 +28620,7 @@ package android.telecomm {
     method public void onCallDestroyed(android.telecomm.Call);
     method public void onCannedTextResponsesLoaded(android.telecomm.Call, java.util.List<java.lang.String>);
     method public void onChildrenChanged(android.telecomm.Call, java.util.List<android.telecomm.Call>);
+    method public void onConferenceableCallsChanged(android.telecomm.Call, java.util.List<android.telecomm.Call>);
     method public void onDetailsChanged(android.telecomm.Call, android.telecomm.Call.Details);
     method public void onParentChanged(android.telecomm.Call, android.telecomm.Call);
     method public void onPostDialWait(android.telecomm.Call, java.lang.String);
@@ -28715,6 +28717,7 @@ package android.telecomm {
     method public void onAbort();
     method public void onAnswer(int);
     method public void onChildrenChanged(java.util.List<android.telecomm.Connection>);
+    method public void onConferenceWith(android.telecomm.Connection);
     method public void onDisconnect();
     method public void onHold();
     method public void onPhoneAccountClicked();
@@ -28732,6 +28735,7 @@ package android.telecomm {
     method public final void setCallCapabilities(int);
     method public final void setCallerDisplayName(java.lang.String, int);
     method public final void setCanceled();
+    method public final void setConferenceableConnections(java.util.List<android.telecomm.Connection>);
     method public final void setDialing();
     method public final void setDisconnected(int, java.lang.String);
     method public final void setFailed(int, java.lang.String);
@@ -28968,6 +28972,7 @@ package android.telecomm {
     method public void onCallCapabilitiesChanged(android.telecomm.RemoteConnection, int);
     method public void onCallerDisplayNameChanged(android.telecomm.RemoteConnection, java.lang.String, int);
     method public void onChildrenChanged(android.telecomm.RemoteConnection, java.util.List<android.telecomm.RemoteConnection>);
+    method public void onConferenceableConnectionsChanged(android.telecomm.RemoteConnection, java.util.List<android.telecomm.RemoteConnection>);
     method public void onDestroyed(android.telecomm.RemoteConnection);
     method public void onDisconnected(android.telecomm.RemoteConnection, int, java.lang.String);
     method public void onHandleChanged(android.telecomm.RemoteConnection, android.net.Uri, int);

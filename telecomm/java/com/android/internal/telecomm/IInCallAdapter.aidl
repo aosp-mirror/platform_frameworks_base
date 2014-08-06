@@ -51,7 +51,7 @@ oneway interface IInCallAdapter {
 
     void phoneAccountSelected(String callId, in PhoneAccountHandle accountHandle);
 
-    void conference(String callId);
+    void conference(String callId, String otherCallId);
 
     void splitFromConference(String callId);
 

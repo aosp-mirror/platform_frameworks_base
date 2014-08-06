@@ -21,9 +21,9 @@ import android.net.Uri;
 import android.os.Bundle;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * Represents a connection to a remote endpoint that carries voice traffic.
@@ -49,7 +49,8 @@ public abstract class Connection {
         public void onAudioModeIsVoipChanged(Connection c, boolean isVoip) {}
         public void onStatusHintsChanged(Connection c, StatusHints statusHints) {}
         public void onStartActivityFromInCall(Connection c, PendingIntent intent) {}
-        public void onFailed(Connection c, int code, String msg) {}
+        public void onConferenceableConnectionsChanged(
+                Connection c, List<Connection> conferenceableConnections) {}
     }
 
     public final class State {
@@ -67,8 +68,18 @@ public abstract class Connection {
 
     }
 
-    private final Set<Listener> mListeners = new HashSet<>();
+    private final Listener mConnectionDeathListener = new Listener() {
+        @Override
+        public void onDestroyed(Connection c) {
+            if (mConferenceableConnections.remove(c)) {
+                fireOnConferenceableConnectionsChanged();
+            }
+        }
+    };
+
+    private final Set<Listener> mListeners = new CopyOnWriteArraySet<>();
     private final List<Connection> mChildConnections = new ArrayList<>();
+    private final List<Connection> mConferenceableConnections = new ArrayList<>();
 
     private int mState = State.NEW;
     private CallAudioState mCallAudioState;
@@ -485,7 +496,7 @@ public abstract class Connection {
     }
 
     /**
-     * TODO(santoscordon): Needs documentation.
+     * Tears down the Connection object.
      */
     public final void destroy() {
         // It is possible that onDestroy() will trigger the listener to remove itself which will
@@ -531,6 +542,24 @@ public abstract class Connection {
         for (Listener l : mListeners) {
             l.onStatusHintsChanged(this, statusHints);
         }
+    }
+
+    /**
+     * Sets the connections with which this connection can be conferenced.
+     *
+     * @param conferenceableConnections The set of connections this connection can conference with.
+     */
+    public final void setConferenceableConnections(List<Connection> conferenceableConnections) {
+        clearConferenceableList();
+        for (Connection c : conferenceableConnections) {
+            // If statement checks for duplicates in input. It makes it N^2 but we're dealing with a
+            // small amount of items here.
+            if (!mConferenceableConnections.contains(c)) {
+                c.addConnectionListener(mConnectionDeathListener);
+                mConferenceableConnections.add(c);
+            }
+        }
+        fireOnConferenceableConnectionsChanged();
     }
 
     /**
@@ -580,7 +609,7 @@ public abstract class Connection {
     public void onDisconnect() {}
 
     /**
-     * Notifies this Connection of a request to disconnect.
+     * Notifies this Connection of a request to separate from its parent conference.
      */
     public void onSeparate() {}
 
@@ -633,6 +662,16 @@ public abstract class Connection {
      * Called when the phone account UI was clicked.
      */
     public void onPhoneAccountClicked() {}
+
+    /**
+     * Merge this connection and the specified connection into a conference call.  Once the
+     * connections are merged, the calls should be added to the an existing or new
+     * {@code Conference} instance. For new {@code Conference} instances, use
+     * {@code ConnectionService#addConference}.
+     *
+     * @param otherConnection The connection with which this connection should be conferenced.
+     */
+    public void onConferenceWith(Connection otherConnection) {}
 
     private void addChild(Connection connection) {
         Log.d(this, "adding child %s", connection);
@@ -692,5 +731,18 @@ public abstract class Connection {
      */
     public static Connection getCanceledConnection() {
         return CANCELED_CONNECTION;
+    }
+
+    private final void  fireOnConferenceableConnectionsChanged() {
+        for (Listener l : mListeners) {
+            l.onConferenceableConnectionsChanged(this, mConferenceableConnections);
+        }
+    }
+
+    private final void clearConferenceableList() {
+        for (Connection c : mConferenceableConnections) {
+            c.removeConnectionListener(mConnectionDeathListener);
+        }
+        mConferenceableConnections.clear();
     }
 }

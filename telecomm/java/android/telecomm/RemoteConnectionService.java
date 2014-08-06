@@ -32,6 +32,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -194,6 +196,18 @@ final class RemoteConnectionService {
         @Override
         public IBinder asBinder() {
             throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public final void setConferenceableConnections(
+                String callId, List<String> conferenceableConnectionIds) {
+
+            // TODO: When we support more than 1 remote connection, this should
+            // loop through the incoming list of connection IDs and acquire the list
+            // of remote connections which correspond to the IDs. That list should
+            // be set onto the remote connections.
+            findConnectionForAction(callId, "setConferenceableConnections")
+                    .setConferenceableConnections(Collections.<RemoteConnection>emptyList());
         }
     };
 
