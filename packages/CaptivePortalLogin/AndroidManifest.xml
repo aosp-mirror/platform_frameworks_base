@@ -25,7 +25,7 @@
         <activity
             android:name="com.android.captiveportallogin.CaptivePortalLoginActivity"
             android:label="@string/action_bar_label"
-            android:theme="@android:style/Theme.Holo" >
+            android:theme="@style/AppTheme" >
             <intent-filter>
                 <action android:name="android.intent.action.ACTION_SEND"/>
                 <category android:name="android.intent.category.DEFAULT"/>
