@@ -4873,6 +4873,17 @@
     <!-- TV content rating system strings for FI TV -->
 
     <!-- TV content rating system strings for FR TV -->
+    <string name="display_name_frtv" translatable="false">FR-TV</string>
+    <string name="display_name_frtv_all" translatable="false">Les programmes tous publics</string>
+    <string name="display_name_frtv_10" translatable="false">Déconseillé aux -10 ans</string>
+    <string name="display_name_frtv_12" translatable="false">Déconseillé aux -12 ans</string>
+    <string name="display_name_frtv_16" translatable="false">Déconseillé aux -16 ans</string>
+    <string name="display_name_frtv_18" translatable="false">Déconseillé aux -18 ans</string>
+    <string name="description_frtv_all">Les programmes tous publics</string>
+    <string name="description_frtv_10">Programmes comportant certaines scènes susceptibles de heurter les -10 ans.</string>
+    <string name="description_frtv_12">Programmes pouvant troubler les -12 ans, notamment lorsque le scénario recourt de façon systématique et répétée à la violence physique ou psychologique.</string>
+    <string name="description_frtv_16">Programmes à caractère érotique ou de grande violence, susceptibles de nuire à l’épanouissement physique, mental ou moral des -16 ans.</string>
+    <string name="description_frtv_18">Programmes pornographiques ou de très grande violence, réservés à un public adulte averti et susceptibles de nuire à l’épanouissement physique, mental ou moral des -18 ans.</string>
 
     <!-- TV content rating system strings for GR TV -->
 
