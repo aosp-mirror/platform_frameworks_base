@@ -21,7 +21,7 @@ import static android.media.tv.TvInputManager.INPUT_STATE_DISCONNECTED;
 
 import android.content.Context;
 import android.content.Intent;
-import android.hardware.hdmi.HdmiCecDeviceInfo;
+import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiHotplugEvent;
 import android.hardware.hdmi.IHdmiControlService;
 import android.hardware.hdmi.IHdmiDeviceEventListener;
@@ -82,7 +82,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
     private final TvInputHal mHal = new TvInputHal(this);
     private final SparseArray<Connection> mConnections = new SparseArray<>();
     private final List<TvInputHardwareInfo> mHardwareList = new ArrayList<>();
-    private List<HdmiCecDeviceInfo> mHdmiCecDeviceList = new LinkedList<>();
+    private List<HdmiDeviceInfo> mHdmiCecDeviceList = new LinkedList<>();
     /* A map from a device ID to the matching TV input ID. */
     private final SparseArray<String> mHardwareInputIdMap = new SparseArray<>();
     /* A map from a HDMI logical address to the matching TV input ID. */
@@ -164,9 +164,9 @@ class TvInputHardwareManager implements TvInputHal.Callback {
             TvInputHardwareInfo info = connection.getHardwareInfoLocked();
             if (info.getType() == TvInputHardwareInfo.TV_INPUT_TYPE_HDMI) {
                 // Remove HDMI CEC devices linked with this hardware.
-                for (Iterator<HdmiCecDeviceInfo> it = mHdmiCecDeviceList.iterator();
+                for (Iterator<HdmiDeviceInfo> it = mHdmiCecDeviceList.iterator();
                         it.hasNext(); ) {
-                    HdmiCecDeviceInfo deviceInfo = it.next();
+                    HdmiDeviceInfo deviceInfo = it.next();
                     if (deviceInfo.getPortId() == info.getHdmiPortId()) {
                         mHandler.obtainMessage(ListenerHandler.HDMI_CEC_DEVICE_REMOVED, 0, 0,
                                 deviceInfo).sendToTarget();
@@ -220,7 +220,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
         }
     }
 
-    public List<HdmiCecDeviceInfo> getHdmiCecInputDeviceList() {
+    public List<HdmiDeviceInfo> getHdmiCecInputDeviceList() {
         synchronized (mLock) {
             return Collections.unmodifiableList(mHdmiCecDeviceList);
         }
@@ -450,7 +450,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
     private void processPendingHdmiDeviceEventsLocked() {
         for (Iterator<Message> it = mPendingHdmiDeviceEvents.iterator(); it.hasNext(); ) {
             Message msg = it.next();
-            HdmiCecDeviceInfo deviceInfo = (HdmiCecDeviceInfo) msg.obj;
+            HdmiDeviceInfo deviceInfo = (HdmiDeviceInfo) msg.obj;
             TvInputHardwareInfo hardwareInfo =
                     findHardwareInfoForHdmiPortLocked(deviceInfo.getPortId());
             if (hardwareInfo != null) {
@@ -864,8 +864,8 @@ class TvInputHardwareManager implements TvInputHal.Callback {
         public void onStateChanged(String inputId, int state);
         public void onHardwareDeviceAdded(TvInputHardwareInfo info);
         public void onHardwareDeviceRemoved(TvInputHardwareInfo info);
-        public void onHdmiCecDeviceAdded(HdmiCecDeviceInfo cecDevice);
-        public void onHdmiCecDeviceRemoved(HdmiCecDeviceInfo cecDevice);
+        public void onHdmiCecDeviceAdded(HdmiDeviceInfo cecDevice);
+        public void onHdmiCecDeviceRemoved(HdmiDeviceInfo cecDevice);
     }
 
     private class ListenerHandler extends Handler {
@@ -895,12 +895,12 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                     break;
                 }
                 case HDMI_CEC_DEVICE_ADDED: {
-                    HdmiCecDeviceInfo info = (HdmiCecDeviceInfo) msg.obj;
+                    HdmiDeviceInfo info = (HdmiDeviceInfo) msg.obj;
                     mListener.onHdmiCecDeviceAdded(info);
                     break;
                 }
                 case HDMI_CEC_DEVICE_REMOVED: {
-                    HdmiCecDeviceInfo info = (HdmiCecDeviceInfo) msg.obj;
+                    HdmiDeviceInfo info = (HdmiDeviceInfo) msg.obj;
                     mListener.onHdmiCecDeviceRemoved(info);
                     break;
                 }
@@ -936,7 +936,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
 
     private final class HdmiDeviceEventListener extends IHdmiDeviceEventListener.Stub {
         @Override
-        public void onStatusChanged(HdmiCecDeviceInfo deviceInfo, boolean activated) {
+        public void onStatusChanged(HdmiDeviceInfo deviceInfo, boolean activated) {
             synchronized (mLock) {
                 if (activated) {
                     if (!mHdmiCecDeviceList.contains(deviceInfo)) {
@@ -966,7 +966,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
 
     private final class HdmiInputChangeListener extends IHdmiInputChangeListener.Stub {
         @Override
-        public void onChanged(HdmiCecDeviceInfo device) throws RemoteException {
+        public void onChanged(HdmiDeviceInfo device) throws RemoteException {
             String inputId;
             synchronized (mLock) {
                 if (device.isCecDevice()) {

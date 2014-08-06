@@ -16,7 +16,7 @@
 
 package com.android.server.hdmi;
 
-import android.hardware.hdmi.HdmiCecDeviceInfo;
+import android.hardware.hdmi.HdmiDeviceInfo;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -268,9 +268,9 @@ public final class HdmiCecMessageValidator {
      * @return true if the given type is valid
      */
     static boolean isValidType(int type) {
-        return (HdmiCecDeviceInfo.DEVICE_TV <= type
-                && type <= HdmiCecDeviceInfo.DEVICE_VIDEO_PROCESSOR)
-                && type != HdmiCecDeviceInfo.DEVICE_RESERVED;
+        return (HdmiDeviceInfo.DEVICE_TV <= type
+                && type <= HdmiDeviceInfo.DEVICE_VIDEO_PROCESSOR)
+                && type != HdmiDeviceInfo.DEVICE_RESERVED;
     }
 
     private class PhysicalAddressValidator implements ParameterValidator {

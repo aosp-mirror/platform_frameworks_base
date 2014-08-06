@@ -29,7 +29,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
-import android.hardware.hdmi.HdmiCecDeviceInfo;
+import android.hardware.hdmi.HdmiDeviceInfo;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -152,10 +152,10 @@ public final class TvInputInfo implements Parcelable {
 
     /**
      * Create a new instance of the TvInputInfo class,
-     * instantiating it from the given Context, ResolveInfo, and HdmiCecDeviceInfo.
+     * instantiating it from the given Context, ResolveInfo, and HdmiDeviceInfo.
      *
      * @param service The ResolveInfo returned from the package manager about this TV input service.
-     * @param cecInfo The HdmiCecDeviceInfo for a HDMI CEC logical device.
+     * @param cecInfo The HdmiDeviceInfo for a HDMI CEC logical device.
      * @param parentId The ID of this TV input's parent input. {@code null} if none exists.
      * @param iconUri The {@link android.net.Uri} to load the icon image.
      *        {@see android.content.ContentResolver#openInputStream}. If it is null, the application
@@ -166,7 +166,7 @@ public final class TvInputInfo implements Parcelable {
      */
     @SystemApi
     public static TvInputInfo createTvInputInfo(Context context, ResolveInfo service,
-            HdmiCecDeviceInfo cecInfo, String parentId, String label, Uri iconUri)
+            HdmiDeviceInfo cecInfo, String parentId, String label, Uri iconUri)
                     throws XmlPullParserException, IOException {
         boolean isConnectedToHdmiSwitch = (cecInfo.getPhysicalAddress() & 0x0FFF) != 0;
         return createTvInputInfo(context, service, generateInputIdForHdmiCec(
@@ -494,14 +494,14 @@ public final class TvInputInfo implements Parcelable {
     }
 
     /**
-     * Used to generate an input id from a ComponentName and HdmiCecDeviceInfo.
+     * Used to generate an input id from a ComponentName and HdmiDeviceInfo.
      *
      * @param name the component name for generating an input id.
-     * @param cecInfo HdmiCecDeviceInfo describing this TV input.
+     * @param cecInfo HdmiDeviceInfo describing this TV input.
      * @return the generated input id for the given {@code name} and {@code cecInfo}.
      */
     private static final String generateInputIdForHdmiCec(
-            ComponentName name, HdmiCecDeviceInfo cecInfo) {
+            ComponentName name, HdmiDeviceInfo cecInfo) {
         // Example of the format : "/CEC%04X%02X"
         String format = String.format("%s%s%%0%sX%%0%sX", DELIMITER_INFO_IN_ID, PREFIX_CEC_DEVICE,
                 LENGTH_CEC_PHYSICAL_ADDRESS, LENGTH_CEC_LOGICAL_ADDRESS);

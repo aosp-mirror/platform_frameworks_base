@@ -228,8 +228,8 @@ public final class HdmiControlManager {
                 // Do nothing.
             }
         }
-        mHasTvDevice = hasDeviceType(types, HdmiCecDeviceInfo.DEVICE_TV);
-        mHasPlaybackDevice = hasDeviceType(types, HdmiCecDeviceInfo.DEVICE_PLAYBACK);
+        mHasTvDevice = hasDeviceType(types, HdmiDeviceInfo.DEVICE_TV);
+        mHasPlaybackDevice = hasDeviceType(types, HdmiDeviceInfo.DEVICE_PLAYBACK);
     }
 
     private static boolean hasDeviceType(int[] types, int type) {
@@ -249,8 +249,8 @@ public final class HdmiControlManager {
      *
      * @param type CEC device type
      * @return {@link HdmiClient} instance. {@code null} on failure.
-     * @see {@link HdmiCecDeviceInfo#DEVICE_PLAYBACK}
-     * @see {@link HdmiCecDeviceInfo#DEVICE_TV}
+     * See {@link HdmiDeviceInfo#DEVICE_PLAYBACK}
+     * See {@link HdmiDeviceInfo#DEVICE_TV}
      */
     @Nullable
     public HdmiClient getClient(int type) {
@@ -258,9 +258,9 @@ public final class HdmiControlManager {
             return null;
         }
         switch (type) {
-            case HdmiCecDeviceInfo.DEVICE_TV:
+            case HdmiDeviceInfo.DEVICE_TV:
                 return mHasTvDevice ? new HdmiTvClient(mService) : null;
-            case HdmiCecDeviceInfo.DEVICE_PLAYBACK:
+            case HdmiDeviceInfo.DEVICE_PLAYBACK:
                 return mHasPlaybackDevice ? new HdmiPlaybackClient(mService) : null;
             default:
                 return null;
@@ -278,7 +278,7 @@ public final class HdmiControlManager {
      */
     @Nullable
     public HdmiPlaybackClient getPlaybackClient() {
-        return (HdmiPlaybackClient) getClient(HdmiCecDeviceInfo.DEVICE_PLAYBACK);
+        return (HdmiPlaybackClient) getClient(HdmiDeviceInfo.DEVICE_PLAYBACK);
     }
 
     /**
@@ -292,7 +292,7 @@ public final class HdmiControlManager {
      */
     @Nullable
     public HdmiTvClient getTvClient() {
-        return (HdmiTvClient) getClient(HdmiCecDeviceInfo.DEVICE_TV);
+        return (HdmiTvClient) getClient(HdmiDeviceInfo.DEVICE_TV);
     }
 
     /**

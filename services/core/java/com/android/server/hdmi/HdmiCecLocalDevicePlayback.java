@@ -16,7 +16,7 @@
 
 package com.android.server.hdmi;
 
-import android.hardware.hdmi.HdmiCecDeviceInfo;
+import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.os.RemoteException;
@@ -34,7 +34,7 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
     private boolean mIsActiveSource = false;
 
     HdmiCecLocalDevicePlayback(HdmiControlService service) {
-        super(service, HdmiCecDeviceInfo.DEVICE_PLAYBACK);
+        super(service, HdmiDeviceInfo.DEVICE_PLAYBACK);
     }
 
     @Override

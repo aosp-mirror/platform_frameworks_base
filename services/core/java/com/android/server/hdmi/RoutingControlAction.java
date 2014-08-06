@@ -17,7 +17,7 @@
 package com.android.server.hdmi;
 
 import android.annotation.Nullable;
-import android.hardware.hdmi.HdmiCecDeviceInfo;
+import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.os.RemoteException;
@@ -155,7 +155,7 @@ final class RoutingControlAction extends FeatureAction {
         }
         switch (timeoutState) {
             case STATE_WAIT_FOR_ROUTING_INFORMATION:
-                HdmiCecDeviceInfo device = tv().getDeviceInfoByPath(mCurrentRoutingPath);
+                HdmiDeviceInfo device = tv().getDeviceInfoByPath(mCurrentRoutingPath);
                 if (device != null && mQueryDevicePowerStatus) {
                     int deviceLogicalAddress = device.getLogicalAddress();
                     queryDevicePowerStatus(deviceLogicalAddress, new SendMessageCallback() {

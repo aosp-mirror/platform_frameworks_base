@@ -28,10 +28,10 @@ public abstract class HdmiClient {
     /**
      * Returns the active source information.
      *
-     * @return {@link HdmiCecDeviceInfo} object that describes the active source
+     * @return {@link HdmiDeviceInfo} object that describes the active source
      *         or active routing path
      */
-    public HdmiCecDeviceInfo getActiveSource() {
+    public HdmiDeviceInfo getActiveSource() {
         try {
             return mService.getActiveSource();
         } catch (RemoteException e) {

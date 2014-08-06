@@ -22,7 +22,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.hardware.hdmi.HdmiCecDeviceInfo;
+import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiHotplugEvent;
 import android.hardware.hdmi.HdmiPortInfo;
@@ -317,7 +317,7 @@ public final class HdmiControlService extends SystemService {
                     if (logicalAddress == Constants.ADDR_UNREGISTERED) {
                         Slog.e(TAG, "Failed to allocate address:[device_type:" + deviceType + "]");
                     } else {
-                        HdmiCecDeviceInfo deviceInfo = createDeviceInfo(logicalAddress, deviceType);
+                        HdmiDeviceInfo deviceInfo = createDeviceInfo(logicalAddress, deviceType);
                         localDevice.setDeviceInfo(deviceInfo);
                         mCecController.addLocalDevice(deviceType, localDevice);
                         mCecController.addLogicalAddress(logicalAddress);
@@ -467,7 +467,7 @@ public final class HdmiControlService extends SystemService {
     }
 
     @ServiceThreadOnly
-    HdmiCecDeviceInfo getDeviceInfo(int logicalAddress) {
+    HdmiDeviceInfo getDeviceInfo(int logicalAddress) {
         assertRunOnServiceThread();
         HdmiCecLocalDeviceTv tv = tv();
         if (tv == null) {
@@ -646,10 +646,10 @@ public final class HdmiControlService extends SystemService {
         }
     }
 
-    private HdmiCecDeviceInfo createDeviceInfo(int logicalAddress, int deviceType) {
+    private HdmiDeviceInfo createDeviceInfo(int logicalAddress, int deviceType) {
         // TODO: find better name instead of model name.
         String displayName = Build.MODEL;
-        return new HdmiCecDeviceInfo(logicalAddress,
+        return new HdmiDeviceInfo(logicalAddress,
                 getPhysicalAddress(), pathToPortId(getPhysicalAddress()), deviceType,
                 getVendorId(), displayName);
     }
@@ -747,7 +747,7 @@ public final class HdmiControlService extends SystemService {
         }
 
         @Override
-        public HdmiCecDeviceInfo getActiveSource() {
+        public HdmiDeviceInfo getActiveSource() {
             HdmiCecLocalDeviceTv tv = tv();
             if (tv == null) {
                 Slog.w(TAG, "Local tv device not available");
@@ -755,13 +755,13 @@ public final class HdmiControlService extends SystemService {
             }
             ActiveSource activeSource = tv.getActiveSource();
             if (activeSource.isValid()) {
-                return new HdmiCecDeviceInfo(activeSource.logicalAddress,
-                        activeSource.physicalAddress, HdmiCecDeviceInfo.PORT_INVALID,
-                        HdmiCecDeviceInfo.DEVICE_INACTIVE, 0, "");
+                return new HdmiDeviceInfo(activeSource.logicalAddress,
+                        activeSource.physicalAddress, HdmiDeviceInfo.PORT_INVALID,
+                        HdmiDeviceInfo.DEVICE_INACTIVE, 0, "");
             }
             int activePath = tv.getActivePath();
-            if (activePath != HdmiCecDeviceInfo.PATH_INVALID) {
-                return new HdmiCecDeviceInfo(activePath, tv.getActivePortId());
+            if (activePath != HdmiDeviceInfo.PATH_INVALID) {
+                return new HdmiDeviceInfo(activePath, tv.getActivePortId());
             }
             return null;
         }
@@ -943,7 +943,7 @@ public final class HdmiControlService extends SystemService {
         }
 
         @Override
-        public List<HdmiCecDeviceInfo> getInputDevices() {
+        public List<HdmiDeviceInfo> getInputDevices() {
             enforceAccessPermission();
             // No need to hold the lock for obtaining TV device as the local device instance
             // is preserved while the HDMI control is enabled.
@@ -1212,7 +1212,7 @@ public final class HdmiControlService extends SystemService {
         }
     }
 
-    void invokeDeviceEventListeners(HdmiCecDeviceInfo device, boolean activated) {
+    void invokeDeviceEventListeners(HdmiDeviceInfo device, boolean activated) {
         synchronized (mLock) {
             for (IHdmiDeviceEventListener listener : mDeviceEventListeners) {
                 try {
@@ -1275,7 +1275,7 @@ public final class HdmiControlService extends SystemService {
         }
     }
 
-    void invokeInputChangeListener(HdmiCecDeviceInfo info) {
+    void invokeInputChangeListener(HdmiDeviceInfo info) {
         synchronized (mLock) {
             if (mInputChangeListener != null) {
                 try {
@@ -1384,7 +1384,7 @@ public final class HdmiControlService extends SystemService {
     }
 
     private HdmiCecLocalDeviceTv tv() {
-        return (HdmiCecLocalDeviceTv) mCecController.getLocalDevice(HdmiCecDeviceInfo.DEVICE_TV);
+        return (HdmiCecLocalDeviceTv) mCecController.getLocalDevice(HdmiDeviceInfo.DEVICE_TV);
     }
 
     boolean isTvDevice() {
@@ -1393,7 +1393,7 @@ public final class HdmiControlService extends SystemService {
 
     private HdmiCecLocalDevicePlayback playback() {
         return (HdmiCecLocalDevicePlayback)
-                mCecController.getLocalDevice(HdmiCecDeviceInfo.DEVICE_PLAYBACK);
+                mCecController.getLocalDevice(HdmiDeviceInfo.DEVICE_PLAYBACK);
     }
 
     AudioManager getAudioManager() {
