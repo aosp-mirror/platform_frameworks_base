@@ -41,9 +41,11 @@ import com.android.internal.telecomm.RemoteServiceCallback;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * A {@link android.app.Service} that provides telephone connections to processes running on an
@@ -58,7 +60,6 @@ public abstract class ConnectionService extends Service {
 
     // Flag controlling whether PII is emitted into the logs
     private static final boolean PII_DEBUG = Log.isLoggable(android.util.Log.DEBUG);
-    private static final Connection NULL_CONNECTION = new Connection() {};
 
     private static final int MSG_ADD_CALL_SERVICE_ADAPTER = 1;
     private static final int MSG_CREATE_CONNECTION = 2;
@@ -76,6 +77,8 @@ public abstract class ConnectionService extends Service {
     private static final int MSG_SWAP_WITH_BACKGROUND_CALL = 14;
     private static final int MSG_ON_POST_DIAL_CONTINUE = 15;
     private static final int MSG_ON_PHONE_ACCOUNT_CLICKED = 16;
+
+    private static Connection sNullConnection;
 
     private final Map<String, Connection> mConnectionById = new HashMap<>();
     private final Map<Connection, String> mIdByConnection = new HashMap<>();
@@ -411,10 +414,11 @@ public abstract class ConnectionService extends Service {
         @Override
         public void onCallCapabilitiesChanged(Connection c, int callCapabilities) {
             String id = mIdByConnection.get(c);
+            Log.d(this, "call capabilities: parcelableconnection: %s",
+                    CallCapabilities.toString(callCapabilities));
             mAdapter.setCallCapabilities(id, callCapabilities);
         }
 
-        /** ${inheritDoc} */
         @Override
         public void onParentConnectionChanged(Connection c, Connection parent) {
             String id = mIdByConnection.get(c);
@@ -444,6 +448,20 @@ public abstract class ConnectionService extends Service {
         public void onStartActivityFromInCall(Connection c, PendingIntent intent) {
             String id = mIdByConnection.get(c);
             mAdapter.startActivityFromInCall(id, intent);
+        }
+
+        @Override
+        public void onConferenceableConnectionsChanged(
+                Connection connection, List<Connection> conferenceableConnections) {
+            String id = mIdByConnection.get(connection);
+            List<String> conferenceableCallIds = new ArrayList<>(conferenceableConnections.size());
+            for (Connection c : conferenceableConnections) {
+                if (mIdByConnection.containsKey(c)) {
+                    conferenceableCallIds.add(mIdByConnection.get(c));
+                }
+            }
+            Collections.sort(conferenceableCallIds);
+            mAdapter.setConferenceableConnections(id, conferenceableCallIds);
         }
     };
 
@@ -519,6 +537,14 @@ public abstract class ConnectionService extends Service {
 
     private void connectionCreated(ConnectionRequest request, Connection connection) {
         addConnection(request.getCallId(), connection);
+        Uri handle = connection.getHandle();
+        String number = handle == null ? "null" : handle.getSchemeSpecificPart();
+        Log.v(this, "connectionCreated, parcelableconnection: %s, %d, %s",
+                toLogSafePhoneNumber(number),
+                connection.getState(),
+                CallCapabilities.toString(connection.getCallCapabilities()));
+
+
         mAdapter.handleCreateConnectionSuccessful(
                 request,
                 new ParcelableConnection(
@@ -583,7 +609,7 @@ public abstract class ConnectionService extends Service {
         Log.d(this, "conference %s, %s", conferenceCallId, callId);
 
         Connection connection = findConnectionForAction(callId, "conference");
-        if (connection == NULL_CONNECTION) {
+        if (connection == getNullConnection()) {
             Log.w(this, "Connection missing in conference request %s.", callId);
             return;
         }
@@ -616,7 +642,7 @@ public abstract class ConnectionService extends Service {
         Log.d(this, "splitFromConference(%s)", callId);
 
         Connection connection = findConnectionForAction(callId, "splitFromConference");
-        if (connection == NULL_CONNECTION) {
+        if (connection == getNullConnection()) {
             Log.w(this, "Connection missing in conference request %s.", callId);
             return;
         }
@@ -844,7 +870,14 @@ public abstract class ConnectionService extends Service {
             return mConnectionById.get(callId);
         }
         Log.w(this, "%s - Cannot find Connection %s", action, callId);
-        return NULL_CONNECTION;
+        return getNullConnection();
+    }
+
+    private final static synchronized Connection getNullConnection() {
+        if (sNullConnection == null) {
+            sNullConnection = new Connection() {};
+        }
+        return sNullConnection;
     }
 
     public static abstract class VideoCallProvider {

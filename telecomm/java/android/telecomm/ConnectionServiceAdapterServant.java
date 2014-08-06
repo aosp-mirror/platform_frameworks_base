@@ -16,16 +16,18 @@
 
 package android.telecomm;
 
-import com.android.internal.os.SomeArgs;
-import com.android.internal.telecomm.IConnectionServiceAdapter;
-import com.android.internal.telecomm.IVideoCallProvider;
-import com.android.internal.telecomm.RemoteServiceCallback;
-
 import android.app.PendingIntent;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
+
+import com.android.internal.os.SomeArgs;
+import com.android.internal.telecomm.IConnectionServiceAdapter;
+import com.android.internal.telecomm.IVideoCallProvider;
+import com.android.internal.telecomm.RemoteServiceCallback;
+
+import java.util.List;
 
 /**
  * A component that provides an RPC servant implementation of {@link IConnectionServiceAdapter},
@@ -58,6 +60,7 @@ final class ConnectionServiceAdapterServant {
     private static final int MSG_SET_HANDLE = 20;
     private static final int MSG_SET_CALLER_DISPLAY_NAME = 21;
     private static final int MSG_START_ACTIVITY_FROM_IN_CALL = 22;
+    private static final int MSG_SET_CONFERENCEABLE_CONNECTIONS = 23;
 
     private final IConnectionServiceAdapter mDelegate;
 
@@ -204,6 +207,16 @@ final class ConnectionServiceAdapterServant {
                     try {
                         mDelegate.startActivityFromInCall(
                                 (String) args.arg1, (PendingIntent) args.arg2);
+                    } finally {
+                        args.recycle();
+                    }
+                    break;
+                }
+                case MSG_SET_CONFERENCEABLE_CONNECTIONS: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    try {
+                        mDelegate.setConferenceableConnections(
+                                (String) args.arg1, (List<String>) args.arg2);
                     } finally {
                         args.recycle();
                     }
@@ -364,6 +377,15 @@ final class ConnectionServiceAdapterServant {
             args.arg1 = connectionId;
             args.arg2 = intent;
             mHandler.obtainMessage(MSG_START_ACTIVITY_FROM_IN_CALL, args).sendToTarget();
+        }
+
+        @Override
+        public final void setConferenceableConnections(
+                String connectionId, List<String> conferenceableConnectionIds) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = connectionId;
+            args.arg2 = conferenceableConnectionIds;
+            mHandler.obtainMessage(MSG_SET_CONFERENCEABLE_CONNECTIONS, args).sendToTarget();
         }
     };
 

@@ -77,5 +77,7 @@ oneway interface IConnectionServiceAdapter {
 
     void setCallerDisplayName(String callId, String callerDisplayName, int presentation);
 
+    void setConferenceableConnections(String callId, in List<String> conferenceableCallIds);
+
     void startActivityFromInCall(String callId, in PendingIntent intent);
 }
