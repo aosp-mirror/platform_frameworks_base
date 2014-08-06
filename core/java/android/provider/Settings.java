@@ -4722,6 +4722,13 @@ public final class Settings {
         public static final String UNSAFE_VOLUME_MUSIC_ACTIVE_MS = "unsafe_volume_music_active_ms";
 
         /**
+         * This preference enables notification display on the lockscreen.
+         * @hide
+         */
+        public static final String LOCK_SCREEN_SHOW_NOTIFICATIONS =
+                "lock_screen_show_notifications";
+
+        /**
          * This are the settings to be backed up.
          *
          * NOTE: Settings are backed up and restored in the order they appear
@@ -6364,15 +6371,6 @@ public final class Settings {
          * @hide
          */
         public static final String POLICY_CONTROL = "policy_control";
-
-
-        /**
-         * This preference enables notification display even over a securely
-         * locked screen.
-         * @hide
-         */
-        public static final String LOCK_SCREEN_SHOW_NOTIFICATIONS =
-                "lock_screen_show_notifications";
 
         /**
          * Defines global zen mode.  ZEN_MODE_OFF, ZEN_MODE_IMPORTANT_INTERRUPTIONS,
