@@ -235,6 +235,21 @@ public final class TvInputManager {
         }
 
         /**
+         * This is called when {@link TvInputService.Session#layoutSurface} is called to
+         * change the layout of surface.
+         *
+         * @param session A {@link TvInputManager.Session} associated with this callback
+         * @param l Left position.
+         * @param t Top position.
+         * @param r Right position.
+         * @param b Bottom position.
+         * @hide
+         */
+        @SystemApi
+        public void onLayoutSurface(Session session, int left, int top, int right, int bottom) {
+        }
+
+        /**
          * This is called when a custom event has been sent from this session.
          *
          * @param session A {@link TvInputManager.Session} associated with this callback
@@ -360,6 +375,16 @@ public final class TvInputManager {
                 @Override
                 public void run() {
                     mSessionCallback.onContentBlocked(mSession, rating);
+                }
+            });
+        }
+
+        public void postLayoutSurface(final int left, final int top, final int right,
+                final int bottom) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onLayoutSurface(mSession, left, top, right, bottom);
                 }
             });
         }
@@ -570,6 +595,18 @@ public final class TvInputManager {
                         return;
                     }
                     record.postContentBlocked(TvContentRating.unflattenFromString(rating));
+                }
+            }
+
+            @Override
+            public void onLayoutSurface(int left, int top, int right, int bottom, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postLayoutSurface(left, top, right, bottom);
                 }
             }
 
