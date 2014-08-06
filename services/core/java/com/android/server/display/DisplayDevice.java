@@ -113,6 +113,12 @@ abstract class DisplayDevice {
     }
 
     /**
+     * Sets the refresh rate, if supported.
+     */
+    public void requestRefreshRateLocked(float refreshRate) {
+    }
+
+    /**
      * Sets the display layer stack while in a transaction.
      */
     public final void setLayerStackInTransactionLocked(int layerStack) {

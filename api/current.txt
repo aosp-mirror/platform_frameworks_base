@@ -33018,6 +33018,7 @@ package android.view {
     method public int getRotation();
     method public void getSize(android.graphics.Point);
     method public int getState();
+    method public float[] getSupportedRefreshRates();
     method public deprecated int getWidth();
     method public boolean isValid();
     field public static final int DEFAULT_DISPLAY = 0; // 0x0
@@ -35661,6 +35662,7 @@ package android.view {
     field public float horizontalWeight;
     field public deprecated int memoryType;
     field public java.lang.String packageName;
+    field public float preferredRefreshRate;
     field public int rotationAnimation;
     field public float screenBrightness;
     field public int screenOrientation;
