@@ -72,6 +72,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private LockPatternUtils mLockPatternUtils;
     private FlashlightController mFlashlightController;
     private PreviewInflater mPreviewInflater;
+    private boolean mFaceUnlockRunning;
 
     public KeyguardBottomAreaView(Context context) {
         super(context);
@@ -105,7 +106,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         updatePhoneVisibility();
         mUnlockMethodCache = UnlockMethodCache.getInstance(getContext());
         mUnlockMethodCache.addListener(this);
-        updateTrust();
+        updateLockIcon();
         setClipChildren(false);
         setClipToPadding(false);
         mPreviewInflater = new PreviewInflater(mContext, new LockPatternUtils(mContext));
@@ -226,21 +227,23 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     protected void onVisibilityChanged(View changedView, int visibility) {
         super.onVisibilityChanged(changedView, visibility);
         if (changedView == this && visibility == VISIBLE) {
-            updateTrust();
+            updateLockIcon();
             updateCameraVisibility();
         }
     }
 
-    private void updateTrust() {
+    private void updateLockIcon() {
         if (getVisibility() != VISIBLE) {
             return;
         }
-        int iconRes = mUnlockMethodCache.isMethodInsecure()
-                ? R.drawable.ic_lock_open_24dp
+        // TODO: Real icon for facelock.
+        int iconRes = mFaceUnlockRunning ? R.drawable.ic_account_circle
+                : mUnlockMethodCache.isMethodInsecure() ? R.drawable.ic_lock_open_24dp
                 : R.drawable.ic_lock_24dp;
         mLockIcon.setImageResource(iconRes);
         boolean trustManaged = mUnlockMethodCache.isTrustManaged();
-        mLockIcon.setBackgroundResource(trustManaged ? R.drawable.trust_circle : 0);
+        mLockIcon.setBackgroundResource(trustManaged && !mFaceUnlockRunning
+                ? R.drawable.trust_circle : 0);
     }
 
     public KeyguardAffordanceView getPhoneView() {
@@ -274,7 +277,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
 
     @Override
     public void onMethodSecureChanged(boolean methodSecure) {
-        updateTrust();
+        updateLockIcon();
         updateCameraVisibility();
     }
 
@@ -307,6 +310,12 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         @Override
         public void onUserSwitchComplete(int userId) {
             updateCameraVisibility();
+        }
+
+        @Override
+        public void onFaceUnlockStateChanged(boolean running) {
+            mFaceUnlockRunning = running;
+            updateLockIcon();
         }
     };
 }
