@@ -196,6 +196,30 @@ public final class MediaController {
     }
 
     /**
+     * Get the queue title for this session.
+     */
+    public @Nullable CharSequence getQueueTitle() {
+        try {
+            return mSessionBinder.getQueueTitle();
+        } catch (RemoteException e) {
+            Log.wtf(TAG, "Error calling getQueueTitle", e);
+        }
+        return null;
+    }
+
+    /**
+     * Get the extras for this session.
+     */
+    public @Nullable Bundle getExtras() {
+        try {
+            return mSessionBinder.getExtras();
+        } catch (RemoteException e) {
+            Log.wtf(TAG, "Error calling getExtras", e);
+        }
+        return null;
+    }
+
+    /**
      * Get the rating type supported by the session. One of:
      * <ul>
      * <li>{@link Rating#RATING_NONE}</li>

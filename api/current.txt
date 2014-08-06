@@ -16260,6 +16260,7 @@ package android.media.browse {
     method public void disconnect();
     method public android.os.Bundle getExtras();
     method public android.net.Uri getRoot();
+    method public android.content.ComponentName getServiceComponent();
     method public android.media.session.MediaSession.Token getSessionToken();
     method public boolean isConnected();
     method public void loadIcon(android.net.Uri, int, int, android.media.browse.MediaBrowser.IconCallback);
@@ -16660,12 +16661,14 @@ package android.media.session {
     method public void adjustVolume(int, int);
     method public android.media.routing.MediaRouter.Delegate createMediaRouterDelegate();
     method public boolean dispatchMediaButtonEvent(android.view.KeyEvent);
+    method public android.os.Bundle getExtras();
     method public long getFlags();
     method public android.app.PendingIntent getLaunchActivity();
     method public android.media.MediaMetadata getMetadata();
     method public java.lang.String getPackageName();
     method public android.media.session.PlaybackState getPlaybackState();
     method public java.util.List<android.media.session.MediaSession.Track> getQueue();
+    method public java.lang.CharSequence getQueueTitle();
     method public int getRatingType();
     method public android.media.session.MediaSession.Token getSessionToken();
     method public android.media.session.MediaController.TransportControls getTransportControls();
