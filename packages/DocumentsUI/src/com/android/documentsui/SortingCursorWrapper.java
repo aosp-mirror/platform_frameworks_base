@@ -27,6 +27,8 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.DocumentsContract.Document;
 
+import com.android.documentsui.model.DocumentInfo;
+
 /**
  * Cursor wrapper that presents a sorted view of the underlying cursor. Handles
  * common {@link Document} sorting modes, such as ordering directories first.
@@ -68,7 +70,7 @@ public class SortingCursorWrapper extends AbstractCursor {
                     final String displayName = getCursorString(
                             cursor, Document.COLUMN_DISPLAY_NAME);
                     if (Document.MIME_TYPE_DIR.equals(mimeType)) {
-                        mValueString[i] = '\001' + displayName;
+                        mValueString[i] = DocumentInfo.DIR_PREFIX + displayName;
                     } else {
                         mValueString[i] = displayName;
                     }
@@ -180,14 +182,7 @@ public class SortingCursorWrapper extends AbstractCursor {
 
                 final String lhs = pivotValue;
                 final String rhs = value[mid];
-                final int compare;
-                if (lhs == null) {
-                    compare = -1;
-                } else if (rhs == null) {
-                    compare = 1;
-                } else {
-                    compare = lhs.compareToIgnoreCase(rhs);
-                }
+                final int compare = DocumentInfo.compareToIgnoreCaseNullable(lhs, rhs);
 
                 if (compare < 0) {
                     right = mid;
