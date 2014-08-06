@@ -83,6 +83,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private static final int FAILED_BIOMETRIC_UNLOCK_ATTEMPTS_BEFORE_BACKUP = 3;
     private static final int LOW_BATTERY_THRESHOLD = 20;
 
+    private static final String ACTION_FACE_UNLOCK_STARTED
+            = "com.android.facelock.FACE_UNLOCK_STARTED";
+    private static final String ACTION_FACE_UNLOCK_STOPPED
+            = "com.android.facelock.FACE_UNLOCK_STOPPED";
+
     // Callback messages
     private static final int MSG_TIME_UPDATE = 301;
     private static final int MSG_BATTERY_UPDATE = 302;
@@ -107,6 +112,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private static final int MSG_KEYGUARD_BOUNCER_CHANGED = 322;
     private static final int MSG_FINGERPRINT_PROCESSED = 323;
     private static final int MSG_FINGERPRINT_ACQUIRED = 324;
+    private static final int MSG_FACE_UNLOCK_STATE_CHANGED = 325;
 
     private static KeyguardUpdateMonitor sInstance;
 
@@ -211,6 +217,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 case MSG_FINGERPRINT_PROCESSED:
                     handleFingerprintProcessed(msg.arg1);
                     break;
+                case MSG_FACE_UNLOCK_STATE_CHANGED:
+                    handleFaceUnlockStateChanged(msg.arg1 != 0);
+                    break;
             }
         }
     };
@@ -281,6 +290,15 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
                 cb.onFingerprintAcquired(info);
+            }
+        }
+    }
+
+    private void handleFaceUnlockStateChanged(boolean running) {
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+            if (cb != null) {
+                cb.onFaceUnlockStateChanged(running);
             }
         }
     }
@@ -376,6 +394,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                        intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0), 0));
             } else if (Intent.ACTION_BOOT_COMPLETED.equals(action)) {
                 dispatchBootCompleted();
+            } else if (ACTION_FACE_UNLOCK_STARTED.equals(action)) {
+                mHandler.sendMessage(mHandler.obtainMessage(MSG_FACE_UNLOCK_STATE_CHANGED, 1, 0));
+            } else if (ACTION_FACE_UNLOCK_STOPPED.equals(action)) {
+                mHandler.sendMessage(mHandler.obtainMessage(MSG_FACE_UNLOCK_STATE_CHANGED, 0, 0));
             }
         }
     };
@@ -588,6 +610,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         filter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
         filter.addAction(Intent.ACTION_USER_REMOVED);
         filter.addAction(AlarmManager.ACTION_NEXT_ALARM_CLOCK_CHANGED);
+        filter.addAction(ACTION_FACE_UNLOCK_STARTED);
+        filter.addAction(ACTION_FACE_UNLOCK_STOPPED);
         context.registerReceiver(mBroadcastReceiver, filter);
 
         final IntentFilter bootCompleteFilter = new IntentFilter();
