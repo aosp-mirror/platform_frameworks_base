@@ -118,7 +118,10 @@ public class NinePatch {
     @Override
     protected void finalize() throws Throwable {
         try {
-            nativeFinalize(mNativeChunk);
+            if (mNativeChunk != 0) {
+                // only attempt to destroy correctly initilized chunks
+                nativeFinalize(mNativeChunk);
+            }
         } finally {
             super.finalize();
         }
