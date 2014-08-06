@@ -589,10 +589,10 @@ public class Scroller  {
         @Override
         public float getInterpolation(float input) {
             final float interpolated = VISCOUS_FLUID_NORMALIZE * viscousFluid(input);
-            if (input > 0) {
-                return input + VISCOUS_FLUID_OFFSET;
+            if (interpolated > 0) {
+                return interpolated + VISCOUS_FLUID_OFFSET;
             }
-            return input;
+            return interpolated;
         }
     }
 }
