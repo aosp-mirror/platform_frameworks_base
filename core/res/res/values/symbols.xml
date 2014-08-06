@@ -382,6 +382,8 @@
   <java-symbol type="string" name="CfMmi" />
   <java-symbol type="string" name="ClipMmi" />
   <java-symbol type="string" name="ClirMmi" />
+  <java-symbol type="string" name="ColpMmi" />
+  <java-symbol type="string" name="ColrMmi" />
   <java-symbol type="string" name="CwMmi" />
   <java-symbol type="string" name="Midnight" />
   <java-symbol type="string" name="Noon" />

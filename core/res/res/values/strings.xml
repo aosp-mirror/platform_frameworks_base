@@ -154,6 +154,10 @@
     <string name="ClipMmi">Incoming Caller ID</string>
     <!-- Displayed as the title for a success/failure report enabling/disabling caller ID. -->
     <string name="ClirMmi">Outgoing Caller ID</string>
+    <!-- Displayed as the title for a success/failure report enabling/disabling connected line ID. -->
+    <string name="ColpMmi">Connected Line ID</string>
+    <!-- Displayed as the title for a success/failure report enabling/disabling connected line ID restriction. -->
+    <string name="ColrMmi">Connected Line ID Restriction</string>
     <!-- Displayed as the title for a success/failure report enabling/disabling call forwarding. -->
     <string name="CfMmi">Call forwarding</string>
     <!-- Displayed as the title for a success/failure report enabling/disabling call waiting. -->
