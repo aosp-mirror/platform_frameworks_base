@@ -193,8 +193,7 @@ public class PlayerController {
             if (metadata == null) {
                 return;
             }
-            Log.d(TAG, "Received metadata change, title is "
-                    + metadata.getString(MediaMetadata.METADATA_KEY_TITLE));
+            Log.d(TAG, "Received metadata change, " + metadata.getDescription());
         }
     }
 

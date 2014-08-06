@@ -191,7 +191,7 @@ public class Media extends BaseCommand {
         @Override
         public void onMetadataChanged(MediaMetadata metadata) {
             String mmString = metadata == null ? null : "title=" + metadata
-                    .getString(MediaMetadata.METADATA_KEY_TITLE);
+                    .getDescription();
             System.out.println("onMetadataChanged " + mmString);
         }
 
