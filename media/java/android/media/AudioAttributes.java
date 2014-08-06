@@ -152,6 +152,12 @@ public final class AudioAttributes implements Parcelable {
      */
     public final static int FLAG_SCO = 0x1 << 2;
 
+    /**
+     * @hide
+     * CANDIDATE FOR PUBLIC API
+     * Flag requesting the use of an output stream supporting hardware A/V synchronization.
+     */
+    public final static int FLAG_HW_AV_SYNC = 0x1 << 4;
 
     private int mUsage = USAGE_UNKNOWN;
     private int mContentType = CONTENT_TYPE_UNKNOWN;
@@ -196,7 +202,7 @@ public final class AudioAttributes implements Parcelable {
      */
     public int getFlags() {
         // only return the flags that are public
-        return (mFlags & (FLAG_AUDIBILITY_ENFORCED));
+        return (mFlags & (FLAG_AUDIBILITY_ENFORCED | FLAG_HW_AV_SYNC));
     }
 
     /**
@@ -340,7 +346,7 @@ public final class AudioAttributes implements Parcelable {
          */
         public Builder setFlags(int flags) {
             flags &= (AudioAttributes.FLAG_AUDIBILITY_ENFORCED | AudioAttributes.FLAG_SCO
-                    | AudioAttributes.FLAG_SECURE);
+                    | AudioAttributes.FLAG_SECURE | AudioAttributes.FLAG_HW_AV_SYNC);
             mFlags |= flags;
             return this;
         }
