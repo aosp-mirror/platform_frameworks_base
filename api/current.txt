@@ -28596,9 +28596,9 @@ package android.telecomm {
 
   public static class Call.Details {
     method public android.telecomm.PhoneAccountHandle getAccountHandle();
+    method public int getCallCapabilities();
     method public java.lang.String getCallerDisplayName();
     method public int getCallerDisplayNamePresentation();
-    method public int getCapabilities();
     method public long getConnectTimeMillis();
     method public int getDisconnectCauseCode();
     method public java.lang.String getDisconnectCauseMsg();
@@ -28616,7 +28616,6 @@ package android.telecomm {
     method public void onChildrenChanged(android.telecomm.Call, java.util.List<android.telecomm.Call>);
     method public void onDetailsChanged(android.telecomm.Call, android.telecomm.Call.Details);
     method public void onParentChanged(android.telecomm.Call, android.telecomm.Call);
-    method public void onPostDial(android.telecomm.Call, java.lang.String);
     method public void onPostDialWait(android.telecomm.Call, java.lang.String);
     method public void onStartActivity(android.telecomm.Call, android.app.PendingIntent);
     method public void onStateChanged(android.telecomm.Call, int);
@@ -28935,22 +28934,25 @@ package android.telecomm {
     method public int getCallCapabilities();
     method public java.lang.String getCallerDisplayName();
     method public int getCallerDisplayNamePresentation();
-    method public int getDisconnectCause();
-    method public java.lang.String getDisconnectMessage();
+    method public java.util.List<android.telecomm.RemoteConnection> getChildren();
+    method public int getDisconnectCauseCode();
+    method public java.lang.String getDisconnectCauseMessage();
     method public int getFailureCode();
     method public java.lang.String getFailureMessage();
     method public android.net.Uri getHandle();
     method public int getHandlePresentation();
+    method public android.telecomm.RemoteConnection getParent();
     method public int getState();
     method public android.telecomm.StatusHints getStatusHints();
     method public int getVideoState();
     method public void hold();
-    method public void playDtmf(char);
+    method public boolean isRequestingRingback();
+    method public void playDtmfTone(char);
     method public void postDialContinue(boolean);
     method public void reject();
     method public void removeListener(android.telecomm.RemoteConnection.Listener);
     method public void setAudioState(android.telecomm.CallAudioState);
-    method public void stopDtmf();
+    method public void stopDtmfTone();
     method public void swapWithBackgroundCall();
     method public void unhold();
   }
@@ -28960,9 +28962,11 @@ package android.telecomm {
     method public void onAudioModeIsVoipChanged(android.telecomm.RemoteConnection, boolean);
     method public void onCallCapabilitiesChanged(android.telecomm.RemoteConnection, int);
     method public void onCallerDisplayNameChanged(android.telecomm.RemoteConnection, java.lang.String, int);
+    method public void onChildrenChanged(android.telecomm.RemoteConnection, java.util.List<android.telecomm.RemoteConnection>);
     method public void onDestroyed(android.telecomm.RemoteConnection);
     method public void onDisconnected(android.telecomm.RemoteConnection, int, java.lang.String);
     method public void onHandleChanged(android.telecomm.RemoteConnection, android.net.Uri, int);
+    method public void onParentChanged(android.telecomm.RemoteConnection, android.telecomm.RemoteConnection);
     method public void onPostDialWait(android.telecomm.RemoteConnection, java.lang.String);
     method public void onRequestingRingback(android.telecomm.RemoteConnection, boolean);
     method public void onStartActivityFromInCall(android.telecomm.RemoteConnection, android.app.PendingIntent);
@@ -43207,8 +43211,8 @@ package java.lang.reflect {
     method public java.lang.annotation.Annotation[] getDeclaredAnnotations();
     method public boolean isAccessible();
     method public boolean isAnnotationPresent(java.lang.Class<? extends java.lang.annotation.Annotation>);
-    method public static void setAccessible(java.lang.reflect.AccessibleObject[], boolean);
     method public void setAccessible(boolean);
+    method public static void setAccessible(java.lang.reflect.AccessibleObject[], boolean);
   }
 
   public abstract interface AnnotatedElement {
@@ -43240,6 +43244,11 @@ package java.lang.reflect {
     method public static void setInt(java.lang.Object, int, int) throws java.lang.ArrayIndexOutOfBoundsException, java.lang.IllegalArgumentException;
     method public static void setLong(java.lang.Object, int, long) throws java.lang.ArrayIndexOutOfBoundsException, java.lang.IllegalArgumentException;
     method public static void setShort(java.lang.Object, int, short) throws java.lang.ArrayIndexOutOfBoundsException, java.lang.IllegalArgumentException;
+  }
+
+  public final class ArtMethod {
+    method public int getAccessFlags();
+    method public static java.lang.String getMethodName(java.lang.reflect.ArtMethod);
   }
 
   public final class Constructor extends java.lang.reflect.AccessibleObject implements java.lang.reflect.GenericDeclaration java.lang.reflect.Member {

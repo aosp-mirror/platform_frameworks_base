@@ -24,25 +24,152 @@ import android.telephony.DisconnectCause;
 import com.android.internal.telecomm.IConnectionService;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
  * RemoteConnection object used by RemoteConnectionService.
  */
 public final class RemoteConnection {
+
     public static abstract class Listener {
+        /**
+         * Invoked when the state of this {@code RemoteConnection} has changed. See
+         * {@link #getState()}.
+         *
+         * @param connection The {@code RemoteConnection} invoking this method.
+         * @param state The new state of the {@code RemoteConnection}.
+         */
         public void onStateChanged(RemoteConnection connection, int state) {}
-        public void onDisconnected(RemoteConnection connection, int cause, String message) {}
+
+        /**
+         * Invoked when the parent of this {@code RemoteConnection} has changed. See
+         * {@link #getParent()}.
+         *
+         * @param connection The {@code RemoteConnection} invoking this method.
+         * @param parent The new parent of the {@code RemoteConnection}.
+         */
+        public void onParentChanged(RemoteConnection connection, RemoteConnection parent) {}
+
+        /**
+         * Invoked when the children of this {@code RemoteConnection} have changed. See
+         * {@link #getChildren()}.
+         *
+         * @param connection The {@code RemoteConnection} invoking this method.
+         * @param children The new children of the {@code RemoteConnection}.
+         */
+        public void onChildrenChanged(
+                RemoteConnection connection, List<RemoteConnection> children) {}
+
+        /**
+         * Invoked when this {@code RemoteConnection} is disconnected.
+         *
+         * @param connection The {@code RemoteConnection} invoking this method.
+         * @param disconnectCauseCode The failure code ({@see DisconnectCause}) associated with this
+         *         failed connection.
+         * @param disconnectCauseMessage The reason for the connection failure. This will not be
+         *         displayed to the user.
+         */
+        public void onDisconnected(
+                RemoteConnection connection,
+                int disconnectCauseCode,
+                String disconnectCauseMessage) {}
+
+        /**
+         * Invoked when this {@code RemoteConnection} is requesting ringback. See
+         * {@link #isRequestingRingback()}.
+         *
+         * @param connection The {@code RemoteConnection} invoking this method.
+         * @param ringback Whether the {@code RemoteConnection} is requesting ringback.
+         */
         public void onRequestingRingback(RemoteConnection connection, boolean ringback) {}
+
+        /**
+         * Indicates that the call capabilities of this {@code RemoteConnection} have changed.
+         * See {@link #getCallCapabilities()}.
+         *
+         * @param connection The {@code RemoteConnection} invoking this method.
+         * @param callCapabilities The new call capabilities of the {@code RemoteConnection}.
+         */
         public void onCallCapabilitiesChanged(RemoteConnection connection, int callCapabilities) {}
-        public void onPostDialWait(RemoteConnection connection, String remainingDigits) {}
+
+        /**
+         * Invoked when the post-dial sequence in the outgoing {@code Connection} has reached a
+         * pause character. This causes the post-dial signals to stop pending user confirmation. An
+         * implementation should present this choice to the user and invoke
+         * {@link #postDialContinue(boolean)} when the user makes the choice.
+         *
+         * @param connection The {@code RemoteConnection} invoking this method.
+         * @param remainingPostDialSequence The post-dial characters that remain to be sent.
+         */
+        public void onPostDialWait(RemoteConnection connection, String remainingPostDialSequence) {}
+
+        /**
+         * Indicates that the VOIP audio status of this {@code RemoteConnection} has changed.
+         * See {@link #getAudioModeIsVoip()}.
+         *
+         * @param connection The {@code RemoteConnection} invoking this method.
+         * @param isVoip Whether the new audio state of the {@code RemoteConnection} is VOIP.
+         */
         public void onAudioModeIsVoipChanged(RemoteConnection connection, boolean isVoip) {}
+
+        /**
+         * Indicates that the status hints of this {@code RemoteConnection} have changed. See
+         * {@link #getStatusHints()} ()}.
+         *
+         * @param connection The {@code RemoteConnection} invoking this method.
+         * @param statusHints The new status hints of the {@code RemoteConnection}.
+         */
         public void onStatusHintsChanged(RemoteConnection connection, StatusHints statusHints) {}
+
+        /**
+         * Indicates that the handle (e.g., phone number) of this {@code RemoteConnection} has
+         * changed. See {@link #getHandle()} and {@link #getHandlePresentation()}.
+         *
+         * @param connection The {@code RemoteConnection} invoking this method.
+         * @param handle The new handle of the {@code RemoteConnection}.
+         * @param presentation The {@link CallPropertyPresentation} which controls how the
+         *         handle is shown.
+         */
         public void onHandleChanged(RemoteConnection connection, Uri handle, int presentation) {}
+
+        /**
+         * Indicates that the caller display name of this {@code RemoteConnection} has changed.
+         * See {@link #getCallerDisplayName()} and {@link #getCallerDisplayNamePresentation()}.
+         *
+         * @param connection The {@code RemoteConnection} invoking this method.
+         * @param callerDisplayName The new caller display name of the {@code RemoteConnection}.
+         * @param presentation The {@link CallPropertyPresentation} which controls how the
+         *         caller display name is shown.
+         */
         public void onCallerDisplayNameChanged(
                 RemoteConnection connection, String callerDisplayName, int presentation) {}
+
+        /**
+         * Indicates that the video state of this {@code RemoteConnection} has changed.
+         * See {@link #getVideoState()}.
+         *
+         * @param connection The {@code RemoteConnection} invoking this method.
+         * @param videoState The new video state of the {@code RemoteConnection}.
+         */
         public void onVideoStateChanged(RemoteConnection connection, int videoState) {}
+
+        /**
+         * Indicates that this {@code RemoteConnection} is requesting that the in-call UI
+         * launch the specified activity.
+         *
+         * @param connection The {@code RemoteConnection} invoking this method.
+         * @param intent A {@link PendingIntent} that the {@code RemoteConnection} wishes to
+         *         have launched on its behalf.
+         */
         public void onStartActivityFromInCall(RemoteConnection connection, PendingIntent intent) {}
+
+        /**
+         * Indicates that this {@code RemoteConnection} has been destroyed. No further requests
+         * should be made to the {@code RemoteConnection}, and references to it should be cleared.
+         *
+         * @param connection The {@code RemoteConnection} invoking this method.
+         */
         public void onDestroyed(RemoteConnection connection) {}
     }
 
@@ -51,8 +178,8 @@ public final class RemoteConnection {
     private final Set<Listener> mListeners = new HashSet<>();
 
     private int mState = Connection.State.NEW;
-    private int mDisconnectCause = DisconnectCause.NOT_VALID;
-    private String mDisconnectMessage;
+    private int mDisconnectCauseCode = DisconnectCause.NOT_VALID;
+    private String mDisconnectCauseMessage;
     private boolean mRequestingRingback;
     private boolean mConnected;
     private int mCallCapabilities;
@@ -69,10 +196,9 @@ public final class RemoteConnection {
     /**
      * @hide
      */
-    RemoteConnection(IConnectionService connectionService, ConnectionRequest request,
-            boolean isIncoming) {
+    RemoteConnection(IConnectionService connectionService, ConnectionRequest request) {
         mConnectionService = connectionService;
-        mConnectionId = request.getCallId();
+        mConnectionId = request == null ? "NULL" : request.getCallId();
 
         mConnected = true;
         mState = Connection.State.INITIALIZING;
@@ -87,73 +213,161 @@ public final class RemoteConnection {
      * @param failureMessage
      */
     private RemoteConnection(int failureCode, String failureMessage) {
-        this(null, null, true);
+        this(null, null);
         mConnected = false;
         mState = Connection.State.FAILED;
         mFailureCode = failureCode;
         mFailureMessage = failureMessage;
     }
 
+    /**
+     * Adds a listener to this {@code RemoteConnection}.
+     *
+     * @param listener A {@code Listener}.
+     */
     public void addListener(Listener listener) {
         mListeners.add(listener);
     }
 
+    /**
+     * Removes a listener from this {@code RemoteConnection}.
+     *
+     * @param listener A {@code Listener}.
+     */
     public void removeListener(Listener listener) {
         mListeners.remove(listener);
     }
 
+    /**
+     * Obtains the parent of this {@code RemoteConnection} in a conference, if any.
+     *
+     * @return The parent {@code RemoteConnection}, or {@code null} if this {@code RemoteConnection}
+     * is not a child of any conference {@code RemoteConnection}s.
+     */
+    public RemoteConnection getParent() { return null; }
+
+    /**
+     * Obtains the children of this conference {@code RemoteConnection}, if any.
+     *
+     * @return The children of this {@code RemoteConnection} if this {@code RemoteConnection} is
+     * a conference, or an empty {@code List} otherwise.
+     */
+    public List<RemoteConnection> getChildren() { return null; }
+
+    /**
+     * Obtains the state of this {@code RemoteConnection}.
+     *
+     * @return A state value, chosen from the {@code STATE_*} constants.
+     */
     public int getState() {
         return mState;
     }
 
-    public int getDisconnectCause() {
-        return mDisconnectCause;
+    /**
+     * @return For a {@link Connection.State#DISCONNECTED} {@code RemoteConnection}, the
+     * disconnect cause expressed as a code chosen from among those declared in
+     * {@link DisconnectCause}.
+     */
+    public int getDisconnectCauseCode() {
+        return mDisconnectCauseCode;
     }
 
-    public String getDisconnectMessage() {
-        return mDisconnectMessage;
+    /**
+     * @return For a {@link Connection.State#DISCONNECTED} {@code RemoteConnection}, an optional
+     * reason for disconnection expressed as a free text message.
+     */
+    public String getDisconnectCauseMessage() {
+        return mDisconnectCauseMessage;
     }
 
+    /**
+     * @return A bitmask of the capabilities of the {@code RemoteConnection}, as defined in
+     *         {@link CallCapabilities}.
+     */
     public int getCallCapabilities() {
         return mCallCapabilities;
     }
 
+    /**
+     * @return {@code true} if the {@code RemoteConnection}'s current audio mode is VOIP.
+     */
     public boolean getAudioModeIsVoip() {
         return mAudioModeIsVoip;
     }
 
+    /**
+     * @return The current {@link android.telecomm.StatusHints} of this {@code RemoteConnection},
+     * or {@code null} if none have been set.
+     */
     public StatusHints getStatusHints() {
         return mStatusHints;
     }
 
+    /**
+     * @return The handle (e.g., phone number) to which the {@code RemoteConnection} is currently
+     * connected.
+     */
     public Uri getHandle() {
         return mHandle;
     }
 
+    /**
+     * @return The presentation requirements for the handle. See
+     * {@link android.telecomm.CallPropertyPresentation} for valid values.
+     */
     public int getHandlePresentation() {
         return mHandlePresentation;
     }
 
+    /**
+     * @return The display name for the caller.
+     */
     public String getCallerDisplayName() {
         return mCallerDisplayName;
     }
 
+    /**
+     * @return The presentation requirements for the caller display name. See
+     * {@link android.telecomm.CallPropertyPresentation} for valid values.
+     */
     public int getCallerDisplayNamePresentation() {
         return mCallerDisplayNamePresentation;
     }
 
+    /**
+     * @return The video state of the {@code RemoteConnection}. See
+     * {@link VideoCallProfile.VideoState}.
+     */
     public int getVideoState() {
         return mVideoState;
     }
 
+    /**
+     * @return The failure code ({@see DisconnectCause}) associated with this failed
+     * {@code RemoteConnection}.
+     */
     public int getFailureCode() {
         return mFailureCode;
     }
 
+    /**
+     * @return The reason for the connection failure. This will not be displayed to the user.
+     */
     public String getFailureMessage() {
         return mFailureMessage;
     }
 
+    /**
+     * @return Whether the {@code RemoteConnection} is requesting that the framework play a
+     * ringback tone on its behalf.
+     */
+    public boolean isRequestingRingback() {
+        return false;
+    }
+
+    /**
+     * Instructs this {@code RemoteConnection} to abort.
+     */
     public void abort() {
         try {
             if (mConnected) {
@@ -163,6 +377,10 @@ public final class RemoteConnection {
         }
     }
 
+    /**
+     * Instructs this {@link Connection.State#RINGING} {@code RemoteConnection} to answer.
+     * @param videoState The video state in which to answer the call.
+     */
     public void answer(int videoState) {
         try {
             if (mConnected) {
@@ -172,6 +390,9 @@ public final class RemoteConnection {
         }
     }
 
+    /**
+     * Instructs this {@link Connection.State#RINGING} {@code RemoteConnection} to reject.
+     */
     public void reject() {
         try {
             if (mConnected) {
@@ -181,6 +402,9 @@ public final class RemoteConnection {
         }
     }
 
+    /**
+     * Instructs this {@code RemoteConnection} to go on hold.
+     */
     public void hold() {
         try {
             if (mConnected) {
@@ -190,6 +414,9 @@ public final class RemoteConnection {
         }
     }
 
+    /**
+     * Instructs this {@link Connection.State#HOLDING} call to release from hold.
+     */
     public void unhold() {
         try {
             if (mConnected) {
@@ -199,6 +426,9 @@ public final class RemoteConnection {
         }
     }
 
+    /**
+     * Instructs this {@code RemoteConnection} to disconnect.
+     */
     public void disconnect() {
         try {
             if (mConnected) {
@@ -208,7 +438,16 @@ public final class RemoteConnection {
         }
     }
 
-    public void playDtmf(char digit) {
+    /**
+     * Instructs this {@code RemoteConnection} to play a dual-tone multi-frequency signaling
+     * (DTMF) tone.
+     *
+     * Any other currently playing DTMF tone in the specified call is immediately stopped.
+     *
+     * @param digit A character representing the DTMF digit for which to play the tone. This
+     *         value must be one of {@code '0'} through {@code '9'}, {@code '*'} or {@code '#'}.
+     */
+    public void playDtmfTone(char digit) {
         try {
             if (mConnected) {
                 mConnectionService.playDtmfTone(mConnectionId, digit);
@@ -217,7 +456,14 @@ public final class RemoteConnection {
         }
     }
 
-    public void stopDtmf() {
+    /**
+     * Instructs this {@code RemoteConnection} to stop any dual-tone multi-frequency signaling
+     * (DTMF) tone currently playing.
+     *
+     * DTMF tones are played by calling {@link #playDtmfTone(char)}. If no DTMF tone is
+     * currently playing, this method will do nothing.
+     */
+    public void stopDtmfTone() {
         try {
             if (mConnected) {
                 mConnectionService.stopDtmfTone(mConnectionId);
@@ -226,6 +472,27 @@ public final class RemoteConnection {
         }
     }
 
+    /**
+     * Instructs this {@code RemoteConnection} to continue playing a post-dial DTMF string.
+     *
+     * A post-dial DTMF string is a string of digits following the first instance of either
+     * {@link TelecommManager#DTMF_CHARACTER_WAIT} or {@link TelecommManager#DTMF_CHARACTER_PAUSE}.
+     * These digits are immediately sent as DTMF tones to the recipient as soon as the
+     * connection is made.
+     *
+     * If the DTMF string contains a {@link TelecommManager#DTMF_CHARACTER_PAUSE} symbol, this
+     * {@code RemoteConnection} will temporarily pause playing the tones for a pre-defined period
+     * of time.
+     *
+     * If the DTMF string contains a {@link TelecommManager#DTMF_CHARACTER_WAIT} symbol, this
+     * {@code RemoteConnection} will pause playing the tones and notify listeners via
+     * {@link Listener#onPostDialWait(RemoteConnection, String)}. At this point, the in-call app
+     * should display to the user an indication of this state and an affordance to continue
+     * the postdial sequence. When the user decides to continue the postdial sequence, the in-call
+     * app should invoke the {@link #postDialContinue(boolean)} method.
+     *
+     * @param proceed Whether or not to continue with the post-dial sequence.
+     */
     public void postDialContinue(boolean proceed) {
         try {
             if (mConnected) {
@@ -235,6 +502,10 @@ public final class RemoteConnection {
         }
     }
 
+    /**
+     * Instructs this {@code RemoteConnection} to swap itself with an existing background call,
+     * if one such call exists.
+     */
     public void swapWithBackgroundCall() {
         try {
             if (mConnected) {
@@ -244,6 +515,11 @@ public final class RemoteConnection {
         }
     }
 
+    /**
+     * Set the audio state of this {@code RemoteConnection}.
+     *
+     * @param state The audio state of this {@code RemoteConnection}.
+     */
     public void setAudioState(CallAudioState state) {
         try {
             if (mConnected) {
@@ -271,8 +547,8 @@ public final class RemoteConnection {
     void setDisconnected(int cause, String message) {
         if (mState != Connection.State.DISCONNECTED) {
             mState = Connection.State.DISCONNECTED;
-            mDisconnectCause = cause;
-            mDisconnectMessage = message;
+            mDisconnectCauseCode = cause;
+            mDisconnectCauseMessage = message;
 
             for (Listener l : mListeners) {
                 l.onDisconnected(this, cause, message);
@@ -382,13 +658,6 @@ public final class RemoteConnection {
         }
     }
 
-    /** @hide */
-    void setConnectionService(IConnectionService connectionService) {
-        mConnectionService = connectionService;
-        mConnectionService = null;
-        setState(Connection.State.NEW);
-    }
-
     /**
      * Create a RemoteConnection which is in the {@link Connection.State#FAILED} state. Attempting
      * to use it for anything will almost certainly result in bad things happening. Do not do this.
@@ -396,7 +665,6 @@ public final class RemoteConnection {
      * @return a failed {@link RemoteConnection}
      *
      * @hide
-     *
      */
     public static RemoteConnection failure(int failureCode, String failureMessage) {
         return new RemoteConnection(failureCode, failureMessage);
