@@ -65,16 +65,6 @@ final class HdmiCecController {
 
     private static final byte[] EMPTY_BODY = EmptyArray.BYTE;
 
-    // A message to pass cec send command to IO looper.
-    private static final int MSG_SEND_CEC_COMMAND = 1;
-    // A message to delegate logical allocation to IO looper.
-    private static final int MSG_ALLOCATE_LOGICAL_ADDRESS = 2;
-
-    // Message types to handle incoming message in main service looper.
-    private final static int MSG_RECEIVE_CEC_COMMAND = 1;
-    // A message to report allocated logical address to main control looper.
-    private final static int MSG_REPORT_LOGICAL_ADDRESS = 2;
-
     private static final int NUM_LOGICAL_ADDRESS = 16;
 
     // Predicate for whether the given logical address is remote device's one or not.
@@ -196,7 +186,15 @@ final class HdmiCecController {
             int curAddress = (startAddress + i) % NUM_LOGICAL_ADDRESS;
             if (curAddress != Constants.ADDR_UNREGISTERED
                     && deviceType == HdmiUtils.getTypeFromAddress(curAddress)) {
-                if (!sendPollMessage(curAddress, curAddress, HdmiConfig.ADDRESS_ALLOCATION_RETRY)) {
+                int failedPollingCount = 0;
+                for (int j = 0; j < HdmiConfig.ADDRESS_ALLOCATION_RETRY; ++j) {
+                    if (!sendPollMessage(curAddress, curAddress, 1)) {
+                        failedPollingCount++;
+                    }
+                }
+
+                // Pick logical address if failed ratio is more than a half of all retries.
+                if (failedPollingCount * 2 >  HdmiConfig.ADDRESS_ALLOCATION_RETRY) {
                     logicalAddress = curAddress;
                     break;
                 }
@@ -206,7 +204,7 @@ final class HdmiCecController {
         final int assignedAddress = logicalAddress;
         if (callback != null) {
             runOnServiceThread(new Runnable() {
-                    @Override
+                @Override
                 public void run() {
                     callback.onAllocated(deviceType, assignedAddress);
                 }
