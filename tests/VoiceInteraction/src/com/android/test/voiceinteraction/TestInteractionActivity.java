@@ -18,7 +18,9 @@ package com.android.test.voiceinteraction;
 
 import android.app.Activity;
 import android.app.VoiceInteractor;
+import android.content.ComponentName;
 import android.os.Bundle;
+import android.service.voice.VoiceInteractionService;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -38,6 +40,13 @@ public class TestInteractionActivity extends Activity implements View.OnClickLis
 
         if (!isVoiceInteraction()) {
             Log.w(TAG, "Not running as a voice interaction!");
+            finish();
+            return;
+        }
+
+        if (!VoiceInteractionService.isActiveService(this,
+                new ComponentName(this, MainInteractionService.class))) {
+            Log.w(TAG, "Not current voice interactor!");
             finish();
             return;
         }
