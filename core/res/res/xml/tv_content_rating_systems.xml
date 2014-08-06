@@ -66,6 +66,42 @@
     <!-- TV content rating system for BG TV -->
 
     <!-- TV content rating system for BR TV -->
+    <rating-system-definition id="BR_TV"
+        displayName="@string/display_name_brtv"
+        country="BR">
+        <rating-definition id="BR_TV_L"
+            displayName="@string/display_name_brtv_l"
+            description="@string/description_brtv_l"
+            ageHint="0" />
+        <rating-definition id="BR_TV_10"
+            displayName="@string/display_name_brtv_10"
+            description="@string/description_brtv_10"
+            ageHint="10" />
+        <rating-definition id="BR_TV_12"
+            displayName="@string/display_name_brtv_12"
+            description="@string/description_brtv_12"
+            ageHint="12" />
+        <rating-definition id="BR_TV_14"
+            displayName="@string/display_name_brtv_14"
+            description="@string/description_brtv_14"
+            ageHint="14" />
+        <rating-definition id="BR_TV_16"
+            displayName="@string/display_name_brtv_16"
+            description="@string/description_brtv_16"
+            ageHint="16" />
+        <rating-definition id="BR_TV_18"
+            displayName="@string/display_name_brtv_18"
+            description="@string/description_brtv_18"
+            ageHint="18" />
+        <order>
+            <rating id="BR_TV_L" />
+            <rating id="BR_TV_10" />
+            <rating id="BR_TV_12" />
+            <rating id="BR_TV_14" />
+            <rating id="BR_TV_16" />
+            <rating id="BR_TV_18" />
+        </order>
+    </rating-system-definition>
 
     <!-- TV content rating system for CA TV -->
 
@@ -191,8 +227,6 @@
     <!-- TV content rating system for IN TV -->
 
     <!-- TV content rating system for IS TV -->
-
-    <!-- TV content rating system for IT TV -->
 
     <!-- TV content rating system for KH TV -->
 
