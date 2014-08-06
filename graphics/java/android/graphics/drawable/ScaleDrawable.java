@@ -190,8 +190,13 @@ public class ScaleDrawable extends Drawable implements Drawable.Callback {
     }
 
     @Override
-    public void setTint(ColorStateList tint, Mode tintMode) {
-        mScaleState.mDrawable.setTint(tint, tintMode);
+    public void setTintList(ColorStateList tint) {
+        mScaleState.mDrawable.setTintList(tint);
+    }
+
+    @Override
+    public void setTintMode(Mode tintMode) {
+        mScaleState.mDrawable.setTintMode(tintMode);
     }
 
     @Override

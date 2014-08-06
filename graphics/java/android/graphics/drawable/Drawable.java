@@ -478,8 +478,46 @@ public abstract class Drawable {
      * @param tint Color state list to use for tinting this drawable, or null to
      *            clear the tint
      * @param tintMode A Porter-Duff blending mode
+     * @hide TODO: Was in L-preview, remove this API for release
      */
     public void setTint(ColorStateList tint, PorterDuff.Mode tintMode) {}
+
+    /**
+     * Specifies a tint for this drawable.
+     * <p>
+     * Setting a color filter via {@link #setColorFilter(ColorFilter)} overrides
+     * tint.
+     *
+     * @param tint Color to use for tinting this drawable
+     * @see #setTintMode(PorterDuff.Mode)
+     */
+    public void setTint(int tint) {
+        setTintList(ColorStateList.valueOf(tint));
+    }
+
+    /**
+     * Specifies a tint for this drawable as a color state list.
+     * <p>
+     * Setting a color filter via {@link #setColorFilter(ColorFilter)} overrides
+     * tint.
+     *
+     * @param tint Color state list to use for tinting this drawable, or null to
+     *            clear the tint
+     * @see #setTintMode(PorterDuff.Mode)
+     */
+    public void setTintList(ColorStateList tint) {}
+
+    /**
+     * Specifies a tint blending mode for this drawable.
+     * <p>
+     * Setting a color filter via {@link #setColorFilter(ColorFilter)} overrides
+     * tint.
+     *
+     * @param tintMode Color state list to use for tinting this drawable, or null to
+     *            clear the tint
+     * @param tintMode A Porter-Duff blending mode
+     */
+    public void setTintMode(PorterDuff.Mode tintMode) {}
 
     /**
      * Returns the current color filter, or {@code null} if none set.

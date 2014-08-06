@@ -285,12 +285,16 @@ public class ShapeDrawable extends Drawable {
     }
 
     @Override
-    public void setTint(ColorStateList tint, PorterDuff.Mode tintMode) {
-        final ShapeState state = mShapeState;
-        state.mTint = tint;
-        state.mTintMode = tintMode;
+    public void setTintList(ColorStateList tint) {
+        mShapeState.mTint = tint;
+        mTintFilter = updateTintFilter(mTintFilter, tint, mShapeState.mTintMode);
+        invalidateSelf();
+    }
 
-        mTintFilter = updateTintFilter(mTintFilter, tint, tintMode);
+    @Override
+    public void setTintMode(PorterDuff.Mode tintMode) {
+        mShapeState.mTintMode = tintMode;
+        mTintFilter = updateTintFilter(mTintFilter, mShapeState.mTint, tintMode);
         invalidateSelf();
     }
 
