@@ -245,7 +245,7 @@
     <string name="recents_search_bar_label" msgid="8074997400187836677">"tafuta"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Betri imejaa"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"Inachaji"</string>
-    <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> hadi ijae"</string>
+    <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"Imebakisha <xliff:g id="CHARGING_TIME">%s</xliff:g> ijae"</string>
     <string name="expanded_header_battery_not_charging" msgid="4798147152367049732">"Haichaji"</string>
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"Huenda mtandao\nunafuatiliwa"</string>
     <string name="description_target_search" msgid="3091587249776033139">"Tafuta"</string>
@@ -267,7 +267,7 @@
     <string name="interruption_level_none" msgid="3831278883136066646">"Hamna"</string>
     <string name="interruption_level_priority" msgid="6517366750688942030">"Kipaumbele"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"Zote"</string>
-    <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Inachaji ( <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> hadi ijae)"</string>
+    <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Inachaji (Imebakisha <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> ijae)"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"Aliyealikwa"</string>
     <string name="guest_new_guest" msgid="4259024453643879653">"+ Aliyealikwa"</string>
     <string name="guest_exit_guest" msgid="1619100760451149682">"Ondoa aliyealikwa"</string>
@@ -297,4 +297,26 @@
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Futa zote"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Anza sasa"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Hakuna arifa"</string>
+    <!-- no translation found for device_owned_footer (3802752663326030053) -->
+    <skip />
+    <!-- no translation found for vpn_footer (2388611096129106812) -->
+    <skip />
+    <!-- no translation found for monitoring_title_device_owned (7121079311903859610) -->
+    <skip />
+    <!-- no translation found for monitoring_title (169206259253048106) -->
+    <skip />
+    <!-- no translation found for open_app (4011771120339160755) -->
+    <skip />
+    <!-- no translation found for disconnect_vpn (1324915059568548655) -->
+    <skip />
+    <!-- no translation found for monitoring_description_device_owned (7801926679066533391) -->
+    <skip />
+    <!-- no translation found for monitoring_description_vpn (93140751707065515) -->
+    <skip />
+    <!-- no translation found for monitoring_description_legacy_vpn (5397847778080663075) -->
+    <skip />
+    <!-- no translation found for monitoring_description_vpn_device_owned (696121105616356493) -->
+    <skip />
+    <!-- no translation found for monitoring_description_legacy_vpn_device_owned (649791650224064248) -->
+    <skip />
 </resources>
