@@ -4246,8 +4246,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 //        for (LinkProperties lp : newLp.getStackedLinks()) {
 //            updateMtu(lp, null);
 //        }
-        updateRoutes(newLp, oldLp, netId);
-        updateDnses(newLp, oldLp, netId);
+        final boolean flushDns = updateRoutes(newLp, oldLp, netId);
+        updateDnses(newLp, oldLp, netId, flushDns);
         updateClat(newLp, oldLp, networkAgent);
     }
 
@@ -4295,7 +4295,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
     }
 
-    private void updateRoutes(LinkProperties newLp, LinkProperties oldLp, int netId) {
+    /**
+     * Have netd update routes from oldLp to newLp.
+     * @return true if routes changed between oldLp and newLp
+     */
+    private boolean updateRoutes(LinkProperties newLp, LinkProperties oldLp, int netId) {
         CompareResult<RouteInfo> routeDiff = new CompareResult<RouteInfo>();
         if (oldLp != null) {
             routeDiff = oldLp.compareAllRoutes(newLp);
@@ -4330,8 +4334,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 loge("Exception in removeRoute: " + e);
             }
         }
+        return !routeDiff.added.isEmpty() || !routeDiff.removed.isEmpty();
     }
-    private void updateDnses(LinkProperties newLp, LinkProperties oldLp, int netId) {
+    private void updateDnses(LinkProperties newLp, LinkProperties oldLp, int netId, boolean flush) {
         if (oldLp == null || (newLp.isIdenticalDnses(oldLp) == false)) {
             Collection<InetAddress> dnses = newLp.getDnsServers();
             if (dnses.size() == 0 && mDefaultDns != null) {
@@ -4350,6 +4355,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             NetworkAgentInfo defaultNai = mNetworkForRequestId.get(mDefaultRequest.requestId);
             if (defaultNai != null && defaultNai.network.netId == netId) {
                 setDefaultDnsSystemProperties(dnses);
+            }
+            flushVmDnsCache();
+        } else if (flush) {
+            try {
+                mNetd.flushNetworkDnsCache(netId);
+            } catch (Exception e) {
+                loge("Exception in flushNetworkDnsCache: " + e);
             }
             flushVmDnsCache();
         }
