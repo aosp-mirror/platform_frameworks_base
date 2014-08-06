@@ -59,6 +59,19 @@ ASensor const* ASensorManager_getDefaultSensor(ASensorManager* manager, int type
     return static_cast<SensorManager*>(manager)->getDefaultSensor(type);
 }
 
+ASensor const* ASensorManager_getDefaultSensorEx(ASensorManager* manager,
+        int type, bool wakeUp) {
+    Sensor const* const* sensorList;
+    size_t size = static_cast<SensorManager*>(manager)->getSensorList(&sensorList);
+    for (size_t i = 0; i < size; ++i) {
+        if (ASensor_getType(sensorList[i]) == type &&
+            ASensor_isWakeUpSensor(sensorList[i]) == wakeUp) {
+            return reinterpret_cast<ASensor const *>(sensorList[i]);
+       }
+    }
+    return NULL;
+}
+
 ASensorEventQueue* ASensorManager_createEventQueue(ASensorManager* manager,
         ALooper* looper, int ident, ALooper_callbackFunc callback, void* data)
 {
@@ -175,4 +188,9 @@ const char* ASensor_getStringType(ASensor const* sensor)
 int ASensor_getReportingMode(ASensor const* sensor)
 {
     return static_cast<Sensor const*>(sensor)->getReportingMode();
+}
+
+bool ASensor_isWakeUpSensor(ASensor const* sensor)
+{
+    return static_cast<Sensor const*>(sensor)->isWakeUpSensor();
 }
