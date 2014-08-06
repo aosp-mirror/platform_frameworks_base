@@ -880,6 +880,11 @@ public abstract class ConnectionService extends Service {
         return sNullConnection;
     }
 
+    /**
+     * Abstraction for a class which provides video call functionality. This class contains no base
+     * implementation for its methods. It is expected that subclasses will override these
+     * functions to provide the desired behavior if it is supported.
+     */
     public static abstract class VideoCallProvider {
         private static final int MSG_SET_VIDEO_CALL_LISTENER = 1;
         private static final int MSG_SET_CAMERA = 2;
@@ -1012,38 +1017,48 @@ public abstract class ConnectionService extends Service {
          *
          * @param cameraId The id of the camera.
          */
-        public abstract void onSetCamera(String cameraId);
+        public void onSetCamera(String cameraId) {
+            // To be implemented by subclass.
+        }
 
         /**
          * Sets the surface to be used for displaying a preview of what the user's camera is
-         * currently capturing.  When video transmission is enabled, this is the video signal which is
-         * sent to the remote device.
+         * currently capturing.  When video transmission is enabled, this is the video signal which
+         * is sent to the remote device.
          *
          * @param surface The surface.
          */
-        public abstract void onSetPreviewSurface(Surface surface);
+        public void onSetPreviewSurface(Surface surface) {
+            // To be implemented by subclass.
+        }
 
         /**
          * Sets the surface to be used for displaying the video received from the remote device.
          *
          * @param surface The surface.
          */
-        public abstract void onSetDisplaySurface(Surface surface);
+        public void onSetDisplaySurface(Surface surface) {
+            // To be implemented by subclass.
+        }
 
         /**
-         * Sets the device orientation, in degrees.  Assumes that a standard portrait orientation of the
-         * device is 0 degrees.
+         * Sets the device orientation, in degrees.  Assumes that a standard portrait orientation of
+         * the device is 0 degrees.
          *
          * @param rotation The device orientation, in degrees.
          */
-        public abstract void onSetDeviceOrientation(int rotation);
+        public void onSetDeviceOrientation(int rotation) {
+            // To be implemented by subclass.
+        }
 
         /**
          * Sets camera zoom ratio.
          *
          * @param value The camera zoom ratio.
          */
-        public abstract void onSetZoom(float value);
+        public void onSetZoom(float value) {
+            // To be implemented by subclass.
+        }
 
         /**
          * Issues a request to modify the properties of the current session.  The request is sent to
@@ -1054,7 +1069,9 @@ public abstract class ConnectionService extends Service {
          *
          * @param requestProfile The requested call video properties.
          */
-        public abstract void onSendSessionModifyRequest(VideoCallProfile requestProfile);
+        public void onSendSessionModifyRequest(VideoCallProfile requestProfile) {
+            // To be implemented by subclass.
+        }
 
         /**te
          * Provides a response to a request to change the current call session video
@@ -1066,21 +1083,27 @@ public abstract class ConnectionService extends Service {
          *
          * @param responseProfile The response call video properties.
          */
-        public abstract void onSendSessionModifyResponse(VideoCallProfile responseProfile);
+        public void onSendSessionModifyResponse(VideoCallProfile responseProfile) {
+            // To be implemented by subclass.
+        }
 
         /**
          * Issues a request to the video provider to retrieve the camera capabilities.
          * Camera capabilities are reported back to the caller via
          * {@link InCallService.VideoCall.Listener#onCameraCapabilitiesChanged(CallCameraCapabilities)}.
          */
-        public abstract void onRequestCameraCapabilities();
+        public void onRequestCameraCapabilities() {
+            // To be implemented by subclass.
+        }
 
         /**
          * Issues a request to the video telephony framework to retrieve the cumulative data usage for
          * the current call.  Data usage is reported back to the caller via
          * {@link InCallService.VideoCall.Listener#onCallDataUsageChanged}.
          */
-        public abstract void onRequestCallDataUsage();
+        public void onRequestCallDataUsage() {
+            // To be implemented by subclass.
+        }
 
         /**
          * Provides the video telephony framework with the URI of an image to be displayed to remote
@@ -1088,7 +1111,9 @@ public abstract class ConnectionService extends Service {
          *
          * @param uri URI of image to display.
          */
-        public abstract void onSetPauseImage(String uri);
+        public void onSetPauseImage(String uri) {
+            // To be implemented by subclass.
+        }
 
         /**
          * Invokes callback method defined in {@link InCallService.VideoCall.Listener}.
