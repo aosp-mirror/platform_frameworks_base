@@ -1722,6 +1722,11 @@ public class KeyEvent extends InputEvent implements Parcelable {
         return false;
     }
 
+    /** @hide */
+    public static final boolean isMetaKey(int keyCode) {
+        return keyCode == KeyEvent.KEYCODE_META_LEFT || keyCode == KeyEvent.KEYCODE_META_RIGHT;
+    }
+
     /** {@inheritDoc} */
     @Override
     public final int getDeviceId() {
