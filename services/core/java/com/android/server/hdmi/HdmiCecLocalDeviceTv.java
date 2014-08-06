@@ -892,7 +892,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @Override
     protected boolean handleTimerClearedStatus(HdmiCecMessage message) {
         byte[] params = message.getParams();
-        int timerClearedStatusData = params[0];
+        int timerClearedStatusData = params[0] & 0xFF;
         announceTimerRecordingResult(timerClearedStatusData);
         return true;
     }
