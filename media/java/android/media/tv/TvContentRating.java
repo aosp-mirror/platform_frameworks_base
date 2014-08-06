@@ -140,10 +140,10 @@ import java.util.List;
  *         <td>FI_TV</td>
  *         <td></td>
  *     </tr-->
- *     <!--tr>
+ *     <tr>
  *         <td>FR_TV</td>
- *         <td></td>
- *     </tr-->
+ *         <td>The content rating system in French</td>
+ *     </tr>
  *     <!--tr>
  *         <td>GR_TV</td>
  *         <td></td>
@@ -332,10 +332,36 @@ import java.util.List;
  *         <td>FI_TV_ALL</td>
  *         <td></td>
  *     </tr-->
- *     <!--tr>
+ *     <tr>
  *         <td>FR_TV_ALL</td>
- *         <td></td>
- *     </tr-->
+ *         <td>A rating string for {@code FR_TV}. According to CSA in France, if no rating appears,
+ *         the program is most likely appropriate for all ages. In Android TV, however,
+ *         {@code RATING_FR_ALL} is used for handling that case.</td>
+ *     </tr>
+ *     <tr>
+ *         <td>FR_TV_10</td>
+ *         <td>A rating string for {@code FR_TV}. This rating is for programs that are not
+ *         recommended for children under 10.</td>
+ *     </tr>
+ *     <tr>
+ *         <td>FR_TV_12</td>
+ *         <td>A rating string for {@code FR_TV}. This rating is for programs that are not
+ *         recommended for children under 12. Programs rated this are not allowed to air before
+ *         10:00 pm (Some channels and programs are subject to exception). </td>
+ *     </tr>
+ *     <tr>
+ *         <td>FR_TV_16</td>
+ *         <td>A rating string for {@code FR_TV}. This rating is for programs that are not
+ *         recommended for children under 16. Programs rated this are not allowed to air before
+ *         10:30 pm (Some channels and programs are subject to exception). </td>
+ *     </tr>
+ *     <tr>
+ *         <td>FR_TV_18</td>
+ *         <td>A rating string for {@code FR_TV}.  This rating is for programs that are not
+ *         recommended for persons under 18. Programs rated this are allowed between midnight and
+ *         5 am and only on some channels. The access to these programs is locked by a personal
+ *         password.</td>
+ *     </tr>
  *     <!--tr>
  *         <td>GR_TV_ALL</td>
  *         <td></td>
