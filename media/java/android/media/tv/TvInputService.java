@@ -28,6 +28,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
@@ -86,7 +87,11 @@ public abstract class TvInputService extends Service {
      */
     public static final String SERVICE_META_DATA = "android.media.tv.input";
 
-    private final Handler mHandler = new ServiceHandler();
+    /**
+     * Handler instance to handle request from TV Input Manager Service. Should be run in the main
+     * looper to be synchronously run with {@code Session.mHandler}.
+     */
+    private final Handler mServiceHandler = new ServiceHandler(getMainLooper());
     private final RemoteCallbackList<ITvInputServiceCallback> mCallbacks =
             new RemoteCallbackList<ITvInputServiceCallback>();
 
@@ -120,30 +125,30 @@ public abstract class TvInputService extends Service {
                 args.arg1 = channel;
                 args.arg2 = cb;
                 args.arg3 = inputId;
-                mHandler.obtainMessage(ServiceHandler.DO_CREATE_SESSION, args).sendToTarget();
+                mServiceHandler.obtainMessage(ServiceHandler.DO_CREATE_SESSION, args).sendToTarget();
             }
 
             @Override
             public void notifyHardwareAdded(TvInputHardwareInfo hardwareInfo) {
-                mHandler.obtainMessage(ServiceHandler.DO_ADD_HARDWARE_TV_INPUT,
+                mServiceHandler.obtainMessage(ServiceHandler.DO_ADD_HARDWARE_TV_INPUT,
                         hardwareInfo).sendToTarget();
             }
 
             @Override
             public void notifyHardwareRemoved(TvInputHardwareInfo hardwareInfo) {
-                mHandler.obtainMessage(ServiceHandler.DO_REMOVE_HARDWARE_TV_INPUT,
+                mServiceHandler.obtainMessage(ServiceHandler.DO_REMOVE_HARDWARE_TV_INPUT,
                         hardwareInfo).sendToTarget();
             }
 
             @Override
             public void notifyHdmiCecDeviceAdded(HdmiCecDeviceInfo cecDeviceInfo) {
-                mHandler.obtainMessage(ServiceHandler.DO_ADD_HDMI_CEC_TV_INPUT,
+                mServiceHandler.obtainMessage(ServiceHandler.DO_ADD_HDMI_CEC_TV_INPUT,
                         cecDeviceInfo).sendToTarget();
             }
 
             @Override
             public void notifyHdmiCecDeviceRemoved(HdmiCecDeviceInfo cecDeviceInfo) {
-                mHandler.obtainMessage(ServiceHandler.DO_REMOVE_HDMI_CEC_TV_INPUT,
+                mServiceHandler.obtainMessage(ServiceHandler.DO_REMOVE_HDMI_CEC_TV_INPUT,
                         cecDeviceInfo).sendToTarget();
             }
         };
@@ -224,9 +229,10 @@ public abstract class TvInputService extends Service {
     /**
      * Base class for derived classes to implement to provide a TV input session.
      */
-    public abstract class Session implements KeyEvent.Callback {
+    public abstract static class Session implements KeyEvent.Callback {
         private final KeyEvent.DispatcherState mDispatcherState = new KeyEvent.DispatcherState();
         private final WindowManager mWindowManager;
+        final Handler mHandler;
         private WindowManager.LayoutParams mWindowParams;
         private Surface mSurface;
         private View mOverlayView;
@@ -235,8 +241,14 @@ public abstract class TvInputService extends Service {
         private Rect mOverlayFrame;
         private ITvInputSessionCallback mSessionCallback;
 
-        public Session() {
-            mWindowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
+        /**
+         * Creates a new Session.
+         *
+         * @param context The context of the application
+         */
+        public Session(Context context) {
+            mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+            mHandler = new Handler(context.getMainLooper());
         }
 
         /**
@@ -982,7 +994,16 @@ public abstract class TvInputService extends Service {
      * the application's surface to the hardware TV input.
      * @see #onCreateSession(String)
      */
-    public abstract class HardwareSession extends Session {
+    public abstract static class HardwareSession extends Session {
+
+        /**
+         * Creates a new HardwareSession.
+         *
+         * @param context The context of the application
+         */
+        public HardwareSession(Context context) {
+            super(context);
+        }
 
         private TvInputManager.Session mHardwareSession;
         private ITvInputSession mProxySession;
@@ -1095,6 +1116,10 @@ public abstract class TvInputService extends Service {
         private static final int DO_ADD_HDMI_CEC_TV_INPUT = 5;
         private static final int DO_REMOVE_HDMI_CEC_TV_INPUT = 6;
 
+        public ServiceHandler(Looper looper) {
+            super(looper);
+        }
+
         private void broadcastAddHardwareTvInput(int deviceId, TvInputInfo inputInfo) {
             int n = mCallbacks.beginBroadcast();
             for (int i = 0; i < n; ++i) {
@@ -1164,7 +1189,7 @@ public abstract class TvInputService extends Service {
                                 TvInputManager manager = (TvInputManager) getSystemService(
                                         Context.TV_INPUT_SERVICE);
                                 manager.createSession(harewareInputId,
-                                        proxySession.mHardwareSessionCallback, mHandler);
+                                        proxySession.mHardwareSessionCallback, mServiceHandler);
                             } else {
                                 sessionImpl.onRelease();
                                 Log.w(TAG, "Hardware input id is not setup yet.");
@@ -1179,7 +1204,7 @@ public abstract class TvInputService extends Service {
                             someArgs.arg1 = stub;
                             someArgs.arg2 = cb;
                             someArgs.arg3 = null;
-                            mHandler.obtainMessage(ServiceHandler.DO_NOTIFY_SESSION_CREATED,
+                            mServiceHandler.obtainMessage(ServiceHandler.DO_NOTIFY_SESSION_CREATED,
                                     someArgs).sendToTarget();
                         }
                     }
