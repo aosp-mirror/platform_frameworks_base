@@ -355,10 +355,90 @@ import java.util.List;
  *         <td>BG_TV_ALL</td>
  *         <td></td>
  *     </tr-->
- *     <!--tr>
- *         <td>BR_TV_ALL</td>
- *         <td></td>
- *     </tr-->
+ *     <tr>
+ *         <td>BR_TV_L</td>
+ *         <td>A rating string for {@code BR_TV}. This classification applies to works which contain
+ *         predominantly positive contents and which do not bring unsuitable elements subject to
+ *         ratings to ages higher than 10, such as the ones listed below:
+ *         <dl>
+ *         <dd><b>Violence</b>: Fantasy violence; display of arms with no violence; deaths with no
+ *         violence; bones and skeletons with no violence.</dd>
+ *         <dd><b>Sex and Nudity</b>: Non-erotic nudity.</dd>
+ *         <dd><b>Drugs</b>: Moderate or insinuated use of legal drugs.</dd>
+ *         </dl>
+ *         </td>
+ *     </tr>
+ *     <tr>
+ *         <td>BR_TV_10</td>
+ *         <td>A rating string for {@code BR_TV}. Not recommended for ages under 10. The following
+ *         contents are accepted for this age range:
+ *         <dl>
+ *         <dd><b>Violence</b>: Display of arms with violence; fear/tension; distress; bones and
+ *         skeletons with signs of violent acts; criminal acts without violence; derogatory
+ *         language.</dd>
+ *         <dd><b>Sex and Nudity</b>: Educational contents about sex.</dd>
+ *         <dd><b>Drugs</b>: Oral description of the use of legal drugs; discussion on the issue
+ *         "drug trafficking"; medicinal use of illegal drugs.</dd>
+ *         </dl>
+ *         </td>
+ *     </tr>
+ *     <tr>
+ *         <td>BR_TV_12</td>
+ *         <td>A rating string for {@code BR_TV}. Not recommended for ages under 12. The following
+ *         contents are accepted for this age range:
+ *         <dl>
+ *         <dd><b>Violence</b>: Violent act; body injury; description of violence; presence of
+ *         blood; victim's grief; natural or accidental death with violence; violent act against
+ *         animals; exposure to danger; showing people in embarrassing or degrading situations;
+ *         verbal aggression; obscenity; bullying; corpses; sexual harassment; overvaluation of the
+ *         physical beauty; overvaluation of consumption.</dd>
+ *         <dd><b>Sex and Nudity</b>: Veiled nudity; sexual innuendo; sexual fondling; masturbation;
+ *         foul language; sex content language; sex simulation; sexual appeal.</dd>
+ *         <dd><b>Drugs</b>: Use of legal drugs; inducing the use of legal drugs; irregular use of
+ *         medication; mention to illegal drugs.</dd>
+ *         </dl>
+ *         </td>
+ *     </tr>
+ *     <tr>
+ *         <td>BR_TV_14</td>
+ *         <td>A rating string for {@code BR_TV}. Not recommended for ages under 14. The following
+ *         contents are accepted for this age range:
+ *         <dl>
+ *         <dd><b>Violence</b>: Intentional death; stigma/prejudice.</dd>
+ *         <dd><b>Sex and Nudity</b>: Nudity; erotization; vulgarity; sexual intercourse;
+ *         prostitution.</dd>
+ *         <dd><b>Drugs</b>: Insinuation of the use of illegal drugs; verbal descriptions of the use
+ *         or trafficking of illegal drugs; discussion on the "decriminalization of illegal drugs".</dd>
+ *         </dl>
+ *         </td>
+ *     </tr>
+ *     <tr>
+ *         <td>BR_TV_16</td>
+ *         <td>A rating string for {@code BR_TV}. Not recommended for ages under 16. The following
+ *         contents are accepted for this age range:
+ *         <dl>
+ *         <dd><b>Violence</b>: Rape; sexual exploitation; sexual coercion; torture; mutilation;
+ *         suicide; gratuitous violence/banalization of violence; abortion, death penalty,
+ *         euthanasia.</dd>
+ *         <dd><b>Sex and Nudity</b>: Intense sexual intercourse.</dd>
+ *         <dd><b>Drugs</b>: Production or trafficking of any illegal drug; use of illegal drugs;
+ *         inducing the use of illegal drugs.</dd>
+ *         </dl>
+ *         </td>
+ *     </tr>
+ *     <tr>
+ *         <td>BR_TV_18</td>
+ *         <td>A rating string for {@code BR_TV}. Not recommended for ages under 18. The following
+ *         contents are accepted for this age range:
+ *         <dl>
+ *         <dd><b>Violence</b>:  Violence of high impact; exaltation, glamorization and/or
+ *         incitement to violence; cruelty; hate crimes; pedophilia.</dd>
+ *         <dd><b>Sex and Nudity</b>: Explicit sex; complex/strong impact sexual intercourses
+ *         (incest, group sex, violent fetish and pornography overall).</dd>
+ *         <dd><b>Drugs</b>:  Inciting the use of illegal drugs.</dd>
+ *         </dl>
+ *         </td>
+ *     </tr>
  *     <!--tr>
  *         <td>CA_TV_ALL</td>
  *         <td></td>
@@ -492,10 +572,6 @@ import java.util.List;
  *     </tr-->
  *     <!--tr>
  *         <td>IS_TV_ALL</td>
- *         <td></td>
- *     </tr-->
- *     <!--tr>
- *         <td>IT_TV_ALL</td>
  *         <td></td>
  *     </tr-->
  *     <!--tr>
@@ -705,10 +781,6 @@ import java.util.List;
  *         <td></td>
  *     </tr-->
  *     <!--tr>
- *         <td>BR_TV_</td>
- *         <td></td>
- *     </tr-->
- *     <!--tr>
  *         <td>CA_TV_</td>
  *         <td></td>
  *     </tr-->
@@ -762,10 +834,6 @@ import java.util.List;
  *     </tr-->
  *     <!--tr>
  *         <td>IS_TV_</td>
- *         <td></td>
- *     </tr-->
- *     <!--tr>
- *         <td>IT_TV_</td>
  *         <td></td>
  *     </tr-->
  *     <!--tr>
