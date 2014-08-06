@@ -32,7 +32,6 @@ import android.media.AudioManager;
 import android.media.session.MediaSession;
 import android.net.Uri;
 import android.os.BadParcelableException;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -1900,8 +1899,7 @@ public class Notification implements Parcelable
             mPriority = PRIORITY_DEFAULT;
             mPeople = new ArrayList<String>();
 
-            mColorUtil = context.getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.L ?
-                    NotificationColorUtil.getInstance() : null;
+            mColorUtil = NotificationColorUtil.getInstance();
         }
 
         /**
