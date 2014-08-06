@@ -4934,6 +4934,29 @@
     <!-- TV content rating system strings for MY TV -->
 
     <!-- TV content rating system strings for NL TV -->
+    <string name="display_name_nltv" translatable="false">NL-TV</string>
+    <string name="display_name_nltv_v" translatable="false">Geweld</string>
+    <string name="display_name_nltv_f" translatable="false">Angst</string>
+    <string name="display_name_nltv_s" translatable="false">Seks</string>
+    <string name="display_name_nltv_d" translatable="false">Discriminatie</string>
+    <string name="display_name_nltv_da" translatable="false">Drugs- en/of alcoholmisbruik</string>
+    <string name="display_name_nltv_l" translatable="false">Grof taalgebruik</string>
+    <string name="display_name_nltv_al" translatable="false">Alle leeftijden</string>
+    <string name="display_name_nltv_6" translatable="false">Let op met kinderen tot 6 jaar</string>
+    <string name="display_name_nltv_9" translatable="false">Let op met kinderen tot 9 jaar</string>
+    <string name="display_name_nltv_12" translatable="false">Let op met kinderen tot 12 jaar</string>
+    <string name="display_name_nltv_16" translatable="false">Let op met kinderen tot 16 jaar</string>
+    <string name="description_nltv_v">Geweld</string>
+    <string name="description_nltv_f">Angst</string>
+    <string name="description_nltv_s">Seks</string>
+    <string name="description_nltv_d">Discriminatie</string>
+    <string name="description_nltv_da">Drugs- en/of alcoholmisbruik</string>
+    <string name="description_nltv_l">Grof taalgebruik</string>
+    <string name="description_nltv_al">De leeftijdscategorie Alle Leeftijden geeft aan dat een mediaproductie geen schadelijke elementen bevat.</string>
+    <string name="description_nltv_6">Mogelijk schadelijk voor kinderen onder de 6 jaar.</string>
+    <string name="description_nltv_9">Mogelijk schadelijk voor kinderen onder de 9 jaar.</string>
+    <string name="description_nltv_12">Mogelijk schadelijk voor kinderen onder de 12 jaar.</string>
+    <string name="description_nltv_16">Mogelijk schadelijk voor kinderen onder de 16 jaar.</string>
 
     <!-- TV content rating system strings for NZ TV -->
 
