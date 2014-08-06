@@ -124,10 +124,10 @@ import java.util.List;
  *         <td>CO_TV</td>
  *         <td></td>
  *     </tr-->
- *     <!--tr>
+ *     <tr>
  *         <td>DE_TV</td>
- *         <td></td>
- *     </tr-->
+ *         <td>The Germany television rating system</td>
+ *     </tr>
  *     <!--tr>
  *         <td>DK_TV</td>
  *         <td></td>
@@ -316,10 +316,31 @@ import java.util.List;
  *         <td>CO_TV_ALL</td>
  *         <td></td>
  *     </tr-->
- *     <!--tr>
+ *     <tr>
  *         <td>DE_TV_ALL</td>
- *         <td></td>
- *     </tr-->
+ *         <td>Without restriction. There are time schedules and certain age groups which have to be
+ *         considered. {@code DE_TV_ALL} is scheduled in daytime (6:00AM – 8:00PM). However, cinema
+ *         films classified with "12" may be shown during the daytime, if they are not considered
+ *         harmful to younger children.</td>
+ *     </tr>
+ *     <tr>
+ *         <td>DE_TV_12</td>
+ *         <td>Suitable for 12 years and above. There are time schedules and certain age groups
+ *         which have to be considered. {@code DE_TV_12} is scheduled in primetime (from 8:00PM
+ *         – 10.00 p.m.).</td>
+ *     </tr>
+ *     <tr>
+ *         <td>DE_TV_16</td>
+ *         <td>Suitable for 16 years and above. There are time schedules and certain age groups
+ *         which have to be considered. {@code DE_TV_16} is scheduled in late evening (from 10:00PM
+ *         - 11:00PM). </td>
+ *     </tr>
+ *     <tr>
+ *         <td>DE_TV_18</td>
+ *         <td>Suitable for 18 years and above. There are time schedules and certain age groups
+ *         which have to be considered. {@code DE_TV_18} is scheduled in late night (from 11:00PM
+ *         - 6:00AM). </td>
+ *     </tr>
  *     <!--tr>
  *         <td>DK_TV_ALL</td>
  *         <td></td>
@@ -608,10 +629,6 @@ import java.util.List;
  *         <td></td>
  *     </tr-->
  *     <!--tr>
- *         <td>DE_TV_</td>
- *         <td></td>
- *     </tr-->
- *     <!--tr>
  *         <td>DK_TV_</td>
  *         <td></td>
  *     </tr-->
@@ -621,10 +638,6 @@ import java.util.List;
  *     </tr-->
  *     <!--tr>
  *         <td>FI_TV_</td>
- *         <td></td>
- *     </tr-->
- *     <!--tr>
- *         <td>FR_TV_</td>
  *         <td></td>
  *     </tr-->
  *     <!--tr>
