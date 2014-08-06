@@ -179,7 +179,10 @@ static void report_exception(JNIEnv* env, jthrowable excep, const char* msg)
     env->ExceptionClear();
 
     jstring tagstr = env->NewStringUTF(LOG_TAG);
-    jstring msgstr = env->NewStringUTF(msg);
+    jstring msgstr = NULL;
+    if (tagstr != NULL) {
+        msgstr = env->NewStringUTF(msg);
+    }
 
     if ((tagstr == NULL) || (msgstr == NULL)) {
         env->ExceptionClear();      /* assume exception (OOM?) was thrown */
