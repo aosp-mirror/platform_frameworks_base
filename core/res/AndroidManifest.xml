@@ -880,6 +880,15 @@
         android:description="@string/permdesc_bluetoothPriv"
         android:label="@string/permlab_bluetoothPriv" />
 
+    <!-- Control access to email providers exclusively for Bluetooth
+         @hide
+    -->
+    <permission android:name="android.permission.BLUETOOTH_MAP"
+        android:permissionGroup="android.permission-group.BLUETOOTH_NETWORK"
+        android:protectionLevel="signature"
+        android:description="@string/permdesc_bluetoothMap"
+        android:label="@string/permlab_bluetoothMap" />
+
     <!-- Allows bluetooth stack to access files
          @hide This should only be used by Bluetooth apk.
     -->
