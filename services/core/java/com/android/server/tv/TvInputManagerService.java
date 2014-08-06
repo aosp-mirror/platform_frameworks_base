@@ -52,7 +52,6 @@ import android.media.tv.TvContentRating;
 import android.media.tv.TvContract;
 import android.media.tv.TvInputHardwareInfo;
 import android.media.tv.TvInputInfo;
-import android.media.tv.TvInputManager;
 import android.media.tv.TvInputService;
 import android.media.tv.TvStreamConfig;
 import android.media.tv.TvTrackInfo;
@@ -631,6 +630,25 @@ public final class TvInputManagerService extends SystemService {
                         sessionState.mClient.onContentBlocked(rating, sessionState.mSeq);
                     } catch (RemoteException e) {
                         Slog.e(TAG, "error in onContentBlocked");
+                    }
+                }
+            }
+
+            @Override
+            public void onLayoutSurface(int left, int top, int right, int bottom) {
+                synchronized (mLock) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "onLayoutSurface (left=" + left + ", top=" + top
+                                + ", right=" + right + ", bottom=" + bottom + ",)");
+                    }
+                    if (sessionState.mSession == null || sessionState.mClient == null) {
+                        return;
+                    }
+                    try {
+                        sessionState.mClient.onLayoutSurface(left, top, right, bottom,
+                                sessionState.mSeq);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "error in onLayoutSurface");
                     }
                 }
             }
