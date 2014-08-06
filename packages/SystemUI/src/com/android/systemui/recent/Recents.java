@@ -77,9 +77,9 @@ public class Recents extends SystemUI implements RecentsComponent {
     }
 
     @Override
-    public void hideRecents(boolean triggeredFromAltTab) {
+    public void hideRecents(boolean triggeredFromAltTab, boolean triggeredFromHomeKey) {
         if (mUseAlternateRecents) {
-            mAlternateRecents.onHideRecents(triggeredFromAltTab);
+            mAlternateRecents.onHideRecents(triggeredFromAltTab, triggeredFromHomeKey);
         } else {
             Intent intent = new Intent(RecentsActivity.CLOSE_RECENTS_INTENT);
             intent.setPackage("com.android.systemui");
