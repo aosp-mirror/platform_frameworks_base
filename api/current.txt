@@ -43253,11 +43253,6 @@ package java.lang.reflect {
     method public static void setShort(java.lang.Object, int, short) throws java.lang.ArrayIndexOutOfBoundsException, java.lang.IllegalArgumentException;
   }
 
-  public final class ArtMethod {
-    method public int getAccessFlags();
-    method public static java.lang.String getMethodName(java.lang.reflect.ArtMethod);
-  }
-
   public final class Constructor extends java.lang.reflect.AccessibleObject implements java.lang.reflect.GenericDeclaration java.lang.reflect.Member {
     method public A getAnnotation(java.lang.Class<A>);
     method public java.lang.Class<T> getDeclaringClass();
