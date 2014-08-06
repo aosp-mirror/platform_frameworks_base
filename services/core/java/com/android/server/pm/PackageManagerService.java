@@ -11702,6 +11702,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         mSettings.writePackageRestrictionsLPr(sourceUserId);
     }
 
+    @Override
     public void removeCrossProfileIntentsForPackage(String packageName,
             int sourceUserId, int targetUserId) {
         mContext.enforceCallingOrSelfPermission(

@@ -772,6 +772,15 @@ public class MockPackageManager extends PackageManager {
     /**
      * @hide
      */
+    @Override
+    public void removeCrossProfileIntentsForPackage(String packageName, int sourceUserId,
+            int targetUserId) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @hide
+     */
     public Drawable loadItemIcon(PackageItemInfo itemInfo, ApplicationInfo appInfo) {
         throw new UnsupportedOperationException();
     }
