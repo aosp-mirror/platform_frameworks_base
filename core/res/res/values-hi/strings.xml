@@ -739,6 +739,10 @@
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"ऐप्लिकेशन को DRM प्रमाणपत्रों का प्रावधान और उपयोग करने देती है. सामान्य ऐप्स के लिए कभी भी आवश्यकता नहीं होना चाहिए."</string>
     <string name="permlab_handoverStatus" msgid="1159132046126626731">"Android Beam स्थानान्तरण स्थिति प्राप्त करें"</string>
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"इस ऐप्लिकेशन को वर्तमान Android Beam स्थानान्तरणों के बारे में जानकारी प्राप्त करने देती है."</string>
+    <!-- no translation found for permlab_removeDrmCertificates (7044888287209892751) -->
+    <skip />
+    <!-- no translation found for permdesc_removeDrmCertificates (7272999075113400993) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"पासवर्ड नियम सेट करें"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"स्‍क्रीन-अनलॉक पासवर्ड में अनुमति प्राप्त लंबाई और वर्णों को नियंत्रित करें."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"स्‍क्रीन-अनलॉक के प्रयासों पर निगरानी रखें"</string>
@@ -1766,6 +1770,16 @@
     <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"पिन"</string>
     <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"पैटर्न अनलॉक करें"</string>
     <string name="lock_to_app_unlock_password" msgid="795224196583495868">"पासवर्ड"</string>
+    <!-- no translation found for description_krtv_all (11497981488871053) -->
+    <skip />
+    <!-- no translation found for description_krtv_7 (6204900788594114856) -->
+    <skip />
+    <!-- no translation found for description_krtv_12 (5134514644432355428) -->
+    <skip />
+    <!-- no translation found for description_krtv_15 (1183692678647313272) -->
+    <skip />
+    <!-- no translation found for description_krtv_19 (7021986912313208481) -->
+    <skip />
     <!-- no translation found for description_ustvpg (3666171166900312727) -->
     <skip />
     <!-- no translation found for description_ustvpg_d (6552868431924879897) -->
@@ -1789,16 +1803,6 @@
     <!-- no translation found for description_ustvpg_14 (6305164472373004907) -->
     <skip />
     <!-- no translation found for description_ustvpg_ma (5842074394338699982) -->
-    <skip />
-    <!-- no translation found for description_krtv_all (11497981488871053) -->
-    <skip />
-    <!-- no translation found for description_krtv_7 (6204900788594114856) -->
-    <skip />
-    <!-- no translation found for description_krtv_12 (5134514644432355428) -->
-    <skip />
-    <!-- no translation found for description_krtv_15 (1183692678647313272) -->
-    <skip />
-    <!-- no translation found for description_krtv_19 (7021986912313208481) -->
     <skip />
     <!-- no translation found for battery_saver_description (724302068634956656) -->
     <skip />

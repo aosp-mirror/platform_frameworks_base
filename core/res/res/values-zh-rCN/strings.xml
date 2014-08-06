@@ -211,10 +211,10 @@
     <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"使用耗电量较大的功能。"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"日历"</string>
     <string name="permgroupdesc_calendar" msgid="5777534316982184416">"直接访问日历和活动。"</string>
-    <string name="permgrouplab_dictionary" msgid="4148597128843641379">"读取用户词典"</string>
-    <string name="permgroupdesc_dictionary" msgid="7921166355964764490">"读取用户词典中的字词。"</string>
-    <string name="permgrouplab_writeDictionary" msgid="8090237702432576788">"写入用户词典"</string>
-    <string name="permgroupdesc_writeDictionary" msgid="2711561994497361646">"将字词添加到用户词典。"</string>
+    <string name="permgrouplab_dictionary" msgid="4148597128843641379">"读取用户字典"</string>
+    <string name="permgroupdesc_dictionary" msgid="7921166355964764490">"读取用户字典中的字词。"</string>
+    <string name="permgrouplab_writeDictionary" msgid="8090237702432576788">"写入用户字典"</string>
+    <string name="permgroupdesc_writeDictionary" msgid="2711561994497361646">"将字词添加到用户字典。"</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"书签和历史记录"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"直接访问书签和浏览器历史记录。"</string>
     <string name="permgrouplab_deviceAlarms" msgid="6117704629728824101">"闹钟"</string>
@@ -689,10 +689,10 @@
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"允许应用获取有关当前同步的 Feed 的详情。"</string>
     <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"写入订阅的供稿"</string>
     <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"允许应用修改您当前同步的 Feed。恶意应用可能会更改您的同步 Feed。"</string>
-    <string name="permlab_readDictionary" msgid="4107101525746035718">"读取您添加到词典的字词"</string>
-    <string name="permdesc_readDictionary" msgid="659614600338904243">"允许该应用读取用户可能已在用户词典中存储的所有字词、名称和词组。"</string>
-    <string name="permlab_writeDictionary" msgid="2183110402314441106">"向用户定义的词典添加字词"</string>
-    <string name="permdesc_writeDictionary" msgid="8185385716255065291">"允许应用向用户词典中写入新词。"</string>
+    <string name="permlab_readDictionary" msgid="4107101525746035718">"读取您添加到字典的字词"</string>
+    <string name="permdesc_readDictionary" msgid="659614600338904243">"允许该应用读取用户可能已在用户字典中存储的所有字词、名称和词组。"</string>
+    <string name="permlab_writeDictionary" msgid="2183110402314441106">"向用户定义的字典添加字词"</string>
+    <string name="permdesc_writeDictionary" msgid="8185385716255065291">"允许应用向用户字典中写入新词。"</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"读取您的USB存储设备中的内容"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"读取您的SD卡中的内容"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"允许应用读取您USB存储设备中的内容。"</string>
@@ -739,6 +739,10 @@
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"允许应用配置和使用DRM证书。普通应用绝不需要此权限。"</string>
     <string name="permlab_handoverStatus" msgid="1159132046126626731">"接收Android Beam的传输状态"</string>
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"允许此应用接收Android Beam当前传输内容的相关信息"</string>
+    <!-- no translation found for permlab_removeDrmCertificates (7044888287209892751) -->
+    <skip />
+    <!-- no translation found for permdesc_removeDrmCertificates (7272999075113400993) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"设置密码规则"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"控制屏幕解锁密码所允许的长度和字符。"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"监视屏幕解锁尝试次数"</string>
@@ -1168,7 +1172,7 @@
     <string name="copyUrl" msgid="2538211579596067402">"复制网址"</string>
     <string name="selectTextMode" msgid="1018691815143165326">"选择文字"</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"文字选择"</string>
-    <string name="addToDictionary" msgid="4352161534510057874">"添加到词典"</string>
+    <string name="addToDictionary" msgid="4352161534510057874">"添加到字典"</string>
     <string name="deleteText" msgid="6979668428458199034">"删除"</string>
     <string name="inputMethod" msgid="1653630062304567879">"输入法"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"文字操作"</string>
@@ -1766,6 +1770,16 @@
     <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN码"</string>
     <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"解锁图案"</string>
     <string name="lock_to_app_unlock_password" msgid="795224196583495868">"密码"</string>
+    <!-- no translation found for description_krtv_all (11497981488871053) -->
+    <skip />
+    <!-- no translation found for description_krtv_7 (6204900788594114856) -->
+    <skip />
+    <!-- no translation found for description_krtv_12 (5134514644432355428) -->
+    <skip />
+    <!-- no translation found for description_krtv_15 (1183692678647313272) -->
+    <skip />
+    <!-- no translation found for description_krtv_19 (7021986912313208481) -->
+    <skip />
     <!-- no translation found for description_ustvpg (3666171166900312727) -->
     <skip />
     <!-- no translation found for description_ustvpg_d (6552868431924879897) -->
@@ -1789,16 +1803,6 @@
     <!-- no translation found for description_ustvpg_14 (6305164472373004907) -->
     <skip />
     <!-- no translation found for description_ustvpg_ma (5842074394338699982) -->
-    <skip />
-    <!-- no translation found for description_krtv_all (11497981488871053) -->
-    <skip />
-    <!-- no translation found for description_krtv_7 (6204900788594114856) -->
-    <skip />
-    <!-- no translation found for description_krtv_12 (5134514644432355428) -->
-    <skip />
-    <!-- no translation found for description_krtv_15 (1183692678647313272) -->
-    <skip />
-    <!-- no translation found for description_krtv_19 (7021986912313208481) -->
     <skip />
     <!-- no translation found for battery_saver_description (724302068634956656) -->
     <skip />

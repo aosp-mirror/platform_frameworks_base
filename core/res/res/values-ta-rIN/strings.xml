@@ -294,8 +294,8 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"ஃபோன் அல்லது SIM கார்டில் சேமிக்கப்பட்ட SMS செய்திகளை எழுத, பயன்பாட்டை அனுமதிக்கிறது. தீங்குவிளைவிக்கும் பயன்பாடுகள் செய்திகளை நீக்கலாம்."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"உரைச் செய்திகளைப் (WAP) பெறுதல்"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"WAP செய்திகளைப் பெற, செயற்படுத்தப் பயன்பாட்டை அனுமதிக்கிறது. உங்களுக்கு அனுப்பப்படும் செய்திகளை உங்களுக்குக் காட்டாமல் கண்காணிக்க அல்லது நீக்குவதற்கான திறன் இந்த அனுமதியில் உள்ளடங்கும்."</string>
-    <string name="permlab_receiveBluetoothMap" msgid="7593811487142360528">"புளூடூத் செய்திகளைப் (MAP) பெறுதல்"</string>
-    <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"புளூடூத் MAP செய்திகளைப் பெற மற்றும் செயல்படுத்த பயன்பாட்டை அனுமதிக்கிறது. அதாவது பயன்பாட்டால் சாதனத்திற்கு அனுப்பப்பட்ட செய்திகளை, உங்களிடம் காட்டாமலே கண்காணிக்கவோ, நீக்கவோ முடியும்."</string>
+    <string name="permlab_receiveBluetoothMap" msgid="7593811487142360528">"Bluetooth செய்திகளைப் (MAP) பெறுதல்"</string>
+    <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Bluetooth MAP செய்திகளைப் பெற மற்றும் செயல்படுத்த பயன்பாட்டை அனுமதிக்கிறது. அதாவது பயன்பாட்டால் சாதனத்திற்கு அனுப்பப்பட்ட செய்திகளை, உங்களிடம் காட்டாமலே கண்காணிக்கவோ, நீக்கவோ முடியும்."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"இயங்கும் பயன்பாடுகளை மீட்டெடுத்தல்"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"நடப்பில் மற்றும் சமீபத்தில் இயங்கும் காரியங்களின் தகவலைப் பெற பயன்பாட்டை அனுமதிக்கிறது. சாதனத்தில் எந்தப் பயன்பாடுகள் பயன்படுத்தப்படுகின்றன என்பது குறித்த தகவலைக் கண்டறிய பயன்பாட்டை இது அனுமதிக்கலாம்."</string>
     <string name="permlab_startTasksFromRecents" msgid="8990073877885690623">"சமீபத்தியவற்றிலிருந்து செயலைத் தொடங்கு"</string>
@@ -739,6 +739,10 @@
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"DRM சான்றிதழ்களை வழங்க மற்றும் பயன்படுத்த, பயன்பாட்டை அனுமதிக்கிறது. சாதாரண பயன்பாடுகளுக்கு எப்போதும் தேவைப்படாது."</string>
     <string name="permlab_handoverStatus" msgid="1159132046126626731">"Android பீம் பரிமாற்ற நிலையைப் பெறுக"</string>
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"நடப்பு Android பீம் பரிமாற்றங்கள் குறித்த தகவலைப் பெற, பயன்பாட்டை அனுமதிக்கிறது"</string>
+    <!-- no translation found for permlab_removeDrmCertificates (7044888287209892751) -->
+    <skip />
+    <!-- no translation found for permdesc_removeDrmCertificates (7272999075113400993) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"கடவுச்சொல் விதிகளை அமைக்கவும்"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"திரையைத் திறக்க கடவுச்சொற்களில் அனுமதிக்கப்பட்ட நீளத்தையும், எழுத்துக்குறிகளையும் கட்டுப்படுத்தலாம்."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"திரைத் திறக்க முயற்சிகளைக் கண்காணித்தல்"</string>
@@ -1219,7 +1223,7 @@
     <string name="smv_application" msgid="3307209192155442829">"<xliff:g id="APPLICATION">%1$s</xliff:g> பயன்பாடு (செயல்முறை <xliff:g id="PROCESS">%2$s</xliff:g>), தனது சுய-செயலாக்க StrictMode கொள்கையை மீறியது."</string>
     <string name="smv_process" msgid="5120397012047462446">"<xliff:g id="PROCESS">%1$s</xliff:g> செயல்முறை, தனது சுய-செயலாக்க StrictMode கொள்கையை மீறியது."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android மேம்படுத்தப்படுகிறது…"</string>
-    <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_0">%1$d</xliff:g> / <xliff:g id="NUMBER_1">%2$d</xliff:g> பயன்பாட்டை உகப்பாக்குகிறது."</string>
+    <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_0">%1$d</xliff:g> / <xliff:g id="NUMBER_1">%2$d</xliff:g> பயன்பாட்டை ஒருங்கிணைக்கிறது."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"பயன்பாடுகள் தொடங்கப்படுகின்றன."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"துவக்குதலை முடிக்கிறது."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> இயங்குகிறது"</string>
@@ -1766,6 +1770,16 @@
     <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN"</string>
     <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"திறப்பதற்கான வடிவம்"</string>
     <string name="lock_to_app_unlock_password" msgid="795224196583495868">"கடவுச்சொல்"</string>
+    <!-- no translation found for description_krtv_all (11497981488871053) -->
+    <skip />
+    <!-- no translation found for description_krtv_7 (6204900788594114856) -->
+    <skip />
+    <!-- no translation found for description_krtv_12 (5134514644432355428) -->
+    <skip />
+    <!-- no translation found for description_krtv_15 (1183692678647313272) -->
+    <skip />
+    <!-- no translation found for description_krtv_19 (7021986912313208481) -->
+    <skip />
     <!-- no translation found for description_ustvpg (3666171166900312727) -->
     <skip />
     <!-- no translation found for description_ustvpg_d (6552868431924879897) -->
@@ -1789,16 +1803,6 @@
     <!-- no translation found for description_ustvpg_14 (6305164472373004907) -->
     <skip />
     <!-- no translation found for description_ustvpg_ma (5842074394338699982) -->
-    <skip />
-    <!-- no translation found for description_krtv_all (11497981488871053) -->
-    <skip />
-    <!-- no translation found for description_krtv_7 (6204900788594114856) -->
-    <skip />
-    <!-- no translation found for description_krtv_12 (5134514644432355428) -->
-    <skip />
-    <!-- no translation found for description_krtv_15 (1183692678647313272) -->
-    <skip />
-    <!-- no translation found for description_krtv_19 (7021986912313208481) -->
     <skip />
     <!-- no translation found for battery_saver_description (724302068634956656) -->
     <skip />
