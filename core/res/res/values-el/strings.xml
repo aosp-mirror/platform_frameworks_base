@@ -739,6 +739,10 @@
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Επιτρέπει σε μια εφαρμογή να παρέχει και να χρησιμοποιεί πιστοποιητικά DRM. Δεν θα χρειαστεί ποτέ για κανονικές εφαρμογές."</string>
     <string name="permlab_handoverStatus" msgid="1159132046126626731">"Λήψη κατάστασης μεταφοράς Android Beam"</string>
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Επιτρέπει σε αυτήν την εφαρμογή να λαμβάνει πληροφορίες σχετικά με τις τρέχουσες μεταφορές Android Beam"</string>
+    <!-- no translation found for permlab_removeDrmCertificates (7044888287209892751) -->
+    <skip />
+    <!-- no translation found for permdesc_removeDrmCertificates (7272999075113400993) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Ορισμός κανόνων κωδικού πρόσβασης"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Έλεγχος του μεγέθους και των χαρακτήρων που επιτρέπονται στους κωδικούς πρόσβασης ξεκλειδώματος οθόνης."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Παρακολούθηση προσπαθειών ξεκλειδώματος οθόνης"</string>
@@ -1766,6 +1770,80 @@
     <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"Αριθμός PIN"</string>
     <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"μοτίβο ξεκλειδώματος"</string>
     <string name="lock_to_app_unlock_password" msgid="795224196583495868">"κωδικός πρόσβασης"</string>
+    <!-- no translation found for description_autv_ctc (1340773034128413833) -->
+    <skip />
+    <!-- no translation found for description_autv_g (8825932008126488114) -->
+    <skip />
+    <!-- no translation found for description_autv_pg (3102051294835672333) -->
+    <skip />
+    <!-- no translation found for description_autv_m (1090796276190749241) -->
+    <skip />
+    <!-- no translation found for description_autv_ma15 (970119104753434051) -->
+    <skip />
+    <!-- no translation found for description_autv_r18 (3826039266665650748) -->
+    <skip />
+    <!-- no translation found for description_autv_x18 (2076614946730171971) -->
+    <skip />
+    <!-- no translation found for description_detv_all (4290816084213277907) -->
+    <skip />
+    <!-- no translation found for description_detv_12 (1483291295919180849) -->
+    <skip />
+    <!-- no translation found for description_detv_16 (1530748520169877780) -->
+    <skip />
+    <!-- no translation found for description_detv_18 (6932133267820316706) -->
+    <skip />
+    <!-- no translation found for description_estv_all (4617683093722624240) -->
+    <skip />
+    <!-- no translation found for description_estv_i (1141171160833794692) -->
+    <skip />
+    <!-- no translation found for description_estv_7 (4917355218226086349) -->
+    <skip />
+    <!-- no translation found for description_estv_13 (1591456940863913304) -->
+    <skip />
+    <!-- no translation found for description_estv_18 (1220200554553594583) -->
+    <skip />
+    <!-- no translation found for description_frtv_all (5277155895495938542) -->
+    <skip />
+    <!-- no translation found for description_frtv_10 (4751687393402667290) -->
+    <skip />
+    <!-- no translation found for description_frtv_12 (6813646899508030376) -->
+    <skip />
+    <!-- no translation found for description_frtv_16 (4466993068286008261) -->
+    <skip />
+    <!-- no translation found for description_frtv_18 (6486375640186293566) -->
+    <skip />
+    <!-- no translation found for description_krtv_all (11497981488871053) -->
+    <skip />
+    <!-- no translation found for description_krtv_7 (6204900788594114856) -->
+    <skip />
+    <!-- no translation found for description_krtv_12 (5134514644432355428) -->
+    <skip />
+    <!-- no translation found for description_krtv_15 (1183692678647313272) -->
+    <skip />
+    <!-- no translation found for description_krtv_19 (7021986912313208481) -->
+    <skip />
+    <!-- no translation found for description_nltv_v (3847993626347313388) -->
+    <skip />
+    <!-- no translation found for description_nltv_f (6053045297000290324) -->
+    <skip />
+    <!-- no translation found for description_nltv_s (5727758317180609838) -->
+    <skip />
+    <!-- no translation found for description_nltv_d (8647908408678974106) -->
+    <skip />
+    <!-- no translation found for description_nltv_da (6201574796131887422) -->
+    <skip />
+    <!-- no translation found for description_nltv_l (4895256473269741839) -->
+    <skip />
+    <!-- no translation found for description_nltv_al (438113237508206711) -->
+    <skip />
+    <!-- no translation found for description_nltv_6 (4940119514342845737) -->
+    <skip />
+    <!-- no translation found for description_nltv_9 (7229781600578274275) -->
+    <skip />
+    <!-- no translation found for description_nltv_12 (4096709091642456107) -->
+    <skip />
+    <!-- no translation found for description_nltv_16 (5921176624389788946) -->
+    <skip />
     <!-- no translation found for description_ustvpg (3666171166900312727) -->
     <skip />
     <!-- no translation found for description_ustvpg_d (6552868431924879897) -->
@@ -1789,16 +1867,6 @@
     <!-- no translation found for description_ustvpg_14 (6305164472373004907) -->
     <skip />
     <!-- no translation found for description_ustvpg_ma (5842074394338699982) -->
-    <skip />
-    <!-- no translation found for description_krtv_all (11497981488871053) -->
-    <skip />
-    <!-- no translation found for description_krtv_7 (6204900788594114856) -->
-    <skip />
-    <!-- no translation found for description_krtv_12 (5134514644432355428) -->
-    <skip />
-    <!-- no translation found for description_krtv_15 (1183692678647313272) -->
-    <skip />
-    <!-- no translation found for description_krtv_19 (7021986912313208481) -->
     <skip />
     <!-- no translation found for battery_saver_description (724302068634956656) -->
     <skip />
