@@ -568,12 +568,12 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.TimePicker">
-        <item name="legacyMode">true</item>
+        <item name="timePickerMode">spinner</item>
         <item name="legacyLayout">@layout/time_picker_legacy</item>
     </style>
 
     <style name="Widget.DatePicker">
-        <item name="legacyMode">true</item>
+        <item name="datePickerMode">spinner</item>
         <item name="legacyLayout">@layout/date_picker_legacy</item>
         <item name="calendarViewShown">false</item>
     </style>

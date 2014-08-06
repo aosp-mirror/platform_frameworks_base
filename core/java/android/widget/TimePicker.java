@@ -45,6 +45,9 @@ import java.util.Locale;
  */
 @Widget
 public class TimePicker extends FrameLayout {
+    private static final int MODE_SPINNER = 1;
+    private static final int MODE_CLOCK = 2;
+
     private final TimePickerDelegate mDelegate;
 
     /**
@@ -77,15 +80,19 @@ public class TimePicker extends FrameLayout {
 
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.TimePicker, defStyleAttr, defStyleRes);
-        final boolean legacyMode = a.getBoolean(R.styleable.TimePicker_legacyMode, true);
+        int mode = a.getInt(R.styleable.TimePicker_timePickerMode, MODE_SPINNER);
         a.recycle();
 
-        if (legacyMode) {
-            mDelegate = new LegacyTimePickerDelegate(
-                    this, context, attrs, defStyleAttr, defStyleRes);
-        } else {
-            mDelegate = new android.widget.TimePickerDelegate(
-                    this, context, attrs, defStyleAttr, defStyleRes);
+        switch (mode) {
+            case MODE_CLOCK:
+                mDelegate = new TimePickerSpinnerDelegate(
+                        this, context, attrs, defStyleAttr, defStyleRes);
+                break;
+            case MODE_SPINNER:
+            default:
+                mDelegate = new TimePickerClockDelegate(
+                        this, context, attrs, defStyleAttr, defStyleRes);
+                break;
         }
     }
 
