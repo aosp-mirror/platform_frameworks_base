@@ -25,6 +25,7 @@ import android.telephony.DisconnectCause;
 import com.android.internal.telecomm.IVideoCallProvider;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -51,8 +52,8 @@ public final class ParcelableCall implements Parcelable {
     private final List<String> mChildCallIds;
     private final StatusHints mStatusHints;
     private final int mVideoState;
+    private final List<String> mConferenceableCallIds;
 
-    /** @hide */
     public ParcelableCall(
             String id,
             CallState state,
@@ -71,7 +72,8 @@ public final class ParcelableCall implements Parcelable {
             String parentCallId,
             List<String> childCallIds,
             StatusHints statusHints,
-            int videoState) {
+            int videoState,
+            List<String> conferenceableCallIds) {
         mId = id;
         mState = state;
         mDisconnectCauseCode = disconnectCauseCode;
@@ -90,6 +92,7 @@ public final class ParcelableCall implements Parcelable {
         mChildCallIds = childCallIds;
         mStatusHints = statusHints;
         mVideoState = videoState;
+        mConferenceableCallIds = Collections.unmodifiableList(conferenceableCallIds);
     }
 
     /** The unique ID of the call. */
@@ -183,7 +186,6 @@ public final class ParcelableCall implements Parcelable {
 
     /**
      * The conference call to which this call is conferenced. Null if not conferenced.
-     * @hide
      */
     public String getParentCallId() {
         return mParentCallId;
@@ -192,10 +194,13 @@ public final class ParcelableCall implements Parcelable {
     /**
      * The child call-IDs if this call is a conference call. Returns an empty list if this is not
      * a conference call or if the conference call contains no children.
-     * @hide
      */
     public List<String> getChildCallIds() {
         return mChildCallIds;
+    }
+
+    public List<String> getConferenceableCallIds() {
+        return mConferenceableCallIds;
     }
 
     /**
@@ -242,11 +247,13 @@ public final class ParcelableCall implements Parcelable {
             source.readList(childCallIds, classLoader);
             StatusHints statusHints = source.readParcelable(classLoader);
             int videoState = source.readInt();
+            List<String> conferenceableCallIds = new ArrayList<>();
+            source.readList(conferenceableCallIds, classLoader);
             return new ParcelableCall(id, state, disconnectCauseCode, disconnectCauseMsg,
                     cannedSmsResponses, capabilities, connectTimeMillis, handle, handlePresentation,
                     callerDisplayName, callerDisplayNamePresentation, gatewayInfo,
                     accountHandle, videoCallProvider, parentCallId, childCallIds, statusHints,
-                    videoState);
+                    videoState, conferenceableCallIds);
         }
 
         @Override
@@ -283,6 +290,7 @@ public final class ParcelableCall implements Parcelable {
         destination.writeList(mChildCallIds);
         destination.writeParcelable(mStatusHints, 0);
         destination.writeInt(mVideoState);
+        destination.writeList(mConferenceableCallIds);
     }
 
     @Override

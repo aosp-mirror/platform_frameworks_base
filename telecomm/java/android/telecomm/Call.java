@@ -24,6 +24,7 @@ import java.lang.String;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -326,20 +327,34 @@ public final class Call {
          * @param call The {@code Call} being destroyed.
          */
         public void onCallDestroyed(Call call) {}
+
+        /**
+         * Invoked upon changes to the set of {@code Call}s with which this {@code Call} can be
+         * conferenced.
+         *
+         * @param call The {@code Call} being updated.
+         * @param conferenceableCalls The {@code Call}s with which this {@code Call} can be
+         *          conferenced.
+         */
+        public void onConferenceableCallsChanged(Call call, List<Call> conferenceableCalls) {}
     }
 
     private final Phone mPhone;
     private final String mTelecommCallId;
     private final InCallAdapter mInCallAdapter;
-    private Call mParent = null;
-    private int mState;
     private final List<Call> mChildren = new ArrayList<>();
     private final List<Call> mUnmodifiableChildren = Collections.unmodifiableList(mChildren);
+    private final List<Listener> mListeners = new ArrayList<>();
+    private final List<Call> mConferenceableCalls = new ArrayList<>();
+    private final List<Call> mUnmodifiableConferenceableCalls =
+            Collections.unmodifiableList(mConferenceableCalls);
+
+    private Call mParent = null;
+    private int mState;
     private List<String> mCannedTextResponses = null;
     private String mRemainingPostDialSequence;
     private InCallService.VideoCall mVideoCall;
     private Details mDetails;
-    private final List<Listener> mListeners = new ArrayList<>();
 
     /**
      * Obtains the post-dial sequence remaining to be emitted by this {@code Call}, if any.
@@ -455,9 +470,13 @@ public final class Call {
 
     /**
      * Instructs this {@code Call} to enter a conference.
+     *
+     * @param callToConferenceWith The other call with which to conference.
      */
-    public void conference() {
-        mInCallAdapter.conference(mTelecommCallId);
+    public void conference(Call callToConferenceWith) {
+        if (callToConferenceWith != null) {
+            mInCallAdapter.conference(mTelecommCallId, callToConferenceWith.mTelecommCallId);
+        }
     }
 
     /**
@@ -494,6 +513,15 @@ public final class Call {
      */
     public List<Call> getChildren() {
         return mUnmodifiableChildren;
+    }
+
+    /**
+     * Returns the list of {@code Call}s with which this {@code Call} is allowed to conference.
+     *
+     * @return The list of conferenceable {@code Call}s.
+     */
+    public List<Call> getConferenceableCalls() {
+        return mUnmodifiableConferenceableCalls;
     }
 
     /**
@@ -568,9 +596,8 @@ public final class Call {
     }
 
     /** {@hide} */
-    final void internalUpdate(ParcelableCall parcelableCall) {
+    final void internalUpdate(ParcelableCall parcelableCall, Map<String, Call> callIdMap) {
         // First, we update the internal state as far as possible before firing any updates.
-
         Details details = new Details(
                 parcelableCall.getHandle(),
                 parcelableCall.getHandlePresentation(),
@@ -617,6 +644,20 @@ public final class Call {
                 mChildren.add(mPhone.internalGetCallByTelecommId(
                         parcelableCall.getChildCallIds().get(i)));
             }
+        }
+
+        List<String> conferenceableCallIds = parcelableCall.getConferenceableCallIds();
+        List<Call> conferenceableCalls = new ArrayList<Call>(conferenceableCallIds.size());
+        for (String otherId : conferenceableCallIds) {
+            if (callIdMap.containsKey(otherId)) {
+                conferenceableCalls.add(callIdMap.get(otherId));
+            }
+        }
+
+        if (!Objects.equals(mConferenceableCalls, conferenceableCalls)) {
+            mConferenceableCalls.clear();
+            mConferenceableCalls.addAll(conferenceableCalls);
+            fireConferenceableCallsChanged();
         }
 
         // Now we fire updates, ensuring that any client who listens to any of these notifications
@@ -716,6 +757,13 @@ public final class Call {
         Listener[] listeners = mListeners.toArray(new Listener[mListeners.size()]);
         for (int i = 0; i < listeners.length; i++) {
             listeners[i].onCallDestroyed(this);
+        }
+    }
+
+    private void fireConferenceableCallsChanged() {
+        Listener[] listeners = mListeners.toArray(new Listener[mListeners.size()]);
+        for (int i = 0; i < listeners.length; i++) {
+            listeners[i].onConferenceableCallsChanged(this, mUnmodifiableConferenceableCalls);
         }
     }
 

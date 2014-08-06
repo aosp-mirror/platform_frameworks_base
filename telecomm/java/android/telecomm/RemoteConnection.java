@@ -23,6 +23,8 @@ import android.telephony.DisconnectCause;
 
 import com.android.internal.telecomm.IConnectionService;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -171,11 +173,14 @@ public final class RemoteConnection {
          * @param connection The {@code RemoteConnection} invoking this method.
          */
         public void onDestroyed(RemoteConnection connection) {}
+        public void onConferenceableConnectionsChanged(
+                RemoteConnection connection, List<RemoteConnection> conferenceableConnections) {}
     }
 
     private IConnectionService mConnectionService;
     private final String mConnectionId;
     private final Set<Listener> mListeners = new HashSet<>();
+    private final Set<RemoteConnection> mConferenceableConnections = new HashSet<>();
 
     private int mState = Connection.State.NEW;
     private int mDisconnectCauseCode = DisconnectCause.NOT_VALID;
@@ -655,6 +660,16 @@ public final class RemoteConnection {
     void startActivityFromInCall(PendingIntent intent) {
         for (Listener l : mListeners) {
             l.onStartActivityFromInCall(this, intent);
+        }
+    }
+
+    /** @hide */
+    void setConferenceableConnections(List<RemoteConnection> conferenceableConnections) {
+        mConferenceableConnections.clear();
+        mConferenceableConnections.addAll(conferenceableConnections);
+        for (Listener l : mListeners) {
+            l.onConferenceableConnectionsChanged(
+                    this, new ArrayList<RemoteConnection>(mConferenceableConnections));
         }
     }
 

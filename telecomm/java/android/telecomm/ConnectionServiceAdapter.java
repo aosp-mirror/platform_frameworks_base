@@ -350,6 +350,16 @@ final class ConnectionServiceAdapter implements DeathRecipient {
         }
     }
 
+    void setConferenceableConnections(String callId, List<String> conferenceableCallIds) {
+        Log.v(this, "setConferenceableConnections: %s, %s", callId, conferenceableCallIds);
+        for (IConnectionServiceAdapter adapter : mAdapters) {
+            try {
+                adapter.setConferenceableConnections(callId, conferenceableCallIds);
+            } catch (RemoteException ignored) {
+            }
+        }
+    }
+
     void startActivityFromInCall(String callId, PendingIntent intent) {
         for (IConnectionServiceAdapter adapter : mAdapters) {
             try {

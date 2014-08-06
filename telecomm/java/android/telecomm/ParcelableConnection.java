@@ -98,6 +98,18 @@ public final class ParcelableConnection implements Parcelable {
         return mVideoState;
     }
 
+    @Override
+    public String toString() {
+        return new StringBuilder()
+                .append("ParcelableConnection [act:")
+                .append(mPhoneAccount)
+                .append(", state:")
+                .append(mState)
+                .append(", capabilities:")
+                .append(CallCapabilities.toString(mCapabilities))
+                .toString();
+    }
+
     public static final Parcelable.Creator<ParcelableConnection> CREATOR =
             new Parcelable.Creator<ParcelableConnection> () {
         @Override
