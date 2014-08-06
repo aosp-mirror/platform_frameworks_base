@@ -94,8 +94,10 @@ void RenderNode::output(uint32_t level) {
 
     properties().debugOutputProperties(level);
     int flags = DisplayListOp::kOpLogFlag_Recurse;
-    for (unsigned int i = 0; i < mDisplayListData->displayListOps.size(); i++) {
-        mDisplayListData->displayListOps[i]->output(level, flags);
+    if (mDisplayListData) {
+        for (unsigned int i = 0; i < mDisplayListData->displayListOps.size(); i++) {
+            mDisplayListData->displayListOps[i]->output(level, flags);
+        }
     }
 
     ALOGD("%*sDone (%p, %s)", (level - 1) * 2, "", this, getName());
