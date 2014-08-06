@@ -2034,12 +2034,8 @@ status_t OpenGLRenderer::drawBitmaps(const SkBitmap* bitmap, AssetAtlas::Entry* 
     return DrawGlInfo::kStatusDrew;
 }
 
-status_t OpenGLRenderer::drawBitmap(const SkBitmap* bitmap, float left, float top,
-        const SkPaint* paint) {
-    const float right = left + bitmap->width();
-    const float bottom = top + bitmap->height();
-
-    if (quickRejectSetupScissor(left, top, right, bottom)) {
+status_t OpenGLRenderer::drawBitmap(const SkBitmap* bitmap, const SkPaint* paint) {
+    if (quickRejectSetupScissor(0, 0, bitmap->width(), bitmap->height())) {
         return DrawGlInfo::kStatusDone;
     }
 
@@ -2049,49 +2045,16 @@ status_t OpenGLRenderer::drawBitmap(const SkBitmap* bitmap, float left, float to
     const AutoTexture autoCleanup(texture);
 
     if (CC_UNLIKELY(bitmap->colorType() == kAlpha_8_SkColorType)) {
-        drawAlphaBitmap(texture, left, top, paint);
+        drawAlphaBitmap(texture, 0, 0, paint);
     } else {
-        drawTextureRect(left, top, right, bottom, texture, paint);
+        drawTextureRect(0, 0, bitmap->width(), bitmap->height(), texture, paint);
     }
 
     return DrawGlInfo::kStatusDrew;
 }
 
-status_t OpenGLRenderer::drawBitmap(const SkBitmap* bitmap, const SkMatrix& matrix,
-        const SkPaint* paint) {
-    Rect r(0.0f, 0.0f, bitmap->width(), bitmap->height());
-    const mat4 transform(matrix);
-    transform.mapRect(r);
-
-    if (quickRejectSetupScissor(r.left, r.top, r.right, r.bottom)) {
-        return DrawGlInfo::kStatusDone;
-    }
-
-    mCaches.activeTexture(0);
-    Texture* texture = getTexture(bitmap);
-    if (!texture) return DrawGlInfo::kStatusDone;
-    const AutoTexture autoCleanup(texture);
-
-    // This could be done in a cheaper way, all we need is pass the matrix
-    // to the vertex shader. The save/restore is a bit overkill.
-    save(SkCanvas::kMatrix_SaveFlag);
-    concatMatrix(matrix);
-    if (CC_UNLIKELY(bitmap->colorType() == kAlpha_8_SkColorType)) {
-        drawAlphaBitmap(texture, 0.0f, 0.0f, paint);
-    } else {
-        drawTextureRect(0.0f, 0.0f, bitmap->width(), bitmap->height(), texture, paint);
-    }
-    restore();
-
-    return DrawGlInfo::kStatusDrew;
-}
-
-status_t OpenGLRenderer::drawBitmapData(const SkBitmap* bitmap, float left, float top,
-        const SkPaint* paint) {
-    const float right = left + bitmap->width();
-    const float bottom = top + bitmap->height();
-
-    if (quickRejectSetupScissor(left, top, right, bottom)) {
+status_t OpenGLRenderer::drawBitmapData(const SkBitmap* bitmap, const SkPaint* paint) {
+    if (quickRejectSetupScissor(0, 0, bitmap->width(), bitmap->height())) {
         return DrawGlInfo::kStatusDone;
     }
 
@@ -2100,9 +2063,9 @@ status_t OpenGLRenderer::drawBitmapData(const SkBitmap* bitmap, float left, floa
     const AutoTexture autoCleanup(texture);
 
     if (CC_UNLIKELY(bitmap->colorType() == kAlpha_8_SkColorType)) {
-        drawAlphaBitmap(texture, left, top, paint);
+        drawAlphaBitmap(texture, 0, 0, paint);
     } else {
-        drawTextureRect(left, top, right, bottom, texture, paint);
+        drawTextureRect(0, 0, bitmap->width(), bitmap->height(), texture, paint);
     }
 
     return DrawGlInfo::kStatusDrew;
