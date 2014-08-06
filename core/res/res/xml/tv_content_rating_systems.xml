@@ -66,6 +66,36 @@
     <!-- TV content rating system for DK TV -->
 
     <!-- TV content rating system for ES TV -->
+    <rating-system-definition id="ES_TV"
+        displayName="@string/display_name_estv"
+        country="ES">
+        <rating-definition id="ES_TV_ALL"
+            displayName="@string/display_name_estv_all"
+            description="@string/description_estv_all"
+            ageHint="0" />
+        <rating-definition id="ES_TV_I"
+            displayName="@string/display_name_estv_i"
+            description="@string/description_estv_i"
+            ageHint="0" />
+        <rating-definition id="ES_TV_7"
+            displayName="@string/display_name_estv_7"
+            description="@string/description_estv_7"
+            ageHint="7" />
+        <rating-definition id="ES_TV_13"
+            displayName="@string/display_name_estv_13"
+            description="@string/description_estv_13"
+            ageHint="13" />
+        <rating-definition id="ES_TV_18"
+            displayName="@string/display_name_estv_18"
+            description="@string/description_estv_18"
+            ageHint="18" />
+        <order>
+            <rating id="ES_TV_ALL" />
+            <rating id="ES_TV_7" />
+            <rating id="ES_TV_13" />
+            <rating id="ES_TV_18" />
+        </order>
+    </rating-system-definition>
 
     <!-- TV content rating system for FI TV -->
 

@@ -132,10 +132,10 @@ import java.util.List;
  *         <td>DK_TV</td>
  *         <td></td>
  *     </tr-->
- *     <!--tr>
+ *     <tr>
  *         <td>ES_TV</td>
- *         <td></td>
- *     </tr-->
+ *         <td>The Spanish rating system for television programs</td>
+ *     </tr>
  *     <!--tr>
  *         <td>FI_TV</td>
  *         <td></td>
@@ -345,10 +345,30 @@ import java.util.List;
  *         <td>DK_TV_ALL</td>
  *         <td></td>
  *     </tr-->
- *     <!--tr>
+ *     <tr>
  *         <td>ES_TV_ALL</td>
- *         <td></td>
- *     </tr-->
+ *         <td>A rating string for {@code ES_TV}. This rating is for programs for all ages.</td>
+ *     </tr>
+ *     <tr>
+ *         <td>ES_TV_I</td>
+ *         <td>A rating string for {@code ES_TV}. This rating is for the recommended programs
+ *         especially for children.</td>
+ *     </tr>
+ *     <tr>
+ *         <td>ES_TV_7</td>
+ *         <td>A rating string for {@code ES_TV}. This rating is for programs not recommended for
+ *         children under 7.</td>
+ *     </tr>
+ *     <tr>
+ *         <td>ES_TV_13</td>
+ *         <td>A rating string for {@code ES_TV}. This rating is for programs not recommended for
+ *         children under 13.</td>
+ *     </tr>
+ *     <tr>
+ *         <td>ES_TV_18</td>
+ *         <td>A rating string for {@code ES_TV}. This rating is for programs not recommended for
+ *         children under 18.</td>
+ *     </tr>
  *     <!--tr>
  *         <td>FI_TV_ALL</td>
  *         <td></td>
@@ -651,10 +671,6 @@ import java.util.List;
  *     </tr-->
  *     <!--tr>
  *         <td>DK_TV_</td>
- *         <td></td>
- *     </tr-->
- *     <!--tr>
- *         <td>ES_TV_</td>
  *         <td></td>
  *     </tr-->
  *     <!--tr>
