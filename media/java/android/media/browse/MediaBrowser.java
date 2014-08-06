@@ -225,6 +225,17 @@ public final class MediaBrowser {
     }
 
     /**
+     * Gets the service component that the media browser is connected to.
+     */
+    public @NonNull ComponentName getServiceComponent() {
+        if (!isConnected()) {
+            throw new IllegalStateException("getServiceComponent() called while not connected" +
+                    " (state=" + mState + ")");
+        }
+        return mServiceComponent;
+    }
+
+    /**
      * Gets the root Uri.
      * <p>
      * Note that the root uri may become invalid or change when when the
@@ -234,7 +245,7 @@ public final class MediaBrowser {
      * @throws IllegalStateException if not connected.
      */
     public @NonNull Uri getRoot() {
-        if (mState != CONNECT_STATE_CONNECTED) {
+        if (!isConnected()) {
             throw new IllegalStateException("getSessionToken() called while not connected (state="
                     + getStateLabel(mState) + ")");
         }
@@ -247,7 +258,7 @@ public final class MediaBrowser {
      * @throws IllegalStateException if not connected.
      */
     public @Nullable Bundle getExtras() {
-        if (mState != CONNECT_STATE_CONNECTED) {
+        if (!isConnected()) {
             throw new IllegalStateException("getExtras() called while not connected (state="
                     + getStateLabel(mState) + ")");
         }
@@ -266,7 +277,7 @@ public final class MediaBrowser {
      * @throws IllegalStateException if not connected.
      */
      public @NonNull MediaSession.Token getSessionToken() {
-        if (mState != CONNECT_STATE_CONNECTED) {
+        if (!isConnected()) {
             throw new IllegalStateException("getSessionToken() called while not connected (state="
                     + mState + ")");
         }
