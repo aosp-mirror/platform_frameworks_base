@@ -41,7 +41,7 @@ public abstract class AbsSeekBar extends ProgressBar {
     private final Rect mTempRect = new Rect();
 
     private Drawable mThumb;
-    private ColorStateList mThumbTint = null;
+    private ColorStateList mThumbTintList = null;
     private PorterDuff.Mode mThumbTintMode = PorterDuff.Mode.SRC_ATOP;
     private boolean mHasThumbTint = false;
 
@@ -100,7 +100,7 @@ public abstract class AbsSeekBar extends ProgressBar {
                 R.styleable.SeekBar_thumbTintMode, -1), mThumbTintMode);
 
         if (a.hasValue(R.styleable.SeekBar_thumbTint)) {
-            mThumbTint = a.getColorStateList(R.styleable.SeekBar_thumbTint);
+            mThumbTintList = a.getColorStateList(R.styleable.SeekBar_thumbTint);
             mHasThumbTint = true;
 
             applyThumbTint();
@@ -193,16 +193,16 @@ public abstract class AbsSeekBar extends ProgressBar {
      * <p>
      * Subsequent calls to {@link #setThumb(Drawable)} will automatically
      * mutate the drawable and apply the specified tint and tint mode using
-     * {@link Drawable#setTint(ColorStateList, PorterDuff.Mode)}.
+     * {@link Drawable#setTintList(ColorStateList)}.
      *
      * @param tint the tint to apply, may be {@code null} to clear tint
      *
      * @attr ref android.R.styleable#SeekBar_thumbTint
-     * @see #getThumbTint()
-     * @see Drawable#setTint(ColorStateList, PorterDuff.Mode)
+     * @see #getThumbTintList()
+     * @see Drawable#setTintList(ColorStateList)
      */
-    public void setThumbTint(@Nullable ColorStateList tint) {
-        mThumbTint = tint;
+    public void setThumbTintList(@Nullable ColorStateList tint) {
+        mThumbTintList = tint;
         mHasThumbTint = true;
 
         applyThumbTint();
@@ -211,16 +211,16 @@ public abstract class AbsSeekBar extends ProgressBar {
     /**
      * @return the tint applied to the thumb drawable
      * @attr ref android.R.styleable#SeekBar_thumbTint
-     * @see #setThumbTint(ColorStateList)
+     * @see #setThumbTintList(ColorStateList)
      */
     @Nullable
-    public ColorStateList getThumbTint() {
-        return mThumbTint;
+    public ColorStateList getThumbTintList() {
+        return mThumbTintList;
     }
 
     /**
      * Specifies the blending mode used to apply the tint specified by
-     * {@link #setThumbTint(ColorStateList)}} to the thumb drawable. The
+     * {@link #setThumbTintList(ColorStateList)}} to the thumb drawable. The
      * default mode is {@link PorterDuff.Mode#SRC_ATOP}.
      *
      * @param tintMode the blending mode used to apply the tint, may be
@@ -228,7 +228,7 @@ public abstract class AbsSeekBar extends ProgressBar {
      *
      * @attr ref android.R.styleable#SeekBar_thumbTintMode
      * @see #getThumbTintMode()
-     * @see Drawable#setTint(ColorStateList, PorterDuff.Mode)
+     * @see Drawable#setTintMode(PorterDuff.Mode)
      */
     public void setThumbTintMode(@Nullable PorterDuff.Mode tintMode) {
         mThumbTintMode = tintMode;
@@ -249,7 +249,8 @@ public abstract class AbsSeekBar extends ProgressBar {
     private void applyThumbTint() {
         if (mThumb != null && mHasThumbTint) {
             mThumb = mThumb.mutate();
-            mThumb.setTint(mThumbTint, mThumbTintMode);
+            mThumb.setTintList(mThumbTintList);
+            mThumb.setTintMode(mThumbTintMode);
         }
     }
 

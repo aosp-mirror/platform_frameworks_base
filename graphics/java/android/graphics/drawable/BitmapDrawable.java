@@ -623,12 +623,16 @@ public class BitmapDrawable extends Drawable {
     }
 
     @Override
-    public void setTint(ColorStateList tint, PorterDuff.Mode tintMode) {
-        final BitmapState state = mBitmapState;
-        state.mTint = tint;
-        state.mTintMode = tintMode;
+    public void setTintList(ColorStateList tint) {
+        mBitmapState.mTint = tint;
+        mTintFilter = updateTintFilter(mTintFilter, tint, mBitmapState.mTintMode);
+        invalidateSelf();
+    }
 
-        mTintFilter = updateTintFilter(mTintFilter, tint, tintMode);
+    @Override
+    public void setTintMode(PorterDuff.Mode tintMode) {
+        mBitmapState.mTintMode = tintMode;
+        mTintFilter = updateTintFilter(mTintFilter, mBitmapState.mTint, tintMode);
         invalidateSelf();
     }
 

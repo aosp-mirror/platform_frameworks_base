@@ -167,15 +167,17 @@ public class ColorDrawable extends Drawable {
     }
 
     @Override
-    public void setTint(ColorStateList tint, Mode tintMode) {
-        final ColorState state = mColorState;
-        if (state.mTint != tint || state.mTintMode != tintMode) {
-            state.mTint = tint;
-            state.mTintMode = tintMode;
+    public void setTintList(ColorStateList tint) {
+        mColorState.mTint = tint;
+        mTintFilter = updateTintFilter(mTintFilter, tint, mColorState.mTintMode);
+        invalidateSelf();
+    }
 
-            mTintFilter = updateTintFilter(mTintFilter, tint, tintMode);
-            invalidateSelf();
-        }
+    @Override
+    public void setTintMode(Mode tintMode) {
+        mColorState.mTintMode = tintMode;
+        mTintFilter = updateTintFilter(mTintFilter, mColorState.mTint, tintMode);
+        invalidateSelf();
     }
 
     @Override

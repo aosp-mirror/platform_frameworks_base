@@ -307,14 +307,23 @@ public class VectorDrawable extends Drawable {
     }
 
     @Override
-    public void setTint(ColorStateList tint, Mode tintMode) {
+    public void setTintList(ColorStateList tint) {
         final VectorDrawableState state = mVectorState;
-        if (state.mTint != tint || state.mTintMode != tintMode) {
+        if (state.mTint != tint) {
             state.mTint = tint;
-            state.mTintMode = tintMode;
+            mTintFilter = updateTintFilter(mTintFilter, tint, state.mTintMode);
+            state.mVPathRenderer.setColorFilter(mTintFilter);
+            invalidateSelf();
+        }
+    }
 
-            mTintFilter = updateTintFilter(mTintFilter, tint, tintMode);
-            mVectorState.mVPathRenderer.setColorFilter(mTintFilter);
+    @Override
+    public void setTintMode(Mode tintMode) {
+        final VectorDrawableState state = mVectorState;
+        if (state.mTintMode != tintMode) {
+            state.mTintMode = tintMode;
+            mTintFilter = updateTintFilter(mTintFilter, state.mTint, tintMode);
+            state.mVPathRenderer.setColorFilter(mTintFilter);
             invalidateSelf();
         }
     }

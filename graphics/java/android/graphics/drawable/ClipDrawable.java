@@ -174,8 +174,13 @@ public class ClipDrawable extends Drawable implements Drawable.Callback {
     }
 
     @Override
-    public void setTint(ColorStateList tint, Mode tintMode) {
-        mClipState.mDrawable.setTint(tint, tintMode);
+    public void setTintList(ColorStateList tint) {
+        mClipState.mDrawable.setTintList(tint);
+    }
+
+    @Override
+    public void setTintMode(Mode tintMode) {
+        mClipState.mDrawable.setTintMode(tintMode);
     }
 
     @Override
