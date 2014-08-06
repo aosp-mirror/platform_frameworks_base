@@ -209,7 +209,7 @@ public:
     }
 
     bool setAlpha(float alpha) {
-        alpha = fminf(1.0f, fmaxf(0.0f, alpha));
+        alpha = MathUtils::clampAlpha(alpha);
         return RP_SET(mPrimitiveFields.mAlpha, alpha);
     }
 
