@@ -17091,8 +17091,8 @@ package android.media.tv {
     method public void notifyChannelRetuned(android.net.Uri);
     method public void notifyContentAllowed();
     method public void notifyContentBlocked(android.media.tv.TvContentRating);
-    method public void notifyTrackInfoChanged(java.util.List<android.media.tv.TvTrackInfo>);
-    method public void notifyTrackSelectionChanged(java.util.List<android.media.tv.TvTrackInfo>);
+    method public void notifyTrackSelected(int, java.lang.String);
+    method public void notifyTracksChanged(java.util.List<android.media.tv.TvTrackInfo>);
     method public void notifyVideoAvailable();
     method public void notifyVideoUnavailable(int);
     method public android.view.View onCreateOverlayView();
@@ -17102,7 +17102,7 @@ package android.media.tv {
     method public boolean onKeyMultiple(int, int, android.view.KeyEvent);
     method public boolean onKeyUp(int, android.view.KeyEvent);
     method public abstract void onRelease();
-    method public boolean onSelectTrack(android.media.tv.TvTrackInfo);
+    method public boolean onSelectTrack(int, java.lang.String);
     method public abstract void onSetCaptionEnabled(boolean);
     method public abstract void onSetStreamVolume(float);
     method public abstract boolean onSetSurface(android.view.Surface);
@@ -17111,7 +17111,6 @@ package android.media.tv {
     method public boolean onTrackballEvent(android.view.MotionEvent);
     method public abstract boolean onTune(android.net.Uri);
     method public void onUnblockContent(android.media.tv.TvContentRating);
-    method public boolean onUnselectTrack(android.media.tv.TvTrackInfo);
     method public void setOverlayViewEnabled(boolean);
   }
 
@@ -17120,6 +17119,7 @@ package android.media.tv {
     method public final int getAudioChannelCount();
     method public final int getAudioSampleRate();
     method public final android.os.Bundle getExtra();
+    method public final java.lang.String getId();
     method public final java.lang.String getLanguage();
     method public final int getType();
     method public final int getVideoHeight();
@@ -17132,7 +17132,7 @@ package android.media.tv {
   }
 
   public static final class TvTrackInfo.Builder {
-    ctor public TvTrackInfo.Builder(int);
+    ctor public TvTrackInfo.Builder(int, java.lang.String);
     method public android.media.tv.TvTrackInfo build();
     method public final android.media.tv.TvTrackInfo.Builder setAudioChannelCount(int);
     method public final android.media.tv.TvTrackInfo.Builder setAudioSampleRate(int);
@@ -17147,18 +17147,17 @@ package android.media.tv {
     ctor public TvView(android.content.Context, android.util.AttributeSet);
     ctor public TvView(android.content.Context, android.util.AttributeSet, int);
     method public boolean dispatchUnhandledInputEvent(android.view.InputEvent);
-    method public java.util.List<android.media.tv.TvTrackInfo> getSelectedTracks();
-    method public java.util.List<android.media.tv.TvTrackInfo> getTracks();
+    method public java.lang.String getSelectedTrack(int);
+    method public java.util.List<android.media.tv.TvTrackInfo> getTracks(int);
     method protected void onLayout(boolean, int, int, int, int);
     method public boolean onUnhandledInputEvent(android.view.InputEvent);
     method public void reset();
-    method public void selectTrack(android.media.tv.TvTrackInfo);
+    method public void selectTrack(int, java.lang.String);
     method public void setCaptionEnabled(boolean);
     method public void setOnUnhandledInputEventListener(android.media.tv.TvView.OnUnhandledInputEventListener);
     method public void setStreamVolume(float);
     method public void setTvInputListener(android.media.tv.TvView.TvInputListener);
     method public void tune(java.lang.String, android.net.Uri);
-    method public void unselectTrack(android.media.tv.TvTrackInfo);
     field public static final int ERROR_INPUT_DISCONNECTED = 1; // 0x1
     field public static final int ERROR_INPUT_NOT_CONNECTED = 0; // 0x0
   }
@@ -17173,8 +17172,8 @@ package android.media.tv {
     method public void onContentAllowed(java.lang.String);
     method public void onContentBlocked(java.lang.String, android.media.tv.TvContentRating);
     method public void onError(java.lang.String, int);
-    method public void onTrackInfoChanged(java.lang.String, java.util.List<android.media.tv.TvTrackInfo>);
-    method public void onTrackSelectionChanged(java.lang.String, java.util.List<android.media.tv.TvTrackInfo>);
+    method public void onTrackSelected(java.lang.String, int, java.lang.String);
+    method public void onTracksChanged(java.lang.String, java.util.List<android.media.tv.TvTrackInfo>);
     method public void onVideoAvailable(java.lang.String);
     method public void onVideoSizeChanged(java.lang.String, int, int);
     method public void onVideoUnavailable(java.lang.String, int);

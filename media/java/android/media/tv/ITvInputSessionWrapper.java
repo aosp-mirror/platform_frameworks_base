@@ -49,12 +49,11 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     private static final int DO_TUNE = 6;
     private static final int DO_SET_CAPTION_ENABLED = 7;
     private static final int DO_SELECT_TRACK = 8;
-    private static final int DO_UNSELECT_TRACK = 9;
-    private static final int DO_APP_PRIVATE_COMMAND = 10;
-    private static final int DO_CREATE_OVERLAY_VIEW = 11;
-    private static final int DO_RELAYOUT_OVERLAY_VIEW = 12;
-    private static final int DO_REMOVE_OVERLAY_VIEW = 13;
-    private static final int DO_REQUEST_UNBLOCK_CONTENT = 14;
+    private static final int DO_APP_PRIVATE_COMMAND = 9;
+    private static final int DO_CREATE_OVERLAY_VIEW = 10;
+    private static final int DO_RELAYOUT_OVERLAY_VIEW = 11;
+    private static final int DO_REMOVE_OVERLAY_VIEW = 12;
+    private static final int DO_REQUEST_UNBLOCK_CONTENT = 13;
 
     private final HandlerCaller mCaller;
 
@@ -121,11 +120,9 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
                 return;
             }
             case DO_SELECT_TRACK: {
-                mTvInputSessionImpl.selectTrack((TvTrackInfo) msg.obj);
-                return;
-            }
-            case DO_UNSELECT_TRACK: {
-                mTvInputSessionImpl.unselectTrack((TvTrackInfo) msg.obj);
+                SomeArgs args = (SomeArgs) msg.obj;
+                mTvInputSessionImpl.selectTrack((Integer) args.arg1, (String) args.arg2);
+                args.recycle();
                 return;
             }
             case DO_APP_PRIVATE_COMMAND: {
@@ -196,13 +193,8 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     }
 
     @Override
-    public void selectTrack(TvTrackInfo track) {
-        mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_SELECT_TRACK, track));
-    }
-
-    @Override
-    public void unselectTrack(TvTrackInfo track) {
-        mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_UNSELECT_TRACK, track));
+    public void selectTrack(int type, String trackId) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageOO(DO_SELECT_TRACK, type, trackId));
     }
 
     @Override
