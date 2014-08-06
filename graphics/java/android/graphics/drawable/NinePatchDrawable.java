@@ -613,10 +613,10 @@ public class NinePatchDrawable extends Drawable {
             this(ninePatch, padding, opticalInsets, DEFAULT_DITHER, false);
         }
 
-        NinePatchState(NinePatch ninePatch, Rect rect, Rect opticalInsets, boolean dither,
+        NinePatchState(NinePatch ninePatch, Rect padding, Rect opticalInsets, boolean dither,
                 boolean autoMirror) {
             mNinePatch = ninePatch;
-            mPadding = rect;
+            mPadding = padding;
             mOpticalInsets = Insets.of(opticalInsets);
             mDither = dither;
             mAutoMirrored = autoMirror;
