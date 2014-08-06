@@ -20,6 +20,7 @@ namespace android {
 namespace uirenderer {
 
 #define NON_ZERO_EPSILON (0.001f)
+#define ALPHA_EPSILON (0.001f)
 
 class MathUtils {
 public:
@@ -32,6 +33,16 @@ public:
 
     inline static bool isPositive(float value) {
         return value >= NON_ZERO_EPSILON;
+    }
+
+    inline static float clampAlpha(float alpha) {
+        if (alpha <= ALPHA_EPSILON) {
+            return 0;
+        } else if (alpha >= (1 - ALPHA_EPSILON)) {
+            return 1;
+        } else {
+            return alpha;
+        }
     }
 
     inline static bool areEqual(float valueA, float valueB) {
