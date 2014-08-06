@@ -20,7 +20,6 @@ import android.graphics.Rect;
 import android.hardware.Camera;
 import android.hardware.Camera.Parameters;
 import android.hardware.camera2.CameraCharacteristics;
-import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.impl.CameraMetadataNative;
@@ -133,26 +132,15 @@ public class LegacyResultMapper {
          */
         mapAe(result, characteristics, request, activeArraySize, zoomData, /*out*/params);
 
-        // control.afMode
-        result.set(CaptureResult.CONTROL_AF_MODE, convertLegacyAfMode(params.getFocusMode()));
+        /*
+         * control.af*
+         */
+        mapAf(result, activeArraySize, zoomData, /*out*/params);
 
-        // control.awbLock
-        result.set(CaptureResult.CONTROL_AWB_LOCK, params.getAutoWhiteBalanceLock());
-
-        // control.awbState
-        if (LegacyMetadataMapper.LIE_ABOUT_AWB_STATE) {
-            // Lie to pass CTS temporarily.
-            // TODO: CTS needs to be updated not to query this value
-            // for LIMITED devices unless its guaranteed to be available.
-            result.set(CaptureResult.CONTROL_AWB_STATE,
-                    CameraMetadata.CONTROL_AWB_STATE_CONVERGED);
-            // TODO: Read the awb mode from parameters instead
-        }
-
-        if (LegacyMetadataMapper.LIE_ABOUT_AWB) {
-            result.set(CaptureResult.CONTROL_AWB_MODE,
-                    request.get(CaptureRequest.CONTROL_AWB_MODE));
-        }
+        /*
+         * control.awb*
+         */
+        mapAwb(result, /*out*/params);
 
 
         /*
@@ -203,7 +191,7 @@ public class LegacyResultMapper {
          * flash
          */
         {
-            // TODO
+            // flash.mode, flash.state mapped in mapAeAndFlashMode
         }
 
         /*
@@ -234,6 +222,11 @@ public class LegacyResultMapper {
         /*
          * sensor
          */
+        // sensor.timestamp varies every frame; mapping is done in #cachedConvertResultMetadata
+        {
+            // Unconditionally no test patterns
+            result.set(SENSOR_TEST_PATTERN_MODE, SENSOR_TEST_PATTERN_MODE_OFF);
+        }
 
         // TODO: Remaining result metadata tags conversions.
         return result;
@@ -295,6 +288,13 @@ public class LegacyResultMapper {
             m.set(CONTROL_AE_REGIONS, meteringRectArray);
         }
 
+    }
+
+    private static void mapAf(CameraMetadataNative m,
+            Rect activeArray, ZoomData zoomData, Camera.Parameters p) {
+        // control.afMode
+        m.set(CaptureResult.CONTROL_AF_MODE, convertLegacyAfMode(p.getFocusMode()));
+
         // control.afRegions
         {
             if (VERBOSE) {
@@ -307,12 +307,20 @@ public class LegacyResultMapper {
 
             m.set(CONTROL_AF_REGIONS, meteringRectArray);
         }
+    }
 
+    private static void mapAwb(CameraMetadataNative m, Camera.Parameters p) {
         // control.awbLock
         {
             boolean lock = p.isAutoWhiteBalanceLockSupported() ?
                     p.getAutoWhiteBalanceLock() : false;
             m.set(CONTROL_AWB_LOCK, lock);
+        }
+
+        // control.awbMode
+        {
+            int awbMode = convertLegacyAwbMode(p.getWhiteBalance());
+            m.set(CONTROL_AWB_MODE, awbMode);
         }
     }
 
@@ -409,6 +417,35 @@ public class LegacyResultMapper {
             default:
                 Log.w(TAG, "convertLegacyAfMode - unknown mode " + mode + " , ignoring");
                 return CONTROL_AF_MODE_OFF;
+        }
+    }
+
+    private static int convertLegacyAwbMode(String mode) {
+        if (mode == null) {
+            // OK: camera1 api may not support changing WB modes; assume AUTO
+            return CONTROL_AWB_MODE_AUTO;
+        }
+
+        switch (mode) {
+            case Camera.Parameters.WHITE_BALANCE_AUTO:
+                return CONTROL_AWB_MODE_AUTO;
+            case Camera.Parameters.WHITE_BALANCE_INCANDESCENT:
+                return CONTROL_AWB_MODE_INCANDESCENT;
+            case Camera.Parameters.WHITE_BALANCE_FLUORESCENT:
+                return CONTROL_AWB_MODE_FLUORESCENT;
+            case Camera.Parameters.WHITE_BALANCE_WARM_FLUORESCENT:
+                return CONTROL_AWB_MODE_WARM_FLUORESCENT;
+            case Camera.Parameters.WHITE_BALANCE_DAYLIGHT:
+                return CONTROL_AWB_MODE_DAYLIGHT;
+            case Camera.Parameters.WHITE_BALANCE_CLOUDY_DAYLIGHT:
+                return CONTROL_AWB_MODE_CLOUDY_DAYLIGHT;
+            case Camera.Parameters.WHITE_BALANCE_TWILIGHT:
+                return CONTROL_AWB_MODE_TWILIGHT;
+            case Camera.Parameters.WHITE_BALANCE_SHADE:
+                return CONTROL_AWB_MODE_SHADE;
+            default:
+                Log.w(TAG, "convertAwbMode - unrecognized WB mode " + mode);
+                return CONTROL_AWB_MODE_AUTO;
         }
     }
 
