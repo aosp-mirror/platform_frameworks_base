@@ -194,51 +194,42 @@ status_t DisplayListRenderer::drawLayer(Layer* layer, float x, float y) {
     return DrawGlInfo::kStatusDone;
 }
 
-status_t DisplayListRenderer::drawBitmap(const SkBitmap* bitmap, float left, float top,
-        const SkPaint* paint) {
+status_t DisplayListRenderer::drawBitmap(const SkBitmap* bitmap, const SkPaint* paint) {
     bitmap = refBitmap(bitmap);
     paint = refPaint(paint);
 
-    addDrawOp(new (alloc()) DrawBitmapOp(bitmap, left, top, paint));
-    return DrawGlInfo::kStatusDone;
-}
-
-status_t DisplayListRenderer::drawBitmap(const SkBitmap* bitmap, const SkMatrix& matrix,
-        const SkPaint* paint) {
-    bitmap = refBitmap(bitmap);
-    paint = refPaint(paint);
-
-    addDrawOp(new (alloc()) DrawBitmapMatrixOp(bitmap, matrix, paint));
+    addDrawOp(new (alloc()) DrawBitmapOp(bitmap, paint));
     return DrawGlInfo::kStatusDone;
 }
 
 status_t DisplayListRenderer::drawBitmap(const SkBitmap* bitmap, float srcLeft, float srcTop,
         float srcRight, float srcBottom, float dstLeft, float dstTop,
         float dstRight, float dstBottom, const SkPaint* paint) {
-    bitmap = refBitmap(bitmap);
-    paint = refPaint(paint);
-
-    if (srcLeft == 0 && srcTop == 0 &&
-            srcRight == bitmap->width() && srcBottom == bitmap->height() &&
-            (srcBottom - srcTop == dstBottom - dstTop) &&
-            (srcRight - srcLeft == dstRight - dstLeft)) {
+    if (srcLeft == 0 && srcTop == 0
+            && srcRight == bitmap->width() && srcBottom == bitmap->height()
+            && (srcBottom - srcTop == dstBottom - dstTop)
+            && (srcRight - srcLeft == dstRight - dstLeft)) {
         // transform simple rect to rect drawing case into position bitmap ops, since they merge
-        addDrawOp(new (alloc()) DrawBitmapOp(bitmap, dstLeft, dstTop, paint));
-        return DrawGlInfo::kStatusDone;
-    }
+        save(SkCanvas::kMatrix_SaveFlag);
+        translate(dstLeft, dstTop);
+        drawBitmap(bitmap, paint);
+        restore();
+    } else {
+        bitmap = refBitmap(bitmap);
+        paint = refPaint(paint);
 
-    addDrawOp(new (alloc()) DrawBitmapRectOp(bitmap,
-                    srcLeft, srcTop, srcRight, srcBottom,
-                    dstLeft, dstTop, dstRight, dstBottom, paint));
+        addDrawOp(new (alloc()) DrawBitmapRectOp(bitmap,
+                srcLeft, srcTop, srcRight, srcBottom,
+                dstLeft, dstTop, dstRight, dstBottom, paint));
+    }
     return DrawGlInfo::kStatusDone;
 }
 
-status_t DisplayListRenderer::drawBitmapData(const SkBitmap* bitmap, float left, float top,
-        const SkPaint* paint) {
+status_t DisplayListRenderer::drawBitmapData(const SkBitmap* bitmap, const SkPaint* paint) {
     bitmap = refBitmapData(bitmap);
     paint = refPaint(paint);
 
-    addDrawOp(new (alloc()) DrawBitmapDataOp(bitmap, left, top, paint));
+    addDrawOp(new (alloc()) DrawBitmapDataOp(bitmap, paint));
     return DrawGlInfo::kStatusDone;
 }
 

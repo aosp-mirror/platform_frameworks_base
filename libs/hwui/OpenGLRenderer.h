@@ -161,17 +161,13 @@ public:
 
     virtual status_t drawRenderNode(RenderNode* displayList, Rect& dirty, int32_t replayFlags = 1);
     virtual status_t drawLayer(Layer* layer, float x, float y);
-    virtual status_t drawBitmap(const SkBitmap* bitmap, float left, float top,
-            const SkPaint* paint);
+    virtual status_t drawBitmap(const SkBitmap* bitmap, const SkPaint* paint);
     status_t drawBitmaps(const SkBitmap* bitmap, AssetAtlas::Entry* entry, int bitmapCount,
             TextureVertex* vertices, bool pureTranslate, const Rect& bounds, const SkPaint* paint);
-    virtual status_t drawBitmap(const SkBitmap* bitmap, const SkMatrix& matrix,
-            const SkPaint* paint);
     virtual status_t drawBitmap(const SkBitmap* bitmap, float srcLeft, float srcTop,
             float srcRight, float srcBottom, float dstLeft, float dstTop,
             float dstRight, float dstBottom, const SkPaint* paint);
-    virtual status_t drawBitmapData(const SkBitmap* bitmap, float left, float top,
-            const SkPaint* paint);
+    virtual status_t drawBitmapData(const SkBitmap* bitmap, const SkPaint* paint);
     virtual status_t drawBitmapMesh(const SkBitmap* bitmap, int meshWidth, int meshHeight,
             const float* vertices, const int* colors, const SkPaint* paint);
     status_t drawPatches(const SkBitmap* bitmap, AssetAtlas::Entry* entry,
