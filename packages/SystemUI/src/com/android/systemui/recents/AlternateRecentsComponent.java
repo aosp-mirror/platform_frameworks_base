@@ -51,8 +51,13 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
     final public static String EXTRA_FROM_HOME = "recents.triggeredOverHome";
     final public static String EXTRA_FROM_APP_THUMBNAIL = "recents.animatingWithThumbnail";
     final public static String EXTRA_FROM_APP_FULL_SCREENSHOT = "recents.thumbnail";
+    final public static String EXTRA_FROM_TASK_ID = "recents.activeTaskId";
     final public static String EXTRA_TRIGGERED_FROM_ALT_TAB = "recents.triggeredFromAltTab";
-    final public static String EXTRA_TRIGGERED_FROM_TASK_ID = "recents.activeTaskId";
+    final public static String EXTRA_TRIGGERED_FROM_HOME_KEY = "recents.triggeredFromHomeKey";
+
+    final public static String ACTION_START_ENTER_ANIMATION = "action_start_enter_animation";
+    final public static String ACTION_TOGGLE_RECENTS_ACTIVITY = "action_toggle_recents_activity";
+    final public static String ACTION_HIDE_RECENTS_ACTIVITY = "action_hide_recents_activity";
 
     final static int sMinToggleDelay = 425;
 
@@ -126,14 +131,15 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
     }
 
     /** Hides the recents */
-    public void onHideRecents(boolean triggeredFromAltTab) {
+    public void onHideRecents(boolean triggeredFromAltTab, boolean triggeredFromHomeKey) {
         if (mBootCompleted) {
             if (isRecentsTopMost(getTopMostTask(), null)) {
                 // Notify recents to hide itself
-                Intent intent = new Intent(RecentsActivity.ACTION_HIDE_RECENTS_ACTIVITY);
+                Intent intent = new Intent(ACTION_HIDE_RECENTS_ACTIVITY);
                 intent.setPackage(mContext.getPackageName());
                 intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-                intent.putExtra(RecentsActivity.EXTRA_TRIGGERED_FROM_ALT_TAB, triggeredFromAltTab);
+                intent.putExtra(EXTRA_TRIGGERED_FROM_ALT_TAB, triggeredFromAltTab);
+                intent.putExtra(EXTRA_TRIGGERED_FROM_HOME_KEY, triggeredFromHomeKey);
                 mContext.sendBroadcastAsUser(intent, UserHandle.CURRENT);
             }
         }
@@ -220,7 +226,7 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
         AtomicBoolean isTopTaskHome = new AtomicBoolean();
         if (isRecentsTopMost(topTask, isTopTaskHome)) {
             // Notify recents to toggle itself
-            Intent intent = new Intent(RecentsActivity.ACTION_TOGGLE_RECENTS_ACTIVITY);
+            Intent intent = new Intent(ACTION_TOGGLE_RECENTS_ACTIVITY);
             intent.setPackage(mContext.getPackageName());
             intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
             mContext.sendBroadcastAsUser(intent, UserHandle.CURRENT);
@@ -403,7 +409,7 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
             intent.putExtra(extraFlag, true);
         }
         intent.putExtra(EXTRA_TRIGGERED_FROM_ALT_TAB, mTriggeredFromAltTab);
-        intent.putExtra(EXTRA_TRIGGERED_FROM_TASK_ID, (topTask != null) ? topTask.id : -1);
+        intent.putExtra(EXTRA_FROM_TASK_ID, (topTask != null) ? topTask.id : -1);
         if (opts != null) {
             mContext.startActivityAsUser(intent, opts.toBundle(), UserHandle.CURRENT);
         } else {
@@ -442,7 +448,7 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
     public void onAnimationStarted() {
         // Notify recents to start the enter animation
         if (!mStartAnimationTriggered) {
-            Intent intent = new Intent(RecentsActivity.ACTION_START_ENTER_ANIMATION);
+            Intent intent = new Intent(ACTION_START_ENTER_ANIMATION);
             intent.setPackage(mContext.getPackageName());
             intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
             mContext.sendBroadcastAsUser(intent, UserHandle.CURRENT);

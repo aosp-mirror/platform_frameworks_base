@@ -684,10 +684,11 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     @Override
-    public void hideRecentApps(boolean triggeredFromAltTab) {
+    public void hideRecentApps(boolean triggeredFromAltTab, boolean triggeredFromHomeKey) {
         int msg = MSG_HIDE_RECENT_APPS;
         mHandler.removeMessages(msg);
-        mHandler.obtainMessage(msg, triggeredFromAltTab ? 1 : 0, 0).sendToTarget();
+        mHandler.obtainMessage(msg, triggeredFromAltTab ? 1 : 0,
+                triggeredFromHomeKey ? 1 : 0).sendToTarget();
     }
 
     @Override
@@ -797,9 +798,9 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
     }
 
-    protected void hideRecents(boolean triggeredFromAltTab) {
+    protected void hideRecents(boolean triggeredFromAltTab, boolean triggeredFromHomeKey) {
         if (mRecents != null) {
-            mRecents.hideRecents(triggeredFromAltTab);
+            mRecents.hideRecents(triggeredFromAltTab, triggeredFromHomeKey);
         }
     }
 
@@ -890,13 +891,12 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected class H extends Handler {
         public void handleMessage(Message m) {
-            Intent intent;
             switch (m.what) {
              case MSG_SHOW_RECENT_APPS:
                  showRecents(m.arg1 > 0);
                  break;
              case MSG_HIDE_RECENT_APPS:
-                 hideRecents(m.arg1 > 0);
+                 hideRecents(m.arg1 > 0, m.arg2 > 0);
                  break;
              case MSG_TOGGLE_RECENTS_APPS:
                  toggleRecents();

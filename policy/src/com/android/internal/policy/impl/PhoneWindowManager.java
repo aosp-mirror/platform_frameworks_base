@@ -2439,7 +2439,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         } else if (!down && mRecentAppsHeldModifiers != 0
                 && (metaState & mRecentAppsHeldModifiers) == 0) {
             mRecentAppsHeldModifiers = 0;
-            hideRecentApps(true);
+            hideRecentApps(true, false);
         }
 
         // Handle keyboard language switching.
@@ -2658,12 +2658,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    private void hideRecentApps(boolean triggeredFromAltTab) {
+    private void hideRecentApps(boolean triggeredFromAltTab, boolean triggeredFromHome) {
         mPreloadedRecentApps = false; // preloading no longer needs to be canceled
         try {
             IStatusBarService statusbar = getStatusBarService();
             if (statusbar != null) {
-                statusbar.hideRecentApps(triggeredFromAltTab);
+                statusbar.hideRecentApps(triggeredFromAltTab, triggeredFromHome);
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "RemoteException when closing recent apps", e);
@@ -2705,7 +2705,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 // Hide Recents and notify it to launch Home
                 awakenDreams();
                 sendCloseSystemWindows(SYSTEM_DIALOG_REASON_HOME_KEY);
-                hideRecentApps(false);
+                hideRecentApps(false, true);
             } else {
                 // Otherwise, just launch Home
                 sendCloseSystemWindows(SYSTEM_DIALOG_REASON_HOME_KEY);
