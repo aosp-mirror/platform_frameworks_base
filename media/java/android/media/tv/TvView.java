@@ -63,6 +63,10 @@ public class TvView extends ViewGroup {
 
     private static final int VIDEO_SIZE_VALUE_UNKNOWN = 0;
 
+    private static final int ZORDER_MEDIA = 0;
+    private static final int ZORDER_MEDIA_OVERLAY = 1;
+    private static final int ZORDER_ON_TOP = 2;
+
     private static final Object sMainTvViewLock = new Object();
     private static TvView sMainTvView;
 
@@ -86,6 +90,7 @@ public class TvView extends ViewGroup {
     private int mSurfaceHeight;
     private final AttributeSet mAttrs;
     private final int mDefStyleAttr;
+    private int mWindowZOrder;
 
     private final SurfaceHolder.Callback mSurfaceHolderCallback = new SurfaceHolder.Callback() {
         @Override
@@ -183,6 +188,51 @@ public class TvView extends ViewGroup {
             }
         }
     }
+
+    /**
+     * Sets the Z order of a window owning the surface of this TvView above the normal TvView
+     * but below an application.
+     *
+     * @see SurfaceView#setZOrderMediaOverlay
+     * @hide
+     */
+    @SystemApi
+    public void setZOrderMediaOverlay(boolean isMediaOverlay) {
+        if (isMediaOverlay) {
+            mWindowZOrder = ZORDER_MEDIA_OVERLAY;
+            removeSessionOverlayView();
+        } else {
+            mWindowZOrder = ZORDER_MEDIA;
+            createSessionOverlayView();
+        }
+        if (mSurfaceView != null) {
+            // ZOrderOnTop(false) removes WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
+            // from WindowLayoutParam as well as changes window type.
+            mSurfaceView.setZOrderOnTop(false);
+            mSurfaceView.setZOrderMediaOverlay(isMediaOverlay);
+        }
+    }
+
+    /**
+     * Sets the Z order of a window owning the surface of this TvView on top of an application.
+     *
+     * @see SurfaceView#setZOrderOnTop
+     * @hide
+     */
+    @SystemApi
+    public void setZOrderOnTop(boolean onTop) {
+        if (onTop) {
+            mWindowZOrder = ZORDER_ON_TOP;
+            removeSessionOverlayView();
+        } else {
+            mWindowZOrder = ZORDER_MEDIA;
+            createSessionOverlayView();
+        }
+        if (mSurfaceView != null) {
+            mSurfaceView.setZOrderMediaOverlay(false);
+            mSurfaceView.setZOrderOnTop(onTop);
+        }
+     }
 
     /**
      * Sets the relative stream volume of this session to handle a change of audio focus.
@@ -522,6 +572,11 @@ public class TvView extends ViewGroup {
                 relayoutSessionOverlayView();
             }};
         mSurfaceView.getHolder().addCallback(mSurfaceHolderCallback);
+        if (mWindowZOrder == ZORDER_MEDIA_OVERLAY) {
+            mSurfaceView.setZOrderMediaOverlay(true);
+        } else if (mWindowZOrder == ZORDER_ON_TOP) {
+            mSurfaceView.setZOrderOnTop(true);
+        }
         addView(mSurfaceView);
     }
 
@@ -549,7 +604,7 @@ public class TvView extends ViewGroup {
 
     private void createSessionOverlayView() {
         if (mSession == null || !isAttachedToWindow()
-                || mOverlayViewCreated) {
+                || mOverlayViewCreated || mWindowZOrder != ZORDER_MEDIA) {
             return;
         }
         mOverlayViewFrame = getViewFrameOnScreen();
@@ -567,8 +622,8 @@ public class TvView extends ViewGroup {
     }
 
     private void relayoutSessionOverlayView() {
-        if (mSession == null || !isAttachedToWindow()
-                || !mOverlayViewCreated) {
+        if (mSession == null || !isAttachedToWindow() || !mOverlayViewCreated
+                || mWindowZOrder != ZORDER_MEDIA) {
             return;
         }
         Rect viewFrame = getViewFrameOnScreen();
