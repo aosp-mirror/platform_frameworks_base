@@ -36,8 +36,11 @@ public class SoundTriggerModule {
     private int mId;
     private NativeEventHandlerDelegate mEventHandlerDelegate;
 
+    // to be kept in sync with core/jni/android_hardware_SoundTrigger.cpp
     private static final int EVENT_RECOGNITION = 1;
     private static final int EVENT_SERVICE_DIED = 2;
+    private static final int EVENT_SOUNDMODEL = 3;
+    private static final int EVENT_SERVICE_STATE_CHANGE = 4;
 
     SoundTriggerModule(int moduleId, SoundTrigger.StatusListener listener, Handler handler) {
         mId = moduleId;
@@ -133,10 +136,7 @@ public class SoundTriggerModule {
             if (handler != null) {
                 looper = handler.getLooper();
             } else {
-                looper = Looper.myLooper();
-                if (looper == null) {
-                    looper = Looper.getMainLooper();
-                }
+                looper = Looper.getMainLooper();
             }
 
             // construct the event handler with this looper
@@ -150,6 +150,17 @@ public class SoundTriggerModule {
                             if (listener != null) {
                                 listener.onRecognition(
                                         (SoundTrigger.RecognitionEvent)msg.obj);
+                            }
+                            break;
+                        case EVENT_SOUNDMODEL:
+                            if (listener != null) {
+                                listener.onSoundModelUpdate(
+                                        (SoundTrigger.SoundModelEvent)msg.obj);
+                            }
+                            break;
+                        case EVENT_SERVICE_STATE_CHANGE:
+                            if (listener != null) {
+                                listener.onServiceStateChange(msg.arg1);
                             }
                             break;
                         case EVENT_SERVICE_DIED:

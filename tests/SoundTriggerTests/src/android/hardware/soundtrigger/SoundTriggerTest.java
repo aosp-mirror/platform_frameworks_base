@@ -23,6 +23,7 @@ import android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionEvent;
 import android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra;
 import android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel;
 import android.hardware.soundtrigger.SoundTrigger.RecognitionEvent;
+import android.media.AudioFormat;
 import android.os.Parcel;
 import android.test.InstrumentationTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
@@ -97,7 +98,8 @@ public class SoundTriggerTest extends InstrumentationTestCase {
         Keyphrase[] keyphrases = new Keyphrase[2];
         keyphrases[0] = new Keyphrase(1, 0, "en-US", "hello", new int[] {0});
         keyphrases[1] = new Keyphrase(2, 0, "fr-FR", "there", new int[] {1, 2});
-        KeyphraseSoundModel ksm = new KeyphraseSoundModel(UUID.randomUUID(), null, keyphrases);
+        KeyphraseSoundModel ksm = new KeyphraseSoundModel(UUID.randomUUID(), UUID.randomUUID(),
+                null, keyphrases);
 
         // Write to a parcel
         Parcel parcel = Parcel.obtain();
@@ -119,8 +121,8 @@ public class SoundTriggerTest extends InstrumentationTestCase {
         Keyphrase[] keyphrases = new Keyphrase[2];
         keyphrases[0] = new Keyphrase(1, 0, "en-US", "hello", new int[] {0});
         keyphrases[1] = new Keyphrase(2, 0, "fr-FR", "there", new int[] {1, 2});
-        KeyphraseSoundModel ksm = new KeyphraseSoundModel(UUID.randomUUID(), new byte[0],
-                keyphrases);
+        KeyphraseSoundModel ksm = new KeyphraseSoundModel(UUID.randomUUID(), UUID.randomUUID(),
+                new byte[0], keyphrases);
 
         // Write to a parcel
         Parcel parcel = Parcel.obtain();
@@ -141,7 +143,8 @@ public class SoundTriggerTest extends InstrumentationTestCase {
     public void testKeyphraseSoundModelParcelUnparcel_noKeyphrases() throws Exception {
         byte[] data = new byte[10];
         mRandom.nextBytes(data);
-        KeyphraseSoundModel ksm = new KeyphraseSoundModel(UUID.randomUUID(), data, null);
+        KeyphraseSoundModel ksm = new KeyphraseSoundModel(UUID.randomUUID(), UUID.randomUUID(),
+                data, null);
 
         // Write to a parcel
         Parcel parcel = Parcel.obtain();
@@ -162,8 +165,8 @@ public class SoundTriggerTest extends InstrumentationTestCase {
     public void testKeyphraseSoundModelParcelUnparcel_zeroKeyphrases() throws Exception {
         byte[] data = new byte[10];
         mRandom.nextBytes(data);
-        KeyphraseSoundModel ksm = new KeyphraseSoundModel(UUID.randomUUID(), data,
-                new Keyphrase[0]);
+        KeyphraseSoundModel ksm = new KeyphraseSoundModel(UUID.randomUUID(), UUID.randomUUID(),
+                data, new Keyphrase[0]);
 
         // Write to a parcel
         Parcel parcel = Parcel.obtain();
@@ -187,7 +190,8 @@ public class SoundTriggerTest extends InstrumentationTestCase {
         keyphrases[1] = new Keyphrase(2, 0, "fr-FR", "there", new int[] {1, 2});
         byte[] data = new byte[200 * 1024];
         mRandom.nextBytes(data);
-        KeyphraseSoundModel ksm = new KeyphraseSoundModel(UUID.randomUUID(), data, keyphrases);
+        KeyphraseSoundModel ksm = new KeyphraseSoundModel(UUID.randomUUID(), UUID.randomUUID(),
+                data, keyphrases);
 
         // Write to a parcel
         Parcel parcel = Parcel.obtain();
@@ -207,7 +211,7 @@ public class SoundTriggerTest extends InstrumentationTestCase {
     @SmallTest
     public void testRecognitionEventParcelUnparcel_noData() throws Exception {
         RecognitionEvent re = new RecognitionEvent(SoundTrigger.RECOGNITION_STATUS_SUCCESS, 1,
-                true, 2, 3, 4, null);
+                true, 2, 3, 4, false, null, null);
 
         // Write to a parcel
         Parcel parcel = Parcel.obtain();
@@ -224,7 +228,7 @@ public class SoundTriggerTest extends InstrumentationTestCase {
     @SmallTest
     public void testRecognitionEventParcelUnparcel_zeroData() throws Exception {
         RecognitionEvent re = new RecognitionEvent(SoundTrigger.RECOGNITION_STATUS_FAILURE, 1,
-                true, 2, 3, 4, new byte[1]);
+                true, 2, 3, 4, false, null, new byte[1]);
 
         // Write to a parcel
         Parcel parcel = Parcel.obtain();
@@ -243,7 +247,32 @@ public class SoundTriggerTest extends InstrumentationTestCase {
         byte[] data = new byte[200 * 1024];
         mRandom.nextBytes(data);
         RecognitionEvent re = new RecognitionEvent(SoundTrigger.RECOGNITION_STATUS_ABORT, 1,
-                false, 2, 3, 4, data);
+                false, 2, 3, 4, false, null, data);
+
+        // Write to a parcel
+        Parcel parcel = Parcel.obtain();
+        re.writeToParcel(parcel, 0);
+
+        // Read from it
+        parcel.setDataPosition(0);
+        RecognitionEvent unparceled = RecognitionEvent.CREATOR.createFromParcel(parcel);
+
+        // Verify that they are the same
+        assertEquals(re, unparceled);
+    }
+
+    @SmallTest
+    public void testRecognitionEventParcelUnparcel_largeAudioData() throws Exception {
+        byte[] data = new byte[200 * 1024];
+        mRandom.nextBytes(data);
+        RecognitionEvent re = new RecognitionEvent(SoundTrigger.RECOGNITION_STATUS_ABORT, 1,
+                false, 2, 3, 4, true,
+                (new AudioFormat.Builder())
+                .setChannelMask(AudioFormat.CHANNEL_IN_MONO)
+                .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+                .setSampleRate(16000)
+                .build(),
+                data);
 
         // Write to a parcel
         Parcel parcel = Parcel.obtain();
@@ -260,7 +289,7 @@ public class SoundTriggerTest extends InstrumentationTestCase {
     @SmallTest
     public void testKeyphraseRecognitionEventParcelUnparcel_noKeyphrases() throws Exception {
         KeyphraseRecognitionEvent re = new KeyphraseRecognitionEvent(
-                SoundTrigger.RECOGNITION_STATUS_SUCCESS, 1, true, 2, 3, 4, null, false, null);
+                SoundTrigger.RECOGNITION_STATUS_SUCCESS, 1, true, 2, 3, 4, false, null, null, null);
 
         // Write to a parcel
         Parcel parcel = Parcel.obtain();
@@ -279,8 +308,8 @@ public class SoundTriggerTest extends InstrumentationTestCase {
     public void testKeyphraseRecognitionEventParcelUnparcel_zeroData() throws Exception {
         KeyphraseRecognitionExtra[] kpExtra = new KeyphraseRecognitionExtra[0];
         KeyphraseRecognitionEvent re = new KeyphraseRecognitionEvent(
-                SoundTrigger.RECOGNITION_STATUS_FAILURE, 2, true, 2, 3, 4, new byte[1],
-                true, kpExtra);
+                SoundTrigger.RECOGNITION_STATUS_FAILURE, 2, true, 2, 3, 4, false, null, new byte[1],
+                kpExtra);
 
         // Write to a parcel
         Parcel parcel = Parcel.obtain();
@@ -303,20 +332,20 @@ public class SoundTriggerTest extends InstrumentationTestCase {
         ConfidenceLevel cl1 = new ConfidenceLevel(1, 90);
         ConfidenceLevel cl2 = new ConfidenceLevel(2, 30);
         kpExtra[0] = new KeyphraseRecognitionExtra(1,
-                SoundTrigger.RECOGNITION_MODE_USER_IDENTIFICATION,
+                SoundTrigger.RECOGNITION_MODE_USER_IDENTIFICATION, 0,
                 new ConfidenceLevel[] {cl1, cl2});
         kpExtra[1] = new KeyphraseRecognitionExtra(1,
-                SoundTrigger.RECOGNITION_MODE_VOICE_TRIGGER,
+                SoundTrigger.RECOGNITION_MODE_VOICE_TRIGGER, 0,
                 new ConfidenceLevel[] {cl2});
         kpExtra[2] = new KeyphraseRecognitionExtra(1,
-                SoundTrigger.RECOGNITION_MODE_VOICE_TRIGGER, null);
+                SoundTrigger.RECOGNITION_MODE_VOICE_TRIGGER, 0, null);
         kpExtra[3] = new KeyphraseRecognitionExtra(1,
-                SoundTrigger.RECOGNITION_MODE_VOICE_TRIGGER,
+                SoundTrigger.RECOGNITION_MODE_VOICE_TRIGGER, 0,
                 new ConfidenceLevel[0]);
 
         KeyphraseRecognitionEvent re = new KeyphraseRecognitionEvent(
-                SoundTrigger.RECOGNITION_STATUS_FAILURE, 1, true, 2, 3, 4, data,
-                false, kpExtra);
+                SoundTrigger.RECOGNITION_STATUS_FAILURE, 1, true, 2, 3, 4, false, null, data,
+                kpExtra);
 
         // Write to a parcel
         Parcel parcel = Parcel.obtain();
