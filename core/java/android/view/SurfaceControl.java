@@ -74,6 +74,7 @@ public class SurfaceControl {
             IBinder displayToken, int orientation,
             int l, int t, int r, int b,
             int L, int T, int R, int B);
+    private static native void nativeSetDisplaySize(IBinder displayToken, int width, int height);
     private static native SurfaceControl.PhysicalDisplayInfo[] nativeGetDisplayConfigs(
             IBinder displayToken);
     private static native int nativeGetActiveConfig(IBinder displayToken);
@@ -586,6 +587,17 @@ public class SurfaceControl {
         } else {
             nativeSetDisplaySurface(displayToken, 0);
         }
+    }
+
+    public static void setDisplaySize(IBinder displayToken, int width, int height) {
+        if (displayToken == null) {
+            throw new IllegalArgumentException("displayToken must not be null");
+        }
+        if (width <= 0 || height <= 0) {
+            throw new IllegalArgumentException("width and height must be positive");
+        }
+
+        nativeSetDisplaySize(displayToken, width, height);
     }
 
     public static IBinder createDisplay(String name, boolean secure) {

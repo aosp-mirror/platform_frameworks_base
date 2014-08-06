@@ -523,6 +523,17 @@ public final class DisplayManagerService extends SystemService {
         return -1;
     }
 
+    private void resizeVirtualDisplayInternal(IBinder appToken,
+            int width, int height, int densityDpi) {
+        synchronized (mSyncRoot) {
+            if (mVirtualDisplayAdapter == null) {
+                return;
+            }
+
+            mVirtualDisplayAdapter.resizeVirtualDisplayLocked(appToken, width, height, densityDpi);
+        }
+    }
+
     private void setVirtualDisplaySurfaceInternal(IBinder appToken, Surface surface) {
         synchronized (mSyncRoot) {
             if (mVirtualDisplayAdapter == null) {
@@ -1298,6 +1309,17 @@ public final class DisplayManagerService extends SystemService {
             try {
                 return createVirtualDisplayInternal(callbacks, projection, callingUid,
                         packageName, name, width, height, densityDpi, surface, flags);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override // Binder call
+        public void resizeVirtualDisplay(IVirtualDisplayCallbacks callbacks,
+                int width, int height, int densityDpi) {
+            final long token = Binder.clearCallingIdentity();
+            try {
+                resizeVirtualDisplayInternal(callbacks.asBinder(), width, height, densityDpi);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
