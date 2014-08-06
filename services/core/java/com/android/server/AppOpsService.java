@@ -437,13 +437,18 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     @Override
     public void resetAllModes() {
+        int callingUid = Binder.getCallingUid();
         mContext.enforcePermission(android.Manifest.permission.UPDATE_APP_OPS_STATS,
-                Binder.getCallingPid(), Binder.getCallingUid(), null);
+                Binder.getCallingPid(), callingUid, null);
         HashMap<Callback, ArrayList<Pair<String, Integer>>> callbacks = null;
         synchronized (this) {
             boolean changed = false;
             for (int i=mUidOps.size()-1; i>=0; i--) {
                 HashMap<String, Ops> packages = mUidOps.valueAt(i);
+                if (UserHandle.getUserId(callingUid) != UserHandle.getUserId(mUidOps.keyAt(i))) {
+                    // Skip any ops for a different user
+                    continue;
+                }
                 Iterator<Map.Entry<String, Ops>> it = packages.entrySet().iterator();
                 while (it.hasNext()) {
                     Map.Entry<String, Ops> ent = it.next();
