@@ -70,7 +70,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 105;
+    private static final int DATABASE_VERSION = 106;
 
     private Context mContext;
     private int mUserHandle;
@@ -1558,24 +1558,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         if (upgradeVersion == 98) {
-            if (mUserHandle == UserHandle.USER_OWNER) {
-                db.beginTransaction();
-                SQLiteStatement stmt = null;
-                try {
-                    stmt = db.compileStatement("INSERT OR REPLACE INTO global(name,value)"
-                            + " VALUES(?,?);");
-                    loadIntegerSetting(stmt, Settings.Global.LOCK_SCREEN_SHOW_NOTIFICATIONS,
-                            R.integer.def_lock_screen_show_notifications);
-                    db.setTransactionSuccessful();
-                } finally {
-                    db.endTransaction();
-                    if (stmt != null) stmt.close();
-                }
-            }
+            // no-op; LOCK_SCREEN_SHOW_NOTIFICATIONS now handled in version 106
             upgradeVersion = 99;
         }
 
         if (upgradeVersion == 99) {
+            // no-op; HEADS_UP_NOTIFICATIONS_ENABLED now handled in version 100
+            upgradeVersion = 100;
+        }
+
+        if (upgradeVersion == 100) {
+            // note: LOCK_SCREEN_SHOW_NOTIFICATIONS now handled in version 106
             if (mUserHandle == UserHandle.USER_OWNER) {
                 db.beginTransaction();
                 SQLiteStatement stmt = null;
@@ -1584,28 +1577,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                             + " VALUES(?,?);");
                     loadIntegerSetting(stmt, Global.HEADS_UP_NOTIFICATIONS_ENABLED,
                             R.integer.def_heads_up_enabled);
-                    db.setTransactionSuccessful();
-                } finally {
-                    db.endTransaction();
-                    if (stmt != null) stmt.close();
-                }
-            }
-            upgradeVersion = 100;
-        }
-        if (upgradeVersion == 100) {
-           // Catch devices that were initialized to version 100 and missed these in onCreate()
-            if (mUserHandle == UserHandle.USER_OWNER) {
-                db.beginTransaction();
-                SQLiteStatement stmt = null;
-                try {
-                    stmt = db.compileStatement("INSERT OR IGNORE INTO global(name,value)"
-                            + " VALUES(?,?);");
-                    loadIntegerSetting(stmt, Settings.Global.LOCK_SCREEN_SHOW_NOTIFICATIONS,
-                            R.integer.def_lock_screen_show_notifications);
-
-                    loadIntegerSetting(stmt, Global.HEADS_UP_NOTIFICATIONS_ENABLED,
-                            R.integer.def_heads_up_enabled);
-
                     db.setTransactionSuccessful();
                 } finally {
                     db.endTransaction();
@@ -1695,6 +1666,34 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             upgradeVersion = 105;
         }
 
+        if (upgradeVersion < 106) {
+            // LOCK_SCREEN_SHOW_NOTIFICATIONS is now per-user.
+            db.beginTransaction();
+            SQLiteStatement stmt = null;
+            try {
+                stmt = db.compileStatement("INSERT OR IGNORE INTO secure(name,value)"
+                        + " VALUES(?,?);");
+                loadBooleanSetting(stmt, Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS,
+                        R.bool.def_guest_user_enabled);
+                if (mUserHandle == UserHandle.USER_OWNER) {
+                    final int oldShow = getIntValueFromTable(db,
+                            TABLE_GLOBAL, Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS, -1);
+                    if (oldShow >= 0) {
+                        // overwrite the default with whatever you had
+                        loadSetting(stmt, Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS, oldShow);
+                        final SQLiteStatement deleteStmt
+                                = db.compileStatement("DELETE FROM global WHERE name=?");
+                        deleteStmt.bindString(1, Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS);
+                        deleteStmt.execute();
+                    }
+                }
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+                if (stmt != null) stmt.close();
+            }
+            upgradeVersion = 106;
+        }
         // *** Remember to update DATABASE_VERSION above!
 
         if (upgradeVersion != currentVersion) {
@@ -2260,6 +2259,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             loadBooleanSetting(stmt, Settings.Secure.WAKE_GESTURE_ENABLED,
                     R.bool.def_wake_gesture_enabled);
 
+            loadIntegerSetting(stmt, Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS,
+                    R.integer.def_lock_screen_show_notifications);
+
         } finally {
             if (stmt != null) stmt.close();
         }
@@ -2419,9 +2421,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             loadIntegerSetting(stmt, Settings.Global.WIFI_SCAN_ALWAYS_AVAILABLE,
                     R.integer.def_wifi_scan_always_available);
-
-            loadIntegerSetting(stmt, Settings.Global.LOCK_SCREEN_SHOW_NOTIFICATIONS,
-                    R.integer.def_lock_screen_show_notifications);
 
             loadIntegerSetting(stmt, Global.HEADS_UP_NOTIFICATIONS_ENABLED,
                     R.integer.def_heads_up_enabled);

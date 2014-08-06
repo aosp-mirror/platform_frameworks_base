@@ -220,9 +220,8 @@ public abstract class BaseStatusBar extends SystemUI implements
             final int mode = Settings.Global.getInt(mContext.getContentResolver(),
                     Settings.Global.ZEN_MODE, Settings.Global.ZEN_MODE_OFF);
             setZenMode(mode);
-            final boolean show = Settings.Global.getInt(mContext.getContentResolver(),
-                    Settings.Global.LOCK_SCREEN_SHOW_NOTIFICATIONS, 1) != 0;
-            mShowLockscreenNotifications = show;
+
+            updateLockscreenNotificationSetting();
         }
     };
 
@@ -289,6 +288,9 @@ public abstract class BaseStatusBar extends SystemUI implements
                 mCurrentUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
                 updateCurrentProfilesCache();
                 if (true) Log.v(TAG, "userId " + mCurrentUserId + " is in the house");
+
+                updateLockscreenNotificationSetting();
+
                 userSwitched(mCurrentUserId);
             } else if (Intent.ACTION_USER_ADDED.equals(action)) {
                 updateCurrentProfilesCache();
@@ -387,8 +389,9 @@ public abstract class BaseStatusBar extends SystemUI implements
                 Settings.Global.getUriFor(Settings.Global.ZEN_MODE), false,
                 mSettingsObserver);
         mContext.getContentResolver().registerContentObserver(
-                Settings.Global.getUriFor(Settings.Global.LOCK_SCREEN_SHOW_NOTIFICATIONS), false,
-                mSettingsObserver);
+                Settings.Secure.getUriFor(Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS), false,
+                mSettingsObserver,
+                UserHandle.USER_ALL);
 
         mContext.getContentResolver().registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS),
@@ -1422,6 +1425,19 @@ public abstract class BaseStatusBar extends SystemUI implements
         if (!isDeviceProvisioned()) return;
         mZenMode = mode;
         updateNotifications();
+    }
+
+    // extended in PhoneStatusBar
+    protected void setShowLockscreenNotifications(boolean show) {
+        mShowLockscreenNotifications = show;
+    }
+
+    private void updateLockscreenNotificationSetting() {
+        final boolean show = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS,
+                1,
+                mCurrentUserId) != 0;
+        setShowLockscreenNotifications(show);
     }
 
     protected abstract void haltTicker();
