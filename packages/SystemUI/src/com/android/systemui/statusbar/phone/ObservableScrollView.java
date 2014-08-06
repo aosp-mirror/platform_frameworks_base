@@ -31,6 +31,8 @@ public class ObservableScrollView extends ScrollView {
     private int mLastOverscrollAmount;
     private boolean mTouchEnabled = true;
     private boolean mHandlingTouchEvent;
+    private float mLastX;
+    private float mLastY;
 
     public ObservableScrollView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -65,6 +67,8 @@ public class ObservableScrollView extends ScrollView {
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         mHandlingTouchEvent = true;
+        mLastX = ev.getX();
+        mLastY = ev.getY();
         boolean result = super.onTouchEvent(ev);
         mHandlingTouchEvent = false;
         return result;
@@ -73,6 +77,8 @@ public class ObservableScrollView extends ScrollView {
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         mHandlingTouchEvent = true;
+        mLastX = ev.getX();
+        mLastY = ev.getY();
         boolean result = super.onInterceptTouchEvent(ev);
         mHandlingTouchEvent = false;
         return result;
@@ -107,12 +113,12 @@ public class ObservableScrollView extends ScrollView {
     protected void onOverScrolled(int scrollX, int scrollY, boolean clampedX, boolean clampedY) {
         super.onOverScrolled(scrollX, scrollY, clampedX, clampedY);
         if (mListener != null && mLastOverscrollAmount > 0) {
-            mListener.onOverscrolled(mLastOverscrollAmount);
+            mListener.onOverscrolled(mLastX, mLastY, mLastOverscrollAmount);
         }
     }
 
     public interface Listener {
         void onScrollChanged();
-        void onOverscrolled(int amount);
+        void onOverscrolled(float lastX, float lastY, int amount);
     }
 }
