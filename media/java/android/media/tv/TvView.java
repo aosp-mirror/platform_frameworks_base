@@ -41,7 +41,18 @@ import android.view.ViewRootImpl;
 import java.util.List;
 
 /**
- * View playing TV
+ * Displays TV contents. The TvView class provides a high level interface for applications to show
+ * TV programs from various TV sources that implement {@link TvInputService}. (Note that the list of
+ * TV inputs available on the system can be obtained by calling
+ * {@link TvInputManager#getTvInputList() TvInputManager.getTvInputList()}.)
+ * <p>
+ * Once the application supplies the URI for a specific TV channel to {@link #tune(String, Uri)}
+ * method, it takes care of underlying service binding (and unbinding if the current TvView is
+ * already bound to a service) and automatically allocates/deallocates resources needed. In addition
+ * to a few essential methods to control how the contents are presented, it also provides a way to
+ * dispatch input events to the connected TvInputService in order to enable custom key actions for
+ * the TV input.
+ * </p>
  */
 public class TvView extends ViewGroup {
     private static final String TAG = "TvView";
