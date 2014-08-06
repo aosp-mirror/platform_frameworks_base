@@ -216,6 +216,25 @@ public class LegacyRequestMapper {
             }
         }
 
+        // control.awbMode
+        {
+            Integer awbMode = getIfSupported(request, CONTROL_AWB_MODE,
+                    /*defaultValue*/CONTROL_AWB_MODE_AUTO,
+                    params.getSupportedWhiteBalance() != null,
+                    /*allowedValue*/CONTROL_AWB_MODE_AUTO);
+
+            String whiteBalanceMode = null;
+            if (awbMode != null) { // null iff AWB is not supported by camera1 api
+                whiteBalanceMode = convertAwbModeToLegacy(awbMode);
+                params.setWhiteBalance(whiteBalanceMode);
+            }
+
+            if (VERBOSE) {
+                Log.v(TAG, "convertRequestToMetadata - control.awbMode "
+                        + awbMode + " mapped to " + whiteBalanceMode);
+            }
+        }
+
         // control.awbLock
         {
             Boolean awbLock = getIfSupported(request, CONTROL_AWB_LOCK, /*defaultValue*/false,
@@ -292,6 +311,20 @@ public class LegacyRequestMapper {
                     params.setColorEffect(Parameters.EFFECT_NONE);
                     Log.w(TAG, "Skipping unknown requested effect mode: " + effectMode);
                 }
+            }
+        }
+
+        /*
+         * sensor
+         */
+
+        // sensor.testPattern
+        {
+            int testPatternMode = ParamsUtils.getOrDefault(request, SENSOR_TEST_PATTERN_MODE,
+                    /*defaultValue*/SENSOR_TEST_PATTERN_MODE_OFF);
+            if (testPatternMode != SENSOR_TEST_PATTERN_MODE_OFF) {
+                Log.w(TAG, "convertRequestToMetadata - ignoring sensor.testPatternMode "
+                        + testPatternMode + "; only OFF is supported");
             }
         }
     }
@@ -444,6 +477,29 @@ public class LegacyRequestMapper {
         legacyFps[Parameters.PREVIEW_FPS_MAX_INDEX] = fpsRange.getUpper();
         return legacyFps;
     }
+
+    private static String convertAwbModeToLegacy(int mode) {
+        switch (mode) {
+            case CONTROL_AWB_MODE_AUTO:
+                return Camera.Parameters.WHITE_BALANCE_AUTO;
+            case CONTROL_AWB_MODE_INCANDESCENT:
+                return Camera.Parameters.WHITE_BALANCE_INCANDESCENT;
+            case CONTROL_AWB_MODE_FLUORESCENT:
+                return Camera.Parameters.WHITE_BALANCE_FLUORESCENT;
+            case CONTROL_AWB_MODE_WARM_FLUORESCENT:
+                return Camera.Parameters.WHITE_BALANCE_WARM_FLUORESCENT;
+            case CONTROL_AWB_MODE_DAYLIGHT:
+                return Camera.Parameters.WHITE_BALANCE_DAYLIGHT;
+            case CONTROL_AWB_MODE_CLOUDY_DAYLIGHT:
+                return Camera.Parameters.WHITE_BALANCE_CLOUDY_DAYLIGHT;
+            case CONTROL_AWB_MODE_TWILIGHT:
+                return Camera.Parameters.WHITE_BALANCE_TWILIGHT;
+            default:
+                Log.w(TAG, "convertAwbModeToLegacy - unrecognized control.awbMode" + mode);
+                return Camera.Parameters.WHITE_BALANCE_AUTO;
+        }
+    }
+
 
     /**
      * Return {@code null} if the value is not supported, otherwise return the retrieved key's
