@@ -336,11 +336,14 @@ CREATE_BRIDGE2(timMemory, RenderThread* thread, int level) {
 }
 
 void RenderProxy::trimMemory(int level) {
-    RenderThread& thread = RenderThread::getInstance();
-    SETUP_TASK(timMemory);
-    args->thread = &thread;
-    args->level = level;
-    thread.queue(task);
+    // Avoid creating a RenderThread to do a trimMemory.
+    if (RenderThread::hasInstance()) {
+        RenderThread& thread = RenderThread::getInstance();
+        SETUP_TASK(timMemory);
+        args->thread = &thread;
+        args->level = level;
+        thread.queue(task);
+    }
 }
 
 CREATE_BRIDGE0(fence) {
