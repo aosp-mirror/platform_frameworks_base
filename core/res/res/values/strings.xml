@@ -4851,6 +4851,21 @@
     <!-- TV content rating system strings for AR TV -->
 
     <!-- TV content rating system strings for AU TV -->
+    <string name="display_name_autv" translatable="false">Australian TV Classification</string>
+    <string name="display_name_autv_ctc" translatable="false">CTC</string>
+    <string name="display_name_autv_g" translatable="false">G</string>
+    <string name="display_name_autv_pg" translatable="false">PG</string>
+    <string name="display_name_autv_m" translatable="false">M</string>
+    <string name="display_name_autv_ma15" translatable="false">MA 15+</string>
+    <string name="display_name_autv_r18" translatable="false">R 18+</string>
+    <string name="display_name_autv_x18" translatable="false">X 18+</string>
+    <string name="description_autv_ctc">This has advertising approval, but is not yet classified.</string>
+    <string name="description_autv_g">The content is very mild in impact, and suitable for everyone.</string>
+    <string name="description_autv_pg">The content is mild in impact, but it may contain content that children find confusing or upsetting and may require the guidance or parents and guardians.</string>
+    <string name="description_autv_m">The content is moderate in impact, and it is recommended for teenagers aged 15 years and over.</string>
+    <string name="description_autv_ma15">The content is strong in impact, and it is legally restricted to persons 15 years and over.</string>
+    <string name="description_autv_r18">The content is high in impact, and it is restricted to adults.</string>
+    <string name="description_autv_x18">The content is restricted to adults. This classification is a special and legally restricted category which contains only sexually explicit content.</string>
 
     <!-- TV content rating system strings for BG TV -->
 
