@@ -229,7 +229,7 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
         }
         mAlwaysUseOption = alwaysUseOption;
 
-        int count = mAdapter.getCount();
+        int count = mAdapter.mList.size();
         if (mLaunchedFromUid < 0 || UserHandle.isIsolated(mLaunchedFromUid)) {
             // Gulp!
             finish();
