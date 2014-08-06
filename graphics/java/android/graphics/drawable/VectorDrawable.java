@@ -883,7 +883,7 @@ public class VectorDrawable extends Drawable {
                         strokePaint.setStrokeCap(fullPath.mStrokeLineCap);
                     }
 
-                    strokePaint.setStrokeMiter(fullPath.mStrokeMiterlimit * minScale);
+                    strokePaint.setStrokeMiter(fullPath.mStrokeMiterlimit);
 
                     strokePaint.setColor(applyAlpha(fullPath.mStrokeColor, stackedAlpha));
                     strokePaint.setStrokeWidth(fullPath.mStrokeWidth * minScale);
