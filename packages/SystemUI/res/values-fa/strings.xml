@@ -243,7 +243,7 @@
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"هشدار <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="recents_empty_message" msgid="7883614615463619450">"هیچ برنامه جدیدی موجود نیست"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"اطلاعات برنامه"</string>
-    <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"قفل در برنامه"</string>
+    <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"قفل به برنامه"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"جستجو"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"شارژ کامل شد"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"در حال شارژ شدن"</string>
@@ -299,4 +299,26 @@
     <string name="clear_all_notifications_text" msgid="814192889771462828">"پاک کردن همه موارد"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"اکنون شروع شود"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"اعلانی موجود نیست"</string>
+    <!-- no translation found for device_owned_footer (3802752663326030053) -->
+    <skip />
+    <!-- no translation found for vpn_footer (2388611096129106812) -->
+    <skip />
+    <!-- no translation found for monitoring_title_device_owned (7121079311903859610) -->
+    <skip />
+    <!-- no translation found for monitoring_title (169206259253048106) -->
+    <skip />
+    <!-- no translation found for open_app (4011771120339160755) -->
+    <skip />
+    <!-- no translation found for disconnect_vpn (1324915059568548655) -->
+    <skip />
+    <!-- no translation found for monitoring_description_device_owned (7801926679066533391) -->
+    <skip />
+    <!-- no translation found for monitoring_description_vpn (93140751707065515) -->
+    <skip />
+    <!-- no translation found for monitoring_description_legacy_vpn (5397847778080663075) -->
+    <skip />
+    <!-- no translation found for monitoring_description_vpn_device_owned (696121105616356493) -->
+    <skip />
+    <!-- no translation found for monitoring_description_legacy_vpn_device_owned (649791650224064248) -->
+    <skip />
 </resources>
