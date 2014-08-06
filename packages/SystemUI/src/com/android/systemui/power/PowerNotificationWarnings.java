@@ -189,7 +189,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
             nb.setContentIntent(pendingBroadcast(ACTION_SHOW_BATTERY_SETTINGS));
         }
         if (!mSaver) {
-            nb.addAction(R.drawable.ic_power_saver,
+            nb.addAction(0,
                     mContext.getString(R.string.battery_saver_start_action),
                     pendingBroadcast(ACTION_START_SAVER));
         } else {
@@ -222,7 +222,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     }
 
     private void addStopSaverAction(Notification.Builder nb) {
-        nb.addAction(R.drawable.ic_power_saver,
+        nb.addAction(0,
                 mContext.getString(R.string.battery_saver_notification_action_text),
                 pendingBroadcast(ACTION_STOP_SAVER));
     }
