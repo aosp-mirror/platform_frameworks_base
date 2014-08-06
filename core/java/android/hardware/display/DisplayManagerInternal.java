@@ -106,21 +106,30 @@ public abstract class DisplayManagerInternal {
     public abstract void performTraversalInTransactionFromWindowManager();
 
     /**
-     * Tells the display manager whether there is interesting unique content on the
-     * specified logical display.  This is used to control automatic mirroring.
+     * Tells the display manager about properties of the display that depend on the windows on it.
+     * This includes whether there is interesting unique content on the specified logical display,
+     * and whether the one of the windows has a preferred refresh rate.
      * <p>
      * If the display has unique content, then the display manager arranges for it
      * to be presented on a physical display if appropriate.  Otherwise, the display manager
      * may choose to make the physical display mirror some other logical display.
      * </p>
      *
+     * <p>
+     * If one of the windows on the display has a preferred refresh rate that's supported by the
+     * display, then the display manager will request its use.
+     * </p>
+     *
      * @param displayId The logical display id to update.
-     * @param hasContent True if the logical display has content.
+     * @param hasContent True if the logical display has content. This is used to control automatic
+     * mirroring.
+     * @param requestedRefreshRate The preferred refresh rate for the top-most visible window that
+     * has a preference.
      * @param inTraversal True if called from WindowManagerService during a window traversal
      * prior to call to performTraversalInTransactionFromWindowManager.
      */
-    public abstract void setDisplayHasContent(int displayId, boolean hasContent,
-            boolean inTraversal);
+    public abstract void setDisplayProperties(int displayId, boolean hasContent,
+            float requestedRefreshRate, boolean inTraversal);
 
     /**
      * Describes the requested power state of the display.

@@ -26,6 +26,8 @@ import android.os.SystemClock;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
+import java.util.Arrays;
+
 /**
  * Provides information about the size and density of a logical display.
  * <p>
@@ -609,6 +611,17 @@ public final class Display {
         synchronized (this) {
             updateDisplayInfoLocked();
             return mDisplayInfo.refreshRate;
+        }
+    }
+
+    /**
+     * Get the supported refresh rates of this display in frames per second.
+     */
+    public float[] getSupportedRefreshRates() {
+        synchronized (this) {
+            updateDisplayInfoLocked();
+            final float[] refreshRates = mDisplayInfo.supportedRefreshRates;
+            return Arrays.copyOf(refreshRates, refreshRates.length);
         }
     }
 

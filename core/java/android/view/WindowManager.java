@@ -1418,6 +1418,16 @@ public interface WindowManager extends ViewManager {
         public int screenOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 
         /**
+         * The preferred refresh rate for the window.
+         *
+         * This must be one of the supported refresh rates obtained for the display(s) the window
+         * is on.
+         *
+         * @see Display#getSupportedRefreshRates()
+         */
+        public float preferredRefreshRate;
+
+        /**
          * Control the visibility of the status bar.
          *
          * @see View#STATUS_BAR_VISIBLE
@@ -1576,6 +1586,7 @@ public interface WindowManager extends ViewManager {
             out.writeString(packageName);
             TextUtils.writeToParcel(mTitle, out, parcelableFlags);
             out.writeInt(screenOrientation);
+            out.writeFloat(preferredRefreshRate);
             out.writeInt(systemUiVisibility);
             out.writeInt(subtreeSystemUiVisibility);
             out.writeInt(hasSystemUiListeners ? 1 : 0);
@@ -1622,6 +1633,7 @@ public interface WindowManager extends ViewManager {
             packageName = in.readString();
             mTitle = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
             screenOrientation = in.readInt();
+            preferredRefreshRate = in.readFloat();
             systemUiVisibility = in.readInt();
             subtreeSystemUiVisibility = in.readInt();
             hasSystemUiListeners = in.readInt() != 0;
@@ -1663,6 +1675,8 @@ public interface WindowManager extends ViewManager {
         public static final int TRANSLUCENT_FLAGS_CHANGED = 1<<19;
         /** {@hide} */
         public static final int SURFACE_INSETS_CHANGED = 1<<20;
+        /** {@hide} */
+        public static final int PREFERRED_REFRESH_RATE_CHANGED = 1 << 21;
         /** {@hide} */
         public static final int EVERYTHING_CHANGED = 0xffffffff;
 
@@ -1776,6 +1790,11 @@ public interface WindowManager extends ViewManager {
                 changes |= SCREEN_ORIENTATION_CHANGED;
             }
 
+            if (preferredRefreshRate != o.preferredRefreshRate) {
+                preferredRefreshRate = o.preferredRefreshRate;
+                changes |= PREFERRED_REFRESH_RATE_CHANGED;
+            }
+
             if (systemUiVisibility != o.systemUiVisibility
                     || subtreeSystemUiVisibility != o.subtreeSystemUiVisibility) {
                 systemUiVisibility = o.systemUiVisibility;
@@ -1883,6 +1902,10 @@ public interface WindowManager extends ViewManager {
             if (rotationAnimation != ROTATION_ANIMATION_ROTATE) {
                 sb.append(" rotAnim=");
                 sb.append(rotationAnimation);
+            }
+            if (preferredRefreshRate != 0) {
+                sb.append(" preferredRefreshRate=");
+                sb.append(preferredRefreshRate);
             }
             if (systemUiVisibility != 0) {
                 sb.append(" sysui=0x");
