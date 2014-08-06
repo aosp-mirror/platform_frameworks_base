@@ -92,7 +92,7 @@ public abstract class TvInputService extends Service {
      * Handler instance to handle request from TV Input Manager Service. Should be run in the main
      * looper to be synchronously run with {@code Session.mHandler}.
      */
-    private final Handler mServiceHandler = new ServiceHandler(getMainLooper());
+    private Handler mServiceHandler = new ServiceHandler();
     private final RemoteCallbackList<ITvInputServiceCallback> mCallbacks =
             new RemoteCallbackList<ITvInputServiceCallback>();
 
@@ -1166,10 +1166,6 @@ public abstract class TvInputService extends Service {
         private static final int DO_REMOVE_HARDWARE_TV_INPUT = 4;
         private static final int DO_ADD_HDMI_CEC_TV_INPUT = 5;
         private static final int DO_REMOVE_HDMI_CEC_TV_INPUT = 6;
-
-        public ServiceHandler(Looper looper) {
-            super(looper);
-        }
 
         private void broadcastAddHardwareTvInput(int deviceId, TvInputInfo inputInfo) {
             int n = mCallbacks.beginBroadcast();
