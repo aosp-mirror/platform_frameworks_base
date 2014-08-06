@@ -39,6 +39,7 @@ import com.android.internal.telecomm.IVideoCallCallback;
 import com.android.internal.telecomm.IVideoCallProvider;
 import com.android.internal.telecomm.RemoteServiceCallback;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -81,6 +82,7 @@ public abstract class ConnectionService extends Service {
     private final RemoteConnectionManager mRemoteConnectionManager = new RemoteConnectionManager();
 
     private boolean mAreAccountsInitialized = false;
+    private final List<Runnable> mPreInitializationConnectionRequests = new ArrayList<>();
     private final ConnectionServiceAdapter mAdapter = new ConnectionServiceAdapter();
 
     /**
@@ -226,11 +228,23 @@ public abstract class ConnectionService extends Service {
                 case MSG_CREATE_CONNECTION: {
                     SomeArgs args = (SomeArgs) msg.obj;
                     try {
-                        PhoneAccountHandle connectionManagerPhoneAccount =
+                        final PhoneAccountHandle connectionManagerPhoneAccount =
                                 (PhoneAccountHandle) args.arg1;
-                        ConnectionRequest request = (ConnectionRequest) args.arg2;
-                        boolean isIncoming = args.argi1 == 1;
-                        createConnection(connectionManagerPhoneAccount, request, isIncoming);
+                        final ConnectionRequest request = (ConnectionRequest) args.arg2;
+                        final boolean isIncoming = args.argi1 == 1;
+                        if (!mAreAccountsInitialized) {
+                            mPreInitializationConnectionRequests.add(new Runnable() {
+                                @Override
+                                public void run() {
+                                    createConnection(
+                                            connectionManagerPhoneAccount,
+                                            request,
+                                            isIncoming);
+                                }
+                            });
+                        } else {
+                            createConnection(connectionManagerPhoneAccount, request, isIncoming);
+                        }
                     } finally {
                         args.recycle();
                     }
@@ -643,7 +657,7 @@ public abstract class ConnectionService extends Service {
                                     componentNames.get(i),
                                     IConnectionService.Stub.asInterface(services.get(i)));
                         }
-                        mAreAccountsInitialized = true;
+                        onAccountsInitialized();
                         Log.d(this, "remote connection services found: " + services);
                     }
                 });
@@ -801,6 +815,14 @@ public abstract class ConnectionService extends Service {
             }
         }
         return builder.toString();
+    }
+
+    private void onAccountsInitialized() {
+        mAreAccountsInitialized = true;
+        for (Runnable r : mPreInitializationConnectionRequests) {
+            r.run();
+        }
+        mPreInitializationConnectionRequests.clear();
     }
 
     private void addConnection(String callId, Connection connection) {

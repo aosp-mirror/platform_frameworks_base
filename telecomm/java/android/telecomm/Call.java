@@ -74,7 +74,7 @@ public final class Call {
         private final String mCallerDisplayName;
         private final int mCallerDisplayNamePresentation;
         private final PhoneAccountHandle mAccountHandle;
-        private final int mCapabilities;
+        private final int mCallCapabilities;
         private final int mDisconnectCauseCode;
         private final String mDisconnectCauseMsg;
         private final long mConnectTimeMillis;
@@ -125,8 +125,8 @@ public final class Call {
          * @return A bitmask of the capabilities of the {@code Call}, as defined in
          *         {@link CallCapabilities}.
          */
-        public int getCapabilities() {
-            return mCapabilities;
+        public int getCallCapabilities() {
+            return mCallCapabilities;
         }
 
         /**
@@ -162,14 +162,15 @@ public final class Call {
         }
 
         /**
-         * @return Returns the video state of the {@code Call}.
+         * @return The video state of the {@code Call}.
          */
         public int getVideoState() {
             return mVideoState;
         }
 
-        /*
-         * @return The current {@link android.telecomm.StatusHints}, or null if none has been set.
+        /**
+         * @return The current {@link android.telecomm.StatusHints}, or {@code null} if none
+         * have been set.
          */
         public StatusHints getStatusHints() {
             return mStatusHints;
@@ -186,7 +187,7 @@ public final class Call {
                         Objects.equals(mCallerDisplayNamePresentation,
                                 d.mCallerDisplayNamePresentation) &&
                         Objects.equals(mAccountHandle, d.mAccountHandle) &&
-                        Objects.equals(mCapabilities, d.mCapabilities) &&
+                        Objects.equals(mCallCapabilities, d.mCallCapabilities) &&
                         Objects.equals(mDisconnectCauseCode, d.mDisconnectCauseCode) &&
                         Objects.equals(mDisconnectCauseMsg, d.mDisconnectCauseMsg) &&
                         Objects.equals(mConnectTimeMillis, d.mConnectTimeMillis) &&
@@ -205,7 +206,7 @@ public final class Call {
                     Objects.hashCode(mCallerDisplayName) +
                     Objects.hashCode(mCallerDisplayNamePresentation) +
                     Objects.hashCode(mAccountHandle) +
-                    Objects.hashCode(mCapabilities) +
+                    Objects.hashCode(mCallCapabilities) +
                     Objects.hashCode(mDisconnectCauseCode) +
                     Objects.hashCode(mDisconnectCauseMsg) +
                     Objects.hashCode(mConnectTimeMillis) +
@@ -233,7 +234,7 @@ public final class Call {
             mCallerDisplayName = callerDisplayName;
             mCallerDisplayNamePresentation = callerDisplayNamePresentation;
             mAccountHandle = accountHandle;
-            mCapabilities = capabilities;
+            mCallCapabilities = capabilities;
             mDisconnectCauseCode = disconnectCauseCode;
             mDisconnectCauseMsg = disconnectCauseMsg;
             mConnectTimeMillis = connectTimeMillis;
@@ -289,15 +290,6 @@ public final class Call {
         public void onCannedTextResponsesLoaded(Call call, List<String> cannedTextResponses) {}
 
         /**
-         * Invoked when the outgoing {@code Call} has finished dialing but is sending DTMF signals
-         * that were embedded into the outgoing number.
-         *
-         * @param call The {@code Call} invoking this method.
-         * @param remainingPostDialSequence The post-dial characters that remain to be sent.
-         */
-        public void onPostDial(Call call, String remainingPostDialSequence) {}
-
-        /**
          * Invoked when the post-dial sequence in the outgoing {@code Call} has reached a pause
          * character. This causes the post-dial signals to stop pending user confirmation. An
          * implementation should present this choice to the user and invoke
@@ -314,7 +306,6 @@ public final class Call {
          * @param call The {@code Call} invoking this method.
          * @param videoCall The {@code Call.VideoCall} associated with the {@code Call}.
          */
-
         public void onVideoCallChanged(Call call, InCallService.VideoCall videoCall) {}
 
         /**
@@ -427,8 +418,6 @@ public final class Call {
      *
      * A post-dial DTMF string is a string of digits entered after a phone number, when dialed,
      * that are immediately sent as DTMF tones to the recipient as soon as the connection is made.
-     * While these tones are playing, this {@code Call} will notify listeners via
-     * {@link Listener#onPostDial(Call, String)}.
      *
      * If the DTMF string contains a {@link TelecommManager#DTMF_CHARACTER_PAUSE} symbol, this
      * {@code Call} will temporarily pause playing the tones for a pre-defined period of time.
@@ -657,12 +646,6 @@ public final class Call {
     }
 
     /** {@hide} */
-    final void internalSetPostDial(String remaining) {
-        mRemainingPostDialSequence = remaining;
-        firePostDial(mRemainingPostDialSequence);
-    }
-
-    /** {@hide} */
     final void internalSetPostDialWait(String remaining) {
         mRemainingPostDialSequence = remaining;
         firePostDialWait(mRemainingPostDialSequence);
@@ -712,13 +695,6 @@ public final class Call {
         Listener[] listeners = mListeners.toArray(new Listener[mListeners.size()]);
         for (int i = 0; i < listeners.length; i++) {
             listeners[i].onVideoCallChanged(this, videoCall);
-        }
-    }
-
-    private void firePostDial(String remainingPostDialSequence) {
-        Listener[] listeners = mListeners.toArray(new Listener[mListeners.size()]);
-        for (int i = 0; i < listeners.length; i++) {
-            listeners[i].onPostDial(this, remainingPostDialSequence);
         }
     }
 

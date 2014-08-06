@@ -17,14 +17,11 @@
 package android.telecomm;
 
 import android.content.ComponentName;
-import android.net.Uri;
 import android.os.RemoteException;
 
 import com.android.internal.telecomm.IConnectionService;
 
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -37,16 +34,11 @@ public class RemoteConnectionManager {
         if (!mRemoteConnectionServices.containsKey(componentName)) {
             try {
                 RemoteConnectionService remoteConnectionService =
-                        new RemoteConnectionService(componentName, connectionService);
+                        new RemoteConnectionService(connectionService);
                 mRemoteConnectionServices.put(componentName, remoteConnectionService);
             } catch (RemoteException ignored) {
             }
         }
-    }
-
-    List<PhoneAccountHandle> getAccounts(Uri handle) {
-        List<PhoneAccountHandle> accountHandles = new LinkedList<>();
-        return accountHandles;
     }
 
     public RemoteConnection createRemoteConnection(

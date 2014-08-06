@@ -41,11 +41,10 @@ public abstract class InCallService extends Service {
     private static final int MSG_SET_IN_CALL_ADAPTER = 1;
     private static final int MSG_ADD_CALL = 2;
     private static final int MSG_UPDATE_CALL = 3;
-    private static final int MSG_SET_POST_DIAL = 4;
-    private static final int MSG_SET_POST_DIAL_WAIT = 5;
-    private static final int MSG_ON_AUDIO_STATE_CHANGED = 6;
-    private static final int MSG_BRING_TO_FOREGROUND = 7;
-    private static final int MSG_START_ACTIVITY = 8;
+    private static final int MSG_SET_POST_DIAL_WAIT = 4;
+    private static final int MSG_ON_AUDIO_STATE_CHANGED = 5;
+    private static final int MSG_BRING_TO_FOREGROUND = 6;
+    private static final int MSG_START_ACTIVITY = 7;
 
     /** Default Handler used to consolidate binder method calls onto a single thread. */
     private final Handler mHandler = new Handler(Looper.getMainLooper()) {
@@ -62,17 +61,6 @@ public abstract class InCallService extends Service {
                 case MSG_UPDATE_CALL:
                     mPhone.internalUpdateCall((ParcelableCall) msg.obj);
                     break;
-                case MSG_SET_POST_DIAL: {
-                    SomeArgs args = (SomeArgs) msg.obj;
-                    try {
-                        String callId = (String) args.arg1;
-                        String remaining = (String) args.arg2;
-                        mPhone.internalSetPostDial(callId, remaining);
-                    } finally {
-                        args.recycle();
-                    }
-                    break;
-                }
                 case MSG_SET_POST_DIAL_WAIT: {
                     SomeArgs args = (SomeArgs) msg.obj;
                     try {
@@ -124,10 +112,7 @@ public abstract class InCallService extends Service {
 
         @Override
         public void setPostDial(String callId, String remaining) {
-            SomeArgs args = SomeArgs.obtain();
-            args.arg1 = callId;
-            args.arg2 = remaining;
-            mHandler.obtainMessage(MSG_SET_POST_DIAL, args).sendToTarget();
+            // TODO: Unused
         }
 
         @Override
