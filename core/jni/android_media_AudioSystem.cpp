@@ -1293,6 +1293,12 @@ android_media_AudioSystem_eventHandlerFinalize(JNIEnv *env, jobject thiz)
     AudioSystem::setAudioPortCallback(callback);
 }
 
+static jint
+android_media_AudioSystem_getAudioHwSyncForSession(JNIEnv *env, jobject thiz, jint sessionId)
+{
+    return (jint)AudioSystem::getAudioHwSyncForSession((audio_session_t)sessionId);
+}
+
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gMethods[] = {
@@ -1332,6 +1338,8 @@ static JNINativeMethod gMethods[] = {
                                                 (void *)android_media_AudioSystem_listAudioPatches},
     {"setAudioPortConfig",   "(Landroid/media/AudioPortConfig;)I",
                                             (void *)android_media_AudioSystem_setAudioPortConfig},
+    {"getAudioHwSyncForSession", "(I)I",
+                                    (void *)android_media_AudioSystem_getAudioHwSyncForSession},
 };
 
 
