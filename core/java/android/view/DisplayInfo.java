@@ -22,6 +22,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.DisplayMetrics;
 
+import java.util.Arrays;
+
+import libcore.util.EmptyArray;
 import libcore.util.Objects;
 
 /**
@@ -154,6 +157,11 @@ public final class DisplayInfo implements Parcelable {
      * </p>
      */
     public float refreshRate;
+
+    /**
+     * The supported refresh rates of this display at the current resolution in frames per second.
+     */
+    public float[] supportedRefreshRates = EmptyArray.FLOAT;
 
     /**
      * The logical display density which is the basis for density-independent
@@ -299,6 +307,8 @@ public final class DisplayInfo implements Parcelable {
         overscanBottom = other.overscanBottom;
         rotation = other.rotation;
         refreshRate = other.refreshRate;
+        supportedRefreshRates = Arrays.copyOf(
+                other.supportedRefreshRates, other.supportedRefreshRates.length);
         logicalDensityDpi = other.logicalDensityDpi;
         physicalXDpi = other.physicalXDpi;
         physicalYDpi = other.physicalYDpi;
@@ -329,6 +339,7 @@ public final class DisplayInfo implements Parcelable {
         overscanBottom = source.readInt();
         rotation = source.readInt();
         refreshRate = source.readFloat();
+        supportedRefreshRates = source.createFloatArray();
         logicalDensityDpi = source.readInt();
         physicalXDpi = source.readFloat();
         physicalYDpi = source.readFloat();
@@ -360,6 +371,7 @@ public final class DisplayInfo implements Parcelable {
         dest.writeInt(overscanBottom);
         dest.writeInt(rotation);
         dest.writeFloat(refreshRate);
+        dest.writeFloatArray(supportedRefreshRates);
         dest.writeInt(logicalDensityDpi);
         dest.writeFloat(physicalXDpi);
         dest.writeFloat(physicalYDpi);
@@ -462,7 +474,9 @@ public final class DisplayInfo implements Parcelable {
         sb.append(smallestNominalAppHeight);
         sb.append(", ");
         sb.append(refreshRate);
-        sb.append(" fps, rotation ");
+        sb.append(" fps, supportedRefreshRates ");
+        sb.append(Arrays.toString(supportedRefreshRates));
+        sb.append(", rotation ");
         sb.append(rotation);
         sb.append(", density ");
         sb.append(logicalDensityDpi);
