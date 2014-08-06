@@ -279,6 +279,7 @@ public class Notification implements Parcelable
      *
      * @deprecated Use {@link #audioAttributes} instead.
      */
+    @Deprecated
     public static final int STREAM_DEFAULT = -1;
 
     /**
@@ -288,6 +289,7 @@ public class Notification implements Parcelable
      *
      * @deprecated Use {@link #audioAttributes} instead.
      */
+    @Deprecated
     public int audioStreamType = STREAM_DEFAULT;
 
     /**
@@ -2193,6 +2195,7 @@ public class Notification implements Parcelable
          * @deprecated use {@link #setSound(Uri, AudioAttributes)} instead.
          * @see Notification#sound
          */
+        @Deprecated
         public Builder setSound(Uri sound, int streamType) {
             mSound = sound;
             mAudioStreamType = streamType;

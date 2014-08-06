@@ -60,7 +60,10 @@ public class Ringtone {
     private Uri mUri;
     private String mTitle;
 
-    private int mStreamType = AudioManager.STREAM_RING;
+    private AudioAttributes mAudioAttributes = new AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
+            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+            .build();
 
     /** {@hide} */
     public Ringtone(Context context, boolean allowRemote) {
@@ -75,22 +78,40 @@ public class Ringtone {
      * Sets the stream type where this ringtone will be played.
      * 
      * @param streamType The stream, see {@link AudioManager}.
+     * @deprecated use {@link #setAudioAttributes(AudioAttributes)}
      */
+    @Deprecated
     public void setStreamType(int streamType) {
-        mStreamType = streamType;
-
-        // The stream type has to be set before the media player is prepared.
-        // Re-initialize it.
-        setUri(mUri);
+        setAudioAttributes(new AudioAttributes.Builder()
+                .setInternalLegacyStreamType(streamType)
+                .build());
     }
 
     /**
      * Gets the stream type where this ringtone will be played.
      * 
      * @return The stream type, see {@link AudioManager}.
+     * @deprecated use of stream types is deprecated, see
+     *     {@link #setAudioAttributes(AudioAttributes)}
      */
+    @Deprecated
     public int getStreamType() {
-        return mStreamType;
+        return AudioAttributes.toLegacyStreamType(mAudioAttributes);
+    }
+
+    /**
+     * Sets the {@link AudioAttributes} for this ringtone.
+     * @param attributes the non-null attributes characterizing this ringtone.
+     */
+    public void setAudioAttributes(AudioAttributes attributes)
+            throws IllegalArgumentException {
+        if (attributes == null) {
+            throw new IllegalArgumentException("Invalid null AudioAttributes for Ringtone");
+        }
+        mAudioAttributes = attributes;
+        // The audio attributes have to be set before the media player is prepared.
+        // Re-initialize it.
+        setUri(mUri);
     }
 
     /**
@@ -178,7 +199,7 @@ public class Ringtone {
         mLocalPlayer = new MediaPlayer();
         try {
             mLocalPlayer.setDataSource(mContext, mUri);
-            mLocalPlayer.setAudioStreamType(mStreamType);
+            mLocalPlayer.setAudioAttributes(mAudioAttributes);
             mLocalPlayer.prepare();
 
         } catch (SecurityException e) {
@@ -214,13 +235,14 @@ public class Ringtone {
         if (mLocalPlayer != null) {
             // do not play ringtones if stream volume is 0
             // (typically because ringer mode is silent).
-            if (mAudioManager.getStreamVolume(mStreamType) != 0) {
+            if (mAudioManager.getStreamVolume(
+                    AudioAttributes.toLegacyStreamType(mAudioAttributes)) != 0) {
                 mLocalPlayer.start();
             }
         } else if (mAllowRemote && (mRemotePlayer != null)) {
             final Uri canonicalUri = mUri.getCanonicalUri();
             try {
-                mRemotePlayer.play(mRemoteToken, canonicalUri, mStreamType);
+                mRemotePlayer.play(mRemoteToken, canonicalUri, mAudioAttributes);
             } catch (RemoteException e) {
                 if (!playFallbackRingtone()) {
                     Log.w(TAG, "Problem playing ringtone: " + e);
@@ -278,7 +300,8 @@ public class Ringtone {
     }
 
     private boolean playFallbackRingtone() {
-        if (mAudioManager.getStreamVolume(mStreamType) != 0) {
+        if (mAudioManager.getStreamVolume(AudioAttributes.toLegacyStreamType(mAudioAttributes))
+                != 0) {
             int ringtoneType = RingtoneManager.getDefaultType(mUri);
             if (ringtoneType == -1 ||
                     RingtoneManager.getActualDefaultRingtoneUri(mContext, ringtoneType) != null) {
@@ -295,7 +318,7 @@ public class Ringtone {
                                     afd.getStartOffset(),
                                     afd.getDeclaredLength());
                         }
-                        mLocalPlayer.setAudioStreamType(mStreamType);
+                        mLocalPlayer.setAudioAttributes(mAudioAttributes);
                         mLocalPlayer.prepare();
                         mLocalPlayer.start();
                         afd.close();
