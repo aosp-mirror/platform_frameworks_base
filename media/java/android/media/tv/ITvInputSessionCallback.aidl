@@ -27,7 +27,7 @@ import android.os.Bundle;
  * @hide
  */
 oneway interface ITvInputSessionCallback {
-    void onSessionCreated(ITvInputSession session);
+    void onSessionCreated(ITvInputSession session, in IBinder hardwareSessionToken);
     void onSessionEvent(in String name, in Bundle args);
     void onChannelRetuned(in Uri channelUri);
     void onTracksChanged(in List<TvTrackInfo> tracks);
