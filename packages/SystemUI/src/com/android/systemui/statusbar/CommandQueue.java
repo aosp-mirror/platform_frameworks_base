@@ -89,7 +89,7 @@ public class CommandQueue extends IStatusBar.Stub {
                 boolean showImeSwitcher);
         public void setHardKeyboardStatus(boolean available, boolean enabled);
         public void showRecentApps(boolean triggeredFromAltTab);
-        public void hideRecentApps(boolean triggeredFromAltTab);
+        public void hideRecentApps(boolean triggeredFromAltTab, boolean triggeredFromHomeKey);
         public void toggleRecentApps();
         public void preloadRecentApps();
         public void cancelPreloadRecentApps();
@@ -191,11 +191,12 @@ public class CommandQueue extends IStatusBar.Stub {
         }
     }
 
-    public void hideRecentApps(boolean triggeredFromAltTab) {
+    public void hideRecentApps(boolean triggeredFromAltTab, boolean triggeredFromHomeKey) {
         synchronized (mList) {
             mHandler.removeMessages(MSG_HIDE_RECENT_APPS);
             mHandler.obtainMessage(MSG_HIDE_RECENT_APPS,
-                    triggeredFromAltTab ? 1 : 0, 0, null).sendToTarget();
+                    triggeredFromAltTab ? 1 : 0, triggeredFromHomeKey ? 1 : 0,
+                    null).sendToTarget();
         }
     }
 
@@ -306,7 +307,7 @@ public class CommandQueue extends IStatusBar.Stub {
                     mCallbacks.showRecentApps(msg.arg1 != 0);
                     break;
                 case MSG_HIDE_RECENT_APPS:
-                    mCallbacks.hideRecentApps(msg.arg1 != 0);
+                    mCallbacks.hideRecentApps(msg.arg1 != 0, msg.arg2 != 0);
                     break;
                 case MSG_TOGGLE_RECENT_APPS:
                     mCallbacks.toggleRecentApps();

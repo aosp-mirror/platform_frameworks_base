@@ -2130,8 +2130,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
 
         if ((flags & CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL) == 0) {
-            mHandler.removeMessages(MSG_HIDE_RECENT_APPS);
-            mHandler.sendEmptyMessage(MSG_HIDE_RECENT_APPS);
+            if (!mHandler.hasMessages(MSG_HIDE_RECENT_APPS)) {
+                mHandler.removeMessages(MSG_HIDE_RECENT_APPS);
+                mHandler.sendEmptyMessage(MSG_HIDE_RECENT_APPS);
+            }
         }
 
         if ((flags & CommandQueue.FLAG_EXCLUDE_SEARCH_PANEL) == 0) {
@@ -3752,11 +3754,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     @Override
-    protected void hideRecents(boolean triggeredFromAltTab) {
+    protected void hideRecents(boolean triggeredFromAltTab, boolean triggeredFromHomeKey) {
         // Unset the recents visibility flag
         mSystemUiVisibility &= ~View.RECENT_APPS_VISIBLE;
         notifyUiVisibilityChanged(mSystemUiVisibility);
-        super.hideRecents(triggeredFromAltTab);
+        super.hideRecents(triggeredFromAltTab, triggeredFromHomeKey);
     }
 
     @Override

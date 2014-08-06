@@ -59,12 +59,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         RecentsAppWidgetHost.RecentsAppWidgetHostCallbacks,
         DebugOverlayView.DebugOverlayViewCallbacks {
 
-    // Actions and Extras sent from AlternateRecentsComponent
-    final static String EXTRA_TRIGGERED_FROM_ALT_TAB = "extra_triggered_from_alt_tab";
-    final static String ACTION_START_ENTER_ANIMATION = "action_start_enter_animation";
-    final static String ACTION_TOGGLE_RECENTS_ACTIVITY = "action_toggle_recents_activity";
-    final static String ACTION_HIDE_RECENTS_ACTIVITY = "action_hide_recents_activity";
-
     RecentsConfiguration mConfig;
     boolean mVisible;
 
@@ -131,18 +125,22 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if (action.equals(ACTION_HIDE_RECENTS_ACTIVITY)) {
-                if (intent.getBooleanExtra(EXTRA_TRIGGERED_FROM_ALT_TAB, false)) {
+            if (action.equals(AlternateRecentsComponent.ACTION_HIDE_RECENTS_ACTIVITY)) {
+                // Mark Recents as no longer visible
+                AlternateRecentsComponent.notifyVisibilityChanged(false);
+                if (intent.getBooleanExtra(AlternateRecentsComponent.EXTRA_TRIGGERED_FROM_ALT_TAB, false)) {
                     // If we are hiding from releasing Alt-Tab, dismiss Recents to the focused app
                     dismissRecentsToFocusedTaskOrHome(false);
-                } else {
+                } else if (intent.getBooleanExtra(AlternateRecentsComponent.EXTRA_TRIGGERED_FROM_HOME_KEY, false)) {
                     // Otherwise, dismiss Recents to Home
                     dismissRecentsToHome(true);
+                } else {
+                    // Do nothing, another activity is being launched on top of Recents
                 }
-            } else if (action.equals(ACTION_TOGGLE_RECENTS_ACTIVITY)) {
+            } else if (action.equals(AlternateRecentsComponent.ACTION_TOGGLE_RECENTS_ACTIVITY)) {
                 // If we are toggling Recents, then first unfilter any filtered stacks first
                 dismissRecentsToFocusedTaskOrHome(true);
-            } else if (action.equals(ACTION_START_ENTER_ANIMATION)) {
+            } else if (action.equals(AlternateRecentsComponent.ACTION_START_ENTER_ANIMATION)) {
                 // Try and start the enter animation (or restart it on configuration changed)
                 ReferenceCountedTrigger t = new ReferenceCountedTrigger(context, null, null, null);
                 mRecentsView.startEnterRecentsAnimation(new ViewAnimation.TaskViewEnterContext(t));
@@ -195,11 +193,11 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                 AlternateRecentsComponent.EXTRA_FROM_APP_THUMBNAIL, false);
         mConfig.launchedFromAppWithScreenshot = launchIntent.getBooleanExtra(
                 AlternateRecentsComponent.EXTRA_FROM_APP_FULL_SCREENSHOT, false);
+        mConfig.launchedToTaskId = launchIntent.getIntExtra(
+                AlternateRecentsComponent.EXTRA_FROM_TASK_ID, -1);
         mConfig.launchedWithAltTab = launchIntent.getBooleanExtra(
                 AlternateRecentsComponent.EXTRA_TRIGGERED_FROM_ALT_TAB, false);
         mConfig.launchedWithNoRecentTasks = !root.hasTasks();
-        mConfig.launchedToTaskId = launchIntent.getIntExtra(
-                AlternateRecentsComponent.EXTRA_TRIGGERED_FROM_TASK_ID, -1);
 
         // Mark the task that is the launch target
         int taskStackCount = stacks.size();
@@ -444,9 +442,9 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
         // Register the broadcast receiver to handle messages from our service
         IntentFilter filter = new IntentFilter();
-        filter.addAction(ACTION_HIDE_RECENTS_ACTIVITY);
-        filter.addAction(ACTION_TOGGLE_RECENTS_ACTIVITY);
-        filter.addAction(ACTION_START_ENTER_ANIMATION);
+        filter.addAction(AlternateRecentsComponent.ACTION_HIDE_RECENTS_ACTIVITY);
+        filter.addAction(AlternateRecentsComponent.ACTION_TOGGLE_RECENTS_ACTIVITY);
+        filter.addAction(AlternateRecentsComponent.ACTION_START_ENTER_ANIMATION);
         registerReceiver(mServiceBroadcastReceiver, filter);
 
         // Register any broadcast receivers for the task loader

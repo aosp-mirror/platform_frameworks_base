@@ -55,7 +55,7 @@ interface IStatusBarService
     void setWindowState(int window, int state);
 
     void showRecentApps(boolean triggeredFromAltTab);
-    void hideRecentApps(boolean triggeredFromAltTab);
+    void hideRecentApps(boolean triggeredFromAltTab, boolean triggeredFromHomeKey);
     void toggleRecentApps();
     void preloadRecentApps();
     void cancelPreloadRecentApps();
