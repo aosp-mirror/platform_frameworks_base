@@ -270,7 +270,7 @@ public class ListPopupWindow {
      * @param modal {@code true} if the popup window should be modal, {@code false} otherwise.
      */
     public void setModal(boolean modal) {
-        mModal = true;
+        mModal = modal;
         mPopup.setFocusable(modal);
     }
 
