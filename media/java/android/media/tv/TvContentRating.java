@@ -96,10 +96,10 @@ import java.util.List;
  *         <td>AR_TV</td>
  *         <td></td>
  *     </tr-->
- *     <!--tr>
+ *     <tr>
  *         <td>AU_TV</td>
- *         <td></td>
- *     </tr-->
+ *         <td>Australian TV Classification</td>
+ *     </tr>
  *     <!--tr>
  *         <td>BG_TV</td>
  *         <td></td>
@@ -288,10 +288,69 @@ import java.util.List;
  *         <td>AR_TV_ALL</td>
  *         <td></td>
  *     </tr-->
- *     <!--tr>
- *         <td>AU_TV_ALL</td>
- *         <td></td>
- *     </tr-->
+ *     <tr>
+ *         <td>AU_TV_CTC</td>
+ *         <td>A rating string for {@code AU_TV}. The content has been assessed and approved for
+ *         advertising unclassified films. Any advertising of unclassified films must display the
+ *         CTC message.</td>
+ *     </tr>
+ *     <tr>
+ *         <td>AU_TV_G</td>
+ *         <td>A rating string for {@code AU_TV}. The content is very mild in impact. The G
+ *         classification is suitable for everyone. G products may contain classifiable elements
+ *         such as language and themes that are very mild in impact. However, some G-classified
+ *         films may contain content that is not of interest to children.</td>
+ *     </tr>
+ *     <tr>
+ *         <td>AU_TV_PG</td>
+ *         <td>A rating string for {@code AU_TV}. The content is mild in impact. The impact of PG
+ *         (Parental Guidance) classified films should be no higher than mild, but they may contain
+ *         content that children find confusing or upsetting and may require the guidance or parents
+ *         and guardians. They may, for example, contain classifiable elements such as language and
+ *         themes that are mild in impact. It is not recommended for viewing or playing by persons
+ *         under 15 without guidance from parents or guardians.</td>
+ *     </tr>
+ *     <tr>
+ *         <td>AU_TV_M</td>
+ *         <td>A rating string for {@code AU_TV}. The content is moderate in impact. Films
+ *         classified M (Mature) contain content of a moderate impact and are recommended for
+ *         teenagers aged 15 years and over. Children under 15 may legally access this material
+ *         because it is an advisory category. However, M classified films may include classifiable
+ *         elements such as violence and nudity of moderate impact that are not recommended for
+ *         children under 15 years. Parents and guardians may need to find out more about the film’s
+ *         specific content, before deciding whether the material is suitable for their child.</td>
+ *     </tr>
+ *     <tr>
+ *         <td>AU_TV_MA16</td>
+ *         <td>A rating string for {@code AU_TV}. The content is strong in impact. MA 15+ classified
+ *         material contains strong content and is legally restricted to persons 15 years and over.
+ *         It may contain classifiable elements such as sex scenes and drug use that are strong in
+ *         impact. A person may be asked to show proof of their age before hiring or purchasing an
+ *         MA 15+ film. Cinema staff may also request that the person show proof of their age before
+ *         allowing them to watch an MA 15+ film. Children under the age of 15 may not legally
+ *         watch, buy or hire MA 15+ classified material unless they are in the company of a parent
+ *         or adult guardian. Children under 15 who go to the cinema to see an MA 15+ film must be
+ *         accompanied by a parent or adult guardian for the duration of the film. The parent or
+ *         adult guardian must also purchase the movie ticket for the child. The guardian must be
+ *         an adult exercising parental control over the person under 15 years of age. The guardian
+ *         needs to be 18 years or older.</td>
+ *     </tr>
+ *     <tr>
+ *         <td>AU_TV_R18</td>
+ *         <td>A rating string for {@code AU_TV}. The content is high in impact. R 18+ classified
+ *         material is restricted to adults. Such material may contain classifiable elements such as
+ *         sex scenes and drug use that are high in impact. Some material classified R18+ may be
+ *         offensive to sections of the adult community. A person may be asked for proof of their
+ *         age before purchasing, hiring or viewing R18+ films at a retail store or cinema.</td>
+ *     </tr>
+ *     <tr>
+ *         <td>AU_TV_X18</td>
+ *         <td>A rating string for {@code AU_TV}. X 18+ films are restricted to adults. This
+ *         classification is a special and legally restricted category which contains only sexually
+ *         explicit content. That is, material which shows actual sexual intercourse and other
+ *         sexual activity between consenting adults. X18+ films are only available for sale or hire
+ *         in the ACT and the NT.</td>
+ *     </tr>
  *     <!--tr>
  *         <td>BG_TV_ALL</td>
  *         <td></td>
@@ -639,10 +698,6 @@ import java.util.List;
  *     </tr-->
  *     <!--tr>
  *         <td>AR_TV_</td>
- *         <td></td>
- *     </tr-->
- *     <!--tr>
- *         <td>AU_TV_</td>
  *         <td></td>
  *     </tr-->
  *     <!--tr>

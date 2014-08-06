@@ -22,6 +22,46 @@
     <!-- TV content rating system for AR TV -->
 
     <!-- TV content rating system for AU TV -->
+    <rating-system-definition id="AU_TV"
+        displayName="@string/display_name_autv"
+        country="AU">
+        <rating-definition id="AU_TV_CTC"
+            displayName="@string/display_name_autv_ctc"
+            description="@string/description_autv_ctc"
+            ageHint="0" />
+        <rating-definition id="AU_TV_G"
+            displayName="@string/display_name_autv_g"
+            description="@string/description_autv_g"
+            ageHint="0" />
+        <rating-definition id="AU_TV_PG"
+            displayName="@string/display_name_autv_pg"
+            description="@string/description_autv_g"
+            ageHint="15" />
+        <rating-definition id="AU_TV_M"
+            displayName="@string/display_name_autv_m"
+            description="@string/description_autv_m"
+            ageHint="15" />
+        <rating-definition id="AU_TV_MA15"
+            displayName="@string/display_name_autv_ma15"
+            description="@string/description_autv_ma15"
+            ageHint="15" />
+        <rating-definition id="AU_TV_R18"
+            displayName="@string/display_name_autv_r18"
+            description="@string/description_autv_r18"
+            ageHint="18" />
+        <rating-definition id="AU_TV_X18"
+            displayName="@string/display_name_autv_x18"
+            description="@string/description_autv_x18"
+            ageHint="18" />
+        <order>
+            <rating id="AU_TV_G" />
+            <rating id="AU_TV_PG" />
+            <rating id="AU_TV_M" />
+            <rating id="AU_TV_MA15" />
+            <rating id="AU_TV_R18" />
+            <rating id="AU_TV_X18" />
+        </order>
+    </rating-system-definition>
 
     <!-- TV content rating system for BG TV -->
 
