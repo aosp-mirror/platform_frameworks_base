@@ -35,7 +35,7 @@ import java.lang.String;
  * This service is implemented by any app that wishes to provide the user-interface for managing
  * phone calls. Telecomm binds to this service while there exists a live (active or incoming) call,
  * and uses it to notify the in-call app of any live and and recently disconnected calls.
- * TODO(santoscordon): What happens if two or more apps on a given device implement this interface?
+ * TODO: What happens if two or more apps on a given device implement this interface?
  */
 public abstract class InCallService extends Service {
     private static final int MSG_SET_IN_CALL_ADAPTER = 1;

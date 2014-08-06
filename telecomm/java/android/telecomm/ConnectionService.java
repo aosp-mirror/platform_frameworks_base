@@ -647,7 +647,7 @@ public abstract class ConnectionService extends Service {
             return;
         }
 
-        // TODO(santoscordon): Find existing conference call and invoke split(connection).
+        // TODO: Find existing conference call and invoke split(connection).
     }
 
     private void swapWithBackgroundCall(String callId) {
