@@ -3341,7 +3341,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     public void showKeyguard() {
         setBarState(StatusBarState.KEYGUARD);
-        updateKeyguardState(false /* goingToFullShade */);
+        updateKeyguardState(false /* goingToFullShade */, false /* fromShadeLocked */);
         instantExpandNotificationsPanel();
         mLeaveOpenOnKeyguardHide = false;
         if (mDraggedDownRow != null) {
@@ -3413,7 +3413,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         } else {
             instantCollapseNotificationPanel();
         }
-        updateKeyguardState(staying);
+        updateKeyguardState(staying, false /* fromShadeLocked */);
         return staying;
     }
 
@@ -3449,14 +3449,15 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 && mStatusBarKeyguardViewManager.isSecure());
     }
 
-    private void updateKeyguardState(boolean goingToFullShade) {
+    private void updateKeyguardState(boolean goingToFullShade, boolean fromShadeLocked) {
         if (mState == StatusBarState.KEYGUARD) {
             mKeyguardIndicationController.setVisible(true);
             mNotificationPanel.resetViews();
-            mKeyguardUserSwitcher.setKeyguard(true);
+            mKeyguardUserSwitcher.setKeyguard(true, fromShadeLocked);
         } else {
             mKeyguardIndicationController.setVisible(false);
-            mKeyguardUserSwitcher.setKeyguard(false);
+            mKeyguardUserSwitcher.setKeyguard(false,
+                    goingToFullShade || mState == StatusBarState.SHADE_LOCKED || fromShadeLocked);
         }
         if (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED) {
             mScrimController.setKeyguardShowing(true);
@@ -3686,7 +3687,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         } else {
             mNotificationPanel.animateToFullShade(0 /* delay */);
             setBarState(StatusBarState.SHADE_LOCKED);
-            updateKeyguardState(false /* goingToFullShade */);
+            updateKeyguardState(false /* goingToFullShade */, false /* fromShadeLocked */);
             if (row != null) {
                 row.setUserLocked(false);
             }
@@ -3699,7 +3700,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     public void goToKeyguard() {
         if (mState == StatusBarState.SHADE_LOCKED) {
             setBarState(StatusBarState.KEYGUARD);
-            updateKeyguardState(false /* goingToFullShade */);
+            updateKeyguardState(false /* goingToFullShade */, true /* fromShadeLocked*/);
         }
     }
 

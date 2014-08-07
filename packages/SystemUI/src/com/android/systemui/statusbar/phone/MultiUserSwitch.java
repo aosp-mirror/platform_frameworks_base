@@ -65,7 +65,7 @@ public class MultiUserSwitch extends FrameLayout implements View.OnClickListener
         if (um.isUserSwitcherEnabled()) {
             if (mKeyguardMode) {
                 if (mKeyguardUserSwitcher != null) {
-                    mKeyguardUserSwitcher.show();
+                    mKeyguardUserSwitcher.show(true /* animate */);
                 }
             } else {
                 mQsPanel.showDetailAdapter(true,
@@ -77,5 +77,10 @@ public class MultiUserSwitch extends FrameLayout implements View.OnClickListener
                     ContactsContract.QuickContact.MODE_LARGE, null);
             getContext().startActivityAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
         }
+    }
+
+    @Override
+    public boolean hasOverlappingRendering() {
+        return false;
     }
 }
