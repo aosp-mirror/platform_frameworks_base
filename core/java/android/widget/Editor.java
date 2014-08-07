@@ -19,6 +19,7 @@ package android.widget;
 import android.content.UndoManager;
 import android.content.UndoOperation;
 import android.content.UndoOwner;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.InputFilter;
@@ -26,6 +27,7 @@ import android.text.SpannableString;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
+import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.widget.EditableInputConnection;
 
 import android.R;
@@ -2810,7 +2812,12 @@ public class Editor {
 
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-            TypedArray styledAttributes = mTextView.getContext().obtainStyledAttributes(
+            final boolean legacy = mTextView.getContext().getApplicationInfo().targetSdkVersion <
+                    Build.VERSION_CODES.L;
+            final Context context = !legacy && menu instanceof MenuBuilder ?
+                    ((MenuBuilder) menu).getContext() :
+                    mTextView.getContext();
+            final TypedArray styledAttributes = context.obtainStyledAttributes(
                     com.android.internal.R.styleable.SelectionModeDrawables);
 
             mode.setTitle(mTextView.getContext().getString(
