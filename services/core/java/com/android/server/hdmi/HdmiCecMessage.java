@@ -28,8 +28,6 @@ import java.util.Arrays;
 public final class HdmiCecMessage {
     public static final byte[] EMPTY_PARAM = EmptyArray.BYTE;
 
-    private static final int MAX_MESSAGE_PARAM_LENGTH = 14;
-
     private final int mSource;
     private final int mDestination;
 
@@ -43,12 +41,6 @@ public final class HdmiCecMessage {
         mSource = source;
         mDestination = destination;
         mOpcode = opcode & 0xFF;
-
-        if (params.length > MAX_MESSAGE_PARAM_LENGTH) {
-            throw new IllegalArgumentException(
-                    "Param length should be at most 13 but current param length is "
-                    + params.length);
-        }
         mParams = Arrays.copyOf(params, params.length);
     }
 
