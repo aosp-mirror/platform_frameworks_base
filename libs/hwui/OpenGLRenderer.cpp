@@ -58,11 +58,6 @@ namespace uirenderer {
 // Defines
 ///////////////////////////////////////////////////////////////////////////////
 
-#define RAD_TO_DEG (180.0f / 3.14159265f)
-#define MIN_ANGLE 0.001f
-
-#define ALPHA_THRESHOLD 0
-
 static GLenum getFilter(const SkPaint* paint) {
     if (!paint || paint->getFilterLevel() != SkPaint::kNone_FilterLevel) {
         return GL_LINEAR;
@@ -692,7 +687,7 @@ void OpenGLRenderer::updateSnapshotIgnoreForLayer(const Rect& bounds, const Rect
             (fboLayer && clip.isEmpty())) {
         mSnapshot->empty = fboLayer;
     } else {
-        mSnapshot->invisible = mSnapshot->invisible || (alpha <= ALPHA_THRESHOLD && fboLayer);
+        mSnapshot->invisible = mSnapshot->invisible || (alpha <= 0 && fboLayer);
     }
 }
 

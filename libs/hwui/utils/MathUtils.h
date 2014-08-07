@@ -35,6 +35,9 @@ public:
         return value >= NON_ZERO_EPSILON;
     }
 
+    /**
+     * Clamps alpha value, and snaps when very near 0 or 1
+     */
     inline static float clampAlpha(float alpha) {
         if (alpha <= ALPHA_EPSILON) {
             return 0;
@@ -43,6 +46,20 @@ public:
         } else {
             return alpha;
         }
+    }
+
+    /*
+     * Clamps positive tessellation scale values
+     */
+    inline static float clampTessellationScale(float scale) {
+        const float MIN_SCALE = 0.0001;
+        const float MAX_SCALE = 1e10;
+        if (scale < MIN_SCALE) {
+            return MIN_SCALE;
+        } else if (scale > MAX_SCALE) {
+            return MAX_SCALE;
+        }
+        return scale;
     }
 
     inline static bool areEqual(float valueA, float valueB) {
