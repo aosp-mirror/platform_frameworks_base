@@ -34,7 +34,7 @@ final class HdmiConfig {
     static final int DEVICE_POLLING_RETRY = 1;
 
     // Number of retries for polling each device in periodic check (hotplug detection).
-    static final int HOTPLUG_DETECTION_RETRY = 2;
+    static final int HOTPLUG_DETECTION_RETRY = 1;
 
     // Number of retries for polling each device in address allocation mechanism.
     static final int ADDRESS_ALLOCATION_RETRY = 3;
