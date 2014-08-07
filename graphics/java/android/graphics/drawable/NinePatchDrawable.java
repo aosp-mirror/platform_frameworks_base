@@ -346,12 +346,16 @@ public class NinePatchDrawable extends Drawable {
     }
 
     @Override
-    public void setTint(ColorStateList tint, PorterDuff.Mode tintMode) {
-        final NinePatchState state = mNinePatchState;
-        state.mTint = tint;
-        state.mTintMode = tintMode;
+    public void setTintList(ColorStateList tint) {
+        mNinePatchState.mTint = tint;
+        mTintFilter = updateTintFilter(mTintFilter, tint, mNinePatchState.mTintMode);
+        invalidateSelf();
+    }
 
-        mTintFilter = updateTintFilter(mTintFilter, tint, tintMode);
+    @Override
+    public void setTintMode(PorterDuff.Mode tintMode) {
+        mNinePatchState.mTintMode = tintMode;
+        mTintFilter = updateTintFilter(mTintFilter, mNinePatchState.mTint, tintMode);
         invalidateSelf();
     }
 

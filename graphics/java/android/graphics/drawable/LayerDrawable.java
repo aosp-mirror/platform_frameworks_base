@@ -698,11 +698,20 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     }
 
     @Override
-    public void setTint(ColorStateList tint, Mode tintMode) {
+    public void setTintList(ColorStateList tint) {
         final ChildDrawable[] array = mLayerState.mChildren;
         final int N = mLayerState.mNum;
         for (int i = 0; i < N; i++) {
-            array[i].mDrawable.setTint(tint, tintMode);
+            array[i].mDrawable.setTintList(tint);
+        }
+    }
+
+    @Override
+    public void setTintMode(Mode tintMode) {
+        final ChildDrawable[] array = mLayerState.mChildren;
+        final int N = mLayerState.mNum;
+        for (int i = 0; i < N; i++) {
+            array[i].mDrawable.setTintMode(tintMode);
         }
     }
 

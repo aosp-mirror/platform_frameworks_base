@@ -11781,7 +11781,9 @@ package android.graphics.drawable {
     method public void setHotspotBounds(int, int, int, int);
     method public final boolean setLevel(int);
     method public boolean setState(int[]);
-    method public void setTint(android.content.res.ColorStateList, android.graphics.PorterDuff.Mode);
+    method public void setTint(int);
+    method public void setTintList(android.content.res.ColorStateList);
+    method public void setTintMode(android.graphics.PorterDuff.Mode);
     method public boolean setVisible(boolean, boolean);
     method public void unscheduleSelf(java.lang.Runnable);
   }
@@ -34271,7 +34273,7 @@ package android.view {
     method public android.view.animation.Animation getAnimation();
     method public android.os.IBinder getApplicationWindowToken();
     method public android.graphics.drawable.Drawable getBackground();
-    method public android.content.res.ColorStateList getBackgroundTint();
+    method public android.content.res.ColorStateList getBackgroundTintList();
     method public android.graphics.PorterDuff.Mode getBackgroundTintMode();
     method public int getBaseline();
     method public final int getBottom();
@@ -34552,7 +34554,7 @@ package android.view {
     method public void setBackgroundColor(int);
     method public deprecated void setBackgroundDrawable(android.graphics.drawable.Drawable);
     method public void setBackgroundResource(int);
-    method public void setBackgroundTint(android.content.res.ColorStateList);
+    method public void setBackgroundTintList(android.content.res.ColorStateList);
     method public void setBackgroundTintMode(android.graphics.PorterDuff.Mode);
     method public final void setBottom(int);
     method public void setCameraDistance(float);
@@ -37607,13 +37609,13 @@ package android.widget {
     method public boolean getSplitTrack();
     method public android.graphics.drawable.Drawable getThumb();
     method public int getThumbOffset();
-    method public android.content.res.ColorStateList getThumbTint();
+    method public android.content.res.ColorStateList getThumbTintList();
     method public android.graphics.PorterDuff.Mode getThumbTintMode();
     method public void setKeyProgressIncrement(int);
     method public void setSplitTrack(boolean);
     method public void setThumb(android.graphics.drawable.Drawable);
     method public void setThumbOffset(int);
-    method public void setThumbTint(android.content.res.ColorStateList);
+    method public void setThumbTintList(android.content.res.ColorStateList);
     method public void setThumbTintMode(android.graphics.PorterDuff.Mode);
   }
 
@@ -38000,12 +38002,12 @@ package android.widget {
     ctor public CheckedTextView(android.content.Context, android.util.AttributeSet, int);
     ctor public CheckedTextView(android.content.Context, android.util.AttributeSet, int, int);
     method public android.graphics.drawable.Drawable getCheckMarkDrawable();
-    method public android.content.res.ColorStateList getCheckMarkTint();
+    method public android.content.res.ColorStateList getCheckMarkTintList();
     method public android.graphics.PorterDuff.Mode getCheckMarkTintMode();
     method public boolean isChecked();
     method public void setCheckMarkDrawable(int);
     method public void setCheckMarkDrawable(android.graphics.drawable.Drawable);
-    method public void setCheckMarkTint(android.content.res.ColorStateList);
+    method public void setCheckMarkTintList(android.content.res.ColorStateList);
     method public void setCheckMarkTintMode(android.graphics.PorterDuff.Mode);
     method public void setChecked(boolean);
     method public void toggle();
@@ -38035,12 +38037,12 @@ package android.widget {
     ctor public CompoundButton(android.content.Context, android.util.AttributeSet);
     ctor public CompoundButton(android.content.Context, android.util.AttributeSet, int);
     ctor public CompoundButton(android.content.Context, android.util.AttributeSet, int, int);
-    method public android.content.res.ColorStateList getButtonTint();
+    method public android.content.res.ColorStateList getButtonTintList();
     method public android.graphics.PorterDuff.Mode getButtonTintMode();
     method public boolean isChecked();
     method public void setButtonDrawable(int);
     method public void setButtonDrawable(android.graphics.drawable.Drawable);
-    method public void setButtonTint(android.content.res.ColorStateList);
+    method public void setButtonTintList(android.content.res.ColorStateList);
     method public void setButtonTintMode(android.graphics.PorterDuff.Mode);
     method public void setChecked(boolean);
     method public void setOnCheckedChangeListener(android.widget.CompoundButton.OnCheckedChangeListener);
@@ -38304,13 +38306,13 @@ package android.widget {
     method public deprecated boolean getConsiderGoneChildrenWhenMeasuring();
     method public android.graphics.drawable.Drawable getForeground();
     method public int getForegroundGravity();
-    method public android.content.res.ColorStateList getForegroundTint();
+    method public android.content.res.ColorStateList getForegroundTintList();
     method public android.graphics.PorterDuff.Mode getForegroundTintMode();
     method public boolean getMeasureAllChildren();
     method protected void onLayout(boolean, int, int, int, int);
     method public void setForeground(android.graphics.drawable.Drawable);
     method public void setForegroundGravity(int);
-    method public void setForegroundTint(android.content.res.ColorStateList);
+    method public void setForegroundTintList(android.content.res.ColorStateList);
     method public void setForegroundTintMode(android.graphics.PorterDuff.Mode);
     method public void setMeasureAllChildren(boolean);
   }
@@ -38517,11 +38519,11 @@ package android.widget {
     method public android.graphics.drawable.Drawable getDrawable();
     method public int getImageAlpha();
     method public android.graphics.Matrix getImageMatrix();
+    method public android.content.res.ColorStateList getImageTintList();
+    method public android.graphics.PorterDuff.Mode getImageTintMode();
     method public int getMaxHeight();
     method public int getMaxWidth();
     method public android.widget.ImageView.ScaleType getScaleType();
-    method public android.content.res.ColorStateList getTint();
-    method public android.graphics.PorterDuff.Mode getTintMode();
     method public int[] onCreateDrawableState(int);
     method public void setAdjustViewBounds(boolean);
     method public deprecated void setAlpha(int);
@@ -38539,12 +38541,12 @@ package android.widget {
     method public void setImageMatrix(android.graphics.Matrix);
     method public void setImageResource(int);
     method public void setImageState(int[], boolean);
+    method public void setImageTintList(android.content.res.ColorStateList);
+    method public void setImageTintMode(android.graphics.PorterDuff.Mode);
     method public void setImageURI(android.net.Uri);
     method public void setMaxHeight(int);
     method public void setMaxWidth(int);
     method public void setScaleType(android.widget.ImageView.ScaleType);
-    method public void setTint(android.content.res.ColorStateList);
-    method public void setTintMode(android.graphics.PorterDuff.Mode);
   }
 
   public static final class ImageView.ScaleType extends java.lang.Enum {
@@ -38919,18 +38921,18 @@ package android.widget {
     ctor public ProgressBar(android.content.Context, android.util.AttributeSet, int);
     ctor public ProgressBar(android.content.Context, android.util.AttributeSet, int, int);
     method public android.graphics.drawable.Drawable getIndeterminateDrawable();
-    method public android.content.res.ColorStateList getIndeterminateTint();
+    method public android.content.res.ColorStateList getIndeterminateTintList();
     method public android.graphics.PorterDuff.Mode getIndeterminateTintMode();
     method public android.view.animation.Interpolator getInterpolator();
     method public synchronized int getMax();
     method public synchronized int getProgress();
-    method public android.content.res.ColorStateList getProgressBackgroundTint();
+    method public android.content.res.ColorStateList getProgressBackgroundTintList();
     method public android.graphics.PorterDuff.Mode getProgressBackgroundTintMode();
     method public android.graphics.drawable.Drawable getProgressDrawable();
-    method public android.content.res.ColorStateList getProgressTint();
+    method public android.content.res.ColorStateList getProgressTintList();
     method public android.graphics.PorterDuff.Mode getProgressTintMode();
     method public synchronized int getSecondaryProgress();
-    method public android.content.res.ColorStateList getSecondaryProgressTint();
+    method public android.content.res.ColorStateList getSecondaryProgressTintList();
     method public android.graphics.PorterDuff.Mode getSecondaryProgressTintMode();
     method public final synchronized void incrementProgressBy(int);
     method public final synchronized void incrementSecondaryProgressBy(int);
@@ -38940,20 +38942,20 @@ package android.widget {
     method public synchronized void setIndeterminate(boolean);
     method public void setIndeterminateDrawable(android.graphics.drawable.Drawable);
     method public void setIndeterminateDrawableTiled(android.graphics.drawable.Drawable);
-    method public void setIndeterminateTint(android.content.res.ColorStateList);
+    method public void setIndeterminateTintList(android.content.res.ColorStateList);
     method public void setIndeterminateTintMode(android.graphics.PorterDuff.Mode);
     method public void setInterpolator(android.content.Context, int);
     method public void setInterpolator(android.view.animation.Interpolator);
     method public synchronized void setMax(int);
     method public synchronized void setProgress(int);
-    method public void setProgressBackgroundTint(android.content.res.ColorStateList);
+    method public void setProgressBackgroundTintList(android.content.res.ColorStateList);
     method public void setProgressBackgroundTintMode(android.graphics.PorterDuff.Mode);
     method public void setProgressDrawable(android.graphics.drawable.Drawable);
     method public void setProgressDrawableTiled(android.graphics.drawable.Drawable);
-    method public void setProgressTint(android.content.res.ColorStateList);
+    method public void setProgressTintList(android.content.res.ColorStateList);
     method public void setProgressTintMode(android.graphics.PorterDuff.Mode);
     method public synchronized void setSecondaryProgress(int);
-    method public void setSecondaryProgressTint(android.content.res.ColorStateList);
+    method public void setSecondaryProgressTintList(android.content.res.ColorStateList);
     method public void setSecondaryProgressTintMode(android.graphics.PorterDuff.Mode);
   }
 

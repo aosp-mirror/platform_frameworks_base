@@ -260,8 +260,13 @@ public class InsetDrawable extends Drawable implements Drawable.Callback {
     }
 
     @Override
-    public void setTint(ColorStateList tint, Mode tintMode) {
-        mInsetState.mDrawable.setTint(tint, tintMode);
+    public void setTintList(ColorStateList tint) {
+        mInsetState.mDrawable.setTintList(tint);
+    }
+
+    @Override
+    public void setTintMode(Mode tintMode) {
+        mInsetState.mDrawable.setTintMode(tintMode);
     }
 
     /** {@hide} */
