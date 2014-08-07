@@ -84,4 +84,8 @@
     <!-- The width/height of the phone/camera/unlock icon on keyguard. -->
     <dimen name="keyguard_affordance_height">80dp</dimen>
     <dimen name="keyguard_affordance_width">120dp</dimen>
+
+    <!-- The width of the region on the left/right edge of the screen for performing the camera/
+     phone hints. -->
+    <dimen name="edge_tap_area_width">80dp</dimen>
 </resources>
