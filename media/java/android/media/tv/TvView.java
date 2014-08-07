@@ -78,6 +78,10 @@ public class TvView extends ViewGroup {
     private static final int ZORDER_MEDIA_OVERLAY = 1;
     private static final int ZORDER_ON_TOP = 2;
 
+    private static final int CAPTION_DEFAULT = 0;
+    private static final int CAPTION_ENABLED = 1;
+    private static final int CAPTION_DISABLED = 2;
+
     private static final Object sMainTvViewLock = new Object();
     private static TvView sMainTvView;
 
@@ -107,6 +111,7 @@ public class TvView extends ViewGroup {
     private int mSurfaceViewRight;
     private int mSurfaceViewTop;
     private int mSurfaceViewBottom;
+    private int mCaptionEnabled;
 
     private final SurfaceHolder.Callback mSurfaceHolderCallback = new SurfaceHolder.Callback() {
         @Override
@@ -353,6 +358,7 @@ public class TvView extends ViewGroup {
      * @param enabled {@code true} to enable, {@code false} to disable.
      */
     public void setCaptionEnabled(boolean enabled) {
+        mCaptionEnabled = enabled ? CAPTION_ENABLED : CAPTION_DISABLED;
         if (mSession != null) {
             mSession.setCaptionEnabled(enabled);
         }
@@ -832,6 +838,9 @@ public class TvView extends ViewGroup {
                     }
                 }
                 createSessionOverlayView();
+                if (mCaptionEnabled != CAPTION_DEFAULT) {
+                    mSession.setCaptionEnabled(mCaptionEnabled == CAPTION_ENABLED);
+                }
                 mSession.tune(mChannelUri, mTuneParams);
                 if (mHasStreamVolume) {
                     mSession.setStreamVolume(mStreamVolume);
