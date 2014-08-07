@@ -26,11 +26,13 @@ import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.Window;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.ProgressBar;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -66,7 +68,6 @@ public class CaptivePortalLoginActivity extends Activity {
             done(true);
         }
 
-        requestWindowFeature(Window.FEATURE_PROGRESS);
         setContentView(R.layout.activity_captive_portal_login);
 
         getActionBar().setDisplayShowHomeEnabled(false);
@@ -164,7 +165,9 @@ public class CaptivePortalLoginActivity extends Activity {
     private class MyWebChromeClient extends WebChromeClient {
         @Override
         public void onProgressChanged(WebView view, int newProgress) {
-            setProgress(newProgress*100);
+            ProgressBar myProgressBar = (ProgressBar) findViewById(R.id.progress_bar);
+            myProgressBar.setProgress(newProgress);
+            myProgressBar.setVisibility(newProgress == 100 ? View.GONE : View.VISIBLE);
         }
     }
 }
