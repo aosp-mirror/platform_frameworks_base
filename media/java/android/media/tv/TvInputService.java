@@ -23,7 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
-import android.hardware.hdmi.HdmiCecDeviceInfo;
+import android.hardware.hdmi.HdmiDeviceInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -142,13 +142,13 @@ public abstract class TvInputService extends Service {
             }
 
             @Override
-            public void notifyHdmiCecDeviceAdded(HdmiCecDeviceInfo cecDeviceInfo) {
+            public void notifyHdmiCecDeviceAdded(HdmiDeviceInfo cecDeviceInfo) {
                 mServiceHandler.obtainMessage(ServiceHandler.DO_ADD_HDMI_CEC_TV_INPUT,
                         cecDeviceInfo).sendToTarget();
             }
 
             @Override
-            public void notifyHdmiCecDeviceRemoved(HdmiCecDeviceInfo cecDeviceInfo) {
+            public void notifyHdmiCecDeviceRemoved(HdmiDeviceInfo cecDeviceInfo) {
                 mServiceHandler.obtainMessage(ServiceHandler.DO_REMOVE_HDMI_CEC_TV_INPUT,
                         cecDeviceInfo).sendToTarget();
             }
@@ -206,11 +206,11 @@ public abstract class TvInputService extends Service {
      * {@code cecDeviceInfo}; otherwise, return {@code null}. Override to modify default behavior
      * of ignoring all HDMI CEC logical input device.
      *
-     * @param cecDeviceInfo {@link HdmiCecDeviceInfo} object just added.
+     * @param cecDeviceInfo {@link HdmiDeviceInfo} object just added.
      * @hide
      */
     @SystemApi
-    public TvInputInfo onHdmiCecDeviceAdded(HdmiCecDeviceInfo cecDeviceInfo) {
+    public TvInputInfo onHdmiCecDeviceAdded(HdmiDeviceInfo cecDeviceInfo) {
         return null;
     }
 
@@ -219,11 +219,11 @@ public abstract class TvInputService extends Service {
      * otherwise, return {@code null}. Override to modify default behavior of ignoring all HDMI CEC
      * logical input device.
      *
-     * @param cecDeviceInfo {@link HdmiCecDeviceInfo} object just removed.
+     * @param cecDeviceInfo {@link HdmiDeviceInfo} object just removed.
      * @hide
      */
     @SystemApi
-    public String onHdmiCecDeviceRemoved(HdmiCecDeviceInfo cecDeviceInfo) {
+    public String onHdmiCecDeviceRemoved(HdmiDeviceInfo cecDeviceInfo) {
         return null;
     }
 
@@ -1287,7 +1287,7 @@ public abstract class TvInputService extends Service {
                     return;
                 }
                 case DO_ADD_HDMI_CEC_TV_INPUT: {
-                    HdmiCecDeviceInfo cecDeviceInfo = (HdmiCecDeviceInfo) msg.obj;
+                    HdmiDeviceInfo cecDeviceInfo = (HdmiDeviceInfo) msg.obj;
                     TvInputInfo inputInfo = onHdmiCecDeviceAdded(cecDeviceInfo);
                     if (inputInfo != null) {
                         broadcastAddHdmiCecTvInput(cecDeviceInfo.getLogicalAddress(), inputInfo);
@@ -1295,7 +1295,7 @@ public abstract class TvInputService extends Service {
                     return;
                 }
                 case DO_REMOVE_HDMI_CEC_TV_INPUT: {
-                    HdmiCecDeviceInfo cecDeviceInfo = (HdmiCecDeviceInfo) msg.obj;
+                    HdmiDeviceInfo cecDeviceInfo = (HdmiDeviceInfo) msg.obj;
                     String inputId = onHdmiCecDeviceRemoved(cecDeviceInfo);
                     if (inputId != null) {
                         broadcastRemoveTvInput(inputId);

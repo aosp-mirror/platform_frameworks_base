@@ -16,7 +16,7 @@
 
 package com.android.server.hdmi;
 
-import android.hardware.hdmi.HdmiCecDeviceInfo;
+import android.hardware.hdmi.HdmiDeviceInfo;
 import android.util.Slog;
 
 /**
@@ -44,8 +44,8 @@ final class SetArcTransmissionStateAction extends FeatureAction {
     SetArcTransmissionStateAction(HdmiCecLocalDevice source, int avrAddress,
             boolean enabled) {
         super(source);
-        HdmiUtils.verifyAddressType(getSourceAddress(), HdmiCecDeviceInfo.DEVICE_TV);
-        HdmiUtils.verifyAddressType(avrAddress, HdmiCecDeviceInfo.DEVICE_AUDIO_SYSTEM);
+        HdmiUtils.verifyAddressType(getSourceAddress(), HdmiDeviceInfo.DEVICE_TV);
+        HdmiUtils.verifyAddressType(avrAddress, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
         mAvrAddress = avrAddress;
         mEnabled = enabled;
     }

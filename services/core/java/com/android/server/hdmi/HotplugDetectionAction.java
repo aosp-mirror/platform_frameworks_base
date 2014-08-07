@@ -16,7 +16,7 @@
 
 package com.android.server.hdmi;
 
-import android.hardware.hdmi.HdmiCecDeviceInfo;
+import android.hardware.hdmi.HdmiDeviceInfo;
 import android.util.Slog;
 
 import com.android.server.hdmi.HdmiControlService.DevicePollingCallback;
@@ -161,11 +161,11 @@ final class HotplugDetectionAction extends FeatureAction {
         }
     }
 
-    private static BitSet infoListToBitSet(List<HdmiCecDeviceInfo> infoList, boolean audioOnly) {
+    private static BitSet infoListToBitSet(List<HdmiDeviceInfo> infoList, boolean audioOnly) {
         BitSet set = new BitSet(NUM_OF_ADDRESS);
-        for (HdmiCecDeviceInfo info : infoList) {
+        for (HdmiDeviceInfo info : infoList) {
             if (audioOnly) {
-                if (info.getDeviceType() == HdmiCecDeviceInfo.DEVICE_AUDIO_SYSTEM) {
+                if (info.getDeviceType() == HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM) {
                     set.set(info.getLogicalAddress());
                 }
             } else {
@@ -207,7 +207,7 @@ final class HotplugDetectionAction extends FeatureAction {
     }
 
     private void mayChangeRoutingPath(int address) {
-        HdmiCecDeviceInfo info = tv().getDeviceInfo(address);
+        HdmiDeviceInfo info = tv().getDeviceInfo(address);
         if (info != null) {
             tv().handleRemoveActiveRoutingPath(info.getPhysicalAddress());
         }
@@ -236,7 +236,7 @@ final class HotplugDetectionAction extends FeatureAction {
     }
 
     private void mayDisableSystemAudioAndARC(int address) {
-        if (HdmiUtils.getTypeFromAddress(address) != HdmiCecDeviceInfo.DEVICE_AUDIO_SYSTEM) {
+        if (HdmiUtils.getTypeFromAddress(address) != HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM) {
             return;
         }
 

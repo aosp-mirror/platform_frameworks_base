@@ -38,7 +38,7 @@ import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Rect;
-import android.hardware.hdmi.HdmiCecDeviceInfo;
+import android.hardware.hdmi.HdmiDeviceInfo;
 import android.media.tv.ITvInputClient;
 import android.media.tv.ITvInputHardware;
 import android.media.tv.ITvInputHardwareCallback;
@@ -1894,9 +1894,9 @@ public final class TvInputManagerService extends SystemService {
                         }
                     }
 
-                    List<HdmiCecDeviceInfo> cecDeviceInfoList =
+                    List<HdmiDeviceInfo> cecDeviceInfoList =
                             mTvInputHardwareManager.getHdmiCecInputDeviceList();
-                    for (HdmiCecDeviceInfo cecDeviceInfo : cecDeviceInfoList) {
+                    for (HdmiDeviceInfo cecDeviceInfo : cecDeviceInfoList) {
                         try {
                             serviceState.mService.notifyHdmiCecDeviceAdded(cecDeviceInfo);
                         } catch (RemoteException e) {
@@ -2204,7 +2204,7 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
-        public void onHdmiCecDeviceAdded(HdmiCecDeviceInfo cecDeviceInfo) {
+        public void onHdmiCecDeviceAdded(HdmiDeviceInfo cecDeviceInfo) {
             synchronized (mLock) {
                 UserState userState = getUserStateLocked(mCurrentUserId);
                 // Broadcast the event to all hardware inputs.
@@ -2220,7 +2220,7 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
-        public void onHdmiCecDeviceRemoved(HdmiCecDeviceInfo cecDeviceInfo) {
+        public void onHdmiCecDeviceRemoved(HdmiDeviceInfo cecDeviceInfo) {
             synchronized (mLock) {
                 UserState userState = getUserStateLocked(mCurrentUserId);
                 // Broadcast the event to all hardware inputs.

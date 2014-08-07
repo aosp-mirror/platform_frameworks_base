@@ -16,7 +16,7 @@
 
 package android.hardware.hdmi;
 
-import android.hardware.hdmi.HdmiCecDeviceInfo;
+import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiPortInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.hardware.hdmi.IHdmiDeviceEventListener;
@@ -37,7 +37,7 @@ import java.util.List;
  */
 interface IHdmiControlService {
     int[] getSupportedTypes();
-    HdmiCecDeviceInfo getActiveSource();
+    HdmiDeviceInfo getActiveSource();
     void oneTouchPlay(IHdmiControlCallback callback);
     void queryDisplayStatus(IHdmiControlCallback callback);
     void addHotplugEventListener(IHdmiHotplugEventListener listener);
@@ -59,7 +59,7 @@ interface IHdmiControlService {
     void setSystemAudioVolume(int oldIndex, int newIndex, int maxIndex);
     void setSystemAudioMute(boolean mute);
     void setInputChangeListener(IHdmiInputChangeListener listener);
-    List<HdmiCecDeviceInfo> getInputDevices();
+    List<HdmiDeviceInfo> getInputDevices();
     void sendVendorCommand(int deviceType, int targetAddress, in byte[] params,
             boolean hasVendorId);
     void addVendorCommandListener(IHdmiVendorCommandListener listener, int deviceType);

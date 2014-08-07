@@ -16,4 +16,4 @@
 
 package android.hardware.hdmi;
 
-parcelable HdmiCecDeviceInfo;
+parcelable HdmiDeviceInfo;
