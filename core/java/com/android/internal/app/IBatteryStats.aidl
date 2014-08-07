@@ -18,6 +18,7 @@ package com.android.internal.app;
 
 import com.android.internal.os.BatteryStatsImpl;
 
+import android.os.ParcelFileDescriptor;
 import android.os.WorkSource;
 import android.telephony.DataConnectionRealTimeInfo;
 import android.telephony.SignalStrength;
@@ -36,6 +37,8 @@ interface IBatteryStats {
 
     // Remaining methods are only used in Java.
     byte[] getStatistics();
+
+    ParcelFileDescriptor getStatisticsStream();
 
     // Return the computed amount of time remaining on battery, in milliseconds.
     // Returns -1 if nothing could be computed.

@@ -18,7 +18,6 @@
 package android.os;
 
 import android.os.Bundle;
-import android.os.ParcelFileDescriptor;
 import android.content.pm.UserInfo;
 import android.content.RestrictionEntry;
 import android.graphics.Bitmap;
