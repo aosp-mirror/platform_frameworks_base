@@ -27,7 +27,7 @@ import com.android.server.hdmi.HdmiControlService.SendMessageCallback;
 /**
  * Action to update audio status (volume or mute) of audio amplifier
  */
-final class SystemAudioStatusAction extends FeatureAction {
+final class SystemAudioStatusAction extends HdmiCecFeatureAction {
     private static final String TAG = "SystemAudioStatusAction";
 
     // State that waits for <ReportAudioStatus>.

@@ -30,7 +30,7 @@ import android.util.Slog;
  * <p>
  * Package-private, accessed by {@link HdmiControlService} only.
  */
-final class DevicePowerStatusAction extends FeatureAction {
+final class DevicePowerStatusAction extends HdmiCecFeatureAction {
     private static final String TAG = "DevicePowerStatusAction";
 
     // State in which the action is waiting for <Report Power Status>.

@@ -33,7 +33,7 @@ import java.util.List;
  * For other devices, keep 15 secs period.
  */
 // Seq #3
-final class HotplugDetectionAction extends FeatureAction {
+final class HotplugDetectionAction extends HdmiCecFeatureAction {
     private static final String TAG = "HotPlugDetectionAction";
 
     private static final int POLLING_INTERVAL_MS = 5000;

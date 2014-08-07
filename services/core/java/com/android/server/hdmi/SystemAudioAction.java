@@ -28,7 +28,7 @@ import java.util.List;
 /**
  * Base feature action class for SystemAudioActionFromTv and SystemAudioActionFromAvr.
  */
-abstract class SystemAudioAction extends FeatureAction {
+abstract class SystemAudioAction extends HdmiCecFeatureAction {
     private static final String TAG = "SystemAudioAction";
 
     // Transient state to differentiate with STATE_NONE where the on-finished callback
