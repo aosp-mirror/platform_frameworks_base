@@ -454,8 +454,8 @@
     <string name="accessibility_clear_all">Clear all notifications.</string>
 
     <!-- Title shown in notification popup for inspecting the responsible
-         application -->
-    <string name="status_bar_notification_inspect_item_title">App info</string>
+         application [CHAR LIMIT=30] -->
+    <string name="status_bar_notification_inspect_item_title">Settings</string>
 
     <!-- Description of the button in the phone-style notification panel that controls auto-rotation, when auto-rotation is on. [CHAR LIMIT=NONE] -->
     <string name="accessibility_rotation_lock_off">Screen will rotate automatically.</string>
