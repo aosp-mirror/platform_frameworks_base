@@ -89,8 +89,8 @@
     <color name="material_teal_A200">#ff18ffff</color>
     <color name="material_teal_A400">#ff00e5ff</color>
 
-    <!-- Accent color used by Settings -->
-    <color name="material_dark_teal_A400">#ff009688</color>
+    <color name="material_deep_teal_A200">#ff80cbc4</color>
+    <color name="material_deep_teal_A500">#ff009688</color>
 
     <color name="material_green_100">#ffb7e1cd</color>
     <color name="material_green_300">#ff57bb8a</color>
