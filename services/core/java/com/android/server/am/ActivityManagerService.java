@@ -17244,6 +17244,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                     Slog.w(TAG, "No user info for user #" + userId);
                     return false;
                 }
+                if (foreground && userInfo.isManagedProfile()) {
+                    Slog.w(TAG, "Cannot switch to User #" + userId + ": not a full user");
+                    return false;
+                }
 
                 if (foreground) {
                     mWindowManager.startFreezingScreen(R.anim.screen_user_exit,
