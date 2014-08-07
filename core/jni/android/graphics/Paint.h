@@ -20,6 +20,8 @@
 #include <SkPaint.h>
 #include <string>
 
+#include <minikin/FontFamily.h>
+
 namespace android {
 
 class Paint : public SkPaint {
@@ -51,9 +53,27 @@ public:
         return mFontFeatureSettings;
     }
 
+    void setTextLocale(const std::string &textLocale) {
+        mTextLocale = textLocale;
+    }
+
+    std::string getTextLocale() const {
+        return mTextLocale;
+    }
+
+    void setFontVariant(FontVariant variant) {
+        mFontVariant = variant;
+    }
+
+    FontVariant getFontVariant() const {
+        return mFontVariant;
+    }
+
 private:
     float mLetterSpacing;
     std::string mFontFeatureSettings;
+    std::string mTextLocale;
+    FontVariant mFontVariant;
 };
 
 }  // namespace android
