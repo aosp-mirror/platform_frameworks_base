@@ -57,7 +57,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
     }
 
     public KeyguardSecurityContainer(Context context) {
-        this(null, null, 0);
+        this(context, null, 0);
     }
 
     public KeyguardSecurityContainer(Context context, AttributeSet attrs, int defStyle) {
@@ -240,10 +240,13 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
 
         boolean showTimeout = false;
         if (remainingBeforeWipe < LockPatternUtils.FAILED_ATTEMPTS_BEFORE_WIPE_GRACE) {
-            // If we reach this code, it means the user has installed a DevicePolicyManager
-            // that requests device wipe after N attempts.  Once we get below the grace
-            // period, we'll post this dialog every time as a clear warning until the
-            // bombshell hits and the device is wiped.
+            // The user has installed a DevicePolicyManager that requests a user/profile to be wiped
+            // N attempts. Once we get below the grace period, we post this dialog every time as a
+            // clear warning until the deletion fires.
+            //
+            // TODO: Show a different dialog depending on whether the device will be completely
+            // wiped (i.e. policy is set for the primary profile of the USER_OWNER) or a single
+            // secondary user or managed profile will be removed.
             if (remainingBeforeWipe > 0) {
                 showAlmostAtWipeDialog(failedAttempts, remainingBeforeWipe);
             } else {
