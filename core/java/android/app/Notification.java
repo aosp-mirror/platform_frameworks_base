@@ -2562,7 +2562,7 @@ public class Notification implements Parcelable
             // Note: This assumes that the current user can read the profile badge of the
             // originating user.
             UserManager userManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-            Drawable badge = userManager.getBadgeForUser(new UserHandle(mOriginatingUserId));
+            Drawable badge = userManager.getBadgeForUser(new UserHandle(mOriginatingUserId), 0);
             if (badge == null) {
                 return null;
             }

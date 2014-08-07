@@ -5838,7 +5838,7 @@ package android.appwidget {
     field public static final int WIDGET_CATEGORY_RECENTS = 4; // 0x4
     field public int autoAdvanceViewId;
     field public android.content.ComponentName configure;
-    field public deprecated int icon;
+    field public int icon;
     field public int initialKeyguardLayout;
     field public int initialLayout;
     field public deprecated java.lang.String label;
@@ -5846,7 +5846,7 @@ package android.appwidget {
     field public int minResizeHeight;
     field public int minResizeWidth;
     field public int minWidth;
-    field public deprecated int previewImage;
+    field public int previewImage;
     field public android.content.ComponentName provider;
     field public int resizeMode;
     field public int updatePeriodMillis;
@@ -22779,7 +22779,8 @@ package android.os {
 
   public class UserManager {
     method public android.os.Bundle getApplicationRestrictions(java.lang.String);
-    method public android.graphics.drawable.Drawable getBadgedDrawableForUser(android.graphics.drawable.Drawable, android.os.UserHandle);
+    method public android.graphics.drawable.Drawable getBadgedDrawableForUser(android.graphics.drawable.Drawable, android.os.UserHandle, android.graphics.Rect, int);
+    method public android.graphics.drawable.Drawable getBadgedIconForUser(android.graphics.drawable.Drawable, android.os.UserHandle);
     method public java.lang.CharSequence getBadgedLabelForUser(java.lang.CharSequence, android.os.UserHandle);
     method public long getSerialNumberForUser(android.os.UserHandle);
     method public int getUserCount();
