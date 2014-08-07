@@ -603,10 +603,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     MSG_HARD_KEYBOARD_SWITCH_CHANGED, available ? 1 : 0, enabled ? 1 : 0));
         }
 
-        public void handleHardKeyboardStatusChange(boolean available, boolean enabled) {
+        public void handleHardKeyboardStatusChange(boolean available,
+                boolean showImeWithHardKeyboard) {
             if (DEBUG) {
-                Slog.w(TAG, "HardKeyboardStatusChanged: available = " + available + ", enabled = "
-                        + enabled);
+                Slog.w(TAG, "HardKeyboardStatusChanged: available = " + available
+                        + ", showImeWithHardKeyboard= " + showImeWithHardKeyboard);
             }
             synchronized(mMethodMap) {
                 if (mSwitchingDialog != null && mSwitchingDialogTitleView != null
@@ -2810,11 +2811,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             ? View.VISIBLE : View.GONE);
             final Switch hardKeySwitch = (Switch)mSwitchingDialogTitleView.findViewById(
                     com.android.internal.R.id.hard_keyboard_switch);
-            hardKeySwitch.setChecked(mWindowManagerService.isHardKeyboardEnabled());
+            hardKeySwitch.setChecked(mWindowManagerService.isShowImeWithHardKeyboardEnabled());
             hardKeySwitch.setOnCheckedChangeListener(new OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    mWindowManagerService.setHardKeyboardEnabled(isChecked);
+                    mWindowManagerService.setShowImeWithHardKeyboard(isChecked);
                     // Ensure that the input method dialog is dismissed when changing
                     // the hardware keyboard state.
                     hideInputMethodMenu();
