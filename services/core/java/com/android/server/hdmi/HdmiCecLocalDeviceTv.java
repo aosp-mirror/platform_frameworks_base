@@ -812,12 +812,6 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         addAndStartAction(VolumeControlAction.ofMute(this, avr.getLogicalAddress(), mute));
     }
 
-    private boolean isSystemAudioOn() {
-        synchronized (mLock) {
-            return mSystemAudioActivated;
-        }
-    }
-
     @Override
     @ServiceThreadOnly
     protected boolean handleInitiateArc(HdmiCecMessage message) {
@@ -965,7 +959,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
      * Return a list of all {@link HdmiCecDeviceInfo}.
      *
      * <p>Declared as package-private. accessed by {@link HdmiControlService} only.
-     * This is not thread-safe. For thread safety, call {@link #getSafeDeviceInfoList(boolean)}.
+     * This is not thread-safe. For thread safety, call {@link #getSafeExternalInputs} which
+     * does not include local device.
      */
     @ServiceThreadOnly
     List<HdmiCecDeviceInfo> getDeviceInfoList(boolean includelLocalDevice) {

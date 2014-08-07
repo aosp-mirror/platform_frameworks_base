@@ -17,19 +17,19 @@ package com.android.server.hdmi;
  */
 
 import android.hardware.hdmi.HdmiControlManager;
+import android.hardware.hdmi.HdmiPlaybackClient;
+import android.hardware.hdmi.HdmiPlaybackClient.DisplayStatusCallback;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.os.RemoteException;
 import android.util.Slog;
 
 /**
- * Feature action that queries the power status of other device.
- *
- * This action is initiated via {@link HdmiControlManager#queryDisplayStatus()} from
- * the Android system working as playback device to get the power status of TV device.
- *
- * <p>Package-private, accessed by {@link HdmiControlService} only.
+ * Feature action that queries the power status of other device. This action is initiated via
+ * {@link HdmiPlaybackClient#queryDisplayStatus(DisplayStatusCallback)} from the Android system
+ * working as playback device to get the power status of TV device.
+ * <p>
+ * Package-private, accessed by {@link HdmiControlService} only.
  */
-
 final class DevicePowerStatusAction extends FeatureAction {
     private static final String TAG = "DevicePowerStatusAction";
 
