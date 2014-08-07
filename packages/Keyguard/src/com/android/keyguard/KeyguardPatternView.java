@@ -37,6 +37,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -108,8 +109,10 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
     public KeyguardPatternView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mKeyguardUpdateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
-        mAppearAnimationUtils = new AppearAnimationUtils(context, 1.5f /* delayScale */,
-                2.0f /* transitionScale */);
+        mAppearAnimationUtils = new AppearAnimationUtils(context,
+                AppearAnimationUtils.DEFAULT_APPEAR_DURATION, 1.5f /* delayScale */,
+                2.0f /* transitionScale */, AnimationUtils.loadInterpolator(
+                        mContext, android.R.interpolator.linear_out_slow_in));
     }
 
     public void setKeyguardCallback(KeyguardSecurityCallback callback) {
@@ -420,7 +423,7 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
                 this);
         if (!TextUtils.isEmpty(mHelpMessage.getText())) {
             mAppearAnimationUtils.createAnimation(mHelpMessage, 0,
-                    AppearAnimationUtils.APPEAR_DURATION,
+                    AppearAnimationUtils.DEFAULT_APPEAR_DURATION,
                     mAppearAnimationUtils.getStartTranslation(),
                     mAppearAnimationUtils.getInterpolator(),
                     null /* finishRunnable */);

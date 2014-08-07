@@ -26,27 +26,35 @@ import android.view.animation.Interpolator;
  */
 public class AppearAnimationUtils implements AppearAnimationCreator<View> {
 
-    public static final long APPEAR_DURATION = 220;
+    public static final long DEFAULT_APPEAR_DURATION = 220;
 
-    private final Interpolator mLinearOutSlowIn;
+    private final Interpolator mInterpolator;
     private final float mStartTranslation;
     private final AppearAnimationProperties mProperties = new AppearAnimationProperties();
     private final float mDelayScale;
+    private final long mDuration;
 
     public AppearAnimationUtils(Context ctx) {
-        this(ctx, 1.0f, 1.0f);
+        this(ctx, DEFAULT_APPEAR_DURATION,
+                ctx.getResources().getDimensionPixelSize(R.dimen.appear_y_translation_start),
+                1.0f,
+                AnimationUtils.loadInterpolator(ctx, android.R.interpolator.linear_out_slow_in));
     }
 
-    public AppearAnimationUtils(Context ctx, float delayScaleFactor,
-            float translationScaleFactor) {
-        mLinearOutSlowIn = AnimationUtils.loadInterpolator(
-                ctx, android.R.interpolator.linear_out_slow_in);
+    public AppearAnimationUtils(Context ctx, long duration, float translationScaleFactor,
+            float delayScaleFactor, Interpolator interpolator) {
+        mInterpolator = interpolator;
         mStartTranslation = ctx.getResources().getDimensionPixelOffset(
                 R.dimen.appear_y_translation_start) * translationScaleFactor;
         mDelayScale = delayScaleFactor;
+        mDuration = duration;
     }
 
     public void startAppearAnimation(View[][] objects, final Runnable finishListener) {
+        startAppearAnimation(objects, finishListener, this);
+    }
+
+    public void startAppearAnimation(View[] objects, final Runnable finishListener) {
         startAppearAnimation(objects, finishListener, this);
     }
 
@@ -56,8 +64,32 @@ public class AppearAnimationUtils implements AppearAnimationCreator<View> {
         startAnimations(properties, objects, finishListener, creator);
     }
 
+    public <T> void startAppearAnimation(T[] objects, final Runnable finishListener,
+            AppearAnimationCreator<T> creator) {
+        AppearAnimationProperties properties = getDelays(objects);
+        startAnimations(properties, objects, finishListener, creator);
+    }
+
+    private <T> void startAnimations(AppearAnimationProperties properties, T[] objects,
+            final Runnable finishListener, AppearAnimationCreator<T> creator) {
+        if (properties.maxDelayRowIndex == -1 || properties.maxDelayColIndex == -1) {
+            finishListener.run();
+            return;
+        }
+        for (int row = 0; row < properties.delays.length; row++) {
+            long[] columns = properties.delays[row];
+            long delay = columns[0];
+            Runnable endRunnable = null;
+            if (properties.maxDelayRowIndex == row && properties.maxDelayColIndex == 0) {
+                endRunnable = finishListener;
+            }
+            creator.createAnimation(objects[row], delay, mDuration,
+                    mStartTranslation, mInterpolator, endRunnable);
+        }
+    }
+
     private <T> void startAnimations(AppearAnimationProperties properties, T[][] objects,
-            final Runnable finishListener, AppearAnimationCreator creator) {;
+            final Runnable finishListener, AppearAnimationCreator<T> creator) {
         if (properties.maxDelayRowIndex == -1 || properties.maxDelayColIndex == -1) {
             finishListener.run();
             return;
@@ -70,15 +102,32 @@ public class AppearAnimationUtils implements AppearAnimationCreator<View> {
                 if (properties.maxDelayRowIndex == row && properties.maxDelayColIndex == col) {
                     endRunnable = finishListener;
                 }
-                creator.createAnimation(objects[row][col], delay, APPEAR_DURATION,
-                        mStartTranslation, mLinearOutSlowIn, endRunnable);
+                creator.createAnimation(objects[row][col], delay, mDuration,
+                        mStartTranslation, mInterpolator, endRunnable);
             }
         }
+    }
 
+    private <T> AppearAnimationProperties getDelays(T[] items) {
+        long maxDelay = -1;
+        mProperties.maxDelayColIndex = -1;
+        mProperties.maxDelayRowIndex = -1;
+        mProperties.delays = new long[items.length][];
+        for (int row = 0; row < items.length; row++) {
+            mProperties.delays[row] = new long[1];
+            long delay = calculateDelay(row, 0);
+            mProperties.delays[row][0] = delay;
+            if (items[row] != null && delay > maxDelay) {
+                maxDelay = delay;
+                mProperties.maxDelayColIndex = 0;
+                mProperties.maxDelayRowIndex = row;
+            }
+        }
+        return mProperties;
     }
 
     private <T> AppearAnimationProperties getDelays(T[][] items) {
-        long maxDelay = 0;
+        long maxDelay = -1;
         mProperties.maxDelayColIndex = -1;
         mProperties.maxDelayRowIndex = -1;
         mProperties.delays = new long[items.length][];
@@ -103,7 +152,7 @@ public class AppearAnimationUtils implements AppearAnimationCreator<View> {
     }
 
     public Interpolator getInterpolator() {
-        return mLinearOutSlowIn;
+        return mInterpolator;
     }
 
     public float getStartTranslation() {
