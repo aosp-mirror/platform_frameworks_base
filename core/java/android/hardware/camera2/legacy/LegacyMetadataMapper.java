@@ -204,6 +204,11 @@ public class LegacyMetadataMapper {
         mapSensor(m, p);
 
         /*
+         * statistics.*
+         */
+        mapStatistics(m, p);
+
+        /*
          * sync.*
          */
         mapSync(m, p);
@@ -487,6 +492,18 @@ public class LegacyMetadataMapper {
 
     private static void mapControlOther(CameraMetadataNative m, Camera.Parameters p) {
         /*
+         * android.control.availableVideoStabilizationModes
+         */
+        {
+            int stabModes[] = p.isVideoStabilizationSupported() ?
+                    new int[] { CONTROL_VIDEO_STABILIZATION_MODE_OFF,
+                                CONTROL_VIDEO_STABILIZATION_MODE_ON } :
+                    new int[] { CONTROL_VIDEO_STABILIZATION_MODE_OFF };
+
+            m.set(CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES, stabModes);
+        }
+
+        /*
          * android.control.maxRegions
          */
         final int AE = 0, AWB = 1, AF = 2;
@@ -740,6 +757,31 @@ public class LegacyMetadataMapper {
          * sensor.info.pixelArraySize
          */
         m.set(SENSOR_INFO_PIXEL_ARRAY_SIZE, largestJpegSize);
+    }
+
+    private static void mapStatistics(CameraMetadataNative m, Parameters p) {
+        /*
+         * statistics.info.availableFaceDetectModes
+         */
+        int[] fdModes;
+
+        if (p.getMaxNumDetectedFaces() > 0) {
+            fdModes = new int[] {
+                STATISTICS_FACE_DETECT_MODE_OFF,
+                STATISTICS_FACE_DETECT_MODE_SIMPLE
+                // FULL is never-listed, since we have no way to query it statically
+            };
+        } else {
+            fdModes = new int[] {
+                STATISTICS_FACE_DETECT_MODE_OFF
+            };
+        }
+        m.set(STATISTICS_INFO_AVAILABLE_FACE_DETECT_MODES, fdModes);
+
+        /*
+         * statistics.info.maxFaceCount
+         */
+        m.set(STATISTICS_INFO_MAX_FACE_COUNT, p.getMaxNumDetectedFaces());
     }
 
     private static void mapSync(CameraMetadataNative m, Parameters p) {

@@ -35,6 +35,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.android.internal.util.Preconditions.*;
+import static android.hardware.camera2.CameraMetadata.CONTROL_VIDEO_STABILIZATION_MODE_OFF;
+import static android.hardware.camera2.CameraMetadata.CONTROL_VIDEO_STABILIZATION_MODE_ON;
+import static android.hardware.camera2.CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE;
 import static android.hardware.camera2.CaptureResult.*;
 
 /**
@@ -142,7 +145,6 @@ public class LegacyResultMapper {
          */
         mapAwb(result, /*out*/params);
 
-
         /*
          * control.mode
          */
@@ -171,7 +173,6 @@ public class LegacyResultMapper {
             }
         }
 
-
         /*
          * control.effectMode
          */
@@ -185,6 +186,15 @@ public class LegacyResultMapper {
                         " returned by camera HAL, setting to off.");
                 result.set(CaptureResult.CONTROL_EFFECT_MODE, CONTROL_EFFECT_MODE_OFF);
             }
+        }
+
+        // control.videoStabilizationMode
+        {
+            int stabMode =
+                    (params.isVideoStabilizationSupported() && params.getVideoStabilization()) ?
+                        CONTROL_VIDEO_STABILIZATION_MODE_ON :
+                        CONTROL_VIDEO_STABILIZATION_MODE_OFF;
+            result.set(CONTROL_VIDEO_STABILIZATION_MODE, stabMode);
         }
 
         /*
