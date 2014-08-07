@@ -372,7 +372,7 @@ please see themes_device_defaults.xml.
         <!-- Color palette -->
         <item name="colorPrimaryDark">@color/material_blue_grey_900</item>
         <item name="colorPrimary">@color/material_blue_grey_800</item>
-        <item name="colorAccent">@color/material_light_blue_A200</item>
+        <item name="colorAccent">@color/material_deep_teal_A200</item>
 
         <item name="colorControlNormal">?attr/textColorSecondary</item>
         <item name="colorControlActivated">?attr/colorAccent</item>
@@ -712,9 +712,9 @@ please see themes_device_defaults.xml.
         <item name="fastScrollOverlayPosition">atThumb</item>
 
         <!-- Color palette -->
-        <item name="colorPrimaryDark">@color/material_blue_grey_600</item>
-        <item name="colorPrimary">@color/material_blue_grey_400</item>
-        <item name="colorAccent">@color/material_light_blue_A200</item>
+        <item name="colorPrimaryDark">@color/material_blue_grey_100</item>
+        <item name="colorPrimary">@color/material_blue_grey_50</item>
+        <item name="colorAccent">@color/material_deep_teal_A500</item>
 
         <item name="colorControlNormal">?attr/textColorSecondary</item>
         <item name="colorControlActivated">?attr/colorAccent</item>
@@ -1229,7 +1229,7 @@ please see themes_device_defaults.xml.
     <style name="Theme.Material.Settings" parent="@style/Theme.Material.Light.DarkActionBar">
         <item name="colorPrimary">@color/material_blue_grey_900</item>
         <item name="colorPrimaryDark">@color/material_blue_grey_950</item>
-        <item name="colorAccent">@color/material_dark_teal_A400</item>
+        <item name="colorAccent">@color/material_deep_teal_A500</item>
     </style>
 
 </resources>
