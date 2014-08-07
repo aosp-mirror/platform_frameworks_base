@@ -16,6 +16,7 @@
 
 package android.app.backup;
 
+import android.annotation.SystemApi;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.os.IBinder;
@@ -30,6 +31,7 @@ import com.android.internal.backup.IBackupTransport;
  *
  * @hide
  */
+@SystemApi
 public class BackupTransport {
     // Zero return always means things are okay.  If returned from
     // getNextFullRestoreDataChunk(), it means that no data could be delivered at
