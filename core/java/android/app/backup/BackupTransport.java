@@ -405,6 +405,25 @@ public class BackupTransport {
         return BackupTransport.TRANSPORT_ERROR;
     }
 
+    /**
+     * Tells the transport to cancel the currently-ongoing full backup operation.  This
+     * will happen between {@link #performFullBackup()} and {@link #finishBackup()}
+     * if the OS needs to abort the backup operation for any reason, such as a crash in
+     * the application undergoing backup.
+     *
+     * <p>When it receives this call, the transport should discard any partial archive
+     * that it has stored so far.  If possible it should also roll back to the previous
+     * known-good archive in its datastore.
+     *
+     * <p>If the transport receives this callback, it will <em>not</em> receive a
+     * call to {@link #finishBackup()}.  It needs to tear down any ongoing backup state
+     * here.
+     */
+    public void cancelFullBackup() {
+        throw new UnsupportedOperationException(
+                "Transport cancelFullBackup() not implemented");
+    }
+
     // ------------------------------------------------------------------------------------
     // Full restore interfaces
 
