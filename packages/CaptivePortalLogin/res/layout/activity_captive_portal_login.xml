@@ -5,9 +5,16 @@
     android:layout_height="match_parent"
     tools:context="com.android.captiveportallogin.CaptivePortalLoginActivity"
     tools:ignore="MergeRootFrame">
-    <RelativeLayout
+    <LinearLayout
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        style="?android:attr/progressBarStyleHorizontal" />
 
     <WebView
         android:id="@+id/webview"
@@ -16,5 +23,5 @@
         android:layout_alignParentBottom="false"
         android:layout_alignParentRight="false" />
 
-</RelativeLayout>
+</LinearLayout>
 </FrameLayout>
