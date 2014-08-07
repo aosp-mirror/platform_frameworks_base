@@ -77,6 +77,7 @@ public class Task {
     public TaskKey key;
     public TaskGrouping group;
     public int taskAffiliation;
+    public int taskAffiliationColor;
     public boolean isLaunchTarget;
     public Drawable applicationIcon;
     public Drawable activityIcon;
@@ -95,16 +96,19 @@ public class Task {
         // Only used by RecentsService for task rect calculations.
     }
 
-    public Task(int id, boolean isActive, Intent intent, int taskAffiliation, String activityTitle,
-                Drawable activityIcon, int colorPrimary, int userId,
+    public Task(int id, boolean isActive, Intent intent, int taskAffiliation, int taskAffiliationColor,
+                String activityTitle, Drawable activityIcon, int colorPrimary, int userId,
                 long firstActiveTime, long lastActiveTime, boolean lockToThisTask,
                 boolean lockToTaskEnabled) {
+        boolean isInAffiliationGroup = (taskAffiliation != id);
+        boolean hasAffiliationGroupColor = isInAffiliationGroup && (taskAffiliationColor != 0);
         this.key = new TaskKey(id, intent, userId, firstActiveTime, lastActiveTime);
         this.taskAffiliation = taskAffiliation;
+        this.taskAffiliationColor = taskAffiliationColor;
         this.activityLabel = activityTitle;
         this.activityIcon = activityIcon;
-        this.colorPrimary = colorPrimary;
-        this.useLightOnPrimaryColor = Utilities.computeContrastBetweenColors(colorPrimary,
+        this.colorPrimary = hasAffiliationGroupColor ? taskAffiliationColor : colorPrimary;
+        this.useLightOnPrimaryColor = Utilities.computeContrastBetweenColors(this.colorPrimary,
                 Color.WHITE) > 3f;
         this.isActive = isActive;
         this.lockToThisTask = lockToTaskEnabled && lockToThisTask;

@@ -330,7 +330,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                         // We can reuse the current task transforms to find the task rects
                         TaskViewTransform transform = mCurrentTaskTransforms.get(mStack.indexOfTask(tv.getTask()));
                         TaskViewTransform nextTransform = mCurrentTaskTransforms.get(mStack.indexOfTask(nextTv.getTask()));
-                        clipBottom = transform.rect.bottom - nextTransform.rect.top - 200;
+                        clipBottom = transform.rect.bottom - nextTransform.rect.top;
                     }
                 }
                 tv.getViewBounds().setClipBottom(clipBottom);
@@ -430,9 +430,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     public void computeScroll() {
         mStackScroller.computeScroll();
         // Synchronize the views
-        if (synchronizeStackViewsWithModel()) {
-            clipTaskViews();
-        }
+        synchronizeStackViewsWithModel();
+        clipTaskViews();
     }
 
     /** Computes the stack and task rects */

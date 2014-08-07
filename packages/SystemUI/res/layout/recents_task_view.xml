@@ -18,11 +18,11 @@
     android:layout_width="match_parent" 
     android:layout_height="match_parent"
     android:focusable="true">
-    <com.android.systemui.recents.views.TaskThumbnailView
+    <com.android.systemui.recents.views.TaskViewThumbnail
         android:id="@+id/task_view_thumbnail"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
-    <com.android.systemui.recents.views.TaskBarView
+    <com.android.systemui.recents.views.TaskViewHeader
         android:id="@+id/task_view_bar"
         android:layout_width="match_parent"
         android:layout_height="@dimen/recents_task_bar_height"
@@ -61,7 +61,7 @@
             android:background="@drawable/recents_button_bg"
             android:visibility="invisible"
             android:src="@drawable/recents_dismiss_light" />
-    </com.android.systemui.recents.views.TaskBarView>
+    </com.android.systemui.recents.views.TaskViewHeader>
     <FrameLayout
         android:id="@+id/lock_to_app_fab"
         android:layout_width="48dp"

@@ -237,6 +237,9 @@
          in dps over one second of time. -->
     <dimen name="recents_animation_movement_in_dps_per_second">800dp</dimen>
 
+    <!-- The min alpha to apply to a task affiliation group color. -->
+    <item name="recents_task_affiliation_color_min_alpha_percentage" format="float" type="dimen">0.6</item>
+
     <!-- Space reserved for the cards behind the top card in the top stack -->
     <dimen name="top_stack_peek_amount">12dp</dimen>
 

@@ -39,7 +39,7 @@ import com.android.systemui.recents.model.Task;
 
 /* A task view */
 public class TaskView extends FrameLayout implements Task.TaskCallbacks,
-        TaskFooterView.TaskFooterViewCallbacks, View.OnClickListener, View.OnLongClickListener {
+        TaskViewFooter.TaskFooterViewCallbacks, View.OnClickListener, View.OnLongClickListener {
     /** The TaskView callbacks */
     interface TaskViewCallbacks {
         public void onTaskViewAppIconClicked(TaskView tv);
@@ -67,9 +67,9 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     AnimateableViewBounds mViewBounds;
     Paint mLayerPaint = new Paint();
 
-    TaskThumbnailView mThumbnailView;
-    TaskBarView mBarView;
-    TaskFooterView mFooterView;
+    TaskViewThumbnail mThumbnailView;
+    TaskViewHeader mBarView;
+    TaskViewFooter mFooterView;
     View mActionButtonView;
     TaskViewCallbacks mCb;
 
@@ -124,8 +124,8 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     @Override
     protected void onFinishInflate() {
         // Bind the views
-        mBarView = (TaskBarView) findViewById(R.id.task_view_bar);
-        mThumbnailView = (TaskThumbnailView) findViewById(R.id.task_view_thumbnail);
+        mBarView = (TaskViewHeader) findViewById(R.id.task_view_bar);
+        mThumbnailView = (TaskViewThumbnail) findViewById(R.id.task_view_thumbnail);
         mActionButtonView = findViewById(R.id.lock_to_app_fab);
         if (mFooterView != null) {
             mFooterView.setCallbacks(this);
@@ -712,7 +712,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         setOnClickListener(enabled ? this : null);
     }
 
-    /**** TaskFooterView.TaskFooterViewCallbacks ****/
+    /**** TaskViewFooter.TaskFooterViewCallbacks ****/
 
     @Override
     public void onTaskFooterHeightChanged(int height, int maxHeight) {
