@@ -24,6 +24,7 @@ import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_RDONLY;
 import static android.system.OsConstants.O_WRONLY;
 
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageInstallObserver2;
 import android.content.pm.IPackageInstallerSession;
@@ -134,8 +135,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     Slog.e(TAG, "Install failed: " + e);
                     destroyInternal();
                     try {
-                        mRemoteObserver.packageInstalled(mPackageName, null, e.error,
-                                e.getMessage());
+                        mRemoteObserver.onPackageInstalled(mPackageName, e.error, e.getMessage(),
+                                null);
                     } catch (RemoteException ignored) {
                     }
                     mCallback.onSessionFinished(PackageInstallerSession.this, false);
@@ -377,11 +378,16 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final IPackageInstallObserver2 remoteObserver = mRemoteObserver;
         final IPackageInstallObserver2 localObserver = new IPackageInstallObserver2.Stub() {
             @Override
-            public void packageInstalled(String basePackageName, Bundle extras, int returnCode,
-                    String msg) {
+            public void onUserActionRequired(Intent intent) {
+                throw new IllegalStateException();
+            }
+
+            @Override
+            public void onPackageInstalled(String basePackageName, int returnCode, String msg,
+                    Bundle extras) {
                 destroyInternal();
                 try {
-                    remoteObserver.packageInstalled(basePackageName, extras, returnCode, msg);
+                    remoteObserver.onPackageInstalled(basePackageName, returnCode, msg, extras);
                 } catch (RemoteException ignored) {
                 }
                 final boolean success = (returnCode == PackageManager.INSTALL_SUCCEEDED);

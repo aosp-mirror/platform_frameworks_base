@@ -38,6 +38,7 @@ import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.IPackageDeleteObserver;
+import android.content.pm.IPackageDeleteObserver2;
 import android.content.pm.IPackageInstaller;
 import android.content.pm.IPackageInstallerCallback;
 import android.content.pm.IPackageInstallerSession;
@@ -540,17 +541,17 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     }
 
     @Override
-    public void uninstall(String packageName, int flags, IPackageDeleteObserver observer,
+    public void uninstall(String packageName, int flags, IPackageDeleteObserver2 observer,
             int userId) {
         mPm.enforceCrossUserPermission(Binder.getCallingUid(), userId, true, "uninstall");
 
         // TODO: enforce installer of record or permission
-        mPm.deletePackageAsUser(packageName, observer, userId, flags);
+        mPm.deletePackage(packageName, observer, userId, flags);
     }
 
     @Override
     public void uninstallSplit(String basePackageName, String overlayName, int flags,
-            IPackageDeleteObserver observer, int userId) {
+            IPackageDeleteObserver2 observer, int userId) {
         mPm.enforceCrossUserPermission(Binder.getCallingUid(), userId, true, "uninstallSplit");
 
         // TODO: flesh out once PM has split support

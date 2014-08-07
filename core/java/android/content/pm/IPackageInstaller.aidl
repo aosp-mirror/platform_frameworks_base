@@ -16,7 +16,7 @@
 
 package android.content.pm;
 
-import android.content.pm.IPackageDeleteObserver;
+import android.content.pm.IPackageDeleteObserver2;
 import android.content.pm.IPackageInstallerCallback;
 import android.content.pm.IPackageInstallerSession;
 import android.content.pm.InstallSessionInfo;
@@ -35,6 +35,6 @@ interface IPackageInstaller {
     void registerCallback(IPackageInstallerCallback callback, int userId);
     void unregisterCallback(IPackageInstallerCallback callback);
 
-    void uninstall(String packageName, int flags, in IPackageDeleteObserver observer, int userId);
-    void uninstallSplit(String packageName, String splitName, int flags, in IPackageDeleteObserver observer, int userId);
+    void uninstall(String packageName, int flags, in IPackageDeleteObserver2 observer, int userId);
+    void uninstallSplit(String packageName, String splitName, int flags, in IPackageDeleteObserver2 observer, int userId);
 }

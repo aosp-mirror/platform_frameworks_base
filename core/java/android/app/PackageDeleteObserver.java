@@ -16,22 +16,31 @@
 
 package android.app;
 
-import android.content.pm.IPackageDeleteObserver;
+import android.content.Intent;
+import android.content.pm.IPackageDeleteObserver2;
 
 /** {@hide} */
-public class PackageUninstallObserver {
-    private final IPackageDeleteObserver.Stub mBinder = new IPackageDeleteObserver.Stub() {
+public class PackageDeleteObserver {
+    private final IPackageDeleteObserver2.Stub mBinder = new IPackageDeleteObserver2.Stub() {
         @Override
-        public void packageDeleted(String basePackageName, int returnCode) {
-            PackageUninstallObserver.this.onUninstallFinished(basePackageName, returnCode);
+        public void onUserActionRequired(Intent intent) {
+            PackageDeleteObserver.this.onUserActionRequired(intent);
+        }
+
+        @Override
+        public void onPackageDeleted(String basePackageName, int returnCode, String msg) {
+            PackageDeleteObserver.this.onPackageDeleted(basePackageName, returnCode, msg);
         }
     };
 
     /** {@hide} */
-    public IPackageDeleteObserver getBinder() {
+    public IPackageDeleteObserver2 getBinder() {
         return mBinder;
     }
 
-    public void onUninstallFinished(String basePackageName, int returnCode) {
+    public void onUserActionRequired(Intent intent) {
+    }
+
+    public void onPackageDeleted(String basePackageName, int returnCode, String msg) {
     }
 }

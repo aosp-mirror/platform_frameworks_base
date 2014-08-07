@@ -28,6 +28,7 @@ import android.content.pm.ContainerEncryptionParams;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageDeleteObserver;
+import android.content.pm.IPackageDeleteObserver2;
 import android.content.pm.IPackageInstallObserver;
 import android.content.pm.IPackageManager;
 import android.content.pm.IPackageMoveObserver;
@@ -1287,6 +1288,7 @@ final class ApplicationPackageManager extends PackageManager {
             // Should never happen!
         }
     }
+
     @Override
     public void clearApplicationUserData(String packageName,
                                          IPackageDataObserver observer) {
@@ -1661,9 +1663,26 @@ final class ApplicationPackageManager extends PackageManager {
         }
 
         @Override
-        public void packageInstalled(String basePackageName, Bundle extras, int returnCode) {
+        public void onPackageInstalled(String basePackageName, int returnCode, String msg,
+                Bundle extras) {
             try {
                 mLegacy.packageInstalled(basePackageName, returnCode);
+            } catch (RemoteException ignored) {
+            }
+        }
+    }
+
+    private static class LegacyPackageDeleteObserver extends PackageDeleteObserver {
+        private final IPackageDeleteObserver mLegacy;
+
+        public LegacyPackageDeleteObserver(IPackageDeleteObserver legacy) {
+            mLegacy = legacy;
+        }
+
+        @Override
+        public void onPackageDeleted(String basePackageName, int returnCode, String msg) {
+            try {
+                mLegacy.packageDeleted(basePackageName, returnCode);
             } catch (RemoteException ignored) {
             }
         }

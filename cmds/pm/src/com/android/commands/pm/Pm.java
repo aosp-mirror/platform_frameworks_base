@@ -19,12 +19,13 @@ package com.android.commands.pm;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
+import android.app.PackageDeleteObserver;
 import android.app.PackageInstallObserver;
 import android.content.ComponentName;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageDataObserver;
-import android.content.pm.IPackageDeleteObserver;
 import android.content.pm.IPackageInstaller;
 import android.content.pm.IPackageManager;
 import android.content.pm.InstallSessionInfo;
@@ -760,7 +761,7 @@ public final class Pm {
         String extraPackage;
 
         @Override
-        public void packageInstalled(String name, Bundle extras, int status) {
+        public void onPackageInstalled(String name, int status, String msg, Bundle extras) {
             synchronized (this) {
                 finished = true;
                 result = status;
@@ -787,6 +788,11 @@ public final class Pm {
                 this.msg = msg;
                 notifyAll();
             }
+        }
+
+        @Override
+        public void onUserActionRequired(Intent intent) {
+            setResult(false, "Unexepected user action required!");
         }
 
         @Override
@@ -1268,11 +1274,12 @@ public final class Pm {
         }
     }
 
-    class PackageDeleteObserver extends IPackageDeleteObserver.Stub {
+    class LocalPackageDeleteObserver extends PackageDeleteObserver {
         boolean finished;
         boolean result;
 
-        public void packageDeleted(String packageName, int returnCode) {
+        @Override
+        public void onPackageDeleted(String name, int returnCode, String msg) {
             synchronized (this) {
                 finished = true;
                 result = returnCode == PackageManager.DELETE_SUCCEEDED;
@@ -1346,9 +1353,9 @@ public final class Pm {
     }
 
     private boolean deletePackage(String packageName, int flags, int userId) {
-        PackageDeleteObserver obs = new PackageDeleteObserver();
+        LocalPackageDeleteObserver obs = new LocalPackageDeleteObserver();
         try {
-            mInstaller.uninstall(packageName, flags, obs, userId);
+            mInstaller.uninstall(packageName, flags, obs.getBinder(), userId);
 
             synchronized (obs) {
                 while (!obs.finished) {

@@ -24,10 +24,10 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ContainerEncryptionParams;
 import android.content.pm.FeatureInfo;
-import android.content.pm.IPackageInstallObserver;
 import android.content.pm.IPackageInstallObserver2;
 import android.content.pm.IPackageInstaller;
 import android.content.pm.IPackageDeleteObserver;
+import android.content.pm.IPackageDeleteObserver2;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.IPackageStatsObserver;
@@ -202,6 +202,10 @@ interface IPackageManager {
 
     void setInstallerPackageName(in String targetPackage, in String installerPackageName);
 
+    /** @deprecated rawr, don't call AIDL methods directly! */
+    void deletePackageAsUser(in String packageName, IPackageDeleteObserver observer,
+            int userId, int flags);
+
     /**
      * Delete a package for a specific user.
      *
@@ -210,8 +214,7 @@ interface IPackageManager {
      * @param userId the id of the user for whom to delete the package
      * @param flags - possible values: {@link #DONT_DELETE_DATA}
      */
-    void deletePackageAsUser(in String packageName, IPackageDeleteObserver observer,
-            int userId, int flags);
+    void deletePackage(in String packageName, IPackageDeleteObserver2 observer, int userId, int flags);
 
     String getInstallerPackageName(in String packageName);
 
