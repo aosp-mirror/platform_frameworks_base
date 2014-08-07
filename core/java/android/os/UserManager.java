@@ -864,15 +864,6 @@ public class UserManager {
     }
 
     /**
-     * Kept during L development to simplify updating unbundled apps.
-     * TODO: Remove after 2014-08-04
-     * @hide
-     */
-    public String getBadgedLabelForUser(String label, UserHandle user) {
-        return (String) getBadgedLabelForUser((CharSequence) label, user);
-    }
-
-    /**
      * If the target user is a managed profile of the calling user or the caller
      * is itself a managed profile, then this returns a drawable to use as a small
      * icon to include in a view to distinguish it from the original icon.
