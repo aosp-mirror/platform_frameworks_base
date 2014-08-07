@@ -28,7 +28,6 @@ import android.graphics.drawable.RippleDrawable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewPropertyAnimator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -39,7 +38,7 @@ import com.android.systemui.recents.model.Task;
 
 
 /* The task bar view */
-class TaskBarView extends FrameLayout {
+class TaskViewHeader extends FrameLayout {
 
     RecentsConfiguration mConfig;
 
@@ -54,19 +53,19 @@ class TaskBarView extends FrameLayout {
 
     static Paint sHighlightPaint;
 
-    public TaskBarView(Context context) {
+    public TaskViewHeader(Context context) {
         this(context, null);
     }
 
-    public TaskBarView(Context context, AttributeSet attrs) {
+    public TaskViewHeader(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public TaskBarView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public TaskViewHeader(Context context, AttributeSet attrs, int defStyleAttr) {
         this(context, attrs, defStyleAttr, 0);
     }
 
-    public TaskBarView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public TaskViewHeader(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         mConfig = RecentsConfiguration.getInstance();
         setWillNotDraw(false);
