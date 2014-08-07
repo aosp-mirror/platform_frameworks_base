@@ -74,7 +74,7 @@ public class JobSchedulerService extends com.android.server.SystemService
     static final boolean DEBUG = true;
     /** The number of concurrent jobs we run at one time. */
     private static final int MAX_JOB_CONTEXTS_COUNT = 3;
-    static final String TAG = "JobManagerService";
+    static final String TAG = "JobSchedulerService";
     /** Master list of jobs. */
     final JobStore mJobs;
 
@@ -88,6 +88,11 @@ public class JobSchedulerService extends com.android.server.SystemService
      */
     static final int MIN_IDLE_COUNT = 1;
     /**
+     * Minimum # of charging jobs that must be ready in order to force the JMS to schedule things
+     * early.
+     */
+    static final int MIN_CHARGING_COUNT = 1;
+    /**
      * Minimum # of connectivity jobs that must be ready in order to force the JMS to schedule
      * things early.
      */
@@ -95,8 +100,9 @@ public class JobSchedulerService extends com.android.server.SystemService
     /**
      * Minimum # of jobs (with no particular constraints) for which the JMS will be happy running
      * some work early.
+     * This is correlated with the amount of batching we'll be able to do.
      */
-    static final int MIN_READY_JOBS_COUNT = 4;
+    static final int MIN_READY_JOBS_COUNT = 2;
 
     /**
      * Track Services that have currently active or pending jobs. The index is provided by
@@ -546,7 +552,8 @@ public class JobSchedulerService extends com.android.server.SystemService
          */
         private void maybeQueueReadyJobsForExecutionH() {
             synchronized (mJobs) {
-                int idleCount = 0;
+                int chargingCount = 0;
+                int idleCount =  0;
                 int backoffCount = 0;
                 int connectivityCount = 0;
                 List<JobStatus> runnableJobs = new ArrayList<JobStatus>();
@@ -563,17 +570,34 @@ public class JobSchedulerService extends com.android.server.SystemService
                         if (job.hasConnectivityConstraint() || job.hasUnmeteredConstraint()) {
                             connectivityCount++;
                         }
+                        if (job.hasChargingConstraint()) {
+                            chargingCount++;
+                        }
                         runnableJobs.add(job);
                     } else if (isReadyToBeCancelledLocked(job)) {
                         stopJobOnServiceContextLocked(job);
                     }
                 }
-                if (backoffCount > 0 || idleCount >= MIN_IDLE_COUNT ||
+                if (backoffCount > 0 ||
+                        idleCount >= MIN_IDLE_COUNT ||
                         connectivityCount >= MIN_CONNECTIVITY_COUNT ||
+                        chargingCount >= MIN_CHARGING_COUNT ||
                         runnableJobs.size() >= MIN_READY_JOBS_COUNT) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "maybeQueueReadyJobsForExecutionH: Running jobs.");
+                    }
                     for (int i=0; i<runnableJobs.size(); i++) {
                         mPendingJobs.add(runnableJobs.get(i));
                     }
+                } else {
+                    if (DEBUG) {
+                        Slog.d(TAG, "maybeQueueReadyJobsForExecutionH: Not running anything.");
+                    }
+                }
+                if (DEBUG) {
+                    Slog.d(TAG, "idle=" + idleCount + " connectivity=" +
+                    connectivityCount + " charging=" + chargingCount + " tot=" +
+                            runnableJobs.size());
                 }
             }
         }
