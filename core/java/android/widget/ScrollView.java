@@ -1577,9 +1577,11 @@ public class ScrollView extends FrameLayout {
     private void flingWithNestedDispatch(int velocityY) {
         final boolean canFling = (mScrollY > 0 || velocityY > 0) &&
                 (mScrollY < getScrollRange() || velocityY < 0);
-        dispatchNestedFling(0, velocityY, canFling);
-        if (canFling) {
-            fling(velocityY);
+        if (!dispatchNestedPreFling(0, velocityY)) {
+            dispatchNestedFling(0, velocityY, canFling);
+            if (canFling) {
+                fling(velocityY);
+            }
         }
     }
 
