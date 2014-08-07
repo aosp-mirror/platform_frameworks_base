@@ -43,6 +43,7 @@ import static com.android.internal.util.Preconditions.*;
 /**
  * Various utilities for dealing with camera API1 parameters.
  */
+@SuppressWarnings("deprecation")
 public class ParameterUtils {
     /** Upper/left minimal point of a normalized rectangle */
     public static final int NORMALIZED_RECTANGLE_MIN = -1000;
@@ -164,19 +165,23 @@ public class ParameterUtils {
          * <p>If the score is out of range of {@value Face#SCORE_MIN}, {@value Face#SCORE_MAX},
          * the score is clipped first and a warning is printed to logcat.</p>
          *
+         * <p>If the id is negative, the id is changed to 0 and a warning is printed to
+         * logcat.</p>
+         *
          * <p>All other parameters are passed-through as-is.</p>
          *
          * @return a new face with the optional features set
          */
         public Face toFace(
                 int id, Point leftEyePosition, Point rightEyePosition, Point mouthPosition) {
+            int idSafe = clipLower(id, /*lo*/0, rect, "id");
             int score = clip(weight,
                     Face.SCORE_MIN,
                     Face.SCORE_MAX,
                     rect,
                     "score");
 
-            return new Face(rect, score, id, leftEyePosition, rightEyePosition, mouthPosition);
+            return new Face(rect, score, idSafe, leftEyePosition, rightEyePosition, mouthPosition);
         }
 
         /**
@@ -859,6 +864,61 @@ public class ParameterUtils {
             Rect activeArray, ZoomData zoomData, Camera.Area area) {
         return convertCameraAreaToActiveArrayRectangle(activeArray, zoomData, area,
                 /*usePreviewCrop*/true);
+    }
+
+    /**
+     * Convert an api1 face into an active-array based api2 face.
+     *
+     * <p>Out-of-ranges scores and ids will be clipped to be within range (with a warning).</p>
+     *
+     * @param face a non-{@code null} api1 face
+     * @param activeArraySize active array size of the sensor (e.g. max jpeg size)
+     * @param zoomData the calculated zoom data corresponding to this request
+     *
+     * @return a non-{@code null} api2 face
+     *
+     * @throws NullPointerException if the {@code face} was {@code null}
+     */
+    public static Face convertFaceFromLegacy(Camera.Face face, Rect activeArray,
+            ZoomData zoomData) {
+        checkNotNull(face, "face must not be null");
+
+        Face api2Face;
+
+        Camera.Area fakeArea = new Camera.Area(face.rect, /*weight*/1);
+
+        WeightedRectangle faceRect =
+                convertCameraAreaToActiveArrayRectangle(activeArray, zoomData, fakeArea);
+
+        Point leftEye = face.leftEye, rightEye = face.rightEye, mouth = face.mouth;
+        if (leftEye != null && rightEye != null && mouth != null) {
+            leftEye = convertCameraPointToActiveArrayPoint(activeArray, zoomData,
+                    leftEye, /*usePreviewCrop*/true);
+            rightEye = convertCameraPointToActiveArrayPoint(activeArray, zoomData,
+                    leftEye, /*usePreviewCrop*/true);
+            mouth = convertCameraPointToActiveArrayPoint(activeArray, zoomData,
+                    leftEye, /*usePreviewCrop*/true);
+
+            api2Face = faceRect.toFace(face.id, leftEye, rightEye, mouth);
+        } else {
+            api2Face = faceRect.toFace();
+        }
+
+        return api2Face;
+    }
+
+    private static Point convertCameraPointToActiveArrayPoint(
+            Rect activeArray, ZoomData zoomData, Point point, boolean usePreviewCrop) {
+        Rect pointedRect = new Rect(point.x, point.y, point.x, point.y);
+        Camera.Area pointedArea = new Area(pointedRect, /*weight*/1);
+
+        WeightedRectangle adjustedRect =
+                convertCameraAreaToActiveArrayRectangle(activeArray,
+                        zoomData, pointedArea, usePreviewCrop);
+
+        Point transformedPoint = new Point(adjustedRect.rect.left, adjustedRect.rect.top);
+
+        return transformedPoint;
     }
 
     private static WeightedRectangle convertCameraAreaToActiveArrayRectangle(
