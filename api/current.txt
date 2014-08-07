@@ -602,6 +602,7 @@ package android {
     field public static final int focusableInTouchMode = 16842971; // 0x10100db
     field public static final int focusedMonthDateColor = 16843587; // 0x1010343
     field public static final int fontFamily = 16843692; // 0x10103ac
+    field public static final int fontFeatureSettings = 16843962; // 0x10104ba
     field public static final int footerDividersEnabled = 16843311; // 0x101022f
     field public static final int foreground = 16843017; // 0x1010109
     field public static final int foregroundGravity = 16843264; // 0x1010200
@@ -837,6 +838,7 @@ package android {
     field public static final int layout_x = 16843135; // 0x101017f
     field public static final int layout_y = 16843136; // 0x1010180
     field public static final int left = 16843181; // 0x10101ad
+    field public static final int letterSpacing = 16843961; // 0x10104b9
     field public static final int lineSpacingExtra = 16843287; // 0x1010217
     field public static final int lineSpacingMultiplier = 16843288; // 0x1010218
     field public static final int lines = 16843092; // 0x1010154
@@ -11031,12 +11033,14 @@ package android.graphics {
     method public android.graphics.ColorFilter getColorFilter();
     method public boolean getFillPath(android.graphics.Path, android.graphics.Path);
     method public int getFlags();
+    method public java.lang.String getFontFeatureSettings();
     method public float getFontMetrics(android.graphics.Paint.FontMetrics);
     method public android.graphics.Paint.FontMetrics getFontMetrics();
     method public int getFontMetricsInt(android.graphics.Paint.FontMetricsInt);
     method public android.graphics.Paint.FontMetricsInt getFontMetricsInt();
     method public float getFontSpacing();
     method public int getHinting();
+    method public float getLetterSpacing();
     method public android.graphics.MaskFilter getMaskFilter();
     method public android.graphics.PathEffect getPathEffect();
     method public deprecated android.graphics.Rasterizer getRasterizer();
@@ -11086,7 +11090,9 @@ package android.graphics {
     method public void setFakeBoldText(boolean);
     method public void setFilterBitmap(boolean);
     method public void setFlags(int);
+    method public void setFontFeatureSettings(java.lang.String);
     method public void setHinting(int);
+    method public void setLetterSpacing(float);
     method public void setLinearText(boolean);
     method public android.graphics.MaskFilter setMaskFilter(android.graphics.MaskFilter);
     method public android.graphics.PathEffect setPathEffect(android.graphics.PathEffect);
@@ -39662,6 +39668,7 @@ package android.widget {
     method public int getExtendedPaddingBottom();
     method public int getExtendedPaddingTop();
     method public android.text.InputFilter[] getFilters();
+    method public java.lang.String getFontFeatureSettings();
     method public boolean getFreezesText();
     method public int getGravity();
     method public int getHighlightColor();
@@ -39675,6 +39682,7 @@ package android.widget {
     method public int getInputType();
     method public final android.text.method.KeyListener getKeyListener();
     method public final android.text.Layout getLayout();
+    method public float getLetterSpacing();
     method public int getLineBounds(int, android.graphics.Rect);
     method public int getLineCount();
     method public int getLineHeight();
@@ -39758,6 +39766,7 @@ package android.widget {
     method public void setError(java.lang.CharSequence, android.graphics.drawable.Drawable);
     method public void setExtractedText(android.view.inputmethod.ExtractedText);
     method public void setFilters(android.text.InputFilter[]);
+    method public void setFontFeatureSettings(java.lang.String);
     method protected boolean setFrame(int, int, int, int);
     method public void setFreezesText(boolean);
     method public void setGravity(int);
@@ -39774,6 +39783,7 @@ package android.widget {
     method public void setInputExtras(int) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
     method public void setInputType(int);
     method public void setKeyListener(android.text.method.KeyListener);
+    method public void setLetterSpacing(float);
     method public void setLineSpacing(float, float);
     method public void setLines(int);
     method public final void setLinkTextColor(int);
