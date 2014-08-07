@@ -301,19 +301,22 @@ public class VoiceInteractionManagerService extends SystemService {
             }
 
             final long caller = Binder.clearCallingIdentity();
+            boolean deleted = false;
             try {
-                if (mDbHelper.deleteKeyphraseSoundModel(keyphraseId)) {
+                KeyphraseSoundModel soundModel = mDbHelper.getKeyphraseSoundModel(keyphraseId);
+                if (soundModel != null) {
+                    deleted = mDbHelper.deleteKeyphraseSoundModel(soundModel.uuid);
+                }
+                return deleted ? SoundTriggerHelper.STATUS_OK : SoundTriggerHelper.STATUS_ERROR;
+            } finally {
+                if (deleted) {
                     synchronized (this) {
                         // Notify the voice interaction service of a change in sound models.
                         if (mImpl != null && mImpl.mService != null) {
                             mImpl.notifySoundModelsChangedLocked();
                         }
                     }
-                    return SoundTriggerHelper.STATUS_OK;
-                } else {
-                    return SoundTriggerHelper.STATUS_ERROR;
                 }
-            } finally {
                 Binder.restoreCallingIdentity(caller);
             }
         }
