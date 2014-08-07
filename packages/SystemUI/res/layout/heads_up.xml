@@ -14,6 +14,7 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
+<!-- extends FrameLayout -->
 <com.android.systemui.statusbar.policy.HeadsUpNotificationView
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_height="match_parent"
@@ -21,11 +22,12 @@
         android:background="@drawable/heads_up_scrim">
 
         <FrameLayout
+                android:layout_width="@dimen/notification_panel_width"
                 android:layout_height="wrap_content"
+                android:layout_gravity="@integer/notification_panel_layout_gravity"
                 android:paddingStart="@dimen/notification_side_padding"
                 android:paddingEnd="@dimen/notification_side_padding"
                 android:elevation="8dp"
-                android:id="@+id/content_holder"
-                style="@style/NotificationsQuickSettings" />
+                android:id="@+id/content_holder" />
 
 </com.android.systemui.statusbar.policy.HeadsUpNotificationView>

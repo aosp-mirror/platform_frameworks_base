@@ -24,6 +24,7 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.PixelFormat;
@@ -44,7 +45,6 @@ import android.os.Vibrator;
 import android.provider.Settings.Global;
 import android.util.Log;
 import android.util.SparseArray;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -355,23 +355,8 @@ public class VolumePanel extends Handler {
             }
         };
 
-        // Change some window properties
         final Window window = mDialog.getWindow();
-        final LayoutParams lp = window.getAttributes();
-        lp.token = null;
-        // Offset from the top
-        lp.y = res.getDimensionPixelOffset(com.android.systemui.R.dimen.volume_panel_top);
-        lp.type = LayoutParams.TYPE_STATUS_BAR_PANEL;
-        lp.format = PixelFormat.TRANSLUCENT;
-        lp.windowAnimations = com.android.systemui.R.style.VolumePanelAnimation;
-        lp.gravity = Gravity.TOP;
-        window.setAttributes(lp);
-        window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
         window.requestFeature(Window.FEATURE_NO_TITLE);
-        window.addFlags(LayoutParams.FLAG_NOT_FOCUSABLE
-                | LayoutParams.FLAG_NOT_TOUCH_MODAL
-                | LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
-                | LayoutParams.FLAG_HARDWARE_ACCELERATED);
         mDialog.setCanceledOnTouchOutside(true);
         mDialog.setContentView(com.android.systemui.R.layout.volume_dialog);
         mDialog.setOnDismissListener(new OnDismissListener() {
@@ -384,9 +369,24 @@ public class VolumePanel extends Handler {
         });
 
         mDialog.create();
-        // temporary workaround, until we support window-level shadows
-        mDialog.getWindow().setBackgroundDrawable(new ColorDrawable(0x00000000));
 
+        final LayoutParams lp = window.getAttributes();
+        lp.token = null;
+        lp.y = res.getDimensionPixelOffset(com.android.systemui.R.dimen.volume_panel_top);
+        lp.type = LayoutParams.TYPE_STATUS_BAR_PANEL;
+        lp.format = PixelFormat.TRANSLUCENT;
+        lp.windowAnimations = com.android.systemui.R.style.VolumePanelAnimation;
+        lp.setTitle(TAG);
+        window.setAttributes(lp);
+
+        updateWidth();
+
+        window.setBackgroundDrawable(new ColorDrawable(0x00000000));
+        window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+        window.addFlags(LayoutParams.FLAG_NOT_FOCUSABLE
+                | LayoutParams.FLAG_NOT_TOUCH_MODAL
+                | LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
+                | LayoutParams.FLAG_HARDWARE_ACCELERATED);
         mView = window.findViewById(R.id.content);
         mView.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -414,6 +414,19 @@ public class VolumePanel extends Handler {
         mPlayMasterStreamTones = masterVolumeOnly && masterVolumeKeySounds;
 
         registerReceiver();
+    }
+
+    public void onConfigurationChanged(Configuration newConfig) {
+        updateWidth();
+    }
+
+    private void updateWidth() {
+        final Resources res = mContext.getResources();
+        final LayoutParams lp = mDialog.getWindow().getAttributes();
+        lp.width = res.getDimensionPixelSize(com.android.systemui.R.dimen.notification_panel_width);
+        lp.gravity =
+                res.getInteger(com.android.systemui.R.integer.notification_panel_layout_gravity);
+        mDialog.getWindow().setAttributes(lp);
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
@@ -1016,7 +1029,6 @@ public class VolumePanel extends Handler {
             int stream = (streamType == AudioService.STREAM_REMOTE_MUSIC) ? -1 : streamType;
             // when the stream is for remote playback, use -1 to reset the stream type evaluation
             mAudioManager.forceVolumeControlStream(stream);
-
             mDialog.show();
             if (mCallback != null) {
                 mCallback.onVisible(true);

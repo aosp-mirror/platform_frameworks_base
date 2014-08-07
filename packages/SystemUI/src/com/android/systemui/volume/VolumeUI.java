@@ -3,6 +3,7 @@ package com.android.systemui.volume;
 import android.app.ActivityManagerNative;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.media.AudioManager;
 import android.media.IRemoteVolumeController;
@@ -70,6 +71,14 @@ public class VolumeUI extends SystemUI {
         putComponent(VolumeComponent.class, mVolumeController);
         updateController();
         mContext.getContentResolver().registerContentObserver(SETTING_URI, false, mObserver);
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if (mPanel != null) {
+            mPanel.onConfigurationChanged(newConfig);
+        }
     }
 
     @Override

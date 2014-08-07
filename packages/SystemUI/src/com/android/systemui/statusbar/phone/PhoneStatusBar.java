@@ -3030,11 +3030,20 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
      */
     void updateResources() {
         // Update the quick setting tiles
-        if (mQSPanel != null) mQSPanel.updateResources();
+        if (mQSPanel != null) {
+            mQSPanel.updateResources();
+        }
 
         loadDimens();
         mLinearOutSlowIn = AnimationUtils.loadInterpolator(
                 mContext, android.R.interpolator.linear_out_slow_in);
+
+        if (mNotificationPanel != null) {
+            mNotificationPanel.updateResources();
+        }
+        if (mHeadsUpNotificationView != null) {
+            mHeadsUpNotificationView.updateResources();
+        }
     }
 
     protected void loadDimens() {
@@ -3076,7 +3085,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         mKeyguardMaxNotificationCount = res.getInteger(R.integer.keyguard_max_notification_count);
 
-        if (false) Log.v(TAG, "updateResources");
+        if (DEBUG) Log.v(TAG, "updateResources");
     }
 
     // Visibility reporting

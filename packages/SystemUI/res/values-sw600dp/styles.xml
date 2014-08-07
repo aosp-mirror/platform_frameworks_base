@@ -19,17 +19,6 @@
         <item name="android:layout_width">480dp</item>
     </style>
 
-    <style name="NotificationsQuickSettings">
-        <item name="android:layout_width">@dimen/notification_panel_width</item>
-        <item name="android:layout_height">match_parent</item>
-        <item name="android:layout_gravity">top|center_horizontal</item>
-    </style>
-
-    <style name="StatusBarHeader">
-        <item name="android:layout_width">@dimen/notification_panel_width</item>
-        <item name="android:layout_gravity">center_horizontal</item>
-    </style>
-
     <style name="SearchPanelCard">
         <item name="android:layout_width">550dp</item>
         <item name="android:layout_height">@dimen/search_panel_card_height</item>
