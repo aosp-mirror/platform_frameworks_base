@@ -35,6 +35,7 @@ public class NotificationsQuickSettingsContainer extends FrameLayout
     private View mScrollView;
     private View mUserSwitcher;
     private View mStackScroller;
+    private View mKeyguardStatusBar;
     private boolean mInflated;
 
     public NotificationsQuickSettingsContainer(Context context, AttributeSet attrs) {
@@ -46,6 +47,7 @@ public class NotificationsQuickSettingsContainer extends FrameLayout
         super.onFinishInflate();
         mScrollView = findViewById(R.id.scroll_view);
         mStackScroller = findViewById(R.id.notification_stack_scroller);
+        mKeyguardStatusBar = findViewById(R.id.keyguard_header);
         ViewStub userSwitcher = (ViewStub) findViewById(R.id.keyguard_user_switcher);
         userSwitcher.setOnInflateListener(this);
         mUserSwitcher = userSwitcher;
@@ -61,18 +63,30 @@ public class NotificationsQuickSettingsContainer extends FrameLayout
     @Override
     protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
         boolean userSwitcherVisible = mInflated && mUserSwitcher.getVisibility() == View.VISIBLE;
+        boolean statusBarVisible = mKeyguardStatusBar.getVisibility() == View.VISIBLE;
 
         // Invert the order of the scroll view and user switcher such that the notifications receive
         // touches first but the panel gets drawn above.
         if (child == mScrollView) {
             return super.drawChild(canvas, mStackScroller, drawingTime);
         } else if (child == mStackScroller) {
-            return super.drawChild(canvas, userSwitcherVisible ? mUserSwitcher : mScrollView,
+            return super.drawChild(canvas,
+                    userSwitcherVisible && statusBarVisible ? mUserSwitcher
+                    : statusBarVisible ? mKeyguardStatusBar
+                    : userSwitcherVisible ? mUserSwitcher
+                    : mScrollView,
                     drawingTime);
         } else if (child == mUserSwitcher) {
-            return super.drawChild(canvas, userSwitcherVisible ? mScrollView : mUserSwitcher,
+            return super.drawChild(canvas,
+                    userSwitcherVisible && statusBarVisible ? mKeyguardStatusBar
+                    : mScrollView,
                     drawingTime);
-        } else {
+        } else if (child == mKeyguardStatusBar) {
+            return super.drawChild(canvas,
+                    userSwitcherVisible && statusBarVisible ? mScrollView
+                    : mScrollView,
+                    drawingTime);
+        }else {
             return super.drawChild(canvas, child, drawingTime);
         }
     }

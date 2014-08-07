@@ -50,12 +50,8 @@
         android:visibility="gone"
         />
 
-    <include
-        layout="@layout/keyguard_status_bar"
-        android:visibility="invisible" />
-
     <com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer
-        android:layout_width="@dimen/notification_panel_width"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="@integer/notification_panel_layout_gravity"
         android:id="@+id/notification_container_parent"
@@ -64,8 +60,9 @@
 
         <com.android.systemui.statusbar.phone.ObservableScrollView
             android:id="@+id/scroll_view"
-            android:layout_width="match_parent"
+            android:layout_width="@dimen/notification_panel_width"
             android:layout_height="match_parent"
+            android:layout_gravity="@integer/notification_panel_layout_gravity"
             android:scrollbars="none"
             android:overScrollMode="never"
             android:fillViewport="true">
@@ -97,8 +94,9 @@
 
         <com.android.systemui.statusbar.stack.NotificationStackScrollLayout
             android:id="@+id/notification_stack_scroller"
-            android:layout_width="match_parent"
+            android:layout_width="@dimen/notification_panel_width"
             android:layout_height="match_parent"
+            android:layout_gravity="@integer/notification_panel_layout_gravity"
             android:layout_marginBottom="@dimen/close_handle_underlap"/>
 
         <ViewStub
@@ -108,6 +106,10 @@
             android:layout_marginTop="@dimen/status_bar_header_height_keyguard"
             android:layout_gravity="end"
             android:layout="@layout/keyguard_user_switcher" />
+
+        <include
+            layout="@layout/keyguard_status_bar"
+            android:visibility="invisible" />
 
     </com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer>
 
