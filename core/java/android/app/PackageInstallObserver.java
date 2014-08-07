@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.content.Intent;
 import android.content.pm.IPackageInstallObserver2;
 import android.os.Bundle;
 
@@ -23,15 +24,24 @@ import android.os.Bundle;
 public class PackageInstallObserver {
     private final IPackageInstallObserver2.Stub mBinder = new IPackageInstallObserver2.Stub() {
         @Override
-        public void packageInstalled(String basePackageName, Bundle extras, int returnCode,
-                String msg) {
-            PackageInstallObserver.this.packageInstalled(basePackageName, extras, returnCode, msg);
+        public void onUserActionRequired(Intent intent) {
+            PackageInstallObserver.this.onUserActionRequired(intent);
+        }
+
+        @Override
+        public void onPackageInstalled(String basePackageName, int returnCode,
+                String msg, Bundle extras) {
+            PackageInstallObserver.this.onPackageInstalled(basePackageName, returnCode, msg,
+                    extras);
         }
     };
 
     /** {@hide} */
     public IPackageInstallObserver2 getBinder() {
         return mBinder;
+    }
+
+    public void onUserActionRequired(Intent intent) {
     }
 
     /**
@@ -49,11 +59,7 @@ public class PackageInstallObserver {
      *            basic outcome
      * @hide
      */
-    public void packageInstalled(String basePackageName, Bundle extras, int returnCode) {
-    }
-
-    public void packageInstalled(String basePackageName, Bundle extras, int returnCode,
-            String msg) {
-        packageInstalled(basePackageName, extras, returnCode);
+    public void onPackageInstalled(String basePackageName, int returnCode, String msg,
+            Bundle extras) {
     }
 }

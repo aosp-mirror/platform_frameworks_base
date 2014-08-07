@@ -16,7 +16,7 @@
 
 package android.content.pm;
 
-import android.content.IntentSender;
+import android.content.Intent;
 import android.os.Bundle;
 
 /**
@@ -25,6 +25,8 @@ import android.os.Bundle;
  * @hide
  */
 oneway interface IPackageInstallObserver2 {
+    void onUserActionRequired(in Intent intent);
+
     /**
      * The install operation has completed.  {@code returnCode} holds a numeric code
      * indicating success or failure.  In certain cases the {@code extras} Bundle will
@@ -40,5 +42,5 @@ oneway interface IPackageInstallObserver2 {
      * </tr>
      * </table>
      */
-    void packageInstalled(String basePackageName, in Bundle extras, int returnCode, String msg);
+    void onPackageInstalled(String basePackageName, int returnCode, String msg, in Bundle extras);
 }
