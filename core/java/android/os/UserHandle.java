@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.annotation.SystemApi;
 import android.util.SparseArray;
 
 import java.io.PrintWriter;
@@ -235,6 +236,16 @@ public final class UserHandle implements Parcelable {
      */
     public static final int myUserId() {
         return getUserId(Process.myUid());
+    }
+
+    /**
+     * Returns true if this UserHandle refers to the owner user; false otherwise.
+     * @return true if this UserHandle refers to the owner user; false otherwise.
+     * @hide
+     */
+    @SystemApi
+    public final boolean isOwner() {
+        return this.equals(OWNER);
     }
 
     /** @hide */
