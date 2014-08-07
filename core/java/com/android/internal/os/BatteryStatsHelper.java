@@ -30,19 +30,26 @@ import android.net.ConnectivityManager;
 import android.os.BatteryStats;
 import android.os.BatteryStats.Uid;
 import android.os.Bundle;
+import android.os.MemoryFile;
 import android.os.Parcel;
+import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.telephony.SignalStrength;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.os.BatterySipper.DrainType;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -55,7 +62,7 @@ import java.util.Map;
  * The caller must initialize this class as soon as activity object is ready to use (for example, in
  * onAttach() for Fragment), call create() in onCreate() and call destroy() in onDestroy().
  */
-public class BatteryStatsHelper {
+public final class BatteryStatsHelper {
 
     private static final boolean DEBUG = false;
 
@@ -63,6 +70,7 @@ public class BatteryStatsHelper {
 
     private static BatteryStats sStatsXfer;
     private static Intent sBatteryBroadcastXfer;
+    private static ArrayMap<File, BatteryStats> sFileXfer = new ArrayMap<>();
 
     final private Context mContext;
     final private boolean mCollectBatteryBroadcast;
@@ -115,6 +123,68 @@ public class BatteryStatsHelper {
     public BatteryStatsHelper(Context context, boolean collectBatteryBroadcast) {
         mContext = context;
         mCollectBatteryBroadcast = collectBatteryBroadcast;
+    }
+
+    public void storeStatsHistoryInFile(String fname) {
+        synchronized (sFileXfer) {
+            File path = makeFilePath(mContext, fname);
+            sFileXfer.put(path, this.getStats());
+            FileOutputStream fout = null;
+            try {
+                fout = new FileOutputStream(path);
+                Parcel hist = Parcel.obtain();
+                getStats().writeToParcelWithoutUids(hist, 0);
+                byte[] histData = hist.marshall();
+                fout.write(histData);
+            } catch (IOException e) {
+                Log.w(TAG, "Unable to write history to file", e);
+            } finally {
+                if (fout != null) {
+                    try {
+                        fout.close();
+                    } catch (IOException e) {
+                    }
+                }
+            }
+        }
+    }
+
+    public static BatteryStats statsFromFile(Context context, String fname) {
+        synchronized (sFileXfer) {
+            File path = makeFilePath(context, fname);
+            BatteryStats stats = sFileXfer.get(path);
+            if (stats != null) {
+                return stats;
+            }
+            FileInputStream fin = null;
+            try {
+                fin = new FileInputStream(path);
+                byte[] data = readFully(fin);
+                Parcel parcel = Parcel.obtain();
+                parcel.unmarshall(data, 0, data.length);
+                parcel.setDataPosition(0);
+                return com.android.internal.os.BatteryStatsImpl.CREATOR.createFromParcel(parcel);
+            } catch (IOException e) {
+                Log.w(TAG, "Unable to read history to file", e);
+            } finally {
+                if (fin != null) {
+                    try {
+                        fin.close();
+                    } catch (IOException e) {
+                    }
+                }
+            }
+        }
+        return getStats(IBatteryStats.Stub.asInterface(
+                        ServiceManager.getService(BatteryStats.SERVICE_NAME)));
+    }
+
+    public static void dropFile(Context context, String fname) {
+        makeFilePath(context, fname).delete();
+    }
+
+    private static File makeFilePath(Context context, String fname) {
+        return new File(context.getFilesDir(), fname);
     }
 
     /** Clears the current stats and forces recreating for future use. */
@@ -853,25 +923,64 @@ public class BatteryStatsHelper {
 
     public long getChargeTimeRemaining() { return mChargeTimeRemaining; }
 
+    public static byte[] readFully(FileInputStream stream) throws java.io.IOException {
+        return readFully(stream, stream.available());
+    }
+
+    public static byte[] readFully(FileInputStream stream, int avail) throws java.io.IOException {
+        int pos = 0;
+        byte[] data = new byte[avail];
+        while (true) {
+            int amt = stream.read(data, pos, data.length-pos);
+            //Log.i("foo", "Read " + amt + " bytes at " + pos
+            //        + " of avail " + data.length);
+            if (amt <= 0) {
+                //Log.i("foo", "**** FINISHED READING: pos=" + pos
+                //        + " len=" + data.length);
+                return data;
+            }
+            pos += amt;
+            avail = stream.available();
+            if (avail > data.length-pos) {
+                byte[] newData = new byte[pos+avail];
+                System.arraycopy(data, 0, newData, 0, pos);
+                data = newData;
+            }
+        }
+    }
+
     private void load() {
         if (mBatteryInfo == null) {
             return;
         }
-        try {
-            byte[] data = mBatteryInfo.getStatistics();
-            Parcel parcel = Parcel.obtain();
-            parcel.unmarshall(data, 0, data.length);
-            parcel.setDataPosition(0);
-            BatteryStatsImpl stats = com.android.internal.os.BatteryStatsImpl.CREATOR
-                    .createFromParcel(parcel);
-            stats.distributeWorkLocked(BatteryStats.STATS_SINCE_CHARGED);
-            mStats = stats;
-        } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException:", e);
-        }
+        mStats = getStats(mBatteryInfo);
         if (mCollectBatteryBroadcast) {
             mBatteryBroadcast = mContext.registerReceiver(null,
                     new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
         }
+    }
+
+    private static BatteryStatsImpl getStats(IBatteryStats service) {
+        try {
+            ParcelFileDescriptor pfd = service.getStatisticsStream();
+            if (pfd != null) {
+                FileInputStream fis = new ParcelFileDescriptor.AutoCloseInputStream(pfd);
+                try {
+                    byte[] data = readFully(fis, MemoryFile.getSize(pfd.getFileDescriptor()));
+                    Parcel parcel = Parcel.obtain();
+                    parcel.unmarshall(data, 0, data.length);
+                    parcel.setDataPosition(0);
+                    BatteryStatsImpl stats = com.android.internal.os.BatteryStatsImpl.CREATOR
+                            .createFromParcel(parcel);
+                    stats.distributeWorkLocked(BatteryStats.STATS_SINCE_CHARGED);
+                    return stats;
+                } catch (IOException e) {
+                    Log.w(TAG, "Unable to read statistics stream", e);
+                }
+            }
+        } catch (RemoteException e) {
+            Log.w(TAG, "RemoteException:", e);
+        }
+        return null;
     }
 }
