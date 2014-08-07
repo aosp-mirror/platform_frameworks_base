@@ -46,5 +46,11 @@ final class HdmiConfig {
     // action. They will have their own retransmission count.
     static final int RETRANSMISSION_COUNT = 1;
 
+    // Do not export the CEC devices connected to a legacy HDMI switch. The usage of legacy
+    // (non-CEC) switches is deprecated. They stop the correct operation of many mandatory
+    // CEC features. If set to true, do not pass the list of CEC devices behind the legacy
+    // switch since they won't be under control from TV.
+    static final boolean HIDE_DEVICES_BEHIND_LEGACY_SWITCH = true;
+
     private HdmiConfig() { /* cannot be instantiated */ }
 }
