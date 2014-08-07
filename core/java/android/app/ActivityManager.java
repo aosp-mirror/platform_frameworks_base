@@ -700,6 +700,13 @@ public class ActivityManager {
          */
         public int affiliatedTaskId;
 
+        /**
+         * Task affiliation color of the source task with the affiliated task id.
+         *
+         * @hide
+         */
+        public int affiliatedTaskColor;
+
         public RecentTaskInfo() {
         }
 
@@ -732,6 +739,7 @@ public class ActivityManager {
             dest.writeLong(firstActiveTime);
             dest.writeLong(lastActiveTime);
             dest.writeInt(affiliatedTaskId);
+            dest.writeInt(affiliatedTaskColor);
         }
 
         public void readFromParcel(Parcel source) {
@@ -747,6 +755,7 @@ public class ActivityManager {
             firstActiveTime = source.readLong();
             lastActiveTime = source.readLong();
             affiliatedTaskId = source.readInt();
+            affiliatedTaskColor = source.readInt();
         }
 
         public static final Creator<RecentTaskInfo> CREATOR

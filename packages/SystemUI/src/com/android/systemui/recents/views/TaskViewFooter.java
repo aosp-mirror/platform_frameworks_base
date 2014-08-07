@@ -24,7 +24,7 @@ import com.android.systemui.recents.RecentsConfiguration;
 
 
 /** The task footer view */
-public class TaskFooterView extends FrameLayout {
+public class TaskViewFooter extends FrameLayout {
 
     interface TaskFooterViewCallbacks {
         public void onTaskFooterHeightChanged(int height, int maxHeight);
@@ -37,19 +37,19 @@ public class TaskFooterView extends FrameLayout {
     int mMaxFooterHeight;
     ObjectAnimator mFooterAnimator;
 
-    public TaskFooterView(Context context) {
+    public TaskViewFooter(Context context) {
         this(context, null);
     }
 
-    public TaskFooterView(Context context, AttributeSet attrs) {
+    public TaskViewFooter(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public TaskFooterView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public TaskViewFooter(Context context, AttributeSet attrs, int defStyleAttr) {
         this(context, attrs, defStyleAttr, 0);
     }
 
-    public TaskFooterView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public TaskViewFooter(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         mConfig = RecentsConfiguration.getInstance();
         mMaxFooterHeight = mConfig.taskViewLockToAppButtonHeight;
