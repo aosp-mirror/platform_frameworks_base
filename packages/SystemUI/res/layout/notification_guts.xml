@@ -77,30 +77,14 @@
                     />
         </LinearLayout>
 
-        <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="8dp"
+        <ImageButton style="@android:style/Widget.Material.Light.Button.Borderless.Small"
+                android:id="@+id/notification_inspect_item"
+                android:layout_width="52dp"
+                android:layout_height="match_parent"
                 android:layout_weight="0"
-                android:orientation="horizontal"
-                android:showDividers="beginning|middle"
-                android:divider="@*android:drawable/list_divider_holo_dark"
-                android:dividerPadding="8dp"
-                >
-            <Button style="@android:style/Widget.Material.Light.Button.Borderless.Small"
-                    android:id="@+id/notification_inspect_item"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:gravity="start|center_vertical"
-                    android:drawablePadding="8dp"
-                    android:paddingStart="8dp"
-                    android:textColor="@color/notification_guts_btn_color"
-                    android:textSize="14dp"
-                    android:singleLine="true"
-                    android:ellipsize="end"
-                    android:text="@string/status_bar_notification_inspect_item_title"
-                    />
-        </LinearLayout>
+                android:gravity="center"
+                android:contentDescription="@string/status_bar_notification_inspect_item_title"
+                android:src="@drawable/ic_settings"
+                />
     </LinearLayout>
 </FrameLayout>

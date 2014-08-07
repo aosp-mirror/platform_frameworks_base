@@ -21,6 +21,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.TimeInterpolator;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
+import android.app.ActivityThread;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
@@ -30,6 +31,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.IPackageManager;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
@@ -585,31 +588,12 @@ public abstract class BaseStatusBar extends SystemUI implements
                entry.expandedBig.findViewById(com.android.internal.R.id.media_action_area) != null;
     }
 
-    private void startApplicationDetailsActivity(String packageName) {
-        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                Uri.fromParts("package", packageName, null));
-        intent.setComponent(intent.resolveActivity(mContext.getPackageManager()));
-        TaskStackBuilder.create(mContext).addNextIntentWithParentStack(intent).startActivities(
-                null, UserHandle.CURRENT);
-    }
-
-    private static final int max(int...args) {
-        switch (args.length) {
-            case 0:
-                return 0;
-            case 1:
-                return args[0];
-            case 2:
-                return args[1] > args[0] ? args[1] : args[0];
-            default:
-                int m = args[0];
-                for (int i = 0; i < args.length; i++) {
-                    if (args[i] > m) {
-                        m = args[i];
-                    }
-                }
-                return m;
-        }
+    private void startAppNotificationSettingsActivity(String packageName, int appUid) {
+        Intent intent = new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
+        intent.putExtra(Settings.EXTRA_APP_PACKAGE, packageName);
+        intent.putExtra(Settings.EXTRA_APP_UID, appUid);
+        TaskStackBuilder.create(mContext).addNextIntentWithParentStack(intent)
+                .startActivities(null, new UserHandle(UserHandle.getUserId(appUid)));
     }
 
     protected SwipeHelper.LongPressListener getNotificationLongClicker() {
@@ -618,8 +602,6 @@ public abstract class BaseStatusBar extends SystemUI implements
             public boolean onLongPress(View v, int x, int y) {
                 dismissPopups();
 
-                final String packageNameF = (String) v.getTag();
-                if (packageNameF == null) return false;
                 if (v.getWindowToken() == null) return false;
 
                 // Assume we are a status_bar_notification_row
@@ -628,14 +610,6 @@ public abstract class BaseStatusBar extends SystemUI implements
 
                 // Already showing?
                 if (guts.getVisibility() == View.VISIBLE) return false;
-
-                final View button = guts.findViewById(R.id.notification_inspect_item);
-                button.setOnClickListener(new View.OnClickListener() {
-                    public void onClick(View v) {
-                        startApplicationDetailsActivity(packageNameF);
-                        animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE);
-                    }
-                });
 
                 guts.setVisibility(View.VISIBLE);
                 final double horz = Math.max(v.getWidth() - x, x);
@@ -959,28 +933,10 @@ public abstract class BaseStatusBar extends SystemUI implements
             return inflateViews(entry, parent, true);
     }
 
-    private Drawable loadPackageIconDrawable(String pkg, int userId) {
-        Drawable icon = null;
-        try {
-            icon = mContext.getPackageManager().getApplicationIcon(pkg);
-        } catch (PackageManager.NameNotFoundException e) {
-        }
-
-        return icon;
-    }
-
-    private CharSequence loadPackageName(String pkg) {
-        final PackageManager pm = mContext.getPackageManager();
-        try {
-            ApplicationInfo info = pm.getApplicationInfo(pkg,
-                    PackageManager.GET_UNINSTALLED_PACKAGES);
-            if (info != null) return pm.getApplicationLabel(info);
-        } catch (PackageManager.NameNotFoundException e) {
-        }
-        return pkg;
-    }
-
     private boolean inflateViews(NotificationData.Entry entry, ViewGroup parent, boolean isHeadsUp) {
+        PackageManager pmUser = getPackageManagerForUser(
+                entry.notification.getUser().getIdentifier());
+
         int maxHeight = mRowMaxHeight;
         StatusBarNotification sbn = entry.notification;
         RemoteViews contentView = sbn.getNotification().contentView;
@@ -1031,12 +987,43 @@ public abstract class BaseStatusBar extends SystemUI implements
         // the notification inspector (see SwipeHelper.setLongPressListener)
         row.setTag(sbn.getPackageName());
         final View guts = row.findViewById(R.id.notification_guts);
-        final Drawable pkgicon = loadPackageIconDrawable(entry.notification.getPackageName(),
-                entry.notification.getUserId());
-        final String pkgname = loadPackageName(entry.notification.getPackageName()).toString();
+        final String pkg = entry.notification.getPackageName();
+        String appname = pkg;
+        Drawable pkgicon = null;
+        int appUid = -1;
+        try {
+            final ApplicationInfo info = pmUser.getApplicationInfo(pkg,
+                PackageManager.GET_UNINSTALLED_PACKAGES | PackageManager.GET_DISABLED_COMPONENTS);
+            if (info != null) {
+                appname = String.valueOf(pmUser.getApplicationLabel(info));
+                pkgicon = pmUser.getApplicationIcon(info);
+                appUid = info.uid;
+            }
+        } catch (NameNotFoundException e) {
+            // app is gone, just show package name and generic icon
+            pkgicon = pmUser.getDefaultActivityIcon();
+        }
         ((ImageView) row.findViewById(android.R.id.icon)).setImageDrawable(pkgicon);
         ((DateTimeView) row.findViewById(R.id.timestamp)).setTime(entry.notification.getPostTime());
-        ((TextView) row.findViewById(R.id.pkgname)).setText(pkgname);
+        ((TextView) row.findViewById(R.id.pkgname)).setText(appname);
+        final View settingsButton = guts.findViewById(R.id.notification_inspect_item);
+        if (appUid >= 0) {
+            final int appUidF = appUid;
+            settingsButton.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    dismissKeyguardThenExecute(new OnDismissAction() {
+                        public boolean onDismiss() {
+                            startAppNotificationSettingsActivity(pkg, appUidF);
+                            animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE);
+                            visibilityChanged(false);
+                            return DELAY_DISMISS_TO_ACTIVITY_LAUNCH;
+                        }
+                    });
+                }
+            });
+        } else {
+            settingsButton.setVisibility(View.GONE);
+        }
 
         workAroundBadLayerDrawableOpacity(row);
         View vetoButton = updateNotificationVetoButton(row, sbn);
@@ -1108,9 +1095,6 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
 
         if (publicViewLocal == null) {
-            PackageManager pm = getPackageManagerForUser(
-                    entry.notification.getUser().getIdentifier());
-
             // Add a basic notification template
             publicViewLocal = LayoutInflater.from(mContext).inflate(
                     com.android.internal.R.layout.notification_template_material_base,
@@ -1118,8 +1102,8 @@ public abstract class BaseStatusBar extends SystemUI implements
 
             final TextView title = (TextView) publicViewLocal.findViewById(com.android.internal.R.id.title);
             try {
-                title.setText(pm.getApplicationLabel(
-                        pm.getApplicationInfo(entry.notification.getPackageName(), 0)));
+                title.setText(pmUser.getApplicationLabel(
+                        pmUser.getApplicationInfo(entry.notification.getPackageName(), 0)));
             } catch (NameNotFoundException e) {
                 title.setText(entry.notification.getPackageName());
             }
