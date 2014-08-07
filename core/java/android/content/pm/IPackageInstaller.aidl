@@ -21,7 +21,6 @@ import android.content.pm.IPackageInstallerCallback;
 import android.content.pm.IPackageInstallerSession;
 import android.content.pm.InstallSessionInfo;
 import android.content.pm.InstallSessionParams;
-import android.os.ParcelFileDescriptor;
 
 /** {@hide} */
 interface IPackageInstaller {
