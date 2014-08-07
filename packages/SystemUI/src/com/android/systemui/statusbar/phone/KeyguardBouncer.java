@@ -82,6 +82,7 @@ public class KeyguardBouncer {
 
     public void hide(boolean destroyView) {
         if (mKeyguardView != null) {
+            mKeyguardView.setOnDismissAction(null);
             mKeyguardView.cleanUp();
         }
         if (destroyView) {
