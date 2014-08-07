@@ -113,12 +113,13 @@ public class IdleController extends StateController {
         public IdlenessTracker() {
             mAlarm = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
 
-            Intent intent = new Intent(ACTION_TRIGGER_IDLE);
-            intent.setComponent(new ComponentName(mContext, this.getClass()));
+            Intent intent = new Intent(ACTION_TRIGGER_IDLE)
+                    .setPackage("android")
+                    .setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
             mIdleTriggerIntent = PendingIntent.getBroadcast(mContext, 0, intent, 0);
 
-            // at boot we presume that the user has just "interacted" with the
-            // device in some meaningful way
+            // At boot we presume that the user has just "interacted" with the
+            // device in some meaningful way.
             mIdle = false;
         }
 
@@ -163,9 +164,11 @@ public class IdleController extends StateController {
                 // when the screen goes off or dreaming starts, we schedule the
                 // alarm that will tell us when we have decided the device is
                 // truly idle.
-                long when = SystemClock.elapsedRealtime() + INACTIVITY_IDLE_THRESHOLD;
+                final long nowElapsed = SystemClock.elapsedRealtime();
+                final long when = nowElapsed + INACTIVITY_IDLE_THRESHOLD;
                 if (DEBUG) {
-                    Slog.v(TAG, "Scheduling idle : " + action + " when=" + when);
+                    Slog.v(TAG, "Scheduling idle : " + action + " now:" + nowElapsed + " when="
+                            + when);
                 }
                 mAlarm.setWindow(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                         when, IDLE_WINDOW_SLOP, mIdleTriggerIntent);
