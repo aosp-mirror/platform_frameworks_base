@@ -229,13 +229,16 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private SparseBooleanArray mUserFingerprintRecognized = new SparseBooleanArray();
 
     @Override
-    public void onTrustChanged(boolean enabled, int userId) {
+    public void onTrustChanged(boolean enabled, int userId, boolean initiatedByUser) {
         mUserHasTrust.put(userId, enabled);
 
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
                 cb.onTrustChanged(userId);
+                if (enabled && initiatedByUser) {
+                    cb.onTrustInitiatedByUser(userId);
+                }
             }
         }
     }
