@@ -4573,6 +4573,17 @@ public class AudioService extends IAudioService.Stub {
                 outDevice = AudioSystem.DEVICE_OUT_USB_ACCESSORY;
                 setWiredDeviceConnectionState(outDevice, state, params);
             } else if (action.equals(Intent.ACTION_USB_AUDIO_DEVICE_PLUG)) {
+                // FIXME Does not yet handle the case where the setting is changed
+                // after device connection.  Ideally we should handle the settings change
+                // in SettingsObserver. Here we should log that a USB device is connected
+                // and disconnected with its address (card , device) and force the
+                // connection or disconnection when the setting changes.
+                int isDisabled = Settings.System.getInt(mContentResolver,
+                        Settings.System.USB_AUDIO_AUTOMATIC_ROUTING_DISABLED, 0);
+                if (isDisabled != 0) {
+                    return;
+                }
+
                 state = intent.getIntExtra("state", 0);
 
                 int alsaCard = intent.getIntExtra("card", -1);
