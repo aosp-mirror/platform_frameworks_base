@@ -448,6 +448,7 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
     }
 
     void doDestroy() {
+        onDestroy();
         if (mInitialized) {
             mRootView.getViewTreeObserver().removeOnComputeInternalInsetsListener(
                     mInsetsComputer);
