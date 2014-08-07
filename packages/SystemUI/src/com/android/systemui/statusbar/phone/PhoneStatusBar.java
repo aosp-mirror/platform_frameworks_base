@@ -805,7 +805,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         mKeyguardUserSwitcher = new KeyguardUserSwitcher(mContext,
                 (ViewStub) mStatusBarWindow.findViewById(R.id.keyguard_user_switcher),
-                mKeyguardStatusBar, mUserSwitcherController);
+                mKeyguardStatusBar, mNotificationPanel, mUserSwitcherController);
 
 
         // Set up the quick settings tile panel
