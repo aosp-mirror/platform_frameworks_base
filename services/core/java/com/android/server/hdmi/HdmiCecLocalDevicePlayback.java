@@ -140,7 +140,7 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
         if (physicalAddress != mService.getPhysicalAddress()) {
             mIsActiveSource = false;
             if (mService.isPowerOnOrTransient()) {
-                mService.standby();
+                mService.nap();
             }
             return true;
         }

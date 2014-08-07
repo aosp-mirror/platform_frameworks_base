@@ -1451,6 +1451,11 @@ public final class HdmiControlService extends SystemService {
         // the intent, the sequence will continue at onStandby().
     }
 
+    void nap() {
+        PowerManager pm = (PowerManager) getContext().getSystemService(Context.POWER_SERVICE);
+        pm.nap(SystemClock.uptimeMillis());
+    }
+
     @ServiceThreadOnly
     private void onWakeUp() {
         assertRunOnServiceThread();
