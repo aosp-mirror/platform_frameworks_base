@@ -103,7 +103,7 @@
     <style name="TextAppearance.StatusBar.Expanded.UserSwitcher">
         <item name="android:textSize">16sp</item>
         <item name="android:textStyle">normal</item>
-        <item name="android:textColor">#ffffff</item>
+        <item name="android:textColor">@color/qs_user_detail_name</item>
     </style>
     <style name="TextAppearance.StatusBar.Expanded.UserSwitcher.UserName" />
 

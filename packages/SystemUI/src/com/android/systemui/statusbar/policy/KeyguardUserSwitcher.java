@@ -26,6 +26,7 @@ import android.view.ViewStub;
 import android.widget.TextView;
 
 import com.android.systemui.R;
+import com.android.systemui.qs.tiles.UserDetailItemView;
 import com.android.systemui.statusbar.phone.KeyguardStatusBarView;
 import com.android.systemui.statusbar.phone.UserAvatarView;
 
@@ -140,21 +141,19 @@ public class KeyguardUserSwitcher {
         public View getView(int position, View convertView, ViewGroup parent) {
             UserSwitcherController.UserRecord item = getItem(position);
 
-            if (convertView == null
+            if (!(convertView instanceof UserDetailItemView)
                     || !(convertView.getTag() instanceof UserSwitcherController.UserRecord)) {
                 convertView = LayoutInflater.from(mContext).inflate(
                         R.layout.keyguard_user_switcher_item, parent, false);
                 convertView.setOnClickListener(this);
             }
+            UserDetailItemView v = (UserDetailItemView) convertView;
 
-            TextView nameView = (TextView) convertView.findViewById(R.id.name);
-            UserAvatarView pictureView = (UserAvatarView) convertView.findViewById(R.id.picture);
-
-            nameView.setText(getName(mContext, item));
+            String name = getName(mContext, item);
             if (item.picture == null) {
-                pictureView.setDrawable(mContext.getDrawable(R.drawable.ic_account_circle_qs));
+                v.bind(name, getDrawable(mContext, item));
             } else {
-                pictureView.setBitmap(item.picture);
+                v.bind(name, item.picture);
             }
             convertView.setActivated(item.isCurrent);
             convertView.setTag(item);
