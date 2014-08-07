@@ -14,39 +14,43 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/qs_detail_background"
-    android:padding="16dp" >
-
-    <TextView
-        android:id="@android:id/button1"
-        style="@style/QSBorderlessButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:minWidth="88dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:text="@string/quick_settings_done"
-        android:textAppearance="@style/TextAppearance.QS.DetailButton" />
-
-    <TextView
-        android:id="@android:id/button2"
-        style="@style/QSBorderlessButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_marginEnd="8dp"
-        android:minWidth="132dp"
-        android:layout_toStartOf="@android:id/button1"
-        android:text="@string/quick_settings_more_settings"
-        android:textAppearance="@style/TextAppearance.QS.DetailButton" />
-
-    <FrameLayout
-        android:id="@android:id/content"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@android:id/button1" />
+        android:background="@drawable/qs_detail_background"
+        android:paddingBottom="16dp"
+        android:orientation="vertical">
 
-</RelativeLayout>
+    <FrameLayout
+            android:id="@android:id/content"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingEnd="16dp"
+            android:gravity="end">
+
+        <TextView
+                android:id="@android:id/button2"
+                style="@style/QSBorderlessButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:minWidth="132dp"
+                android:text="@string/quick_settings_more_settings"
+                android:textAppearance="@style/TextAppearance.QS.DetailButton" />
+
+        <TextView
+                android:id="@android:id/button1"
+                style="@style/QSBorderlessButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="88dp"
+                android:text="@string/quick_settings_done"
+                android:textAppearance="@style/TextAppearance.QS.DetailButton" />
+
+    </LinearLayout>
+</LinearLayout>

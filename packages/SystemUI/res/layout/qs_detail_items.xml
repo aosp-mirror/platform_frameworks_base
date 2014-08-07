@@ -17,7 +17,10 @@
 <!-- extends FrameLayout -->
 <com.android.systemui.qs.QSDetailItems xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent"
+    android:paddingTop="16dp"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp">
 
     <LinearLayout
         android:id="@android:id/list"

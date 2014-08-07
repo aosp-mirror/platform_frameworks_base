@@ -25,16 +25,17 @@
         android:orientation="vertical"
         android:gravity="top|center_horizontal"
         android:paddingTop="16dp"
-        android:paddingBottom="20dp"
+        android:minHeight="112dp"
         android:clipChildren="false"
         android:clipToPadding="false"
+        android:background="@drawable/ripple_drawable"
         systemui:activatedFontFamily="sans-serif-medium">
 
     <com.android.systemui.statusbar.phone.UserAvatarView
             android:id="@+id/user_picture"
             android:layout_width="@dimen/max_avatar_size"
             android:layout_height="@dimen/max_avatar_size"
-            android:layout_marginBottom="12dp"
+            android:layout_marginBottom="10dp"
             systemui:frameWidth="2dp"
             systemui:framePadding="6dp"
             systemui:activeFrameColor="@color/current_user_border_color"/>
