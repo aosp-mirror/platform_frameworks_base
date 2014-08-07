@@ -1,0 +1,298 @@
+page.title=Updating Your Security Provider to Protect Against SSL Exploits
+page.tags="network","certificates"
+
+page.article=true
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>In this document</h2>
+<ol class="nolist">
+  <li><a href="#patching">Patching the Security Provider with
+      ProviderInstaller</a></li>
+  <li><a href="#example_sync">Patching Synchronously</a></li>
+  <li><a href="#example_async">Patching Asynchronously</a></li>
+
+</ol>
+
+
+<h2>See also</h2>
+<ul>
+  <li><a href="{@docRoot}google/play-services/">Google Play Services</a></li>
+  <li><a href="https://www.openssl.org/news/secadv_20140605.txt">OpenSSL
+   Security Advisory [05 Jun 2014]: SSL/TLS MITM vulnerability
+   (CVE-2014-0224)</a></li>
+  <li><a href="http://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2014-0224">
+    Vulnerability Summary for CVE-2014-0224</a></li>
+</ul>
+</div>
+</div>
+
+
+<p> Android relies on a security {@link java.security.Provider Provider} to
+provide secure network communications. However, from time to time,
+vulnerabilities are found in the default security provider. To protect against
+these vulnerabilities, <a href="{@docRoot}google/play-services/">Google Play
+services</a> provides a way to automatically update a device's security provider
+to protect against known exploits. By calling Google Play services methods, your
+app can ensure that it's running on a device that has the latest updates to
+protect against known exploits.</p>
+
+<p>For example, a vulnerability was discovered in OpenSSL
+(<a href="http://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2014-0224">CVE-2014-0224</a>)
+that can leave apps open to a "man-in-the-middle" attack that decrypts
+secure traffic without either side knowing. With Google Play services version
+5.0, a fix is available, but apps must ensure that this fix is installed. By
+using the Google Play services methods, your app can ensure that it's running
+on a device that's secured against that attack.</p>
+
+<p class="caution"><strong>Caution: </strong>Updating a device's security {@link
+java.security.Provider Provider} does <em>not</em> update {@link
+android.net.SSLCertificateSocketFactory
+android.net.SSLCertificateSocketFactory}. Rather than using this class, we
+encourage app developers to use high-level methods for interacting with
+cryptography. Most apps can use APIs like {@link
+javax.net.ssl.HttpsURLConnection}, {@link org.apache.http.client.HttpClient},
+and {@link android.net.http.AndroidHttpClient} without needing to set a custom
+{@link javax.net.ssl.TrustManager} or create an {@link
+android.net.SSLCertificateSocketFactory}.</p>
+
+<h2 id="patching">Patching the Security Provider with ProviderInstaller</h2>
+
+<p>To update a device's security provider, use the
+<a href="{@docRoot}reference/com/google/android/gms/security/ProviderInstaller.html">{@code ProviderInstaller}</a>
+class. You can verify that the security provider is up-to-date (and update it,
+if necessary) by calling
+that class's <a href="{@docRoot}reference/com/google/android/gms/security/ProviderInstaller.html##installIfNeeded(android.content.Context)">{@code installIfNeeded()}</a>
+(or <a href="{@docRoot}reference/com/google/android/gms/security/ProviderInstaller.html#installIfNeededAsync(android.content.Context, com.google.android.gms.security.ProviderInstaller.ProviderInstallListener)">{@code installIfNeededAsync()}</a>)
+method.</p>
+
+<p>When you call <a href="{@docRoot}reference/com/google/android/gms/security/ProviderInstaller.html##installIfNeeded(android.content.Context)">{@code installIfNeeded()}</a>, the
+<a href="{@docRoot}reference/com/google/android/gms/security/ProviderInstaller.html">{@code ProviderInstaller}</a>
+does the following:</p>
+
+<ul>
+  <li>If the device's {@link java.security.Provider Provider} is successfully
+    updated (or is already up-to-date), the method returns normally.</li>
+  <li>If the device's Google Play services library is out of date, the method
+    throws
+    <a href="{@docRoot}reference/com/google/android/gms/common/GooglePlayServicesRepairableException.html">{@code GooglePlayServicesRepairableException}</a>.
+    The app can then catch this exception and show
+    the user an appropriate dialog box to update Google Play services.</li>
+    <li>If a non-recoverable error occurs, the method throws
+    <a href="{@docRoot}reference/com/google/android/gms/common/GooglePlayServicesNotAvailableException.html">{@code GooglePlayServicesNotAvailableException}</a>
+    to indicate that it is unable to update the {@link java.security.Provider
+    Provider}. The app can then catch the exception and choose an appropriate
+    course of action, such as displaying the standard
+    <a href="{@docRoot}reference/com/google/android/gms/common/SupportErrorDialogFragment.html">fix-it flow diagram</a>.</li>
+</ul>
+
+<p>The
+<a href="{@docRoot}reference/com/google/android/gms/security/ProviderInstaller.html#installIfNeededAsync(android.content.Context, com.google.android.gms.security.ProviderInstaller.ProviderInstallListener)">{@code installIfNeededAsync()}</a>
+method behaves similarly, except that instead of
+throwing exceptions, it calls the appropriate callback method to indicate
+success or failure.</p>
+
+<p>If <a href="{@docRoot}reference/com/google/android/gms/security/ProviderInstaller.html##installIfNeeded(android.content.Context)">{@code installIfNeeded()}</a>
+needs to install a new {@link java.security.Provider Provider}, this can take
+anywhere from 30-50 milliseconds (on more recent devices) to 350 ms (on older
+devices). If the security provider is already up-to-date, the method takes a
+negligible amount of time. To avoid affecting user experience:</p>
+
+<ul>
+  <li>Call
+  <a href="{@docRoot}reference/com/google/android/gms/security/ProviderInstaller.html##installIfNeeded(android.content.Context)">{@code installIfNeeded()}</a>
+  from background networking threads immediately when the threads are loaded,
+  instead of waiting for the thread to try to use the network. (There's no harm
+  in calling the method multiple times, since it returns immediately if the
+  security provider doesn't need updating.)</li>
+
+  <li>If user experience will be affected by the thread blocking--for example,
+  if the call is from an activity in the UI thread--call the asynchronous
+  version of the method,
+  <a href="{@docRoot}reference/com/google/android/gms/security/ProviderInstaller.html#installIfNeededAsync(android.content.Context, com.google.android.gms.security.ProviderInstaller.ProviderInstallListener)">{@code installIfNeededAsync()}</a>.
+  (Of course, if you do this, you need to wait for the operation to finish
+  before you attempt any secure communications. The
+  <a href="{@docRoot}reference/com/google/android/gms/security/ProviderInstaller.html">{@code ProviderInstaller}</a>
+  calls your listener's <a href="{@docRoot}reference/com/google/android/gms/security/ProviderInstaller.ProviderInstallListener.html#onProviderInstalled()">{@code onProviderInstalled()}</a>
+  method to signal success.)</li>
+</ul>
+
+<p class="warning"><strong>Warning:</strong> If the
+<a href="{@docRoot}reference/com/google/android/gms/security/ProviderInstaller.html">{@code ProviderInstaller}</a>
+is unable to install an updated {@link java.security.Provider Provider},
+your device's security provider might be vulnerable  to known exploits. Your app
+should behave as if all HTTP communication is unencrypted.</p>
+
+<p>Once the {@link java.security.Provider Provider} is updated, all calls to
+security APIs (including SSL APIs) are routed through it.
+(However, this does not apply to  {@link android.net.SSLCertificateSocketFactory
+android.net.SSLCertificateSocketFactory}, which remains vulnerable to such
+exploits as
+<a href="http://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2014-0224">CVE-2014-0224</a>.)</p>
+
+<h2 id="example_sync">Patching Synchronously</h2>
+
+<p>The simplest way to patch the security provider is to call the synchronous
+method <a href="{@docRoot}reference/com/google/android/gms/security/ProviderInstaller.html##installIfNeeded(android.content.Context)">{@code installIfNeeded()}</a>.
+This is appropriate if user experience won't be affected by the thread blocking
+while it waits for the operation to finish.</p>
+
+<p>For example, here's an implementation of a <a href="{@docRoot}training/sync-adapters">sync adapter</a> that updates the security provider. Since a sync
+adapter runs in the background, it's okay if the thread blocks while waiting
+for the security provider to be updated. The sync adapter calls
+<a href="{@docRoot}reference/com/google/android/gms/security/ProviderInstaller.html##installIfNeeded(android.content.Context)">{@code installIfNeeded()}</a> to
+update the security provider. If the method returns normally, the sync adapter
+knows the security provider is up-to-date. If the method throws an exception,
+the sync adapter can take appropriate action (such as prompting the user to
+update Google Play services).</p>
+
+<pre>/**
+ * Sample sync adapter using {&#64;link ProviderInstaller}.
+ */
+public class SyncAdapter extends AbstractThreadedSyncAdapter {
+
+  ...
+
+  // This is called each time a sync is attempted; this is okay, since the
+  // overhead is negligible if the security provider is up-to-date.
+  &#64;Override
+  public void onPerformSync(Account account, Bundle extras, String authority,
+      ContentProviderClient provider, SyncResult syncResult) {
+    try {
+      ProviderInstaller.installIfNeeded(getContext());
+    } catch (GooglePlayServicesRepairableException e) {
+
+      // Indicates that Google Play services is out of date, disabled, etc.
+
+      // Prompt the user to install/update/enable Google Play services.
+      GooglePlayServicesUtil.showErrorNotification(
+          e.getConnectionStatusCode(), getContext());
+
+      // Notify the SyncManager that a soft error occurred.
+      syncResult.stats.numIOExceptions++;
+      return;
+
+    } catch (GooglePlayServicesNotAvailableException e) {
+      // Indicates a non-recoverable error; the ProviderInstaller is not able
+      // to install an up-to-date Provider.
+
+      // Notify the SyncManager that a hard error occurred.
+      syncResult.stats.numAuthExceptions++;
+      return;
+    }
+
+    // If this is reached, you know that the provider was already up-to-date,
+    // or was successfully updated.
+  }
+}</pre>
+
+<h2 id="example_async">Patching Asynchronously</h2>
+
+<p>Updating the security provider can take as much as 350 milliseconds (on
+older devices). If you're doing the update on a thread that directly affects
+user experience, such as the UI thread, you don't want to make a synchronous
+call to update the provider, since that can result in the app or device
+freezing until the operation finishes. Instead, you should use the asynchronous
+method
+<a href="{@docRoot}reference/com/google/android/gms/security/ProviderInstaller.html#installIfNeededAsync(android.content.Context, com.google.android.gms.security.ProviderInstaller.ProviderInstallListener)">{@code installIfNeededAsync()}</a>.
+That method indicates its success or failure by calling callbacks.</p>
+
+<p>For example, here's some code that updates the security provider in an
+activity in the UI thread. The activity calls <a href="{@docRoot}reference/com/google/android/gms/security/ProviderInstaller.html#installIfNeededAsync(android.content.Context, com.google.android.gms.security.ProviderInstaller.ProviderInstallListener)">{@code installIfNeededAsync()}</a>
+to update the provider, and designates itself as the listener to receive success
+or failure notifications. If the security provider is up-to-date or is
+successfully updated, the activity's
+<a href="{@docRoot}reference/com/google/android/gms/security/ProviderInstaller.ProviderInstallListener.html#onProviderInstalled()">{@code onProviderInstalled()}</a>
+method is called, and the activity knows communication is secure. If the
+provider cannot be updated, the activity's
+<a href="{@docRoot}reference/com/google/android/gms/security/ProviderInstaller.ProviderInstallListener.html#onProviderInstallFailed(int, android.content.Intent)">{@code onProviderInstallFailed()}</a>
+method is called, and the activity can take appropriate action (such as
+prompting the user to update Google Play services).</p>
+
+<pre>/**
+ * Sample activity using {&#64;link ProviderInstaller}.
+ */
+public class MainActivity extends Activity
+    implements ProviderInstaller.ProviderInstallListener {
+
+  private static final int ERROR_DIALOG_REQUEST_CODE = 1;
+
+  private boolean mRetryProviderInstall;
+
+  //Update the security provider when the activity is created.
+  &#64;Override
+  protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    ProviderInstaller.installIfNeededAsync(this, this);
+  }
+
+  /**
+   * This method is only called if the provider is successfully updated
+   * (or is already up-to-date).
+   */
+  &#64;Override
+  protected void onProviderInstalled() {
+    // Provider is up-to-date, app can make secure network calls.
+  }
+
+  /**
+   * This method is called if updating fails; the error code indicates
+   * whether the error is recoverable.
+   */
+  &#64;Override
+  protected void onProviderInstallFailed(int errorCode, Intent recoveryIntent) {
+    if (GooglePlayServicesUtil.isUserRecoverableError(errorCode)) {
+      // Recoverable error. Show a dialog prompting the user to
+      // install/update/enable Google Play services.
+      GooglePlayServicesUtil.showErrorDialogFragment(
+          errorCode,
+          this,
+          ERROR_DIALOG_REQUEST_CODE,
+          new DialogInterface.OnCancelListener() {
+            &#64;Override
+            public void onCancel(DialogInterface dialog) {
+              // The user chose not to take the recovery action
+              onProviderInstallerNotAvailable();
+            }
+          });
+    } else {
+      // Google Play services is not available.
+      onProviderInstallerNotAvailable();
+    }
+  }
+
+  &#64;Override
+  protected void onActivityResult(int requestCode, int resultCode,
+      Intent data) {
+    super.onActivityResult(requestCode, resultCode, data);
+    if (requestCode == ERROR_DIALOG_REQUEST_CODE) {
+      // Adding a fragment via GooglePlayServicesUtil.showErrorDialogFragment
+      // before the instance state is restored throws an error. So instead,
+      // set a flag here, which will cause the fragment to delay until
+      // onPostResume.
+      mRetryProviderInstall = true;
+    }
+  }
+
+  /**
+   * On resume, check to see if we flagged that we need to reinstall the
+   * provider.
+   */
+  &#64;Override
+  protected void onPostResume() {
+    super.onPostResult();
+    if (mRetryProviderInstall) {
+      // We can now safely retry installation.
+      ProviderInstall.installIfNeededAsync(this, this);
+    }
+    mRetryProviderInstall = false;
+  }
+
+  private void onProviderInstallerNotAvailable() {
+    // This is reached if the provider cannot be updated for some reason.
+    // App should consider all HTTP communication to be vulnerable, and take
+    // appropriate action.
+  }
+}
+</pre>
