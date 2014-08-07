@@ -161,6 +161,8 @@ public class AlwaysOnHotwordDetector {
     private static final int MSG_AVAILABILITY_CHANGED = 1;
     private static final int MSG_HOTWORD_DETECTED = 2;
     private static final int MSG_DETECTION_ERROR = 3;
+    private static final int MSG_DETECTION_PAUSE = 4;
+    private static final int MSG_DETECTION_RESUME = 5;
 
     private final String mText;
     private final String mLocale;
@@ -239,6 +241,18 @@ public class AlwaysOnHotwordDetector {
          * Called when the detection fails due to an error.
          */
         void onError();
+        /**
+         * Called when the recognition is paused temporarily for some reason.
+         * This is an informational callback, and the clients shouldn't be doing anything here
+         * except showing an indication on their UI if they have to.
+         */
+        void onRecognitionPaused();
+        /**
+         * Called when the recognition is resumed after it was temporarily paused.
+         * This is an informational callback, and the clients shouldn't be doing anything here
+         * except showing an indication on their UI if they have to.
+         */
+        void onRecognitionResumed();
     }
 
     /**
@@ -508,6 +522,18 @@ public class AlwaysOnHotwordDetector {
             Slog.i(TAG, "onError: " + status);
             mHandler.sendEmptyMessage(MSG_DETECTION_ERROR);
         }
+
+        @Override
+        public void onRecognitionPaused() {
+            Slog.i(TAG, "onRecognitionPaused");
+            mHandler.sendEmptyMessage(MSG_DETECTION_PAUSE);
+        }
+
+        @Override
+        public void onRecognitionResumed() {
+            Slog.i(TAG, "onRecognitionResumed");
+            mHandler.sendEmptyMessage(MSG_DETECTION_RESUME);
+        }
     }
 
     class MyHandler extends Handler {
@@ -529,6 +555,12 @@ public class AlwaysOnHotwordDetector {
                     break;
                 case MSG_DETECTION_ERROR:
                     mExternalCallback.onError();
+                    break;
+                case MSG_DETECTION_PAUSE:
+                    mExternalCallback.onRecognitionPaused();
+                    break;
+                case MSG_DETECTION_RESUME:
+                    mExternalCallback.onRecognitionResumed();
                     break;
                 default:
                     super.handleMessage(msg);
