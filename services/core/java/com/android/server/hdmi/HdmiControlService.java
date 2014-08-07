@@ -517,13 +517,20 @@ public final class HdmiControlService extends SystemService {
     @ServiceThreadOnly
     void sendCecCommand(HdmiCecMessage command, @Nullable SendMessageCallback callback) {
         assertRunOnServiceThread();
-        mCecController.sendCommand(command, callback);
+        if (mMessageValidator.isValid(command)) {
+            mCecController.sendCommand(command, callback);
+        } else {
+            Slog.e(TAG, "Invalid message type:" + command);
+            if (callback != null) {
+                callback.onSendCompleted(Constants.SEND_RESULT_FAILURE);
+            }
+        }
     }
 
     @ServiceThreadOnly
     void sendCecCommand(HdmiCecMessage command) {
         assertRunOnServiceThread();
-        mCecController.sendCommand(command, null);
+        sendCecCommand(command, null);
     }
 
     /**
