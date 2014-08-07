@@ -26,6 +26,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.net.Uri;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -474,7 +475,8 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                 Uri.fromParts("package", baseIntent.getComponent().getPackageName(), null));
         intent.setComponent(intent.resolveActivity(getContext().getPackageManager()));
         TaskStackBuilder.create(getContext())
-                .addNextIntentWithParentStack(intent).startActivities();
+                .addNextIntentWithParentStack(intent).startActivities(null,
+                new UserHandle(t.userId));
     }
 
     @Override
