@@ -52,7 +52,7 @@ import java.util.Locale;
 /**
  * A delegate for picking up a date (day / month / year).
  */
-class DatePickerDelegate extends DatePicker.AbstractDatePickerDelegate implements
+class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate implements
         View.OnClickListener, DatePickerController {
 
     private static final int UNINITIALIZED = -1;
@@ -113,7 +113,7 @@ class DatePickerDelegate extends DatePicker.AbstractDatePickerDelegate implement
 
     private HashSet<OnDateChangedListener> mListeners = new HashSet<OnDateChangedListener>();
 
-    public DatePickerDelegate(DatePicker delegator, Context context, AttributeSet attrs,
+    public DatePickerCalendarDelegate(DatePicker delegator, Context context, AttributeSet attrs,
             int defStyleAttr, int defStyleRes) {
         super(delegator, context);
 
