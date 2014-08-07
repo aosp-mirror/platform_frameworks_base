@@ -1074,39 +1074,50 @@ public final class TvInputManagerService extends SystemService {
             try {
                 synchronized (mLock) {
                     UserState userState = getUserStateLocked(resolvedUserId);
-                    if (sessionToken == userState.mainSessionToken) {
+                    if (userState.mainSessionToken == sessionToken) {
                         return;
                     }
 
-                    SessionState sessionState = getSessionStateLocked(sessionToken, callingUid,
-                            resolvedUserId);
-                    ServiceState serviceState = getServiceStateLocked(
-                            sessionState.mInfo.getComponent(), resolvedUserId);
-                    ITvInputSession session = getSessionLocked(sessionState);
+                    SessionState newMainSessionState = getSessionStateLocked(
+                            sessionToken, callingUid, resolvedUserId);
+                    if (newMainSessionState.mHardwareSessionToken != null) {
+                        newMainSessionState = getSessionStateLocked(
+                                newMainSessionState.mHardwareSessionToken,
+                                Process.SYSTEM_UID, resolvedUserId);
+                    }
+                    ServiceState newMainServiceState = getServiceStateLocked(
+                            newMainSessionState.mInfo.getComponent(), resolvedUserId);
+                    ITvInputSession newMainSession = getSessionLocked(newMainSessionState);
 
-                    ServiceState prevMainServiceState = null;
-                    ITvInputSession prevMainSession = null;
+                    ServiceState oldMainServiceState = null;
+                    ITvInputSession oldMainSession = null;
                     if (userState.mainSessionToken != null) {
-                        SessionState prevMainSessionState = getSessionStateLocked(
+                        SessionState oldMainSessionState = getSessionStateLocked(
                                 userState.mainSessionToken, Process.SYSTEM_UID, resolvedUserId);
-                        prevMainServiceState = getServiceStateLocked(
-                                prevMainSessionState.mInfo.getComponent(), resolvedUserId);
-                        prevMainSession = getSessionLocked(prevMainSessionState);
+                        if (oldMainSessionState.mHardwareSessionToken != null) {
+                            oldMainSessionState = getSessionStateLocked(
+                                    oldMainSessionState.mHardwareSessionToken,
+                                    Process.SYSTEM_UID, resolvedUserId);
+                        }
+                        oldMainServiceState = getServiceStateLocked(
+                                oldMainSessionState.mInfo.getComponent(), resolvedUserId);
+                        oldMainSession = getSessionLocked(oldMainSessionState);
                     }
 
                     userState.mainSessionToken = sessionToken;
 
-                    // Inform the new main session first. See {@link TvInputService#onSetMain}.
-                    if (serviceState.mIsHardware) {
+                    // Inform the new main session first.
+                    // See {@link TvInputService#onSetMainSession}.
+                    if (newMainServiceState.mIsHardware) {
                         try {
-                            session.setMainSession(true);
+                            newMainSession.setMainSession(true);
                         } catch (RemoteException e) {
                             Slog.e(TAG, "error in setMainSession", e);
                         }
                     }
-                    if (prevMainSession != null && prevMainServiceState.mIsHardware) {
+                    if (oldMainSession != null && oldMainServiceState.mIsHardware) {
                         try {
-                            prevMainSession.setMainSession(false);
+                            oldMainSession.setMainSession(false);
                         } catch (RemoteException e) {
                             Slog.e(TAG, "error in setMainSession", e);
                         }
@@ -1672,6 +1683,7 @@ public final class TvInputManagerService extends SystemService {
                     }
                     pw.decreaseIndent();
 
+                    pw.println("mainSessionToken: " + userState.mainSessionToken);
                     pw.decreaseIndent();
                 }
             }
