@@ -82,4 +82,5 @@ interface ITvInputManager {
     List<TvStreamConfig> getAvailableTvStreamConfigList(in String inputId, int userId);
     boolean captureFrame(in String inputId, in Surface surface, in TvStreamConfig config,
             int userId);
+    boolean isSingleSessionActive(int userId);
 }
