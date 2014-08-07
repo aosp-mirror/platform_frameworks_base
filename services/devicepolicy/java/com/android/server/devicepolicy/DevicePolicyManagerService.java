@@ -4718,6 +4718,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             DevicePolicyData policy = getUserData(profileId);
             ActiveAdmin admin = policy.mAdminMap.get(ownerComponent);
 
+            if (admin == null) {
+                return Collections.emptyList();
+            }
+
             if (admin.crossProfileWidgetProviders == null
                     || admin.crossProfileWidgetProviders.isEmpty()) {
                 return Collections.emptyList();
