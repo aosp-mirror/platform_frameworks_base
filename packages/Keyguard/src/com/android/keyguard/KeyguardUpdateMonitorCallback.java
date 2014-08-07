@@ -179,6 +179,11 @@ public class KeyguardUpdateMonitorCallback {
     public void onTrustManagedChanged(int userId) { }
 
     /**
+     * Called when the user has proved to a trust agent that they want to use the device.
+     */
+    public void onTrustInitiatedByUser(int userId) { }
+
+    /**
      * Called when a fingerprint is recognized.
      * @param userId
      */
