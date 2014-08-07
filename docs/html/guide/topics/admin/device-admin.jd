@@ -28,12 +28,6 @@ page.tags="devicepolicymanager","policy","security"
       <li>{@link android.app.admin.DevicePolicyManager}</li>
       <li>{@link android.app.admin.DeviceAdminInfo}</li>
     </ol>
-    <h2>Related samples</h2>
-    <ol>
-      <li><a
-href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/DeviceAdminSample.html">
-DeviceAdminSample</a></li>
-</ol>
 </div>
 </div>
 
@@ -232,18 +226,12 @@ Administration API lets you do the following:</p> <ul>
 
 <h2 id="sample">Sample Application</h2>
 
-<p>The examples used in this document are based on the <a
-href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/DeviceAdminSample.html">
-Device Administration API
-sample</a>, which is included in the SDK samples. For information on downloading and
-installing the SDK samples, see <a
-href="{@docRoot}resources/samples/get.html">
-Getting the Samples</a>. Here is the  <a
-href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/DeviceAdminSample.html">
-complete code</a> for
-the sample. </p>
-<p>The
-sample application offers a demo of device admin features. It presents users
+<p>The examples used in this document are based on the Device Administration API
+sample, which is included in the SDK samples (available through the
+Android SDK Manager) and located on your system as 
+<code>&lt;sdk_root&gt;/ApiDemos/app/src/main/java/com/example/android/apis/app/DeviceAdminSample.java</code>.</p>
+
+<p>The sample application offers a demo of device admin features. It presents users
 with a user interface that lets them enable the device admin application. Once
 they've enabled the application, they can use the buttons in the user interface
 to do the following:</p>
@@ -676,7 +664,8 @@ mDPM.setMaximumTimeToLock(mDeviceAdminSample, timeMs);
 <p>You can also programmatically tell the device to lock immediately:</p>
 <pre>
 DevicePolicyManager mDPM;
-mDPM.lockNow();</pre>
+mDPM.lockNow();
+</pre>
 
 
 
@@ -692,12 +681,12 @@ wiped after a specific number of failed password attempts.</p>
 <pre>
 DevicePolicyManager mDPM;
 mDPM.wipeData(0);</pre>
-<p>The {@link android.app.admin.DevicePolicyManager#wipeData wipeData()} method takes as its parameter a bit mask of
-additional options. Currently the value must be 0. </p>
+<p>The {@link android.app.admin.DevicePolicyManager#wipeData wipeData()} method takes as its
+  parameter a bit mask of additional options. Currently the value must be 0. </p>
 
 <h4>Disable camera</h4>
 <p>Beginning with Android 4.0, you can disable the camera. Note that this doesn't have to be a permanent disabling. The camera can be enabled/disabled dynamically based on context, time, and so on. </p>
-<p>You control whether the camera is disabled by using the 
+<p>You control whether the camera is disabled by using the
 {@link android.app.admin.DevicePolicyManager#setCameraDisabled(android.content.ComponentName, boolean) setCameraDisabled()} method. For example, this snippet sets the camera to be enabled or disabled based on a checkbox setting:</p>
 
 <pre>private CheckBoxPreference mDisableCameraCheckbox;
@@ -708,8 +697,8 @@ mDPM.setCameraDisabled(mDeviceAdminSample, mDisableCameraCheckbox.isChecked());<
 </pre>
 
 
-<h4 id=storage">Storage encryption</h4>
-<p>Beginning with Android 3.0, you can use the 
+<h4 id="storage">Storage encryption</h4>
+<p>Beginning with Android 3.0, you can use the
 {@link android.app.admin.DevicePolicyManager#setStorageEncryption(android.content.ComponentName,boolean) setStorageEncryption()} 
 method to set a policy requiring encryption of the storage area, where supported.</p>
 
@@ -722,5 +711,5 @@ ComponentName mDeviceAdminSample;
 mDPM.setStorageEncryption(mDeviceAdminSample, true);
 </pre>
 <p>
-See the <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/DeviceAdminSample.html"> Device Administration API sample</a> for a complete
-example of how to enable storage encryption.</p>
+See the Device Administration API sample for a complete example of how to enable storage encryption.
+</p>
