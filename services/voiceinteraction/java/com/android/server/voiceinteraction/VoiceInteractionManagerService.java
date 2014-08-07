@@ -432,6 +432,7 @@ public class VoiceInteractionManagerService extends SystemService {
                 }
                 mImpl.dumpLocked(fd, pw, args);
             }
+            mSoundTriggerHelper.dump(fd, pw, args);
         }
 
         class SettingsObserver extends ContentObserver {
