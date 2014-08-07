@@ -28,7 +28,7 @@ import android.util.Slog;
  * <p>
  * Package-private, accessed by {@link HdmiControlService} only.
  */
-final class OneTouchPlayAction extends FeatureAction {
+final class OneTouchPlayAction extends HdmiCecFeatureAction {
     private static final String TAG = "OneTouchPlayAction";
 
     // State in which the action is waiting for <Report Power Status>. In normal situation

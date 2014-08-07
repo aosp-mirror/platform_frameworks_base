@@ -102,7 +102,7 @@ abstract class HdmiCecLocalDevice {
 
     // A collection of FeatureAction.
     // Note that access to this collection should happen in service thread.
-    private final LinkedList<FeatureAction> mActions = new LinkedList<>();
+    private final LinkedList<HdmiCecFeatureAction> mActions = new LinkedList<>();
 
     private final Handler mHandler = new Handler () {
         @Override
@@ -250,7 +250,7 @@ abstract class HdmiCecLocalDevice {
     @ServiceThreadOnly
     private boolean dispatchMessageToAction(HdmiCecMessage message) {
         assertRunOnServiceThread();
-        for (FeatureAction action : mActions) {
+        for (HdmiCecFeatureAction action : mActions) {
             if (action.processCommand(message)) {
                 return true;
             }
@@ -486,7 +486,7 @@ abstract class HdmiCecLocalDevice {
     }
 
     @ServiceThreadOnly
-    void addAndStartAction(final FeatureAction action) {
+    void addAndStartAction(final HdmiCecFeatureAction action) {
         assertRunOnServiceThread();
         if (mService.isPowerStandbyOrTransient()) {
             Slog.w(TAG, "Skip the action during Standby: " + action);
@@ -498,9 +498,9 @@ abstract class HdmiCecLocalDevice {
 
     // See if we have an action of a given type in progress.
     @ServiceThreadOnly
-    <T extends FeatureAction> boolean hasAction(final Class<T> clazz) {
+    <T extends HdmiCecFeatureAction> boolean hasAction(final Class<T> clazz) {
         assertRunOnServiceThread();
-        for (FeatureAction action : mActions) {
+        for (HdmiCecFeatureAction action : mActions) {
             if (action.getClass().equals(clazz)) {
                 return true;
             }
@@ -510,10 +510,10 @@ abstract class HdmiCecLocalDevice {
 
     // Returns all actions matched with given class type.
     @ServiceThreadOnly
-    <T extends FeatureAction> List<T> getActions(final Class<T> clazz) {
+    <T extends HdmiCecFeatureAction> List<T> getActions(final Class<T> clazz) {
         assertRunOnServiceThread();
         List<T> actions = Collections.<T>emptyList();
-        for (FeatureAction action : mActions) {
+        for (HdmiCecFeatureAction action : mActions) {
             if (action.getClass().equals(clazz)) {
                 if (actions.isEmpty()) {
                     actions = new ArrayList<T>();
@@ -525,12 +525,12 @@ abstract class HdmiCecLocalDevice {
     }
 
     /**
-     * Remove the given {@link FeatureAction} object from the action queue.
+     * Remove the given {@link HdmiCecFeatureAction} object from the action queue.
      *
-     * @param action {@link FeatureAction} to remove
+     * @param action {@link HdmiCecFeatureAction} to remove
      */
     @ServiceThreadOnly
-    void removeAction(final FeatureAction action) {
+    void removeAction(final HdmiCecFeatureAction action) {
         assertRunOnServiceThread();
         action.finish(false);
         mActions.remove(action);
@@ -539,19 +539,19 @@ abstract class HdmiCecLocalDevice {
 
     // Remove all actions matched with the given Class type.
     @ServiceThreadOnly
-    <T extends FeatureAction> void removeAction(final Class<T> clazz) {
+    <T extends HdmiCecFeatureAction> void removeAction(final Class<T> clazz) {
         assertRunOnServiceThread();
         removeActionExcept(clazz, null);
     }
 
     // Remove all actions matched with the given Class type besides |exception|.
     @ServiceThreadOnly
-    <T extends FeatureAction> void removeActionExcept(final Class<T> clazz,
-            final FeatureAction exception) {
+    <T extends HdmiCecFeatureAction> void removeActionExcept(final Class<T> clazz,
+            final HdmiCecFeatureAction exception) {
         assertRunOnServiceThread();
-        Iterator<FeatureAction> iter = mActions.iterator();
+        Iterator<HdmiCecFeatureAction> iter = mActions.iterator();
         while (iter.hasNext()) {
-            FeatureAction action = iter.next();
+            HdmiCecFeatureAction action = iter.next();
             if (action != exception && action.getClass().equals(clazz)) {
                 action.finish(false);
                 iter.remove();
@@ -698,9 +698,9 @@ abstract class HdmiCecLocalDevice {
 
         // If all actions are not cleared in DEVICE_CLEANUP_TIMEOUT, enforce to finish them.
         // onCleard will be called at the last action's finish method.
-        Iterator<FeatureAction> iter = mActions.iterator();
+        Iterator<HdmiCecFeatureAction> iter = mActions.iterator();
         while (iter.hasNext()) {
-            FeatureAction action = iter.next();
+            HdmiCecFeatureAction action = iter.next();
             action.finish(false);
             iter.remove();
         }
