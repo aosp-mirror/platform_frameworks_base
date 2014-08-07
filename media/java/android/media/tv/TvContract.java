@@ -20,6 +20,7 @@ import android.annotation.SystemApi;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.ContentUris;
+import android.media.tv.TvContract.Programs;
 import android.net.Uri;
 import android.provider.BaseColumns;
 import android.util.ArraySet;
@@ -684,10 +685,11 @@ public final class TvContract {
          * The flag indicating whether this TV channel is searchable or not.
          * <p>
          * In some regions, it is not allowed to surface search results for a given channel without
-         * broadcaster's consent. This is used to impose such restriction. A value of 1 indicates
-         * the channel is searchable and can be included in search results, a value of 0 indicates
-         * the channel and its TV programs are hidden from search. If not specified, this value is
-         * set to 1 (searchable) by default.
+         * broadcaster's consent. This is used to impose such restriction. Channels marked with
+         * "not searchable" cannot be used by other services except for the system service that
+         * shows the TV content. A value of 1 indicates the channel is searchable and can be
+         * included in search results, a value of 0 indicates the channel and its TV programs are
+         * hidden from search. If not specified, this value is set to 1 (searchable) by default.
          * </p><p>
          * Type: INTEGER (boolean)
          * </p>
