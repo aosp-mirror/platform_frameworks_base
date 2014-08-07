@@ -32,7 +32,6 @@ import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.UserHandle;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.widget.RemoteViews;
@@ -57,7 +56,6 @@ public class AppWidgetHost {
     private DisplayMetrics mDisplayMetrics;
 
     Context mContext;
-    String mPackageName;
     Handler mHandler;
     int mHostId;
     Callbacks mCallbacks = new Callbacks();
@@ -154,10 +152,7 @@ public class AppWidgetHost {
         int[] updatedIds;
         ArrayList<RemoteViews> updatedViews = new ArrayList<RemoteViews>();
         try {
-            if (mPackageName == null) {
-                mPackageName = mContext.getPackageName();
-            }
-            updatedIds = sService.startListening(mCallbacks, mPackageName, mHostId,
+            updatedIds = sService.startListening(mCallbacks, mContext.getPackageName(), mHostId,
                     updatedViews);
         }
         catch (RemoteException e) {
@@ -176,7 +171,7 @@ public class AppWidgetHost {
      */
     public void stopListening() {
         try {
-            sService.stopListening(mPackageName, mHostId);
+            sService.stopListening(mContext.getPackageName(), mHostId);
         }
         catch (RemoteException e) {
             throw new RuntimeException("system server dead?", e);
@@ -194,10 +189,7 @@ public class AppWidgetHost {
      */
     public int allocateAppWidgetId() {
         try {
-            if (mPackageName == null) {
-                mPackageName = mContext.getPackageName();
-            }
-            return sService.allocateAppWidgetId(mPackageName, mHostId);
+            return sService.allocateAppWidgetId(mContext.getPackageName(), mHostId);
         }
         catch (RemoteException e) {
             throw new RuntimeException("system server dead?", e);
@@ -326,7 +318,7 @@ public class AppWidgetHost {
         }
         RemoteViews views;
         try {
-            views = sService.getAppWidgetViews(mPackageName, appWidgetId);
+            views = sService.getAppWidgetViews(mContext.getPackageName(), appWidgetId);
         } catch (RemoteException e) {
             throw new RuntimeException("system server dead?", e);
         }
