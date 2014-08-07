@@ -225,8 +225,7 @@ com.android.support:gridlayout-v7:18.0.+
 
 <p>This library provides {@link android.support.v7.media.MediaRouter}, {@link
 android.support.v7.media.MediaRouteProvider}, and related media classes that
-support the <a href="https://developers.google.com/cast/">Google Cast
-developer preview</a>. </p>
+support <a href="https://developers.google.com/cast/docs/android_sender">Google Cast</a>. </p>
 
 <p>In general, the APIs in the v7 mediarouter library provide a means of
 controlling the routing of media channels and streams from the current device to
@@ -258,9 +257,8 @@ com.android.support:mediarouter-v7:18.0.+
 
 <p class="caution">The v7 mediarouter library APIs introduced in Support Library
 r18 are subject to change in later revisions of the Support Library. At this
-time, we recommend using the library only in connection with the <a
-href="https://developers.google.com/cast/">Google Cast
-developer preview</a>. </p>
+time, we recommend using the library only in connection with <a
+href="https://developers.google.com/cast/docs/android_sender">Google Cast</a>. </p>
 
 
 <h2 id="v8">v8 Support Library</h2>
