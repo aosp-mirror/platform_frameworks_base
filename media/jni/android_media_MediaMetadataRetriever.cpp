@@ -33,6 +33,7 @@
 #include "android_media_Utils.h"
 #include "android_util_Binder.h"
 
+#include "android/graphics/GraphicsJNI.h"
 
 using namespace android;
 
@@ -255,7 +256,7 @@ static jobject android_media_MediaMetadataRetriever_getFrameAtTime(JNIEnv *env, 
     jobject config = env->CallStaticObjectMethod(
                         fields.configClazz,
                         fields.createConfigMethod,
-                        SkBitmap::kRGB_565_Config);
+                        GraphicsJNI::colorTypeToLegacyBitmapConfig(kRGB_565_SkColorType));
 
     uint32_t width, height;
     bool swapWidthAndHeight = false;
