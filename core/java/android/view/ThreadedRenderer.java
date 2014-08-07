@@ -276,12 +276,12 @@ public class ThreadedRenderer extends HardwareRenderer {
         if (mRootNodeNeedsUpdate || !mRootNode.isValid()) {
             HardwareCanvas canvas = mRootNode.start(mSurfaceWidth, mSurfaceHeight);
             try {
-                canvas.save();
+                final int saveCount = canvas.save();
                 canvas.translate(mInsetLeft, mInsetTop);
                 callbacks.onHardwarePreDraw(canvas);
                 canvas.drawRenderNode(view.getDisplayList());
                 callbacks.onHardwarePostDraw(canvas);
-                canvas.restore();
+                canvas.restoreToCount(saveCount);
                 mRootNodeNeedsUpdate = false;
             } finally {
                 mRootNode.end(canvas);
