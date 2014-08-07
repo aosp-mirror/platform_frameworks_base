@@ -15,6 +15,8 @@
  */
 package android.security;
 
+import android.content.pm.ParceledListSlice;
+
 /**
  * Caller is required to ensure that {@link KeyStore#unlock
  * KeyStore.unlock} was successful.
@@ -32,6 +34,11 @@ interface IKeyChainService {
     // APIs used by Settings
     boolean deleteCaCertificate(String alias);
     boolean reset();
+    ParceledListSlice getUserCaAliases();
+    ParceledListSlice getSystemCaAliases();
+    boolean containsCaAlias(String alias);
+    byte[] getEncodedCaCertificate(String alias, boolean includeDeletedSystem);
+    List<String> getCaCertificateChainAliases(String rootAlias, boolean includeDeletedSystem);
 
     // APIs used by KeyChainActivity
     void setGrant(int uid, String alias, boolean value);
