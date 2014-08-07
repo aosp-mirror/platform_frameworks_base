@@ -44,6 +44,7 @@ import com.android.systemui.statusbar.GestureRecorder;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
 import com.android.systemui.statusbar.MirrorView;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.stack.StackStateAnimator;
 
@@ -62,6 +63,7 @@ public class NotificationPanelView extends PanelView implements
 
     private KeyguardAffordanceHelper mAfforanceHelper;
     private StatusBarHeaderView mHeader;
+    private KeyguardUserSwitcher mKeyguardUserSwitcher;
     private KeyguardStatusBarView mKeyguardStatusBar;
     private View mQsContainer;
     private QSPanel mQsPanel;
@@ -225,11 +227,18 @@ public class NotificationPanelView extends PanelView implements
             mHeader.post(mUpdateHeader);
         }
 
-        lp = (FrameLayout.LayoutParams) mNotificationContainerParent.getLayoutParams();
+        lp = (FrameLayout.LayoutParams) mNotificationStackScroller.getLayoutParams();
         if (lp.width != panelWidth) {
             lp.width = panelWidth;
             lp.gravity = panelGravity;
-            mNotificationContainerParent.setLayoutParams(lp);
+            mNotificationStackScroller.setLayoutParams(lp);
+        }
+
+        lp = (FrameLayout.LayoutParams) mScrollView.getLayoutParams();
+        if (lp.width != panelWidth) {
+            lp.width = panelWidth;
+            lp.gravity = panelGravity;
+            mScrollView.setLayoutParams(lp);
         }
     }
 
@@ -939,6 +948,9 @@ public class NotificationPanelView extends PanelView implements
                 && !mStackScrollerOverscrolling && mQsScrimEnabled
                         ? View.VISIBLE
                         : View.INVISIBLE);
+        if (mKeyguardUserSwitcher != null && mQsExpanded && !mStackScrollerOverscrolling) {
+            mKeyguardUserSwitcher.hide();
+        }
     }
 
     private void setQsExpansion(float height) {
@@ -1702,6 +1714,10 @@ public class NotificationPanelView extends PanelView implements
         if (changed) {
             updateQsState();
         }
+    }
+
+    public void setKeyguardUserSwitcher(KeyguardUserSwitcher keyguardUserSwitcher) {
+        mKeyguardUserSwitcher = keyguardUserSwitcher;
     }
 
     private final Runnable mUpdateHeader = new Runnable() {
