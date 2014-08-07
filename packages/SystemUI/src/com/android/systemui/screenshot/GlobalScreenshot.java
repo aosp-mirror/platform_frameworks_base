@@ -429,6 +429,9 @@ class GlobalScreenshot {
         try {
             panelWidth = r.getDimensionPixelSize(R.dimen.notification_panel_width);
         } catch (Resources.NotFoundException e) {
+        }
+        if (panelWidth <= 0) {
+            // includes notification_panel_width==match_parent (-1)
             panelWidth = mDisplayMetrics.widthPixels;
         }
         mPreviewWidth = panelWidth;
