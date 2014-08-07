@@ -1748,6 +1748,16 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     @Override
+    public void flushNetworkDnsCache(int netId) {
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+        try {
+            mConnector.execute("resolver", "flushnet", netId);
+        } catch (NativeDaemonConnectorException e) {
+            throw e.rethrowAsParcelableException();
+        }
+    }
+
+    @Override
     public void setFirewallEnabled(boolean enabled) {
         enforceSystemUid();
         try {
