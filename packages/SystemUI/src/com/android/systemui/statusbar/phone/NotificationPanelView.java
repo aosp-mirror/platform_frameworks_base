@@ -368,6 +368,7 @@ public class NotificationPanelView extends PanelView implements
         mUnlockIconActive = false;
         mAfforanceHelper.reset(true);
         closeQs();
+        mStatusBar.dismissPopups();
         mNotificationStackScroller.setOverScrollAmount(0f, true /* onTop */, false /* animate */,
                 true /* cancelAnimators */);
     }
