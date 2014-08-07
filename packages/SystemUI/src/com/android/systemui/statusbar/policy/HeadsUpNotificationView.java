@@ -70,6 +70,15 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
         if (DEBUG) Log.v(TAG, "create() " + mTouchSensitivityDelay);
     }
 
+    public void updateResources() {
+        if (mContentHolder != null) {
+            final LayoutParams lp = (LayoutParams) mContentHolder.getLayoutParams();
+            lp.width = getResources().getDimensionPixelSize(R.dimen.notification_panel_width);
+            lp.gravity = getResources().getInteger(R.integer.notification_panel_layout_gravity);
+            mContentHolder.setLayoutParams(lp);
+        }
+    }
+
     public void setBar(PhoneStatusBar bar) {
         mBar = bar;
     }
