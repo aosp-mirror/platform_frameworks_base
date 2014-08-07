@@ -20,8 +20,9 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.app.PackageDeleteObserver;
 import android.app.PackageInstallObserver;
-import android.app.PackageUninstallObserver;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.FileBridge;
 import android.os.Handler;
@@ -536,15 +537,25 @@ public class PackageInstaller {
     }
 
     /**
-     * Final result of an uninstall request.
+     * Events for a specific uninstall request.
      */
     public static abstract class UninstallCallback {
+        /**
+         * User action is required to proceed. You can start the given intent
+         * activity to involve the user and continue.
+         * <p>
+         * You may choose to immediately launch the intent if the user is
+         * actively using your app. However, you should use a notification to
+         * guide the user back into your app if not currently active.
+         */
+        public abstract void onUserActionRequired(Intent intent);
+
         public abstract void onSuccess();
         public abstract void onFailure(String msg);
     }
 
     /** {@hide} */
-    private static class UninstallCallbackDelegate extends PackageUninstallObserver {
+    private static class UninstallCallbackDelegate extends PackageDeleteObserver {
         private final UninstallCallback target;
 
         public UninstallCallbackDelegate(UninstallCallback target) {
@@ -552,11 +563,16 @@ public class PackageInstaller {
         }
 
         @Override
-        public void onUninstallFinished(String basePackageName, int returnCode) {
+        public void onUserActionRequired(Intent intent) {
+            target.onUserActionRequired(intent);
+        }
+
+        @Override
+        public void onPackageDeleted(String basePackageName, int returnCode, String msg) {
             if (returnCode == PackageManager.DELETE_SUCCEEDED) {
                 target.onSuccess();
             } else {
-                final String msg = PackageManager.deleteStatusToString(returnCode);
+                msg = PackageManager.deleteStatusToString(returnCode) + ": " + msg;
                 target.onFailure(msg);
             }
         }
@@ -612,6 +628,16 @@ public class PackageInstaller {
 
         public static final String EXTRA_PACKAGE_NAME = "android.content.pm.extra.PACKAGE_NAME";
 
+        /**
+         * User action is required to proceed. You can start the given intent
+         * activity to involve the user and continue.
+         * <p>
+         * You may choose to immediately launch the intent if the user is
+         * actively using your app. However, you should use a notification to
+         * guide the user back into your app if not currently active.
+         */
+        public abstract void onUserActionRequired(Intent intent);
+
         public abstract void onSuccess();
         public abstract void onFailure(int failureReason, String msg, Bundle extras);
     }
@@ -625,8 +651,13 @@ public class PackageInstaller {
         }
 
         @Override
-        public void packageInstalled(String basePackageName, Bundle extras, int returnCode,
-                String msg) {
+        public void onUserActionRequired(Intent intent) {
+            target.onUserActionRequired(intent);
+        }
+
+        @Override
+        public void onPackageInstalled(String basePackageName, int returnCode, String msg,
+                Bundle extras) {
             if (returnCode == PackageManager.INSTALL_SUCCEEDED) {
                 target.onSuccess();
             } else {

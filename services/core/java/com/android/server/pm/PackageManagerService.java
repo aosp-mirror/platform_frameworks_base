@@ -85,6 +85,7 @@ import org.xmlpull.v1.XmlSerializer;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
+import android.app.PackageDeleteObserver;
 import android.app.admin.IDevicePolicyManager;
 import android.app.backup.IBackupManager;
 import android.content.BroadcastReceiver;
@@ -101,6 +102,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageDeleteObserver;
+import android.content.pm.IPackageDeleteObserver2;
 import android.content.pm.IPackageInstallObserver2;
 import android.content.pm.IPackageInstaller;
 import android.content.pm.IPackageManager;
@@ -1063,8 +1065,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                         if (args.observer != null) {
                             try {
                                 Bundle extras = extrasForInstallResult(res);
-                                args.observer.packageInstalled(res.name, extras, res.returnCode,
-                                        res.returnMsg);
+                                args.observer.onPackageInstalled(res.name, res.returnCode,
+                                        res.returnMsg, extras);
                             } catch (RemoteException e) {
                                 Slog.i(TAG, "Observer no longer exists.");
                             }
@@ -7756,7 +7758,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (isUserRestricted(UserHandle.getUserId(uid), UserManager.DISALLOW_INSTALL_APPS)) {
             try {
                 if (observer != null) {
-                    observer.packageInstalled("", null, INSTALL_FAILED_USER_RESTRICTED, null);
+                    observer.onPackageInstalled("", INSTALL_FAILED_USER_RESTRICTED, null, null);
                 }
             } catch (RemoteException re) {
             }
@@ -10519,9 +10521,15 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     @Override
-    public void deletePackageAsUser(final String packageName,
-                                    final IPackageDeleteObserver observer,
-                                    final int userId, final int flags) {
+    public void deletePackageAsUser(String packageName, IPackageDeleteObserver observer, int userId,
+            int flags) {
+        deletePackage(packageName, new LegacyPackageDeleteObserver(observer).getBinder(), userId,
+                flags);
+    }
+
+    @Override
+    public void deletePackage(final String packageName,
+            final IPackageDeleteObserver2 observer, final int userId, final int flags) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.DELETE_PACKAGES, null);
         final int uid = Binder.getCallingUid();
@@ -10532,7 +10540,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         if (isUserRestricted(userId, UserManager.DISALLOW_UNINSTALL_APPS)) {
             try {
-                observer.packageDeleted(packageName, PackageManager.DELETE_FAILED_USER_RESTRICTED);
+                observer.onPackageDeleted(packageName,
+                        PackageManager.DELETE_FAILED_USER_RESTRICTED, null);
             } catch (RemoteException re) {
             }
             return;
@@ -10552,7 +10561,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         if (uninstallBlocked) {
             try {
-                observer.packageDeleted(packageName, PackageManager.DELETE_FAILED_OWNER_BLOCKED);
+                observer.onPackageDeleted(packageName, PackageManager.DELETE_FAILED_OWNER_BLOCKED,
+                        null);
             } catch (RemoteException re) {
             }
             return;
@@ -10568,7 +10578,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 final int returnCode = deletePackageX(packageName, userId, flags);
                 if (observer != null) {
                     try {
-                        observer.packageDeleted(packageName, returnCode);
+                        observer.onPackageDeleted(packageName, returnCode, null);
                     } catch (RemoteException e) {
                         Log.i(TAG, "Observer no longer exists.");
                     } //end catch
@@ -13438,6 +13448,22 @@ public class PackageManagerService extends IPackageManager.Stub {
                 return ksms.packageIsSignedByExactlyLPr(packageName, (KeySetHandle) ks);
             }
             return false;
+        }
+    }
+
+    private static class LegacyPackageDeleteObserver extends PackageDeleteObserver {
+        private final IPackageDeleteObserver mLegacy;
+
+        public LegacyPackageDeleteObserver(IPackageDeleteObserver legacy) {
+            mLegacy = legacy;
+        }
+
+        @Override
+        public void onPackageDeleted(String basePackageName, int returnCode, String msg) {
+            try {
+                mLegacy.packageDeleted(basePackageName, returnCode);
+            } catch (RemoteException ignored) {
+            }
         }
     }
 }
