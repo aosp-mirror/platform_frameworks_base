@@ -18,7 +18,7 @@ package com.android.server.hdmi;
 
 import android.annotation.Nullable;
 import android.hardware.hdmi.IHdmiControlCallback;
-import android.hardware.hdmi.HdmiCecDeviceInfo;
+import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiControlManager;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -66,7 +66,7 @@ final class ActiveSourceHandler {
             invokeCallback(HdmiControlManager.RESULT_SUCCESS);
             return;
         }
-        HdmiCecDeviceInfo device = mService.getDeviceInfo(newActive.logicalAddress);
+        HdmiDeviceInfo device = mService.getDeviceInfo(newActive.logicalAddress);
         if (device == null) {
             tv.startNewDeviceAction(newActive);
         }

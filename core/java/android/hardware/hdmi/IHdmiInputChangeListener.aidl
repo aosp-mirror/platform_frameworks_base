@@ -16,7 +16,7 @@
 
 package android.hardware.hdmi;
 
-import android.hardware.hdmi.HdmiCecDeviceInfo;
+import android.hardware.hdmi.HdmiDeviceInfo;
 
 /**
  * Callback interface definition for TV to get informed of
@@ -25,5 +25,5 @@ import android.hardware.hdmi.HdmiCecDeviceInfo;
  * @hide
  */
 oneway interface IHdmiInputChangeListener {
-    void onChanged(in HdmiCecDeviceInfo device);
+    void onChanged(in HdmiDeviceInfo device);
 }

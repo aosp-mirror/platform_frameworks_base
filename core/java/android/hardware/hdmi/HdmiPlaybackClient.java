@@ -52,12 +52,14 @@ public final class HdmiPlaybackClient extends HdmiClient {
         /**
          * Called when display device status is reported.
          *
-         * @param status display device status
-         * @see {@link HdmiControlManager#POWER_STATUS_ON}
-         * @see {@link HdmiControlManager#POWER_STATUS_STANDBY}
-         * @see {@link HdmiControlManager#POWER_STATUS_TRANSIENT_TO_ON}
-         * @see {@link HdmiControlManager#POWER_STATUS_TRANSIENT_TO_STANDBY}
-         * @see {@link HdmiControlManager#POWER_STATUS_UNKNOWN}
+         * @param status display device status. It should be one of the following values.
+         *            <ul>
+         *            <li>{@link HdmiControlManager#POWER_STATUS_ON}
+         *            <li>{@link HdmiControlManager#POWER_STATUS_STANDBY}
+         *            <li>{@link HdmiControlManager#POWER_STATUS_TRANSIENT_TO_ON}
+         *            <li>{@link HdmiControlManager#POWER_STATUS_TRANSIENT_TO_STANDBY}
+         *            <li>{@link HdmiControlManager#POWER_STATUS_UNKNOWN}
+         *            </ul>
          */
         public void onComplete(int status);
     }
@@ -84,7 +86,7 @@ public final class HdmiPlaybackClient extends HdmiClient {
 
     @Override
     public int getDeviceType() {
-        return HdmiCecDeviceInfo.DEVICE_PLAYBACK;
+        return HdmiDeviceInfo.DEVICE_PLAYBACK;
     }
 
     /**

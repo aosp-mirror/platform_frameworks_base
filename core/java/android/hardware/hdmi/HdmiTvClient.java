@@ -96,7 +96,7 @@ public final class HdmiTvClient extends HdmiClient {
 
     @Override
     public int getDeviceType() {
-        return HdmiCecDeviceInfo.DEVICE_TV;
+        return HdmiDeviceInfo.DEVICE_TV;
     }
 
     /**

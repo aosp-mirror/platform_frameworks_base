@@ -16,7 +16,7 @@
 
 package android.media.tv;
 
-import android.hardware.hdmi.HdmiCecDeviceInfo;
+import android.hardware.hdmi.HdmiDeviceInfo;
 import android.media.tv.ITvInputServiceCallback;
 import android.media.tv.ITvInputSessionCallback;
 import android.media.tv.TvInputHardwareInfo;
@@ -35,6 +35,6 @@ oneway interface ITvInputService {
     // For hardware TvInputService
     void notifyHardwareAdded(in TvInputHardwareInfo hardwareInfo);
     void notifyHardwareRemoved(in TvInputHardwareInfo hardwareInfo);
-    void notifyHdmiCecDeviceAdded(in HdmiCecDeviceInfo cecDeviceInfo);
-    void notifyHdmiCecDeviceRemoved(in HdmiCecDeviceInfo cecDeviceInfo);
+    void notifyHdmiCecDeviceAdded(in HdmiDeviceInfo deviceInfo);
+    void notifyHdmiCecDeviceRemoved(in HdmiDeviceInfo deviceInfo);
 }
