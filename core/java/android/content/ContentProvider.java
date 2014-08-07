@@ -97,6 +97,11 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
 
     private Context mContext = null;
     private int mMyUid;
+
+    // Since most Providers have only one authority, we keep both a String and a String[] to improve
+    // performance.
+    private String mAuthority;
+    private String[] mAuthorities;
     private String mReadPermission;
     private String mWritePermission;
     private PathPermission[] mPathPermissions;
@@ -193,7 +198,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         public Cursor query(String callingPkg, Uri uri, String[] projection,
                 String selection, String[] selectionArgs, String sortOrder,
                 ICancellationSignal cancellationSignal) {
-            getAndEnforceUserId(uri);
+            validateIncomingUri(uri);
             uri = getUriWithoutUserId(uri);
             if (enforceReadPermission(callingPkg, uri) != AppOpsManager.MODE_ALLOWED) {
                 return rejectQuery(uri, projection, selection, selectionArgs, sortOrder,
@@ -211,14 +216,15 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
 
         @Override
         public String getType(Uri uri) {
-            getAndEnforceUserId(uri);
+            validateIncomingUri(uri);
             uri = getUriWithoutUserId(uri);
             return ContentProvider.this.getType(uri);
         }
 
         @Override
         public Uri insert(String callingPkg, Uri uri, ContentValues initialValues) {
-            int userId = getAndEnforceUserId(uri);
+            validateIncomingUri(uri);
+            int userId = getUserIdFromUri(uri);
             uri = getUriWithoutUserId(uri);
             if (enforceWritePermission(callingPkg, uri) != AppOpsManager.MODE_ALLOWED) {
                 return rejectInsert(uri, initialValues);
@@ -233,7 +239,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
 
         @Override
         public int bulkInsert(String callingPkg, Uri uri, ContentValues[] initialValues) {
-            getAndEnforceUserId(uri);
+            validateIncomingUri(uri);
             uri = getUriWithoutUserId(uri);
             if (enforceWritePermission(callingPkg, uri) != AppOpsManager.MODE_ALLOWED) {
                 return 0;
@@ -254,20 +260,22 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             final int[] userIds = new int[numOperations];
             for (int i = 0; i < numOperations; i++) {
                 ContentProviderOperation operation = operations.get(i);
-                userIds[i] = getAndEnforceUserId(operation.getUri());
+                Uri uri = operation.getUri();
+                validateIncomingUri(uri);
+                userIds[i] = getUserIdFromUri(uri);
                 if (userIds[i] != UserHandle.USER_CURRENT) {
                     // Removing the user id from the uri.
                     operation = new ContentProviderOperation(operation, true);
                     operations.set(i, operation);
                 }
                 if (operation.isReadOperation()) {
-                    if (enforceReadPermission(callingPkg, operation.getUri())
+                    if (enforceReadPermission(callingPkg, uri)
                             != AppOpsManager.MODE_ALLOWED) {
                         throw new OperationApplicationException("App op not allowed", 0);
                     }
                 }
                 if (operation.isWriteOperation()) {
-                    if (enforceWritePermission(callingPkg, operation.getUri())
+                    if (enforceWritePermission(callingPkg, uri)
                             != AppOpsManager.MODE_ALLOWED) {
                         throw new OperationApplicationException("App op not allowed", 0);
                     }
@@ -290,7 +298,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
 
         @Override
         public int delete(String callingPkg, Uri uri, String selection, String[] selectionArgs) {
-            getAndEnforceUserId(uri);
+            validateIncomingUri(uri);
             uri = getUriWithoutUserId(uri);
             if (enforceWritePermission(callingPkg, uri) != AppOpsManager.MODE_ALLOWED) {
                 return 0;
@@ -306,7 +314,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         @Override
         public int update(String callingPkg, Uri uri, ContentValues values, String selection,
                 String[] selectionArgs) {
-            getAndEnforceUserId(uri);
+            validateIncomingUri(uri);
             uri = getUriWithoutUserId(uri);
             if (enforceWritePermission(callingPkg, uri) != AppOpsManager.MODE_ALLOWED) {
                 return 0;
@@ -323,7 +331,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         public ParcelFileDescriptor openFile(
                 String callingPkg, Uri uri, String mode, ICancellationSignal cancellationSignal)
                 throws FileNotFoundException {
-            getAndEnforceUserId(uri);
+            validateIncomingUri(uri);
             uri = getUriWithoutUserId(uri);
             enforceFilePermission(callingPkg, uri, mode);
             final String original = setCallingPackage(callingPkg);
@@ -339,7 +347,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         public AssetFileDescriptor openAssetFile(
                 String callingPkg, Uri uri, String mode, ICancellationSignal cancellationSignal)
                 throws FileNotFoundException {
-            getAndEnforceUserId(uri);
+            validateIncomingUri(uri);
             uri = getUriWithoutUserId(uri);
             enforceFilePermission(callingPkg, uri, mode);
             final String original = setCallingPackage(callingPkg);
@@ -363,7 +371,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
 
         @Override
         public String[] getStreamTypes(Uri uri, String mimeTypeFilter) {
-            getAndEnforceUserId(uri);
+            validateIncomingUri(uri);
             uri = getUriWithoutUserId(uri);
             return ContentProvider.this.getStreamTypes(uri, mimeTypeFilter);
         }
@@ -371,7 +379,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         @Override
         public AssetFileDescriptor openTypedAssetFile(String callingPkg, Uri uri, String mimeType,
                 Bundle opts, ICancellationSignal cancellationSignal) throws FileNotFoundException {
-            getAndEnforceUserId(uri);
+            validateIncomingUri(uri);
             uri = getUriWithoutUserId(uri);
             enforceFilePermission(callingPkg, uri, "r");
             final String original = setCallingPackage(callingPkg);
@@ -390,7 +398,8 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
 
         @Override
         public Uri canonicalize(String callingPkg, Uri uri) {
-            int userId = getAndEnforceUserId(uri);
+            validateIncomingUri(uri);
+            int userId = getUserIdFromUri(uri);
             uri = getUriWithoutUserId(uri);
             if (enforceReadPermission(callingPkg, uri) != AppOpsManager.MODE_ALLOWED) {
                 return null;
@@ -405,7 +414,8 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
 
         @Override
         public Uri uncanonicalize(String callingPkg, Uri uri) {
-            int userId = getAndEnforceUserId(uri);
+            validateIncomingUri(uri);
+            int userId = getUserIdFromUri(uri);
             uri = getUriWithoutUserId(uri);
             if (enforceReadPermission(callingPkg, uri) != AppOpsManager.MODE_ALLOWED) {
                 return null;
@@ -618,6 +628,36 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         }
         return pkg;
     }
+
+    /**
+     * Change the authorities of the ContentProvider.
+     * This is normally set for you from its manifest information when the provider is first
+     * created.
+     * @hide
+     * @param authorities the semi-colon separated authorities of the ContentProvider.
+     */
+    protected final void setAuthorities(String authorities) {
+        if (authorities.indexOf(';') == -1) {
+            mAuthority = authorities;
+            mAuthorities = null;
+        } else {
+            mAuthority = null;
+            mAuthorities = authorities.split(";");
+        }
+    }
+
+    /** @hide */
+    protected final boolean matchesOurAuthorities(String authority) {
+        if (mAuthority != null) {
+            return mAuthority.equals(authority);
+        }
+        int length = mAuthorities.length;
+        for (int i = 0; i < length; i++) {
+            if (mAuthorities[i].equals(authority)) return true;
+        }
+        return false;
+    }
+
 
     /**
      * Change the permission required to read data from the content
@@ -1634,6 +1674,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
                 setWritePermission(info.writePermission);
                 setPathPermissions(info.pathPermissions);
                 mExported = info.exported;
+                setAuthorities(info.authority);
             }
             ContentProvider.this.onCreate();
         }
@@ -1727,14 +1768,25 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
     public void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
         writer.println("nothing to dump");
     }
+
     /** @hide */
-    private int getAndEnforceUserId(Uri uri) {
-        int userId = getUserIdFromUri(uri, UserHandle.USER_CURRENT);
+    private void validateIncomingUri(Uri uri) throws SecurityException {
+        String auth = uri.getAuthority();
+        int userId = getUserIdFromAuthority(auth, UserHandle.USER_CURRENT);
         if (userId != UserHandle.USER_CURRENT && userId != mContext.getUserId()) {
             throw new SecurityException("trying to query a ContentProvider in user "
-                    + mContext.getUserId() + "with a uri belonging to user " + userId);
+                    + mContext.getUserId() + " with a uri belonging to user " + userId);
         }
-        return userId;
+        if (!matchesOurAuthorities(getAuthorityWithoutUserId(auth))) {
+            String message = "The authority of the uri " + uri + " does not match the one of the "
+                    + "contentProvider: ";
+            if (mAuthority != null) {
+                message += mAuthority;
+            } else {
+                message += mAuthorities;
+            }
+            throw new SecurityException(message);
+        }
     }
 
     /** @hide */
