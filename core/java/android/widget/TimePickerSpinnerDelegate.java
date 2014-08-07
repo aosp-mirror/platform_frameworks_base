@@ -134,6 +134,8 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
         mSelectHours = res.getString(R.string.select_hours);
         mMinutePickerDescription = res.getString(R.string.minute_picker_description);
         mSelectMinutes = res.getString(R.string.select_minutes);
+        mAmText = res.getString(R.string.time_picker_am_label);
+        mPmText = res.getString(R.string.time_picker_pm_label);
 
         final int layoutResourceId = a.getResourceId(R.styleable.TimePicker_internalLayout,
                 R.layout.time_picker_holo);
@@ -181,10 +183,6 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
         mRadialTimePickerView = (RadialTimePickerView) mainView.findViewById(
                 R.id.radial_picker);
         mDoneButton = (Button) mainView.findViewById(R.id.done_button);
-
-        String[] amPmTexts = new DateFormatSymbols().getAmPmStrings();
-        mAmText = amPmTexts[0];
-        mPmText = amPmTexts[1];
 
         setupListeners();
 

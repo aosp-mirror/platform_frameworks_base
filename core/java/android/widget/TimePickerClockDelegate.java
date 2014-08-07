@@ -18,6 +18,7 @@ package android.widget;
 
 import android.content.Context;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.os.Parcel;
@@ -171,7 +172,10 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate {
         mMinuteSpinnerInput.setImeOptions(EditorInfo.IME_ACTION_NEXT);
 
             /* Get the localized am/pm strings and use them in the spinner */
-        mAmPmStrings = new DateFormatSymbols().getAmPmStrings();
+        final Resources res = context.getResources();
+        final String amText = res.getString(R.string.time_picker_am_label);
+        final String pmText = res.getString(R.string.time_picker_pm_label);
+        mAmPmStrings = new String[] {amText, pmText};
 
         // am/pm
         View amPmView = mDelegator.findViewById(R.id.amPm);
