@@ -15,15 +15,16 @@
 # limitations under the License.
 
 """
-Rename the PS name of all fonts in the input directories and copy them to the
-output directory.
+Rename the PS name of the input font.
 
-Usage: build_font.py /path/to/input_fonts1/ /path/to/input_fonts2/ /path/to/output_fonts/
+OpenType fonts (*.otf) are not currently supported. They are copied to the destination without renaming.
+XML files are also copied in case they are passed there by mistake.
+
+Usage: build_font.py /path/to/input_font.ttf /path/to/output_font.ttf
 
 """
 
 import glob
-from multiprocessing import Pool
 import os
 import re
 import shutil
@@ -35,9 +36,6 @@ sys.dont_write_bytecode = True
 
 # fontTools is available at platform/external/fonttools
 from fontTools import ttx
-
-# global variable
-dest_dir = '/tmp'
 
 
 class FontInfo(object):
@@ -52,6 +50,10 @@ class InvalidFontException(Exception):
   pass
 
 
+# A constant to copy the font without modifying. This is useful when running
+# locally and speed up the time to build the SDK.
+COPY_ONLY = False
+
 # These constants represent the value of nameID parameter in the namerecord for
 # different information.
 # see http://scripts.sil.org/cms/scripts/page.php?item_id=IWS-Chapter08#3054f18b
@@ -60,50 +62,31 @@ NAMEID_STYLE = 2
 NAMEID_FULLNAME = 4
 NAMEID_VERSION = 5
 
+# A list of extensions to process.
+EXTENSIONS = ['.ttf', '.otf', '.xml']
 
 def main(argv):
   if len(argv) < 2:
-    sys.exit('Usage: build_font.py /path/to/input_fonts/ /path/to/out/dir/')
-  for directory in argv:
-    if not os.path.isdir(directory):
-      sys.exit(directory + ' is not a valid directory')
-  global dest_dir
-  dest_dir = argv[-1]
-  src_dirs = argv[:-1]
-  cwd = os.getcwd()
-  os.chdir(dest_dir)
-  files = glob.glob('*')
-  for filename in files:
-    os.remove(filename)
-  os.chdir(cwd)
-  input_fonts = list()
-  for src_dir in src_dirs:
-    for dirname, dirnames, filenames in os.walk(src_dir):
-      for filename in filenames:
-        input_path = os.path.join(dirname, filename)
-        extension = os.path.splitext(filename)[1].lower()
-        if extension == '.ttf':
-          input_fonts.append(input_path)
-        elif extension == '.xml':
-          shutil.copy(input_path, dest_dir)
-      if '.git' in dirnames:
-        # don't go into any .git directories.
-        dirnames.remove('.git')
-  # Create as many threads as the number of CPUs
-  pool = Pool(processes=None)
-  pool.map(convert_font, input_fonts)
+    sys.exit('Usage: build_font.py /path/to/input/font.ttf /path/to/out/font.ttf')
+  dest_path = argv[-1]
+  input_path = argv[0]
+  extension = os.path.splitext(input_path)[1].lower()
+  if extension in EXTENSIONS:
+    if not COPY_ONLY and extension == '.ttf':
+      convert_font(input_path, dest_path)
+      return
+    shutil.copy(input_path, dest_path)
 
 
-def convert_font(input_path):
+def convert_font(input_path, dest_path):
   filename = os.path.basename(input_path)
   print 'Converting font: ' + filename
   # the path to the output file. The file name is the fontfilename.ttx
-  ttx_path = os.path.join(dest_dir, filename)
-  ttx_path = ttx_path[:-1] + 'x'
+  ttx_path = dest_path[:-1] + 'x'
   try:
     # run ttx to generate an xml file in the output folder which represents all
     # its info
-    ttx_args = ['-q', '-d', dest_dir, input_path]
+    ttx_args = ['-q', '-o', ttx_path, input_path]
     ttx.main(ttx_args)
     # now parse the xml file to change its PS name.
     tree = etree.parse(ttx_path)
@@ -112,7 +95,7 @@ def convert_font(input_path):
       update_tag(name, get_font_info(name))
     tree.write(ttx_path, xml_declaration=True, encoding='utf-8')
     # generate the udpated font now.
-    ttx_args = ['-q', '-d', dest_dir, ttx_path]
+    ttx_args = ['-q', '-o', dest_path, ttx_path]
     ttx.main(ttx_args)
   except InvalidFontException:
     # In case of invalid fonts, we exit.
@@ -123,7 +106,7 @@ def convert_font(input_path):
     print e
     # Some fonts are too big to be handled by the ttx library.
     # Just copy paste them.
-    shutil.copy(input_path, dest_dir)
+    shutil.copy(input_path, dest_path)
   try:
     # delete the temp ttx file is it exists.
     os.remove(ttx_path)
