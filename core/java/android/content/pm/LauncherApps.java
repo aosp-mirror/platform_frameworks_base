@@ -210,20 +210,6 @@ public class LauncherApps {
      * Starts an activity in the specified profile.
      *
      * @param component The ComponentName of the activity to launch
-     * @param sourceBounds The Rect containing the source bounds of the clicked icon
-     * @param opts Options to pass to startActivity
-     * @param user The UserHandle of the profile
-     * @hide remove before ship
-     */
-    public void startActivityForProfile(ComponentName component, Rect sourceBounds,
-            Bundle opts, UserHandle user) {
-        startActivityForProfile(component, user, sourceBounds, opts);
-    }
-
-    /**
-     * Starts an activity in the specified profile.
-     *
-     * @param component The ComponentName of the activity to launch
      * @param user The UserHandle of the profile
      * @param sourceBounds The Rect containing the source bounds of the clicked icon
      * @param opts Options to pass to startActivity
