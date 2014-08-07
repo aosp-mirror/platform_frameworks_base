@@ -44,7 +44,7 @@ import static android.view.View.IMPORTANT_FOR_ACCESSIBILITY_YES;
 /**
  * A delegate implementing the basic TimePicker
  */
-class LegacyTimePickerDelegate extends TimePicker.AbstractTimePickerDelegate {
+class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate {
 
     private static final boolean DEFAULT_ENABLED_STATE = true;
 
@@ -100,8 +100,8 @@ class LegacyTimePickerDelegate extends TimePicker.AbstractTimePickerDelegate {
                 }
             };
 
-    public LegacyTimePickerDelegate(TimePicker delegator, Context context, AttributeSet attrs,
-                                    int defStyleAttr, int defStyleRes) {
+    public TimePickerClockDelegate(TimePicker delegator, Context context, AttributeSet attrs,
+            int defStyleAttr, int defStyleRes) {
         super(delegator, context);
 
         // process style attributes

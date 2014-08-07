@@ -51,7 +51,7 @@ import java.util.Locale;
 /**
  * A view for selecting the time of day, in either 24 hour or AM/PM mode.
  */
-class TimePickerDelegate extends TimePicker.AbstractTimePickerDelegate implements
+class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate implements
         RadialTimePickerView.OnValueSelectedListener {
 
     private static final String TAG = "TimePickerDelegate";
@@ -119,8 +119,8 @@ class TimePickerDelegate extends TimePicker.AbstractTimePickerDelegate implement
 
     private Calendar mTempCalendar;
 
-    public TimePickerDelegate(TimePicker delegator, Context context, AttributeSet attrs,
-                              int defStyleAttr, int defStyleRes) {
+    public TimePickerSpinnerDelegate(TimePicker delegator, Context context, AttributeSet attrs,
+            int defStyleAttr, int defStyleRes) {
         super(delegator, context);
 
         // process style attributes

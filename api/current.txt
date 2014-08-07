@@ -479,6 +479,7 @@ package android {
     field public static final int dashWidth = 16843174; // 0x10101a6
     field public static final int data = 16842798; // 0x101002e
     field public static final int datePickerDialogTheme = 16843951; // 0x10104af
+    field public static final int datePickerMode = 16843958; // 0x10104b6
     field public static final int datePickerStyle = 16843612; // 0x101035c
     field public static final int dateTextAppearance = 16843593; // 0x1010349
     field public static final int dayOfWeekBackgroundColor = 16843926; // 0x1010496
@@ -1313,6 +1314,7 @@ package android {
     field public static final int tileModeX = 16843897; // 0x1010479
     field public static final int tileModeY = 16843898; // 0x101047a
     field public static final int timePickerDialogTheme = 16843936; // 0x10104a0
+    field public static final int timePickerMode = 16843959; // 0x10104b7
     field public static final int timePickerStyle = 16843935; // 0x101049f
     field public static final int timeZone = 16843724; // 0x10103cc
     field public static final int tint = 16843041; // 0x1010121

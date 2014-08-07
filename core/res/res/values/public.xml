@@ -2562,4 +2562,7 @@
   <public type="raw" name="nodomain"/>
 
   <public type="attr" name="contentRatingSystemXml"/>
+
+  <public type="attr" name="datePickerMode"/>
+  <public type="attr" name="timePickerMode"/>
 </resources>
