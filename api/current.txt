@@ -37498,6 +37498,7 @@ package android.widget {
     method public void clearChoices();
     method public void clearTextFilter();
     method public void deferNotifyDataSetChanged();
+    method public void fling(int);
     method public int getCacheColorHint();
     method public int getCheckedItemCount();
     method public long[] getCheckedItemIds();
