@@ -349,9 +349,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     /** Updates the min and max virtual scroll bounds */
-    void updateMinMaxScroll(boolean boundScrollToNewMinMax) {
+    void updateMinMaxScroll(boolean boundScrollToNewMinMax, boolean launchedWithAltTab) {
         // Compute the min and max scroll values
-        mLayoutAlgorithm.computeMinMaxScroll(mStack.getTasks());
+        mLayoutAlgorithm.computeMinMaxScroll(mStack.getTasks(), launchedWithAltTab);
 
         // Debug logging
         if (boundScrollToNewMinMax) {
@@ -388,17 +388,17 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 };
             }
 
+            // Scroll the view into position (just center it in the curve)
             if (scrollToNewPosition) {
-                // Scroll the view into position
-                // XXX: We probably want this to be centered in view instead of p = 0f
-                float newScroll = mStackScroller.getBoundedStackScroll(
-                        mLayoutAlgorithm.getStackScrollForTaskIndex(t));
+                float newScroll = mLayoutAlgorithm.getStackScrollForTaskIndex(t) - 0.5f;
+                newScroll = mStackScroller.getBoundedStackScroll(newScroll);
                 mStackScroller.animateScroll(mStackScroller.getStackScroll(), newScroll, postScrollRunnable);
             } else {
                 if (postScrollRunnable != null) {
                     postScrollRunnable.run();
                 }
             }
+
         }
     }
 
@@ -435,12 +435,13 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     /** Computes the stack and task rects */
-    public void computeRects(int windowWidth, int windowHeight, Rect taskStackBounds) {
+    public void computeRects(int windowWidth, int windowHeight, Rect taskStackBounds,
+                             boolean launchedWithAltTab) {
         // Compute the rects in the stack algorithm
         mLayoutAlgorithm.computeRects(windowWidth, windowHeight, taskStackBounds);
 
         // Update the scroll bounds
-        updateMinMaxScroll(false);
+        updateMinMaxScroll(false, launchedWithAltTab);
     }
 
     /**
@@ -455,7 +456,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // Compute our stack/task rects
         Rect taskStackBounds = new Rect(mTaskStackBounds);
         taskStackBounds.bottom -= mConfig.systemInsets.bottom;
-        computeRects(width, height, taskStackBounds);
+        computeRects(width, height, taskStackBounds, mConfig.launchedWithAltTab);
 
         // If this is the first layout, then scroll to the front of the stack and synchronize the
         // stack views immediately to load all the views
@@ -543,9 +544,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             mStartEnterAnimationContext = null;
         }
 
-        // Update the focused task index to be the next item to the top task
+        // When Alt-Tabbing, we scroll to and focus the previous task
         if (mConfig.launchedWithAltTab) {
-            // When alt-tabbing, we focus the next previous task
             focusTask(Math.max(0, mStack.getTaskCount() - 2), false);
         }
     }
@@ -661,7 +661,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mCb.onTaskViewDismissed(removedTask);
 
         // Update the min/max scroll and animate other task views into their new positions
-        updateMinMaxScroll(true);
+        updateMinMaxScroll(true, mConfig.launchedWithAltTab);
         requestSynchronizeStackViewsWithModel(200);
 
         // Update the new front most task
