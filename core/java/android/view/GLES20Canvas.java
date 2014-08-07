@@ -386,9 +386,6 @@ class GLES20Canvas extends HardwareCanvas {
 
     @Override
     public void scale(float sx, float sy) {
-        // TODO: remove
-        if (sx > 1000000 || sy > 1000000) throw new IllegalArgumentException("invalid scales passed " + sx + ", " + sy);
-
         nScale(mRenderer, sx, sy);
     }
 
