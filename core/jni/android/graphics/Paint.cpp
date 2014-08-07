@@ -365,27 +365,19 @@ public:
         char langTag[ULOC_FULLNAME_CAPACITY];
         toLanguageTag(langTag, ULOC_FULLNAME_CAPACITY, localeChars.c_str());
 
-        SkPaintOptionsAndroid paintOpts = obj->getPaintOptionsAndroid();
-        paintOpts.setLanguage(langTag);
-        obj->setPaintOptionsAndroid(paintOpts);
+        obj->setTextLocale(langTag);
     }
 
     static jboolean isElegantTextHeight(JNIEnv* env, jobject paint) {
         NPE_CHECK_RETURN_ZERO(env, paint);
         Paint* obj = GraphicsJNI::getNativePaint(env, paint);
-        SkPaintOptionsAndroid paintOpts = obj->getPaintOptionsAndroid();
-        return paintOpts.getFontVariant() == SkPaintOptionsAndroid::kElegant_Variant;
+        return obj->getFontVariant() == VARIANT_ELEGANT;
     }
 
     static void setElegantTextHeight(JNIEnv* env, jobject paint, jboolean aa) {
         NPE_CHECK_RETURN_VOID(env, paint);
         Paint* obj = GraphicsJNI::getNativePaint(env, paint);
-        SkPaintOptionsAndroid::FontVariant variant =
-            aa ? SkPaintOptionsAndroid::kElegant_Variant :
-            SkPaintOptionsAndroid::kDefault_Variant;
-        SkPaintOptionsAndroid paintOpts = obj->getPaintOptionsAndroid();
-        paintOpts.setFontVariant(variant);
-        obj->setPaintOptionsAndroid(paintOpts);
+        obj->setFontVariant(aa ? VARIANT_ELEGANT : VARIANT_DEFAULT);
     }
 
     static jfloat getTextSize(JNIEnv* env, jobject paint) {
@@ -457,8 +449,7 @@ public:
         // restore the original settings.
         paint->setTextSkewX(saveSkewX);
         paint->setFakeBoldText(savefakeBold);
-        SkPaintOptionsAndroid paintOpts = paint->getPaintOptionsAndroid();
-        if (paintOpts.getFontVariant() == SkPaintOptionsAndroid::kElegant_Variant) {
+        if (paint->getFontVariant() == VARIANT_ELEGANT) {
             SkScalar size = paint->getTextSize();
             metrics->fTop = -size * kElegantTop / 2048;
             metrics->fBottom = -size * kElegantBottom / 2048;

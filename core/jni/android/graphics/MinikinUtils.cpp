@@ -45,10 +45,9 @@ void MinikinUtils::doLayout(Layout* layout, const Paint* paint, int bidiFlags, T
     FontStyle resolved = resolvedFace->fStyle;
 
     /* Prepare minikin FontStyle */
-    SkString langStr = paint->getPaintOptionsAndroid().getLanguage().getTag();
-    FontLanguage minikinLang(langStr.c_str(), langStr.size());
-    SkPaintOptionsAndroid::FontVariant var = paint->getPaintOptionsAndroid().getFontVariant();
-    FontVariant minikinVariant = var == SkPaintOptionsAndroid::kElegant_Variant ? VARIANT_ELEGANT
+    std::string lang = paint->getTextLocale();
+    FontLanguage minikinLang(lang.c_str(), lang.size());
+    FontVariant minikinVariant = (paint->getFontVariant() == VARIANT_ELEGANT) ? VARIANT_ELEGANT
             : VARIANT_COMPACT;
     FontStyle minikinStyle(minikinLang, minikinVariant, resolved.getWeight(), resolved.getItalic());
 
