@@ -15,7 +15,7 @@
  */
 package com.android.server.hdmi;
 
-import android.hardware.hdmi.HdmiCecDeviceInfo;
+import android.hardware.hdmi.HdmiDeviceInfo;
 import android.util.Slog;
 
 import com.android.server.hdmi.HdmiCecLocalDevice.ActiveSource;
@@ -28,7 +28,7 @@ import java.io.UnsupportedEncodingException;
  * connected HDMI-CEC device broadcasts to announce its advent. Additional commands are issued in
  * this action to gather more information on the device such as OSD name and device vendor ID.
  *
- * <p>The result is made in the form of {@link HdmiCecDeviceInfo} object, and passed to service
+ * <p>The result is made in the form of {@link HdmiDeviceInfo} object, and passed to service
  * for the management through its life cycle.
  *
  * <p>Package-private, accessed by {@link HdmiControlService} only.
@@ -152,14 +152,14 @@ final class NewDeviceAction extends FeatureAction {
         if (mDisplayName == null) {
             mDisplayName = HdmiUtils.getDefaultDeviceName(mDeviceLogicalAddress);
         }
-        tv().addCecDevice(new HdmiCecDeviceInfo(
+        tv().addCecDevice(new HdmiDeviceInfo(
                 mDeviceLogicalAddress, mDevicePhysicalAddress,
                 tv().getPortId(mDevicePhysicalAddress),
                 HdmiUtils.getTypeFromAddress(mDeviceLogicalAddress),
                 mVendorId, mDisplayName));
 
         if (HdmiUtils.getTypeFromAddress(mDeviceLogicalAddress)
-                == HdmiCecDeviceInfo.DEVICE_AUDIO_SYSTEM) {
+                == HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM) {
             if (tv().getSystemAudioModeSetting()) {
                 addAndStartAction(new SystemAudioAutoInitiationAction(localDevice(),
                         mDeviceLogicalAddress));

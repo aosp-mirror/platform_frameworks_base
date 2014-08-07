@@ -16,7 +16,7 @@
 
 package com.android.server.hdmi;
 
-import android.hardware.hdmi.HdmiCecDeviceInfo;
+import android.hardware.hdmi.HdmiDeviceInfo;
 import android.util.Slog;
 
 import com.android.internal.util.Preconditions;
@@ -60,7 +60,7 @@ final class DeviceDiscoveryAction extends FeatureAction {
          *
          * @param deviceInfos a list of all non-local devices. It can be empty list.
          */
-        void onDeviceDiscoveryDone(List<HdmiCecDeviceInfo> deviceInfos);
+        void onDeviceDiscoveryDone(List<HdmiDeviceInfo> deviceInfos);
     }
 
     // An internal container used to keep track of device information during
@@ -72,14 +72,14 @@ final class DeviceDiscoveryAction extends FeatureAction {
         private int mPortId = Constants.INVALID_PORT_ID;
         private int mVendorId = Constants.UNKNOWN_VENDOR_ID;
         private String mDisplayName = "";
-        private int mDeviceType = HdmiCecDeviceInfo.DEVICE_INACTIVE;
+        private int mDeviceType = HdmiDeviceInfo.DEVICE_INACTIVE;
 
         private DeviceInfo(int logicalAddress) {
             mLogicalAddress = logicalAddress;
         }
 
-        private HdmiCecDeviceInfo toHdmiCecDeviceInfo() {
-            return new HdmiCecDeviceInfo(mLogicalAddress, mPhysicalAddress, mPortId, mDeviceType,
+        private HdmiDeviceInfo toHdmiDeviceInfo() {
+            return new HdmiDeviceInfo(mLogicalAddress, mPhysicalAddress, mPortId, mDeviceType,
                     mVendorId, mDisplayName);
         }
     }
@@ -314,9 +314,9 @@ final class DeviceDiscoveryAction extends FeatureAction {
 
     private void wrapUpAndFinish() {
         Slog.v(TAG, "---------Wrap up Device Discovery:[" + mDevices.size() + "]---------");
-        ArrayList<HdmiCecDeviceInfo> result = new ArrayList<>();
+        ArrayList<HdmiDeviceInfo> result = new ArrayList<>();
         for (DeviceInfo info : mDevices) {
-            HdmiCecDeviceInfo cecDeviceInfo = info.toHdmiCecDeviceInfo();
+            HdmiDeviceInfo cecDeviceInfo = info.toHdmiDeviceInfo();
             Slog.v(TAG, " DeviceInfo: " + cecDeviceInfo);
             result.add(cecDeviceInfo);
         }

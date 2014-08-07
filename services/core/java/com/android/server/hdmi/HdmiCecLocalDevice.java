@@ -16,7 +16,7 @@
 
 package com.android.server.hdmi;
 
-import android.hardware.hdmi.HdmiCecDeviceInfo;
+import android.hardware.hdmi.HdmiDeviceInfo;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -47,7 +47,7 @@ abstract class HdmiCecLocalDevice {
     protected final int mDeviceType;
     protected int mAddress;
     protected int mPreferredAddress;
-    protected HdmiCecDeviceInfo mDeviceInfo;
+    protected HdmiDeviceInfo mDeviceInfo;
 
     static class ActiveSource {
         int logicalAddress;
@@ -135,9 +135,9 @@ abstract class HdmiCecLocalDevice {
     // Factory method that returns HdmiCecLocalDevice of corresponding type.
     static HdmiCecLocalDevice create(HdmiControlService service, int deviceType) {
         switch (deviceType) {
-        case HdmiCecDeviceInfo.DEVICE_TV:
+        case HdmiDeviceInfo.DEVICE_TV:
             return new HdmiCecLocalDeviceTv(service);
-        case HdmiCecDeviceInfo.DEVICE_PLAYBACK:
+        case HdmiDeviceInfo.DEVICE_PLAYBACK:
             return new HdmiCecLocalDevicePlayback(service);
         default:
             return null;
@@ -460,13 +460,13 @@ abstract class HdmiCecLocalDevice {
     }
 
     @ServiceThreadOnly
-    HdmiCecDeviceInfo getDeviceInfo() {
+    HdmiDeviceInfo getDeviceInfo() {
         assertRunOnServiceThread();
         return mDeviceInfo;
     }
 
     @ServiceThreadOnly
-    void setDeviceInfo(HdmiCecDeviceInfo info) {
+    void setDeviceInfo(HdmiDeviceInfo info) {
         assertRunOnServiceThread();
         mDeviceInfo = info;
     }
@@ -604,7 +604,7 @@ abstract class HdmiCecLocalDevice {
         setActiveSource(newActive.logicalAddress, newActive.physicalAddress);
     }
 
-    void setActiveSource(HdmiCecDeviceInfo info) {
+    void setActiveSource(HdmiDeviceInfo info) {
         setActiveSource(info.getLogicalAddress(), info.getPhysicalAddress());
     }
 

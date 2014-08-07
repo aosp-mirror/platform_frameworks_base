@@ -16,7 +16,7 @@
 
 package com.android.server.hdmi;
 
-import android.hardware.hdmi.HdmiCecDeviceInfo;
+import android.hardware.hdmi.HdmiDeviceInfo;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -30,21 +30,21 @@ import java.util.List;
 final class HdmiUtils {
 
     private static final int[] ADDRESS_TO_TYPE = {
-        HdmiCecDeviceInfo.DEVICE_TV,  // ADDR_TV
-        HdmiCecDeviceInfo.DEVICE_RECORDER,  // ADDR_RECORDER_1
-        HdmiCecDeviceInfo.DEVICE_RECORDER,  // ADDR_RECORDER_2
-        HdmiCecDeviceInfo.DEVICE_TUNER,  // ADDR_TUNER_1
-        HdmiCecDeviceInfo.DEVICE_PLAYBACK,  // ADDR_PLAYBACK_1
-        HdmiCecDeviceInfo.DEVICE_AUDIO_SYSTEM,  // ADDR_AUDIO_SYSTEM
-        HdmiCecDeviceInfo.DEVICE_TUNER,  // ADDR_TUNER_2
-        HdmiCecDeviceInfo.DEVICE_TUNER,  // ADDR_TUNER_3
-        HdmiCecDeviceInfo.DEVICE_PLAYBACK,  // ADDR_PLAYBACK_2
-        HdmiCecDeviceInfo.DEVICE_RECORDER,  // ADDR_RECORDER_3
-        HdmiCecDeviceInfo.DEVICE_TUNER,  // ADDR_TUNER_4
-        HdmiCecDeviceInfo.DEVICE_PLAYBACK,  // ADDR_PLAYBACK_3
-        HdmiCecDeviceInfo.DEVICE_RESERVED,
-        HdmiCecDeviceInfo.DEVICE_RESERVED,
-        HdmiCecDeviceInfo.DEVICE_TV,  // ADDR_SPECIFIC_USE
+        HdmiDeviceInfo.DEVICE_TV,  // ADDR_TV
+        HdmiDeviceInfo.DEVICE_RECORDER,  // ADDR_RECORDER_1
+        HdmiDeviceInfo.DEVICE_RECORDER,  // ADDR_RECORDER_2
+        HdmiDeviceInfo.DEVICE_TUNER,  // ADDR_TUNER_1
+        HdmiDeviceInfo.DEVICE_PLAYBACK,  // ADDR_PLAYBACK_1
+        HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM,  // ADDR_AUDIO_SYSTEM
+        HdmiDeviceInfo.DEVICE_TUNER,  // ADDR_TUNER_2
+        HdmiDeviceInfo.DEVICE_TUNER,  // ADDR_TUNER_3
+        HdmiDeviceInfo.DEVICE_PLAYBACK,  // ADDR_PLAYBACK_2
+        HdmiDeviceInfo.DEVICE_RECORDER,  // ADDR_RECORDER_3
+        HdmiDeviceInfo.DEVICE_TUNER,  // ADDR_TUNER_4
+        HdmiDeviceInfo.DEVICE_PLAYBACK,  // ADDR_PLAYBACK_3
+        HdmiDeviceInfo.DEVICE_RESERVED,
+        HdmiDeviceInfo.DEVICE_RESERVED,
+        HdmiDeviceInfo.DEVICE_TV,  // ADDR_SPECIFIC_USE
     };
 
     private static final String[] DEFAULT_NAMES = {
@@ -90,7 +90,7 @@ final class HdmiUtils {
         if (isValidAddress(address)) {
             return ADDRESS_TO_TYPE[address];
         }
-        return HdmiCecDeviceInfo.DEVICE_INACTIVE;
+        return HdmiDeviceInfo.DEVICE_INACTIVE;
     }
 
     /**
