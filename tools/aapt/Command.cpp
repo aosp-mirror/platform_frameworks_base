@@ -752,6 +752,7 @@ int doDump(Bundle* bundle)
     config.screenWidthDp = 320;
     config.screenHeightDp = 480;
     config.smallestScreenWidthDp = 320;
+    config.screenLayout |= ResTable_config::SCREENSIZE_NORMAL;
     assets.setConfiguration(config);
 
     const ResTable& res = assets.getResources(false);
