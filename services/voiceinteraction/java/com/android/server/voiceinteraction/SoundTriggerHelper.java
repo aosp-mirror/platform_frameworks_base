@@ -32,6 +32,8 @@ import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Slog;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -507,5 +509,23 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
 
         // Unregister from call state changes.
         mTelephonyManager.listen(mPhoneStateListener, PhoneStateListener.LISTEN_NONE);
+    }
+
+    void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        synchronized (mLock) {
+            pw.print("  module properties=");
+            pw.println(moduleProperties == null ? "null" : moduleProperties);
+            pw.print("  keyphrase ID="); pw.println(mKeyphraseId);
+            pw.print("  sound model handle="); pw.println(mCurrentSoundModelHandle);
+            pw.print("  sound model UUID=");
+            pw.println(mCurrentSoundModelUuid == null ? "null" : mCurrentSoundModelUuid);
+            pw.print("  current listener=");
+            pw.println(mActiveListener == null ? "null" : mActiveListener.asBinder());
+
+            pw.print("  requested="); pw.println(mRequested);
+            pw.print("  started="); pw.println(mStarted);
+            pw.print("  call active="); pw.println(mCallActive);
+            pw.print("  service disabled="); pw.println(mServiceDisabled);
+        }
     }
 }
