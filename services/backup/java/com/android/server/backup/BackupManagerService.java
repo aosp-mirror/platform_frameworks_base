@@ -5129,6 +5129,14 @@ public class BackupManagerService extends IBackupManager.Stub {
                 }
             }
 
+            // The path needs to be canonical
+            if (info.path.contains("..") || info.path.contains("//")) {
+                if (MORE_DEBUG) {
+                    Slog.w(TAG, "Dropping invalid path " + info.path);
+                }
+                return false;
+            }
+
             // Otherwise we think this file is good to go
             return true;
         }
@@ -5678,6 +5686,14 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                                 okay = false;
                                 mPackagePolicies.put(pkg, RestorePolicy.IGNORE);
                                 break;
+                        }
+
+                        // The path needs to be canonical
+                        if (info.path.contains("..") || info.path.contains("//")) {
+                            if (MORE_DEBUG) {
+                                Slog.w(TAG, "Dropping invalid path " + info.path);
+                            }
+                            okay = false;
                         }
 
                         // If the policy is satisfied, go ahead and set up to pipe the
