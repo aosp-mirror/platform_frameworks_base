@@ -17,6 +17,7 @@
 package android.widget;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.media.AudioManager;
 import android.os.Handler;
@@ -55,7 +56,7 @@ import java.util.Locale;
  * <p>
  * Functions like show() and hide() have no effect when MediaController
  * is created in an xml layout.
- * 
+ *
  * MediaController will hide and
  * show the buttons according to these rules:
  * <ul>
@@ -70,32 +71,34 @@ import java.util.Locale;
  */
 public class MediaController extends FrameLayout {
 
-    private MediaPlayerControl  mPlayer;
-    private Context             mContext;
-    private View                mAnchor;
-    private View                mRoot;
-    private WindowManager       mWindowManager;
-    private Window              mWindow;
-    private View                mDecor;
+    private MediaPlayerControl mPlayer;
+    private Context mContext;
+    private View mAnchor;
+    private View mRoot;
+    private WindowManager mWindowManager;
+    private Window mWindow;
+    private View mDecor;
     private WindowManager.LayoutParams mDecorLayoutParams;
-    private ProgressBar         mProgress;
-    private TextView            mEndTime, mCurrentTime;
-    private boolean             mShowing;
-    private boolean             mDragging;
-    private static final int    sDefaultTimeout = 3000;
-    private static final int    FADE_OUT = 1;
-    private static final int    SHOW_PROGRESS = 2;
-    private boolean             mUseFastForward;
-    private boolean             mFromXml;
-    private boolean             mListenersSet;
+    private ProgressBar mProgress;
+    private TextView mEndTime, mCurrentTime;
+    private boolean mShowing;
+    private boolean mDragging;
+    private static final int sDefaultTimeout = 3000;
+    private static final int FADE_OUT = 1;
+    private static final int SHOW_PROGRESS = 2;
+    private boolean mUseFastForward;
+    private boolean mFromXml;
+    private boolean mListenersSet;
     private View.OnClickListener mNextListener, mPrevListener;
-    StringBuilder               mFormatBuilder;
-    Formatter                   mFormatter;
-    private ImageButton         mPauseButton;
-    private ImageButton         mFfwdButton;
-    private ImageButton         mRewButton;
-    private ImageButton         mNextButton;
-    private ImageButton         mPrevButton;
+    StringBuilder mFormatBuilder;
+    Formatter mFormatter;
+    private ImageButton mPauseButton;
+    private ImageButton mFfwdButton;
+    private ImageButton mRewButton;
+    private ImageButton mNextButton;
+    private ImageButton mPrevButton;
+    private CharSequence mPlayDescription;
+    private CharSequence mPauseDescription;
 
     public MediaController(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -132,7 +135,7 @@ public class MediaController extends FrameLayout {
         mDecor.setOnTouchListener(mTouchListener);
         mWindow.setContentView(this);
         mWindow.setBackgroundDrawableResource(android.R.color.transparent);
-        
+
         // While the media controller is up, the volume control keys should
         // affect the media stream type
         mWindow.setVolumeControlStream(AudioManager.STREAM_MUSIC);
@@ -201,7 +204,7 @@ public class MediaController extends FrameLayout {
             return false;
         }
     };
-    
+
     public void setMediaPlayer(MediaPlayerControl player) {
         mPlayer = player;
         updatePausePlay();
@@ -249,6 +252,11 @@ public class MediaController extends FrameLayout {
     }
 
     private void initControllerView(View v) {
+        Resources res = mContext.getResources();
+        mPlayDescription = res
+                .getText(com.android.internal.R.string.lockscreen_transport_play_description);
+        mPauseDescription = res
+                .getText(com.android.internal.R.string.lockscreen_transport_pause_description);
         mPauseButton = (ImageButton) v.findViewById(com.android.internal.R.id.pause);
         if (mPauseButton != null) {
             mPauseButton.requestFocus();
@@ -271,7 +279,7 @@ public class MediaController extends FrameLayout {
             }
         }
 
-        // By default these are hidden. They will be enabled when setPrevNextListeners() is called 
+        // By default these are hidden. They will be enabled when setPrevNextListeners() is called
         mNextButton = (ImageButton) v.findViewById(com.android.internal.R.id.next);
         if (mNextButton != null && !mFromXml && !mListenersSet) {
             mNextButton.setVisibility(View.GONE);
@@ -328,7 +336,7 @@ public class MediaController extends FrameLayout {
             // the buttons.
         }
     }
-    
+
     /**
      * Show the controller on screen. It will go away
      * automatically after 'timeout' milliseconds of inactivity.
@@ -347,7 +355,7 @@ public class MediaController extends FrameLayout {
             mShowing = true;
         }
         updatePausePlay();
-        
+
         // cause the progress bar to be updated even if mShowing
         // was already true.  This happens, for example, if we're
         // paused with the progress bar showing the user hits play.
@@ -359,7 +367,7 @@ public class MediaController extends FrameLayout {
             mHandler.sendMessageDelayed(msg, timeout);
         }
     }
-    
+
     public boolean isShowing() {
         return mShowing;
     }
@@ -525,8 +533,10 @@ public class MediaController extends FrameLayout {
 
         if (mPlayer.isPlaying()) {
             mPauseButton.setImageResource(com.android.internal.R.drawable.ic_media_pause);
+            mPauseButton.setContentDescription(mPauseDescription);
         } else {
             mPauseButton.setImageResource(com.android.internal.R.drawable.ic_media_play);
+            mPauseButton.setContentDescription(mPlayDescription);
         }
     }
 
@@ -668,7 +678,7 @@ public class MediaController extends FrameLayout {
 
         if (mRoot != null) {
             installPrevNextListeners();
-            
+
             if (mNextButton != null && !mFromXml) {
                 mNextButton.setVisibility(View.VISIBLE);
             }
