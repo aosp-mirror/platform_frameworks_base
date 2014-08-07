@@ -339,8 +339,9 @@ public class RecentsTaskLoader {
 
             // Create a new task
             Task task = new Task(t.persistentId, (t.id > -1), t.baseIntent, t.affiliatedTaskId,
-                    activityLabel, activityIcon, activityColor, t.userId, t.firstActiveTime,
-                    t.lastActiveTime, (i == (taskCount - 1)), config.lockToAppEnabled);
+                    t.affiliatedTaskColor, activityLabel, activityIcon, activityColor, t.userId,
+                    t.firstActiveTime, t.lastActiveTime, (i == (taskCount - 1)),
+                    config.lockToAppEnabled);
 
             // Preload the specified number of apps
             if (i >= (taskCount - preloadCount)) {
@@ -381,7 +382,7 @@ public class RecentsTaskLoader {
         }
 
         // Simulate the groupings that we describe
-        stack.createAffiliatedGroupings();
+        stack.createAffiliatedGroupings(config);
 
         // Start the task loader and add all the tasks we need to load
         mLoader.start(context);
@@ -405,11 +406,11 @@ public class RecentsTaskLoader {
             ActivityInfo info = ssp.getActivityInfo(t.baseIntent.getComponent(), t.userId);
             if (info == null) continue;
 
-            stack.addTask(new Task(t.persistentId, true, t.baseIntent, t.affiliatedTaskId, null,
-                    null, 0, 0, t.firstActiveTime, t.lastActiveTime, (i == (taskCount - 1)),
-                    config.lockToAppEnabled));
+            stack.addTask(new Task(t.persistentId, true, t.baseIntent, t.affiliatedTaskId,
+                    t.affiliatedTaskColor, null, null, 0, 0, t.firstActiveTime, t.lastActiveTime,
+                    (i == (taskCount - 1)), config.lockToAppEnabled));
         }
-        stack.createAffiliatedGroupings();
+        stack.createAffiliatedGroupings(config);
         return stack;
     }
 

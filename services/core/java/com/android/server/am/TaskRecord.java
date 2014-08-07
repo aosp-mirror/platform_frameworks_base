@@ -68,6 +68,7 @@ final class TaskRecord {
     private static final String ATTR_TASK_AFFILIATION = "task_affiliation";
     private static final String ATTR_PREV_AFFILIATION = "prev_affiliation";
     private static final String ATTR_NEXT_AFFILIATION = "next_affiliation";
+    private static final String ATTR_TASK_AFFILIATION_COLOR = "task_affiliation_color";
     private static final String ATTR_CALLING_UID = "calling_uid";
     private static final String ATTR_CALLING_PACKAGE = "calling_package";
     private static final String LAST_ACTIVITY_ICON_SUFFIX = "_last_activity_icon_";
@@ -140,6 +141,7 @@ final class TaskRecord {
     CharSequence lastDescription; // Last description captured for this item.
 
     int mAffiliatedTaskId; // taskId of parent affiliation or self if no parent.
+    int mAffiliatedTaskColor; // color of the parent task affiliation.
     TaskRecord mPrevAffiliate; // previous task in affiliated chain.
     int mPrevAffiliateTaskId = -1; // previous id for persistence.
     TaskRecord mNextAffiliate; // next task in affiliated chain.
@@ -172,7 +174,8 @@ final class TaskRecord {
             String _lastDescription, ArrayList<ActivityRecord> activities, long _firstActiveTime,
             long _lastActiveTime, long lastTimeMoved, boolean neverRelinquishIdentity,
             ActivityManager.TaskDescription _lastTaskDescription, int taskAffiliation,
-            int prevTaskId, int nextTaskId, int callingUid, String callingPackage) {
+            int prevTaskId, int nextTaskId, int taskAffiliationColor, int callingUid,
+            String callingPackage) {
         mService = service;
         mFilename = String.valueOf(_taskId) + TASK_THUMBNAIL_SUFFIX +
                 TaskPersister.IMAGE_EXTENSION;
@@ -199,6 +202,7 @@ final class TaskRecord {
         mNeverRelinquishIdentity = neverRelinquishIdentity;
         lastTaskDescription = _lastTaskDescription;
         mAffiliatedTaskId = taskAffiliation;
+        mAffiliatedTaskColor = taskAffiliationColor;
         mPrevAffiliateTaskId = prevTaskId;
         mNextAffiliateTaskId = nextTaskId;
         mCallingUid = callingUid;
@@ -326,6 +330,7 @@ final class TaskRecord {
     void setTaskToAffiliateWith(TaskRecord taskToAffiliateWith) {
         closeRecentsChain();
         mAffiliatedTaskId = taskToAffiliateWith.mAffiliatedTaskId;
+        mAffiliatedTaskColor = taskToAffiliateWith.mAffiliatedTaskColor;
         // Find the end
         while (taskToAffiliateWith.mNextAffiliate != null) {
             final TaskRecord nextRecents = taskToAffiliateWith.mNextAffiliate;
@@ -689,11 +694,14 @@ final class TaskRecord {
                     }
                     if (colorPrimary == 0) {
                         colorPrimary = r.taskDescription.getPrimaryColor();
-
                     }
                 }
             }
             lastTaskDescription = new ActivityManager.TaskDescription(label, icon, colorPrimary);
+            // Update the task affiliation color if we are the parent of the group
+            if (taskId == mAffiliatedTaskId) {
+                mAffiliatedTaskColor = lastTaskDescription.getPrimaryColor();
+            }
         }
     }
 
@@ -777,6 +785,7 @@ final class TaskRecord {
             saveTaskDescription(lastTaskDescription, String.valueOf(taskId) +
                     LAST_ACTIVITY_ICON_SUFFIX + lastActiveTime, out);
         }
+        out.attribute(null, ATTR_TASK_AFFILIATION_COLOR, String.valueOf(mAffiliatedTaskColor));
         out.attribute(null, ATTR_TASK_AFFILIATION, String.valueOf(mAffiliatedTaskId));
         out.attribute(null, ATTR_PREV_AFFILIATION, String.valueOf(mPrevAffiliateTaskId));
         out.attribute(null, ATTR_NEXT_AFFILIATION, String.valueOf(mNextAffiliateTaskId));
@@ -831,6 +840,7 @@ final class TaskRecord {
         final int outerDepth = in.getDepth();
         ActivityManager.TaskDescription taskDescription = new ActivityManager.TaskDescription();
         int taskAffiliation = -1;
+        int taskAffiliationColor = 0;
         int prevTaskId = -1;
         int nextTaskId = -1;
         int callingUid = -1;
@@ -877,6 +887,8 @@ final class TaskRecord {
                 prevTaskId = Integer.valueOf(attrValue);
             } else if (ATTR_NEXT_AFFILIATION.equals(attrName)) {
                 nextTaskId = Integer.valueOf(attrValue);
+            } else if (ATTR_TASK_AFFILIATION_COLOR.equals(attrName)) {
+                taskAffiliationColor = Integer.valueOf(attrValue);
             } else if (ATTR_CALLING_UID.equals(attrName)) {
                 callingUid = Integer.valueOf(attrValue);
             } else if (ATTR_CALLING_PACKAGE.equals(attrName)) {
@@ -921,8 +933,8 @@ final class TaskRecord {
                 affinityIntent, affinity, realActivity, origActivity, rootHasReset,
                 autoRemoveRecents, askedCompatMode, taskType, userId, lastDescription, activities,
                 firstActiveTime, lastActiveTime, lastTimeOnTop, neverRelinquishIdentity,
-                taskDescription, taskAffiliation, prevTaskId, nextTaskId, callingUid,
-                callingPackage);
+                taskDescription, taskAffiliation, prevTaskId, nextTaskId, taskAffiliationColor,
+                callingUid, callingPackage);
 
         for (int activityNdx = activities.size() - 1; activityNdx >=0; --activityNdx) {
             activities.get(activityNdx).task = task;

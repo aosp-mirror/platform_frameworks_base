@@ -16,7 +16,9 @@
 
 package com.android.systemui.recents.model;
 
+import android.graphics.Color;
 import com.android.systemui.recents.Constants;
+import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.misc.NamedCounter;
 
 import java.util.ArrayList;
@@ -320,7 +322,7 @@ public class TaskStack {
     /**
      * Temporary: This method will simulate affiliation groups by
      */
-    public void createAffiliatedGroupings() {
+    public void createAffiliatedGroupings(RecentsConfiguration config) {
         if (Constants.DebugFlags.App.EnableSimulatedTaskGroups) {
             HashMap<Task.TaskKey, Task> taskMap = new HashMap<Task.TaskKey, Task>();
             // Sort all tasks by increasing firstActiveTime of the task
@@ -387,6 +389,7 @@ public class TaskStack {
             mTaskList.set(tasks);
         } else {
             // Create the task groups
+            HashMap<Task.TaskKey, Task> tasksMap = new HashMap<Task.TaskKey, Task>();
             ArrayList<Task> tasks = mTaskList.getTasks();
             int taskCount = tasks.size();
             for (int i = 0; i < taskCount; i++) {
@@ -401,6 +404,28 @@ public class TaskStack {
                     addGroup(group);
                 }
                 group.addTask(t);
+                tasksMap.put(t.key, t);
+            }
+            // Update the task colors for each of the groups
+            float minAlpha = config.taskBarViewAffiliationColorMinAlpha;
+            int taskGroupCount = mGroups.size();
+            for (int i = 0; i < taskGroupCount; i++) {
+                TaskGrouping group = mGroups.get(i);
+                taskCount = group.getTaskCount();
+                // Ignore the groups that only have one task
+                if (taskCount <= 1) continue;
+                // Calculate the group color distribution
+                int affiliationColor = tasksMap.get(group.mTaskKeys.get(0)).taskAffiliationColor;
+                float alphaStep = (1f - minAlpha) / taskCount;
+                float alpha = 1f;
+                for (int j = 0; j < taskCount; j++) {
+                    Task t = tasksMap.get(group.mTaskKeys.get(j));
+                    t.colorPrimary = Color.rgb(
+                            (int) (alpha * Color.red(affiliationColor) + (1f - alpha) * 0xFF),
+                            (int) (alpha * Color.green(affiliationColor) + (1f - alpha) * 0xFF),
+                            (int) (alpha * Color.blue(affiliationColor) + (1f - alpha) * 0xFF));
+                    alpha -= alphaStep;
+                }
             }
         }
     }

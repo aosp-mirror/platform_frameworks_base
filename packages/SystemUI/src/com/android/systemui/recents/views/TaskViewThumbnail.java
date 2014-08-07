@@ -25,24 +25,24 @@ import com.android.systemui.recents.model.Task;
 
 
 /** The task thumbnail view */
-public class TaskThumbnailView extends FixedSizeImageView {
+public class TaskViewThumbnail extends FixedSizeImageView {
 
     // Task bar clipping
     Rect mClipRect = new Rect();
 
-    public TaskThumbnailView(Context context) {
+    public TaskViewThumbnail(Context context) {
         this(context, null);
     }
 
-    public TaskThumbnailView(Context context, AttributeSet attrs) {
+    public TaskViewThumbnail(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public TaskThumbnailView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public TaskViewThumbnail(Context context, AttributeSet attrs, int defStyleAttr) {
         this(context, attrs, defStyleAttr, 0);
     }
 
-    public TaskThumbnailView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public TaskViewThumbnail(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         setScaleType(ScaleType.FIT_XY);
     }

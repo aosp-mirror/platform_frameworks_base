@@ -86,6 +86,7 @@ public class RecentsConfiguration {
     public int taskBarViewLightTextColor;
     public int taskBarViewDarkTextColor;
     public int taskBarViewHighlightColor;
+    public float taskBarViewAffiliationColorMinAlpha;
 
     /** Task bar size & animations */
     public int taskBarHeight;
@@ -221,6 +222,9 @@ public class RecentsConfiguration {
                 res.getColor(R.color.recents_task_bar_dark_text_color);
         taskBarViewHighlightColor =
                 res.getColor(R.color.recents_task_bar_highlight_color);
+        TypedValue affMinAlphaPctValue = new TypedValue();
+        res.getValue(R.dimen.recents_task_affiliation_color_min_alpha_percentage, affMinAlphaPctValue, true);
+        taskBarViewAffiliationColorMinAlpha = affMinAlphaPctValue.getFloat();
 
         // Task bar size & animations
         taskBarHeight = res.getDimensionPixelSize(R.dimen.recents_task_bar_height);
