@@ -735,15 +735,23 @@ public final class ViewRootImpl implements ViewParent,
 
     void setLayoutParams(WindowManager.LayoutParams attrs, boolean newView) {
         synchronized (this) {
-            int oldSoftInputMode = mWindowAttributes.softInputMode;
+            final int oldInsetLeft = mWindowAttributes.surfaceInsets.left;
+            final int oldInsetTop = mWindowAttributes.surfaceInsets.top;
+            final int oldInsetRight = mWindowAttributes.surfaceInsets.right;
+            final int oldInsetBottom = mWindowAttributes.surfaceInsets.bottom;
+            final int oldSoftInputMode = mWindowAttributes.softInputMode;
+
             // Keep track of the actual window flags supplied by the client.
             mClientWindowLayoutFlags = attrs.flags;
-            // preserve compatible window flag if exists.
-            int compatibleWindowFlag = mWindowAttributes.privateFlags
+
+            // Preserve compatible window flag if exists.
+            final int compatibleWindowFlag = mWindowAttributes.privateFlags
                     & WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
-            // transfer over system UI visibility values as they carry current state.
+
+            // Transfer over system UI visibility values as they carry current state.
             attrs.systemUiVisibility = mWindowAttributes.systemUiVisibility;
             attrs.subtreeSystemUiVisibility = mWindowAttributes.subtreeSystemUiVisibility;
+
             mWindowAttributesChangesFlag = mWindowAttributes.copyFrom(attrs);
             if ((mWindowAttributesChangesFlag
                     & WindowManager.LayoutParams.TRANSLUCENT_FLAGS_CHANGED) != 0) {
@@ -755,20 +763,25 @@ public final class ViewRootImpl implements ViewParent,
             }
             mWindowAttributes.privateFlags |= compatibleWindowFlag;
 
+            // Restore old surface insets.
+            mWindowAttributes.surfaceInsets.set(
+                    oldInsetLeft, oldInsetTop, oldInsetRight, oldInsetBottom);
+
             applyKeepScreenOnFlag(mWindowAttributes);
 
             if (newView) {
                 mSoftInputMode = attrs.softInputMode;
                 requestLayout();
             }
+
             // Don't lose the mode we last auto-computed.
-            if ((attrs.softInputMode&WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST)
+            if ((attrs.softInputMode & WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST)
                     == WindowManager.LayoutParams.SOFT_INPUT_ADJUST_UNSPECIFIED) {
                 mWindowAttributes.softInputMode = (mWindowAttributes.softInputMode
                         & ~WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST)
-                        | (oldSoftInputMode
-                                & WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST);
+                        | (oldSoftInputMode & WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST);
             }
+
             mWindowAttributesChanged = true;
             scheduleTraversals();
         }
