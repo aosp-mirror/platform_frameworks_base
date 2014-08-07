@@ -328,7 +328,7 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
         TaskStackViewLayoutAlgorithm algo = tsv.getStackAlgorithm();
         Rect taskStackBounds = new Rect(mTaskStackBounds);
         taskStackBounds.bottom -= mSystemInsets.bottom;
-        tsv.computeRects(mWindowRect.width(), mWindowRect.height(), taskStackBounds);
+        tsv.computeRects(mWindowRect.width(), mWindowRect.height(), taskStackBounds, mTriggeredFromAltTab);
         tsv.getScroller().setStackScrollToInitialState();
 
         // Find the running task in the TaskStack

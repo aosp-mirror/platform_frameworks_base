@@ -18,7 +18,6 @@ package com.android.systemui.recents.views;
 
 import android.graphics.Rect;
 import com.android.systemui.recents.RecentsConfiguration;
-import com.android.systemui.recents.misc.Console;
 import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.Task;
 
@@ -87,8 +86,9 @@ public class TaskStackViewLayoutAlgorithm {
                 left + size, mStackRect.top + size);
     }
 
-    /** Computes the minimum and maximum scroll progress values */
-    void computeMinMaxScroll(ArrayList<Task> tasks) {
+    /** Computes the minimum and maximum scroll progress values.  This method may be called before
+     * the RecentsConfiguration is set, so we need to pass in the alt-tab state. */
+    void computeMinMaxScroll(ArrayList<Task> tasks, boolean launchedWithAltTab) {
         // Clear the progress map
         mTaskProgressMap.clear();
 
@@ -130,7 +130,12 @@ public class TaskStackViewLayoutAlgorithm {
 
         mMinScrollP = 0f;
         mMaxScrollP = pAtFrontMostCardTop - ((1f - pTaskHeightOffset - pNavBarOffset));
-        mInitialScrollP = pAtSecondFrontMostCardTop - ((1f - pTaskHeightOffset - pNavBarOffset));
+        if (launchedWithAltTab) {
+            // Center the second most task, since that will be focused first
+            mInitialScrollP = pAtSecondFrontMostCardTop - 0.5f;
+        } else {
+            mInitialScrollP = pAtSecondFrontMostCardTop - ((1f - pTaskHeightOffset - pNavBarOffset));
+        }
     }
 
     /** Update/get the transform */
@@ -151,6 +156,7 @@ public class TaskStackViewLayoutAlgorithm {
         // If the task top is outside of the bounds below the screen, then immediately reset it
         if (pTaskRelative > 1f) {
             transformOut.reset();
+            transformOut.rect.set(mTaskRect);
             return transformOut;
         }
         // The check for the top is trickier, since we want to show the next task if it is at all
@@ -158,6 +164,7 @@ public class TaskStackViewLayoutAlgorithm {
         if (pTaskRelative < 0f) {
             if (prevTransform != null && Float.compare(prevTransform.p, 0f) <= 0) {
                 transformOut.reset();
+                transformOut.rect.set(mTaskRect);
                 return transformOut;
             }
         }
