@@ -264,7 +264,7 @@ class RippleBackground {
     public void getBounds(Rect bounds) {
         final int outerX = (int) mOuterX;
         final int outerY = (int) mOuterY;
-        final int r = (int) mOuterRadius;
+        final int r = (int) mOuterRadius + 1;
         bounds.set(outerX - r, outerY - r, outerX + r, outerY + r);
     }
 
