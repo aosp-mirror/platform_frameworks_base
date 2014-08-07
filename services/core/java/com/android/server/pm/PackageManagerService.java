@@ -1420,11 +1420,18 @@ public class PackageManagerService extends IPackageManager.Stub {
                         }
 
                         try {
-                            if (DexFile.isDexOptNeededInternal(lib, null, instructionSet, false)) {
+                            byte dexoptRequired = DexFile.isDexOptNeededInternal(lib, null,
+                                                                                 instructionSet,
+                                                                                 false);
+                            if (dexoptRequired != DexFile.UP_TO_DATE) {
                                 alreadyDexOpted.add(lib);
 
                                 // The list of "shared libraries" we have at this point is
-                                mInstaller.dexopt(lib, Process.SYSTEM_UID, true, instructionSet);
+                                if (dexoptRequired == DexFile.DEXOPT_NEEDED) {
+                                    mInstaller.dexopt(lib, Process.SYSTEM_UID, true, instructionSet);
+                                } else {
+                                    mInstaller.patchoat(lib, Process.SYSTEM_UID, true, instructionSet);
+                                }
                                 didDexOptLibraryOrTool = true;
                             }
                         } catch (FileNotFoundException e) {
@@ -1471,8 +1478,14 @@ public class PackageManagerService extends IPackageManager.Stub {
                             continue;
                         }
                         try {
-                            if (DexFile.isDexOptNeededInternal(path, null, instructionSet, false)) {
+                            byte dexoptRequired = DexFile.isDexOptNeededInternal(path, null,
+                                                                                 instructionSet,
+                                                                                 false);
+                            if (dexoptRequired == DexFile.DEXOPT_NEEDED) {
                                 mInstaller.dexopt(path, Process.SYSTEM_UID, true, instructionSet);
+                                didDexOptLibraryOrTool = true;
+                            } else if (dexoptRequired == DexFile.PATCHOAT_NEEDED) {
+                                mInstaller.patchoat(path, Process.SYSTEM_UID, true, instructionSet);
                                 didDexOptLibraryOrTool = true;
                             }
                         } catch (FileNotFoundException e) {
@@ -4625,9 +4638,14 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
 
                 try {
-                    final boolean isDexOptNeeded = DexFile.isDexOptNeededInternal(path,
+                    // This will return DEXOPT_NEEDED if we either cannot find any odex file for this
+                    // patckage or the one we find does not match the image checksum (i.e. it was
+                    // compiled against an old image). It will return PATCHOAT_NEEDED if we can find a
+                    // odex file and it matches the checksum of the image but not its base address,
+                    // meaning we need to move it.
+                    final byte isDexOptNeeded = DexFile.isDexOptNeededInternal(path,
                             pkg.packageName, instructionSet, defer);
-                    if (forceDex || (!defer && isDexOptNeeded)) {
+                    if (forceDex || (!defer && isDexOptNeeded == DexFile.DEXOPT_NEEDED)) {
                         Log.i(TAG, "Running dexopt on: " + path + " pkg="
                                 + pkg.applicationInfo.packageName + " isa=" + instructionSet);
                         final int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
@@ -4643,12 +4661,27 @@ public class PackageManagerService extends IPackageManager.Stub {
                             performedDexOpt = true;
                             pkg.mDexOptPerformed.add(instructionSet);
                         }
+                    } else if (!defer && isDexOptNeeded == DexFile.PATCHOAT_NEEDED) {
+                        Log.i(TAG, "Running patchoat on: " + pkg.applicationInfo.packageName);
+                        final int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
+                        final int ret = mInstaller.patchoat(path, sharedGid, !isForwardLocked(pkg),
+                                pkg.packageName, instructionSet);
+
+                        if (ret < 0) {
+                            // Don't bother running patchoat again if we failed, it will probably
+                            // just result in an error again. Also, don't bother dexopting for other
+                            // paths & ISAs.
+                            return DEX_OPT_FAILED;
+                        } else {
+                            performedDexOpt = true;
+                            pkg.mDexOptPerformed.add(instructionSet);
+                        }
                     }
 
                     // We're deciding to defer a needed dexopt. Don't bother dexopting for other
                     // paths and instruction sets. We'll deal with them all together when we process
                     // our list of deferred dexopts.
-                    if (defer && isDexOptNeeded) {
+                    if (defer && isDexOptNeeded != DexFile.UP_TO_DATE) {
                         if (mDeferredDexOpt == null) {
                             mDeferredDexOpt = new HashSet<PackageParser.Package>();
                         }
