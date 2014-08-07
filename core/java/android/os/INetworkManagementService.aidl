@@ -312,6 +312,11 @@ interface INetworkManagementService
      */
     void setDnsServersForNetwork(int netId, in String[] servers, String domains);
 
+    /**
+     * Flush the DNS cache associated with the specified network.
+     */
+    void flushNetworkDnsCache(int netId);
+
     void setFirewallEnabled(boolean enabled);
     boolean isFirewallEnabled();
     void setFirewallInterfaceRule(String iface, boolean allow);
