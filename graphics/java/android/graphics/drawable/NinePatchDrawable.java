@@ -626,13 +626,18 @@ public class NinePatchDrawable extends Drawable {
             mAutoMirrored = autoMirror;
 
             // Sanity check for valid padding when we have optical insets.
-            if (mPadding.left < mOpticalInsets.left) {
-                mPadding.left = mOpticalInsets.left;
-                mPadding.right = mOpticalInsets.right;
-            }
-            if (mPadding.top < mOpticalInsets.top) {
-                mPadding.top = mOpticalInsets.top;
-                mPadding.bottom = mOpticalInsets.bottom;
+            if (!opticalInsets.isEmpty()) {
+                if (mPadding == null) {
+                    mPadding = new Rect();
+                }
+                if (mPadding.left < opticalInsets.left) {
+                    mPadding.left = opticalInsets.left;
+                    mPadding.right = opticalInsets.right;
+                }
+                if (mPadding.top < opticalInsets.top) {
+                    mPadding.top = opticalInsets.top;
+                    mPadding.bottom = opticalInsets.bottom;
+                }
             }
         }
 
