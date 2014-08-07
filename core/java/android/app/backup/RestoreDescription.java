@@ -16,6 +16,7 @@
 
 package android.app.backup;
 
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -28,6 +29,7 @@ import android.os.Parcelable;
  *
  * @hide
  */
+@SystemApi
 public class RestoreDescription implements Parcelable {
     private final String mPackageName;
     private final int mDataType;
