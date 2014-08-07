@@ -3857,13 +3857,17 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                                     firstChildTop == contentTop - mOverscrollDistance) ||
                               (mFirstPosition + childCount == mItemCount &&
                                     lastChildBottom == contentBottom + mOverscrollDistance))) {
-                        if (mFlingRunnable == null) {
-                            mFlingRunnable = new FlingRunnable();
+                        if (!dispatchNestedPreFling(0, -initialVelocity)) {
+                            if (mFlingRunnable == null) {
+                                mFlingRunnable = new FlingRunnable();
+                            }
+                            reportScrollStateChange(OnScrollListener.SCROLL_STATE_FLING);
+                            mFlingRunnable.start(-initialVelocity);
+                            dispatchNestedFling(0, -initialVelocity, true);
+                        } else {
+                            mTouchMode = TOUCH_MODE_REST;
+                            reportScrollStateChange(OnScrollListener.SCROLL_STATE_IDLE);
                         }
-                        reportScrollStateChange(OnScrollListener.SCROLL_STATE_FLING);
-
-                        mFlingRunnable.start(-initialVelocity);
-                        dispatchNestedFling(0, -initialVelocity, true);
                     } else {
                         mTouchMode = TOUCH_MODE_REST;
                         reportScrollStateChange(OnScrollListener.SCROLL_STATE_IDLE);
@@ -4029,7 +4033,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             if (mFlingRunnable == null) {
                 mFlingRunnable = new FlingRunnable();
             }
-            mFlingRunnable.start((int) velocityY);
+            if (!dispatchNestedPreFling(0, velocityY)) {
+                mFlingRunnable.start((int) velocityY);
+            }
             return true;
         }
         return dispatchNestedFling(velocityX, velocityY, consumed);
