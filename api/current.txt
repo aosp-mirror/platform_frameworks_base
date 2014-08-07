@@ -8680,6 +8680,7 @@ package android.content.pm {
     field public static final int FAILURE_CONFLICT = 2; // 0x2
     field public static final int FAILURE_INCOMPATIBLE = 4; // 0x4
     field public static final int FAILURE_INVALID = 1; // 0x1
+    field public static final int FAILURE_REJECTED = 5; // 0x5
     field public static final int FAILURE_STORAGE = 3; // 0x3
     field public static final int FAILURE_UNKNOWN = 0; // 0x0
   }
