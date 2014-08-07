@@ -2315,30 +2315,39 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         enforceCrossUserPermission(userHandle);
         synchronized (this) {
-            int count = 0;
+            ActiveAdmin admin = (who != null) ? getActiveAdminUncheckedLocked(who, userHandle)
+                    : getAdminWithMinimumFailedPasswordsForWipeLocked(userHandle);
+            return admin != null ? admin.maximumFailedPasswordsForWipe : 0;
+        }
+    }
 
-            if (who != null) {
-                ActiveAdmin admin = getActiveAdminUncheckedLocked(who, userHandle);
-                return admin != null ? admin.maximumFailedPasswordsForWipe : count;
-            }
+    /**
+     * Returns the admin with the strictest policy on maximum failed passwords for this user and all
+     * profiles that are visible from this user. If the policy for the primary and any other profile
+     * are equal, it returns the admin for the primary profile.
+     * Returns {@code null} if none of them have that policy set.
+     */
+    private ActiveAdmin getAdminWithMinimumFailedPasswordsForWipeLocked(int userHandle) {
+        int count = 0;
+        ActiveAdmin strictestAdmin = null;
+        for (UserInfo userInfo : mUserManager.getProfiles(userHandle)) {
+            DevicePolicyData policy = getUserData(userInfo.getUserHandle().getIdentifier());
+            for (ActiveAdmin admin : policy.mAdminList) {
+                if (admin.maximumFailedPasswordsForWipe ==
+                        ActiveAdmin.DEF_MAXIMUM_FAILED_PASSWORDS_FOR_WIPE) {
+                    continue;  // No max number of failed passwords policy set for this profile.
+                }
 
-            // Return strictest policy for this user and profiles that are visible from this user.
-            List<UserInfo> profiles = mUserManager.getProfiles(userHandle);
-            for (UserInfo userInfo : profiles) {
-                DevicePolicyData policy = getUserData(userInfo.getUserHandle().getIdentifier());
-                final int N = policy.mAdminList.size();
-                for (int i=0; i<N; i++) {
-                    ActiveAdmin admin = policy.mAdminList.get(i);
-                    if (count == 0) {
-                        count = admin.maximumFailedPasswordsForWipe;
-                    } else if (admin.maximumFailedPasswordsForWipe != 0
-                            && count > admin.maximumFailedPasswordsForWipe) {
-                        count = admin.maximumFailedPasswordsForWipe;
-                    }
+                // We always favor the primary profile if several profiles have the same value set.
+                if (count == 0 ||
+                        count > admin.maximumFailedPasswordsForWipe ||
+                        (userInfo.isPrimary() && count >= admin.maximumFailedPasswordsForWipe)) {
+                    count = admin.maximumFailedPasswordsForWipe;
+                    strictestAdmin = admin;
                 }
             }
-            return count;
         }
+        return strictestAdmin;
     }
 
     public boolean resetPassword(String password, int flags, int userHandle) {
@@ -2713,7 +2722,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 public void run() {
                     try {
                         ActivityManagerNative.getDefault().switchUser(UserHandle.USER_OWNER);
-                        mUserManager.removeUser(userHandle);
+                        if (!mUserManager.removeUser(userHandle)) {
+                            Slog.w(LOG_TAG, "Couldn't remove user " + userHandle);
+                        }
                     } catch (RemoteException re) {
                         // Shouldn't happen
                     }
@@ -2837,9 +2848,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 policy.mFailedPasswordAttempts++;
                 saveSettingsLocked(userHandle);
                 if (mHasFeature) {
-                    int max = getMaximumFailedPasswordsForWipe(null, userHandle);
+                    ActiveAdmin strictestAdmin =
+                            getAdminWithMinimumFailedPasswordsForWipeLocked(userHandle);
+                    int max = strictestAdmin.maximumFailedPasswordsForWipe;
                     if (max > 0 && policy.mFailedPasswordAttempts >= max) {
-                        wipeDeviceOrUserLocked(0, userHandle);
+                        // Wipe the user/profile associated with the policy that was violated. This
+                        // is not necessarily calling user: if the policy that fired was from a
+                        // managed profile rather than the main user profile, we wipe former only.
+                        wipeDeviceOrUserLocked(0, strictestAdmin.getUserHandle().getIdentifier());
                     }
                     sendAdminCommandToSelfAndProfilesLocked(
                             DeviceAdminReceiver.ACTION_PASSWORD_FAILED,
