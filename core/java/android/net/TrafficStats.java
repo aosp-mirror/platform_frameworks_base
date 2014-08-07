@@ -16,6 +16,7 @@
 
 package android.net;
 
+import android.annotation.SystemApi;
 import android.app.DownloadManager;
 import android.app.backup.BackupManager;
 import android.content.Context;
@@ -127,6 +128,16 @@ public class TrafficStats {
     }
 
     /**
+     * System API for backup-related support components to tag network traffic
+     * appropriately.
+     * @hide
+     */
+    @SystemApi
+    public static void setThreadStatsTagBackup() {
+        setThreadStatsTag(TAG_SYSTEM_BACKUP);
+    }
+
+    /**
      * Get the active tag used when accounting {@link Socket} traffic originating
      * from the current thread. Only one active tag per thread is supported.
      * {@link #tagSocket(Socket)}.
@@ -160,11 +171,13 @@ public class TrafficStats {
      *
      * @hide
      */
+    @SystemApi
     public static void setThreadStatsUid(int uid) {
         NetworkManagementSocketTagger.setThreadSocketStatsUid(uid);
     }
 
     /** {@hide} */
+    @SystemApi
     public static void clearThreadStatsUid() {
         NetworkManagementSocketTagger.setThreadSocketStatsUid(-1);
     }
