@@ -2540,15 +2540,19 @@
     Contact your wireless service provider for another SIM card.</string>
 
     <!-- Shown on transport control of lockscreen. Pressing button goes to previous track. -->
-    <string name="lockscreen_transport_prev_description">Previous track button</string>
+    <string name="lockscreen_transport_prev_description">Previous track</string>
     <!-- Shown on transport control of lockscreen. Pressing button goes to next track. -->
-    <string name="lockscreen_transport_next_description">Next track button</string>
+    <string name="lockscreen_transport_next_description">Next track</string>
     <!-- Shown on transport control of lockscreen. Pressing button pauses playback -->
-    <string name="lockscreen_transport_pause_description">Pause button</string>
+    <string name="lockscreen_transport_pause_description">Pause</string>
     <!-- Shown on transport control of lockscreen. Pressing button pauses playback -->
-    <string name="lockscreen_transport_play_description">Play button</string>
+    <string name="lockscreen_transport_play_description">Play</string>
     <!-- Shown on transport control of lockscreen. Pressing button pauses playback -->
-    <string name="lockscreen_transport_stop_description">Stop button</string>
+    <string name="lockscreen_transport_stop_description">Stop</string>
+    <!-- Shown on transport control screens. Pressing button rewinds playback [CHAR LIMIT=NONE]-->
+    <string name="lockscreen_transport_rew_description">Rewind</string>
+    <!-- Shown on transport control screens. Pressing button fast forwards playback [CHAR LIMIT=NONE]-->
+    <string name="lockscreen_transport_ffw_description">Fast forward</string>
 
     <!-- Shown in the lock screen when there is emergency calls only mode. -->
     <string name="emergency_calls_only" msgid="2485604591272668370">Emergency calls only</string>
