@@ -20,7 +20,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.service.voice.AlwaysOnHotwordDetector;
 import android.service.voice.AlwaysOnHotwordDetector.Callback;
-import android.service.voice.AlwaysOnHotwordDetector.TriggerAudio;
+import android.service.voice.AlwaysOnHotwordDetector.EventPayload;
 import android.service.voice.VoiceInteractionService;
 import android.util.Log;
 
@@ -37,7 +37,7 @@ public class MainInteractionService extends VoiceInteractionService {
         }
 
         @Override
-        public void onDetected(TriggerAudio triggerAudio) {
+        public void onDetected(EventPayload eventPayload) {
             Log.i(TAG, "onDetected");
         }
 
