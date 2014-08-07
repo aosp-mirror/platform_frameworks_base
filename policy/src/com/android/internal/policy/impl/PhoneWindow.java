@@ -1314,7 +1314,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             mBackgroundDrawable = drawable;
             if (mDecor != null) {
                 mDecor.setWindowBackground(drawable);
-                mDecor.setClipToOutline(drawable != null && mClipToOutline);
             }
         }
     }
@@ -3389,10 +3388,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             }
             mDecor.setWindowBackground(background);
 
-            if (background != null) {
-                mDecor.setClipToOutline(mClipToOutline);
-            }
-
             final Drawable frame;
             if (mFrameResource != 0) {
                 frame = getContext().getDrawable(mFrameResource);
@@ -3402,6 +3397,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             mDecor.setWindowFrame(frame);
 
             mDecor.setElevation(mElevation);
+            mDecor.setClipToOutline(mClipToOutline);
 
             if (mTitle != null) {
                 setTitle(mTitle);
