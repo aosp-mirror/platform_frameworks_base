@@ -33,7 +33,7 @@ import com.android.server.hdmi.HdmiControlService.SendMessageCallback;
  * for a new active source. It does its best to wake up the target in standby mode
  * before issuing the command &gt;Set Stream path&lt;.
  */
-final class DeviceSelectAction extends FeatureAction {
+final class DeviceSelectAction extends HdmiCecFeatureAction {
     private static final String TAG = "DeviceSelect";
 
     // Time in milliseconds we wait for the device power status to switch to 'Standby'

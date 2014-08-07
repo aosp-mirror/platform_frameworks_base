@@ -29,7 +29,7 @@ import com.android.server.hdmi.HdmiControlService.SendMessageCallback;
 /**
  * Feature action that performs one touch record.
  */
-public class OneTouchRecordAction extends FeatureAction {
+public class OneTouchRecordAction extends HdmiCecFeatureAction {
     private static final String TAG = "OneTouchRecordAction";
 
     // Timer out for waiting <Record Status> 120s

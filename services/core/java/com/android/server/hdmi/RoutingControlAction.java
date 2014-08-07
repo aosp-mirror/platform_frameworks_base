@@ -38,7 +38,7 @@ import com.android.server.hdmi.HdmiControlService.SendMessageCallback;
  * <li> Routing at CEC enable time
  * </ul>
  */
-final class RoutingControlAction extends FeatureAction {
+final class RoutingControlAction extends HdmiCecFeatureAction {
     private static final String TAG = "RoutingControlAction";
 
     // State in which we wait for <Routing Information> to arrive. If timed out, we use the
