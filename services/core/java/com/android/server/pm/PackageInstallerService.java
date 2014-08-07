@@ -37,7 +37,6 @@ import static org.xmlpull.v1.XmlPullParser.START_TAG;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.content.Context;
-import android.content.pm.IPackageDeleteObserver;
 import android.content.pm.IPackageDeleteObserver2;
 import android.content.pm.IPackageInstaller;
 import android.content.pm.IPackageInstallerCallback;
@@ -197,6 +196,10 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
                 stage.delete();
             }
         }
+    }
+
+    public static boolean isStageFile(File file) {
+        return sStageFilter.accept(null, file.getName());
     }
 
     @Deprecated
@@ -556,6 +559,15 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
 
         // TODO: flesh out once PM has split support
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setPermissionsResult(int sessionId, boolean accepted) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.INSTALL_PACKAGES, TAG);
+
+        synchronized (mSessions) {
+            mSessions.get(sessionId).setPermissionsResult(accepted);
+        }
     }
 
     @Override

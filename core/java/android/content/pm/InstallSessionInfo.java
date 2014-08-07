@@ -16,7 +16,6 @@
 
 package android.content.pm;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -33,7 +32,11 @@ public class InstallSessionInfo implements Parcelable {
     /** {@hide} */
     public String installerPackageName;
     /** {@hide} */
+    public String resolvedBaseCodePath;
+    /** {@hide} */
     public float progress;
+    /** {@hide} */
+    public boolean sealed;
     /** {@hide} */
     public boolean open;
 
@@ -56,7 +59,9 @@ public class InstallSessionInfo implements Parcelable {
     public InstallSessionInfo(Parcel source) {
         sessionId = source.readInt();
         installerPackageName = source.readString();
+        resolvedBaseCodePath = source.readString();
         progress = source.readFloat();
+        sealed = source.readInt() != 0;
         open = source.readInt() != 0;
 
         mode = source.readInt();
@@ -149,7 +154,9 @@ public class InstallSessionInfo implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(sessionId);
         dest.writeString(installerPackageName);
+        dest.writeString(resolvedBaseCodePath);
         dest.writeFloat(progress);
+        dest.writeInt(sealed ? 1 : 0);
         dest.writeInt(open ? 1 : 0);
 
         dest.writeInt(mode);

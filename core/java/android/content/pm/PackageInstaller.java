@@ -81,6 +81,10 @@ public class PackageInstaller {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_SESSION_DETAILS = "android.content.pm.action.SESSION_DETAILS";
 
+    /** {@hide} */
+    public static final String
+            ACTION_CONFIRM_PERMISSIONS = "android.content.pm.action.CONFIRM_PERMISSIONS";
+
     /**
      * An integer session ID.
      *
@@ -201,6 +205,15 @@ public class PackageInstaller {
         try {
             mInstaller.uninstallSplit(packageName, splitName, 0,
                     new UninstallCallbackDelegate(callback).getBinder(), mUserId);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    /** {@hide} */
+    public void setPermissionsResult(int sessionId, boolean accepted) {
+        try {
+            mInstaller.setPermissionsResult(sessionId, accepted);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
@@ -603,9 +616,8 @@ public class PackageInstaller {
          * permission, incompatible certificates, etc. The user may be able to
          * uninstall another app to fix the issue.
          * <p>
-         * The extras bundle may contain {@link #EXTRA_PACKAGE_NAME} if one
-         * specific package was identified as the cause of the conflict. If
-         * unknown, or multiple packages, the extra may be {@code null}.
+         * The extras bundle may contain {@link #EXTRA_PACKAGE_NAME} with the
+         * specific packages identified as the cause of the conflict.
          */
         public static final int FAILURE_CONFLICT = 2;
 
@@ -625,6 +637,15 @@ public class PackageInstaller {
          * never succeed.
          */
         public static final int FAILURE_INCOMPATIBLE = 4;
+
+        /**
+         * This install session failed because it was rejected. For example, the
+         * user declined requested permissions, or a package verifier rejected
+         * the session.
+         *
+         * @see PackageManager#VERIFICATION_REJECT
+         */
+        public static final int FAILURE_REJECTED = 5;
 
         public static final String EXTRA_PACKAGE_NAME = "android.content.pm.extra.PACKAGE_NAME";
 

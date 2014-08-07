@@ -36,4 +36,6 @@ interface IPackageInstaller {
 
     void uninstall(String packageName, int flags, in IPackageDeleteObserver2 observer, int userId);
     void uninstallSplit(String packageName, String splitName, int flags, in IPackageDeleteObserver2 observer, int userId);
+
+    void setPermissionsResult(int sessionId, boolean accepted);
 }

@@ -4084,7 +4084,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         for (File file : files) {
-            final boolean isPackage = isApkFile(file) || file.isDirectory();
+            final boolean isPackage = (isApkFile(file) || file.isDirectory())
+                    && !PackageInstallerService.isStageFile(file);
             if (!isPackage) {
                 // Ignore entries which are not apk's
                 continue;
