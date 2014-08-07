@@ -304,8 +304,8 @@ please see themes_device_defaults.xml.
         <item name="actionButtonStyle">@style/Widget.Material.ActionButton</item>
         <item name="actionOverflowButtonStyle">@style/Widget.Material.ActionButton.Overflow</item>
         <item name="actionOverflowMenuStyle">@style/Widget.Material.PopupMenu.Overflow</item>
-        <item name="actionModeBackground">?attr/colorPrimaryDark</item>
-        <item name="actionModeSplitBackground">?attr/colorPrimaryDark</item>
+        <item name="actionModeBackground">@drawable/cab_background_top_material</item>
+        <item name="actionModeSplitBackground">@drawable/cab_background_bottom_material</item>
         <item name="actionModeCloseDrawable">@drawable/ic_cab_done_material</item>
         <item name="actionBarTabStyle">@style/Widget.Material.ActionBar.TabView</item>
         <item name="actionBarTabBarStyle">@style/Widget.Material.ActionBar.TabBar</item>
@@ -650,9 +650,8 @@ please see themes_device_defaults.xml.
         <item name="actionButtonStyle">@style/Widget.Material.Light.ActionButton</item>
         <item name="actionOverflowButtonStyle">@style/Widget.Material.Light.ActionButton.Overflow</item>
         <item name="actionOverflowMenuStyle">@style/Widget.Material.Light.PopupMenu.Overflow</item>
-        <item name="actionBarPopupTheme">@null</item>
-        <item name="actionModeBackground">@drawable/cab_background_top_holo_light</item>
-        <item name="actionModeSplitBackground">@drawable/cab_background_bottom_holo_light</item>
+        <item name="actionModeBackground">@drawable/cab_background_top_material</item>
+        <item name="actionModeSplitBackground">@drawable/cab_background_bottom_material</item>
         <item name="actionModeCloseDrawable">@drawable/ic_cab_done_material</item>
         <item name="actionBarTabStyle">@style/Widget.Material.Light.ActionBar.TabView</item>
         <item name="actionBarTabBarStyle">@style/Widget.Material.Light.ActionBar.TabBar</item>
@@ -663,6 +662,7 @@ please see themes_device_defaults.xml.
         <item name="actionBarSize">@dimen/action_bar_default_height_material</item>
         <item name="actionModePopupWindowStyle">@style/Widget.Material.Light.PopupWindow.ActionMode</item>
         <item name="actionBarWidgetTheme">@null</item>
+        <item name="actionBarPopupTheme">@null</item>
         <item name="actionBarTheme">@style/ThemeOverlay.Material.ActionBar</item>
         <item name="actionBarItemBackground">?attr/selectableItemBackgroundBorderless</item>
 
@@ -960,16 +960,8 @@ please see themes_device_defaults.xml.
     </style>
 
     <!-- Theme for the search input bar. -->
-
-    <style name="Theme.Material.SearchBar" parent="Theme.Material.Panel">
-        <item name="actionModeBackground">@drawable/cab_background_top_holo_dark</item>
-        <item name="actionModeSplitBackground">@drawable/cab_background_bottom_holo_light</item>
-    </style>
-
-    <style name="Theme.Material.Light.SearchBar" parent="Theme.Material.Light.Panel">
-        <item name="actionModeBackground">@drawable/cab_background_top_holo_light</item>
-        <item name="actionModeSplitBackground">@drawable/cab_background_bottom_holo_light</item>
-    </style>
+    <style name="Theme.Material.SearchBar" parent="Theme.Material.Panel" />
+    <style name="Theme.Material.Light.SearchBar" parent="Theme.Material.Light.Panel" />
 
     <!-- Menu Themes -->
     <eat-comment />
