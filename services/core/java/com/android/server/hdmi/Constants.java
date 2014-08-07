@@ -16,7 +16,7 @@
 
 package com.android.server.hdmi;
 
-import android.hardware.hdmi.HdmiCecDeviceInfo;
+import android.hardware.hdmi.HdmiDeviceInfo;
 
 /**
  * Defines constants related to HDMI-CEC protocol internal implementation.
@@ -80,7 +80,7 @@ final class Constants {
     public static final int ADDR_INVALID = -1;
 
     /** Logical address used to indicate the source comes from internal device. */
-    public static final int ADDR_INTERNAL = HdmiCecDeviceInfo.ADDR_INTERNAL;
+    public static final int ADDR_INTERNAL = HdmiDeviceInfo.ADDR_INTERNAL;
 
     static final int MESSAGE_FEATURE_ABORT = 0x00;
     static final int MESSAGE_IMAGE_VIEW_ON = 0x04;
@@ -178,8 +178,8 @@ final class Constants {
     static final int ROUTING_PATH_TOP_MASK = 0xF000;
     static final int ROUTING_PATH_TOP_SHIFT = 12;
 
-    static final int INVALID_PORT_ID = HdmiCecDeviceInfo.PORT_INVALID;
-    static final int INVALID_PHYSICAL_ADDRESS = HdmiCecDeviceInfo.PATH_INVALID;
+    static final int INVALID_PORT_ID = HdmiDeviceInfo.PORT_INVALID;
+    static final int INVALID_PHYSICAL_ADDRESS = HdmiDeviceInfo.PATH_INVALID;
 
     // Send result codes. It should be consistent with hdmi_cec.h's send_message error code.
     static final int SEND_RESULT_SUCCESS = 0;

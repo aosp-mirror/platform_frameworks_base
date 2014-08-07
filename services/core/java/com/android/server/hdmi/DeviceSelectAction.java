@@ -16,7 +16,7 @@
 
 package com.android.server.hdmi;
 
-import android.hardware.hdmi.HdmiCecDeviceInfo;
+import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiTvClient;
 import android.hardware.hdmi.IHdmiControlCallback;
@@ -67,7 +67,7 @@ final class DeviceSelectAction extends FeatureAction {
     // before we give up and mark the action as failure.
     private static final int STATE_WAIT_FOR_ACTIVE_SOURCE = 4;
 
-    private final HdmiCecDeviceInfo mTarget;
+    private final HdmiDeviceInfo mTarget;
     private final IHdmiControlCallback mCallback;
     private final HdmiCecMessage mGivePowerStatus;
 
@@ -81,7 +81,7 @@ final class DeviceSelectAction extends FeatureAction {
      * @param callback callback object
      */
     public DeviceSelectAction(HdmiCecLocalDeviceTv source,
-            HdmiCecDeviceInfo target, IHdmiControlCallback callback) {
+            HdmiDeviceInfo target, IHdmiControlCallback callback) {
         super(source);
         mCallback = callback;
         mTarget = target;

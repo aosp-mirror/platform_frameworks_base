@@ -16,7 +16,7 @@
 
 package com.android.server.hdmi;
 
-import android.hardware.hdmi.HdmiCecDeviceInfo;
+import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.IHdmiControlCallback;
 
@@ -37,7 +37,7 @@ final class SystemAudioActionFromAvr extends SystemAudioAction {
     SystemAudioActionFromAvr(HdmiCecLocalDevice source, int avrAddress,
             boolean targetStatus, IHdmiControlCallback callback) {
         super(source, avrAddress, targetStatus, callback);
-        HdmiUtils.verifyAddressType(getSourceAddress(), HdmiCecDeviceInfo.DEVICE_TV);
+        HdmiUtils.verifyAddressType(getSourceAddress(), HdmiDeviceInfo.DEVICE_TV);
     }
 
     @Override
