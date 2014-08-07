@@ -322,22 +322,27 @@ public final class BluetoothLeScanner {
         }
 
         @Override
-        public void onFoundOrLost(boolean onFound, String address, int rssi,
-                byte[] advData) {
+        public void onFoundOrLost(final boolean onFound, final ScanResult scanResult) {
             if (DBG) {
-                Log.d(TAG, "onFoundOrLost() - Device=" + address);
+                Log.d(TAG, "onFoundOrLost() - onFound = " + onFound +
+                        " " + scanResult.toString());
             }
-            // ToDo: Fix issue with underlying reporting from chipset
-            BluetoothDevice device = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(
-                    address);
-            long scanNanos = SystemClock.elapsedRealtimeNanos();
-            ScanResult result = new ScanResult(device, ScanRecord.parseFromBytes(advData), rssi,
-                    scanNanos);
-            if (onFound) {
-                mScanCallback.onScanResult(ScanSettings.CALLBACK_TYPE_FIRST_MATCH, result);
-            } else {
-                mScanCallback.onScanResult(ScanSettings.CALLBACK_TYPE_MATCH_LOST, result);
+
+            // Check null in case the scan has been stopped
+            synchronized (this) {
+                if (mClientIf <= 0) return;
             }
+            Handler handler = new Handler(Looper.getMainLooper());
+            handler.post(new Runnable() {
+                    @Override
+                public void run() {
+                    if (onFound) {
+                        mScanCallback.onScanResult(ScanSettings.CALLBACK_TYPE_FIRST_MATCH, scanResult);
+                    } else {
+                        mScanCallback.onScanResult(ScanSettings.CALLBACK_TYPE_MATCH_LOST, scanResult);
+                    }
+                }
+            });
         }
     }
 
