@@ -83,7 +83,7 @@ public class UserDetailView extends GridView {
                     mContext, convertView, parent);
             String name = getName(mContext, item);
             if (item.picture == null) {
-                v.bind(name, mContext.getDrawable(R.drawable.ic_account_circle_qs));
+                v.bind(name, getDrawable(mContext, item));
             } else {
                 v.bind(name, item.picture);
             }

@@ -16,11 +16,14 @@
 
 package com.android.systemui.qs.tiles;
 
+import com.android.internal.util.ArrayUtils;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.UserAvatarView;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -36,6 +39,8 @@ public class UserDetailItemView extends LinearLayout {
 
     private UserAvatarView mAvatar;
     private TextView mName;
+    private Typeface mRegularTypeface;
+    private Typeface mActivatedTypeface;
 
     public UserDetailItemView(Context context) {
         this(context, null);
@@ -52,6 +57,21 @@ public class UserDetailItemView extends LinearLayout {
     public UserDetailItemView(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+        final TypedArray a = context.obtainStyledAttributes(
+                attrs, R.styleable.UserDetailItemView, defStyleAttr, defStyleRes);
+        final int N = a.getIndexCount();
+        for (int i = 0; i < N; i++) {
+            int attr = a.getIndex(i);
+            switch (attr) {
+                case R.styleable.UserDetailItemView_regularFontFamily:
+                    mRegularTypeface = Typeface.create(a.getString(attr), 0 /* style */);
+                    break;
+                case R.styleable.UserDetailItemView_activatedFontFamily:
+                    mActivatedTypeface = Typeface.create(a.getString(attr), 0 /* style */);
+                    break;
+            }
+        }
+        a.recycle();
     }
 
     public static UserDetailItemView convertOrInflate(Context context, View convertView,
@@ -77,6 +97,23 @@ public class UserDetailItemView extends LinearLayout {
     protected void onFinishInflate() {
         mAvatar = (UserAvatarView) findViewById(R.id.user_picture);
         mName = (TextView) findViewById(R.id.user_name);
+        if (mRegularTypeface == null) {
+            mRegularTypeface = mName.getTypeface();
+        }
+        if (mActivatedTypeface == null) {
+            mActivatedTypeface = mName.getTypeface();
+        }
+        updateTypeface();
     }
 
+    @Override
+    protected void drawableStateChanged() {
+        super.drawableStateChanged();
+        updateTypeface();
+    }
+
+    private void updateTypeface() {
+        boolean activated = ArrayUtils.contains(getDrawableState(), android.R.attr.state_activated);
+        mName.setTypeface(activated ? mActivatedTypeface : mRegularTypeface);
+    }
 }
