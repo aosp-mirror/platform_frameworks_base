@@ -188,9 +188,28 @@ public class AlwaysOnHotwordDetector {
         /**
          * Indicates if {@code data} is the audio that triggered the keyphrase.
          */
-        public final boolean isTriggerAudio;
+        public final boolean triggerAvailable;
         /**
-         * Format of {@code data}. May be null if {@code isTriggerAudio} is false.
+         * Indicates if {@code captureSession} can be used to continue capturing more audio from
+         * the DSP hardware.
+         *
+         * Candidate for public API
+         * @hide
+         */
+        public final boolean captureAvailable;
+        /**
+         * The session to use when attempting to capture more audio from the DSP hardware.
+         *
+         * Candidate for public API
+         * TODO: When unhiding, change javadoc of audioFormat to -
+         * "Format of {@code data} or the audio that may be captured using {@code captureSession}.
+         * May be null if {@code triggerAvailable} and {@code captureAvailable} are false."
+         * @hide
+         */
+        public final int captureSession;
+        /**
+         * Format of {@code data}.
+         * May be null if {@code triggerAvailable} is false.
          */
         @Nullable
         public final AudioFormat audioFormat;
@@ -201,8 +220,11 @@ public class AlwaysOnHotwordDetector {
         @Nullable
         public final byte[] data;
 
-        private EventPayload(boolean _isTriggerAudio, AudioFormat _audioFormat, byte[] _data) {
-            isTriggerAudio = _isTriggerAudio;
+        private EventPayload(boolean _triggerAvailable, boolean _captureAvailable,
+                AudioFormat _audioFormat, int _captureSession, byte[] _data) {
+            triggerAvailable = _triggerAvailable;
+            captureAvailable = _captureAvailable;
+            captureSession = _captureSession;
             audioFormat = _audioFormat;
             data = _data;
         }
@@ -513,7 +535,8 @@ public class AlwaysOnHotwordDetector {
                 Slog.i(TAG, "onDetected");
             }
             Message.obtain(mHandler, MSG_HOTWORD_DETECTED,
-                    new EventPayload(event.triggerInData, event.captureFormat, event.data))
+                    new EventPayload(event.triggerInData, event.captureAvailable,
+                            event.captureFormat, event.captureSession, event.data))
                     .sendToTarget();
         }
 
