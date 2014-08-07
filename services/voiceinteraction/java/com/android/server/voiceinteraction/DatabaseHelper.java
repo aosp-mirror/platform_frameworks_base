@@ -41,12 +41,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     static final boolean DBG = true;
 
     private static final String NAME = "sound_model.db";
-    private static final int VERSION = 3;
+    private static final int VERSION = 4;
 
     public static interface SoundModelContract {
         public static final String TABLE = "sound_model";
-        public static final String KEY_KEYPHRASE_ID = "keyphrase_id";
         public static final String KEY_MODEL_UUID = "model_uuid";
+        public static final String KEY_KEYPHRASE_ID = "keyphrase_id";
         public static final String KEY_TYPE = "type";
         public static final String KEY_DATA = "data";
         public static final String KEY_RECOGNITION_MODES = "recognition_modes";
@@ -58,8 +58,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // Table Create Statement
     private static final String CREATE_TABLE_SOUND_MODEL = "CREATE TABLE "
             + SoundModelContract.TABLE + "("
-            + SoundModelContract.KEY_KEYPHRASE_ID + " INTEGER PRIMARY KEY,"
-            + SoundModelContract.KEY_MODEL_UUID + " TEXT,"
+            + SoundModelContract.KEY_MODEL_UUID + " TEXT PRIMARY KEY,"
+            + SoundModelContract.KEY_KEYPHRASE_ID + " INTEGER,"
             + SoundModelContract.KEY_TYPE + " INTEGER,"
             + SoundModelContract.KEY_DATA + " BLOB,"
             + SoundModelContract.KEY_RECOGNITION_MODES + " INTEGER,"
@@ -122,10 +122,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     /**
      * Deletes the sound model and associated keyphrases.
      */
-    public boolean deleteKeyphraseSoundModel(int keyphraseId) {
+    public boolean deleteKeyphraseSoundModel(UUID modelUuid) {
+        if (modelUuid == null) {
+            Slog.w(TAG, "Model UUID must be specified for deletion");
+            return false;
+        }
+
         synchronized(this) {
             SQLiteDatabase db = getWritableDatabase();
-            String soundModelClause = SoundModelContract.KEY_KEYPHRASE_ID + "=" + keyphraseId;
+            String soundModelClause = SoundModelContract.KEY_MODEL_UUID + "="
+                    + modelUuid.toString();
 
             try {
                 return db.delete(SoundModelContract.TABLE, soundModelClause, null) != 0;
@@ -151,52 +157,56 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             try {
                 if (c.moveToFirst()) {
-                    int type = c.getInt(c.getColumnIndex(SoundModelContract.KEY_TYPE));
-                    if (type != SoundTrigger.SoundModel.TYPE_KEYPHRASE) {
-                        Slog.w(TAG, "No KeyphraseSoundModel available for the given keyphrase");
-                        return null;
-                    }
-
-                    String modelUuid = c.getString(
-                            c.getColumnIndex(SoundModelContract.KEY_MODEL_UUID));
-                    if (modelUuid == null) {
-                        Slog.w(TAG, "Ignoring sound model since it doesn't specify an ID");
-                        return null;
-                    }
-
-                    byte[] data = c.getBlob(c.getColumnIndex(SoundModelContract.KEY_DATA));
-                    int recognitionModes = c.getInt(
-                            c.getColumnIndex(SoundModelContract.KEY_RECOGNITION_MODES));
-                    int[] users = getArrayForCommaSeparatedString(
-                            c.getString(c.getColumnIndex(SoundModelContract.KEY_USERS)));
-                    String locale = c.getString(c.getColumnIndex(SoundModelContract.KEY_LOCALE));
-                    String text = c.getString(
-                            c.getColumnIndex(SoundModelContract.KEY_HINT_TEXT));
-
-                    // Only add keyphrases meant for the current user.
-                    if (users == null) {
-                        // No users present in the keyphrase.
-                        Slog.w(TAG, "Ignoring keyphrase since it doesn't specify users");
-                        return null;
-                    }
-                    boolean isAvailableForCurrentUser = false;
-                    int currentUser = mUserManager.getUserHandle();
-                    for (int user : users) {
-                        if (currentUser == user) {
-                            isAvailableForCurrentUser = true;
-                            break;
+                    do {
+                        int type = c.getInt(c.getColumnIndex(SoundModelContract.KEY_TYPE));
+                        if (type != SoundTrigger.SoundModel.TYPE_KEYPHRASE) {
+                            Slog.w(TAG, "Ignoring sound model since it's type is incorrect");
+                            continue;
                         }
-                    }
-                    if (!isAvailableForCurrentUser) {
-                        Slog.w(TAG, "Ignoring keyphrase since it's not for the current user");
-                        return null;
-                    }
 
-                    Keyphrase[] keyphrases = new Keyphrase[1];
-                    keyphrases[0] = new Keyphrase(
-                            keyphraseId, recognitionModes, locale, text, users);
-                    return new KeyphraseSoundModel(UUID.fromString(modelUuid),
-                            null /* FIXME use vendor UUID */, data, keyphrases);
+                        String modelUuid = c.getString(
+                                c.getColumnIndex(SoundModelContract.KEY_MODEL_UUID));
+                        if (modelUuid == null) {
+                            Slog.w(TAG, "Ignoring sound model since it doesn't specify an ID");
+                            continue;
+                        }
+
+                        byte[] data = c.getBlob(c.getColumnIndex(SoundModelContract.KEY_DATA));
+                        int recognitionModes = c.getInt(
+                                c.getColumnIndex(SoundModelContract.KEY_RECOGNITION_MODES));
+                        int[] users = getArrayForCommaSeparatedString(
+                                c.getString(c.getColumnIndex(SoundModelContract.KEY_USERS)));
+                        String locale = c.getString(
+                                c.getColumnIndex(SoundModelContract.KEY_LOCALE));
+                        String text = c.getString(
+                                c.getColumnIndex(SoundModelContract.KEY_HINT_TEXT));
+
+                        // Only add keyphrases meant for the current user.
+                        if (users == null) {
+                            // No users present in the keyphrase.
+                            Slog.w(TAG, "Ignoring keyphrase since it doesn't specify users");
+                            continue;
+                        }
+
+                        boolean isAvailableForCurrentUser = false;
+                        int currentUser = mUserManager.getUserHandle();
+                        for (int user : users) {
+                            if (currentUser == user) {
+                                isAvailableForCurrentUser = true;
+                                break;
+                            }
+                        }
+                        if (!isAvailableForCurrentUser) {
+                            Slog.w(TAG, "Ignoring keyphrase since it's not for the current user");
+                            continue;
+                        }
+
+                        Keyphrase[] keyphrases = new Keyphrase[1];
+                        keyphrases[0] = new Keyphrase(
+                                keyphraseId, recognitionModes, locale, text, users);
+                        return new KeyphraseSoundModel(UUID.fromString(modelUuid),
+                                null /* FIXME use vendor UUID */, data, keyphrases);
+                    } while (c.moveToNext());
                 }
                 Slog.w(TAG, "No SoundModel available for the given keyphrase");
             } finally {
