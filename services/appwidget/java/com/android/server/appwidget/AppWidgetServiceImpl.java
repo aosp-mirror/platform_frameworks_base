@@ -2732,13 +2732,16 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             }
 
             // Take a note we no longer have state for this user.
-            final int index = mLoadedUserIds.indexOfKey(userId);
-            if (index >= 0) {
-                mLoadedUserIds.removeAt(index);
+            final int userIndex = mLoadedUserIds.indexOfKey(userId);
+            if (userIndex >= 0) {
+                mLoadedUserIds.removeAt(userIndex);
             }
 
             // Remove the widget id counter.
-            mNextAppWidgetIds.removeAt(userId);
+            final int nextIdIndex = mNextAppWidgetIds.indexOfKey(userId);
+            if (nextIdIndex >= 0) {
+                mNextAppWidgetIds.removeAt(nextIdIndex);
+            }
         }
     }
 

@@ -20,13 +20,11 @@ import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.content.ComponentName;
 import android.os.UserHandle;
-import android.os.UserManager;
 
 /**
  * Describes the meta data for an installed AppWidget provider.  The fields in this class
@@ -166,10 +164,7 @@ public class AppWidgetProviderInfo implements Parcelable {
      *
      * <p>This field corresponds to the <code>android:icon</code> attribute in
      * the <code>&lt;receiver&gt;</code> element in the AndroidManifest.xml file.
-     *
-     * @deprecated Use {@link #loadIcon(android.content.Context, int)}.
      */
-    @Deprecated
     public int icon;
 
     /**
@@ -186,10 +181,7 @@ public class AppWidgetProviderInfo implements Parcelable {
      *
      * <p>This field corresponds to the <code>android:previewImage</code> attribute in
      * the <code>&lt;receiver&gt;</code> element in the AndroidManifest.xml file.
-     *
-     * @deprecated User {@link #loadPreviewImage(android.content.Context, int)}.
      */
-    @Deprecated
     public int previewImage;
 
     /**
@@ -271,16 +263,11 @@ public class AppWidgetProviderInfo implements Parcelable {
      * The loaded icon corresponds to the <code>android:icon</code> attribute in
      * the <code>&lt;receiver&gt;</code> element in the AndroidManifest.xml file.
      * </p>
-     * <p>
-     * <strong>Note:</strong> If you care about widgets from different profiles, you
-     * should use this method to load the icon as the system will apply the correct
-     * badging when applicable, so the user knows which profile a widget comes from.
-     * </p>
      *
      * @param context Context for accessing resources.
      * @param density The optional desired density as per
      *         {@link android.util.DisplayMetrics#densityDpi}.
-     * @return The potentially badged provider icon.
+     * @return The provider icon.
      */
     public final Drawable loadIcon(Context context, int density) {
         return loadDrawable(context, density, providerInfo.getIconResource());
@@ -296,19 +283,12 @@ public class AppWidgetProviderInfo implements Parcelable {
      * The loaded image corresponds to the <code>android:previewImage</code> attribute
      * in the <code>&lt;receiver&gt;</code> element in the AndroidManifest.xml file.
      * </p>
-     * <p>
-     * <strong>Note:</strong> If you care about widgets from different profiles, you
-     * should use this method to load the preview image as the system will apply the
-     * correct badging when applicable, so the user knows which profile a previewed
-     * widget comes from.
-     * </p>
      *
      * @param context Context for accessing resources.
      * @param density The optional desired density as per
      *         {@link android.util.DisplayMetrics#densityDpi}.
-     * @return The potentially badged widget preview image.
+     * @return The widget preview image.
      */
-    @SuppressWarnings("deprecation")
     public final Drawable loadPreviewImage(Context context, int density) {
         return loadDrawable(context, density, previewImage);
     }
@@ -384,27 +364,16 @@ public class AppWidgetProviderInfo implements Parcelable {
         try {
             Resources resources = context.getPackageManager().getResourcesForApplication(
                     providerInfo.applicationInfo);
-
-            final Drawable drawable;
             if (resourceId > 0) {
                 if (density <= 0) {
                     density = context.getResources().getDisplayMetrics().densityDpi;
                 }
-                drawable = resources.getDrawableForDensity(resourceId, density);
-            } else {
-                drawable = providerInfo.loadIcon(context.getPackageManager());
-            }
-
-            if (drawable instanceof BitmapDrawable) {
-                UserManager userManager = (UserManager) context.getSystemService(
-                        Context.USER_SERVICE);
-                return userManager.getBadgedDrawableForUser(drawable, getProfile());
+                return resources.getDrawableForDensity(resourceId, density);
             }
         } catch (PackageManager.NameNotFoundException | Resources.NotFoundException e) {
             /* ignore */
         }
-
-        return null;
+        return providerInfo.loadIcon(context.getPackageManager());
     }
 
     /**
