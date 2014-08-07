@@ -26,11 +26,24 @@ import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.os.Message;
+import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.telephony.CellIdentityCdma;
+import android.telephony.CellIdentityGsm;
+import android.telephony.CellIdentityLte;
+import android.telephony.CellIdentityWcdma;
+import android.telephony.CellInfo;
+import android.telephony.CellInfoCdma;
+import android.telephony.CellInfoGsm;
+import android.telephony.CellInfoLte;
+import android.telephony.CellInfoWcdma;
+import android.telephony.TelephonyManager;
 
 import com.android.internal.util.Protocol;
 import com.android.internal.util.State;
@@ -41,6 +54,7 @@ import com.android.server.connectivity.NetworkAgentInfo;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.List;
 
 /**
  * {@hide}
@@ -50,6 +64,21 @@ public class NetworkMonitor extends StateMachine {
     private static final String TAG = "NetworkMonitor";
     private static final String DEFAULT_SERVER = "clients3.google.com";
     private static final int SOCKET_TIMEOUT_MS = 10000;
+    public static final String ACTION_NETWORK_CONDITIONS_MEASURED =
+            "android.net.conn.NETWORK_CONDITIONS_MEASURED";
+    public static final String EXTRA_CONNECTIVITY_TYPE = "extra_connectivity_type";
+    public static final String EXTRA_NETWORK_TYPE = "extra_network_type";
+    public static final String EXTRA_RESPONSE_RECEIVED = "extra_response_received";
+    public static final String EXTRA_IS_CAPTIVE_PORTAL = "extra_is_captive_portal";
+    public static final String EXTRA_CELL_ID = "extra_cellid";
+    public static final String EXTRA_SSID = "extra_ssid";
+    public static final String EXTRA_BSSID = "extra_bssid";
+    /** real time since boot */
+    public static final String EXTRA_REQUEST_TIMESTAMP_MS = "extra_request_timestamp_ms";
+    public static final String EXTRA_RESPONSE_TIMESTAMP_MS = "extra_response_timestamp_ms";
+
+    private static final String PERMISSION_ACCESS_NETWORK_CONDITIONS =
+            "android.permission.ACCESS_NETWORK_CONDITIONS";
 
     // Intent broadcast when user selects sign-in notification.
     private static final String ACTION_SIGN_IN_REQUESTED =
@@ -182,6 +211,8 @@ public class NetworkMonitor extends StateMachine {
     private final Context mContext;
     private final Handler mConnectivityServiceHandler;
     private final NetworkAgentInfo mNetworkAgentInfo;
+    private final TelephonyManager mTelephonyManager;
+    private final WifiManager mWifiManager;
 
     private String mServer;
     private boolean mIsCaptivePortalCheckEnabled = false;
@@ -203,6 +234,8 @@ public class NetworkMonitor extends StateMachine {
         mContext = context;
         mConnectivityServiceHandler = handler;
         mNetworkAgentInfo = networkAgentInfo;
+        mTelephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+        mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
 
         addState(mDefaultState);
         addState(mOfflineState, mDefaultState);
@@ -616,7 +649,15 @@ public class NetworkMonitor extends StateMachine {
             urlConnection.setConnectTimeout(SOCKET_TIMEOUT_MS);
             urlConnection.setReadTimeout(SOCKET_TIMEOUT_MS);
             urlConnection.setUseCaches(false);
+
+            // Time how long it takes to get a response to our request
+            long requestTimestamp = SystemClock.elapsedRealtime();
+
             urlConnection.getInputStream();
+
+            // Time how long it takes to get a response to our request
+            long responseTimestamp = SystemClock.elapsedRealtime();
+
             httpResponseCode = urlConnection.getResponseCode();
             if (DBG) {
                 log("isCaptivePortal: ret=" + httpResponseCode +
@@ -637,6 +678,9 @@ public class NetworkMonitor extends StateMachine {
                 if (DBG) log("Empty 200 response interpreted as 204 response.");
                 httpResponseCode = 204;
             }
+
+            sendNetworkConditionsBroadcast(true /* response received */, httpResponseCode == 204,
+                    requestTimestamp, responseTimestamp);
         } catch (IOException e) {
             if (DBG) log("Probably not a portal: exception " + e);
             if (httpResponseCode == 599) {
@@ -648,5 +692,85 @@ public class NetworkMonitor extends StateMachine {
             }
         }
         return httpResponseCode;
+    }
+
+    /**
+     * @param responseReceived - whether or not we received a valid HTTP response to our request.
+     * If false, isCaptivePortal and responseTimestampMs are ignored
+     * TODO: This should be moved to the transports.  The latency could be passed to the transports
+     * along with the captive portal result.  Currently the TYPE_MOBILE broadcasts appear unused so
+     * perhaps this could just be added to the WiFi transport only.
+     */
+    private void sendNetworkConditionsBroadcast(boolean responseReceived, boolean isCaptivePortal,
+            long requestTimestampMs, long responseTimestampMs) {
+        if (Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.WIFI_SCAN_ALWAYS_AVAILABLE, 0) == 0) {
+            if (DBG) log("Don't send network conditions - lacking user consent.");
+            return;
+        }
+
+        Intent latencyBroadcast = new Intent(ACTION_NETWORK_CONDITIONS_MEASURED);
+        switch (mNetworkAgentInfo.networkInfo.getType()) {
+            case ConnectivityManager.TYPE_WIFI:
+                WifiInfo currentWifiInfo = mWifiManager.getConnectionInfo();
+                if (currentWifiInfo != null) {
+                    // NOTE: getSSID()'s behavior changed in API 17; before that, SSIDs were not
+                    // surrounded by double quotation marks (thus violating the Javadoc), but this
+                    // was changed to match the Javadoc in API 17. Since clients may have started
+                    // sanitizing the output of this method since API 17 was released, we should
+                    // not change it here as it would become impossible to tell whether the SSID is
+                    // simply being surrounded by quotes due to the API, or whether those quotes
+                    // are actually part of the SSID.
+                    latencyBroadcast.putExtra(EXTRA_SSID, currentWifiInfo.getSSID());
+                    latencyBroadcast.putExtra(EXTRA_BSSID, currentWifiInfo.getBSSID());
+                } else {
+                    if (DBG) logw("network info is TYPE_WIFI but no ConnectionInfo found");
+                    return;
+                }
+                break;
+            case ConnectivityManager.TYPE_MOBILE:
+                latencyBroadcast.putExtra(EXTRA_NETWORK_TYPE, mTelephonyManager.getNetworkType());
+                List<CellInfo> info = mTelephonyManager.getAllCellInfo();
+                if (info == null) return;
+                int numRegisteredCellInfo = 0;
+                for (CellInfo cellInfo : info) {
+                    if (cellInfo.isRegistered()) {
+                        numRegisteredCellInfo++;
+                        if (numRegisteredCellInfo > 1) {
+                            if (DBG) log("more than one registered CellInfo.  Can't " +
+                                    "tell which is active.  Bailing.");
+                            return;
+                        }
+                        if (cellInfo instanceof CellInfoCdma) {
+                            CellIdentityCdma cellId = ((CellInfoCdma) cellInfo).getCellIdentity();
+                            latencyBroadcast.putExtra(EXTRA_CELL_ID, cellId);
+                        } else if (cellInfo instanceof CellInfoGsm) {
+                            CellIdentityGsm cellId = ((CellInfoGsm) cellInfo).getCellIdentity();
+                            latencyBroadcast.putExtra(EXTRA_CELL_ID, cellId);
+                        } else if (cellInfo instanceof CellInfoLte) {
+                            CellIdentityLte cellId = ((CellInfoLte) cellInfo).getCellIdentity();
+                            latencyBroadcast.putExtra(EXTRA_CELL_ID, cellId);
+                        } else if (cellInfo instanceof CellInfoWcdma) {
+                            CellIdentityWcdma cellId = ((CellInfoWcdma) cellInfo).getCellIdentity();
+                            latencyBroadcast.putExtra(EXTRA_CELL_ID, cellId);
+                        } else {
+                            if (DBG) logw("Registered cellinfo is unrecognized");
+                            return;
+                        }
+                    }
+                }
+                break;
+            default:
+                return;
+        }
+        latencyBroadcast.putExtra(EXTRA_CONNECTIVITY_TYPE, mNetworkAgentInfo.networkInfo.getType());
+        latencyBroadcast.putExtra(EXTRA_RESPONSE_RECEIVED, responseReceived);
+        latencyBroadcast.putExtra(EXTRA_REQUEST_TIMESTAMP_MS, requestTimestampMs);
+
+        if (responseReceived) {
+            latencyBroadcast.putExtra(EXTRA_IS_CAPTIVE_PORTAL, isCaptivePortal);
+            latencyBroadcast.putExtra(EXTRA_RESPONSE_TIMESTAMP_MS, responseTimestampMs);
+        }
+        mContext.sendBroadcast(latencyBroadcast, PERMISSION_ACCESS_NETWORK_CONDITIONS);
     }
 }
