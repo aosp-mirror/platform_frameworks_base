@@ -1487,6 +1487,14 @@ results."
           >Security with HTTPS and SSL</a>
       </li>
 
+      <li>
+        <a href="<?cs var:toroot ?>training/articles/security-gms-provider.html"
+           description=
+           "How to use and update Google Play services security provider, to
+           protect against SSL exploits."
+          >Updating Your Security Provider to Protect Against SSL Exploits</a>
+      </li>
+
       <li class="nav-section">
         <div class="nav-section-header">
           <a href="<?cs var:toroot ?>training/enterprise/index.html"
