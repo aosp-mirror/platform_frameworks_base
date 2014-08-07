@@ -148,13 +148,13 @@ public class TrustManagerService extends SystemService {
     private void updateTrustAll() {
         List<UserInfo> userInfos = mUserManager.getUsers(true /* excludeDying */);
         for (UserInfo userInfo : userInfos) {
-            updateTrust(userInfo.id);
+            updateTrust(userInfo.id, false);
         }
     }
 
-    public void updateTrust(int userId) {
+    public void updateTrust(int userId, boolean initiatedByUser) {
         dispatchOnTrustManagedChanged(aggregateIsTrustManaged(userId), userId);
-        dispatchOnTrustChanged(aggregateIsTrusted(userId), userId);
+        dispatchOnTrustChanged(aggregateIsTrusted(userId), userId, initiatedByUser);
     }
 
     void refreshAgentList() {
@@ -272,7 +272,7 @@ public class TrustManagerService extends SystemService {
             }
         }
         if (trustMayHaveChanged) {
-            updateTrust(userId);
+            updateTrust(userId, false);
         }
         refreshAgentList();
     }
@@ -375,7 +375,7 @@ public class TrustManagerService extends SystemService {
 
         if (successful && !mUserHasAuthenticatedSinceBoot.get(userId)) {
             mUserHasAuthenticatedSinceBoot.put(userId, true);
-            updateTrust(userId);
+            updateTrust(userId, false);
         }
     }
 
@@ -386,7 +386,7 @@ public class TrustManagerService extends SystemService {
             updateTrustAll();
         } else {
             mUserHasAuthenticatedSinceBoot.put(userId, false);
-            updateTrust(userId);
+            updateTrust(userId, false);
         }
     }
 
@@ -410,10 +410,11 @@ public class TrustManagerService extends SystemService {
         }
     }
 
-    private void dispatchOnTrustChanged(boolean enabled, int userId) {
+    private void dispatchOnTrustChanged(boolean enabled, int userId, boolean initiatedByUser) {
+        if (!enabled) initiatedByUser = false;
         for (int i = 0; i < mTrustListeners.size(); i++) {
             try {
-                mTrustListeners.get(i).onTrustChanged(enabled, userId);
+                mTrustListeners.get(i).onTrustChanged(enabled, userId, initiatedByUser);
             } catch (DeadObjectException e) {
                 Slog.d(TAG, "Removing dead TrustListener.");
                 mTrustListeners.remove(i);
