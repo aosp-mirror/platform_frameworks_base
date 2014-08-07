@@ -21,10 +21,10 @@ limitations under the License.
 
     <group>
         <path
-            android:fillOpacity="0.9"
+            android:fillColor="#E6000000"
             android:pathData="M11.994999,2.0C6.4679985,2.0 2.0,6.4780006 2.0,12.0s4.468,10.0 9.995,10.0S22.0,17.522 22.0,12.0S17.521,2.0 11.994999,2.0zM12.0,20.0c-4.42,0.0 -8.0,-3.582 -8.0,-8.0s3.58,-8.0 8.0,-8.0s8.0,3.582 8.0,8.0S16.419998,20.0 12.0,20.0z" />
         <path
-            android:fillOpacity="0.9"
+            android:fillColor="#E6000000"
             android:pathData="M12.5,6.0l-1.5,0.0 0.0,7.0 5.3029995,3.1819992 0.75,-1.249999 -4.5529995,-2.7320004z" />
     </group>
 
