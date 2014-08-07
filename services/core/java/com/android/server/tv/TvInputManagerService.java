@@ -1522,6 +1522,34 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
+        public boolean isSingleSessionActive(int userId) throws RemoteException {
+            final long identity = Binder.clearCallingIdentity();
+            final int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
+                    userId, "isSingleSessionActive");
+            try {
+                synchronized (mLock) {
+                    UserState userState = getUserStateLocked(resolvedUserId);
+                    if (userState.sessionStateMap.size() == 1) {
+                        return true;
+                    }
+                    else if (userState.sessionStateMap.size() == 2) {
+                        SessionState[] sessionStates = userState.sessionStateMap.values().toArray(
+                                new SessionState[0]);
+                        // Check if there is a wrapper input.
+                        if (sessionStates[0].mHardwareSessionToken != null
+                                || sessionStates[1].mHardwareSessionToken != null) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
         @SuppressWarnings("resource")
         protected void dump(FileDescriptor fd, final PrintWriter writer, String[] args) {
             final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
