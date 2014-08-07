@@ -103,4 +103,6 @@
     <color name="notification_guts_btn_color">#FFFFFFFF</color>
 
     <color name="search_panel_card_color">#ffffff</color>
+
+    <color name="keyguard_user_switcher_background_gradient_color">#77000000</color>
 </resources>

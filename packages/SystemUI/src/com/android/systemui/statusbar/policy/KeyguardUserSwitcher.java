@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.policy;
 
 import android.content.Context;
 import android.database.DataSetObserver;
-import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,6 +27,8 @@ import android.widget.TextView;
 import com.android.systemui.R;
 import com.android.systemui.qs.tiles.UserDetailItemView;
 import com.android.systemui.statusbar.phone.KeyguardStatusBarView;
+import com.android.systemui.statusbar.phone.NotificationPanelView;
+import com.android.systemui.statusbar.phone.StatusBarHeaderView;
 import com.android.systemui.statusbar.phone.UserAvatarView;
 
 /**
@@ -44,11 +45,14 @@ public class KeyguardUserSwitcher {
     private final boolean mSimpleUserSwitcher;
 
     public KeyguardUserSwitcher(Context context, ViewStub userSwitcher,
-            KeyguardStatusBarView statusBarView, UserSwitcherController userSwitcherController) {
+            KeyguardStatusBarView statusBarView, NotificationPanelView panelView,
+            UserSwitcherController userSwitcherController) {
         if (context.getResources().getBoolean(R.bool.config_keyguardUserSwitcher) || ALWAYS_ON) {
             mUserSwitcher = (ViewGroup) userSwitcher.inflate();
+            mUserSwitcher.setBackground(new KeyguardUserSwitcherScrim(mUserSwitcher));
             mStatusBarView = statusBarView;
             mStatusBarView.setKeyguardUserSwitcher(this);
+            panelView.setKeyguardUserSwitcher(this);
             mAdapter = new Adapter(context, userSwitcherController);
             mAdapter.registerDataSetObserver(mDataSetObserver);
             mSimpleUserSwitcher = userSwitcherController.isSimpleUserSwitcher();
@@ -75,7 +79,7 @@ public class KeyguardUserSwitcher {
      * @see android.os.UserManager#isUserSwitcherEnabled()
      */
     private boolean shouldExpandByDefault() {
-        return mSimpleUserSwitcher || mAdapter.getSwitchableUsers() > 1;
+        return mSimpleUserSwitcher;
     }
 
     public void show() {
@@ -87,7 +91,7 @@ public class KeyguardUserSwitcher {
     }
 
     public void hide() {
-        if (mUserSwitcher != null) {
+        if (mUserSwitcher != null && mUserSwitcher.getVisibility() == View.VISIBLE) {
             // TODO: animate
             mUserSwitcher.setVisibility(View.GONE);
             mStatusBarView.setKeyguardUserSwitcherShowing(false);
