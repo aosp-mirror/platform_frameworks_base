@@ -13236,10 +13236,10 @@ package android.hardware.display {
     method public void registerDisplayListener(android.hardware.display.DisplayManager.DisplayListener, android.os.Handler);
     method public void unregisterDisplayListener(android.hardware.display.DisplayManager.DisplayListener);
     field public static final java.lang.String DISPLAY_CATEGORY_PRESENTATION = "android.hardware.display.category.PRESENTATION";
+    field public static final int VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR = 16; // 0x10
     field public static final int VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY = 8; // 0x8
     field public static final int VIRTUAL_DISPLAY_FLAG_PRESENTATION = 2; // 0x2
     field public static final int VIRTUAL_DISPLAY_FLAG_PUBLIC = 1; // 0x1
-    field public static final int VIRTUAL_DISPLAY_FLAG_SCREEN_SHARE = 16; // 0x10
     field public static final int VIRTUAL_DISPLAY_FLAG_SECURE = 4; // 0x4
   }
 
@@ -16401,7 +16401,7 @@ package android.media.projection {
   public final class MediaProjection {
     method public void addCallback(android.media.projection.MediaProjection.Callback, android.os.Handler);
     method public android.media.AudioRecord createAudioRecord(int, int, int, int);
-    method public android.hardware.display.VirtualDisplay createVirtualDisplay(java.lang.String, int, int, int, boolean, android.view.Surface, android.hardware.display.VirtualDisplay.Callbacks, android.os.Handler);
+    method public android.hardware.display.VirtualDisplay createVirtualDisplay(java.lang.String, int, int, int, int, android.view.Surface, android.hardware.display.VirtualDisplay.Callbacks, android.os.Handler);
     method public void removeCallback(android.media.projection.MediaProjection.Callback);
     method public void stop();
   }

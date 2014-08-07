@@ -93,6 +93,19 @@ public final class MediaProjection {
     }
 
     /**
+     * @hide
+     */
+    public VirtualDisplay createVirtualDisplay(@NonNull String name,
+            int width, int height, int dpi, boolean isSecure, @Nullable Surface surface,
+            @Nullable VirtualDisplay.Callbacks callbacks, @Nullable Handler handler) {
+        DisplayManager dm = (DisplayManager) mContext.getSystemService(Context.DISPLAY_SERVICE);
+        int flags = isSecure ? DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE : 0;
+        return dm.createVirtualDisplay(this, name, width, height, dpi, surface,
+                    flags | DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR |
+                    DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION, callbacks, handler);
+    }
+
+    /**
      * Creates a {@link android.hardware.display.VirtualDisplay} to capture the
      * contents of the screen.
      *
@@ -105,9 +118,8 @@ public final class MediaProjection {
      * than 0.
      * @param surface The surface to which the content of the virtual display
      * should be rendered, or null if there is none initially.
-     * @param isSecure Whether the display should be considered a secure
-     * display. This typically requires special permissions not available to
-     * third party applications.
+     * @param flags A combination of virtual display flags. See {@link DisplayManager} for the full
+     * list of flags.
      * @param callbacks Callbacks to call when the virtual display's state
      * changes, or null if none.
      * @param handler The {@link android.os.Handler} on which the callback should be
@@ -118,10 +130,9 @@ public final class MediaProjection {
      * String, int, int, int, int, Surface, VirtualDisplay.Callbacks, Handler)
      */
     public VirtualDisplay createVirtualDisplay(@NonNull String name,
-            int width, int height, int dpi, boolean isSecure, @Nullable Surface surface,
+            int width, int height, int dpi, int flags, @Nullable Surface surface,
             @Nullable VirtualDisplay.Callbacks callbacks, @Nullable Handler handler) {
         DisplayManager dm = (DisplayManager) mContext.getSystemService(Context.DISPLAY_SERVICE);
-        int flags = isSecure ? DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE : 0;
         return dm.createVirtualDisplay(
                     this, name, width, height, dpi, surface, flags, callbacks, handler);
     }
