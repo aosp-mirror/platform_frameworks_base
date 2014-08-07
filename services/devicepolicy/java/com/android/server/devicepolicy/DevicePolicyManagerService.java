@@ -2984,7 +2984,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 if (mHasFeature) {
                     ActiveAdmin strictestAdmin =
                             getAdminWithMinimumFailedPasswordsForWipeLocked(userHandle);
-                    int max = strictestAdmin.maximumFailedPasswordsForWipe;
+                    int max = strictestAdmin != null
+                            ? strictestAdmin.maximumFailedPasswordsForWipe : 0;
                     if (max > 0 && policy.mFailedPasswordAttempts >= max) {
                         // Wipe the user/profile associated with the policy that was violated. This
                         // is not necessarily calling user: if the policy that fired was from a
