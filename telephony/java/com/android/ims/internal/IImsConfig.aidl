@@ -73,9 +73,9 @@ interface IImsConfig {
      *
      * @param item, as defined in com.android.ims.ImsConfig#ConfigConstants.
      * @param value in Integer format.
-     * @return void.
+     * @return as defined in com.android.ims.ImsConfig#OperationStatusConstants.
      */
-    void setProvisionedValue(int item, int value);
+    int setProvisionedValue(int item, int value);
 
     /**
      * Sets the value for IMS service/capabilities parameters by the operator device
@@ -84,9 +84,9 @@ interface IImsConfig {
      *
      * @param item, as defined in com.android.ims.ImsConfig#ConfigConstants.
      * @param value in String format.
-     * @return void.
+     * @return as defined in com.android.ims.ImsConfig#OperationStatusConstants.
      */
-    void setProvisionedStringValue(int item, String value);
+    int setProvisionedStringValue(int item, String value);
 
     /**
      * Gets the value of the specified IMS feature item for specified network type.
