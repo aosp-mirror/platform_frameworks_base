@@ -25,7 +25,10 @@
         android:orientation="vertical"
         android:gravity="top|center_horizontal"
         android:paddingTop="16dp"
-        android:paddingBottom="20dp">
+        android:paddingBottom="20dp"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        systemui:activatedFontFamily="sans-serif-medium">
 
     <com.android.systemui.statusbar.phone.UserAvatarView
             android:id="@+id/user_picture"
@@ -33,6 +36,7 @@
             android:layout_height="@dimen/max_avatar_size"
             android:layout_marginBottom="12dp"
             systemui:frameWidth="2dp"
+            systemui:framePadding="6dp"
             systemui:activeFrameColor="@color/current_user_border_color"/>
 
     <TextView
