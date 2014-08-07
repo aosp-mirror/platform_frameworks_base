@@ -236,7 +236,6 @@
     <protected-broadcast android:name="com.android.server.WifiManager.action.DELAYED_DRIVER_STOP" />
     <protected-broadcast android:name="android.net.wifi.WIFI_STATE_CHANGED" />
     <protected-broadcast android:name="android.net.wifi.WIFI_AP_STATE_CHANGED" />
-    <protected-broadcast android:name="android.net.wifi.WIFI_CREDENTIAL_CHANGED" />
     <protected-broadcast android:name="android.net.wifi.WIFI_SCAN_AVAILABLE" />
     <protected-broadcast android:name="android.net.wifi.SCAN_RESULTS" />
     <protected-broadcast android:name="android.net.wifi.RSSI_CHANGED" />
@@ -814,13 +813,6 @@
     <!-- @SystemApi @hide Allows applications to read Wi-Fi credential.
          <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.READ_WIFI_CREDENTIAL"
-        android:permissionGroup="android.permission-group.NETWORK"
-        android:protectionLevel="signature|system" />
-
-    <!-- @SystemApi @hide Allow system apps to receive broadcast
-         when a wifi network credential is changed.
-         <p>Not for use by third-party applications. -->
-    <permission android:name="android.permission.RECEIVE_WIFI_CREDENTIAL_CHANGE"
         android:permissionGroup="android.permission-group.NETWORK"
         android:protectionLevel="signature|system" />
 
