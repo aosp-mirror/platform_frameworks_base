@@ -249,7 +249,7 @@ public final class Call {
         /**
          * Invoked when the state of this {@code Call} has changed. See {@link #getState()}.
          *
-         * TODO(ihab): Provide previous state also?
+         * TODO: Provide previous state also?
          *
          * @param call The {@code Call} invoking this method.
          * @param state The new state of the {@code Call}.
@@ -453,7 +453,7 @@ public final class Call {
     /**
      * Notifies this {@code Call} that the phone account user interface element was touched.
      *
-     * TODO(ihab): Figure out if and how we can generalize this
+     * TODO: Figure out if and how we can generalize this
      */
     public void phoneAccountClicked() {
         mInCallAdapter.phoneAccountClicked(mTelecommCallId);
