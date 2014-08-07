@@ -607,7 +607,6 @@ public class RequestThreadManager {
                             Log.e(TAG, "Interrupted while waiting for requests to complete.");
                         }
                         mDeviceState.setIdle();
-                        stopPreview();
                         break;
                     } else {
                         // Queue another capture if we did not get the last burst.
