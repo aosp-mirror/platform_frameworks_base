@@ -18,6 +18,8 @@ package android.net.wifi;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.RemoteException;
+import android.util.Log;
 
 /**
  * Represents local wifi adapter. Different devices have different kinds of
@@ -25,6 +27,7 @@ import android.os.Parcelable;
  * which capabilites are supported by the wifi adapter on the device.
  */
 public class WifiAdapter implements Parcelable {
+    private static final String TAG = "WifiAdapter";
 
     /* Keep this list in sync with wifi_hal.h */
     /** @hide */
@@ -58,8 +61,19 @@ public class WifiAdapter implements Parcelable {
     /** @hide */
     public static final int WIFI_FEATURE_EPR              = 0x4000;  // Enhanced power reporting
 
+    private static final int CONTROLLER_ENERGY_UPDATE_TIMEOUT_MILLIS = 30;
+    /** @hide */
+    public static final int ACTIVITY_ENERGY_INFO_CACHED = 0;
+    /** @hide */
+    public static final int ACTIVITY_ENERGY_INFO_REFRESHED = 1;
+
     private String name;
     private int    supportedFeatures;
+
+    // Make the API consistent with BlueTooth Adaptor, allowing WifiService to be accessed
+    // Directly from the adapter
+    /** @hide */
+    public IWifiManager mService = null;
 
     /** @hide */
     public WifiAdapter(String name, int supportedFeatures) {
@@ -173,6 +187,38 @@ public class WifiAdapter implements Parcelable {
      */
     public boolean isEnhancedPowerReportingSupported() {
         return isFeatureSupported(WIFI_FEATURE_EPR);
+    }
+
+
+    /**
+     * Return the record of {@link WifiActivityEnergyInfo} object that
+     * has the activity and energy info. This can be used to ascertain what
+     * the controller has been up to, since the last sample.
+     * @param updateType Type of info, cached vs refreshed.
+     *
+     * @return a record with {@link WifiActivityEnergyInfo} or null if
+     * report is unavailable or unsupported
+     * @hide
+     */
+    public WifiActivityEnergyInfo getControllerActivityEnergyInfo(int updateType) {
+        if (mService == null) return null;
+        try {
+            WifiActivityEnergyInfo record;
+            if (!isEnhancedPowerReportingSupported()) {
+                return null;
+            }
+            synchronized(this) {
+                record = mService.reportActivityInfo(this);
+                if (record.isValid()) {
+                    return record;
+                } else {
+                    return null;
+                }
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "getControllerActivityEnergyInfo: " + e);
+        }
+        return null;
     }
 
     /* Parcelable implementation */
