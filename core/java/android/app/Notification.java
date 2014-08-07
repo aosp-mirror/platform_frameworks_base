@@ -2577,7 +2577,8 @@ public class Notification implements Parcelable
 
         private RemoteViews applyStandardTemplate(int resId, boolean fitIn1U) {
             Bitmap profileIcon = getProfileBadge();
-            RemoteViews contentView = new BuilderRemoteViews(mContext.getPackageName(), resId);
+            RemoteViews contentView = new BuilderRemoteViews(mContext.getPackageName(),
+                    mOriginatingUserId, resId);
             boolean showLine3 = false;
             boolean showLine2 = false;
 
@@ -4576,8 +4577,8 @@ public class Notification implements Parcelable
             super(parcel);
         }
 
-        public BuilderRemoteViews(String packageName, int layoutId) {
-            super(packageName, layoutId);
+        public BuilderRemoteViews(String packageName, int userId, int layoutId) {
+            super(packageName, userId, layoutId);
         }
 
         @Override

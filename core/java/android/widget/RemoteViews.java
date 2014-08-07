@@ -18,6 +18,7 @@ package android.widget;
 
 import android.app.ActivityOptions;
 import android.app.ActivityThread;
+import android.app.Application;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetHostView;
 import android.content.Context;
@@ -79,12 +80,6 @@ public class RemoteViews implements Parcelable, Filter {
      * @hide
      */
     private ApplicationInfo mApplication;
-
-    /**
-     * The package name of the package containing the layout
-     * resource. (Added to the parcel)
-     */
-    private final String mPackage;
 
     /**
      * The resource ID of the layout file. (Added to the parcel)
@@ -1635,11 +1630,34 @@ public class RemoteViews implements Parcelable, Filter {
      * @param layoutId The id of the layout resource
      */
     public RemoteViews(String packageName, int layoutId) {
-        mPackage = packageName;
+        this(getApplicationInfo(packageName, UserHandle.myUserId()), layoutId);
+    }
+
+    /**
+     * Create a new RemoteViews object that will display the views contained
+     * in the specified layout file.
+     *
+     * @param packageName Name of the package that contains the layout resource.
+     * @param userId The user under which the package is running.
+     * @param layoutId The id of the layout resource.
+     *
+     * @hide
+     */
+    public RemoteViews(String packageName, int userId, int layoutId) {
+        this(getApplicationInfo(packageName, userId), layoutId);
+    }
+
+    /**
+     * Create a new RemoteViews object that will display the views contained
+     * in the specified layout file.
+     *
+     * @param application The application whose content is shown by the views.
+     * @param layoutId The id of the layout resource.
+     */
+    private RemoteViews(ApplicationInfo application, int layoutId) {
+        mApplication = application;
         mLayoutId = layoutId;
         mBitmapCache = new BitmapCache();
-        mApplication = ActivityThread.currentApplication().getApplicationInfo();
-
         // setup the memory usage statistics
         mMemoryUsageCounter = new MemoryUsageCounter();
         recalculateMemoryUsage();
@@ -1660,10 +1678,11 @@ public class RemoteViews implements Parcelable, Filter {
         if (landscape == null || portrait == null) {
             throw new RuntimeException("Both RemoteViews must be non-null");
         }
-        if (landscape.getPackage().compareTo(portrait.getPackage()) != 0) {
-            throw new RuntimeException("Both RemoteViews must share the same package");
+        if (landscape.mApplication.uid != portrait.mApplication.uid
+                || !landscape.mApplication.packageName.equals(portrait.mApplication.packageName)) {
+            throw new RuntimeException("Both RemoteViews must share the same package and user");
         }
-        mPackage = portrait.getPackage();
+        mApplication = portrait.mApplication;
         mLayoutId = portrait.getLayoutId();
 
         mLandscape = landscape;
@@ -1700,7 +1719,7 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         if (mode == MODE_NORMAL) {
-            mPackage = parcel.readString();
+            mApplication = parcel.readParcelable(null);
             mLayoutId = parcel.readInt();
             mIsWidgetCollectionChild = parcel.readInt() == 1;
 
@@ -1764,11 +1783,9 @@ public class RemoteViews implements Parcelable, Filter {
             // MODE_HAS_LANDSCAPE_AND_PORTRAIT
             mLandscape = new RemoteViews(parcel, mBitmapCache);
             mPortrait = new RemoteViews(parcel, mBitmapCache);
-            mPackage = mPortrait.getPackage();
+            mApplication = mPortrait.mApplication;
             mLayoutId = mPortrait.getLayoutId();
         }
-
-        mApplication = parcel.readParcelable(null);
 
         // setup the memory usage statistics
         mMemoryUsageCounter = new MemoryUsageCounter();
@@ -1786,7 +1803,7 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     public String getPackage() {
-        return mPackage;
+        return mApplication.packageName;
     }
 
     /**
@@ -2565,19 +2582,7 @@ public class RemoteViews implements Parcelable, Filter {
                 return context.createApplicationContext(mApplication,
                         Context.CONTEXT_RESTRICTED);
             } catch (NameNotFoundException e) {
-                Log.e(LOG_TAG, "Package name " + mPackage + " not found");
-            }
-        }
-
-        if (mPackage != null) {
-            if (context.getPackageName().equals(mPackage)) {
-                return context;
-            }
-            try {
-                return context.createPackageContext(
-                        mPackage, Context.CONTEXT_RESTRICTED);
-            } catch (NameNotFoundException e) {
-                Log.e(LOG_TAG, "Package name " + mPackage + " not found");
+                Log.e(LOG_TAG, "Package name " + mApplication.packageName + " not found");
             }
         }
 
@@ -2614,7 +2619,7 @@ public class RemoteViews implements Parcelable, Filter {
             if (mIsRoot) {
                 mBitmapCache.writeBitmapsToParcel(dest, flags);
             }
-            dest.writeString(mPackage);
+            dest.writeParcelable(mApplication, flags);
             dest.writeInt(mLayoutId);
             dest.writeInt(mIsWidgetCollectionChild ? 1 : 0);
             int count;
@@ -2638,8 +2643,28 @@ public class RemoteViews implements Parcelable, Filter {
             mLandscape.writeToParcel(dest, flags);
             mPortrait.writeToParcel(dest, flags);
         }
+    }
 
-        dest.writeParcelable(mApplication, 0);
+    private static ApplicationInfo getApplicationInfo(String packageName, int userId) {
+        // Get the application for the passed in package and user.
+        Application application = ActivityThread.currentApplication();
+        if (application == null) {
+            throw new IllegalStateException("Cannot create remote views out of an aplication.");
+        }
+
+        ApplicationInfo applicationInfo = application.getApplicationInfo();
+        if (UserHandle.getUserId(applicationInfo.uid) != userId
+                || !applicationInfo.packageName.equals(packageName)) {
+            try {
+                Context context = application.getApplicationContext().createPackageContextAsUser(
+                        packageName, 0, new UserHandle(userId));
+                applicationInfo = context.getApplicationInfo();
+            } catch (NameNotFoundException nnfe) {
+                throw new IllegalArgumentException("No such package " + packageName);
+            }
+        }
+
+        return applicationInfo;
     }
 
     /**
