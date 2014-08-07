@@ -2429,7 +2429,7 @@ public class WindowManagerService extends IWindowManager.Stub
             // relayout to be displayed, so we'll do it there.
 
             if (focusChanged) {
-                finishUpdateFocusedWindowAfterAssignLayersLocked(false /*updateInputWindows*/);
+                mInputMonitor.setInputFocusLw(mCurrentFocus, false /*updateInputWindows*/);
             }
             mInputMonitor.updateInputWindowsLw(false /*force*/);
 
@@ -2546,11 +2546,14 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (displayContent != null) {
                     displayContent.layoutNeeded = true;
                 }
-                updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES,
-                        false /*updateInputWindows*/);
+                final boolean focusChanged = updateFocusedWindowLocked(
+                        UPDATE_FOCUS_WILL_PLACE_SURFACES, false /*updateInputWindows*/);
                 performLayoutAndPlaceSurfacesLocked();
                 if (win.mAppToken != null) {
                     win.mAppToken.updateReportedVisibilityLocked();
+                }
+                if (focusChanged) {
+                    mInputMonitor.updateInputWindowsLw(false /*force*/);
                 }
                 //dump();
                 Binder.restoreCallingIdentity(origId);
@@ -3910,7 +3913,7 @@ public class WindowManagerService extends IWindowManager.Stub
             final boolean changed = mFocusedApp != newFocus;
             if (changed) {
                 mFocusedApp = newFocus;
-                mInputMonitor.setFocusedAppLw(null);
+                mInputMonitor.setFocusedAppLw(newFocus);
             }
 
             if (moveFocusNow && changed) {
@@ -8917,7 +8920,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     && !moveInputMethodWindowsIfNeededLocked(true)) {
                 assignLayersLocked(windows);
             }
-            updateFocusedWindowLocked(UPDATE_FOCUS_PLACING_SURFACES, false /*updateInputWindows*/);
+            updateFocusedWindowLocked(UPDATE_FOCUS_PLACING_SURFACES, true /*updateInputWindows*/);
             mFocusMayChange = false;
         }
 
@@ -9152,10 +9155,11 @@ public class WindowManagerService extends IWindowManager.Stub
         final long currentTime = SystemClock.uptimeMillis();
 
         int i;
+        boolean updateInputWindowsNeeded = false;
 
         if (mFocusMayChange) {
             mFocusMayChange = false;
-            updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES,
+            updateInputWindowsNeeded = updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES,
                     false /*updateInputWindows*/);
         }
 
@@ -9517,6 +9521,7 @@ public class WindowManagerService extends IWindowManager.Stub
             mFocusMayChange = false;
             if (updateFocusedWindowLocked(UPDATE_FOCUS_PLACING_SURFACES,
                     false /*updateInputWindows*/)) {
+                updateInputWindowsNeeded = true;
                 defaultDisplay.pendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
             }
         }
@@ -9697,6 +9702,9 @@ public class WindowManagerService extends IWindowManager.Stub
             mDisplayContents.valueAt(displayNdx).checkForDeferredActions();
         }
 
+        if (updateInputWindowsNeeded) {
+            mInputMonitor.updateInputWindowsLw(false /*force*/);
+        }
         setFocusedStackFrame();
 
         // Check to see if we are now in a state where the screen should
@@ -10012,17 +10020,13 @@ public class WindowManagerService extends IWindowManager.Stub
             if (mode != UPDATE_FOCUS_WILL_ASSIGN_LAYERS) {
                 // If we defer assigning layers, then the caller is responsible for
                 // doing this part.
-                finishUpdateFocusedWindowAfterAssignLayersLocked(updateInputWindows);
+                mInputMonitor.setInputFocusLw(mCurrentFocus, updateInputWindows);
             }
 
             Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
             return true;
         }
         return false;
-    }
-
-    private void finishUpdateFocusedWindowAfterAssignLayersLocked(boolean updateInputWindows) {
-        mInputMonitor.setInputFocusLw(mCurrentFocus, updateInputWindows);
     }
 
     private WindowState computeFocusedWindowLocked() {
