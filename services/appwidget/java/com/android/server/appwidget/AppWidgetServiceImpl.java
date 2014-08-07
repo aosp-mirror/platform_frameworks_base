@@ -3125,9 +3125,13 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 // Apps hosting the AppWidget get to bind to a remote view service in the provider.
                 return true;
             }
-            if (mContext.checkCallingPermission(android.Manifest.permission.BIND_APPWIDGET)
+            final int userId = UserHandle.getUserId(uid);
+            if ((widget.host.getUserId() == userId || (widget.provider != null
+                    && widget.provider.getUserId() == userId))
+                && mContext.checkCallingPermission(android.Manifest.permission.BIND_APPWIDGET)
                     == PackageManager.PERMISSION_GRANTED) {
-                // Apps that can bind have access to all appWidgetIds.
+                // Apps that run in the same user as either the host or the provider and
+                // have the bind widget permission have access to the widget.
                 return true;
             }
             return false;
@@ -3187,14 +3191,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
 
         public boolean isHostInPackageForUid(Host host, int uid, String packageName) {
-            if (UserHandle.getAppId(uid) == Process.myUid()) {
-                // For a host that's in the system process, ignore the user id.
-                return UserHandle.isSameApp(host.id.uid, uid)
-                        && host.id.packageName.equals(packageName);
-            } else {
-                return host.id.uid == uid
-                        && host.id.packageName.equals(packageName);
-            }
+            return host.id.uid == uid && host.id.packageName.equals(packageName);
         }
 
         public boolean isProviderInPackageForUid(Provider provider, int uid,
