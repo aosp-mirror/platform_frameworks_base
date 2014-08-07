@@ -156,7 +156,6 @@ public class KeyguardAffordanceView extends ImageView {
         drawBackgroundCircle(canvas);
         drawArrow(canvas);
         canvas.save();
-        updateIconColor();
         canvas.scale(mImageScale, mImageScale, getWidth() / 2, getHeight() / 2);
         super.onDraw(canvas);
         canvas.restore();
@@ -267,6 +266,7 @@ public class KeyguardAffordanceView extends ImageView {
         if (!radiusNeedsAnimation) {
             if (mCircleAnimator == null) {
                 mCircleRadius = circleRadius;
+                updateIconColor();
                 invalidate();
                 if (nowHidden) {
                     if (mPreviewView != null) {
@@ -323,6 +323,7 @@ public class KeyguardAffordanceView extends ImageView {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 mCircleRadius = (float) animation.getAnimatedValue();
+                updateIconColor();
                 invalidate();
             }
         });
