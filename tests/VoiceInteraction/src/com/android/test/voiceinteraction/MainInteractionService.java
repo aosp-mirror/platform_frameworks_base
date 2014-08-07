@@ -45,6 +45,16 @@ public class MainInteractionService extends VoiceInteractionService {
         public void onError() {
             Log.i(TAG, "onError");
         }
+
+        @Override
+        public void onRecognitionPaused() {
+            Log.i(TAG, "onRecognitionPaused");
+        }
+
+        @Override
+        public void onRecognitionResumed() {
+            Log.i(TAG, "onRecognitionResumed");
+        }
     };
 
     private AlwaysOnHotwordDetector mHotwordDetector;

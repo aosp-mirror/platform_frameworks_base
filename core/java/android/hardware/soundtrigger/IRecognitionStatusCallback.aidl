@@ -34,4 +34,12 @@ oneway interface IRecognitionStatusCallback {
      * @param status The error code that was seen.
      */
     void onError(int status);
+    /**
+     * Called when the recognition is paused temporarily for some reason.
+     */
+    void onRecognitionPaused();
+    /**
+     * Called when the recognition is resumed after it was temporarily paused.
+     */
+    void onRecognitionResumed();
 }
