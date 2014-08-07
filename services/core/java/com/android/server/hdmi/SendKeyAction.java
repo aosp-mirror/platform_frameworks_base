@@ -32,7 +32,7 @@ import android.view.KeyEvent;
  *
  * <p>Package-private, accessed by {@link HdmiControlService} only.
  */
-final class SendKeyAction extends FeatureAction {
+final class SendKeyAction extends HdmiCecFeatureAction {
     private static final String TAG = "SendKeyAction";
 
     // State in which the action is at work. The state is set in {@link #start()} and

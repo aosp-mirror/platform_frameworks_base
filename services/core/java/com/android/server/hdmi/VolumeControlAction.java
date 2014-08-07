@@ -28,7 +28,7 @@ import com.android.internal.util.Preconditions;
  * from Audio Receiver(AVR). If TV receives no &lt;Report Audio Status&gt; from AVR, this action
  * will be finished in {@link #IRT_MS} * {@link #VOLUME_CHANGE_TIMEOUT_MAX_COUNT} (ms).
  */
-final class VolumeControlAction extends FeatureAction {
+final class VolumeControlAction extends HdmiCecFeatureAction {
     private static final String TAG = "VolumeControlAction";
 
     private static final int VOLUME_MUTE = 101;

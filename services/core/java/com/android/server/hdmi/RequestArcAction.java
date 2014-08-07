@@ -23,7 +23,7 @@ import android.util.Slog;
 /**
  * Base feature action class for &lt;Request ARC Initiation&gt;/&lt;Request ARC Termination&gt;.
  */
-abstract class RequestArcAction extends FeatureAction {
+abstract class RequestArcAction extends HdmiCecFeatureAction {
     private static final String TAG = "RequestArcAction";
 
     // State in which waits for ARC response.
