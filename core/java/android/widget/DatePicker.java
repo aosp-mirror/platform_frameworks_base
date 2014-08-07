@@ -84,6 +84,9 @@ import libcore.icu.ICU;
 public class DatePicker extends FrameLayout {
     private static final String LOG_TAG = DatePicker.class.getSimpleName();
 
+    private static final int MODE_SPINNER = 1;
+    private static final int MODE_CALENDAR = 2;
+
     private final DatePickerDelegate mDelegate;
 
     /**
@@ -120,24 +123,28 @@ public class DatePicker extends FrameLayout {
 
         final TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.DatePicker,
                 defStyleAttr, defStyleRes);
-        final boolean legacyMode = a.getBoolean(R.styleable.DatePicker_legacyMode, true);
+        int mode = a.getInt(R.styleable.DatePicker_datePickerMode, MODE_SPINNER);
         a.recycle();
 
-        if (legacyMode) {
-            mDelegate = createLegacyUIDelegate(context, attrs, defStyleAttr, defStyleRes);
-        } else {
-            mDelegate = createNewUIDelegate(context, attrs, defStyleAttr, defStyleRes);
+        switch (mode) {
+            case MODE_CALENDAR:
+                mDelegate = createCalendarUIDelegate(context, attrs, defStyleAttr, defStyleRes);
+                break;
+            case MODE_SPINNER:
+            default:
+                mDelegate = createSpinnerUIDelegate(context, attrs, defStyleAttr, defStyleRes);
+                break;
         }
     }
 
-    private DatePickerDelegate createLegacyUIDelegate(Context context, AttributeSet attrs,
+    private DatePickerDelegate createSpinnerUIDelegate(Context context, AttributeSet attrs,
             int defStyleAttr, int defStyleRes) {
-        return new LegacyDatePickerDelegate(this, context, attrs, defStyleAttr, defStyleRes);
+        return new DatePickerSpinnerDelegate(this, context, attrs, defStyleAttr, defStyleRes);
     }
 
-    private DatePickerDelegate createNewUIDelegate(Context context, AttributeSet attrs,
+    private DatePickerDelegate createCalendarUIDelegate(Context context, AttributeSet attrs,
             int defStyleAttr, int defStyleRes) {
-        return new android.widget.DatePickerDelegate(this, context, attrs, defStyleAttr,
+        return new DatePickerCalendarDelegate(this, context, attrs, defStyleAttr,
                 defStyleRes);
     }
 
@@ -454,7 +461,7 @@ public class DatePicker extends FrameLayout {
     /**
      * A delegate implementing the basic DatePicker
      */
-    private static class LegacyDatePickerDelegate extends AbstractDatePickerDelegate {
+    private static class DatePickerSpinnerDelegate extends AbstractDatePickerDelegate {
 
         private static final String DATE_FORMAT = "MM/dd/yyyy";
 
@@ -500,7 +507,7 @@ public class DatePicker extends FrameLayout {
 
         private boolean mIsEnabled = DEFAULT_ENABLED_STATE;
 
-        LegacyDatePickerDelegate(DatePicker delegator, Context context, AttributeSet attrs,
+        DatePickerSpinnerDelegate(DatePicker delegator, Context context, AttributeSet attrs,
                 int defStyleAttr, int defStyleRes) {
             super(delegator, context);
 

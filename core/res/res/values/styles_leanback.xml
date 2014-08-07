@@ -23,12 +23,12 @@
     </style>
 
     <style name="Widget.Leanback.TimePicker" parent="Widget.Material.TimePicker">
-        <item name="legacyMode">true</item>
+        <item name="timePickerMode">spinner</item>
         <item name="legacyLayout">@layout/time_picker_legacy_leanback</item>
     </style>
 
     <style name="Widget.Leanback.DatePicker" parent="Widget.Material.DatePicker">
-        <item name="legacyMode">true</item>
+        <item name="datePickerMode">spinner</item>
     </style>
 
     <style name="Widget.Leanback.NumberPicker" parent="Widget.Material.NumberPicker">

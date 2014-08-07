@@ -4260,8 +4260,6 @@
         <attr name="internalLayout" format="reference"  />
         <!-- @hide The layout of the legacy DatePicker. -->
         <attr name="legacyLayout" />
-        <!-- @hide Enables or disable the use of the legacy layout for the DatePicker. -->
-        <attr name="legacyMode" />
         <!-- The background color for the date selector 's day of week. -->
         <attr name="dayOfWeekBackgroundColor" format="color" />
         <!-- The text color for the date selector's day of week. -->
@@ -4288,6 +4286,15 @@
              if the text color does not explicitly have a color set for the
              selected state. -->
         <attr name="calendarSelectedTextColor" format="color" />
+        <!-- Defines the look of the widget. Prior to the L release, the only choice was
+             spinner. As of L, with the Material theme selected, the default layout is calendar,
+             but this attribute can be used to force spinner to be used instead. -->
+        <attr name="datePickerMode">
+            <!-- Date picker with spinner controls to select the date. -->
+            <enum name="spinner" value="1" />
+            <!-- Date picker with calendar to select the date. -->
+            <enum name="calendar" value="2" />
+        </attr>
     </declare-styleable>
 
     <declare-styleable name="TwoLineListItem">
@@ -4557,8 +4564,6 @@
     </declare-styleable>
 
     <declare-styleable name="TimePicker">
-        <!-- @hide Enables or disable the use of the legacy layout for the TimePicker. -->
-        <attr name="legacyMode" format="boolean" />
         <!-- @hide The layout of the legacy time picker. -->
         <attr name="legacyLayout" format="reference" />
         <!-- @hide The layout of the time picker. -->
@@ -4587,6 +4592,15 @@
         <attr name="amPmSelectedBackgroundColor" format="color" />
         <!-- The color for the hours/minutes selector of the TimePicker. -->
         <attr name="numbersSelectorColor" format="color" />
+        <!-- Defines the look of the widget. Prior to the L release, the only choice was
+             spinner. As of L, with the Material theme selected, the default layout is clock,
+             but this attribute can be used to force spinner to be used instead. -->
+        <attr name="timePickerMode">
+            <!-- Time picker with spinner controls to select the time. -->
+            <enum name="spinner" value="1" />
+            <!-- Time picker with clock face to select the time. -->
+            <enum name="clock" value="2" />
+        </attr>
     </declare-styleable>
 
     <!-- ========================= -->

@@ -462,7 +462,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Holo.TimePicker" parent="Widget.TimePicker">
-        <item name="legacyMode">true</item>
+        <item name="timePickerMode">spinner</item>
         <item name="legacyLayout">@layout/time_picker_legacy_holo</item>
         <!-- Attributes for new-style TimePicker. -->
         <item name="internalLayout">@layout/time_picker_holo</item>
@@ -479,7 +479,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Holo.DatePicker" parent="Widget.DatePicker">
-        <item name="legacyMode">true</item>
+        <item name="datePickerMode">spinner</item>
         <item name="legacyLayout">@layout/date_picker_legacy_holo</item>
         <item name="internalLayout">@layout/date_picker_holo</item>
         <item name="calendarViewShown">true</item>
@@ -886,7 +886,7 @@ please see styles_device_defaults.xml.
     <style name="Widget.Holo.Light.NumberPicker" parent="Widget.Holo.NumberPicker" />
 
     <style name="Widget.Holo.Light.TimePicker" parent="Widget.TimePicker">
-        <item name="legacyMode">true</item>
+        <item name="timePickerMode">spinner</item>
         <item name="legacyLayout">@layout/time_picker_legacy_holo</item>
         <!-- Non-legacy styling -->
         <item name="internalLayout">@layout/time_picker_holo</item>
@@ -903,7 +903,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Holo.Light.DatePicker" parent="Widget.DatePicker">
-        <item name="legacyMode">true</item>
+        <item name="datePickerMode">spinner</item>
         <item name="legacyLayout">@layout/date_picker_legacy_holo</item>
         <item name="internalLayout">@layout/date_picker_holo</item>
         <item name="calendarViewShown">true</item>
