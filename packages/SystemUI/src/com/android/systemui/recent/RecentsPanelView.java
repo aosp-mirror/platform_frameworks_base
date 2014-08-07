@@ -738,12 +738,12 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         }
     }
 
-    private void startApplicationDetailsActivity(String packageName) {
+    private void startApplicationDetailsActivity(String packageName, int userId) {
         Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
                 Uri.fromParts("package", packageName, null));
         intent.setComponent(intent.resolveActivity(getContext().getPackageManager()));
         TaskStackBuilder.create(getContext())
-                .addNextIntentWithParentStack(intent).startActivities();
+                .addNextIntentWithParentStack(intent).startActivities(null, new UserHandle(userId));
     }
 
     public boolean onInterceptTouchEvent(MotionEvent ev) {
@@ -769,7 +769,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
                     ViewHolder viewHolder = (ViewHolder) selectedView.getTag();
                     if (viewHolder != null) {
                         final TaskDescription ad = viewHolder.taskDescription;
-                        startApplicationDetailsActivity(ad.packageName);
+                        startApplicationDetailsActivity(ad.packageName, ad.userId);
                         show(false);
                     } else {
                         throw new IllegalStateException("Oops, no tag on view " + selectedView);
