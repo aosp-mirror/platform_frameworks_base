@@ -161,11 +161,14 @@ public class BackupManager {
         return result;
     }
 
+    // system APIs start here
+
     /**
      * Begin the process of restoring data from backup.  See the
      * {@link android.app.backup.RestoreSession} class for documentation on that process.
      * @hide
      */
+    @SystemApi
     public RestoreSession beginRestoreSession() {
         RestoreSession session = null;
         checkServiceBinder();
@@ -182,8 +185,6 @@ public class BackupManager {
         }
         return session;
     }
-
-    // system APIs start here
 
     /**
      * Enable/disable the backup service entirely.  When disabled, no backup
