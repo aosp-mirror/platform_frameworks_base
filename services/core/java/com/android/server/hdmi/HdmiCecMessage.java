@@ -16,9 +16,6 @@
 
 package com.android.server.hdmi;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
 import libcore.util.EmptyArray;
 
 import java.util.Arrays;
@@ -28,11 +25,10 @@ import java.util.Arrays;
  * HDMI cable to communicate with one another. A message is defined by its
  * source and destination address, command (or opcode), and optional parameters.
  */
-public final class HdmiCecMessage implements Parcelable {
-
+public final class HdmiCecMessage {
     public static final byte[] EMPTY_PARAM = EmptyArray.BYTE;
 
-    private static final int MAX_MESSAGE_LENGTH = 16;
+    private static final int MAX_MESSAGE_PARAM_LENGTH = 14;
 
     private final int mSource;
     private final int mDestination;
@@ -47,6 +43,12 @@ public final class HdmiCecMessage implements Parcelable {
         mSource = source;
         mDestination = destination;
         mOpcode = opcode & 0xFF;
+
+        if (params.length > MAX_MESSAGE_PARAM_LENGTH) {
+            throw new IllegalArgumentException(
+                    "Param length should be at most 13 but current param length is "
+                    + params.length);
+        }
         mParams = Arrays.copyOf(params, params.length);
     }
 
@@ -90,53 +92,6 @@ public final class HdmiCecMessage implements Parcelable {
     public byte[] getParams() {
         return mParams;
     }
-
-    /**
-     * Describe the kinds of special objects contained in this Parcelable's
-     * marshalled representation.
-     */
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    /**
-     * Flatten this object in to a Parcel.
-     *
-     * @param dest The Parcel in which the object should be written.
-     * @param flags Additional flags about how the object should be written.
-     *        May be 0 or {@link Parcelable#PARCELABLE_WRITE_RETURN_VALUE}.
-     */
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(mSource);
-        dest.writeInt(mDestination);
-        dest.writeInt(mOpcode);
-        dest.writeInt(mParams.length);
-        dest.writeByteArray(mParams);
-    }
-
-    public static final Parcelable.Creator<HdmiCecMessage> CREATOR
-            = new Parcelable.Creator<HdmiCecMessage>() {
-        /**
-         * Rebuild a HdmiCecMessage previously stored with writeToParcel().
-         * @param p HdmiCecMessage object to read the Rating from
-         * @return a new HdmiCecMessage created from the data in the parcel
-         */
-        @Override
-        public HdmiCecMessage createFromParcel(Parcel p) {
-            int source = p.readInt();
-            int destination = p.readInt();
-            int opcode = p.readInt();
-            byte[] params = new byte[p.readInt()];
-            p.readByteArray(params);
-            return new HdmiCecMessage(source, destination, opcode, params);
-        }
-        @Override
-        public HdmiCecMessage[] newArray(int size) {
-            return new HdmiCecMessage[size];
-        }
-    };
 
     @Override
     public String toString() {

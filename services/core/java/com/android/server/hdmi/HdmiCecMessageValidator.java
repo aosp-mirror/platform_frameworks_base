@@ -258,10 +258,11 @@ public final class HdmiCecMessageValidator {
     }
 
     /**
-     * Check if the given type is valid. A valid type is one of the actual
-     * logical device types defined in the standard ({@link #DEVICE_TV},
-     * {@link #DEVICE_PLAYBACK}, {@link #DEVICE_TUNER}, {@link #DEVICE_RECORDER},
-     * and {@link #DEVICE_AUDIO_SYSTEM}).
+     * Check if the given type is valid. A valid type is one of the actual logical device types
+     * defined in the standard ({@link HdmiCecDeviceInfo#DEVICE_TV},
+     * {@link HdmiCecDeviceInfo#DEVICE_PLAYBACK}, {@link HdmiCecDeviceInfo#DEVICE_TUNER},
+     * {@link HdmiCecDeviceInfo#DEVICE_RECORDER}, and
+     * {@link HdmiCecDeviceInfo#DEVICE_AUDIO_SYSTEM}).
      *
      * @param type device type
      * @return true if the given type is valid

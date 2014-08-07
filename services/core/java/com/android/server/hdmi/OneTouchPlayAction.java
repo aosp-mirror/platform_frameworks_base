@@ -17,18 +17,17 @@ package com.android.server.hdmi;
 
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.IHdmiControlCallback;
+import android.hardware.hdmi.HdmiPlaybackClient.OneTouchPlayCallback;
 import android.os.RemoteException;
 import android.util.Slog;
 
 /**
- * Feature action that performs one touch play against TV/Display device.
- *
- * This action is initiated via {@link HdmiControlManager#oneTouchPlay()} from
- * the Android system working as playback device to turn on the TV, and switch the input.
- *
- * <p>Package-private, accessed by {@link HdmiControlService} only.
+ * Feature action that performs one touch play against TV/Display device. This action is initiated
+ * via {@link android.hardware.hdmi.HdmiPlaybackClient#oneTouchPlay(OneTouchPlayCallback)} from the
+ * Android system working as playback device to turn on the TV, and switch the input.
+ * <p>
+ * Package-private, accessed by {@link HdmiControlService} only.
  */
-
 final class OneTouchPlayAction extends FeatureAction {
     private static final String TAG = "OneTouchPlayAction";
 

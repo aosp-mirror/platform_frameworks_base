@@ -82,6 +82,7 @@ public final class HdmiPlaybackClient extends HdmiClient {
         }
     }
 
+    @Override
     public int getDeviceType() {
         return HdmiCecDeviceInfo.DEVICE_PLAYBACK;
     }
@@ -93,7 +94,6 @@ public final class HdmiPlaybackClient extends HdmiClient {
      *         of the result
      */
     public void queryDisplayStatus(DisplayStatusCallback callback) {
-        // TODO: PendingResult.
         try {
             mService.queryDisplayStatus(getCallbackWrapper(callback));
         } catch (RemoteException e) {

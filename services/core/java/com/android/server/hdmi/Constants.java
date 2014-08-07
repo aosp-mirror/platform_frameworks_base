@@ -21,7 +21,7 @@ import android.hardware.hdmi.HdmiCecDeviceInfo;
 /**
  * Defines constants related to HDMI-CEC protocol internal implementation.
  * If a constant will be used in the public api, it should be located in
- * {@link android.hardware.hdmi.HdmiCec}.
+ * {@link android.hardware.hdmi.HdmiControlManager}.
  */
 final class Constants {
 
