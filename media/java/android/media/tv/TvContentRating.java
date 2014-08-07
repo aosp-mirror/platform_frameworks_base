@@ -19,7 +19,6 @@ package android.media.tv;
 import android.annotation.SystemApi;
 import android.net.Uri;
 import android.text.TextUtils;
-import android.util.Log;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -963,8 +962,6 @@ import java.util.List;
  * </table>
  */
 public final class TvContentRating {
-    private static final String TAG = "TvContentRating";
-
     /** @hide */
     public static final Uri SYSTEM_CONTENT_RATING_SYSTEM_XML = Uri.parse(
             "android.resource://system/" + com.android.internal.R.xml.tv_content_rating_systems);

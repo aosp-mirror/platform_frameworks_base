@@ -20,7 +20,6 @@ import android.annotation.SystemApi;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.ContentUris;
-import android.media.tv.TvContract.Programs;
 import android.net.Uri;
 import android.provider.BaseColumns;
 import android.util.ArraySet;
