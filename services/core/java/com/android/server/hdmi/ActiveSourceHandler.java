@@ -101,10 +101,6 @@ final class ActiveSourceHandler {
         return mSource.getDeviceInfo().getLogicalAddress();
     }
 
-    private final int getSourcePath() {
-        return mSource.getDeviceInfo().getPhysicalAddress();
-    }
-
     private void invokeCallback(int result) {
         if (mCallback == null) {
             return;
